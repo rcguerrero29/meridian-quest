@@ -1,0 +1,47 @@
+---
+name: don-guero
+description: Don Güero plans the city's next growth phase on Opus 5 and brings decisions back as side quests. Use when the user says /don-guero, "plan the city", "grow the city", "next phase", "what should we build next", or wants a new business/district/content pack planned for Meridian Quest.
+---
+
+# Don Güero, city planner
+
+The city grows in phases. Planning happens in **Don Güero's head (an Opus 5 agent)**;
+decisions come back to the owner as **side quests**; the main session builds only
+after the permits are signed. Fun is a requirement, not a nice-to-have.
+
+## The loop
+
+1. **Read the ledger first**: `docs/CITY.md` (create it from the template there if
+   missing — it should already exist). Note any decisions still marked ⏳ pending.
+
+2. **Summon the planner**: spawn the `don-guero` agent (Agent tool,
+   `subagent_type: "don-guero"` — its definition pins Opus 5; don't override the
+   model). Prompt it with: the current phase number, any newly signed decisions
+   since the last plan, and what the owner asked for this session. It returns the
+   growth plan, side quests, and ledger updates.
+
+3. **Run the side quests**: present Don Güero's open decisions to the owner via
+   `AskUserQuestion` — one call, up to 4 questions. Keep his framing: header like
+   "❗ Obra" / "❗ Permiso", his voice in the question text, his options with their
+   one-line consequences. The owner picking an answer IS the quest reward — respond
+   in character (one line, e.g. "Don Güero stamps the permit. The crew starts
+   Monday.") before moving on.
+
+4. **Sign the ledger**: append the answered decisions to `docs/CITY.md`'s decision
+   log (date + quest + choice + one-line why), apply the planner's ledger updates,
+   and update the phase number. Commit with the rest of the session's work.
+
+5. **Build (same or next session)**: the plan's build notes are the work order —
+   new content in `content/meridian/` (or a new pack), map edits, NPCs, quests.
+   Normal shipping rules apply (`docs/HANDOFF.md`): smoke test green, EN/ES in
+   lockstep, bump `sw.js` CACHE, playtest stop added if the feature is visible.
+
+## House rules
+
+- Don Güero plans, the session builds, the owner decides. Never skip step 3 on a
+  real tradeoff — the owner WANTS the side quests.
+- Every new business: Hispanic-owned, and a practice pack for an AI role the owner
+  wants to be hired in (the ledger's "Purpose" section lists the roles).
+- One phase at a time. Don't bank unbuilt phases; the ledger's ⏳ items come first.
+- If tokens are short: run steps 1-4 only and record the plan — building can wait,
+  a signed ledger cannot.
