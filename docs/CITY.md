@@ -64,3 +64,32 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
   cable · zero-maintenance rule. *(imported from HANDOFF)*
 - 2026-08-30 · Retry-until-correct · quests complete only on the right answer ·
   teaching game, not a quiz show. *(imported from HANDOFF)*
+
+## Phase 1 plan (drafted by Don Güero 2026-08-30 — AWAITING FINAL "sign it")
+
+**El Mercado Robles** on the st SW lot + interior world `me`. Cast: Doña Chelo
+(owner), Nando (receiving, half-automates everything), Perla (counter, accidental
+analyst), Chava (carnicero, chat-only, rings everything as "chile"), optional
+bodega cat Frijol. Role: **AI ops analyst**. Quests 16-20: "Everything is chile"
+(data quality at source), "Tamal season" (drift + actionable alerting), "The
+abuela test" (proxy vs guardrail metrics), "The camera guy" (root-cause before
+tooling; consent), "The Monday number" (business KPI vs model metric; honest
+review). Core = 1,2,5 (MAXXP→290); stretch 3,4 (→330). Full build notes incl. map
+rows, portals (`M` door), stations s/n/u/v, and the DOORS/TOWNLBL/MAPDOT engine
+extraction are in this session's Don Güero plan — reproduce via /don-guero if lost.
+
+**Owner directives given 2026-08-30 (recorded verbatim intent):**
+- Balance built-out vs player-built; mix per business; expand via quests.
+- **Standing law — entities as data**: every character/critter/tile/building is
+  declared as data (type, look, placement, behavior) so graphics can be re-rendered
+  wholesale (2D today → richer/3D someday) without changing what things are. AJ's
+  upgrade waves depend on this.
+
+**Recommendations pending owner's "sign it":**
+- Role ranking: 1 Automation/Solutions Consultant (headline — matches owner's
+  existing SMB AI-audit work), 2 AI Ops Analyst (the resume gap; Phase 1 trains it),
+  3 Implementation Lead, 4 AI PM, 5 Prompt/Solutions Engineer.
+- El Mercado: ribbon + `me` interior, WITH the content-seam extraction; growth
+  registry queued so Phase 2+ can be player-built.
+- Decision-report export: next phase.
+- Week framing: "Week Two, chapter one" (content-only reframe).
