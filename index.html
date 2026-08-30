@@ -1,0 +1,1781 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light dark}body{margin:0;padding:0}img{max-width:100%}</style>
+<title>Meridian Quest</title>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  [hidden]{display:none !important;}
+  :root{
+    --bg:#F2F1EA; --surface:#FFFFFF; --ink:#221F2B; --muted:#635E6E; --line:#DAD7CB;
+    --accent:#7A3FE0; --accent-ink:#FFFFFF; --gold:#B07A10; --gold-bg:#F5EAD2;
+    --good:#1F7A4D; --good-bg:#E4F2E9; --bad:#B3372E; --bad-bg:#F7E7E4;
+    --mid:#8A5A14; --mid-bg:#F5EBD9;
+    --chip:#EBE9E0; --bubble:#EFEBF8; --bubble-line:#D4C7F1;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14121B; --surface:#1E1B29; --ink:#EAE7F0; --muted:#9C96AB; --line:#322D42;
+      --accent:#A97FFF; --accent-ink:#160F26; --gold:#E0B45C; --gold-bg:#3A2F17;
+      --good:#4CC38A; --good-bg:#173226; --bad:#E5695F; --bad-bg:#3A201D;
+      --mid:#D9A85B; --mid-bg:#38301F;
+      --chip:#292435; --bubble:#272138; --bubble-line:#453963;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14121B; --surface:#1E1B29; --ink:#EAE7F0; --muted:#9C96AB; --line:#322D42;
+    --accent:#A97FFF; --accent-ink:#160F26; --gold:#E0B45C; --gold-bg:#3A2F17;
+    --good:#4CC38A; --good-bg:#173226; --bad:#E5695F; --bad-bg:#3A201D;
+    --mid:#D9A85B; --mid-bg:#38301F;
+    --chip:#292435; --bubble:#272138; --bubble-line:#453963;
+  }
+  body{background:var(--bg); color:var(--ink); font-family:'IBM Plex Sans',system-ui,sans-serif; line-height:1.55;}
+  .wrap{max-width:560px; margin:0 auto; padding:22px 16px 60px;}
+  header{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;}
+  h1{font-family:'Unbounded',sans-serif; font-weight:700; font-size:1.2rem; margin:0;}
+  h1 span{color:var(--accent);}
+  .hud{display:flex; justify-content:space-between; align-items:center; gap:10px; font-family:'IBM Plex Mono',monospace; font-size:.78rem; color:var(--muted); margin-bottom:6px; font-variant-numeric:tabular-nums;}
+  .hearts{letter-spacing:2px;}
+  .xpbar{height:6px; background:var(--chip); border-radius:3px; overflow:hidden; margin-bottom:14px;}
+  .xpbar div{height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--gold)); border-radius:3px; transition:width .3s;}
+  .panel{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:var(--accent); margin:0 0 12px;}
+  .worldpanel{padding:12px;}
+  .viewport{position:relative; border-radius:10px; overflow:hidden; background:#241F2E; touch-action:none;}
+  .settings .box{touch-action:pan-y;}
+  .tlsearch{display:flex; gap:8px; margin-bottom:10px;}
+  .tlsearch input{flex:1; box-sizing:border-box; font-family:'IBM Plex Mono',monospace; font-size:.8rem; padding:8px 10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink);}
+  .tlsearch button{font-size:.8rem; padding:8px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer;}
+  canvas{display:block; width:100%; image-rendering:pixelated;}
+  .dpad{position:absolute; left:10px; bottom:10px; display:grid; grid-template-columns:repeat(3,44px); grid-template-rows:repeat(3,44px); gap:2px; opacity:.92; touch-action:none; user-select:none;}
+  .dpad button{border:none; border-radius:9px; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.05rem; cursor:pointer; backdrop-filter:blur(2px); touch-action:none;}
+  .dpad button:active{background:rgba(122,63,224,.75);}
+  .dpad .blank{visibility:hidden;}
+  .joy{position:absolute; left:12px; bottom:12px; width:116px; height:116px; touch-action:none; user-select:none;}
+  .joybase{position:absolute; inset:0; border-radius:50%; background:rgba(20,16,30,.4); border:2px solid rgba(237,233,245,.25); backdrop-filter:blur(2px);}
+  .knob{position:absolute; left:50%; top:50%; width:48px; height:48px; border-radius:50%; background:rgba(122,63,224,.85); border:2px solid rgba(237,233,245,.5); transform:translate(-50%,-50%); transition:transform .08s;}
+  .gear{position:absolute; right:10px; top:10px; width:38px; height:38px; border-radius:10px; border:none; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.05rem; cursor:pointer; z-index:4;}
+  .fsbtn{right:54px !important;}
+  .mapbtn{right:98px !important;}
+  .vmap{display:flex; flex-direction:column; align-items:center; gap:2px; margin-bottom:14px; font-size:.78rem;}
+  .vmap .vrow{display:flex; gap:6px; justify-content:center; width:100%;}
+  .vmap .vm{border:1.5px solid var(--line); border-radius:8px; padding:6px 8px; background:var(--bg); text-align:center; flex:1;}
+  .vmap .vm.here{border-color:var(--accent); background:var(--accent); color:var(--accent-ink); font-weight:600;}
+  .vmap .vlink{color:var(--muted); line-height:1.1;}
+  .vmap .vm small{display:block; color:inherit; opacity:.78; font-size:.65rem;}
+  .viewport.fs{position:fixed; inset:0; z-index:50; border-radius:0; display:flex; align-items:center; justify-content:center;}
+  .viewport.fs canvas{width:100%; height:100% !important; object-fit:contain;}
+  body.noscroll{overflow:hidden;}
+  .status{position:absolute; left:10px; top:10px; background:rgba(20,16,30,.55); color:#EDE9F5; font-family:'IBM Plex Mono',monospace; font-size:.74rem; padding:5px 10px; border-radius:999px; pointer-events:none; z-index:4; letter-spacing:1px;}
+  .brushes{position:absolute; left:50%; transform:translateX(-50%); top:54px; display:flex; flex-wrap:wrap; justify-content:center; max-width:88%; gap:5px; z-index:4; background:rgba(20,16,30,.55); padding:5px 7px; border-radius:12px;}
+  .brushes button{width:44px; height:48px; border-radius:8px; border:1.5px solid transparent; background:rgba(237,233,245,.12); font-size:.95rem; cursor:pointer; padding:2px 0 0; display:flex; flex-direction:column; align-items:center; gap:1px; color:#EDE9F5;}
+  .brushes button .bl{font-size:.5rem; letter-spacing:.03em; opacity:.85;}
+  .brushes button[aria-pressed="true"]{border-color:#E0B45C; background:rgba(224,180,92,.25);}
+  .talk{position:absolute; right:10px; bottom:16px; font-family:'Unbounded',sans-serif; font-size:.8rem; padding:12px 16px; border-radius:12px; border:none; background:var(--accent); color:var(--accent-ink); cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.35);}
+  .treat{bottom:72px !important; background:#B5773A !important; color:#FFF !important;}
+  .hint{font-size:.8rem; color:var(--muted); margin:10px 2px 0;}
+  .npc{display:flex; gap:10px; margin-bottom:12px;}
+  .avatar{flex:0 0 auto; width:44px; height:44px; border-radius:50%; background:var(--chip); display:flex; align-items:center; justify-content:center; font-size:1.4rem;}
+  .bubble{background:var(--bubble); border:1px solid var(--bubble-line); border-radius:4px 14px 14px 14px; padding:10px 13px;}
+  .bubble b{display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--accent); margin-bottom:3px;}
+  .bubble p{margin:0; font-size:.93rem;}
+  .codex{background:var(--gold-bg); border:1px solid var(--gold); border-radius:10px; padding:11px 14px; margin:12px 0;}
+  .codex b{display:block; font-family:'IBM Plex Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:4px;}
+  .codex p{margin:0; font-size:.88rem;}
+  .q{font-size:1rem; font-weight:600; margin:12px 0;}
+  .choices{display:flex; flex-direction:column; gap:10px;}
+  .choices button{font-family:'IBM Plex Sans',sans-serif; font-size:.93rem; text-align:left; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer;}
+  .choices button:hover{border-color:var(--accent);}
+  .choices button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .choices button:disabled{cursor:default; opacity:.88;}
+  .choices button.right{border-color:var(--good); background:var(--good-bg);}
+  .choices button.wrong{border-color:var(--bad); background:var(--bad-bg);}
+  .choices button.midpick{border-color:var(--mid); background:var(--mid-bg);}
+  .verdict{margin-top:14px; border-radius:10px; padding:13px;}
+  .verdict.ok{background:var(--good-bg);} .verdict.no{background:var(--bad-bg);} .verdict.mid{background:var(--mid-bg);}
+  .verdict h2{font-family:'Unbounded',sans-serif; font-size:.9rem; margin:0 0 6px;}
+  .verdict.ok h2{color:var(--good);} .verdict.no h2{color:var(--bad);} .verdict.mid h2{color:var(--mid);}
+  .verdict p{margin:0 0 7px; font-size:.9rem;}
+  .verdict .beat{font-style:italic; color:var(--muted); font-size:.87rem;}
+  .concept{display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:.7rem; padding:3px 10px; border-radius:999px; background:var(--chip); color:var(--muted); margin-bottom:7px;}
+  .levelup{margin-top:12px; text-align:center; font-family:'Unbounded',sans-serif; font-size:.82rem; color:var(--gold); background:var(--gold-bg); border:1px dashed var(--gold); border-radius:10px; padding:9px;}
+  .btn{margin-top:14px; width:100%; font-family:'Unbounded',sans-serif; font-weight:500; font-size:.88rem; padding:12px; border-radius:10px; border:none; background:var(--accent); color:var(--accent-ink); cursor:pointer;}
+  .btn:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+  .intro p{margin:.5rem 0; color:var(--muted); font-size:.94rem;}
+  .intro p.lead{color:var(--ink); font-weight:500;}
+  .classes{display:flex; flex-direction:column; gap:10px; margin-top:12px;}
+  .classes button{display:flex; gap:10px; align-items:center; text-align:left; padding:11px 13px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer; font-family:'IBM Plex Sans',sans-serif;}
+  .classes button:hover{border-color:var(--accent);}
+  .classes button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .classes .ce{font-size:1.3rem;}
+  .classes b{display:block; font-size:.92rem;}
+  .classes small{color:var(--muted); font-size:.8rem;}
+  .toast{position:absolute; left:50%; transform:translateX(-50%); bottom:64px; background:rgba(20,16,30,.85); color:#EDE9F5; font-size:.8rem; padding:8px 14px; border-radius:999px; max-width:86%; text-align:center; pointer-events:none; opacity:0; transition:opacity .25s; z-index:6;}
+  .toast.on{opacity:1;}
+  .creator label{display:block; font-family:'IBM Plex Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:4px;}
+  .creator .row{display:flex; gap:8px; flex-wrap:wrap; margin:2px 0 14px;}
+  .creator .sw{width:34px; height:34px; border-radius:50%; border:2px solid var(--line); cursor:pointer; padding:0;}
+  .creator .sw[aria-pressed="true"]{border-color:var(--accent); outline:2px solid var(--accent); outline-offset:1px;}
+  .creator input[type=text]{width:100%; box-sizing:border-box; font-family:'IBM Plex Sans',sans-serif; font-size:1rem; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); margin-bottom:14px;}
+  .creator input[type=text]:focus-visible{outline:2px solid var(--accent); border-color:var(--accent);}
+  .creator .preview{display:flex; justify-content:center; margin-bottom:10px;}
+  .pvbox{position:relative; background:#F7F4EC; border:1px solid #D9D3C5; border-radius:12px; padding:8px 26px 4px;}
+  .pvbox.dark{background:#241F2E; border-color:var(--line);}
+  .pvtog{position:absolute; top:6px; right:6px; width:28px; height:28px; border-radius:8px; border:none; background:rgba(128,120,150,.28); cursor:pointer; font-size:.85rem; line-height:1; padding:0;}
+  #pv{width:96px; height:156px; image-rendering:pixelated;}
+  .opt{font-family:'IBM Plex Sans',sans-serif; font-size:.82rem; padding:8px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer;}
+  .opt[aria-pressed="true"]{border-color:var(--accent); background:var(--accent); color:var(--accent-ink);}
+  .settings{position:absolute; inset:0; background:rgba(15,12,22,.78); display:flex; align-items:center; justify-content:center; z-index:5;}
+  .settings .box{background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:12px; padding:18px; width:82%; max-width:320px; max-height:88%; overflow-y:auto;}
+  .settings h3{font-family:'Unbounded',sans-serif; font-size:.9rem; margin:0 0 12px;}
+  .settings .optrow{display:flex; gap:8px; margin-bottom:14px;}
+  .settings .optrow button{flex:1; font-family:'IBM Plex Sans',sans-serif; font-size:.85rem; padding:10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer;}
+  .settings .optrow button[aria-pressed="true"]{border-color:var(--accent); background:var(--accent); color:var(--accent-ink);}
+  .settings .close{width:100%; font-family:'Unbounded',sans-serif; font-size:.8rem; padding:10px; border-radius:10px; border:none; background:var(--accent); color:var(--accent-ink); cursor:pointer;}
+  .settings label{display:block; font-family:'IBM Plex Mono',monospace; font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:6px;}
+  .settings textarea{width:100%; box-sizing:border-box; height:220px; font-family:'IBM Plex Mono',monospace; font-size:.72rem; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); padding:10px; margin-bottom:12px;}
+  .end h2{font-family:'Unbounded',sans-serif; font-size:1.05rem; margin:0 0 6px;}
+  .end .final{font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:.88rem; margin:0 0 8px;}
+  .end .epi{font-style:italic; color:var(--muted); font-size:.92rem; margin:0 0 12px;}
+</style>
+<div class="wrap">
+  <header><h1>MERIDIAN <span>QUEST</span></h1></header>
+  <div class="hud" id="hud" hidden><span id="ptag"></span><span class="hearts" id="hearts"></span><span id="xp"></span></div>
+  <div class="xpbar" id="xpbarwrap" hidden><div id="xpfill"></div></div>
+
+  <div class="panel intro" id="intro">
+    <p class="lead" id="in1"></p>
+    <p id="in2"></p>
+    <p id="in3"></p>
+    <p class="lead" style="margin-top:14px;" id="in4"></p>
+    <div class="classes" id="classes">
+      <button data-c="architect"><span class="ce">🏗️</span><span><b></b><small></small></span></button>
+      <button data-c="diplomat"><span class="ce">🤝</span><span><b></b><small></small></span></button>
+      <button data-c="operator"><span class="ce">⚡</span><span><b></b><small></small></span></button>
+    </div>
+    <button class="btn" id="continueBtn" hidden></button>
+    <div class="settings" id="introLangWrap" hidden></div>
+    <p style="margin-top:12px;"><button class="opt" id="langQuick">🌐 Español</button></p>
+  </div>
+
+  <div class="panel creator" id="creator" hidden>
+    <p class="eyebrow" id="crTitle"></p>
+    <div class="preview"><div class="pvbox" id="pvbox"><canvas id="pv" width="48" height="78"></canvas><button class="pvtog" id="pvtog" aria-label="Toggle preview background">🌙</button></div></div>
+    <label for="heroname" id="lbName"></label>
+    <input type="text" id="heroname" maxlength="14" placeholder="Rookie">
+    <label id="lbOutfit"></label><div class="row" id="rowOutfit"></div>
+    <label id="lbShirt"></label><div class="row" id="rowShirt"></div>
+    <label id="lbSkin"></label><div class="row" id="rowSkin"></div>
+    <label id="lbHairC"></label><div class="row" id="rowHair"></div>
+    <label id="lbHairS"></label><div class="row" id="rowStyle"></div>
+    <button class="btn" id="begin"></button>
+  </div>
+
+  <div class="panel worldpanel" id="world" hidden>
+    <p class="eyebrow" id="worldTag"></p>
+    <div class="viewport" id="vp">
+      <canvas id="cv"></canvas>
+      <div class="dpad" id="dpad" hidden>
+        <button class="blank"></button><button data-d="up" aria-label="Up">▲</button><button class="blank"></button>
+        <button data-d="left" aria-label="Left">◀</button><button class="blank"></button><button data-d="right" aria-label="Right">▶</button>
+        <button class="blank"></button><button data-d="down" aria-label="Down">▼</button><button class="blank"></button>
+      </div>
+      <div class="joy" id="joy" hidden><div class="joybase"></div><div class="knob" id="knob"></div></div>
+      <button class="gear" id="gear" aria-label="Settings">⚙️</button>
+      <button class="gear fsbtn" id="fsbtn" aria-label="Fullscreen">⛶</button>
+      <button class="gear mapbtn" id="mapbtn" aria-label="Map">🗺️</button>
+      <div class="status" id="status"></div>
+      <div class="brushes" id="brushes" hidden>
+        <button data-b="."><span>⬜</span><span class="bl"></span></button>
+        <button data-b="#"><span>🧱</span><span class="bl"></span></button>
+        <button data-b="D"><span>🖥️</span><span class="bl"></span></button>
+        <button data-b="P"><span>🪴</span><span class="bl"></span></button>
+        <button data-b="R"><span>🟪</span><span class="bl"></span></button>
+        <button data-b="+"><span>🚪</span><span class="bl"></span></button>
+        <button data-b="T"><span>🍽️</span><span class="bl"></span></button>
+        <button data-b="W"><span>🧊</span><span class="bl"></span></button>
+        <button data-b="V"><span>🔥</span><span class="bl"></span></button>
+        <button id="undoBtn"><span>↩️</span><span class="bl"></span></button>
+      </div>
+      <button class="talk" id="talk" hidden></button>
+      <button class="talk treat" id="treat" hidden></button>
+      <div class="toast" id="toast"></div>
+      <div class="settings" id="settings" hidden>
+        <div class="box">
+          <h3 id="setTitle"></h3>
+          <label id="lbCtl"></label>
+          <div class="optrow">
+            <button id="optSwipe"></button>
+            <button id="optJoy"></button>
+            <button id="optPad"></button>
+          </div>
+          <label id="lbLang"></label>
+          <div class="optrow">
+            <button id="optEn">English</button>
+            <button id="optEs">Español</button>
+          </div>
+          <label id="lbAdm"></label>
+          <div class="optrow">
+            <button id="admOff"></button>
+            <button id="admOn"></button>
+          </div>
+          <div class="optrow"><button id="openLab" style="flex:1;"></button></div>
+          <div class="optrow"><button id="openExp" style="flex:1;"></button></div>
+          <button class="close" id="closeSet"></button>
+        </div>
+      </div>
+      <div class="settings" id="textlab" hidden>
+        <div class="box">
+          <h3 id="tlTitle"></h3>
+          <label id="tlHint"></label>
+          <div class="tlsearch"><input id="tlSearch" type="text"><button id="tlFind">🔍</button></div>
+          <textarea id="tlArea" spellcheck="false"></textarea>
+          <div class="optrow"><button id="tlApply"></button><button id="tlClose"></button></div>
+        </div>
+      </div>
+      <div class="settings" id="exporter" hidden>
+        <div class="box">
+          <h3 id="exTitle"></h3>
+          <label id="exHint"></label>
+          <textarea id="exArea" readonly></textarea>
+          <div class="optrow"><button id="exCopy"></button><button id="exClose"></button></div>
+        </div>
+      </div>
+      <div class="settings" id="travel" hidden>
+        <div class="box">
+          <h3 id="tvTitle" style="margin-top:0;"></h3>
+          <p id="tvNote" style="font-size:.8rem; color:var(--muted); margin:4px 0 12px;"></p>
+          <div id="tvList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;"></div>
+          <button class="close" id="tvClose"></button>
+        </div>
+      </div>
+      <div class="settings" id="mapov" hidden>
+        <div class="box">
+          <h3 id="mapTitle"></h3>
+          <canvas id="mapcv" style="width:100%; border-radius:8px; image-rendering:pixelated;"></canvas>
+          <p id="mapNote" style="font-size:.78rem; color:var(--muted); margin:8px 0 12px;"></p>
+          <button class="close" id="mapClose"></button>
+        </div>
+      </div>
+    </div>
+    <p class="hint" id="ctlHint"></p>
+  </div>
+
+  <div class="panel" id="card" hidden>
+    <p class="eyebrow" id="qtag"></p>
+    <div class="npc"><div class="avatar" id="npcAv"></div><div class="bubble"><b id="npcName"></b><p id="npcSay"></p></div></div>
+    <div class="codex"><b id="cdxLb"></b><p id="codex"></p></div>
+    <p class="q" id="q"></p>
+    <div class="choices" id="choices"></div>
+    <div id="verdict" hidden></div>
+    <div class="levelup" id="levelup" hidden></div>
+    <button class="btn" id="next" hidden></button>
+  </div>
+
+  <div class="panel end" id="end" hidden>
+    <h2 id="endTitle"></h2>
+    <p class="final" id="endScore"></p>
+    <p class="epi" id="epi"></p>
+    <button class="btn" id="replay"></button>
+  </div>
+</div>
+<script>
+/* =========================================================
+   MERIDIAN QUEST v7 — bilingual (EN/ES), text lab, real doors
+   Architecture: engine / content / saves are separate layers.
+   ========================================================= */
+const NPCE={priya:"🛠️",marcus:"💼",camila:"🎧",tovar:"🌮",legal:"⚖️",cto:"🏥",junior:"🐣",ceo:"👑",fred:"🐕",rosa:"🌶️",chuy:"👨‍🍳",guero:"👷",lupe:"📐",beto:"🔨",kike:"🧱",mari:"🏗️"};
+const NPCN={
+ en:{priya:"Priya · Engineering Lead",marcus:"Marcus · CFO",camila:"Camila · Customer Success",tovar:"Ops Director · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · Bayview CTO",junior:"Theo · Junior PM",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Good Boy",rosa:"Doña Rosa · Owner, La Cocina",chuy:"Chuy · Head Cook",guero:"Don Güero · Foreman, La Obra",lupe:"Lupe · Estimator & Permits",beto:"Beto · Crew, La Obra",kike:"Kike · Mason",mari:"Mari · Crane Operator"},
+ es:{priya:"Priya · Líder de Ingeniería",marcus:"Marcus · CFO",camila:"Camila · Éxito del Cliente",tovar:"Director de Operaciones · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · CTO de Bayview",junior:"Theo · PM Junior",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Buen Chico",rosa:"Doña Rosa · Dueña de La Cocina",chuy:"Chuy · Jefe de Cocina",guero:"Don Güero · Maestro de Obra",lupe:"Lupe · Presupuestos y Permisos",beto:"Beto · Cuadrilla de La Obra",kike:"Kike · Albañil",mari:"Mari · Operadora de Grúa"}};
+/* Frederick's secret side quest (not part of the 10) */
+const FQEN={npc:"fred",title:"🐾 Personal side quest: Frederick's Files",start:"a",nodes:{
+ a:{say:"Frederick drops a chewed folder at your feet. Inside: vet reminders on napkins, a feeding schedule that lives in three people's heads, and 40 unposted photos of him being majestic. This dog needs an ops system.",
+    codex:"Personal ops is PM discipline with smaller stakes: one source of truth, recurring reminders for anything on a cycle (food, vet, grooming), and one list everyone shares. If it repeats, it gets a reminder — memory is not a system.",
+    q:"How do you organize Frederick's life?",
+    ch:[{t:"One giant sticky note on the fridge",out:{r:"mid",concept:"Single source of truth",why:"It IS one source of truth — but nothing reminds anyone of anything, and the vet appointment dies the day someone needs the fridge. Half credit.",beat:"Frederick sniffs the sticky note. Unimpressed."}},
+        {t:"A shared calendar with recurring reminders + one shared checklist",next:"b"},
+        {t:"Hire a dog assistant",out:{r:"bad",concept:"Single source of truth",why:"An assistant for a dog's calendar is a payroll line for a problem two recurring reminders solve.",beat:"Marcus appears from nowhere. “A WHAT for the dog?”"}}]},
+ b:{say:"His public awaits. Forty majestic photos, zero posts. Frederick's content pipeline?",
+    codex:"Creative work batches: one session producing a month of content beats posting when you remember. AI drafts the captions; a human approves before anything goes out — Frederick cannot approve, he is a dog.",
+    q:"The content plan is…",
+    ch:[{t:"Post whenever you remember",out:{r:"mid",concept:"Batching & scheduling",why:"That's how it's going now — 40 photos, zero posts. Sporadic effort loses to a boring schedule every time. Half credit for honesty.",beat:"Frederick's fans refresh in vain."}},
+        {t:"Monthly batch day: AI drafts captions, you approve, a scheduler posts",out:{r:"ok",concept:"Batching & scheduling",why:"One hour a month, AI does the writing, human keeps the judgment, the scheduler does the remembering. Frederick's brand: consistent.",beat:"First scheduled post hits 200 likes. Frederick remains humble."}},
+        {t:"Let AI auto-post as Frederick, unsupervised",out:{r:"bad",concept:"Batching & scheduling",why:"Unsupervised auto-posting is how brands die. No review, no floor.",beat:"Within the hour, Frederick's account endorses a crypto scheme."}}]}}};
+const FQES={npc:"fred",title:"🐾 Misión personal secreta: Los archivos de Frederick",start:"a",nodes:{
+ a:{say:"Frederick deja una carpeta mordisqueada a tus pies. Adentro: recordatorios del veterinario en servilletas, un horario de comida que vive en la cabeza de tres personas, y 40 fotos majestuosas sin publicar. Este perro necesita un sistema.",
+    codex:"Las operaciones personales son disciplina de PM con menos riesgo: una sola fuente de verdad, recordatorios recurrentes para todo lo cíclico (comida, veterinario, peluquería), y una lista compartida. Si se repite, lleva recordatorio — la memoria no es un sistema.",
+    q:"¿Cómo organizas la vida de Frederick?",
+    ch:[{t:"Una nota gigante pegada al refrigerador",out:{r:"mid",concept:"Fuente única de verdad",why:"SÍ es una sola fuente — pero nada le recuerda nada a nadie, y la cita del veterinario muere el día que alguien necesita el refrigerador. Medio crédito.",beat:"Frederick olfatea la nota. No le impresiona."}},
+        {t:"Un calendario compartido con recordatorios recurrentes + una lista común",next:"b"},
+        {t:"Contratar un asistente para el perro",out:{r:"bad",concept:"Fuente única de verdad",why:"Un asistente para la agenda de un perro es una línea de nómina para un problema que resuelven dos recordatorios recurrentes.",beat:"Marcus aparece de la nada. «¿Un QUÉ para el perro?»"}}]},
+ b:{say:"Su público espera. Cuarenta fotos majestuosas, cero publicaciones. ¿El plan de contenido de Frederick?",
+    codex:"El trabajo creativo se hace por lotes: una sesión que produce un mes de contenido le gana a publicar cuando te acuerdas. La IA redacta los pies de foto; un humano aprueba antes de publicar — Frederick no puede aprobar, es un perro.",
+    q:"El plan de contenido es…",
+    ch:[{t:"Publicar cuando te acuerdes",out:{r:"mid",concept:"Lotes y programación",why:"Así va todo ahora — 40 fotos, cero publicaciones. El esfuerzo esporádico pierde contra un calendario aburrido, siempre. Medio crédito por honestidad.",beat:"Los fans de Frederick actualizan la página en vano."}},
+        {t:"Día de lote mensual: la IA redacta, tú apruebas, un programador publica",out:{r:"ok",concept:"Lotes y programación",why:"Una hora al mes, la IA escribe, el humano conserva el criterio, el programador se encarga de recordar. La marca de Frederick: consistente.",beat:"La primera publicación programada llega a 200 me-gusta. Frederick sigue humilde."}},
+        {t:"Dejar que la IA publique como Frederick, sin supervisión",out:{r:"bad",concept:"Lotes y programación",why:"El auto-posteo sin supervisión es como mueren las marcas. Sin revisión no hay piso.",beat:"En menos de una hora, la cuenta de Frederick promociona una cripto-estafa."}}]}}};
+const FQ=()=>lang==="es"?FQES:FQEN;
+const QEN=[
+ {npc:"tovar",title:"The 500-doc chatbot",start:"a",nodes:{
+  a:{say:"Store managers call me all day with policy questions. I want a chatbot on these 500 docs — and corporate rewrites them every month.",
+     codex:"Two ways to give a model knowledge: train it into the model itself (slow, costly, frozen once done) — or keep it in a searchable index the model reads at answer time, fresh the moment a doc updates.",
+     q:"The docs change monthly. Where does the knowledge live?",
+     ch:[{t:"Train a custom model on the docs",out:{r:"bad",concept:"RAG vs fine-tuning",why:"Monthly retraining chases stale docs with money. By the time training finishes, corporate has rewritten the manual.",beat:"Priya, quietly: “That's how we lost the last lead.”"}},
+         {t:"Index the docs; the bot retrieves the right pages per question",next:"b"},
+         {t:"Paste all 500 docs into every prompt",out:{r:"bad",concept:"RAG vs fine-tuning",why:"You'd pay for 500 documents on every single question — and models lose focus across enormous inputs anyway.",beat:"Marcus materializes holding a calculator. Ominously."}}]},
+  b:{say:"Indexing — good. One more thing: yesterday a manager asked about a policy that isn't in any document at all. What should the bot do?",
+     codex:"A grounded bot answers only from retrieved text. When retrieval comes back empty, the honest moves are admitting it or routing to a human — the dangerous move is letting the model improvise.",
+     q:"No matching document exists. The bot should…",
+     ch:[{t:"Answer anyway from general knowledge — it usually sounds right",out:{r:"bad",concept:"Grounding & refusal",why:"“Sounds right” is how Free Churro Friday happens. An ungated answer with no source is a hallucination waiting for a customer.",beat:"Camila, from three desks away: “Don't you dare.”"}},
+         {t:"Say “I don't have that policy” and route the question to the ops team",out:{r:"ok",concept:"Grounding & refusal",why:"A grounded bot that admits the gap — and hands a human the question — builds trust and shows ops which docs are missing.",beat:"The ops director nods slowly. “The bot knows what it doesn't know. Unlike my nephew.”"}},
+         {t:"Make the bot apologize and end the chat",out:{r:"mid",concept:"Grounding & refusal",why:"Safe, but a dead end — no human routing means the manager's real question dies in the chat. Half credit: nothing false, nothing helpful.",beat:"Shipped with incidents. The manager calls the ops director anyway."}}]}}},
+ {npc:"camila",title:"Free Churro Friday",start:"a",nodes:{
+  a:{say:"The pilot bot just promised a manager ‘Free Churro Friday — all locations.’ That policy does not exist. Managers are already asking about it.",
+     codex:"Models generate plausible text — when they don't know, plausible means invented. Asking nicely or lowering randomness reduces variety, not fabrication. What works: answers may only come from retrieved documents, with a citation.",
+     q:"How do you kill the imaginary churros?",
+     ch:[{t:"Add “don't make things up” to the instructions",out:{r:"mid",concept:"Hallucination control",why:"It helps at the margins — and fails the day it matters. Instructions nudge; they don't gate. Half credit for trying the cheap fix first.",beat:"The bot invents ‘Taco Tuesday Amnesty’ a week later."}},
+         {t:"Set randomness to zero",out:{r:"bad",concept:"Hallucination control",why:"Temperature zero makes the bot confidently wrong the same way every time. Determinism isn't truth.",beat:"Camila: “Now it promises churros CONSISTENTLY.”"}},
+         {t:"Ground every answer in retrieved text — no source, no answer",out:{r:"ok",concept:"Hallucination control",why:"Grounding treats the cause: the bot states only what a real document says, cites it, or admits it doesn't have the policy.",beat:"Camila drafts the official Death of Churro Friday memo. There is grief."}}]}}},
+ {npc:"legal",title:"The 300-page contract",start:"a",nodes:{
+  a:{say:"I need Q&A over the 300-page franchise agreement. The prototype nails page 20 and faceplants on page 200.",
+     codex:"Every request has a token budget — you pay for every word sent, every time — and models attend unevenly across very long inputs: the middle sags. Less, better-chosen text beats everything-and-hope.",
+     q:"How do you cover all 300 pages?",
+     ch:[{t:"Chunk the contract; retrieve only sections relevant to each question",out:{r:"ok",concept:"Context windows & chunking",why:"Retrieval sends the three pages that matter instead of billing legal for all 300 every time — and quality holds on page 200 like it does on page 20.",beat:"Dana closes her laptop satisfied, which legal-ly speaking is a hug."}},
+         {t:"Query a one-time summary instead",out:{r:"mid",concept:"Context windows & chunking",why:"Works for “what's the gist” — fails the clause-level questions contracts exist for. Half credit: fine as a companion, wrong as the answer.",beat:"Dana: “The summary says ‘standard terms apply.’ WHICH terms, bot?”"}},
+         {t:"Buy a giant context window and send all 300 pages every time",out:{r:"bad",concept:"Context windows & chunking",why:"The middle still sags, and now every parking question costs a full contract's worth of tokens.",beat:"Marcus appears. He heard the word ‘buy.’"}}]}}},
+ {npc:"marcus",title:"The morning report",start:"a",nodes:{
+  a:{say:"Someone spends 40 minutes every morning pulling sales numbers, formatting the report, emailing leadership. Can your… robot… handle it?",
+     codex:"A plain model call only writes text — it can't touch a database or send email. Hand it tools (run query, send email) and it can decide which tool, in what order: that's an agent. Fixed steps live in code; judgment lives in the model.",
+     q:"How does the morning report automate?",
+     ch:[{t:"One giant ‘do the report’ prompt",out:{r:"bad",concept:"Agents & tool use",why:"A beautiful report full of imaginary numbers — no tools, no data access, pure fiction in a spreadsheet costume.",beat:"Leadership compliments the formatting. Then reads the numbers."}},
+         {t:"An agent with tools: query → format → send",out:{r:"ok",concept:"Agents & tool use",why:"Real data through real tools, orchestrated by the model. Forty minutes becomes zero.",beat:"Marcus: “If the robot breaks, it's coming out of your budget.” He's smiling. Probably."}},
+         {t:"Tell Marcus robots aren't ready",out:{r:"bad",concept:"Agents & tool use",why:"They've been ready. The CFO asking you for automation is not the person to underdeliver to.",beat:"Marcus writes something in a small notebook. You don't like the notebook."}}]}}},
+ {npc:"marcus",title:"The invoice",start:"a",nodes:{
+  a:{say:"This invoice. Ten thousand support tickets a month, all answered by the most expensive model money can buy. Most of them ask where their order is.",
+     codex:"Models come in sizes and prices; small ones do simple work for pennies. Systems can flag their own low-confidence answers — so easy tickets go cheap, and only hard ones escalate to the flagship.",
+     q:"How do you cut the bill without cutting quality?",
+     ch:[{t:"Everything to the cheapest model, accept the drop",out:{r:"mid",concept:"Model routing & cost design",why:"The bill collapses — and so does quality exactly on the hard tickets that decide whether customers stay. Half credit: right instinct, no escape hatch.",beat:"Refund disputes now answered by a model that thinks a churro is a shoe."}},
+         {t:"Cheap model first; escalate hard or unsure tickets to premium",out:{r:"ok",concept:"Model routing & cost design",why:"The cheap model earns its keep on “where's my order”; the flagship earns its price on the gnarly 10%. Same quality where it matters, fraction of the spend.",beat:"Marcus initials the invoice. From Marcus, that's fireworks."}},
+         {t:"Ask the vendor for a discount",out:{r:"bad",concept:"Model routing & cost design",why:"A discount on the wrong architecture is still the wrong architecture, now with a longer contract.",beat:"The vendor sends a fruit basket. Marcus sends it back."}}]}}},
+ {npc:"priya",title:"The 98% quote-bot",start:"a",nodes:{
+  a:{say:"Quote-bot is 98% right and auto-sends everything. Here's the other 2% — real customers, prices that lose real money. Sales loves it. Finance found the 2%.",
+     codex:"Automation level should match cost-of-error: full auto where mistakes are cheap, human review where they're expensive. Confidence scores sort which is which — only the uncertain outputs wait for a person.",
+     q:"Ship it, gate it, or kill it?",
+     ch:[{t:"Ship — 98% is an A+",out:{r:"bad",concept:"Human-in-the-loop",why:"98% is an A+ on a quiz. On auto-sent pricing it's 200 wrong quotes a month, in dollars.",beat:"Finance starts a spreadsheet titled ‘The 2%.’ It has your name on it."}},
+         {t:"Route uncertain quotes to human review",next:"b"},
+         {t:"Kill it until perfect",out:{r:"bad",concept:"Human-in-the-loop",why:"Perfect never comes, and you just threw away the 98% that was printing time savings.",beat:"Sales holds a small vigil."}}]},
+  b:{say:"Agreed — review queue. Now the tree question: WHICH quotes wait for a human?",
+     codex:"Reviewing everything recreates the manual job you automated. Reviewing nothing is where you started. The lever is the confidence threshold — plus the cost of the error type: a too-low price hurts more than a too-slow quote.",
+     q:"What goes to the review queue?",
+     ch:[{t:"Every quote — humans re-check all of it",out:{r:"mid",concept:"Confidence thresholds",why:"Safe but self-defeating: you've rebuilt the 40-hour job with extra steps. Half credit — no losses, no leverage.",beat:"The reviewer now reviews quotes about reviewing."}},
+         {t:"Only low-confidence quotes and any quote above a price ceiling",out:{r:"ok",concept:"Confidence thresholds",why:"Confidence catches the model's own doubt; the price ceiling catches the expensive mistakes it's confidently wrong about. Two nets, minimal drag.",beat:"Sales keeps its speed, finance keeps its sleep, Priya almost smiles."}},
+         {t:"A random 10% sample",out:{r:"mid",concept:"Confidence thresholds",why:"Sampling measures error rate — it doesn't stop errors. Fine for monitoring, wrong as the only gate. Half credit.",beat:"The 2% waves at you from the un-sampled 90%."}}]}}},
+ {npc:"cto",title:"Bayview's notes",start:"a",nodes:{
+  a:{say:"Our doctors drown in paperwork. I want AI summaries of visit notes — but every note is full of patient data, and I need to not end up in the news.",
+     codex:"Health data is regulated. Two keys make LLM work possible: mask patient identifiers before the model sees text, and use an enterprise endpoint covered by a signed agreement (BAA) that permits health data. Consumer AI endpoints are never covered.",
+     q:"How do you deliver the summaries?",
+     ch:[{t:"Send raw notes to a consumer AI tool",out:{r:"bad",concept:"PII/PHI governance",why:"That's the career-ending option — a reportable breach with a timestamp.",beat:"Somewhere, a compliance officer wakes in a cold sweat, unsure why."}},
+         {t:"Mask identifiers + BAA-covered endpoint + log everything",out:{r:"ok",concept:"PII/PHI governance",why:"The model sees only what it needs, on infrastructure that's allowed to see it, with an audit trail. The standard, defensible path.",beat:"Dr. Okafor: “Finally. Someone who's done this in healthcare before.”"}},
+         {t:"Refuse: AI can't touch health data",out:{r:"mid",concept:"PII/PHI governance",why:"Zero risk, zero help — and someone less careful will say yes instead. Half credit for caution without craft.",beat:"The doctors keep drowning, but compliantly."}}]}}},
+ {npc:"junior",title:"Theo's prompt",start:"a",nodes:{
+  a:{say:"I reworded the support bot's prompt and the demo got WAY better! Can we ship today? Please? I already told my mom.",
+     codex:"One good demo is an anecdote. Prompt changes routinely fix one case and silently break five others. Teams keep an eval set — real past cases with known good answers — and score every change against it before shipping. Unit tests, but for AI.",
+     q:"Does Theo's prompt ship today?",
+     ch:[{t:"Ship it — you both saw it improve",out:{r:"bad",concept:"Evals & regression testing",why:"The demo showed one case. The eval would have shown the two refund flows it broke. Now customers get to find them.",beat:"Theo's mom is proud. The refund queue is not."}},
+         {t:"Run the eval set; ship tomorrow if the score holds",out:{r:"ok",concept:"Evals & regression testing",why:"One hour of eval catches what demos hide — it finds two broken refund cases. Theo ships tomorrow, correctly, and learns the ritual.",beat:"Theo buys Priya coffee for a week. Growth arc initiated."}},
+         {t:"Ask another AI which prompt is better",out:{r:"mid",concept:"Evals & regression testing",why:"AI-as-judge is a real technique — inside an eval harness with defined criteria. As a vibes oracle, it's a coin with opinions. Half credit.",beat:"The judge model says both prompts are “great!” It says that about everything."}}]}}},
+ {npc:"tovar",title:"The laminated plan",start:"a",nodes:{
+  a:{say:"One more thing — managers want meeting transcription inside the app. Theo has a six-month plan to build speech-to-text from scratch. He laminated it.",
+     codex:"Some AI capabilities are commodities — transcription, translation, OCR — sold as excellent APIs for cents. Differentiation lives in what your product does with the output, not in rebuilding the commodity.",
+     q:"Six months to build, or…?",
+     ch:[{t:"Build speech-to-text from scratch",out:{r:"bad",concept:"Build vs buy",why:"Six months rebuilding what costs cents per minute, to reach quality the API already beats. Nobody will notice — except Marcus.",beat:"The lamination was the best part of the plan."}},
+         {t:"Integrate a proven transcription API; build the features on top",out:{r:"ok",concept:"Build vs buy",why:"Two weeks to integrate, then the team builds what managers actually asked for — the stuff on top of the transcript. Build the last mile, buy the commodity.",beat:"Theo un-laminates the plan. Quietly."}},
+         {t:"Hire human transcribers",out:{r:"bad",concept:"Build vs buy",why:"Slower, costlier, and doesn't scale past the third meeting. It's 2026.",beat:"The job posting gets three applicants. All bots."}}]}}},
+ {npc:"ceo",title:"The 8-second silence",start:"a",nodes:{
+  a:{say:"Final demo. Your phone agent gives brilliant answers… eight seconds after callers stop talking. I counted. Twice. Callers hang up.",
+     codex:"In real-time AI, people judge time-to-first-word, not time-to-full-answer. Two levers: stream the reply so speech starts as it generates, and open with a small fast model while heavier reasoning catches up behind it.",
+     q:"Kill the eight-second silence:",
+     ch:[{t:"Wait for faster hardware",out:{r:"bad",concept:"Latency engineering",why:"Latency is a design problem you can fix this sprint, not a hardware problem someone else fixes next year.",beat:"The CEO checks his watch a third time. It echoes."}},
+         {t:"Stream the reply; lead with a small fast model",next:"b"},
+         {t:"Add hold music",out:{r:"bad",concept:"Latency engineering",why:"Now it's eight seconds of jazz before the disappointment.",beat:"Camila vetoes the smooth-jazz license request."}}]},
+  b:{say:"Priya, patching it live: “Streaming's in. Last call — what's the metric on the launch dashboard?”",
+     codex:"You get what you measure. Total answer time hides the fix; time-to-first-word is what callers actually feel — with total time and answer quality tracked beside it, not instead of it.",
+     q:"The headline latency metric is…",
+     ch:[{t:"Average total response time",out:{r:"mid",concept:"Latency metrics",why:"Real but wrong headline — a slow-but-streaming answer FEELS instant, and this metric can't see that. Half credit; keep it secondary.",beat:"The dashboard says ‘slower.’ The callers say ‘finally.’"}},
+         {t:"Time-to-first-word",out:{r:"ok",concept:"Latency metrics",why:"That's the moment the silence ends — the thing callers judge. Track total time and quality beside it, headline this.",beat:"Sub-second. The CEO puts his watch away. Priya smiles. Witnesses confirm."}},
+         {t:"Number of callers who hang up",out:{r:"mid",concept:"Latency metrics",why:"A great outcome metric — but it's a lagging alarm, not a steering wheel. Half credit.",beat:"“Good news: hang-ups down. Bad news: we learned it a week late.”"}}]}}},
+ {npc:"rosa",title:"The phone never stops",start:"a",nodes:{
+  a:{say:"Mijo, the phone rings all day — orders, questions, “¿tienen birria?” I miss half the calls while I'm cooking. They tell me a robot can answer. Fine. But can it take orders WITHOUT ruining them?",
+     codex:"A voice agent can take phone orders — the trick is structure. Speech gets matched into a structured order (items, sizes, extras, price) against the real menu, then read back to the caller to confirm before it counts. Free-text guessing is how you end up with three surprise birrias.",
+     q:"How should the phone agent take orders?",
+     ch:[{t:"Let it chat freely and write down what it hears",out:{r:"bad",concept:"Structured outputs",why:"Free text means “large horchata” becomes “¿la orchata grande?” becomes mystery tickets. No structure, no reliable kitchen ticket.",beat:"Ticket #4 reads “birria??? maybe 3?”. The kitchen weeps."}},
+         {t:"Match every order to the real menu as structured items, then read it back to confirm",next:"b"},
+         {t:"Keep missing calls — it's more authentic",out:{r:"bad",concept:"Structured outputs",why:"Missed calls are missed revenue — a third of Rosa's orders come by phone.",beat:"Across town, a competitor's robot says “gracias por su orden.”"}},
+         {t:"Hire someone just to answer the phone",out:{r:"mid",concept:"Structured outputs",why:"A human works — at a salary, with breaks, quitting at the worst moment. A real option, a heavy cost for a solvable problem. Half credit.",beat:"The new hire quits after one Saturday rush."}}]},
+  b:{say:"It works, mijo! But last night someone asked for “the wedding catering package for 200 people” — and the robot happily said YES. We do not do weddings.",
+     codex:"Agents need explicit guardrails: what they may sell, ceilings on order size, and a rule that unusual requests get handed to a human. Confirmation protects the customer; guardrails protect Rosa.",
+     q:"Fix the robot's enthusiasm:",
+     ch:[{t:"Menu-only + a max order size + route anything unusual to Rosa's phone",out:{r:"ok",concept:"Agent guardrails",why:"Sell only what exists, up to sane limits, and escalate the weird stuff to a human. Rosa decides about weddings — not the robot.",beat:"The robot politely transfers a quinceañera inquiry. Rosa negotiates like a champion."}},
+         {t:"Turn the robot off at night",out:{r:"mid",concept:"Agent guardrails",why:"That dodges the failure by dodging the revenue. Half credit — safe, but small.",beat:"The night owls order pizza instead. Traitors."}},
+         {t:"Let it improvise — the customer is always right",out:{r:"bad",concept:"Agent guardrails",why:"An agent without limits will promise 200 birrias and a mariachi. The cost of error is unbounded.",beat:"Somewhere, Marcus feels a disturbance he cannot explain."}},
+         {t:"Make the robot upsell everything to boost revenue",out:{r:"bad",concept:"Agent guardrails",why:"An agent optimizing revenue without limits torches trust — what it may OFFER is a guardrail decision too.",beat:"An abuelita ordering one coffee gets offered the party platter. Twice."}}]}}},
+ {npc:"chuy",title:"Prep for Friday",start:"a",nodes:{
+  a:{say:"Every Friday I guess how much barbacoa to prep. Guess low — we run out by 8pm and people cry. Guess high — Sunday me eats sad leftovers for three days. There has to be a better way, ¿no?",
+     codex:"Forecasting beats gut feeling: average the last several Fridays, adjust for what's different this week (payday, weather, events), and track how wrong you were to improve each week. Overproduction is money in the trash; running out is customers in the trash.",
+     q:"How much barbacoa for Friday?",
+     ch:[{t:"Same as always — feel it out",out:{r:"mid",concept:"Demand forecasting",why:"The gut got Chuy this far — sometimes right, never measured, impossible to improve. Half credit for surviving on instinct.",beat:"Friday, 8:15pm: “no hay.” Hearts break audibly."}},
+         {t:"Average the last 8 Fridays, adjust for payday and weather, track the error weekly",out:{r:"ok",concept:"Demand forecasting",why:"A simple forecast plus error tracking gets smarter every single week. This is data science in an apron.",beat:"Chuy tapes the forecast to the walk-in. It becomes law."}},
+         {t:"Double everything and sell leftovers Saturday",out:{r:"bad",concept:"Demand forecasting",why:"Waste as a strategy — the margin dies quietly in the walk-in fridge.",beat:"A tower of Sunday barbacoa. Even Frederick, visiting, declines."}},
+         {t:"Buy a big AI forecasting platform first",out:{r:"mid",concept:"Demand forecasting",why:"Tools before data discipline is backwards — the simple average with error tracking wins until the data earns a platform. Half credit.",beat:"The platform's onboarding call runs longer than Friday service."}}]}}},
+ {npc:"guero",title:"The estimate",start:"a",nodes:{
+  a:{say:"Jefe! A client wants a remodel quote for a storefront across town. She sent thirty photos and wants the number TODAY. Old days, I'd drive over, measure for two hours, and guess the rest. You're the AI person — impress me.",
+     codex:"Vision models can read measurements from photos: wall areas, fixtures, damage, materials. The reliable pattern is AI-drafted line items from the photos — quantities, materials, labor — with a human checking prices and the weird corners before it goes out. Fast AND defensible.",
+     q:"How does the quote get built?",
+     ch:[{t:"Eyeball the photos and quote from experience",out:{r:"mid",concept:"Vision estimates",why:"Experience is real — but unmeasured guesses win jobs that lose money. Half credit for the gray hairs.",beat:"Don Güero's mustache twitches. He knows you're right."}},
+         {t:"AI drafts a line-item estimate from the photos; Güero verifies materials and prices before it ships",next:"b"},
+         {t:"Promise to beat any other quote, figure it out later",out:{r:"bad",concept:"Vision estimates",why:"Winning on price without knowing your costs is how construction companies die with full calendars.",beat:"Lupe, without looking up: “That's how the last company went down.”"}},
+         {t:"Send an apprentice to measure everything by hand today",out:{r:"mid",concept:"Vision estimates",why:"Accurate — and slow. The quote lands late, and late quotes lose. Half credit for rigor without speed.",beat:"The apprentice measures beautifully. The client signed elsewhere at noon."}}]},
+  b:{say:"We won the job, jefe! But now the client says: “while you're at it, just add one little bathroom.” ONE LITTLE BATHROOM. What do I tell her?",
+     codex:"Scope changes are where jobs bleed. The discipline is the change order: every addition gets written up with its price and schedule impact, approved BEFORE the work happens. AI drafts it in minutes from the original estimate — no awkwardness, just paper.",
+     q:"The “one little bathroom” gets…",
+     ch:[{t:"Just do it — keep the client happy",out:{r:"bad",concept:"Change orders",why:"Free bathrooms today, bankruptcy mañana. Unpaid scope is the quiet killer of good crews.",beat:"The crew builds it beautifully. Nobody pays for it."}},
+         {t:"A written change order — price and timeline impact, AI-drafted, client-approved before work starts",out:{r:"ok",concept:"Change orders",why:"The AI turns the estimate into a change order in minutes; the client signs knowing exactly what it costs. Everyone stays friends AND solvent.",beat:"The client signs. Don Güero frames the change order like a diploma."}},
+         {t:"Refuse all changes — the contract is the contract",out:{r:"mid",concept:"Change orders",why:"Protects the margin, loses the relationship — and remodels ALWAYS change. Half credit for spine, zero for flexibility.",beat:"The client calls someone else for the next job. And the next."}},
+         {t:"Do it, and quietly add it to the final invoice",out:{r:"bad",concept:"Change orders",why:"Surprise charges are how trust — and occasionally court dates — get lost and found. Paper first, work second.",beat:"The final invoice starts a shouting match in two languages."}}]}}},
+ {npc:"lupe",title:"Permit purgatory",start:"a",nodes:{
+  a:{say:"Three projects are sitting dead because the permits aren't filed. Same forms, same city, every time — owner info, scope, drawings list, fees. I spend my Sundays copying the same data into the same boxes. There has to be dignity somewhere in this.",
+     codex:"Repetitive paperwork is document automation's home turf: the project data already exists, so AI can fill the standard forms from it and track each permit's status. The human reviews before filing — a wrong permit is worse than a slow one.",
+     q:"How do the permits get done?",
+     ch:[{t:"Find a guy who knows a guy at the city",out:{r:"bad",concept:"Document automation",why:"The guy retires, the shortcut becomes a scandal, and the projects stay dead. Not a system.",beat:"The guy's cousin quotes a “consulting fee.” Lupe hangs up."}},
+         {t:"AI fills the forms from the project data, Lupe reviews before filing, a tracker follows each permit's status",out:{r:"ok",concept:"Document automation",why:"The data exists once, the forms fill themselves, the human signs off, and nothing gets lost in purgatory again. Sundays return to Lupe.",beat:"Three permits filed by lunch. Lupe takes an actual weekend. The city is confused."}},
+         {t:"Keep doing them by hand — it's tradition",out:{r:"mid",concept:"Document automation",why:"It works, slowly, and eats the estimator who should be estimating. Half credit for reliability, at the cost of Sundays.",beat:"Lupe's coffee goes cold over form B-247. Again."}},
+         {t:"Outsource all permits to a consulting firm",out:{r:"mid",concept:"Document automation",why:"It works — at a fee, forever, and the capability never comes in-house. Half credit: delegated, not solved.",beat:"The consultant uses the same AI tool. Lupe watches, invoiced."}}]}}},
+ {npc:"priya",title:"Say it so it's true",start:"a",nodes:{
+  a:{say:"The support bot's answers SOUND great — confident, polished, wrong maybe one time in ten. Nobody can tell which time. Marketing loves the tone. I hate the tone. Fix the wording.",
+     codex:"Trust is built with calibrated language: instructions that make the bot cite its source, mark uncertain answers as uncertain, and say 'I don't know' when nothing supports an answer. 'Be accurate' is a vibe — cite, qualify, and refuse are behaviors.",
+     q:"What goes in the bot's instructions?",
+     ch:[{t:"Write “be accurate and helpful” at the top",out:{r:"mid",concept:"Calibrated language",why:"A vibe, not a behavior. Models follow concrete verbs; “be accurate” measures nothing. Half credit — harmless, useless.",beat:"The bot stays confidently wrong, but now politely."}},
+         {t:"Cite the source for every claim, mark uncertain answers as uncertain, and say “I don't know” when nothing supports it",next:"b"},
+         {t:"Make it sound MORE confident — customers like certainty",out:{r:"bad",concept:"Calibrated language",why:"Confident wording on wrong answers is how trust dies at scale. That's polishing the failure.",beat:"Marketing applauds. Camila opens a new spreadsheet."}},
+         {t:"Append a legal disclaimer to every answer",out:{r:"mid",concept:"Calibrated language",why:"Cover isn't candor — by the third message, users are trained to skip it. Half credit for lawyer instincts.",beat:"Users scroll past the disclaimer at record speed. All of them."}}]},
+  b:{say:"Better. Now the live one: a caller asks “how many locations take the app?” — retrieval finds nothing current. The bot has to say SOMETHING. Word it.",
+     codex:"When you can't verify, the trustworthy shape is: state what you CAN confirm, name what you can't, and hand over the path to the answer. Precision about your own limits is what accuracy sounds like.",
+     q:"The bot's best reply is…",
+     ch:[{t:"“Around 300 locations!” — probably close",out:{r:"bad",concept:"Verifiable claims",why:"A confident guess is a lie with good posture. One wrong number unravels every right one that came before it.",beat:"It was 41. A journalist was on the line."}},
+         {t:"“I can't verify the current count. As of the last update it was 38 — here's where the live list is.”",out:{r:"ok",concept:"Verifiable claims",why:"Confirms the known, names the unknown, hands over the path. That wording IS the trust product.",beat:"Priya reads it twice. “Ship the wording.” The highest praise she knows."}},
+         {t:"“I cannot answer that question.”",out:{r:"mid",concept:"Verifiable claims",why:"Honest but lazy — refusing everything unverifiable throws away the partial truth you DO have. Half credit.",beat:"The caller asks a human, who reads them the same last update."}},
+         {t:"Answer normally, tuck “estimates may vary” at the end",out:{r:"mid",concept:"Verifiable claims",why:"Uncertainty in the footnote is certainty in the headline. Placement is part of wording. Half credit.",beat:"Nobody reads footnote three. Ever."}}]}}}
+];
+const QES=[
+ {npc:"tovar",title:"El chatbot de 500 documentos",start:"a",nodes:{
+  a:{say:"Los gerentes de tienda me llaman todo el día con preguntas de políticas. Quiero un chatbot sobre estos 500 documentos — y corporativo los reescribe cada mes.",
+     codex:"Dos formas de darle conocimiento a un modelo: entrenarlo dentro del modelo (lento, caro, congelado al terminar) — o mantenerlo en un índice consultable que el modelo lee al responder, fresco al instante en que un documento se actualiza.",
+     q:"Los documentos cambian cada mes. ¿Dónde vive el conocimiento?",
+     ch:[{t:"Entrenar un modelo a medida con los documentos",out:{r:"bad",concept:"RAG vs fine-tuning",why:"Reentrenar cada mes es perseguir documentos viejos con dinero. Para cuando termina el entrenamiento, corporativo ya reescribió el manual.",beat:"Priya, en voz baja: «Así perdimos al líder anterior»."}},
+         {t:"Indexar los documentos; el bot recupera las páginas correctas por pregunta",next:"b"},
+         {t:"Pegar los 500 documentos en cada prompt",out:{r:"bad",concept:"RAG vs fine-tuning",why:"Pagarías por 500 documentos en cada pregunta — y los modelos pierden el foco en entradas enormes.",beat:"Marcus se materializa con una calculadora. De forma ominosa."}}]},
+  b:{say:"Indexar — bien. Una cosa más: ayer un gerente preguntó por una política que no existe en ningún documento. ¿Qué debe hacer el bot?",
+     codex:"Un bot anclado responde solo desde texto recuperado. Cuando la búsqueda vuelve vacía, lo honesto es admitirlo o derivar a un humano — lo peligroso es dejar que el modelo improvise.",
+     q:"No existe documento que coincida. El bot debería…",
+     ch:[{t:"Responder igual con conocimiento general — suele sonar bien",out:{r:"bad",concept:"Anclaje y rechazo",why:"«Suena bien» es como nace el Viernes de Churros Gratis. Una respuesta sin fuente es una alucinación esperando a un cliente.",beat:"Camila, a tres escritorios: «Ni se te ocurra»."}},
+         {t:"Decir «no tengo esa política» y derivar la pregunta al equipo de operaciones",out:{r:"ok",concept:"Anclaje y rechazo",why:"Un bot que admite el hueco — y le pasa la pregunta a un humano — genera confianza y muestra qué documentos faltan.",beat:"El director asiente lento. «El bot sabe lo que no sabe. No como mi sobrino»."}},
+         {t:"Que el bot pida disculpas y termine el chat",out:{r:"mid",concept:"Anclaje y rechazo",why:"Seguro, pero sin salida — sin derivación humana, la pregunta real muere en el chat. Medio crédito: nada falso, nada útil.",beat:"Entregado con incidentes. El gerente llama al director de todos modos."}}]}}},
+ {npc:"camila",title:"Viernes de Churros Gratis",start:"a",nodes:{
+  a:{say:"El bot piloto le acaba de prometer a un gerente el «Viernes de Churros Gratis — todas las sucursales». Esa política no existe. Los gerentes ya están preguntando.",
+     codex:"Los modelos generan texto plausible — y cuando no saben, plausible significa inventado. Pedirlo por favor o bajar la aleatoriedad reduce variedad, no fabricación. Lo que funciona: las respuestas solo pueden venir de documentos recuperados, con cita.",
+     q:"¿Cómo matas los churros imaginarios?",
+     ch:[{t:"Agregar «no inventes cosas» a las instrucciones",out:{r:"mid",concept:"Control de alucinaciones",why:"Ayuda en los márgenes — y falla el día que importa. Las instrucciones empujan; no bloquean. Medio crédito por probar primero lo barato.",beat:"El bot inventa la «Amnistía del Martes de Tacos» una semana después."}},
+         {t:"Poner la aleatoriedad en cero",out:{r:"bad",concept:"Control de alucinaciones",why:"Con temperatura cero el bot se equivoca con confianza, igual, todas las veces. Determinismo no es verdad.",beat:"Camila: «Ahora promete churros CONSISTENTEMENTE»."}},
+         {t:"Anclar cada respuesta en texto recuperado — sin fuente, no hay respuesta",out:{r:"ok",concept:"Control de alucinaciones",why:"El anclaje ataca la causa: el bot dice solo lo que un documento real dice, lo cita, o admite que no tiene esa política.",beat:"Camila redacta el memo oficial de la Muerte del Viernes de Churros. Hay luto."}}]}}},
+ {npc:"legal",title:"El contrato de 300 páginas",start:"a",nodes:{
+  a:{say:"Necesito preguntas y respuestas sobre el contrato de franquicia de 300 páginas. El prototipo brilla en la página 20 y se estrella en la 200.",
+     codex:"Cada solicitud tiene un presupuesto de tokens — pagas cada palabra enviada, cada vez — y los modelos atienden de forma dispareja las entradas muy largas: el medio se hunde. Menos texto, mejor elegido, le gana a mandarlo todo.",
+     q:"¿Cómo cubres las 300 páginas?",
+     ch:[{t:"Trocear el contrato; recuperar solo las secciones relevantes por pregunta",out:{r:"ok",concept:"Ventanas de contexto",why:"La recuperación envía las tres páginas que importan en vez de cobrarle a legal las 300 cada vez — y la calidad aguanta en la página 200 igual que en la 20.",beat:"Dana cierra su laptop satisfecha, lo que en términos legales es un abrazo."}},
+         {t:"Consultar un resumen único del contrato",out:{r:"mid",concept:"Ventanas de contexto",why:"Sirve para «la idea general» — falla en las preguntas de cláusula por las que existen los contratos. Medio crédito: bien de acompañante, mal de respuesta.",beat:"Dana: «El resumen dice ‘aplican términos estándar’. ¿CUÁLES términos, bot?»."}},
+         {t:"Comprar una ventana de contexto gigante y mandar las 300 páginas siempre",out:{r:"bad",concept:"Ventanas de contexto",why:"El medio se hunde igual, y ahora cada pregunta de estacionamiento cuesta un contrato entero en tokens.",beat:"Aparece Marcus. Escuchó la palabra «comprar»."}}]}}},
+ {npc:"marcus",title:"El reporte matutino",start:"a",nodes:{
+  a:{say:"Alguien gasta 40 minutos cada mañana sacando las ventas de ayer, formateando el reporte y enviándolo a dirección. ¿Puede tu… robot… hacerlo?",
+     codex:"Una llamada simple al modelo solo escribe texto — no puede tocar una base de datos ni enviar correos. Dale herramientas (ejecutar consulta, enviar correo) y puede decidir cuál usar y en qué orden: eso es un agente. Los pasos fijos van en código; el criterio va en el modelo.",
+     q:"¿Cómo se automatiza el reporte matutino?",
+     ch:[{t:"Un mega-prompt de «haz el reporte»",out:{r:"bad",concept:"Agentes y herramientas",why:"Un reporte hermoso lleno de números imaginarios — sin herramientas no hay datos: pura ficción disfrazada de hoja de cálculo.",beat:"Dirección felicita el formato. Luego lee los números."}},
+         {t:"Un agente con herramientas: consultar → formatear → enviar",out:{r:"ok",concept:"Agentes y herramientas",why:"Datos reales por herramientas reales, orquestado por el modelo. Cuarenta minutos se vuelven cero.",beat:"Marcus: «Si el robot se rompe, sale de tu presupuesto». Sonríe. Probablemente."}},
+         {t:"Decirle a Marcus que los robots no están listos",out:{r:"bad",concept:"Agentes y herramientas",why:"Llevan tiempo listos. El CFO que te pide automatización no es la persona a la que conviene quedarle mal.",beat:"Marcus anota algo en una libretita. No te gusta la libretita."}}]}}},
+ {npc:"marcus",title:"La factura",start:"a",nodes:{
+  a:{say:"Esta factura. Diez mil tickets de soporte al mes, todos respondidos por el modelo más caro del mercado. La mayoría pregunta dónde está su pedido.",
+     codex:"Hay modelos de varios tamaños y precios; los pequeños hacen el trabajo simple por centavos. Los sistemas pueden marcar sus propias respuestas de baja confianza — lo fácil va al modelo barato y solo lo difícil escala al premium.",
+     q:"¿Cómo bajas la factura sin bajar la calidad?",
+     ch:[{t:"Todo al modelo más barato, aceptar la caída",out:{r:"mid",concept:"Enrutamiento y costos",why:"La factura colapsa — y la calidad también, justo en los tickets difíciles que deciden si el cliente se queda. Medio crédito: buen instinto, sin salida de emergencia.",beat:"Las disputas de reembolso ahora las responde un modelo que cree que un churro es un zapato."}},
+         {t:"Modelo barato primero; escalar lo difícil o dudoso al premium",out:{r:"ok",concept:"Enrutamiento y costos",why:"El barato se gana el pan con «¿dónde está mi pedido?»; el premium justifica su precio solo en el 10% espinoso. Misma calidad donde importa, fracción del gasto.",beat:"Marcus firma la factura. Viniendo de Marcus, son fuegos artificiales."}},
+         {t:"Pedirle un descuento al proveedor",out:{r:"bad",concept:"Enrutamiento y costos",why:"Un descuento sobre la arquitectura equivocada sigue siendo la arquitectura equivocada, ahora con contrato más largo.",beat:"El proveedor manda una canasta de frutas. Marcus la devuelve."}}]}}},
+ {npc:"priya",title:"El bot del 98%",start:"a",nodes:{
+  a:{say:"El bot de cotizaciones acierta el 98% y envía todo solo. Aquí está el otro 2% — clientes reales, precios que pierden dinero real. A ventas le encanta. Finanzas encontró el 2%.",
+     codex:"El nivel de automatización debe seguir el costo del error: automático donde equivocarse es barato, revisión humana donde es caro. Los puntajes de confianza separan cuál es cuál — solo lo dudoso espera a una persona.",
+     q:"¿Lo lanzas, lo controlas o lo matas?",
+     ch:[{t:"Lanzarlo — 98% es un diez",out:{r:"bad",concept:"Humano en el circuito",why:"98% es un diez en un examen. En precios auto-enviados son 200 cotizaciones malas al mes, en dinero real.",beat:"Finanzas abre una hoja de cálculo titulada «El 2%». Lleva tu nombre."}},
+         {t:"Enviar las cotizaciones dudosas a revisión humana",next:"b"},
+         {t:"Matarlo hasta que sea perfecto",out:{r:"bad",concept:"Humano en el circuito",why:"Perfecto nunca llega, y acabas de tirar el 98% que ahorraba horas todos los días.",beat:"Ventas hace una pequeña vigilia."}}]},
+  b:{say:"De acuerdo — cola de revisión. Ahora la pregunta del árbol: ¿QUÉ cotizaciones esperan a un humano?",
+     codex:"Revisarlo todo recrea el trabajo manual que automatizaste. No revisar nada es donde empezaste. La palanca es el umbral de confianza — más el costo del tipo de error: un precio demasiado bajo duele más que una cotización lenta.",
+     q:"¿Qué va a la cola de revisión?",
+     ch:[{t:"Todas — humanos revisan todo de nuevo",out:{r:"mid",concept:"Umbrales de confianza",why:"Seguro pero contraproducente: reconstruiste el trabajo de 40 horas con pasos extra. Medio crédito — sin pérdidas, sin palanca.",beat:"El revisor ahora revisa cotizaciones sobre revisar."}},
+         {t:"Solo las de baja confianza y cualquiera sobre un tope de precio",out:{r:"ok",concept:"Umbrales de confianza",why:"La confianza captura la duda del modelo; el tope de precio captura los errores caros de los que está confiadamente equivocado. Dos redes, mínima fricción.",beat:"Ventas conserva su velocidad, finanzas su sueño, y Priya casi sonríe."}},
+         {t:"Una muestra aleatoria del 10%",out:{r:"mid",concept:"Umbrales de confianza",why:"Muestrear mide la tasa de error — no detiene errores. Bien para monitorear, mal como única barrera. Medio crédito.",beat:"El 2% te saluda desde el 90% sin muestrear."}}]}}},
+ {npc:"cto",title:"Las notas de Bayview",start:"a",nodes:{
+  a:{say:"Nuestros médicos se ahogan en papeleo. Quiero resúmenes con IA de las notas de visita — pero cada nota está llena de datos de pacientes, y necesito no salir en las noticias.",
+     codex:"Los datos de salud están regulados. Dos llaves hacen posible trabajar con LLM: enmascarar identificadores antes de que el modelo vea el texto, y usar un endpoint empresarial cubierto por un acuerdo firmado (BAA) que permite datos de salud. Los endpoints de consumo nunca están cubiertos.",
+     q:"¿Cómo entregas los resúmenes?",
+     ch:[{t:"Mandar las notas crudas a una IA de consumo",out:{r:"bad",concept:"Gobernanza de datos",why:"Esa es la opción que termina carreras — una brecha reportable con marca de tiempo.",beat:"En algún lugar, un oficial de cumplimiento despierta sudando frío, sin saber por qué."}},
+         {t:"Enmascarar identificadores + endpoint cubierto por BAA + registrar todo",out:{r:"ok",concept:"Gobernanza de datos",why:"El modelo ve solo lo necesario, en infraestructura autorizada a verlo, con rastro de auditoría. El camino estándar y defendible.",beat:"Dr. Okafor: «Por fin. Alguien que ya hizo esto en salud»."}},
+         {t:"Negarse: la IA no puede tocar datos de salud",out:{r:"mid",concept:"Gobernanza de datos",why:"Cero riesgo, cero ayuda — y alguien menos cuidadoso dirá que sí. Medio crédito por cautela sin oficio.",beat:"Los médicos siguen ahogándose, pero en regla."}}]}}},
+ {npc:"junior",title:"El prompt de Theo",start:"a",nodes:{
+  a:{say:"¡Cambié el prompt del bot de soporte y el demo mejoró MUCHÍSIMO! ¿Podemos lanzar hoy? ¿Porfa? Ya le dije a mi mamá.",
+     codex:"Un buen demo es una anécdota. Los cambios de prompt arreglan un caso y rompen cinco en silencio. Los equipos mantienen un set de evaluación — casos reales con respuestas correctas conocidas — y puntúan cada cambio antes de lanzar. Tests unitarios, pero para IA.",
+     q:"¿El prompt de Theo se lanza hoy?",
+     ch:[{t:"Lanzarlo — ambos lo vieron mejorar",out:{r:"bad",concept:"Evaluaciones y regresión",why:"El demo mostró un caso. La evaluación habría mostrado los dos flujos de reembolso que rompió. Ahora los encontrarán los clientes.",beat:"La mamá de Theo está orgullosa. La cola de reembolsos no."}},
+         {t:"Correr el set de evaluación; lanzar mañana si el puntaje aguanta",out:{r:"ok",concept:"Evaluaciones y regresión",why:"Una hora de evaluación atrapa lo que los demos esconden — encuentra dos casos de reembolso rotos. Theo lanza mañana, correctamente, y aprende el ritual.",beat:"Theo le compra café a Priya por una semana. Arco de crecimiento iniciado."}},
+         {t:"Preguntarle a otra IA cuál prompt es mejor",out:{r:"mid",concept:"Evaluaciones y regresión",why:"IA-como-juez es una técnica real — dentro de un arnés de evaluación con criterios definidos. Como oráculo de intuiciones, es una moneda con opiniones. Medio crédito.",beat:"El modelo juez dice que ambos prompts están «¡geniales!». Lo dice de todo."}}]}}},
+ {npc:"tovar",title:"El plan enmicado",start:"a",nodes:{
+  a:{say:"Una cosa más — los gerentes quieren transcripción de reuniones en la app. Theo tiene un plan de seis meses para construir voz-a-texto desde cero. Lo enmicó.",
+     codex:"Algunas capacidades de IA son commodities — transcripción, traducción, OCR — vendidas como APIs excelentes por centavos. La diferenciación vive en lo que tu producto hace con el resultado, no en reconstruir el commodity.",
+     q:"¿Seis meses para construirlo, o…?",
+     ch:[{t:"Construir voz-a-texto desde cero",out:{r:"bad",concept:"Construir vs comprar",why:"Seis meses reconstruyendo lo que cuesta centavos por minuto, para alcanzar una calidad que la API ya supera. Nadie lo notará — excepto Marcus.",beat:"Lo enmicado era lo mejor del plan."}},
+         {t:"Integrar una API probada de transcripción; construir las funciones encima",out:{r:"ok",concept:"Construir vs comprar",why:"Dos semanas para integrar, y el equipo construye lo que los gerentes pidieron — lo que va sobre la transcripción. Construye la última milla, compra el commodity.",beat:"Theo des-enmica el plan. En silencio."}},
+         {t:"Contratar transcriptores humanos",out:{r:"bad",concept:"Construir vs comprar",why:"Más lento, más caro, y no escala pasada la tercera reunión. Estamos en 2026.",beat:"La vacante recibe tres postulaciones. Todas de bots."}}]}}},
+ {npc:"ceo",title:"El silencio de 8 segundos",start:"a",nodes:{
+  a:{say:"Demo final. Tu agente telefónico da respuestas brillantes… ocho segundos después de que el cliente deja de hablar. Los conté. Dos veces. La gente cuelga.",
+     codex:"En IA en tiempo real, la gente juzga el tiempo hasta la primera palabra, no el tiempo de la respuesta completa. Dos palancas: transmitir la respuesta en streaming para que empiece a hablar mientras se genera, y abrir con un modelo pequeño y rápido mientras lo pesado alcanza por detrás.",
+     q:"Mata el silencio de ocho segundos:",
+     ch:[{t:"Esperar hardware más rápido",out:{r:"bad",concept:"Ingeniería de latencia",why:"La latencia es un problema de diseño que arreglas este sprint, no un problema de hardware que otro arregla el año que viene.",beat:"El CEO mira su reloj por tercera vez. Hace eco."}},
+         {t:"Streaming en la respuesta; abrir con un modelo pequeño y rápido",next:"b"},
+         {t:"Poner música de espera",out:{r:"bad",concept:"Ingeniería de latencia",why:"Ahora son ocho segundos de jazz antes de la decepción.",beat:"Camila veta la licencia de smooth jazz."}}]},
+  b:{say:"Priya, parchando en vivo: «El streaming quedó. Última llamada — ¿qué métrica va en el tablero de lanzamiento?»",
+     codex:"Obtienes lo que mides. El tiempo total esconde el arreglo; el tiempo hasta la primera palabra es lo que la gente siente — con el tiempo total y la calidad al lado, no en su lugar.",
+     q:"La métrica principal de latencia es…",
+     ch:[{t:"Tiempo total promedio de respuesta",out:{r:"mid",concept:"Métricas de latencia",why:"Real, pero titular equivocado — una respuesta lenta en streaming SE SIENTE instantánea, y esta métrica no lo ve. Medio crédito; déjala como secundaria.",beat:"El tablero dice «más lento». Los clientes dicen «por fin»."}},
+         {t:"Tiempo hasta la primera palabra",out:{r:"ok",concept:"Métricas de latencia",why:"Es el momento en que el silencio termina — lo que la gente juzga. Mide el tiempo total y la calidad al lado; titula con esta.",beat:"Menos de un segundo. El CEO guarda el reloj. Priya sonríe. Hay testigos."}},
+         {t:"Número de personas que cuelgan",out:{r:"mid",concept:"Métricas de latencia",why:"Gran métrica de resultado — pero es una alarma tardía, no un volante. Medio crédito.",beat:"«Buenas noticias: caen los cuelgues. Malas: lo supimos una semana tarde»."}}]}}},
+ {npc:"rosa",title:"El teléfono no para",start:"a",nodes:{
+  a:{say:"Mijo, el teléfono suena todo el día — pedidos, preguntas, «¿tienen birria?». Pierdo la mitad de las llamadas mientras cocino. Dicen que un robot puede contestar. Bueno. ¿Pero puede tomar pedidos SIN arruinarlos?",
+     codex:"Un agente de voz puede tomar pedidos por teléfono — el truco es la estructura. Lo hablado se convierte en un pedido estructurado (platillos, tamaños, extras, precio) contra el menú real, y se lo lee de vuelta al cliente para confirmar antes de que cuente. Adivinar con texto libre es como terminas con tres birrias sorpresa.",
+     q:"¿Cómo debe tomar pedidos el agente telefónico?",
+     ch:[{t:"Que converse libremente y anote lo que escuche",out:{r:"bad",concept:"Salidas estructuradas",why:"Texto libre significa que «horchata grande» se vuelve «¿la orchata grande?» se vuelve tickets misteriosos. Sin estructura no hay comanda confiable.",beat:"El ticket #4 dice «birria??? ¿3 quizás?». La cocina llora."}},
+         {t:"Emparejar cada pedido con el menú real como items estructurados, y leerlo de vuelta para confirmar",next:"b"},
+         {t:"Seguir perdiendo llamadas — es más auténtico",out:{r:"bad",concept:"Salidas estructuradas",why:"Llamadas perdidas son ingresos perdidos — un tercio de los pedidos de Rosa llegan por teléfono.",beat:"Al otro lado de la ciudad, el robot de la competencia dice «gracias por su orden»."}},
+         {t:"Contratar a alguien solo para contestar el teléfono",out:{r:"mid",concept:"Salidas estructuradas",why:"Un humano funciona — con sueldo, descansos, y renuncias en el peor momento. Opción real, costo pesado para un problema resoluble. Medio crédito.",beat:"La nueva contratación renuncia tras un solo sábado en friega."}}]},
+  b:{say:"¡Funciona, mijo! Pero anoche alguien pidió «el paquete de banquete de bodas para 200 personas» — y el robot dijo que SÍ, feliz de la vida. Nosotros no hacemos bodas.",
+     codex:"Los agentes necesitan límites explícitos: qué pueden vender, topes de tamaño de pedido, y la regla de pasarle a un humano cualquier solicitud inusual. La confirmación protege al cliente; los límites protegen a Rosa.",
+     q:"Arregla el entusiasmo del robot:",
+     ch:[{t:"Solo menú + tope de pedido + lo inusual va al teléfono de Rosa",out:{r:"ok",concept:"Límites del agente",why:"Vender solo lo que existe, hasta límites sensatos, y escalar lo raro a un humano. De las bodas decide Rosa — no el robot.",beat:"El robot transfiere cortésmente una consulta de quinceañera. Rosa negocia como campeona."}},
+         {t:"Apagar el robot de noche",out:{r:"mid",concept:"Límites del agente",why:"Esquiva el error esquivando también los ingresos. Medio crédito — seguro, pero pequeño.",beat:"Los noctámbulos piden pizza. Traidores."}},
+         {t:"Que improvise — el cliente siempre tiene la razón",out:{r:"bad",concept:"Límites del agente",why:"Un agente sin límites prometerá 200 birrias y un mariachi. El costo del error no tiene techo.",beat:"En algún lugar, Marcus siente una perturbación que no puede explicar."}},
+         {t:"Que el robot ofrezca extras en todo para subir ventas",out:{r:"bad",concept:"Límites del agente",why:"Un agente optimizando ingresos sin límites quema la confianza — lo que puede OFRECER también es decisión de límites.",beat:"Una abuelita que pide un café recibe oferta del paquete de fiesta. Dos veces."}}]}}},
+ {npc:"chuy",title:"La prep del viernes",start:"a",nodes:{
+  a:{say:"Cada viernes adivino cuánta barbacoa preparar. Si le atino bajo — se acaba a las 8 y la gente llora. Si le atino alto — el Chuy del domingo come sobras tristes tres días. Tiene que haber una mejor manera, ¿no?",
+     codex:"Pronosticar le gana al instinto: promedia los últimos viernes, ajusta por lo distinto de esta semana (quincena, clima, eventos), y registra qué tan equivocado estuviste para mejorar cada semana. Sobreproducir es dinero a la basura; quedarse sin producto es clientes a la basura.",
+     q:"¿Cuánta barbacoa para el viernes?",
+     ch:[{t:"Lo de siempre — al tanteo",out:{r:"mid",concept:"Pronóstico de demanda",why:"El instinto trajo a Chuy hasta aquí — a veces acierta, nunca se mide, imposible de mejorar. Medio crédito por sobrevivir al puro oficio.",beat:"Viernes, 8:15pm: «no hay». Se escuchan corazones romperse."}},
+         {t:"Promediar los últimos 8 viernes, ajustar por quincena y clima, y registrar el error semanal",out:{r:"ok",concept:"Pronóstico de demanda",why:"Un pronóstico simple más registro del error se vuelve más listo cada semana. Esto es ciencia de datos con mandil.",beat:"Chuy pega el pronóstico en el refri. Se vuelve ley."}},
+         {t:"Doblar todo y vender sobras el sábado",out:{r:"bad",concept:"Pronóstico de demanda",why:"El desperdicio como estrategia — el margen muere calladito en el cuarto frío.",beat:"Una torre de barbacoa dominical. Hasta Frederick, de visita, dice que no."}},
+         {t:"Comprar primero una gran plataforma de pronósticos con IA",out:{r:"mid",concept:"Pronóstico de demanda",why:"Herramientas antes que disciplina de datos es al revés — el promedio simple con registro de error gana hasta que los datos ameriten plataforma. Medio crédito.",beat:"La llamada de implementación dura más que el servicio del viernes."}}]}}},
+ {npc:"guero",title:"El presupuesto",start:"a",nodes:{
+  a:{say:"¡Jefe! Una clienta quiere cotización para remodelar un local al otro lado de la ciudad. Mandó treinta fotos y quiere el número HOY. Antes, yo manejaba hasta allá, medía dos horas y adivinaba el resto. Tú eres el de la IA — impresióname.",
+     codex:"Los modelos de visión pueden leer medidas desde fotos: áreas de muros, instalaciones, daños, materiales. El patrón confiable: la IA redacta las partidas desde las fotos — cantidades, materiales, mano de obra — y un humano verifica precios y rincones raros antes de enviarla. Rápido Y defendible.",
+     q:"¿Cómo se arma la cotización?",
+     ch:[{t:"Calcular a ojo desde las fotos, con experiencia",out:{r:"mid",concept:"Presupuestos con visión",why:"La experiencia es real — pero adivinar sin medir gana trabajos que pierden dinero. Medio crédito por las canas.",beat:"El bigote de Don Güero tiembla. Sabe que tienes razón."}},
+         {t:"La IA redacta partidas desde las fotos; Güero verifica materiales y precios antes de enviar",next:"b"},
+         {t:"Prometer ganarle a cualquier otra cotización y ya verás después",out:{r:"bad",concept:"Presupuestos con visión",why:"Ganar por precio sin conocer tus costos es como mueren las constructoras con la agenda llena.",beat:"Lupe, sin levantar la vista: «Así cayó la empresa pasada»."}},
+         {t:"Mandar a un aprendiz a medir todo a mano hoy",out:{r:"mid",concept:"Presupuestos con visión",why:"Preciso — y lento. La cotización llega tarde, y las tardías pierden. Medio crédito por rigor sin velocidad.",beat:"El aprendiz mide precioso. La clienta firmó con otros al mediodía."}}]},
+  b:{say:"¡Ganamos el trabajo, jefe! Pero ahora la clienta dice: «ya que están ahí, agréguenme un bañito». UN BAÑITO. ¿Qué le digo?",
+     codex:"Los cambios de alcance son donde se desangran las obras. La disciplina es la orden de cambio: cada extra se escribe con su precio e impacto en el calendario, y se aprueba ANTES de trabajar. La IA la redacta en minutos desde el presupuesto original — sin pena, puro papel.",
+     q:"El «bañito» se maneja con…",
+     ch:[{t:"Hacerlo y ya — cliente contenta",out:{r:"bad",concept:"Órdenes de cambio",why:"Baños gratis hoy, quiebra mañana. El alcance no cobrado es el asesino silencioso de las buenas cuadrillas.",beat:"La cuadrilla lo construye precioso. Nadie lo paga."}},
+         {t:"Orden de cambio escrita — precio e impacto en tiempo, redactada por IA, aprobada antes de trabajar",out:{r:"ok",concept:"Órdenes de cambio",why:"La IA convierte el presupuesto en orden de cambio en minutos; la clienta firma sabiendo exactamente qué cuesta. Todos quedan amigos Y solventes.",beat:"La clienta firma. Don Güero enmarca la orden de cambio como diploma."}},
+         {t:"Negarse a todo cambio — el contrato es el contrato",out:{r:"mid",concept:"Órdenes de cambio",why:"Protege el margen, pierde la relación — y las remodelaciones SIEMPRE cambian. Medio crédito por carácter, cero por flexibilidad.",beat:"La clienta llama a otros para el siguiente trabajo. Y el siguiente."}},
+         {t:"Hacerlo y colarlo calladito en la factura final",out:{r:"bad",concept:"Órdenes de cambio",why:"Los cobros sorpresa son como se pierde la confianza — y a veces se ganan citas en el juzgado. Primero papel, luego trabajo.",beat:"La factura final desata una discusión a gritos en dos idiomas."}}]}}},
+ {npc:"lupe",title:"El purgatorio de permisos",start:"a",nodes:{
+  a:{say:"Tres proyectos están muertos porque los permisos no se han metido. Los mismos formularios, la misma ciudad, cada vez — datos del dueño, alcance, lista de planos, cuotas. Me gasto los domingos copiando los mismos datos en las mismas casillas. En algún lugar de esto debe haber dignidad.",
+     codex:"El papeleo repetitivo es la cancha del automatizado de documentos: los datos del proyecto ya existen, así que la IA puede llenar los formularios estándar y seguir el estado de cada permiso. El humano revisa antes de presentar — un permiso mal hecho es peor que uno lento.",
+     q:"¿Cómo se resuelven los permisos?",
+     ch:[{t:"Buscar a un conocido que conoce a alguien en el municipio",out:{r:"bad",concept:"Automatización de documentos",why:"El conocido se jubila, el atajo se vuelve escándalo, y los proyectos siguen muertos. Eso no es un sistema.",beat:"El primo del conocido cotiza una «cuota de consultoría». Lupe cuelga."}},
+         {t:"La IA llena los formularios desde los datos del proyecto, Lupe revisa antes de presentar, y un tablero sigue cada permiso",out:{r:"ok",concept:"Automatización de documentos",why:"Los datos existen una vez, los formularios se llenan solos, el humano firma, y nada vuelve a perderse en el purgatorio. Los domingos regresan a Lupe.",beat:"Tres permisos presentados antes del almuerzo. Lupe toma un fin de semana de verdad. El municipio está confundido."}},
+         {t:"Seguir a mano — es la tradición",out:{r:"mid",concept:"Automatización de documentos",why:"Funciona, lento, y se come a la presupuestista que debería estar presupuestando. Medio crédito por confiable, al costo de los domingos.",beat:"El café de Lupe se enfría sobre el formulario B-247. Otra vez."}},
+         {t:"Tercerizar todos los permisos a una consultora",out:{r:"mid",concept:"Automatización de documentos",why:"Funciona — con honorarios, para siempre, y la capacidad nunca llega a casa. Medio crédito: delegado, no resuelto.",beat:"La consultora usa la misma herramienta de IA. Lupe observa, facturada."}}]}}},
+ {npc:"priya",title:"Dilo para que sea verdad",start:"a",nodes:{
+  a:{say:"Las respuestas del bot de soporte SUENAN geniales — seguras, pulidas, equivocadas una de cada diez veces. Nadie sabe cuál. A marketing le encanta el tono. Yo odio el tono. Arregla la redacción.",
+     codex:"La confianza se construye con lenguaje calibrado: instrucciones que hacen que el bot cite su fuente, marque lo incierto como incierto, y diga «no lo sé» cuando nada respalda la respuesta. «Sé preciso» es una vibra — citar, matizar y rehusar son conductas.",
+     q:"¿Qué va en las instrucciones del bot?",
+     ch:[{t:"Escribir «sé preciso y útil» al inicio",out:{r:"mid",concept:"Lenguaje calibrado",why:"Una vibra, no una conducta. Los modelos siguen verbos concretos; «sé preciso» no mide nada. Medio crédito — inofensivo, inútil.",beat:"El bot sigue equivocándose con confianza, pero ahora con cortesía."}},
+         {t:"Citar la fuente de cada afirmación, marcar lo incierto como incierto, y decir «no lo sé» cuando nada lo respalda",next:"b"},
+         {t:"Que suene MÁS seguro — a los clientes les gusta la certeza",out:{r:"bad",concept:"Lenguaje calibrado",why:"Redacción segura sobre respuestas equivocadas es como muere la confianza a escala. Eso es pulir el fracaso.",beat:"Marketing aplaude. Camila abre una hoja de cálculo nueva."}},
+         {t:"Agregar un descargo legal a cada respuesta",out:{r:"mid",concept:"Lenguaje calibrado",why:"Cubrirse no es sincerarse — al tercer mensaje, los usuarios ya aprendieron a saltárselo. Medio crédito por instinto de abogado.",beat:"Los usuarios pasan el descargo a velocidad récord. Todos."}}]},
+  b:{say:"Mejor. Ahora la de verdad: alguien llama y pregunta «¿cuántas sucursales aceptan la app?» — la búsqueda no encuentra nada actual. El bot tiene que decir ALGO. Redáctalo.",
+     codex:"Cuando no puedes verificar, la forma confiable es: afirmar lo que SÍ puedes confirmar, nombrar lo que no, y entregar el camino a la respuesta. La precisión sobre tus propios límites es a lo que suena la exactitud.",
+     q:"La mejor respuesta del bot es…",
+     ch:[{t:"«¡Unas 300 sucursales!» — seguro le atina",out:{r:"bad",concept:"Afirmaciones verificables",why:"Una suposición con confianza es una mentira con buena postura. Un número equivocado desteje todos los correctos anteriores.",beat:"Eran 41. En la línea había una periodista."}},
+         {t:"«No puedo verificar el número actual. Al último corte eran 38 — aquí está la lista en vivo.»",out:{r:"ok",concept:"Afirmaciones verificables",why:"Confirma lo conocido, nombra lo desconocido, entrega el camino. Esa redacción ES el producto de confianza.",beat:"Priya lo lee dos veces. «Publica esa redacción.» El mayor elogio que conoce."}},
+         {t:"«No puedo responder esa pregunta.»",out:{r:"mid",concept:"Afirmaciones verificables",why:"Honesto pero flojo — rehusar todo lo no verificable tira la verdad parcial que SÍ tienes. Medio crédito.",beat:"La persona le pregunta a un humano, que le lee el mismo último corte."}},
+         {t:"Responder normal y esconder «las cifras pueden variar» al final",out:{r:"mid",concept:"Afirmaciones verificables",why:"Incertidumbre en la letra chica es certeza en el titular. La ubicación también es redacción. Medio crédito.",beat:"Nadie lee la nota tres al pie. Nunca."}}]}}}
+];
+const UI={
+ en:{
+  in1:"Meridian Labs needs an AI delivery hero. The old lead fine-tuned something he shouldn't have and was never seen again.",
+  in2:"The office is a world. Roam it — hallways, the kitchen, the corner offices. Coworkers with a ❗ have quests; walk up and talk, in any order. Some decisions open follow-up decisions.",
+  in3:"Three reputation hearts. Bad calls cost one; mediocre calls ship with incidents (half XP). Lose all three and the week resets. Ladder: Junior → Delivery Lead → Senior Lead → AI Legend.",
+  in4:"Choose your class:",
+  classes:{architect:["The Architect","You see systems. Meridian's diagrams fear you."],diplomat:["The Diplomat","Bilingual, unflappable. CFOs sign things near you."],operator:["The Operator","You ship. Production logs whisper your name."]},
+  crTitle:"Create your hero",lbName:"Name",lbOutfit:"Outfit",lbShirt:"Shirt / jacket",lbSkin:"Skin tone",lbHairC:"Hair color",lbHairS:"Hair style",begin:"Badge in",
+  outfits:[["casual","Casual"],["formal","Formal 👔"]],styles:[["cap","Short"],["long","Long"],["curly","Curly"],["buzz","Buzz"],["spiky","Spiky"],["pony","Ponytail"],["afro","Afro"],["mohawk","Mohawk"],["braids","Braids"],["flat","Flat top"],["buns","Buns"],["edgar","Edgar"],["fade","Taper fade"],["mullet","Mullet"],["broccoli","Broccoli"],["bald","Bald"]],
+  worldTag:"Meridian HQ · find the ❗",
+  hintSwipe:"Touch anywhere on the screen and drag to walk · release to stop · ⚙️ to switch controls.",
+  hintJoy:"Joystick or arrow keys to roam · walk up to a ❗ coworker and Talk · ⚙️ to switch controls.",
+  hintPad:"D-pad or arrow keys to roam · walk up to a ❗ coworker and Talk · ⚙️ to switch controls.",
+  setTitle:"Settings",lbCtl:"Movement controls",swipeB:"👆 Swipe",joyB:"🕹️ Joystick",padB:"✛ D-pad",lbLang:"Language",lbAdm:"Admin mode — touch tiles to reshape the office",admOff:"Off",admOn:"🛠️ On",openLab:"📝 Text lab",closeSet:"Done",
+  brushes:["Floor","Wall","Desk","Plant","Rug","Door","Table","Fridge","Stove"],
+  obraUp:"🏗️ Progress! The site across the street is taking shape.",
+  pigeon:["Coo.","The pigeon judges your crosswalk technique.","She was here before the city. She'll be here after."],
+  loro:["¡Ándale, jefe!","Lorenzo supervises. Lorenzo approves.","¡Qué bonito trabajo!"],
+  tlTitle:"Text lab",tlHint:"Edit names, quest titles and bump lines (JSON). Applies to the current language.",tlApply:"Save",tlClose:"Close",tlOk:"Texts updated.",tlErr:"That JSON didn't parse — nothing changed.",
+  levels:["Junior","Delivery Lead","Senior Lead","AI LEGEND"],
+  quest:"Quest",followup:" · follow-up",codexLb:"📜 Codex",
+  okH:"⚔️ QUEST COMPLETE +10 XP",midH:"🟡 SHIPPED WITH INCIDENTS +5 XP",badH:"💔 SLIP — reputation takes a hit",
+  lvlUp:"⬆ LEVEL UP — you are now ",
+  nextBack:"Back to the office",nextEnd:"Claim your title",nextDoom:"Face the consequences",
+  talkPre:"💬 ",
+  tut1:"This is you. Roam with the joystick or arrow keys.",tut2:"Desks, plants and walls just block you — coworkers with a ❗ have quests. Walk up and Talk.",
+  admToast:"Admin on. Pick a brush, tap tiles. With great power comes the ability to wall yourself in.",
+  undoLb:"Undo",undoToast:"Edit undone.",undoEmpty:"Nothing to undo.",
+  tlFindPh:"Search text…",tlNoHit:"No match.",
+  dog:["Woof!","Frederick approves.","Frederick is herding you back to work."],
+  treatLb:"🦴 Treat Frederick",fredHeart:"Frederick: ❤",
+  petCat:"🐾 Pet Canela",petPig:"🐾 Greet Paloma",petLoro:"🦜 Say hi to Lorenzo",
+  fredUnlock:"Frederick trusts you now… and he has paperwork. 🐾 Secret side quest unlocked — treat him again to open it.",
+  fredDoneToast:"🎀 Mod unlocked: Frederick's red bandana.",
+  locs:{hq:"Meridian HQ",f2:"Floor 2 · Expansion",st:"Meridian Street",lc:"La Cocina",lo:"La Obra · Studio",ex:"Calle Dos · Expansion block"},
+  chat:{beto:["We pour El Mercado's slab Thursday. Don Güero says hi.","Two more weeks and this block gets groceries, primo."],
+        kike:["Straight walls, straight prompts — same discipline.","The AI did the material takeoff. I checked every line. We're friends now."],
+        mari:["From the crane you can see Güero's whole plan.","The lift schedule is AI-sorted — weight, wind, order. Smooth all day."]},
+  arrive:{hq:"Meridian HQ.",f2:"Floor 2 — expansion space. Quiet up here… for now.",st:"Street level. Mind the crosswalk.",lc:"La Cocina — smells like consommé and opportunity.",lo:"La Obra's studio — you helped build this. Every drawing here becomes a building.",ex:"Calle Dos — the town grows east. El Mercado is going up."},
+  trolley:{title:"🚋 Barrio Trolley",note:"The MQT line — every district, one hop. Where to, consultant?",here:"you are here",soon:"Barrio Norte — coming soon",close:"Stay here"},
+  cat:["Mrrp.","Canela blinks slowly. You are accepted.","The health inspector doesn't know about Canela. Keep it that way."],
+  expBtn:"📤 Export (beta)",expTitle:"Export (beta)",
+  expHint:"Skeleton v1 — your play data as JSON, ready to copy. Future: typed documents from real work (decision report, Frederick's care sheet), email delivery, conversation export.",
+  expCopy:"Copy",expCopied:"Copied to clipboard.",
+  mapTitle:"Village map",vmF2:"Floor 2",vmHQ:"Meridian HQ",vmSt:"Meridian Street",vmLc:"La Cocina 🌶️",
+  vmSite0:"🚧 Construction site",vmSite2:"La Obra · Studio 📐",vmPlots:"Reserved lots — El Mercado & more",vmHere:"◉ you are here",
+  goTitle:"☠️ Reputation: zero",goEpi:"Priya finds you in the parking lot. “The last lead didn't get a second chance. You do. Same desk, Monday.” The week resets — but this time, you've read the Codex.",
+  endScore:(x,m,h)=>`${x}/${m} XP · ${h}/3 hearts intact`,goScore:(x,d,n)=>`${x} XP · ${d}/${n} quests attempted`,
+  epi1:"Friday, 6pm. The VP stands up when you enter. “Flawless week — and you walked your own path. The agents program is yours.” Roll credits — until Week Two.",
+  epi2:"Friday, 6pm. “Strong week,” says the VP. “Some incidents shipped, but you owned the floor.” Priya nods on your way out. Week Two is coming.",
+  epi3:"Friday, 6pm. You survived — barely. The VP slides the Codex back across the table: “Study. Run the week again. Meridian believes in second playthroughs.”",
+  replay:"New game +",replayToast:n=>`Back at it, ${n}. Same office, wiser hero.`,
+  contBtn:(n,x,d)=>`▶ Continue as ${n} — ${x} XP, ${d}/10 quests`,contDead:"That run ended. Start fresh.",
+  langQuick:"🌐 Español",
+  flavor:{D:["Just a desk. The monitor is judging you anyway.","A coworker's desk. Their kombucha, their rules."],K:["The coffee counter. Sacred ground.","The coffee machine. It has seen things."],P:["A potted plant. It's doing its best.","The office ficus. Load-bearing morale."],"#":["A wall. Solid argument.","That's a wall. Even AI Legends respect walls."],"+":["A door. It opens by walking through it. Technology.","Doorway detected. You may proceed."],B:["The building facade. Sturdy. Corporate.","Brick. It was here before you and will be here after."],F:["Construction fence. Hard hats beyond this point."],G:["Steel girders. The future has scaffolding."],C:["A traffic cone. Respect it."],X:["🚧 Under construction — La Cocina (restaurant), El Mercado (grocery), and La Obra (construction office) open here soon."],T:["A dining table. The tablecloth is non-negotiable.","Reserved. Probably for Canela."],W:["The walk-in fridge. Chuy's forecast is taped to it. It is law.","Cold storage. Where margins live or die."],V:["The stove. Six burners of consommé diplomacy.","Hot. Chuy's domain. Ask before touching."],A:["A drafting table. Hand sketch first, AI render second — the judgment stays human.","Work in progress. Measure twice, prompt once."],U:["The blueprint wall. Blueprints: the original structured output.","Every building on this street was a drawing here first."],Q:["La Cocina's storefront. The awning alone raises the block's property value.","Smell that? That's Rosa's consommé calling."]}
+ },
+ es:{
+  in1:"Meridian Labs necesita un héroe de la entrega con IA. Al líder anterior se le ocurrió hacer fine-tuning de algo que no debía y nunca se le volvió a ver.",
+  in2:"La oficina es un mundo. Recórrela — pasillos, la cocina, las oficinas de la esquina. Los compañeros con ❗ tienen misiones; acércate y habla, en el orden que quieras. Algunas decisiones abren decisiones de seguimiento.",
+  in3:"Tres corazones de reputación. Las malas decisiones cuestan uno; las mediocres se entregan con incidentes (mitad de XP). Pierde los tres y la semana se reinicia. Escalera: Junior → Líder de Delivery → Líder Senior → Leyenda de la IA.",
+  in4:"Elige tu clase:",
+  classes:{architect:["El Arquitecto","Ves sistemas. Los diagramas de Meridian te temen."],diplomat:["El Diplomático","Bilingüe, imperturbable. Los CFO firman cosas cerca de ti."],operator:["El Operador","Tú entregas. Los logs de producción susurran tu nombre."]},
+  crTitle:"Crea tu héroe",lbName:"Nombre",lbOutfit:"Atuendo",lbShirt:"Camisa / saco",lbSkin:"Tono de piel",lbHairC:"Color de pelo",lbHairS:"Estilo de pelo",begin:"Fichar",
+  outfits:[["casual","Casual"],["formal","Formal 👔"]],styles:[["cap","Corto"],["long","Largo"],["curly","Rizado"],["buzz","Rapado"],["spiky","Puntas"],["pony","Coleta"],["afro","Afro"],["mohawk","Cresta"],["braids","Trenzas"],["flat","Corte plano"],["buns","Chonguitos"],["edgar","Edgar"],["fade","Degradado"],["mullet","Mullet"],["broccoli","Brócoli"],["bald","Sin pelo"]],
+  worldTag:"Meridian HQ · busca los ❗",
+  hintSwipe:"Toca cualquier parte de la pantalla y arrastra para caminar · suelta para detenerte · ⚙️ para cambiar controles.",
+  hintJoy:"Joystick o flechas para moverte · acércate a un compañero con ❗ y habla · ⚙️ para cambiar controles.",
+  hintPad:"Cruceta o flechas para moverte · acércate a un compañero con ❗ y habla · ⚙️ para cambiar controles.",
+  setTitle:"Ajustes",lbCtl:"Controles de movimiento",swipeB:"👆 Deslizar",joyB:"🕹️ Joystick",padB:"✛ Cruceta",lbLang:"Idioma",lbAdm:"Modo admin — toca casillas para remodelar la oficina",admOff:"Apagado",admOn:"🛠️ Activo",openLab:"📝 Laboratorio de textos",closeSet:"Listo",
+  brushes:["Piso","Pared","Escritorio","Planta","Tapete","Puerta","Mesa","Refri","Estufa"],
+  obraUp:"🏗️ ¡Avance! La obra de enfrente va tomando forma.",
+  pigeon:["Curucucú.","La paloma juzga tu técnica para cruzar.","Estaba aquí antes que la ciudad. Seguirá después."],
+  loro:["¡Ándale, jefe!","Lorenzo supervisa. Lorenzo aprueba.","¡Qué bonito trabajo!"],
+  tlTitle:"Laboratorio de textos",tlHint:"Edita nombres, títulos de misiones y frases de choque (JSON). Aplica al idioma actual.",tlApply:"Guardar",tlClose:"Cerrar",tlOk:"Textos actualizados.",tlErr:"Ese JSON no se pudo leer — no cambió nada.",
+  levels:["Junior","Líder de Delivery","Líder Senior","LEYENDA DE LA IA"],
+  quest:"Misión",followup:" · seguimiento",codexLb:"📜 Códice",
+  okH:"⚔️ MISIÓN CUMPLIDA +10 XP",midH:"🟡 ENTREGADO CON INCIDENTES +5 XP",badH:"💔 RESBALÓN — tu reputación sufre",
+  lvlUp:"⬆ SUBISTE DE NIVEL — ahora eres ",
+  nextBack:"Volver a la oficina",nextEnd:"Reclama tu título",nextDoom:"Enfrenta las consecuencias",
+  talkPre:"💬 ",
+  tut1:"Este eres tú. Muévete con el joystick o las flechas.",tut2:"Escritorios, plantas y paredes solo bloquean — los compañeros con ❗ tienen misiones. Acércate y habla.",
+  admToast:"Admin activado. Elige un pincel y toca casillas. Un gran poder conlleva la capacidad de encerrarte a ti mismo.",
+  undoLb:"Deshacer",undoToast:"Edición deshecha.",undoEmpty:"Nada que deshacer.",
+  tlFindPh:"Buscar texto…",tlNoHit:"Sin coincidencias.",
+  dog:["¡Guau!","Frederick aprueba.","Frederick te pastorea de vuelta al trabajo."],
+  treatLb:"🦴 Premio a Frederick",fredHeart:"Frederick: ❤",
+  petCat:"🐾 Acariciar a Canela",petPig:"🐾 Saludar a Paloma",petLoro:"🦜 Saludar a Lorenzo",
+  fredUnlock:"Frederick ya confía en ti… y tiene papeleo. 🐾 Misión secreta desbloqueada — dale otro premio para abrirla.",
+  fredDoneToast:"🎀 Mod desbloqueado: el pañuelo rojo de Frederick.",
+  locs:{hq:"Meridian HQ",f2:"Piso 2 · Expansión",st:"Calle Meridian",lc:"La Cocina",lo:"La Obra · Estudio",ex:"Calle Dos · Cuadra de expansión"},
+  chat:{beto:["El jueves colamos la losa de El Mercado. Don Güero manda saludos.","Dos semanas más y esta cuadra tiene abarrotes, primo."],
+        kike:["Muros derechos, prompts derechos — la misma disciplina.","La IA hizo el despiece de materiales. Revisé cada línea. Ya somos amigos."],
+        mari:["Desde la grúa se ve el plan completo de Güero.","La IA ordena los izajes — peso, viento, orden. Suavecito todo el día."]},
+  arrive:{hq:"Meridian HQ.",f2:"Piso 2 — espacio de expansión. Tranquilo por aquí… por ahora.",st:"Nivel de calle. Cuidado con el cruce.",lc:"La Cocina — huele a consomé y a oportunidad.",lo:"El estudio de La Obra — tú ayudaste a construirlo. Cada dibujo de aquí se vuelve un edificio.",ex:"Calle Dos — el pueblo crece al este. El Mercado va subiendo."},
+  trolley:{title:"🚋 Tranvía del Barrio",note:"La línea MQT — cada distrito, un solo viaje. ¿A dónde vamos?",here:"estás aquí",soon:"Barrio Norte — próximamente",close:"Quedarme aquí"},
+  cat:["Mrrp.","Canela parpadea despacio. Estás aceptado.","La inspectora de salubridad no sabe de Canela. Que siga así."],
+  expBtn:"📤 Exportar (beta)",expTitle:"Exportar (beta)",
+  expHint:"Esqueleto v1 — tus datos de juego como JSON, listos para copiar. Futuro: documentos tipados desde trabajo real (reporte de decisiones, ficha de cuidados de Frederick), envío por correo, exportar conversaciones.",
+  expCopy:"Copiar",expCopied:"Copiado al portapapeles.",
+  mapTitle:"Mapa del pueblo",vmF2:"Piso 2",vmHQ:"Meridian HQ",vmSt:"Calle Meridian",vmLc:"La Cocina 🌶️",
+  vmSite0:"🚧 Obra en construcción",vmSite2:"La Obra · Estudio 📐",vmPlots:"Lotes reservados — El Mercado y más",vmHere:"◉ estás aquí",
+  goTitle:"☠️ Reputación: cero",goEpi:"Priya te encuentra en el estacionamiento. «El líder anterior no tuvo segunda oportunidad. Tú sí. Mismo escritorio, el lunes.» La semana se reinicia — pero esta vez, ya leíste el Códice.",
+  endScore:(x,m,h)=>`${x}/${m} XP · ${h}/3 corazones intactos`,goScore:(x,d,n)=>`${x} XP · ${d}/${n} misiones intentadas`,
+  epi1:"Viernes, 6pm. La VP se pone de pie cuando entras. «Semana impecable — y caminaste tu propio camino. El programa de agentes es tuyo.» Créditos finales — hasta la Semana Dos.",
+  epi2:"Viernes, 6pm. «Buena semana», dice la VP. «Se entregaron algunos incidentes, pero el piso fue tuyo.» Priya asiente cuando sales. La Semana Dos se acerca.",
+  epi3:"Viernes, 6pm. Sobreviviste — apenas. La VP desliza el Códice de vuelta por la mesa: «Estudia. Corre la semana otra vez. Meridian cree en las segundas partidas.»",
+  replay:"Nueva partida +",replayToast:n=>`De vuelta, ${n}. Misma oficina, héroe con más calle.`,
+  contBtn:(n,x,d)=>`▶ Continuar como ${n} — ${x} XP, ${d}/10 misiones`,contDead:"Esa partida terminó. Empieza de nuevo.",
+  langQuick:"🌐 English",
+  flavor:{D:["Solo un escritorio. El monitor te juzga igual.","El escritorio de un colega. Su kombucha, sus reglas."],K:["La barra de café. Tierra sagrada.","La cafetera. Ha visto cosas."],P:["Una planta en maceta. Hace lo que puede.","El ficus de la oficina. Moral estructural."],"#":["Una pared. Argumento sólido.","Eso es una pared. Hasta las leyendas respetan las paredes."],"+":["Una puerta. Se abre caminando a través de ella. Tecnología.","Puerta detectada. Puedes pasar."],B:["La fachada del edificio. Sólida. Corporativa.","Ladrillo. Estaba aquí antes que tú y seguirá después."],F:["Cerca de obra. Casco obligatorio más allá."],G:["Vigas de acero. El futuro tiene andamios."],C:["Un cono de tráfico. Respétalo."],X:["🚧 En construcción — La Cocina (restaurante), El Mercado (abarrotes) y La Obra (oficina de construcción) abren aquí pronto."],T:["Una mesa del comedor. El mantel no es negociable.","Reservada. Probablemente para Canela."],W:["El cuarto frío. El pronóstico de Chuy está pegado ahí. Es ley.","Almacén frío. Donde los márgenes viven o mueren."],V:["La estufa. Seis quemadores de diplomacia de consomé.","Caliente. Dominio de Chuy. Pregunta antes de tocar."],A:["Una mesa de dibujo. Primero el boceto a mano, luego el render con IA — el criterio sigue siendo humano.","Trabajo en curso. Mide dos veces, promptea una."],U:["El muro de planos. Los planos: la salida estructurada original.","Cada edificio de esta calle fue primero un dibujo aquí."],Q:["La fachada de La Cocina. El toldo solito sube la plusvalía de la cuadra.","¿Hueles eso? Es el consomé de Rosa llamándote."]}
+ }
+};
+/* npc letter -> npc key + quest queue */
+const STATIONS={p:{npc:"priya",q:[5,14]},j:{npc:"junior",q:[7]},c:{npc:"ceo",q:[9]},l:{npc:"legal",q:[2]},
+                t:{npc:"tovar",q:[0,8]},a:{npc:"camila",q:[1]},h:{npc:"cto",q:[6]},m:{npc:"marcus",q:[3,4]}};
+/* ---------- worlds (multi-map: HQ, Floor 2, Street) ---------- */
+const WORLD_DEFS={
+ hq:["####################",
+     "#......#........#..#",
+     "#.p..D.#.D....D.#c.#",
+     "#......+........+..#",
+     "#.j..D.#........####",
+     "#......#..RR...#.1.#",
+     "####+###..RR...#.l.#",
+     "#......#.......+...#",
+     "#.t.K..+...m...#####",
+     "#......#.......#...#",
+     "####+###...P...#.h.#",
+     "#......#.......+...#",
+     "#.a....+.......#####",
+     "##########E#########"],
+ f2:["####################",
+     "#..................#",
+     "#..D..D....D..D....#",
+     "#..................#",
+     "#....RR......P.....#",
+     "#....RR............#",
+     "#..................#",
+     "#.....X......X.....#",
+     "#..................#",
+     "#..P............D..#",
+     "#..................#",
+     "#.................1#",
+     "#..................#",
+     "####################"],
+ st:["BBBBBBBBBBBBBBEBBBBBBBBBBBBBBB",
+     "Y............................2",
+     "≈≈≈≈≈≈≈≈≈≈≈≈≈--≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
+     "≈≈≈≈≈≈≈≈≈≈≈≈≈--≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
+     "....C....................C....",
+     "QQQQQQLQQQQQQ..FFFFFF.FFFFFFFF",
+     "..............F..G....G...G..F",
+     "....f.........F............e.F",
+     "..............F.G...GX...G...F",
+     "..............FFFFFFFFFFFFFFFF",
+     "..............................",
+     "....P....................P....",
+     "..............................",
+     "...XX....................XX...",
+     "..............................",
+     "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"],
+ ex:["........................",
+     "≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
+     "≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
+     "2......................Y",
+     "..FFFFFFFFF.FFFFFFFFF...",
+     "..F..G...G....G...G..F..",
+     "..F.w....A....x...z..F..",
+     "..F...G....G....G....F..",
+     "..FFFFFFFFFFFFFFFFFFF...",
+     "........................"],
+ lo:["####################",
+     "#UU..UU..UU..UU..UU#",
+     "#..................#",
+     "#..A....A....A.....#",
+     "#..................#",
+     "#....RR....T.......#",
+     "#..................#",
+     "#..P..........P....#",
+     "#..................#",
+     "##########O#########"],
+ lc:["####################",
+     "#.P..............P.#",
+     "#..................#",
+     "#..T...T...T...T...#",
+     "#..................#",
+     "#....RR............#",
+     "#..................#",
+     "#KKKKKKK...KKKKKKK.#",
+     "#WV................#",
+     "#..r..........y....#",
+     "#..................#",
+     "##########L#########"]
+};
+const PORTALS={hq:{"1":{to:"f2",x:17,y:11,dir:"left"},"E":{to:"st",x:14,y:1,dir:"down"}},
+               f2:{"1":{to:"hq",x:16,y:5,dir:"left"}},
+               st:{"E":{to:"hq",x:10,y:12,dir:"up"},"L":{to:"lc",x:10,y:10,dir:"up"},"O":{to:"lo",x:10,y:8,dir:"up"},"2":{to:"ex",x:1,y:3,dir:"right"}},
+               ex:{"2":{to:"st",x:28,y:1,dir:"left"}},
+               lc:{"L":{to:"st",x:6,y:4,dir:"up"}},
+               lo:{"O":{to:"st",x:21,y:4,dir:"up"}}};
+const TS=32;
+const SOLID=new Set(["#","D","K","P","B","F","G","C","X","T","W","V","A","U","Q"]);
+const WNPC={hq:STATIONS,lc:{r:{npc:"rosa",q:[10]},y:{npc:"chuy",q:[11]}},st:{f:{npc:"guero",q:[12]},e:{npc:"lupe",q:[13]}},
+            ex:{w:{npc:"beto",q:[],chat:1},x:{npc:"kike",q:[],chat:1},z:{npc:"mari",q:[],chat:1}}};
+/* city growth: helping La Obra visibly advances the construction site */
+const OBRA=[[],
+ [[6,17,"#"],[6,22,"#"],[6,26,"#"],[8,16,"#"],[8,20,"#"],[8,25,"#"]],
+ [[5,15,"B"],[5,16,"B"],[5,17,"B"],[5,18,"B"],[5,19,"B"],[5,20,"B"],[5,21,"O"],
+  [5,22,"B"],[5,23,"B"],[5,24,"B"],[5,25,"B"],[5,26,"B"],[5,27,"B"],[5,28,"B"],[5,29,"B"],
+  [6,14,"B"],[6,29,"B"],[7,14,"B"],[7,29,"B"],[8,14,"B"],[8,29,"B"],[8,21,"."],
+  [9,14,"B"],[9,15,"B"],[9,16,"B"],[9,17,"B"],[9,18,"B"],[9,19,"B"],[9,20,"B"],[9,21,"B"],
+  [9,22,"B"],[9,23,"B"],[9,24,"B"],[9,25,"B"],[9,26,"B"],[9,27,"B"],[9,28,"B"],[9,29,"B"]]];
+let world="hq";
+const WORLDS={};
+Object.keys(WORLD_DEFS).forEach(id=>{
+  const rows=WORLD_DEFS[id].slice(),grid=[],wnpcs=[],defs=WNPC[id]||{};
+  rows.forEach((row,y)=>{grid.push(row.split(""));row.split("").forEach((ch,x)=>{
+    if(defs[ch]){wnpcs.push({key:ch,x,y,...defs[ch]});grid[y][x]="N";}});});
+  WORLDS[id]={rows,rows0:WORLD_DEFS[id].slice(),grid,npcs:wnpcs,W:rows[0].length,H:rows.length};
+});
+const CW=()=>WORLDS[world];
+const isSolid=(x,y)=>{const w=CW();return x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N";};
+/* boot-time world integrity check — malformed maps and bad portals get caught HERE, never in play */
+(function validateWorlds(){
+  Object.entries(WORLD_DEFS).forEach(([id,rows])=>{
+    const L=rows[0].length;
+    rows.forEach((r,i)=>{if(r.length!==L)console.warn("WORLD "+id+" row "+i+" width "+r.length+" != "+L);});
+  });
+  Object.entries(PORTALS).forEach(([from,m])=>Object.entries(m).forEach(([ch,p])=>{
+    const w=WORLDS[p.to];
+    if(!w){console.warn("PORTAL "+from+":"+ch+" → missing world "+p.to);return;}
+    const t=w.rows[p.y]&&w.rows[p.y][p.x];
+    if(t===undefined||SOLID.has(t)||w.grid[p.y][p.x]==="N")console.warn("PORTAL "+from+":"+ch+" spawn blocked at "+p.to+" ("+p.x+","+p.y+")");
+    if(PORTALS[p.to]&&PORTALS[p.to][t])console.warn("PORTAL "+from+":"+ch+" spawns ON a portal tile — ping-pong risk");
+  }));
+})();
+/* full-universe reachability audit: BFS from the hero's spawn across every world THROUGH portals.
+   Guarantees: every walkable tile is reachable, and every character always has a reachable adjacent tile. */
+function auditReach(){
+  const probs=[],seen={};Object.keys(WORLDS).forEach(k=>seen[k]=new Set());
+  const walk=(id,x,y)=>{const w=WORLDS[id];return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N");};
+  const q=[["hq",10,11]];seen.hq.add("10,11");
+  while(q.length){const[idw,x,y]=q.shift();
+    const ch=WORLDS[idw].rows[y][x];
+    if(PORTALS[idw]&&PORTALS[idw][ch]){const p=PORTALS[idw][ch],key=p.x+","+p.y;
+      if(!seen[p.to].has(key)&&walk(p.to,p.x,p.y)){seen[p.to].add(key);q.push([p.to,p.x,p.y]);}}
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{const nx=x+dx,ny=y+dy,key=nx+","+ny;
+      if(!seen[idw].has(key)&&walk(idw,nx,ny)){seen[idw].add(key);q.push([idw,nx,ny]);}});}
+  Object.entries(WORLDS).forEach(([id,w])=>{
+    if(seen[id].size===0)return; /* world locked behind a not-yet-built portal (e.g. the Studio pre-completion) — audited once it opens */
+    w.npcs.forEach(n=>{const ok=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen[id].has((n.x+dx)+","+(n.y+dy)));
+      if(!ok)probs.push("NPC unreachable: "+n.npc+" in "+id);});
+    let un=0;
+    for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++)if(walk(id,x,y)&&!seen[id].has(x+","+y))un++;
+    if(un)probs.push(id+": "+un+" walkable tiles unreachable");
+  });
+  return probs;
+}
+auditReach().forEach(p=>console.warn("REACH "+p));
+/* ---------- state ---------- */
+const LEVELS=[0,45,90,120];
+const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"};
+const NPCLOOK={p:{shirt:"#C2543F",skin:"#B97E52",hair:"#171219",style:"long"},j:{shirt:"#3E8ED0",skin:"#EFC49A",hair:"#7A4A22",style:"curly"},
+  c:{shirt:"#2C2637",skin:"#D9995F",hair:"#5C5C66",style:"cap",outfit:"formal"},l:{shirt:"#25423C",skin:"#F0C9A6",hair:"#2C1C12",style:"long",outfit:"formal"},
+  t:{shirt:"#D08A2E",skin:"#C08356",hair:"#1E1620",style:"cap"},a:{shirt:"#B04A78",skin:"#8C5A33",hair:"#241B26",style:"curly"},
+  h:{shirt:"#31446E",skin:"#E8B98C",hair:"#403830",style:"buzz",outfit:"formal"},m:{shirt:"#3A415C",skin:"#F1CDA9",hair:"#8E8E96",style:"buzz",outfit:"formal"},
+  r:{shirt:"#B23A48",skin:"#C08356",hair:"#B9B9C0",style:"long"},y:{shirt:"#F0EEE6",skin:"#B97E52",hair:"#26202B",style:"buzz"},
+  f:{shirt:"#E8720C",skin:"#B97E52",hair:"#9A9AA2",style:"buzz"},e:{shirt:"#2E7F86",skin:"#E5AC82",hair:"#26202B",style:"pony"},
+  w:{shirt:"#3E6FA8",skin:"#B97E52",hair:"#26202B",style:"buzz",hat:"hard"},x:{shirt:"#7A8752",skin:"#C08356",hair:"#26202B",style:"buzz",hat:"hard"},z:{shirt:"#A85C86",skin:"#E5AC82",hair:"#26202B",style:"pony",hat:"hard"}};
+let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
+let xp=0,hearts=3,cls="",heroName="Rookie",look={shirt:"#8B5CF6",skin:"#E5AC82",hair:"#26202B",style:"cap",outfit:"casual"},done=new Set(),cur=null,curQ=null,node=null,treats=0,fredQ=0;
+let px=10,py=11,fx=10,fy=11,dir="down",moving=false,mt=0,held=null,bob=0;
+let warpT=0,portalT=0; /* post-warp grace: warpT blocks input, portalT blocks re-triggering — kills door ping-pong */
+const MAXXP=210;
+const $=id=>document.getElementById(id);
+const T=()=>UI[lang];
+const AQ=()=>lang==="es"?QES:QEN;
+const npcName=k=>NPCN[lang][k];
+const lvlIdx=()=>{let i=0;LEVELS.forEach((t2,j)=>{if(xp>=t2)i=j;});return i;};
+const lvlName=()=>T().levels[lvlIdx()];
+function hud(){const hs="❤".repeat(Math.max(0,hearts))+"♡".repeat(3-Math.max(0,hearts));
+  $("ptag").textContent=`${heroName} · ${lvlName()}`;$("hearts").textContent=hs;$("xp").textContent=`${xp} XP`;
+  $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
+  $("status").textContent=`${hs}  ${xp}XP`;}
+/* save */
+function save(){try{localStorage.setItem("mq1",JSON.stringify({n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world}));}catch(e){}}
+function setWorldTag(){$("worldTag").textContent=T().locs[world]+(world==="hq"?" · ❗":"");}
+function loadSave(){try{return JSON.parse(localStorage.getItem("mq1")||"");}catch(e){return null;}}
+function clearSave(){try{localStorage.removeItem("mq1");}catch(e){}}
+/* toasts */
+let toastT=null,toastQ=[];
+function toast(msg,ms){const el=$("toast");
+  if(el.classList.contains("on")){toastQ.push([msg,ms]);return;}
+  el.textContent=msg;el.classList.add("on");
+  clearTimeout(toastT);toastT=setTimeout(()=>{el.classList.remove("on");
+    if(toastQ.length){const[m,d]=toastQ.shift();setTimeout(()=>toast(m,d),300);}},ms||2600);}
+let lastBump=0;
+const pendingAt=n=>n.q.find(qi=>!done.has(qi));
+/* ---------- canvas ---------- */
+const cv=$("cv"),ctx=cv.getContext("2d");
+const VW=10*TS,VH=8*TS;
+function sizeCanvas(){
+  const w=$("vp").clientWidth,scale=window.devicePixelRatio||1;
+  cv.style.height=(w*VH/VW)+"px";
+  cv.width=VW*scale; cv.height=VH*scale;
+  ctx.setTransform(scale,0,0,scale,0,0);
+}
+window.addEventListener("resize",sizeCanvas);
+const C={floor:"#E7DFC8",floorAlt:"#E1D8BE",rug:"#C9B7E8",wall:"#453D57",wallTop:"#5A5170",
+        desk:"#8A6F4D",deskTop:"#A98B62",counter:"#7E8894",plant:"#3E7C4F",pot:"#B06A3C",
+        doorWood:"#7A5233",doorWood2:"#8F6440",doorFrame:"#4A331F"};
+let camXg=0,camYg=0;
+function draw(){
+  const w=CW();
+  const camX=Math.max(0,Math.min(w.W*TS-VW,fx*TS+TS/2-VW/2));
+  const camY=Math.max(0,Math.min(Math.max(0,w.H*TS-VH),fy*TS+TS/2-VH/2));
+  camXg=camX;camYg=camY;
+  ctx.fillStyle="#241F2E";ctx.fillRect(0,0,VW,VH);
+  const x0=Math.floor(camX/TS),y0=Math.floor(camY/TS);
+  for(let y=y0;y<=Math.min(w.H-1,y0+9);y++)for(let x=x0;x<=Math.min(w.W-1,x0+11);x++){
+    const ch=w.rows[y][x],sx=x*TS-camX,sy=y*TS-camY;
+    if(world==="st")ctx.fillStyle=((x+y)%2?"#C6C4BB":"#BFBDB4");
+    else if(world==="lo")ctx.fillStyle=((x+y)%2?"#D9DCE0":"#D1D5DA");
+    else ctx.fillStyle=((x+y)%2?C.floor:C.floorAlt);
+    ctx.fillRect(sx,sy,TS,TS);
+    if(ch==="#"){ctx.fillStyle=C.wall;ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle=C.wallTop;ctx.fillRect(sx,sy,TS,6);}
+    else if(ch==="B"){ctx.fillStyle="#5C4A50";ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle="#6E5A60";ctx.fillRect(sx,sy,TS,5);
+      ctx.fillStyle="#8E7A80";ctx.fillRect(sx+5,sy+10,8,9);ctx.fillRect(sx+19,sy+10,8,9);}
+    else if(ch==="R"){ctx.fillStyle=C.rug;ctx.fillRect(sx+2,sy+2,TS-4,TS-4);}
+    else if(ch==="≈"){ctx.fillStyle="#54555B";ctx.fillRect(sx,sy,TS,TS);
+      if(y%2===0){ctx.fillStyle="#6A6B72";ctx.fillRect(sx+4,sy+15,10,2);}}
+    else if(ch==="-"){ctx.fillStyle="#54555B";ctx.fillRect(sx,sy,TS,TS);
+      ctx.fillStyle="#D8D6CE";ctx.fillRect(sx+3,sy+4,TS-6,5);ctx.fillRect(sx+3,sy+14,TS-6,5);ctx.fillRect(sx+3,sy+24,TS-6,5);}
+    else if(ch==="F"){ctx.fillStyle="#A87F4F";for(let i=0;i<4;i++)ctx.fillRect(sx+2+i*8,sy+4,6,TS-8);
+      ctx.fillStyle="#8B6A42";ctx.fillRect(sx,sy+8,TS,3);ctx.fillRect(sx,sy+21,TS,3);}
+    else if(ch==="G"){ctx.fillStyle="#C98A2D";ctx.fillRect(sx+4,sy+2,4,TS-4);ctx.fillRect(sx+24,sy+2,4,TS-4);
+      ctx.fillRect(sx+4,sy+6,24,4);ctx.fillRect(sx+4,sy+22,24,4);}
+    else if(ch==="C"){ctx.fillStyle="#E0662B";ctx.beginPath();ctx.moveTo(sx+16,sy+8);ctx.lineTo(sx+23,sy+26);ctx.lineTo(sx+9,sy+26);ctx.closePath();ctx.fill();
+      ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+11.5,sy+17,9,3);}
+    else if(ch==="X"){ctx.fillStyle="#E7C25A";ctx.fillRect(sx+4,sy+4,TS-8,TS-12);ctx.fillStyle="#6B5210";
+      ctx.font="14px serif";ctx.textAlign="center";ctx.fillText("🚧",sx+16,sy+19);ctx.textAlign="start";
+      ctx.fillStyle="#8B6A42";ctx.fillRect(sx+14,sy+24,4,6);}
+    else if(ch==="1"){ctx.fillStyle="#8A8474";for(let i=0;i<4;i++){ctx.fillStyle=i%2?"#9A947F":"#7E7867";ctx.fillRect(sx+3,sy+4+i*6,TS-6,6);}
+      ctx.fillStyle="#4A331F";ctx.fillRect(sx+2,sy+2,2,TS-4);ctx.fillRect(sx+28,sy+2,2,TS-4);}
+    else if(ch==="2"){ctx.fillStyle="#E0B45C";ctx.font="700 15px sans-serif";ctx.textAlign="center";
+      ctx.fillText("»",sx+16,sy+21);ctx.textAlign="start";}
+    else if(ch==="Y"){ /* trolley stop: pole + sign + bench — the town's transit spine */
+      ctx.fillStyle="#3B3F45";ctx.fillRect(sx+6,sy+5,3,22);
+      ctx.fillStyle="#C0392B";ctx.fillRect(sx+2,sy+2,15,9);
+      ctx.strokeStyle="rgba(15,12,20,.4)";ctx.lineWidth=1;ctx.strokeRect(sx+2,sy+2,15,9);
+      ctx.fillStyle="#F2E8D8";ctx.font="700 7px monospace";ctx.fillText("MQT",sx+4,sy+9);
+      ctx.fillStyle="#8A6B3F";ctx.fillRect(sx+14,sy+21,15,3);
+      ctx.fillRect(sx+15,sy+24,2,5);ctx.fillRect(sx+26,sy+24,2,5);}
+    else if(ch==="Q"){ /* La Cocina storefront: terracotta facade + striped awning + window */
+      ctx.fillStyle="#A8503A";ctx.fillRect(sx,sy,TS,TS);
+      for(let i=0;i<4;i++){ctx.fillStyle=i%2?"#F2E8D8":"#C0392B";ctx.fillRect(sx+i*8,sy,8,7);}
+      ctx.fillStyle="#7A3527";ctx.fillRect(sx,sy+7,TS,2);
+      ctx.fillStyle="#F5DFA9";ctx.fillRect(sx+8,sy+14,16,10);
+      ctx.fillStyle="#7A3527";ctx.fillRect(sx+15,sy+14,2,10);}
+    else if(ch==="+"||ch==="E"||ch==="L"||ch==="O"){
+      ctx.fillStyle=C.doorFrame;ctx.fillRect(sx+2,sy,TS-4,TS);
+      ctx.fillStyle=C.doorWood;ctx.fillRect(sx+4,sy+2,11,TS-4);
+      ctx.fillStyle=C.doorWood2;ctx.fillRect(sx+17,sy+2,11,TS-4);
+      ctx.fillStyle="rgba(0,0,0,.15)";ctx.fillRect(sx+15,sy+2,2,TS-4);
+      ctx.fillStyle="#E0B45C";
+      ctx.beginPath();ctx.arc(sx+12.5,sy+17,1.7,0,7);ctx.fill();
+      ctx.beginPath();ctx.arc(sx+19.5,sy+17,1.7,0,7);ctx.fill();
+    }
+    else if(ch==="D"){ctx.fillStyle=C.desk;ctx.fillRect(sx+2,sy+8,TS-4,TS-12);ctx.fillStyle=C.deskTop;ctx.fillRect(sx+2,sy+4,TS-4,8);
+      ctx.fillStyle="#DDE4EA";ctx.fillRect(sx+8,sy+6,10,5);}
+    else if(ch==="K"){ctx.fillStyle=C.counter;ctx.fillRect(sx+2,sy+6,TS-4,TS-10);ctx.font="12px serif";ctx.fillText("☕",sx+9,sy+22);}
+    else if(ch==="P"){ctx.fillStyle=C.pot;ctx.fillRect(sx+10,sy+18,12,10);ctx.fillStyle=C.plant;
+      ctx.beginPath();ctx.arc(sx+16,sy+13,8,0,7);ctx.fill();}
+    else if(ch==="T"){ctx.fillStyle="#7A4E2C";ctx.beginPath();ctx.arc(sx+16,sy+16,11,0,7);ctx.fill();
+      ctx.fillStyle="#F2E8D8";ctx.beginPath();ctx.arc(sx+16,sy+16,9,0,7);ctx.fill();
+      ctx.fillStyle="#C0392B";ctx.beginPath();ctx.arc(sx+16,sy+16,3,0,7);ctx.fill();}
+    else if(ch==="W"){ctx.fillStyle="#AEB6BE";ctx.fillRect(sx+4,sy+2,TS-8,TS-4);
+      ctx.fillStyle="#8E969E";ctx.fillRect(sx+4,sy+14,TS-8,2);
+      ctx.fillStyle="#5F676F";ctx.fillRect(sx+21,sy+5,3,7);ctx.fillRect(sx+21,sy+18,3,7);}
+    else if(ch==="V"){ctx.fillStyle="#3A3F46";ctx.fillRect(sx+3,sy+4,TS-6,TS-8);
+      ctx.fillStyle="#23272C";[[10,12],[22,12],[10,22],[22,22]].forEach(p=>{
+        ctx.beginPath();ctx.arc(sx+p[0],sy+p[1],3.4,0,7);ctx.fill();});
+      ctx.fillStyle="#E0662B";ctx.fillRect(sx+14,sy+6,4,2);}
+    else if(ch==="A"){ /* drafting table: tilted board, blueprint sheet, T-square */
+      ctx.fillStyle="#8A6F4D";ctx.fillRect(sx+13,sy+20,6,8);
+      ctx.fillStyle="#B08B5A";ctx.beginPath();ctx.moveTo(sx+4,sy+20);ctx.lineTo(sx+28,sy+16);ctx.lineTo(sx+28,sy+6);ctx.lineTo(sx+4,sy+10);ctx.closePath();ctx.fill();
+      ctx.fillStyle="#2E5FA8";ctx.beginPath();ctx.moveTo(sx+7,sy+18.6);ctx.lineTo(sx+25,sy+15.4);ctx.lineTo(sx+25,sy+8);ctx.lineTo(sx+7,sy+11);ctx.closePath();ctx.fill();
+      ctx.strokeStyle="#DDE8F5";ctx.lineWidth=0.8;
+      ctx.beginPath();ctx.moveTo(sx+9,sy+12);ctx.lineTo(sx+22,sy+10);ctx.moveTo(sx+9,sy+14.5);ctx.lineTo(sx+22,sy+12.5);ctx.moveTo(sx+9,sy+17);ctx.lineTo(sx+18,sy+15.4);ctx.stroke();}
+    else if(ch==="U"){ /* blueprint wall panel */
+      ctx.fillStyle=C.wall;ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle=C.wallTop;ctx.fillRect(sx,sy,TS,6);
+      ctx.fillStyle="#2E5FA8";ctx.fillRect(sx+4,sy+9,TS-8,18);
+      ctx.strokeStyle="#DDE8F5";ctx.lineWidth=0.9;
+      ctx.strokeRect(sx+8,sy+13,9,7);ctx.beginPath();ctx.moveTo(sx+8,sy+23);ctx.lineTo(sx+24,sy+23);ctx.moveTo(sx+20,sy+13);ctx.lineTo(sx+24,sy+17);ctx.stroke();
+      ctx.fillStyle="#E0B45C";[[5,10],[26,10],[5,25],[26,25]].forEach(p=>ctx.fillRect(sx+p[0],sy+p[1],1.6,1.6));}
+  }
+  w.npcs.forEach(n=>{
+    const sx=n.x*TS-camX,sy=n.y*TS-camY;
+    if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
+    drawPerson(ctx,sx,sy,NPCLOOK[n.key],{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
+    if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
+      ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
+  });
+  if(world==="hq")drawDog(ctx,DOG.fx*TS-camX,DOG.fy*TS-camY);
+  if(world==="lc")drawCat(ctx,CAT.fx*TS-camX,CAT.fy*TS-camY);
+  if(world==="st"){drawPigeon(ctx,PIG.fx*TS-camX,PIG.fy*TS-camY);drawLoro(ctx,LORO.x*TS-camX,LORO.y*TS-camY);}
+  drawPerson(ctx,fx*TS-camX,fy*TS-camY,look,{dir,bob:moving?Math.sin(bob)*2:0,moving});
+}
+/* ---------- the office Aussie ---------- */
+const DOG={x:12,y:5,fx:12,fy:5,moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false};
+function dogFree(x,y){const w=WORLDS.hq;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world==="hq"&&x===px&&y===py);}
+function dogUpdate(dt,now){
+  if(world!=="hq"&&!DOG.moving){DOG.next=now+800;return;}
+  if(DOG.moving){
+    DOG.mt+=dt/430;
+    if(DOG.mt>=1){DOG.moving=false;DOG.fx=DOG.x;DOG.fy=DOG.y;}
+    else{DOG.fx=DOG.x-DOG.dx*(1-DOG.mt);DOG.fy=DOG.y-DOG.dy*(1-DOG.mt);}
+    return;
+  }
+  if(now<DOG.next)return;
+  const r=Math.random();
+  if(r<0.35){DOG.sit=r<0.15;DOG.next=now+900+Math.random()*2200;return;}
+  DOG.sit=false;
+  const dirs=[[1,0],[-1,0],[0,1],[0,-1]].filter(d=>dogFree(DOG.x+d[0],DOG.y+d[1]));
+  if(!dirs.length){DOG.next=now+1200;return;}
+  const d=dirs[Math.floor(Math.random()*dirs.length)];
+  DOG.dx=d[0];DOG.dy=d[1];if(d[0])DOG.face=d[0];
+  DOG.x+=d[0];DOG.y+=d[1];DOG.moving=true;DOG.mt=0;
+  DOG.next=now+600+Math.random()*1800;
+  if(Math.abs(DOG.x-px)+Math.abs(DOG.y-py)===1&&Math.random()<0.35&&Date.now()-lastBump>2500){
+    lastBump=Date.now();const L=T().dog;toast(L[Math.floor(Math.random()*L.length)],1800);}
+}
+function drawDog(g,sx,sy){
+  const cx=sx+16,wob=DOG.moving?Math.sin(Date.now()/90)*0.8:0;
+  g.save();g.translate(cx,0);g.scale(DOG.face,1);g.translate(-cx,0);
+  g.fillStyle="rgba(0,0,0,.18)";g.beginPath();g.ellipse(cx,sy+27,8,3,0,0,7);g.fill();
+  g.fillStyle="#4C4F58";
+  g.fillRect(cx-7,sy+22+wob,2.4,4.5);g.fillRect(cx-2.5,sy+22-wob,2.4,4.5);
+  g.fillRect(cx+1.5,sy+22+wob,2.4,4.5);g.fillRect(cx+5,sy+22-wob,2.4,4.5);
+  g.fillStyle="#7B7E8A";g.beginPath();g.roundRect(cx-8.5,sy+15,16,9,4.5);g.fill();
+  g.fillStyle="#4C4F58";g.beginPath();g.arc(cx-3,sy+18,2.4,0,7);g.fill();
+  g.beginPath();g.arc(cx+3.4,sy+20.6,1.9,0,7);g.fill();
+  g.fillStyle="#EDEDE8";g.beginPath();g.roundRect(cx+3.6,sy+16.4,4.4,7.2,2.2);g.fill();
+  /* bobbed tail — small, always wagging, as requested by management */
+  g.fillStyle="#7B7E8A";
+  g.beginPath();g.ellipse(cx-9.6,sy+16.5+Math.sin(Date.now()/110)*1.4,2.3,1.7,-0.5,0,7);g.fill();
+  if(DOG.sit){g.fillStyle="#7B7E8A";g.beginPath();g.roundRect(cx-9.5,sy+18,7,7,3);g.fill();}
+  if(fredQ>=2){ /* red bandana mod */
+    g.fillStyle="#C0392B";g.beginPath();g.moveTo(cx+3.4,sy+15.6);g.lineTo(cx+10.4,sy+15.6);g.lineTo(cx+7,sy+20.2);g.closePath();g.fill();}
+  g.fillStyle="#6E7280";g.beginPath();g.arc(cx+7.5,sy+13.5,4.6,0,7);g.fill();
+  g.fillStyle="#4C4F58";
+  g.beginPath();g.moveTo(cx+4.4,sy+10.6);g.lineTo(cx+6.4,sy+7.4);g.lineTo(cx+8,sy+10.2);g.closePath();g.fill();
+  g.beginPath();g.moveTo(cx+8.6,sy+10);g.lineTo(cx+10.8,sy+7.6);g.lineTo(cx+11.6,sy+10.8);g.closePath();g.fill();
+  g.fillStyle="#B5773A";g.beginPath();g.arc(cx+10.2,sy+15.2,1.7,0,7);g.fill();
+  g.fillStyle="#EDEDE8";g.beginPath();g.arc(cx+11,sy+14.2,1.9,0,7);g.fill();
+  g.fillStyle="#26202B";g.beginPath();g.arc(cx+12.1,sy+13.8,0.9,0,7);g.fill();
+  g.fillRect(cx+8.2,sy+12.2,1.2,1.2);
+  g.restore();
+}
+/* ---------- Canela, La Cocina's cat ---------- */
+const CAT={x:16,y:9,fx:16,fy:9,moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:true};
+function catFree(x,y){const w=WORLDS.lc;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world==="lc"&&x===px&&y===py);}
+function catUpdate(dt,now){
+  if(CAT.moving){CAT.mt+=dt/520;
+    if(CAT.mt>=1){CAT.moving=false;CAT.fx=CAT.x;CAT.fy=CAT.y;}
+    else{CAT.fx=CAT.x-CAT.dx*(1-CAT.mt);CAT.fy=CAT.y-CAT.dy*(1-CAT.mt);}return;}
+  if(world!=="lc"){CAT.next=now+1000;return;}
+  if(now<CAT.next)return;
+  const r=Math.random();
+  if(r<0.55){CAT.sit=r<0.4;CAT.next=now+1500+Math.random()*3500;return;}
+  CAT.sit=false;
+  const dirs=[[1,0],[-1,0],[0,1],[0,-1]].filter(d=>catFree(CAT.x+d[0],CAT.y+d[1]));
+  if(!dirs.length){CAT.next=now+1500;return;}
+  const d=dirs[Math.floor(Math.random()*dirs.length)];
+  CAT.dx=d[0];CAT.dy=d[1];if(d[0])CAT.face=d[0];
+  CAT.x+=d[0];CAT.y+=d[1];CAT.moving=true;CAT.mt=0;
+  CAT.next=now+900+Math.random()*2600;
+  if(Math.abs(CAT.x-px)+Math.abs(CAT.y-py)===1&&Math.random()<0.3&&Date.now()-lastBump>2500){
+    lastBump=Date.now();const L=T().cat;toast(L[Math.floor(Math.random()*L.length)],1800);}
+}
+function drawCat(g,sx,sy){
+  const cx=sx+16,sw=Math.sin(Date.now()/300);
+  g.save();g.translate(cx,0);g.scale(CAT.face,1);g.translate(-cx,0);
+  g.fillStyle="rgba(0,0,0,.15)";g.beginPath();g.ellipse(cx,sy+27,6.5,2.6,0,0,7);g.fill();
+  g.strokeStyle="#C97F3F";g.lineWidth=2.6;g.lineCap="round";
+  g.beginPath();g.moveTo(cx-6.5,sy+21);g.quadraticCurveTo(cx-11,sy+18+sw*2,cx-9.5,sy+13+sw*3);g.stroke();
+  g.fillStyle="#D98E4A";g.beginPath();g.roundRect(cx-7,sy+18,12.5,7.5,3.8);g.fill();
+  g.fillStyle="#B96F31";g.fillRect(cx-4.5,sy+18.5,1.8,6);g.fillRect(cx-1,sy+18.5,1.8,6);
+  if(!CAT.sit){g.fillStyle="#C97F3F";g.fillRect(cx-5.5,sy+24.5,2,3);g.fillRect(cx+2.5,sy+24.5,2,3);}
+  g.fillStyle="#D98E4A";g.beginPath();g.arc(cx+6,sy+17.5,4.2,0,7);g.fill();
+  g.beginPath();g.moveTo(cx+3.2,sy+15);g.lineTo(cx+4.2,sy+11.6);g.lineTo(cx+6,sy+14);g.closePath();g.fill();
+  g.beginPath();g.moveTo(cx+6.6,sy+13.8);g.lineTo(cx+8.6,sy+11.8);g.lineTo(cx+9,sy+15);g.closePath();g.fill();
+  g.fillStyle="#F1E3CE";g.beginPath();g.arc(cx+7.3,sy+19.4,2,0,7);g.fill();
+  g.fillStyle="#26202B";
+  if(CAT.sit){g.fillRect(cx+5.2,sy+17,1.8,0.7);g.fillRect(cx+8,sy+17,1.8,0.7);}
+  else{g.fillRect(cx+5.4,sy+16.6,1.1,1.1);g.fillRect(cx+8,sy+16.6,1.1,1.1);}
+  g.fillStyle="#C4586B";g.fillRect(cx+9.2,sy+18,1.1,0.9);
+  g.restore();
+}
+/* ---------- Paloma the pigeon (street) & Lorenzo the parrot (perched on the fence) ---------- */
+const PIG={x:4,y:1,fx:4,fy:1,moving:false,mt:0,dx:0,dy:0,face:1,next:0,peck:false};
+function pigFree(x,y){const w=WORLDS.st;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world==="st"&&x===px&&y===py);}
+function pigUpdate(dt,now){
+  if(PIG.moving){PIG.mt+=dt/180;
+    if(PIG.mt>=1){PIG.moving=false;PIG.fx=PIG.x;PIG.fy=PIG.y;}
+    else{PIG.fx=PIG.x-PIG.dx*(1-PIG.mt);PIG.fy=PIG.y-PIG.dy*(1-PIG.mt);}return;}
+  if(world!=="st"){PIG.next=now+1000;return;}
+  if(now<PIG.next)return;
+  const r=Math.random();
+  if(r<0.5){PIG.peck=r<0.3;PIG.next=now+500+Math.random()*1400;return;}
+  PIG.peck=false;
+  const dirs=[[1,0],[-1,0],[0,1],[0,-1]].filter(d=>pigFree(PIG.x+d[0],PIG.y+d[1]));
+  if(!dirs.length){PIG.next=now+900;return;}
+  const d=dirs[Math.floor(Math.random()*dirs.length)];
+  PIG.dx=d[0];PIG.dy=d[1];if(d[0])PIG.face=d[0];
+  PIG.x+=d[0];PIG.y+=d[1];PIG.moving=true;PIG.mt=0;
+  PIG.next=now+300+Math.random()*1200;
+  if(Math.abs(PIG.x-px)+Math.abs(PIG.y-py)===1&&Math.random()<0.25&&Date.now()-lastBump>3000){
+    lastBump=Date.now();const L=T().pigeon;toast(L[Math.floor(Math.random()*L.length)],1700);}
+}
+function drawPigeon(g,sx,sy){
+  const cx=sx+16,pk=PIG.peck?2.2:0;
+  g.save();g.translate(cx,0);g.scale(PIG.face,1);g.translate(-cx,0);
+  g.fillStyle="rgba(0,0,0,.12)";g.beginPath();g.ellipse(cx,sy+27,4.5,1.8,0,0,7);g.fill();
+  g.fillStyle="#E0662B";g.fillRect(cx-1.5,sy+24.5,1,2.5);g.fillRect(cx+1,sy+24.5,1,2.5);
+  g.fillStyle="#8B8F98";g.beginPath();g.ellipse(cx,sy+21.5,4.6,3.4,0,0,7);g.fill();
+  g.fillStyle="#767A84";g.beginPath();g.ellipse(cx-1.5,sy+21,3,2.2,-.4,0,7);g.fill();
+  g.fillStyle="#5E8F6E";g.beginPath();g.arc(cx+3.6,sy+18.6+pk,2.2,0,7);g.fill();
+  g.fillStyle="#E0B45C";g.fillRect(cx+5.4,sy+18.2+pk,1.8,0.9);
+  g.fillStyle="#26202B";g.fillRect(cx+3.9,sy+17.8+pk,0.9,0.9);
+  g.restore();
+}
+const LORO={x:17,y:5,next:0};
+function loroTick(now){
+  if(world!=="st")return;
+  if(now<LORO.next)return;LORO.next=now+2000;
+  if(Math.abs(LORO.x-px)+Math.abs(LORO.y-py)<=2&&Math.random()<0.45&&Date.now()-lastBump>2600){
+    lastBump=Date.now();const L=T().loro;toast("🦜 "+L[Math.floor(Math.random()*L.length)],2000);}
+}
+function drawLoro(g,sx,sy){
+  const bob=Math.sin(Date.now()/280)*1.1;
+  g.fillStyle="#2F7D3E";g.beginPath();g.ellipse(sx+16,sy+10+bob*0.4,4,5.2,0,0,7);g.fill();
+  g.fillStyle="#2C5FA8";g.fillRect(sx+14.6,sy+14,2.8,9);
+  g.fillStyle="#C0392B";g.beginPath();g.arc(sx+16,sy+5.2+bob,2.8,0,7);g.fill();
+  g.fillStyle="#F5D34C";g.beginPath();g.moveTo(sx+18.4,sy+5+bob);g.lineTo(sx+21,sy+6+bob);g.lineTo(sx+18.4,sy+7+bob);g.closePath();g.fill();
+  g.fillStyle="#26202B";g.fillRect(sx+16.6,sy+4.4+bob,1,1);
+  g.fillStyle="#F1E3CE";g.beginPath();g.ellipse(sx+15.2,sy+9.4+bob*0.4,1.6,2.4,0,0,7);g.fill();
+}
+function drawPerson(g,sx,sy,lk,o){
+  o=o||{};const b=o.bob||o.idle||0,d=o.dir||"down",bh=b*0.5;
+  g.fillStyle="rgba(0,0,0,.2)";g.beginPath();g.ellipse(sx+16,sy+28,8,3.5,0,0,7);g.fill();
+  g.fillStyle=lk.outfit==="formal"?"#23262E":"#2E3547";
+  g.fillRect(sx+11,sy+20+b,4,7);g.fillRect(sx+17,sy+20-(o.moving?b:0),4,7);
+  g.fillStyle=lk.shirt;
+  g.beginPath();g.roundRect(sx+9,sy+9+bh,14,13,4);g.fill();
+  g.strokeStyle="rgba(15,12,20,.35)";g.lineWidth=.8;g.stroke();
+  if(lk.outfit==="formal"){
+    g.fillStyle="#F2F1EA";g.beginPath();g.moveTo(sx+13,sy+9+bh);g.lineTo(sx+19,sy+9+bh);g.lineTo(sx+16,sy+16+bh);g.closePath();g.fill();
+    g.fillStyle="#8E2F3C";g.fillRect(sx+15.2,sy+10.5+bh,1.6,5.5);
+  }
+  g.fillStyle=lk.skin;g.beginPath();g.arc(sx+16,sy+5+bh,6.5,0,7);g.fill();
+  g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.8;g.stroke();
+  const st=lk.style||"cap",hx=sx+16,hy=sy+5+bh;
+  /* hair v3: clipped to the actual skull, so every style fits clean */
+  const inHead=fn=>{g.save();g.beginPath();g.arc(hx,hy,6.5,0,7);g.clip();g.fillStyle=lk.hair;fn();g.restore();g.fillStyle=lk.hair;};
+  g.fillStyle=lk.hair;
+  const capFill=(h)=>{inHead(()=>{g.fillRect(hx-7,hy-8,14,h);
+    g.beginPath();g.ellipse(hx,hy-8+h,7,1.3,0,0,Math.PI);g.fill();});}; /* soft hairline, no hard bar */
+  if(st==="cap"){capFill(6.2);inHead(()=>{g.fillRect(hx-7,hy-3.2,2,4.4);g.fillRect(hx+5,hy-3.2,2,4.4);});}
+  else if(st==="buzz"){g.globalAlpha=.9;capFill(4.6);g.globalAlpha=1;}
+  else if(st==="long"){ /* v5: full mane behind the head, face windowed out */
+    g.beginPath();g.roundRect(hx-8.6,hy-7.6,17.2,17.6,7);g.fill();
+    g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.8;g.stroke();
+    g.fillStyle=lk.skin;g.beginPath();g.arc(hx,hy+0.4,5.7,0,7);g.fill();
+    g.fillStyle=lk.hair;capFill(5.2);}
+  else if(st==="curly"){ /* v5: dense curly wreath, ear to ear, with inner volume */
+    for(let a=0;a<7;a++){const ang=Math.PI*(1.0+a/6);
+      g.beginPath();g.arc(hx+6.3*Math.cos(ang),hy+6.0*Math.sin(ang),3.1,0,7);g.fill();}
+    for(let a=0;a<5;a++){const ang=Math.PI*(1.08+a*0.21);
+      g.beginPath();g.arc(hx+3.8*Math.cos(ang),hy-1.6+3.4*Math.sin(ang),2.6,0,7);g.fill();}
+    g.strokeStyle="rgba(15,12,20,.22)";g.lineWidth=.7;
+    g.beginPath();g.arc(hx,hy-1.2,7.2,Math.PI*1.02,-Math.PI*0.02);g.stroke();}
+  else if(st==="spiky"){capFill(4.8);
+    [[-4.4,-5.2],[-1.5,-6.6],[1.5,-6.6],[4.4,-5.2]].forEach(p=>{
+      g.beginPath();g.moveTo(hx+p[0]-1.4,hy+p[1]+1.6);g.lineTo(hx+p[0],hy+p[1]-2.8);g.lineTo(hx+p[0]+1.4,hy+p[1]+1.6);g.closePath();g.fill();});}
+  else if(st==="pony"){capFill(6.2);
+    g.beginPath();g.arc(hx+5.6,hy-4.4,1.9,0,7);g.fill();
+    g.beginPath();g.roundRect(hx+6.2,hy-4.2,2.6,9,1.3);g.fill();}
+  else if(st==="afro"){
+    g.beginPath();g.arc(hx-4,hy-4.6,4.4,0,7);g.fill();
+    g.beginPath();g.arc(hx,hy-6.2,4.6,0,7);g.fill();
+    g.beginPath();g.arc(hx+4,hy-4.6,4.4,0,7);g.fill();
+    capFill(4.6);}
+  else if(st==="mohawk"){ /* shaved sides, one jagged proud crest */
+    g.globalAlpha=.3;capFill(3.2);g.globalAlpha=1;
+    g.beginPath();g.moveTo(hx-2.3,hy-4.4);
+    g.lineTo(hx-2.7,hy-9.2);g.lineTo(hx-1.2,hy-8.2);g.lineTo(hx-0.5,hy-12.8);
+    g.lineTo(hx+0.9,hy-9.6);g.lineTo(hx+1.7,hy-12);g.lineTo(hx+2.7,hy-8.2);g.lineTo(hx+2.3,hy-4.4);
+    g.closePath();g.fill();
+    g.strokeStyle="rgba(15,12,20,.4)";g.lineWidth=.8;g.stroke();}
+  else if(st==="edgar"){ /* the Edgar: dense straight fringe, crisp line — the bar is the point */
+    inHead(()=>{g.fillRect(hx-7,hy-8,14,7.3);});
+    g.globalAlpha=.35;inHead(()=>{g.fillRect(hx-7,hy-0.7,2.2,3.4);g.fillRect(hx+4.8,hy-0.7,2.2,3.4);});g.globalAlpha=1;}
+  else if(st==="fade"){ /* taper fade: short top, sides melting away */
+    capFill(4.4);
+    g.globalAlpha=.5;inHead(()=>{g.fillRect(hx-7,hy-3.6,2.4,2.6);g.fillRect(hx+4.6,hy-3.6,2.4,2.6);});
+    g.globalAlpha=.22;inHead(()=>{g.fillRect(hx-7,hy-1,2.4,2.6);g.fillRect(hx+4.6,hy-1,2.4,2.6);});g.globalAlpha=1;}
+  else if(st==="mullet"){ /* v6: business up front, straight ragged party hanging down the back */
+    capFill(4.6);
+    const curtain=(sgn)=>{g.beginPath();
+      g.moveTo(hx+sgn*4.2,hy+0.6);
+      g.lineTo(hx+sgn*7.3,hy+1.8);
+      g.lineTo(hx+sgn*7.8,hy+9.4);
+      g.lineTo(hx+sgn*6.5,hy+12.4);
+      g.lineTo(hx+sgn*5.8,hy+9.8);
+      g.lineTo(hx+sgn*4.9,hy+12.0);
+      g.lineTo(hx+sgn*4.3,hy+8.4);
+      g.closePath();g.fill();
+      g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.7;g.stroke();};
+    curtain(1);curtain(-1);
+    g.globalAlpha=.9;inHead(()=>{g.fillRect(hx-7,hy-2.8,2,3.6);g.fillRect(hx+5,hy-2.8,2,3.6);});g.globalAlpha=1;}
+  else if(st==="broccoli"){ /* fluffy high crown, clean sides */
+    [[-3.4,-6.6],[0,-8],[3.4,-6.6],[-1.8,-5.2],[1.8,-5.2],[0,-5.8]].forEach(p=>{
+      g.beginPath();g.arc(hx+p[0],hy+p[1],2.7,0,7);g.fill();});
+    g.globalAlpha=.3;capFill(2.6);g.globalAlpha=1;}
+  else if(st==="braids"){capFill(6.6);
+    const seg=(x2,k)=>{g.fillStyle=lk.hair;g.beginPath();g.roundRect(x2,hy-0.6+k*3.1,3.2,3.5,1.6);g.fill();
+      g.strokeStyle="rgba(15,12,20,.35)";g.lineWidth=.7;g.stroke();
+      g.fillStyle="rgba(255,255,255,.14)";g.fillRect(x2+0.7,hy+0.1+k*3.1,1,1.4);};
+    for(let k=0;k<3;k++){seg(hx-8.7+(k%2?0.9:0),k);seg(hx+5.5-(k%2?0.9:0),k);}
+    g.fillStyle="#C0392B";
+    g.beginPath();g.arc(hx-6.9,hy+9.7,1.25,0,7);g.fill();
+    g.beginPath();g.arc(hx+6.9,hy+9.7,1.25,0,7);g.fill();
+    g.fillStyle=lk.hair;}
+  else if(st==="flat"){capFill(3.6);
+    g.fillRect(hx-6.3,hy-11.6,12.6,6);
+    g.fillRect(hx-6.9,hy-6.4,1.9,2.6);g.fillRect(hx+5,hy-6.4,1.9,2.6);}
+  else if(st==="buns"){capFill(5.2);
+    g.beginPath();g.arc(hx-5.4,hy-7.2,3,0,7);g.fill();
+    g.beginPath();g.arc(hx+5.4,hy-7.2,3,0,7);g.fill();
+    g.fillStyle="#C0392B";
+    g.beginPath();g.arc(hx-5.4,hy-5,1,0,7);g.fill();
+    g.beginPath();g.arc(hx+5.4,hy-5,1,0,7);g.fill();}
+  /* bald: nothing at all */
+  if(lk.hat==="hard"){ /* hard hat crew: safety first, hair second */
+    g.fillStyle="#F2C230";g.beginPath();g.arc(hx,hy-0.4,6.9,Math.PI,0);g.closePath();g.fill();
+    g.fillStyle="#D9A81C";g.fillRect(hx-8,hy-0.9,16,1.9);
+    g.strokeStyle="rgba(15,12,20,.35)";g.lineWidth=.8;
+    g.beginPath();g.arc(hx,hy-0.4,6.9,Math.PI,0);g.stroke();
+  }
+  const ex=d==="left"?-2:d==="right"?2:0, ey=d==="up"?-1:1;
+  if(d!=="up"){g.fillStyle="#26202B";g.fillRect(sx+13.5+ex,sy+4.5+ey+bh,1.6,1.6);g.fillRect(sx+17+ex,sy+4.5+ey+bh,1.6,1.6);}
+}
+/* ---------- movement ---------- */
+const DIRS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+function tryStep(){
+  if(moving||!held)return;
+  if(performance.now()<warpT)return;
+  dir=held;const[dx,dy]=DIRS[held],nx=px+dx,ny=py+dy;
+  if(isSolid(nx,ny)){
+    const w=CW();
+    const ch=(ny>=0&&ny<w.H&&nx>=0&&nx<w.W)?w.rows[ny][nx]:"#";
+    const F=T().flavor;
+    if(F[ch]&&Date.now()-lastBump>1800){lastBump=Date.now();
+      toast(F[ch][Math.floor(Math.random()*F[ch].length)],2000);}
+    return;
+  }
+  moving=true;mt=0;px=nx;py=ny;
+}
+let last=0;
+function loop(ts){
+  const dt=Math.min(50,ts-last);last=ts;
+  if(moving){
+    mt+=dt/240;bob+=dt/70;
+    if(mt>=1){moving=false;fx=px;fy=py;
+      const pch=CW().rows[py][px];
+      if(ts>portalT&&PORTALS[world]&&PORTALS[world][pch]){const p=PORTALS[world][pch];
+        world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
+        warpT=performance.now()+450;portalT=performance.now()+900;
+        save();setWorldTag();toast(T().arrive[world],2200);}
+      else if(pch==="Y"&&ts>portalT){portalT=performance.now()+900;held=null;openTravel();}
+      else{checkTalk();tryStep();}
+    }
+    else{const[dx,dy]=DIRS[dir];fx=px-dx*(1-mt);fy=py-dy*(1-mt);}
+  }else tryStep();
+  dogUpdate(dt,ts);catUpdate(dt,ts);pigUpdate(dt,ts);loroTick(ts);fredCheck();
+  if(!$("world").hidden)draw();
+  requestAnimationFrame(loop);
+}
+function checkTalk(){
+  const n=CW().npcs.find(n=>Math.abs(n.x-px)+Math.abs(n.y-py)===1&&(pendingAt(n)!==undefined||n.chat));
+  if(n){const qi=pendingAt(n),tb=$("talk");
+    if(qi!==undefined){tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${AQ()[qi].title}”`;
+      tb.dataset.qi=qi;delete tb.dataset.chatn;}
+    else{tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]}`;
+      tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
+    tb.hidden=false;}
+  else $("talk").hidden=true;
+}
+/* controls */
+document.querySelectorAll(".dpad button[data-d]").forEach(b=>{
+  const on=e=>{e.preventDefault();held=b.dataset.d;};
+  const off=e=>{e.preventDefault();if(held===b.dataset.d)held=null;};
+  b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);
+  b.addEventListener("pointercancel",off);b.addEventListener("pointerleave",off);
+});
+const KEYS={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right"};
+window.addEventListener("keydown",e=>{if(!$("world").hidden&&KEYS[e.key]){held=KEYS[e.key];e.preventDefault();}
+  if(e.key==="Enter"&&!$("talk").hidden&&!$("world").hidden)$("talk").click();});
+window.addEventListener("keyup",e=>{if(KEYS[e.key]&&held===KEYS[e.key])held=null;});
+$("talk").addEventListener("click",()=>{
+  const tb=$("talk");
+  if(tb.dataset.chatn){const L=(T().chat||{})[tb.dataset.chatn]||[];
+    if(L.length)toast("💬 "+L[Math.floor(Math.random()*L.length)],2800);return;}
+  questStart(+tb.dataset.qi);});
+let petTarget=null;
+function fredCheck(){ /* now the generic animal-interaction check: every creature is reachable and greetable */
+  let tgt=null,label="";
+  if(!$("world").hidden&&!moving){
+    if(world==="hq"&&!DOG.moving&&Math.abs(DOG.x-px)+Math.abs(DOG.y-py)===1){tgt="fred";label=T().treatLb;}
+    else if(world==="lc"&&!CAT.moving&&Math.abs(CAT.x-px)+Math.abs(CAT.y-py)===1){tgt="cat";label=T().petCat;}
+    else if(world==="st"&&!PIG.moving&&Math.abs(PIG.x-px)+Math.abs(PIG.y-py)===1){tgt="pig";label=T().petPig;}
+    else if(world==="st"&&Math.abs(LORO.x-px)+Math.abs(LORO.y-py)<=2){tgt="loro";label=T().petLoro;}
+  }
+  petTarget=tgt;$("treat").hidden=!tgt;
+  if(tgt)$("treat").textContent=label;
+}
+$("treat").addEventListener("click",()=>{
+  if(petTarget==="fred"){
+    treats++;save();
+    toast(T().fredHeart,1200);DOG.sit=true;DOG.next=performance.now()+2600;
+    if(fredQ===0&&treats>=3){fredQ=1;save();setTimeout(()=>toast(T().fredUnlock,3800),1400);}
+    else if(fredQ===1){fredQuestStart();}
+    return;
+  }
+  if(petTarget==="cat"){CAT.sit=true;CAT.next=performance.now()+3200;
+    const L=T().cat;toast("❤ "+L[Math.floor(Math.random()*L.length)],2000);}
+  else if(petTarget==="pig"){PIG.peck=true;PIG.next=performance.now()+2200;
+    const L=T().pigeon;toast("❤ "+L[Math.floor(Math.random()*L.length)],2000);}
+  else if(petTarget==="loro"){
+    const L=T().loro;toast("🦜 "+L[Math.floor(Math.random()*L.length)],2200);}
+});
+/* ---------- quest overlay ---------- */
+let wasFs=false;
+function exitFsForCard(){wasFs=$("vp").classList.contains("fs");
+  if(wasFs){$("vp").classList.remove("fs");document.body.classList.remove("noscroll");
+    if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});setTimeout(sizeCanvas,60);}}
+function restoreFs(){if(wasFs){$("vp").classList.add("fs");document.body.classList.add("noscroll");setTimeout(sizeCanvas,60);}}
+function questStart(qi){cur=qi;curQ=AQ()[qi];node=curQ.start;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
+function fredQuestStart(){cur=-1;curQ=FQ();node=curQ.start;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
+function nodeShow(){
+  const q=curQ,t=q.nodes[node];
+  $("qtag").textContent=`${T().quest}: ${q.title}${node!==q.start?T().followup:""}`;
+  $("npcAv").textContent=NPCE[q.npc];$("npcName").textContent=npcName(q.npc);$("npcSay").textContent=t.say;
+  $("cdxLb").textContent=T().codexLb;$("codex").textContent=t.codex;$("q").textContent=t.q;
+  const box=$("choices");box.innerHTML="";
+  const list=[...t.ch].sort(()=>Math.random()-0.5); /* shuffled every time — no more middle-answer tell */
+  list.forEach(c=>{const b=document.createElement("button");b.textContent=c.t;
+    b.addEventListener("click",()=>pick(c,b,{ch:list}));box.appendChild(b);});
+  $("verdict").hidden=true;$("next").hidden=true;$("levelup").hidden=true;hud();
+  window.scrollTo({top:0});
+}
+function pick(c,btn,t){
+  if(c.next){[...$("choices").children].forEach(b=>b.disabled=true);btn.classList.add("right");
+    xp+=10;hud();setTimeout(()=>{node=c.next;nodeShow();},550);return;}
+  const o=c.out,before=lvlIdx();
+  [...$("choices").children].forEach(b=>b.disabled=true);
+  const rightIdx=t.ch.findIndex(x=>(x.out&&x.out.r==="ok")||x.next);
+  if(o.r==="ok")btn.classList.add("right");
+  else{btn.classList.add(o.r==="mid"?"midpick":"wrong");if(rightIdx>=0)$("choices").children[rightIdx].classList.add("right");}
+  if(o.r==="ok")xp+=10;else if(o.r==="mid")xp+=5;else hearts--;
+  logDecision(o);
+  const v=$("verdict");
+  v.className="verdict "+(o.r==="ok"?"ok":o.r==="mid"?"mid":"no");
+  v.innerHTML=`<h2>${o.r==="ok"?T().okH:o.r==="mid"?T().midH:T().badH}</h2><span class="concept">${o.concept}</span><p>${o.why}</p><p class="beat">${o.beat}</p>`;
+  v.hidden=false;hud();
+  if(o.r!=="bad"&&lvlIdx()!==before){$("levelup").textContent=T().lvlUp+lvlName();$("levelup").hidden=false;}
+  if(cur>=0){done.add(cur);
+    if(cur===12||cur===13){applyObra();setTimeout(()=>toast(T().obraUp,2800),700);}}
+  else if(o.r==="ok"&&node==="b"){fredQ=2;setTimeout(()=>toast(T().fredDoneToast,3000),600);}
+  save();
+  $("next").textContent=hearts<=0?T().nextDoom:(done.size===AQ().length?T().nextEnd:T().nextBack);
+  $("next").hidden=false;
+}
+$("next").addEventListener("click",()=>{
+  if(hearts<=0){wasFs=false;gameover();return;}
+  if(done.size===AQ().length){wasFs=false;finish();return;}
+  $("card").hidden=true;$("world").hidden=false;restoreFs();checkTalk();
+});
+/* ---------- character creator ---------- */
+const SWATCH={shirt:["#8B5CF6","#E0A430","#2AA47C","#C2543F","#3E8ED0","#B04A78"],
+  skin:["#F1CDA9","#E5AC82","#C08356","#8C5A33"],
+  hair:["#26202B","#7A4A22","#8E8E96","#C2543F"]};
+function buildSwatches(){
+  Object.entries(SWATCH).forEach(([part,colors])=>{
+    const row=$("row"+part[0].toUpperCase()+part.slice(1));row.innerHTML="";
+    colors.forEach(col=>{const b=document.createElement("button");
+      b.className="sw";b.style.background=col;b.setAttribute("aria-label",part+" "+col);
+      b.setAttribute("aria-pressed",look[part]===col?"true":"false");
+      b.addEventListener("click",()=>{look[part]=col;
+        [...row.children].forEach(x=>x.setAttribute("aria-pressed","false"));
+        b.setAttribute("aria-pressed","true");pvDraw();});
+      row.appendChild(b);});
+  });
+}
+function buildOpts(rowId,list,key){
+  const row=$(rowId);row.innerHTML="";
+  list.forEach(([val,label])=>{const b=document.createElement("button");
+    b.className="opt";b.textContent=label;
+    b.setAttribute("aria-pressed",look[key]===val?"true":"false");
+    b.addEventListener("click",()=>{look[key]=val;
+      [...row.children].forEach(x=>x.setAttribute("aria-pressed","false"));
+      b.setAttribute("aria-pressed","true");pvDraw();});
+    row.appendChild(b);});
+}
+function pvDraw(){const g=$("pv").getContext("2d");g.setTransform(1.6,0,0,1.6,5,22);
+  g.clearRect(-6,-16,70,80);drawPerson(g,0,0,look,{dir:"down"});}
+$("pvtog").addEventListener("click",()=>{const bx=$("pvbox");bx.classList.toggle("dark");
+  $("pvtog").textContent=bx.classList.contains("dark")?"☀️":"🌙";});
+function enterWorld(fresh){
+  $("intro").hidden=true;$("creator").hidden=true;
+  $("hud").hidden=false;$("xpbarwrap").hidden=false;$("world").hidden=false;
+  sizeCanvas();applyCtl();hud();setWorldTag();checkTalk();
+  if(fresh){toast(T().tut1,3000);
+    setTimeout(()=>toast(T().tut2,3800),3300);}
+}
+document.querySelectorAll(".classes button").forEach(b=>b.addEventListener("click",()=>{
+  cls=b.querySelector("b").textContent;look.shirt=SHIRTS[b.dataset.c]||look.shirt;
+  $("intro").hidden=true;$("creator").hidden=false;
+  buildSwatches();buildOpts("rowStyle",T().styles,"style");buildOpts("rowOutfit",T().outfits,"outfit");pvDraw();
+}));
+$("begin").addEventListener("click",()=>{
+  heroName=($("heroname").value.trim()||"Rookie").slice(0,14);
+  xp=0;hearts=3;done=new Set();px=fx=10;py=fy=11;dir="down";
+  save();enterWorld(true);
+});
+/* ---------- start/end ---------- */
+function gameover(){
+  $("card").hidden=true;$("world").hidden=true;
+  $("endTitle").textContent=T().goTitle;
+  $("endScore").textContent=T().goScore(xp,done.size,AQ().length);
+  $("epi").textContent=T().goEpi;
+  $("replay").textContent=T().replay;
+  $("end").hidden=false;
+}
+function finish(){
+  $("card").hidden=true;$("world").hidden=true;
+  $("endTitle").textContent=`🏆 ${lvlName()}`;
+  $("endScore").textContent=T().endScore(xp,MAXXP,Math.max(0,hearts));
+  const pct=xp/MAXXP;
+  $("epi").textContent = pct>=.95?T().epi1 : pct>=.65?T().epi2 : T().epi3;
+  $("replay").textContent=T().replay;
+  $("end").hidden=false;
+}
+$("replay").addEventListener("click",()=>{xp=0;hearts=3;done=new Set();px=fx=10;py=fy=11;dir="down";
+  save();$("end").hidden=true;$("world").hidden=false;hud();checkTalk();
+  toast(T().replayToast(heroName),2500);});
+/* ---------- controls scheme ---------- */
+let ctl="swipe";try{ctl=localStorage.getItem("mqctl")||"swipe";}catch(e){}
+if(!["swipe","joy","pad"].includes(ctl))ctl="swipe";
+function applyCtl(){
+  $("joy").hidden=(ctl!=="joy");$("dpad").hidden=(ctl!=="pad");
+  $("optSwipe").setAttribute("aria-pressed",ctl==="swipe"?"true":"false");
+  $("optJoy").setAttribute("aria-pressed",ctl==="joy"?"true":"false");
+  $("optPad").setAttribute("aria-pressed",ctl==="pad"?"true":"false");
+  $("ctlHint").textContent=ctl==="swipe"?T().hintSwipe:(ctl==="joy"?T().hintJoy:T().hintPad);
+  try{localStorage.setItem("mqctl",ctl);}catch(e){}
+}
+$("gear").addEventListener("click",()=>{$("settings").hidden=false;held=null;});
+$("closeSet").addEventListener("click",()=>{$("settings").hidden=true;});
+$("optSwipe").addEventListener("click",()=>{ctl="swipe";applyCtl();});
+$("optJoy").addEventListener("click",()=>{ctl="joy";applyCtl();});
+$("optPad").addEventListener("click",()=>{ctl="pad";applyCtl();});
+(function(){
+  const joy=$("joy"),knob=$("knob");let active=null;
+  function setFrom(e){
+    const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+    let dx=e.clientX-cx,dy=e.clientY-cy;
+    const max=r.width/2-14,len=Math.hypot(dx,dy);
+    if(len>max){dx=dx/len*max;dy=dy/len*max;}
+    knob.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+    if(Math.hypot(dx,dy)<16){held=null;return;}
+    held=Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up");
+  }
+  function end(){active=null;held=null;knob.style.transform="translate(-50%,-50%)";}
+  joy.addEventListener("pointerdown",e=>{e.preventDefault();active=e.pointerId;joy.setPointerCapture(e.pointerId);setFrom(e);});
+  joy.addEventListener("pointermove",e=>{if(e.pointerId===active)setFrom(e);});
+  joy.addEventListener("pointerup",end);joy.addEventListener("pointercancel",end);
+})();
+/* ---------- language ---------- */
+function applyLang(){
+  const t=T();
+  $("in1").textContent=t.in1;$("in2").textContent=t.in2;$("in3").textContent=t.in3;$("in4").textContent=t.in4;
+  document.querySelectorAll(".classes button").forEach(b=>{
+    const pair=t.classes[b.dataset.c];b.querySelector("b").textContent=pair[0];b.querySelector("small").textContent=pair[1];});
+  $("crTitle").textContent=t.crTitle;$("lbName").textContent=t.lbName;$("lbOutfit").textContent=t.lbOutfit;
+  $("lbShirt").textContent=t.lbShirt;$("lbSkin").textContent=t.lbSkin;$("lbHairC").textContent=t.lbHairC;$("lbHairS").textContent=t.lbHairS;
+  $("begin").textContent=t.begin;
+  setWorldTag();
+  $("openExp").textContent=t.expBtn;$("exTitle").textContent=t.expTitle;$("exHint").textContent=t.expHint;
+  $("exCopy").textContent=t.expCopy;$("exClose").textContent=t.tlClose;
+  $("mapTitle").textContent=t.mapTitle;$("mapClose").textContent=t.tlClose;
+  $("setTitle").textContent=t.setTitle;$("lbCtl").textContent=t.lbCtl;
+  $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
+  $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
+  $("openLab").textContent=t.openLab;$("closeSet").textContent=t.closeSet;
+  $("tlTitle").textContent=t.tlTitle;$("tlHint").textContent=t.tlHint;$("tlApply").textContent=t.tlApply;$("tlClose").textContent=t.tlClose;
+  document.querySelectorAll("#brushes button[data-b] .bl").forEach((el,i)=>el.textContent=t.brushes[i]);
+  $("undoBtn").querySelector(".bl").textContent=t.undoLb;
+  $("tlSearch").placeholder=t.tlFindPh;
+  $("next").textContent=t.nextBack;$("replay").textContent=t.replay;
+  $("optEn").setAttribute("aria-pressed",lang==="en"?"true":"false");
+  $("optEs").setAttribute("aria-pressed",lang==="es"?"true":"false");
+  $("langQuick").textContent=t.langQuick;
+  applyText();
+  if(!$("world").hidden){applyCtl();checkTalk();}
+  if(!$("creator").hidden){buildOpts("rowStyle",t.styles,"style");buildOpts("rowOutfit",t.outfits,"outfit");}
+  if(!$("hud").hidden)hud();
+  try{localStorage.setItem("mqlang",lang);}catch(e){}
+}
+$("optEn").addEventListener("click",()=>{lang="en";applyLang();});
+$("optEs").addEventListener("click",()=>{lang="es";applyLang();});
+$("langQuick").addEventListener("click",()=>{lang=(lang==="en"?"es":"en");applyLang();});
+/* ---------- text lab (edit names, titles, bump lines) ---------- */
+function labData(){return {npcNames:{...NPCN[lang]},titles:AQ().map(q=>q.title),flavor:JSON.parse(JSON.stringify(T().flavor))};}
+function applyText(){
+  try{const o=JSON.parse(localStorage.getItem("mqtext_"+lang)||"null");if(!o)return;
+    if(o.npcNames)Object.assign(NPCN[lang],o.npcNames);
+    if(o.titles)AQ().forEach((q,i)=>{if(o.titles[i])q.title=o.titles[i];});
+    if(o.flavor)Object.assign(UI[lang].flavor,o.flavor);
+  }catch(e){}
+}
+$("openLab").addEventListener("click",()=>{
+  $("settings").hidden=true;$("tlArea").value=JSON.stringify(labData(),null,1);$("textlab").hidden=false;});
+$("tlClose").addEventListener("click",()=>{$("textlab").hidden=true;});
+$("tlApply").addEventListener("click",()=>{
+  try{const o=JSON.parse($("tlArea").value);
+    localStorage.setItem("mqtext_"+lang,JSON.stringify(o));
+    applyText();applyLang();$("textlab").hidden=true;toast(T().tlOk,2000);
+  }catch(e){toast(T().tlErr,2600);}
+});
+function tlFindNext(){
+  const q=$("tlSearch").value.toLowerCase();if(!q)return;
+  const ta=$("tlArea"),v=ta.value,lo=v.toLowerCase();
+  let idx=lo.indexOf(q,ta.selectionEnd||0);
+  if(idx<0)idx=lo.indexOf(q,0);
+  if(idx<0){toast(T().tlNoHit,1400);return;}
+  ta.setSelectionRange(idx,idx+q.length);
+  ta.blur();ta.focus(); /* blur+focus makes mobile Safari scroll the caret into view */
+  const lh=parseFloat(getComputedStyle(ta).lineHeight)||15;
+  const cols=Math.max(20,Math.floor(ta.clientWidth/7.2));
+  let rows=0;v.slice(0,idx).split("\n").forEach(l=>{rows+=1+Math.floor(l.length/cols);});
+  ta.scrollTop=Math.max(0,(rows-4)*lh);
+}
+$("tlFind").addEventListener("click",tlFindNext);
+$("tlSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();tlFindNext();}});
+/* ---------- export skeleton (v1): play data → JSON; future: typed docs, email, convo export ---------- */
+let dlog=[];try{dlog=JSON.parse(localStorage.getItem("mqdlog")||"[]");}catch(e){}
+function logDecision(o){dlog.push({t:Date.now(),quest:curQ.title,concept:o.concept,result:o.r});dlog=dlog.slice(-200);
+  try{localStorage.setItem("mqdlog",JSON.stringify(dlog));}catch(e){}}
+function exportData(){return JSON.stringify({schema:"meridian-export-v1",exported:new Date().toISOString(),
+  player:{name:heroName,class:cls,look},
+  progress:{xp,level:lvlName(),hearts,questsDone:[...done],location:world},
+  frederick:{name:"Frederick",treats,bandana:fredQ>=2},
+  decisions:dlog,
+  futureExportTypes:["decision-report.docx","frederick-care-sheet.pdf","conversation-export.md","training-transcript.csv"]},null,1);}
+$("openExp").addEventListener("click",()=>{$("settings").hidden=true;$("exArea").value=exportData();$("exporter").hidden=false;});
+$("exClose").addEventListener("click",()=>{$("exporter").hidden=true;});
+$("exCopy").addEventListener("click",()=>{const v=$("exArea").value;
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(v):Promise.reject())
+    .then(()=>toast(T().expCopied,1600))
+    .catch(()=>{$("exArea").focus();$("exArea").select();});});
+/* ---------- village map: a real town plan drawn from the actual streets ---------- */
+function drawTown(){
+  const mc=$("mapcv"),g2=mc.getContext("2d"),w=WORLDS.st,s=10;
+  mc.width=w.W*s;mc.height=w.H*s+14;
+  g2.fillStyle="#EFE9DA";g2.fillRect(0,0,mc.width,mc.height);
+  const col={"≈":"#4A4B52","-":"#9A9B9E",".":"#D5D2C6","B":"#5C4A50","Q":"#B0563A","F":"#B0895B","G":"#C98A2D","C":"#E0662B","X":"#E7C25A","P":"#3E7C4F","E":"#E0B45C","L":"#E0B45C","O":"#E0B45C","1":"#8A8474","2":"#E0B45C","Y":"#C0392B"};
+  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
+    g2.fillStyle=col[w.rows[y][x]]||"#D5D2C6";g2.fillRect(x*s,y*s,s,s);}
+  const stage=(done.has(12)?1:0)+(done.has(13)?1:0),es=lang==="es";
+  g2.textAlign="center";g2.font="700 10px sans-serif";
+  g2.fillStyle="#F2E8D8";g2.fillText("MERIDIAN HQ  (⇧ "+(es?"PISO 2":"FLOOR 2")+")",15*s,0.75*s);
+  g2.fillStyle="#F2E8D8";g2.fillText("LA COCINA",6.5*s,5.75*s);
+  g2.fillStyle=stage>=2?"#F2E8D8":"#3A2F17";
+  g2.fillText(stage>=2?(es?"LA OBRA · ESTUDIO":"LA OBRA · STUDIO"):(es?"🚧 OBRA":"🚧 SITE"),22*s,7.7*s);
+  g2.fillStyle="#6B5210";g2.font="700 9px sans-serif";
+  g2.fillText(es?"LOTE: EL MERCADO":"LOT: EL MERCADO",4.5*s,13.7*s);
+  g2.fillText(es?"LOTE RESERVADO":"RESERVED LOT",25.5*s,13.7*s);
+  g2.fillStyle="#6B5210";g2.font="700 8px sans-serif";
+  g2.fillText("CALLE DOS →",27*s,1.7*s);
+  g2.fillText("🚋",0.5*s+3,1.8*s); /* trolley stop, west terminus */
+  g2.fillStyle="#8A8474";g2.font="600 8px sans-serif";
+  g2.fillText(es?"puertas y escaleras en dorado · ◉ estás aquí":"doors & stairs in gold · ◉ you are here",mc.width/2,w.H*s+10);
+  let dot=null;
+  if(world==="st")dot=[fx,fy];
+  else if(world==="hq"||world==="f2")dot=[14,0];
+  else if(world==="lc")dot=[6,5];
+  else if(world==="lo")dot=[21,5];
+  else if(world==="ex")dot=[29,1];
+  if(dot){g2.fillStyle="#7A3FE0";g2.beginPath();g2.arc(dot[0]*s+s/2,dot[1]*s+s/2,5,0,7);g2.fill();
+    g2.strokeStyle="#F2F1EA";g2.lineWidth=2;g2.stroke();}
+}
+function openMap(){
+  drawTown();
+  const t=T();
+  $("mapNote").textContent="📍 "+t.locs[world]+(world==="f2"?"  ·  ⇧":"");
+  $("mapov").hidden=false;held=null;
+}
+$("mapbtn").addEventListener("click",openMap);
+$("mapClose").addEventListener("click",()=>{$("mapov").hidden=true;});
+/* ---------- trolley fast travel: the streets never dead-end, they connect ---------- */
+const TRV=[{w:"st",x:1,y:1,dir:"right"},{w:"ex",x:22,y:3,dir:"left"}];
+function openTravel(){
+  const t=T().trolley,list=$("tvList");
+  $("tvTitle").textContent=t.title;$("tvNote").textContent=t.note;$("tvClose").textContent=t.close;
+  list.innerHTML="";
+  TRV.forEach(d=>{const b=document.createElement("button");b.className="opt";
+    b.textContent=(d.w===world?"◉ ":"🚋 ")+T().locs[d.w]+(d.w===world?" · "+t.here:"");
+    if(d.w===world){b.disabled=true;b.style.opacity=".55";}
+    else b.addEventListener("click",()=>{$("travel").hidden=true;
+      world=d.w;px=fx=d.x;py=fy=d.y;held=null;dir=d.dir;
+      warpT=performance.now()+450;portalT=performance.now()+900;
+      save();setWorldTag();toast(T().arrive[world],2200);});
+    list.appendChild(b);});
+  const s=document.createElement("button");s.className="opt";s.disabled=true;s.style.opacity=".45";
+  s.textContent="🏗️ "+t.soon;list.appendChild(s);
+  $("travel").hidden=false;
+}
+$("tvClose").addEventListener("click",()=>{$("travel").hidden=true;
+  /* step back off the stop so it can re-trigger later */
+  if(world==="st"){px=fx=1;py=fy=1;dir="right";}
+  if(world==="ex"){px=fx=22;py=fy=3;dir="left";}
+  checkTalk();});
+/* ---------- fullscreen + admin ---------- */
+let admin=false,brush="#";
+$("fsbtn").addEventListener("click",()=>{
+  const vp=$("vp"),fs=vp.classList.toggle("fs");
+  document.body.classList.toggle("noscroll",fs);
+  if(fs&&vp.requestFullscreen)vp.requestFullscreen().catch(()=>{});
+  else if(!fs&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+  setTimeout(sizeCanvas,80);
+});
+document.addEventListener("fullscreenchange",()=>{setTimeout(sizeCanvas,80);});
+try{admin=localStorage.getItem("mqadmin")==="1";}catch(e){}
+function applyAdmin(){
+  $("brushes").hidden=!admin;
+  $("admOn").setAttribute("aria-pressed",admin?"true":"false");
+  $("admOff").setAttribute("aria-pressed",admin?"false":"true");
+  try{localStorage.setItem("mqadmin",admin?"1":"0");}catch(e){}
+}
+$("admOn").addEventListener("click",()=>{admin=true;applyAdmin();toast(T().admToast,3400);});
+$("admOff").addEventListener("click",()=>{admin=false;applyAdmin();});
+document.querySelectorAll("#brushes button[data-b]").forEach(b=>{
+  if(b.dataset.b===brush)b.setAttribute("aria-pressed","true");
+  b.addEventListener("click",()=>{brush=b.dataset.b;
+    document.querySelectorAll("#brushes button[data-b]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));});
+});
+function setTile(x,y,ch){
+  const w=CW();
+  if(x<=0||y<=0||x>=w.W-1||y>=w.H-1)return;
+  if(w.grid[y][x]==="N")return;
+  if(PORTALS[world]&&PORTALS[world][w.rows[y][x]])return; /* never paint over stairs/exits */
+  const prev=w.rows[y][x];
+  w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);
+  w.grid[y][x]=ch;
+  try{const ed=JSON.parse(localStorage.getItem("mqedits")||"[]");ed.push({m:world,x,y,ch,prev});
+    localStorage.setItem("mqedits",JSON.stringify(ed.slice(-400)));}catch(e){}
+}
+$("undoBtn").addEventListener("click",()=>{
+  let ed=[];try{ed=JSON.parse(localStorage.getItem("mqedits")||"[]");}catch(e){}
+  if(!ed.length){toast(T().undoEmpty,1500);return;}
+  const e2=ed.pop(),w=WORLDS[e2.m||"hq"];
+  const back=(e2.prev!==undefined&&e2.prev!==null)?e2.prev:w.rows0[e2.y][e2.x];
+  w.rows[e2.y]=w.rows[e2.y].slice(0,e2.x)+back+w.rows[e2.y].slice(e2.x+1);
+  if(w.grid[e2.y][e2.x]!=="N")w.grid[e2.y][e2.x]=back;
+  try{localStorage.setItem("mqedits",JSON.stringify(ed));}catch(e){}
+  toast(T().undoToast,1200);
+});
+function paintAt(clientX,clientY){
+  const r=cv.getBoundingClientRect();
+  let dw=r.width,dh=r.height,ox=0,oy=0;const ar=VW/VH;
+  if(dw/dh>ar){const w2=dh*ar;ox=(dw-w2)/2;dw=w2;}else{const h2=dw/ar;oy=(dh-h2)/2;dh=h2;}
+  const gx=Math.floor(((clientX-r.left-ox)/dw*VW+camXg)/TS);
+  const gy=Math.floor(((clientY-r.top-oy)/dh*VH+camYg)/TS);
+  if(gx===px&&gy===py)return;
+  setTile(gx,gy,brush);
+}
+/* swipe-to-move: touch anywhere on the game, drag = walk (floating direction), release = stop.
+   In admin mode a TAP (no drag) paints; a drag still moves — best of both. */
+let swActive=null,swSX=0,swSY=0,swMoved=false;
+cv.addEventListener("pointerdown",e=>{
+  if($("world").hidden)return;
+  swActive=e.pointerId;swSX=e.clientX;swSY=e.clientY;swMoved=false;
+  try{cv.setPointerCapture(e.pointerId);}catch(err){}
+  e.preventDefault();
+});
+cv.addEventListener("pointermove",e=>{
+  if(e.pointerId!==swActive)return;
+  const dx=e.clientX-swSX,dy=e.clientY-swSY;
+  if(Math.hypot(dx,dy)>10)swMoved=true;
+  if(ctl==="swipe"){
+    if(Math.hypot(dx,dy)<14){held=null;return;}
+    held=Math.abs(dx)>Math.abs(dy)?(dx>0?"right":"left"):(dy>0?"down":"up");
+  }
+});
+function swEnd(e){
+  if(e.pointerId!==swActive)return;
+  if(admin&&!swMoved)paintAt(e.clientX,e.clientY);
+  if(ctl==="swipe")held=null;
+  swActive=null;
+}
+cv.addEventListener("pointerup",swEnd);cv.addEventListener("pointercancel",swEnd);
+try{(JSON.parse(localStorage.getItem("mqedits")||"[]")).forEach(e2=>{
+  const w=WORLDS[e2&&(e2.m||"hq")];if(!w)return;
+  if(e2&&w.grid[e2.y]&&w.grid[e2.y][e2.x]!=="N"&&!(e2.x<=0||e2.y<=0||e2.x>=w.W-1||e2.y>=w.H-1)){
+    w.rows[e2.y]=w.rows[e2.y].slice(0,e2.x)+e2.ch+w.rows[e2.y].slice(e2.x+1);w.grid[e2.y][e2.x]=e2.ch;}});}catch(e){}
+/* city growth application: stages follow completed La Obra quests (12, 13) */
+function applyObra(){const s=(done.has(12)?1:0)+(done.has(13)?1:0);
+  const w=WORLDS.st;
+  for(let k=1;k<=s;k++)OBRA[k].forEach(([y,x,ch])=>{
+    if(w.grid[y][x]!=="N"&&w.rows[y][x]!=="L"){w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);w.grid[y][x]=ch;}});
+  if(s>=2){
+    /* the finished building is solid; its inside becomes the Studio (lo). Lupe moves streetside next to Güero. */
+    const lu=w.npcs.find(n=>n.key==="e");
+    if(lu&&!(lu.x===7&&lu.y===7)){
+      if(w.grid[lu.y]&&w.grid[lu.y][lu.x]==="N"){w.grid[lu.y][lu.x]="B";
+        w.rows[lu.y]=w.rows[lu.y].slice(0,lu.x)+"B"+w.rows[lu.y].slice(lu.x+1);}
+      lu.x=7;lu.y=7;w.grid[7][7]="N";
+    }
+    for(let y=6;y<=8;y++)for(let x=15;x<=28;x++){
+      if(w.grid[y][x]!=="N"){w.rows[y]=w.rows[y].slice(0,x)+"B"+w.rows[y].slice(x+1);w.grid[y][x]="B";}}
+  }
+}
+/* ---------- boot ---------- */
+const SV=loadSave();
+if(SV&&SV.n){$("continueBtn").hidden=false;
+  $("continueBtn").textContent=T().contBtn(SV.n,SV.xp,SV.d.length);
+  $("continueBtn").addEventListener("click",()=>{
+    heroName=SV.n;cls=SV.c||"";look=SV.lk||look;xp=SV.xp||0;hearts=SV.he??3;done=new Set(SV.d||[]);
+    treats=SV.tr||0;fredQ=SV.fq||0;
+    world=WORLDS[SV.w]?SV.w:"hq";
+    applyObra();
+    px=fx=SV.px??10;py=fy=SV.py??11;
+    if(px>=CW().W||py>=CW().H||isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
+    if(done.size>=AQ().length){finish();$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;hud();}
+    else if(hearts<=0){clearSave();$("continueBtn").hidden=true;toast(T().contDead,2500);}
+    else enterWorld(false);
+  });
+}
+applyAdmin();applyLang();applyCtl();
+requestAnimationFrame(ts=>{last=ts;loop(ts);});
+sizeCanvas();
+</script>
+
+</body>
+</html>
