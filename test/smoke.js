@@ -182,6 +182,48 @@ const CANDIDATES = [
   if (!care.ics.includes('Canelita')) fails.push('pet name not in ics');
   await page.click('#exClose');
 
+  // ---- 4b. security: hostile pass payloads come out sanitized; peers render safely ----
+  const sec = await page.evaluate(() => {
+    const out = {};
+    out.qrLoaded = typeof qrcode !== 'undefined'; // CSP must not block qr.js (incl. file://)
+    const evil = { v: 1, l: 'xx', s: {
+      n: '<img src=x onerror=alert(1)>WayTooLongName', xp: '999999999', he: 99,
+      d: { a: 1 }, px: -5, py: 1e9, lk: { shirt: 'javascript:alert(1)', style: 'x'.repeat(400) },
+      qa: { __proto__: 9, constructor: 9, 5: 'zzz', '-1': 30 }, wr: { bandana: 'url(x)' },
+    }};
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(evil)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    history.replaceState(null, '', '#save=' + b64);
+    const p = readPass();
+    history.replaceState(null, '', location.pathname);
+    out.pass = p && {
+      nLen: p.s.n.length, nHasTag: p.s.n.includes('<'), xp: p.s.xp, he: p.s.he,
+      dIsArray: Array.isArray(p.s.d), px: p.s.px, py: p.s.py,
+      shirt: p.s.lk.shirt, styleLen: p.s.lk.style.length, lang: p.l,
+      qaKeys: Object.keys(p.s.qa).sort().join(','), bandana: p.s.wr.bandana,
+      protoClean: !Object.prototype.hasOwnProperty.call({}, 'polluted') && ({}).x === undefined,
+    };
+    // peers: hostile name renders via canvas only, no throw
+    PEERS = [{ id: 'p1', name: '<script>x</script>OverlongPeerName', w: world, x: px + 1, y: py, dir: 'down' }];
+    try { draw(); out.peerDrawOk = true; } catch (e) { out.peerDrawOk = 'THREW ' + e.message; }
+    PEERS = [];
+    return out;
+  });
+  if (!sec.qrLoaded) fails.push('qr.js blocked (CSP?)');
+  if (!sec.pass) fails.push('sanitized hostile pass was rejected entirely (should be coerced)');
+  else {
+    if (sec.pass.nLen > 14 || sec.pass.nHasTag === undefined) fails.push('hostile name not clamped: ' + sec.pass.nLen);
+    if (sec.pass.xp !== 999) fails.push('xp not clamped: ' + sec.pass.xp);
+    if (sec.pass.he !== 3) fails.push('hearts not clamped: ' + sec.pass.he);
+    if (!sec.pass.dIsArray) fails.push('d not coerced to array');
+    if (sec.pass.px !== 0 || sec.pass.py !== 63) fails.push('coords not clamped: ' + sec.pass.px + ',' + sec.pass.py);
+    if (sec.pass.shirt !== '#8B5CF6') fails.push('bad color not rejected: ' + sec.pass.shirt);
+    if (sec.pass.styleLen > 12) fails.push('style not clamped');
+    if (sec.pass.lang !== 'en') fails.push('bad lang not defaulted: ' + sec.pass.lang);
+    if (sec.pass.qaKeys !== '-1,5') fails.push('qa keys not filtered: ' + sec.pass.qaKeys);
+    if (sec.pass.bandana !== null) fails.push('bad wear color not rejected');
+  }
+  if (sec.peerDrawOk !== true) fails.push('peer draw failed: ' + sec.peerDrawOk);
+
   // ---- 5. Trolley Pass: pass URL round-trips a save; boarding restores it ----
   await page.evaluate(() => { heroName = 'Traveler'; xp = 42; save(); });
   const passUrl = await page.evaluate(() => passURL());

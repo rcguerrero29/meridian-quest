@@ -97,6 +97,14 @@ the product/template today. Full pivot recipe (PartyKit / Durable Objects,
 presence-first) in `IDEAS.md` §4. Rule: no other code may touch a network;
 `NET.enabled` stays false for single-player games.
 
+Hardening that ships with it (all covered by the smoke test): the **`PEERS`
+draw pass** (co-presence hook — peers render like NPCs, names as canvas text
+only, never DOM); **`sanitizeSave()`** guarding every trust boundary (Trolley
+Pass links, corrupted localStorage, future NET payloads — numbers clamp, colors
+must be hex, hostile keys drop); and a **CSP meta** (scripts self-only,
+`connect-src 'self'` — a future server origin gets added there deliberately).
+The split must keep PEERS, sanitizeSave, and the CSP in `engine/` territory.
+
 ## Roadmap
 
 1. ~~CI~~ — **shipped** (`.github/workflows/ci.yml`).

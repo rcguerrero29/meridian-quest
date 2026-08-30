@@ -90,6 +90,21 @@ engine may talk to a network. The engine/content split must keep `NET` in `engin
 **Scope guard:** single-player games stay pure cartridge-model (no server, no
 telemetry). `NET.enabled` stays false unless a specific game turns it on.
 
+**Security rules for the pivot (enforced/prepared 2026-08-30):**
+- Every payload crossing a trust boundary goes through `sanitizeSave()` (numbers
+  clamp, strings trim, colors must be hex, non-numeric keys drop). NET payloads
+  MUST use it or an equivalent typed coercion — never trust the wire.
+- Peer data is hostile by default: names length-clamped, rendered ONLY as canvas
+  text (the `PEERS` draw pass — never innerHTML/DOM); looks pass color validation.
+- The page ships a CSP meta (scripts self-only, `connect-src 'self'`) — a NET
+  server's origin must be explicitly added to `connect-src`, which doubles as the
+  checklist reminder that networking was consciously enabled.
+- Server side (when it exists): wss only, unguessable room ids (128-bit), validate
+  message schema and size, rate-limit per connection, hold no PII (names are
+  player-typed display strings, nothing else), and the server is authoritative
+  about nothing in v1 — presence is display-only, so a hostile client can at
+  worst draw itself somewhere silly.
+
 > Current roadmap and shipping process live in `HANDOFF.md`.
 
 ---
