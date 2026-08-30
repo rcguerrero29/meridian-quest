@@ -5,7 +5,9 @@ This is the pick-up-where-we-left-off doc for future sessions. Companion docs:
 `APPROACH.md` (why this is a repo; the gifted-games thesis — historical record, numbers
 are as of the port), `IDEAS.md` (feature designs not yet built), and `PLAYTEST.md`
 (the guided "Week One tour" for testing — the `/playtest` skill walks the owner
-through it and maps reports to code).
+through it and maps reports to code). Session-to-session: `CITY.md` is the city
+ledger behind the `/don-guero` planning skill (Opus 5), and `NEXT-SESSION.md` is
+the live queue — read it first, rewrite it before signing off.
 
 ## What the game is right now
 
