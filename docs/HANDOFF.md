@@ -163,6 +163,23 @@ The split must keep PEERS, sanitizeSave, and the CSP in `engine/` territory.
    already shipped earlier the same day.
 6. **More wardrobe / Week Two** — extra items are data (`WEAR` + a draw snippet);
    the epilogues already tease "Week Two" content.
+7. ~~Music~~ — **shipped** (2026-08-30): procedural WebAudio (`MUSIC` in the engine) —
+   generative pentatonic melody + pad + bass, voiced/tempoed per theme, zero assets,
+   zero licensing, works offline. Starts on first gesture (autoplay rules), sleeps
+   when hidden. 🎵 volume slider + mute in Settings, persisted (`mqvol`/`mqmus`).
+   No AI-music connector existed in the registry (checked 2026-08-30); if the owner
+   later wants authored tracks, Suno-class tools need a licensing review first —
+   procedural stays the $0-forever default.
+8. ~~Chill townsfolk + character creator + name eggs~~ — **shipped** (2026-08-30):
+   chat-only characters from the content pack (`CHILL`) and owner-created ones via
+   admin 🧍 brush (tap tile → name them; tap again to remove; 12 max, stored
+   per-device in `mqnpcs`, sanitized like every trust boundary). `EGGS` maps
+   lowercase name triggers → original homage reaction lines (EN/ES); `dog:true`
+   eggs (e.g. **Sonny**) join as a lemon beagle critter instead. Egg checks run on
+   created characters, the hero's name, and the care-pack pet name. All lines are
+   original allusions — never franchise quotes.
+9. **AI-as-NPC** — future seam only, per owner ("not yet"): design notes in
+   `IDEAS.md`; nothing may touch a network until it rides the NET rules.
 
 ## Known quirks (accepted, not bugs)
 

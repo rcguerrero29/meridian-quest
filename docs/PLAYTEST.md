@@ -72,6 +72,22 @@ the epilogue teases Week Two. *(engine: endings)*
 and never overwrites without asking. Export → 🐾 gives Frederick's care pack (.ics
 works in your calendar). *(engine: Trolley Pass, exports)*
 
+**12 · Turn up the radio.** ⚙️ Settings → 🎵 Music (starts after your first tap —
+phones require a gesture).
+*See/hear:* a soft generative tune that matches the theme — lo-fi office on Meridian,
+little bells on Fairy, marimba on Forest, warm dusk on Sunset. The slider changes
+volume live; 🔇 mutes; both stick across sessions; sound pauses when the app is in
+the background. *(engine: MUSIC — procedural WebAudio, no files)*
+
+**13 · Move somebody in.** ⚙️ Settings → Admin mode On → tap the 🧍 Character brush →
+tap an empty tile → type a name.
+*See:* a townsperson with a random look moves in and chats when talked to (they hold
+no quests — they just vibe). Tap them again with 🧍 to move them out. Up to 12, saved
+on this device. Now the magic: name one **Harry Potter** — the barrio reacts. Name
+one **Sonny** — a lemon beagle trots in instead, and petting him has opinions. Try
+naming your hero or Frederick's care-pack pet something legendary too.
+*(engine: chill townsfolk + EGGS; content: npcs.js)*
+
 ---
 
 ## Known quirks (not bugs)

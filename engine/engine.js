@@ -18,6 +18,34 @@ Object.keys(WORLD_DEFS).forEach(id=>{
 });
 const CW=()=>WORLDS[world];
 const isSolid=(x,y)=>{const w=CW();return x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N";};
+/* ---------- chill townsfolk ----------
+   Chat-only characters with no quests — they just vibe. The content pack ships some
+   (CHILL) and the owner can create more in admin mode (➕ brush, stored per device).
+   Name one after somebody legendary and the barrio reacts: EGGS maps lowercase name
+   triggers to reaction lines (and dog:true eggs join as a critter instead). */
+const CHILLN={},CHILLEGG={};let chillSeq=0;
+const EGGSAFE=typeof EGGS!=="undefined"?EGGS:{};
+function eggFor(name){const n=String(name||"").toLowerCase();let hit=null;
+  Object.entries(EGGSAFE).forEach(([k,e])=>{if(!hit&&e.triggers.some(t2=>n.includes(t2)))hit=k;});
+  return hit;}
+function addChill(c){ /* {name:{en,es},world,x,y,look} → chat NPC; returns key or null */
+  const w=WORLDS[c.world];if(!w)return null;
+  const x=c.x|0,y=c.y|0;
+  if(x<0||y<0||x>=w.W||y>=w.H)return null; /* edge tiles are fine — worlds like ex have no wall border */
+  if(SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")return null;
+  const key="~c"+(chillSeq++);
+  CHILLN[key]={en:c.name.en,es:c.name.es};
+  NPCLOOK[key]=c.look;
+  const eg=eggFor(c.name.en);if(eg&&!EGGSAFE[eg].dog)CHILLEGG[key]=eg;
+  w.npcs.push({key,x,y,npc:key,q:[],chat:1});
+  w.grid[y][x]="N";
+  return key;}
+(typeof CHILL!=="undefined"?CHILL:[]).forEach(c=>addChill(c));
+const chillLines=k=>{
+  if(CHILLEGG[k])return EGGSAFE[CHILLEGG[k]].lines[lang];
+  if(String(k).startsWith("~c"))
+    return T().chill.concat(typeof CHATTER!=="undefined"?CHATTER[lang]||[]:[]);
+  return null;};
 /* boot-time world integrity check — malformed maps and bad portals get caught HERE, never in play */
 (function validateWorlds(){
   Object.entries(WORLD_DEFS).forEach(([id,rows])=>{
@@ -86,7 +114,7 @@ const NET={enabled:false,boot(){},sync(state){}};
 let PEERS=[];
 const T=()=>UI[lang];
 const AQ=()=>lang==="es"?QES:QEN;
-const npcName=k=>NPCN[lang][k];
+const npcName=k=>CHILLN[k]?CHILLN[k][lang]:NPCN[lang][k];
 const lvlIdx=()=>{let i=0;LEVELS.forEach((t2,j)=>{if(xp>=t2)i=j;});return i;};
 const lvlName=()=>T().levels[lvlIdx()];
 function hud(){const hs="❤".repeat(Math.max(0,hearts))+"♡".repeat(3-Math.max(0,hearts));
@@ -286,6 +314,7 @@ function draw(){
     if(cr.kind==="butterfly")drawButterfly(ctx,cr,sx,sy);
     else if(cr.kind==="colibri")drawColibri(ctx,cr,sx,sy);
     else if(cr.kind==="gato")drawGato(ctx,cr,sx,sy);
+    else if(cr.kind==="beagle")drawBeagle(ctx,cr,sx,sy);
   });
   drawPerson(ctx,fx*TS-camX,fy*TS-camY,look,{dir,bob:moving?Math.sin(bob)*2:0,moving});
   drawAmbient(w,camX,camY);
@@ -515,6 +544,24 @@ function drawColibri(g,cr,sx,sy){
   g.fillRect(cx+3.2,cy-2.1,0.8,0.8);
   g.restore();
 }
+function drawBeagle(g,cr,sx,sy){ /* a lemon beagle: white coat, lemon saddle, floppy ears, working tail */
+  const cx=sx+16,wag=Math.sin(Date.now()/130)*2.4,lemon="#E8C46A",white="#F6F2E8";
+  g.save();g.translate(cx,0);g.scale(cr.face,1);g.translate(-cx,0);
+  g.fillStyle="rgba(0,0,0,.15)";g.beginPath();g.ellipse(cx,sy+27,7,2.8,0,0,7);g.fill();
+  g.strokeStyle=white;g.lineWidth=2.4;g.lineCap="round"; /* tail, always going */
+  g.beginPath();g.moveTo(cx-7,sy+19.5);g.quadraticCurveTo(cx-11,sy+15+wag*0.5,cx-10+wag,sy+11);g.stroke();
+  g.fillStyle=white;g.beginPath();g.roundRect(cx-7.5,sy+17,14,8,4);g.fill();
+  g.fillStyle=lemon;g.beginPath();g.roundRect(cx-5,sy+16.5,8,4.5,3);g.fill(); /* saddle */
+  g.fillStyle=white;
+  if(!cr.sit){g.fillRect(cx-6,sy+24.5,2.2,3.2);g.fillRect(cx+3,sy+24.5,2.2,3.2);}
+  g.beginPath();g.arc(cx+6.5,sy+16,4.6,0,7);g.fill(); /* head */
+  g.fillStyle=lemon; /* floppy ear */
+  g.beginPath();g.roundRect(cx+2.2,sy+13.2,3.4,7.5,2);g.fill();
+  g.fillStyle="#26202B";
+  g.fillRect(cx+6.8,sy+14.6,1.2,1.2); /* eye */
+  g.beginPath();g.arc(cx+10.6,sy+17.2,1.3,0,7);g.fill(); /* nose */
+  g.restore();
+}
 function drawGato(g,cr,sx,sy){ /* the street cat: Canela's silhouette, alley palette, no collar — yet */
   const cx=sx+16,sw=Math.sin(Date.now()/300+7);
   g.save();g.translate(cx,0);g.scale(cr.face,1);g.translate(-cx,0);
@@ -696,10 +743,10 @@ $("talk").addEventListener("click",()=>{
   const tb=$("talk");
   if(tb.dataset.chatn){
     if(tb.dataset.chatn==="xochi"){openWardrobe();return;} /* post-quest, Xochi runs the fitting room */
-    const L=(T().chat||{})[tb.dataset.chatn]||[];
+    const L=chillLines(tb.dataset.chatn)||(T().chat||{})[tb.dataset.chatn]||[];
     if(L.length)toast("💬 "+L[Math.floor(Math.random()*L.length)],2800);return;}
   questStart(+tb.dataset.qi);});
-let petTarget=null;
+let petTarget=null,petCrit=null;
 function fredCheck(){ /* now the generic animal-interaction check: every creature is reachable and greetable */
   let tgt=null,label="";
   if(!$("world").hidden&&!moving){
@@ -707,8 +754,8 @@ function fredCheck(){ /* now the generic animal-interaction check: every creatur
     else if(world==="lc"&&!CAT.moving&&Math.abs(CAT.x-px)+Math.abs(CAT.y-py)===1){tgt="cat";label=T().petCat;}
     else if(world==="st"&&!PIG.moving&&Math.abs(PIG.x-px)+Math.abs(PIG.y-py)===1){tgt="pig";label=T().petPig;}
     else if(world==="st"&&Math.abs(LORO.x-px)+Math.abs(LORO.y-py)<=2){tgt="loro";label=T().petLoro;}
-    else{const g2=CRIT.find(cr=>cr.world===world&&cr.kind==="gato"&&!cr.moving&&Math.abs(cr.x-px)+Math.abs(cr.y-py)===1);
-      if(g2){tgt="gato";label=T().petGato;}}
+    else{const g2=CRIT.find(cr=>cr.world===world&&(cr.kind==="gato"||cr.kind==="beagle")&&!cr.moving&&Math.abs(cr.x-px)+Math.abs(cr.y-py)===1);
+      if(g2){tgt=g2.kind;petCrit=g2;label=g2.kind==="beagle"?"🐾 "+(g2.name||"🐶"):T().petGato;}}
   }
   petTarget=tgt;$("treat").hidden=!tgt;
   if(tgt)$("treat").textContent=label;
@@ -728,10 +775,11 @@ $("treat").addEventListener("click",()=>{
     const L=T().pigeon;toast("❤ "+L[Math.floor(Math.random()*L.length)],2000);}
   else if(petTarget==="loro"){
     const L=T().loro;toast("🦜 "+L[Math.floor(Math.random()*L.length)],2200);}
-  else if(petTarget==="gato"){
-    const g2=CRIT.find(cr=>cr.world===world&&cr.kind==="gato");
+  else if(petTarget==="gato"||petTarget==="beagle"){
+    const g2=petCrit;
     if(g2){g2.sit=true;g2.next=performance.now()+3200;}
-    const L=T().gato;toast("❤ "+L[Math.floor(Math.random()*L.length)],2000);}
+    const L=(g2&&g2.egg&&EGGSAFE[g2.egg])?EGGSAFE[g2.egg].lines[lang]:T().gato;
+    toast("❤ "+L[Math.floor(Math.random()*L.length)],2200);}
 });
 /* ---------- quest overlay ---------- */
 let wasFs=false;
@@ -833,6 +881,8 @@ $("begin").addEventListener("click",()=>{
   heroName=($("heroname").value.trim()||"Rookie").slice(0,14);
   xp=0;hearts=3;done=new Set();qa={};world="hq";px=fx=10;py=fy=11;dir="down";
   save();enterWorld(true);
+  const eg=eggFor(heroName); /* a legendary name gets a nod once the tutorial clears */
+  if(eg)setTimeout(()=>toast(EGGSAFE[eg].lines[lang][0],3600),7400);
 });
 /* ---------- start/end ---------- */
 function gameover(){
@@ -953,6 +1003,7 @@ function applyTheme(){
     .forEach(b=>b.setAttribute("aria-pressed",b.dataset.th===themeName?"true":"false"));
   $("thCustom").hidden=!customTheme;
   setCanvasTint();
+  if(MUSIC.timer)musRetime(); /* tempo follows the theme */
   try{localStorage.setItem("mqtheme",themeName);}catch(e){}
 }
 try{darkMq.addEventListener("change",applyTheme);}catch(e){}
@@ -1019,6 +1070,84 @@ $("teLight").addEventListener("click",()=>{teMode="light";teRender();});
 $("teDark").addEventListener("click",()=>{teMode="dark";teRender();});
 $("teFix").addEventListener("click",autoFixTheme);
 $("teClose").addEventListener("click",()=>{$("themeEd").hidden=true;});
+/* ---------- music: procedural WebAudio — generative, theme-aware, $0, offline.
+   No assets, no network, nothing to license: a sparse pentatonic melody wanders over
+   a soft pad and bass, voiced per theme. Starts on the first user gesture (autoplay
+   rules), sleeps when the tab hides, and lives behind 🎵 volume/mute in Settings. */
+const MUSIC={ctx:null,master:null,timer:null,step:0,mel:2};
+let musOn=true,musVol=0.6;
+try{musOn=localStorage.getItem("mqmus")!=="0";}catch(e){}
+try{const v=parseFloat(localStorage.getItem("mqvol"));if(!isNaN(v))musVol=Math.min(1,Math.max(0,v));}catch(e){}
+const MUSDEF={
+ meridian:{bpm:76,root:57,scale:[0,3,5,7,10],lead:"triangle",pad:"sine",bright:900},  /* A min pent — lo-fi office */
+ forest:{bpm:84,root:64,scale:[0,2,4,7,9],lead:"triangle",pad:"triangle",bright:1500},/* E maj pent — marimba woods */
+ fairy:{bpm:64,root:73,scale:[0,2,4,7,9],lead:"sine",pad:"sine",bright:2800},         /* C#5 maj pent — little bells */
+ sunset:{bpm:58,root:55,scale:[0,2,4,7,9],lead:"sine",pad:"sine",bright:800}};        /* G maj pent — warm dusk */
+const musDef=()=>MUSDEF[themeName]||MUSDEF.meridian;
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+function musVoice(m,t0,dur,type,peak,bright){
+  const c=MUSIC.ctx,o=c.createOscillator(),f=c.createBiquadFilter(),g=c.createGain();
+  o.type=type;o.frequency.value=mtof(m);
+  f.type="lowpass";f.frequency.value=bright;
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(peak,t0+Math.min(0.05,dur*0.2));
+  g.gain.exponentialRampToValueAtTime(0.0008,t0+dur);
+  o.connect(f);f.connect(g);g.connect(MUSIC.master);
+  o.start(t0);o.stop(t0+dur+0.05);
+}
+function musTick(){
+  const c=MUSIC.ctx,d=musDef(),t0=c.currentTime+0.08,st=MUSIC.step++;
+  if(Math.random()<0.42){ /* melody: sparse random walk on the pentatonic */
+    MUSIC.mel+=[1,-1,2,-2,1,-1,0][Math.floor(Math.random()*7)];
+    MUSIC.mel=Math.max(-3,Math.min(9,MUSIC.mel));
+    const deg=((MUSIC.mel%5)+5)%5,oct=Math.floor(MUSIC.mel/5);
+    musVoice(d.root+12+oct*12+d.scale[deg],t0,0.55,d.lead,0.16,d.bright);
+  }
+  if(st%8===0)musVoice(d.root-12,t0,1.8,"sine",0.12,500);      /* bass root */
+  if(st%16===4)musVoice(d.root-5,t0,1.6,"sine",0.08,500);      /* bass fifth */
+  if(st%16===0)[0,7].forEach(iv=>musVoice(d.root+iv,t0,3.4,d.pad,0.05,d.bright*0.8)); /* pad swell */
+}
+function musRetime(){if(MUSIC.timer){clearInterval(MUSIC.timer);MUSIC.timer=null;}
+  if(musOn&&MUSIC.ctx)MUSIC.timer=setInterval(()=>{
+    if(!document.hidden&&MUSIC.ctx.state==="running")musTick();},30000/musDef().bpm);}
+function musStart(){
+  if(!musOn)return;
+  if(!MUSIC.ctx){
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    try{MUSIC.ctx=new AC();}catch(e){return;}
+    MUSIC.master=MUSIC.ctx.createGain();
+    MUSIC.master.gain.value=0.55*musVol*musVol;
+    MUSIC.master.connect(MUSIC.ctx.destination);
+    /* iOS can suspend us behind our back (calls, Siri, control center) — heal it */
+    MUSIC.ctx.onstatechange=()=>{
+      if(musOn&&!document.hidden&&MUSIC.ctx.state==="suspended")MUSIC.ctx.resume().catch(()=>{});};
+  }
+  if(MUSIC.ctx.state==="suspended")MUSIC.ctx.resume().catch(()=>{});
+  if(!MUSIC.timer)musRetime();
+}
+function musStop(){if(MUSIC.timer){clearInterval(MUSIC.timer);MUSIC.timer=null;}
+  if(MUSIC.ctx&&MUSIC.ctx.state==="running")MUSIC.ctx.suspend().catch(()=>{});}
+function musApply(){
+  /* squared taper: linear sliders feel top-heavy for loudness */
+  if(MUSIC.master)MUSIC.master.gain.value=musOn?0.55*musVol*musVol:0;
+  $("musMute").textContent=musOn?T().musOn:T().musOff;
+  $("musMute").setAttribute("aria-pressed",musOn?"true":"false");
+  $("musVol").value=Math.round(musVol*100);
+  try{localStorage.setItem("mqmus",musOn?"1":"0");localStorage.setItem("mqvol",String(musVol));}catch(e){}
+  if(musOn)musStart();else musStop();
+}
+$("musMute").addEventListener("click",()=>{musOn=!musOn;musApply();});
+$("musVol").addEventListener("input",()=>{musVol=$("musVol").value/100;if(!musOn)musOn=true;musApply();});
+/* persistent, not once: the same cheap poke does the first-gesture unlock AND recovers
+   from iOS interruption-suspends later; musStart early-returns when already running */
+const musPoke=()=>{if(musOn)musStart();};
+window.addEventListener("pointerdown",musPoke,{passive:true});
+window.addEventListener("touchend",musPoke,{passive:true});
+window.addEventListener("keydown",musPoke);
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="hidden")musStop();
+  else if(musOn&&MUSIC.ctx)musStart();
+});
 /* ---------- language ---------- */
 function applyLang(){
   const t=T();
@@ -1037,6 +1166,9 @@ function applyLang(){
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
   $("lbTheme").textContent=t.lbTheme;
+  $("lbMusic").textContent=t.lbMusic;
+  $("musMute").textContent=musOn?t.musOn:t.musOff;
+  $("musVol").value=Math.round(musVol*100);
   document.querySelectorAll("#themeRow button,#thCustom").forEach(b=>b.textContent=t.themes[b.dataset.th]);
   $("teOpen").textContent=t.teOpen;$("teTitle").textContent=t.teTitle;$("teFrom").textContent=t.teFrom;
   $("teModeLb").textContent=t.teModeLb;$("teFix").textContent=t.teFix;$("teClose").textContent=t.tlClose;
@@ -1107,10 +1239,13 @@ let exMode="json";
 let petCfg={n:"Frederick",am:"07:30",pm:"18:00"};
 try{const p=JSON.parse(localStorage.getItem("mqpet")||"null");if(p&&p.n)petCfg=p;}catch(e){}
 function petSave(){try{localStorage.setItem("mqpet",JSON.stringify(petCfg));}catch(e){}}
+let petEggSeen=null;
 ["petName","petAm","petPm"].forEach((id,i)=>$(id).addEventListener("input",()=>{
   const v=$(id).value.trim();
   if(i===0)petCfg.n=v||"Frederick";else if(i===1)petCfg.am=v||"07:30";else petCfg.pm=v||"18:00";
   petSave();$("exArea").value=T().carePack(heroName,treats,petCfg);
+  if(i===0){const eg=eggFor(petCfg.n); /* name the pet Sonny and the barrio knows */
+    if(eg&&eg!==petEggSeen){petEggSeen=eg;toast(EGGSAFE[eg].lines[lang][0],3200);}}
 }));
 function icsData(){
   const now=new Date(),p2=n2=>String(n2).padStart(2,"0");
@@ -1353,6 +1488,7 @@ function paintAt(clientX,clientY){
   const gx=Math.floor(((clientX-r.left-ox)/dw*VW+camXg)/TS);
   const gy=Math.floor(((clientY-r.top-oy)/dh*VH+camYg)/TS);
   if(gx===px&&gy===py)return;
+  if(brush==="npc"){npcAt(gx,gy);return;}
   setTile(gx,gy,brush);
 }
 /* swipe-to-move: touch anywhere on the game, drag = walk (floating direction), release = stop.
@@ -1384,6 +1520,67 @@ try{(JSON.parse(localStorage.getItem("mqedits")||"[]")).forEach(e2=>{
   const w=WORLDS[e2&&(e2.m||"hq")];if(!w)return;
   if(e2&&w.grid[e2.y]&&w.grid[e2.y][e2.x]!=="N"&&!(e2.x<=0||e2.y<=0||e2.x>=w.W-1||e2.y>=w.H-1)){
     w.rows[e2.y]=w.rows[e2.y].slice(0,e2.x)+e2.ch+w.rows[e2.y].slice(e2.x+1);w.grid[e2.y][e2.x]=e2.ch;}});}catch(e){}
+/* ---------- owner-created characters (admin ➕ brush) — per-device, like map edits.
+   Records: {n:name, w:world, x, y, lk:{shirt,skin,hair,style}}. Names are data:
+   length-clamped, rendered only via textContent/canvas. A name matching a dog egg
+   (e.g. Sonny) joins as a beagle critter instead of a person. */
+const NPCSTYLES=["cap","long","curly","spiky","pony","afro","buzz","braids","buns","broccoli","fade","mullet"];
+const sanName=s2=>String(s2||"").replace(/[\u0000-\u001f<>]/g,"").trim().slice(0,24);
+const hexOK=v=>typeof v==="string"&&/^#[0-9A-Fa-f]{6}$/.test(v);
+function randLook(){const pick=a=>a[Math.floor(Math.random()*a.length)];
+  return {shirt:pick(SWATCH.shirt),skin:pick(SWATCH.skin),hair:pick(SWATCH.hair),style:pick(NPCSTYLES)};}
+let myNpcs=[];
+try{myNpcs=(JSON.parse(localStorage.getItem("mqnpcs")||"[]")||[]).slice(0,12);}catch(e){}
+function npcPersist(){try{localStorage.setItem("mqnpcs",JSON.stringify(myNpcs.slice(0,12)));}catch(e){}}
+function spawnCustom(rec){
+  const name=sanName(rec.n);if(!name)return false;
+  const w=WORLDS[rec.w];if(!w)return false;
+  const x=rec.x|0,y=rec.y|0;
+  const eg=eggFor(name);
+  if(eg&&EGGSAFE[eg].dog){ /* a legendary dog joins the critter pass */
+    if(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")return false;
+    CRIT.push({kind:"beagle",world:rec.w,x,y,fx:x,fy:y,c:"#E8C46A",name,egg:eg,
+      moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false,home:[x,y]});
+    return true;}
+  const lk=rec.lk||{};
+  const look=hexOK(lk.shirt)&&hexOK(lk.skin)&&hexOK(lk.hair)
+    ?{shirt:lk.shirt,skin:lk.skin,hair:lk.hair,style:NPCSTYLES.includes(lk.style)?lk.style:"cap"}
+    :randLook();
+  return !!addChill({name:{en:name,es:name},world:rec.w,x,y,look});}
+myNpcs=myNpcs.filter(r=>{try{return spawnCustom(r);}catch(e){return false;}});
+npcPersist();
+let nmPending=null;
+function npcAt(gx,gy){
+  const w=CW();
+  if(gx<0||gy<0||gx>=w.W||gy>=w.H)return;
+  /* tap an existing creation to remove it */
+  const i=w.npcs.findIndex(n=>n.x===gx&&n.y===gy&&String(n.key).startsWith("~c"));
+  if(i>=0){w.grid[gy][gx]=w.rows[gy][gx];w.npcs.splice(i,1);
+    myNpcs=myNpcs.filter(r=>!(r.w===world&&(r.x|0)===gx&&(r.y|0)===gy));npcPersist();
+    toast(T().npcGone,1800);return;}
+  const ci=CRIT.findIndex(cr=>cr.kind==="beagle"&&cr.world===world&&cr.home[0]===gx&&cr.home[1]===gy);
+  if(ci>=0){CRIT.splice(ci,1);
+    myNpcs=myNpcs.filter(r=>!(r.w===world&&(r.x|0)===gx&&(r.y|0)===gy));npcPersist();
+    toast(T().npcGone,1800);return;}
+  if(SOLID.has(w.grid[gy][gx])||w.grid[gy][gx]==="N")return;
+  if(myNpcs.length>=12){toast(T().npcFull,2400);return;}
+  nmPending={w:world,x:gx,y:gy};
+  $("nmTitle").textContent=T().nmTitle;$("nmLb").textContent=T().nmLb;
+  $("nmOk").textContent=T().nmOk;$("nmCancel").textContent=T().nmCancel;
+  $("nmName").value="";$("npcMaker").hidden=false;
+  setTimeout(()=>$("nmName").focus(),60);
+}
+$("nmCancel").addEventListener("click",()=>{$("npcMaker").hidden=true;nmPending=null;});
+$("nmOk").addEventListener("click",()=>{
+  const name=sanName($("nmName").value);
+  if(!name||!nmPending){$("npcMaker").hidden=true;nmPending=null;return;}
+  const rec={n:name,w:nmPending.w,x:nmPending.x,y:nmPending.y,lk:randLook()};
+  if(spawnCustom(rec)){myNpcs.push(rec);npcPersist();
+    const eg=eggFor(name);
+    toast(eg?EGGSAFE[eg].lines[lang][0]:T().npcMade(name),eg?3400:2200);}
+  $("npcMaker").hidden=true;nmPending=null;
+});
+$("nmName").addEventListener("keydown",e=>{if(e.key==="Enter")$("nmOk").click();});
 /* city growth application: stages follow completed La Obra quests (12, 13) */
 function applyObra(){const s=(done.has(12)?1:0)+(done.has(13)?1:0);
   const w=WORLDS.st;

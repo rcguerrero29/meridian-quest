@@ -155,6 +155,8 @@
   .settings .close{width:100%; font-family:'Unbounded',sans-serif; font-size:.8rem; padding:10px; border-radius:10px; border:none; background:var(--accent); color:var(--accent-ink); cursor:pointer;}
   .settings label{display:block; font-family:'IBM Plex Mono',monospace; font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:6px;}
   .settings textarea{width:100%; box-sizing:border-box; height:220px; font-family:'IBM Plex Mono',monospace; font-size:.72rem; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); padding:10px; margin-bottom:12px;}
+  .settings input[type=range]{flex:1; accent-color:var(--accent); min-height:24px;}
+  .settings input[type=text]{width:100%; box-sizing:border-box; font-family:'IBM Plex Sans',sans-serif; font-size:.95rem; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); padding:10px; margin-bottom:12px;}
   .end h2{font-family:'Unbounded',sans-serif; font-size:1.05rem; margin:0 0 6px;}
   .end .final{font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:.88rem; margin:0 0 8px;}
   .end .epi{font-style:italic; color:var(--muted); font-size:.92rem; margin:0 0 12px;}
@@ -223,6 +225,7 @@
         <button data-b="T"><span>🍽️</span><span class="bl"></span></button>
         <button data-b="W"><span>🧊</span><span class="bl"></span></button>
         <button data-b="V"><span>🔥</span><span class="bl"></span></button>
+        <button data-b="npc"><span>🧍</span><span class="bl"></span></button>
         <button id="undoBtn"><span>↩️</span><span class="bl"></span></button>
       </div>
       <button class="talk" id="talk" hidden></button>
@@ -253,6 +256,11 @@
             <button data-th="custom" id="thCustom" hidden></button>
             <button id="teOpen" hidden></button>
           </div>
+          <label id="lbMusic"></label>
+          <div class="optrow">
+            <button id="musMute" style="flex:0 0 38%;"></button>
+            <input type="range" id="musVol" min="0" max="100" step="1" aria-label="music volume">
+          </div>
           <label id="lbAdm"></label>
           <div class="optrow">
             <button id="admOff"></button>
@@ -264,6 +272,17 @@
           <div class="optrow"><button id="openTp" style="flex:1;"></button></div>
           <div class="optrow"><button id="openMp" style="flex:1;"></button></div>
           <button class="close" id="closeSet"></button>
+        </div>
+      </div>
+      <div class="settings" id="npcMaker" hidden>
+        <div class="box">
+          <h3 id="nmTitle"></h3>
+          <label id="nmLb"></label>
+          <input type="text" id="nmName" maxlength="24" autocomplete="off">
+          <div class="optrow">
+            <button id="nmOk"></button>
+            <button id="nmCancel"></button>
+          </div>
         </div>
       </div>
       <div class="settings" id="textlab" hidden>

@@ -88,7 +88,8 @@ engine may talk to a network. The engine/content split must keep `NET` in `engin
    room-code UI. The button already exists so the product never changes shape.
 
 **Scope guard:** single-player games stay pure cartridge-model (no server, no
-telemetry). `NET.enabled` stays false unless a specific game turns it on.
+telemetry). Network access lives ONLY in the named seams — `NET`, and later
+`AINPC` (§6). `NET.enabled` stays false unless a specific game turns it on.
 
 **Security rules for the pivot (enforced/prepared 2026-08-30):**
 - Every payload crossing a trust boundary goes through `sanitizeSave()` (numbers
@@ -154,3 +155,118 @@ reminders as `.ics`. Possible next steps:
 - A printable one-page PDF version.
 - The decision report export (`decision-report.docx` in `futureExportTypes`) using
   the logged `decisions` array — the work-side twin of the care pack.
+
+---
+
+## 7. Graphics upgrade path (scouted 2026-08-30; prep steps not yet built)
+
+**Recommendation:** Stay 2D canvas and go all-in on procedural upgrades, but FIRST refactor the tile if/else chain into a tile-renderer registry that content packs can extend/override. Why: it is the only path that costs $0, keeps offline/CSP/no-build intact, preserves the flat-color charm AJ responded to, and compounds with what already exists (tc() theming, ambient particles, parametric people). Sprites are rejected for Meridian itself because the game's identity features (creator, wardrobe, theme-mixed shirts, AJ-named townsfolk with data-driven looks) are parametric and would fight raster art — but the registry seam deliberately leaves a sprite escape hatch: a future gift pack could register a drawImage-based tile from a committed same-origin PNG without touching the engine, turning "sprite art" into a per-content-pack choice instead of an engine rewrite.
+
+**Plan (ordered):**
+1. PREP NOW (no visual change, engine-only): extract the tile branches in draw() (engine/engine.js ~lines 186-275) into a TILE_DRAW registry keyed by map char — each entry a fn(g, rc) where rc={sx,sy,x,y,now,tc,rand,queueCanopy}; draw() becomes ground pass → TILE_DRAW lookup → canopy queue → actors → overlay hook. Support an optional content-pack global TILEART (guarded typeof, like CRITTERS/EGGS) whose entries override/extend the defaults — this closes the engine/content seam gap.
+2. PREP NOW: consolidate the frame clock — compute now=performance.now() once per frame in loop() and pass it down (Date.now() is currently called dozens of times per frame in canopy/critter/person draws); add rand = deterministic per-tile hash h(x,y,worldId) to rc for stable variation. Run node test/smoke.js, bump CACHE in sw.js, ship — this is the pure-refactor PR.
+3. LATER wave 1 (first visible upgrade, one PR): hash-driven floor variation (speckles/tone shifts on the checkerboard), south-face wall shadows (rgba(0,0,0,.12) strip on the tile below any solid), thin dark rim outlines on solid props to pop them off the floor, and 2-frame walk cycle + true left/right leg-arm swing + occasional blink in drawPerson (it already takes {dir,moving,bob} — extend, don't re-sign).
+4. LATER wave 2: time-of-day lighting as the overlay-pass hook's first tenant — a low-alpha full-viewport tint (golden-hour for sunset theme, cool dusk after local sunset if the content config opts in), plus warm light pools under windows/doors at night; keep quest ❗ markers and peer name labels drawn after the overlay; cap overlay alpha ≤0.25 so themes stay comfortable.
+5. LATER wave 3 (per IDEAS.md §5 'later'): per-theme/per-pack explicit tile palettes — the registry makes this a content/config schema addition (optional, backward-compatible) replacing the tc() accent wash for games that want full art direction; plus window boxes/vines as new registry tiles.
+6. LATER, only if a specific gift wants raster art: document the sprite path — committed PNG in the content folder (img-src 'self' already allows it), add to sw.js precache list, CC0 source (e.g. Kenney) noted in README, registered as a TILEART entry using drawImage. Never for people/animals — those stay procedural.
+
+---
+
+## 8. Music v2 refinements (v1 SHIPPED 2026-08-30 — procedural WebAudio, per-theme,
+volume/mute; the iOS poke-unlock, interruption recovery, and squared volume taper
+from this scout landed with v1. The rest waits for a dedicated music session):
+
+1. Prep now: adopt path (a) procedural WebAudio; record the decision (and the AI-tier licensing findings, marked verify-before-use) in docs/HANDOFF.md so nobody later commits Suno/Udio free-tier tracks into the public repo.
+2. Prep now: confirm the v1 seam points in /home/user/meridian-quest/engine/engine.js — replace lines 1072–1141, keep the applyTheme() hook at line 1005, keep localStorage keys mqmus/mqvol and the #musMute/#musVol wiring; no index.html, strings.js, or CSP changes.
+3. Later (build, ~1 session): implement v2 per the spec — MUSDEF with prog/density/swing/voice fields, persistent bus graph (mel/pad/bass -> master -> compressor, one echo delay), 100ms lookahead scheduler with 0.25s horizon, per-theme voice recipes (lo-fi triangle+swing+echo, bell sine+2.76x partial, marimba fast-decay triangle+grace notes, dusk detuned sine pair).
+4. Later (build, same session): replace the once-listeners with the persistent musPoke unlock (pointerdown/touchend/keydown) plus onstatechange recovery, add pagehide/pageshow to the visibility pause, and switch volume to squared taper with setTargetAtTime ramps and mute->suspend after 250ms.
+5. Later (polish): wire musDuck(0.35) into quest-card open/close; set customTheme.base in cloneTheme() so custom palettes inherit the right soundtrack.
+6. Later (verify): extend test/smoke.js with the MUSDEF structural checks and the gesture->ctx/timer assertion; on-device pass on iOS Safari (lock/unlock, phone-call interruption, home-screen PWA, silent switch) and Android Chrome; listen to each theme for 3+ minutes for annoyance/fatigue and tune density/peaks.
+7. Later (ship): bump the sw.js CACHE name and deploy to GitHub Pages.
+
+**Licensing note (researched):** no free AI-music route is clean for a public game —
+free tiers of Suno-class tools are non-commercial or service-owned; do NOT commit
+AI-generated tracks. If authored tracks are ever wanted, use verified CC0 loops
+(Kenney/Junkala) behind the same bus graph.
+
+---
+
+## 9. More fandoms & egg mechanics (brainstormed 2026-08-30 — awaiting AJ's picks;
+each shipped one becomes EGGS/engine data and leaves this list)
+
+**Fandom candidates:**
+- **Twilight** — Sister fandom to Vampire Diaries — brooding vampire romance. Egg: type 'Bella' or 'Edward' and the paletera fans herself: 'That pale boy from the mercado only shops after sundown... and yesterday I swear he glittered.'
+- **Stranger Things** — Nerdy sci-fi with a cozy friend-group heart, huge overlap with Marvel/PLL fans. Egg: 'Eleven' makes the taco shop's string lights blink one bulb at a time while the cook mutters that the walkie-talkies are acting up again — and a waffle special appears on the menu.
+- **Gilmore Girls** — The patron saint of cozy small-town comfort TV. Egg: 'Lorelai' or 'Rory' makes the La Cocina abuela pour a fourth cup of coffee and declare that caffeine is a personality, mija.
+- **Bridgerton** — Romantic drama royalty with a gossip engine PLL fans adore. Egg: 'Penelope' or 'Daphne' spawns an anonymous barrio gossip zine on the trolley bench; the muralist quietly adds a little bee to the mural.
+- **Grey's Anatomy** — Long-arc romantic drama — the classic companion watch to TVD/PLL. Egg: 'Meredith' makes the curandera sigh that after a hard shift you either cry in the supply closet or dance it out in the kitchen — she recommends the kitchen.
+- **Star Wars / The Mandalorian** — Marvel-adjacent nerd canon with a cozy found-family angle. Egg: 'Grogu' puts a tiny green napper inside a lunchbox at La Obra; the foreman complains the little guy already ate two workers' tortas.
+- **Doctor Who** — Cozy-nerdy sci-fi comfort show. Egg: 'Doctor' turns one La Obra portapotty blue, and a worker swears on his abuela that it's bigger on the inside — nobody believes him.
+- **Percy Jackson** — Nerdy YA mythology with humor, right in the HP fan pipeline. Egg: 'Percy' makes the taco shop debut blue horchata, and the plaza fountain bubbles suspiciously whenever you walk past.
+- **The Hunger Games** — YA romance-drama with a fierce heroine, core HP-fan adjacency. Egg: 'Katniss' makes the panadero 'accidentally' burn a loaf and slip it to a girl he likes, while a bird on the trolley wire whistles back any tune the parrot starts.
+- **Studio Ghibli** — Peak cozy aesthetic — matches the game's warm pixel-town soul. Egg: 'Totoro' spawns drifting soot-mote particles at the trolley stop (the ambient layer already exists), and a kid insists the last trolley purred at her.
+- **Animal Crossing / Stardew Valley** — Cozy-game canon; Meridian Quest is basically their cousin. Egg: 'Nook' makes a tianguis vendor grumble about a raccoon who'd charge rent on a park bench; 'Junimo' adds tiny fruit-colored motes bobbing over the garden plots.
+- **Outer Banks / Riverdale** — Teen mystery-drama in the PLL lane. Egg: 'JJ' or 'Sarah' makes chalk treasure-map arrows appear near La Obra, and the foreman insists there is absolutely no gold under the cement, please stop digging.
+
+**Mechanics beyond name triggers:**
+- Calendar magic (real-date triggers): the barrio decorates itself by the device clock — marigold particles and papel picado for Día de Muertos week, chalk hearts on Feb 14, and a Settings field for 'special dates' so the owner can set AJ's birthday: that day the whole town strings up lights, the paletera hands out a free paleta, and townsfolk lines swap to celebration variants. Zero network needed, pure Date().
+- Date-seeded ambient weather: since the CSP forbids weather APIs, hash today's date into a deterministic forecast (sunny/drizzle/golden-hour). Rain days get puddle tiles, umbrella-carrying NPCs, and small-talk changes ('good day for pozole'); everyone on any device sees the same 'weather' that day, which makes it feel real and shareable.
+- Streak memory (townsfolk who remember you): count consecutive real days played in localStorage. At 3 days the street cat starts trailing you; at 7 the taco cook has 'your usual' ready and greetings shift from formal to nickname warmth. Ambient characters earning familiarity is the coziest mechanic a cozy game can have.
+- Matching-outfit reactions: the wardrobe system (player shirt colors + pet bandana/collar/cape registry) enables combo detection — dress yourself and Frederick in matching colors and the muralist begs to paint you both; specific palettes read as homage fits (red+gold formal gets 'you look ready to save the block, jefe' — a Marvel wink with no name typed).
+- Pet choreography chains: petting the animals in a secret order (dog, then parrot, then cat, within a minute) makes Lorenzo the loro squawk a parade announcement and all the pets follow you in a conga line for one lap of the plaza. Hidden orders can unlock more formations — discoverable by pure play, no text input.
+- Trolley Pass gift tickets: the save-link plumbing (index.html#save=...) can carry a second kind of hash — #ticket=... codes the owner crafts and texts to AJ. Opening one plays a small scene at the trolley stop (a firework, a serenade by the trio, a banner with her townsfolk's name), turning the existing QR/deep-link system into a love-note delivery service.
+
+---
+
+## 6. AINPC — a townsperson played by a live model (designed 2026-08-30; NOT built)
+
+**Wish:** talk to one NPC that is actually Claude roleplaying that character, with a small task. Everything below is shaped so it attaches later without breaking $0 / zero-maintenance / static / offline.
+
+### The seam (mirrors NET; ships as dead code whenever we are ready)
+
+```js
+/* AINPC seam — the ONLY other place (besides NET) that may touch a network.
+   Deliberately empty: a cartridge that wants a live townsperson fills it;
+   every other game stays pure cartridge-model. See docs/IDEAS.md §6. */
+const AINPC={
+  enabled:false,
+  cast:[],                    /* npc keys handed to the model, e.g. ["consul"] */
+  boot(){},                   /* once at startup: read config; must NOT hit the network */
+  online(){return false;},    /* cheap gate: config present && navigator.onLine */
+  ask(req,onLine){},          /* req={npc,text,lang,ctx}; onLine(text) called once with the reply */
+  stop(){}                    /* abort in-flight (player walked away / closed the card) */
+};
+```
+
+**Engine-side contract** (written once, works for every transport):
+- Gate: the live-chat affordance ("Ask <name> anything") appears only for `AINPC.cast` NPCs, only when `enabled && online()`. Otherwise the NPC is 100% its scripted self — the existing `chillLines`/`T().chat` path IS the offline fallback. No error states; degradation is silent and in-fiction.
+- Input: one text box on the talk card; clamp to 280 chars before send; `lang` follows the game language.
+- Output: every reply passes `sanitizeLine()` (below) and renders ONLY via `textContent` on the dialog card or `ctx.fillText` bubble — same posture as PEERS names.
+- Context (`req.ctx`): minimal and PII-free — `{npcKey, role, world, lang, questsDone, heroName}` (heroName is already a clamped player-typed display string). Up to 6 prior turns kept in memory only; never written to the save; wiped when the card closes.
+- Timeout 10s, then scripted line + fiction toast ("the line to the capital is busy"). `stop()` fires on walk-away.
+
+### Transports, judged
+
+1. **Bring-your-own-llave (recommended v1 — family mode).** Owner/AJ pastes their own Anthropic API key into a Settings field (localStorage, this device only). The browser calls the Messages API directly (Anthropic supports CORS via the direct-browser-access opt-in header). $0 to the game, no server, zero-maintenance intact — and the audience for this feature is literally the household. Cheapest model, `max_tokens` ~160. Key hygiene: a dedicated key with a hard monthly spend cap set in the Anthropic console; the game never displays it back.
+2. **Tiny proxy Worker (v2 — only if gifted games become a product).** ~80-line Cloudflare Worker holds the key, pins the system prompt server-side, enforces per-IP rate limits plus a KV daily token budget, clamps `max_tokens`, returns plain text. Players need nothing. The price is not money (pennies of tokens) but the same broken rule as Trolley Pass Phase 2: a service to own. Seam-compatible: upgrading 1→2 changes only what `boot()` reads (endpoint, no key) — `ask()` is untouched.
+3. **Claude-artifact companion — rejected as transport.** The PWA cannot sanely call an artifact page: foreign origin in connect-src, no stable public runtime contract, requires a claude.ai login, dies offline. Keep the idea only as a possible "pen-pal" gag: the NPC offers a link that opens a claude.ai chat pre-briefed to roleplay them — fun and $0, but there is no return channel into the game, so it is a postcard, not a conversation.
+
+### CSP + service worker implications
+
+- `connect-src` names the transport explicitly: v1 adds `https://api.anthropic.com`; v2 replaces that with the Worker origin. Editing the CSP meta remains the conscious "networking is now on" act (same rule as NET).
+- sw.js ignores non-GET requests and the Messages API is POST, so AI calls bypass the cache untouched. Standing rule for any future transport: POST only — a GET endpoint would be poisoned by the cache-first handler.
+
+### Safety rules (kid-safe; transport-independent)
+
+- **The model has no authority.** Replies are flavor text only: no state changes, no XP, no tools, no quest verdicts. If a live-guided task is ever wanted, the model may only choose among engine-defined outcome IDs, validated the way `sanitizeSave` validates keys — never free-form effects. Prompt-injection worst case stays "a weird line of dialog."
+- **`sanitizeLine()` — client-side, always, even behind a trusted Worker:** coerce to string; strip control and zero-width chars; collapse whitespace; drop any reply containing `http`/`www` (townsfolk do not hand out links); clamp to ~220 chars; if empty after cleaning, use a scripted fallback line. Rendered only as `textContent`/canvas text — never innerHTML, never parsed as markdown. Wire data is hostile.
+- **Pinned system prompt** (server-side in v2; client-side is acceptable in v1 because the player IS the household): stay in character as this barrio neighbor; PG and warm; at most 2 short sentences; reply in the player's language (EN or Mexican ES); never ask for or repeat personal info beyond the hero's name; no links, code, instructions, or real-world advice; steer off-topic questions gently back to the barrio; deflect anything not kid-appropriate in character.
+- **Player text is data:** sent as untrusted user content, never concatenated into the system prompt.
+- **Nothing persists:** no transcripts in the save, no content logging anywhere (v1 has nowhere to log; the v2 Worker keeps counters, never content).
+
+### Cost controls
+
+- v1: dedicated spend-capped key; cheapest model; `max_tokens` clamp; localStorage daily soft cap (~50 exchanges) after which the NPC "gets sleepy" in-fiction.
+- v2: Worker KV daily budget with a hard stop, per-IP rate limit, same clamps. Budget exhaustion is a character beat ("the antenna is resting"), never an error dialog.
+
+**Scope guard:** like NET, `AINPC.enabled` stays false for every cartridge that does not explicitly opt in; network access in the engine remains confined to exactly two named seams: NET and AINPC.
