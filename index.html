@@ -233,6 +233,7 @@
           </div>
           <div class="optrow"><button id="openLab" style="flex:1;"></button></div>
           <div class="optrow"><button id="openExp" style="flex:1;"></button></div>
+          <div class="optrow"><button id="openWd" style="flex:1;" hidden></button></div>
           <button class="close" id="closeSet"></button>
         </div>
       </div>
@@ -674,7 +675,7 @@ const UI={
  en:{
   in1:"Meridian Labs needs an AI delivery hero. The old lead fine-tuned something he shouldn't have and was never seen again.",
   in2:"The office is a world. Roam it — hallways, the kitchen, the corner offices. Coworkers with a ❗ have quests; walk up and talk, in any order. Some decisions open follow-up decisions.",
-  in3:"Three reputation hearts. Bad calls cost one; mediocre calls ship with incidents (half XP). Lose all three and the week resets. Ladder: Junior → Delivery Lead → Senior Lead → AI Legend.",
+  in3:"Three reputation hearts. Bad calls cost one; mediocre calls earn half XP — and either way the quest stays open until you make the right call. Lose all three hearts and the week resets. Ladder: Junior → Delivery Lead → Senior Lead → AI Legend.",
   in4:"Choose your class:",
   classes:{architect:["The Architect","You see systems. Meridian's diagrams fear you."],diplomat:["The Diplomat","Bilingual, unflappable. CFOs sign things near you."],operator:["The Operator","You ship. Production logs whisper your name."]},
   crTitle:"Create your hero",lbName:"Name",lbOutfit:"Outfit",lbShirt:"Shirt / jacket",lbSkin:"Skin tone",lbHairC:"Hair color",lbHairS:"Hair style",begin:"Badge in",
@@ -743,11 +744,14 @@ One source of truth for one very good dog. Swap in your own pet's details and it
   careEvents:["🐾 Flea/tick + heartworm — Frederick","🐾 Grooming — Frederick","🐾 Weigh-in — Frederick","🐾 Vet checkup + vaccines — Frederick","📸 Frederick content batch day"],
   wdTitle:"🧵 Xochi's Collar Drop",wdNote:"Fresh from the tech pack — dress Frederick. Changes save instantly; he's at HQ, being majestic.",
   wdBandana:"Bandana",wdCollar:"Collar",wdCape:"Cape",
-  wdUnlockToast:"🧵 Wardrobe unlocked — talk to Xochi again to dress Frederick.",
+  wdUnlockToast:"🧵 Wardrobe unlocked — in ⚙️ Settings, or with Xochi once her quest is beaten.",
+  wdBtn:"🧵 Wardrobe",
+  retryNote:"❗ This one stays open — come back and make the better call.",
+  retryNoteFred:"🦴 Frederick will reopen the folder for another treat.",
   mapTitle:"Village map",vmF2:"Floor 2",vmHQ:"Meridian HQ",vmSt:"Meridian Street",vmLc:"La Cocina 🌶️",
   vmSite0:"🚧 Construction site",vmSite2:"La Obra · Studio 📐",vmPlots:"Reserved lots — El Mercado & more",vmHere:"◉ you are here",
   goTitle:"☠️ Reputation: zero",goEpi:"Priya finds you in the parking lot. “The last lead didn't get a second chance. You do. Same desk, Monday.” The week resets — but this time, you've read the Codex.",
-  endScore:(x,m,h)=>`${x}/${m} XP · ${h}/3 hearts intact`,goScore:(x,d,n)=>`${x} XP · ${d}/${n} quests attempted`,
+  endScore:(x,m,h)=>`${x}/${m} XP · ${h}/3 hearts intact`,goScore:(x,d,n)=>`${x} XP · ${d}/${n} quests completed`,
   epi1:"Friday, 6pm. The VP stands up when you enter. “Flawless week — and you walked your own path. The agents program is yours.” Roll credits — until Week Two.",
   epi2:"Friday, 6pm. “Strong week,” says the VP. “Some incidents shipped, but you owned the floor.” Priya nods on your way out. Week Two is coming.",
   epi3:"Friday, 6pm. You survived — barely. The VP slides the Codex back across the table: “Study. Run the week again. Meridian believes in second playthroughs.”",
@@ -759,7 +763,7 @@ One source of truth for one very good dog. Swap in your own pet's details and it
  es:{
   in1:"Meridian Labs necesita un héroe de la entrega con IA. Al líder anterior se le ocurrió hacer fine-tuning de algo que no debía y nunca se le volvió a ver.",
   in2:"La oficina es un mundo. Recórrela — pasillos, la cocina, las oficinas de la esquina. Los compañeros con ❗ tienen misiones; acércate y habla, en el orden que quieras. Algunas decisiones abren decisiones de seguimiento.",
-  in3:"Tres corazones de reputación. Las malas decisiones cuestan uno; las mediocres se entregan con incidentes (mitad de XP). Pierde los tres y la semana se reinicia. Escalera: Junior → Líder de Delivery → Líder Senior → Leyenda de la IA.",
+  in3:"Tres corazones de reputación. Las malas decisiones cuestan uno; las mediocres dan la mitad de XP — y en ambos casos la misión sigue abierta hasta que tomes la decisión correcta. Pierde los tres corazones y la semana se reinicia. Escalera: Junior → Líder de Delivery → Líder Senior → Leyenda de la IA.",
   in4:"Elige tu clase:",
   classes:{architect:["El Arquitecto","Ves sistemas. Los diagramas de Meridian te temen."],diplomat:["El Diplomático","Bilingüe, imperturbable. Los CFO firman cosas cerca de ti."],operator:["El Operador","Tú entregas. Los logs de producción susurran tu nombre."]},
   crTitle:"Crea tu héroe",lbName:"Nombre",lbOutfit:"Atuendo",lbShirt:"Camisa / saco",lbSkin:"Tono de piel",lbHairC:"Color de pelo",lbHairS:"Estilo de pelo",begin:"Fichar",
@@ -828,11 +832,14 @@ Una sola fuente de verdad para un muy buen perro. Cambia los datos por los de tu
   careEvents:["🐾 Pulgas/garrapatas + desparasitante — Frederick","🐾 Peluquería — Frederick","🐾 Pesaje — Frederick","🐾 Chequeo veterinario + vacunas — Frederick","📸 Día de contenido de Frederick"],
   wdTitle:"🧵 El Drop de Xochi",wdNote:"Recién salido del tech pack — viste a Frederick. Los cambios se guardan al instante; anda en el HQ, siendo majestuoso.",
   wdBandana:"Bandana",wdCollar:"Collar",wdCape:"Capa",
-  wdUnlockToast:"🧵 Vestidor desbloqueado — habla con Xochi otra vez para vestir a Frederick.",
+  wdUnlockToast:"🧵 Vestidor desbloqueado — en ⚙️ Ajustes, o con Xochi cuando venzas su misión.",
+  wdBtn:"🧵 Vestidor",
+  retryNote:"❗ Esta sigue abierta — vuelve y toma la mejor decisión.",
+  retryNoteFred:"🦴 Frederick reabrirá la carpeta por otro premio.",
   mapTitle:"Mapa del pueblo",vmF2:"Piso 2",vmHQ:"Meridian HQ",vmSt:"Calle Meridian",vmLc:"La Cocina 🌶️",
   vmSite0:"🚧 Obra en construcción",vmSite2:"La Obra · Estudio 📐",vmPlots:"Lotes reservados — El Mercado y más",vmHere:"◉ estás aquí",
   goTitle:"☠️ Reputación: cero",goEpi:"Priya te encuentra en el estacionamiento. «El líder anterior no tuvo segunda oportunidad. Tú sí. Mismo escritorio, el lunes.» La semana se reinicia — pero esta vez, ya leíste el Códice.",
-  endScore:(x,m,h)=>`${x}/${m} XP · ${h}/3 corazones intactos`,goScore:(x,d,n)=>`${x} XP · ${d}/${n} misiones intentadas`,
+  endScore:(x,m,h)=>`${x}/${m} XP · ${h}/3 corazones intactos`,goScore:(x,d,n)=>`${x} XP · ${d}/${n} misiones completadas`,
   epi1:"Viernes, 6pm. La VP se pone de pie cuando entras. «Semana impecable — y caminaste tu propio camino. El programa de agentes es tuyo.» Créditos finales — hasta la Semana Dos.",
   epi2:"Viernes, 6pm. «Buena semana», dice la VP. «Se entregaron algunos incidentes, pero el piso fue tuyo.» Priya asiente cuando sales. La Semana Dos se acerca.",
   epi3:"Viernes, 6pm. Sobreviviste — apenas. La VP desliza el Códice de vuelta por la mesa: «Estudia. Corre la semana otra vez. Meridian cree en las segundas partidas.»",
@@ -1003,6 +1010,12 @@ const NPCLOOK={p:{shirt:"#C2543F",skin:"#B97E52",hair:"#171219",style:"long"},j:
   d:{shirt:"#C4586B",skin:"#C08356",hair:"#26202B",style:"buns"}};
 let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
 let xp=0,hearts=3,cls="",heroName="Rookie",look={shirt:"#8B5CF6",skin:"#E5AC82",hair:"#26202B",style:"cap",outfit:"casual"},done=new Set(),cur=null,curQ=null,node=null,treats=0,fredQ=0,qLvl0=0;
+/* retry-until-correct: `done` = answered right; `qa` maps quest -> best XP already
+   awarded across attempts (retries only pay the difference, so nothing farms) + doubles
+   as the "attempted" marker; runXP accumulates within the current attempt */
+let qa={},runXP=0;
+function awardXP(amt){runXP+=amt;const k=cur,prev=qa[k]||0;
+  if(runXP>prev){xp+=runXP-prev;qa[k]=runXP;}else qa[k]=prev;}
 let px=10,py=11,fx=10,fy=11,dir="down",moving=false,mt=0,held=null,bob=0;
 let warpT=0,portalT=0; /* post-warp grace: warpT blocks input, portalT blocks re-triggering — kills door ping-pong */
 const MAXXP=230;
@@ -1022,7 +1035,7 @@ function hud(){const hs="❤".repeat(Math.max(0,hearts))+"♡".repeat(3-Math.max
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
   $("status").textContent=`${hs}  ${xp}XP`;}
 /* save */
-function save(){try{localStorage.setItem("mq1",JSON.stringify({n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear}));}catch(e){}}
+function save(){try{localStorage.setItem("mq1",JSON.stringify({n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,qa}));}catch(e){}}
 function setWorldTag(){$("worldTag").textContent=T().locs[world]+(world==="hq"?" · ❗":"");}
 function loadSave(){try{return JSON.parse(localStorage.getItem("mq1")||"");}catch(e){return null;}}
 /* belt & suspenders: flush progress when the tab is backgrounded or closed (only once a run exists) */
@@ -1491,8 +1504,9 @@ function exitFsForCard(){wasFs=$("vp").classList.contains("fs");
   if(wasFs){$("vp").classList.remove("fs");document.body.classList.remove("noscroll");
     if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});setTimeout(sizeCanvas,60);}}
 function restoreFs(){if(wasFs){$("vp").classList.add("fs");document.body.classList.add("noscroll");setTimeout(sizeCanvas,60);}}
-function questStart(qi){cur=qi;curQ=AQ()[qi];node=curQ.start;qLvl0=lvlIdx();exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
-function fredQuestStart(){cur=-1;curQ=FQ();node=curQ.start;qLvl0=lvlIdx();exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
+let qFirst=false;
+function questStart(qi){cur=qi;curQ=AQ()[qi];node=curQ.start;qLvl0=lvlIdx();runXP=0;qFirst=qa[qi]===undefined;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
+function fredQuestStart(){cur=-1;curQ=FQ();node=curQ.start;qLvl0=lvlIdx();runXP=0;qFirst=qa[-1]===undefined;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
 function nodeShow(){
   const q=curQ,t=q.nodes[node];
   $("qtag").textContent=`${T().quest}: ${q.title}${node!==q.start?T().followup:""}`;
@@ -1507,23 +1521,26 @@ function nodeShow(){
 }
 function pick(c,btn,t){
   if(c.next){[...$("choices").children].forEach(b=>b.disabled=true);btn.classList.add("right");
-    xp+=10;hud();save();setTimeout(()=>{node=c.next;nodeShow();},550);return;}
+    awardXP(10);hud();save();setTimeout(()=>{node=c.next;nodeShow();},550);return;}
   const o=c.out,before=qLvl0; /* level at quest START — a level crossed on a follow-up step still gets announced here */
   [...$("choices").children].forEach(b=>b.disabled=true);
-  const rightIdx=t.ch.findIndex(x=>(x.out&&x.out.r==="ok")||x.next);
+  /* retries exist, so a miss explains itself but never reveals the right answer — the codex teaches, the shuffle re-tests */
   if(o.r==="ok")btn.classList.add("right");
-  else{btn.classList.add(o.r==="mid"?"midpick":"wrong");if(rightIdx>=0)$("choices").children[rightIdx].classList.add("right");}
-  if(o.r==="ok")xp+=10;else if(o.r==="mid")xp+=5;else hearts--;
+  else btn.classList.add(o.r==="mid"?"midpick":"wrong");
+  if(o.r==="ok")awardXP(10);else if(o.r==="mid")awardXP(5);else{hearts--;awardXP(0);}
   logDecision(o);
+  const solved=o.r==="ok";
+  const retry=!solved&&hearts>0?`<p class="beat">${cur>=0?T().retryNote:T().retryNoteFred}</p>`:"";
   const v=$("verdict");
   v.className="verdict "+(o.r==="ok"?"ok":o.r==="mid"?"mid":"no");
-  v.innerHTML=`<h2>${o.r==="ok"?T().okH:o.r==="mid"?T().midH:T().badH}</h2><span class="concept">${o.concept}</span><p>${o.why}</p><p class="beat">${o.beat}</p>`;
+  v.innerHTML=`<h2>${o.r==="ok"?T().okH:o.r==="mid"?T().midH:T().badH}</h2><span class="concept">${o.concept}</span><p>${o.why}</p><p class="beat">${o.beat}</p>${retry}`;
   v.hidden=false;hud();
   if(o.r!=="bad"&&lvlIdx()!==before){$("levelup").textContent=T().lvlUp+lvlName();$("levelup").hidden=false;}
-  if(cur>=0){done.add(cur);
-    if(cur===12||cur===13){applyObra();setTimeout(()=>toast(T().obraUp,2800),700);}
-    if(cur===15)setTimeout(()=>toast(T().wdUnlockToast,3400),700);}
-  else if(o.r==="ok"&&node==="b"){fredQ=2;wear.bandana=wear.bandana||"#C0392B";setTimeout(()=>toast(T().fredDoneToast,3000),600);}
+  if(cur>=0){
+    if(solved){done.add(cur);
+      if(cur===12||cur===13){applyObra();setTimeout(()=>toast(T().obraUp,2800),700);}}
+    if(cur===15&&qFirst)setTimeout(()=>toast(T().wdUnlockToast,3400),700);}
+  else if(solved&&node==="b"){fredQ=2;wear.bandana=wear.bandana||"#C0392B";setTimeout(()=>toast(T().fredDoneToast,3000),600);}
   save();
   $("next").textContent=hearts<=0?T().nextDoom:(done.size===AQ().length?T().nextEnd:T().nextBack);
   $("next").hidden=false;
@@ -1577,7 +1594,7 @@ document.querySelectorAll(".classes button").forEach(b=>b.addEventListener("clic
 }));
 $("begin").addEventListener("click",()=>{
   heroName=($("heroname").value.trim()||"Rookie").slice(0,14);
-  xp=0;hearts=3;done=new Set();world="hq";px=fx=10;py=fy=11;dir="down";
+  xp=0;hearts=3;done=new Set();qa={};world="hq";px=fx=10;py=fy=11;dir="down";
   save();enterWorld(true);
 });
 /* ---------- start/end ---------- */
@@ -1593,12 +1610,13 @@ function finish(){
   $("card").hidden=true;$("world").hidden=true;
   $("endTitle").textContent=`🏆 ${lvlName()}`;
   $("endScore").textContent=T().endScore(xp,MAXXP,Math.max(0,hearts));
-  const pct=xp/MAXXP;
-  $("epi").textContent = pct>=.95?T().epi1 : pct>=.65?T().epi2 : T().epi3;
+  /* every finished week ends at full XP now (retry-until-correct), so the ending is judged by hearts: bad calls leave scars */
+  const h=Math.max(0,hearts);
+  $("epi").textContent = h>=3?T().epi1 : h===2?T().epi2 : T().epi3;
   $("replay").textContent=T().replay;
   $("end").hidden=false;
 }
-$("replay").addEventListener("click",()=>{xp=0;hearts=3;done=new Set();world="hq";px=fx=10;py=fy=11;dir="down";
+$("replay").addEventListener("click",()=>{xp=0;hearts=3;done=new Set();qa={};world="hq";px=fx=10;py=fy=11;dir="down";
   save();$("end").hidden=true;$("world").hidden=false;setWorldTag();hud();checkTalk();
   toast(T().replayToast(heroName),2500);});
 /* ---------- controls scheme ---------- */
@@ -1612,7 +1630,10 @@ function applyCtl(){
   $("ctlHint").textContent=ctl==="swipe"?T().hintSwipe:(ctl==="joy"?T().hintJoy:T().hintPad);
   try{localStorage.setItem("mqctl",ctl);}catch(e){}
 }
-$("gear").addEventListener("click",()=>{$("settings").hidden=false;held=null;});
+$("gear").addEventListener("click",()=>{
+  $("openWd").hidden=!(done.has(15)||qa[15]!==undefined); /* the wardrobe is extra — any attempt at Xochi's quest opens it */
+  $("settings").hidden=false;held=null;});
+$("openWd").addEventListener("click",()=>{$("settings").hidden=true;openWardrobe();});
 $("closeSet").addEventListener("click",()=>{$("settings").hidden=true;});
 $("optSwipe").addEventListener("click",()=>{ctl="swipe";applyCtl();});
 $("optJoy").addEventListener("click",()=>{ctl="joy";applyCtl();});
@@ -1650,7 +1671,7 @@ function applyLang(){
   $("setTitle").textContent=t.setTitle;$("lbCtl").textContent=t.lbCtl;
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
-  $("openLab").textContent=t.openLab;$("closeSet").textContent=t.closeSet;
+  $("openLab").textContent=t.openLab;$("closeSet").textContent=t.closeSet;$("openWd").textContent=t.wdBtn;
   $("tlTitle").textContent=t.tlTitle;$("tlHint").textContent=t.tlHint;$("tlApply").textContent=t.tlApply;$("tlClose").textContent=t.tlClose;
   document.querySelectorAll("#brushes button[data-b] .bl").forEach((el,i)=>el.textContent=t.brushes[i]);
   $("undoBtn").querySelector(".bl").textContent=t.undoLb;
@@ -1955,6 +1976,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
     treats=SV.tr||0;fredQ=SV.fq||0;
     wear=(SV.wr&&typeof SV.wr==="object")?{bandana:null,collar:null,cape:null,...SV.wr}
         :{bandana:fredQ>=2?"#C0392B":null,collar:null,cape:null}; /* pre-wardrobe saves: keep the earned red bandana */
+    qa=(SV.qa&&typeof SV.qa==="object")?SV.qa:{}; /* pre-retry saves: done quests stay done, credited as-is */
     world=WORLDS[SV.w]?SV.w:"hq";
     px=fx=SV.px??10;py=fy=SV.py??11;
     applyObra();
