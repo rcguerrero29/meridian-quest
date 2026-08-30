@@ -1,5 +1,5 @@
 /* Meridian Quest service worker — cache-first, offline-capable */
-const CACHE = "mq-v2";
+const CACHE = "mq-v3";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {

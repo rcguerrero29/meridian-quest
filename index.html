@@ -244,9 +244,10 @@
       <div class="settings" id="exporter" hidden>
         <div class="box">
           <h3 id="exTitle"></h3>
+          <div class="optrow"><button id="exTabJson"></button><button id="exTabCare" hidden></button></div>
           <label id="exHint"></label>
           <textarea id="exArea" readonly></textarea>
-          <div class="optrow"><button id="exCopy"></button><button id="exClose"></button></div>
+          <div class="optrow"><button id="exCopy"></button><button id="exIcs" hidden></button><button id="exClose"></button></div>
         </div>
       </div>
       <div class="settings" id="travel" hidden>
@@ -659,6 +660,7 @@ const UI={
   treatLb:"🦴 Treat Frederick",fredHeart:"Frederick: ❤",
   petCat:"🐾 Pet Canela",petPig:"🐾 Greet Paloma",petLoro:"🦜 Say hi to Lorenzo",
   fredUnlock:"Frederick trusts you now… and he has paperwork. 🐾 Secret side quest unlocked — treat him again to open it.",
+  carePackToast:"📦 New in ⚙️ → Export: Frederick's care pack — his sheet + reminders, ready for your own pet.",
   fredDoneToast:"🎀 Mod unlocked: Frederick's red bandana.",
   locs:{hq:"Meridian HQ",f2:"Floor 2 · Expansion",st:"Meridian Street",lc:"La Cocina",lo:"La Obra · Studio",ex:"Calle Dos · Expansion block"},
   chat:{beto:["We pour El Mercado's slab Thursday. Don Güero says hi.","Two more weeks and this block gets groceries, primo."],
@@ -668,8 +670,34 @@ const UI={
   trolley:{title:"🚋 Barrio Trolley",note:"The MQT line — every district, one hop. Where to, consultant?",here:"you are here",soon:"Barrio Norte — coming soon",close:"Stay here"},
   cat:["Mrrp.","Canela blinks slowly. You are accepted.","The health inspector doesn't know about Canela. Keep it that way."],
   expBtn:"📤 Export (beta)",expTitle:"Export (beta)",
-  expHint:"Skeleton v1 — your play data as JSON, ready to copy. Future: typed documents from real work (decision report, Frederick's care sheet), email delivery, conversation export.",
+  expHint:"Skeleton v1 — your play data as JSON, ready to copy. Future: typed documents from real work (decision report), email delivery, conversation export.",
   expCopy:"Copy",expCopied:"Copied to clipboard.",
+  exTabJson:"Play data",exTabCare:"🐾 Care pack",exIcs:"📅 Reminders (.ics)",
+  careHint:"Frederick's ops system as a real deliverable — copy the sheet, download the recurring reminders, swap in your own pet's details.",
+  carePack:(n,tr)=>`# 🐾 FREDERICK'S CARE PACK
+Kept by ${n} · Meridian Labs
+One source of truth for one very good dog. Swap in your own pet's details and it's yours.
+
+## Daily
+- 07:30  Breakfast (1 cup)
+- 07:45  Morning walk — 20 min
+- 18:00  Dinner (1 cup)
+- 18:30  Evening walk — 20 min
+- Treats: 3/day max (lifetime treats from you so far: ${tr})
+
+## Recurring — if it repeats, it gets a reminder
+- Flea/tick + heartworm ....... monthly, the 1st
+- Grooming .................... every 8 weeks
+- Weigh-in .................... every 3 months
+- Vet checkup + vaccines ...... yearly (book 2 weeks ahead)
+- Content batch day ........... monthly: AI drafts the captions, a human approves
+
+## House rules (as decided in the quest)
+1. This sheet is the single source of truth — not the fridge, not three people's heads.
+2. Memory is not a system — every cycle above lives in a shared calendar (see the .ics).
+3. One shared checklist; whoever feeds him checks it off.
+4. Nothing posts as Frederick without human approval. He cannot approve. He is a dog.`,
+  careEvents:["🐾 Flea/tick + heartworm — Frederick","🐾 Grooming — Frederick","🐾 Weigh-in — Frederick","🐾 Vet checkup + vaccines — Frederick","📸 Frederick content batch day"],
   mapTitle:"Village map",vmF2:"Floor 2",vmHQ:"Meridian HQ",vmSt:"Meridian Street",vmLc:"La Cocina 🌶️",
   vmSite0:"🚧 Construction site",vmSite2:"La Obra · Studio 📐",vmPlots:"Reserved lots — El Mercado & more",vmHere:"◉ you are here",
   goTitle:"☠️ Reputation: zero",goEpi:"Priya finds you in the parking lot. “The last lead didn't get a second chance. You do. Same desk, Monday.” The week resets — but this time, you've read the Codex.",
@@ -714,6 +742,7 @@ const UI={
   treatLb:"🦴 Premio a Frederick",fredHeart:"Frederick: ❤",
   petCat:"🐾 Acariciar a Canela",petPig:"🐾 Saludar a Paloma",petLoro:"🦜 Saludar a Lorenzo",
   fredUnlock:"Frederick ya confía en ti… y tiene papeleo. 🐾 Misión secreta desbloqueada — dale otro premio para abrirla.",
+  carePackToast:"📦 Nuevo en ⚙️ → Exportar: el kit de cuidados de Frederick — su ficha + recordatorios, listos para tu propia mascota.",
   fredDoneToast:"🎀 Mod desbloqueado: el pañuelo rojo de Frederick.",
   locs:{hq:"Meridian HQ",f2:"Piso 2 · Expansión",st:"Calle Meridian",lc:"La Cocina",lo:"La Obra · Estudio",ex:"Calle Dos · Cuadra de expansión"},
   chat:{beto:["El jueves colamos la losa de El Mercado. Don Güero manda saludos.","Dos semanas más y esta cuadra tiene abarrotes, primo."],
@@ -723,8 +752,34 @@ const UI={
   trolley:{title:"🚋 Tranvía del Barrio",note:"La línea MQT — cada distrito, un solo viaje. ¿A dónde vamos?",here:"estás aquí",soon:"Barrio Norte — próximamente",close:"Quedarme aquí"},
   cat:["Mrrp.","Canela parpadea despacio. Estás aceptado.","La inspectora de salubridad no sabe de Canela. Que siga así."],
   expBtn:"📤 Exportar (beta)",expTitle:"Exportar (beta)",
-  expHint:"Esqueleto v1 — tus datos de juego como JSON, listos para copiar. Futuro: documentos tipados desde trabajo real (reporte de decisiones, ficha de cuidados de Frederick), envío por correo, exportar conversaciones.",
+  expHint:"Esqueleto v1 — tus datos de juego como JSON, listos para copiar. Futuro: documentos tipados desde trabajo real (reporte de decisiones), envío por correo, exportar conversaciones.",
   expCopy:"Copiar",expCopied:"Copiado al portapapeles.",
+  exTabJson:"Datos de juego",exTabCare:"🐾 Kit de cuidados",exIcs:"📅 Recordatorios (.ics)",
+  careHint:"El sistema de operaciones de Frederick como entregable real — copia la ficha, descarga los recordatorios recurrentes y pon los datos de tu propia mascota.",
+  carePack:(n,tr)=>`# 🐾 KIT DE CUIDADOS DE FREDERICK
+A cargo de ${n} · Meridian Labs
+Una sola fuente de verdad para un muy buen perro. Cambia los datos por los de tu mascota y es tuyo.
+
+## Diario
+- 07:30  Desayuno (1 taza)
+- 07:45  Paseo matutino — 20 min
+- 18:00  Cena (1 taza)
+- 18:30  Paseo vespertino — 20 min
+- Premios: máx. 3 al día (premios que le has dado en total: ${tr})
+
+## Recurrente — si se repite, lleva recordatorio
+- Pulgas/garrapatas + desparasitante ... mensual, el día 1
+- Peluquería ........................... cada 8 semanas
+- Pesaje ............................... cada 3 meses
+- Chequeo veterinario + vacunas ........ anual (agenda con 2 semanas de anticipación)
+- Día de lote de contenido ............. mensual: la IA redacta, un humano aprueba
+
+## Reglas de la casa (según lo decidido en la misión)
+1. Esta ficha es la única fuente de verdad — no el refri, no la cabeza de tres personas.
+2. La memoria no es un sistema — cada ciclo de arriba vive en un calendario compartido (ve el .ics).
+3. Una lista compartida; quien lo alimente, la marca.
+4. Nada se publica como Frederick sin aprobación humana. Él no puede aprobar. Es un perro.`,
+  careEvents:["🐾 Pulgas/garrapatas + desparasitante — Frederick","🐾 Peluquería — Frederick","🐾 Pesaje — Frederick","🐾 Chequeo veterinario + vacunas — Frederick","📸 Día de contenido de Frederick"],
   mapTitle:"Mapa del pueblo",vmF2:"Piso 2",vmHQ:"Meridian HQ",vmSt:"Calle Meridian",vmLc:"La Cocina 🌶️",
   vmSite0:"🚧 Obra en construcción",vmSite2:"La Obra · Estudio 📐",vmPlots:"Lotes reservados — El Mercado y más",vmHere:"◉ estás aquí",
   goTitle:"☠️ Reputación: cero",goEpi:"Priya te encuentra en el estacionamiento. «El líder anterior no tuvo segunda oportunidad. Tú sí. Mismo escritorio, el lunes.» La semana se reinicia — pero esta vez, ya leíste el Códice.",
@@ -896,7 +951,7 @@ const NPCLOOK={p:{shirt:"#C2543F",skin:"#B97E52",hair:"#171219",style:"long"},j:
   f:{shirt:"#E8720C",skin:"#B97E52",hair:"#9A9AA2",style:"buzz"},e:{shirt:"#2E7F86",skin:"#E5AC82",hair:"#26202B",style:"pony"},
   w:{shirt:"#3E6FA8",skin:"#B97E52",hair:"#26202B",style:"buzz",hat:"hard"},x:{shirt:"#7A8752",skin:"#C08356",hair:"#26202B",style:"buzz",hat:"hard"},z:{shirt:"#A85C86",skin:"#E5AC82",hair:"#26202B",style:"pony",hat:"hard"}};
 let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
-let xp=0,hearts=3,cls="",heroName="Rookie",look={shirt:"#8B5CF6",skin:"#E5AC82",hair:"#26202B",style:"cap",outfit:"casual"},done=new Set(),cur=null,curQ=null,node=null,treats=0,fredQ=0;
+let xp=0,hearts=3,cls="",heroName="Rookie",look={shirt:"#8B5CF6",skin:"#E5AC82",hair:"#26202B",style:"cap",outfit:"casual"},done=new Set(),cur=null,curQ=null,node=null,treats=0,fredQ=0,qLvl0=0;
 let px=10,py=11,fx=10,fy=11,dir="down",moving=false,mt=0,held=null,bob=0;
 let warpT=0,portalT=0; /* post-warp grace: warpT blocks input, portalT blocks re-triggering — kills door ping-pong */
 const MAXXP=210;
@@ -1356,7 +1411,8 @@ $("treat").addEventListener("click",()=>{
   if(petTarget==="fred"){
     treats++;save();
     toast(T().fredHeart,1200);DOG.sit=true;DOG.next=performance.now()+2600;
-    if(fredQ===0&&treats>=3){fredQ=1;save();setTimeout(()=>toast(T().fredUnlock,3800),1400);}
+    if(fredQ===0&&treats>=3){fredQ=1;save();setTimeout(()=>toast(T().fredUnlock,3800),1400);
+      setTimeout(()=>toast(T().carePackToast,3600),1600);}
     else if(fredQ===1){fredQuestStart();}
     return;
   }
@@ -1373,8 +1429,8 @@ function exitFsForCard(){wasFs=$("vp").classList.contains("fs");
   if(wasFs){$("vp").classList.remove("fs");document.body.classList.remove("noscroll");
     if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});setTimeout(sizeCanvas,60);}}
 function restoreFs(){if(wasFs){$("vp").classList.add("fs");document.body.classList.add("noscroll");setTimeout(sizeCanvas,60);}}
-function questStart(qi){cur=qi;curQ=AQ()[qi];node=curQ.start;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
-function fredQuestStart(){cur=-1;curQ=FQ();node=curQ.start;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
+function questStart(qi){cur=qi;curQ=AQ()[qi];node=curQ.start;qLvl0=lvlIdx();exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
+function fredQuestStart(){cur=-1;curQ=FQ();node=curQ.start;qLvl0=lvlIdx();exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
 function nodeShow(){
   const q=curQ,t=q.nodes[node];
   $("qtag").textContent=`${T().quest}: ${q.title}${node!==q.start?T().followup:""}`;
@@ -1390,7 +1446,7 @@ function nodeShow(){
 function pick(c,btn,t){
   if(c.next){[...$("choices").children].forEach(b=>b.disabled=true);btn.classList.add("right");
     xp+=10;hud();save();setTimeout(()=>{node=c.next;nodeShow();},550);return;}
-  const o=c.out,before=lvlIdx();
+  const o=c.out,before=qLvl0; /* level at quest START — a level crossed on a follow-up step still gets announced here */
   [...$("choices").children].forEach(b=>b.disabled=true);
   const rightIdx=t.ch.findIndex(x=>(x.out&&x.out.r==="ok")||x.next);
   if(o.r==="ok")btn.classList.add("right");
@@ -1526,6 +1582,7 @@ function applyLang(){
   setWorldTag();
   $("openExp").textContent=t.expBtn;$("exTitle").textContent=t.expTitle;$("exHint").textContent=t.expHint;
   $("exCopy").textContent=t.expCopy;$("exClose").textContent=t.tlClose;
+  $("exTabJson").textContent=t.exTabJson;$("exTabCare").textContent=t.exTabCare;$("exIcs").textContent=t.exIcs;
   $("mapTitle").textContent=t.mapTitle;$("mapClose").textContent=t.tlClose;
   $("setTitle").textContent=t.setTitle;$("lbCtl").textContent=t.lbCtl;
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
@@ -1588,10 +1645,46 @@ function logDecision(o){dlog.push({t:Date.now(),quest:curQ.title,concept:o.conce
 function exportData(){return JSON.stringify({schema:"meridian-export-v1",exported:new Date().toISOString(),
   player:{name:heroName,class:cls,look},
   progress:{xp,level:lvlName(),hearts,questsDone:[...done],location:world},
-  frederick:{name:"Frederick",treats,bandana:fredQ>=2},
+  frederick:{name:"Frederick",treats,bandana:fredQ>=2,carePackUnlocked:fredQ>=1},
   decisions:dlog,
-  futureExportTypes:["decision-report.docx","frederick-care-sheet.pdf","conversation-export.md","training-transcript.csv"]},null,1);}
-$("openExp").addEventListener("click",()=>{$("settings").hidden=true;$("exArea").value=exportData();$("exporter").hidden=false;});
+  futureExportTypes:["decision-report.docx","conversation-export.md","training-transcript.csv"]},null,1);}
+/* Frederick's care pack: the secret quest's lesson as a real deliverable —
+   a care sheet you can copy, plus recurring reminders as a downloadable .ics */
+let exMode="json";
+function icsData(){
+  const now=new Date(),p2=n2=>String(n2).padStart(2,"0");
+  const stamp=now.getUTCFullYear()+p2(now.getUTCMonth()+1)+p2(now.getUTCDate())+"T000000Z";
+  const day=d=>d.getFullYear()+""+p2(d.getMonth()+1)+p2(d.getDate());
+  const month1=new Date(now.getFullYear(),now.getMonth()+1,1);
+  const soon=new Date(now.getFullYear(),now.getMonth(),now.getDate()+14);
+  const sat=new Date(now.getFullYear(),now.getMonth(),now.getDate()+((6-now.getDay()+7)%7||7));
+  const ev=T().careEvents;
+  const rows=[[ev[0],month1,"FREQ=MONTHLY"],[ev[1],soon,"FREQ=WEEKLY;INTERVAL=8"],[ev[2],month1,"FREQ=MONTHLY;INTERVAL=3"],
+              [ev[3],soon,"FREQ=YEARLY"],[ev[4],sat,"FREQ=MONTHLY"]];
+  return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Meridian Quest//Care Pack//ES-EN",
+    ...rows.flatMap((r,i)=>["BEGIN:VEVENT","UID:mq-care-"+i+"@meridian-quest","DTSTAMP:"+stamp,
+      "DTSTART;VALUE=DATE:"+day(r[1]),"RRULE:"+r[2],"SUMMARY:"+r[0],"END:VEVENT"]),
+    "END:VCALENDAR"].join("\r\n");
+}
+function renderExport(){
+  $("exArea").value=exMode==="care"?T().carePack(heroName,treats):exportData();
+  $("exHint").textContent=exMode==="care"?T().careHint:T().expHint;
+  $("exTabJson").setAttribute("aria-pressed",exMode==="json"?"true":"false");
+  $("exTabCare").setAttribute("aria-pressed",exMode==="care"?"true":"false");
+  $("exIcs").hidden=exMode!=="care";
+}
+$("openExp").addEventListener("click",()=>{$("settings").hidden=true;
+  $("exTabCare").hidden=fredQ<1;if(fredQ<1)exMode="json";
+  renderExport();$("exporter").hidden=false;});
+$("exTabJson").addEventListener("click",()=>{exMode="json";renderExport();});
+$("exTabCare").addEventListener("click",()=>{exMode="care";renderExport();});
+$("exIcs").addEventListener("click",()=>{
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([icsData()],{type:"text/calendar"}));
+  a.download="frederick-care-reminders.ics";
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
+});
 $("exClose").addEventListener("click",()=>{$("exporter").hidden=true;});
 $("exCopy").addEventListener("click",()=>{const v=$("exArea").value;
   (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(v):Promise.reject())
