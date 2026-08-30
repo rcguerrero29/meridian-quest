@@ -125,22 +125,20 @@ colors take the smallest nudge toward black or white that clears 4.5:1 on
 every pair (the same WCAG math CI runs). CI verifies the fixer itself: a
 sabotaged palette (ink = background) must come out passing.
 
-**Future graphics pass (the "better graphics / nature / fairy vibes" ask —
-schedule after the engine/content split):**
-- **Critters as data**: DOG/CAT/PIG are three copies of the same wander logic —
-  generalize into a `CRITTERS` registry (per-world spawn, palette, draw fn,
-  bump lines) during the split; then "more animals" = data entries. Candidates:
-  butterflies, a hummingbird, a street cat, koi if a game has water.
-- **Flora set**: more plant tiles (flower beds, vines, trees with canopy
-  overhang, window boxes) drawn in the existing tile style; flora tiles are
-  content-pack data once maps split out.
-- **Ambient layer**: a lightweight particle pass in `draw()` — fireflies at
-  dusk-themed maps, drifting petals/leaves, sparkle motes for fairy-themed
-  games. Cheap (a dozen points per frame), huge vibe. Theme-aware (the fairy
-  palette begs for motes).
-- **Canvas theming**: world tile colors are still hardcoded per world; a later
-  step maps them through the theme so Forest/Fairy reach into the world itself,
-  not just the UI chrome.
+**Graphics/nature pass — SHIPPED 2026-08-30** (canvas theming via `tc()` accent
+mixing, NPC whimsy shirts, ambient particles, `J`/`b`/`g` flora tiles, and the
+`CRITTERS` registry with butterflies, a colibrí, and a pettable street cat —
+details in `HANDOFF.md` roadmap #5).
+
+### Later / bigger
+
+- **Fold the named animals into `CRITTERS`**: DOG/CAT/PIG/LORO are still bespoke
+  copies of the same wander logic — they carry special interactions (treats,
+  wardrobe, quest hooks), so the fold needs an interaction hook on the registry.
+  Then: koi for a game with water, window boxes and vines for the flora set.
+- **Per-theme world palettes**: `tc()` mixes toward the accent, which reads as a
+  wash; a game that wants full art direction per theme could declare explicit
+  tile palettes in its content pack instead.
 
 > Current roadmap and shipping process live in `HANDOFF.md`.
 

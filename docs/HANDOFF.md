@@ -3,7 +3,9 @@
 **Updated:** 2026-08-30 · everything below is live on `main` (deployed via GitHub Pages + PWA).
 This is the pick-up-where-we-left-off doc for future sessions. Companion docs:
 `APPROACH.md` (why this is a repo; the gifted-games thesis — historical record, numbers
-are as of the port) and `IDEAS.md` (feature designs not yet built).
+are as of the port), `IDEAS.md` (feature designs not yet built), and `PLAYTEST.md`
+(the guided "Week One tour" for testing — the `/playtest` skill walks the owner
+through it and maps reports to code).
 
 ## What the game is right now
 
@@ -136,12 +138,29 @@ The split must keep PEERS, sanitizeSave, and the CSP in `engine/` territory.
 3. ~~Trolley Pass~~ — **shipped** (Phase 1). Phase 2 (auto-sync) parked; see the
    cartridge-model note above.
 4. ~~Care-pack personalization~~ — **shipped**.
-5. **Graphics/nature pass** (AJ's feedback; after the split): critters-as-data
-   (generalize DOG/CAT/PIG into a registry), flora tiles, ambient particles
-   (fireflies/petals/fairy motes), theme-aware canvas colors. Design in
-   `IDEAS.md` §5. Comfort themes, the admin theme editor (clone a preset →
-   customize → 🪄 auto-fix contrast), and CI contrast/tap-target audits all
-   shipped 2026-08-30.
+5. ~~Graphics/nature pass~~ — **shipped** (2026-08-30, owner ask: "theme should
+   change the game colors everywhere + more trees and animals"):
+   - **Canvas theming**: `setCanvasTint()` + `tc()` mix big-surface tile colors
+     (floors, walls, water, fences, furniture bulk) toward the active theme's
+     accent — light 16% / dark 22%; landmark props (doors, cones, storefronts)
+     keep their identity for wayfinding. Custom themes tint too (via accent).
+   - **Whimsy clothing** (owner-approved): NPC shirts mix 40% toward the accent
+     via `npcWhimsy()`; the player's chosen look, all skin/hair, and animal fur
+     never change.
+   - **Ambient layer**: `drawAmbient()` — fairy motes / forest petals / sunset
+     fireflies, ~14 world-anchored particles; none on Meridian.
+   - **Flora tiles**: `J` jacaranda (solid; canopy-overhang pass + blooms + EN/ES
+     bump lines), `b` flower bed, `g` grass tuft (walkable) — placed in st + ex.
+   - **Critters as data**: `CRITTERS` in the content pack (kind/world/spawn/color),
+     kinds in the engine — butterfly ×2, colibrí, and a pettable street cat
+     (`petGato`/`gato` strings). **Left for later**: folding DOG/CAT/PIG/LORO
+     into the same registry (they carry special interactions — treats, wardrobe,
+     quest hooks), koi for a game with water.
+   - **Construction hardening**: `applyObra`'s rescue now also fires if growth
+     cuts off (not just covers) the hero's tile (`obraReach` BFS), and Paloma
+     gets relocated instead of bricked into the Studio.
+   Comfort themes, the admin theme editor, and CI contrast/tap-target audits had
+   already shipped earlier the same day.
 6. **More wardrobe / Week Two** — extra items are data (`WEAR` + a draw snippet);
    the epilogues already tease "Week Two" content.
 

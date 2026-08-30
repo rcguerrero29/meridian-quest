@@ -33,7 +33,7 @@ const WORLD_DEFS={
      "Y............................2",
      "≈≈≈≈≈≈≈≈≈≈≈≈≈--≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
      "≈≈≈≈≈≈≈≈≈≈≈≈≈--≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
-     "....C....................C....",
+     "....C...b........b.......C....",
      "QQQQQQLQQQQQQ..FFFFFF.FFFFFFFF",
      "..............F..G....G...G..F",
      "....f.........F............e.F",
@@ -41,20 +41,20 @@ const WORLD_DEFS={
      "..............FFFFFFFFFFFFFFFF",
      "..............................",
      "....P....................P....",
-     "..............................",
+     "........g............g........",
      "...XX....................XX...",
-     "..............................",
+     "..J.........J.....J.......J...",
      "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"],
- ex:["........................",
+ ex:["...J.....J.....J....J...",
      "≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
      "≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
      "2......................Y",
      "..FFFFFFFFF.FFFFFFFFF...",
      "..F..G...G....G...G..F..",
      "..F.w....A....x...z..F..",
-     "..F...G....G....G....F..",
+     "..F.g.G....G....G....F..",
      "..FFFFFFFFFFFFFFFFFFF...",
-     "........................"],
+     ".....g......J.....g....."],
  lo:["####################",
      "#UU..UU..UU..UU..UU#",
      "#..................#",
@@ -94,3 +94,11 @@ const OBRA=[[],
   [9,22,"B"],[9,23,"B"],[9,24,"B"],[9,25,"B"],[9,26,"B"],[9,27,"B"],[9,28,"B"],[9,29,"B"]]];
 /* ---------- trolley fast travel: the streets never dead-end, they connect ---------- */
 const TRV=[{w:"st",x:1,y:1,dir:"right"},{w:"ex",x:22,y:3,dir:"left"}];
+/* ambient critters: kinds live in the engine (butterfly, colibri, gato); spawns are
+   content. Each wanders a small radius around home; the gato is pettable. */
+const CRITTERS=[
+ {kind:"butterfly",world:"st",x:6,y:12,c:"#E4A7D8"},
+ {kind:"butterfly",world:"ex",x:10,y:0,c:"#8FC7E8"},
+ {kind:"colibri",world:"st",x:16,y:4,c:"#3FA88F"},
+ {kind:"gato",world:"ex",x:20,y:5,c:"#8B8F98"}
+];
