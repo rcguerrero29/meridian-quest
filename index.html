@@ -243,6 +243,7 @@
           <div class="optrow"><button id="openExp" style="flex:1;"></button></div>
           <div class="optrow"><button id="openWd" style="flex:1;" hidden></button></div>
           <div class="optrow"><button id="openTp" style="flex:1;"></button></div>
+          <div class="optrow"><button id="openMp" style="flex:1;"></button></div>
           <button class="close" id="closeSet"></button>
         </div>
       </div>
@@ -283,6 +284,13 @@
           <canvas id="mapcv" style="width:100%; border-radius:8px; image-rendering:pixelated;"></canvas>
           <p id="mapNote" style="font-size:.78rem; color:var(--muted); margin:8px 0 12px;"></p>
           <button class="close" id="mapClose"></button>
+        </div>
+      </div>
+      <div class="settings" id="mpanel" hidden>
+        <div class="box">
+          <h3 id="mpTitle"></h3>
+          <p id="mpNote" style="font-size:.85rem; color:var(--muted); margin:4px 0 14px;"></p>
+          <button class="close" id="mpClose"></button>
         </div>
       </div>
       <div class="settings" id="tpass" hidden>
@@ -779,6 +787,8 @@ One source of truth for one very good pet.
   tpFoundTx:(n,x,d,q)=>`${n} rode in on the trolley — ${x} XP, ${d}/${q} quests.`,
   tpReplace:n=>`Boarding replaces this device's save (${n}).`,
   tpBoard:"🎫 Board with this save",tpSkip:"Keep this device's save",
+  mpBtn:"🌐 Multiplayer 🚧",mpTitle:"🌐 Multiplayer",
+  mpNote:"🚧 Under construction. The MQT crew is laying track to Barrio Norte — one day other consultants will roam these streets with you. For now, the office is all yours. (Hard hats stay on until the line opens.)",
   retryNote:"❗ This one stays open — come back and make the better call.",
   retryNoteFred:"🦴 Frederick will reopen the folder for another treat.",
   mapTitle:"Village map",vmF2:"Floor 2",vmHQ:"Meridian HQ",vmSt:"Meridian Street",vmLc:"La Cocina 🌶️",
@@ -875,6 +885,8 @@ Una sola fuente de verdad para una gran mascota.
   tpFoundTx:(n,x,d,q)=>`${n} llegó en el tranvía — ${x} XP, ${d}/${q} misiones.`,
   tpReplace:n=>`Abordar reemplaza la partida de este dispositivo (${n}).`,
   tpBoard:"🎫 Abordar con esta partida",tpSkip:"Conservar la partida de este dispositivo",
+  mpBtn:"🌐 Multijugador 🚧",mpTitle:"🌐 Multijugador",
+  mpNote:"🚧 En construcción. La cuadrilla del MQT está tendiendo vías hacia Barrio Norte — un día otros consultores rondarán estas calles contigo. Por ahora, la oficina es toda tuya. (El casco no se quita hasta que abra la línea.)",
   retryNote:"❗ Esta sigue abierta — vuelve y toma la mejor decisión.",
   retryNoteFred:"🦴 Frederick reabrirá la carpeta por otro premio.",
   mapTitle:"Mapa del pueblo",vmF2:"Piso 2",vmHQ:"Meridian HQ",vmSt:"Calle Meridian",vmLc:"La Cocina 🌶️",
@@ -1067,6 +1079,11 @@ const WEAR={bandana:["#C0392B","#7A3FE0","#E0B45C","#2AA47C","#3E8ED0"],
 let wear={bandana:null,collar:null,cape:null};
 let wearCat={bandana:null,collar:null}; /* Canela: no cape — physics and dignity both object */
 const $=id=>document.getElementById(id);
+/* NET seam — the server pivot point. Deliberately empty: the cartridge model keeps
+   everything on-device today, but a future game (multiplayer, cloud saves) plugs a
+   backend in HERE and nowhere else. boot() = connect/auth once at startup;
+   sync(state) = called after every save with the full save blob. See docs/IDEAS.md §4. */
+const NET={enabled:false,boot(){},sync(state){}};
 const T=()=>UI[lang];
 const AQ=()=>lang==="es"?QES:QEN;
 const npcName=k=>NPCN[lang][k];
@@ -1077,7 +1094,9 @@ function hud(){const hs="❤".repeat(Math.max(0,hearts))+"♡".repeat(3-Math.max
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
   $("status").textContent=`${hs}  ${xp}XP`;}
 /* save */
-function save(){try{localStorage.setItem("mq1",JSON.stringify({n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa}));}catch(e){}}
+function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa};
+  try{localStorage.setItem("mq1",JSON.stringify(st));}catch(e){}
+  if(NET.enabled)NET.sync(st);}
 function setWorldTag(){$("worldTag").textContent=T().locs[world]+(world==="hq"?" · ❗":"");}
 function loadSave(){try{return JSON.parse(localStorage.getItem("mq1")||"");}catch(e){return null;}}
 /* belt & suspenders: flush progress when the tab is backgrounded or closed (only once a run exists) */
@@ -1719,7 +1738,7 @@ function applyLang(){
   $("setTitle").textContent=t.setTitle;$("lbCtl").textContent=t.lbCtl;
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
-  $("openLab").textContent=t.openLab;$("closeSet").textContent=t.closeSet;$("openWd").textContent=t.wdBtn;$("openTp").textContent=t.tpBtn;
+  $("openLab").textContent=t.openLab;$("closeSet").textContent=t.closeSet;$("openWd").textContent=t.wdBtn;$("openTp").textContent=t.tpBtn;$("openMp").textContent=t.mpBtn;
   $("tlTitle").textContent=t.tlTitle;$("tlHint").textContent=t.tlHint;$("tlApply").textContent=t.tlApply;$("tlClose").textContent=t.tlClose;
   document.querySelectorAll("#brushes button[data-b] .bl").forEach((el,i)=>el.textContent=t.brushes[i]);
   $("undoBtn").querySelector(".bl").textContent=t.undoLb;
@@ -1970,6 +1989,10 @@ function openPass(){
   $("settings").hidden=true;$("tpass").hidden=false;held=null;
 }
 $("openTp").addEventListener("click",openPass);
+$("openMp").addEventListener("click",()=>{const t=T();
+  $("mpTitle").textContent=t.mpTitle;$("mpNote").textContent=t.mpNote;$("mpClose").textContent=t.closeSet;
+  $("settings").hidden=true;$("mpanel").hidden=false;held=null;});
+$("mpClose").addEventListener("click",()=>{$("mpanel").hidden=true;});
 $("tpClose").addEventListener("click",()=>{$("tpass").hidden=true;});
 $("tpShare").addEventListener("click",()=>{navigator.share({title:"Meridian Quest",url:passURL()}).catch(()=>{});});
 $("tpCopy").addEventListener("click",()=>{const u=passURL();
@@ -2115,6 +2138,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("tpSkip").addEventListener("click",()=>{stripPassHash();$("tpFound").hidden=true;});
 })();
 applyAdmin();applyLang();applyCtl();
+if(NET.enabled)NET.boot();
 requestAnimationFrame(ts=>{last=ts;loop(ts);});
 sizeCanvas();
 </script>

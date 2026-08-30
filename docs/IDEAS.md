@@ -63,6 +63,33 @@ data worth syncing (note to optimize later).
   contra APPROACH.md's zero-maintenance promise. Decision deferred until there's
   a product reason.
 
+---
+
+## 4. Multiplayer & the server pivot (seam shipped 2026-08-30; feature not built)
+
+**What shipped:** a 🌐 Multiplayer 🚧 button in ⚙️ Settings opening an
+"under construction" panel (fiction: the MQT is laying track to Barrio Norte), and
+the **`NET` seam** in the engine — `NET={enabled:false,boot(),sync(state)}`.
+`boot()` runs once at startup when enabled; `sync(state)` receives the full save
+blob after every save. This is THE place a backend attaches; nothing else in the
+engine may talk to a network. The engine/content split must keep `NET` in `engine/`.
+
+**How a future game (e.g. AJ's) pivots to multiplayer on this template:**
+1. Pick the transport: a WebSocket room server — PartyKit or a Cloudflare Worker
+   with Durable Objects are the natural fits (free tiers, one file of server code).
+2. Fill in `NET`: `boot()` opens the socket and joins a room (room id = the game's
+   content-pack name or an invite code); `sync()` throttles and pushes
+   `{name, look, wear, world, px, py, dir}` — presence data, not the whole save.
+3. Render peers: the engine's `draw()` already draws NPCs from a list; peers are
+   just entries in a `peers` array drawn with `drawPerson`. Toasts for
+   "AJ entered Meridian HQ." Co-presence first (see each other roam, dressed pets
+   visible); shared quests/state come much later, if ever.
+4. Flip the button: the Multiplayer panel swaps "under construction" for a
+   room-code UI. The button already exists so the product never changes shape.
+
+**Scope guard:** single-player games stay pure cartridge-model (no server, no
+telemetry). `NET.enabled` stays false unless a specific game turns it on.
+
 > Current roadmap and shipping process live in `HANDOFF.md`.
 
 ---

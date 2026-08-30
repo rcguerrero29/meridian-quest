@@ -87,14 +87,24 @@ Options, ranked:
    the $0-forever, zero-maintenance rule in APPROACH.md. Revisit only if gifted
    games grow a paid tier.
 
+## Server-pivot readiness (shipped 2026-08-30)
+
+The engine has exactly one place a backend can attach: the **`NET` seam**
+(`NET={enabled:false,boot(),sync(state)}` near the top of the script) — `boot()`
+at startup, `sync()` with the full save blob after every save. A 🌐 Multiplayer 🚧
+button in Settings opens an under-construction panel, so the affordance exists in
+the product/template today. Full pivot recipe (PartyKit / Durable Objects,
+presence-first) in `IDEAS.md` §4. Rule: no other code may touch a network;
+`NET.enabled` stays false for single-player games.
+
 ## Roadmap
 
 1. ~~CI~~ — **shipped** (`.github/workflows/ci.yml`).
 2. **Engine/content split** — the big one, deliberately deferred to a dedicated
    session (it touches every line and should land alone, with nothing else in
    flight). Per APPROACH.md §3, before any second game: `engine/` (renderer,
-   movement, saves, validators) + `content/meridian/` (quests, maps, NPCs, both
-   languages). Unlocks the gifted-games template.
+   movement, saves, validators, the NET seam) + `content/meridian/` (quests, maps,
+   NPCs, both languages). Unlocks the gifted-games template.
 3. ~~Trolley Pass~~ — **shipped** (Phase 1). Phase 2 (auto-sync) parked; see the
    cartridge-model note above.
 4. ~~Care-pack personalization~~ — **shipped**.

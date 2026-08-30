@@ -150,9 +150,21 @@ const CANDIDATES = [
   if (!t3.saved.wr || !t3.saved.wr.bandana) fails.push('dog wear not saved');
   if (!t3.saved.wc || !t3.saved.wc.bandana || !t3.saved.wc.collar) fails.push('cat wear not saved');
 
+  // ---- 3b. multiplayer stub: button opens the under-construction panel; NET seam inert ----
+  await page.evaluate(() => { document.getElementById('wardrobe').hidden = true; });
+  await page.click('#gear');
+  await page.click('#openMp');
+  const mp = await page.evaluate(() => ({
+    open: !document.getElementById('mpanel').hidden,
+    title: document.getElementById('mpTitle').textContent,
+    netInert: typeof NET === 'object' && NET.enabled === false,
+  }));
+  if (!mp.open || !mp.title) fails.push('multiplayer panel did not open');
+  if (!mp.netInert) fails.push('NET seam missing or enabled by default');
+  await page.click('#mpClose');
+
   // ---- 4. care-pack personalization: pet name flows into sheet + ics ----
   await page.evaluate(() => { fredQ = 1; treats = 3; });
-  await page.click('#wdClose');
   await page.click('#gear');
   await page.click('#openExp');
   await page.click('#exTabCare');
