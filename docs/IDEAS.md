@@ -25,6 +25,38 @@ collar for the cat (`wearCat`, saved as `wc`), accessory pass in `drawCat`.
   static-page version of that idea: a palette/pattern editor (like the character
   creator) whose output is data, not pixels — same lesson, no backend.
 
+---
+
+## 3. The Trolley Pass — productized cross-device saves (brainstormed 2026-08-30)
+
+**Problem:** cross-device saves must feel like a product, not a manual chore
+(owner: no copy-paste, "imports automatically"). Hard constraint: automatic sync
+needs a server; free-and-serverless can only be a very smooth one-shot transfer.
+
+**Phase 1 — Trolley Pass (build as roadmap #3; $0, no backend):**
+- One button (⚙️ Settings): **🎫 Take your Trolley Pass** — the save as an
+  in-fiction transit pass, serialized base64url into `index.html#save=…`.
+- Phone: opens the native share sheet (Web Share API) — AirDrop / message it.
+- Desktop: renders the pass as a **QR code** (small inline QR lib, ~2KB, vendored)
+  — scan with the phone camera.
+- Opening the link: "🎫 Trolley Pass found — <name>, <xp> XP, <n>/16. Continue
+  this run here?" Confirm imports; NEVER auto-overwrite an existing local save;
+  strip the hash after handling.
+- Skipped alternatives: File System Access + synced folder (no mobile Safari),
+  WebRTC p2p (needs signaling + both devices online), browser sync (doesn't cover
+  localStorage), GitHub-as-storage (players lack tokens).
+
+**Phase 2 — pair-once auto-sync (only if gifted games become a product):**
+- ~100-line Cloudflare Worker + KV (free tier: ~1k writes/day). No accounts:
+  device A generates a random 128-bit slot ID; device B joins by scanning the same
+  Trolley Pass QR once; thereafter both devices push saves on change and pull on
+  boot (last-write-wins with a timestamp; prompt on conflict).
+- Same button, same fiction — pairing rides the existing pass, so shipping Phase 2
+  changes no UI, just upgrades "transfer" to "sync".
+- Cost is not money but a broken rule: it adds a service to own and maintain,
+  contra APPROACH.md's zero-maintenance promise. Decision deferred until there's
+  a product reason.
+
 > Current roadmap and shipping process live in `HANDOFF.md`.
 
 ---
