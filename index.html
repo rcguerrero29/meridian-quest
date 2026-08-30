@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#14121B">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>:root{color-scheme:light dark}body{margin:0;padding:0}img{max-width:100%}</style>
 <title>Meridian Quest</title>
 </head>
@@ -59,6 +62,7 @@
   .joybase{position:absolute; inset:0; border-radius:50%; background:rgba(20,16,30,.4); border:2px solid rgba(237,233,245,.25); backdrop-filter:blur(2px);}
   .knob{position:absolute; left:50%; top:50%; width:48px; height:48px; border-radius:50%; background:rgba(122,63,224,.85); border:2px solid rgba(237,233,245,.5); transform:translate(-50%,-50%); transition:transform .08s;}
   .gear{position:absolute; right:10px; top:10px; width:38px; height:38px; border-radius:10px; border:none; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.05rem; cursor:pointer; z-index:4;}
+  .gear svg{display:block; width:20px; height:20px; margin:auto; pointer-events:none;}
   .fsbtn{right:54px !important;}
   .mapbtn{right:98px !important;}
   .vmap{display:flex; flex-direction:column; align-items:center; gap:2px; margin-bottom:14px; font-size:.78rem;}
@@ -185,9 +189,9 @@
         <button class="blank"></button><button data-d="down" aria-label="Down">▼</button><button class="blank"></button>
       </div>
       <div class="joy" id="joy" hidden><div class="joybase"></div><div class="knob" id="knob"></div></div>
-      <button class="gear" id="gear" aria-label="Settings">⚙️</button>
-      <button class="gear fsbtn" id="fsbtn" aria-label="Fullscreen">⛶</button>
-      <button class="gear mapbtn" id="mapbtn" aria-label="Map">🗺️</button>
+      <button class="gear" id="gear" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.4"/><path d="M12 2.8v3.1M12 18.1v3.1M2.8 12h3.1M18.1 12h3.1M5.5 5.5l2.2 2.2M16.3 16.3l2.2 2.2M18.5 5.5l-2.2 2.2M7.7 16.3l-2.2 2.2"/></svg></button>
+      <button class="gear fsbtn" id="fsbtn" aria-label="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button class="gear mapbtn" id="mapbtn" aria-label="Map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></button>
       <div class="status" id="status"></div>
       <div class="brushes" id="brushes" hidden>
         <button data-b="."><span>⬜</span><span class="bl"></span></button>
@@ -674,7 +678,7 @@ const UI={
   epi2:"Friday, 6pm. “Strong week,” says the VP. “Some incidents shipped, but you owned the floor.” Priya nods on your way out. Week Two is coming.",
   epi3:"Friday, 6pm. You survived — barely. The VP slides the Codex back across the table: “Study. Run the week again. Meridian believes in second playthroughs.”",
   replay:"New game +",replayToast:n=>`Back at it, ${n}. Same office, wiser hero.`,
-  contBtn:(n,x,d)=>`▶ Continue as ${n} — ${x} XP, ${d}/10 quests`,contDead:"That run ended. Start fresh.",
+  contBtn:(n,x,d)=>`▶ Continue as ${n} — ${x} XP, ${d}/${QEN.length} quests`,contDead:"That run ended. Start fresh.",
   langQuick:"🌐 Español",
   flavor:{D:["Just a desk. The monitor is judging you anyway.","A coworker's desk. Their kombucha, their rules."],K:["The coffee counter. Sacred ground.","The coffee machine. It has seen things."],P:["A potted plant. It's doing its best.","The office ficus. Load-bearing morale."],"#":["A wall. Solid argument.","That's a wall. Even AI Legends respect walls."],"+":["A door. It opens by walking through it. Technology.","Doorway detected. You may proceed."],B:["The building facade. Sturdy. Corporate.","Brick. It was here before you and will be here after."],F:["Construction fence. Hard hats beyond this point."],G:["Steel girders. The future has scaffolding."],C:["A traffic cone. Respect it."],X:["🚧 Under construction — La Cocina (restaurant), El Mercado (grocery), and La Obra (construction office) open here soon."],T:["A dining table. The tablecloth is non-negotiable.","Reserved. Probably for Canela."],W:["The walk-in fridge. Chuy's forecast is taped to it. It is law.","Cold storage. Where margins live or die."],V:["The stove. Six burners of consommé diplomacy.","Hot. Chuy's domain. Ask before touching."],A:["A drafting table. Hand sketch first, AI render second — the judgment stays human.","Work in progress. Measure twice, prompt once."],U:["The blueprint wall. Blueprints: the original structured output.","Every building on this street was a drawing here first."],Q:["La Cocina's storefront. The awning alone raises the block's property value.","Smell that? That's Rosa's consommé calling."]}
  },
@@ -729,7 +733,7 @@ const UI={
   epi2:"Viernes, 6pm. «Buena semana», dice la VP. «Se entregaron algunos incidentes, pero el piso fue tuyo.» Priya asiente cuando sales. La Semana Dos se acerca.",
   epi3:"Viernes, 6pm. Sobreviviste — apenas. La VP desliza el Códice de vuelta por la mesa: «Estudia. Corre la semana otra vez. Meridian cree en las segundas partidas.»",
   replay:"Nueva partida +",replayToast:n=>`De vuelta, ${n}. Misma oficina, héroe con más calle.`,
-  contBtn:(n,x,d)=>`▶ Continuar como ${n} — ${x} XP, ${d}/10 misiones`,contDead:"Esa partida terminó. Empieza de nuevo.",
+  contBtn:(n,x,d)=>`▶ Continuar como ${n} — ${x} XP, ${d}/${QES.length} misiones`,contDead:"Esa partida terminó. Empieza de nuevo.",
   langQuick:"🌐 English",
   flavor:{D:["Solo un escritorio. El monitor te juzga igual.","El escritorio de un colega. Su kombucha, sus reglas."],K:["La barra de café. Tierra sagrada.","La cafetera. Ha visto cosas."],P:["Una planta en maceta. Hace lo que puede.","El ficus de la oficina. Moral estructural."],"#":["Una pared. Argumento sólido.","Eso es una pared. Hasta las leyendas respetan las paredes."],"+":["Una puerta. Se abre caminando a través de ella. Tecnología.","Puerta detectada. Puedes pasar."],B:["La fachada del edificio. Sólida. Corporativa.","Ladrillo. Estaba aquí antes que tú y seguirá después."],F:["Cerca de obra. Casco obligatorio más allá."],G:["Vigas de acero. El futuro tiene andamios."],C:["Un cono de tráfico. Respétalo."],X:["🚧 En construcción — La Cocina (restaurante), El Mercado (abarrotes) y La Obra (oficina de construcción) abren aquí pronto."],T:["Una mesa del comedor. El mantel no es negociable.","Reservada. Probablemente para Canela."],W:["El cuarto frío. El pronóstico de Chuy está pegado ahí. Es ley.","Almacén frío. Donde los márgenes viven o mueren."],V:["La estufa. Seis quemadores de diplomacia de consomé.","Caliente. Dominio de Chuy. Pregunta antes de tocar."],A:["Una mesa de dibujo. Primero el boceto a mano, luego el render con IA — el criterio sigue siendo humano.","Trabajo en curso. Mide dos veces, promptea una."],U:["El muro de planos. Los planos: la salida estructurada original.","Cada edificio de esta calle fue primero un dibujo aquí."],Q:["La fachada de La Cocina. El toldo solito sube la plusvalía de la cuadra.","¿Hueles eso? Es el consomé de Rosa llamándote."]}
  }
@@ -910,6 +914,9 @@ function hud(){const hs="❤".repeat(Math.max(0,hearts))+"♡".repeat(3-Math.max
 function save(){try{localStorage.setItem("mq1",JSON.stringify({n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world}));}catch(e){}}
 function setWorldTag(){$("worldTag").textContent=T().locs[world]+(world==="hq"?" · ❗":"");}
 function loadSave(){try{return JSON.parse(localStorage.getItem("mq1")||"");}catch(e){return null;}}
+/* belt & suspenders: flush progress when the tab is backgrounded or closed (only once a run exists) */
+window.addEventListener("pagehide",()=>{if(!$("hud").hidden)save();});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&!$("hud").hidden)save();});
 function clearSave(){try{localStorage.removeItem("mq1");}catch(e){}}
 /* toasts */
 let toastT=null,toastQ=[];
@@ -1229,20 +1236,16 @@ function drawPerson(g,sx,sy,lk,o){
     capFill(4.4);
     g.globalAlpha=.5;inHead(()=>{g.fillRect(hx-7,hy-3.6,2.4,2.6);g.fillRect(hx+4.6,hy-3.6,2.4,2.6);});
     g.globalAlpha=.22;inHead(()=>{g.fillRect(hx-7,hy-1,2.4,2.6);g.fillRect(hx+4.6,hy-1,2.4,2.6);});g.globalAlpha=1;}
-  else if(st==="mullet"){ /* v6: business up front, straight ragged party hanging down the back */
-    capFill(4.6);
-    const curtain=(sgn)=>{g.beginPath();
-      g.moveTo(hx+sgn*4.2,hy+0.6);
-      g.lineTo(hx+sgn*7.3,hy+1.8);
-      g.lineTo(hx+sgn*7.8,hy+9.4);
-      g.lineTo(hx+sgn*6.5,hy+12.4);
-      g.lineTo(hx+sgn*5.8,hy+9.8);
-      g.lineTo(hx+sgn*4.9,hy+12.0);
-      g.lineTo(hx+sgn*4.3,hy+8.4);
-      g.closePath();g.fill();
-      g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.7;g.stroke();};
-    curtain(1);curtain(-1);
-    g.globalAlpha=.9;inHead(()=>{g.fillRect(hx-7,hy-2.8,2,3.6);g.fillRect(hx+5,hy-2.8,2,3.6);});g.globalAlpha=1;}
+  else if(st==="mullet"){ /* v7: built like "long" — mane behind the head, collar-high in the center, party tails at the shoulders */
+    g.beginPath();g.roundRect(hx-8.2,hy-6.8,16.4,12,6);g.fill();
+    g.beginPath();
+    g.moveTo(hx-8.2,hy+2);g.lineTo(hx-8.2,hy+9.5);g.lineTo(hx-6.4,hy+7);
+    g.lineTo(hx-4.6,hy+10.5);g.lineTo(hx-3.2,hy+6.5);g.lineTo(hx+3.2,hy+6.5);
+    g.lineTo(hx+4.6,hy+10.5);g.lineTo(hx+6.4,hy+7);g.lineTo(hx+8.2,hy+9.5);
+    g.lineTo(hx+8.2,hy+2);g.closePath();g.fill();
+    g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.8;g.stroke();
+    g.fillStyle=lk.skin;g.beginPath();g.arc(hx,hy+0.4,5.7,0,7);g.fill();
+    g.fillStyle=lk.hair;capFill(4.8);}
   else if(st==="broccoli"){ /* fluffy high crown, clean sides */
     [[-3.4,-6.6],[0,-8],[3.4,-6.6],[-1.8,-5.2],[1.8,-5.2],[0,-5.8]].forEach(p=>{
       g.beginPath();g.arc(hx+p[0],hy+p[1],2.7,0,7);g.fill();});
@@ -1303,7 +1306,7 @@ function loop(ts){
         warpT=performance.now()+450;portalT=performance.now()+900;
         save();setWorldTag();toast(T().arrive[world],2200);}
       else if(pch==="Y"&&ts>portalT){portalT=performance.now()+900;held=null;openTravel();}
-      else{checkTalk();tryStep();}
+      else{save();checkTalk();tryStep();}
     }
     else{const[dx,dy]=DIRS[dir];fx=px-dx*(1-mt);fy=py-dy*(1-mt);}
   }else tryStep();
@@ -1386,7 +1389,7 @@ function nodeShow(){
 }
 function pick(c,btn,t){
   if(c.next){[...$("choices").children].forEach(b=>b.disabled=true);btn.classList.add("right");
-    xp+=10;hud();setTimeout(()=>{node=c.next;nodeShow();},550);return;}
+    xp+=10;hud();save();setTimeout(()=>{node=c.next;nodeShow();},550);return;}
   const o=c.out,before=lvlIdx();
   [...$("choices").children].forEach(b=>b.disabled=true);
   const rightIdx=t.ch.findIndex(x=>(x.out&&x.out.r==="ok")||x.next);
@@ -1455,7 +1458,7 @@ document.querySelectorAll(".classes button").forEach(b=>b.addEventListener("clic
 }));
 $("begin").addEventListener("click",()=>{
   heroName=($("heroname").value.trim()||"Rookie").slice(0,14);
-  xp=0;hearts=3;done=new Set();px=fx=10;py=fy=11;dir="down";
+  xp=0;hearts=3;done=new Set();world="hq";px=fx=10;py=fy=11;dir="down";
   save();enterWorld(true);
 });
 /* ---------- start/end ---------- */
@@ -1476,8 +1479,8 @@ function finish(){
   $("replay").textContent=T().replay;
   $("end").hidden=false;
 }
-$("replay").addEventListener("click",()=>{xp=0;hearts=3;done=new Set();px=fx=10;py=fy=11;dir="down";
-  save();$("end").hidden=true;$("world").hidden=false;hud();checkTalk();
+$("replay").addEventListener("click",()=>{xp=0;hearts=3;done=new Set();world="hq";px=fx=10;py=fy=11;dir="down";
+  save();$("end").hidden=true;$("world").hidden=false;setWorldTag();hud();checkTalk();
   toast(T().replayToast(heroName),2500);});
 /* ---------- controls scheme ---------- */
 let ctl="swipe";try{ctl=localStorage.getItem("mqctl")||"swipe";}catch(e){}
@@ -1685,6 +1688,7 @@ function setTile(x,y,ch){
   if(x<=0||y<=0||x>=w.W-1||y>=w.H-1)return;
   if(w.grid[y][x]==="N")return;
   if(PORTALS[world]&&PORTALS[world][w.rows[y][x]])return; /* never paint over stairs/exits */
+  if(w.rows[y][x]==="Y")return; /* nor the trolley stop — transit infrastructure is sacred */
   const prev=w.rows[y][x];
   w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);
   w.grid[y][x]=ch;
@@ -1755,6 +1759,8 @@ function applyObra(){const s=(done.has(12)?1:0)+(done.has(13)?1:0);
     for(let y=6;y<=8;y++)for(let x=15;x<=28;x++){
       if(w.grid[y][x]!=="N"){w.rows[y]=w.rows[y].slice(0,x)+"B"+w.rows[y].slice(x+1);w.grid[y][x]="B";}}
   }
+  /* the site can grow over the tile the hero stands on — step them out to the Studio's front door */
+  if(world==="st"&&isSolid(px,py)){px=fx=21;py=fy=4;dir="down";held=null;moving=false;}
 }
 /* ---------- boot ---------- */
 const SV=loadSave();
@@ -1764,8 +1770,8 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
     heroName=SV.n;cls=SV.c||"";look=SV.lk||look;xp=SV.xp||0;hearts=SV.he??3;done=new Set(SV.d||[]);
     treats=SV.tr||0;fredQ=SV.fq||0;
     world=WORLDS[SV.w]?SV.w:"hq";
-    applyObra();
     px=fx=SV.px??10;py=fy=SV.py??11;
+    applyObra();
     if(px>=CW().W||py>=CW().H||isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
     if(done.size>=AQ().length){finish();$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;hud();}
     else if(hearts<=0){clearSave();$("continueBtn").hidden=true;toast(T().contDead,2500);}
@@ -1776,6 +1782,6 @@ applyAdmin();applyLang();applyCtl();
 requestAnimationFrame(ts=>{last=ts;loop(ts);});
 sizeCanvas();
 </script>
-
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("./sw.js").catch(function(){});</script>
 </body>
 </html>
