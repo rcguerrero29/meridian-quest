@@ -7,9 +7,24 @@ are as of the port) and `IDEAS.md` (feature designs not yet built).
 
 ## What the game is right now
 
-One static page (`index.html`) + a thin PWA shell (`sw.js`, `manifest.webmanifest`,
-`icon-192/512.png`). No build, no backend, no dependencies. Installable on a phone,
-fully offline after first load.
+Static files, no build, no backend, no dependencies. Installable on a phone, fully
+offline after first load. Since the engine/content split (2026-08-30) the game is:
+
+- `index.html` — the shell: CSS, DOM chrome, and the script tags that load a
+  content pack + the engine (plus the tiny inline service-worker registration).
+- `engine/engine.js` — renderer, movement, portals, saves, validators, animals,
+  themes, admin tools, the NET seam. **Shared and stable; a new game never edits it.**
+- `content/meridian/` — this game as data: `strings.js` (all UI copy, EN+ES),
+  `quests.en.js` / `quests.es.js` (kept in lockstep), `npcs.js` (roster, looks,
+  placement), `maps.js` (worlds, portals, construction stages, trolley stops),
+  `config.js` (LEVELS, MAXXP).
+- PWA shell: `sw.js` (precaches engine + content), `manifest.webmanifest`,
+  `icon-192/512.png`.
+
+Load order matters and is fixed in `index.html`: `qr.js` → content pack → engine.
+Everything is plain `<script>` tags sharing the global scope — content files are pure
+`const` data, the engine reads them. **A new gifted game = a new `content/<game>/`
+folder + a copy of `index.html` pointing its six content script tags at it.**
 
 - **16 quests** (indices 0–15) + Frederick's secret side quest, fully bilingual EN/ES.
   MAXXP = 230 (10 per node; six two-node quests + Xochi's).
@@ -62,7 +77,8 @@ completion/interaction data worth tracking across devices, revisit Phase 2 in
 
 ## Shipping checklist (every change)
 
-1. Edit; keep EN and ES in lockstep (the test fails otherwise).
+1. Edit — game data in `content/meridian/`, mechanics in `engine/engine.js`, chrome
+   in `index.html`; keep EN and ES in lockstep (the test fails otherwise).
 2. `npm install playwright-core` once, then `node test/smoke.js` — must print OK.
    It runs the real game headless: boot errors, world/portal validators, BFS
    reachability (boot AND post-construction), EN/ES parity, XP math, retry
@@ -108,11 +124,15 @@ The split must keep PEERS, sanitizeSave, and the CSP in `engine/` territory.
 ## Roadmap
 
 1. ~~CI~~ — **shipped** (`.github/workflows/ci.yml`).
-2. **Engine/content split** — the big one, deliberately deferred to a dedicated
-   session (it touches every line and should land alone, with nothing else in
-   flight). Per APPROACH.md §3, before any second game: `engine/` (renderer,
-   movement, saves, validators, the NET seam) + `content/meridian/` (quests, maps,
-   NPCs, both languages). Unlocks the gifted-games template.
+2. ~~Engine/content split~~ — **shipped** (2026-08-30, its own dedicated session as
+   planned): `engine/engine.js` + `content/meridian/{strings,quests.en,quests.es,
+   npcs,maps,config}.js`, loaded as plain script tags (no build, no modules), with
+   `index.html` as the shell. Byte-for-byte the same game — the split moved lines,
+   the smoke test held throughout. The gifted-games template is real now.
+   Known seams left in the engine on purpose (move when they next matter):
+   `SOLID`/tile glyph semantics, `SHIRTS` + class ids, the animals' spawn worlds
+   (goes with critters-as-data, roadmap #5), and the CSS/DOM chrome in
+   `index.html` (per-game shell anyway).
 3. ~~Trolley Pass~~ — **shipped** (Phase 1). Phase 2 (auto-sync) parked; see the
    cartridge-model note above.
 4. ~~Care-pack personalization~~ — **shipped**.
