@@ -116,7 +116,12 @@ The split must keep PEERS, sanitizeSave, and the CSP in `engine/` territory.
 3. ~~Trolley Pass~~ — **shipped** (Phase 1). Phase 2 (auto-sync) parked; see the
    cartridge-model note above.
 4. ~~Care-pack personalization~~ — **shipped**.
-5. **More wardrobe / Week Two** — extra items are data (`WEAR` + a draw snippet);
+5. **Graphics/nature pass** (AJ's feedback; after the split): critters-as-data
+   (generalize DOG/CAT/PIG into a registry), flora tiles, ambient particles
+   (fireflies/petals/fairy motes), theme-aware canvas colors. Design in
+   `IDEAS.md` §5. Comfort themes + CI contrast/tap-target audits already
+   shipped 2026-08-30.
+6. **More wardrobe / Week Two** — extra items are data (`WEAR` + a draw snippet);
    the epilogues already tease "Week Two" content.
 
 ## Known quirks (accepted, not bugs)

@@ -105,6 +105,36 @@ telemetry). `NET.enabled` stays false unless a specific game turns it on.
   about nothing in v1 — presence is display-only, so a hostile client can at
   worst draw itself somewhere silly.
 
+---
+
+## 5. Comfort & graphics (AJ's feedback, 2026-08-30)
+
+**Shipped same day:** the theme system — ⚙️ Settings → Color theme, four curated
+palettes (Meridian / Forest 🌿 / Fairy 🧚 / Sunset 🌇), each with light+dark
+variants, persisted per device. Adding a theme = one data object in `THEMES`;
+CI enforces comfort automatically: every theme variant must pass a **WCAG
+contrast audit** (≥ 4.5:1 on all text pairs) and every visible button a
+**≥ 24px tap-target check** — a template palette that hurts eyes or thumbs
+cannot ship. Curated presets over free color pickers, deliberately: comfort
+needs coherent combinations, and presets keep the audit exhaustive.
+
+**Future graphics pass (the "better graphics / nature / fairy vibes" ask —
+schedule after the engine/content split):**
+- **Critters as data**: DOG/CAT/PIG are three copies of the same wander logic —
+  generalize into a `CRITTERS` registry (per-world spawn, palette, draw fn,
+  bump lines) during the split; then "more animals" = data entries. Candidates:
+  butterflies, a hummingbird, a street cat, koi if a game has water.
+- **Flora set**: more plant tiles (flower beds, vines, trees with canopy
+  overhang, window boxes) drawn in the existing tile style; flora tiles are
+  content-pack data once maps split out.
+- **Ambient layer**: a lightweight particle pass in `draw()` — fireflies at
+  dusk-themed maps, drifting petals/leaves, sparkle motes for fairy-themed
+  games. Cheap (a dozen points per frame), huge vibe. Theme-aware (the fairy
+  palette begs for motes).
+- **Canvas theming**: world tile colors are still hardcoded per world; a later
+  step maps them through the theme so Forest/Fairy reach into the world itself,
+  not just the UI chrome.
+
 > Current roadmap and shipping process live in `HANDOFF.md`.
 
 ---

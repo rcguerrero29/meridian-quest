@@ -150,6 +150,49 @@ const CANDIDATES = [
   if (!t3.saved.wr || !t3.saved.wr.bandana) fails.push('dog wear not saved');
   if (!t3.saved.wc || !t3.saved.wc.bandana || !t3.saved.wc.collar) fails.push('cat wear not saved');
 
+  // ---- 3a2. comfort checks (template guarantee): WCAG contrast on every theme
+  //           variant, and tap targets >= 24px on every visible button ----
+  const comfort = await page.evaluate(() => {
+    const problems = [];
+    const lum = h => {
+      const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255)
+        .map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    };
+    const ratio = (a, b) => { const l = [lum(a), lum(b)].sort((x, y) => y - x); return (l[0] + 0.05) / (l[1] + 0.05); };
+    const PAIRS = [['ink', 'bg'], ['ink', 'surface'], ['ink', 'chip'], ['ink', 'bubble'], ['muted', 'surface'], ['accent-ink', 'accent']];
+    const audit = (name, mode, p) => PAIRS.forEach(([fg, bg2]) => {
+      const r = ratio(p[fg], p[bg2]);
+      if (r < 4.5) problems.push(`contrast ${name}/${mode} ${fg} on ${bg2} = ${r.toFixed(2)} (< 4.5)`);
+    });
+    // built-in palette: read the stylesheet's values in both modes via data-theme
+    const readVars = () => { const cs = getComputedStyle(document.documentElement); const o = {};
+      ['bg', 'surface', 'ink', 'muted', 'line', 'accent', 'accent-ink', 'chip', 'bubble', 'bubble-line']
+        .forEach(k => o[k] = cs.getPropertyValue('--' + k).trim()); return o; };
+    document.documentElement.dataset.theme = 'light'; audit('meridian', 'light', readVars());
+    document.documentElement.dataset.theme = 'dark'; audit('meridian', 'dark', readVars());
+    delete document.documentElement.dataset.theme;
+    Object.entries(THEMES).forEach(([name, t]) => {
+      if (!t) return;
+      audit(name, 'light', t.light); audit(name, 'dark', t.dark);
+    });
+    // tap targets: every visible button at least 24x24 (WCAG 2.5.8)
+    document.querySelectorAll('button').forEach(b => {
+      const r = b.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) return; // hidden
+      if (Math.min(r.width, r.height) < 24) problems.push(`tap target < 24px: #${b.id || b.className || b.textContent.slice(0, 12)} (${Math.round(r.width)}x${Math.round(r.height)})`);
+    });
+    // theme switch applies + persists
+    document.querySelector('#themeRow button[data-th="fairy"]').click();
+    const acc = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    let stored = null; try { stored = localStorage.getItem('mqtheme'); } catch (e) {}
+    if (!(acc === THEMES.fairy.light.accent || acc === THEMES.fairy.dark.accent)) problems.push('fairy theme did not apply: ' + acc);
+    if (stored !== 'fairy') problems.push('theme not persisted: ' + stored);
+    document.querySelector('#themeRow button[data-th="meridian"]').click();
+    return problems;
+  });
+  fails.push(...comfort);
+
   // ---- 3b. multiplayer stub: button opens the under-construction panel; NET seam inert ----
   await page.evaluate(() => { document.getElementById('wardrobe').hidden = true; });
   await page.click('#gear');

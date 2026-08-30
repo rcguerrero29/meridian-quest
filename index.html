@@ -238,6 +238,13 @@
             <button id="optEn">English</button>
             <button id="optEs">Español</button>
           </div>
+          <label id="lbTheme"></label>
+          <div class="optrow" id="themeRow">
+            <button data-th="meridian"></button>
+            <button data-th="forest"></button>
+            <button data-th="fairy"></button>
+            <button data-th="sunset"></button>
+          </div>
           <label id="lbAdm"></label>
           <div class="optrow">
             <button id="admOff"></button>
@@ -793,6 +800,8 @@ One source of truth for one very good pet.
   tpBoard:"🎫 Board with this save",tpSkip:"Keep this device's save",
   mpBtn:"🌐 Multiplayer 🚧",mpTitle:"🌐 Multiplayer",
   mpNote:"🚧 Under construction. The MQT crew is laying track to Barrio Norte — one day other consultants will roam these streets with you. For now, the office is all yours. (Hard hats stay on until the line opens.)",
+  lbTheme:"Color theme",
+  themes:{meridian:"🏢 Meridian",forest:"🌿 Forest",fairy:"🧚 Fairy",sunset:"🌇 Sunset"},
   retryNote:"❗ This one stays open — come back and make the better call.",
   retryNoteFred:"🦴 Frederick will reopen the folder for another treat.",
   mapTitle:"Village map",vmF2:"Floor 2",vmHQ:"Meridian HQ",vmSt:"Meridian Street",vmLc:"La Cocina 🌶️",
@@ -891,6 +900,8 @@ Una sola fuente de verdad para una gran mascota.
   tpBoard:"🎫 Abordar con esta partida",tpSkip:"Conservar la partida de este dispositivo",
   mpBtn:"🌐 Multijugador 🚧",mpTitle:"🌐 Multijugador",
   mpNote:"🚧 En construcción. La cuadrilla del MQT está tendiendo vías hacia Barrio Norte — un día otros consultores rondarán estas calles contigo. Por ahora, la oficina es toda tuya. (El casco no se quita hasta que abra la línea.)",
+  lbTheme:"Tema de color",
+  themes:{meridian:"🏢 Meridian",forest:"🌿 Bosque",fairy:"🧚 Hada",sunset:"🌇 Atardecer"},
   retryNote:"❗ Esta sigue abierta — vuelve y toma la mejor decisión.",
   retryNoteFred:"🦴 Frederick reabrirá la carpeta por otro premio.",
   mapTitle:"Mapa del pueblo",vmF2:"Piso 2",vmHQ:"Meridian HQ",vmSt:"Calle Meridian",vmLc:"La Cocina 🌶️",
@@ -1763,6 +1774,40 @@ $("optPad").addEventListener("click",()=>{ctl="pad";applyCtl();});
   joy.addEventListener("pointermove",e=>{if(e.pointerId===active)setFrom(e);});
   joy.addEventListener("pointerup",end);joy.addEventListener("pointercancel",end);
 })();
+/* ---------- comfort themes (AJ's feedback): curated palettes, each with light+dark
+   variants, applied over the CSS variables. Adding a theme = data only — and CI runs
+   a WCAG contrast audit over every variant, so a palette that hurts eyes can't ship. */
+const THEMES={
+ meridian:null, /* the built-in palette from the stylesheet */
+ forest:{
+  light:{bg:"#EDF2E6",surface:"#FFFFFF",ink:"#1E2A1E",muted:"#54644E",line:"#CBD6C0",
+         accent:"#2E7D4F","accent-ink":"#FFFFFF",chip:"#E2EAD8",bubble:"#E7F0DD","bubble-line":"#C4D6B0"},
+  dark:{bg:"#121A12",surface:"#1B241B",ink:"#E6EEE2",muted:"#A3B49C",line:"#2E3C2E",
+        accent:"#7FD8A0","accent-ink":"#0F2114",chip:"#243024",bubble:"#223022","bubble-line":"#3C503C"}},
+ fairy:{
+  light:{bg:"#F4EFFA",surface:"#FFFFFF",ink:"#2A2140",muted:"#665A82",line:"#DDD2EE",
+         accent:"#8140CE","accent-ink":"#FFFFFF",chip:"#ECE3F7",bubble:"#F0E6FB","bubble-line":"#D8C4F0"},
+  dark:{bg:"#171226",surface:"#221A35",ink:"#EFE8FA",muted:"#AC9FCA",line:"#3A2E58",
+        accent:"#C9A2FF","accent-ink":"#241040",chip:"#2C2344",bubble:"#2A2145","bubble-line":"#4C3B70"}},
+ sunset:{
+  light:{bg:"#F7EFE3",surface:"#FFFDF8",ink:"#33261C",muted:"#776450",line:"#E2D4C0",
+         accent:"#B34A14","accent-ink":"#FFFFFF",chip:"#EFE3D0",bubble:"#F3E7D3","bubble-line":"#DFC9A8"},
+  dark:{bg:"#1D140E",surface:"#291D14",ink:"#F2E7DA",muted:"#BEA88F",line:"#443221",
+        accent:"#F0A868","accent-ink":"#2A1505",chip:"#362718",bubble:"#342517","bubble-line":"#55402B"}}};
+const THEME_KEYS=["bg","surface","ink","muted","line","accent","accent-ink","chip","bubble","bubble-line"];
+let themeName="meridian";try{themeName=localStorage.getItem("mqtheme")||"meridian";}catch(e){}
+if(!THEMES.hasOwnProperty(themeName))themeName="meridian";
+const darkMq=window.matchMedia("(prefers-color-scheme: dark)");
+function applyTheme(){
+  const t2=THEMES[themeName],root=document.documentElement;
+  THEME_KEYS.forEach(k2=>root.style.removeProperty("--"+k2));
+  if(t2){const set2=darkMq.matches?t2.dark:t2.light;
+    Object.entries(set2).forEach(([k2,v])=>root.style.setProperty("--"+k2,v));}
+  document.querySelectorAll("#themeRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.th===themeName?"true":"false"));
+  try{localStorage.setItem("mqtheme",themeName);}catch(e){}
+}
+try{darkMq.addEventListener("change",applyTheme);}catch(e){}
+document.querySelectorAll("#themeRow button").forEach(b=>b.addEventListener("click",()=>{themeName=b.dataset.th;applyTheme();}));
 /* ---------- language ---------- */
 function applyLang(){
   const t=T();
@@ -1780,6 +1825,8 @@ function applyLang(){
   $("setTitle").textContent=t.setTitle;$("lbCtl").textContent=t.lbCtl;
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
+  $("lbTheme").textContent=t.lbTheme;
+  document.querySelectorAll("#themeRow button").forEach(b=>b.textContent=t.themes[b.dataset.th]);
   $("openLab").textContent=t.openLab;$("closeSet").textContent=t.closeSet;$("openWd").textContent=t.wdBtn;$("openTp").textContent=t.tpBtn;$("openMp").textContent=t.mpBtn;
   $("tlTitle").textContent=t.tlTitle;$("tlHint").textContent=t.tlHint;$("tlApply").textContent=t.tlApply;$("tlClose").textContent=t.tlClose;
   document.querySelectorAll("#brushes button[data-b] .bl").forEach((el,i)=>el.textContent=t.brushes[i]);
@@ -2180,7 +2227,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   });
   $("tpSkip").addEventListener("click",()=>{stripPassHash();$("tpFound").hidden=true;});
 })();
-applyAdmin();applyLang();applyCtl();
+applyAdmin();applyLang();applyCtl();applyTheme();
 if(NET.enabled)NET.boot();
 requestAnimationFrame(ts=>{last=ts;loop(ts);});
 sizeCanvas();
