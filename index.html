@@ -68,6 +68,9 @@
   .gear{position:absolute; right:10px; top:10px; width:38px; height:38px; border-radius:10px; border:none; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.05rem; cursor:pointer; z-index:4;}
   .gear svg{display:block; width:20px; height:20px; margin:auto; pointer-events:none;}
   #careForm input{box-sizing:border-box; min-width:0; font-family:'IBM Plex Sans',sans-serif; font-size:.85rem; padding:8px 10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink);}
+  .terow{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+  .terow span{flex:1; font-family:'IBM Plex Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted);}
+  .terow input[type=color]{width:52px; height:30px; border:1.5px solid var(--line); border-radius:8px; background:var(--bg); padding:2px; cursor:pointer;}
   .wdrow{display:flex; gap:8px; flex-wrap:wrap; margin:2px 0 12px;}
   .wdrow .sw{width:30px; height:30px; border-radius:50%; border:2px solid var(--line); cursor:pointer; padding:0; background:var(--chip); color:var(--muted); font-size:.75rem; line-height:1;}
   .wdrow .sw[aria-pressed="true"]{border-color:var(--accent); outline:2px solid var(--accent); outline-offset:1px;}
@@ -245,6 +248,10 @@
             <button data-th="fairy"></button>
             <button data-th="sunset"></button>
           </div>
+          <div class="optrow" id="themeRow2">
+            <button data-th="custom" id="thCustom" hidden></button>
+            <button id="teOpen" hidden></button>
+          </div>
           <label id="lbAdm"></label>
           <div class="optrow">
             <button id="admOff"></button>
@@ -295,6 +302,20 @@
           <canvas id="mapcv" style="width:100%; border-radius:8px; image-rendering:pixelated;"></canvas>
           <p id="mapNote" style="font-size:.78rem; color:var(--muted); margin:8px 0 12px;"></p>
           <button class="close" id="mapClose"></button>
+        </div>
+      </div>
+      <div class="settings" id="themeEd" hidden>
+        <div class="box">
+          <h3 id="teTitle"></h3>
+          <label id="teFrom"></label>
+          <div class="optrow" id="teClone">
+            <button data-cl="meridian">🏢</button><button data-cl="forest">🌿</button><button data-cl="fairy">🧚</button><button data-cl="sunset">🌇</button>
+          </div>
+          <label id="teModeLb"></label>
+          <div class="optrow"><button id="teLight">☀️</button><button id="teDark">🌙</button></div>
+          <div id="teRows"></div>
+          <div class="optrow" style="margin-top:10px;"><button id="teFix"></button></div>
+          <button class="close" id="teClose"></button>
         </div>
       </div>
       <div class="settings" id="mpanel" hidden>
@@ -801,7 +822,11 @@ One source of truth for one very good pet.
   mpBtn:"🌐 Multiplayer 🚧",mpTitle:"🌐 Multiplayer",
   mpNote:"🚧 Under construction. The MQT crew is laying track to Barrio Norte — one day other consultants will roam these streets with you. For now, the office is all yours. (Hard hats stay on until the line opens.)",
   lbTheme:"Color theme",
-  themes:{meridian:"🏢 Meridian",forest:"🌿 Forest",fairy:"🧚 Fairy",sunset:"🌇 Sunset"},
+  themes:{meridian:"🏢 Meridian",forest:"🌿 Forest",fairy:"🧚 Fairy",sunset:"🌇 Sunset",custom:"✨ Custom"},
+  teOpen:"🎨 Theme editor",teTitle:"🎨 Theme editor",
+  teFrom:"Start from a preset (clones it into ✨ Custom)",teModeLb:"Editing variant",
+  teFix:"🪄 Auto-fix contrast",
+  teFixed:"🪄 Text colors nudged until every pair passes the contrast audit.",
   retryNote:"❗ This one stays open — come back and make the better call.",
   retryNoteFred:"🦴 Frederick will reopen the folder for another treat.",
   mapTitle:"Village map",vmF2:"Floor 2",vmHQ:"Meridian HQ",vmSt:"Meridian Street",vmLc:"La Cocina 🌶️",
@@ -901,7 +926,11 @@ Una sola fuente de verdad para una gran mascota.
   mpBtn:"🌐 Multijugador 🚧",mpTitle:"🌐 Multijugador",
   mpNote:"🚧 En construcción. La cuadrilla del MQT está tendiendo vías hacia Barrio Norte — un día otros consultores rondarán estas calles contigo. Por ahora, la oficina es toda tuya. (El casco no se quita hasta que abra la línea.)",
   lbTheme:"Tema de color",
-  themes:{meridian:"🏢 Meridian",forest:"🌿 Bosque",fairy:"🧚 Hada",sunset:"🌇 Atardecer"},
+  themes:{meridian:"🏢 Meridian",forest:"🌿 Bosque",fairy:"🧚 Hada",sunset:"🌇 Atardecer",custom:"✨ Personalizado"},
+  teOpen:"🎨 Editor de temas",teTitle:"🎨 Editor de temas",
+  teFrom:"Parte de un preset (se clona en ✨ Personalizado)",teModeLb:"Variante en edición",
+  teFix:"🪄 Auto-ajustar contraste",
+  teFixed:"🪄 Colores de texto ajustados hasta que cada par pasa la auditoría de contraste.",
   retryNote:"❗ Esta sigue abierta — vuelve y toma la mejor decisión.",
   retryNoteFred:"🦴 Frederick reabrirá la carpeta por otro premio.",
   mapTitle:"Mapa del pueblo",vmF2:"Piso 2",vmHQ:"Meridian HQ",vmSt:"Calle Meridian",vmLc:"La Cocina 🌶️",
@@ -1795,19 +1824,97 @@ const THEMES={
   dark:{bg:"#1D140E",surface:"#291D14",ink:"#F2E7DA",muted:"#BEA88F",line:"#443221",
         accent:"#F0A868","accent-ink":"#2A1505",chip:"#362718",bubble:"#342517","bubble-line":"#55402B"}}};
 const THEME_KEYS=["bg","surface","ink","muted","line","accent","accent-ink","chip","bubble","bubble-line"];
+/* custom theme: clone a preset in the admin theme editor, tweak freely, and the
+   🪄 auto-fix button repairs contrast after lazy changes. Stored per device. */
+function sanitizeTheme(t2){
+  if(!t2||typeof t2!=="object")return null;
+  const out={};
+  ["light","dark"].forEach(m2=>{const src=t2[m2];if(!src||typeof src!=="object")return;
+    const o={};THEME_KEYS.forEach(k2=>{const v=src[k2];
+      if(typeof v==="string"&&/^#[0-9A-Fa-f]{6}$/.test(v))o[k2]=v;});
+    if(Object.keys(o).length===THEME_KEYS.length)out[m2]=o;});
+  return out.light&&out.dark?out:null;
+}
+let customTheme=null;
+try{customTheme=sanitizeTheme(JSON.parse(localStorage.getItem("mqcustom")||"null"));}catch(e){}
 let themeName="meridian";try{themeName=localStorage.getItem("mqtheme")||"meridian";}catch(e){}
-if(!THEMES.hasOwnProperty(themeName))themeName="meridian";
+if(!THEMES.hasOwnProperty(themeName)&&themeName!=="custom")themeName="meridian";
 const darkMq=window.matchMedia("(prefers-color-scheme: dark)");
 function applyTheme(){
-  const t2=THEMES[themeName],root=document.documentElement;
+  if(themeName==="custom"&&!customTheme)themeName="meridian";
+  const t2=themeName==="custom"?customTheme:THEMES[themeName],root=document.documentElement;
   THEME_KEYS.forEach(k2=>root.style.removeProperty("--"+k2));
   if(t2){const set2=darkMq.matches?t2.dark:t2.light;
     Object.entries(set2).forEach(([k2,v])=>root.style.setProperty("--"+k2,v));}
-  document.querySelectorAll("#themeRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.th===themeName?"true":"false"));
+  document.querySelectorAll("#themeRow button,#themeRow2 button[data-th]")
+    .forEach(b=>b.setAttribute("aria-pressed",b.dataset.th===themeName?"true":"false"));
+  $("thCustom").hidden=!customTheme;
   try{localStorage.setItem("mqtheme",themeName);}catch(e){}
 }
 try{darkMq.addEventListener("change",applyTheme);}catch(e){}
-document.querySelectorAll("#themeRow button").forEach(b=>b.addEventListener("click",()=>{themeName=b.dataset.th;applyTheme();}));
+document.querySelectorAll("#themeRow button,#thCustom").forEach(b=>b.addEventListener("click",()=>{themeName=b.dataset.th;applyTheme();}));
+/* --- contrast math (same WCAG formula the CI audit uses) --- */
+const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const rgb2hex=r=>"#"+r.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,"0")).join("");
+const relLum=h=>{const c=hex2rgb(h).map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return .2126*c[0]+.7152*c[1]+.0722*c[2];};
+const cRatio=(a,b)=>{const l1=relLum(a),l2=relLum(b);return(Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);};
+const mixHex=(h,t2,amt)=>{const tr=hex2rgb(t2);return rgb2hex(hex2rgb(h).map((v,i)=>v+(tr[i]-v)*amt));};
+function fixFg(fg,bgs,min){ /* smallest nudge toward black or white that clears `min` vs every bg */
+  const ok=h=>bgs.every(b=>cRatio(h,b)>=min);
+  if(ok(fg))return fg;
+  for(let a=0.05;a<=1.001;a+=0.05){
+    const dk=mixHex(fg,"#000000",a);if(ok(dk))return dk;
+    const lt=mixHex(fg,"#FFFFFF",a);if(ok(lt))return lt;
+  }
+  return bgs.every(b=>cRatio("#000000",b)>=cRatio("#FFFFFF",b))?"#000000":"#FFFFFF";
+}
+function autoFixTheme(){ /* backgrounds are the designer's; text adjusts to stay readable */
+  ["light","dark"].forEach(m2=>{const p=customTheme[m2];
+    p.ink=fixFg(p.ink,[p.bg,p.surface,p.chip,p.bubble],4.5);
+    p.muted=fixFg(p.muted,[p.surface,p.bg],4.5);
+    p["accent-ink"]=fixFg(p["accent-ink"],[p.accent],4.5);
+  });
+  saveCustom();applyTheme();teRender();toast(T().teFixed,2200);
+}
+/* --- theme editor (admin) --- */
+let teMode="light";
+function saveCustom(){try{localStorage.setItem("mqcustom",JSON.stringify(customTheme));}catch(e){}}
+function meridianVars(mode){ /* read the built-in palette out of the stylesheet */
+  const root=document.documentElement,prev=root.dataset.theme;
+  THEME_KEYS.forEach(k2=>root.style.removeProperty("--"+k2));
+  root.dataset.theme=mode;
+  const cs=getComputedStyle(root),o={};
+  THEME_KEYS.forEach(k2=>o[k2]=cs.getPropertyValue("--"+k2).trim());
+  if(prev)root.dataset.theme=prev;else delete root.dataset.theme;
+  return o;
+}
+function cloneTheme(name){
+  customTheme=name==="meridian"?{light:meridianVars("light"),dark:meridianVars("dark")}
+    :JSON.parse(JSON.stringify(THEMES[name]));
+  themeName="custom";saveCustom();applyTheme();teRender();
+}
+function teRender(){
+  const box=$("teRows");box.innerHTML="";
+  if(!customTheme)return;
+  $("teLight").setAttribute("aria-pressed",teMode==="light"?"true":"false");
+  $("teDark").setAttribute("aria-pressed",teMode==="dark"?"true":"false");
+  THEME_KEYS.forEach(k2=>{
+    const row=document.createElement("div");row.className="terow";
+    const lb=document.createElement("span");lb.textContent=k2;
+    const inp=document.createElement("input");inp.type="color";inp.value=customTheme[teMode][k2];
+    inp.addEventListener("input",()=>{customTheme[teMode][k2]=inp.value;saveCustom();applyTheme();});
+    row.appendChild(lb);row.appendChild(inp);box.appendChild(row);
+  });
+}
+$("teOpen").addEventListener("click",()=>{
+  if(!customTheme)cloneTheme(themeName==="custom"?"meridian":themeName);
+  else{themeName="custom";applyTheme();}
+  teRender();$("settings").hidden=true;$("themeEd").hidden=false;held=null;});
+document.querySelectorAll("#teClone button").forEach(b=>b.addEventListener("click",()=>cloneTheme(b.dataset.cl)));
+$("teLight").addEventListener("click",()=>{teMode="light";teRender();});
+$("teDark").addEventListener("click",()=>{teMode="dark";teRender();});
+$("teFix").addEventListener("click",autoFixTheme);
+$("teClose").addEventListener("click",()=>{$("themeEd").hidden=true;});
 /* ---------- language ---------- */
 function applyLang(){
   const t=T();
@@ -1826,7 +1933,9 @@ function applyLang(){
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
   $("lbTheme").textContent=t.lbTheme;
-  document.querySelectorAll("#themeRow button").forEach(b=>b.textContent=t.themes[b.dataset.th]);
+  document.querySelectorAll("#themeRow button,#thCustom").forEach(b=>b.textContent=t.themes[b.dataset.th]);
+  $("teOpen").textContent=t.teOpen;$("teTitle").textContent=t.teTitle;$("teFrom").textContent=t.teFrom;
+  $("teModeLb").textContent=t.teModeLb;$("teFix").textContent=t.teFix;$("teClose").textContent=t.tlClose;
   $("openLab").textContent=t.openLab;$("closeSet").textContent=t.closeSet;$("openWd").textContent=t.wdBtn;$("openTp").textContent=t.tpBtn;$("openMp").textContent=t.mpBtn;
   $("tlTitle").textContent=t.tlTitle;$("tlHint").textContent=t.tlHint;$("tlApply").textContent=t.tlApply;$("tlClose").textContent=t.tlClose;
   document.querySelectorAll("#brushes button[data-b] .bl").forEach((el,i)=>el.textContent=t.brushes[i]);
@@ -2101,6 +2210,7 @@ document.addEventListener("fullscreenchange",()=>{setTimeout(sizeCanvas,80);});
 try{admin=localStorage.getItem("mqadmin")==="1";}catch(e){}
 function applyAdmin(){
   $("brushes").hidden=!admin;
+  $("teOpen").hidden=!admin; /* the theme editor is admin-mode tooling; the ✨ Custom result is for everyone */
   $("admOn").setAttribute("aria-pressed",admin?"true":"false");
   $("admOff").setAttribute("aria-pressed",admin?"false":"true");
   try{localStorage.setItem("mqadmin",admin?"1":"0");}catch(e){}

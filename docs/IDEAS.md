@@ -115,8 +115,15 @@ variants, persisted per device. Adding a theme = one data object in `THEMES`;
 CI enforces comfort automatically: every theme variant must pass a **WCAG
 contrast audit** (≥ 4.5:1 on all text pairs) and every visible button a
 **≥ 24px tap-target check** — a template palette that hurts eyes or thumbs
-cannot ship. Curated presets over free color pickers, deliberately: comfort
-needs coherent combinations, and presets keep the audit exhaustive.
+cannot ship. Presets stay the default because comfort needs coherent
+combinations — but customization shipped the same day (owner + AJ ask): the
+**admin theme editor** (⚙️ Settings → 🎨 Theme editor, admin mode only) clones
+any preset into a ✨ Custom theme, exposes all ten color keys per light/dark
+variant as color pickers with live preview, and a **🪄 Auto-fix contrast**
+button repairs lazy changes — backgrounds stay as the designer set them, text
+colors take the smallest nudge toward black or white that clears 4.5:1 on
+every pair (the same WCAG math CI runs). CI verifies the fixer itself: a
+sabotaged palette (ink = background) must come out passing.
 
 **Future graphics pass (the "better graphics / nature / fairy vibes" ask —
 schedule after the engine/content split):**

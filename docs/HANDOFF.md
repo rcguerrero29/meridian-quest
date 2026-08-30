@@ -119,7 +119,8 @@ The split must keep PEERS, sanitizeSave, and the CSP in `engine/` territory.
 5. **Graphics/nature pass** (AJ's feedback; after the split): critters-as-data
    (generalize DOG/CAT/PIG into a registry), flora tiles, ambient particles
    (fireflies/petals/fairy motes), theme-aware canvas colors. Design in
-   `IDEAS.md` §5. Comfort themes + CI contrast/tap-target audits already
+   `IDEAS.md` §5. Comfort themes, the admin theme editor (clone a preset →
+   customize → 🪄 auto-fix contrast), and CI contrast/tap-target audits all
    shipped 2026-08-30.
 6. **More wardrobe / Week Two** — extra items are data (`WEAR` + a draw snippet);
    the epilogues already tease "Week Two" content.

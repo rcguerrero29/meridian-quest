@@ -193,6 +193,32 @@ const CANDIDATES = [
   });
   fails.push(...comfort);
 
+  // ---- 3a3. theme editor: clone -> sabotage -> auto-fix must repass the audit ----
+  const editor = await page.evaluate(() => {
+    const problems = [];
+    cloneTheme('fairy');
+    if (themeName !== 'custom') problems.push('clone did not select custom theme');
+    if (document.getElementById('thCustom').hidden) problems.push('custom button not revealed');
+    // lazy change: ink painted the same as the background, muted nearly invisible
+    customTheme.light.ink = customTheme.light.bg;
+    customTheme.dark.muted = customTheme.dark.surface;
+    customTheme.light['accent-ink'] = customTheme.light.accent;
+    autoFixTheme();
+    const PAIRS = [['ink', 'bg'], ['ink', 'surface'], ['ink', 'chip'], ['ink', 'bubble'], ['muted', 'surface'], ['accent-ink', 'accent']];
+    ['light', 'dark'].forEach(m => PAIRS.forEach(([fg, bg2]) => {
+      const r = cRatio(customTheme[m][fg], customTheme[m][bg2]);
+      if (r < 4.5) problems.push(`auto-fix left ${m} ${fg}/${bg2} at ${r.toFixed(2)}`);
+    }));
+    let stored = null; try { stored = JSON.parse(localStorage.getItem('mqcustom')); } catch (e) {}
+    if (!stored || !stored.light || !stored.dark) problems.push('custom theme not persisted');
+    if (sanitizeTheme({ light: { bg: 'javascript:x' }, dark: null }) !== null) problems.push('sanitizeTheme accepted garbage');
+    if (sanitizeTheme(stored) === null) problems.push('sanitizeTheme rejected its own output');
+    // back to default for the rest of the suite
+    themeName = 'meridian'; applyTheme();
+    return problems;
+  });
+  fails.push(...editor);
+
   // ---- 3b. multiplayer stub: button opens the under-construction panel; NET seam inert ----
   await page.evaluate(() => { document.getElementById('wardrobe').hidden = true; });
   await page.click('#gear');
