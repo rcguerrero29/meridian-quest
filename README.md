@@ -15,6 +15,10 @@ Everything is one self-contained static page: canvas engine, 6 maps, 16 NPCs,
 - **Run locally:** open `index.html` in a browser. No build, no dependencies
   (Google Fonts is the only external fetch, with system-font fallbacks).
 - **Hosting:** designed for GitHub Pages or any static host.
+- **Install as an app:** when served from a host (not `file://`), the game ships a
+  web-app manifest and a cache-first service worker (`sw.js`), so it can be added
+  to a phone's home screen and played fully offline. Bump the cache name in
+  `sw.js` (`mq-v2` → `mq-v3`, …) when shipping a new version.
 
 ## Why a repo instead of a chat artifact?
 
