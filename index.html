@@ -63,6 +63,10 @@
   .knob{position:absolute; left:50%; top:50%; width:48px; height:48px; border-radius:50%; background:rgba(122,63,224,.85); border:2px solid rgba(237,233,245,.5); transform:translate(-50%,-50%); transition:transform .08s;}
   .gear{position:absolute; right:10px; top:10px; width:38px; height:38px; border-radius:10px; border:none; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.05rem; cursor:pointer; z-index:4;}
   .gear svg{display:block; width:20px; height:20px; margin:auto; pointer-events:none;}
+  .wdrow{display:flex; gap:8px; flex-wrap:wrap; margin:2px 0 12px;}
+  .wdrow .sw{width:30px; height:30px; border-radius:50%; border:2px solid var(--line); cursor:pointer; padding:0; background:var(--chip); color:var(--muted); font-size:.75rem; line-height:1;}
+  .wdrow .sw[aria-pressed="true"]{border-color:var(--accent); outline:2px solid var(--accent); outline-offset:1px;}
+  #wdpv{display:block; margin:0 auto 12px; width:132px; image-rendering:pixelated; background:#241F2E; border-radius:10px;}
   .fsbtn{right:54px !important;}
   .mapbtn{right:98px !important;}
   .vmap{display:flex; flex-direction:column; align-items:center; gap:2px; margin-bottom:14px; font-size:.78rem;}
@@ -266,6 +270,17 @@
           <button class="close" id="mapClose"></button>
         </div>
       </div>
+      <div class="settings" id="wardrobe" hidden>
+        <div class="box">
+          <h3 id="wdTitle"></h3>
+          <p id="wdNote" style="font-size:.8rem; color:var(--muted); margin:4px 0 10px;"></p>
+          <canvas id="wdpv" width="66" height="44"></canvas>
+          <label id="wdLbBandana"></label><div class="wdrow" id="wdRowBandana"></div>
+          <label id="wdLbCollar"></label><div class="wdrow" id="wdRowCollar"></div>
+          <label id="wdLbCape"></label><div class="wdrow" id="wdRowCape"></div>
+          <button class="close" id="wdClose"></button>
+        </div>
+      </div>
     </div>
     <p class="hint" id="ctlHint"></p>
   </div>
@@ -293,10 +308,10 @@
    MERIDIAN QUEST v7 — bilingual (EN/ES), text lab, real doors
    Architecture: engine / content / saves are separate layers.
    ========================================================= */
-const NPCE={priya:"🛠️",marcus:"💼",camila:"🎧",tovar:"🌮",legal:"⚖️",cto:"🏥",junior:"🐣",ceo:"👑",fred:"🐕",rosa:"🌶️",chuy:"👨‍🍳",guero:"👷",lupe:"📐",beto:"🔨",kike:"🧱",mari:"🏗️"};
+const NPCE={priya:"🛠️",marcus:"💼",camila:"🎧",tovar:"🌮",legal:"⚖️",cto:"🏥",junior:"🐣",ceo:"👑",fred:"🐕",rosa:"🌶️",chuy:"👨‍🍳",guero:"👷",lupe:"📐",beto:"🔨",kike:"🧱",mari:"🏗️",xochi:"🧵"};
 const NPCN={
- en:{priya:"Priya · Engineering Lead",marcus:"Marcus · CFO",camila:"Camila · Customer Success",tovar:"Ops Director · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · Bayview CTO",junior:"Theo · Junior PM",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Good Boy",rosa:"Doña Rosa · Owner, La Cocina",chuy:"Chuy · Head Cook",guero:"Don Güero · Foreman, La Obra",lupe:"Lupe · Estimator & Permits",beto:"Beto · Crew, La Obra",kike:"Kike · Mason",mari:"Mari · Crane Operator"},
- es:{priya:"Priya · Líder de Ingeniería",marcus:"Marcus · CFO",camila:"Camila · Éxito del Cliente",tovar:"Director de Operaciones · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · CTO de Bayview",junior:"Theo · PM Junior",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Buen Chico",rosa:"Doña Rosa · Dueña de La Cocina",chuy:"Chuy · Jefe de Cocina",guero:"Don Güero · Maestro de Obra",lupe:"Lupe · Presupuestos y Permisos",beto:"Beto · Cuadrilla de La Obra",kike:"Kike · Albañil",mari:"Mari · Operadora de Grúa"}};
+ en:{priya:"Priya · Engineering Lead",marcus:"Marcus · CFO",camila:"Camila · Customer Success",tovar:"Ops Director · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · Bayview CTO",junior:"Theo · Junior PM",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Good Boy",rosa:"Doña Rosa · Owner, La Cocina",chuy:"Chuy · Head Cook",guero:"Don Güero · Foreman, La Obra",lupe:"Lupe · Estimator & Permits",beto:"Beto · Crew, La Obra",kike:"Kike · Mason",mari:"Mari · Crane Operator",xochi:"Xochi · Designer"},
+ es:{priya:"Priya · Líder de Ingeniería",marcus:"Marcus · CFO",camila:"Camila · Éxito del Cliente",tovar:"Director de Operaciones · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · CTO de Bayview",junior:"Theo · PM Junior",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Buen Chico",rosa:"Doña Rosa · Dueña de La Cocina",chuy:"Chuy · Jefe de Cocina",guero:"Don Güero · Maestro de Obra",lupe:"Lupe · Presupuestos y Permisos",beto:"Beto · Cuadrilla de La Obra",kike:"Kike · Albañil",mari:"Mari · Operadora de Grúa",xochi:"Xochi · Diseñadora"}};
 /* Frederick's secret side quest (not part of the 10) */
 const FQEN={npc:"fred",title:"🐾 Personal side quest: Frederick's Files",start:"a",nodes:{
  a:{say:"Frederick drops a chewed folder at your feet. Inside: vet reminders on napkins, a feeding schedule that lives in three people's heads, and 40 unposted photos of him being majestic. This dog needs an ops system.",
@@ -474,7 +489,21 @@ const QEN=[
      ch:[{t:"“Around 300 locations!” — probably close",out:{r:"bad",concept:"Verifiable claims",why:"A confident guess is a lie with good posture. One wrong number unravels every right one that came before it.",beat:"It was 41. A journalist was on the line."}},
          {t:"“I can't verify the current count. As of the last update it was 38 — here's where the live list is.”",out:{r:"ok",concept:"Verifiable claims",why:"Confirms the known, names the unknown, hands over the path. That wording IS the trust product.",beat:"Priya reads it twice. “Ship the wording.” The highest praise she knows."}},
          {t:"“I cannot answer that question.”",out:{r:"mid",concept:"Verifiable claims",why:"Honest but lazy — refusing everything unverifiable throws away the partial truth you DO have. Half credit.",beat:"The caller asks a human, who reads them the same last update."}},
-         {t:"Answer normally, tuck “estimates may vary” at the end",out:{r:"mid",concept:"Verifiable claims",why:"Uncertainty in the footnote is certainty in the headline. Placement is part of wording. Half credit.",beat:"Nobody reads footnote three. Ever."}}]}}}
+         {t:"Answer normally, tuck “estimates may vary” at the end",out:{r:"mid",concept:"Verifiable claims",why:"Uncertainty in the footnote is certainty in the headline. Placement is part of wording. Half credit.",beat:"Nobody reads footnote three. Ever."}}]}}},
+ {npc:"xochi",title:"The collar drop",start:"a",nodes:{
+  a:{say:"Ah, the AI person! Look — La Obra builds the barrio, I dress it. I want a collar line for the neighborhood's pets: Frederick, Canela, the whole cast. I can sketch, but these AI image tools… how do we DESIGN with them without losing the craft?",
+     codex:"Image models are variation engines, not designers. The working pattern: the designer sets the brief, AI generates dozens of directions, the human curates and refines the winners — and a pick only becomes real once it's a structured spec (a tech pack): materials, measurements, colorways. Taste stays human; the machine does volume.",
+     q:"How does the collar line get designed?",
+     ch:[{t:"One prompt, first image, straight to production",out:{r:"bad",concept:"AI-assisted design",why:"No curation, no spec, no sizes — a first output is a mood, not a product. Production needs measurements, not vibes.",beat:"The sample arrives sized for a horse. Frederick declines to comment."}},
+         {t:"AI generates variations against Xochi's brief; she curates, and the pick becomes a tech pack — materials, sizes, colorways",next:"b"},
+         {t:"Copy that famous designer's collar and have AI restyle it a little",out:{r:"bad",concept:"IP & originality",why:"A restyled copy is still a copy — legally radioactive and creatively hollow. AI makes imitation faster, not legal, and the barrio deserves its own look.",beat:"Dana appears in the Studio doorway holding a cease-and-desist. Just so you know what one looks like."}},
+         {t:"Hand-sketch everything like always, no AI",out:{r:"mid",concept:"AI-assisted design",why:"The craft is real and the taste is the point — but one designer exploring five directions by hand loses to the same designer curating fifty. Half credit for standards.",beat:"Week two: three beautiful sketches, ninety unexplored ideas."}}]},
+  b:{say:"The tech pack came out gorgeous. Now the launch — these are virtual fits for the town's pets. How do we ship the line?",
+     codex:"Curation is quality control for creative goods. Small drops with a human QA pass — does every piece fit every body it's sold for? — keep a catalog worth browsing. Auto-generating infinite listings floods the shelf with slop, and “free everything forever” just means the work can't continue.",
+     q:"The drop strategy is…",
+     ch:[{t:"Small curated drops; every piece checked on every pet body before listing",out:{r:"ok",concept:"Curation as QA",why:"Each drop is small enough to check and special enough to want. The eval mindset, applied to fashion: test on every body shape before it ships.",beat:"Drop one sells out by sunset. Frederick models the gold collar with unbearable dignity."}},
+         {t:"Auto-generate and auto-list new items daily",out:{r:"bad",concept:"Curation as QA",why:"An infinite uncurated catalog is a landfill with a search bar. Nobody browses slop twice.",beat:"Item #4,072 is a collar with three buckles and no hole. A confused pigeon already bought it."}},
+         {t:"Everything free, forever, for everyone",out:{r:"mid",concept:"Curation as QA",why:"Generous — and unsustainable. Free is a launch tactic, not a plan; the line dies when the work can't pay for itself. Half credit for heart.",beat:"Month two: Xochi quietly takes a mural commission to fund collar three."}}]}}}
 ];
 const QES=[
  {npc:"tovar",title:"El chatbot de 500 documentos",start:"a",nodes:{
@@ -625,7 +654,21 @@ const QES=[
      ch:[{t:"«¡Unas 300 sucursales!» — seguro le atina",out:{r:"bad",concept:"Afirmaciones verificables",why:"Una suposición con confianza es una mentira con buena postura. Un número equivocado desteje todos los correctos anteriores.",beat:"Eran 41. En la línea había una periodista."}},
          {t:"«No puedo verificar el número actual. Al último corte eran 38 — aquí está la lista en vivo.»",out:{r:"ok",concept:"Afirmaciones verificables",why:"Confirma lo conocido, nombra lo desconocido, entrega el camino. Esa redacción ES el producto de confianza.",beat:"Priya lo lee dos veces. «Publica esa redacción.» El mayor elogio que conoce."}},
          {t:"«No puedo responder esa pregunta.»",out:{r:"mid",concept:"Afirmaciones verificables",why:"Honesto pero flojo — rehusar todo lo no verificable tira la verdad parcial que SÍ tienes. Medio crédito.",beat:"La persona le pregunta a un humano, que le lee el mismo último corte."}},
-         {t:"Responder normal y esconder «las cifras pueden variar» al final",out:{r:"mid",concept:"Afirmaciones verificables",why:"Incertidumbre en la letra chica es certeza en el titular. La ubicación también es redacción. Medio crédito.",beat:"Nadie lee la nota tres al pie. Nunca."}}]}}}
+         {t:"Responder normal y esconder «las cifras pueden variar» al final",out:{r:"mid",concept:"Afirmaciones verificables",why:"Incertidumbre en la letra chica es certeza en el titular. La ubicación también es redacción. Medio crédito.",beat:"Nadie lee la nota tres al pie. Nunca."}}]}}},
+ {npc:"xochi",title:"El drop de collares",start:"a",nodes:{
+  a:{say:"¡Ah, la persona de IA! Mira — La Obra construye el barrio, yo lo visto. Quiero una línea de collares para las mascotas del rumbo: Frederick, Canela, todo el elenco. Sé dibujar, pero estas herramientas de imágenes con IA… ¿cómo DISEÑAMOS con ellas sin perder el oficio?",
+     codex:"Los modelos de imágenes son motores de variaciones, no diseñadores. El patrón que funciona: la diseñadora define el brief, la IA genera decenas de direcciones, el humano cura y refina las ganadoras — y la elegida solo se vuelve real cuando es una especificación estructurada (un tech pack): materiales, medidas, colores. El gusto sigue siendo humano; la máquina pone el volumen.",
+     q:"¿Cómo se diseña la línea de collares?",
+     ch:[{t:"Un prompt, la primera imagen, directo a producción",out:{r:"bad",concept:"Diseño asistido por IA",why:"Sin curaduría, sin especificación, sin tallas — una primera salida es un mood, no un producto. Producción necesita medidas, no vibras.",beat:"La muestra llega en talla caballo. Frederick se niega a comentar."}},
+         {t:"La IA genera variaciones sobre el brief de Xochi; ella cura, y la elegida se vuelve tech pack — materiales, tallas, colores",next:"b"},
+         {t:"Copiar el collar de esa diseñadora famosa y que la IA lo restilice un poco",out:{r:"bad",concept:"PI y originalidad",why:"Una copia restilizada sigue siendo una copia — radiactiva en lo legal y hueca en lo creativo. La IA hace la imitación más rápida, no legal, y el barrio merece su propio estilo.",beat:"Dana aparece en la puerta del Estudio con un cese y desista. Solo para que sepas cómo se ve uno."}},
+         {t:"Dibujar todo a mano como siempre, sin IA",out:{r:"mid",concept:"Diseño asistido por IA",why:"El oficio es real y el gusto es el punto — pero una diseñadora explorando cinco direcciones a mano pierde contra la misma curando cincuenta. Medio crédito por los estándares.",beat:"Semana dos: tres bocetos hermosos, noventa ideas sin explorar."}}]},
+  b:{say:"El tech pack quedó precioso. Ahora el lanzamiento — son atuendos virtuales para las mascotas del pueblo. ¿Cómo sacamos la línea?",
+     codex:"La curaduría es control de calidad para bienes creativos. Drops pequeños con revisión humana — ¿cada pieza le queda a cada cuerpo para el que se vende? — mantienen un catálogo que vale la pena. Auto-generar publicaciones infinitas inunda el estante de basura, y «todo gratis para siempre» solo significa que el trabajo no puede continuar.",
+     q:"La estrategia del drop es…",
+     ch:[{t:"Drops pequeños y curados; cada pieza probada en cada cuerpo antes de publicarse",out:{r:"ok",concept:"Curaduría como QA",why:"Cada drop es lo bastante pequeño para revisarse y lo bastante especial para desearse. La mentalidad de evals, aplicada a la moda: se prueba en cada tipo de cuerpo antes de salir.",beat:"El primer drop se agota antes del atardecer. Frederick modela el collar dorado con una dignidad insoportable."}},
+         {t:"Auto-generar y auto-publicar artículos nuevos a diario",out:{r:"bad",concept:"Curaduría como QA",why:"Un catálogo infinito sin curar es un basurero con buscador. Nadie navega la basura dos veces.",beat:"El artículo #4,072 es un collar con tres hebillas y ningún agujero. Ya lo compró una paloma confundida."}},
+         {t:"Todo gratis, para siempre, para todos",out:{r:"mid",concept:"Curaduría como QA",why:"Generoso — e insostenible. Lo gratis es táctica de lanzamiento, no un plan; la línea muere cuando el trabajo no se paga solo. Medio crédito por el corazón.",beat:"Mes dos: Xochi acepta un mural en silencio para financiar el collar tres."}}]}}}
 ];
 const UI={
  en:{
@@ -698,6 +741,9 @@ One source of truth for one very good dog. Swap in your own pet's details and it
 3. One shared checklist; whoever feeds him checks it off.
 4. Nothing posts as Frederick without human approval. He cannot approve. He is a dog.`,
   careEvents:["🐾 Flea/tick + heartworm — Frederick","🐾 Grooming — Frederick","🐾 Weigh-in — Frederick","🐾 Vet checkup + vaccines — Frederick","📸 Frederick content batch day"],
+  wdTitle:"🧵 Xochi's Collar Drop",wdNote:"Fresh from the tech pack — dress Frederick. Changes save instantly; he's at HQ, being majestic.",
+  wdBandana:"Bandana",wdCollar:"Collar",wdCape:"Cape",
+  wdUnlockToast:"🧵 Wardrobe unlocked — talk to Xochi again to dress Frederick.",
   mapTitle:"Village map",vmF2:"Floor 2",vmHQ:"Meridian HQ",vmSt:"Meridian Street",vmLc:"La Cocina 🌶️",
   vmSite0:"🚧 Construction site",vmSite2:"La Obra · Studio 📐",vmPlots:"Reserved lots — El Mercado & more",vmHere:"◉ you are here",
   goTitle:"☠️ Reputation: zero",goEpi:"Priya finds you in the parking lot. “The last lead didn't get a second chance. You do. Same desk, Monday.” The week resets — but this time, you've read the Codex.",
@@ -780,6 +826,9 @@ Una sola fuente de verdad para un muy buen perro. Cambia los datos por los de tu
 3. Una lista compartida; quien lo alimente, la marca.
 4. Nada se publica como Frederick sin aprobación humana. Él no puede aprobar. Es un perro.`,
   careEvents:["🐾 Pulgas/garrapatas + desparasitante — Frederick","🐾 Peluquería — Frederick","🐾 Pesaje — Frederick","🐾 Chequeo veterinario + vacunas — Frederick","📸 Día de contenido de Frederick"],
+  wdTitle:"🧵 El Drop de Xochi",wdNote:"Recién salido del tech pack — viste a Frederick. Los cambios se guardan al instante; anda en el HQ, siendo majestuoso.",
+  wdBandana:"Bandana",wdCollar:"Collar",wdCape:"Capa",
+  wdUnlockToast:"🧵 Vestidor desbloqueado — habla con Xochi otra vez para vestir a Frederick.",
   mapTitle:"Mapa del pueblo",vmF2:"Piso 2",vmHQ:"Meridian HQ",vmSt:"Calle Meridian",vmLc:"La Cocina 🌶️",
   vmSite0:"🚧 Obra en construcción",vmSite2:"La Obra · Estudio 📐",vmPlots:"Lotes reservados — El Mercado y más",vmHere:"◉ estás aquí",
   goTitle:"☠️ Reputación: cero",goEpi:"Priya te encuentra en el estacionamiento. «El líder anterior no tuvo segunda oportunidad. Tú sí. Mismo escritorio, el lunes.» La semana se reinicia — pero esta vez, ya leíste el Códice.",
@@ -857,7 +906,7 @@ const WORLD_DEFS={
      "#..................#",
      "#..A....A....A.....#",
      "#..................#",
-     "#....RR....T.......#",
+     "#....RR....T.d.....#",
      "#..................#",
      "#..P..........P....#",
      "#..................#",
@@ -884,7 +933,8 @@ const PORTALS={hq:{"1":{to:"f2",x:17,y:11,dir:"left"},"E":{to:"st",x:14,y:1,dir:
 const TS=32;
 const SOLID=new Set(["#","D","K","P","B","F","G","C","X","T","W","V","A","U","Q"]);
 const WNPC={hq:STATIONS,lc:{r:{npc:"rosa",q:[10]},y:{npc:"chuy",q:[11]}},st:{f:{npc:"guero",q:[12]},e:{npc:"lupe",q:[13]}},
-            ex:{w:{npc:"beto",q:[],chat:1},x:{npc:"kike",q:[],chat:1},z:{npc:"mari",q:[],chat:1}}};
+            ex:{w:{npc:"beto",q:[],chat:1},x:{npc:"kike",q:[],chat:1},z:{npc:"mari",q:[],chat:1}},
+            lo:{d:{npc:"xochi",q:[15],chat:1}}};
 /* city growth: helping La Obra visibly advances the construction site */
 const OBRA=[[],
  [[6,17,"#"],[6,22,"#"],[6,26,"#"],[8,16,"#"],[8,20,"#"],[8,25,"#"]],
@@ -949,12 +999,18 @@ const NPCLOOK={p:{shirt:"#C2543F",skin:"#B97E52",hair:"#171219",style:"long"},j:
   h:{shirt:"#31446E",skin:"#E8B98C",hair:"#403830",style:"buzz",outfit:"formal"},m:{shirt:"#3A415C",skin:"#F1CDA9",hair:"#8E8E96",style:"buzz",outfit:"formal"},
   r:{shirt:"#B23A48",skin:"#C08356",hair:"#B9B9C0",style:"long"},y:{shirt:"#F0EEE6",skin:"#B97E52",hair:"#26202B",style:"buzz"},
   f:{shirt:"#E8720C",skin:"#B97E52",hair:"#9A9AA2",style:"buzz"},e:{shirt:"#2E7F86",skin:"#E5AC82",hair:"#26202B",style:"pony"},
-  w:{shirt:"#3E6FA8",skin:"#B97E52",hair:"#26202B",style:"buzz",hat:"hard"},x:{shirt:"#7A8752",skin:"#C08356",hair:"#26202B",style:"buzz",hat:"hard"},z:{shirt:"#A85C86",skin:"#E5AC82",hair:"#26202B",style:"pony",hat:"hard"}};
+  w:{shirt:"#3E6FA8",skin:"#B97E52",hair:"#26202B",style:"buzz",hat:"hard"},x:{shirt:"#7A8752",skin:"#C08356",hair:"#26202B",style:"buzz",hat:"hard"},z:{shirt:"#A85C86",skin:"#E5AC82",hair:"#26202B",style:"pony",hat:"hard"},
+  d:{shirt:"#C4586B",skin:"#C08356",hair:"#26202B",style:"buns"}};
 let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
 let xp=0,hearts=3,cls="",heroName="Rookie",look={shirt:"#8B5CF6",skin:"#E5AC82",hair:"#26202B",style:"cap",outfit:"casual"},done=new Set(),cur=null,curQ=null,node=null,treats=0,fredQ=0,qLvl0=0;
 let px=10,py=11,fx=10,fy=11,dir="down",moving=false,mt=0,held=null,bob=0;
 let warpT=0,portalT=0; /* post-warp grace: warpT blocks input, portalT blocks re-triggering — kills door ping-pong */
-const MAXXP=210;
+const MAXXP=230;
+/* Frederick's wardrobe — Xochi's collar line. Cosmetics are data; drawDog reads `wear`. */
+const WEAR={bandana:["#C0392B","#7A3FE0","#E0B45C","#2AA47C","#3E8ED0"],
+            collar:["#E0B45C","#C0392B","#7A3FE0","#2AA47C"],
+            cape:["#7A3FE0","#C0392B","#2C5FA8"]};
+let wear={bandana:null,collar:null,cape:null};
 const $=id=>document.getElementById(id);
 const T=()=>UI[lang];
 const AQ=()=>lang==="es"?QES:QEN;
@@ -966,7 +1022,7 @@ function hud(){const hs="❤".repeat(Math.max(0,hearts))+"♡".repeat(3-Math.max
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
   $("status").textContent=`${hs}  ${xp}XP`;}
 /* save */
-function save(){try{localStorage.setItem("mq1",JSON.stringify({n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world}));}catch(e){}}
+function save(){try{localStorage.setItem("mq1",JSON.stringify({n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear}));}catch(e){}}
 function setWorldTag(){$("worldTag").textContent=T().locs[world]+(world==="hq"?" · ❗":"");}
 function loadSave(){try{return JSON.parse(localStorage.getItem("mq1")||"");}catch(e){return null;}}
 /* belt & suspenders: flush progress when the tab is backgrounded or closed (only once a run exists) */
@@ -1131,9 +1187,13 @@ function drawDog(g,sx,sy){
   g.fillStyle="#7B7E8A";
   g.beginPath();g.ellipse(cx-9.6,sy+16.5+Math.sin(Date.now()/110)*1.4,2.3,1.7,-0.5,0,7);g.fill();
   if(DOG.sit){g.fillStyle="#7B7E8A";g.beginPath();g.roundRect(cx-9.5,sy+18,7,7,3);g.fill();}
-  if(fredQ>=2){ /* red bandana mod */
-    g.fillStyle="#C0392B";g.beginPath();g.moveTo(cx+3.4,sy+15.6);g.lineTo(cx+10.4,sy+15.6);g.lineTo(cx+7,sy+20.2);g.closePath();g.fill();}
+  /* Xochi's wardrobe: cape over the back, bandana at the neck (collar comes after the head) */
+  if(wear.cape){g.fillStyle=wear.cape;g.beginPath();g.roundRect(cx-7.8,sy+13.9,10,6.6,2.6);g.fill();
+    g.fillStyle="rgba(255,255,255,.28)";g.fillRect(cx-7.8,sy+14.8,10,1);}
+  if(wear.bandana){g.fillStyle=wear.bandana;g.beginPath();g.moveTo(cx+3.4,sy+15.6);g.lineTo(cx+10.4,sy+15.6);g.lineTo(cx+7,sy+20.2);g.closePath();g.fill();}
   g.fillStyle="#6E7280";g.beginPath();g.arc(cx+7.5,sy+13.5,4.6,0,7);g.fill();
+  if(wear.collar){g.fillStyle=wear.collar;g.fillRect(cx+3.2,sy+16.5,6.2,1.8);
+    g.fillStyle="#E0B45C";g.beginPath();g.arc(cx+6.3,sy+19.2,1.05,0,7);g.fill();}
   g.fillStyle="#4C4F58";
   g.beginPath();g.moveTo(cx+4.4,sy+10.6);g.lineTo(cx+6.4,sy+7.4);g.lineTo(cx+8,sy+10.2);g.closePath();g.fill();
   g.beginPath();g.moveTo(cx+8.6,sy+10);g.lineTo(cx+10.8,sy+7.6);g.lineTo(cx+11.6,sy+10.8);g.closePath();g.fill();
@@ -1392,7 +1452,9 @@ window.addEventListener("keydown",e=>{if(!$("world").hidden&&KEYS[e.key]){held=K
 window.addEventListener("keyup",e=>{if(KEYS[e.key]&&held===KEYS[e.key])held=null;});
 $("talk").addEventListener("click",()=>{
   const tb=$("talk");
-  if(tb.dataset.chatn){const L=(T().chat||{})[tb.dataset.chatn]||[];
+  if(tb.dataset.chatn){
+    if(tb.dataset.chatn==="xochi"){openWardrobe();return;} /* post-quest, Xochi runs the fitting room */
+    const L=(T().chat||{})[tb.dataset.chatn]||[];
     if(L.length)toast("💬 "+L[Math.floor(Math.random()*L.length)],2800);return;}
   questStart(+tb.dataset.qi);});
 let petTarget=null;
@@ -1459,8 +1521,9 @@ function pick(c,btn,t){
   v.hidden=false;hud();
   if(o.r!=="bad"&&lvlIdx()!==before){$("levelup").textContent=T().lvlUp+lvlName();$("levelup").hidden=false;}
   if(cur>=0){done.add(cur);
-    if(cur===12||cur===13){applyObra();setTimeout(()=>toast(T().obraUp,2800),700);}}
-  else if(o.r==="ok"&&node==="b"){fredQ=2;setTimeout(()=>toast(T().fredDoneToast,3000),600);}
+    if(cur===12||cur===13){applyObra();setTimeout(()=>toast(T().obraUp,2800),700);}
+    if(cur===15)setTimeout(()=>toast(T().wdUnlockToast,3400),700);}
+  else if(o.r==="ok"&&node==="b"){fredQ=2;wear.bandana=wear.bandana||"#C0392B";setTimeout(()=>toast(T().fredDoneToast,3000),600);}
   save();
   $("next").textContent=hearts<=0?T().nextDoom:(done.size===AQ().length?T().nextEnd:T().nextBack);
   $("next").hidden=false;
@@ -1752,6 +1815,34 @@ $("tvClose").addEventListener("click",()=>{$("travel").hidden=true;
   if(world==="st"){px=fx=1;py=fy=1;dir="right";}
   if(world==="ex"){px=fx=22;py=fy=3;dir="left";}
   checkTalk();});
+/* ---------- Xochi's wardrobe: equippable dog cosmetics, unlocked by the Designer quest ---------- */
+function wdDraw(){
+  const g=$("wdpv").getContext("2d");
+  g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,66,44);
+  g.setTransform(1.9,0,0,1.9,1,-13);
+  drawDog(g,1,0);
+}
+function buildWearRow(rowId,key){
+  const row=$(rowId);row.innerHTML="";
+  const mk=col=>{const b=document.createElement("button");b.className="sw";
+    if(col){b.style.background=col;b.setAttribute("aria-label",key+" "+col);}
+    else{b.textContent="✕";b.setAttribute("aria-label",key+": none");}
+    b.setAttribute("aria-pressed",wear[key]===col?"true":"false");
+    b.addEventListener("click",()=>{wear[key]=col;save();
+      [...row.children].forEach(x2=>x2.setAttribute("aria-pressed","false"));
+      b.setAttribute("aria-pressed","true");wdDraw();});
+    row.appendChild(b);};
+  mk(null);WEAR[key].forEach(mk);
+}
+function openWardrobe(){
+  const t=T();
+  $("wdTitle").textContent=t.wdTitle;$("wdNote").textContent=t.wdNote;
+  $("wdLbBandana").textContent=t.wdBandana;$("wdLbCollar").textContent=t.wdCollar;$("wdLbCape").textContent=t.wdCape;
+  $("wdClose").textContent=t.closeSet;
+  buildWearRow("wdRowBandana","bandana");buildWearRow("wdRowCollar","collar");buildWearRow("wdRowCape","cape");
+  wdDraw();$("wardrobe").hidden=false;held=null;
+}
+$("wdClose").addEventListener("click",()=>{$("wardrobe").hidden=true;});
 /* ---------- fullscreen + admin ---------- */
 let admin=false,brush="#";
 $("fsbtn").addEventListener("click",()=>{
@@ -1862,6 +1953,8 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").addEventListener("click",()=>{
     heroName=SV.n;cls=SV.c||"";look=SV.lk||look;xp=SV.xp||0;hearts=SV.he??3;done=new Set(SV.d||[]);
     treats=SV.tr||0;fredQ=SV.fq||0;
+    wear=(SV.wr&&typeof SV.wr==="object")?{bandana:null,collar:null,cape:null,...SV.wr}
+        :{bandana:fredQ>=2?"#C0392B":null,collar:null,cape:null}; /* pre-wardrobe saves: keep the earned red bandana */
     world=WORLDS[SV.w]?SV.w:"hq";
     px=fx=SV.px??10;py=fy=SV.py??11;
     applyObra();
