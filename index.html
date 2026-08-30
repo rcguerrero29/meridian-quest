@@ -692,7 +692,7 @@ const UI={
   tlTitle:"Text lab",tlHint:"Edit names, quest titles and bump lines (JSON). Applies to the current language.",tlApply:"Save",tlClose:"Close",tlOk:"Texts updated.",tlErr:"That JSON didn't parse — nothing changed.",
   levels:["Junior","Delivery Lead","Senior Lead","AI LEGEND"],
   quest:"Quest",followup:" · follow-up",codexLb:"📜 Codex",
-  okH:"⚔️ QUEST COMPLETE +10 XP",midH:"🟡 SHIPPED WITH INCIDENTS +5 XP",badH:"💔 SLIP — reputation takes a hit",
+  okH:"⚔️ QUEST COMPLETE",midH:"🟡 SHIPPED WITH INCIDENTS",badH:"💔 SLIP — reputation takes a hit",
   lvlUp:"⬆ LEVEL UP — you are now ",
   nextBack:"Back to the office",nextEnd:"Claim your title",nextDoom:"Face the consequences",
   talkPre:"💬 ",
@@ -780,7 +780,7 @@ One source of truth for one very good dog. Swap in your own pet's details and it
   tlTitle:"Laboratorio de textos",tlHint:"Edita nombres, títulos de misiones y frases de choque (JSON). Aplica al idioma actual.",tlApply:"Guardar",tlClose:"Cerrar",tlOk:"Textos actualizados.",tlErr:"Ese JSON no se pudo leer — no cambió nada.",
   levels:["Junior","Líder de Delivery","Líder Senior","LEYENDA DE LA IA"],
   quest:"Misión",followup:" · seguimiento",codexLb:"📜 Códice",
-  okH:"⚔️ MISIÓN CUMPLIDA +10 XP",midH:"🟡 ENTREGADO CON INCIDENTES +5 XP",badH:"💔 RESBALÓN — tu reputación sufre",
+  okH:"⚔️ MISIÓN CUMPLIDA",midH:"🟡 ENTREGADO CON INCIDENTES",badH:"💔 RESBALÓN — tu reputación sufre",
   lvlUp:"⬆ SUBISTE DE NIVEL — ahora eres ",
   nextBack:"Volver a la oficina",nextEnd:"Reclama tu título",nextDoom:"Enfrenta las consecuencias",
   talkPre:"💬 ",
@@ -1527,13 +1527,15 @@ function pick(c,btn,t){
   /* retries exist, so a miss explains itself but never reveals the right answer — the codex teaches, the shuffle re-tests */
   if(o.r==="ok")btn.classList.add("right");
   else btn.classList.add(o.r==="mid"?"midpick":"wrong");
+  const xp0=xp;
   if(o.r==="ok")awardXP(10);else if(o.r==="mid")awardXP(5);else{hearts--;awardXP(0);}
+  const gained=xp-xp0; /* the header claims only what this pick actually paid — retries after partial credit pay the difference */
   logDecision(o);
   const solved=o.r==="ok";
   const retry=!solved&&hearts>0?`<p class="beat">${cur>=0?T().retryNote:T().retryNoteFred}</p>`:"";
   const v=$("verdict");
   v.className="verdict "+(o.r==="ok"?"ok":o.r==="mid"?"mid":"no");
-  v.innerHTML=`<h2>${o.r==="ok"?T().okH:o.r==="mid"?T().midH:T().badH}</h2><span class="concept">${o.concept}</span><p>${o.why}</p><p class="beat">${o.beat}</p>${retry}`;
+  v.innerHTML=`<h2>${(o.r==="ok"?T().okH:o.r==="mid"?T().midH:T().badH)+(gained>0?` +${gained} XP`:"")}</h2><span class="concept">${o.concept}</span><p>${o.why}</p><p class="beat">${o.beat}</p>${retry}`;
   v.hidden=false;hud();
   if(o.r!=="bad"&&lvlIdx()!==before){$("levelup").textContent=T().lvlUp+lvlName();$("levelup").hidden=false;}
   if(cur>=0){
