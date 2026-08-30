@@ -9,7 +9,8 @@ hearts, and consequences.
 Everything is one self-contained static page (plus a thin PWA shell): canvas engine,
 6 maps, 17 NPCs, 16 quests + a secret side quest, retry-until-correct progression,
 a pet wardrobe (dress Frederick and Canela), full English/Spanish localization,
-mobile controls (swipe / joystick / d-pad), continuous localStorage saves, and an
+mobile controls (swipe / joystick / d-pad), continuous localStorage saves, a
+🎫 Trolley Pass to carry a save between devices (QR / share sheet), and an
 in-game map editor.
 
 ## Play / develop

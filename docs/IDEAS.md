@@ -33,7 +33,13 @@ collar for the cat (`wearCat`, saved as `wc`), accessory pass in `drawCat`.
 (owner: no copy-paste, "imports automatically"). Hard constraint: automatic sync
 needs a server; free-and-serverless can only be a very smooth one-shot transfer.
 
-**Phase 1 — Trolley Pass (build as roadmap #3; $0, no backend):**
+**Phase 1 — Trolley Pass: SHIPPED 2026-08-30** (as specified below, plus a copy-link
+fallback; QR via vendored `qr.js`). Owner decision, same day: stay on the **cartridge
+model** — phone = device, PWA = cartridge, localStorage = battery save, pass = link
+cable. Phase 2 judged too risky for now; revisit when there's completion/interaction
+data worth syncing (note to optimize later).
+
+**Phase 1 spec ($0, no backend):**
 - One button (⚙️ Settings): **🎫 Take your Trolley Pass** — the save as an
   in-fiction transit pass, serialized base64url into `index.html#save=…`.
 - Phone: opens the native share sheet (Web Share API) — AirDrop / message it.

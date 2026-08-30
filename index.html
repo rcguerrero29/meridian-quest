@@ -63,6 +63,7 @@
   .knob{position:absolute; left:50%; top:50%; width:48px; height:48px; border-radius:50%; background:rgba(122,63,224,.85); border:2px solid rgba(237,233,245,.5); transform:translate(-50%,-50%); transition:transform .08s;}
   .gear{position:absolute; right:10px; top:10px; width:38px; height:38px; border-radius:10px; border:none; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.05rem; cursor:pointer; z-index:4;}
   .gear svg{display:block; width:20px; height:20px; margin:auto; pointer-events:none;}
+  #careForm input{box-sizing:border-box; min-width:0; font-family:'IBM Plex Sans',sans-serif; font-size:.85rem; padding:8px 10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink);}
   .wdrow{display:flex; gap:8px; flex-wrap:wrap; margin:2px 0 12px;}
   .wdrow .sw{width:30px; height:30px; border-radius:50%; border:2px solid var(--line); cursor:pointer; padding:0; background:var(--chip); color:var(--muted); font-size:.75rem; line-height:1;}
   .wdrow .sw[aria-pressed="true"]{border-color:var(--accent); outline:2px solid var(--accent); outline-offset:1px;}
@@ -156,6 +157,13 @@
   <div class="xpbar" id="xpbarwrap" hidden><div id="xpfill"></div></div>
 
   <div class="panel intro" id="intro">
+    <div class="codex" id="tpFound" hidden>
+      <b id="tpFoundLb"></b><p id="tpFoundTx"></p>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button class="opt" id="tpBoard" style="flex:1;"></button>
+        <button class="opt" id="tpSkip" style="flex:1;"></button>
+      </div>
+    </div>
     <p class="lead" id="in1"></p>
     <p id="in2"></p>
     <p id="in3"></p>
@@ -234,6 +242,7 @@
           <div class="optrow"><button id="openLab" style="flex:1;"></button></div>
           <div class="optrow"><button id="openExp" style="flex:1;"></button></div>
           <div class="optrow"><button id="openWd" style="flex:1;" hidden></button></div>
+          <div class="optrow"><button id="openTp" style="flex:1;"></button></div>
           <button class="close" id="closeSet"></button>
         </div>
       </div>
@@ -251,6 +260,11 @@
           <h3 id="exTitle"></h3>
           <div class="optrow"><button id="exTabJson"></button><button id="exTabCare" hidden></button></div>
           <label id="exHint"></label>
+          <div id="careForm" hidden style="display:flex; gap:8px; margin-bottom:10px;">
+            <input id="petName" type="text" maxlength="16" style="flex:2;">
+            <input id="petAm" type="time" style="flex:1;">
+            <input id="petPm" type="time" style="flex:1;">
+          </div>
           <textarea id="exArea" readonly></textarea>
           <div class="optrow"><button id="exCopy"></button><button id="exIcs" hidden></button><button id="exClose"></button></div>
         </div>
@@ -269,6 +283,15 @@
           <canvas id="mapcv" style="width:100%; border-radius:8px; image-rendering:pixelated;"></canvas>
           <p id="mapNote" style="font-size:.78rem; color:var(--muted); margin:8px 0 12px;"></p>
           <button class="close" id="mapClose"></button>
+        </div>
+      </div>
+      <div class="settings" id="tpass" hidden>
+        <div class="box">
+          <h3 id="tpTitle"></h3>
+          <p id="tpNote" style="font-size:.8rem; color:var(--muted); margin:4px 0 10px;"></p>
+          <canvas id="tpqr" style="display:block; margin:0 auto 12px; width:190px; height:190px; image-rendering:pixelated; background:#FFF; border-radius:10px;"></canvas>
+          <div class="optrow"><button id="tpShare"></button><button id="tpCopy"></button></div>
+          <button class="close" id="tpClose"></button>
         </div>
       </div>
       <div class="settings" id="wardrobe" hidden>
@@ -305,6 +328,7 @@
     <button class="btn" id="replay"></button>
   </div>
 </div>
+<script src="qr.js"></script>
 <script>
 /* =========================================================
    MERIDIAN QUEST v7 — bilingual (EN/ES), text lab, real doors
@@ -719,16 +743,16 @@ const UI={
   expCopy:"Copy",expCopied:"Copied to clipboard.",
   exTabJson:"Play data",exTabCare:"🐾 Care pack",exIcs:"📅 Reminders (.ics)",
   careHint:"Frederick's ops system as a real deliverable — copy the sheet, download the recurring reminders, swap in your own pet's details.",
-  carePack:(n,tr)=>`# 🐾 FREDERICK'S CARE PACK
+  carePack:(n,tr,p)=>`# 🐾 ${p.n.toUpperCase()}'S CARE PACK
 Kept by ${n} · Meridian Labs
-One source of truth for one very good dog. Swap in your own pet's details and it's yours.
+One source of truth for one very good pet.
 
 ## Daily
-- 07:30  Breakfast (1 cup)
-- 07:45  Morning walk — 20 min
-- 18:00  Dinner (1 cup)
-- 18:30  Evening walk — 20 min
-- Treats: 3/day max (lifetime treats from you so far: ${tr})
+- ${p.am}  Breakfast
+- Morning walk — 20 min
+- ${p.pm}  Dinner
+- Evening walk — 20 min
+- Treats: 3/day max (in-game treats given to Frederick: ${tr})
 
 ## Recurring — if it repeats, it gets a reminder
 - Flea/tick + heartworm ....... monthly, the 1st
@@ -740,13 +764,21 @@ One source of truth for one very good dog. Swap in your own pet's details and it
 ## House rules (as decided in the quest)
 1. This sheet is the single source of truth — not the fridge, not three people's heads.
 2. Memory is not a system — every cycle above lives in a shared calendar (see the .ics).
-3. One shared checklist; whoever feeds him checks it off.
-4. Nothing posts as Frederick without human approval. He cannot approve. He is a dog.`,
-  careEvents:["🐾 Flea/tick + heartworm — Frederick","🐾 Grooming — Frederick","🐾 Weigh-in — Frederick","🐾 Vet checkup + vaccines — Frederick","📸 Frederick content batch day"],
+3. One shared checklist; whoever does the feeding checks it off.
+4. Nothing posts as ${p.n} without human approval. ${p.n} cannot approve. ${p.n} is a very good pet.`,
+  careEvents:pn=>["🐾 Flea/tick + heartworm — "+pn,"🐾 Grooming — "+pn,"🐾 Weigh-in — "+pn,"🐾 Vet checkup + vaccines — "+pn,"📸 "+pn+" content batch day"],
+  petPh:"Pet's name",
   wdTitle:"🧵 Xochi's Collar Drop",wdNote:"Fresh from the tech pack — dress the neighborhood. Frederick roams HQ; Canela holds court at La Cocina. Changes save instantly.",
   wdBandana:"Bandana",wdCollar:"Collar",wdCape:"Cape",
   wdUnlockToast:"🧵 Wardrobe unlocked — in ⚙️ Settings, or with Xochi once her quest is beaten.",
   wdBtn:"🧵 Wardrobe",
+  tpBtn:"🎫 Trolley Pass",tpTitle:"🎫 Trolley Pass",
+  tpNote:"Your save, stamped as a transit pass. Scan the code with your other device's camera, or share the pass to it — boarding over there always asks first.",
+  tpShare:"📤 Share pass",tpCopy:"🔗 Copy link",tpCopied:"Pass link copied.",
+  tpFoundLb:"🎫 Trolley Pass found",
+  tpFoundTx:(n,x,d,q)=>`${n} rode in on the trolley — ${x} XP, ${d}/${q} quests.`,
+  tpReplace:n=>`Boarding replaces this device's save (${n}).`,
+  tpBoard:"🎫 Board with this save",tpSkip:"Keep this device's save",
   retryNote:"❗ This one stays open — come back and make the better call.",
   retryNoteFred:"🦴 Frederick will reopen the folder for another treat.",
   mapTitle:"Village map",vmF2:"Floor 2",vmHQ:"Meridian HQ",vmSt:"Meridian Street",vmLc:"La Cocina 🌶️",
@@ -807,16 +839,16 @@ One source of truth for one very good dog. Swap in your own pet's details and it
   expCopy:"Copiar",expCopied:"Copiado al portapapeles.",
   exTabJson:"Datos de juego",exTabCare:"🐾 Kit de cuidados",exIcs:"📅 Recordatorios (.ics)",
   careHint:"El sistema de operaciones de Frederick como entregable real — copia la ficha, descarga los recordatorios recurrentes y pon los datos de tu propia mascota.",
-  carePack:(n,tr)=>`# 🐾 KIT DE CUIDADOS DE FREDERICK
+  carePack:(n,tr,p)=>`# 🐾 KIT DE CUIDADOS DE ${p.n.toUpperCase()}
 A cargo de ${n} · Meridian Labs
-Una sola fuente de verdad para un muy buen perro. Cambia los datos por los de tu mascota y es tuyo.
+Una sola fuente de verdad para una gran mascota.
 
 ## Diario
-- 07:30  Desayuno (1 taza)
-- 07:45  Paseo matutino — 20 min
-- 18:00  Cena (1 taza)
-- 18:30  Paseo vespertino — 20 min
-- Premios: máx. 3 al día (premios que le has dado en total: ${tr})
+- ${p.am}  Desayuno
+- Paseo matutino — 20 min
+- ${p.pm}  Cena
+- Paseo vespertino — 20 min
+- Premios: máx. 3 al día (premios dados a Frederick en el juego: ${tr})
 
 ## Recurrente — si se repite, lleva recordatorio
 - Pulgas/garrapatas + desparasitante ... mensual, el día 1
@@ -828,13 +860,21 @@ Una sola fuente de verdad para un muy buen perro. Cambia los datos por los de tu
 ## Reglas de la casa (según lo decidido en la misión)
 1. Esta ficha es la única fuente de verdad — no el refri, no la cabeza de tres personas.
 2. La memoria no es un sistema — cada ciclo de arriba vive en un calendario compartido (ve el .ics).
-3. Una lista compartida; quien lo alimente, la marca.
-4. Nada se publica como Frederick sin aprobación humana. Él no puede aprobar. Es un perro.`,
-  careEvents:["🐾 Pulgas/garrapatas + desparasitante — Frederick","🐾 Peluquería — Frederick","🐾 Pesaje — Frederick","🐾 Chequeo veterinario + vacunas — Frederick","📸 Día de contenido de Frederick"],
+3. Una lista compartida; quien dé de comer, la marca.
+4. Nada se publica como ${p.n} sin aprobación humana. ${p.n} no puede aprobar. ${p.n} es una gran mascota.`,
+  careEvents:pn=>["🐾 Pulgas/garrapatas + desparasitante — "+pn,"🐾 Peluquería — "+pn,"🐾 Pesaje — "+pn,"🐾 Chequeo veterinario + vacunas — "+pn,"📸 Día de contenido de "+pn],
+  petPh:"Nombre de la mascota",
   wdTitle:"🧵 El Drop de Xochi",wdNote:"Recién salido del tech pack — viste al barrio. Frederick ronda el HQ; Canela reina en La Cocina. Los cambios se guardan al instante.",
   wdBandana:"Bandana",wdCollar:"Collar",wdCape:"Capa",
   wdUnlockToast:"🧵 Vestidor desbloqueado — en ⚙️ Ajustes, o con Xochi cuando venzas su misión.",
   wdBtn:"🧵 Vestidor",
+  tpBtn:"🎫 Pase del Tranvía",tpTitle:"🎫 Pase del Tranvía",
+  tpNote:"Tu partida, sellada como pase de tranvía. Escanea el código con la cámara de tu otro dispositivo, o comparte el pase — al abordar allá siempre se pregunta primero.",
+  tpShare:"📤 Compartir pase",tpCopy:"🔗 Copiar enlace",tpCopied:"Enlace del pase copiado.",
+  tpFoundLb:"🎫 Pase del Tranvía encontrado",
+  tpFoundTx:(n,x,d,q)=>`${n} llegó en el tranvía — ${x} XP, ${d}/${q} misiones.`,
+  tpReplace:n=>`Abordar reemplaza la partida de este dispositivo (${n}).`,
+  tpBoard:"🎫 Abordar con esta partida",tpSkip:"Conservar la partida de este dispositivo",
   retryNote:"❗ Esta sigue abierta — vuelve y toma la mejor decisión.",
   retryNoteFred:"🦴 Frederick reabrirá la carpeta por otro premio.",
   mapTitle:"Mapa del pueblo",vmF2:"Piso 2",vmHQ:"Meridian HQ",vmSt:"Calle Meridian",vmLc:"La Cocina 🌶️",
@@ -1679,7 +1719,7 @@ function applyLang(){
   $("setTitle").textContent=t.setTitle;$("lbCtl").textContent=t.lbCtl;
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
-  $("openLab").textContent=t.openLab;$("closeSet").textContent=t.closeSet;$("openWd").textContent=t.wdBtn;
+  $("openLab").textContent=t.openLab;$("closeSet").textContent=t.closeSet;$("openWd").textContent=t.wdBtn;$("openTp").textContent=t.tpBtn;
   $("tlTitle").textContent=t.tlTitle;$("tlHint").textContent=t.tlHint;$("tlApply").textContent=t.tlApply;$("tlClose").textContent=t.tlClose;
   document.querySelectorAll("#brushes button[data-b] .bl").forEach((el,i)=>el.textContent=t.brushes[i]);
   $("undoBtn").querySelector(".bl").textContent=t.undoLb;
@@ -1743,6 +1783,14 @@ function exportData(){return JSON.stringify({schema:"meridian-export-v1",exporte
 /* Frederick's care pack: the secret quest's lesson as a real deliverable —
    a care sheet you can copy, plus recurring reminders as a downloadable .ics */
 let exMode="json";
+let petCfg={n:"Frederick",am:"07:30",pm:"18:00"};
+try{const p=JSON.parse(localStorage.getItem("mqpet")||"null");if(p&&p.n)petCfg=p;}catch(e){}
+function petSave(){try{localStorage.setItem("mqpet",JSON.stringify(petCfg));}catch(e){}}
+["petName","petAm","petPm"].forEach((id,i)=>$(id).addEventListener("input",()=>{
+  const v=$(id).value.trim();
+  if(i===0)petCfg.n=v||"Frederick";else if(i===1)petCfg.am=v||"07:30";else petCfg.pm=v||"18:00";
+  petSave();$("exArea").value=T().carePack(heroName,treats,petCfg);
+}));
 function icsData(){
   const now=new Date(),p2=n2=>String(n2).padStart(2,"0");
   const stamp=now.getUTCFullYear()+p2(now.getUTCMonth()+1)+p2(now.getUTCDate())+"T000000Z";
@@ -1750,7 +1798,7 @@ function icsData(){
   const month1=new Date(now.getFullYear(),now.getMonth()+1,1);
   const soon=new Date(now.getFullYear(),now.getMonth(),now.getDate()+14);
   const sat=new Date(now.getFullYear(),now.getMonth(),now.getDate()+((6-now.getDay()+7)%7||7));
-  const ev=T().careEvents;
+  const ev=T().careEvents(petCfg.n);
   const rows=[[ev[0],month1,"FREQ=MONTHLY"],[ev[1],soon,"FREQ=WEEKLY;INTERVAL=8"],[ev[2],month1,"FREQ=MONTHLY;INTERVAL=3"],
               [ev[3],soon,"FREQ=YEARLY"],[ev[4],sat,"FREQ=MONTHLY"]];
   return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Meridian Quest//Care Pack//ES-EN",
@@ -1759,11 +1807,14 @@ function icsData(){
     "END:VCALENDAR"].join("\r\n");
 }
 function renderExport(){
-  $("exArea").value=exMode==="care"?T().carePack(heroName,treats):exportData();
+  $("exArea").value=exMode==="care"?T().carePack(heroName,treats,petCfg):exportData();
   $("exHint").textContent=exMode==="care"?T().careHint:T().expHint;
   $("exTabJson").setAttribute("aria-pressed",exMode==="json"?"true":"false");
   $("exTabCare").setAttribute("aria-pressed",exMode==="care"?"true":"false");
   $("exIcs").hidden=exMode!=="care";
+  $("careForm").hidden=exMode!=="care";
+  $("petName").value=petCfg.n;$("petName").placeholder=T().petPh;
+  $("petAm").value=petCfg.am;$("petPm").value=petCfg.pm;
 }
 $("openExp").addEventListener("click",()=>{$("settings").hidden=true;
   $("exTabCare").hidden=fredQ<1;if(fredQ<1)exMode="json";
@@ -1773,7 +1824,7 @@ $("exTabCare").addEventListener("click",()=>{exMode="care";renderExport();});
 $("exIcs").addEventListener("click",()=>{
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([icsData()],{type:"text/calendar"}));
-  a.download="frederick-care-reminders.ics";
+  a.download=(petCfg.n.toLowerCase().replace(/[^a-z0-9]+/gi,"-")||"pet")+"-care-reminders.ics";
   document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
 });
@@ -1882,6 +1933,48 @@ function openWardrobe(){
 $("wdTabF").addEventListener("click",()=>{wdPet="fred";openWardrobe();});
 $("wdTabC").addEventListener("click",()=>{wdPet="cat";openWardrobe();});
 $("wdClose").addEventListener("click",()=>{$("wardrobe").hidden=true;});
+/* ---------- Trolley Pass: your save as a transit pass (cartridge model — the save
+   lives on-device like a Game Boy battery save; the pass is the link cable).
+   Share it to your other device, or scan the QR with its camera. ---------- */
+const b64u=s2=>btoa(unescape(encodeURIComponent(s2))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64u=s2=>decodeURIComponent(escape(atob(s2.replace(/-/g,"+").replace(/_/g,"/"))));
+function passURL(){
+  save();
+  const blob={v:1,l:lang,s:loadSave()};
+  return location.href.replace(/#.*$/,"")+"#save="+b64u(JSON.stringify(blob)); /* href, not origin — file:// has origin "null" */
+}
+function readPass(){
+  const m=location.hash.match(/#save=([A-Za-z0-9\-_]+)/);
+  if(!m)return null;
+  try{const j=JSON.parse(unb64u(m[1]));
+    if(j&&j.v===1&&j.s&&typeof j.s.n==="string")return j;}catch(e){}
+  return null;
+}
+function stripPassHash(){try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}}
+function openPass(){
+  const t=T(),url=passURL();
+  $("tpTitle").textContent=t.tpTitle;$("tpNote").textContent=t.tpNote;
+  $("tpShare").textContent=t.tpShare;$("tpCopy").textContent=t.tpCopy;$("tpClose").textContent=t.closeSet;
+  $("tpShare").hidden=!navigator.share;
+  const cv2=$("tpqr");
+  if(typeof qrcode!=="undefined"){
+    const qr=qrcode(0,"L");qr.addData(url);qr.make();
+    const n=qr.getModuleCount(),q=4,px2=n+q*2;
+    cv2.width=px2;cv2.height=px2;
+    const g=cv2.getContext("2d");
+    g.fillStyle="#FFF";g.fillRect(0,0,px2,px2);
+    g.fillStyle="#14121B";
+    for(let y=0;y<n;y++)for(let x=0;x<n;x++)if(qr.isDark(y,x))g.fillRect(x+q,y+q,1,1);
+    cv2.hidden=false;
+  }else cv2.hidden=true;
+  $("settings").hidden=true;$("tpass").hidden=false;held=null;
+}
+$("openTp").addEventListener("click",openPass);
+$("tpClose").addEventListener("click",()=>{$("tpass").hidden=true;});
+$("tpShare").addEventListener("click",()=>{navigator.share({title:"Meridian Quest",url:passURL()}).catch(()=>{});});
+$("tpCopy").addEventListener("click",()=>{const u=passURL();
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(u):Promise.reject())
+    .then(()=>toast(T().tpCopied,1600)).catch(()=>{});});
 /* ---------- fullscreen + admin ---------- */
 let admin=false,brush="#";
 $("fsbtn").addEventListener("click",()=>{
@@ -2005,6 +2098,22 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
     else enterWorld(false);
   });
 }
+/* Trolley Pass arrival: a #save= hash offers to board; never overwrites without the tap */
+(function(){
+  const pass=readPass();
+  if(!pass)return;
+  const t=T();
+  $("tpFoundLb").textContent=t.tpFoundLb;
+  $("tpFoundTx").textContent=t.tpFoundTx(pass.s.n,pass.s.xp||0,(pass.s.d||[]).length,QEN.length)+(SV&&SV.n?" "+t.tpReplace(SV.n):"");
+  $("tpBoard").textContent=t.tpBoard;$("tpSkip").textContent=t.tpSkip;
+  $("tpFound").hidden=false;
+  $("tpBoard").addEventListener("click",()=>{
+    try{localStorage.setItem("mq1",JSON.stringify(pass.s));
+      if(pass.l)localStorage.setItem("mqlang",pass.l);}catch(e){}
+    stripPassHash();location.reload();
+  });
+  $("tpSkip").addEventListener("click",()=>{stripPassHash();$("tpFound").hidden=true;});
+})();
 applyAdmin();applyLang();applyCtl();
 requestAnimationFrame(ts=>{last=ts;loop(ts);});
 sizeCanvas();

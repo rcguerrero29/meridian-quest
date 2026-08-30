@@ -24,7 +24,9 @@ const CANDIDATES = [
 ].filter(Boolean);
 
 (async () => {
-  const exe = CANDIDATES.find(p => { try { return fs.existsSync(p) && fs.statSync(p).isFile(); } catch (e) { return false; } });
+  let exe;
+  try { const p = chromium.executablePath(); if (p && fs.existsSync(p)) exe = p; } catch (e) {}
+  if (!exe) exe = CANDIDATES.find(p => { try { return fs.existsSync(p) && fs.statSync(p).isFile(); } catch (e) { return false; } });
   if (!exe) { console.error('No Chromium found. Set CHROMIUM_PATH.'); process.exit(1); }
   const fails = [];
   const browser = await chromium.launch({ executablePath: exe });
@@ -33,6 +35,8 @@ const CANDIDATES = [
   page.on('pageerror', e => pageErrors.push(e.message));
   const warns = [];
   page.on('console', m => { if (m.type() === 'warning') warns.push(m.text()); });
+  // fail external fetches (Google Fonts) instantly — a hanging CDN must never stall the suite
+  await page.route('**', r => r.request().url().startsWith('file://') ? r.continue() : r.abort());
 
   const index = 'file://' + path.resolve(__dirname, '..', 'index.html');
   await page.goto(index);
@@ -54,7 +58,7 @@ const CANDIDATES = [
     ['flavor', 'locs', 'classes', 'chat', 'arrive', 'trolley'].forEach(k => {
       if (keys(UI.en[k]) !== keys(UI.es[k])) problems.push('UI.' + k + ' subkeys differ');
     });
-    if (UI.en.careEvents.length !== UI.es.careEvents.length) problems.push('careEvents length differs');
+    if (UI.en.careEvents('X').length !== UI.es.careEvents('X').length) problems.push('careEvents length differs');
     if (UI.en.styles.length !== UI.es.styles.length) problems.push('styles length differs');
     if (keys(NPCN.en) !== keys(NPCN.es)) problems.push('NPCN keys differ');
     Object.keys(NPCN.en).forEach(k => { if (!NPCE[k]) problems.push('NPCE missing emoji: ' + k); });
@@ -145,6 +149,48 @@ const CANDIDATES = [
   if (!t3.capeRowHiddenForCat) fails.push('cape row visible for Canela');
   if (!t3.saved.wr || !t3.saved.wr.bandana) fails.push('dog wear not saved');
   if (!t3.saved.wc || !t3.saved.wc.bandana || !t3.saved.wc.collar) fails.push('cat wear not saved');
+
+  // ---- 4. care-pack personalization: pet name flows into sheet + ics ----
+  await page.evaluate(() => { fredQ = 1; treats = 3; });
+  await page.click('#wdClose');
+  await page.click('#gear');
+  await page.click('#openExp');
+  await page.click('#exTabCare');
+  await page.evaluate(() => {
+    const el = document.getElementById('petName');
+    el.value = 'Canelita'; el.dispatchEvent(new Event('input'));
+  });
+  const care = await page.evaluate(() => ({
+    sheet: document.getElementById('exArea').value.split('\n')[0],
+    ics: icsData(),
+    formVisible: !document.getElementById('careForm').hidden,
+  }));
+  if (!care.formVisible) fails.push('care form not visible in care mode');
+  if (!care.sheet.includes('CANELITA')) fails.push('pet name not in care sheet: ' + care.sheet);
+  if (!care.ics.includes('Canelita')) fails.push('pet name not in ics');
+  await page.click('#exClose');
+
+  // ---- 5. Trolley Pass: pass URL round-trips a save; boarding restores it ----
+  await page.evaluate(() => { heroName = 'Traveler'; xp = 42; save(); });
+  const passUrl = await page.evaluate(() => passURL());
+  if (!/#save=[A-Za-z0-9\-_]+$/.test(passUrl)) fails.push('pass URL malformed: ' + passUrl.slice(0, 60));
+  await page.evaluate(() => localStorage.removeItem('mq1')); // fresh device
+  await page.goto(passUrl);
+  await page.reload(); // hash-only navigation doesn't rerun boot; reload does
+  await page.waitForTimeout(800);
+  const banner = await page.evaluate(() => ({
+    shown: !document.getElementById('tpFound').hidden,
+    text: document.getElementById('tpFoundTx').textContent,
+  }));
+  if (!banner.shown) fails.push('pass banner not shown');
+  if (!banner.text.includes('Traveler') || !banner.text.includes('42')) fails.push('pass banner text wrong: ' + banner.text);
+  await page.click('#tpBoard'); // boarding reloads the page
+  await page.waitForSelector('#continueBtn:not([hidden])', { timeout: 10000 }).catch(() => {});
+  const boarded = await page.evaluate(() => {
+    const b = document.getElementById('continueBtn');
+    return b ? { cont: !b.hidden, label: b.textContent } : { cont: false, label: '(no button)' };
+  });
+  if (!boarded.cont || !boarded.label.includes('Traveler')) fails.push('boarding did not restore the save: ' + JSON.stringify(boarded));
 
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }

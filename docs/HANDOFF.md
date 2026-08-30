@@ -39,6 +39,26 @@ fully offline after first load.
   completed quests).
 - **Update flow**: cache-first service worker; the page auto-reloads once when a new
   version takes control, so one manual refresh always lands on the latest deploy.
+- **🎫 Trolley Pass** (cross-device saves, Phase 1 — shipped 2026-08-30): ⚙️ Settings →
+  Trolley Pass shows the save as a QR (vendored `qr.js`, MIT, qrcode-generator) plus a
+  native share button (and a copy-link fallback). Opening a pass URL (`#save=…`) on any
+  device shows a boarding banner on the intro screen — name, XP, quests, and an explicit
+  warning if boarding replaces a local save; it never imports without the tap.
+- **Care pack personalization** (shipped 2026-08-30): the care tab has pet name +
+  breakfast/dinner time fields (persisted in `mqpet`); the sheet, the `.ics` events,
+  and the download filename all follow the pet.
+- **CI** (shipped 2026-08-30): `.github/workflows/ci.yml` runs `test/smoke.js` on
+  every push and PR.
+
+## The save model — decided: the cartridge model (owner, 2026-08-30)
+
+Like a Game Boy: **the phone is the device, the installed PWA is the cartridge, and
+localStorage is the battery save** — the save lives on-device, full stop. The Trolley
+Pass is the link cable for moving a save between devices. Phase 2 (pair-once auto-sync
+via a tiny Worker) was judged **too risky for now** — it adds a service to own, contra
+the zero-maintenance rule. ⚠️ **OPTIMIZE LATER**: if gifted games grow real users or
+completion/interaction data worth tracking across devices, revisit Phase 2 in
+`IDEAS.md` §3 — the pass UI was built so sync can slot in with no UI change.
 
 ## Shipping checklist (every change)
 
@@ -67,23 +87,17 @@ Options, ranked:
    the $0-forever, zero-maintenance rule in APPROACH.md. Revisit only if gifted
    games grow a paid tier.
 
-## Roadmap (owner-approved order)
+## Roadmap
 
-1. **CI** — a GitHub Action running `test/smoke.js` on every push. The test is
-   already in the repo; the workflow just needs writing (ubuntu-latest,
-   `npm i playwright-core`, install chromium via `npx playwright-core install
-   chromium --with-deps` or apt `chromium-browser`, set `CHROMIUM_PATH`).
-2. **Engine/content split** — per APPROACH.md §3, before any second game:
-   `engine/` (renderer, movement, saves, validators) + `content/meridian/`
-   (quests, maps, NPCs, both languages). Biggest lift; unlocks the gifted-games
-   template.
-3. **Share-link saves** — as designed above. Implementation sketch: serialize the
-   `mq1` blob → base64url in `location.hash`; on boot, if `#save=` present and
-   parses, offer a continue prompt before touching local state; add a share button
-   (Web Share API with clipboard-free fallback = the link auto-copied into a share
-   sheet only). Never auto-overwrite an existing local save.
-4. **Care-pack personalization** — tiny form (pet name, feeding times) above the
-   export textarea; template substitutes them into the sheet and `.ics`.
+1. ~~CI~~ — **shipped** (`.github/workflows/ci.yml`).
+2. **Engine/content split** — the big one, deliberately deferred to a dedicated
+   session (it touches every line and should land alone, with nothing else in
+   flight). Per APPROACH.md §3, before any second game: `engine/` (renderer,
+   movement, saves, validators) + `content/meridian/` (quests, maps, NPCs, both
+   languages). Unlocks the gifted-games template.
+3. ~~Trolley Pass~~ — **shipped** (Phase 1). Phase 2 (auto-sync) parked; see the
+   cartridge-model note above.
+4. ~~Care-pack personalization~~ — **shipped**.
 5. **More wardrobe / Week Two** — extra items are data (`WEAR` + a draw snippet);
    the epilogues already tease "Week Two" content.
 
