@@ -6,9 +6,11 @@ from coworkers (and one very good dog), and make the calls — RAG vs fine-tunin
 human-in-the-loop thresholds, agent guardrails, build vs buy — with XP, reputation
 hearts, and consequences.
 
-Everything is one self-contained static page: canvas engine, 6 maps, 16 NPCs,
-15 quests + a secret side quest, full English/Spanish localization, mobile controls
-(swipe / joystick / d-pad), localStorage saves, and an in-game map editor.
+Everything is one self-contained static page (plus a thin PWA shell): canvas engine,
+6 maps, 17 NPCs, 16 quests + a secret side quest, retry-until-correct progression,
+a pet wardrobe (dress Frederick and Canela), full English/Spanish localization,
+mobile controls (swipe / joystick / d-pad), continuous localStorage saves, and an
+in-game map editor.
 
 ## Play / develop
 
@@ -19,6 +21,13 @@ Everything is one self-contained static page: canvas engine, 6 maps, 16 NPCs,
   web-app manifest and a cache-first service worker (`sw.js`), so it can be added
   to a phone's home screen and played fully offline. Bump the cache name in
   `sw.js` (`mq-v2` → `mq-v3`, …) when shipping a new version.
+
+## Test before shipping
+
+`npm install playwright-core`, then `node test/smoke.js` (set `CHROMIUM_PATH` if
+Chromium isn't in a standard spot). It boots the real game headless and checks map
+integrity, reachability, EN/ES parity, XP math, the retry rules, and the wardrobe.
+Current state, decisions, and the roadmap live in [docs/HANDOFF.md](docs/HANDOFF.md).
 
 ## Why a repo instead of a chat artifact?
 

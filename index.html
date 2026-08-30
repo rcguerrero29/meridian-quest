@@ -275,6 +275,7 @@
         <div class="box">
           <h3 id="wdTitle"></h3>
           <p id="wdNote" style="font-size:.8rem; color:var(--muted); margin:4px 0 10px;"></p>
+          <div class="optrow"><button id="wdTabF">🐕 Frederick</button><button id="wdTabC">🐈 Canela</button></div>
           <canvas id="wdpv" width="66" height="44"></canvas>
           <label id="wdLbBandana"></label><div class="wdrow" id="wdRowBandana"></div>
           <label id="wdLbCollar"></label><div class="wdrow" id="wdRowCollar"></div>
@@ -742,7 +743,7 @@ One source of truth for one very good dog. Swap in your own pet's details and it
 3. One shared checklist; whoever feeds him checks it off.
 4. Nothing posts as Frederick without human approval. He cannot approve. He is a dog.`,
   careEvents:["🐾 Flea/tick + heartworm — Frederick","🐾 Grooming — Frederick","🐾 Weigh-in — Frederick","🐾 Vet checkup + vaccines — Frederick","📸 Frederick content batch day"],
-  wdTitle:"🧵 Xochi's Collar Drop",wdNote:"Fresh from the tech pack — dress Frederick. Changes save instantly; he's at HQ, being majestic.",
+  wdTitle:"🧵 Xochi's Collar Drop",wdNote:"Fresh from the tech pack — dress the neighborhood. Frederick roams HQ; Canela holds court at La Cocina. Changes save instantly.",
   wdBandana:"Bandana",wdCollar:"Collar",wdCape:"Cape",
   wdUnlockToast:"🧵 Wardrobe unlocked — in ⚙️ Settings, or with Xochi once her quest is beaten.",
   wdBtn:"🧵 Wardrobe",
@@ -830,7 +831,7 @@ Una sola fuente de verdad para un muy buen perro. Cambia los datos por los de tu
 3. Una lista compartida; quien lo alimente, la marca.
 4. Nada se publica como Frederick sin aprobación humana. Él no puede aprobar. Es un perro.`,
   careEvents:["🐾 Pulgas/garrapatas + desparasitante — Frederick","🐾 Peluquería — Frederick","🐾 Pesaje — Frederick","🐾 Chequeo veterinario + vacunas — Frederick","📸 Día de contenido de Frederick"],
-  wdTitle:"🧵 El Drop de Xochi",wdNote:"Recién salido del tech pack — viste a Frederick. Los cambios se guardan al instante; anda en el HQ, siendo majestuoso.",
+  wdTitle:"🧵 El Drop de Xochi",wdNote:"Recién salido del tech pack — viste al barrio. Frederick ronda el HQ; Canela reina en La Cocina. Los cambios se guardan al instante.",
   wdBandana:"Bandana",wdCollar:"Collar",wdCape:"Capa",
   wdUnlockToast:"🧵 Vestidor desbloqueado — en ⚙️ Ajustes, o con Xochi cuando venzas su misión.",
   wdBtn:"🧵 Vestidor",
@@ -1024,6 +1025,7 @@ const WEAR={bandana:["#C0392B","#7A3FE0","#E0B45C","#2AA47C","#3E8ED0"],
             collar:["#E0B45C","#C0392B","#7A3FE0","#2AA47C"],
             cape:["#7A3FE0","#C0392B","#2C5FA8"]};
 let wear={bandana:null,collar:null,cape:null};
+let wearCat={bandana:null,collar:null}; /* Canela: no cape — physics and dignity both object */
 const $=id=>document.getElementById(id);
 const T=()=>UI[lang];
 const AQ=()=>lang==="es"?QES:QEN;
@@ -1035,7 +1037,7 @@ function hud(){const hs="❤".repeat(Math.max(0,hearts))+"♡".repeat(3-Math.max
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
   $("status").textContent=`${hs}  ${xp}XP`;}
 /* save */
-function save(){try{localStorage.setItem("mq1",JSON.stringify({n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,qa}));}catch(e){}}
+function save(){try{localStorage.setItem("mq1",JSON.stringify({n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa}));}catch(e){}}
 function setWorldTag(){$("worldTag").textContent=T().locs[world]+(world==="hq"?" · ❗":"");}
 function loadSave(){try{return JSON.parse(localStorage.getItem("mq1")||"");}catch(e){return null;}}
 /* belt & suspenders: flush progress when the tab is backgrounded or closed (only once a run exists) */
@@ -1246,6 +1248,8 @@ function drawCat(g,sx,sy){
   g.fillStyle="#D98E4A";g.beginPath();g.roundRect(cx-7,sy+18,12.5,7.5,3.8);g.fill();
   g.fillStyle="#B96F31";g.fillRect(cx-4.5,sy+18.5,1.8,6);g.fillRect(cx-1,sy+18.5,1.8,6);
   if(!CAT.sit){g.fillStyle="#C97F3F";g.fillRect(cx-5.5,sy+24.5,2,3);g.fillRect(cx+2.5,sy+24.5,2,3);}
+  if(wearCat.bandana){g.fillStyle=wearCat.bandana; /* neckerchief tucks behind the head */
+    g.beginPath();g.moveTo(cx+2.2,sy+18.8);g.lineTo(cx+9.2,sy+18.8);g.lineTo(cx+5.7,sy+22.8);g.closePath();g.fill();}
   g.fillStyle="#D98E4A";g.beginPath();g.arc(cx+6,sy+17.5,4.2,0,7);g.fill();
   g.beginPath();g.moveTo(cx+3.2,sy+15);g.lineTo(cx+4.2,sy+11.6);g.lineTo(cx+6,sy+14);g.closePath();g.fill();
   g.beginPath();g.moveTo(cx+6.6,sy+13.8);g.lineTo(cx+8.6,sy+11.8);g.lineTo(cx+9,sy+15);g.closePath();g.fill();
@@ -1254,6 +1258,8 @@ function drawCat(g,sx,sy){
   if(CAT.sit){g.fillRect(cx+5.2,sy+17,1.8,0.7);g.fillRect(cx+8,sy+17,1.8,0.7);}
   else{g.fillRect(cx+5.4,sy+16.6,1.1,1.1);g.fillRect(cx+8,sy+16.6,1.1,1.1);}
   g.fillStyle="#C4586B";g.fillRect(cx+9.2,sy+18,1.1,0.9);
+  if(wearCat.collar){g.fillStyle=wearCat.collar;g.fillRect(cx+2.8,sy+20.6,5.2,1.4);
+    g.fillStyle="#E0B45C";g.beginPath();g.arc(cx+5.4,sy+22.5,0.9,0,7);g.fill();}
   g.restore();
 }
 /* ---------- Paloma the pigeon (street) & Lorenzo the parrot (perched on the fence) ---------- */
@@ -1838,20 +1844,23 @@ $("tvClose").addEventListener("click",()=>{$("travel").hidden=true;
   if(world==="st"){px=fx=1;py=fy=1;dir="right";}
   if(world==="ex"){px=fx=22;py=fy=3;dir="left";}
   checkTalk();});
-/* ---------- Xochi's wardrobe: equippable dog cosmetics, unlocked by the Designer quest ---------- */
+/* ---------- Xochi's wardrobe: equippable pet cosmetics, unlocked by the Designer quest ---------- */
+let wdPet="fred";
+const wdState=()=>wdPet==="fred"?wear:wearCat;
 function wdDraw(){
   const g=$("wdpv").getContext("2d");
   g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,66,44);
-  g.setTransform(1.9,0,0,1.9,1,-13);
-  drawDog(g,1,0);
+  if(wdPet==="fred"){g.setTransform(1.9,0,0,1.9,1,-13);drawDog(g,1,0);}
+  else{g.setTransform(1.9,0,0,1.9,1,-16);drawCat(g,1,0);}
 }
 function buildWearRow(rowId,key){
   const row=$(rowId);row.innerHTML="";
+  const st2=wdState();
   const mk=col=>{const b=document.createElement("button");b.className="sw";
     if(col){b.style.background=col;b.setAttribute("aria-label",key+" "+col);}
     else{b.textContent="✕";b.setAttribute("aria-label",key+": none");}
-    b.setAttribute("aria-pressed",wear[key]===col?"true":"false");
-    b.addEventListener("click",()=>{wear[key]=col;save();
+    b.setAttribute("aria-pressed",st2[key]===col?"true":"false");
+    b.addEventListener("click",()=>{wdState()[key]=col;save();
       [...row.children].forEach(x2=>x2.setAttribute("aria-pressed","false"));
       b.setAttribute("aria-pressed","true");wdDraw();});
     row.appendChild(b);};
@@ -1862,9 +1871,16 @@ function openWardrobe(){
   $("wdTitle").textContent=t.wdTitle;$("wdNote").textContent=t.wdNote;
   $("wdLbBandana").textContent=t.wdBandana;$("wdLbCollar").textContent=t.wdCollar;$("wdLbCape").textContent=t.wdCape;
   $("wdClose").textContent=t.closeSet;
-  buildWearRow("wdRowBandana","bandana");buildWearRow("wdRowCollar","collar");buildWearRow("wdRowCape","cape");
+  $("wdTabF").setAttribute("aria-pressed",wdPet==="fred"?"true":"false");
+  $("wdTabC").setAttribute("aria-pressed",wdPet==="cat"?"true":"false");
+  const cape=wdPet==="fred"; /* Canela wears bandanas and collars only */
+  $("wdLbCape").hidden=!cape;$("wdRowCape").hidden=!cape;
+  buildWearRow("wdRowBandana","bandana");buildWearRow("wdRowCollar","collar");
+  if(cape)buildWearRow("wdRowCape","cape");
   wdDraw();$("wardrobe").hidden=false;held=null;
 }
+$("wdTabF").addEventListener("click",()=>{wdPet="fred";openWardrobe();});
+$("wdTabC").addEventListener("click",()=>{wdPet="cat";openWardrobe();});
 $("wdClose").addEventListener("click",()=>{$("wardrobe").hidden=true;});
 /* ---------- fullscreen + admin ---------- */
 let admin=false,brush="#";
@@ -1979,6 +1995,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
     wear=(SV.wr&&typeof SV.wr==="object")?{bandana:null,collar:null,cape:null,...SV.wr}
         :{bandana:fredQ>=2?"#C0392B":null,collar:null,cape:null}; /* pre-wardrobe saves: keep the earned red bandana */
     qa=(SV.qa&&typeof SV.qa==="object")?SV.qa:{}; /* pre-retry saves: done quests stay done, credited as-is */
+    wearCat=(SV.wc&&typeof SV.wc==="object")?{bandana:null,collar:null,...SV.wc}:{bandana:null,collar:null};
     world=WORLDS[SV.w]?SV.w:"hq";
     px=fx=SV.px??10;py=fy=SV.py??11;
     applyObra();

@@ -14,13 +14,18 @@ accessory pass in `drawDog`, `wr` field in the save, equip picker via talking to
 Xochi after the quest. The Frederick-quest red bandana migrated into the system.
 MAXXP 210 → 230.
 
+**Canela shipped too** (2026-08-30): pet tabs in the wardrobe panel, bandana +
+collar for the cat (`wearCat`, saved as `wc`), accessory pass in `drawCat`.
+
 ### Later / bigger
 
-- Dress Canela and the other animals too (the accessory pass generalizes).
+- Dress the remaining animals (Paloma, Lorenzo) — the accessory pass generalizes.
 - If we ever want *player-designed* garments (typed descriptions → generated art),
   that needs an image model at runtime — out of scope for a $0 static page. The
   static-page version of that idea: a palette/pattern editor (like the character
   creator) whose output is data, not pixels — same lesson, no backend.
+
+> Current roadmap and shipping process live in `HANDOFF.md`.
 
 ---
 
