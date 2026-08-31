@@ -8,6 +8,9 @@
 const FQ=()=>lang==="es"?FQES:FQEN;
 const TS=32;
 const SOLID=new Set(["#","D","K","P","B","F","G","C","X","T","W","V","A","U","Q","J"]);
+/* the content seam: a pack adds its own solid glyphs and declares which are doors */
+(typeof SOLIDX!=="undefined"?SOLIDX:"").split("").forEach(c=>SOLID.add(c));
+const DOORSET=new Set((typeof DOORS!=="undefined"?DOORS:"+ELO").split(""));
 let world="hq";
 const WORLDS={};
 Object.keys(WORLD_DEFS).forEach(id=>{
@@ -83,9 +86,26 @@ function auditReach(){
   return probs;
 }
 auditReach().forEach(p=>console.warn("REACH "+p));
+/* ---------- chapters ----------
+   A chapter is a district's quest pack plus how many of them close it. Both live in
+   content (config.js): `need` is deliberately lower than the pack size, so the city
+   stays a template — retune the bar there, never here. */
+const CHS=()=>(typeof CHAPTERS!=="undefined"&&CHAPTERS.length)
+  ?CHAPTERS:[{id:"all",quests:QEN.map((_,i)=>i),need:QEN.length}];
+const chClosed=c=>c.quests.filter(i=>done.has(i)).length>=c.need;
+/* `chSeen` is the chapter being played; everything before it is closed for good.
+   A chapter ends two ways: you meet its `need`, or you run out of hearts. Either way
+   it ends — it never resets. Whatever you left unanswered stays unanswered, and that
+   is the whole consequence: the city is never taken away. */
+const chDue=()=>{const L=CHS();return chSeen<L.length&&(hearts<=0||chClosed(L[chSeen]));};
+/* a quest still on offer: unanswered, and its chapter has not closed behind you */
+const qChapter=qi=>{const L=CHS();for(let i=0;i<L.length;i++)if(L[i].quests.indexOf(qi)>=0)return i;return -1;};
+const qOpen=qi=>{const c=qChapter(qi);return c<0||c>=chSeen;};
+const mercadoOpen=()=>chSeen>=1;   /* opens once you take the Monday handover */
 /* ---------- state ---------- */
 const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"};
 let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
+let chSeen=0,replayTimer=null;
 let xp=0,hearts=3,cls="",heroName="Rookie",look={shirt:"#8B5CF6",skin:"#E5AC82",hair:"#26202B",style:"cap",outfit:"casual"},done=new Set(),cur=null,curQ=null,node=null,treats=0,fredQ=0,qLvl0=0;
 /* retry-until-correct: `done` = answered right; `qa` maps quest -> best XP already
    awarded across attempts (retries only pay the difference, so nothing farms) + doubles
@@ -122,7 +142,7 @@ function hud(){const hs="❤".repeat(Math.max(0,hearts))+"♡".repeat(3-Math.max
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
   $("status").textContent=`${hs}  ${xp}XP`;}
 /* save */
-function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa};
+function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen};
   try{localStorage.setItem("mq1",JSON.stringify(st));}catch(e){}
   if(NET.enabled)NET.sync(st);}
 function setWorldTag(){$("worldTag").textContent=T().locs[world]+(world==="hq"?" · ❗":"");}
@@ -162,7 +182,7 @@ function toast(msg,ms){const el=$("toast");
   clearTimeout(toastT);toastT=setTimeout(()=>{el.classList.remove("on");
     if(toastQ.length){const[m,d]=toastQ.shift();setTimeout(()=>toast(m,d),300);}},ms||2600);}
 let lastBump=0;
-const pendingAt=n=>n.q.find(qi=>!done.has(qi));
+const pendingAt=n=>n.q.find(qi=>!done.has(qi)&&qOpen(qi));
 /* ---------- canvas ---------- */
 const cv=$("cv"),ctx=cv.getContext("2d");
 const VW=10*TS,VH=8*TS;
@@ -173,11 +193,6 @@ function sizeCanvas(){
   ctx.setTransform(scale,0,0,scale,0,0);
 }
 window.addEventListener("resize",sizeCanvas);
-/* content seams (entities-as-data law): door glyphs, mini-map labels, and map dots
-   come from the content pack when declared — new districts need zero engine edits */
-const DOORGL=new Set(typeof DOORS!=="undefined"?DOORS:["+","E","L","O"]);
-const TOWNLBL2=typeof TOWNLBL!=="undefined"?TOWNLBL:[];
-const MAPDOT2=typeof MAPDOT!=="undefined"?MAPDOT:{hq:[14,0],f2:[14,0],lc:[6,5],lo:[21,5],ex:[29,1]};
 const C={floor:"#E7DFC8",floorAlt:"#E1D8BE",rug:"#C9B7E8",wall:"#453D57",wallTop:"#5A5170",
         desk:"#8A6F4D",deskTop:"#A98B62",counter:"#7E8894",plant:"#3E7C4F",pot:"#B06A3C",
         doorWood:"#7A5233",doorWood2:"#8F6440",doorFrame:"#4A331F"};
@@ -242,7 +257,7 @@ function draw(){
       ctx.fillStyle="#7A3527";ctx.fillRect(sx,sy+7,TS,2);
       ctx.fillStyle="#F5DFA9";ctx.fillRect(sx+8,sy+14,16,10);
       ctx.fillStyle="#7A3527";ctx.fillRect(sx+15,sy+14,2,10);}
-    else if(DOORGL.has(ch)){
+    else if(DOORSET.has(ch)){
       ctx.fillStyle=C.doorFrame;ctx.fillRect(sx+2,sy,TS-4,TS);
       ctx.fillStyle=C.doorWood;ctx.fillRect(sx+4,sy+2,11,TS-4);
       ctx.fillStyle=C.doorWood2;ctx.fillRect(sx+17,sy+2,11,TS-4);
@@ -272,6 +287,28 @@ function draw(){
       ctx.fillStyle="#2E5FA8";ctx.beginPath();ctx.moveTo(sx+7,sy+18.6);ctx.lineTo(sx+25,sy+15.4);ctx.lineTo(sx+25,sy+8);ctx.lineTo(sx+7,sy+11);ctx.closePath();ctx.fill();
       ctx.strokeStyle="#DDE8F5";ctx.lineWidth=0.8;
       ctx.beginPath();ctx.moveTo(sx+9,sy+12);ctx.lineTo(sx+22,sy+10);ctx.moveTo(sx+9,sy+14.5);ctx.lineTo(sx+22,sy+12.5);ctx.moveTo(sx+9,sy+17);ctx.lineTo(sx+18,sy+15.4);ctx.stroke();}
+    else if(ch==="Z"){ /* El Mercado facade: green stall front, striped awning, produce window */
+      ctx.fillStyle="#4E7A4A";ctx.fillRect(sx,sy,TS,TS);
+      for(let i=0;i<4;i++){ctx.fillStyle=i%2?"#F2E8D8":"#C98A2D";ctx.fillRect(sx+i*8,sy,8,7);}
+      ctx.fillStyle="#385C36";ctx.fillRect(sx,sy+7,TS,2);
+      ctx.fillStyle="#EFE3C4";ctx.fillRect(sx+7,sy+13,18,11);
+      [[11,17,"#C0392B"],[16,17,"#E0A430"],[21,17,"#7A9A4E"],[13,21,"#D77FA8"],[19,21,"#E0662B"]].forEach(f=>{
+        ctx.fillStyle=f[2];ctx.beginPath();ctx.arc(sx+f[0],sy+f[1],2.2,0,7);ctx.fill();});}
+    else if(ch==="S"){ /* shelving: three loaded shelves */
+      ctx.fillStyle="#8A6F4D";ctx.fillRect(sx+2,sy+2,TS-4,TS-4);
+      ctx.fillStyle="#6E5638";[6,14,22].forEach(yy=>ctx.fillRect(sx+2,sy+yy,TS-4,2));
+      ctx.fillStyle="#D9C9A3";[[6,3],[13,3],[20,3],[6,11],[15,11],[9,19],[18,19]].forEach(b=>
+        ctx.fillRect(sx+b[0],sy+b[1],5,4));}
+    else if(ch==="H"){ /* produce crate */
+      ctx.fillStyle="#B0895B";ctx.fillRect(sx+3,sy+10,TS-6,TS-14);
+      ctx.fillStyle="#8B6A42";ctx.fillRect(sx+3,sy+16,TS-6,2);ctx.fillRect(sx+15,sy+10,2,TS-14);
+      [[9,9,"#C0392B"],[16,7,"#7A9A4E"],[23,9,"#E0A430"]].forEach(f=>{
+        ctx.fillStyle=f[2];ctx.beginPath();ctx.arc(sx+f[0],sy+f[1],3.2,0,7);ctx.fill();});}
+    else if(ch==="I"){ /* mercado counter: worn wood, scale on top */
+      ctx.fillStyle="#A8825A";ctx.fillRect(sx+2,sy+6,TS-4,TS-10);
+      ctx.fillStyle="#8B6A42";ctx.fillRect(sx+2,sy+6,TS-4,3);
+      ctx.fillStyle="#C9CDD2";ctx.fillRect(sx+11,sy+11,10,6);
+      ctx.fillStyle="#5F676F";ctx.fillRect(sx+14,sy+9,4,2);}
     else if(ch==="U"){ /* blueprint wall panel */
       ctx.fillStyle=tc(C.wall);ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle=tc(C.wallTop);ctx.fillRect(sx,sy,TS,6);
       ctx.fillStyle="#2E5FA8";ctx.fillRect(sx+4,sy+9,TS-8,18);
@@ -820,6 +857,8 @@ function nodeShow(){
 }
 function pick(c,btn,t){
   if(c.next){[...$("choices").children].forEach(b=>b.disabled=true);btn.classList.add("right");
+    /* a correct first-node call is still a decision — the report would be a lie without it */
+    logDecision({r:"ok",concept:nodeConcept(),why:""},c);
     awardXP(10);hud();save();setTimeout(()=>{node=c.next;nodeShow();},550);return;}
   const o=c.out,before=qLvl0; /* level at quest START — a level crossed on a follow-up step still gets announced here */
   [...$("choices").children].forEach(b=>b.disabled=true);
@@ -829,7 +868,7 @@ function pick(c,btn,t){
   const xp0=xp;
   if(o.r==="ok")awardXP(10);else if(o.r==="mid")awardXP(5);else{hearts--;awardXP(0);}
   const gained=xp-xp0; /* the header claims only what this pick actually paid — retries after partial credit pay the difference */
-  logDecision(o);
+  logDecision(o,c);
   const solved=o.r==="ok";
   const retry=!solved&&hearts>0?`<p class="beat">${cur>=0?T().retryNote:T().retryNoteFred}</p>`:"";
   const v=$("verdict");
@@ -843,12 +882,11 @@ function pick(c,btn,t){
     if(cur===15&&qFirst)setTimeout(()=>toast(T().wdUnlockToast,3400),700);}
   else if(solved&&node==="b"){fredQ=2;wear.bandana=wear.bandana||"#C0392B";setTimeout(()=>toast(T().fredDoneToast,3000),600);}
   save();
-  $("next").textContent=hearts<=0?T().nextDoom:(done.size===AQ().length?T().nextEnd:T().nextBack);
+  $("next").textContent=hearts<=0?T().nextDoom:(chDue()?T().nextEnd:T().nextBack);
   $("next").hidden=false;
 }
 $("next").addEventListener("click",()=>{
-  if(hearts<=0){wasFs=false;gameover();return;}
-  if(done.size===AQ().length){wasFs=false;finish();return;}
+  if(chDue()){wasFs=false;finish(hearts<=0);return;}
   $("card").hidden=true;$("world").hidden=false;restoreFs();checkTalk();
 });
 /* ---------- character creator ---------- */
@@ -901,26 +939,44 @@ $("begin").addEventListener("click",()=>{
   if(eg)setTimeout(()=>toast(EGGSAFE[eg].lines[lang][0],3600),7400);
 });
 /* ---------- start/end ---------- */
-function gameover(){
+/* One curtain for every ending. `burnout` = the hearts ran out: the chapter closes
+   where it stands and the unanswered quests stay unanswered — nothing is erased.
+   A chapter that ended well is judged by hearts; the last one rolls real credits. */
+function finish(burnout){
   $("card").hidden=true;$("world").hidden=true;
-  $("endTitle").textContent=T().goTitle;
-  $("endScore").textContent=T().goScore(xp,done.size,AQ().length);
-  $("epi").textContent=T().goEpi;
-  $("replay").textContent=T().replay;
+  const L=CHS(),last=Math.min(chSeen,L.length-1)>=L.length-1;
+  const h=Math.max(0,hearts),t=T();
+  $("endTitle").textContent=burnout?t.goTitle:`🏆 ${lvlName()}`;
+  $("endScore").textContent=burnout?t.goScore(xp,done.size,AQ().length)
+                                   :t.endScore(xp,MAXXP,h);
+  const E=last?[t.mepi1,t.mepi2,t.mepi3]:[t.epi1,t.epi2,t.epi3];
+  $("epi").textContent = burnout?(last?t.mgoEpi:t.goEpi) : h>=3?E[0] : h===2?E[1] : E[2];
+  $("endGo").textContent=last?t.endStay:t.endGo;$("endGo").hidden=false;
   $("end").hidden=false;
 }
-function finish(){
-  $("card").hidden=true;$("world").hidden=true;
-  $("endTitle").textContent=`🏆 ${lvlName()}`;
-  $("endScore").textContent=T().endScore(xp,MAXXP,Math.max(0,hearts));
-  /* every finished week ends at full XP now (retry-until-correct), so the ending is judged by hearts: bad calls leave scars */
-  const h=Math.max(0,hearts);
-  $("epi").textContent = h>=3?T().epi1 : h===2?T().epi2 : T().epi3;
-  $("replay").textContent=T().replay;
-  $("end").hidden=false;
-}
-$("replay").addEventListener("click",()=>{xp=0;hearts=3;done=new Set();qa={};world="hq";px=fx=10;py=fy=11;dir="down";
+/* Acknowledging an ending closes that chapter for good and starts the next one on
+   Monday with three fresh hearts. After the last one you keep the city and wander it. */
+$("endGo").addEventListener("click",()=>{
+  const last=chSeen>=CHS().length-1;
+  chSeen=Math.min(chSeen+1,CHS().length);hearts=3;
+  applyGrowth();
+  if(!last){world="st";px=fx=6;py=fy=12;dir="down";}
+  if(isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
+  wasFs=false;
   save();$("end").hidden=true;$("world").hidden=false;setWorldTag();hud();checkTalk();
+  toast(last?T().endStayToast:T().weekTwoToast,4000);
+});
+/* Wiping a city is never one tap. The story never sends you here — this is a tool. */
+$("replay").addEventListener("click",()=>{
+  if(!replayTimer){
+    $("replay").textContent=T().replayArm;
+    replayTimer=setTimeout(()=>{replayTimer=null;$("replay").textContent=T().replay;},4000);
+    return;}
+  clearTimeout(replayTimer);replayTimer=null;$("replay").textContent=T().replay;
+  xp=0;hearts=3;done=new Set();qa={};chSeen=0;world="hq";px=fx=10;py=fy=11;dir="down";
+  applyGrowth();save();
+  $("settings").hidden=true;$("end").hidden=true;$("card").hidden=true;$("world").hidden=false;
+  setWorldTag();hud();checkTalk();
   toast(T().replayToast(heroName),2500);});
 /* ---------- controls scheme ---------- */
 let ctl="swipe";try{ctl=localStorage.getItem("mqctl")||"swipe";}catch(e){}
@@ -1180,6 +1236,8 @@ function applyLang(){
   $("openExp").textContent=t.expBtn;$("exTitle").textContent=t.expTitle;$("exHint").textContent=t.expHint;
   $("exCopy").textContent=t.expCopy;$("exClose").textContent=t.tlClose;
   $("exTabJson").textContent=t.exTabJson;$("exTabCare").textContent=t.exTabCare;$("exIcs").textContent=t.exIcs;
+  $("exTabRep").textContent=t.exTabRep;$("exDl").textContent=t.exDl;
+  if(!replayTimer)$("replay").textContent=t.replay;
   $("mapTitle").textContent=t.mapTitle;$("mapClose").textContent=t.tlClose;
   $("setTitle").textContent=t.setTitle;$("lbCtl").textContent=t.lbCtl;
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
@@ -1244,8 +1302,52 @@ $("tlFind").addEventListener("click",tlFindNext);
 $("tlSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();tlFindNext();}});
 /* ---------- export skeleton (v1): play data → JSON; future: typed docs, email, convo export ---------- */
 let dlog=[];try{dlog=JSON.parse(localStorage.getItem("mqdlog")||"[]");}catch(e){}
-function logDecision(o){dlog.push({t:Date.now(),quest:curQ.title,concept:o.concept,result:o.r});dlog=dlog.slice(-200);
+/* choices that advance carry no concept of their own — the node's siblings do */
+function nodeConcept(){const n=(curQ&&curQ.nodes[node])||{},c=(n.ch||[]).find(x=>x.out&&x.out.concept);return c?c.out.concept:"";}
+function logDecision(o,c){const n=(curQ&&curQ.nodes[node])||{};
+  dlog.push({t:Date.now(),quest:curQ.title,npc:curQ.npc,ask:n.q||"",pick:c?c.t:"",
+             concept:o.concept||"",why:o.why||"",result:o.r});
+  dlog=dlog.slice(-200);
   try{localStorage.setItem("mqdlog",JSON.stringify(dlog));}catch(e){}}
+/* The decision report: play data → a portfolio document. One section per quest, one
+   block per decision point; the latest attempt is the answer of record, and the retry
+   count stays visible because the second try is where the learning shows. */
+function decisionReport(){
+  const t=T(),L=t.repL,d=new Date(),p2=n2=>String(n2).padStart(2,"0");
+  const stamp=d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
+  const out=[t.repHead(heroName,lvlName(),xp,MAXXP,Math.max(0,hearts),stamp),""];
+  if(!dlog.length){out.push(t.repEmpty,"","---","*"+L.foot+"*");return out.join("\n");}
+  const order=[],by={};
+  dlog.forEach(e=>{const k=e.quest||"?";
+    if(!by[k]){by[k]={quest:k,npc:e.npc,order:[],nodes:{}};order.push(k);}
+    const g=by[k],nk=e.ask||"-";
+    if(!g.nodes[nk]){g.nodes[nk]=[];g.order.push(nk);}
+    g.nodes[nk].push(e);});
+  let points=0,clean=0;
+  order.forEach(k=>by[k].order.forEach(nk=>{const r=by[k].nodes[nk];points++;
+    if(r.length===1&&r[0].result==="ok")clean++;}));
+  out.push(t.repSum(dlog.length,order.length,Math.round(clean/points*100)),"");
+  const seen=[];
+  order.forEach(k=>{
+    const g=by[k];
+    out.push("## "+g.quest);
+    if(g.npc&&NPCN[lang]&&NPCN[lang][g.npc])out.push("","*"+NPCN[lang][g.npc]+"*");
+    out.push("");
+    g.order.forEach(nk=>{
+      const rows=g.nodes[nk],last=rows[rows.length-1],n=rows.length;
+      if(nk!=="-")out.push("**"+L.question+":** "+nk);
+      if(last.pick)out.push("**"+L.call+":** "+last.pick);
+      out.push("**"+L.verdict+":** "+(L[last.result]||last.result)
+        +(last.concept?" — *"+last.concept+"*":"")
+        +(n>1?"  ("+n+" "+L.attempts+")":""));
+      out.push("**"+L.why+":** "+(last.why||L.advanced),"");
+      rows.forEach(r=>{if(r.concept&&seen.indexOf(r.concept)<0)seen.push(r.concept);});
+    });
+  });
+  if(seen.length){out.push("## "+L.concepts,"");seen.forEach(c=>out.push("- "+c));out.push("");}
+  out.push("---","*"+L.foot+"*");
+  return out.join("\n");
+}
 function exportData(){return JSON.stringify({schema:"meridian-export-v1",exported:new Date().toISOString(),
   player:{name:heroName,class:cls,look},
   progress:{xp,level:lvlName(),hearts,questsDone:[...done],location:world},
@@ -1282,11 +1384,14 @@ function icsData(){
     "END:VCALENDAR"].join("\r\n");
 }
 function renderExport(){
-  $("exArea").value=exMode==="care"?T().carePack(heroName,treats,petCfg):exportData();
-  $("exHint").textContent=exMode==="care"?T().careHint:T().expHint;
+  $("exArea").value=exMode==="care"?T().carePack(heroName,treats,petCfg)
+                   :exMode==="rep"?decisionReport():exportData();
+  $("exHint").textContent=exMode==="care"?T().careHint:exMode==="rep"?T().repHint:T().expHint;
   $("exTabJson").setAttribute("aria-pressed",exMode==="json"?"true":"false");
   $("exTabCare").setAttribute("aria-pressed",exMode==="care"?"true":"false");
+  $("exTabRep").setAttribute("aria-pressed",exMode==="rep"?"true":"false");
   $("exIcs").hidden=exMode!=="care";
+  $("exDl").hidden=exMode!=="rep";
   $("careForm").hidden=exMode!=="care";
   $("petName").value=petCfg.n;$("petName").placeholder=T().petPh;
   $("petAm").value=petCfg.am;$("petPm").value=petCfg.pm;
@@ -1296,6 +1401,14 @@ $("openExp").addEventListener("click",()=>{$("settings").hidden=true;
   renderExport();$("exporter").hidden=false;});
 $("exTabJson").addEventListener("click",()=>{exMode="json";renderExport();});
 $("exTabCare").addEventListener("click",()=>{exMode="care";renderExport();});
+$("exTabRep").addEventListener("click",()=>{exMode="rep";renderExport();});
+$("exDl").addEventListener("click",()=>{
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([decisionReport()],{type:"text/markdown"}));
+  a.download=(heroName.toLowerCase().replace(/[^a-z0-9]+/gi,"-")||"player")+"-decision-report.md";
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
+});
 $("exIcs").addEventListener("click",()=>{
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([icsData()],{type:"text/calendar"}));
@@ -1308,29 +1421,29 @@ $("exCopy").addEventListener("click",()=>{const v=$("exArea").value;
   (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(v):Promise.reject())
     .then(()=>toast(T().expCopied,1600))
     .catch(()=>{$("exArea").focus();$("exArea").select();});});
-/* ---------- village map: a real town plan drawn from the actual streets ---------- */
+/* ---------- village map: a real town plan drawn from the actual streets ----------
+   Tile colours, district labels and the you-are-here dot all come from the content
+   pack (MAPCOL / TOWNLBL / MAPDOT). A new business shows up on the plan without a
+   line of engine change. */
+const BASECOL={"≈":"#4A4B52","-":"#9A9B9E",".":"#D5D2C6","B":"#5C4A50","Q":"#B0563A","F":"#B0895B","G":"#C98A2D","C":"#E0662B","X":"#E7C25A","P":"#3E7C4F","E":"#E0B45C","L":"#E0B45C","O":"#E0B45C","1":"#8A8474","2":"#E0B45C","Y":"#C0392B","J":"#639C6C","b":"#D77FA8","g":"#9DBB77"};
 function drawTown(){
   const mc=$("mapcv"),g2=mc.getContext("2d"),w=WORLDS.st,s=10;
   mc.width=w.W*s;mc.height=w.H*s+14;
   g2.fillStyle="#EFE9DA";g2.fillRect(0,0,mc.width,mc.height);
-  const col={"≈":"#4A4B52","-":"#9A9B9E",".":"#D5D2C6","B":"#5C4A50","Q":"#B0563A","F":"#B0895B","G":"#C98A2D","C":"#E0662B","X":"#E7C25A","P":"#3E7C4F","E":"#E0B45C","L":"#E0B45C","O":"#E0B45C","M":"#E0B45C","1":"#8A8474","2":"#E0B45C","Y":"#C0392B","J":"#639C6C","b":"#D77FA8","g":"#9DBB77"};
+  const col={...BASECOL,...(typeof MAPCOL!=="undefined"?MAPCOL:{})};
   for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
     g2.fillStyle=col[w.rows[y][x]]||"#D5D2C6";g2.fillRect(x*s,y*s,s,s);}
-  const stage=(done.has(12)?1:0)+(done.has(13)?1:0),es=lang==="es";
+  const es=lang==="es";
+  const flags={obra:(done.has(12)?1:0)+(done.has(13)?1:0),mercado:mercadoOpen()};
   g2.textAlign="center";
-  TOWNLBL2.forEach(([x,y,px2,colr,txt])=>{ /* mini-map labels are content-pack data */
-    g2.font="700 "+px2+"px sans-serif";g2.fillStyle=colr;
-    g2.fillText(txt[lang]||txt.en,x*s,y*s);});
-  g2.font="700 10px sans-serif";
-  g2.fillStyle=stage>=2?"#F2E8D8":"#3A2F17";
-  g2.fillText(stage>=2?(es?"LA OBRA · ESTUDIO":"LA OBRA · STUDIO"):(es?"🚧 OBRA":"🚧 SITE"),22*s,7.7*s);
-  g2.font="700 8px sans-serif";
-  g2.fillText("🚋",0.5*s+3,1.8*s); /* trolley stop, west terminus */
+  (typeof TOWNLBL!=="undefined"?TOWNLBL:[]).forEach(l=>{
+    if(l.when&&!l.when(flags))return;
+    g2.font="700 "+(l.s||10)+"px sans-serif";g2.fillStyle=l.c||"#3A2F17";
+    g2.fillText(es?l.es:l.en,l.x*s+(l.dx||0),l.y*s);});
   g2.fillStyle="#8A8474";g2.font="600 8px sans-serif";
   g2.fillText(es?"puertas y escaleras en dorado · ◉ estás aquí":"doors & stairs in gold · ◉ you are here",mc.width/2,w.H*s+10);
-  let dot=null;
-  if(world==="st")dot=[fx,fy];
-  else if(MAPDOT2[world])dot=MAPDOT2[world];
+  const M=typeof MAPDOT!=="undefined"?MAPDOT:{};
+  const dot=world==="st"?[fx,fy]:M[world]||null;
   if(dot){g2.fillStyle="#7A3FE0";g2.beginPath();g2.arc(dot[0]*s+s/2,dot[1]*s+s/2,5,0,7);g2.fill();
     g2.strokeStyle="#F2F1EA";g2.lineWidth=2;g2.stroke();}
 }
@@ -1596,6 +1709,29 @@ $("nmOk").addEventListener("click",()=>{
 });
 $("nmName").addEventListener("keydown",e=>{if(e.key==="Enter")$("nmOk").click();});
 /* city growth application: stages follow completed La Obra quests (12, 13) */
+/* Rewind a world to the map it shipped with. Station NPCs go back to where the map
+   put them (Lupe included); chill townsfolk — the content pack's and the owner's —
+   keep the spots they were placed on. */
+function rebuildWorld(id){
+  const w=WORLDS[id],defs=WNPC[id]||{};
+  w.rows=w.rows0.slice();
+  w.grid=w.rows.map(r=>r.split(""));
+  w.rows.forEach((row,y)=>[...row].forEach((ch,x)=>{
+    if(defs[ch]){const n=w.npcs.find(m=>m.key===ch);if(n){n.x=x;n.y=y;}}}));
+  w.npcs.forEach(n=>{if(w.grid[n.y]&&w.grid[n.y][n.x]!==undefined)w.grid[n.y][n.x]="N";});
+}
+/* El Mercado's facade goes up when Week One closes. */
+function applyMercado(){
+  if(typeof MERCADO==="undefined"||!mercadoOpen())return;
+  const w=WORLDS.st;
+  MERCADO.forEach(([y,x,ch])=>{
+    if(!w.grid[y]||w.grid[y][x]==="N")return;
+    w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);w.grid[y][x]=ch;});
+}
+/* The city is a pure function of progress: rewind the street, then build back
+   exactly what has been earned. So "New game +" really does hand you an empty lot —
+   no Studio you did not raise, no mercado you did not open. */
+function applyGrowth(){rebuildWorld("st");applyObra();applyMercado();}
 function applyObra(){const s=(done.has(12)?1:0)+(done.has(13)?1:0);
   const w=WORLDS.st;
   for(let k=1;k<=s;k++)OBRA[k].forEach(([y,x,ch])=>{
@@ -1632,17 +1768,16 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").textContent=T().contBtn(SV.n,SV.xp,SV.d.length);
   $("continueBtn").addEventListener("click",()=>{
     heroName=SV.n;cls=SV.c||"";look=SV.lk||look;xp=SV.xp||0;hearts=SV.he??3;done=new Set(SV.d||[]);
-    treats=SV.tr||0;fredQ=SV.fq||0;
+    treats=SV.tr||0;fredQ=SV.fq||0;chSeen=SV.cs||0;
     wear=(SV.wr&&typeof SV.wr==="object")?{bandana:null,collar:null,cape:null,...SV.wr}
         :{bandana:fredQ>=2?"#C0392B":null,collar:null,cape:null}; /* pre-wardrobe saves: keep the earned red bandana */
     qa=(SV.qa&&typeof SV.qa==="object")?SV.qa:{}; /* pre-retry saves: done quests stay done, credited as-is */
     wearCat=(SV.wc&&typeof SV.wc==="object")?{bandana:null,collar:null,...SV.wc}:{bandana:null,collar:null};
     world=WORLDS[SV.w]?SV.w:"hq";
     px=fx=SV.px??10;py=fy=SV.py??11;
-    applyObra();
+    applyGrowth();
     if(px>=CW().W||py>=CW().H||isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
-    if(done.size>=AQ().length){finish();$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;hud();}
-    else if(hearts<=0){clearSave();$("continueBtn").hidden=true;toast(T().contDead,2500);}
+    if(chDue()){finish(hearts<=0);$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;hud();}
     else enterWorld(false);
   });
 }

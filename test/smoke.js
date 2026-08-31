@@ -150,6 +150,122 @@ const CANDIDATES = [
   if (!t3.saved.wr || !t3.saved.wr.bandana) fails.push('dog wear not saved');
   if (!t3.saved.wc || !t3.saved.wc.bandana || !t3.saved.wc.collar) fails.push('cat wear not saved');
 
+  // ---- 3a1. chapters: Week One closes, the epilogue hands over, El Mercado opens ----
+  const chap = await page.evaluate(() => {
+    const problems = [];
+    const week1 = CHAPTERS[0], merc = CHAPTERS[1];
+    // the owner's rule: write the full pack, need fewer than all of it to close the district
+    if (!(merc.need < merc.quests.length)) problems.push('mercado `need` must be lower than its pack size');
+    done = new Set(); chSeen = 0; hearts = 3; applyGrowth();
+    if (chDue()) problems.push('chapter reported due on a fresh save');
+    if (mercadoOpen()) problems.push('El Mercado open before Week One closed');
+    if (WORLDS.st.rows[13][6] === 'M') problems.push('mercado door on the street before it was earned');
+
+    week1.quests.forEach(i => done.add(i));
+    if (!chDue()) problems.push('Week One closed but no epilogue is due');
+    hearts = 2; finish();
+    if (!document.getElementById('epi').textContent) problems.push('no epilogue text on the chapter close');
+    if (document.getElementById('endGo').hidden) problems.push('handover button hidden with a chapter still to come');
+    document.getElementById('endGo').click();
+    if (chSeen !== 1) problems.push('handover did not advance the chapter cursor');
+    if (hearts !== 3) problems.push('the new week did not restore hearts');
+    if (world !== 'st') problems.push('handover did not put the hero on the street: ' + world);
+    if (isSolid(px, py)) problems.push('handover dropped the hero inside a wall');
+    if (!mercadoOpen()) problems.push('El Mercado did not open on the handover');
+    if (WORLDS.st.rows[13][6] !== 'M') problems.push('mercado door missing from the street');
+    // Week One included La Obra, so the Studio must be standing and Lupe streetside
+    if (WORLDS.st.rows[5][21] !== 'O') problems.push('Studio door missing after a rewind + rebuild');
+    { const lu = WORLDS.st.npcs.find(n => n.key === 'e');
+      if (!lu || lu.x !== 7 || lu.y !== 7) problems.push('Lupe did not move streetside after a rewind + rebuild'); }
+    if (auditReach().length) problems.push('post-mercado reachability: ' + auditReach().join(' | '));
+
+    // the district closes at `need`, not at the full pack
+    merc.quests.slice(0, merc.need).forEach(i => done.add(i));
+    if (!chDue()) problems.push('district did not close at its `need` threshold');
+    finish();
+    if (document.getElementById('endGo').hidden) problems.push('no way off the final ending screen');
+    if (document.getElementById('endGo').textContent !== UI[lang].endStay)
+      problems.push('final chapter still offers a handover instead of returning to the city');
+    document.getElementById('endGo').click();
+    if (chSeen !== CHAPTERS.length) problems.push('final acknowledgement did not close the last chapter');
+    if (chDue()) problems.push('an ending is still due after the last chapter closed');
+    if (isSolid(px, py)) problems.push('returning to the city dropped the hero inside a wall');
+
+    // rewind: a fresh run must not inherit a shop it never earned
+    document.getElementById('end').hidden = true;
+    done = new Set(); chSeen = 0; hearts = 3; applyGrowth();
+    world = 'hq'; px = fx = 10; py = fy = 11;
+    if (mercadoOpen()) problems.push('replay left El Mercado standing');
+    if (WORLDS.st.rows[13][6] === 'M') problems.push('replay left the mercado door on the street');
+    // and the city rewinds evenly: no building survives a run it was not built in
+    if (WORLDS.st.rows[5][21] === 'O') problems.push('replay left the Studio standing');
+    if (WORLDS.st.rows[9][20] === 'B') problems.push('replay left the Studio walls on the street');
+    { const lu = WORLDS.st.npcs.find(n => n.key === 'e');
+      if (!lu || lu.x !== 27 || lu.y !== 7) problems.push('replay left Lupe streetside instead of at her post'); }
+    if (auditReach().length) problems.push('post-replay reachability: ' + auditReach().join(' | '));
+    document.getElementById('world').hidden = false;
+    return problems;
+  });
+  fails.push(...chap);
+
+  // ---- 3a1b. running out of hearts ends the chapter; it never erases the city ----
+  const doom = await page.evaluate(() => {
+    const problems = [];
+    done = new Set(); chSeen = 0; hearts = 3; xp = 0; applyGrowth();
+    // build something, then burn out with most of Week One unanswered
+    [12, 13].forEach(i => done.add(i)); applyGrowth();
+    if (WORLDS.st.rows[5][21] !== 'O') problems.push('setup: Studio did not go up');
+    hearts = 0; save();
+    if (!chDue()) problems.push('zero hearts did not end the chapter');
+    if (!localStorage.getItem('mq1')) problems.push('the save was deleted at zero hearts');
+    finish(true);
+    if (document.getElementById('endTitle').textContent !== UI[lang].goTitle)
+      problems.push('burnout did not show the burnout title');
+    if (document.getElementById('endGo').hidden) problems.push('burnout offers no way forward');
+
+    document.getElementById('endGo').click();
+    if (chSeen !== 1) problems.push('burnout did not move the story on to the next chapter');
+    if (hearts !== 3) problems.push('the new week did not restore hearts after a burnout');
+    if (xp !== 0) problems.push('burnout changed XP');
+    if (!done.has(12) || !done.has(13)) problems.push('burnout erased answered quests');
+    if (WORLDS.st.rows[5][21] !== 'O') problems.push('burnout tore down the Studio');
+    if (!mercadoOpen()) problems.push('burnout did not open the next district');
+    // the quests left unanswered are closed for good — no ❗ left on Week One
+    if (qOpen(0)) problems.push('a Week One quest is still on offer after the chapter closed');
+    { const tovar = WORLDS.hq.npcs.find(n => n.npc === 'tovar');
+      if (!tovar || pendingAt(tovar) !== undefined) problems.push('a closed chapter still shows a quest marker'); }
+    if (!qOpen(16)) problems.push('the new chapter\'s quests are not on offer');
+
+    done = new Set(); chSeen = 0; hearts = 3; applyGrowth();
+    world = 'hq'; px = fx = 10; py = fy = 11;
+    return problems;
+  });
+  fails.push(...doom);
+
+  // ---- 3a1c. restart is a Settings tool behind a two-tap confirm, not a story button ----
+  await page.evaluate(() => {
+    document.getElementById('end').hidden = true;
+    document.getElementById('wardrobe').hidden = true;
+  });
+  await page.click('#gear');
+  const reset = await page.evaluate(() => {
+    const problems = [];
+    const b = document.getElementById('replay');
+    if (!b) return ['restart button missing'];
+    if (!document.getElementById('settings').contains(b)) problems.push('restart is not in Settings');
+    if (document.getElementById('end').contains(b)) problems.push('restart is still on the ending screen');
+    xp = 99; done = new Set([1, 2]); chSeen = 1; save();
+    b.click();  // first tap only arms it
+    if (b.textContent !== UI[lang].replayArm) problems.push('first tap did not ask for confirmation');
+    if (xp !== 99 || chSeen !== 1) problems.push('first tap already wiped the run');
+    b.click();  // second tap commits
+    if (xp !== 0 || chSeen !== 0 || done.size) problems.push('confirmed restart did not reset the run');
+    if (b.textContent !== UI[lang].replay) problems.push('restart button stuck on the confirm label');
+    return problems;
+  });
+  fails.push(...reset);
+  await page.evaluate(() => { document.getElementById('settings').hidden = true; hearts = 3; });
+
   // ---- 3a2. comfort checks (template guarantee): WCAG contrast on every theme
   //           variant, and tap targets >= 24px on every visible button ----
   const comfort = await page.evaluate(() => {
@@ -249,6 +365,23 @@ const CANDIDATES = [
   if (!care.formVisible) fails.push('care form not visible in care mode');
   if (!care.sheet.includes('CANELITA')) fails.push('pet name not in care sheet: ' + care.sheet);
   if (!care.ics.includes('Canelita')) fails.push('pet name not in ics');
+
+  // ---- 4a. decision report: the play log becomes a portfolio document ----
+  await page.click('#exTabRep');
+  const rep = await page.evaluate(() => ({
+    text: document.getElementById('exArea').value,
+    dl: !document.getElementById('exDl').hidden,
+    ics: document.getElementById('exIcs').hidden,
+    form: document.getElementById('careForm').hidden,
+    logged: dlog.length,
+  }));
+  if (!rep.dl) fails.push('report download button hidden in report mode');
+  if (!rep.ics) fails.push('ics button still visible in report mode');
+  if (!rep.form) fails.push('care form still visible in report mode');
+  if (!rep.logged) fails.push('no decisions logged after answering quests');
+  if (!rep.text.includes('Free Churro Friday')) fails.push('report missing a quest the player answered');
+  if (!rep.text.includes('Hallucination control')) fails.push('report missing the concept it tested');
+  if (!rep.text.includes('Your call:')) fails.push('report missing the choice the player made');
   await page.click('#exClose');
 
   // ---- 4b. security: hostile pass payloads come out sanitized; peers render safely ----

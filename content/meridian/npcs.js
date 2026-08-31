@@ -1,15 +1,16 @@
 /* Meridian Quest content pack — NPC roster: emoji, names (EN/ES), looks, and world placement. */
-const NPCE={priya:"🛠️",marcus:"💼",camila:"🎧",tovar:"🌮",legal:"⚖️",cto:"🏥",junior:"🐣",ceo:"👑",fred:"🐕",rosa:"🌶️",chuy:"👨‍🍳",guero:"👷",lupe:"📐",beto:"🔨",kike:"🧱",mari:"🏗️",xochi:"🧵",chelo:"🛒",nando:"📦",perla:"🧮",chava:"🔪"};
+const NPCE={priya:"🛠️",marcus:"💼",camila:"🎧",tovar:"🌮",legal:"⚖️",cto:"🏥",junior:"🐣",ceo:"👑",fred:"🐕",rosa:"🌶️",chuy:"👨‍🍳",guero:"👷",lupe:"📐",beto:"🔨",kike:"🧱",mari:"🏗️",xochi:"🧵",chelo:"🧺",nando:"📦",perla:"🧾",chava:"🔪"};
 const NPCN={
- en:{priya:"Priya · Engineering Lead",marcus:"Marcus · CFO",camila:"Camila · Customer Success",tovar:"Ops Director · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · Bayview CTO",junior:"Theo · Junior PM",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Good Boy",rosa:"Doña Rosa · Owner, La Cocina",chuy:"Chuy · Head Cook",guero:"Don Güero · Foreman, La Obra",lupe:"Lupe · Estimator & Permits",beto:"Beto · Crew, La Obra",kike:"Kike · Mason",mari:"Mari · Crane Operator",xochi:"Xochi · Designer",chelo:"Doña Chelo · Owner, El Mercado",nando:"Nando · Receiving & Systems",perla:"Perla · Counter & Numbers",chava:"Chava · Carnicero"},
- es:{priya:"Priya · Líder de Ingeniería",marcus:"Marcus · CFO",camila:"Camila · Éxito del Cliente",tovar:"Director de Operaciones · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · CTO de Bayview",junior:"Theo · PM Junior",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Buen Chico",rosa:"Doña Rosa · Dueña de La Cocina",chuy:"Chuy · Jefe de Cocina",guero:"Don Güero · Maestro de Obra",lupe:"Lupe · Presupuestos y Permisos",beto:"Beto · Cuadrilla de La Obra",kike:"Kike · Albañil",mari:"Mari · Operadora de Grúa",xochi:"Xochi · Diseñadora",chelo:"Doña Chelo · Dueña, El Mercado",nando:"Nando · Recibo y Sistemas",perla:"Perla · Mostrador y Números",chava:"Chava · Carnicero"}};
+ en:{priya:"Priya · Engineering Lead",marcus:"Marcus · CFO",camila:"Camila · Customer Success",tovar:"Ops Director · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · Bayview CTO",junior:"Theo · Junior PM",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Good Boy",rosa:"Doña Rosa · Owner, La Cocina",chuy:"Chuy · Head Cook",guero:"Don Güero · Foreman, La Obra",lupe:"Lupe · Estimator & Permits",beto:"Beto · Crew, La Obra",kike:"Kike · Mason",mari:"Mari · Crane Operator",xochi:"Xochi · Designer",chelo:"Doña Chelo · Owner, El Mercado Robles",nando:"Nando · Receiving",perla:"Perla · Counter",chava:"Chava · Carnicero"},
+ es:{priya:"Priya · Líder de Ingeniería",marcus:"Marcus · CFO",camila:"Camila · Éxito del Cliente",tovar:"Director de Operaciones · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · CTO de Bayview",junior:"Theo · PM Junior",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Buen Chico",rosa:"Doña Rosa · Dueña de La Cocina",chuy:"Chuy · Jefe de Cocina",guero:"Don Güero · Maestro de Obra",lupe:"Lupe · Presupuestos y Permisos",beto:"Beto · Cuadrilla de La Obra",kike:"Kike · Albañil",mari:"Mari · Operadora de Grúa",xochi:"Xochi · Diseñadora",chelo:"Doña Chelo · Dueña de El Mercado Robles",nando:"Nando · Recibo de Mercancía",perla:"Perla · Caja",chava:"Chava · Carnicero"}};
 /* npc letter -> npc key + quest queue */
 const STATIONS={p:{npc:"priya",q:[5,14]},j:{npc:"junior",q:[7]},c:{npc:"ceo",q:[9]},l:{npc:"legal",q:[2]},
                 t:{npc:"tovar",q:[0,8]},a:{npc:"camila",q:[1]},h:{npc:"cto",q:[6]},m:{npc:"marcus",q:[3,4]}};
 const WNPC={hq:STATIONS,lc:{r:{npc:"rosa",q:[10]},y:{npc:"chuy",q:[11]}},st:{f:{npc:"guero",q:[12]},e:{npc:"lupe",q:[13]}},
             ex:{w:{npc:"beto",q:[],chat:1},x:{npc:"kike",q:[],chat:1},z:{npc:"mari",q:[],chat:1}},
             lo:{d:{npc:"xochi",q:[15],chat:1}},
-            me:{s:{npc:"chelo",q:[17,20]},n:{npc:"nando",q:[16,19]},u:{npc:"perla",q:[18],chat:1},v:{npc:"chava",q:[],chat:1}}};
+            me:{s:{npc:"chelo",q:[16,17,23]},n:{npc:"nando",q:[18,20]},
+                u:{npc:"perla",q:[19,21]},v:{npc:"chava",q:[22],chat:1}}};
 const NPCLOOK={p:{shirt:"#C2543F",skin:"#B97E52",hair:"#171219",style:"long"},j:{shirt:"#3E8ED0",skin:"#EFC49A",hair:"#7A4A22",style:"curly"},
   c:{shirt:"#2C2637",skin:"#D9995F",hair:"#5C5C66",style:"cap",outfit:"formal"},l:{shirt:"#25423C",skin:"#F0C9A6",hair:"#2C1C12",style:"long",outfit:"formal"},
   t:{shirt:"#D08A2E",skin:"#C08356",hair:"#1E1620",style:"cap"},a:{shirt:"#B04A78",skin:"#8C5A33",hair:"#241B26",style:"curly"},
@@ -18,8 +19,10 @@ const NPCLOOK={p:{shirt:"#C2543F",skin:"#B97E52",hair:"#171219",style:"long"},j:
   f:{shirt:"#E8720C",skin:"#B97E52",hair:"#9A9AA2",style:"buzz"},e:{shirt:"#2E7F86",skin:"#E5AC82",hair:"#26202B",style:"pony"},
   w:{shirt:"#3E6FA8",skin:"#B97E52",hair:"#26202B",style:"buzz",hat:"hard"},x:{shirt:"#7A8752",skin:"#C08356",hair:"#26202B",style:"buzz",hat:"hard"},z:{shirt:"#A85C86",skin:"#E5AC82",hair:"#26202B",style:"pony",hat:"hard"},
   d:{shirt:"#C4586B",skin:"#C08356",hair:"#26202B",style:"buns"},
-  s:{shirt:"#8E3B5C",skin:"#C08356",hair:"#B9B9C0",style:"buns"},n:{shirt:"#2E6E8E",skin:"#B97E52",hair:"#26202B",style:"fade"},
-  u:{shirt:"#E0A430",skin:"#E5AC82",hair:"#171219",style:"pony"},v:{shirt:"#F0EEE6",skin:"#8C5A33",hair:"#26202B",style:"edgar"}};
+  s:{shirt:"#7A9A4E",skin:"#C08356",hair:"#B9B9C0",style:"buns"},
+  n:{shirt:"#C88A3A",skin:"#B97E52",hair:"#26202B",style:"cap"},
+  u:{shirt:"#5B8FC9",skin:"#E5AC82",hair:"#171219",style:"pony"},
+  v:{shirt:"#F0EEE6",skin:"#8C5A33",hair:"#26202B",style:"buzz"}};
 /* chill townsfolk: chat-only characters with no quests — they just vibe. The engine
    spawns them at boot; their chatter comes from UI.chill (strings.js) unless a name
    matches an egg below. The owner can create more in admin mode (🧍 brush). */
