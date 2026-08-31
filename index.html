@@ -292,6 +292,7 @@
           <div class="optrow"><button id="openMp" style="flex:1;"></button></div>
           <div class="optrow"><button id="replay" style="flex:1;"></button></div>
           <button class="close" id="closeSet"></button>
+          <p id="verTag" style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--muted);margin:10px 0 0;"></p>
         </div>
       </div>
       <div class="settings" id="npcMaker" hidden>
@@ -430,7 +431,9 @@ if("serviceWorker" in navigator){
      control, reload once so a single manual refresh always lands on the latest version */
   var mqHadSW=!!navigator.serviceWorker.controller,mqReloaded=false;
   navigator.serviceWorker.addEventListener("controllerchange",function(){
-    if(mqHadSW&&!mqReloaded){mqReloaded=true;location.reload();}
+    if(mqHadSW&&!mqReloaded){mqReloaded=true;
+      try{sessionStorage.setItem("mqupd","1");}catch(e){}
+      location.reload();}
   });
 }
 </script>

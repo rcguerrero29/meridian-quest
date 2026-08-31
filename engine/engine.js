@@ -2066,6 +2066,9 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("tpSkip").addEventListener("click",()=>{stripPassHash();$("tpFound").hidden=true;});
 })();
 applyAdmin();applyLang();applyCtl();applyTheme();
+$("verTag").textContent="Meridian Quest · "+(typeof GAMEV!=="undefined"?GAMEV:"dev");
+try{if(sessionStorage.getItem("mqupd")==="1"){sessionStorage.removeItem("mqupd");
+  setTimeout(()=>toast("⬆️ "+(typeof GAMEV!=="undefined"?GAMEV:"")+" — "+T().updToast,3200),900);}}catch(e){}
 if(NET.enabled)NET.boot();
 requestAnimationFrame(ts=>{last=ts;loop(ts);});
 sizeCanvas();

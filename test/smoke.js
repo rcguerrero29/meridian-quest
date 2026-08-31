@@ -29,6 +29,14 @@ const CANDIDATES = [
   if (!exe) exe = CANDIDATES.find(p => { try { return fs.existsSync(p) && fs.statSync(p).isFile(); } catch (e) { return false; } });
   if (!exe) { console.error('No Chromium found. Set CHROMIUM_PATH.'); process.exit(1); }
   const fails = [];
+  // version lockstep: sw.js CACHE and config.js GAMEV must move together
+  {
+    const sw = fs.readFileSync(path.resolve(__dirname, '..', 'sw.js'), 'utf8');
+    const cfg = fs.readFileSync(path.resolve(__dirname, '..', 'content', 'meridian', 'config.js'), 'utf8');
+    const swv = (sw.match(/CACHE = "(mq-v\d+)"/) || [])[1];
+    const gv = (cfg.match(/GAMEV="(mq-v\d+)"/) || [])[1];
+    if (!swv || !gv || swv !== gv) fails.push(`version lockstep broken: sw=${swv} config=${gv}`);
+  }
   const browser = await chromium.launch({ executablePath: exe });
   const page = await browser.newPage({ viewport: { width: 480, height: 900 } });
   const pageErrors = [];
