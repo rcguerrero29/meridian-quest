@@ -393,6 +393,18 @@ const CANDIDATES = [
   if (!rep.text.includes('Free Churro Friday')) fails.push('report missing a quest the player answered');
   if (!rep.text.includes('Hallucination control')) fails.push('report missing the concept it tested');
   if (!rep.text.includes('Your call:')) fails.push('report missing the choice the player made');
+  const roles = await page.evaluate(() => {
+    const problems = [];
+    // every chapter must declare the job it trains, or the report cannot attribute a call
+    CHAPTERS.forEach(c => { if (!c.role || !c.role.en || !c.role.es) problems.push('chapter ' + c.id + ' declares no role'); });
+    const txt = document.getElementById('exArea').value;
+    if (!txt.includes(UI[lang].repL.roles)) problems.push('report has no roles-practiced section');
+    const r = CHAPTERS.find(c => c.quests.includes(1));
+    if (!r || !r.role) problems.push('the chapter holding quest 1 declares no role');
+    else if (!txt.includes(r.role[lang])) problems.push('report does not name the role a played quest trains');
+    return problems;
+  });
+  fails.push(...roles);
   await page.click('#exClose');
 
   // ---- 4b. security: hostile pass payloads come out sanitized; peers render safely ----

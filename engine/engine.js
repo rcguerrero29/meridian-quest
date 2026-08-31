@@ -1548,10 +1548,21 @@ let dlog=[];try{dlog=JSON.parse(localStorage.getItem("mqdlog")||"[]");}catch(e){
 /* choices that advance carry no concept of their own — the node's siblings do */
 function nodeConcept(){const n=(curQ&&curQ.nodes[node])||{},c=(n.ch||[]).find(x=>x.out&&x.out.concept);return c?c.out.concept:"";}
 function logDecision(o,c){const n=(curQ&&curQ.nodes[node])||{};
-  dlog.push({t:Date.now(),quest:curQ.title,npc:curQ.npc,ask:n.q||"",pick:c?c.t:"",
+  dlog.push({t:Date.now(),quest:curQ.title,qi:cur,npc:curQ.npc,ask:n.q||"",pick:c?c.t:"",
              concept:o.concept||"",why:o.why||"",result:o.r});
   dlog=dlog.slice(-200);
   try{localStorage.setItem("mqdlog",JSON.stringify(dlog));}catch(e){}}
+/* Which job a quest was practice for. Chapters declare their role in content;
+   entries logged before roles existed are matched back by title. */
+function roleOf(e){
+  const L=CHS();
+  let qi=typeof e.qi==="number"?e.qi:-2;
+  if(qi===-2){const i=AQ().findIndex(q=>q.title===e.quest);qi=i<0?-2:i;}
+  if(qi<0)return null;
+  for(let i=0;i<L.length;i++)
+    if(L[i].quests.indexOf(qi)>=0&&L[i].role)return L[i].role[lang]||L[i].role.en;
+  return null;
+}
 /* The decision report: play data → a portfolio document. One section per quest, one
    block per decision point; the latest attempt is the answer of record, and the retry
    count stays visible because the second try is where the learning shows. */
@@ -1562,7 +1573,7 @@ function decisionReport(){
   if(!dlog.length){out.push(t.repEmpty,"","---","*"+L.foot+"*");return out.join("\n");}
   const order=[],by={};
   dlog.forEach(e=>{const k=e.quest||"?";
-    if(!by[k]){by[k]={quest:k,npc:e.npc,order:[],nodes:{}};order.push(k);}
+    if(!by[k]){by[k]={quest:k,npc:e.npc,rows0:e,order:[],nodes:{}};order.push(k);}
     const g=by[k],nk=e.ask||"-";
     if(!g.nodes[nk]){g.nodes[nk]=[];g.order.push(nk);}
     g.nodes[nk].push(e);});
@@ -1570,6 +1581,18 @@ function decisionReport(){
   order.forEach(k=>by[k].order.forEach(nk=>{const r=by[k].nodes[nk];points++;
     if(r.length===1&&r[0].result==="ok")clean++;}));
   out.push(t.repSum(dlog.length,order.length,Math.round(clean/points*100)),"");
+  /* roles first: a hiring manager reads the job they are hiring for, then the detail */
+  const rOrd=[],rBy={};
+  order.forEach(k=>{const g=by[k],r=roleOf(g.rows0)||L.side;
+    if(!rBy[r]){rBy[r]={quests:0,calls:0,clean:0,points:0};rOrd.push(r);}
+    const a=rBy[r];a.quests++;
+    g.order.forEach(nk=>{const rows=g.nodes[nk];a.points++;a.calls+=rows.length;
+      if(rows.length===1&&rows[0].result==="ok")a.clean++;});});
+  if(rOrd.length){
+    out.push("## "+L.roles,"");
+    rOrd.forEach(r=>{const a=rBy[r];
+      out.push("- **"+r+"** — "+t.repRole(a.calls,a.quests,Math.round(a.clean/a.points*100)));});
+    out.push("");}
   const seen=[];
   order.forEach(k=>{
     const g=by[k];
