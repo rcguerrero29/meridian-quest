@@ -1032,7 +1032,9 @@ function autoFixTheme(){ /* backgrounds are the designer's; text adjusts to stay
   saveCustom();applyTheme();teRender();toast(T().teFixed,2200);
 }
 /* --- theme editor (admin) --- */
-let teMode="light";
+/* open the editor on the variant the player is actually SEEING — editing the light
+   palette while the phone displays dark reads as "my colors don't change" */
+let teMode=darkMq.matches?"dark":"light";
 function saveCustom(){try{localStorage.setItem("mqcustom",JSON.stringify(customTheme));}catch(e){}}
 function meridianVars(mode){ /* read the built-in palette out of the stylesheet */
   const root=document.documentElement,prev=root.dataset.theme;
@@ -1069,7 +1071,8 @@ document.querySelectorAll("#teClone button").forEach(b=>b.addEventListener("clic
 $("teLight").addEventListener("click",()=>{teMode="light";teRender();});
 $("teDark").addEventListener("click",()=>{teMode="dark";teRender();});
 $("teFix").addEventListener("click",autoFixTheme);
-$("teClose").addEventListener("click",()=>{$("themeEd").hidden=true;});
+$("teClose").addEventListener("click",()=>{$("themeEd").hidden=true;
+  if(customTheme)toast(T().teSaved,2000);});
 /* ---------- music: procedural WebAudio — generative, theme-aware, $0, offline.
    No assets, no network, nothing to license: a sparse pentatonic melody wanders over
    a soft pad and bass, voiced per theme. Starts on the first user gesture (autoplay

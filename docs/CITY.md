@@ -107,3 +107,13 @@ extraction are in this session's Don Güero plan — reproduce via /don-guero if
   next · the owner wants the interview-ready artifact of their in-game calls.
 - Week framing · "Week Two, chapter one" (content-only reframe) · same feeling,
   zero engine surgery.
+
+## Owner feedback log (2026-08-30, playtest round 2)
+
+- Theme editor "colors don't change" — **root-caused & fixed**: editor opened on the
+  Light variant while the phone displayed Dark; now opens on the visible variant, and
+  closing the editor confirms "✨ Custom theme saved."
+- ⏳ **Palette wardrobe** (owner ask): NAME each custom palette, keep several saved
+  ("favorites"), and drag to reorder/swap them in Settings. Design: mqcustom becomes
+  a list [{name, light, dark}] with a picker row; drag-reorder; cap ~8. Queue after
+  Phase 1 build, pairs with the graphics prep refactor session.
