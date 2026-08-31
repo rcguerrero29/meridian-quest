@@ -32,6 +32,12 @@ folder + a copy of `index.html` pointing its six content script tags at it.**
 
 - **24 quests** (indices 0–23) + Frederick's secret side quest, fully bilingual EN/ES.
   MAXXP = 350 (10 per node). Quests 16–23 are El Mercado's **AI product manager** pack.
+- **Growth is a pure function of progress**: `applyGrowth()` rewinds Calle Principal to
+  its shipped map (`rebuildWorld`) and then rebuilds exactly what the run has earned —
+  La Obra's stages, then El Mercado's facade. So "New game +" really does hand you empty
+  lots, and station NPCs (Lupe) return to their map positions while chill townsfolk keep
+  the spots they were placed on. Add a new parcel by adding its stage list and one line
+  to `applyGrowth`.
 - **Chapters** (`CHAPTERS` in `config.js`): each district declares its quest indices and
   how many close it. Week One needs all 16; El Mercado needs **5 of its 8** — the bar is
   deliberately below the pack size so the city stays a template, and the smoke test

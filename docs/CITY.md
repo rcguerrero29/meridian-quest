@@ -35,6 +35,10 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 
 ## Growth history
 
+- 2026-08-31 — Replay fixed (owner ask): the city is now a pure function of progress.
+  "New game +" rewinds Calle Principal to its shipped map and rebuilds only what the
+  run has earned — no Studio you did not raise, Lupe back at her post. Predates
+  Phase 1; El Mercado made it visible.
 - 2026-08-31 — **Phase 1 built**: El Mercado Robles opened on the SW lot (`me` interior,
   storefront ribbon, Chelo/Nando/Perla/Chava + Frijol), 8 AI-PM quests EN+ES (16-23,
   5 needed to close), chapters became data, the Week Two handover shipped, the
@@ -60,10 +64,6 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 - ✅ **Week Two** — signed 2026-08-31: El Mercado *is* chapter one. The arc now
   has a Monday; later phases extend it rather than inventing it.
 - Fandom eggs round 2 + mechanics (IDEAS §9) — waiting on AJ's picks.
-- ⏳ **Replay rewinds unevenly** (found while building Phase 1): El Mercado now takes
-  its facade back down on "New game +", but La Obra's Studio stays standing — the
-  OBRA stages have no rewind. Worth making growth symmetric when the tile-renderer
-  registry lands.
 - **Full tile registry** — DOORS/SOLIDX/MAPCOL are the seam Phase 1 needed; the
   per-glyph `TILES` table (solid + colour + renderer, all as data) belongs with the
   queued graphics-prep refactor, not a second content pass.

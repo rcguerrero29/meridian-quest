@@ -173,6 +173,10 @@ const CANDIDATES = [
     if (isSolid(px, py)) problems.push('handover dropped the hero inside a wall');
     if (!mercadoOpen()) problems.push('El Mercado did not open on the handover');
     if (WORLDS.st.rows[13][6] !== 'M') problems.push('mercado door missing from the street');
+    // Week One included La Obra, so the Studio must be standing and Lupe streetside
+    if (WORLDS.st.rows[5][21] !== 'O') problems.push('Studio door missing after a rewind + rebuild');
+    { const lu = WORLDS.st.npcs.find(n => n.key === 'e');
+      if (!lu || lu.x !== 7 || lu.y !== 7) problems.push('Lupe did not move streetside after a rewind + rebuild'); }
     if (auditReach().length) problems.push('post-mercado reachability: ' + auditReach().join(' | '));
 
     // the district closes at `need`, not at the full pack
@@ -187,6 +191,12 @@ const CANDIDATES = [
     world = 'hq'; px = fx = 10; py = fy = 11;
     if (mercadoOpen()) problems.push('replay left El Mercado standing');
     if (WORLDS.st.rows[13][6] === 'M') problems.push('replay left the mercado door on the street');
+    // and the city rewinds evenly: no building survives a run it was not built in
+    if (WORLDS.st.rows[5][21] === 'O') problems.push('replay left the Studio standing');
+    if (WORLDS.st.rows[9][20] === 'B') problems.push('replay left the Studio walls on the street');
+    { const lu = WORLDS.st.npcs.find(n => n.key === 'e');
+      if (!lu || lu.x !== 27 || lu.y !== 7) problems.push('replay left Lupe streetside instead of at her post'); }
+    if (auditReach().length) problems.push('post-replay reachability: ' + auditReach().join(' | '));
     document.getElementById('world').hidden = false;
     return problems;
   });

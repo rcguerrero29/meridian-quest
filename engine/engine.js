@@ -1685,17 +1685,29 @@ $("nmOk").addEventListener("click",()=>{
 });
 $("nmName").addEventListener("keydown",e=>{if(e.key==="Enter")$("nmOk").click();});
 /* city growth application: stages follow completed La Obra quests (12, 13) */
-/* El Mercado's facade goes up when Week One closes — and comes back down on replay,
-   so a fresh run never finds a shop that hasn't been earned yet. */
+/* Rewind a world to the map it shipped with. Station NPCs go back to where the map
+   put them (Lupe included); chill townsfolk — the content pack's and the owner's —
+   keep the spots they were placed on. */
+function rebuildWorld(id){
+  const w=WORLDS[id],defs=WNPC[id]||{};
+  w.rows=w.rows0.slice();
+  w.grid=w.rows.map(r=>r.split(""));
+  w.rows.forEach((row,y)=>[...row].forEach((ch,x)=>{
+    if(defs[ch]){const n=w.npcs.find(m=>m.key===ch);if(n){n.x=x;n.y=y;}}}));
+  w.npcs.forEach(n=>{if(w.grid[n.y]&&w.grid[n.y][n.x]!==undefined)w.grid[n.y][n.x]="N";});
+}
+/* El Mercado's facade goes up when Week One closes. */
 function applyMercado(){
-  if(typeof MERCADO==="undefined")return;
-  const w=WORLDS.st,open=mercadoOpen();
+  if(typeof MERCADO==="undefined"||!mercadoOpen())return;
+  const w=WORLDS.st;
   MERCADO.forEach(([y,x,ch])=>{
     if(!w.grid[y]||w.grid[y][x]==="N")return;
-    const t=open?ch:w.rows0[y][x];
-    w.rows[y]=w.rows[y].slice(0,x)+t+w.rows[y].slice(x+1);w.grid[y][x]=t;});
+    w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);w.grid[y][x]=ch;});
 }
-function applyGrowth(){applyObra();applyMercado();}
+/* The city is a pure function of progress: rewind the street, then build back
+   exactly what has been earned. So "New game +" really does hand you an empty lot —
+   no Studio you did not raise, no mercado you did not open. */
+function applyGrowth(){rebuildWorld("st");applyObra();applyMercado();}
 function applyObra(){const s=(done.has(12)?1:0)+(done.has(13)?1:0);
   const w=WORLDS.st;
   for(let k=1;k<=s;k++)OBRA[k].forEach(([y,x,ch])=>{

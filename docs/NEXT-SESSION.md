@@ -26,8 +26,7 @@ current: each session rewrites the queue before signing off.)*
 3. **Graphics prep refactor** (IDEAS §7 steps 1-2): tile-renderer registry +
    frame-clock consolidation. Now carries the queued **full `TILES` table** — Phase 1
    moved doors, solids and map colours into content (DOORS/SOLIDX/MAPCOL); the
-   per-glyph registry finishes the job. Also fold in the ⏳ replay-rewind asymmetry
-   noted in CITY.md (the Studio does not come back down; El Mercado does).
+   per-glyph registry finishes the job.
 4. **AJ's picks**: fandom eggs round 2 + mechanics (IDEAS §9 — Grogu lunchbox,
    birthday calendar magic, streak memory…). Blocked on AJ choosing.
 5. **Music v2** (IDEAS §8) when music gets its own session.
