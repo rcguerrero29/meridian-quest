@@ -1,0 +1,18 @@
+# Pelaez brand — locked 2026-04-28. Single source of truth for branded deliverables.
+# Mirrors the palette in the `ai-audit` skill. Change it HERE, then regenerate:
+#   node docs/templates/build-branded.js
+# Do not introduce colors that are not in this file.
+
+name: Pelaez
+palette:
+  teal:  "#0E4F4A"   # headings, outcome cards
+  cream: "#F5F1E8"   # page ground
+  coral: "#E07856"   # accent bar, emphasis only
+fonts:
+  headings: "Aptos Display"
+  body: "Aptos"
+voice:
+  tagline: "Where AI gives you time back."
+  # One action per document. No stacked CTAs.
+  cta_rule: "single action only"
+footer: "Prepared by Pelaez · {date}"

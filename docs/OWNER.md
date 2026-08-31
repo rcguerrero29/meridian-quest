@@ -63,6 +63,12 @@ should log in to see what is different in town, not to find out whether they won
   someday.** Every system here ships as a content-pack seam so AJ's game can swap the
   businesses, the deliverables, the trust language, or drop the career layer entirely
   and keep the comfort. If a feature cannot be turned off for AJ, it is built wrong.
+  **Settled 2026-08-31:** *"for ajs game same engine and a different content pack but
+  can borrow from mine."* So — one engine, never forked; a new `content/<aj>/` folder;
+  and Meridian's pack is a lending library, not a base class. AJ's pack may copy any
+  quest, NPC, tile or deliverable from `content/meridian/` and change it freely. Copying
+  is the sanctioned reuse; inheritance is not, because a shared base would make Meridian
+  unable to change without breaking AJ.
 - *"prepare mock documentation and templates so we can technically use these for work
   and clients in the future — would be dope — thus the idea to export."* The export is
   the point of the exercise: the paperwork the quests teach should be real paperwork.

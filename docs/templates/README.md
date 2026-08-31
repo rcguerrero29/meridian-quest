@@ -20,11 +20,33 @@ Two audiences, one file:
 
 | # | Template | The call it captures | Taught by |
 |---|---|---|---|
-| 01 | [Process Discovery Notes](01-discovery-notes.md) | Map the work before you automate it | Taller Herrera — *Nando's shortcut* (planned) |
-| 02 | [Recommendation Memo](02-recommendation-memo.md) | What to build first, and why not the rest | El Mercado — *Everything at once* |
-| 03 | [Acceptance Criteria & Error Budget](03-acceptance-criteria.md) | What "working" means before you build it | El Mercado — *The label problem* |
-| 04 | [Pilot Review](04-pilot-review.md) | Did it pay off — and should we stop? | El Mercado — *The Monday number* |
-| 05 | [Decision Log](05-decision-log.md) | The running record of calls and why | The decision report export |
+| 01 | Process Discovery Notes | Map the work before you automate it | Taller Herrera — *Nando's shortcut* (planned) |
+| 02 | Recommendation Memo | What to build first, and why not the rest | El Mercado — *Everything at once* |
+| 03 | Acceptance Criteria & Error Budget | What "working" means before you build it | El Mercado — *The label problem* |
+| 04 | Pilot Review | Did it pay off — and should we stop? | El Mercado — *The Monday number* |
+| 05 | Decision Log | The running record of calls and why | The decision report export |
+
+Each one exists twice:
+
+- **[`neutral/`](neutral/)** — no brand, no letterhead. For the game's export, for a
+  client who has their own template, and for anyone reusing this outside Pelaez.
+- **[`branded/`](branded/)** — the locked Pelaez brand: letterhead, tagline, footer,
+  and YAML front matter carrying the palette and fonts so a renderer (docx, pptx,
+  HTML) applies them without guessing.
+
+**The bodies are identical on purpose, and enforced.** `branded/` is generated from
+`neutral/` + `brand.yml`, so the two drafts cannot drift into disagreeing with each
+other — the classic failure of keeping two copies by hand.
+
+```
+node docs/templates/build-branded.js           # regenerate branded/
+node docs/templates/build-branded.js --check   # fails if branded/ is stale
+```
+
+Edit `neutral/` for wording. Edit `brand.yml` for the brand — it is the single source
+for the palette (Teal `#0E4F4A`, Cream `#F5F1E8`, Coral `#E07856`), the fonts (Aptos
+Display / Aptos), the tagline and the footer, mirroring the `ai-audit` skill's locked
+brand. Never hand-edit anything in `branded/`.
 
 ## How to use them at work
 
@@ -53,6 +75,7 @@ Per the owner's standing rule (`docs/OWNER.md`): **these are content, not engine
 
 ## Status
 
-Templates: **written, usable by hand.** In-game filled-in export of 01–04: **not
-built** — the decision report (05) is the only one the game generates today. Recorded
-so nobody reads this folder and assumes the game already produces all five.
+Templates: **written, usable by hand, in both neutral and branded form.** In-game
+filled-in export of 01–04: **not built** — the decision report (05) is the only one the
+game generates today. Recorded so nobody reads this folder and assumes the game already
+produces all five.

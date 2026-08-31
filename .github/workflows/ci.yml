@@ -15,5 +15,7 @@ jobs:
         run: |
           npm install playwright
           npx playwright install --with-deps chromium
+      - name: Branded templates match neutral + brand.yml
+        run: node docs/templates/build-branded.js --check
       - name: Headless smoke test
         run: node test/smoke.js
