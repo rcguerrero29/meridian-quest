@@ -12,31 +12,25 @@ current: each session rewrites the queue before signing off.)*
 3. Every ship: `npm install playwright-core` once, `node test/smoke.js` green,
    EN/ES in lockstep, bump `CACHE` in `sw.js`.
 
-## Queue (owner-set, 2026-08-30)
+## Queue (owner-set; rewritten 2026-08-30 after Phase 1 shipped)
 
-1. **Build Phase 1 — El Mercado Robles.** Don Güero already planned it (see CITY.md "Phase 1 plan"); ALL FOUR DECISIONS ARE SIGNED (see CITY.md decision log — all 5 roles in order, all 5 quests, interior + extraction, memo export, Week Two framing). Build: `me` interior + st storefront rows, 4 NPCs, quests 16-20 EN+ES, the DOORS/TOWNLBL/MAPDOT engine extraction, MAXXP bump, smoke green, sw CACHE bump. Originally: The skill spawns the Don Güero
-   planner agent (pinned to Opus 5), which drafts the growth phase and returns
-   decisions as ❗ side quests for the owner. Expected Phase 1 shape: develop the
-   El Mercado lot as the first **Hispanic-business practice pack**. Deliverables:
-   signed ledger + built content if tokens allow.
-2. **Hispanic-business brainstorm, for real.** Owner wants: businesses that give
-   them working experience in AI roles they'd like to be hired in (implementation
-   lead, AI PM, solutions engineer, automation consultant, AI ops analyst — have
-   the owner RANK these, it's a pending side quest in CITY.md). Each business =
-   quests written as that role's real judgment calls. Candidate list is in
-   CITY.md → Pending proposals.
-3. **Graphics prep refactor** (IDEAS §7 steps 1-2): tile-renderer registry +
-   frame-clock consolidation. Pure refactor, no visual change, unlocks the
-   shading/animation waves AJ wants.
-4. **AJ's picks**: fandom eggs round 2 + mechanics (IDEAS §9 — Grogu lunchbox,
-   birthday calendar magic, streak memory…). Blocked on AJ choosing.
-5. **Music v2** (IDEAS §8) when music gets its own session.
-6. **AINPC** (IDEAS §6) — designed, owner said *not yet*. Don't build until asked.
+1. **Decision-report export** ("el acta") — SIGNED, deferred only for budget:
+   export tab that turns the player's logged quest decisions into an interview-ready
+   memo (situation → call → tradeoff → concept), EN/ES. Needs logDecision to also
+   store the chosen option text. IDEAS §2 has the seed.
+2. **Phase 2 — run `/don-guero`.** Next parcel (st SE "RESERVED LOT" or Calle Dos
+   frontage), next business off the brainstorm list, voiced for role #1 in the
+   owner's ranking: **Automation/Solutions Consultant**. The growth-registry and
+   player-built options are ⏳ in CITY.md.
+3. **Graphics prep refactor** (IDEAS §7 steps 1-2) + **palette wardrobe** (named
+   custom palettes, favorites, drag-to-reorder — CITY.md feedback log).
+4. **AJ's fandom picks** (IDEAS §9) · **Music v2** (IDEAS §8) · **AINPC** (§6, only
+   when the owner says go).
 
 ## State snapshot (2026-08-30)
 
-- `main` = deployed = everything through "Music, chill townsfolk, a character
-  creator, and 39 name eggs" (sw `mq-v16`). CI green.
+- `main` = deployed = everything through "Phase 1 built: El Mercado Robles opens"
+  (sw `mq-v18`, 21 quests, MAXXP 330). CI green.
 - Default-branch setting on GitHub still points at an old `claude/...` branch —
   owner intends to flip it to `main` (repo Settings → General → Default branch).
 - Engine/content split holds: engine untouched by content work. New seams since:
