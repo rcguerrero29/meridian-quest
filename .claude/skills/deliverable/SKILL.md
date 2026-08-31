@@ -12,7 +12,11 @@ do not merge them, and do not edit `ai-audit`'s generator from here.
 
 ## The templates
 
-Source of truth: `docs/templates/` in `meridian-quest`.
+Source of truth, whichever exists:
+- **Installed globally** (`~/.claude/skills/deliverable/`): `./templates/`
+- **In the meridian-quest repo**: `docs/templates/`
+
+Check for `./templates/` first; fall back to the repo path.
 
 | # | Template | Use it when |
 |---|---|---|
@@ -79,9 +83,8 @@ because the client will act on it and you will not be able to defend it. So:
 
 ## Notes
 
-- This skill currently lives in the `meridian-quest` repo because that is where the
-  templates live and because a repo skill survives a container. To use it across
-  every project, promote it to a personal skill — copy this folder and
-  `docs/templates/` to `~/.claude/skills/deliverable/`.
+- Installed everywhere by `./install-skills.sh` in the meridian-quest repo, which
+  copies this skill plus the templates to `~/.claude/skills/`. The repo remains the
+  source of truth: edit there, re-run the installer.
 - The game's decision-report export (⚙️ Settings → Export → 📄) produces template 05
   from play. The other four are hand-filled today.

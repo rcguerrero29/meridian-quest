@@ -69,6 +69,13 @@ should log in to see what is different in town, not to find out whether they won
   quest, NPC, tile or deliverable from `content/meridian/` and change it freely. Copying
   is the sanctioned reuse; inheritance is not, because a shared base would make Meridian
   unable to change without breaking AJ.
+  **AJ, 2026-08-31:** she/her. *"the best humie ever. she will be working on games for
+  fun using meridian quest as example but will want an open world comfort concept."*
+  Her taste is already encoded in `docs/IDEAS.md` §9 — Marvel, Harry Potter, Vampire
+  Diaries and PLL are in; the candidate list (Ghibli, Gilmore Girls, Stranger Things,
+  Bridgerton, Riverdale…) reads teen mystery-romance plus cozy plus nerd canon.
+  Questions for her and the map of what each answer changes are in `docs/for-aj/`.
+  **She is a designer, not a stakeholder — ask her directly and take the answer.**
 - *"prepare mock documentation and templates so we can technically use these for work
   and clients in the future — would be dope — thus the idea to export."* The export is
   the point of the exercise: the paperwork the quests teach should be real paperwork.
