@@ -551,10 +551,19 @@ function drawFront(){
     const gch=w.grid[y][x];if(!SOLID.has(gch))continue;
     const ch=w.rows[y][x],sx=x*TS-camX,sy=y*TS-camY;
     R.push({d:y,f:()=>{
-      const m=TILES[gch]||TILES[ch]||{lift:7},L=m.lift|0;
-      if(L>0){ctx.fillStyle=tc(roofCol(gch));ctx.fillRect(sx,sy-L,TS,L);
-        ctx.fillStyle="rgba(255,255,255,.14)";ctx.fillRect(sx,sy-L,TS,1.5);
-        ctx.fillStyle="rgba(15,12,20,.18)";ctx.fillRect(sx,sy-1,TS,1);}
+      const m=TILES[gch]||TILES[ch]||{lift:7,kind:"prop"},L=m.lift|0,kd=m.kind;
+      if(kd==="wall"||kd==="facade"||kd==="fence"){
+        /* structure: a roof strip only where the run starts, so interior rows of a
+           building connect cleanly instead of banding (AJ: "walls are clunky") */
+        if(L>0&&(y===0||!SOLID.has(w.grid[y-1][x]))){
+          ctx.fillStyle=tc(roofCol(gch));ctx.fillRect(sx,sy-L,TS,L);
+          ctx.fillStyle="rgba(255,255,255,.14)";ctx.fillRect(sx,sy-L,TS,1.5);
+          ctx.fillStyle="rgba(15,12,20,.22)";ctx.fillRect(sx,sy-1.2,TS,1.2);}
+      }else{ /* an object stands ON the floor: contact shadow, never a slab
+                (AJ: tables and potted plants seemed to float) */
+        ctx.fillStyle="rgba(15,12,20,.16)";
+        ctx.beginPath();ctx.ellipse(sx+16,sy+27.5,11,3.2,0,0,7);ctx.fill();
+      }
       const tf=TILEDRAW[ch]||TILEDRAW[gch];if(tf)tf({sx,sy,x,y,canopy:queueCanopy});
     }});
   }
@@ -935,8 +944,8 @@ function beagleStep(cr,now){
 function dogWhim(cr,now){ /* his own clock: mostly naps, sometimes opinions */
   const r=Math.random();
   if(r<0.40){cr.layT=now+3800+Math.random()*3200;cr.sit=false;cr.next=cr.layT;}
-  else if(r<0.70){cr.howlT=now+1900;cr.next=now+2600;
-    try{musChirp();}catch(e){}
+  else if(r<0.70){cr.howlT=now+2100;cr.next=now+2800;
+    try{musHowl();}catch(e){} /* an actual tiny howl, when the sound is on */
     if(Math.random()<0.5)toast("🐶 "+(T().howl||"AWOOOOO…"),1800);}
   else if(r<0.95){cr.digT=now+1700;cr.next=now+2400;
     const hx=cr.x,hy=cr.y,hw=cr.world;
@@ -1731,6 +1740,24 @@ function musChirp(){ /* instant audible proof the audio path works (owner: "no t
   if(!MUSIC.ctx||MUSIC.ctx.state!=="running")return;
   const d=musDef(),t0=MUSIC.ctx.currentTime+0.03;
   [0,2,4].forEach((deg,i)=>musVoice(d.root+12+d.scale[deg],t0+i*0.09,0.4,d.lead,0.22,d.bright));}
+function musHowl(){ /* a tiny beagle howl: one voice — up, hold, trail off. Awoo. */
+  if(!MUSIC.ctx||MUSIC.ctx.state!=="running")return; /* muted dog stays a mime */
+  const c=MUSIC.ctx,t0=c.currentTime+0.05;
+  const o=c.createOscillator(),f=c.createBiquadFilter(),g=c.createGain();
+  o.type="sawtooth";f.type="lowpass";f.frequency.value=900;
+  o.frequency.setValueAtTime(310,t0);
+  o.frequency.exponentialRampToValueAtTime(620,t0+0.28);
+  o.frequency.setValueAtTime(620,t0+0.55);
+  o.frequency.exponentialRampToValueAtTime(430,t0+0.95);
+  const v=c.createOscillator(),vg=c.createGain(); /* slow vibrato — the mournful part */
+  v.frequency.value=5.5;vg.gain.value=12;v.connect(vg);vg.connect(o.frequency);
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(0.15,t0+0.12);
+  g.gain.setValueAtTime(0.15,t0+0.6);
+  g.gain.exponentialRampToValueAtTime(0.0008,t0+1.05);
+  o.connect(f);f.connect(g);g.connect(MUSIC.master);
+  o.start(t0);v.start(t0);o.stop(t0+1.15);v.stop(t0+1.15);
+}
 $("musMute").addEventListener("click",()=>{musOn=!musOn;musApply();if(musOn)setTimeout(musChirp,150);});
 $("musVol").addEventListener("input",()=>{musVol=$("musVol").value/100;if(!musOn)musOn=true;musApply();});
 $("musVol").addEventListener("change",()=>setTimeout(musChirp,100));

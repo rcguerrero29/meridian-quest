@@ -336,6 +336,21 @@ a front-camera frame, persistence, DECOR art references.
 art wave if wanted: per-`kind` facade treatments (e.g. windows lit at night on
 `facade` tiles) now trivial because kind is data.
 
+**AJ playtest round 2 (2026-08-31, on mq-v29) — polish SHIPPED mq-v30:** tables and
+potted plants floated (they were getting building roof-slabs) → objects now draw a
+contact shadow and stand on the floor, no slab; walls were clunky (every row of a
+building drew its own roof strip = banding) → the strip draws only where a run
+starts, so building interiors connect cleanly. **The ladder to "even better",
+in order of cost, for when AJ wants the next rung:**
+1. *(shipped)* grounding + clean rooflines — this wave.
+2. **Per-kind art wave**: lit windows on `facade` tiles at night, awning shadows,
+   fence posts at run ends, door frames casting onto the floor. A session.
+3. **2× sprite detail**: keep TS=32 but draw at double internal resolution
+   (crisper curves, outlines, dithered shading) — renderer-only, art-heavy.
+4. **Real sprite sheets**: hand-drawn PNG tiles/actors replacing canvas-drawn art.
+   The TILEDRAW/TILES seams take PNGs today; the cost is pure art time, and it is
+   the big one. Decide with AJ only when rung 2 stops being enough.
+
 **v1 shipped:** `drawIso()` in the engine — projection core, painter''s-sort depth,
 floors as diamonds with inlays (water, rugs, blooms, grass), solids as extruded
 blocks colored from BASECOL/MAPCOL with per-glyph heights, jacarandas with canopy,
@@ -421,3 +436,19 @@ behavior flags), all engine-generic so any dog can opt in:
   owner's regression testing.)
 - Iso list from §10 (doors, thin walls, trolley stop, street detail) — subsumed
   by the front-profile direction.
+
+## 13. The pet-care spin-off game (owner wish, 2026-08-31 — logged, not built)
+
+Owner, verbatim: *"we will want a mini game one day to split off and be free
+marketting for a new game for pet caring only."*
+
+- **What it is:** a standalone pet-caring game — Sonny's program grown into a whole
+  loop (feed, fetch, walks, grooming, the janitor economy) — published as its own
+  free PWA that points people at Meridian Quest and the studio.
+- **Why the architecture is ready:** the engine/content split means this is a new
+  content pack, not a fork — `content/petcare/` with its own maps, strings, config,
+  and the beagle/ball/decal systems already engine-generic. Same $0 hosting model.
+- **Sequencing:** after AJ's game gets its pack (she's first in line for a split-off),
+  and worth a `/nacho` + `/don-guero` sitting of its own for loop and cast.
+  A name, a star dog (Sonny, presumably), and the marketing hook are owner decisions
+  for that sitting — nothing signed yet.
