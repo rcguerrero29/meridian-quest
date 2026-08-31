@@ -51,10 +51,15 @@ Deployed at sw `mq-v22`. Smoke suite green throughout (24 quests, maxXP 350).
    signed (AI PM first, then automation consultant, ops analyst, implementation
    lead, prompt engineer) — Phase 2 picks the next business off the brainstorm list
    in CITY.md and the next role down.
-3. **Graphics: what remains** — waves 1-2, palette wardrobe, AND isometric v1
-   (camera toggle) all SHIPPED 2026-08-31. Remaining: per-glyph TILEART-ISO art
-   pack for richer iso facades, frame-clock + TILES table consolidation, iso swipe
-   remap, iso night door-spills (IDEAS §7 step 2 + §10 remainder).
+3. **Graphics next: the front-profile pivot** (owner-redirected 2026-08-31, plans
+   in IDEAS §10): ① consolidate TILES glyph metadata + DECOR instance metadata
+   (describe the world, don't just draw it), ② build the FRONT-PROFILE 2.5D
+   renderer (square grid, facades facing the player — keeps all existing detail;
+   what the owner actually wants instead of diamond-iso), ③ camera-rotate +
+   wall-fade occlusion fallbacks, ④ owner+AJ pick the default. ALSO: restore NPC
+   activity emotes in the iso path (regression, IDEAS §12).
+3b. **Sonny's program** (IDEAS §11): ball fetch at exactly 4/7, feed/treats,
+   howl, lay down, dig, the disappearing 💩, and the future janitor practice pack.
 4. **AJ's picks**: fandom eggs round 2 + mechanics (IDEAS §9 — Grogu lunchbox,
    birthday calendar magic, streak memory…). Blocked on AJ choosing.
 5. **Music v2** (IDEAS §8) when music gets its own session.

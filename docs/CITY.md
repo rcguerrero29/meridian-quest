@@ -157,3 +157,12 @@ ops-analyst business — the concepts don't expire. Also landed in the merge: th
 editor edits the visible variant, every animal interactive, door under-glow, activity
 ticker, music chirp + denser melody, admin NPC editing (rename / re-roll look / move
 out), Calle Dos got its south fence.
+
+## Owner playtest feedback — iso round (2026-08-31, logged for next session)
+
+Diamond-iso v1 verdict: generic surfaces, hidden entrance, doors/walls/fences/
+trolley-stop all lost identity, emotes missing. Owner steer: front profile, not
+angled. Full plans: IDEAS §10 (TILES+DECOR metadata architecture, front-profile
+renderer, camera rotate/wall fade), §11 (Sonny's program — fetch 4/7, feed, howl,
+lay, dig, 💩→ future janitor pack), §12 (emote regression). Only plans were made,
+per owner instruction — nothing built this round.

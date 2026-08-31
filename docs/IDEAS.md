@@ -273,7 +273,48 @@ const AINPC={
 
 ---
 
-## 10. Isometric 2.5D — v1 SHIPPED 2026-08-31 (camera toggle); pack remains
+## 10. The 2.5D question — REDIRECTED by owner playtest (2026-08-31)
+
+**Owner verdict on diamond-iso v1** (toggle stays as an experiment, default stays
+top-down): tables/surfaces went generic; one building entrance is hard to see
+(occlusion); doors don't read as doors; walls too thick; the street lost details,
+decoration, doors and fences; the trolley stop became "a square"; and the NPC
+activity emotes don't render in iso (bug — the billboard path skips them). Verbatim
+steer: **"we don't want an angled profile — show us a profile from the front."**
+
+### The architecture the owner asked for: describe the world, don't just draw it
+
+1. **`TILES` — glyph-class metadata** (engine defaults + content overrides, one
+   row per glyph): `{solid, height, thin, baseColor, kind, top, face, label}`.
+   Renderers derive drawing from meaning: a counter KNOWS it's a counter. Absorbs
+   today's SOLID/SOLIDX/IZH/BASECOL/MAPCOL/TILEDRAW into one table — this was
+   already queued as "full tile registry"; the iso feedback proves why.
+2. **`DECOR` — instance metadata** (content): one-off place descriptions
+   `{world,x,y,deco:"awning-red-cream"|"trolley-sign"|"mural"}` — the trolley
+   stop squared off because its identity lived in hand-drawn pixels, not data.
+3. Every future renderer (front-profile, iso, someday 3D) reads TILES+DECOR.
+   Never again a camera that loses meaning.
+
+### The revised direction: FRONT-PROFILE 2.5D (not diamond)
+
+Key insight from the owner's note: the existing art is ALREADY front-profile —
+La Cocina's awning, the mercado window, the trolley sign are painted as building
+FRONTS. So the right 2.5D keeps the square grid and a straight-on, slightly-high
+camera, and draws solids as tall FACADES facing the player (Pokémon/EarthBound/
+Stardew school):
+- Keeps every pixel of existing facade detail; doors read as doors (you look AT
+  them); entrances can't hide; walls read thin; fences stay fences.
+- Implementation: rows render back-to-front; a solid run draws its top strip +
+  a front face of `height` px; walkable rows draw flat. Actors already fit.
+- Occlusion fallbacks (plan): (a) camera rotate N/E/S/W as a HUD control (iso and
+  front-profile both benefit), (b) hero-proximity wall fade (alpha on faces that
+  cover the hero), (c) door markers always drawn on top.
+- Diamond-iso v1 fixes IF it stays: thin wall slabs via neighbor-aware
+  orientation, door faces on blocks, emotes in billboards, TILES-driven tops.
+
+**Order of work (next graphics session):** ① TILES+DECOR consolidation →
+② front-profile renderer as a third camera option → ③ owner picks the default
+with AJ → ④ retire or polish diamond-iso accordingly.
 
 **v1 shipped:** `drawIso()` in the engine — projection core, painter''s-sort depth,
 floors as diamonds with inlays (water, rugs, blooms, grass), solids as extruded
@@ -320,3 +361,31 @@ the iso pack overrides one table, not three.
 spend the same budget on top-down waves (animated water, seasonal foliage, night
 windows)? Both ride the registry; iso is the bigger wow, top-down is the safer
 compounding.
+
+
+---
+
+## 11. Sonny's program (owner-signed wishes, 2026-08-31 — future build)
+
+Frederick's beagle colleague earns a real life. All data-driven (CRITTERS gains
+behavior flags), all engine-generic so any dog can opt in:
+
+- **Fetch**: throw a ball (new item/button near Sonny); he fetches it **exactly
+  4 out of 7 times** (owner-specified ratio — a seeded 7-cycle so it FEELS like
+  4/7, not a coin). The misses: he looks at the ball, looks at you, sits.
+- **Feed & treats**: a treat/feed interaction like Frederick's (shared treat
+  system; per-pet counters).
+- **Behaviors on his own clock**: howl (little musical note + AWOO toast), lay
+  down (sprite state), dig holes (temporary dirt-patch tile decal that fades),
+  and infrequently 💩 — which disappears on its own... until the day the city
+  hires **janitors** (logged as a future business/quest concept: sanitation +
+  ops-scheduling practice pack — Don Güero will love the permit jokes).
+- **Activity emotes for animals** ride the same pass as the humans'.
+
+## 12. Regressions & polish logged from owner playtest (2026-08-31)
+
+- **NPC activity emotes missing in iso view** — the iso billboard path skips the
+  emote branch; fix by moving emote drawing into a shared NPC-draw helper both
+  renderers call. ("some activity was lost from the humies")
+- Iso list from §10 (doors, thin walls, trolley stop, street detail) — subsumed
+  by the front-profile direction.
