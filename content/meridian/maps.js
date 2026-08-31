@@ -41,10 +41,21 @@ const WORLD_DEFS={
      "..............FFFFFFFFFFFFFFFF",
      "..............................",
      "....P....................P....",
-     "........g............g........",
-     "...XX....................XX...",
-     "..J.........J.....J.......J...",
+     "QQQQQQMQQQQ..........g........",
+     "BBBBBBBBBBB..............XX...",
+     "BBBBBBBBBBB.J.....J.......J...",
      "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"],
+ me:["####################",
+     "#.P..............P.#",
+     "#.WWW....T....WWW..#",
+     "#..................#",
+     "#..KKKK......KKKK..#",
+     "#..................#",
+     "#..T....s.....T....#",
+     "#..n............u..#",
+     "#.....v............#",
+     "#..................#",
+     "##########M#########"],
  ex:["...J.....J.....J....J...",
      "≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
      "≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
@@ -80,7 +91,8 @@ const WORLD_DEFS={
 };
 const PORTALS={hq:{"1":{to:"f2",x:17,y:11,dir:"left"},"E":{to:"st",x:14,y:1,dir:"down"}},
                f2:{"1":{to:"hq",x:16,y:5,dir:"left"}},
-               st:{"E":{to:"hq",x:10,y:12,dir:"up"},"L":{to:"lc",x:10,y:10,dir:"up"},"O":{to:"lo",x:10,y:8,dir:"up"},"2":{to:"ex",x:1,y:3,dir:"right"}},
+               st:{"E":{to:"hq",x:10,y:12,dir:"up"},"L":{to:"lc",x:10,y:10,dir:"up"},"O":{to:"lo",x:10,y:8,dir:"up"},"M":{to:"me",x:10,y:9,dir:"up"},"2":{to:"ex",x:1,y:3,dir:"right"}},
+               me:{"M":{to:"st",x:6,y:11,dir:"down"}},
                ex:{"2":{to:"st",x:28,y:1,dir:"left"}},
                lc:{"L":{to:"st",x:6,y:4,dir:"up"}},
                lo:{"O":{to:"st",x:21,y:4,dir:"up"}}};
@@ -97,8 +109,19 @@ const TRV=[{w:"st",x:1,y:1,dir:"right"},{w:"ex",x:22,y:3,dir:"left"}];
 /* ambient critters: kinds live in the engine (butterfly, colibri, gato); spawns are
    content. Each wanders a small radius around home; the gato is pettable. */
 const CRITTERS=[
- {kind:"butterfly",world:"st",x:6,y:12,c:"#E4A7D8"},
+ {kind:"butterfly",world:"st",x:16,y:10,c:"#E4A7D8"},
  {kind:"butterfly",world:"ex",x:10,y:0,c:"#8FC7E8"},
  {kind:"colibri",world:"st",x:16,y:4,c:"#3FA88F"},
- {kind:"gato",world:"ex",x:20,y:5,c:"#8B8F98"}
+ {kind:"gato",world:"ex",x:20,y:5,c:"#8B8F98"},
+ {kind:"gato",world:"me",x:13,y:8,c:"#3A3F46"} /* Frijol, the bodega cat */
+];
+/* content seams read by the engine (entities-as-data law) */
+const DOORS=["+","E","L","O","M"];
+const MAPDOT={hq:[14,0],f2:[14,0],lc:[6,5],lo:[21,5],ex:[29,1],me:[6,12]};
+const TOWNLBL=[
+ [15,0.75,10,"#F2E8D8",{en:"MERIDIAN HQ  (⇧ FLOOR 2)",es:"MERIDIAN HQ  (⇧ PISO 2)"}],
+ [6.5,5.75,10,"#F2E8D8",{en:"LA COCINA",es:"LA COCINA"}],
+ [5.5,13.7,9,"#F2E8D8",{en:"EL MERCADO ROBLES",es:"EL MERCADO ROBLES"}],
+ [25.5,13.7,9,"#6B5210",{en:"RESERVED LOT",es:"LOTE RESERVADO"}],
+ [27,1.7,8,"#6B5210",{en:"CALLE DOS →",es:"CALLE DOS →"}]
 ];

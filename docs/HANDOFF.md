@@ -30,9 +30,9 @@ Everything is plain `<script>` tags sharing the global scope — content files a
 `const` data, the engine reads them. **A new gifted game = a new `content/<game>/`
 folder + a copy of `index.html` pointing its six content script tags at it.**
 
-- **16 quests** (indices 0–15) + Frederick's secret side quest, fully bilingual EN/ES.
-  MAXXP = 230 (10 per node; six two-node quests + Xochi's).
-- **17 NPCs** across 6 maps (hq, f2, st, ex, lc, lo). The Studio (`lo`) and its
+- **21 quests** (indices 0–20; 16–20 are El Mercado's Week Two ops-analyst pack) +
+  Frederick's secret side quest, fully bilingual EN/ES. MAXXP = 330 (10 per node).
+- **21 NPCs** across 7 maps (hq, f2, st, ex, lc, lo, me — El Mercado Robles). The Studio (`lo`) and its
   designer **Xochi** (quest 15, "The collar drop") unlock only after both La Obra
   quests (12, 13) are answered correctly.
 - **Retry-until-correct** (owner decision, 2026-08-30): a quest completes only on the

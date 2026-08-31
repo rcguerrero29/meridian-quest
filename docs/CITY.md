@@ -4,7 +4,7 @@ Don Güero's single source of truth. The `/don-guero` skill reads this, plans th
 next phase on Opus 5, and brings open decisions to the owner as side quests. Every
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
-**Phase: 1 (planning next)** · Ledger opened 2026-08-30.
+**Phase: 1 BUILT — Phase 2 planning next** · Ledger opened 2026-08-30.
 
 ## Purpose
 
@@ -22,18 +22,24 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 | Calle Principal | `st` | La Cocina storefronts, La Obra site → **finished Studio** (`lo`), trolley west terminus, jacarandas, flower beds. |
 | La Cocina | `lc` | Doña Rosa's restaurant. 2 quests, Canela. |
 | The Studio | `lo` | Xochi's design studio (unlocks after La Obra quests). |
+| El Mercado Robles | `st` SW + `me` | Chelo, Nando, Perla, Chava, Frijol. AI-ops-analyst pack, quests 16-20 (Week Two ch.1). |
 | Calle Dos | `ex` | Construction crew pen (Beto, Kike, Mari), Yola's cart, canal trees, street cat, trolley east terminus. |
 
 ## Open parcels
 
-- **st southwest lot** — signposted "LOT: EL MERCADO" on the mini-map (drawTown).
-  The obvious phase-1 candidate: a family abarrotes/mercado.
+- ~~st southwest lot~~ — **developed 2026-08-30: El Mercado Robles** (Phase 1).
 - **st southeast lot** — signposted "RESERVED LOT". Unassigned.
 - **Calle Dos frontage** (`ex` rows 0/9) — room for small storefronts along the canal.
 - **New maps** — the engine takes new worlds as data (`WORLD_DEFS` + portal); a
   bigger business can be its own interior, like La Cocina.
 
 ## Growth history
+
+- 2026-08-30 — **Phase 1 · El Mercado Robles built**: SW lot became the mercado
+  (storefront rows + interior `me`); 4 NPCs + Frijol; quests 16-20 (ops analyst);
+  MAXXP 230→330; DOORS/TOWNLBL/MAPDOT content seams extracted (new districts are
+  pure content now); every animal interactive. Decision-report export → next
+  session per signed fallback (budget went to all 5 quests).
 
 - 2026-08-30 — La Obra completed: two-stage construction (quests 12+13) raised the
   Studio; Lupe moved streetside; Xochi's quest + wardrobe opened.

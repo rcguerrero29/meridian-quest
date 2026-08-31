@@ -173,6 +173,11 @@ function sizeCanvas(){
   ctx.setTransform(scale,0,0,scale,0,0);
 }
 window.addEventListener("resize",sizeCanvas);
+/* content seams (entities-as-data law): door glyphs, mini-map labels, and map dots
+   come from the content pack when declared — new districts need zero engine edits */
+const DOORGL=new Set(typeof DOORS!=="undefined"?DOORS:["+","E","L","O"]);
+const TOWNLBL2=typeof TOWNLBL!=="undefined"?TOWNLBL:[];
+const MAPDOT2=typeof MAPDOT!=="undefined"?MAPDOT:{hq:[14,0],f2:[14,0],lc:[6,5],lo:[21,5],ex:[29,1]};
 const C={floor:"#E7DFC8",floorAlt:"#E1D8BE",rug:"#C9B7E8",wall:"#453D57",wallTop:"#5A5170",
         desk:"#8A6F4D",deskTop:"#A98B62",counter:"#7E8894",plant:"#3E7C4F",pot:"#B06A3C",
         doorWood:"#7A5233",doorWood2:"#8F6440",doorFrame:"#4A331F"};
@@ -237,7 +242,7 @@ function draw(){
       ctx.fillStyle="#7A3527";ctx.fillRect(sx,sy+7,TS,2);
       ctx.fillStyle="#F5DFA9";ctx.fillRect(sx+8,sy+14,16,10);
       ctx.fillStyle="#7A3527";ctx.fillRect(sx+15,sy+14,2,10);}
-    else if(ch==="+"||ch==="E"||ch==="L"||ch==="O"){
+    else if(DOORGL.has(ch)){
       ctx.fillStyle=C.doorFrame;ctx.fillRect(sx+2,sy,TS-4,TS);
       ctx.fillStyle=C.doorWood;ctx.fillRect(sx+4,sy+2,11,TS-4);
       ctx.fillStyle=C.doorWood2;ctx.fillRect(sx+17,sy+2,11,TS-4);
@@ -754,8 +759,14 @@ function fredCheck(){ /* now the generic animal-interaction check: every creatur
     else if(world==="lc"&&!CAT.moving&&Math.abs(CAT.x-px)+Math.abs(CAT.y-py)===1){tgt="cat";label=T().petCat;}
     else if(world==="st"&&!PIG.moving&&Math.abs(PIG.x-px)+Math.abs(PIG.y-py)===1){tgt="pig";label=T().petPig;}
     else if(world==="st"&&Math.abs(LORO.x-px)+Math.abs(LORO.y-py)<=2){tgt="loro";label=T().petLoro;}
-    else{const g2=CRIT.find(cr=>cr.world===world&&(cr.kind==="gato"||cr.kind==="beagle")&&!cr.moving&&Math.abs(cr.x-px)+Math.abs(cr.y-py)===1);
-      if(g2){tgt=g2.kind;petCrit=g2;label=g2.kind==="beagle"?"🐾 "+(g2.name||"🐶"):T().petGato;}}
+    else{ /* every critter is interactive — cats and dogs get petted, fliers get admired */
+      const g2=CRIT.find(cr=>cr.world===world&&
+        ((cr.kind==="gato"||cr.kind==="beagle")?(!cr.moving&&Math.abs(cr.x-px)+Math.abs(cr.y-py)===1)
+                                               :Math.abs(cr.x-px)+Math.abs(cr.y-py)<=1));
+      if(g2){tgt=g2.kind;petCrit=g2;
+        label=g2.kind==="beagle"?"🐾 "+(g2.name||"🐶")
+             :g2.kind==="gato"?T().petGato
+             :g2.kind==="butterfly"?T().petFly:T().petColi;}}
   }
   petTarget=tgt;$("treat").hidden=!tgt;
   if(tgt)$("treat").textContent=label;
@@ -780,6 +791,11 @@ $("treat").addEventListener("click",()=>{
     if(g2){g2.sit=true;g2.next=performance.now()+3200;}
     const L=(g2&&g2.egg&&EGGSAFE[g2.egg])?EGGSAFE[g2.egg].lines[lang]:T().gato;
     toast("❤ "+L[Math.floor(Math.random()*L.length)],2200);}
+  else if(petTarget==="butterfly"||petTarget==="colibri"){
+    const g2=petCrit;
+    if(g2){g2.sit=true;g2.moving=false;g2.next=performance.now()+2600;} /* it pauses for you */
+    const L=petTarget==="butterfly"?T().mariposa:T().colibri;
+    toast((petTarget==="butterfly"?"🦋 ":"🌺 ")+L[Math.floor(Math.random()*L.length)],2200);}
 });
 /* ---------- quest overlay ---------- */
 let wasFs=false;
@@ -1297,29 +1313,24 @@ function drawTown(){
   const mc=$("mapcv"),g2=mc.getContext("2d"),w=WORLDS.st,s=10;
   mc.width=w.W*s;mc.height=w.H*s+14;
   g2.fillStyle="#EFE9DA";g2.fillRect(0,0,mc.width,mc.height);
-  const col={"≈":"#4A4B52","-":"#9A9B9E",".":"#D5D2C6","B":"#5C4A50","Q":"#B0563A","F":"#B0895B","G":"#C98A2D","C":"#E0662B","X":"#E7C25A","P":"#3E7C4F","E":"#E0B45C","L":"#E0B45C","O":"#E0B45C","1":"#8A8474","2":"#E0B45C","Y":"#C0392B","J":"#639C6C","b":"#D77FA8","g":"#9DBB77"};
+  const col={"≈":"#4A4B52","-":"#9A9B9E",".":"#D5D2C6","B":"#5C4A50","Q":"#B0563A","F":"#B0895B","G":"#C98A2D","C":"#E0662B","X":"#E7C25A","P":"#3E7C4F","E":"#E0B45C","L":"#E0B45C","O":"#E0B45C","M":"#E0B45C","1":"#8A8474","2":"#E0B45C","Y":"#C0392B","J":"#639C6C","b":"#D77FA8","g":"#9DBB77"};
   for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
     g2.fillStyle=col[w.rows[y][x]]||"#D5D2C6";g2.fillRect(x*s,y*s,s,s);}
   const stage=(done.has(12)?1:0)+(done.has(13)?1:0),es=lang==="es";
-  g2.textAlign="center";g2.font="700 10px sans-serif";
-  g2.fillStyle="#F2E8D8";g2.fillText("MERIDIAN HQ  (⇧ "+(es?"PISO 2":"FLOOR 2")+")",15*s,0.75*s);
-  g2.fillStyle="#F2E8D8";g2.fillText("LA COCINA",6.5*s,5.75*s);
+  g2.textAlign="center";
+  TOWNLBL2.forEach(([x,y,px2,colr,txt])=>{ /* mini-map labels are content-pack data */
+    g2.font="700 "+px2+"px sans-serif";g2.fillStyle=colr;
+    g2.fillText(txt[lang]||txt.en,x*s,y*s);});
+  g2.font="700 10px sans-serif";
   g2.fillStyle=stage>=2?"#F2E8D8":"#3A2F17";
   g2.fillText(stage>=2?(es?"LA OBRA · ESTUDIO":"LA OBRA · STUDIO"):(es?"🚧 OBRA":"🚧 SITE"),22*s,7.7*s);
-  g2.fillStyle="#6B5210";g2.font="700 9px sans-serif";
-  g2.fillText(es?"LOTE: EL MERCADO":"LOT: EL MERCADO",4.5*s,13.7*s);
-  g2.fillText(es?"LOTE RESERVADO":"RESERVED LOT",25.5*s,13.7*s);
-  g2.fillStyle="#6B5210";g2.font="700 8px sans-serif";
-  g2.fillText("CALLE DOS →",27*s,1.7*s);
+  g2.font="700 8px sans-serif";
   g2.fillText("🚋",0.5*s+3,1.8*s); /* trolley stop, west terminus */
   g2.fillStyle="#8A8474";g2.font="600 8px sans-serif";
   g2.fillText(es?"puertas y escaleras en dorado · ◉ estás aquí":"doors & stairs in gold · ◉ you are here",mc.width/2,w.H*s+10);
   let dot=null;
   if(world==="st")dot=[fx,fy];
-  else if(world==="hq"||world==="f2")dot=[14,0];
-  else if(world==="lc")dot=[6,5];
-  else if(world==="lo")dot=[21,5];
-  else if(world==="ex")dot=[29,1];
+  else if(MAPDOT2[world])dot=MAPDOT2[world];
   if(dot){g2.fillStyle="#7A3FE0";g2.beginPath();g2.arc(dot[0]*s+s/2,dot[1]*s+s/2,5,0,7);g2.fill();
     g2.strokeStyle="#F2F1EA";g2.lineWidth=2;g2.stroke();}
 }

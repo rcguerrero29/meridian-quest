@@ -90,6 +90,15 @@ naming your hero or Frederick's care-pack pet something legendary too.
 
 ---
 
+**14 · Week Two opens.** On the street, walk south past the planters — the southwest
+lot is now **El Mercado Robles** (striped awning, door in the middle). Go in.
+*See:* Doña Chelo, Nando, Perla, Chava the carnicero (chat him — everything is
+chile), and Frijol the bodega cat (pettable). Five new quests (❗) put you in the AI
+ops analyst chair: data quality, drift, guardrail metrics, vendor pitches, and the
+Monday number. The mini-map labels the store; arriving announces Week Two. The
+butterflies and colibrí are interactive now too — walk up and Watch.
+*(content: me world, quests 16-20; engine: DOORS/TOWNLBL/MAPDOT seams)*
+
 ## Known quirks (not bugs)
 
 - A toast can briefly float over an open settings panel.
