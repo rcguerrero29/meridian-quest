@@ -30,9 +30,15 @@ Everything is plain `<script>` tags sharing the global scope — content files a
 `const` data, the engine reads them. **A new gifted game = a new `content/<game>/`
 folder + a copy of `index.html` pointing its six content script tags at it.**
 
-- **16 quests** (indices 0–15) + Frederick's secret side quest, fully bilingual EN/ES.
-  MAXXP = 230 (10 per node; six two-node quests + Xochi's).
-- **17 NPCs** across 6 maps (hq, f2, st, ex, lc, lo). The Studio (`lo`) and its
+- **24 quests** (indices 0–23) + Frederick's secret side quest, fully bilingual EN/ES.
+  MAXXP = 350 (10 per node). Quests 16–23 are El Mercado's **AI product manager** pack.
+- **Chapters** (`CHAPTERS` in `config.js`): each district declares its quest indices and
+  how many close it. Week One needs all 16; El Mercado needs **5 of its 8** — the bar is
+  deliberately below the pack size so the city stays a template, and the smoke test
+  enforces that. When a chapter closes, its epilogue runs; if another chapter follows,
+  the end screen offers **▶ Monday — Week Two**, which restores three hearts, drops the
+  hero on the street outside El Mercado, and raises its facade.
+- **21 NPCs** across 7 maps (hq, f2, st, ex, lc, lo, me). The Studio (`lo`) and its
   designer **Xochi** (quest 15, "The collar drop") unlock only after both La Obra
   quests (12, 13) are answered correctly.
 - **Retry-until-correct** (owner decision, 2026-08-30): a quest completes only on the
@@ -50,6 +56,13 @@ folder + a copy of `index.html` pointing its six content script tags at it.**
   in `wear` / `wearCat`, rendered by accessory passes in `drawDog` / `drawCat`,
   registry in `WEAR`. The Frederick-quest red bandana auto-equips on his quest's
   completion.
+- **Decision report** (Export → 📄 tab, always available): the play log rendered as a
+  portfolio document — per quest, the question asked, the answer given, the concept it
+  tested, why it landed, and how many attempts it took, plus a concepts-practiced list
+  and a first-try rate. Copy it, or download it as Markdown. `dlog` (localStorage
+  `mqdlog`) records every pick including the correct ones that advance a node; the
+  labels translate EN/ES but recorded answers stay verbatim as played, because it is a
+  record, not a retelling.
 - **Frederick's care pack** (Export → 🐾 tab, unlocks with his side quest at 3 treats):
   bilingual care sheet + downloadable `.ics` of five recurring reminders.
 - **Saves**: continuous localStorage (`mq1`) — every step, every pick, tab close.

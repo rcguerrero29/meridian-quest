@@ -4,7 +4,7 @@ Don Güero's single source of truth. The `/don-guero` skill reads this, plans th
 next phase on Opus 5, and brings open decisions to the owner as side quests. Every
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
-**Phase: 1 (SIGNED 2026-08-31 — building)** · Ledger opened 2026-08-30.
+**Phase: 1 (BUILT & SHIPPED 2026-08-31)** · Phase 2 planning next · Ledger opened 2026-08-30.
 
 ## Purpose
 
@@ -23,18 +23,23 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 | La Cocina | `lc` | Doña Rosa's restaurant. 2 quests, Canela. |
 | The Studio | `lo` | Xochi's design studio (unlocks after La Obra quests). |
 | Calle Dos | `ex` | Construction crew pen (Beto, Kike, Mari), Yola's cart, canal trees, street cat, trolley east terminus. |
+| El Mercado Robles | `me` | Doña Chelo's abarrotes on the st SW lot. 8 AI-PM quests (16-23), 4 NPCs, Frijol the bodega cat. Opens Monday of Week Two. |
 
 ## Open parcels
 
-- **st southwest lot** — signposted "LOT: EL MERCADO" on the mini-map (drawTown).
-  The obvious phase-1 candidate: a family abarrotes/mercado.
-- **st southeast lot** — signposted "RESERVED LOT". Unassigned.
+- ~~**st southwest lot**~~ — **built 2026-08-31**: El Mercado Robles.
+- **st southeast lot** — signposted "RESERVED LOT". Unassigned. Next obvious parcel.
 - **Calle Dos frontage** (`ex` rows 0/9) — room for small storefronts along the canal.
 - **New maps** — the engine takes new worlds as data (`WORLD_DEFS` + portal); a
   bigger business can be its own interior, like La Cocina.
 
 ## Growth history
 
+- 2026-08-31 — **Phase 1 built**: El Mercado Robles opened on the SW lot (`me` interior,
+  storefront ribbon, Chelo/Nando/Perla/Chava + Frijol), 8 AI-PM quests EN+ES (16-23,
+  5 needed to close), chapters became data, the Week Two handover shipped, the
+  decision-report export landed, and the DOORS/TOWNLBL/MAPDOT/MAPCOL/SOLIDX seam moved
+  the city's buildings out of the engine. MAXXP 230 → 350, sw `mq-v17`.
 - 2026-08-30 — La Obra completed: two-stage construction (quests 12+13) raised the
   Studio; Lupe moved streetside; Xochi's quest + wardrobe opened.
 - 2026-08-30 — Nature pass: jacarandas, flower beds, grass, butterflies, colibrí,
@@ -55,6 +60,13 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 - ✅ **Week Two** — signed 2026-08-31: El Mercado *is* chapter one. The arc now
   has a Monday; later phases extend it rather than inventing it.
 - Fandom eggs round 2 + mechanics (IDEAS §9) — waiting on AJ's picks.
+- ⏳ **Replay rewinds unevenly** (found while building Phase 1): El Mercado now takes
+  its facade back down on "New game +", but La Obra's Studio stays standing — the
+  OBRA stages have no rewind. Worth making growth symmetric when the tile-renderer
+  registry lands.
+- **Full tile registry** — DOORS/SOLIDX/MAPCOL are the seam Phase 1 needed; the
+  per-glyph `TILES` table (solid + colour + renderer, all as data) belongs with the
+  queued graphics-prep refactor, not a second content pass.
 
 ## Decision log
 

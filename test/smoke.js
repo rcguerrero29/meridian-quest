@@ -150,6 +150,48 @@ const CANDIDATES = [
   if (!t3.saved.wr || !t3.saved.wr.bandana) fails.push('dog wear not saved');
   if (!t3.saved.wc || !t3.saved.wc.bandana || !t3.saved.wc.collar) fails.push('cat wear not saved');
 
+  // ---- 3a1. chapters: Week One closes, the epilogue hands over, El Mercado opens ----
+  const chap = await page.evaluate(() => {
+    const problems = [];
+    const week1 = CHAPTERS[0], merc = CHAPTERS[1];
+    // the owner's rule: write the full pack, need fewer than all of it to close the district
+    if (!(merc.need < merc.quests.length)) problems.push('mercado `need` must be lower than its pack size');
+    done = new Set(); chSeen = 0; hearts = 3; applyGrowth();
+    if (chDue()) problems.push('chapter reported due on a fresh save');
+    if (mercadoOpen()) problems.push('El Mercado open before Week One closed');
+    if (WORLDS.st.rows[13][6] === 'M') problems.push('mercado door on the street before it was earned');
+
+    week1.quests.forEach(i => done.add(i));
+    if (!chDue()) problems.push('Week One closed but no epilogue is due');
+    hearts = 2; finish();
+    if (!document.getElementById('epi').textContent) problems.push('no epilogue text on the chapter close');
+    if (document.getElementById('endGo').hidden) problems.push('handover button hidden with a chapter still to come');
+    document.getElementById('endGo').click();
+    if (chSeen !== 1) problems.push('handover did not advance the chapter cursor');
+    if (hearts !== 3) problems.push('the new week did not restore hearts');
+    if (world !== 'st') problems.push('handover did not put the hero on the street: ' + world);
+    if (isSolid(px, py)) problems.push('handover dropped the hero inside a wall');
+    if (!mercadoOpen()) problems.push('El Mercado did not open on the handover');
+    if (WORLDS.st.rows[13][6] !== 'M') problems.push('mercado door missing from the street');
+    if (auditReach().length) problems.push('post-mercado reachability: ' + auditReach().join(' | '));
+
+    // the district closes at `need`, not at the full pack
+    merc.quests.slice(0, merc.need).forEach(i => done.add(i));
+    if (!chDue()) problems.push('district did not close at its `need` threshold');
+    finish();
+    if (!document.getElementById('endGo').hidden) problems.push('handover offered on the final chapter');
+
+    // rewind: a fresh run must not inherit a shop it never earned
+    document.getElementById('end').hidden = true;
+    done = new Set(); chSeen = 0; hearts = 3; applyGrowth();
+    world = 'hq'; px = fx = 10; py = fy = 11;
+    if (mercadoOpen()) problems.push('replay left El Mercado standing');
+    if (WORLDS.st.rows[13][6] === 'M') problems.push('replay left the mercado door on the street');
+    document.getElementById('world').hidden = false;
+    return problems;
+  });
+  fails.push(...chap);
+
   // ---- 3a2. comfort checks (template guarantee): WCAG contrast on every theme
   //           variant, and tap targets >= 24px on every visible button ----
   const comfort = await page.evaluate(() => {
@@ -249,6 +291,23 @@ const CANDIDATES = [
   if (!care.formVisible) fails.push('care form not visible in care mode');
   if (!care.sheet.includes('CANELITA')) fails.push('pet name not in care sheet: ' + care.sheet);
   if (!care.ics.includes('Canelita')) fails.push('pet name not in ics');
+
+  // ---- 4a. decision report: the play log becomes a portfolio document ----
+  await page.click('#exTabRep');
+  const rep = await page.evaluate(() => ({
+    text: document.getElementById('exArea').value,
+    dl: !document.getElementById('exDl').hidden,
+    ics: document.getElementById('exIcs').hidden,
+    form: document.getElementById('careForm').hidden,
+    logged: dlog.length,
+  }));
+  if (!rep.dl) fails.push('report download button hidden in report mode');
+  if (!rep.ics) fails.push('ics button still visible in report mode');
+  if (!rep.form) fails.push('care form still visible in report mode');
+  if (!rep.logged) fails.push('no decisions logged after answering quests');
+  if (!rep.text.includes('Free Churro Friday')) fails.push('report missing a quest the player answered');
+  if (!rep.text.includes('Hallucination control')) fails.push('report missing the concept it tested');
+  if (!rep.text.includes('Your call:')) fails.push('report missing the choice the player made');
   await page.click('#exClose');
 
   // ---- 4b. security: hostile pass payloads come out sanitized; peers render safely ----

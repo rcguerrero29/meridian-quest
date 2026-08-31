@@ -297,7 +297,7 @@
       <div class="settings" id="exporter" hidden>
         <div class="box">
           <h3 id="exTitle"></h3>
-          <div class="optrow"><button id="exTabJson"></button><button id="exTabCare" hidden></button></div>
+          <div class="optrow"><button id="exTabJson"></button><button id="exTabRep"></button><button id="exTabCare" hidden></button></div>
           <label id="exHint"></label>
           <div id="careForm" hidden style="display:flex; gap:8px; margin-bottom:10px;">
             <input id="petName" type="text" maxlength="16" style="flex:2;">
@@ -305,7 +305,7 @@
             <input id="petPm" type="time" style="flex:1;">
           </div>
           <textarea id="exArea" readonly></textarea>
-          <div class="optrow"><button id="exCopy"></button><button id="exIcs" hidden></button><button id="exClose"></button></div>
+          <div class="optrow"><button id="exCopy"></button><button id="exDl" hidden></button><button id="exIcs" hidden></button><button id="exClose"></button></div>
         </div>
       </div>
       <div class="settings" id="travel" hidden>
@@ -385,6 +385,7 @@
     <h2 id="endTitle"></h2>
     <p class="final" id="endScore"></p>
     <p class="epi" id="epi"></p>
+    <button class="btn" id="endGo" hidden></button>
     <button class="btn" id="replay"></button>
   </div>
 </div>
