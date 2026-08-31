@@ -56,8 +56,8 @@ Deployed at sw `mq-v22`. Smoke suite green throughout (24 quests, maxXP 350).
    (describe the world, don't just draw it), ② build the FRONT-PROFILE 2.5D
    renderer (square grid, facades facing the player — keeps all existing detail;
    what the owner actually wants instead of diamond-iso), ③ camera-rotate +
-   wall-fade occlusion fallbacks, ④ owner+AJ pick the default. ALSO: restore NPC
-   activity emotes in the iso path (regression, IDEAS §12).
+   wall-fade occlusion fallbacks, ④ owner+AJ pick the default. (Emote-in-iso
+   regression: FIXED same session it was reported — drawEmote is shared by both cameras.)
 3b. **Sonny's program** (IDEAS §11): ball fetch at exactly 4/7, feed/treats,
    howl, lay down, dig, the disappearing 💩, and the future janitor practice pack.
 4. **AJ's picks**: fandom eggs round 2 + mechanics (IDEAS §9 — Grogu lunchbox,

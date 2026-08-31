@@ -29,6 +29,16 @@ const isSolid=(x,y)=>{const w=CW();return x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.
 const CHILLN={},CHILLEGG={};let chillSeq=0;
 const EGGSAFE=typeof EGGS!=="undefined"?EGGS:{};
 const DEFACT=["💬","☕"]; /* fallback activity emotes for anyone NPCACT does not name */
+function drawEmote(n,sx,sy){ /* shared by every camera — townsfolk stay busy from any angle */
+  const acts=(typeof NPCACT!=="undefined"&&NPCACT[n.npc])||DEFACT;
+  const nw=Date.now(),ph=((nw/1000)+n.x*7.3+n.y*13.7)%13;
+  if(ph>=2.4)return;
+  const em=acts[Math.floor((nw/13000+n.x+n.y)%acts.length)];
+  ctx.font="10px serif";ctx.textAlign="center";
+  ctx.globalAlpha=ph<0.3?ph/0.3:ph>2.1?(2.4-ph)/0.3:1;
+  ctx.fillText(em,sx+25,sy+1-Math.sin(ph*2.1)*1.6);
+  ctx.globalAlpha=1;ctx.textAlign="start";
+}
 function eggFor(name){const n=String(name||"").toLowerCase();let hit=null;
   Object.entries(EGGSAFE).forEach(([k,e])=>{if(!hit&&e.triggers.some(t2=>n.includes(t2)))hit=k;});
   return hit;}
@@ -278,7 +288,8 @@ function drawIso(){
   w.npcs.forEach(n=>bill(n.x,n.y,(bx,by)=>{
     drawPerson(ctx,bx,by,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
-      ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}}));
+      ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
+    else drawEmote(n,bx,by);}));
   if(world==="hq")bill(DOG.fx,DOG.fy,(bx,by)=>drawDog(ctx,bx,by));
   if(world==="lc")bill(CAT.fx,CAT.fy,(bx,by)=>drawCat(ctx,bx,by));
   if(world==="st"){bill(PIG.fx,PIG.fy,(bx,by)=>drawPigeon(ctx,bx,by));bill(LORO.x,LORO.y,(bx,by)=>drawLoro(ctx,bx,by));}
@@ -460,15 +471,7 @@ function draw(){
     drawPerson(ctx,sx,sy,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
-    else{ /* activity emotes: townsfolk visibly do their thing (NPCACT is content data) */
-      const acts=(typeof NPCACT!=="undefined"&&NPCACT[n.npc])||DEFACT;
-      const nw=Date.now(),ph=((nw/1000)+n.x*7.3+n.y*13.7)%13;
-      if(ph<2.4){
-        const em=acts[Math.floor((nw/13000+n.x+n.y)%acts.length)];
-        ctx.font="10px serif";ctx.textAlign="center";
-        ctx.globalAlpha=ph<0.3?ph/0.3:ph>2.1?(2.4-ph)/0.3:1;
-        ctx.fillText(em,sx+25,sy+1-Math.sin(ph*2.1)*1.6);
-        ctx.globalAlpha=1;ctx.textAlign="start";}}
+    else drawEmote(n,sx,sy);
   });
   PEERS.forEach(p=>{
     if(p.w!==world)return;

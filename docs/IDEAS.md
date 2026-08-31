@@ -384,8 +384,8 @@ behavior flags), all engine-generic so any dog can opt in:
 
 ## 12. Regressions & polish logged from owner playtest (2026-08-31)
 
-- **NPC activity emotes missing in iso view** — the iso billboard path skips the
-  emote branch; fix by moving emote drawing into a shared NPC-draw helper both
-  renderers call. ("some activity was lost from the humies")
+- ~~NPC activity emotes missing in iso view~~ — **FIXED 2026-08-31**: emote drawing
+  extracted into shared `drawEmote()`, called by both cameras. (Found by the
+  owner's regression testing.)
 - Iso list from §10 (doors, thin walls, trolley stop, street detail) — subsumed
   by the front-profile direction.
