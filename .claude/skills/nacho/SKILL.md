@@ -21,7 +21,7 @@ Don Güero plans the city; **Nacho plans the story**. Same loop, different craft
    `docs/HANDOFF.md`.
 
 House rules: teaching mode IS story mode — concepts land as beats. Endings key off
-hearts. Never retcon a signed decision. When a new phase is planned, /don-guero and
+the grade (hearts are an optional stakes layer, off by default). Never retcon a signed decision. When a new phase is planned, /don-guero and
 /nacho should both weigh in — parcels and plot are one city.
 
 ## Honesty & the approval ladder

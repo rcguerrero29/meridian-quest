@@ -180,10 +180,10 @@ const AQ=()=>lang==="es"?QES:QEN;
 const npcName=k=>CHILLN[k]?CHILLN[k][lang]:NPCN[lang][k];
 const lvlIdx=()=>{let i=0;LEVELS.forEach((t2,j)=>{if(xp>=t2)i=j;});return i;};
 const lvlName=()=>T().levels[lvlIdx()];
-function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat(Math.max(0,3-Math.max(0,hearts)))):"";
+function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat(Math.max(0,startHearts()-Math.max(0,hearts)))):"";
   $("ptag").textContent=`${heroName} · ${lvlName()}`;$("hearts").textContent=hs;$("xp").textContent=`${xp} XP`;
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
-  $("status").textContent=`${hs}  ${xp}XP`;}
+  $("status").textContent=`${hs}  ${xp}XP`.trim();}
 /* save */
 function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks};
   try{localStorage.setItem("mq1",JSON.stringify(st));}catch(e){}
@@ -2146,7 +2146,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   });
   $("tpSkip").addEventListener("click",()=>{stripPassHash();$("tpFound").hidden=true;});
 })();
-applyAdmin();applyLang();applyCtl();applyTheme();
+applyAdmin();applyStakes();applyLang();applyCtl();applyTheme();
 $("verTag").textContent="Meridian Quest · "+(typeof GAMEV!=="undefined"?GAMEV:"dev");
 try{if(sessionStorage.getItem("mqupd")==="1"){sessionStorage.removeItem("mqupd");
   setTimeout(()=>toast("⬆️ "+(typeof GAMEV!=="undefined"?GAMEV:"")+" — "+T().updToast,3200),900);}}catch(e){}

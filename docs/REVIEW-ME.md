@@ -3,6 +3,19 @@
 *Written 2026-08-31 for the session the owner asked to review this work. Branch
 `claude/don-guero-bct8tx`, not merged. Smoke green, `node test/smoke.js`.*
 
+> **REVIEWED & MERGED 2026-08-31 (mq-v28).** The review session worked every
+> checkable item below: ending copy read in EN and ES (item 2 — it lands),
+> grade words approved (item 3), old saves confirmed to grade kindly by the
+> owner (item 4 — now Settled in OWNER.md), iso HUD verified headless at four
+> viewports with the empty hearts string (item 5 — no overflow or overlap),
+> stakes row confirmed scroll-reachable at 480px including landscape (item 6).
+> Item 1 (grade-band feel, 90/60) still needs the owner's human playtest.
+> Merged with four nit fixes: `applyStakes()` now runs at boot so a stored
+> `mqstakes` shows the pressed button; the empty-hearts padding uses
+> `startHearts()` instead of a hardcoded 3; the status line trims its leading
+> spaces when hearts are off; nacho's SKILL.md no longer says endings key off
+> hearts. This file stays as the record of what was asked and answered.
+
 ## What changed
 
 The long-open "signed but not built" gap is closed. Hearts were doing two jobs — a

@@ -47,6 +47,13 @@ preference that outlives one phase; cite the date and their words.
     lesson in *The Monday number* and money makes that arithmetic visible instead of
     narrated. Until the owner asks: no UI, no numbers, no engine code. `none` is the
     default and `hearts` is the only other mode with an implementation to toggle to.
+  - **Old saves grade kindly.** Progress from before the grade existed has no
+    attempt history and counts as first-try. Signed at the merge review: only saves
+    made before 2026-08-31 are affected, and new play is tracked honestly. Do not
+    "fix" this to a neutral wording. *(2026-08-31)*
+  - **The grade is words, not marks.** "solid work" / "buen trabajo" on the end
+    screen — no stars, letters, or percentages player-side. Signed at the merge
+    review; revisit only if AJ asks for something more game-like. *(2026-08-31)*
 - **Every business is Hispanic-owned** and doubles as a practice pack for an AI role
   the owner wants to be hired in.
 - **Role order (signed 2026-08-31):** 1 AI product manager *(spent on El Mercado)*,
