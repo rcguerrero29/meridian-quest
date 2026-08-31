@@ -33,6 +33,81 @@ preference that outlives one phase; cite the date and their words.
 - **Fun is a requirement**, not a nice-to-have.
 - **HQ is the onboarding.** No separate tutorial or staging area. *(2026-08-31)*
 
+## The shape of the game (signed 2026-08-31, with caveats)
+
+The owner's purpose, in their words: *"right now the goal for us is providing comfort.
+With my personal one of practicing ai skills."* Comfort is the product; the AI practice
+is the mechanic. Keep that order — it is what stops learning from feeling like homework.
+
+**North star.** *Meridian is a barrio that grows because you helped it.* The player
+should log in to see what is different in town, not to find out whether they won.
+
+**Three rules, signed "for now":**
+
+1. **The record is a room, not a menu.** The decision report is the game's collection
+   mechanic — its museum — and a collection you cannot walk into is not a collection.
+   It gets a physical home in the world that visibly fills.
+2. **Clients, not chapters.** Every business is open; each is a relationship that
+   deepens as you answer its quests. Trust in a business replaces a chapter gate. No
+   weeks, no locked doors.
+3. **The goal line above** is stated out loud in the game, once.
+
+**Caveats the owner attached — these are part of the signature, not footnotes:**
+
+- *"for now it sounds good"* — this is a working shape, not a constitution. Revisit it
+  after real play; nothing here outranks something learned from actually playing.
+- *"remember to leave room in architecture to change if needed"* — build all three as
+  data in the content pack, never as engine assumptions. A rule that cannot be turned
+  off is a rule that will be regretted.
+- *"and to custoize for AJ's game"* — **AJ's game is a first-class target, not a
+  someday.** Every system here ships as a content-pack seam so AJ's game can swap the
+  businesses, the deliverables, the trust language, or drop the career layer entirely
+  and keep the comfort. If a feature cannot be turned off for AJ, it is built wrong.
+- *"prepare mock documentation and templates so we can technically use these for work
+  and clients in the future — would be dope — thus the idea to export."* The export is
+  the point of the exercise: the paperwork the quests teach should be real paperwork.
+  Five templates written 2026-08-31 in `docs/templates/` — usable by hand at work
+  today; the game only generates the decision log so far.
+
+## What a session feels like under this shape
+
+*(Owed to the owner as a walkthrough and never delivered live — written down instead,
+2026-08-31. If this reads wrong, the shape above is what changes.)*
+
+You open the game on your phone. No countdown, no "day 4 of 7," no unfinished business
+blinking at you. Calle Principal at whatever hour it is, and the lights are on at El
+Mercado because you got the gate open last time.
+
+You wander. That is allowed and it is most of the point — the jacarandas move, Frijol
+is asleep on the scale, Nacho has painted something new on the wall. Nothing is asking
+you for anything.
+
+Doña Chelo has a ❗ over her head. You walk over because you want to, not because a
+quest log told you to. She has a problem: the phone rings forty times a day and every
+call pulls Perla off the register. You get the codex — the short bit of real teaching —
+and three ways to answer. You pick the wrong one.
+
+Nothing punishes you. You get a verdict that explains why it was wrong without telling
+you the right answer, a funny beat, and the quest stays open. A heart is gone. Your
+city is untouched, your save is untouched, and Chelo will talk to you again in a
+minute. You try again and get it.
+
+Something shifts in how she talks to you. Not a number going up — the next thing she
+asks you is a harder thing, the kind you only ask someone you trust. That is the
+progress bar, and it is a person.
+
+You get bored of the mercado, so you leave. Down the street the taller is open too, and
+Don Tacho has a completely different problem and does not trust you at all yet. You can
+work on either. Neither closes.
+
+On the way out you pass the room where your record hangs. Twelve calls, two jobs, and
+the wall is visibly fuller than it was last week. You can take it with you — it is a
+real document with your name on it, and it is the thing that leaves the game and does
+something for your actual career.
+
+You close the app. Nothing was lost, nothing expired, and there is a barrio out there
+that is a little more built than it was, because you helped.
+
 ## Taste — how to write and plan for this owner
 
 - **Plain language, player-side.** Describe what the player sees and feels, not the

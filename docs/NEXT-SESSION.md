@@ -64,6 +64,13 @@ Deployed at sw `mq-v22`. Smoke suite green throughout (24 quests, maxXP 350).
    business, never blocks anything" — what ships today still ends the chapter at
    zero. Do the open-city refactor before the taller; the taller depends on it.
 
+**Game shape signed 2026-08-31** (`docs/OWNER.md` → "The shape of the game"): north
+star is *"a barrio that grows because you helped it"*; the record becomes a room you
+walk into, not a menu; clients-not-chapters replaces week gating. Signed "for now",
+explicitly revisable after real play, and every piece must ship as a content-pack seam
+so **AJ's game can swap or drop it**. Deliverable templates for real client work live
+in `docs/templates/` (written; only the decision log is game-generated so far).
+
 **Owner-set build order (2026-08-31): front-profile 2.5D first → close the
 signed-not-built gap (open-city refactor + per-business hearts) → then the four
 business packs.** Item 3 below is therefore the head of the queue.
