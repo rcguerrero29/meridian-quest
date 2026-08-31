@@ -4,7 +4,7 @@ Don Güero's single source of truth. The `/don-guero` skill reads this, plans th
 next phase on Opus 5, and brings open decisions to the owner as side quests. Every
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
-**Phase: 1 (planning next)** · Ledger opened 2026-08-30.
+**Phase: 1 (SIGNED 2026-08-31 — building)** · Ledger opened 2026-08-30.
 
 ## Purpose
 
@@ -44,16 +44,16 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
-- ⏳ **El Mercado** (st southwest lot): Hispanic family grocery. Natural first
-  practice pack — candidate roles: AI ops analyst (inventory/demand) or automation
-  consultant (ordering, supplier WhatsApp bot). Don Güero to propose in Phase 1.
-- ⏳ **Which AI role first**: the owner should rank the roles in Purpose (side quest
-  material for Phase 1).
+- ✅ **El Mercado** — signed 2026-08-31. Full build + engine seam, AI PM pack.
+  See "Phase 1 plan (SIGNED)" below.
+- ✅ **Which AI role first** — signed 2026-08-31: **AI product manager** leads.
+  Full ranking in the decision log.
 - **Hispanic-business brainstorm** (owner ask, 2026-08-30): panadería, salon/barbería,
   auto shop, landscaping, cleaning company, real-estate/property mgmt, trucking,
   dental/clinic, event planning/quinceañeras, tax prep/notario. Don Güero curates
   per phase — one at a time.
-- **Week Two** (endings tease it) — narrative arc for a later phase.
+- ✅ **Week Two** — signed 2026-08-31: El Mercado *is* chapter one. The arc now
+  has a Monday; later phases extend it rather than inventing it.
 - Fandom eggs round 2 + mechanics (IDEAS §9) — waiting on AJ's picks.
 
 ## Decision log
@@ -64,8 +64,21 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
   cable · zero-maintenance rule. *(imported from HANDOFF)*
 - 2026-08-30 · Retry-until-correct · quests complete only on the right answer ·
   teaching game, not a quiz show. *(imported from HANDOFF)*
+- 2026-08-31 · ❗Permiso: which trade first · **AI product manager** leads; then
+  automation/solutions consultant, AI ops analyst, implementation lead, prompt
+  engineer · owner chose the role they want next, not the one they already do.
+- 2026-08-31 · ❗Obra: how much mercado · **full build + engine seam** — storefront
+  ribbon, `me` interior, and the DOORS/TOWNLBL/MAPDOT extraction · pay the seam
+  once so every future shop is data, not code.
+- 2026-08-31 · ❗Planos: quest depth · **write the full pack, don't skimp; gate
+  completion on fewer** — required-to-complete count lives in config as data ·
+  this mercado is the open-world template, so the threshold must be tunable later.
+- 2026-08-31 · ❗Papeles: decision-report export · **build it in Phase 1, first,
+  accept a longer session** · the portfolio artifact is the point of the gym.
+- 2026-08-31 · ❗Semana: when is the mercado · **Monday of Week Two — chapter one**
+  · the epilogues already promise Week Two; this cashes that check.
 
-## Phase 1 plan (drafted by Don Güero 2026-08-30 — AWAITING FINAL "sign it")
+## Phase 1 plan (drafted 2026-08-30 · **SIGNED 2026-08-31**)
 
 **El Mercado Robles** on the st SW lot + interior world `me`. Cast: Doña Chelo
 (owner), Nando (receiving, half-automates everything), Perla (counter, accidental
@@ -85,11 +98,20 @@ extraction are in this session's Don Güero plan — reproduce via /don-guero if
   wholesale (2D today → richer/3D someday) without changing what things are. AJ's
   upgrade waves depend on this.
 
-**Recommendations pending owner's "sign it":**
-- Role ranking: 1 Automation/Solutions Consultant (headline — matches owner's
-  existing SMB AI-audit work), 2 AI Ops Analyst (the resume gap; Phase 1 trains it),
-  3 Implementation Lead, 4 AI PM, 5 Prompt/Solutions Engineer.
-- El Mercado: ribbon + `me` interior, WITH the content-seam extraction; growth
-  registry queued so Phase 2+ can be player-built.
-- Decision-report export: next phase.
-- Week framing: "Week Two, chapter one" (content-only reframe).
+**As signed 2026-08-31 — these override the 2026-08-30 draft above:**
+- **Role: AI product manager**, not ops analyst. The mercado's quests become PM
+  judgment calls — scoping, prioritization, saying no, shipping the small version —
+  with Doña Chelo wanting everything at once and the player deciding what actually
+  gets built. The drafted ops-analyst beats are not discarded: they stay in the pack
+  as the operational half of the same story.
+- **Quest depth: full pack, lower bar.** Write every quest properly; the number
+  required to "complete" El Mercado is smaller than the number available, and that
+  threshold is **data in config**, not a constant in code — this business is the
+  template for the open world, so a later phase retunes it without a rewrite.
+- **Build: full** — storefront ribbon on the st SW lot, `me` interior world, the
+  full cast, AND the DOORS/TOWNLBL/MAPDOT engine extraction. Growth registry queued
+  so Phase 2+ parcels can be player-built.
+- **Decision-report export: in Phase 1, built first.** Owner accepted a longer
+  session for it. Prints the player's quest answers as a portfolio artifact.
+- **Week framing: Monday of Week Two, chapter one.** The epilogues' promise gets
+  kept. Content-only — the calendar lives in quest text and signage, not the engine.
