@@ -110,9 +110,20 @@ underneath (they open — walls don't), and the last activity message lingers in
 top corner ticker (tap to dismiss).
 *(content: me world + growth data, quests 16-23; engine: chapters, growth, export)*
 
+**15 · Tilt the world.** ⚙️ Settings → Camera → **◆ Isometric**.
+*See:* the same city in three-quarter view — diamond streets, buildings and furniture
+extruded with real height, everyone standing upright, doors glowing gold on the
+ground, jacarandas with swaying canopies. Walk around; depth sorting keeps you in
+front of and behind things correctly. Switch back to 🗺️ Top-down any time — same
+save, same world, just a different camera. Admin tile-painting asks for Top-down
+(the tap math differs). *(engine: drawIso — a second renderer over the same data)*
+
 ## Known quirks (not bugs)
 
 - A toast can briefly float over an open settings panel.
 - Offline/file:// runs use system fonts (Google Fonts is the only external fetch).
 - Lorenzo may end up perched on the finished Studio — he's a parrot, he's fine.
 - Admin-mode map edits (`mqedits`) replay on boot, per device, by design.
+- Isometric v1: swipe directions feel slightly rotated (grid movement under a tilted
+  camera), and all walls share the block style — per-glyph iso art is the planned
+  TILEART-ISO pack (IDEAS §10 step 2).

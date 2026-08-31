@@ -203,6 +203,105 @@ const C={floor:"#E7DFC8",floorAlt:"#E1D8BE",rug:"#C9B7E8",wall:"#453D57",wallTop
         desk:"#8A6F4D",deskTop:"#A98B62",counter:"#7E8894",plant:"#3E7C4F",pot:"#B06A3C",
         doorWood:"#7A5233",doorWood2:"#8F6440",doorFrame:"#4A331F"};
 let camXg=0,camYg=0;
+/* ---------- isometric 2.5D camera (IDEAS §10, v1) ----------
+   A second RENDERER over the same world — the entities-as-data payoff. Floors become
+   diamonds, solids extrude into blocks colored from the mini-map tables, people and
+   animals render as upright billboards at their projected feet, depth by painter's
+   sort. Ships as a Settings camera toggle beside top-down; admin painting stays
+   top-down-only (tap→tile math differs). */
+let camMode="top";try{camMode=localStorage.getItem("mqcam")==="iso"?"iso":"top";}catch(e){}
+const ISW=44,ISH=22;
+let ISOCOL=null;
+const IZH={"#":20,B:20,Q:17,Z:17,U:20,W:12,V:10,D:9,K:9,T:8,S:13,H:8,I:9,A:9,P:11,F:7,G:9,C:7,X:8,"1":10};
+const shadeHex=(h,amt)=>amt>=0?mixHex(h,"#FFFFFF",amt):mixHex(h,"#000000",-amt);
+function isoDiamond(cx,cy,col){ctx.fillStyle=col;ctx.beginPath();
+  ctx.moveTo(cx,cy-ISH/2);ctx.lineTo(cx+ISW/2,cy);ctx.lineTo(cx,cy+ISH/2);ctx.lineTo(cx-ISW/2,cy);
+  ctx.closePath();ctx.fill();}
+function isoBlock(cx,cy,base,h){
+  const ty=cy-h;
+  ctx.fillStyle=shadeHex(base,-0.32);ctx.beginPath(); /* left face */
+  ctx.moveTo(cx-ISW/2,cy);ctx.lineTo(cx,cy+ISH/2);ctx.lineTo(cx,cy+ISH/2-h);ctx.lineTo(cx-ISW/2,ty);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle=shadeHex(base,-0.5);ctx.beginPath(); /* right face */
+  ctx.moveTo(cx+ISW/2,cy);ctx.lineTo(cx,cy+ISH/2);ctx.lineTo(cx,cy+ISH/2-h);ctx.lineTo(cx+ISW/2,ty);
+  ctx.closePath();ctx.fill();
+  isoDiamond(cx,ty,tc(base));
+  ctx.strokeStyle="rgba(15,12,20,.25)";ctx.lineWidth=.7;ctx.stroke();}
+function drawIso(){
+  const w=CW();
+  ISOCOL=ISOCOL||{"#":C.wall,D:C.desk,K:C.counter,T:"#C9A96A",W:"#AEB6BE",V:"#3A3F46",A:"#B08B5A",U:C.wall,
+    ...BASECOL,...(typeof MAPCOL!=="undefined"?MAPCOL:{})};
+  const hx=(fx-fy)*ISW/2,hy=(fx+fy)*ISH/2;
+  const ox=VW/2-hx,oy=VH/2-hy;
+  ctx.fillStyle=tc("#241F2E");ctx.fillRect(0,0,VW,VH);
+  const P=(x,y)=>[(x-y)*ISW/2+ox,(x+y)*ISH/2+oy];
+  /* floor pass */
+  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
+    const[cx,cy]=P(x,y);
+    if(cx<-ISW||cx>VW+ISW||cy<-ISH-24||cy>VH+ISH+24)continue;
+    const ch=w.rows[y][x];
+    let fc=world==="st"?((x+y)%2?"#C6C4BB":"#BFBDB4"):world==="lo"?((x+y)%2?"#D9DCE0":"#D1D5DA"):((x+y)%2?C.floor:C.floorAlt);
+    const hsh=(x*374761393+y*668265263)>>>0;
+    if((hsh&7)<2)fc=shadeHex(fc,-0.045);
+    isoDiamond(cx,cy,tc(fc));
+    if(ch==="≈"){isoDiamond(cx,cy,tc("#54555B"));}
+    else if(ch==="-"){isoDiamond(cx,cy,tc("#8F9096"));}
+    else if(ch==="R"){ctx.save();ctx.translate(cx,cy);ctx.scale(0.75,0.75);ctx.translate(-cx,-cy);isoDiamond(cx,cy,tc(C.rug));ctx.restore();}
+    else if(ch==="b"){[[ -7,0,"#D77FA8"],[3,-3,"#E7C25A"],[6,3,"#C9699E"]].forEach(f=>{
+      ctx.fillStyle=f[2];ctx.beginPath();ctx.arc(cx+f[0],cy+f[1],2,0,7);ctx.fill();});}
+    else if(ch==="g"){ctx.strokeStyle=tc("#5FA86A");ctx.lineWidth=1.4;ctx.lineCap="round";
+      [[-6,0],[0,-2],[6,1]].forEach(q=>{ctx.beginPath();ctx.moveTo(cx+q[0],cy+q[1]+3);ctx.lineTo(cx+q[0]+1.5,cy+q[1]-5);ctx.stroke();});}
+    else if(DOORSET.has(ch)||ch==="Y"||ch==="2"||ch==="1"&&!SOLID.has(ch)){
+      if(DOORSET.has(ch)){ctx.save();ctx.translate(cx,cy);ctx.scale(0.55,0.55);ctx.translate(-cx,-cy);
+        isoDiamond(cx,cy,"#E0B45C");ctx.restore();
+        ctx.globalAlpha=0.25+0.2*Math.sin(Date.now()/380);isoDiamond(cx,cy,"#FFE9A8");ctx.globalAlpha=1;}
+      else{ctx.save();ctx.translate(cx,cy);ctx.scale(0.45,0.45);ctx.translate(-cx,-cy);
+        isoDiamond(cx,cy,ch==="Y"?"#C0392B":"#E0B45C");ctx.restore();}}
+  }
+  /* depth pass: blocks + actors, painter's order */
+  const R=[];
+  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
+    const gch=w.grid[y][x];
+    if(!SOLID.has(gch))continue;
+    const[cx,cy]=P(x,y);
+    if(cx<-ISW||cx>VW+ISW||cy<-ISH-40||cy>VH+ISH+40)continue;
+    if(gch==="J")R.push({d:x+y,f:()=>{isoBlock(cx,cy,"#6E4A2C",12);
+      const t2=Math.sin(Date.now()/900+x)*1.2;
+      ctx.fillStyle=tc("#4E8A58");
+      [[-9,-1,9],[9,-1,9],[0,-7,10]].forEach(q=>{ctx.beginPath();ctx.arc(cx+q[0]+t2,cy-16+q[1],q[2],0,7);ctx.fill();});
+      ctx.fillStyle="#B08FE0";[[-8,-4],[4,-9],[8,0],[-2,-2]].forEach(q=>{
+        ctx.beginPath();ctx.arc(cx+q[0]+t2,cy-16+q[1],1.6,0,7);ctx.fill();});}});
+    else R.push({d:x+y,f:()=>isoBlock(cx,cy,ISOCOL[gch]||ISOCOL[w.rows[y][x]]||C.wall,IZH[gch]||IZH[w.rows[y][x]]||14)});
+  }
+  const bill=(gx,gy,fn)=>{const[cx,cy]=P(gx,gy);
+    if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
+  w.npcs.forEach(n=>bill(n.x,n.y,(bx,by)=>{
+    drawPerson(ctx,bx,by,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
+    if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
+      ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}}));
+  if(world==="hq")bill(DOG.fx,DOG.fy,(bx,by)=>drawDog(ctx,bx,by));
+  if(world==="lc")bill(CAT.fx,CAT.fy,(bx,by)=>drawCat(ctx,bx,by));
+  if(world==="st"){bill(PIG.fx,PIG.fy,(bx,by)=>drawPigeon(ctx,bx,by));bill(LORO.x,LORO.y,(bx,by)=>drawLoro(ctx,bx,by));}
+  CRIT.forEach(cr=>{if(cr.world!==world)return;
+    bill(cr.fx,cr.fy,(bx,by)=>{
+      if(cr.kind==="butterfly")drawButterfly(ctx,cr,bx,by);
+      else if(cr.kind==="colibri")drawColibri(ctx,cr,bx,by);
+      else if(cr.kind==="gato")drawGato(ctx,cr,bx,by);
+      else if(cr.kind==="beagle")drawBeagle(ctx,cr,bx,by);});});
+  bill(fx,fy,(bx,by)=>drawPerson(ctx,bx,by,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
+  R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
+  /* shared time-of-day wash (door spills are top-down-only for now) */
+  const dnow=new Date(),hr=dnow.getHours()+dnow.getMinutes()/60;
+  let wash=null;
+  if(themeName==="sunset")wash="rgba(255,150,60,.10)";
+  else if(hr>=20.5||hr<6)wash="rgba(28,38,92,.20)";
+  else if(hr>=18||hr<8)wash="rgba(255,150,60,.07)";
+  if(wash){ctx.fillStyle=wash;ctx.fillRect(0,0,VW,VH);}
+}
+function camSet(m){camMode=m;
+  try{localStorage.setItem("mqcam",m);}catch(e){}
+  document.querySelectorAll("#camRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.cam===camMode?"true":"false"));}
+document.querySelectorAll("#camRow button").forEach(b=>b.addEventListener("click",()=>camSet(b.dataset.cam)));
 /* ---------- tile renderer registry (graphics-prep, IDEAS §7 step 1) ----------
    Every glyph draws via TILEDRAW[ch](rc), rc={sx,sy,x,y,canopy}. Content packs
    may override or add art via TILEART (typeof-guarded, like CRITTERS/EGGS) —
@@ -319,6 +418,7 @@ DOORSET.forEach(dch=>TILEDRAW[dch]=rc=>{const{sx,sy}=rc;
     });
 if(typeof TILEART!=="undefined")Object.assign(TILEDRAW,TILEART);
 function draw(){
+  if(camMode==="iso"){drawIso();return;}
   const w=CW();
   const camX=Math.max(0,Math.min(w.W*TS-VW,fx*TS+TS/2-VW/2));
   const camY=Math.max(0,Math.min(Math.max(0,w.H*TS-VH),fy*TS+TS/2-VH/2));
@@ -1376,6 +1476,10 @@ function applyLang(){
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
   $("lbTheme").textContent=t.lbTheme;
+  $("lbCam").textContent=t.lbCam;
+  document.querySelectorAll("#camRow button").forEach(b=>{
+    b.textContent=b.dataset.cam==="top"?t.camTop:t.camIso;
+    b.setAttribute("aria-pressed",b.dataset.cam===camMode?"true":"false");});
   $("lbMusic").textContent=t.lbMusic;
   document.querySelectorAll("#tuneRow button").forEach((b,i)=>{
     b.textContent=t.tunes[i];
@@ -1745,6 +1849,7 @@ $("undoBtn").addEventListener("click",()=>{
   toast(T().undoToast,1200);
 });
 function paintAt(clientX,clientY){
+  if(camMode==="iso"){toast(T().isoEdit,2200);return;} /* tap→tile math is top-down */
   const r=cv.getBoundingClientRect();
   let dw=r.width,dh=r.height,ox=0,oy=0;const ar=VW/VH;
   if(dw/dh>ar){const w2=dh*ar;ox=(dw-w2)/2;dw=w2;}else{const h2=dw/ar;oy=(dh-h2)/2;dh=h2;}

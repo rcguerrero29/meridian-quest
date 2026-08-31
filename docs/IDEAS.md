@@ -273,7 +273,15 @@ const AINPC={
 
 ---
 
-## 10. Isometric 2.5D — the plan (planned 2026-08-31; NOT started)
+## 10. Isometric 2.5D — v1 SHIPPED 2026-08-31 (camera toggle); pack remains
+
+**v1 shipped:** `drawIso()` in the engine — projection core, painter''s-sort depth,
+floors as diamonds with inlays (water, rugs, blooms, grass), solids as extruded
+blocks colored from BASECOL/MAPCOL with per-glyph heights, jacarandas with canopy,
+door glow, people/animals as upright billboards, shared time-of-day wash. Settings →
+Camera toggle (persisted `mqcam`); admin painting stays top-down. REMAINING from the
+plan below: the per-glyph TILEART-ISO art pack (step 2 — richer facades), input
+remap for swipe, night door-spills in iso, and the TILES-table prereq.
 
 **What it is:** the true "between 2D and 3D" — the camera tilts to three-quarter
 view, tiles become diamonds, buildings get visible height. Stardew/Hades-adjacent

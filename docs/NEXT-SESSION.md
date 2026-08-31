@@ -51,10 +51,10 @@ Deployed at sw `mq-v22`. Smoke suite green throughout (24 quests, maxXP 350).
    signed (AI PM first, then automation consultant, ops analyst, implementation
    lead, prompt engineer) — Phase 2 picks the next business off the brainstorm list
    in CITY.md and the next role down.
-3. **Graphics: what remains** — waves 1-2 AND the palette wardrobe SHIPPED
-   2026-08-31. Remaining: frame-clock consolidation + per-glyph TILES table
-   (IDEAS §7 step 2 — the iso prereq), then the owner's iso-vs-top-down decision
-   (IDEAS §10 has the full isometric 2.5D plan; prototype world = `ex`).
+3. **Graphics: what remains** — waves 1-2, palette wardrobe, AND isometric v1
+   (camera toggle) all SHIPPED 2026-08-31. Remaining: per-glyph TILEART-ISO art
+   pack for richer iso facades, frame-clock + TILES table consolidation, iso swipe
+   remap, iso night door-spills (IDEAS §7 step 2 + §10 remainder).
 4. **AJ's picks**: fandom eggs round 2 + mechanics (IDEAS §9 — Grogu lunchbox,
    birthday calendar magic, streak memory…). Blocked on AJ choosing.
 5. **Music v2** (IDEAS §8) when music gets its own session.
