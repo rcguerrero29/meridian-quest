@@ -51,6 +51,16 @@ Deployed at sw `mq-v22`. Smoke suite green throughout (24 quests, maxXP 350).
    signed (AI PM first, then automation consultant, ops analyst, implementation
    lead, prompt engineer) — Phase 2 picks the next business off the brainstorm list
    in CITY.md and the next role down.
+2b. **Phase 2 detail is already planned** (added by the /don-guero session, see
+   CITY.md → "The open city — Phases 2-5"): weeks are retired, `CHAPTERS` becomes
+   districts that do NOT close behind the player, and all four remaining businesses
+   are cast and scoped — Taller Herrera (automation consultant, st southeast lot),
+   Panadería La Espiga (ops analyst), Limpieza Velázquez (implementation lead),
+   Nolasco Tax & Notario (prompt engineer). One per sitting. **Hearts are signed but
+   NOT built**: the rule is now "the grade on a business's ending, scoped per
+   business, never blocks anything" — what ships today still ends the chapter at
+   zero. Do the open-city refactor before the taller; the taller depends on it.
+
 3. **Graphics next: the front-profile pivot** (owner-redirected 2026-08-31, plans
    in IDEAS §10): ① consolidate TILES glyph metadata + DECOR instance metadata
    (describe the world, don't just draw it), ② build the FRONT-PROFILE 2.5D

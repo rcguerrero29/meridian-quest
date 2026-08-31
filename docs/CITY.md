@@ -4,7 +4,7 @@ Don Güero's single source of truth. The `/don-guero` skill reads this, plans th
 next phase on Opus 5, and brings open decisions to the owner as side quests. Every
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
-**Phase: 1 (BUILT & SHIPPED 2026-08-31)** · Phase 2 planning next · Ledger opened 2026-08-30.
+**Phase: 2 (planned 2026-08-31 — building)** · Ledger opened 2026-08-30.
 
 ## Purpose
 
@@ -75,9 +75,69 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 - ✅ **Week Two** — signed 2026-08-31: El Mercado *is* chapter one. The arc now
   has a Monday; later phases extend it rather than inventing it.
 - Fandom eggs round 2 + mechanics (IDEAS §9) — waiting on AJ's picks.
+- ✅ **What zero hearts costs in an open city** — signed 2026-08-31, lands with the
+  open-city refactor in Phase 2. See the decision log.
 - **Full tile registry** — DOORS/SOLIDX/MAPCOL are the seam Phase 1 needed; the
   per-glyph `TILES` table (solid + colour + renderer, all as data) belongs with the
   queued graphics-prep refactor, not a second content pass.
+
+## The open city — Phases 2-5 (planned 2026-08-31)
+
+Owner retired weeks as the organizing principle ("we dont have to follow weeks any
+longer") and asked for all four remaining businesses planned at once. Weeks One and
+Two stay in the fiction — they are written and shipped — but nothing new is gated
+behind a calendar.
+
+**The model.** `CHAPTERS` becomes **districts**: each declares its quests, a `need`
+below its pack size, the AI role it trains, and what opens its lot. Districts do
+**not** close behind you — every opened business stays available and the player
+roams. Closing a district plays its own ending beat and breaks ground on the next
+lot (Don Güero's job, in fiction). The city itself has no credits; it keeps growing.
+
+**One business per phase.** Four packs of ~8 quests is ~32 quests of writing — that
+is four sittings, not one. Order follows the owner's signed role ranking.
+
+| Phase | Business | Parcel · map | Role trained | Cast |
+|---|---|---|---|---|
+| 2 | **Taller Herrera** (auto shop) | st southeast lot · `ta` | Automation / solutions consultant | Don Tacho (master mechanic, refuses the tablet), Yesenia (service writer, runs a paper book), Moy (apprentice, already using AI on his phone) |
+| 3 | **Panadería La Espiga** | Calle Dos frontage west · `pa` | AI ops analyst | Doña Licha (baker), Tito (night baker), Sol (counter) |
+| 4 | **Limpieza Velázquez** | Calle Dos frontage east · `li` | Implementation lead | Doña Vero (owner), Chente (crew lead), Karla (scheduler) |
+| 5 | **Nolasco Tax & Notario** | walkup off Calle Principal · `no` | Prompt / solutions engineer | Lic. Nolasco, Bere (intake) |
+
+**What each pack teaches**
+
+- **Taller Herrera — automation consultant.** Where automation actually pays and
+  where it must not go. Intake and estimates from a photo; parts ordering; the
+  master mechanic who will not touch the tablet (the lever is the workflow, not the
+  person); what an AI estimate commits you to when it is wrong; and the one thing
+  that stays human — diagnosis. The counterweight to El Mercado: there the answer
+  was usually "build the small thing", here it is often "do not automate this".
+- **Panadería La Espiga — AI ops analyst.** The forecast El Mercado could not
+  build yet, now that invoice data exists. Waste against stockout, the 4am
+  decision, holiday spikes, drift when a competitor opens, and measuring a model
+  against the pan dulce that did not sell.
+- **Limpieza Velázquez — implementation lead.** Rolling a tool out to crews who do
+  not sit at desks: phased pilots, training, the crew that quietly ignores the app,
+  and measuring adoption rather than logins.
+- **Nolasco Tax & Notario — prompt / solutions engineer.** Designing what a system
+  must refuse. Grounding answers in the actual form instructions, PII in document
+  intake, escalation paths, and the **notario false-friend** — in Mexico a notario
+  público is a senior lawyer; in the US a notary is not, and the confusion has cost
+  real families real money. A quest about an assistant that must refuse to give
+  immigration advice and hand off to a human is the sharpest "know the limits of
+  the tool" lesson in the city.
+
+**Hearts, in one sentence (signed 2026-08-31).** *Hearts are the grade on a
+business's ending, scoped per business, and they never block anything.* Three at
+each business; bad calls spend them; the count remaining picks which ending that
+business plays (flawless / strong / survived / burned through their patience).
+Zero stops nothing — you keep answering, you have simply already earned your
+ending. Walk into another business and you start fresh at three.
+
+This is deliberately a **template rule, not a Meridian rule**: it is one sentence,
+it never takes anything away, and it reads the same in any story the engine is
+reused for. It replaces "zero hearts ends the week" — which is what ships today and
+stays live until the Phase 2 refactor lands.
 
 ## Decision log
 
@@ -106,6 +166,19 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 - 2026-08-31 · ❗Botón: where restart lives · **⚙️ Settings, behind a two-tap confirm**
   · the story never sends you there; it is a testing tool, so it stops sitting next to
   the button that continues the story.
+- 2026-08-31 · ❗Negocio: the southeast lot · **plan all four remaining businesses**
+  — taller, panadería, limpieza, tax/notario, one per phase · the owner wants the
+  city grown, not a single storefront.
+- 2026-08-31 · ❗Semana: weekly chapters · **retired** — "we dont have to follow weeks
+  any longer" · districts open and stay open; the city has no credits, it grows.
+- 2026-08-31 · ❗Reporte: two jobs in one report · **role summary on top, chronological
+  detail underneath** · a hiring manager reads the job they are hiring for. BUILT.
+- 2026-08-31 · ❗Corazones (open city): what three bad calls cost · **hearts are the
+  grade on a business's ending, scoped per business, and never block anything** ·
+  owner: "this is for story mode so no big deal just so i learn, and we can reuse the
+  same for other stories" — so the rule is one sentence and takes nothing away.
+- 2026-08-31 · ❗Orden: what to build now · **the plan only** · roadmap signed, report
+  shipped, no new district this session.
 - 2026-08-31 · ❗Entrada: a staging area for new players · **skipped — Meridian Labs HQ
   is the onboarding** · Priya, Frederick and the early quests already do that job.
 
