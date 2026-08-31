@@ -65,7 +65,7 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 - 2026-08-30 · Retry-until-correct · quests complete only on the right answer ·
   teaching game, not a quiz show. *(imported from HANDOFF)*
 
-## Phase 1 plan (drafted by Don Güero 2026-08-30 — AWAITING FINAL "sign it")
+## Phase 1 plan (drafted by Don Güero, SIGNED by the owner 2026-08-30)
 
 **El Mercado Robles** on the st SW lot + interior world `me`. Cast: Doña Chelo
 (owner), Nando (receiving, half-automates everything), Perla (counter, accidental
@@ -85,7 +85,7 @@ extraction are in this session's Don Güero plan — reproduce via /don-guero if
   wholesale (2D today → richer/3D someday) without changing what things are. AJ's
   upgrade waves depend on this.
 
-**Recommendations pending owner's "sign it":**
+**Signed 2026-08-30 (see decision log):**
 - Role ranking: 1 Automation/Solutions Consultant (headline — matches owner's
   existing SMB AI-audit work), 2 AI Ops Analyst (the resume gap; Phase 1 trains it),
   3 Implementation Lead, 4 AI PM, 5 Prompt/Solutions Engineer.
@@ -93,3 +93,17 @@ extraction are in this session's Don Güero plan — reproduce via /don-guero if
   registry queued so Phase 2+ can be player-built.
 - Decision-report export: next phase.
 - Week framing: "Week Two, chapter one" (content-only reframe).
+
+**Decision log — Phase 1 signatures (2026-08-30):**
+- Role ranking · ALL FIVE, in order: 1 Automation/Solutions Consultant, 2 AI Ops
+  Analyst, 3 Implementation Lead, 4 AI PM, 5 Prompt/Solutions Engineer · "reach for
+  the sky" — the city trains every role, one business each; Phase 1 = ops analyst.
+- El Mercado build · ribbon + `me` interior + DOORS/TOWNLBL/MAPDOT extraction ·
+  balance now, pure-content businesses forever; growth registry queued for
+  player-built later. Entities-as-data law affirmed.
+- Quest scope · all 5 mercado quests (core 1,2,5 first; stretch 3,4 same session if
+  budget holds) · MAXXP target 330.
+- Decision-report export · SHIP IT — with Phase 1 if budget holds, else immediately
+  next · the owner wants the interview-ready artifact of their in-game calls.
+- Week framing · "Week Two, chapter one" (content-only reframe) · same feeling,
+  zero engine surgery.

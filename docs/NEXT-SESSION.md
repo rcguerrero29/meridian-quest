@@ -14,7 +14,7 @@ current: each session rewrites the queue before signing off.)*
 
 ## Queue (owner-set, 2026-08-30)
 
-1. **Build Phase 1 — El Mercado Robles.** Don Güero already planned it (see CITY.md "Phase 1 plan"); owner must confirm "sign it" on the four recommendations there (or override), then build: `me` interior + st storefront rows, 4 NPCs, quests 16-20 EN+ES, the DOORS/TOWNLBL/MAPDOT engine extraction, MAXXP bump, smoke green, sw CACHE bump. Originally: The skill spawns the Don Güero
+1. **Build Phase 1 — El Mercado Robles.** Don Güero already planned it (see CITY.md "Phase 1 plan"); ALL FOUR DECISIONS ARE SIGNED (see CITY.md decision log — all 5 roles in order, all 5 quests, interior + extraction, memo export, Week Two framing). Build: `me` interior + st storefront rows, 4 NPCs, quests 16-20 EN+ES, the DOORS/TOWNLBL/MAPDOT engine extraction, MAXXP bump, smoke green, sw CACHE bump. Originally: The skill spawns the Don Güero
    planner agent (pinned to Opus 5), which drafts the growth phase and returns
    decisions as ❗ side quests for the owner. Expected Phase 1 shape: develop the
    El Mercado lot as the first **Hispanic-business practice pack**. Deliverables:
