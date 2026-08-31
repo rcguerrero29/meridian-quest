@@ -23,6 +23,12 @@ const NPCLOOK={p:{shirt:"#C2543F",skin:"#B97E52",hair:"#171219",style:"long"},j:
   n:{shirt:"#C88A3A",skin:"#B97E52",hair:"#26202B",style:"cap"},
   u:{shirt:"#5B8FC9",skin:"#E5AC82",hair:"#171219",style:"pony"},
   v:{shirt:"#F0EEE6",skin:"#8C5A33",hair:"#26202B",style:"buzz"}};
+/* activity emotes: what each townsperson is visibly up to between conversations */
+const NPCACT={priya:["🛠️","💻"],marcus:["📊","🧮"],camila:["🎧","💬"],tovar:["🌮","📋"],
+ legal:["⚖️","📄"],cto:["🩺","📋"],junior:["📝","☕"],ceo:["📈","👑"],
+ rosa:["🌶️","🍲"],chuy:["🍳","🔪"],guero:["📐","🧱"],lupe:["📋","✏️"],
+ beto:["🔨","🧱"],kike:["🧱","🎵"],mari:["🏗️","📻"],xochi:["🧵","✂️"],
+ chelo:["🧺","🧮"],nando:["📦","📲"],perla:["🧾","🖊️"],chava:["🔪","🥩"]};
 /* chill townsfolk: chat-only characters with no quests — they just vibe. The engine
    spawns them at boot; their chatter comes from UI.chill (strings.js) unless a name
    matches an egg below. The owner can create more in admin mode (🧍 brush). */

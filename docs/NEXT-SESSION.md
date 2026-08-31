@@ -18,7 +18,8 @@ current: each session rewrites the queue before signing off.)*
    human. Walk Week One to its close, take the Monday handover, and work the eight
    mercado quests — `/playtest` has the tour. Report anything that reads wrong; the
    quest copy is the deliverable here, not the plumbing.
-2. **Phase 2 — run `/don-guero` again.** The SW lot is built; the ledger's next
+2. **Phase 2 — run `/nacho` then `/don-guero`.** NEW: /nacho (Opus 5 story director, docs/STORY.md is his bible) plans the arc past the mercado chapter — the story currently ENDS there and the owner noticed. Story beats and the parcel plan land together.
+   Original queue text: **run `/don-guero` again.** The SW lot is built; the ledger's next
    obvious parcel is the **st southeast "RESERVED LOT"**. Owner's role ranking is
    signed (AI PM first, then automation consultant, ops analyst, implementation
    lead, prompt engineer) — Phase 2 picks the next business off the brainstorm list
@@ -44,7 +45,7 @@ current: each session rewrites the queue before signing off.)*
 - **Chapters are data**: `CHAPTERS` in config.js decides how many quests close a
   district. `need` is deliberately below the pack size (mercado: 5 of 8) — the smoke
   test asserts that, so keep it true when adding packs.
-- Skills in repo: `/playtest` (guided testing + triage), `/don-guero` (city
-  planning on Opus 5, decisions as side quests).
+- Skills in repo: `/playtest` (testing + triage), `/don-guero` (city planning,
+  Opus 5), `/nacho` (story direction, Opus 5 — docs/STORY.md).
 - Owner's meta-goal: keep practicing AI delivery across industries; the city is
   the gym. Fun is a requirement.

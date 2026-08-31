@@ -28,6 +28,7 @@ const isSolid=(x,y)=>{const w=CW();return x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.
    triggers to reaction lines (and dog:true eggs join as a critter instead). */
 const CHILLN={},CHILLEGG={};let chillSeq=0;
 const EGGSAFE=typeof EGGS!=="undefined"?EGGS:{};
+const DEFACT=["💬","☕"]; /* fallback activity emotes for anyone NPCACT does not name */
 function eggFor(name){const n=String(name||"").toLowerCase();let hit=null;
   Object.entries(EGGSAFE).forEach(([k,e])=>{if(!hit&&e.triggers.some(t2=>n.includes(t2)))hit=k;});
   return hit;}
@@ -344,6 +345,15 @@ function draw(){
     drawPerson(ctx,sx,sy,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
+    else{ /* activity emotes: townsfolk visibly do their thing (NPCACT is content data) */
+      const acts=(typeof NPCACT!=="undefined"&&NPCACT[n.npc])||DEFACT;
+      const nw=Date.now(),ph=((nw/1000)+n.x*7.3+n.y*13.7)%13;
+      if(ph<2.4){
+        const em=acts[Math.floor((nw/13000+n.x+n.y)%acts.length)];
+        ctx.font="10px serif";ctx.textAlign="center";
+        ctx.globalAlpha=ph<0.3?ph/0.3:ph>2.1?(2.4-ph)/0.3:1;
+        ctx.fillText(em,sx+25,sy+1-Math.sin(ph*2.1)*1.6);
+        ctx.globalAlpha=1;ctx.textAlign="start";}}
   });
   PEERS.forEach(p=>{
     if(p.w!==world)return;
@@ -1167,7 +1177,16 @@ const MUSDEF={
  forest:{bpm:84,root:64,scale:[0,2,4,7,9],lead:"triangle",pad:"triangle",bright:1500},/* E maj pent — marimba woods */
  fairy:{bpm:64,root:73,scale:[0,2,4,7,9],lead:"sine",pad:"sine",bright:2800},         /* C#5 maj pent — little bells */
  sunset:{bpm:58,root:55,scale:[0,2,4,7,9],lead:"sine",pad:"sine",bright:800}};        /* G maj pent — warm dusk */
-const musDef=()=>MUSDEF[themeName]||MUSDEF.meridian;
+/* tune picker: Auto follows the theme; or pin one of the four tunes (owner ask) */
+let musTune="default";try{musTune=localStorage.getItem("mqtune")||"default";}catch(e){}
+if(!MUSDEF[musTune]&&musTune!=="default")musTune="default";
+const musDef=()=>MUSDEF[musTune]||MUSDEF[themeName]||MUSDEF.meridian;
+function musTuneSet(tn){musTune=tn;
+  try{localStorage.setItem("mqtune",tn);}catch(e){}
+  document.querySelectorAll("#tuneRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tn===musTune?"true":"false"));
+  if(MUSIC.timer)musRetime();
+  if(musOn)setTimeout(musChirp,120);}
+document.querySelectorAll("#tuneRow button").forEach(b=>b.addEventListener("click",()=>musTuneSet(b.dataset.tn)));
 const mtof=m=>440*Math.pow(2,(m-69)/12);
 function musVoice(m,t0,dur,type,peak,bright){
   const c=MUSIC.ctx,o=c.createOscillator(),f=c.createBiquadFilter(),g=c.createGain();
@@ -1258,6 +1277,9 @@ function applyLang(){
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
   $("lbTheme").textContent=t.lbTheme;
   $("lbMusic").textContent=t.lbMusic;
+  document.querySelectorAll("#tuneRow button").forEach((b,i)=>{
+    b.textContent=t.tunes[i];
+    b.setAttribute("aria-pressed",b.dataset.tn===musTune?"true":"false");});
   $("musMute").textContent=musOn?t.musOn:t.musOff;
   $("musVol").value=Math.round(musVol*100);
   document.querySelectorAll("#themeRow button,#thCustom").forEach(b=>b.textContent=t.themes[b.dataset.th]);
