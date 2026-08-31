@@ -93,13 +93,19 @@ auditReach().forEach(p=>console.warn("REACH "+p));
 const CHS=()=>(typeof CHAPTERS!=="undefined"&&CHAPTERS.length)
   ?CHAPTERS:[{id:"all",quests:QEN.map((_,i)=>i),need:QEN.length}];
 const chClosed=c=>c.quests.filter(i=>done.has(i)).length>=c.need;
-function chIdx(){const L=CHS();for(let i=0;i<L.length;i++)if(!chClosed(L[i]))return i;return L.length;}
-const chDue=()=>chIdx()>chSeen;          /* a chapter closed that the player hasn't been shown */
-const mercadoOpen=()=>chClosed(CHS()[0]);
+/* `chSeen` is the chapter being played; everything before it is closed for good.
+   A chapter ends two ways: you meet its `need`, or you run out of hearts. Either way
+   it ends — it never resets. Whatever you left unanswered stays unanswered, and that
+   is the whole consequence: the city is never taken away. */
+const chDue=()=>{const L=CHS();return chSeen<L.length&&(hearts<=0||chClosed(L[chSeen]));};
+/* a quest still on offer: unanswered, and its chapter has not closed behind you */
+const qChapter=qi=>{const L=CHS();for(let i=0;i<L.length;i++)if(L[i].quests.indexOf(qi)>=0)return i;return -1;};
+const qOpen=qi=>{const c=qChapter(qi);return c<0||c>=chSeen;};
+const mercadoOpen=()=>chSeen>=1;   /* opens once you take the Monday handover */
 /* ---------- state ---------- */
 const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"};
 let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
-let chSeen=0;
+let chSeen=0,replayTimer=null;
 let xp=0,hearts=3,cls="",heroName="Rookie",look={shirt:"#8B5CF6",skin:"#E5AC82",hair:"#26202B",style:"cap",outfit:"casual"},done=new Set(),cur=null,curQ=null,node=null,treats=0,fredQ=0,qLvl0=0;
 /* retry-until-correct: `done` = answered right; `qa` maps quest -> best XP already
    awarded across attempts (retries only pay the difference, so nothing farms) + doubles
@@ -176,7 +182,7 @@ function toast(msg,ms){const el=$("toast");
   clearTimeout(toastT);toastT=setTimeout(()=>{el.classList.remove("on");
     if(toastQ.length){const[m,d]=toastQ.shift();setTimeout(()=>toast(m,d),300);}},ms||2600);}
 let lastBump=0;
-const pendingAt=n=>n.q.find(qi=>!done.has(qi));
+const pendingAt=n=>n.q.find(qi=>!done.has(qi)&&qOpen(qi));
 /* ---------- canvas ---------- */
 const cv=$("cv"),ctx=cv.getContext("2d");
 const VW=10*TS,VH=8*TS;
@@ -869,8 +875,7 @@ function pick(c,btn,t){
   $("next").hidden=false;
 }
 $("next").addEventListener("click",()=>{
-  if(hearts<=0){wasFs=false;gameover();return;}
-  if(chDue()){wasFs=false;finish();return;}
+  if(chDue()){wasFs=false;finish(hearts<=0);return;}
   $("card").hidden=true;$("world").hidden=false;restoreFs();checkTalk();
 });
 /* ---------- character creator ---------- */
@@ -923,40 +928,44 @@ $("begin").addEventListener("click",()=>{
   if(eg)setTimeout(()=>toast(EGGSAFE[eg].lines[lang][0],3600),7400);
 });
 /* ---------- start/end ---------- */
-function gameover(){
-  $("card").hidden=true;$("world").hidden=true;
-  $("endTitle").textContent=T().goTitle;
-  $("endScore").textContent=T().goScore(xp,done.size,AQ().length);
-  $("epi").textContent=T().goEpi;
-  $("replay").textContent=T().replay;
-  $("end").hidden=false;
-}
-function finish(){
+/* One curtain for every ending. `burnout` = the hearts ran out: the chapter closes
+   where it stands and the unanswered quests stay unanswered — nothing is erased.
+   A chapter that ended well is judged by hearts; the last one rolls real credits. */
+function finish(burnout){
   $("card").hidden=true;$("world").hidden=true;
   const L=CHS(),last=Math.min(chSeen,L.length-1)>=L.length-1;
-  $("endTitle").textContent=`🏆 ${lvlName()}`;
-  $("endScore").textContent=T().endScore(xp,MAXXP,Math.max(0,hearts));
-  /* a chapter is judged by hearts, not XP — retry-until-correct means bad calls leave
-     scars, not gaps. The last chapter rolls the real credits; an earlier one hands
-     over to the next Monday. */
   const h=Math.max(0,hearts),t=T();
+  $("endTitle").textContent=burnout?t.goTitle:`🏆 ${lvlName()}`;
+  $("endScore").textContent=burnout?t.goScore(xp,done.size,AQ().length)
+                                   :t.endScore(xp,MAXXP,h);
   const E=last?[t.mepi1,t.mepi2,t.mepi3]:[t.epi1,t.epi2,t.epi3];
-  $("epi").textContent = h>=3?E[0] : h===2?E[1] : E[2];
-  $("replay").textContent=t.replay;
-  $("endGo").textContent=t.endGo;$("endGo").hidden=last;
+  $("epi").textContent = burnout?(last?t.mgoEpi:t.goEpi) : h>=3?E[0] : h===2?E[1] : E[2];
+  $("endGo").textContent=last?t.endStay:t.endGo;$("endGo").hidden=false;
   $("end").hidden=false;
 }
-/* the handover: a new week starts Monday, on the street, with a full three hearts */
+/* Acknowledging an ending closes that chapter for good and starts the next one on
+   Monday with three fresh hearts. After the last one you keep the city and wander it. */
 $("endGo").addEventListener("click",()=>{
+  const last=chSeen>=CHS().length-1;
   chSeen=Math.min(chSeen+1,CHS().length);hearts=3;
   applyGrowth();
-  world="st";px=fx=6;py=fy=12;dir="down";wasFs=false;
+  if(!last){world="st";px=fx=6;py=fy=12;dir="down";}
+  if(isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
+  wasFs=false;
   save();$("end").hidden=true;$("world").hidden=false;setWorldTag();hud();checkTalk();
-  toast(T().weekTwoToast,4000);
+  toast(last?T().endStayToast:T().weekTwoToast,4000);
 });
-$("replay").addEventListener("click",()=>{xp=0;hearts=3;done=new Set();qa={};chSeen=0;world="hq";px=fx=10;py=fy=11;dir="down";
-  applyGrowth();
-  save();$("end").hidden=true;$("world").hidden=false;setWorldTag();hud();checkTalk();
+/* Wiping a city is never one tap. The story never sends you here — this is a tool. */
+$("replay").addEventListener("click",()=>{
+  if(!replayTimer){
+    $("replay").textContent=T().replayArm;
+    replayTimer=setTimeout(()=>{replayTimer=null;$("replay").textContent=T().replay;},4000);
+    return;}
+  clearTimeout(replayTimer);replayTimer=null;$("replay").textContent=T().replay;
+  xp=0;hearts=3;done=new Set();qa={};chSeen=0;world="hq";px=fx=10;py=fy=11;dir="down";
+  applyGrowth();save();
+  $("settings").hidden=true;$("end").hidden=true;$("card").hidden=true;$("world").hidden=false;
+  setWorldTag();hud();checkTalk();
   toast(T().replayToast(heroName),2500);});
 /* ---------- controls scheme ---------- */
 let ctl="swipe";try{ctl=localStorage.getItem("mqctl")||"swipe";}catch(e){}
@@ -1214,6 +1223,7 @@ function applyLang(){
   $("exCopy").textContent=t.expCopy;$("exClose").textContent=t.tlClose;
   $("exTabJson").textContent=t.exTabJson;$("exTabCare").textContent=t.exTabCare;$("exIcs").textContent=t.exIcs;
   $("exTabRep").textContent=t.exTabRep;$("exDl").textContent=t.exDl;
+  if(!replayTimer)$("replay").textContent=t.replay;
   $("mapTitle").textContent=t.mapTitle;$("mapClose").textContent=t.tlClose;
   $("setTitle").textContent=t.setTitle;$("lbCtl").textContent=t.lbCtl;
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
@@ -1753,8 +1763,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
     px=fx=SV.px??10;py=fy=SV.py??11;
     applyGrowth();
     if(px>=CW().W||py>=CW().H||isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
-    if(chDue()){finish();$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;hud();}
-    else if(hearts<=0){clearSave();$("continueBtn").hidden=true;toast(T().contDead,2500);}
+    if(chDue()){finish(hearts<=0);$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;hud();}
     else enterWorld(false);
   });
 }

@@ -50,11 +50,18 @@ folder + a copy of `index.html` pointing its six content script tags at it.**
 - **Retry-until-correct** (owner decision, 2026-08-30): a quest completes only on the
   right answer. Wrong/mid picks show the verdict + codex but never reveal the correct
   choice; the NPC keeps the ❗ and the quest can be retried. Bad picks cost a heart
-  every attempt; 0 hearts still resets the week. XP is farm-proof: `qa` records the
+  every attempt. XP is farm-proof: `qa` records the
   best XP already paid per quest and retries pay only the difference; the verdict
   header shows the actual delta (and no XP claim when nothing new was earned).
-- **Endings key off hearts** (3 = flawless / 2 = strong / ≤1 = survived) because every
-  finished week now ends at full XP.
+- **Hearts are a grade and a clock, never a wipe** (owner decision, 2026-08-31). Bad
+  picks cost hearts; at zero the **chapter ends where it stands** — the quests you left
+  unanswered stay unanswered and its NPCs drop their ❗ for good — and Monday comes
+  anyway with three fresh hearts and the city untouched. Nothing is ever erased and the
+  save is never deleted. A chapter finished properly is graded on hearts (3 = flawless /
+  2 = strong / ≤1 = survived); a chapter that ran out gets its own burnout ending.
+- **Restarting is a tool, not a story beat** (owner decision, 2026-08-31). "New game +"
+  lives in ⚙️ Settings behind a two-tap confirm; the ending screens only ever move you
+  forward (**▶ Monday — Week Two**, or **↩ Back to the city** after the last chapter).
 - **Wardrobe** (the one exception to correctness-gating, by owner decision: cosmetics
   are extra): ANY attempt at Xochi's quest reveals a 🧵 Wardrobe button in ⚙️ Settings;
   beating the quest also makes talking to Xochi open it. Dresses **Frederick**

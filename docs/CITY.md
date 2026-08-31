@@ -35,6 +35,9 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 
 ## Growth history
 
+- 2026-08-31 — Hearts stopped wiping the city (owner ask): zero hearts now ends the
+  chapter instead of the run, restart moved to Settings behind a confirm, and the
+  save is never deleted out from under a player.
 - 2026-08-31 — Replay fixed (owner ask): the city is now a pure function of progress.
   "New game +" rewinds Calle Principal to its shipped map and rebuilds only what the
   run has earned — no Studio you did not raise, Lupe back at her post. Predates
@@ -89,6 +92,14 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
   accept a longer session** · the portfolio artifact is the point of the gym.
 - 2026-08-31 · ❗Semana: when is the mercado · **Monday of Week Two — chapter one**
   · the epilogues already promise Week Two; this cashes that check.
+- 2026-08-31 · ❗Corazones: what zero hearts costs · **the week, not the city** — the
+  chapter ends where it stands, unanswered quests stay unanswered and close for good,
+  Monday comes with three fresh hearts · a teaching game must never delete the gym.
+- 2026-08-31 · ❗Botón: where restart lives · **⚙️ Settings, behind a two-tap confirm**
+  · the story never sends you there; it is a testing tool, so it stops sitting next to
+  the button that continues the story.
+- 2026-08-31 · ❗Entrada: a staging area for new players · **skipped — Meridian Labs HQ
+  is the onboarding** · Priya, Frederick and the early quests already do that job.
 
 ## Phase 1 plan (drafted 2026-08-30 · **SIGNED 2026-08-31**)
 

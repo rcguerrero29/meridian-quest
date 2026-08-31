@@ -183,7 +183,13 @@ const CANDIDATES = [
     merc.quests.slice(0, merc.need).forEach(i => done.add(i));
     if (!chDue()) problems.push('district did not close at its `need` threshold');
     finish();
-    if (!document.getElementById('endGo').hidden) problems.push('handover offered on the final chapter');
+    if (document.getElementById('endGo').hidden) problems.push('no way off the final ending screen');
+    if (document.getElementById('endGo').textContent !== UI[lang].endStay)
+      problems.push('final chapter still offers a handover instead of returning to the city');
+    document.getElementById('endGo').click();
+    if (chSeen !== CHAPTERS.length) problems.push('final acknowledgement did not close the last chapter');
+    if (chDue()) problems.push('an ending is still due after the last chapter closed');
+    if (isSolid(px, py)) problems.push('returning to the city dropped the hero inside a wall');
 
     // rewind: a fresh run must not inherit a shop it never earned
     document.getElementById('end').hidden = true;
@@ -201,6 +207,64 @@ const CANDIDATES = [
     return problems;
   });
   fails.push(...chap);
+
+  // ---- 3a1b. running out of hearts ends the chapter; it never erases the city ----
+  const doom = await page.evaluate(() => {
+    const problems = [];
+    done = new Set(); chSeen = 0; hearts = 3; xp = 0; applyGrowth();
+    // build something, then burn out with most of Week One unanswered
+    [12, 13].forEach(i => done.add(i)); applyGrowth();
+    if (WORLDS.st.rows[5][21] !== 'O') problems.push('setup: Studio did not go up');
+    hearts = 0; save();
+    if (!chDue()) problems.push('zero hearts did not end the chapter');
+    if (!localStorage.getItem('mq1')) problems.push('the save was deleted at zero hearts');
+    finish(true);
+    if (document.getElementById('endTitle').textContent !== UI[lang].goTitle)
+      problems.push('burnout did not show the burnout title');
+    if (document.getElementById('endGo').hidden) problems.push('burnout offers no way forward');
+
+    document.getElementById('endGo').click();
+    if (chSeen !== 1) problems.push('burnout did not move the story on to the next chapter');
+    if (hearts !== 3) problems.push('the new week did not restore hearts after a burnout');
+    if (xp !== 0) problems.push('burnout changed XP');
+    if (!done.has(12) || !done.has(13)) problems.push('burnout erased answered quests');
+    if (WORLDS.st.rows[5][21] !== 'O') problems.push('burnout tore down the Studio');
+    if (!mercadoOpen()) problems.push('burnout did not open the next district');
+    // the quests left unanswered are closed for good — no ❗ left on Week One
+    if (qOpen(0)) problems.push('a Week One quest is still on offer after the chapter closed');
+    { const tovar = WORLDS.hq.npcs.find(n => n.npc === 'tovar');
+      if (!tovar || pendingAt(tovar) !== undefined) problems.push('a closed chapter still shows a quest marker'); }
+    if (!qOpen(16)) problems.push('the new chapter\'s quests are not on offer');
+
+    done = new Set(); chSeen = 0; hearts = 3; applyGrowth();
+    world = 'hq'; px = fx = 10; py = fy = 11;
+    return problems;
+  });
+  fails.push(...doom);
+
+  // ---- 3a1c. restart is a Settings tool behind a two-tap confirm, not a story button ----
+  await page.evaluate(() => {
+    document.getElementById('end').hidden = true;
+    document.getElementById('wardrobe').hidden = true;
+  });
+  await page.click('#gear');
+  const reset = await page.evaluate(() => {
+    const problems = [];
+    const b = document.getElementById('replay');
+    if (!b) return ['restart button missing'];
+    if (!document.getElementById('settings').contains(b)) problems.push('restart is not in Settings');
+    if (document.getElementById('end').contains(b)) problems.push('restart is still on the ending screen');
+    xp = 99; done = new Set([1, 2]); chSeen = 1; save();
+    b.click();  // first tap only arms it
+    if (b.textContent !== UI[lang].replayArm) problems.push('first tap did not ask for confirmation');
+    if (xp !== 99 || chSeen !== 1) problems.push('first tap already wiped the run');
+    b.click();  // second tap commits
+    if (xp !== 0 || chSeen !== 0 || done.size) problems.push('confirmed restart did not reset the run');
+    if (b.textContent !== UI[lang].replay) problems.push('restart button stuck on the confirm label');
+    return problems;
+  });
+  fails.push(...reset);
+  await page.evaluate(() => { document.getElementById('settings').hidden = true; hearts = 3; });
 
   // ---- 3a2. comfort checks (template guarantee): WCAG contrast on every theme
   //           variant, and tap targets >= 24px on every visible button ----
