@@ -12,23 +12,49 @@ current: each session rewrites the queue before signing off.)*
 3. Every ship: `npm install playwright-core` once, `node test/smoke.js` green,
    EN/ES in lockstep, bump `CACHE` in `sw.js`.
 
-## Queue (owner-set, 2026-08-31)
+## Today in review (2026-08-31, the marathon session)
 
-1. **Playtest Phase 1.** El Mercado Robles is live but has never been played by a
-   human. Walk Week One to its close, take the Monday handover, and work the eight
-   mercado quests — `/playtest` has the tour. Report anything that reads wrong; the
-   quest copy is the deliverable here, not the plumbing.
+Shipped to `main`, in order: engine/content split verified → nature pass (canvas
+theming, flora, critters) → music + townsfolk + 39 name eggs + character creator →
+Don Güero (city planner, Opus 5) + city ledger → Phase 1 signed → El Mercado built
+(superseded by the parallel don-guero session's AI-PM build — merged, its newer
+signatures win) → theme-editor dark-variant fix → every-animal interactions →
+activity ticker → NPC edit panel → door glow → Nacho (story director, Opus 5) +
+story bible → tune picker → activity emotes → **world upgrade wave 1** (TILEDRAW
+registry + TILEART seam, floor variation, wall shadows, walk cycle, blinking) →
+**wave 2 lighting** (time-of-day wash, night light spills from doors/storefronts,
+sunset theme keeps golden hour) → **palette wardrobe** (up to 8 named custom
+palettes: clone-from-preset saves-as-new, rename, ▲▼ reorder, evict; per-device).
+Deployed at sw `mq-v22`. Smoke suite green throughout (24 quests, maxXP 350).
+
+## The skills (the team, documented)
+
+- **`/don-guero`** — city planner. Opus 5 agent reads `docs/CITY.md` (districts,
+  parcels, decision log), drafts the growth phase, returns owner decisions as
+  ❗ side quests. Signed answers are permits.
+- **`/nacho`** — story director. Opus 5 agent reads `docs/STORY.md` (premise,
+  principles, arc, open threads), plans chapters/arcs/endings, side-quests the
+  owner on story forks. Teaching mode IS story mode.
+- **`/playtest`** — walks the owner through the tour (docs/PLAYTEST.md, 14 stops)
+  and maps "stop N broke" to the right file.
+- Loop for any phase: `/nacho` (plot) → `/don-guero` (parcel) → owner signs both →
+  build → smoke green → bump sw CACHE → merge on owner's word.
+
+## Queue (owner-set, rewritten end of 2026-08-31)
+
+1. **Playtest everything** — the mercado chapter AND today's upgrades (lighting at
+   night, palette wardrobe, tune picker, NPC editing) have not been human-played.
+   `/playtest` guides; quest copy and feel are the deliverables.
 2. **Phase 2 — run `/nacho` then `/don-guero`.** NEW: /nacho (Opus 5 story director, docs/STORY.md is his bible) plans the arc past the mercado chapter — the story currently ENDS there and the owner noticed. Story beats and the parcel plan land together.
    Original queue text: **run `/don-guero` again.** The SW lot is built; the ledger's next
    obvious parcel is the **st southeast "RESERVED LOT"**. Owner's role ranking is
    signed (AI PM first, then automation consultant, ops analyst, implementation
    lead, prompt engineer) — Phase 2 picks the next business off the brainstorm list
    in CITY.md and the next role down.
-3. **Graphics: waves 2+** — the registry refactor and wave 1 SHIPPED 2026-08-31
-   (TILEDRAW registry + TILEART content override, floor variation, wall-cast
-   shadows, walk-cycle arms, blinking, door under-glow). Remaining: frame-clock
-   consolidation, per-glyph solid/colour in one TILES table, time-of-day lighting
-   overlay (IDEAS §7 waves 2-3), palette wardrobe.
+3. **Graphics: what remains** — waves 1-2 AND the palette wardrobe SHIPPED
+   2026-08-31. Remaining: frame-clock consolidation + per-glyph TILES table
+   (IDEAS §7 step 2 — the iso prereq), then the owner's iso-vs-top-down decision
+   (IDEAS §10 has the full isometric 2.5D plan; prototype world = `ex`).
 4. **AJ's picks**: fandom eggs round 2 + mechanics (IDEAS §9 — Grogu lunchbox,
    birthday calendar magic, streak memory…). Blocked on AJ choosing.
 5. **Music v2** (IDEAS §8) when music gets its own session.

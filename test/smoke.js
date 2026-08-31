@@ -325,10 +325,13 @@ const CANDIDATES = [
       const r = cRatio(customTheme[m][fg], customTheme[m][bg2]);
       if (r < 4.5) problems.push(`auto-fix left ${m} ${fg}/${bg2} at ${r.toFixed(2)}`);
     }));
-    let stored = null; try { stored = JSON.parse(localStorage.getItem('mqcustom')); } catch (e) {}
-    if (!stored || !stored.light || !stored.dark) problems.push('custom theme not persisted');
+    /* palette wardrobe model: mqpals is a list of named palettes, mqpal the active index */
+    let pals = null; try { pals = JSON.parse(localStorage.getItem('mqpals')); } catch (e) {}
+    const active = Array.isArray(pals) ? pals[parseInt(localStorage.getItem('mqpal') || '0') || 0] : null;
+    if (!active || !active.light || !active.dark || !active.n) problems.push('custom palette not persisted');
     if (sanitizeTheme({ light: { bg: 'javascript:x' }, dark: null }) !== null) problems.push('sanitizeTheme accepted garbage');
-    if (sanitizeTheme(stored) === null) problems.push('sanitizeTheme rejected its own output');
+    if (sanitizeTheme(active) === null) problems.push('sanitizeTheme rejected its own output');
+    if (pals && pals.length > 8) problems.push('palette wardrobe exceeded its cap');
     // back to default for the rest of the suite
     themeName = 'meridian'; applyTheme();
     return problems;

@@ -394,6 +394,32 @@ function draw(){
   });
   drawPerson(ctx,fx*TS-camX,fy*TS-camY,look,{dir,bob:moving?Math.sin(bob)*2:0,moving});
   drawAmbient(w,camX,camY);
+  drawDaylight(w,camX,camY);
+}
+/* wave-2 lighting: the world knows what time it is. Sunset theme keeps golden hour
+   always; otherwise the device clock sets the mood — cool night wash with warm light
+   spilling from doors and storefronts, a soft amber edge at dusk/dawn. Alpha stays
+   ≤0.22 so themes remain comfortable and the ❗ markers stay readable. */
+function drawDaylight(w,camX,camY){
+  const dnow=new Date(),hr=dnow.getHours()+dnow.getMinutes()/60;
+  const night=hr>=20.5||hr<6,edge=!night&&(hr>=18||hr<8);
+  let wash=null;
+  if(themeName==="sunset")wash="rgba(255,150,60,.10)";
+  else if(night)wash="rgba(28,38,92,.20)";
+  else if(edge)wash="rgba(255,150,60,.07)";
+  if(!wash)return;
+  ctx.fillStyle=wash;ctx.fillRect(0,0,VW,VH);
+  if(night){ /* doors and storefronts spill warm light onto the pavement */
+    const x0=Math.floor(camX/TS),y0=Math.floor(camY/TS);
+    for(let y=y0;y<=Math.min(w.H-1,y0+9);y++)for(let x=x0;x<=Math.min(w.W-1,x0+11);x++){
+      const ch=w.rows[y][x];
+      if(!(DOORSET.has(ch)||ch==="Q"||ch==="Z"))continue;
+      const sx=x*TS-camX,sy=y*TS-camY;
+      const g2=ctx.createRadialGradient(sx+16,sy+30,2,sx+16,sy+30,22);
+      g2.addColorStop(0,"rgba(255,214,130,.22)");g2.addColorStop(1,"rgba(255,214,130,0)");
+      ctx.fillStyle=g2;ctx.fillRect(sx-8,sy+12,TS+16,TS+8);
+    }
+  }
 }
 /* ambient layer: a handful of drifting theme particles — fairy motes, forest petals,
    sunset fireflies. World-anchored so they parallax with the camera; ~14 points/frame. */
@@ -1089,8 +1115,18 @@ function sanitizeTheme(t2){
     if(Object.keys(o).length===THEME_KEYS.length)out[m2]=o;});
   return out.light&&out.dark?out:null;
 }
-let customTheme=null;
-try{customTheme=sanitizeTheme(JSON.parse(localStorage.getItem("mqcustom")||"null"));}catch(e){}
+/* palette wardrobe: several named custom palettes, reorderable, one active.
+   mqpals=[{n,light,dark}...] + mqpal=active index; legacy mqcustom migrates in. */
+let PALS=[],palIdx=0;
+try{
+  const raw=JSON.parse(localStorage.getItem("mqpals")||"null");
+  if(Array.isArray(raw))raw.slice(0,8).forEach(e2=>{const t2=sanitizeTheme(e2);
+    if(t2)PALS.push({n:String(e2.n||"Custom").slice(0,18),light:t2.light,dark:t2.dark});});
+}catch(e){}
+if(!PALS.length){try{const old=sanitizeTheme(JSON.parse(localStorage.getItem("mqcustom")||"null"));
+  if(old)PALS.push({n:"Custom 1",light:old.light,dark:old.dark});}catch(e){}}
+try{palIdx=Math.min(PALS.length-1,Math.max(0,parseInt(localStorage.getItem("mqpal")||"0")||0));}catch(e){}
+let customTheme=PALS[palIdx]||null;
 let themeName="meridian";try{themeName=localStorage.getItem("mqtheme")||"meridian";}catch(e){}
 if(!THEMES.hasOwnProperty(themeName)&&themeName!=="custom")themeName="meridian";
 const darkMq=window.matchMedia("(prefers-color-scheme: dark)");
@@ -1118,6 +1154,7 @@ function applyTheme(){
   document.querySelectorAll("#themeRow button,#themeRow2 button[data-th]")
     .forEach(b=>b.setAttribute("aria-pressed",b.dataset.th===themeName?"true":"false"));
   $("thCustom").hidden=!customTheme;
+  if(customTheme)$("thCustom").textContent="\u2728 "+customTheme.n;
   setCanvasTint();
   if(MUSIC.timer)musRetime(); /* tempo follows the theme */
   try{localStorage.setItem("mqtheme",themeName);}catch(e){}
@@ -1151,7 +1188,8 @@ function autoFixTheme(){ /* backgrounds are the designer's; text adjusts to stay
 /* open the editor on the variant the player is actually SEEING — editing the light
    palette while the phone displays dark reads as "my colors don't change" */
 let teMode=darkMq.matches?"dark":"light";
-function saveCustom(){try{localStorage.setItem("mqcustom",JSON.stringify(customTheme));}catch(e){}}
+function saveCustom(){try{localStorage.setItem("mqpals",JSON.stringify(PALS));
+  localStorage.setItem("mqpal",String(palIdx));}catch(e){}}
 function meridianVars(mode){ /* read the built-in palette out of the stylesheet */
   const root=document.documentElement,prev=root.dataset.theme;
   THEME_KEYS.forEach(k2=>root.style.removeProperty("--"+k2));
@@ -1161,12 +1199,49 @@ function meridianVars(mode){ /* read the built-in palette out of the stylesheet 
   if(prev)root.dataset.theme=prev;else delete root.dataset.theme;
   return o;
 }
-function cloneTheme(name){
-  customTheme=name==="meridian"?{light:meridianVars("light"),dark:meridianVars("dark")}
+function cloneTheme(name){ /* clone = save-as-new palette in the wardrobe */
+  if(PALS.length>=8){toast(T().palFull,2400);return;}
+  const src=name==="meridian"?{light:meridianVars("light"),dark:meridianVars("dark")}
     :JSON.parse(JSON.stringify(THEMES[name]));
+  PALS.push({n:(T().palNames[name]||name)+" "+(PALS.length+1),light:src.light,dark:src.dark});
+  palIdx=PALS.length-1;customTheme=PALS[palIdx];
   themeName="custom";saveCustom();applyTheme();teRender();
 }
+function palSelect(i){palIdx=i;customTheme=PALS[i];themeName="custom";saveCustom();applyTheme();teRender();}
+function palRender(){ /* the wardrobe list: pick, reorder, evict */
+  const box=$("tePals");box.innerHTML="";
+  PALS.forEach((pal,i)=>{
+    const row=document.createElement("div");row.className="palrow";
+    const use=document.createElement("button");use.textContent=pal.n;use.className="palname";
+    use.setAttribute("aria-pressed",themeName==="custom"&&i===palIdx?"true":"false");
+    use.addEventListener("click",()=>palSelect(i));
+    const up=document.createElement("button");up.textContent="\u25b2";up.disabled=i===0;
+    up.addEventListener("click",()=>{[PALS[i-1],PALS[i]]=[PALS[i],PALS[i-1]];
+      if(palIdx===i)palIdx=i-1;else if(palIdx===i-1)palIdx=i;
+      customTheme=PALS[palIdx];saveCustom();teRender();});
+    const dn=document.createElement("button");dn.textContent="\u25bc";dn.disabled=i===PALS.length-1;
+    dn.addEventListener("click",()=>{[PALS[i+1],PALS[i]]=[PALS[i],PALS[i+1]];
+      if(palIdx===i)palIdx=i+1;else if(palIdx===i+1)palIdx=i;
+      customTheme=PALS[palIdx];saveCustom();teRender();});
+    const del=document.createElement("button");del.textContent="\ud83d\uddd1";
+    del.addEventListener("click",()=>{PALS.splice(i,1);
+      if(palIdx>=PALS.length)palIdx=Math.max(0,PALS.length-1);
+      customTheme=PALS[palIdx]||null;
+      if(!customTheme&&themeName==="custom")themeName="meridian";
+      saveCustom();applyTheme();teRender();});
+    row.appendChild(use);row.appendChild(up);row.appendChild(dn);row.appendChild(del);
+    box.appendChild(row);});
+  $("teName").value=customTheme?customTheme.n:"";
+  $("teName").placeholder=T().teNamePh;
+}
+$("teName").addEventListener("input",()=>{
+  if(!customTheme)return;
+  customTheme.n=$("teName").value.slice(0,18).trim()||"Custom";
+  saveCustom();
+  if(themeName==="custom")$("thCustom").textContent="\u2728 "+customTheme.n;
+});
 function teRender(){
+  palRender();
   const box=$("teRows");box.innerHTML="";
   if(!customTheme)return;
   $("teLight").setAttribute("aria-pressed",teMode==="light"?"true":"false");

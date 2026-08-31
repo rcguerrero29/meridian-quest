@@ -270,3 +270,45 @@ const AINPC={
 - v2: Worker KV daily budget with a hard stop, per-IP rate limit, same clamps. Budget exhaustion is a character beat ("the antenna is resting"), never an error dialog.
 
 **Scope guard:** like NET, `AINPC.enabled` stays false for every cartridge that does not explicitly opt in; network access in the engine remains confined to exactly two named seams: NET and AINPC.
+
+---
+
+## 10. Isometric 2.5D — the plan (planned 2026-08-31; NOT started)
+
+**What it is:** the true "between 2D and 3D" — the camera tilts to three-quarter
+view, tiles become diamonds, buildings get visible height. Stardew/Hades-adjacent
+feel without any 3D engine.
+
+**Why we're READY (and why nothing before this was wasted):** the entities-as-data
+law means the world model never changes — maps stay glyph grids, NPCs/critters stay
+data, portals/quests/saves untouched. Isometric is a RENDERER swap, and the TILEDRAW
+registry (shipped 2026-08-31) is exactly the seam it swaps through.
+
+**The plan, in order:**
+1. **Projection core** (engine, ~1 session): `iso(x,y) = ((x-y)*TSW/2, (x+y)*TSH/2)`
+   with TSW=64, TSH=32; camera follows the hero in iso space; draw order becomes
+   painter's algorithm (sort by x+y, then layer) — the existing canopy/actor passes
+   already separate layers, so this generalizes them.
+2. **TILEART-ISO pack** (content, the big cost): every glyph redrawn as a diamond
+   tile + optional wall piece with height. ~35 glyphs today. Start with floors/walls
+   (the 80% of pixels), keep props as billboarded sprites (drawn upright at the iso
+   anchor) — this halves the art cost and looks correct.
+3. **Actors as billboards:** drawPerson/animals render unchanged, anchored to iso
+   feet positions — pixel people in an iso world is a beloved style (see classic
+   RPG maker / Habbo). Walk input stays 4-directional.
+4. **Toggle, not migration:** ship as a Settings option ("Camera: Top-down / Iso")
+   reading the same world — the top-down renderer stays, so nothing breaks and AJ
+   can compare live. Per-content-pack default via config.
+5. **Costs & risks:** the art pack is the real bill (every tile touched); occlusion
+   bugs (actor behind tall wall) need the painter's sort done right; small phones
+   lose some viewport to the diagonal. Mitigation: prototype ONE world (`ex`, the
+   simplest) end-to-end before committing the rest.
+
+**Prereqs before starting:** frame-clock consolidation + per-glyph TILES table
+(solid/colour/renderer in one data row) — the remaining IDEAS §7 step-2 work — so
+the iso pack overrides one table, not three.
+
+**Decision for the owner (when ready):** commit an art session to the iso pack, or
+spend the same budget on top-down waves (animated water, seasonal foliage, night
+windows)? Both ride the registry; iso is the bigger wow, top-down is the safer
+compounding.

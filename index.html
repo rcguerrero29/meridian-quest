@@ -69,6 +69,11 @@
   .gear{position:absolute; right:10px; top:10px; width:38px; height:38px; border-radius:10px; border:none; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.05rem; cursor:pointer; z-index:4;}
   .gear svg{display:block; width:20px; height:20px; margin:auto; pointer-events:none;}
   #careForm input{box-sizing:border-box; min-width:0; font-family:'IBM Plex Sans',sans-serif; font-size:.85rem; padding:8px 10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink);}
+  .palrow{display:flex; gap:6px; margin-bottom:6px;}
+  .palrow button{min-height:28px; min-width:30px; border-radius:8px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer; font-size:.8rem; padding:4px 8px;}
+  .palrow .palname{flex:1; text-align:left; font-family:'IBM Plex Sans',sans-serif;}
+  .palrow button[aria-pressed="true"]{border-color:var(--accent); background:var(--accent); color:var(--accent-ink);}
+  .palrow button:disabled{opacity:.35;}
   .terow{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
   .terow span{flex:1; font-family:'IBM Plex Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted);}
   .terow input[type=color]{width:52px; height:30px; border:1.5px solid var(--line); border-radius:8px; background:var(--bg); padding:2px; cursor:pointer;}
@@ -347,6 +352,9 @@
           </div>
           <label id="teModeLb"></label>
           <div class="optrow"><button id="teLight">☀️</button><button id="teDark">🌙</button></div>
+          <label id="tePalsLb"></label>
+          <input type="text" id="teName" maxlength="18" autocomplete="off">
+          <div id="tePals"></div>
           <div id="teRows"></div>
           <div class="optrow" style="margin-top:10px;"><button id="teFix"></button></div>
           <button class="close" id="teClose"></button>
