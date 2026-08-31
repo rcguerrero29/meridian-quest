@@ -251,7 +251,7 @@ let camXg=0,camYg=0;
    animals render as upright billboards at their projected feet, depth by painter's
    sort. Ships as a Settings camera toggle beside top-down; admin painting stays
    top-down-only (tap→tile math differs). */
-let camMode="top";try{camMode=localStorage.getItem("mqcam")==="iso"?"iso":"top";}catch(e){}
+let camMode="top";try{const cm0=localStorage.getItem("mqcam");if(cm0==="iso"||cm0==="front")camMode=cm0;}catch(e){}
 const ISW=44,ISH=22;
 let ISOCOL=null;
 const IZH={"#":20,B:20,Q:17,Z:17,U:20,W:12,V:10,D:9,K:9,T:8,S:13,H:8,I:9,A:9,P:11,F:7,G:9,C:7,X:8,"1":10};
@@ -331,6 +331,7 @@ function drawIso(){
       else if(cr.kind==="colibri")drawColibri(ctx,cr,bx,by);
       else if(cr.kind==="gato")drawGato(ctx,cr,bx,by);
       else if(cr.kind==="beagle")drawBeagle(ctx,cr,bx,by);});});
+  if(BALL&&BALL.world===world)bill(BALL.fx,BALL.fy,(bx,by)=>drawBall(ctx,bx,by,BALL.phase,BALL.t));
   bill(fx,fy,(bx,by)=>drawPerson(ctx,bx,by,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
   /* shared time-of-day wash (door spills are top-down-only for now) */
@@ -460,8 +461,147 @@ DOORSET.forEach(dch=>TILEDRAW[dch]=rc=>{const{sx,sy}=rc;
       ctx.globalAlpha=1;
     });
 if(typeof TILEART!=="undefined")Object.assign(TILEDRAW,TILEART);
+/* ---------- TILES: glyph-class metadata (IDEAS §10 step ①) ----------
+   What a tile IS — one row per glyph — so any camera derives drawing from meaning
+   instead of meaning living in one renderer's pixels. `lift` is how tall the tile
+   stands in front-profile view (facade px above its grid row); `kind` is meaning
+   for future renderers. Content packs override or add rows via TILEMETA. */
+const TILES={};
+SOLID.forEach(g=>TILES[g]={lift:7,kind:"prop"});
+Object.assign(TILES,{
+  "#":{lift:13,kind:"wall"},U:{lift:13,kind:"wall"},
+  B:{lift:13,kind:"facade"},Q:{lift:13,kind:"facade"},Z:{lift:13,kind:"facade"},
+  D:{lift:6,kind:"furniture"},K:{lift:6,kind:"furniture"},T:{lift:6,kind:"furniture"},
+  A:{lift:6,kind:"furniture"},S:{lift:9,kind:"furniture"},H:{lift:5,kind:"furniture"},
+  I:{lift:6,kind:"furniture"},W:{lift:8,kind:"appliance"},V:{lift:8,kind:"appliance"},
+  F:{lift:5,kind:"fence"},G:{lift:5,kind:"fence"},
+  C:{lift:3,kind:"marker"},X:{lift:6,kind:"obra"},
+  P:{lift:6,kind:"nature"},J:{lift:0,kind:"tree"}});
+if(typeof TILEMETA!=="undefined")Object.entries(TILEMETA).forEach(([g,m])=>TILES[g]={...(TILES[g]||{}),...m});
+const roofCol=g=>({"#":C.wallTop,U:C.wallTop,B:"#6E5A60",Q:"#7A3527",Z:"#385C36",D:C.deskTop,K:C.counter,
+  W:"#8E969E",V:"#23272C"})[g]||shadeHex(BASECOL[g]||(typeof MAPCOL!=="undefined"&&MAPCOL[g])||C.wall,-0.18);
+/* ---------- DECOR: instance metadata (IDEAS §10 step ①b) ----------
+   One-off place identity as content data: DECOR=[{world,x,y,deco,...}]. What used
+   to live only in hand-drawn pixels becomes something every camera can honor.
+   The engine ships a small vocabulary; packs add or override art via DECOART. */
+const DECODRAW={
+  sign:(sx,sy,d)=>{ctx.fillStyle="#3B3F45";ctx.fillRect(sx+14,sy+8,3,20);
+    ctx.fillStyle=d.c||"#C0392B";ctx.fillRect(sx+6,sy+4,20,10);
+    ctx.strokeStyle="rgba(15,12,20,.4)";ctx.lineWidth=1;ctx.strokeRect(sx+6,sy+4,20,10);
+    ctx.fillStyle="#F2E8D8";ctx.font="700 7px monospace";ctx.textAlign="center";
+    ctx.fillText(String(d.text||"").slice(0,4),sx+16,sy+11);ctx.textAlign="start";},
+  mural:(sx,sy)=>{["#C0392B","#E0A430","#2E5FA8","#7A9A4E"].forEach((cc,i)=>{
+    ctx.fillStyle=cc;ctx.fillRect(sx+3+i*7,sy+10,6,14);});},
+};
+if(typeof DECOART!=="undefined")Object.assign(DECODRAW,DECOART);
+const DECOS=(typeof DECOR!=="undefined"?DECOR:[]);
+function drawDecor(camX,camY){DECOS.forEach(d=>{if(d.world!==world)return;
+  const f=DECODRAW[d.deco];if(!f)return;
+  const sx=d.x*TS-camX,sy=d.y*TS-camY;
+  if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;f(sx,sy,d);});}
+/* temporary ground marks — dug holes and the other thing; they fade on their own */
+const DECALS=[];
+function drawDecals(camX,camY){const nw=Date.now();
+  for(let i=DECALS.length-1;i>=0;i--)if(DECALS[i].until<nw)DECALS.splice(i,1);
+  DECALS.forEach(dc=>{if(dc.world!==world)return;
+    const sx=dc.x*TS-camX,sy=dc.y*TS-camY;
+    if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
+    ctx.globalAlpha=Math.min(1,(dc.until-nw)/1500);
+    if(dc.kind==="hole"){ctx.fillStyle="#5A4630";ctx.beginPath();ctx.ellipse(sx+16,sy+18,8,5,0,0,7);ctx.fill();
+      ctx.fillStyle="#3E2F1E";ctx.beginPath();ctx.ellipse(sx+16,sy+18,5,3,0,0,7);ctx.fill();
+      ctx.fillStyle="#6E5638";[[6,10],[25,12],[10,25],[23,24]].forEach(p=>ctx.fillRect(sx+p[0],sy+p[1],2.5,2));}
+    else if(dc.kind==="poop"){ctx.font="11px serif";ctx.textAlign="center";ctx.fillText("💩",sx+16,sy+22);ctx.textAlign="start";}
+    ctx.globalAlpha=1;});}
+/* ---------- front-profile 2.5D (IDEAS §10 step ②) ----------
+   The owner's steer, verbatim: "show us a profile from the front." Square grid,
+   straight-on camera. Solids keep every painted pixel of their facades and grow a
+   roof strip upward; rows render back-to-front so the town gets true depth without
+   losing a door, an awning, or a fence. */
+function drawFront(){
+  const w=CW();
+  const camX=Math.max(0,Math.min(w.W*TS-VW,fx*TS+TS/2-VW/2));
+  const camY=Math.max(0,Math.min(Math.max(0,w.H*TS-VH),fy*TS+TS/2-VH/2));
+  camXg=camX;camYg=camY;
+  ctx.fillStyle=tc("#241F2E");ctx.fillRect(0,0,VW,VH);
+  const x0=Math.floor(camX/TS),y0=Math.floor(camY/TS),trees=[];
+  const queueCanopy=(cx2,cy2)=>trees.push([cx2,cy2]);
+  const yEnd=Math.min(w.H-1,y0+9),xEnd=Math.min(w.W-1,x0+11);
+  /* ground pass: floors, walkable art, and the shadow every facade casts */
+  for(let y=y0;y<=yEnd;y++)for(let x=x0;x<=xEnd;x++){
+    const ch=w.rows[y][x],sx=x*TS-camX,sy=y*TS-camY;
+    if(world==="st")ctx.fillStyle=tc((x+y)%2?"#C6C4BB":"#BFBDB4");
+    else if(world==="lo")ctx.fillStyle=tc((x+y)%2?"#D9DCE0":"#D1D5DA");
+    else ctx.fillStyle=tc((x+y)%2?C.floor:C.floorAlt);
+    ctx.fillRect(sx,sy,TS,TS);
+    const hsh=(x*374761393+y*668265263+world.charCodeAt(0)*69069)>>>0;
+    if((hsh&7)<2){ctx.globalAlpha=0.05;ctx.fillStyle="#000";ctx.fillRect(sx,sy,TS,TS);ctx.globalAlpha=1;}
+    if(hsh%11===3){ctx.globalAlpha=0.08;ctx.fillStyle="#FFF";ctx.fillRect(sx+(hsh>>3)%26+2,sy+(hsh>>5)%26+2,2,2);ctx.globalAlpha=1;}
+    if(!SOLID.has(w.grid[y][x])){const tf=TILEDRAW[ch];if(tf)tf({sx,sy,x,y,canopy:queueCanopy});}
+    if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
+      ctx.fillStyle="rgba(15,12,20,.16)";ctx.fillRect(sx,sy,TS,8);}
+  }
+  drawDecals(camX,camY);
+  /* depth pass: facades, decor and actors interleaved by row, back to front */
+  const R=[];
+  DECOS.forEach(d=>{if(d.world!==world)return;const f=DECODRAW[d.deco];if(!f)return;
+    const sx=d.x*TS-camX,sy=d.y*TS-camY;
+    if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
+    R.push({d:d.y+0.05,f:()=>f(sx,sy,d)});}); /* after its row's facade, before actors */
+  for(let y=Math.max(0,y0-1);y<=yEnd;y++)for(let x=x0;x<=xEnd;x++){
+    const gch=w.grid[y][x];if(!SOLID.has(gch))continue;
+    const ch=w.rows[y][x],sx=x*TS-camX,sy=y*TS-camY;
+    R.push({d:y,f:()=>{
+      const m=TILES[gch]||TILES[ch]||{lift:7},L=m.lift|0;
+      if(L>0){ctx.fillStyle=tc(roofCol(gch));ctx.fillRect(sx,sy-L,TS,L);
+        ctx.fillStyle="rgba(255,255,255,.14)";ctx.fillRect(sx,sy-L,TS,1.5);
+        ctx.fillStyle="rgba(15,12,20,.18)";ctx.fillRect(sx,sy-1,TS,1);}
+      const tf=TILEDRAW[ch]||TILEDRAW[gch];if(tf)tf({sx,sy,x,y,canopy:queueCanopy});
+    }});
+  }
+  const act=(gx,gy,fn)=>{const sx=gx*TS-camX,sy=gy*TS-camY;
+    if(sx<-TS||sy<-TS-16||sx>VW||sy>VH)return;R.push({d:gy+0.55,f:()=>fn(sx,sy)});};
+  w.npcs.forEach(n=>act(n.x,n.y,(sx,sy)=>{
+    drawPerson(ctx,sx,sy,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
+    if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
+      ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
+    else drawEmote(n,sx,sy);}));
+  PEERS.forEach(p=>{if(p.w!==world)return;
+    act(p.x,p.y,(sx,sy)=>{drawPerson(ctx,sx,sy,p.look||look,{dir:p.dir||"down"});
+      ctx.font="600 8px monospace";ctx.textAlign="center";
+      ctx.fillStyle="rgba(15,12,20,.75)";ctx.fillText(String(p.name||"").slice(0,12),sx+16.7,sy-1.3);
+      ctx.fillStyle="#EDE9F5";ctx.fillText(String(p.name||"").slice(0,12),sx+16,sy-2);
+      ctx.textAlign="start";});});
+  if(world==="hq")act(DOG.fx,DOG.fy,(sx,sy)=>drawDog(ctx,sx,sy));
+  if(world==="lc")act(CAT.fx,CAT.fy,(sx,sy)=>drawCat(ctx,sx,sy));
+  if(world==="st"){act(PIG.fx,PIG.fy,(sx,sy)=>drawPigeon(ctx,sx,sy));act(LORO.x,LORO.y,(sx,sy)=>drawLoro(ctx,sx,sy));}
+  CRIT.forEach(cr=>{if(cr.world!==world)return;
+    act(cr.fx,cr.fy,(sx,sy)=>{
+      if(cr.kind==="butterfly")drawButterfly(ctx,cr,sx,sy);
+      else if(cr.kind==="colibri")drawColibri(ctx,cr,sx,sy);
+      else if(cr.kind==="gato")drawGato(ctx,cr,sx,sy);
+      else if(cr.kind==="beagle")drawBeagle(ctx,cr,sx,sy);});});
+  if(BALL&&BALL.world===world)act(BALL.fx,BALL.fy,(sx,sy)=>drawBall(ctx,sx,sy,BALL.phase,BALL.t));
+  act(fx,fy,(sx,sy)=>drawPerson(ctx,sx,sy,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
+  R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
+  trees.forEach(([sx,sy])=>{ /* canopy pass, shared shape with top-down */
+    const sw=Math.sin(Date.now()/900+sx)*1.2,cxT=sx+16+sw,cyT=sy+6;
+    ctx.fillStyle=tc("#4E8A58");
+    ctx.beginPath();ctx.arc(cxT-9,cyT+3,8.5,0,7);ctx.fill();
+    ctx.beginPath();ctx.arc(cxT+9,cyT+3,8.5,0,7);ctx.fill();
+    ctx.beginPath();ctx.arc(cxT,cyT-3,10,0,7);ctx.fill();
+    ctx.fillStyle=tc("#639C6C");
+    ctx.beginPath();ctx.arc(cxT-4,cyT-1,6.5,0,7);ctx.fill();
+    ctx.beginPath();ctx.arc(cxT+6,cyT+1,5.5,0,7);ctx.fill();
+    ctx.fillStyle="#B08FE0";
+    [[-8,-4],[3,-8],[9,-1],[-2,2],[-12,4],[12,5]].forEach(p=>{
+      ctx.beginPath();ctx.arc(cxT+p[0],cyT+p[1],1.7,0,7);ctx.fill();});
+  });
+  drawAmbient(w,camX,camY);
+  drawDaylight(w,camX,camY);
+}
 function draw(){
   if(camMode==="iso"){drawIso();return;}
+  if(camMode==="front"){drawFront();return;}
   const w=CW();
   const camX=Math.max(0,Math.min(w.W*TS-VW,fx*TS+TS/2-VW/2));
   const camY=Math.max(0,Math.min(Math.max(0,w.H*TS-VH),fy*TS+TS/2-VH/2));
@@ -484,6 +624,7 @@ function draw(){
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
       ctx.fillStyle="rgba(15,12,20,.13)";ctx.fillRect(sx,sy,TS,6);}
   }
+  drawDecals(camX,camY);drawDecor(camX,camY);
   trees.forEach(([sx,sy])=>{ /* canopy pass: overhangs neighboring tiles, sways gently */
     const sw=Math.sin(Date.now()/900+sx)*1.2,cxT=sx+16+sw,cyT=sy+6;
     ctx.fillStyle=tc("#4E8A58");
@@ -527,6 +668,7 @@ function draw(){
     else if(cr.kind==="gato")drawGato(ctx,cr,sx,sy);
     else if(cr.kind==="beagle")drawBeagle(ctx,cr,sx,sy);
   });
+  if(BALL&&BALL.world===world)drawBall(ctx,BALL.fx*TS-camX,BALL.fy*TS-camY,BALL.phase,BALL.t);
   drawPerson(ctx,fx*TS-camX,fy*TS-camY,look,{dir,bob:moving?Math.sin(bob)*2:0,moving});
   drawAmbient(w,camX,camY);
   drawDaylight(w,camX,camY);
@@ -741,8 +883,11 @@ function critUpdate(dt,now){CRIT.forEach(cr=>{
   if(cr.moving){cr.mt+=dt/(cr.kind==="gato"?520:cr.kind==="butterfly"?300:160);
     if(cr.mt>=1){cr.moving=false;cr.fx=cr.x;cr.fy=cr.y;}
     else{cr.fx=cr.x-cr.dx*(1-cr.mt);cr.fy=cr.y-cr.dy*(1-cr.mt);}return;}
+  if(cr.task){if(world===cr.world)beagleStep(cr,now);
+    else{cr.task=null;if(BALL&&BALL.dog===cr)BALL=null;}return;}
   if(world!==cr.world){cr.next=now+1200;return;}
   if(now<cr.next)return;
+  if(cr.kind==="beagle"&&Math.random()<0.018){dogWhim(cr,now);return;}
   const r=Math.random(),idle=cr.kind==="gato"?0.55:0.3;
   if(r<idle){cr.sit=r<idle*0.7;cr.next=now+(cr.kind==="gato"?1500+Math.random()*3500:400+Math.random()*900);return;}
   cr.sit=false;
@@ -753,6 +898,87 @@ function critUpdate(dt,now){CRIT.forEach(cr=>{
   cr.x+=d[0];cr.y+=d[1];cr.moving=true;cr.mt=0;
   cr.next=now+(cr.kind==="gato"?900+Math.random()*2600:250+Math.random()*900);
 });}
+/* ---------- Sonny's program (IDEAS §11) ----------
+   Any beagle gets a real life: a ball he fetches exactly 4 times in 7 (a shuffled
+   cycle, so it feels like a dog and not a coin), a howl, a proper lie-down, holes,
+   and — infrequently — the other thing, which fades on its own until the day the
+   city hires janitors. All engine-generic: name a dog and the program is his. */
+let BALL=null; /* one ball at a time; the city is not a ball pit */
+const FETCH_ODDS=[1,1,1,1,0,0,0];
+function fetchRoll(cr){ /* a fresh shuffled 7-cycle per dog — streaks stay dog-like */
+  if(!cr.fseq||cr.fi>=7){cr.fseq=FETCH_ODDS.slice();
+    for(let i=6;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cr.fseq[i],cr.fseq[j]]=[cr.fseq[j],cr.fseq[i]];}
+    cr.fi=0;}
+  return !!cr.fseq[cr.fi++];}
+function taskFree(cr,x,y){const w=WORLDS[cr.world]; /* the home leash comes off on a job */
+  return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N");}
+function beagleStep(cr,now){
+  if(cr.task.phase==="go"&&!BALL){cr.task=null;return;}
+  const tgt=cr.task.phase==="go"?[BALL.tx,BALL.ty]:[px,py];
+  const d=Math.abs(cr.x-tgt[0])+Math.abs(cr.y-tgt[1]);
+  if(cr.task.phase==="go"&&d===0){BALL.phase="carried";BALL.dog=cr;cr.task.phase="return";return;}
+  if(cr.task.phase==="return"&&d<=1){
+    BALL=null;cr.task=null;cr.sit=true;cr.next=now+2400;cr.happyT=now+1800;
+    const L=T().fetchYes||[];if(L.length)toast("🎾 "+L[Math.floor(Math.random()*L.length)],2600);
+    return;}
+  cr.task.steps=(cr.task.steps||0)+1;
+  if(cr.task.steps>40){ /* wedged somewhere — a dog knows when to let go */
+    cr.task=null;if(BALL&&BALL.phase!=="carried")BALL.until=Date.now()+4000;else BALL=null;return;}
+  const dirs=[[1,0],[-1,0],[0,1],[0,-1]].filter(dd=>taskFree(cr,cr.x+dd[0],cr.y+dd[1]))
+    .sort((a,b)=>(Math.abs(cr.x+a[0]-tgt[0])+Math.abs(cr.y+a[1]-tgt[1]))
+               -(Math.abs(cr.x+b[0]-tgt[0])+Math.abs(cr.y+b[1]-tgt[1])));
+  if(!dirs.length){cr.task=null;if(BALL&&BALL.phase!=="carried")BALL.until=Date.now()+4000;return;}
+  const dd=dirs[0];
+  cr.dx=dd[0];cr.dy=dd[1];if(dd[0])cr.face=dd[0];
+  cr.x+=dd[0];cr.y+=dd[1];cr.moving=true;cr.mt=0;
+}
+function dogWhim(cr,now){ /* his own clock: mostly naps, sometimes opinions */
+  const r=Math.random();
+  if(r<0.40){cr.layT=now+3800+Math.random()*3200;cr.sit=false;cr.next=cr.layT;}
+  else if(r<0.70){cr.howlT=now+1900;cr.next=now+2600;
+    try{musChirp();}catch(e){}
+    if(Math.random()<0.5)toast("🐶 "+(T().howl||"AWOOOOO…"),1800);}
+  else if(r<0.95){cr.digT=now+1700;cr.next=now+2400;
+    const hx=cr.x,hy=cr.y,hw=cr.world;
+    setTimeout(()=>DECALS.push({world:hw,x:hx,y:hy,kind:"hole",until:Date.now()+34000}),1400);}
+  else{DECALS.push({world:cr.world,x:cr.x,y:cr.y,kind:"poop",until:Date.now()+45000});cr.next=now+3000;}
+}
+function ballUpdate(dt,now){
+  if(!BALL)return;
+  if(BALL.world!==world&&BALL.phase!=="carried"){BALL=null;return;} /* you left; the ball stays a memory */
+  if(BALL.phase==="fly"){BALL.t+=dt/480;
+    if(BALL.t>=1){BALL.t=1;BALL.fx=BALL.tx;BALL.fy=BALL.ty;BALL.phase="ground";
+      const dog=BALL.dog;
+      if(dog&&dog.world===world&&!dog.task){
+        if(fetchRoll(dog)){dog.task={type:"fetch",phase:"go"};dog.sit=false;dog.layT=0;dog.next=0;}
+        else{dog.sit=true;dog.face=Math.sign(BALL.tx-dog.x)||dog.face;dog.next=now+2600;
+          BALL.until=Date.now()+6000;
+          const L=T().fetchNo||[];if(L.length)toast("🐶 "+L[Math.floor(Math.random()*L.length)],2600);}}
+      else BALL.until=Date.now()+6000;}
+    else{BALL.fx=BALL.sx+(BALL.tx-BALL.sx)*BALL.t;BALL.fy=BALL.sy+(BALL.ty-BALL.sy)*BALL.t;}}
+  else if(BALL.phase==="ground"&&BALL.until&&Date.now()>BALL.until)BALL=null;
+  else if(BALL.phase==="carried"&&BALL.dog){BALL.fx=BALL.dog.fx+0.28*BALL.dog.face;BALL.fy=BALL.dog.fy-0.12;}
+}
+function drawBall(g,sx,sy,phase,t){
+  const arc=phase==="fly"?Math.sin(Math.PI*Math.min(1,t))*16:0;
+  const cx=sx+16,cy=sy+20-arc;
+  if(phase!=="carried"){g.fillStyle="rgba(0,0,0,.15)";g.beginPath();g.ellipse(cx,sy+24,3.4,1.4,0,0,7);g.fill();}
+  g.fillStyle="#CBE04A";g.beginPath();g.arc(cx,cy,3.4,0,7);g.fill();
+  g.strokeStyle="#F4F1EA";g.lineWidth=0.9;
+  g.beginPath();g.arc(cx-1.4,cy,3.1,-1.1,1.1);g.stroke();
+  g.beginPath();g.arc(cx+1.4,cy,3.1,Math.PI-1.1,Math.PI+1.1);g.stroke();
+}
+$("ball").addEventListener("click",()=>{
+  if(BALL||petTarget!=="beagle"||!petCrit||petCrit.task)return;
+  const w=CW(),opts=[];
+  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
+    const d=Math.abs(x-px)+Math.abs(y-py);
+    if(d>=2&&d<=4&&!SOLID.has(w.grid[y][x])&&w.grid[y][x]!=="N")opts.push([x,y]);}
+  if(!opts.length){toast(T().ballNoRoom||"…",1800);return;}
+  const [tx,ty]=opts[Math.floor(Math.random()*opts.length)];
+  BALL={world,sx:px,sy:py,fx:px,fy:py,tx,ty,t:0,phase:"fly",dog:petCrit};
+  $("ball").hidden=true;
+});
 function drawButterfly(g,cr,sx,sy){
   const t2=Date.now(),fl=Math.abs(Math.sin(t2/90)),bobY=Math.sin(t2/300+cr.home[0])*2.5;
   const cx=sx+16,cy=sy+13+bobY;
@@ -782,22 +1008,38 @@ function drawColibri(g,cr,sx,sy){
   g.restore();
 }
 function drawBeagle(g,cr,sx,sy){ /* a lemon beagle: white coat, lemon saddle, floppy ears, working tail */
-  const cx=sx+16,wag=Math.sin(Date.now()/130)*2.4,lemon="#E8C46A",white="#F6F2E8";
+  const nw=performance.now(),lay=cr.layT>nw,howl=cr.howlT>nw,dig=cr.digT>nw,happy=cr.happyT>nw;
+  const cx=sx+16,wag=Math.sin(Date.now()/(happy?70:130))*(happy?3.4:2.4),lemon="#E8C46A",white="#F6F2E8";
+  const dy=lay?3:0,hy=howl?-3:0;
   g.save();g.translate(cx,0);g.scale(cr.face,1);g.translate(-cx,0);
   g.fillStyle="rgba(0,0,0,.15)";g.beginPath();g.ellipse(cx,sy+27,7,2.8,0,0,7);g.fill();
-  g.strokeStyle=white;g.lineWidth=2.4;g.lineCap="round"; /* tail, always going */
-  g.beginPath();g.moveTo(cx-7,sy+19.5);g.quadraticCurveTo(cx-11,sy+15+wag*0.5,cx-10+wag,sy+11);g.stroke();
-  g.fillStyle=white;g.beginPath();g.roundRect(cx-7.5,sy+17,14,8,4);g.fill();
-  g.fillStyle=lemon;g.beginPath();g.roundRect(cx-5,sy+16.5,8,4.5,3);g.fill(); /* saddle */
+  g.strokeStyle=white;g.lineWidth=2.4;g.lineCap="round"; /* tail, always going (slower when resting) */
+  const wg=lay?wag*0.4:wag;
+  g.beginPath();g.moveTo(cx-7,sy+19.5+dy);g.quadraticCurveTo(cx-11,sy+15+dy+wg*0.5,cx-10+wg,sy+11+dy);g.stroke();
+  g.fillStyle=white;g.beginPath();g.roundRect(cx-7.5,sy+17+dy,14,8,4);g.fill();
+  g.fillStyle=lemon;g.beginPath();g.roundRect(cx-5,sy+16.5+dy,8,4.5,3);g.fill(); /* saddle */
   g.fillStyle=white;
-  if(!cr.sit){g.fillRect(cx-6,sy+24.5,2.2,3.2);g.fillRect(cx+3,sy+24.5,2.2,3.2);}
-  g.beginPath();g.arc(cx+6.5,sy+16,4.6,0,7);g.fill(); /* head */
+  if(!cr.sit&&!lay){g.fillRect(cx-6,sy+24.5,2.2,3.2);g.fillRect(cx+3,sy+24.5,2.2,3.2);}
+  if(lay)g.fillRect(cx+2,sy+24.8,7.5,2.2); /* front legs stretched out, professionally */
+  if(dig){ /* paws at the ground, dirt flying */
+    g.fillRect(cx+7,sy+22+Math.sin(Date.now()/70)*2,3,4);
+    g.fillStyle="#6E5638";[[13,17],[16,13],[14,21]].forEach((p,i)=>{
+      g.fillRect(cx+p[0]+Math.sin(Date.now()/90+i*2)*2.5,sy+p[1],2,2);});
+    g.fillStyle=white;}
+  g.beginPath();g.arc(cx+6.5,sy+16+dy+hy,4.6,0,7);g.fill(); /* head */
   g.fillStyle=lemon; /* floppy ear */
-  g.beginPath();g.roundRect(cx+2.2,sy+13.2,3.4,7.5,2);g.fill();
+  g.beginPath();g.roundRect(cx+2.2,sy+13.2+dy+hy,3.4,7.5,2);g.fill();
   g.fillStyle="#26202B";
-  g.fillRect(cx+6.8,sy+14.6,1.2,1.2); /* eye */
-  g.beginPath();g.arc(cx+10.6,sy+17.2,1.3,0,7);g.fill(); /* nose */
-  g.restore();
+  if(lay&&!howl)g.fillRect(cx+6.2,sy+15.2+dy,1.9,0.7); /* eyes closed — do not disturb */
+  else g.fillRect(cx+6.8,sy+14.6+dy+hy,1.2,1.2); /* eye */
+  if(howl)g.beginPath(),g.arc(cx+9.6,sy+13.4+dy+hy,1.3,0,7),g.fill(); /* nose to the sky */
+  else g.beginPath(),g.arc(cx+10.6,sy+17.2+dy,1.3,0,7),g.fill(); /* nose */
+  g.restore(); /* text outside the mirror so it never flips */
+  g.textAlign="center";
+  if(howl){g.fillStyle="#8B6FC8";g.font="9px serif";
+    g.fillText("♪",cx+3,sy+5+Math.sin(Date.now()/200)*2);}
+  if(happy){g.fillStyle="#C4586B";g.font="8px serif";g.fillText("❤",cx-5,sy+9);}
+  g.textAlign="start";
 }
 function drawGato(g,cr,sx,sy){ /* the street cat: Canela's silhouette, alley palette, no collar — yet */
   const cx=sx+16,sw=Math.sin(Date.now()/300+7);
@@ -961,7 +1203,7 @@ function loop(ts){
     }
     else{const[dx,dy]=DIRS[dir];fx=px-dx*(1-mt);fy=py-dy*(1-mt);}
   }else tryStep();
-  dogUpdate(dt,ts);catUpdate(dt,ts);pigUpdate(dt,ts);loroTick(ts);critUpdate(dt,ts);fredCheck();
+  dogUpdate(dt,ts);catUpdate(dt,ts);pigUpdate(dt,ts);loroTick(ts);critUpdate(dt,ts);ballUpdate(dt,ts);fredCheck();
   if(!$("world").hidden)draw();
   requestAnimationFrame(loop);
 }
@@ -1012,6 +1254,9 @@ function fredCheck(){ /* now the generic animal-interaction check: every creatur
   }
   petTarget=tgt;$("treat").hidden=!tgt;
   if(tgt)$("treat").textContent=label;
+  const ballOK=tgt==="beagle"&&!BALL&&petCrit&&!petCrit.task;
+  $("ball").hidden=!ballOK;
+  if(ballOK)$("ball").textContent=T().ballLb;
 }
 $("treat").addEventListener("click",()=>{
   if(petTarget==="fred"){
@@ -1028,7 +1273,13 @@ $("treat").addEventListener("click",()=>{
     const L=T().pigeon;toast("❤ "+L[Math.floor(Math.random()*L.length)],2000);}
   else if(petTarget==="loro"){
     const L=T().loro;toast("🦜 "+L[Math.floor(Math.random()*L.length)],2200);}
-  else if(petTarget==="gato"||petTarget==="beagle"){
+  else if(petTarget==="beagle"){ /* a treat: the tail achieves liftoff */
+    const g2=petCrit;
+    if(g2){g2.sit=true;g2.next=performance.now()+3200;g2.happyT=performance.now()+2200;g2.layT=0;}
+    const L=(g2&&g2.egg&&EGGSAFE[g2.egg]&&Math.random()<0.4)?EGGSAFE[g2.egg].lines[lang]
+           :(T().beagleTreat||T().gato);
+    toast("🦴 "+L[Math.floor(Math.random()*L.length)],2400);}
+  else if(petTarget==="gato"){
     const g2=petCrit;
     if(g2){g2.sit=true;g2.next=performance.now()+3200;}
     const L=(g2&&g2.egg&&EGGSAFE[g2.egg])?EGGSAFE[g2.egg].lines[lang]:T().gato;
@@ -1516,7 +1767,7 @@ function applyLang(){
   $("lbTheme").textContent=t.lbTheme;
   $("lbCam").textContent=t.lbCam;
   document.querySelectorAll("#camRow button").forEach(b=>{
-    b.textContent=b.dataset.cam==="top"?t.camTop:t.camIso;
+    b.textContent=b.dataset.cam==="top"?t.camTop:b.dataset.cam==="front"?(t.camFront||"⬆ 2.5D"):t.camIso;
     b.setAttribute("aria-pressed",b.dataset.cam===camMode?"true":"false");});
   $("lbMusic").textContent=t.lbMusic;
   document.querySelectorAll("#tuneRow button").forEach((b,i)=>{

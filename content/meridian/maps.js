@@ -145,3 +145,9 @@ const CRITTERS=[
  {kind:"gato",world:"ex",x:20,y:5,c:"#8B8F98"},
  {kind:"gato",world:"me",x:15,y:9,c:"#7A6A55"}   /* Frijol — the bodega cat, pettable */
 ];
+/* one-off place identity as data (IDEAS §10): the engine's DECODRAW vocabulary
+   (sign, mural) renders these in every camera, so no landmark ever squares off.
+   Packs can add art via DECOART. */
+const DECOR=[
+ {world:"st",x:20,y:0,deco:"mural"}   /* Nacho's mural on the avenue wall */
+];

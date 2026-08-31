@@ -321,6 +321,21 @@ Stardew school):
 ② front-profile renderer as a third camera option → ③ owner picks the default
 with AJ → ④ retire or polish diamond-iso accordingly.
 
+**①② SHIPPED 2026-08-31 (mq-v29):** `TILES` glyph-metadata table in the engine
+(every solid glyph carries `{lift,kind}`; content overrides via `TILEMETA`),
+`DECOR` instance seam (content rows `{world,x,y,deco}` drawn by the engine's
+`DECODRAW` vocabulary — sign, mural — extendable via `DECOART`; Nacho's mural on
+the avenue is the first), and `drawFront()` — the front-profile camera as a third
+Settings option (`mqcam:"front"`). Square grid, straight-on view; solids keep every
+painted facade pixel and grow a per-glyph roof strip; rows render back-to-front so
+walls occlude what stands behind them; decor and actors interleave by row. Doors,
+awnings, fences and the trolley stop all read exactly as drawn. Painting works in
+front mode (tap→tile math is unchanged). Smoke covers: TILES rows for all solids,
+a front-camera frame, persistence, DECOR art references.
+**Remaining: ③ owner + AJ pick the default camera, ④ iso verdict**, and a future
+art wave if wanted: per-`kind` facade treatments (e.g. windows lit at night on
+`facade` tiles) now trivial because kind is data.
+
 **v1 shipped:** `drawIso()` in the engine — projection core, painter''s-sort depth,
 floors as diamonds with inlays (water, rugs, blooms, grass), solids as extruded
 blocks colored from BASECOL/MAPCOL with per-glyph heights, jacarandas with canopy,
@@ -370,7 +385,19 @@ compounding.
 
 ---
 
-## 11. Sonny's program (owner-signed wishes, 2026-08-31 — future build)
+## 11. Sonny's program (owner-signed wishes, 2026-08-31 — **SHIPPED v1 2026-08-31, mq-v29**)
+
+**Shipped:** engine-generic for every beagle (any dog named into the world gets it).
+🎾 Throw-the-ball button next to the treat button when standing by a dog; he fetches
+**exactly 4 of every 7 throws** via a shuffled per-dog 7-cycle (`fetchRoll` —
+smoke-tested at 4/7 and 8/14); a miss is canon: he looks at the ball, looks at you,
+and sits. Fetch runs a real task loop (leash off, greedy pathing, gives up gracefully
+if wedged). On his own clock: lies down (eyes closed, tail slows), howls (♪ + AWOO
+toast + a real note through the music engine), digs (dirt flies, leaves a hole decal
+that fades in ~34s), and infrequently 💩 (fades in ~45s — the janitor business quest
+stays open for Don Güero). Treats get dedicated bilingual lines and a visible tail
+liftoff. Ground decals are a generic engine system (`DECALS`), drawn in top-down and
+front cameras. Original wish list below, kept for the record:
 
 Frederick's beagle colleague earns a real life. All data-driven (CRITTERS gains
 behavior flags), all engine-generic so any dog can opt in:

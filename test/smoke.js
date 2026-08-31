@@ -566,6 +566,43 @@ const CANDIDATES = [
   });
   if (!boarded.cont || !boarded.label.includes('Traveler')) fails.push('boarding did not restore the save: ' + JSON.stringify(boarded));
 
+  // ---- 6. Front-profile 2.5D, TILES metadata, and Sonny's program ----
+  const front = await page.evaluate(() => {
+    const out = {};
+    // TILES: every solid glyph (content SOLIDX included) carries a numeric lift
+    out.tilesMissing = [...SOLID].filter(g => !TILES[g] || typeof TILES[g].lift !== 'number');
+    // the front camera renders a frame without throwing, and the toggle persists
+    try { camSet('front'); draw(); out.frontDraw = true; } catch (e) { out.frontDraw = String(e); }
+    out.camStored = localStorage.getItem('mqcam');
+    try { camSet('top'); draw(); } catch (e) { out.frontDraw = 'top restore threw: ' + e; }
+    // the fetch cycle: exactly 4 of every 7, cycle after cycle
+    const dog = {};
+    let a = 0; for (let i = 0; i < 7; i++) a += fetchRoll(dog) ? 1 : 0;
+    let b = 0; for (let i = 0; i < 7; i++) b += fetchRoll(dog) ? 1 : 0;
+    out.fetch7 = a; out.fetch14 = a + b;
+    // ground decals fade on their own
+    const n0 = DECALS.length;
+    DECALS.push({ world, x: 1, y: 1, kind: 'hole', until: Date.now() - 10 });
+    drawDecals(0, 0);
+    out.decalPruned = DECALS.length === n0;
+    // every DECOR row points at art the engine (or the pack) actually has
+    out.decorOk = typeof DECOR === 'undefined' || DECOR.every(d => !!DECODRAW[d.deco]);
+    // the ball button exists and Sonny's strings are in both languages
+    out.ballBtn = !!document.getElementById('ball');
+    out.langOk = ['ballLb', 'fetchYes', 'fetchNo', 'howl', 'beagleTreat', 'camFront']
+      .every(k => UI.en[k] && UI.es[k]);
+    return out;
+  });
+  if (front.tilesMissing.length) fails.push('TILES rows missing for solid glyphs: ' + front.tilesMissing.join(','));
+  if (front.frontDraw !== true) fails.push('front camera draw threw: ' + front.frontDraw);
+  if (front.camStored !== 'front') fails.push('front camera choice not persisted: ' + front.camStored);
+  if (front.fetch7 !== 4) fails.push(`fetch cycle: ${front.fetch7}/7 fetched, expected exactly 4`);
+  if (front.fetch14 !== 8) fails.push(`fetch across two cycles: ${front.fetch14}/14, expected 8`);
+  if (!front.decalPruned) fails.push('expired ground decal not pruned');
+  if (front.decorOk !== true) fails.push('DECOR references unknown deco art');
+  if (!front.ballBtn) fails.push('ball button missing from the HUD');
+  if (!front.langOk) fails.push('Sonny/camera strings missing in EN or ES');
+
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);

@@ -90,15 +90,18 @@ as a per-client profile. Build them only when a real engagement needs them.
 signed-not-built gap (open-city refactor + per-business hearts) → then the four
 business packs.** Item 3 below is therefore the head of the queue.
 
-3. **Graphics next: the front-profile pivot** (owner-redirected 2026-08-31, plans
-   in IDEAS §10): ① consolidate TILES glyph metadata + DECOR instance metadata
-   (describe the world, don't just draw it), ② build the FRONT-PROFILE 2.5D
-   renderer (square grid, facades facing the player — keeps all existing detail;
-   what the owner actually wants instead of diamond-iso), ③ camera-rotate +
-   wall-fade occlusion fallbacks, ④ owner+AJ pick the default. (Emote-in-iso
-   regression: FIXED same session it was reported — drawEmote is shared by both cameras.)
-3b. **Sonny's program** (IDEAS §11): ball fetch at exactly 4/7, feed/treats,
-   howl, lay down, dig, the disappearing 💩, and the future janitor practice pack.
+3. **Graphics: the front-profile pivot — ①② SHIPPED 2026-08-31 (mq-v29).**
+   `TILES` glyph metadata + `DECOR` instance seam + the front-profile 2.5D camera
+   are live as a third Settings → Camera option (details in IDEAS §10). REMAINING:
+   ③ occlusion fallbacks only if real play needs them (lifts are modest; nothing
+   hid in testing), ④ **owner + AJ pick the default camera** — then polish or
+   retire diamond-iso accordingly. A per-`kind` facade art wave (lit windows at
+   night on `facade` tiles) is now cheap if wanted. (Emote-in-iso regression:
+   FIXED same session it was reported — drawEmote is shared by all cameras.)
+3b. **Sonny's program — SHIPPED v1 2026-08-31 (mq-v29,** IDEAS §11): 🎾 ball with
+   fetch at exactly 4/7 (shuffled per-dog cycle), treats with tail liftoff, howl,
+   lay down, dig holes, infrequent disappearing 💩 (`DECALS` engine seam). The
+   janitor business/practice pack stays a future Don Güero phase.
 4. **AJ's picks**: fandom eggs round 2 + mechanics (IDEAS §9 — Grogu lunchbox,
    birthday calendar magic, streak memory…). Blocked on AJ choosing.
 5. **Music v2** (IDEAS §8) when music gets its own session.
@@ -106,8 +109,9 @@ business packs.** Item 3 below is therefore the head of the queue.
 
 ## State snapshot (2026-08-31)
 
-- `main` = deployed through the Phase 1 ledger signing. The El Mercado build lives on
-  `claude/don-guero-bct8tx` (sw `mq-v17`, smoke green) — merge when the owner says.
+- `main` = deployed through `mq-v29`: the stakes/grade layer (reviewed & merged, see
+  REVIEW-ME.md), the front-profile 2.5D camera + TILES/DECOR seams, and Sonny's
+  program v1. The don-guero branch is fully merged; nothing is waiting on a branch.
 - Default-branch setting on GitHub still points at an old `claude/...` branch —
   owner intends to flip it to `main` (repo Settings → General → Default branch).
 - Engine/content split holds. Seams: `CRITTERS`, `CHILL`, `EGGS`, `CHATTER`, `MUSIC`,
