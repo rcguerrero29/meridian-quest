@@ -48,6 +48,18 @@ for the palette (Teal `#0E4F4A`, Cream `#F5F1E8`, Coral `#E07856`), the fonts (A
 Display / Aptos), the tagline and the footer, mirroring the `ai-audit` skill's locked
 brand. Never hand-edit anything in `branded/`.
 
+## A worked example
+
+[`example/`](example/) holds a fictional discovery call (Rivera Dental — invented,
+not a real client) and the Recommendation Memo filled from it. It exists to show two
+things the blank template cannot: how the client's own words carry into "What you
+asked for", and what it looks like to **leave a blank blank**. The example's cost
+figures are `___` because the client said "don't quote me" — that is the correct
+output, not a gap to fill in later.
+
+Generated with the `/deliverable` skill (`.claude/skills/deliverable/`), which fills
+any of these five from a transcript, a file, or pasted notes.
+
 ## How to use them at work
 
 Start at **02** for a new engagement — a one-page recommendation is the cheapest thing

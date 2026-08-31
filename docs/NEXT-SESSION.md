@@ -71,6 +71,14 @@ explicitly revisable after real play, and every piece must ship as a content-pac
 so **AJ's game can swap or drop it**. Deliverable templates for real client work live
 in `docs/templates/` (written; only the decision log is game-generated so far).
 
+**Org-level reuse (owner-approved 2026-08-31).** `/deliverable` is BUILT
+(`.claude/skills/deliverable/`) — fills any of the five `docs/templates/` from a
+transcript, branded or neutral, sister to `ai-audit` and deliberately NOT merged with
+it (that skill is brand-locked with a frozen regression snapshot; they share
+`brand.yml` and nothing else). Two further reuse candidates were recommended and NOT
+built: the planner-ledger pattern generalized to client engagements, and `OWNER.md`
+as a per-client profile. Build them only when a real engagement needs them.
+
 **Owner-set build order (2026-08-31): front-profile 2.5D first → close the
 signed-not-built gap (open-city refactor + per-business hearts) → then the four
 business packs.** Item 3 below is therefore the head of the queue.
