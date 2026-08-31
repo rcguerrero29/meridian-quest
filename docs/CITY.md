@@ -54,6 +54,14 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 - 2026-08-30 — Townsfolk: Nacho (muralist) and Yola (paletera) moved in; owner can
   create up to 12 chill characters (admin 🧍); 39 name eggs live.
 
+## Growth history (append)
+
+- 2026-08-31 — **World upgrade wave 1**: draw() tile chain became the TILEDRAW
+  registry (28 glyphs + doors as data; content packs override via TILEART) — the
+  entities-as-data law now covers ART. Visible: per-tile floor variation, walls cast
+  shadows, walk-cycle arm swing, per-person blinking, doors glow underneath. Plus:
+  /nacho story director, tune picker, NPC activity emotes, NPC edit panel.
+
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
 - ✅ **El Mercado** — signed 2026-08-31. Full build + engine seam, AI PM pack.

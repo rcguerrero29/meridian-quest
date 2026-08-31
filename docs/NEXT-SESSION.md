@@ -24,10 +24,11 @@ current: each session rewrites the queue before signing off.)*
    signed (AI PM first, then automation consultant, ops analyst, implementation
    lead, prompt engineer) — Phase 2 picks the next business off the brainstorm list
    in CITY.md and the next role down.
-3. **Graphics prep refactor** (IDEAS §7 steps 1-2): tile-renderer registry +
-   frame-clock consolidation. Now carries the queued **full `TILES` table** — Phase 1
-   moved doors, solids and map colours into content (DOORS/SOLIDX/MAPCOL); the
-   per-glyph registry finishes the job.
+3. **Graphics: waves 2+** — the registry refactor and wave 1 SHIPPED 2026-08-31
+   (TILEDRAW registry + TILEART content override, floor variation, wall-cast
+   shadows, walk-cycle arms, blinking, door under-glow). Remaining: frame-clock
+   consolidation, per-glyph solid/colour in one TILES table, time-of-day lighting
+   overlay (IDEAS §7 waves 2-3), palette wardrobe.
 4. **AJ's picks**: fandom eggs round 2 + mechanics (IDEAS §9 — Grogu lunchbox,
    birthday calendar magic, streak memory…). Blocked on AJ choosing.
 5. **Music v2** (IDEAS §8) when music gets its own session.
