@@ -34,6 +34,19 @@ preference that outlives one phase; cite the date and their words.
     mode at runtime so hearts can be brought back for a challenge without a rebuild.
   - **Nothing a stakes mode does may take progress, the city, or the save.** That
     rule outranks the stakes layer.
+  - **No stakes mode may harm a character or their business.** *(2026-08-31, from the
+    owner considering and rejecting a bankruptcy mode: "i could think of a mode where
+    you can bankrupt somone.. lol but no thats stressful.")* Doña Chelo does not go
+    under because the player made a bad call. This is "the city never resets" pointed
+    at people instead of buildings, and it is a law precisely because bankruptcy is
+    realistic — a future session could talk itself into it without this line.
+  - **`budget` is ARCHITECTURE ONLY — do not implement it.** *(2026-08-31: "for now
+    lets keep it theoretical and only in architecture.")* It is named in the design so
+    the seam exists if a more realistic teaching scenario is ever wanted; it is
+    denominated in **money**, because "this costs more than it saves" is already the
+    lesson in *The Monday number* and money makes that arithmetic visible instead of
+    narrated. Until the owner asks: no UI, no numbers, no engine code. `none` is the
+    default and `hearts` is the only other mode with an implementation to toggle to.
 - **Every business is Hispanic-owned** and doubles as a practice pack for an AI role
   the owner wants to be hired in.
 - **Role order (signed 2026-08-31):** 1 AI product manager *(spent on El Mercado)*,

@@ -38,11 +38,11 @@ knowing early rather than discovering in month two.
 
 **`[stakes]` — "should anything ever go wrong?"** The engine is getting a stakes layer
 so this is a setting, not an argument: `none` (wander freely), `hearts` (lives), or
-`budget` (something you spend). Declared per game AND per district, so a relaxed town
+`budget` (money you spend — designed but deliberately not built). Declared per game AND per district, so a relaxed town
 can still hold one scored mini-game. Underneath any mode, every quest earns a
 **grade** — first try / took a retry / took a few — that never blocks anything and is
 never switched off. **Nothing any stakes mode does can take your progress, your town,
-or your save.** AJ picks her mode; Meridian picks its own; neither constrains the other.
+or your save — and nothing can hurt a character or ruin their business.** AJ picks her mode; Meridian picks its own; neither constrains the other.
 
 ## What is already portable, at no cost
 
