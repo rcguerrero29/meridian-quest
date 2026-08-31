@@ -20,8 +20,20 @@ preference that outlives one phase; cite the date and their words.
   save. *(2026-08-31)*
 - **Weeks are retired.** Districts open and stay open. The city has no credits — it
   grows. Weeks One and Two remain in the fiction as written. *(2026-08-31)*
-- **Hearts** are the grade on a business's ending, scoped per business, and never
-  block anything. *(2026-08-31 — signed, not yet built)*
+- **Stakes are a pluggable layer; the grade is always on underneath.** *(2026-08-31,
+  superseding the earlier hearts rule.)* Owner correction, verbatim: *"i didnt say
+  remove the hearts my friend, but ok for now. make it a toggle in admin mode in case
+  we can bring back for mini games."*
+  - **The grade is permanent and separate.** Every quest earns a mark when it is
+    answered — first try / took a retry / took a few. Marks make a business's grade,
+    which picks its ending. The grade never blocks anything and is never turned off:
+    it is what the decision report is made of.
+  - **Stakes sit on top and are optional.** `none` (the open-world default),
+    `hearts`, or `budget`. Declared in content, per pack and per district, so a
+    stakes-free town can still contain a scored mini-game. Admin mode toggles the
+    mode at runtime so hearts can be brought back for a challenge without a rebuild.
+  - **Nothing a stakes mode does may take progress, the city, or the save.** That
+    rule outranks the stakes layer.
 - **Every business is Hispanic-owned** and doubles as a practice pack for an AI role
   the owner wants to be hired in.
 - **Role order (signed 2026-08-31):** 1 AI product manager *(spent on El Mercado)*,
@@ -32,6 +44,19 @@ preference that outlives one phase; cite the date and their words.
 - **EN/ES in lockstep**, retry-until-correct, saves stay on-device.
 - **Fun is a requirement**, not a nice-to-have.
 - **HQ is the onboarding.** No separate tutorial or staging area. *(2026-08-31)*
+
+## Asking someone what game they want
+
+`/game-brief` builds a tailored questionnaire for anyone who wants a custom game —
+their world, cast, loop, feel, stakes and taste — plus a map of which files each
+answer moves. Reference implementation: `docs/for-aj/`. Owner's ask: *"we can wrap a
+skill around this aj exercise for best/recommended questions for custom games
+questionnaires."*
+
+The rule that skill carries and that applies here too: **do not ask about a mechanic,
+ask about a feeling.** "Do you want hearts?" is the wrong question; "should anything
+ever go wrong, and is there a mini-game where stakes would be fun?" is the right one.
+Asking it the wrong way is how the hearts confusion happened in the first place.
 
 ## The shape of the game (signed 2026-08-31, with caveats)
 

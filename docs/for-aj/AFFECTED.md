@@ -19,7 +19,7 @@ copy any file out of `content/meridian/` and edit it freely.
 | `[story]` | 9 | A `STORY.md` for her game; quest and epilogue text | **Medium.** `/nacho` plans this |
 | `[art]` | 2, 10 | `THEMES` (palettes), `MUSIC`, ambient particles, `CRITTERS`, tile art in `TILEDRAW` | **Small–medium.** Palettes are data; new tile art is a small function each |
 | `[loop]` | 3, 6, 10, 11 | Possibly engine — this is the one place an answer might reach past content | **Depends.** Flagged loudly on purpose |
-| `[grade]` | 11, 12 | Engine: hearts. **Currently unresolved for Meridian too** — see the note below | **Shared decision** |
+| `[stakes]` | 11, 12, 12b | `content/<aj>/config.js` — `STAKES` mode: `none` / `hearts` / `budget`, per pack and per district | **Small once the layer is built.** Picking a mode is one line |
 | `[eggs]` | 13, 14 | `content/<aj>/npcs.js` — `EGGS`. Jokes already written in `docs/IDEAS.md` §9 | **Tiny.** Picking from the list is nearly free |
 | `[i18n]` | 16 | Whether `quests.es.js` exists and whether `strings.js` carries an `es` block. The test suite checks EN/ES stay matched | **Doubles the writing.** Nothing else |
 | `[career]` | 8 | The decision-report export and `docs/templates/`. **Fully removable** — drop it and no other feature breaks | **Free to skip** |
@@ -36,10 +36,13 @@ the engine does not have (things changing while you're away). Not hard, but it i
 engine work, and it would be shared with Meridian rather than hers alone. Worth
 knowing early rather than discovering in month two.
 
-**`[grade]` — "should anything ever go wrong?"** Meridian has an unresolved version of
-this exact question right now. The game currently counts hearts like lives, and the
-written plan says they should only be a grade. AJ's answer and Meridian's should be
-decided together, because they are the same decision and they live in the same engine.
+**`[stakes]` — "should anything ever go wrong?"** The engine is getting a stakes layer
+so this is a setting, not an argument: `none` (wander freely), `hearts` (lives), or
+`budget` (something you spend). Declared per game AND per district, so a relaxed town
+can still hold one scored mini-game. Underneath any mode, every quest earns a
+**grade** — first try / took a retry / took a few — that never blocks anything and is
+never switched off. **Nothing any stakes mode does can take your progress, your town,
+or your save.** AJ picks her mode; Meridian picks its own; neither constrains the other.
 
 ## What is already portable, at no cost
 

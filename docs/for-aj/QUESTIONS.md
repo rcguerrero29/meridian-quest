@@ -62,9 +62,15 @@ a much better guide than the word "cozy."
 Genuinely useful. Timers? Losing progress? Being told you failed? Too much reading?
 Not knowing what to do? Say the thing that annoys you.
 
-**12. Should anything ever go wrong?** `[grade]`
+**12. Should anything ever go wrong?** `[stakes]`
 Meridian is going the "nothing bad ever happens" route — you can get an answer wrong
 and nothing is taken from you. Do you want the same, or do you want *some* stakes?
+
+**12b. Is there a mini-game or challenge inside it where stakes WOULD be fun?** `[stakes]`
+These are separate questions and most people want both once asked. A town can be
+completely relaxed to wander around and still have one scored thing in it — a race, a
+bake-off, a timed delivery, a quiz. Stakes can be lives, or a budget you spend, or a
+clock. Or none at all, anywhere.
 
 ## Your shows
 
