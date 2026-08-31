@@ -108,7 +108,39 @@ const chClosed=c=>c.quests.filter(i=>done.has(i)).length>=c.need;
    A chapter ends two ways: you meet its `need`, or you run out of hearts. Either way
    it ends — it never resets. Whatever you left unanswered stays unanswered, and that
    is the whole consequence: the city is never taken away. */
-const chDue=()=>{const L=CHS();return chSeen<L.length&&(hearts<=0||chClosed(L[chSeen]));};
+/* ---------- stakes and the grade ----------
+   The GRADE is always on: every attempt at a quest is counted, the counts make a
+   district's grade, and the grade picks which ending it plays. It never blocks.
+   STAKES are a separate optional layer on top — `none` by default. Neither may take
+   progress, the city or the save, and neither may harm a character (docs/OWNER.md). */
+const STK=()=>(typeof STAKES!=="undefined"&&STAKES)?STAKES:{mode:"none",hearts:3};
+let stakesAdmin=null;                       /* admin override, per device, never in the save */
+try{const m=localStorage.getItem("mqstakes");if(m)stakesAdmin={mode:m};}catch(e){}
+function stakesCfg(){
+  if(stakesAdmin)return{...STK(),...stakesAdmin};
+  const L=CHS(),c=L[Math.min(chSeen,L.length-1)];
+  return (c&&c.stakes)?{...STK(),...c.stakes}:STK();
+}
+/* `budget` is declared in content but not implemented — it reads as `none` until built */
+const stakesMode=()=>{const m=stakesCfg().mode;return m==="hearts"?"hearts":"none";};
+const livesOn=()=>stakesMode()==="hearts";
+const startHearts=()=>stakesCfg().hearts||3;
+/* marks: quest index -> attempts taken. 1 = first try. This is the grade's raw data. */
+let marks={};
+/* a district's grade out of 3, from how many of its answered quests landed first try */
+function gradeOf(c){
+  const ans=(c&&c.quests||[]).filter(i=>done.has(i));
+  if(!ans.length)return 3;
+  const clean=ans.filter(i=>(marks[i]||1)===1).length/ans.length;
+  return clean>=0.9?3:clean>=0.6?2:1;
+}
+function gradeAll(){
+  const ans=Object.keys(marks).map(Number).filter(i=>done.has(i));
+  if(!ans.length)return 3;
+  const clean=ans.filter(i=>marks[i]===1).length/ans.length;
+  return clean>=0.9?3:clean>=0.6?2:1;
+}
+const chDue=()=>{const L=CHS();return chSeen<L.length&&((livesOn()&&hearts<=0)||chClosed(L[chSeen]));};
 /* a quest still on offer: unanswered, and its chapter has not closed behind you */
 const qChapter=qi=>{const L=CHS();for(let i=0;i<L.length;i++)if(L[i].quests.indexOf(qi)>=0)return i;return -1;};
 const qOpen=qi=>{const c=qChapter(qi);return c<0||c>=chSeen;};
@@ -148,12 +180,12 @@ const AQ=()=>lang==="es"?QES:QEN;
 const npcName=k=>CHILLN[k]?CHILLN[k][lang]:NPCN[lang][k];
 const lvlIdx=()=>{let i=0;LEVELS.forEach((t2,j)=>{if(xp>=t2)i=j;});return i;};
 const lvlName=()=>T().levels[lvlIdx()];
-function hud(){const hs="❤".repeat(Math.max(0,hearts))+"♡".repeat(3-Math.max(0,hearts));
+function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat(Math.max(0,3-Math.max(0,hearts)))):"";
   $("ptag").textContent=`${heroName} · ${lvlName()}`;$("hearts").textContent=hs;$("xp").textContent=`${xp} XP`;
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
   $("status").textContent=`${hs}  ${xp}XP`;}
 /* save */
-function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen};
+function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks};
   try{localStorage.setItem("mq1",JSON.stringify(st));}catch(e){}
   if(NET.enabled)NET.sync(st);}
 function setWorldTag(){$("worldTag").textContent=T().locs[world]+(world==="hq"?" · ❗":"");}
@@ -1039,11 +1071,12 @@ function pick(c,btn,t){
   if(o.r==="ok")btn.classList.add("right");
   else btn.classList.add(o.r==="mid"?"midpick":"wrong");
   const xp0=xp;
-  if(o.r==="ok")awardXP(10);else if(o.r==="mid")awardXP(5);else{hearts--;awardXP(0);}
+  if(cur>=0)marks[cur]=(marks[cur]||0)+1;   /* the grade counts every attempt, always */
+  if(o.r==="ok")awardXP(10);else if(o.r==="mid")awardXP(5);else{if(livesOn())hearts--;awardXP(0);}
   const gained=xp-xp0; /* the header claims only what this pick actually paid — retries after partial credit pay the difference */
   logDecision(o,c);
   const solved=o.r==="ok";
-  const retry=!solved&&hearts>0?`<p class="beat">${cur>=0?T().retryNote:T().retryNoteFred}</p>`:"";
+  const retry=!solved&&(!livesOn()||hearts>0)?`<p class="beat">${cur>=0?T().retryNote:T().retryNoteFred}</p>`:"";
   const v=$("verdict");
   v.className="verdict "+(o.r==="ok"?"ok":o.r==="mid"?"mid":"no");
   v.innerHTML=`<h2>${(o.r==="ok"?T().okH:o.r==="mid"?T().midH:T().badH)+(gained>0?` +${gained} XP`:"")}</h2><span class="concept">${o.concept}</span><p>${o.why}</p><p class="beat">${o.beat}</p>${retry}`;
@@ -1055,11 +1088,11 @@ function pick(c,btn,t){
     if(cur===15&&qFirst)setTimeout(()=>toast(T().wdUnlockToast,3400),700);}
   else if(solved&&node==="b"){fredQ=2;wear.bandana=wear.bandana||"#C0392B";setTimeout(()=>toast(T().fredDoneToast,3000),600);}
   save();
-  $("next").textContent=hearts<=0?T().nextDoom:(chDue()?T().nextEnd:T().nextBack);
+  $("next").textContent=(livesOn()&&hearts<=0)?T().nextDoom:(chDue()?T().nextEnd:T().nextBack);
   $("next").hidden=false;
 }
 $("next").addEventListener("click",()=>{
-  if(chDue()){wasFs=false;finish(hearts<=0);return;}
+  if(chDue()){wasFs=false;finish(livesOn()&&hearts<=0);return;}
   $("card").hidden=true;$("world").hidden=false;restoreFs();checkTalk();
 });
 /* ---------- character creator ---------- */
@@ -1106,7 +1139,7 @@ document.querySelectorAll(".classes button").forEach(b=>b.addEventListener("clic
 }));
 $("begin").addEventListener("click",()=>{
   heroName=($("heroname").value.trim()||"Rookie").slice(0,14);
-  xp=0;hearts=3;done=new Set();qa={};world="hq";px=fx=10;py=fy=11;dir="down";
+  xp=0;hearts=startHearts();done=new Set();qa={};marks={};world="hq";px=fx=10;py=fy=11;dir="down";
   save();enterWorld(true);
   const eg=eggFor(heroName); /* a legendary name gets a nod once the tutorial clears */
   if(eg)setTimeout(()=>toast(EGGSAFE[eg].lines[lang][0],3600),7400);
@@ -1117,13 +1150,14 @@ $("begin").addEventListener("click",()=>{
    A chapter that ended well is judged by hearts; the last one rolls real credits. */
 function finish(burnout){
   $("card").hidden=true;$("world").hidden=true;
-  const L=CHS(),last=Math.min(chSeen,L.length-1)>=L.length-1;
-  const h=Math.max(0,hearts),t=T();
+  const L=CHS(),i=Math.min(chSeen,L.length-1),last=i>=L.length-1;
+  const t=T(),g=gradeOf(L[i]);   /* the grade picks the ending — hearts never did the work */
   $("endTitle").textContent=burnout?t.goTitle:`🏆 ${lvlName()}`;
   $("endScore").textContent=burnout?t.goScore(xp,done.size,AQ().length)
-                                   :t.endScore(xp,MAXXP,h);
+                           :livesOn()?t.endScore(xp,MAXXP,Math.max(0,hearts))
+                           :t.endGrade(xp,MAXXP,t.grades[g-1]);
   const E=last?[t.mepi1,t.mepi2,t.mepi3]:[t.epi1,t.epi2,t.epi3];
-  $("epi").textContent = burnout?(last?t.mgoEpi:t.goEpi) : h>=3?E[0] : h===2?E[1] : E[2];
+  $("epi").textContent = burnout?(last?t.mgoEpi:t.goEpi) : g>=3?E[0] : g===2?E[1] : E[2];
   $("endGo").textContent=last?t.endStay:t.endGo;$("endGo").hidden=false;
   $("end").hidden=false;
 }
@@ -1131,7 +1165,7 @@ function finish(burnout){
    Monday with three fresh hearts. After the last one you keep the city and wander it. */
 $("endGo").addEventListener("click",()=>{
   const last=chSeen>=CHS().length-1;
-  chSeen=Math.min(chSeen+1,CHS().length);hearts=3;
+  chSeen=Math.min(chSeen+1,CHS().length);hearts=startHearts();
   applyGrowth();
   if(!last){world="st";px=fx=6;py=fy=12;dir="down";}
   if(isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
@@ -1146,7 +1180,7 @@ $("replay").addEventListener("click",()=>{
     replayTimer=setTimeout(()=>{replayTimer=null;$("replay").textContent=T().replay;},4000);
     return;}
   clearTimeout(replayTimer);replayTimer=null;$("replay").textContent=T().replay;
-  xp=0;hearts=3;done=new Set();qa={};chSeen=0;world="hq";px=fx=10;py=fy=11;dir="down";
+  xp=0;hearts=startHearts();done=new Set();qa={};marks={};chSeen=0;world="hq";px=fx=10;py=fy=11;dir="down";
   applyGrowth();save();
   $("settings").hidden=true;$("end").hidden=true;$("card").hidden=true;$("world").hidden=false;
   setWorldTag();hud();checkTalk();
@@ -1478,6 +1512,7 @@ function applyLang(){
   $("setTitle").textContent=t.setTitle;$("lbCtl").textContent=t.lbCtl;
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
+  $("lbStakes").textContent=t.lbStakes;$("stkNone").textContent=t.stkNone;$("stkHearts").textContent=t.stkHearts;
   $("lbTheme").textContent=t.lbTheme;
   $("lbCam").textContent=t.lbCam;
   document.querySelectorAll("#camRow button").forEach(b=>{
@@ -1569,7 +1604,7 @@ function roleOf(e){
 function decisionReport(){
   const t=T(),L=t.repL,d=new Date(),p2=n2=>String(n2).padStart(2,"0");
   const stamp=d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
-  const out=[t.repHead(heroName,lvlName(),xp,MAXXP,Math.max(0,hearts),stamp),""];
+  const out=[t.repHead(heroName,lvlName(),xp,MAXXP,t.grades[gradeAll()-1],stamp),""];
   if(!dlog.length){out.push(t.repEmpty,"","---","*"+L.foot+"*");return out.join("\n");}
   const order=[],by={};
   dlog.forEach(e=>{const k=e.quest||"?";
@@ -1616,7 +1651,8 @@ function decisionReport(){
 }
 function exportData(){return JSON.stringify({schema:"meridian-export-v1",exported:new Date().toISOString(),
   player:{name:heroName,class:cls,look},
-  progress:{xp,level:lvlName(),hearts,questsDone:[...done],location:world},
+  progress:{xp,level:lvlName(),stakes:stakesMode(),hearts:livesOn()?hearts:null,
+            grade:gradeAll(),marks,questsDone:[...done],location:world},
   frederick:{name:"Frederick",treats,bandana:fredQ>=2,carePackUnlocked:fredQ>=1},
   decisions:dlog,
   futureExportTypes:["decision-report.docx","conversation-export.md","training-transcript.csv"]},null,1);}
@@ -1841,11 +1877,29 @@ try{admin=localStorage.getItem("mqadmin")==="1";}catch(e){}
 function applyAdmin(){
   $("brushes").hidden=!admin;
   $("teOpen").hidden=!admin; /* the theme editor is admin-mode tooling; the ✨ Custom result is for everyone */
+  $("stkRow").hidden=!admin;$("lbStakes").hidden=!admin;
   $("admOn").setAttribute("aria-pressed",admin?"true":"false");
   $("admOff").setAttribute("aria-pressed",admin?"false":"true");
   try{localStorage.setItem("mqadmin",admin?"1":"0");}catch(e){}
 }
 $("admOn").addEventListener("click",()=>{admin=true;applyAdmin();toast(T().admToast,3400);});
+/* Stakes toggle — admin tooling. Hearts are off by default in an open world, but they
+   stay one tap away for a mini-game or a challenge. Per device, never in the save. */
+function applyStakes(){
+  const on=stakesMode()==="hearts";
+  $("stkRow").hidden=!admin;
+  $("stkNone").setAttribute("aria-pressed",on?"false":"true");
+  $("stkHearts").setAttribute("aria-pressed",on?"true":"false");
+  hud();
+}
+function setStakes(m){
+  stakesAdmin={mode:m};
+  try{localStorage.setItem("mqstakes",m);}catch(e){}
+  if(m==="hearts"&&hearts<=0)hearts=startHearts();
+  applyStakes();save();toast(T().stkToast(m),3000);
+}
+$("stkNone").addEventListener("click",()=>setStakes("none"));
+$("stkHearts").addEventListener("click",()=>setStakes("hearts"));
 $("admOff").addEventListener("click",()=>{admin=false;applyAdmin();});
 document.querySelectorAll("#brushes button[data-b]").forEach(b=>{
   if(b.dataset.b===brush)b.setAttribute("aria-pressed","true");
@@ -2063,6 +2117,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").addEventListener("click",()=>{
     heroName=SV.n;cls=SV.c||"";look=SV.lk||look;xp=SV.xp||0;hearts=SV.he??3;done=new Set(SV.d||[]);
     treats=SV.tr||0;fredQ=SV.fq||0;chSeen=SV.cs||0;
+    marks=(SV.mk&&typeof SV.mk==="object")?SV.mk:{}; /* pre-grade saves start unmarked */
     wear=(SV.wr&&typeof SV.wr==="object")?{bandana:null,collar:null,cape:null,...SV.wr}
         :{bandana:fredQ>=2?"#C0392B":null,collar:null,cape:null}; /* pre-wardrobe saves: keep the earned red bandana */
     qa=(SV.qa&&typeof SV.qa==="object")?SV.qa:{}; /* pre-retry saves: done quests stay done, credited as-is */
@@ -2071,7 +2126,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
     px=fx=SV.px??10;py=fy=SV.py??11;
     applyGrowth();
     if(px>=CW().W||py>=CW().H||isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
-    if(chDue()){finish(hearts<=0);$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;hud();}
+    if(chDue()){finish(livesOn()&&hearts<=0);$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;hud();}
     else enterWorld(false);
   });
 }

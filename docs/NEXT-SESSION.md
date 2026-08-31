@@ -71,6 +71,13 @@ explicitly revisable after real play, and every piece must ship as a content-pac
 so **AJ's game can swap or drop it**. Deliverable templates for real client work live
 in `docs/templates/` (written; only the decision log is game-generated so far).
 
+**BUILT 2026-08-31 — needs review: the stakes layer + the grade.** The signed-not-built
+gap is closed: hearts are now one optional mode (`none` default, `hearts`, `budget`
+declared-not-built) with an admin toggle, and a permanent grade underneath picks each
+district's ending. **Read `docs/REVIEW-ME.md` first** — it lists what the smoke test
+covers and the six things it could not, including whether the 90%/60% grade bands feel
+right in real play and how old saves should grade.
+
 **Org-level reuse (owner-approved 2026-08-31).** `/deliverable` is BUILT
 (`.claude/skills/deliverable/`) — fills any of the five `docs/templates/` from a
 transcript, branded or neutral, sister to `ai-audit` and deliberately NOT merged with

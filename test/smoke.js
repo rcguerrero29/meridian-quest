@@ -108,6 +108,9 @@ const CANDIDATES = [
   }, pred);
   const header = () => page.evaluate(() => document.querySelector('#verdict h2').textContent);
 
+  // hearts are OFF by default now (open world). Turn them on for the lives tests.
+  await page.evaluate(() => { stakesAdmin = { mode: 'hearts' }; hearts = 3; });
+
   // bad pick: heart lost, quest open, no reveal
   await page.evaluate(() => questStart(1));
   await clickChoice(`c => c.out && c.out.r === 'bad'`);
@@ -219,7 +222,8 @@ const CANDIDATES = [
   // ---- 3a1b. running out of hearts ends the chapter; it never erases the city ----
   const doom = await page.evaluate(() => {
     const problems = [];
-    done = new Set(); chSeen = 0; hearts = 3; xp = 0; applyGrowth();
+    stakesAdmin = { mode: 'hearts' };   // burnout only exists when lives are on
+    done = new Set(); chSeen = 0; hearts = 3; xp = 0; marks = {}; applyGrowth();
     // build something, then burn out with most of Week One unanswered
     [12, 13].forEach(i => done.add(i)); applyGrowth();
     if (WORLDS.st.rows[5][21] !== 'O') problems.push('setup: Studio did not go up');
@@ -244,11 +248,102 @@ const CANDIDATES = [
       if (!tovar || pendingAt(tovar) !== undefined) problems.push('a closed chapter still shows a quest marker'); }
     if (!qOpen(16)) problems.push('the new chapter\'s quests are not on offer');
 
-    done = new Set(); chSeen = 0; hearts = 3; applyGrowth();
+    done = new Set(); chSeen = 0; hearts = 3; marks = {}; applyGrowth();
     world = 'hq'; px = fx = 10; py = fy = 11;
     return problems;
   });
   fails.push(...doom);
+
+  // ---- 3a1d. stakes are a layer; the grade underneath is always on ----
+  const stakes = await page.evaluate(() => {
+    const problems = [];
+    const week1 = CHAPTERS[0];
+
+    // the pack ships open-world: no lives, nothing to lose
+    stakesAdmin = null;
+    if (STAKES.mode !== 'none') problems.push('the shipped pack should default to no stakes');
+    if (livesOn()) problems.push('lives are on with the pack default');
+    done = new Set(); marks = {}; hearts = 3; chSeen = 0;
+    hud();
+    if (document.getElementById('hearts').textContent !== '')
+      problems.push('the HUD shows hearts when there are no lives');
+
+    // a wrong answer with stakes off costs nothing but the mark
+    hearts = 3; questStart(1);
+    const bad = curQ.nodes[node].ch.find(c => c.out && c.out.r === 'bad');
+    [...document.getElementById('choices').children].find(b => b.textContent === bad.t).click();
+    if (hearts !== 3) problems.push('a wrong answer cost a heart with stakes off');
+    if (marks[1] !== 1) problems.push('the attempt was not recorded as a mark');
+    if (chDue()) problems.push('a wrong answer ended a chapter with stakes off');
+    const ok = curQ.nodes[node].ch.find(c => c.out && c.out.r === 'ok');
+    questStart(1);
+    [...document.getElementById('choices').children].find(b => b.textContent === ok.t).click();
+    if (marks[1] !== 2) problems.push('the retry was not counted toward the grade');
+    if (!done.has(1)) problems.push('the right answer did not complete the quest');
+
+    // the grade reads the marks, and a retry costs grade — not progress
+    marks = {}; done = new Set();
+    week1.quests.forEach(i => { done.add(i); marks[i] = 1; });
+    if (gradeOf(week1) !== 3) problems.push('all-first-try did not grade 3');
+    week1.quests.forEach(i => { marks[i] = 3; });
+    if (gradeOf(week1) !== 1) problems.push('all-retried did not grade 1');
+    week1.quests.forEach((i, n) => { marks[i] = n < 12 ? 1 : 3; });   // 75% clean
+    if (gradeOf(week1) !== 2) problems.push('a mixed run did not grade 2');
+
+    // budget is declared in content but must behave as `none` until it is built
+    stakesAdmin = { mode: 'budget' };
+    if (stakesMode() !== 'none') problems.push('unbuilt `budget` mode is not falling back to none');
+    if (livesOn()) problems.push('`budget` switched lives on');
+
+    // a district may override the pack, so a calm town can hold a scored challenge
+    stakesAdmin = null;
+    const saved = CHAPTERS[0].stakes;
+    CHAPTERS[0].stakes = { mode: 'hearts', hearts: 2 };
+    chSeen = 0;
+    if (!livesOn()) problems.push('a district could not switch its own stakes on');
+    if (startHearts() !== 2) problems.push('a district could not set its own heart count');
+    CHAPTERS[0].stakes = saved;
+
+    stakesAdmin = null; done = new Set(); marks = {}; hearts = 3; chSeen = 0;
+    document.getElementById('card').hidden = true;      // the quest card would cover #gear
+    document.getElementById('world').hidden = false;
+    return problems;
+  });
+  fails.push(...stakes);
+
+  // ---- 3a1e. the admin toggle brings hearts back for a mini-game ----
+  await page.evaluate(() => { document.getElementById('end').hidden = true; document.getElementById('wardrobe').hidden = true; });
+  await page.click('#gear');
+  const stkUI = await page.evaluate(() => {
+    const problems = [];
+    admin = false; applyAdmin(); applyStakes();
+    if (!document.getElementById('stkRow').hidden) problems.push('the stakes toggle is visible outside admin mode');
+    admin = true; applyAdmin(); applyStakes();
+    if (document.getElementById('stkRow').hidden) problems.push('the stakes toggle is hidden in admin mode');
+    document.getElementById('stkHearts').click();
+    if (!livesOn()) problems.push('the admin toggle did not switch hearts on');
+    let stored = null; try { stored = localStorage.getItem('mqstakes'); } catch (e) {}
+    if (stored !== 'hearts') problems.push('the stakes choice was not remembered: ' + stored);
+    hud();
+    if (!document.getElementById('hearts').textContent) problems.push('the HUD hid hearts while lives were on');
+    document.getElementById('stkNone').click();
+    if (livesOn()) problems.push('the admin toggle did not switch hearts back off');
+    // the project's own comfort standard: the audit skips these because they are
+    // admin-only and hidden when it runs, so check them here while they are visible
+    ['stkNone', 'stkHearts'].forEach(id => {
+      const r = document.getElementById(id).getBoundingClientRect();
+      if (Math.min(r.width, r.height) < 24)
+        problems.push(`tap target < 24px: #${id} (${Math.round(r.width)}x${Math.round(r.height)})`);
+      if (!document.getElementById(id).textContent.trim())
+        problems.push(`#${id} has no label`);
+    });
+    if (!document.getElementById('lbStakes').textContent.trim()) problems.push('stakes row has no label');
+    admin = false; applyAdmin(); stakesAdmin = null;
+    try { localStorage.removeItem('mqstakes'); } catch (e) {}
+    return problems;
+  });
+  fails.push(...stkUI);
+  await page.evaluate(() => { document.getElementById('settings').hidden = true; });
 
   // ---- 3a1c. restart is a Settings tool behind a two-tap confirm, not a story button ----
   await page.evaluate(() => {

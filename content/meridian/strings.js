@@ -66,7 +66,7 @@ const UI={
 
 *Meridian Quest · judgment calls under pressure · ${dt}*
 
-**Level:** ${lv}  ·  **XP:** ${x}/${mx}  ·  **Hearts:** ${he}/3`,
+**Level:** ${lv}  ·  **XP:** ${x}/${mx}  ·  **Grade:** ${he}`,
   repSum:(d,q,pct)=>`**${d} decisions across ${q} quests — ${pct}% solved on the first attempt.**`,
   repEmpty:"No decisions recorded yet. Answer a quest and this report writes itself.",
   repRole:(c,q,pct)=>`${c} ${c===1?"decision":"decisions"} across ${q} ${q===1?"quest":"quests"} · ${pct}% first try`,
@@ -132,7 +132,11 @@ One source of truth for one very good pet.
   endStay:"↩ Back to the city",
   endStayToast:"The city is yours to walk. Nothing left to answer — for now.",
   replayArm:"⚠️ Tap again to erase everything",
-  endScore:(x,m,h)=>`${x}/${m} XP · ${h}/3 hearts intact`,goScore:(x,d,n)=>`${x} XP · ${d}/${n} quests completed`,
+  endScore:(x,m,h)=>`${x}/${m} XP · ${h}/3 hearts intact`,
+  endGrade:(x,m,g)=>`${x}/${m} XP · ${g}`,
+  grades:["scraped through","solid work","clean — first try, nearly every time"],
+  lbStakes:"Stakes (admin)",stkNone:"None",stkHearts:"❤ Hearts",
+  stkToast:m=>m==="hearts"?"Hearts on. Wrong calls cost one — nothing else.":"Hearts off. Nothing to lose but the grade.",goScore:(x,d,n)=>`${x} XP · ${d}/${n} quests completed`,
   epi1:"Friday, 6pm. The VP stands up when you enter. “Flawless week — and you walked your own path. The agents program is yours.” Roll credits — until Week Two.",
   epi2:"Friday, 6pm. “Strong week,” says the VP. “Some incidents shipped, but you owned the floor.” Priya nods on your way out. Week Two is coming.",
   epi3:"Friday, 6pm. You survived — barely. The VP slides the Codex back across the table: “Study. Run the week again. Meridian believes in second playthroughs.”",
@@ -207,7 +211,7 @@ One source of truth for one very good pet.
 
 *Meridian Quest · criterio bajo presión · ${dt}*
 
-**Nivel:** ${lv}  ·  **XP:** ${x}/${mx}  ·  **Vidas:** ${he}/3`,
+**Nivel:** ${lv}  ·  **XP:** ${x}/${mx}  ·  **Calificación:** ${he}`,
   repSum:(d,q,pct)=>`**${d} decisiones en ${q} misiones — ${pct}% resueltas al primer intento.**`,
   repEmpty:"Aún no hay decisiones registradas. Responde una misión y este reporte se escribe solo.",
   repRole:(c,q,pct)=>`${c} ${c===1?"decisión":"decisiones"} en ${q} ${q===1?"misión":"misiones"} · ${pct}% al primer intento`,
@@ -273,7 +277,11 @@ Una sola fuente de verdad para una gran mascota.
   endStay:"↩ De vuelta a la ciudad",
   endStayToast:"La ciudad es tuya para caminarla. Nada pendiente por contestar — por ahora.",
   replayArm:"⚠️ Toca otra vez para borrar todo",
-  endScore:(x,m,h)=>`${x}/${m} XP · ${h}/3 corazones intactos`,goScore:(x,d,n)=>`${x} XP · ${d}/${n} misiones completadas`,
+  endScore:(x,m,h)=>`${x}/${m} XP · ${h}/3 corazones intactos`,
+  endGrade:(x,m,g)=>`${x}/${m} XP · ${g}`,
+  grades:["la libraste","buen trabajo","impecable — al primer intento, casi siempre"],
+  lbStakes:"Riesgo (admin)",stkNone:"Ninguno",stkHearts:"❤ Corazones",
+  stkToast:m=>m==="hearts"?"Corazones encendidos. Una mala decisión cuesta uno — nada más.":"Corazones apagados. No hay nada que perder salvo la calificación.",goScore:(x,d,n)=>`${x} XP · ${d}/${n} misiones completadas`,
   epi1:"Viernes, 6pm. La VP se pone de pie cuando entras. «Semana impecable — y caminaste tu propio camino. El programa de agentes es tuyo.» Créditos finales — hasta la Semana Dos.",
   epi2:"Viernes, 6pm. «Buena semana», dice la VP. «Se entregaron algunos incidentes, pero el piso fue tuyo.» Priya asiente cuando sales. La Semana Dos se acerca.",
   epi3:"Viernes, 6pm. Sobreviviste — apenas. La VP desliza el Códice de vuelta por la mesa: «Estudia. Corre la semana otra vez. Meridian cree en las segundas partidas.»",
