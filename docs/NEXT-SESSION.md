@@ -5,6 +5,9 @@ current: each session rewrites the queue before signing off.)*
 
 ## Resume ritual
 
+0. **Read `docs/OWNER.md`** — the owner's standing rules (settled decisions, taste,
+   how to bring them a choice, and the referee → browse-and-approve ladder). New
+   2026-08-31; both planner skills now read it before planning.
 1. Read `docs/HANDOFF.md` (state + shipping rules), `docs/CITY.md` (city ledger),
    and this queue. Skim `docs/IDEAS.md` §6-9 for the designed-but-unbuilt backlog.
 2. Work on a `claude/...` session branch; merge to `main` only when the owner says
@@ -60,6 +63,10 @@ Deployed at sw `mq-v22`. Smoke suite green throughout (24 quests, maxXP 350).
    NOT built**: the rule is now "the grade on a business's ending, scoped per
    business, never blocks anything" — what ships today still ends the chapter at
    zero. Do the open-city refactor before the taller; the taller depends on it.
+
+**Owner-set build order (2026-08-31): front-profile 2.5D first → close the
+signed-not-built gap (open-city refactor + per-business hearts) → then the four
+business packs.** Item 3 below is therefore the head of the queue.
 
 3. **Graphics next: the front-profile pivot** (owner-redirected 2026-08-31, plans
    in IDEAS §10): ① consolidate TILES glyph metadata + DECOR instance metadata

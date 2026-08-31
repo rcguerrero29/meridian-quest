@@ -1,6 +1,7 @@
 # The City Ledger 🏗️
 
-Don Güero's single source of truth. The `/don-guero` skill reads this, plans the
+Don Güero's single source of truth. **Read `docs/OWNER.md` first** — the owner's
+standing rules; anything Settled there is a permit, not a question. The `/don-guero` skill reads this, plans the
 next phase on Opus 5, and brings open decisions to the owner as side quests. Every
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
@@ -177,6 +178,12 @@ stays live until the Phase 2 refactor lands.
   grade on a business's ending, scoped per business, and never block anything** ·
   owner: "this is for story mode so no big deal just so i learn, and we can reuse the
   same for other stories" — so the rule is one sentence and takes nothing away.
+- 2026-08-31 · ❗Siguiente: build order · **front-profile 2.5D first, then close the
+  signed-not-built gap (open-city refactor + per-business hearts), then build the four
+  packs** · owner set the order directly.
+- 2026-08-31 · ❗Mando: who wins when Nacho and Don Güero disagree · **the owner
+  referees, every time — for now** · with a stated goal of graduating to browse-and-
+  approve, so every standing preference now gets written to `docs/OWNER.md`.
 - 2026-08-31 · ❗Orden: what to build now · **the plan only** · roadmap signed, report
   shipped, no new district this session.
 - 2026-08-31 · ❗Entrada: a staging area for new players · **skipped — Meridian Labs HQ

@@ -11,7 +11,9 @@ after the permits are signed. Fun is a requirement, not a nice-to-have.
 
 ## The loop
 
-1. **Read the ledger first**: `docs/CITY.md` (create it from the template there if
+0. **Read `docs/OWNER.md` first** — the owner's standing rules. Never put a
+   **Settled** item to them again.
+1. **Read the ledger**: `docs/CITY.md` (create it from the template there if
    missing — it should already exist). Note any decisions still marked ⏳ pending.
 
 2. **Summon the planner**: spawn the `don-guero` agent (Agent tool,
@@ -45,3 +47,17 @@ after the permits are signed. Fun is a requirement, not a nice-to-have.
 - One phase at a time. Don't bank unbuilt phases; the ledger's ⏳ items come first.
 - If tokens are short: run steps 1-4 only and record the plan — building can wait,
   a signed ledger cannot.
+
+## Honesty & the approval ladder
+
+- **If the planner agent fails to run** (rate limit, error, anything), say so in the
+  FIRST line of your reply and label any plan you write as your own, in their voice —
+  never as theirs. This went wrong twice on 2026-08-31.
+- **Stay in your lane.** Don Güero plans parcels, businesses and AI-role packs; Nacho
+  plans story, arcs and endings. The session builds. Neither plans the other's craft.
+- **Signed ≠ built.** Where the ledger records a rule the code has not implemented,
+  say so every place it is written.
+- **After every signing**, ask whether the answer outlives this phase. If it does and
+  it fits in one sentence that a planner could apply to a business nobody has invented
+  yet, add it to `docs/OWNER.md` under Settled or Taste. That is how the owner
+  graduates from refereeing every call to browsing and approving.
