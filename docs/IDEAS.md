@@ -158,7 +158,12 @@ reminders as `.ics`. Possible next steps:
 
 ---
 
-## 7. Graphics upgrade path (scouted 2026-08-30; prep steps not yet built)
+## 7. Graphics upgrade path (scouted 2026-08-30; **step 1 SHIPPED 2026-08-31**)
+
+> **Status:** step 1 (the tile-renderer registry) shipped as `TILEDRAW` in
+> `engine/engine.js` — 31 glyphs, each `TILEDRAW[ch](rc)`. The content-side per-glyph
+> `TILES`/`DECOR` metadata table is NOT built and now lives in §10 (the front-profile
+> pivot). Read §10 before touching this section.
 
 **Recommendation:** Stay 2D canvas and go all-in on procedural upgrades, but FIRST refactor the tile if/else chain into a tile-renderer registry that content packs can extend/override. Why: it is the only path that costs $0, keeps offline/CSP/no-build intact, preserves the flat-color charm AJ responded to, and compounds with what already exists (tc() theming, ambient particles, parametric people). Sprites are rejected for Meridian itself because the game's identity features (creator, wardrobe, theme-mixed shirts, AJ-named townsfolk with data-driven looks) are parametric and would fight raster art — but the registry seam deliberately leaves a sprite escape hatch: a future gift pack could register a drawImage-based tile from a committed same-origin PNG without touching the engine, turning "sprite art" into a per-content-pack choice instead of an engine rewrite.
 
