@@ -5,8 +5,13 @@ see** — if what you see differs, note the stop number and tell Claude "playtes
 broke" and describe it; each stop maps to one engine or content area, so the bug hunt
 starts in the right file. (In a Claude session, `/playtest` loads the guide skill.)
 
-Saves are continuous, so you can stop anywhere and Continue later. If you want a clean
-run first: ⚙️ Settings → Reset save.
+Saves are continuous, so you can stop anywhere and Continue later. A clean run lives
+behind ⚙️ Settings → Restart (two-tap confirm — it is a testing tool, not a story exit).
+
+**The maps are DYNAMIC.** The town map (🗺️) and the world itself redraw from story
+state: the construction site advances with La Obra's quests, El Mercado grows onto
+its lot when Week Two opens, and a new game hands the lots back empty. If a map looks
+"wrong," first ask: which chapter is this save in?
 
 ---
 
@@ -77,7 +82,10 @@ phones require a gesture).
 *See/hear:* a soft generative tune that matches the theme — lo-fi office on Meridian,
 little bells on Fairy, marimba on Forest, warm dusk on Sunset. The slider changes
 volume live; 🔇 mutes; both stick across sessions; sound pauses when the app is in
-the background. *(engine: MUSIC — procedural WebAudio, no files)*
+the background. Toggling music on (or releasing the slider) plays a quick three-note
+chirp — instant proof the audio path works. **iPhone gotcha:** the physical ring/silent
+switch can mute web audio entirely — if you hear nothing, flip the ringer on and press
+volume-up. *(engine: MUSIC — procedural WebAudio, no files)*
 
 **13 · Move somebody in.** ⚙️ Settings → Admin mode On → tap the 🧍 Character brush →
 tap an empty tile → type a name.
@@ -90,14 +98,17 @@ naming your hero or Frederick's care-pack pet something legendary too.
 
 ---
 
-**14 · Week Two opens.** On the street, walk south past the planters — the southwest
-lot is now **El Mercado Robles** (striped awning, door in the middle). Go in.
-*See:* Doña Chelo, Nando, Perla, Chava the carnicero (chat him — everything is
-chile), and Frijol the bodega cat (pettable). Five new quests (❗) put you in the AI
-ops analyst chair: data quality, drift, guardrail metrics, vendor pitches, and the
-Monday number. The mini-map labels the store; arriving announces Week Two. The
-butterflies and colibrí are interactive now too — walk up and Watch.
-*(content: me world, quests 16-20; engine: DOORS/TOWNLBL/MAPDOT seams)*
+**14 · Week Two opens.** Finish all of Week One, claim your title — the epilogue now
+offers **▶ Monday — Week Two**. Take it.
+*See:* three fresh hearts, and Doña Chelo unlocking the gate on the southwest lot —
+**El Mercado Robles grows onto the lot as the chapter begins** (the empty lot is real:
+a new game hands it back). Inside: Doña Chelo, Nando, Perla, Chava (everything is
+chile), Frijol the bodega cat. Eight quests (16-23) put you in the **AI product
+manager** chair; five close the chapter. Export → the decision report prints your
+calls as a portfolio memo. Butterflies and the colibrí are watchable now, doors glow
+underneath (they open — walls don't), and the last activity message lingers in the
+top corner ticker (tap to dismiss).
+*(content: me world + growth data, quests 16-23; engine: chapters, growth, export)*
 
 ## Known quirks (not bugs)
 

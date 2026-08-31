@@ -138,3 +138,14 @@ extraction are in this session's Don Güero plan — reproduce via /don-guero if
   session for it. Prints the player's quest answers as a portfolio artifact.
 - **Week framing: Monday of Week Two, chapter one.** The epilogues' promise gets
   kept. Content-only — the calendar lives in quest text and signage, not the engine.
+
+## Merge note (2026-08-31)
+
+Two sessions built Phase 1 in parallel; the owner's /don-guero session signed later
+(AI-PM pack, 8 quests, chapters-as-data, export built, hearts-end-the-week) and WINS.
+This session's 5-quest **AI ops analyst pack** ("Everything is chile" ... "The Monday
+number") is preserved in git history (commit 00fc1aa) and returns with a future
+ops-analyst business — the concepts don't expire. Also landed in the merge: theme
+editor edits the visible variant, every animal interactive, door under-glow, activity
+ticker, music chirp + denser melody, admin NPC editing (rename / re-roll look / move
+out), Calle Dos got its south fence.

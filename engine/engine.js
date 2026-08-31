@@ -175,12 +175,17 @@ window.addEventListener("pagehide",()=>{if(!$("hud").hidden)save();});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&!$("hud").hidden)save();});
 function clearSave(){try{localStorage.removeItem("mq1");}catch(e){}}
 /* toasts */
-let toastT=null,toastQ=[];
+let toastT=null,toastQ=[],tickerT=null;
 function toast(msg,ms){const el=$("toast");
+  /* the activity ticker mirrors the last message in the top corner and lingers,
+     so short interactions can be re-read after the toast fades (owner ask) */
+  const tk=$("ticker");tk.textContent=msg;tk.hidden=false;
+  clearTimeout(tickerT);tickerT=setTimeout(()=>{tk.hidden=true;},10000);
   if(el.classList.contains("on")){toastQ.push([msg,ms]);return;}
   el.textContent=msg;el.classList.add("on");
   clearTimeout(toastT);toastT=setTimeout(()=>{el.classList.remove("on");
     if(toastQ.length){const[m,d]=toastQ.shift();setTimeout(()=>toast(m,d),300);}},ms||2600);}
+$("ticker").addEventListener("click",()=>{$("ticker").hidden=true;});
 let lastBump=0;
 const pendingAt=n=>n.q.find(qi=>!done.has(qi)&&qOpen(qi));
 /* ---------- canvas ---------- */
@@ -265,6 +270,10 @@ function draw(){
       ctx.fillStyle="#E0B45C";
       ctx.beginPath();ctx.arc(sx+12.5,sy+17,1.7,0,7);ctx.fill();
       ctx.beginPath();ctx.arc(sx+19.5,sy+17,1.7,0,7);ctx.fill();
+      /* light under the door, gently pulsing: this one opens (doors were reading as walls) */
+      ctx.globalAlpha=0.25+0.2*Math.sin(Date.now()/380);
+      ctx.fillStyle="#FFE9A8";ctx.fillRect(sx+4,sy+TS-3,TS-8,2);
+      ctx.globalAlpha=1;
     }
     else if(ch==="D"){ctx.fillStyle=tc(C.desk);ctx.fillRect(sx+2,sy+8,TS-4,TS-12);ctx.fillStyle=tc(C.deskTop);ctx.fillRect(sx+2,sy+4,TS-4,8);
       ctx.fillStyle="#DDE4EA";ctx.fillRect(sx+8,sy+6,10,5);}
@@ -1172,11 +1181,11 @@ function musVoice(m,t0,dur,type,peak,bright){
 }
 function musTick(){
   const c=MUSIC.ctx,d=musDef(),t0=c.currentTime+0.08,st=MUSIC.step++;
-  if(Math.random()<0.42){ /* melody: sparse random walk on the pentatonic */
+  if(Math.random()<0.58){ /* melody: random walk on the pentatonic — dense enough to read as a tune */
     MUSIC.mel+=[1,-1,2,-2,1,-1,0][Math.floor(Math.random()*7)];
     MUSIC.mel=Math.max(-3,Math.min(9,MUSIC.mel));
     const deg=((MUSIC.mel%5)+5)%5,oct=Math.floor(MUSIC.mel/5);
-    musVoice(d.root+12+oct*12+d.scale[deg],t0,0.55,d.lead,0.16,d.bright);
+    musVoice(d.root+12+oct*12+d.scale[deg],t0,0.55,d.lead,0.19,d.bright);
   }
   if(st%8===0)musVoice(d.root-12,t0,1.8,"sine",0.12,500);      /* bass root */
   if(st%16===4)musVoice(d.root-5,t0,1.6,"sine",0.08,500);      /* bass fifth */
@@ -1211,8 +1220,13 @@ function musApply(){
   try{localStorage.setItem("mqmus",musOn?"1":"0");localStorage.setItem("mqvol",String(musVol));}catch(e){}
   if(musOn)musStart();else musStop();
 }
-$("musMute").addEventListener("click",()=>{musOn=!musOn;musApply();});
+function musChirp(){ /* instant audible proof the audio path works (owner: "no tune") */
+  if(!MUSIC.ctx||MUSIC.ctx.state!=="running")return;
+  const d=musDef(),t0=MUSIC.ctx.currentTime+0.03;
+  [0,2,4].forEach((deg,i)=>musVoice(d.root+12+d.scale[deg],t0+i*0.09,0.4,d.lead,0.22,d.bright));}
+$("musMute").addEventListener("click",()=>{musOn=!musOn;musApply();if(musOn)setTimeout(musChirp,150);});
 $("musVol").addEventListener("input",()=>{musVol=$("musVol").value/100;if(!musOn)musOn=true;musApply();});
+$("musVol").addEventListener("change",()=>setTimeout(musChirp,100));
 /* persistent, not once: the same cheap poke does the first-gesture unlock AND recovers
    from iOS interruption-suspends later; musStart early-returns when already running */
 const musPoke=()=>{if(musOn)musStart();};
@@ -1676,29 +1690,56 @@ function spawnCustom(rec){
   return !!addChill({name:{en:name,es:name},world:rec.w,x,y,look});}
 myNpcs=myNpcs.filter(r=>{try{return spawnCustom(r);}catch(e){return false;}});
 npcPersist();
-let nmPending=null;
+let nmPending=null,nmEdit=null;
+function despawnAt(gx,gy){ /* lift a custom creation off the map (record untouched) */
+  const w=CW();
+  const i=w.npcs.findIndex(n=>n.x===gx&&n.y===gy&&String(n.key).startsWith("~c"));
+  if(i>=0){w.grid[gy][gx]=w.rows[gy][gx];w.npcs.splice(i,1);return true;}
+  return false;}
 function npcAt(gx,gy){
   const w=CW();
   if(gx<0||gy<0||gx>=w.W||gy>=w.H)return;
-  /* tap an existing creation to remove it */
+  /* tap an existing creation to EDIT it: rename, re-roll the look, or move out */
   const i=w.npcs.findIndex(n=>n.x===gx&&n.y===gy&&String(n.key).startsWith("~c"));
-  if(i>=0){w.grid[gy][gx]=w.rows[gy][gx];w.npcs.splice(i,1);
-    myNpcs=myNpcs.filter(r=>!(r.w===world&&(r.x|0)===gx&&(r.y|0)===gy));npcPersist();
-    toast(T().npcGone,1800);return;}
+  if(i>=0){
+    const rec=myNpcs.find(r=>r.w===world&&(r.x|0)===gx&&(r.y|0)===gy);
+    if(!rec){toast(T().npcLease,2200);return;} /* content townsfolk have a lease — they stay */
+    nmEdit={rec,gx,gy};nmPending=null;
+    $("nmTitle").textContent=T().nmEditTitle;$("nmLb").textContent=T().nmLb;
+    $("nmOk").textContent=T().nmSave;$("nmCancel").textContent=T().nmCancel;
+    $("nmLook").textContent=T().nmLook;$("nmOut").textContent=T().nmOut;
+    $("nmLook").hidden=false;$("nmOut").hidden=false;
+    $("nmName").value=rec.n;$("npcMaker").hidden=false;
+    setTimeout(()=>$("nmName").focus(),60);return;}
   const ci=CRIT.findIndex(cr=>cr.kind==="beagle"&&cr.world===world&&cr.home[0]===gx&&cr.home[1]===gy);
   if(ci>=0){CRIT.splice(ci,1);
     myNpcs=myNpcs.filter(r=>!(r.w===world&&(r.x|0)===gx&&(r.y|0)===gy));npcPersist();
     toast(T().npcGone,1800);return;}
   if(SOLID.has(w.grid[gy][gx])||w.grid[gy][gx]==="N")return;
   if(myNpcs.length>=12){toast(T().npcFull,2400);return;}
-  nmPending={w:world,x:gx,y:gy};
+  nmPending={w:world,x:gx,y:gy};nmEdit=null;
   $("nmTitle").textContent=T().nmTitle;$("nmLb").textContent=T().nmLb;
   $("nmOk").textContent=T().nmOk;$("nmCancel").textContent=T().nmCancel;
+  $("nmLook").hidden=true;$("nmOut").hidden=true;
   $("nmName").value="";$("npcMaker").hidden=false;
   setTimeout(()=>$("nmName").focus(),60);
 }
-$("nmCancel").addEventListener("click",()=>{$("npcMaker").hidden=true;nmPending=null;});
+$("nmCancel").addEventListener("click",()=>{$("npcMaker").hidden=true;nmPending=null;nmEdit=null;});
+$("nmLook").addEventListener("click",()=>{ /* re-roll the look, panel stays open — roll till it's them */
+  if(!nmEdit)return;
+  nmEdit.rec.lk=randLook();despawnAt(nmEdit.gx,nmEdit.gy);spawnCustom(nmEdit.rec);npcPersist();
+  toast(T().npcLook,1400);});
+$("nmOut").addEventListener("click",()=>{
+  if(!nmEdit)return;
+  despawnAt(nmEdit.gx,nmEdit.gy);
+  myNpcs=myNpcs.filter(r=>r!==nmEdit.rec);npcPersist();
+  $("npcMaker").hidden=true;nmEdit=null;toast(T().npcGone,1800);});
 $("nmOk").addEventListener("click",()=>{
+  if(nmEdit){ /* save edits: rename can even re-trigger an egg (Sonny transforms) */
+    const name=sanName($("nmName").value);
+    if(name){nmEdit.rec.n=name;despawnAt(nmEdit.gx,nmEdit.gy);spawnCustom(nmEdit.rec);npcPersist();
+      const eg2=eggFor(name);toast(eg2?EGGSAFE[eg2].lines[lang][0]:T().npcSaved,eg2?3400:1800);}
+    $("npcMaker").hidden=true;nmEdit=null;return;}
   const name=sanName($("nmName").value);
   if(!name||!nmPending){$("npcMaker").hidden=true;nmPending=null;return;}
   const rec={n:name,w:nmPending.w,x:nmPending.x,y:nmPending.y,lk:randLook()};
