@@ -158,11 +158,23 @@ preference that outlives one phase; cite the date and their words.
   owner can **teach it onward** — the report is a portfolio, and the codex is a
   curriculum. If a quest cannot survive the question *"what would I call this in front
   of my team?"*, it is not finished.
-- **Endings play in the world, not in a curtain.** *(2026-09-01, ❗El listón.)* No
-  cutscene takes control to tell the player they did well. The street changes, they
-  walk through it, and anything longer — speeches, the report read aloud — is
-  walk-up dialogue they may elect to hear or skip. Owner's words: *"we make the
-  player notice for 5 seconds then the game goes back to normal."*
+- **La inauguración plays in the world, not in a curtain.** *(2026-09-01, ❗El listón.
+  SCOPE CORRECTED 2026-09-02 — see below.)* The city's FINAL ceremony: the street
+  changes, the player walks through it, and anything longer — speeches, the report read
+  aloud — is walk-up dialogue they may elect to hear or skip. Owner's exact words:
+  *"we make the player notice for 5 seconds then the game goes back to normal to
+  continue with more training."*
+  - **⚠️ Scope correction, owner-prompted (*"When did I ban a curtain like that?"*).**
+    The owner said this about ONE scene — the city's finale. The session generalised it
+    into a law covering EVERY district ending, in the owner's name, and then cited it to
+    call the existing end panel a contradiction. **That generalisation was the session's,
+    not the owner's.** The rule above is now scoped to what was actually said.
+  - **Still open, deferred to /nacho** *(owner: "It is probably something I can defer to
+    nacho. I think we can try one thing but it shouldn't be hard coded so it can be
+    customized. We just need to be aware of points in the game that are affected.")*
+    How a DISTRICT's ending presents itself is a story-craft call, not a settled law.
+    Whatever is chosen ships as **content-declared, per district** — never hardcoded —
+    and the session must list every point in the game the choice touches.
 
 ## Asking someone what game they want
 

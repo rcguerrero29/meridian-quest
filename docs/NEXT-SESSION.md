@@ -26,6 +26,13 @@ tools: `smoke.js`, `shots.js` (scene screenshots), `tilesheet.js` (the cold read
 **Everything else that session produced is a PLAN, deliberately not built** — the owner
 said so repeatedly. See `docs/IDEAS.md` §15.
 
+## The backlog lives in `docs/BACKLOG.md`
+
+*El changarrito de Don Güero* — one ranked list of everything queued, with costs, so
+nobody has to reconcile `IDEAS.md`, `CITY.md` and this file to find out what is next.
+Opened 2026-09-02 at the owner's ask. **Read it before planning; update it when
+something ships or a decision lands.**
+
 ## Resume ritual
 
 0. **Read `docs/OWNER.md`** — the owner's standing rules (settled decisions, taste,

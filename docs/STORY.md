@@ -332,11 +332,13 @@ green). Kept as a record of what was wrong and what replaced it.
 which was over-broad.** Two rules signed LATER on 2026-09-01 are NOT built, and one of
 them the engine currently contradicts:
 
-- **❗El listón — "endings play in the world, not in a curtain" is SIGNED AND NOT BUILT.**
-  `finish()` at `engine/engine.js:1813-1814` does `$("world").hidden=true` and shows the
-  `#end` panel. That is a curtain that takes control — precisely what the Settled rule
-  forbids. The five-second diegetic inauguración, the walk-up speeches and the mural
-  carrying the grade are all still promises.
+- **❗El listón — the INAUGURACIÓN is signed and not built.** The five-second diegetic
+  ceremony, the walk-up speeches and the mural carrying the grade are still promises.
+  **Correction 2026-09-02:** an earlier version of this entry called `finish()`'s end
+  panel a *contradiction* of a Settled rule. It is not. The owner scoped their answer to
+  the city's finale; the session generalised it to every district ending. `finish()` is
+  **unchanged, unjudged, and awaiting a /nacho call** on how a district's Saturday should
+  present itself — which then ships as content-declared, per district, never hardcoded.
 - **❗El día — "the morning after" is NOT built.** Nothing tracks last-played; there is
   no day-turnover state anywhere in the engine.
 
