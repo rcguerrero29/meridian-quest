@@ -215,6 +215,8 @@
     <p class="eyebrow" id="worldTag"></p>
     <div class="viewport" id="vp">
       <canvas id="cv"></canvas>
+      <canvas id="cv3" hidden></canvas>
+      <button id="rot3d" hidden aria-label="Rotate camera" style="position:absolute; right:12px; top:58px; width:40px; height:40px; border:none; border-radius:50%; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.15rem; cursor:pointer; backdrop-filter:blur(2px);">↻</button>
       <div class="dpad" id="dpad" hidden>
         <button class="blank"></button><button data-d="up" aria-label="Up">▲</button><button class="blank"></button>
         <button data-d="left" aria-label="Left">◀</button><button class="blank"></button><button data-d="right" aria-label="Right">▶</button>
@@ -276,6 +278,7 @@
             <button data-cam="top"></button>
             <button data-cam="front"></button>
             <button data-cam="iso"></button>
+            <button data-cam="3d"></button>
           </div>
           <label id="lbMusic"></label>
           <div class="optrow" id="tuneRow">
@@ -453,7 +456,9 @@
 <script src="content/meridian/npcs.js"></script>
 <script src="content/meridian/maps.js"></script>
 <script src="content/meridian/config.js"></script>
+<script src="vendor/three.min.js"></script>
 <script src="engine/engine.js"></script>
+<script src="engine/engine3d.js"></script>
 <script>
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("./sw.js").catch(function(){});

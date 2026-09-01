@@ -232,13 +232,14 @@ $("ticker").addEventListener("click",()=>{$("ticker").hidden=true;});
 let lastBump=0;
 const pendingAt=n=>n.q.find(qi=>!done.has(qi)&&qOpen(qi));
 /* ---------- canvas ---------- */
-const cv=$("cv"),ctx=cv.getContext("2d");
+const cv=$("cv");let ctx=cv.getContext("2d"); /* let: the 3D baker borrows ctx to render tile art into textures */
 const VW=10*TS,VH=8*TS;
 function sizeCanvas(){
   const w=$("vp").clientWidth,scale=window.devicePixelRatio||1;
   cv.style.height=(w*VH/VW)+"px";
   cv.width=VW*scale; cv.height=VH*scale;
   ctx.setTransform(scale,0,0,scale,0,0);
+  const c3=$("cv3");if(c3)c3.style.height=cv.style.height;
 }
 window.addEventListener("resize",sizeCanvas);
 const C={floor:"#E7DFC8",floorAlt:"#E1D8BE",rug:"#C9B7E8",wall:"#453D57",wallTop:"#5A5170",
@@ -346,7 +347,11 @@ function drawIso(){
 }
 function camSet(m){camMode=m;
   try{localStorage.setItem("mqcam",m);}catch(e){}
-  document.querySelectorAll("#camRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.cam===camMode?"true":"false"));}
+  document.querySelectorAll("#camRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.cam===camMode?"true":"false"));
+  const is3=camMode==="3d",c3=$("cv3");
+  if(c3)c3.hidden=!is3;
+  cv.hidden=is3;
+  if($("rot3d"))$("rot3d").hidden=!is3;}
 document.querySelectorAll("#camRow button").forEach(b=>b.addEventListener("click",()=>camSet(b.dataset.cam)));
 /* ---------- tile renderer registry (graphics-prep, IDEAS §7 step 1) ----------
    Every glyph draws via TILEDRAW[ch](rc), rc={sx,sy,x,y,canopy}. Content packs
@@ -640,6 +645,9 @@ function drawFront(){
   drawWindows(w,camX,camY);
 }
 function draw(){
+  if(camMode==="3d"){ /* camera #4 — falls back to front-profile if 3D can't run here */
+    if(typeof draw3d==="function"&&window.THREE&&draw3d())return;
+    drawFront();return;}
   if(camMode==="iso"){drawIso();return;}
   if(camMode==="front"){drawFront();return;}
   const w=CW();
@@ -1927,7 +1935,8 @@ function applyLang(){
   $("lbTheme").textContent=t.lbTheme;
   $("lbCam").textContent=t.lbCam;
   document.querySelectorAll("#camRow button").forEach(b=>{
-    b.textContent=b.dataset.cam==="top"?t.camTop:b.dataset.cam==="front"?(t.camFront||"⬆ 2.5D"):t.camIso;
+    b.textContent=b.dataset.cam==="top"?t.camTop:b.dataset.cam==="front"?(t.camFront||"⬆ 2.5D")
+                 :b.dataset.cam==="3d"?(t.cam3d||"⛰ 3D"):t.camIso;
     b.setAttribute("aria-pressed",b.dataset.cam===camMode?"true":"false");});
   $("lbMusic").textContent=t.lbMusic;
   document.querySelectorAll("#tuneRow button").forEach((b,i)=>{
@@ -2340,7 +2349,7 @@ $("undoBtn").addEventListener("click",()=>{
   toast(T().undoToast,1200);
 });
 function paintAt(clientX,clientY){
-  if(camMode==="iso"){toast(T().isoEdit,2200);return;} /* tap→tile math is top-down */
+  if(camMode==="iso"||camMode==="3d"){toast(T().isoEdit,2200);return;} /* tap→tile math is top-down */
   const r=cv.getBoundingClientRect();
   let dw=r.width,dh=r.height,ox=0,oy=0;const ar=VW/VH;
   if(dw/dh>ar){const w2=dh*ar;ox=(dw-w2)/2;dw=w2;}else{const h2=dw/ar;oy=(dh-h2)/2;dh=h2;}
@@ -2567,7 +2576,8 @@ function applyMercado(){
 /* The city is a pure function of progress: rewind the street, then build back
    exactly what has been earned. So "New game +" really does hand you an empty lot —
    no Studio you did not raise, no mercado you did not open. */
-function applyGrowth(){rebuildWorld("st");applyObra();applyMercado();}
+function applyGrowth(){rebuildWorld("st");applyObra();applyMercado();
+  if(typeof t3Invalidate==="function")t3Invalidate();} /* the 3D camera rebuilds its meshes */
 function applyObra(){const s=(done.has(12)?1:0)+(done.has(13)?1:0);
   const w=WORLDS.st;
   for(let k=1;k<=s;k++)OBRA[k].forEach(([y,x,ch])=>{
@@ -2634,7 +2644,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   });
   $("tpSkip").addEventListener("click",()=>{stripPassHash();$("tpFound").hidden=true;});
 })();
-applyAdmin();applyStakes();applyLang();applyCtl();applyTheme();
+applyAdmin();applyStakes();applyLang();applyCtl();applyTheme();camSet(camMode);
 $("verTag").textContent="Meridian Quest · "+(typeof GAMEV!=="undefined"?GAMEV:"dev");
 try{if(sessionStorage.getItem("mqupd")==="1"){sessionStorage.removeItem("mqupd");
   setTimeout(()=>toast("⬆️ "+(typeof GAMEV!=="undefined"?GAMEV:"")+" — "+T().updToast,3200),900);}}catch(e){}

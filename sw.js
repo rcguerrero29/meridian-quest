@@ -1,7 +1,7 @@
 /* Meridian Quest service worker — cache-first, offline-capable */
-const CACHE = "mq-v35";
+const CACHE = "mq-v36";
 const ASSETS = ["./", "./index.html", "./qr.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
-  "./engine/engine.js",
+  "./engine/engine.js", "./engine/engine3d.js", "./vendor/three.min.js",
   "./content/meridian/strings.js", "./content/meridian/quests.en.js", "./content/meridian/quests.es.js",
   "./content/meridian/npcs.js", "./content/meridian/maps.js", "./content/meridian/config.js"];
 

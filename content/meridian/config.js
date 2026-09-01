@@ -1,5 +1,5 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
-const GAMEV="mq-v35";
+const GAMEV="mq-v36";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack (owner + AJ pick, 2026-08-31): the front-profile

@@ -611,6 +611,11 @@ const CANDIDATES = [
         Date = RD; return true;
       } catch (e) { Date = RD; return String(e); }
     })();
+    // camera #4: three.js is vendored and a 3D frame actually renders
+    out.threeOk = !!window.THREE;
+    try { camSet('3d'); out.d3 = (typeof draw3d === 'function') ? draw3d() : 'missing'; }
+    catch (e) { out.d3 = String(e); }
+    try { camSet('top'); draw(); } catch (e) { out.d3 = 'top restore threw: ' + e; }
     // the ball button exists and Sonny's strings are in both languages
     out.ballBtn = !!document.getElementById('ball');
     out.langOk = ['ballLb', 'fetchYes', 'fetchNo', 'howl', 'beagleTreat', 'camFront']
@@ -630,6 +635,8 @@ const CANDIDATES = [
   if (!['top', 'front', 'iso'].includes(front.camdef)) fails.push('CAMDEF missing or invalid: ' + front.camdef);
   if (!front.facadeWin) fails.push('facade tiles missing win metadata');
   if (front.winPass !== true) fails.push('lit-windows pass threw: ' + front.winPass);
+  if (!front.threeOk) fails.push('three.js not loaded (vendor/three.min.js missing?)');
+  if (front.d3 !== true) fails.push('3D camera did not render: ' + front.d3);
   if (!front.ballBtn) fails.push('ball button missing from the HUD');
   if (!front.langOk) fails.push('Sonny/camera strings missing in EN or ES');
 

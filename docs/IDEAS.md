@@ -489,7 +489,26 @@ marketting for a new game for pet caring only."*
   the city (Sonny's own corner? a parcel?), and exactly which customizations the
   preview offers vs. holds back for the standalone.
 
-## 14. The 3D plan (owner-requested 2026-08-31 — PLAN ONLY, nothing built)
+## 14. The 3D plan (owner-requested 2026-08-31 — **v1 SHIPPED 2026-09-01, mq-v36**)
+
+**Shipped as planned** (sittings 1-2 merged into one): three.js r149 vendored at
+`vendor/three.min.js` (owner said "go ahead" — the confirm gate below is
+satisfied); `engine/engine3d.js` is the fourth camera (⛰ 3D in Settings, `mqcam
+"3d"`). The ground is the whole 2D floor pass baked to one texture; walls and
+facades are boxes wearing their TILEDRAW art (facade texture on both long faces);
+fences are cutout planes; doors stand upright and you walk through them;
+furniture/props are standing cutouts; trees are trunk + canopy sprite; every
+actor is a live billboard repainted each frame by the same drawPerson/drawDog/
+drawBeagle code — emotes, ❗ markers, bandanas and the face heart included. The
+↻ button (3D only) orbits the camera in eight stops — the "flip the camera"
+wish from the iso playtest. Time-of-day drives ambient/sun/sprite tint and the
+sky color. No WebGL → automatic fall back to the front camera. Smoke asserts a
+3D frame actually renders headless.
+**Remaining (sitting 3):** drag-to-orbit, emissive window quads at night, DECOR/
+decals in 3D, input remap when the camera is rotated, and the iso retirement
+decision. Original plan below, kept for the record:
+
+### Original plan (2026-08-31)
 
 **The strategy in one line:** we do not rebuild the art for 3D — we put the
 existing 2D art INSIDE 3D. The school is "HD-2D" (Octopath Traveler, Don't

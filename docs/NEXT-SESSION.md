@@ -111,6 +111,13 @@ business packs.** Item 3 below is therefore the head of the queue.
    **dress him via Xochi** — plan written in IDEAS §11 (generalize the pet
    wardrobe to named beagles, one short sitting). The janitor business/practice
    pack stays a future Don Güero phase.
+3c. **El Parque SHIPPED (mq-v35)** — leash → rainbow bridge → chill session →
+   recap card; bandanas + adopt-up-to-4 dogs (`mqpark`). It is the pet spin-off's
+   preview and future starting map (IDEAS §13).
+3d. **3D v1 SHIPPED (mq-v36)** — camera #4 per IDEAS §14 (three.js vendored,
+   HD-2D: baked-texture world + live billboard actors, ↻ orbit stops, day/night).
+   Sitting 3 remains: drag-orbit, emissive night windows, DECOR/decals in 3D,
+   rotated-camera input remap, iso retirement decision.
 4. **AJ's picks**: fandom eggs round 2 + mechanics (IDEAS §9 — Grogu lunchbox,
    birthday calendar magic, streak memory…). Blocked on AJ choosing.
 5. **Music v2** (IDEAS §8) when music gets its own session.
