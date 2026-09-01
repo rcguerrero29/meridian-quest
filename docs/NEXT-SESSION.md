@@ -48,21 +48,42 @@ Deployed at sw `mq-v22`. Smoke suite green throughout (24 quests, maxXP 350).
 1. **Playtest everything** — the mercado chapter AND today's upgrades (lighting at
    night, palette wardrobe, tune picker, NPC editing) have not been human-played.
    `/playtest` guides; quest copy and feel are the deliverables.
-2. **Phase 2 — run `/nacho` then `/don-guero`.** NEW: /nacho (Opus 5 story director, docs/STORY.md is his bible) plans the arc past the mercado chapter — the story currently ENDS there and the owner noticed. Story beats and the parcel plan land together.
-   Original queue text: **run `/don-guero` again.** The SW lot is built; the ledger's next
-   obvious parcel is the **st southeast "RESERVED LOT"**. Owner's role ranking is
-   signed (AI PM first, then automation consultant, ops analyst, implementation
-   lead, prompt engineer) — Phase 2 picks the next business off the brainstorm list
-   in CITY.md and the next role down.
+2. **Phase 2 — `/nacho` is DONE (2026-09-01); `/don-guero` is next.** The arc past
+   the mercado is planned and four story decisions are SIGNED into `docs/STORY.md`:
+   ❗La vía (the trolley brings customers *and* a franchise scouting the north end),
+   ❗La carta (**referrals** — Chelo phones ahead and what she says is the grade you
+   earned; the barrio is the player's reference letter and every business is a job
+   interview), ❗Tacho (the old mechanic never comes around, and that's the win),
+   ❗El listón + ❗El día (la inauguración plays in the world in five diegetic
+   seconds; the day turns over while the player is away and the street remembers).
+   Three of those graduated to `docs/OWNER.md` → Settled. Taller Herrera is cast,
+   escalated across 8 quests, given three grade endings and a voice guide — a build
+   session can write EN+ES from `docs/STORY.md` → "Phase 2 — Taller Herrera".
+   **Run `/don-guero` for the parcel half before building** (st southeast lot, `ta`).
+   Nacho's finding worth carrying: the quests train the roles, the arc did not —
+   the role was a label in `config.js` nobody in the world ever said. Referrals,
+   naming the role out of a character's mouth, and giving the decision report a
+   reader in the world are the three fixes, now canon.
+2a. **Story canon the shipped game contradicts** (`docs/STORY.md` → "🚩 Bible vs.
+   game text — signed, NOT BUILT"). Three, in cost order: `qOpen` at
+   `engine/engine.js:146` still gates on `chSeen` so districts close behind the
+   player (highest story cost — the barrio takes things away); "Roll credits" ends
+   all three mercado epilogues against Settled "the city has no credits"
+   (**replacement copy EN+ES is written and ready to drop in**); and `in3` still
+   threatens "the week resets" while `STAKES.mode` ships as `none` (copy not yet
+   written — Nacho's lane).
 2b. **Phase 2 detail is already planned** (added by the /don-guero session, see
    CITY.md → "The open city — Phases 2-5"): weeks are retired, `CHAPTERS` becomes
    districts that do NOT close behind the player, and all four remaining businesses
    are cast and scoped — Taller Herrera (automation consultant, st southeast lot),
    Panadería La Espiga (ops analyst), Limpieza Velázquez (implementation lead),
-   Nolasco Tax & Notario (prompt engineer). One per sitting. **Hearts are signed but
-   NOT built**: the rule is now "the grade on a business's ending, scoped per
-   business, never blocks anything" — what ships today still ends the chapter at
-   zero. Do the open-city refactor before the taller; the taller depends on it.
+   Nolasco Tax & Notario (prompt engineer). One per sitting. **Correction 2026-09-01:
+   the stakes layer and the per-business grade DID ship** (`STAKES={mode:"none"}` in
+   config, `gradeOf()` at `engine/engine.js:131`) — earlier queue text calling them
+   signed-not-built was wrong. The one real gap left is **the open city itself**:
+   `qOpen` at `engine/engine.js:146` still gates on `chSeen`, so districts close
+   behind the player. Do that refactor before the taller; the taller depends on it,
+   and Nacho's referral spine assumes every door stays open.
 
 **Game shape signed 2026-08-31** (`docs/OWNER.md` → "The shape of the game"): north
 star is *"a barrio that grows because you helped it"*; the record becomes a room you

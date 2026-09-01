@@ -67,6 +67,22 @@ preference that outlives one phase; cite the date and their words.
 - **EN/ES in lockstep**, retry-until-correct, saves stay on-device.
 - **Fun is a requirement**, not a nice-to-have.
 - **HQ is the onboarding.** No separate tutorial or staging area. *(2026-08-31)*
+- **The barrio is the player's reference letter.** *(2026-09-01, ❗La carta.)* A
+  business's grade becomes what its owner says about you to the next one — the
+  previous neighbor phones ahead, and every new business is a job interview you walk
+  into with somebody's opinion of you already in the room. A cold referral opens the
+  door colder; it never locks it. This is what puts the career layer inside the
+  fiction instead of beside it, and it works in any story the engine is reused for.
+- **A day may end. It may never close anything.** *(2026-09-01, ❗El día.)* Days are
+  light and memory, not containers for content. The test: if a day's ending changes
+  what the player CAN DO, it is a week wearing a hat. The shipped shape is **the
+  morning after** — the player plays as long as they like, the day turns over while
+  they are away, and next launch the street remembers.
+- **Endings play in the world, not in a curtain.** *(2026-09-01, ❗El listón.)* No
+  cutscene takes control to tell the player they did well. The street changes, they
+  walk through it, and anything longer — speeches, the report read aloud — is
+  walk-up dialogue they may elect to hear or skip. Owner's words: *"we make the
+  player notice for 5 seconds then the game goes back to normal."*
 
 ## Asking someone what game they want
 
