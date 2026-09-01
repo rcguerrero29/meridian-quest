@@ -98,6 +98,14 @@ preference that outlives one phase; cite the date and their words.
   - **Version pins collide.** Two branches will both bump to the same `mq-vN`. On a
     merge, resolve FORWARD to a new number rather than picking a side.
   - **Never assume the owner can see your work.** Only `main` deploys. Say so.
+- **Arc-level tension is a declarable layer a pack may omit.** *(2026-09-01, ❗La
+  sombra. Owner: "it comes for me but it is custom in case we have aJ wanting a version
+  to focus on the calming/comfort.")* Meridian's late arc has a franchise that makes the
+  player a job offer — nobody's business is harmed, and the temptation is the story. But
+  the whole thread ships as **content**, declared per pack and droppable, so a pack can
+  run the same city with no antagonist and no offer and lose nothing structural. This is
+  the AJ law ("if a feature cannot be turned off for AJ, it is built wrong") pointed at
+  *story pressure* rather than mechanics: comfort is the floor, tension is opt-in.
 - **Surface every contradiction, every time — never silently.** *(2026-09-01, owner:
   "lets make sure we fix or ask me about this contradiction, we need all these brought
   up at all times - all agents and skills for this should let the owner/me know
