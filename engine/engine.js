@@ -1528,7 +1528,10 @@ document.querySelectorAll(".dpad button[data-d]").forEach(b=>{
   b.addEventListener("pointercancel",off);b.addEventListener("pointerleave",off);
 });
 const KEYS={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right"};
-window.addEventListener("keydown",e=>{if(!$("world").hidden&&KEYS[e.key]){held=KEYS[e.key];e.preventDefault();}
+window.addEventListener("keydown",e=>{
+  const t2=e.target; /* typing a dog's name is not walking — "shadow" has a w, an a, an s and a d */
+  if(t2&&(t2.tagName==="INPUT"||t2.tagName==="TEXTAREA"))return;
+  if(!$("world").hidden&&KEYS[e.key]){held=KEYS[e.key];e.preventDefault();}
   if(e.key==="Enter"&&!$("talk").hidden&&!$("world").hidden)$("talk").click();});
 window.addEventListener("keyup",e=>{if(KEYS[e.key]&&held===KEYS[e.key])held=null;});
 $("talk").addEventListener("click",()=>{
@@ -1571,10 +1574,10 @@ function fredCheck(){ /* now the generic animal-interaction check: every creatur
   const loveOK=dogT; /* you can always tell him */
   $("love").hidden=!loveOK;
   if(loveOK)$("love").textContent=T().loveLb||"💗";
-  /* 🎓 commands: anywhere in the park (Come works from afar), or beside a roaming dog */
-  const cmdOK=(world==="pk"&&CRIT.some(c=>isDog(c)&&c.world==="pk"))||dogT;
-  $("cmd").hidden=!cmdOK;
-  if(cmdOK)$("cmd").textContent=T().cmdLb||"🎓";
+  /* 🐾 the paw menu: always on screen (owner ask) — commands reach the nearest
+     dog here, or whistle Sonny across the whole city */
+  $("cmd").hidden=false;
+  $("cmd").textContent="🐾";
   let adoptOK=false;
   if(world==="pk"&&!moving&&!bandOK){const w9=CW();
     adoptOK=[[1,0],[-1,0],[0,1],[0,-1]].some(dd=>{const nx=px+dd[0],ny=py+dd[1];
@@ -2743,7 +2746,8 @@ $("adoptX").addEventListener("click",()=>{$("adoptP").hidden=true;});
 function nearestDog(){let best=null,bd=1e9;
   CRIT.forEach(c=>{if(!isDog(c)||c.world!==world)return;
     const d=Math.abs(c.x-px)+Math.abs(c.y-py);if(d<bd){bd=d;best=c;}});
-  return best;}
+  /* nobody here? the paw menu still reaches Sonny, wherever he is */
+  return best||CRIT.find(c=>isDog(c)&&c.name==="Sonny")||CRIT.find(c=>isDog(c))||null;}
 function dogCmd(kind){
   const c=nearestDog();if(!c)return;
   $("dogP").hidden=true;
@@ -2761,7 +2765,15 @@ function dogCmd(kind){
   if(kind==="sit"){c.sit=true;c.next=now+4500;toast("🐶 "+T().cmdOkSit,2200);}
   else if(kind==="down"){c.layT=now+5200;c.next=c.layT;toast("🐶 "+T().cmdOkDown,2200);}
   else if(kind==="stay"){c.stayT=now+9000;c.sit=true;toast("🐶 "+T().cmdOkStay,2200);}
-  else if(kind==="come"){c.stayT=0;c.sit=false;c.task={type:"come"};}
+  else if(kind==="come"){c.stayT=0;c.sit=false;
+    if(c.world!==world){ /* the whistle carries across the whole city */
+      const w=CW(),rs=dogReach({world,x:px,y:py}),opts=[];
+      for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
+        const d=Math.abs(x-px)+Math.abs(y-py);
+        if(d>=3&&d<=6&&rs[y*w.W+x])opts.push([x,y]);}
+      if(opts.length){const[wx,wy]=opts[Math.floor(Math.random()*opts.length)];
+        c.world=world;c.x=wx;c.y=wy;c.fx=wx;c.fy=wy;c.home=[wx,wy];c.follow=false;}}
+    c.task={type:"come"};}
   if(tr[kind]===3)setTimeout(()=>toast("🎓 "+T().cmdTrained(c.name||"🐶"),2600),2300);
 }
 $("cmd").addEventListener("click",()=>{
