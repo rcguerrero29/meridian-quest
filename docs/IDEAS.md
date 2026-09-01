@@ -861,3 +861,44 @@ drop the hero at a list of spots and screenshot the viewport per camera into `sh
   be re-read after the toast fades) — so this is a design call, not a bug: either make
   the ticker one clipped line, or suppress it while the toast is still showing the same
   string.
+
+---
+
+### 15.8 THE COLD-READ PASS — `node test/tilesheet.js` (built 2026-09-01)
+
+Owner named the gap: *"the test we are missing is acting as a person new to videogames
+going through the store fronts or building fronts."* `smoke.js` checks structure;
+`shots.js` shows scenes in context, **where the surroundings give the answer away**.
+This renders every tile at 4x labelled ONLY by its glyph, so the art has to carry the
+meaning alone. Findings from the first pass, judged cold before checking intent:
+
+**Reads instantly — leave alone:** agility hurdle, tunnel, weave poles, doghouse,
+fence, traffic cone, the yellow/black construction barrier, the MQT stop (pole + sign +
+bench), coffee cup, potted plant, fridge, stove, shelving, drafting table, blueprint
+wall, river, stairs, flower bed, scaffolding — and the produce crate, now that the
+fruit has silhouettes instead of coloured dots.
+
+**Fails the cold read — NOT fixed, pending the owner's call on scheduling:**
+
+1. **`Q` — La Cocina's storefront does not say "restaurant".** A red building, an
+   awning, two blank cream windows. No food cue anywhere. The mercado (`Z`) now reads
+   correctly *because it has produce in the window*; La Cocina has nothing equivalent.
+   **Biggest one — a whole business nobody can identify.** Fix shape: give the window
+   something edible or a hanging sign (a bowl, a comal, pan dulce), the way `Z` got
+   produce. *(minutes)*
+2. **All five door glyphs are pixel-identical** (`+ E L O M`). An interior office door,
+   a shop entrance and the mercado's door are the same brown double doors, so nothing
+   tells a newcomer which one leads somewhere. Fix shape: keep the shared door body,
+   vary the frame/colour per destination class. Note this compounds §15.3 — in 3D six
+   of them also face the wrong way. *(an hour)*
+3. **`D` — the desk reads as a cardboard box.** Brown box, small white label. *(minutes)*
+4. **`T` — the dining table reads as a dartboard.** Round, cream, red dot centred.
+   *(minutes)*
+5. **`I` — the mercado counter's scale is illegible** at tile size; another brown box
+   with a grey smudge. *(minutes)*
+
+**Ambiguous but arguably fine** (they are floor/infrastructure, and context does carry
+them): `R` plain lilac, `≈` dark grey, `-` grey with three bars, `2` a small chevron.
+
+**Open question put to the owner and not yet answered:** whether this storefront
+legibility pass is its own sitting or rides along with the 3D/world session in §15.
