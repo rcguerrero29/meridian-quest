@@ -423,9 +423,10 @@ front cameras. Original wish list below, kept for the record:
 - **FIXED: "sometimes sonny cant get the ball."** Greedy stepping wedged on walls.
   Fetch now runs real BFS pathfinding (`bfsStep`), and throws only target tiles the
   dog can actually reach (`dogReach` flood) — a throw is never a trap.
-- **Sonny canon look signed & shipped:** lemon coat with a WHITE HEART in the
-  lemon saddle, white freckles across the coat and ear, white tail (tail was
-  already white). This is the default beagle look, engine-wide.
+- **Sonny canon look signed & shipped** *(corrected by the owner same day —
+  mq-v33)*: the WHITE HEART is ON HIS FACE, right above and between the eyes,
+  set in a lemon crown over the brow; white freckles across the lemon coat and
+  ear; white tail. This is the default beagle look, engine-wide.
 - **Food-driven fetch shipped:** a treat fuels him for ~4 minutes — the next fetch
   cycle rolls at **6 of 7** instead of 4 of 7 (baseline 4/7 stays canon when
   unfed). Feeding restarts the cycle so the fuel applies immediately.

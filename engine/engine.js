@@ -1096,12 +1096,8 @@ function drawBeagle(g,cr,sx,sy){ /* a lemon beagle: white coat, lemon saddle, fl
   g.beginPath();g.moveTo(cx-7,sy+19.5+dy);g.quadraticCurveTo(cx-11,sy+15+dy+wg*0.5,cx-10+wg,sy+11+dy);g.stroke();
   g.fillStyle=white;g.beginPath();g.roundRect(cx-7.5,sy+17+dy,14,8,4);g.fill();
   g.fillStyle=lemon;g.beginPath();g.roundRect(cx-5,sy+16.5+dy,8,4.5,3);g.fill(); /* saddle */
-  g.fillStyle=white; /* Sonny canon: a white heart in the lemon */
-  g.beginPath();g.arc(cx-2.2,sy+17.8+dy,0.95,0,7);g.arc(cx-0.6,sy+17.8+dy,0.95,0,7);g.fill();
-  g.beginPath();g.moveTo(cx-3.15,sy+18.2+dy);g.lineTo(cx-1.4,sy+20.1+dy);g.lineTo(cx+0.35,sy+18.2+dy);
-  g.closePath();g.fill();
-  /* and white freckles across the lemon coat */
-  [[-4.4,17.2],[2.3,17.4],[1.6,20]].forEach(p=>{g.beginPath();g.arc(cx+p[0],sy+p[1]+dy,0.55,0,7);g.fill();});
+  g.fillStyle=white; /* white freckles across the lemon coat */
+  [[-4.4,17.2],[2.3,17.4],[-1.2,18.6],[1.6,20]].forEach(p=>{g.beginPath();g.arc(cx+p[0],sy+p[1]+dy,0.55,0,7);g.fill();});
   if(!cr.sit&&!lay){g.fillRect(cx-6,sy+24.5,2.2,3.2);g.fillRect(cx+3,sy+24.5,2.2,3.2);}
   if(lay)g.fillRect(cx+2,sy+24.8,7.5,2.2); /* front legs stretched out, professionally */
   if(dig){ /* paws at the ground, dirt flying */
@@ -1110,6 +1106,13 @@ function drawBeagle(g,cr,sx,sy){ /* a lemon beagle: white coat, lemon saddle, fl
       g.fillRect(cx+p[0]+Math.sin(Date.now()/90+i*2)*2.5,sy+p[1],2,2);});
     g.fillStyle=white;}
   g.beginPath();g.arc(cx+6.5,sy+16+dy+hy,4.6,0,7);g.fill(); /* head */
+  g.fillStyle=lemon; /* lemon crown over the brow — a lemon beagle wears his color up top */
+  g.beginPath();g.arc(cx+7,sy+14.4+dy+hy,3.7,Math.PI,Math.PI*2);g.fill();
+  g.fillRect(cx+3.3,sy+14.4+dy+hy,7.4,1.6);
+  g.fillStyle=white; /* Sonny canon: the white heart on his face, above and between the eyes */
+  g.beginPath();g.arc(cx+5.9,sy+12.7+dy+hy,0.8,0,7);g.arc(cx+7.2,sy+12.7+dy+hy,0.8,0,7);g.fill();
+  g.beginPath();g.moveTo(cx+5.1,sy+13+dy+hy);g.lineTo(cx+6.55,sy+14.5+dy+hy);g.lineTo(cx+8,sy+13+dy+hy);
+  g.closePath();g.fill();
   g.fillStyle=lemon; /* floppy ear */
   g.beginPath();g.roundRect(cx+2.2,sy+13.2+dy+hy,3.4,7.5,2);g.fill();
   g.fillStyle=white; /* ear freckles */
