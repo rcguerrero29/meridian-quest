@@ -772,3 +772,87 @@ already `console.warn` real diagnostics that are invisible on a phone. That is w
 buried behind the gear, so "am I on the new build?" cannot be answered in the field.
 And CI's version lockstep proves `sw.js` and `config.js` *agree*, never that the number
 *moved* — a fix shipped without a bump strands every installed PWA and CI stays green.
+
+---
+
+### 15.6 THE DOORWAY BUG — reproduced 2026-09-01, NOT fixed
+
+Owner: *"what also happens when the character doesnt quite move but turn in place or
+close to it infront of an entrance, this was also behaving weird."* Two separate real
+things, both reproduced with a scripted probe, neither guessed at.
+
+**(a) A door you just came through ignores you for ~900ms — and never re-checks.**
+
+Reproduction, exactly: walk out of Meridian HQ into the street. You arrive at (14,1).
+Turn around and step straight back onto the door at (14,0). **Nothing happens.** You are
+standing on the door and it does nothing. Waiting does not help. You have to step off
+and step back on.
+
+Mechanism, confirmed by waiting out the window and retrying the *same* door (it then
+worked): `portalT = performance.now()+900` at `engine/engine.js` blocks re-triggering
+after a warp. The portal check lives inside `if(mt>=1)` — the move-completion branch of
+`loop()`. So if you *arrive* on a portal tile while the window is still open, the portal
+is skipped, and because standing still never completes another move, **it is never
+re-checked**. The door is not broken; the guard is swallowing a legitimate entry.
+
+Do not just delete the guard — its comment says it "kills door ping-pong", and that is
+real: without it you would bounce between two doors forever. The fix has to keep that.
+Options, cheapest first:
+1. **Re-check on arrival, once the window closes.** Keep a `pendingPortal` flag when a
+   portal is skipped, and fire it the moment `performance.now() > portalT` while the
+   hero is still standing on it. Preserves ping-pong protection exactly.
+2. **Scope the guard to the portal you just used**, not all portals — remember the
+   destination tile and only suppress *that* one.
+3. Shorten the window (weakest — it just makes the dead zone smaller).
+
+**A test exists for this and is deliberately NOT committed**, because it fails today: it
+walks the hero out and straight back in, and asserts the world changed. Add it with the
+fix, in the same commit.
+
+**(b) There is no turn-in-place. One press always steps.**
+
+Verified on open ground with the post-warp input freeze cleared (the first measurement
+was contaminated by that freeze — noting it so the next session does not repeat the
+mistake). `tryStep()` sets `dir` and moves in the same call, so **you cannot face a door
+without walking into it**, and you cannot face anything without stepping onto it. In
+front of an entrance that means every press toward the door is a warp — there is no
+"stand and look at it" state at all. That is very likely what "doesn't quite move but
+turn in place" is describing.
+
+This is a **design decision, not a bug** — Zelda/Pokémon-style "first press turns, second
+press walks" is a real option but it changes the feel of every single step in the game,
+so it is the owner's call, not a fix to slip in. Note that nothing needs facing today:
+`checkTalk()` and every animal interaction use Manhattan distance only, so adding
+turn-in-place would cost a step everywhere and buy nothing mechanically — its only
+benefit is that doorways stop feeling twitchy.
+
+---
+
+### 15.7 THE EYEBALL PASS — `node test/shots.js` (built 2026-09-01)
+
+Owner's ask: *"can you run basic 'manual' smoke tests like oh this looks like a door or
+store or restaurant."* `node test/smoke.js` proves the maps are structurally sound; it
+cannot see that a door is lying on the floor. So `test/shots.js` + `test/spots.json`
+drop the hero at a list of spots and screenshot the viewport per camera into `shots/`
+(gitignored). What the first pass actually showed:
+
+- ✅ **Calle Principal reads correctly in 3D.** The terracotta facade with a striped
+  awning and lit windows reads as a restaurant; the green storefront with produce
+  crates reads as a grocery. Awnings, trees, jacaranda blossoms and the trolley track
+  all land. This is the best-looking part of the game.
+- ✅ **Doors in the FRONT camera are excellent** — panelled, handled, upright, properly
+  set into the wall.
+- ❌ **Doors in 3D are lying flat / rotated 90°**, confirming §15.3 finding 1 *visually*
+  rather than by code reading. In HQ — the first room anyone sees — several doors read
+  as brown rectangles on the floor.
+- ❌ **HQ's walls in 3D are flat untextured purple slabs** (§15.3 finding 2). The room
+  reads as an empty gallery rather than an office.
+- ❌ **The rainbow bridge is a flat rainbow stripe painted on the ground** that does not
+  even span the river — it reads as a smear on the floor, not a crossing. Confirms
+  §15.4: there is no bridge object in any camera.
+- ⚠️ **The activity ticker and the toast show the same text at the same time**, and the
+  ticker is a large translucent block over roughly a third of the view. Both cameras.
+  The ticker is a deliberate owner-requested feature (mirror the last message so it can
+  be re-read after the toast fades) — so this is a design call, not a bug: either make
+  the ticker one clipped line, or suppress it while the toast is still showing the same
+  string.
