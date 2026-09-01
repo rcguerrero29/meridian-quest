@@ -64,7 +64,18 @@ Deployed at sw `mq-v22`. Smoke suite green throughout (24 quests, maxXP 350).
    the role was a label in `config.js` nobody in the world ever said. Referrals,
    naming the role out of a character's mouth, and giving the decision report a
    reader in the world are the three fixes, now canon.
-2a. **Story canon the shipped game contradicts** (`docs/STORY.md` → "🚩 Bible vs.
+2a. **DONE 2026-09-01 — the open city shipped, and so did the story canon it needed.**
+   `qOpen` fixed (districts open and stay open), `week1` `need` 16 → 12, nine strings
+   rewritten EN+ES, 24 `late` reframe lines added, nine continuity breaks fixed, the
+   world-tag ❗ un-hardcoded. sw + GAMEV `mq-v40`, smoke extended and green.
+   **What is left for the customization pass is written up in `docs/STORY.md` →
+   "Bible vs. game text — OPEN"** — four items, each with options: the burnout
+   epilogues belong to a mode that ships off; which calendar survives into the
+   reusable template (`week1` as an id will mislead AJ's planner); ambient chat has no
+   state; and Nacho's preferred Week One split (office 0-9 / barrio 10-15 as two
+   districts with two Saturdays) which would make the barrio floor structural instead
+   of arithmetic — queued for the Taller Herrera session.
+2b-old. **Story canon the shipped game contradicts** (`docs/STORY.md` → "🚩 Bible vs.
    game text — signed, NOT BUILT"). Three, in cost order: `qOpen` at
    `engine/engine.js:146` still gates on `chSeen` so districts close behind the
    player (highest story cost — the barrio takes things away); "Roll credits" ends

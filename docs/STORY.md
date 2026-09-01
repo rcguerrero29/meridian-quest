@@ -318,6 +318,11 @@ hired you for. Three fixes, now canon:
   EN+ES shipped; nine continuity breaks fixed in the text; four unresolved items
   written to the OPEN list below.
 
+- 2026-09-01 · ❗La puerta · **Week One's bar drops 16 → 12** · the office was the one
+  room in Meridian that closed behind you; twelve opens the street with four quests
+  still answerable and puts every reframe line into default play. Owner: *"drop it to
+  12 but doesnt have to happen in the office"* — which is what `need` already meant.
+
 ## Bible vs. game text — RESOLVED 2026-09-01
 
 Everything logged here on 2026-09-01 as signed-not-built is now shipped (sw `mq-v38`,
@@ -371,15 +376,22 @@ Contradictions found 2026-09-01 that cannot be settled by rewriting a line. Each
 what conflicts, why it is not Nacho's to decide, and the options. Owner's instruction:
 *"make a note so that during customization we clear the goals and this topic."*
 
-1. **Where Week One's Saturday belongs.** `week1` is one sixteen-quest district with
-   `need:16`, so its ending only fires on a full sweep and none of its quests can ever
-   be answered late in default play — the one place in Meridian that closes behind you,
-   in the city that just made "you can always come back" the law. It also gates El
-   Mercado behind 16/16, and it means sixteen of the twenty-four reframe lines only
-   render for a player who burns out in a stakes mode that ships turned off. Options:
-   leave it; drop the bar to ~12; or split the office (0-9) from the first three barrio
-   businesses (10-15) into two districts with two endings and two mural panels.
-   **Blocked on ❗La puerta.**
+1. ~~**Where Week One's Saturday belongs.**~~ **SETTLED 2026-09-01 (❗La puerta):
+   `need` dropped 16 → 12.** Week One's Saturday now plays with four quests still on
+   the board, they stay answerable forever, and all 24 reframe lines are live in
+   default play. Owner's clarification, which was already true of the data: *"doesnt
+   have to happen in the office"* — `need` is a count over the whole district, and
+   week1 spans HQ (0-9, 14), La Cocina (10, 11), La Obra (12, 13) and the Studio (15).
+   Any twelve, from anywhere, in any order.
+   **What is still open, and it is smaller:** eleven of the sixteen are HQ quests, so a
+   player who works the office hard can reach twelve having answered just one barrio
+   quest, and open El Mercado barely knowing the neighborhood. Referrals (❗La carta)
+   assume the barrio can vouch for you. A per-district floor does not exist in the
+   engine and would be a build. Nacho's preferred fix is the one he already named:
+   **split Week One into the office (0-9) and the barrio (10-15) as two districts with
+   two Saturdays and two mural panels** — which makes the floor structural instead of
+   arithmetic. Queued for the session that builds Taller Herrera, when districts are
+   already on the workbench.
 
 2. **The burnout epilogues belong to a mode that ships off.** `goTitle`, `goEpi` and
    `mgoEpi` only play when stakes are `hearts`, which is admin-only; `goEpi` still
