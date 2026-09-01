@@ -78,6 +78,12 @@ preference that outlives one phase; cite the date and their words.
   what the player CAN DO, it is a week wearing a hat. The shipped shape is **the
   morning after** — the player plays as long as they like, the day turns over while
   they are away, and next launch the street remembers.
+- **No practice is ever missed.** *(2026-09-01.)* Every quest stays answerable
+  forever; a quest the world outgrows is rewritten, never removed. Owner's words:
+  *"dont close old quests... keep them open and if they need updates instead, do so
+  but i dont understand why i would miss any practice."* Corollaries: never build a
+  quest log (a list is a backlog, a person is an invitation); the ❗ carries no count,
+  colour or age; and the mural's paint only ever goes on.
 - **Endings play in the world, not in a curtain.** *(2026-09-01, ❗El listón.)* No
   cutscene takes control to tell the player they did well. The street changes, they
   walk through it, and anything longer — speeches, the report read aloud — is

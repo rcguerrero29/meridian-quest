@@ -126,8 +126,10 @@ const OBRA=[[],
   [6,14,"B"],[6,29,"B"],[7,14,"B"],[7,29,"B"],[8,14,"B"],[8,29,"B"],[8,21,"."],
   [9,14,"B"],[9,15,"B"],[9,16,"B"],[9,17,"B"],[9,18,"B"],[9,19,"B"],[9,20,"B"],[9,21,"B"],
   [9,22,"B"],[9,23,"B"],[9,24,"B"],[9,25,"B"],[9,26,"B"],[9,27,"B"],[9,28,"B"],[9,29,"B"]]];
-/* El Mercado opens on the southwest lot when Week One closes — the facade replaces
-   the barricades, the door (M) drops into the middle of the ribbon. */
+/* El Mercado opens on the southwest lot once Week One's district has played its
+   ending — the facade replaces the barricades, the door (M) drops into the middle of
+   the ribbon. Opening the next district never closes this one: Week One's quests stay
+   answerable forever (docs/OWNER.md — no practice is ever missed). */
 const MERCADO=[[13,1,"Z"],[13,2,"Z"],[13,3,"Z"],[13,4,"Z"],[13,5,"Z"],[13,6,"M"],
                [13,7,"Z"],[13,8,"Z"],[13,9,"Z"],[13,10,"Z"],[13,11,"Z"]];
 /* ---------- the content seam: what the engine draws, declared here ----------

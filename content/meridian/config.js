@@ -1,14 +1,17 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
-const GAMEV="mq-v37";
+const GAMEV="mq-v38";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack (owner + AJ pick, 2026-08-31): the front-profile
    2.5D view greets new players; a device's own Settings choice always wins */
 const CAMDEF="front";
 const MAXXP=350;
-/* Chapters: a district's quest pack, and how many of them close it.
+/* Districts: a district's quest pack, and how many answers play its ending.
    `need` is deliberately LOWER than the pack size — the city is a template, so the
-   bar to finish is data, not a constant in the engine. Retune it here. */
+   bar is data, not a constant in the engine. Retune it here.
+   `need` closes nothing: it is the bar for the ENDING BEAT, after which the district
+   stays open and its remaining quests stay answerable (docs/OWNER.md — no practice
+   is ever missed). Reaching it breaks ground on the next lot; it never locks a door. */
 /* Stakes — an OPTIONAL layer on top of the grade, declared in content so a pack
    picks its own and a district can override the pack (a relaxed town can still hold
    one scored mini-game). Modes:

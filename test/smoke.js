@@ -207,6 +207,9 @@ const CANDIDATES = [
     done = new Set(); chSeen = 0; hearts = 3; applyGrowth();
     world = 'hq'; px = fx = 10; py = fy = 11;
     if (mercadoOpen()) problems.push('replay left El Mercado standing');
+    // ...and a district that has not opened yet is not answerable from the street
+    if (qOpen(16)) problems.push('an unopened district\'s quests were already on offer');
+    if (!qOpen(0)) problems.push('the opening district is not on offer at the start');
     if (WORLDS.st.rows[13][6] === 'M') problems.push('replay left the mercado door on the street');
     // and the city rewinds evenly: no building survives a run it was not built in
     if (WORLDS.st.rows[5][21] === 'O') problems.push('replay left the Studio standing');
@@ -242,10 +245,11 @@ const CANDIDATES = [
     if (!done.has(12) || !done.has(13)) problems.push('burnout erased answered quests');
     if (WORLDS.st.rows[5][21] !== 'O') problems.push('burnout tore down the Studio');
     if (!mercadoOpen()) problems.push('burnout did not open the next district');
-    // the quests left unanswered are closed for good — no ❗ left on Week One
-    if (qOpen(0)) problems.push('a Week One quest is still on offer after the chapter closed');
+    // owner's law (docs/OWNER.md, 2026-09-01): no practice is ever missed. Ending a
+    // district's ARC never closes its quests — they stay answerable, and the ❗ stays up.
+    if (!qOpen(0)) problems.push('a Week One quest closed behind the player');
     { const tovar = WORLDS.hq.npcs.find(n => n.npc === 'tovar');
-      if (!tovar || pendingAt(tovar) !== undefined) problems.push('a closed chapter still shows a quest marker'); }
+      if (!tovar || pendingAt(tovar) === undefined) problems.push('an unanswered quest lost its marker when its district closed'); }
     if (!qOpen(16)) problems.push('the new chapter\'s quests are not on offer');
 
     done = new Set(); chSeen = 0; hearts = 3; marks = {}; applyGrowth();

@@ -33,6 +33,23 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
 - **Endings play in the world, not in a curtain.** No cutscene takes control to
   tell the player they did well; the street changes and they walk through it.
   *(signed 2026-09-01, ❗El listón)*
+- **No practice is ever missed.** Every quest stays answerable forever; a quest the
+  world outgrows gets rewritten, never removed. *(owner, 2026-09-01: "i dont
+  understand why i would miss any practice, if anything got stale.")* The shipped
+  line `retryNote` — "this one stays open, come back and make the better call" —
+  was always this law; it just applied to one quest instead of the city.
+- **Old quest, reframe line; changed world, new quest.** A late-answered quest keeps
+  its text and gains one line in the NPC's voice that acknowledges only that time
+  passed — never what happened in it, or the reframe goes stale too. When the world
+  genuinely moves on, you write a second-order quest (the second lap), never an edit.
+- **Never a quest log.** A list of undone things is a backlog; a person with
+  something to tell you is an invitation. The ❗ means one thing forever — *this
+  neighbor has something to say* — with no count, no colour, no age. One person,
+  one open ask at a time; that is the bound that keeps an open city from piling up.
+- **Paint only ever goes on.** A grade can improve after its ending played and the
+  mural repaints — but a late answer may never scrape colour off a panel already
+  earned. Derived from "nothing is ever taken away"; recorded so nobody freezes the
+  grade at Saturday, and nobody lets a rusty return trip cost the player a wall.
 - EN and ES are equals, written with sazón, never machine-flat.
 
 ## The arc so far
@@ -43,8 +60,9 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   de logros; the epilogue promises Week Two.
 - **Week Two, chapter one** (quests 16-23): Monday. Doña Chelo unlocks the gate and
   El Mercado Robles grows onto the southwest lot. You're the de-facto AI PM —
-  scoping, saying no, shipping the small version. Chapter closes at 5 of 8 quests;
-  Saturday epilogue at the register ("You built me a Tuesday I can trust").
+  scoping, saying no, shipping the small version. Plays its Saturday at 5 of 8
+  quests **and stays open** — epilogue at the register ("You built me a Tuesday I
+  can trust"), and the other three answerable forever.
 - **The open city** (post-mercado, planned 2026-09-01). Weeks end; referrals
   begin. Doña Chelo phones Don Tacho, and what she says is the grade you earned
   at her register — the barrio is the player's reference letter. Four businesses
@@ -76,6 +94,13 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   it down, a neighbor mentions yesterday, a new sign on a lot. Nothing announced;
   the street simply remembers. **Reusable for every business's Saturday** — close
   the taller at dusk, come back Monday and Tuerca has moved onto the Caprice.
+- **La carpeta abierta** (2026-09-01). The owner's law arrives as story: nothing in
+  Meridian closes. Doña Chelo does not ask for the keys back; the work you didn't
+  finish is a folder on her counter with your handwriting on it, and the gate opens
+  at seven. The first lap is **the referral** — a neighbor vouches for you to the
+  next one. The second lap is **the callback** — a neighbor phones *you*, by name.
+  A business's second-order quest only opens after its own Saturday, so the barrio
+  deepens instead of accumulating and "more training" reads as a promotion.
 - **The second lap** — what "more training" means after the ribbon. The franchise's
   shadow and doubled foot traffic hand every neighbor a *second-order* problem, the
   kind you only get after the first thing worked: Chelo's bot misses the ten angry
@@ -258,36 +283,54 @@ hired you for. Three fixes, now canon:
   parcels, no new cast, and deepens relationships instead of adding strangers.
   Barrio Norte stays a promise.
 
-## 🚩 Bible vs. game text — signed, NOT BUILT
+- 2026-09-01 · ❗La carpeta · **no practice is ever missed; old quests get a reframe
+  line, changed worlds get new quests** · owner order, not a survey — the city stops
+  doing to the player what Taller Herrera is about to teach him to stop doing to
+  customers: never automate the irreversible step.
 
-Story canon above that the shipped game currently contradicts. Copy is written and
-ready; applying it is a build session's job (EN+ES lockstep, smoke green, bump
-`CACHE` in `sw.js` per `docs/HANDOFF.md`).
+## Bible vs. game text — RESOLVED 2026-09-01
 
-**1. "Roll credits" — `content/meridian/strings.js` (EN 56-58, ES 219-221).**
-Contradicts Settled *"the city has no credits — it grows."* Nacho's replacements,
-which turn the current dead end into the hook for the open city:
+Everything logged here on 2026-09-01 as signed-not-built is now shipped (sw `mq-v38`,
+smoke green). Kept as a record of what was wrong and what replaced it.
 
-- `mepi1` — *"Roll credits."* → **"Outside, somebody is laying track."**
-  ES: **«Afuera, alguien está tendiendo vía.»**
-- `mepi2` — *"…next to the permit. Roll credits."* → **"…next to the permit — and
-  under a name in older handwriting you don't recognize yet."**
-  ES: **«…al lado del permiso — debajo de un nombre con letra más vieja que todavía
-  no reconoces.»**
-- `mepi3` — *"Roll credits."* → **"The door does not lock behind you."**
-  ES: **«La puerta no se cierra con llave detrás de ti.»**
+**Built — the open city.** `qOpen` in `engine/engine.js` had `c>=chSeen`, which closed
+every district behind the player and (latently) left unopened districts nominally
+answerable. Now `c<=chSeen`: a district's quests open when it opens and stay open
+forever. Reaching a district's `need` plays its ending beat and breaks ground on the
+next lot; it closes nothing. The smoke suite's two assertions that encoded the old law
+are inverted, and a new one checks the other half — an unopened district is not
+answerable. Stale comments corrected in `engine/engine.js`, `content/meridian/maps.js`
+and `content/meridian/config.js`.
 
-Also carrying "Roll credits": `mgoEpi` (EN 149) and `epi1` (EN 158). Same problem,
-copy not yet written.
+**Built — nine strings that contradicted signed canon**, EN+ES, all in
+`content/meridian/strings.js`:
 
-**2. The intro card threatens a punishment that cannot happen.** `in3` (EN 6 / ES
-169) still reads *"Lose all three hearts and the week resets"* while `STAKES.mode`
-ships as `none`. Same in `weekTwoToast` (EN 55 / ES 218, "Three hearts, fresh week")
-and `endGo` (EN 54 / ES 217, "▶ Monday — Week Two"). A comfort game must not open
-with a threat it does not make. Copy not yet written — Nacho's lane.
+- `mepi1` → "Outside, somebody is laying track." · `mepi2` → "…next to the permit —
+  and under a name in older handwriting you don't recognize yet." · `mepi3` → "The
+  door does not lock behind you." *(the three "Roll credits" against Settled "the
+  city has no credits"; now the hook into the open city, Barrio Norte and the old
+  AI lead.)*
+- `in3` — the intro card no longer threatens "the week resets" while stakes ship as
+  `none`. It describes the grade, which is always on, and promises the report. True
+  at `none`, still true if admin flips `hearts`.
+- `weekTwoToast` → the gate is unlocked "and left open. Nothing behind you closes
+  either." · `endGo` → "▶ Out to the street" *(weeks retired)*.
+- `mgoEpi` — Chelo no longer takes the keys back and the mercado no longer "forgets
+  the rest": the unfinished work is a folder on the counter with your handwriting on
+  it, and the gate opens at seven.
+- `goEpi` — Priya said the new law's exact negation out loud ("whatever you left
+  unanswered stays unanswered"). Now: "Nothing in here got closed."
+- `epi3` — no longer tells a struggling player to run the week again; everything they
+  didn't answer is still sitting there. `endStayToast` — "Whatever's still open stays
+  open." `goTitle` — "The floor stopped trusting you" *(no calendar, no funeral)*.
+- `epi1` — the credits tail becomes the mural's first appearance: Nacho chalking the
+  outline of a block that isn't built yet, at the end of Week One. The earliest
+  possible plant for the record's room.
 
-**3. Districts still close behind the player.** `engine/engine.js:146` — `qOpen`
-gates on `qChapter(qi) >= chSeen`, so unanswered Week One quests are unreachable
-once the mercado starts. Player-side that reads as *the barrio takes things away*,
-which is the one thing this story cannot say. This is the signed-not-built open-city
-refactor, and it is the highest story cost on the board.
+Deliberately untouched: `epi2` (names a week, which is canon, and rolls no credits);
+`mepi3`'s "a folder nobody opens" (a deliverable, not lost practice); Perla's
+wrong-answer beat in `quests.en.js` (consequence, not closure — and one of the best
+lines in the pack).
+
+**Flagged to Don Güero's lane:** `docs/CITY.md` still describes districts as things
+that "close". His file, his call — but the word is now load-bearing and wrong.

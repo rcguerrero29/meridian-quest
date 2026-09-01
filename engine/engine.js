@@ -104,10 +104,10 @@ auditReach().forEach(p=>console.warn("REACH "+p));
 const CHS=()=>(typeof CHAPTERS!=="undefined"&&CHAPTERS.length)
   ?CHAPTERS:[{id:"all",quests:QEN.map((_,i)=>i),need:QEN.length}];
 const chClosed=c=>c.quests.filter(i=>done.has(i)).length>=c.need;
-/* `chSeen` is the chapter being played; everything before it is closed for good.
-   A chapter ends two ways: you meet its `need`, or you run out of hearts. Either way
-   it ends — it never resets. Whatever you left unanswered stays unanswered, and that
-   is the whole consequence: the city is never taken away. */
+/* `chSeen` is how far the city has GROWN — the newest district that has opened.
+   It is not a cursor that closes things behind you. A district reaching its `need`
+   plays its ending beat and breaks ground on the next lot; its quests stay open
+   forever. Owner's law (docs/OWNER.md, 2026-09-01): no practice is ever missed. */
 /* ---------- stakes and the grade ----------
    The GRADE is always on: every attempt at a quest is counted, the counts make a
    district's grade, and the grade picks which ending it plays. It never blocks.
@@ -141,9 +141,14 @@ function gradeAll(){
   return clean>=0.9?3:clean>=0.6?2:1;
 }
 const chDue=()=>{const L=CHS();return chSeen<L.length&&((livesOn()&&hearts<=0)||chClosed(L[chSeen]));};
-/* a quest still on offer: unanswered, and its chapter has not closed behind you */
+/* which district a quest belongs to; -1 for quests that belong to none */
 const qChapter=qi=>{const L=CHS();for(let i=0;i<L.length;i++)if(L[i].quests.indexOf(qi)>=0)return i;return -1;};
-const qOpen=qi=>{const c=qChapter(qi);return c<0||c>=chSeen;};
+/* Districts open and stay open. A quest is on offer once its district has opened
+   (`c<=chSeen`) and from then on forever — answering it late is always allowed.
+   `c<0` is a quest belonging to no district (Frederick's), always on offer.
+   This was `c>=chSeen`, which had it backwards: it closed everything you walked
+   past and left unopened districts nominally answerable. */
+const qOpen=qi=>{const c=qChapter(qi);return c<0||c<=chSeen;};
 const mercadoOpen=()=>chSeen>=1;   /* opens once you take the Monday handover */
 /* ---------- state ---------- */
 const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"};
@@ -1568,9 +1573,10 @@ $("begin").addEventListener("click",()=>{
   if(eg)setTimeout(()=>toast(EGGSAFE[eg].lines[lang][0],3600),7400);
 });
 /* ---------- start/end ---------- */
-/* One curtain for every ending. `burnout` = the hearts ran out: the chapter closes
-   where it stands and the unanswered quests stay unanswered — nothing is erased.
-   A chapter that ended well is judged by hearts; the last one rolls real credits. */
+/* One curtain for every ending. `burnout` = the optional hearts layer ran out, which
+   ends the district's ARC where it stands — it never closes the district's quests;
+   they stay answerable forever and nothing is erased. The grade picks which ending
+   plays. The last district does not roll credits: the city has none, it grows. */
 function finish(burnout){
   $("card").hidden=true;$("world").hidden=true;
   const L=CHS(),i=Math.min(chSeen,L.length-1),last=i>=L.length-1;
@@ -1584,8 +1590,10 @@ function finish(burnout){
   $("endGo").textContent=last?t.endStay:t.endGo;$("endGo").hidden=false;
   $("end").hidden=false;
 }
-/* Acknowledging an ending closes that chapter for good and starts the next one on
-   Monday with three fresh hearts. After the last one you keep the city and wander it. */
+/* Acknowledging an ending opens the next district and refills the optional stakes
+   layer. It closes nothing: every quest you walked past is still on offer, and the
+   district you just finished stays open behind you. After the last one you keep the
+   city and wander it. */
 $("endGo").addEventListener("click",()=>{
   const last=chSeen>=CHS().length-1;
   chSeen=Math.min(chSeen+1,CHS().length);hearts=startHearts();
