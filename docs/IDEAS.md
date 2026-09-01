@@ -431,6 +431,18 @@ front cameras. Original wish list below, kept for the record:
   cycle rolls at **6 of 7** instead of 4 of 7 (baseline 4/7 stays canon when
   unfed). Feeding restarts the cycle so the fuel applies immediately.
 
+**v1.2 (2026-09-01, mq-v37) — owner canon round 2:**
+- **Digging is minimal** — "he apparently mostly dug when younger." It stays in the
+  repertoire as a rare puppy tribute (~8% of whims, was ~25%).
+- **Tail: lemon with a white tip.** Collar: **blue by default**, and the drawn
+  leash line (now actually rendered, player→dog, top-down and front cameras) is
+  the same blue.
+- **💗 I love you** — a button whenever you're beside a dog. He sits, hearts rise,
+  a soft note plays, and one of three lines answers (EN/ES). "Tail thump. Slow
+  blink. I love you too, says the dog."
+- **Kisses: PENDING owner verification** ("he did give kisses often but ill check
+  it for now") — do not build until the owner confirms the canon.
+
 **PLANNED — dress Sonny via Xochi (owner ask, next build):** the wardrobe already
 does pets (Frederick's bandana/collar/cape via `WEAR`; Canela's tab and `wearCat`).
 Generalize it to named beagles: a `wr` field on the critter's stored record

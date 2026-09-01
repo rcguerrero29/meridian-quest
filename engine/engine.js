@@ -627,6 +627,7 @@ function drawFront(){
   if(BALL&&BALL.world===world)act(BALL.fx,BALL.fy,(sx,sy)=>drawBall(ctx,sx,sy,BALL.phase,BALL.t));
   act(fx,fy,(sx,sy)=>drawPerson(ctx,sx,sy,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
+  CRIT.forEach(cr=>{if(cr.follow&&cr.world===world)drawLeash(cr,camX,camY);});
   trees.forEach(([sx,sy])=>{ /* canopy pass, shared shape with top-down */
     const sw=Math.sin(Date.now()/900+sx)*1.2,cxT=sx+16+sw,cyT=sy+6;
     ctx.fillStyle=tc("#4E8A58");
@@ -718,6 +719,7 @@ function draw(){
   });
   if(BALL&&BALL.world===world)drawBall(ctx,BALL.fx*TS-camX,BALL.fy*TS-camY,BALL.phase,BALL.t);
   drawPerson(ctx,fx*TS-camX,fy*TS-camY,look,{dir,bob:moving?Math.sin(bob)*2:0,moving});
+  CRIT.forEach(cr=>{if(cr.follow&&cr.world===world)drawLeash(cr,camX,camY);});
   drawAmbient(w,camX,camY);
   drawDaylight(w,camX,camY);
   drawWindows(w,camX,camY);
@@ -1047,14 +1049,15 @@ function beagleStep(cr,now){
   cr.dx=st[0];cr.dy=st[1];if(st[0])cr.face=st[0];
   cr.x+=st[0];cr.y+=st[1];cr.moving=true;cr.mt=0;
 }
-function dogWhim(cr,now){ /* his own clock: mostly naps, sometimes opinions */
+function dogWhim(cr,now){ /* his own clock: mostly naps and songs. Digging was a
+  puppy phase (owner canon) — it stays in the repertoire, barely. */
   const r=Math.random();
-  if(r<0.40){cr.layT=now+3800+Math.random()*3200;cr.sit=false;cr.next=cr.layT;}
-  else if(r<0.70){cr.howlT=now+2100;cr.next=now+2800;
+  if(r<0.48){cr.layT=now+3800+Math.random()*3200;cr.sit=false;cr.next=cr.layT;}
+  else if(r<0.87){cr.howlT=now+2100;cr.next=now+2800;
     if(cr.world==="pk")PARK.h++;
     try{musHowl();}catch(e){} /* an actual tiny howl, when the sound is on */
     if(Math.random()<0.5)toast("🐶 "+(T().howl||"AWOOOOO…"),1800);}
-  else if(r<0.95){cr.digT=now+1700;cr.next=now+2400;
+  else if(r<0.95){cr.digT=now+1700;cr.next=now+2400; /* the rare tribute to puppy Sonny */
     if(cr.world==="pk")PARK.d++;
     const hx=cr.x,hy=cr.y,hw=cr.world;
     setTimeout(()=>DECALS.push({world:hw,x:hx,y:hy,kind:"hole",until:Date.now()+34000}),1400);}
@@ -1075,6 +1078,13 @@ function ballUpdate(dt,now){
     else{BALL.fx=BALL.sx+(BALL.tx-BALL.sx)*BALL.t;BALL.fy=BALL.sy+(BALL.ty-BALL.sy)*BALL.t;}}
   else if(BALL.phase==="ground"&&BALL.until&&Date.now()>BALL.until)BALL=null;
   else if(BALL.phase==="carried"&&BALL.dog){BALL.fx=BALL.dog.fx+0.28*BALL.dog.face;BALL.fy=BALL.dog.fy-0.12;}
+}
+function drawLeash(cr,camX,camY){ /* blue, like his collar — owner canon */
+  const hx=fx*TS-camX+16,hy=fy*TS-camY+21;
+  const dx=cr.fx*TS-camX+16,dy2=cr.fy*TS-camY+19;
+  ctx.strokeStyle="#2E5FA8";ctx.lineWidth=1.6;ctx.lineCap="round";
+  ctx.beginPath();ctx.moveTo(hx,hy);
+  ctx.quadraticCurveTo((hx+dx)/2,Math.max(hy,dy2)+7,dx,dy2);ctx.stroke();
 }
 function drawBall(g,sx,sy,phase,t){
   const arc=phase==="fly"?Math.sin(Math.PI*Math.min(1,t))*16:0;
@@ -1130,9 +1140,10 @@ function drawBeagle(g,cr,sx,sy){ /* a lemon beagle: white coat, lemon saddle, fl
   const dy=lay?3:0,hy=howl?-3:0;
   g.save();g.translate(cx,0);g.scale(cr.face,1);g.translate(-cx,0);
   g.fillStyle="rgba(0,0,0,.15)";g.beginPath();g.ellipse(cx,sy+27,7,2.8,0,0,7);g.fill();
-  g.strokeStyle=white;g.lineWidth=2.4;g.lineCap="round"; /* tail, always going (slower when resting) */
-  const wg=lay?wag*0.4:wag;
-  g.beginPath();g.moveTo(cx-7,sy+19.5+dy);g.quadraticCurveTo(cx-11,sy+15+dy+wg*0.5,cx-10+wg,sy+11+dy);g.stroke();
+  g.strokeStyle=lemon;g.lineWidth=2.4;g.lineCap="round"; /* the tail: lemon, always going (slower when resting) */
+  const wg=lay?wag*0.4:wag,tex2=cx-10+wg,tey=sy+11+dy;
+  g.beginPath();g.moveTo(cx-7,sy+19.5+dy);g.quadraticCurveTo(cx-11,sy+15+dy+wg*0.5,tex2,tey);g.stroke();
+  g.fillStyle=white;g.beginPath();g.arc(tex2,tey,1.5,0,7);g.fill(); /* the white tip — owner canon */
   g.fillStyle=white;g.beginPath();g.roundRect(cx-7.5,sy+17+dy,14,8,4);g.fill();
   g.fillStyle=lemon;g.beginPath();g.roundRect(cx-5,sy+16.5+dy,8,4.5,3);g.fill(); /* saddle */
   g.fillStyle=white; /* white freckles across the lemon coat */
@@ -1145,7 +1156,9 @@ function drawBeagle(g,cr,sx,sy){ /* a lemon beagle: white coat, lemon saddle, fl
       g.fillRect(cx+p[0]+Math.sin(Date.now()/90+i*2)*2.5,sy+p[1],2,2);});
     g.fillStyle=white;}
   g.beginPath();g.arc(cx+6.5,sy+16+dy+hy,4.6,0,7);g.fill(); /* head */
-  if(cr.band){g.fillStyle=cr.band; /* a bandana from the park, worn with dignity */
+  g.fillStyle=cr.collar||"#2E5FA8"; /* the collar: blue to start, like his leash (owner canon) */
+  g.beginPath();g.roundRect(cx+2.5,sy+18.6+dy,6,1.7,1);g.fill();
+  if(cr.band){g.fillStyle=cr.band; /* a bandana from the park, worn with dignity over the collar */
     g.beginPath();g.moveTo(cx+2.4,sy+18.4+dy);g.lineTo(cx+8.2,sy+18.6+dy);g.lineTo(cx+5.2,sy+22+dy);
     g.closePath();g.fill();
     g.fillStyle="rgba(255,255,255,.3)";g.fillRect(cx+2.6,sy+18.4+dy,5.4,0.9);}
@@ -1172,6 +1185,12 @@ function drawBeagle(g,cr,sx,sy){ /* a lemon beagle: white coat, lemon saddle, fl
   if(howl){g.fillStyle="#8B6FC8";g.font="9px serif";
     g.fillText("♪",cx+3,sy+5+Math.sin(Date.now()/200)*2);}
   if(happy){g.fillStyle="#C4586B";g.font="8px serif";g.fillText("❤",cx-5,sy+9);}
+  if(cr.loveT>nw){ /* you said it; he heard you */
+    g.fillStyle="#C4586B";g.font="8px serif";
+    [[-8,0],[0,-3],[8,1]].forEach((p,i)=>{
+      g.globalAlpha=0.45+0.55*Math.abs(Math.sin(Date.now()/260+i*1.9));
+      g.fillText("❤",cx+p[0],sy+8+p[1]-((Date.now()/150+i*30)%14)*0.5);});
+    g.globalAlpha=1;}
   g.textAlign="start";
 }
 function drawGato(g,cr,sx,sy){ /* the street cat: Canela's silhouette, alley palette, no collar — yet */
@@ -1399,6 +1418,9 @@ function fredCheck(){ /* now the generic animal-interaction check: every creatur
   const bandOK=tgt==="beagle"&&world==="pk";
   $("band").hidden=!bandOK;
   if(bandOK)$("band").textContent=T().bandLb||"🎀";
+  const loveOK=tgt==="beagle"; /* you can always tell him */
+  $("love").hidden=!loveOK;
+  if(loveOK)$("love").textContent=T().loveLb||"💗";
   let adoptOK=false;
   if(world==="pk"&&!moving&&!bandOK){const w9=CW();
     adoptOK=[[1,0],[-1,0],[0,1],[0,-1]].some(dd=>{const nx=px+dd[0],ny=py+dd[1];
@@ -2466,6 +2488,14 @@ $("band").addEventListener("click",()=>{
   c.band=BANDCOLS[i];
   if(c.name){if(c.band)parkPrefs.band[c.name]=c.band;else delete parkPrefs.band[c.name];parkPersist();}
   toast(c.band?T().bandToast:T().bandOff,1600);
+});
+$("love").addEventListener("click",()=>{ /* "let us say i love you to him" — owner ask */
+  if(petTarget!=="beagle"||!petCrit)return;
+  const c=petCrit;
+  c.loveT=performance.now()+2800;c.happyT=performance.now()+2800;
+  c.sit=true;c.layT=0;c.next=performance.now()+3000;
+  try{musChirp();}catch(e){}
+  const L=T().loveLines||[];if(L.length)toast("💗 "+L[Math.floor(Math.random()*L.length)],3200);
 });
 $("adopt").addEventListener("click",()=>{
   if(parkPrefs.dogs.length>=4){toast(T().parkFull,2600);return;}

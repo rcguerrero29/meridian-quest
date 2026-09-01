@@ -685,7 +685,7 @@ const CANDIDATES = [
     document.getElementById('pkClose').click();
     // strings in both languages
     out.langOk = !!(['leashLb', 'parkArrive', 'parkTitle', 'parkSum', 'parkLove', 'parkTeaser',
-      'adoptLb', 'adoptAsk', 'adoptDone', 'bandLb', 'parkFull']
+      'adoptLb', 'adoptAsk', 'adoptDone', 'bandLb', 'parkFull', 'loveLb', 'loveLines']
       .every(k => UI.en[k] && UI.es[k]) && UI.en.locs.pk && UI.es.locs.pk && UI.en.arrive.pk && UI.es.arrive.pk);
     // cleanup so this section leaves no park residue for reruns
     localStorage.removeItem('mqpark');
