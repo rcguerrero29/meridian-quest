@@ -5,7 +5,8 @@ standing rules; anything Settled there is a permit, not a question. The `/don-gu
 next phase on Opus 5, and brings open decisions to the owner as side quests. Every
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
-**Phase: 2 (planned 2026-08-31 — building)** · Ledger opened 2026-08-30.
+**Phase: 2 (planned 2026-08-31 — parcel NOT yet planned, pack NOT built)** · Ledger
+opened 2026-08-30. **Deployed: `mq-v44` on `main`, 2026-09-01.**
 
 ## Purpose
 
@@ -62,6 +63,21 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
   entities-as-data law now covers ART. Visible: per-tile floor variation, walls cast
   shadows, walk-cycle arm swing, per-person blinking, doors glow underneath. Plus:
   /nacho story director, tune picker, NPC activity emotes, NPC edit panel.
+
+- 2026-09-01 — **The open city SHIPPED, and the story caught up with it.** `qOpen`
+  had `c>=chSeen`, which closed every district behind the player; it is now `c<=chSeen`
+  — districts open and stay open, forever. `need` for the first district dropped 16→12
+  so its Saturday plays with quests still on the board. 24 `late` reframe lines (EN+ES)
+  give a neighbour one line when you answer them long after. Nine continuity breaks
+  fixed; nine strings rewritten (the three "Roll credits" and the intro card that
+  threatened a reset that cannot happen). **`GROWTH` moved Meridian's names OUT of the
+  engine** — quests 12/13 raising La Obra, quest 15 opening the wardrobe and "district 1
+  is El Mercado" were all hardcoded, so AJ's pack would have inherited them; a smoke
+  guard now fails the build if any content name reappears in `engine/`. 3D is the
+  default camera; movement follows the camera when you rotate (it never consulted it
+  before); the mercado's produce is identifiable; the ticker keeps two messages.
+  Three test tools now exist: `smoke.js`, `shots.js` (scene screenshots) and
+  `tilesheet.js` (**the cold read** — every tile alone, labelled only by its glyph).
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
@@ -161,9 +177,11 @@ stays live until the Phase 2 refactor lands.
   accept a longer session** · the portfolio artifact is the point of the gym.
 - 2026-08-31 · ❗Semana: when is the mercado · **Monday of Week Two — chapter one**
   · the epilogues already promise Week Two; this cashes that check.
-- 2026-08-31 · ❗Corazones: what zero hearts costs · **the week, not the city** — the
-  chapter ends where it stands, unanswered quests stay unanswered and close for good,
-  Monday comes with three fresh hearts · a teaching game must never delete the gym.
+- 2026-08-31 · ❗Corazones: what zero hearts costs · ~~the week, not the city — the
+  chapter ends where it stands, unanswered quests stay unanswered and close for good~~
+  · **SUPERSEDED 2026-09-01 by "no practice is ever missed"** (docs/OWNER.md → Settled):
+  ending a district's arc never closes its quests. Only the "never delete the gym" half
+  survives, and it is now absolute.
 - 2026-08-31 · ❗Botón: where restart lives · **⚙️ Settings, behind a two-tap confirm**
   · the story never sends you there; it is a testing tool, so it stops sitting next to
   the button that continues the story.
