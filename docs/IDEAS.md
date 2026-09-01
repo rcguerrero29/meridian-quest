@@ -613,3 +613,162 @@ angles — capping camera pitch fixes that, same as the genre does.
 detail — visible immediately in every camera, and those better sprites become the
 3D billboards for free), then 3D per this plan. The pet-care spin-off inherits 3D
 automatically the day it lands, since it's the same engine.
+
+## 15. The 3D deep dive — root causes, and what is planned but NOT built (2026-09-01)
+
+Owner asked for a deep dive on "still super blurry" (AJ agrees), for the broken swipe
+directions under rotation, and for the rainbow bridge and doors to be **planned, not
+built**. A 33-agent investigation ran with adversarial verification of every causal
+claim: 27 findings survived, 17 were refuted. Only the two smallest were built.
+
+**BUILT already (mq-v43):** the rotation bug (see §15.2 — movement never consulted the
+camera; ↻ now steps 90° and swipes are rotated into world space) and the camera-default
+persistence bug (three drifted whitelists, two omitting `"3d"`).
+
+**Honest note on the investigation itself:** the adversarial-verify prompt was written
+around the blur question, so it judged the rotation findings against the wrong
+criterion and labelled them "red herring" while confirming every code citation as
+exact. The findings were right; the label was the session's error. If a future round
+reuses that workflow, give each dimension its own verify criterion.
+
+---
+
+### 15.1 THE BLUR — root cause found, fix specified, NOT BUILT
+
+**This is the answer.** Every 3D texture is baked at **1x logical resolution** (32 px
+per tile) while the renderer outputs at device pixel ratio up to 3x. That is a hard
+**2.9x–4.0x magnification of the source art**, measured:
+
+| what | source | on screen (dpr 3 phone) | magnification |
+|---|---|---|---|
+| ground at the hero | 32 texels | ~94 device px | **2.95x** |
+| wall / facade face | 32 texels | ~94 px | **2.95x** |
+| door plane | 32 texels | ~94 px | **2.95x** |
+| prop sprite | 32 texels | ~99 px | **3.10x** |
+| actor billboard | 36x40 texels | ~119x132 px | **3.30x** |
+| tree canopy | 40x40 texels | ~161 px | **4.01x** |
+
+The 3D view is effectively a 320x256-class image on a retina display, while the 2D
+camera beside it renders the *same art* at a genuine 960x768 (`sizeCanvas()` already
+multiplies by devicePixelRatio — engine.js:257-263). That is exactly the "3D looks
+softer than 2D" complaint, and it is measurable, not aesthetic.
+
+**Why the two fixes already on `main` could not have fixed it — this is the key
+insight, and it explains "we fixed it twice and it's still blurry":**
+- The canvas-sizing fix raised the *output* resolution. That is what makes the deficit
+  visible; before it, the canvas was as coarse as the textures. On a high-DPR phone it
+  was only a **~12% linear gain**.
+- The mipmap/anisotropy fix only helps **minification**. A magnified texture is, by
+  definition, beyond its reach. And the ground is magnified across the bottom ~68% of
+  the frame — it is only minified in the top ~32%, so that fix addressed a third of
+  the screen.
+
+**The fix (≈1 hour).** Introduce one factor `K = clamp(round(devicePixelRatio),1,3)`
+and bake at K× everywhere, with a `ctx.setTransform(K,0,0,K,0,0)` so the existing
+drawing code is untouched:
+
+| site | now | becomes |
+|---|---|---|
+| `engine3d.js:13` glyph bake | `c.width=32;c.height=32` | `32*K`, then setTransform |
+| `engine3d.js:69` world ground | `gc.width=w.W*32` | `w.W*32*K`, then setTransform |
+| `engine3d.js:135` canopy | `cc.width=40` | `40*K` + `g2.scale(K,K)` |
+| `engine3d.js:162` actor | `c.width=36;c.height=40` | `36*K` / `40*K` |
+| `engine3d.js:198` actor redraw | `setTransform(1,0,0,1,0,0)` | `setTransform(K,0,0,K,0,0)` |
+
+No world-unit scale changes — every `scale.set(...)` is in world units and stays.
+This is safe because `TILEDRAW` and `drawPerson` only issue logical 2D drawing calls;
+they never read `canvas.width` or touch pixel data, so a ctx transform scales them
+cleanly.
+
+**Memory guard, required:** the largest ground is `st` at 30x16 tiles = 960x512 today.
+K=2 → 1920x1024 (7.9 MB RGBA); K=3 → 2880x1536 (17.7 MB + ~6 MB mipmaps). Clamp with
+`K = Math.min(K, Math.floor(maxTextureSize / (w.W*32)))`. **K=2 is the safe default**;
+K=3 only where `capabilities.maxTextureSize` allows. Also re-bake on a devicePixelRatio
+change (a window dragged between monitors), which nothing currently does.
+
+**Ruled out — do not re-investigate.** The drawing buffer is an exact 1:1 match for
+displayed device pixels at dpr ≤ 3 (measured). setPixelRatio-before-setSize ordering is
+correct in the vendored three.js. There is no path where the renderer keeps a stale
+small buffer, and the `clientWidth`-before-layout / 360 fallback never sticks.
+
+**Also true, smaller:** billboards are baked once and never re-baked — not on resize,
+not on fullscreen, not on DPR change — so entering fullscreen makes actors measurably
+softer than the world around them.
+
+---
+
+### 15.2 Rotation — BUILT 2026-09-01, recorded for the record
+
+`grep -c "T3" engine/engine.js` was **0**: movement was pure world-space and never
+consulted the camera. At yaw 0 that is an exact identity, which is why it felt fine
+un-rotated and the bug looked intermittent. And ↻ stepped **45°** — a 4-way grid cannot
+be driven from a 45°-rotated camera, so at four of the eight stops *no* swipe
+corresponded to a straight on-screen move. That is why "some directions" broke rather
+than all. Fixed: quarter turns (N/E/S/W, as docs/IDEAS.md §14 originally specified) and
+screen intent rotated into world space inside `tryStep`, before `dir` is set — it must
+be there, because `dir` feeds both sprite facing and the move interpolation.
+
+---
+
+### 15.3 DOORS — planned, NOT built (owner: "i dont want to build that yet")
+
+The maps are **not** the problem — the smoke suite now proves every shipped door is
+structurally sound. The wrongness is entirely in `engine3d.js:98-124`.
+
+1. **The 3D door plane has no rotation, so 6 of 16 doors face 90° away from their
+   wall.** Every one of them is in HQ — the starting map, the first thing anyone sees.
+   *(minutes)*
+2. **The deeper cause: wall boxes are orientation-blind too** — every N-S wall in HQ is
+   an untextured dark-purple slab. Fixing doors properly means fixing this. *(a sitting)*
+3. **No recess, no jamb, no lintel — and a see-through slot above every door.** *(an hour)*
+4. **The "this one opens" pulse is frozen in 3D** at a random brightness, sometimes
+   near-invisible. *(an hour)*
+5. Doors vanish or mirror at 2 of the (previously 8) camera stops. *(minutes)*
+6. Cosmetic: a 2px theme-tinted border frames every 3D door, because the bake base is
+   `tc()`'d and the art is not. *(minutes)*
+
+**Suggested order:** 1 → 2 → 3, since 1 is minutes and 2 is the real cause.
+
+---
+
+### 15.4 THE RAINBOW BRIDGE — planned, NOT built
+
+**Fact base:** the rainbow bridge is **2 tiles of flat floor art**. There is no bridge
+object, in any camera. The owner wants "an arch and even some day of the dead theme
+colors".
+
+- **The tile grid is not the constraint** — the flat ground plane and the `y=0` actor
+  pin are. An arch means actors need a height, which is a real engine change, not art.
+- **Day of the Dead colours cannot come from `THEMES`**: the bridge is deliberately
+  theme-immune and only one theme key reaches the canvas. Options: a new named theme, a
+  per-prop palette, or a seasonal override — each costed differently, none chosen.
+- **This is culturally specific — the owner should sign off on the palette**, and it
+  touches El Parque, which is the pet spin-off's shop window.
+
+---
+
+### 15.5 ERROR LOG — designed, NOT built (owner: "efficient and low storage")
+
+**Blind spot it must close first:** 3D failure is swallowed in four places and leaves
+zero trace (`engine3d.js:228, :242, :200` and `engine.js:263`), and the boot audits
+already `console.warn` real diagnostics that are invisible on a phone. That is why "is
+3D even running?" could not be answered from the field.
+
+- **Buffer:** key `mqerr`, 30 entries, dedup by `kind|message|source` with a count and
+  last-seen instead of N copies, **16 KB hard ceiling** — worst case ~14 KB, typical
+  ~4 KB. Follows the existing `slice(-N)` ring-buffer and terse-key conventions.
+- **Capture:** `window.onerror` + `unhandledrejection` + one `mqwarn()` that upgrades
+  the five `console.warn` sites already in the engine. Four swallowing catches each get
+  one call and no control-flow change.
+- **Storage failure:** existing try/catch-and-carry-on convention, with a halve-once
+  retry and an in-memory fallback (private mode must not break the game).
+- **Surface:** a 4th tab in the existing Exporter — **zero new UI, zero new copy code**,
+  four taps from the gear.
+- **Never log:** every player-entered free-text field, scrubbed out of exception
+  messages too (clamping alone does not close this).
+- **Footprint:** ~55 new lines, ~12 modified, 4 files, no new file, no new dependency.
+
+**Related, worth doing with it:** there is no at-a-glance build stamp — the version is
+buried behind the gear, so "am I on the new build?" cannot be answered in the field.
+And CI's version lockstep proves `sw.js` and `config.js` *agree*, never that the number
+*moved* — a fix shipped without a bump strands every installed PWA and CI stays green.
