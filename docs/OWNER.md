@@ -98,6 +98,16 @@ preference that outlives one phase; cite the date and their words.
   - **Version pins collide.** Two branches will both bump to the same `mq-vN`. On a
     merge, resolve FORWARD to a new number rather than picking a side.
   - **Never assume the owner can see your work.** Only `main` deploys. Say so.
+- **A season changes colour, never design.** *(2026-09-01, owner: "add another mode for
+  fall/halloween and thats where the rainbow bridge colors are accurate to the dia de
+  los muertos colors, then if someone changes the palette, it can change but keep the
+  general design.")* Seasonal palettes swap world-art colours; the shapes, structures
+  and silhouettes stay put. Two consequences worth keeping: a culturally specific
+  palette becomes a season the player *enters* rather than the game's permanent
+  default, and swapping a palette can never break legibility, because the silhouette
+  is what carries meaning (see the cold-read pass). Note this is a SECOND palette layer
+  from `THEMES`, which is UI chrome only — choosing a UI theme must never repaint the
+  barrio.
 - **Movement is one press, one step — there is no turn-in-place.** *(2026-09-01,
   asked and answered.)* Nothing in the game requires facing: `checkTalk()` and every
   animal interaction use Manhattan distance only. So a Zelda-style turn-first step

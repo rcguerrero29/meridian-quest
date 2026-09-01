@@ -902,3 +902,111 @@ them): `R` plain lilac, `≈` dark grey, `-` grey with three bars, `2` a small c
 
 **Open question put to the owner and not yet answered:** whether this storefront
 legibility pass is its own sitting or rides along with the 3D/world session in §15.
+
+---
+
+### 15.9 SEASONS — the design is constant, the palette is the season (owner, 2026-09-01)
+
+Owner's answer to the bridge-palette question, and it is better than any of the three
+options I offered: *"add another mode for fall/halloween and thats where the rainbow
+bridge colors are accurate to the dia de los muertos colors, then if someone changes
+the palette, it can change but keep the general design."*
+
+**The rule, which travels to any pack and any story:** **a season changes colour, never
+design.** The arch, the abutments, the deck, the plank rails — all constant. Only the
+six band colours, and whatever else a season declares, are swapped. That also settles
+the cultural-specificity worry cleanly: Día de Muertos becomes a *season the player
+enters*, not the game's permanent default.
+
+**Why it needs new machinery.** `THEMES` (engine.js:1892) is a **UI-chrome** palette —
+`bg / surface / ink / muted / line / accent / chip / bubble`. It never reaches tile art.
+That is precisely why the bridge is theme-immune today: `TILEDRAW["^"]` (engine.js:525)
+hardcodes its six stripes as literal hex. So seasons are a **second, separate** palette
+layer for WORLD ART, and the two must not be merged — a player choosing the "forest" UI
+theme should not repaint the barrio.
+
+**Shape (content-declared, per the entities-as-data and engine-never-names-content
+laws):**
+
+```
+/* content/meridian/config.js */
+const SEASONS={
+  default:{},                                  /* the year-round look */
+  otono:{ label:{en:"Autumn",es:"Otoño"},
+          art:{ bridge:["#E0483C","#F07C24","#F2B705","#E8478F","#7B4BA8","#2FA5A0"],
+                jacaranda:"#C8721F", ... } }
+};
+```
+
+- Engine gains one accessor — `art(key, fallback)` — and every hardcoded world-art hex
+  moves behind it. `TILEDRAW["^"]` becomes `art("bridge",DEFAULT_BRIDGE).forEach(...)`.
+  A pack that declares no seasons behaves exactly as today.
+- **The engine must not know the season NAMES** (§ the portability guard). It knows
+  "there is a current season and it may override art keys"; content names them.
+- The bake caches must invalidate on a season change — both `TILEART`/`TILEDRAW`
+  consumers and `t3Invalidate()`.
+
+**Open, and NOT decided — three questions for the owner:**
+
+1. **Halloween and Día de Muertos are different traditions** (Oct 31 vs Nov 1–2; one is
+   costumes and scares, the other is remembrance, marigolds and altars). Merging them
+   into one "fall" mode is a real choice and worth making deliberately, not by default.
+   Options: one autumn season carrying both; two distinct seasons a few days apart;
+   or one season named for Día de Muertos alone, with no Halloween framing. **Ask the
+   owner — this is theirs, and the bridge is a memorial crossing, which points at
+   remembrance rather than Halloween.**
+2. **Auto by date, or a manual pick?** Recommendation: auto by date with a manual
+   override in Settings — "log in to see what is different in town" is the north star,
+   and a season arriving on its own is exactly that. A pure toggle makes it a costume.
+3. **How far does a season reach?** Bridge only (cheap, contained) or the whole city —
+   jacarandas, awnings, the lighting wash? Recommendation: ship the seam with the
+   bridge only, then widen once it is proven. Wide is where the cost is.
+
+---
+
+### 15.10 ELEVATION — the maths for walking over the arch (owner: "worth taking the
+time to figure out the maths"; PLAN ONLY)
+
+Today every actor is pinned to the floor: `engine3d.js:207` sets a sprite's position
+to `(ax, 0, az)` — the y is a literal zero — and the world is one flat
+`PlaneGeometry(W,H)` at y=0. That pin, not the tile grid, is what stops you walking
+over anything.
+
+**The cheap version first, so it is on the record:** draw the arch as a prop *behind*
+the walkway and leave the hero on the flat tiles. From the front camera nobody can
+tell. If the answer to "is the arch worth an engine change?" is ever no, this is the
+fallback and it costs an afternoon.
+
+**The real version — a height field.** Four pieces:
+
+1. **`ELEV`, content-declared.** A list of spans: `{world, from:[x,y], to:[x,y],
+   rise:0.9}`. The engine derives a per-tile height; content never writes a curve by
+   hand.
+2. **The curve.** For a span of `n` tiles, with `t` the normalised position along it
+   (0 at one bank, 1 at the other): **`h(t) = rise · sin(π·t)`**. It is zero at both
+   ends, peaks at the middle, and its slope is continuous, so the walk has no visible
+   kink where the bridge meets the bank. A true circular arc
+   (`h = √(r² − (t−½)²·span²) − (r − rise)`) is marginally more "bridge-like" and needs
+   a radius solve; the sine is the right first choice.
+3. **Actor height = bilinear sample.** The hero sits at fractional `(fx, fy)` during a
+   step, so sampling the nearest tile would make the walk stair-step. Bilinearly
+   interpolate the four surrounding tile heights — that is what makes the climb read as
+   a slope instead of a lift.
+4. **Per camera:**
+   - **3D:** `spr.position.set(ax, h, az)`. The arch itself is a **separate mesh**, not
+     a displaced world plane — re-meshing the whole ground to raise two tiles is waste,
+     and a separate mesh keeps depth-sorting honest so the hero passes in front of the
+     bands below and behind the ones above, for free.
+   - **Front / 2.5D:** offset the sprite's screen y by `−h · PX_PER_UNIT`. This is the
+     camera the owner plays in most — get this one right first.
+   - **Top-down:** elevation is invisible by definition. Leave it; optionally a small
+     shadow offset so the hero reads as "above" the deck.
+
+**What it costs beyond the bridge.** This is the honest part: a height field touches
+movement, both 2D renderers and the 3D renderer, and every future prop has to decide
+whether it has a height. That is exactly why it is worth doing *once, properly* — it is
+also the thing that unlocks stairs, rooftops, the trolley platform and any future
+bridge. Do not build it for one park tile alone; build it when a second thing needs it,
+or when the owner says the arch is worth it on its own.
+
+**Not a blocker for §15.9.** Seasons are pure colour and can ship without any of this.
