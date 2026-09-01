@@ -98,6 +98,12 @@ preference that outlives one phase; cite the date and their words.
   - **Version pins collide.** Two branches will both bump to the same `mq-vN`. On a
     merge, resolve FORWARD to a new number rather than picking a side.
   - **Never assume the owner can see your work.** Only `main` deploys. Say so.
+- **Movement is one press, one step — there is no turn-in-place.** *(2026-09-01,
+  asked and answered.)* Nothing in the game requires facing: `checkTalk()` and every
+  animal interaction use Manhattan distance only. So a Zelda-style turn-first step
+  would cost an extra press on every step in the whole game and buy only calmer
+  doorways. Do not re-propose it, and do not add a facing requirement to a new
+  interaction without raising it — that would change this answer.
 - **The engine may never name a pack's content.** *(2026-09-01.)* No business, NPC,
   cat, street or quest index from any one story may appear in `engine/`. The engine
   knows mechanisms — raise staged tiles, open a fitting room, drop a storefront ribbon

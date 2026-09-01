@@ -809,6 +809,11 @@ Options, cheapest first:
 walks the hero out and straight back in, and asserts the world changed. Add it with the
 fix, in the same commit.
 
+**DECIDED 2026-09-01:** (a) is **planned, not fixed** — it goes in with the doors,
+walls and bridge so one session does all the 3D/world work together. (b) is **settled:
+movement stays one press, one step** (now in `docs/OWNER.md` → Settled). So the doorway
+feel is expected to come entirely from fixing (a).
+
 **(b) There is no turn-in-place. One press always steps.**
 
 Verified on open ground with the post-warp input freeze cleared (the first measurement
