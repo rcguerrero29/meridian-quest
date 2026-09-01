@@ -98,6 +98,14 @@ preference that outlives one phase; cite the date and their words.
   - **Version pins collide.** Two branches will both bump to the same `mq-vN`. On a
     merge, resolve FORWARD to a new number rather than picking a side.
   - **Never assume the owner can see your work.** Only `main` deploys. Say so.
+- **New art gets a cold read before it ships.** *(2026-09-01, owner: the legibility
+  pass "should ride with the 3d work but after that be a regular thing".)* Any change
+  to a tile, sprite, facade, prop or palette runs `node test/tilesheet.js` — every tile
+  rendered alone, labelled only by its glyph — and the question is *"would someone new
+  to videogames know what this is?"* Context does not count: in a scene the
+  surroundings give the answer away. If the silhouette cannot carry the meaning by
+  itself, the art is not finished. This is now step 2b of the shipping checklist in
+  `docs/HANDOFF.md`.
 - **A season changes colour, never design.** *(2026-09-01, owner: "add another mode for
   fall/halloween and thats where the rainbow bridge colors are accurate to the dia de
   los muertos colors, then if someone changes the palette, it can change but keep the

@@ -31,6 +31,14 @@ current: each session rewrites the queue before signing off.)*
    arch + Day of the Dead palette (§15.4, needs an owner sign-off on the palette).
    Use `node test/shots.js` before AND after — it is the only check that can see a door
    lying on the floor.
+   **Ride-alongs the owner assigned to this same sitting:** the storefront legibility
+   fixes (§15.8 — La Cocina must say "restaurant", the five identical doors must differ
+   by destination, and the desk/table/scale props) and the `SEASONS` seam (§15.9 — one
+   autumn season on the Día de Muertos palette, auto by date with a Settings override,
+   bridge only as the proving run). Elevation (§15.10) is NOT in this sitting — it waits
+   for a second thing that needs it.
+   **After this sitting the cold read is permanent**, not a one-off: it is step 2b of
+   the shipping checklist in `docs/HANDOFF.md` and a Settled rule in `docs/OWNER.md`.
 2. Work on a `claude/...` session branch; merge to `main` only when the owner says
    (main auto-deploys to GitHub Pages; installed PWAs update after one refresh).
    **The owner sees `main` and nothing else** — if work is not merged, say so plainly

@@ -946,7 +946,23 @@ const SEASONS={
 - The bake caches must invalidate on a season change — both `TILEART`/`TILEDRAW`
   consumers and `t3Invalidate()`.
 
-**Open, and NOT decided — three questions for the owner:**
+**SIGNED 2026-09-01 — all three answered:**
+
+1. **ONE season, named for Día de Muertos.** The owner asked why two might ever be
+   worth it; the honest answer is that it would not be about the palette. Halloween and
+   Día de Muertos share a week and share almost no visual language — Halloween is
+   pumpkins, black and orange, cobwebs; Día de Muertos is marigold, papel picado,
+   candles and altars. Splitting only pays if the game wants Halloween's *props* as
+   well, which is a content pack, not a palette. One season it is, and it takes the
+   Día de Muertos palette — which is also the right fit for a bridge that is a memorial
+   crossing.
+2. **Auto by date, with a manual override in Settings.** The season arriving on its own
+   is the north star ("log in to see what is different in town"); the override is for
+   testing and for anyone who wants it year-round.
+3. **Bridge first, then widen.** Ship the seam with the bridge alone as the proving
+   run; jacarandas, awnings and the lighting wash come after it is shown to work.
+
+**For the record, the original three questions:**
 
 1. **Halloween and Día de Muertos are different traditions** (Oct 31 vs Nov 1–2; one is
    costumes and scares, the other is remembrance, marigolds and altars). Merging them

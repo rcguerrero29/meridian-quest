@@ -113,6 +113,17 @@ completion/interaction data worth tracking across devices, revisit Phase 2 in
    It runs the real game headless: boot errors, world/portal validators, BFS
    reachability (boot AND post-construction), EN/ES parity, XP math, retry
    invariants, wardrobe for both pets. Set `CHROMIUM_PATH` if needed.
+2b. **If the change touched ART — any tile, sprite, facade, prop or palette — LOOK at
+   it.** Two tools, both cheap, added 2026-09-01 because automated tests proved the
+   maps were sound while a door lay flat on the floor and a whole restaurant was
+   unidentifiable:
+   - `node test/tilesheet.js` — **the cold read.** Renders every tile at 4x labelled
+     ONLY by its glyph. Write down what each one says to you BEFORE checking what it
+     was meant to be. If a newcomer could not name it, the art is not done.
+   - `node test/shots.js` — the scene pass. Screenshots listed spots per camera into
+     `shots/` (gitignored). Edit `test/spots.json` to aim it.
+   Neither can be automated away: `smoke.js` proves structure, and structure was never
+   the problem. Findings go in `docs/IDEAS.md`.
 3. **Bump `CACHE` in `sw.js`** (`mq-v8` → `mq-v9` → …) or installed PWAs won't
    update. This is the most forgettable step; the README warns about it too.
 4. Commit, push `main` (Pages deploys from it, ~a minute of lag).
