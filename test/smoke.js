@@ -580,6 +580,18 @@ const CANDIDATES = [
     let a = 0; for (let i = 0; i < 7; i++) a += fetchRoll(dog) ? 1 : 0;
     let b = 0; for (let i = 0; i < 7; i++) b += fetchRoll(dog) ? 1 : 0;
     out.fetch7 = a; out.fetch14 = a + b;
+    // food-driven: a fed dog's cycle rolls at exactly 6 of 7
+    const fed = { fedT: performance.now() };
+    let f = 0; for (let i = 0; i < 7; i++) f += fetchRoll(fed) ? 1 : 0;
+    out.fetchFed = f;
+    // BFS pathing: from a walkable hq tile, a step toward another exists,
+    // and a target inside a wall is correctly unreachable
+    out.bfs = (() => {
+      const cr = { world: 'hq', x: 1, y: 1 };
+      const step = bfsStep(cr, 3, 1);
+      const blocked = bfsStep(cr, 0, 0); // (0,0) is border wall
+      return { step: Array.isArray(step), blocked: blocked === null };
+    })();
     // ground decals fade on their own
     const n0 = DECALS.length;
     DECALS.push({ world, x: 1, y: 1, kind: 'hole', until: Date.now() - 10 });
@@ -610,6 +622,9 @@ const CANDIDATES = [
   if (front.camStored !== 'front') fails.push('front camera choice not persisted: ' + front.camStored);
   if (front.fetch7 !== 4) fails.push(`fetch cycle: ${front.fetch7}/7 fetched, expected exactly 4`);
   if (front.fetch14 !== 8) fails.push(`fetch across two cycles: ${front.fetch14}/14, expected 8`);
+  if (front.fetchFed !== 6) fails.push(`fed fetch cycle: ${front.fetchFed}/7 fetched, expected exactly 6`);
+  if (!front.bfs.step) fails.push('bfsStep found no path between open hq tiles');
+  if (!front.bfs.blocked) fails.push('bfsStep pathed into a wall');
   if (!front.decalPruned) fails.push('expired ground decal not pruned');
   if (front.decorOk !== true) fails.push('DECOR references unknown deco art');
   if (!['top', 'front', 'iso'].includes(front.camdef)) fails.push('CAMDEF missing or invalid: ' + front.camdef);

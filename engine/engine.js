@@ -949,13 +949,49 @@ function critUpdate(dt,now){CRIT.forEach(cr=>{
    city hires janitors. All engine-generic: name a dog and the program is his. */
 let BALL=null; /* one ball at a time; the city is not a ball pit */
 const FETCH_ODDS=[1,1,1,1,0,0,0];
+const FED_ODDS=[1,1,1,1,1,1,0]; /* food-driven: a recent treat buys a 6-of-7 cycle */
+const dogFed=cr=>!!cr.fedT&&performance.now()-cr.fedT<240000; /* ~4 min of motivation */
 function fetchRoll(cr){ /* a fresh shuffled 7-cycle per dog — streaks stay dog-like */
-  if(!cr.fseq||cr.fi>=7){cr.fseq=FETCH_ODDS.slice();
+  if(!cr.fseq||cr.fi>=7){cr.fseq=(dogFed(cr)?FED_ODDS:FETCH_ODDS).slice();
     for(let i=6;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cr.fseq[i],cr.fseq[j]]=[cr.fseq[j],cr.fseq[i]];}
     cr.fi=0;}
   return !!cr.fseq[cr.fi++];}
 function taskFree(cr,x,y){const w=WORLDS[cr.world]; /* the home leash comes off on a job */
   return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N");}
+/* real pathfinding for a dog with a job — greedy stepping wedged on walls
+   (owner: "sometimes sonny cant get the ball"). BFS floods from the target;
+   the first tile to touch the dog is his next step. null = no path exists. */
+function bfsStep(cr,tx,ty){
+  const w=WORLDS[cr.world];
+  if(cr.x===tx&&cr.y===ty)return[0,0];
+  const seen=new Uint8Array(w.W*w.H),q=[[tx,ty]];
+  seen[ty*w.W+tx]=1;
+  while(q.length){
+    const[cx,cy]=q.shift();
+    for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){
+      const nx=cx+dx,ny=cy+dy;
+      if(nx<0||ny<0||nx>=w.W||ny>=w.H||seen[ny*w.W+nx])continue;
+      if(nx===cr.x&&ny===cr.y)return[cx-nx,cy-ny];
+      if(SOLID.has(w.grid[ny][nx])||w.grid[ny][nx]==="N")continue;
+      seen[ny*w.W+nx]=1;q.push([nx,ny]);
+    }
+  }
+  return null;
+}
+function dogReach(cr){ /* every tile a dog can actually stand on — throws stay honest */
+  const w=WORLDS[cr.world],seen=new Uint8Array(w.W*w.H),q=[[cr.x,cr.y]];
+  seen[cr.y*w.W+cr.x]=1;
+  while(q.length){
+    const[cx,cy]=q.shift();
+    for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){
+      const nx=cx+dx,ny=cy+dy;
+      if(nx<0||ny<0||nx>=w.W||ny>=w.H||seen[ny*w.W+nx])continue;
+      if(SOLID.has(w.grid[ny][nx])||w.grid[ny][nx]==="N")continue;
+      seen[ny*w.W+nx]=1;q.push([nx,ny]);
+    }
+  }
+  return seen;
+}
 function beagleStep(cr,now){
   if(cr.task.phase==="go"&&!BALL){cr.task=null;return;}
   const tgt=cr.task.phase==="go"?[BALL.tx,BALL.ty]:[px,py];
@@ -966,15 +1002,13 @@ function beagleStep(cr,now){
     const L=T().fetchYes||[];if(L.length)toast("🎾 "+L[Math.floor(Math.random()*L.length)],2600);
     return;}
   cr.task.steps=(cr.task.steps||0)+1;
-  if(cr.task.steps>40){ /* wedged somewhere — a dog knows when to let go */
+  if(cr.task.steps>60){ /* pure safety valve; BFS should never need it */
     cr.task=null;if(BALL&&BALL.phase!=="carried")BALL.until=Date.now()+4000;else BALL=null;return;}
-  const dirs=[[1,0],[-1,0],[0,1],[0,-1]].filter(dd=>taskFree(cr,cr.x+dd[0],cr.y+dd[1]))
-    .sort((a,b)=>(Math.abs(cr.x+a[0]-tgt[0])+Math.abs(cr.y+a[1]-tgt[1]))
-               -(Math.abs(cr.x+b[0]-tgt[0])+Math.abs(cr.y+b[1]-tgt[1])));
-  if(!dirs.length){cr.task=null;if(BALL&&BALL.phase!=="carried")BALL.until=Date.now()+4000;return;}
-  const dd=dirs[0];
-  cr.dx=dd[0];cr.dy=dd[1];if(dd[0])cr.face=dd[0];
-  cr.x+=dd[0];cr.y+=dd[1];cr.moving=true;cr.mt=0;
+  const st=bfsStep(cr,tgt[0],tgt[1]);
+  if(!st||st[0]===0&&st[1]===0){ /* no path (or the return target is on him): let go gracefully */
+    cr.task=null;if(BALL&&BALL.phase!=="carried")BALL.until=Date.now()+4000;else BALL=null;return;}
+  cr.dx=st[0];cr.dy=st[1];if(st[0])cr.face=st[0];
+  cr.x+=st[0];cr.y+=st[1];cr.moving=true;cr.mt=0;
 }
 function dogWhim(cr,now){ /* his own clock: mostly naps, sometimes opinions */
   const r=Math.random();
@@ -1014,10 +1048,10 @@ function drawBall(g,sx,sy,phase,t){
 }
 $("ball").addEventListener("click",()=>{
   if(BALL||petTarget!=="beagle"||!petCrit||petCrit.task)return;
-  const w=CW(),opts=[];
+  const w=CW(),rs=dogReach(petCrit),opts=[];
   for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
     const d=Math.abs(x-px)+Math.abs(y-py);
-    if(d>=2&&d<=4&&!SOLID.has(w.grid[y][x])&&w.grid[y][x]!=="N")opts.push([x,y]);}
+    if(d>=2&&d<=4&&rs[y*w.W+x])opts.push([x,y]);} /* only tiles the dog can reach */
   if(!opts.length){toast(T().ballNoRoom||"…",1800);return;}
   const [tx,ty]=opts[Math.floor(Math.random()*opts.length)];
   BALL={world,sx:px,sy:py,fx:px,fy:py,tx,ty,t:0,phase:"fly",dog:petCrit};
@@ -1062,7 +1096,12 @@ function drawBeagle(g,cr,sx,sy){ /* a lemon beagle: white coat, lemon saddle, fl
   g.beginPath();g.moveTo(cx-7,sy+19.5+dy);g.quadraticCurveTo(cx-11,sy+15+dy+wg*0.5,cx-10+wg,sy+11+dy);g.stroke();
   g.fillStyle=white;g.beginPath();g.roundRect(cx-7.5,sy+17+dy,14,8,4);g.fill();
   g.fillStyle=lemon;g.beginPath();g.roundRect(cx-5,sy+16.5+dy,8,4.5,3);g.fill(); /* saddle */
-  g.fillStyle=white;
+  g.fillStyle=white; /* Sonny canon: a white heart in the lemon */
+  g.beginPath();g.arc(cx-2.2,sy+17.8+dy,0.95,0,7);g.arc(cx-0.6,sy+17.8+dy,0.95,0,7);g.fill();
+  g.beginPath();g.moveTo(cx-3.15,sy+18.2+dy);g.lineTo(cx-1.4,sy+20.1+dy);g.lineTo(cx+0.35,sy+18.2+dy);
+  g.closePath();g.fill();
+  /* and white freckles across the lemon coat */
+  [[-4.4,17.2],[2.3,17.4],[1.6,20]].forEach(p=>{g.beginPath();g.arc(cx+p[0],sy+p[1]+dy,0.55,0,7);g.fill();});
   if(!cr.sit&&!lay){g.fillRect(cx-6,sy+24.5,2.2,3.2);g.fillRect(cx+3,sy+24.5,2.2,3.2);}
   if(lay)g.fillRect(cx+2,sy+24.8,7.5,2.2); /* front legs stretched out, professionally */
   if(dig){ /* paws at the ground, dirt flying */
@@ -1073,6 +1112,8 @@ function drawBeagle(g,cr,sx,sy){ /* a lemon beagle: white coat, lemon saddle, fl
   g.beginPath();g.arc(cx+6.5,sy+16+dy+hy,4.6,0,7);g.fill(); /* head */
   g.fillStyle=lemon; /* floppy ear */
   g.beginPath();g.roundRect(cx+2.2,sy+13.2+dy+hy,3.4,7.5,2);g.fill();
+  g.fillStyle=white; /* ear freckles */
+  [[3.4,15.2],[4.4,18.3]].forEach(p=>{g.beginPath();g.arc(cx+p[0],sy+p[1]+dy+hy,0.5,0,7);g.fill();});
   g.fillStyle="#26202B";
   if(lay&&!howl)g.fillRect(cx+6.2,sy+15.2+dy,1.9,0.7); /* eyes closed — do not disturb */
   else g.fillRect(cx+6.8,sy+14.6+dy+hy,1.2,1.2); /* eye */
@@ -1317,10 +1358,11 @@ $("treat").addEventListener("click",()=>{
     const L=T().pigeon;toast("❤ "+L[Math.floor(Math.random()*L.length)],2000);}
   else if(petTarget==="loro"){
     const L=T().loro;toast("🦜 "+L[Math.floor(Math.random()*L.length)],2200);}
-  else if(petTarget==="beagle"){ /* a treat: the tail achieves liftoff */
+  else if(petTarget==="beagle"){ /* a treat: the tail achieves liftoff, and he's FUELED */
     const g2=petCrit;
-    if(g2){g2.sit=true;g2.next=performance.now()+3200;g2.happyT=performance.now()+2200;g2.layT=0;}
-    const L=(g2&&g2.egg&&EGGSAFE[g2.egg]&&Math.random()<0.4)?EGGSAFE[g2.egg].lines[lang]
+    if(g2){g2.sit=true;g2.next=performance.now()+3200;g2.happyT=performance.now()+2200;g2.layT=0;
+      g2.fedT=performance.now();g2.fseq=null;} /* food-driven: the next cycle rolls at 6/7 */
+    const L=(g2&&g2.egg&&EGGSAFE[g2.egg]&&Math.random()<0.35)?EGGSAFE[g2.egg].lines[lang]
            :(T().beagleTreat||T().gato);
     toast("🦴 "+L[Math.floor(Math.random()*L.length)],2400);}
   else if(petTarget==="gato"){

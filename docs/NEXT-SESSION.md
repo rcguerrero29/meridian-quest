@@ -103,10 +103,14 @@ business packs.** Item 3 below is therefore the head of the queue.
    art as textures, actors as pixel billboards; 2-3 sittings; rung ③ sprites
    become the 3D billboards for free). Confirm the three.js vendoring decision
    with the owner before starting 3D. Iso retires when 3D lands, most likely.
-3b. **Sonny's program — SHIPPED v1 2026-08-31 (mq-v29,** IDEAS §11): 🎾 ball with
-   fetch at exactly 4/7 (shuffled per-dog cycle), treats with tail liftoff, howl,
-   lay down, dig holes, infrequent disappearing 💩 (`DECALS` engine seam). The
-   janitor business/practice pack stays a future Don Güero phase.
+3b. **Sonny's program — SHIPPED v1 (mq-v29) + v1.1 (mq-v32,** IDEAS §11): 🎾 fetch
+   at exactly 4/7 with real BFS pathfinding (the "can't get the ball" bug is dead),
+   canon look (white heart in the lemon, freckles, white tail), real howls through
+   the music engine, food-driven fetch (a treat buys a 6/7 cycle for ~4 min), dig
+   holes, infrequent disappearing 💩 (`DECALS` seam). QUEUED NEXT for Sonny:
+   **dress him via Xochi** — plan written in IDEAS §11 (generalize the pet
+   wardrobe to named beagles, one short sitting). The janitor business/practice
+   pack stays a future Don Güero phase.
 4. **AJ's picks**: fandom eggs round 2 + mechanics (IDEAS §9 — Grogu lunchbox,
    birthday calendar magic, streak memory…). Blocked on AJ choosing.
 5. **Music v2** (IDEAS §8) when music gets its own session.

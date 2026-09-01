@@ -419,6 +419,25 @@ stays open for Don Güero). Treats get dedicated bilingual lines and a visible t
 liftoff. Ground decals are a generic engine system (`DECALS`), drawn in top-down and
 front cameras. Original wish list below, kept for the record:
 
+**v1.1 (2026-08-31/09-01, mq-v32) — owner playtest round:**
+- **FIXED: "sometimes sonny cant get the ball."** Greedy stepping wedged on walls.
+  Fetch now runs real BFS pathfinding (`bfsStep`), and throws only target tiles the
+  dog can actually reach (`dogReach` flood) — a throw is never a trap.
+- **Sonny canon look signed & shipped:** lemon coat with a WHITE HEART in the
+  lemon saddle, white freckles across the coat and ear, white tail (tail was
+  already white). This is the default beagle look, engine-wide.
+- **Food-driven fetch shipped:** a treat fuels him for ~4 minutes — the next fetch
+  cycle rolls at **6 of 7** instead of 4 of 7 (baseline 4/7 stays canon when
+  unfed). Feeding restarts the cycle so the fuel applies immediately.
+
+**PLANNED — dress Sonny via Xochi (owner ask, next build):** the wardrobe already
+does pets (Frederick's bandana/collar/cape via `WEAR`; Canela's tab and `wearCat`).
+Generalize it to named beagles: a `wr` field on the critter's stored record
+(`mqnpcs`), an accessory pass in `drawBeagle` (bandana at the neck, collar, tiny
+cape over the saddle — drawn to spare the heart), and Xochi's fitting room grows a
+tab per named dog present in the world. Persistence rides the existing custom-NPC
+records; AJ's game inherits it for any pet. Estimated one short sitting.
+
 Frederick's beagle colleague earns a real life. All data-driven (CRITTERS gains
 behavior flags), all engine-generic so any dog can opt in:
 
