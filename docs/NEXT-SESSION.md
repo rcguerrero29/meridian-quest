@@ -43,7 +43,18 @@ Deployed at sw `mq-v22`. Smoke suite green throughout (24 quests, maxXP 350).
 - Loop for any phase: `/nacho` (plot) → `/don-guero` (parcel) → owner signs both →
   build → smoke green → bump sw CACHE → merge on owner's word.
 
-## Queue (owner-set, rewritten end of 2026-08-31)
+## Queue (owner-set, rewritten end of 2026-09-01 — the Sonny marathon session)
+
+**What this session shipped (mq-v27 → mq-v40):** the stakes/grade review+merge;
+front-profile 2.5D camera (now DEFAULT via CAMDEF); TILES/DECOR/DECALS seams;
+lit windows/awnings/fence posts; TRUE 3D as camera #4 (three.js vendored, HD-2D,
+blur root-caused twice: pixel-art pipeline + resolution); El Parque 🌈 (leash →
+rainbow bridge → chill session → recap card); Sonny canon (face heart tip-to-nose,
+lemon tail white tip, blue collar+leash, minimal digging, real howls, food-driven
+6/7 fetch, BFS fetch); breeds (lab/chihuahua + coats); 🎓 training (sit/down/stay/
+come/follow with reps + treat bonus); agility course; dog society (sniff/chase);
+NPC best friends + city roaming; rename/rehome (no limit, nobody deleted); the
+always-on 🐾 paw menu with the cross-city whistle; WASD-vs-typing fix.
 
 1. **Playtest everything** — the mercado chapter AND today's upgrades (lighting at
    night, palette wardrobe, tune picker, NPC editing) have not been human-played.
@@ -95,72 +106,44 @@ Deployed at sw `mq-v22`. Smoke suite green throughout (24 quests, maxXP 350).
    `qOpen` at `engine/engine.js:146` still gates on `chSeen`, so districts close
    behind the player. Do that refactor before the taller; the taller depends on it,
    and Nacho's referral spine assumes every door stays open.
+2c. **MERGE NOTE 2026-09-01.** This branch (story/open-city) and the pet/3D lineage
+   both bumped to mq-v40 independently and were merged here; the merged tree is
+   **mq-v42**. Nothing was dropped from either side. The story branch was cut from
+   1774116, i.e. BEFORE the two 3D blur fixes, so any 3D reading taken on that
+   branch alone was stale — check `engine/engine3d.js` on the merged tree.
 
-**Game shape signed 2026-08-31** (`docs/OWNER.md` → "The shape of the game"): north
-star is *"a barrio that grows because you helped it"*; the record becomes a room you
-walk into, not a menu; clients-not-chapters replaces week gating. Signed "for now",
-explicitly revisable after real play, and every piece must ship as a content-pack seam
-so **AJ's game can swap or drop it**. Deliverable templates for real client work live
-in `docs/templates/` (written; only the decision log is game-generated so far).
+1. **Playtest sweep with AJ** — the whole park loop, 3D on their real phones
+   (sharpness verdict!), the paw menu, roaming dogs at their friends' sides.
+   Triage with /playtest. Kisses: PENDING owner canon check (IDEAS §11) — build
+   into the 💗 button only when confirmed.
+2. **Dress dogs via Xochi** (planned, IDEAS §11): pet wardrobe generalizes to
+   named dogs; one short sitting.
+3. **THE CAREER GAME NEEDS LOVE.** This session was all Sonny; the AI-role
+   practice packs are the actual product (OWNER.md). Next: the open-city refactor
+   (clients-not-chapters, CITY.md Phases 2-5), then Taller Herrera (automation
+   consultant pack) via /nacho + /don-guero. The janitor business (sanitation +
+   ops-scheduling practice, Sonny's 💩 economy) is a natural Don Güero phase that
+   BRIDGES the dog world and the career game — pitch it to the owner.
+4. **Graphics rung ③** — 2× sprite detail, people + dogs first (IDEAS §10);
+   those sprites become the 3D billboards for free.
+5. **3D sitting 3** (IDEAS §14): drag-to-orbit, emissive night windows, DECOR +
+   decals in 3D, input remap under rotation, iso retirement decision.
+6. **Pet spin-off split** (IDEAS §13): content/petcare/ cartridge — after AJ's
+   pack; the park is its starting map; Sonny fronts the preview.
+7. **AJ's picks** (IDEAS §9 fandom round 2) and **Music v2** (IDEAS §8) when
+   their turns come. **AINPC** (§6) stays owner-gated.
 
-**BUILT 2026-08-31 — needs review: the stakes layer + the grade.** The signed-not-built
-gap is closed: hearts are now one optional mode (`none` default, `hearts`, `budget`
-declared-not-built) with an admin toggle, and a permanent grade underneath picks each
-district's ending. **Read `docs/REVIEW-ME.md` first** — it lists what the smoke test
-covers and the six things it could not, including whether the 90%/60% grade bands feel
-right in real play and how old saves should grade.
+## Resume ritual additions for this queue
+- Sonny is CANON now — read IDEAS §11 before touching any dog code.
+- Dog persistence lives in `mqpark` (dogs, bandanas, training, friends, rehomed).
+- Cameras: top / front (default) / iso / 3d — engine3d.js requires
+  vendor/three.min.js; sw ASSETS lists both. Version lockstep now spans 3 files'
+  worth of caution: sw.js CACHE == config.js GAMEV, smoke-enforced.
 
-**Org-level reuse (owner-approved 2026-08-31).** `/deliverable` is BUILT
-(`.claude/skills/deliverable/`) — fills any of the five `docs/templates/` from a
-transcript, branded or neutral, sister to `ai-audit` and deliberately NOT merged with
-it (that skill is brand-locked with a frozen regression snapshot; they share
-`brand.yml` and nothing else). Two further reuse candidates were recommended and NOT
-built: the planner-ledger pattern generalized to client engagements, and `OWNER.md`
-as a per-client profile. Build them only when a real engagement needs them.
+## State snapshot (2026-09-01)
 
-**Owner-set build order (2026-08-31): front-profile 2.5D first → close the
-signed-not-built gap (open-city refactor + per-business hearts) → then the four
-business packs.** Item 3 below is therefore the head of the queue.
-
-3. **Graphics — where it stands end of 2026-08-31:** front-profile camera SHIPPED
-   (mq-v29) and is now the DEFAULT (mq-v31, `CAMDEF` seam, owner+AJ signed —
-   OWNER.md Settled). Ladder rungs ① grounding/rooflines and ② lit windows /
-   awning shadows / fence posts SHIPPED (mq-v30/31). Owner verdict on rung ②:
-   too subtle — "i dont see much of any improvements". **HEAD OF QUEUE: rung ③,
-   2× sprite detail** — same tile size, every sprite redrawn at double internal
-   detail; visible at any hour in every camera. Ship in chunks so the owner can
-   react early: (a) people + animals FIRST (AJ looks at Sonny, not walls),
-   (b) facades/doors, (c) props/furniture. Then: **the 3D plan is written —
-   IDEAS §14** (HD-2D school: three.js extruded world wearing the existing tile
-   art as textures, actors as pixel billboards; 2-3 sittings; rung ③ sprites
-   become the 3D billboards for free). Confirm the three.js vendoring decision
-   with the owner before starting 3D. Iso retires when 3D lands, most likely.
-3b. **Sonny's program — SHIPPED v1 (mq-v29) + v1.1 (mq-v32,** IDEAS §11): 🎾 fetch
-   at exactly 4/7 with real BFS pathfinding (the "can't get the ball" bug is dead),
-   canon look (white heart in the lemon, freckles, white tail), real howls through
-   the music engine, food-driven fetch (a treat buys a 6/7 cycle for ~4 min), dig
-   holes, infrequent disappearing 💩 (`DECALS` seam). QUEUED NEXT for Sonny:
-   **dress him via Xochi** — plan written in IDEAS §11 (generalize the pet
-   wardrobe to named beagles, one short sitting). The janitor business/practice
-   pack stays a future Don Güero phase.
-3c. **El Parque SHIPPED (mq-v35)** — leash → rainbow bridge → chill session →
-   recap card; bandanas + adopt-up-to-4 dogs (`mqpark`). It is the pet spin-off's
-   preview and future starting map (IDEAS §13).
-3d. **3D v1 SHIPPED (mq-v36)** — camera #4 per IDEAS §14 (three.js vendored,
-   HD-2D: baked-texture world + live billboard actors, ↻ orbit stops, day/night).
-   Sitting 3 remains: drag-orbit, emissive night windows, DECOR/decals in 3D,
-   rotated-camera input remap, iso retirement decision.
-4. **AJ's picks**: fandom eggs round 2 + mechanics (IDEAS §9 — Grogu lunchbox,
-   birthday calendar magic, streak memory…). Blocked on AJ choosing.
-5. **Music v2** (IDEAS §8) when music gets its own session.
-6. **AINPC** (IDEAS §6) — designed, owner said *not yet*. Don't build until asked.
-
-## State snapshot (2026-08-31)
-
-- `main` = deployed through `mq-v31`: the stakes/grade layer (reviewed & merged, see
-  REVIEW-ME.md), the front-profile 2.5D camera (now the DEFAULT via `CAMDEF`) +
-  TILES/DECOR/DECALS seams, Sonny's program v1 with a real howl, and the rung-②
-  lighting wave. The don-guero branch is fully merged; nothing waits on a branch.
+- `main` = deployed through `mq-v40` (everything in the shipped list above).
+  Nothing waits on a branch.
 - Pet-care spin-off shape signed (IDEAS §13): Sonny fronts the preview mini game
   inside Meridian, some customization there, full customization in the standalone.
 - The 3D plan is written and signed off as PLAN ONLY: IDEAS §14.

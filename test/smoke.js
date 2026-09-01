@@ -708,6 +708,84 @@ const CANDIDATES = [
     document.getElementById('adoptGo').click();
     out.adopted = CRIT.some(c => c.kind === 'beagle' && c.name === 'Nube' && c.world === 'pk');
     out.adoptStored = (JSON.parse(localStorage.getItem('mqpark') || '{}').dogs || []).length === 1;
+    // breeds: adopt a chocolate lab, and a duplicate name is refused
+    adoptB = 'lab'; adoptC = '#6E4B2F';
+    document.getElementById('adoptName').value = 'Oso';
+    document.getElementById('adoptGo').click();
+    out.labAdopted = CRIT.some(c => c.kind === 'lab' && c.name === 'Oso' && c.c === '#6E4B2F');
+    const nDogs = CRIT.filter(c => DOGK.has(c.kind)).length;
+    document.getElementById('adoptName').value = 'Sonny';
+    document.getElementById('adoptGo').click();
+    out.dupBlocked = CRIT.filter(c => DOGK.has(c.kind)).length === nDogs;
+    // the star is a single instance: a player-made 'Sonny' egg must not double him
+    spawnCustom({ n: 'Sonny', w: 'st', x: 9, y: 11 });
+    out.oneSonny = CRIT.filter(c => DOGK.has(c.kind) && c.name === 'Sonny').length === 1;
+    // no adoption limit: dogs 3-6 all land (the old cap was 4)
+    for (const nm of ['Kiko', 'Luna', 'Rex', 'Toby']) {
+      adoptB = 'chi'; adoptC = '#C9975C';
+      document.getElementById('adoptName').value = nm;
+      document.getElementById('adoptGo').click();
+    }
+    out.noLimit = CRIT.filter(c => DOGK.has(c.kind) && dogRecord(c)).length === 6;
+    // every adopted dog has one particular friend in the city
+    out.friends = parkPrefs.dogs.every(d => d.friend && d.friend.w && d.friend.key);
+    // rename: works for an adopted dog, migrates its records, refuses 'Sonny'
+    const nube = CRIT.find(c => c.name === 'Nube');
+    parkPrefs.band.Nube = '#C0392B'; parkPrefs.train.Nube = { sit: 2 };
+    renTarget = nube; document.getElementById('renName').value = 'Nieve';
+    document.getElementById('renGo').click();
+    out.renamed = nube.name === 'Nieve' && dogRecord(nube).n === 'Nieve'
+      && parkPrefs.band.Nieve === '#C0392B' && parkPrefs.train.Nieve.sit === 2;
+    renTarget = nube; document.getElementById('renName').value = 'sonny';
+    document.getElementById('renGo').click();
+    out.renDupBlocked = nube.name === 'Nieve';
+    // rehome: the dog moves in with its friend, record kept — never deleted
+    const oso = CRIT.find(c => c.name === 'Oso');
+    px = fx = 10; py = fy = 10; // an empty corner: Oso alone is nearest
+    oso.x = 9; oso.y = 10; oso.fx = 9; oso.fy = 10; oso.task = null;
+    petCrit = oso; petTarget = 'lab';
+    document.getElementById('cmd').click();
+    out.rehBtn = !document.getElementById('cmdReh').hidden;
+    document.getElementById('cmdReh').click();
+    const orec = parkPrefs.dogs.find(d => d.n === 'Oso');
+    out.rehomed = !!orec && orec.rehomed === true && oso.world === orec.friend.w
+      && CRIT.includes(oso);
+    // Sonny gets no rename/rehome buttons
+    px = fx = 8; py = fy = 6;
+    sonny.x = 9; sonny.y = 6; sonny.fx = 9; sonny.fy = 6; sonny.world = 'pk'; sonny.task = null;
+    document.getElementById('cmd').click();
+    out.sonnyProtected = document.getElementById('cmdRen').hidden && document.getElementById('cmdReh').hidden;
+    document.getElementById('dogPX').click();
+    // training: with luck pinned, Sit lands and Come recalls from across the lawn
+    const MR = Math.random; Math.random = () => 0.01;
+    sonny.task = null; sonny.layT = 0; sonny.stayT = 0;
+    px = fx = 8; py = fy = 6;
+    dogCmd('sit');
+    out.sitOk = sonny.sit === true;
+    dogCmd('stay');
+    out.stayOk = sonny.stayT > performance.now();
+    sonny.stayT = 0; sonny.x = 17; sonny.y = 2; sonny.fx = 17; sonny.fy = 2; sonny.moving = false; sonny.next = 0;
+    dogCmd('come');
+    Math.random = MR;
+    const runner = CRIT.find(c => c.task && c.task.type === 'come') || sonny;
+    const t1 = Date.now();
+    while (Date.now() - t1 < 6000) {
+      await sleep(150);
+      if (!runner.task && Math.abs(runner.x - px) + Math.abs(runner.y - py) <= 1) break;
+    }
+    out.comeOk = Math.abs(runner.x - px) + Math.abs(runner.y - py) <= 1;
+    // the agility course exists and is reachable
+    out.agility = WORLDS.pk.rows[8].includes('3.4.5') &&
+      AGILITY.every(([ax, ay]) => !!dogReach({ world: 'pk', x: 2, y: 6 })[ay * WORLDS.pk.W + ax]);
+    // swipe works on the 3D canvas too
+    held = null; ctl = 'swipe';
+    document.getElementById('world').hidden = false; // the trolley-pass section left the intro up
+    const c3 = document.getElementById('cv3');
+    c3.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 7, clientX: 100, clientY: 100 }));
+    c3.dispatchEvent(new PointerEvent('pointermove', { pointerId: 7, clientX: 170, clientY: 104 }));
+    out.swipe3d = held === 'right';
+    c3.dispatchEvent(new PointerEvent('pointerup', { pointerId: 7, clientX: 170, clientY: 104 }));
+    held = null;
     // walk out over the bridge: land on the exit tile and let the portal fire
     px = fx = 1; py = fy = 6; moving = true; mt = 1; dir = 'left'; px = 0; portalT = 0;
     await sleep(300);
@@ -724,7 +802,9 @@ const CANDIDATES = [
     return out;
   });
   ['pkOk', 'lawnReach', 'waterBlocked', 'sonny', 'inPark', 'treatCounted', 'band', 'bandStored',
-    'adopted', 'adoptStored', 'exited', 'card', 'sonnyHome', 'langOk'].forEach(k => {
+    'adopted', 'adoptStored', 'labAdopted', 'dupBlocked', 'oneSonny', 'sitOk', 'stayOk', 'comeOk',
+    'noLimit', 'friends', 'renamed', 'renDupBlocked', 'rehBtn', 'rehomed', 'sonnyProtected',
+    'agility', 'swipe3d', 'exited', 'card', 'sonnyHome', 'langOk'].forEach(k => {
     if (park[k] !== true) fails.push('park: ' + k + ' failed (' + JSON.stringify(park[k]) + ')');
   });
 
