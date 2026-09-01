@@ -323,10 +323,24 @@ hired you for. Three fixes, now canon:
   still answerable and puts every reframe line into default play. Owner: *"drop it to
   12 but doesnt have to happen in the office"* — which is what `need` already meant.
 
-## Bible vs. game text — RESOLVED 2026-09-01
+## Bible vs. game text — RESOLVED 2026-09-01 (the open-city items only)
 
-Everything logged here on 2026-09-01 as signed-not-built is now shipped (sw `mq-v38`,
-smoke green). Kept as a record of what was wrong and what replaced it.
+The items logged on 2026-09-01 **as of that morning** are shipped (sw `mq-v38`, smoke
+green). Kept as a record of what was wrong and what replaced it.
+
+**⚠️ Corrected the same day — this header used to say "everything ... is now shipped",
+which was over-broad.** Two rules signed LATER on 2026-09-01 are NOT built, and one of
+them the engine currently contradicts:
+
+- **❗El listón — "endings play in the world, not in a curtain" is SIGNED AND NOT BUILT.**
+  `finish()` at `engine/engine.js:1813-1814` does `$("world").hidden=true` and shows the
+  `#end` panel. That is a curtain that takes control — precisely what the Settled rule
+  forbids. The five-second diegetic inauguración, the walk-up speeches and the mural
+  carrying the grade are all still promises.
+- **❗El día — "the morning after" is NOT built.** Nothing tracks last-played; there is
+  no day-turnover state anywhere in the engine.
+
+Both are real work, not wording. They belong with the 3D/world sitting or after it.
 
 **Built — the open city.** `qOpen` in `engine/engine.js` had `c>=chSeen`, which closed
 every district behind the player and (latently) left unopened districts nominally

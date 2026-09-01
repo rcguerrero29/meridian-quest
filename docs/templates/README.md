@@ -20,7 +20,7 @@ Two audiences, one file:
 
 | # | Template | The call it captures | Taught by |
 |---|---|---|---|
-| 01 | Process Discovery Notes | Map the work before you automate it | Taller Herrera — *Nando's shortcut* (planned) |
+| 01 | Process Discovery Notes | Map the work before you automate it | Taller Herrera — the process-and-exception map (❗El papel, signed 2026-09-01, planned) |
 | 02 | Recommendation Memo | What to build first, and why not the rest | El Mercado — *Everything at once* |
 | 03 | Acceptance Criteria & Error Budget | What "working" means before you build it | El Mercado — *The label problem* |
 | 04 | Pilot Review | Did it pay off — and should we stop? | El Mercado — *The Monday number* |

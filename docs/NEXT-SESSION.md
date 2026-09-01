@@ -197,8 +197,9 @@ always-on 🐾 paw menu with the cross-city whistle; WASD-vs-typing fix.
 
 ## State snapshot (2026-09-01)
 
-- `main` = deployed through `mq-v40` (everything in the shipped list above).
-  Nothing waits on a branch.
+- `main` = deployed through **`mq-v44`** (2026-09-01). Nothing waits on a branch.
+  *(This line said `mq-v40` and contradicted the state-of-play block at the top of this
+  same file — caught in the 2026-09-01 contradiction sweep.)*
 - Pet-care spin-off shape signed (IDEAS §13): Sonny fronts the preview mini game
   inside Meridian, some customization there, full customization in the standalone.
 - The 3D plan is written and signed off as PLAN ONLY: IDEAS §14.
