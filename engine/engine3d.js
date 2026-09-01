@@ -18,13 +18,18 @@ function t3BakeGlyph(g,opaque,base){
   }finally{ctx=old;}
   return c;
 }
-function t3Tex(c){const t=new THREE.CanvasTexture(c);
-  t.magFilter=THREE.NearestFilter;t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;
+function t3Tex(c,ground){const t=new THREE.CanvasTexture(c);
+  t.magFilter=THREE.NearestFilter; /* crisp pixels up close */
+  if(ground&&T3.renderer){ /* the floor at glancing angles was the blur (owner) —
+       mipmaps + anisotropy sharpen it into the distance */
+    t.generateMipmaps=true;t.minFilter=THREE.LinearMipmapLinearFilter;
+    t.anisotropy=T3.renderer.capabilities.getMaxAnisotropy();
+  }else{t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;}
   return t;}
 function t3Init(){
   const c3=document.getElementById("cv3");
-  T3.renderer=new THREE.WebGLRenderer({canvas:c3,antialias:false});
-  T3.renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  T3.renderer=new THREE.WebGLRenderer({canvas:c3,antialias:true});
+  T3.renderer.setPixelRatio(Math.min(3,window.devicePixelRatio||1));
   T3.renderer.setSize(VW,VH,false);
   T3.scene=new THREE.Scene();
   T3.scene.background=new THREE.Color(0x241F2E);
@@ -64,13 +69,13 @@ function t3Build(key){
       const gch=w.grid[y][x],m=TILES[gch];
       const water=m&&m.kind==="water";
       if(!SOLID.has(gch)||water){
-        if(!DOORSET.has(ch)){const tf=TILEDRAW[ch]||(water?TILEDRAW[gch]:null);
-          if(tf)tf({sx,sy,x,y,canopy:()=>{}});}
+        if(!DOORSET.has(ch)&&!"345".includes(ch)){const tf=TILEDRAW[ch]||(water?TILEDRAW[gch]:null);
+          if(tf)tf({sx,sy,x,y,canopy:()=>{}});} /* agility gear stands up instead */
       }
     }
   }finally{ctx=old;}
   const ground=new THREE.Mesh(new THREE.PlaneGeometry(w.W,w.H),
-    new THREE.MeshLambertMaterial({map:t3Tex(gc)}));
+    new THREE.MeshLambertMaterial({map:t3Tex(gc,true)}));
   ground.rotation.x=-Math.PI/2;ground.position.set(w.W/2,0,w.H/2);
   grp.add(ground);
   /* the standing world: boxes wear the facade art, everything else is a cutout */
@@ -85,6 +90,14 @@ function t3Build(key){
       const door=new THREE.Mesh(new THREE.PlaneGeometry(1,1),
         new THREE.MeshLambertMaterial({map:flatTex[g],side:THREE.DoubleSide}));
       door.position.set(cx,0.5,cz);grp.add(door);
+      continue;
+    }
+    if("345".includes(w.rows[y][x])&&!SOLID.has(gch)){ /* agility gear: walkable cutouts */
+      const g=w.rows[y][x];
+      flatTex[g]=flatTex[g]||t3Tex(t3BakeGlyph(g,false));
+      const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[g]}));
+      s.center.set(0.5,0.06);s.scale.set(1.05,1.05,1);s.position.set(cx,0,cz);
+      T3.tintables.push(s.material);grp.add(s);
       continue;
     }
     if(!SOLID.has(gch))continue;
@@ -163,7 +176,9 @@ function t3Actors(){
       if(cr.kind==="butterfly")drawButterfly(g,cr,2,6);
       else if(cr.kind==="colibri")drawColibri(g,cr,2,6);
       else if(cr.kind==="gato")drawGato(g,cr,2,6);
-      else if(cr.kind==="beagle")drawBeagle(g,cr,2,6);}});});
+      else if(cr.kind==="beagle")drawBeagle(g,cr,2,6);
+      else if(cr.kind==="lab")drawLab(g,cr,2,6);
+      else if(cr.kind==="chi")drawChi(g,cr,2,6);}});});
   if(BALL&&BALL.world===world)list.push({x:BALL.fx,y:BALL.fy,f:g=>drawBall(g,2,6,BALL.phase,BALL.t)});
   list.push({x:fx,y:fy,f:g=>drawPerson(g,2,6,look,{dir,bob:moving?Math.sin(bob)*2:0,moving})});
   const old=ctx;
@@ -174,7 +189,11 @@ function t3Actors(){
     try{a.f(p.g);}catch(e){}
     ctx=old;
     p.tex.needsUpdate=true;
-    p.spr.position.set(a.x+0.5,0,a.y+0.5);
+    /* pull each billboard a step toward the camera so heads stop sinking into the
+       wall behind them (owner: "head disappearance near walls") */
+    const ax=a.x+0.5,az=a.y+0.5;
+    const ddx=T3.cam.position.x-ax,ddz=T3.cam.position.z-az,dl=Math.hypot(ddx,ddz)||1;
+    p.spr.position.set(ax+ddx/dl*0.34,0,az+ddz/dl*0.34);
     p.spr.scale.set(36/32*1.12,40/32*1.12,1);
     p.spr.material.color.copy(T3.tint);
     p.spr.visible=true;p.live=true;
@@ -204,9 +223,23 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
     T3.cam.lookAt(hx,0.4,hz);
     t3Light();
     t3Actors();
+    t3Leash();
     T3.renderer.render(T3.scene,T3.cam);
     return true;
   }catch(e){T3.fail=true;return false;}
+}
+function t3Leash(){ /* the blue leash exists in 3D too, while it's on */
+  const dog=CRIT.find(c=>c.leashT>performance.now()&&c.world===world);
+  if(!dog){if(T3.leashLn)T3.leashLn.visible=false;return;}
+  if(!T3.leashLn){
+    const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]);
+    T3.leashLn=new THREE.Line(g,new THREE.LineBasicMaterial({color:0x2E5FA8}));
+    T3.scene.add(T3.leashLn);
+  }
+  const pos=T3.leashLn.geometry.attributes.position;
+  pos.setXYZ(0,fx+0.5,0.5,fy+0.5);
+  pos.setXYZ(1,dog.fx+0.5,0.35,dog.fy+0.5);
+  pos.needsUpdate=true;T3.leashLn.visible=true;
 }
 /* ↻ — the camera-flip wish from the iso playtest, finally real: eight stops */
 (function(){

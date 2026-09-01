@@ -443,6 +443,30 @@ front cameras. Original wish list below, kept for the record:
 - **Kisses: PENDING owner verification** ("he did give kisses often but ill check
   it for now") — do not build until the owner confirms the canon.
 
+**v2 (2026-09-01, mq-v38) — owner playtest round 3, all shipped:**
+- **Breeds at the doghouse:** beagle, lab (yellow/chocolate/black), chihuahua
+  (tan/cream/black/white) — coat picker in the adopt panel; every breed runs the
+  full dog program. Duplicate names refused, and the double-Sonny bug is dead
+  (a player-named egg Sonny no longer spawns beside the content Sonny).
+- **🎓 Training:** Sit / Down / Stay / Come / Follow-me from a commands panel in
+  the park. Every successful rep raises the odds of the next (stored per dog in
+  `mqpark.train`); a recent treat adds a big bonus — recall lands "most of the
+  time, especially after a treat" (owner spec). Come works from across the park.
+- **Agility course** (hurdle, tunnel, weave poles) on the east lawn — dogs
+  sometimes take it at full commitment on their own clock; it stands upright in
+  the 3D camera.
+- **Dogs being dogs:** butt-sniffing (the ancient greeting) and chase bursts
+  between park dogs.
+- **Off-leash park (owner canon):** the leash line shows for the bridge crossing
+  (~6s), then he's loose but follows most of the time (10% "something smelled
+  important"); Follow-me toggles it, Come recalls. Leash line renders in 2D,
+  front AND 3D now.
+- **3D fixes:** sharper (antialias, full pixel ratio, mipmaps + anisotropy on the
+  ground), billboard heads no longer sink into walls (sprites pulled toward the
+  camera), swipe controls now work on the 3D canvas (they were attached only to
+  the 2D one — the "movement not working" bug).
+- **The face heart is smaller**, still tip-to-nose.
+
 **PLANNED — dress Sonny via Xochi (owner ask, next build):** the wardrobe already
 does pets (Frederick's bandana/collar/cape via `WEAR`; Canela's tab and `wearCat`).
 Generalize it to named beagles: a `wr` field on the critter's stored record

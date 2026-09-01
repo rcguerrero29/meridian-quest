@@ -105,6 +105,7 @@
   #band{bottom:184px !important; background:#D77FA8 !important;}
   #adopt{bottom:184px !important; background:#4E7A4A !important;}
   #love{bottom:240px !important; background:#C4586B !important;}
+  #cmd{bottom:296px !important; background:#5A5170 !important;}
   .hint{font-size:.8rem; color:var(--muted); margin:10px 2px 0;}
   .npc{display:flex; gap:10px; margin-bottom:12px;}
   .avatar{flex:0 0 auto; width:44px; height:44px; border-radius:50%; background:var(--chip); display:flex; align-items:center; justify-content:center; font-size:1.4rem;}
@@ -248,6 +249,7 @@
       <button class="talk treat" id="band" hidden></button>
       <button class="talk treat" id="adopt" hidden></button>
       <button class="talk treat" id="love" hidden></button>
+      <button class="talk treat" id="cmd" hidden></button>
       <div class="toast" id="toast"></div>
       <div class="ticker" id="ticker" hidden></div>
       <div class="settings" id="settings" hidden>
@@ -404,8 +406,24 @@
       <div class="settings" id="adoptP" hidden>
         <div class="box">
           <h3 id="adoptTitle"></h3>
+          <label id="lbBreed"></label>
+          <div class="optrow" id="adoptBreeds">
+            <button data-b="beagle"></button>
+            <button data-b="lab"></button>
+            <button data-b="chi"></button>
+          </div>
+          <label id="lbCoat"></label>
+          <div class="optrow" id="adoptCoats" style="gap:10px;"></div>
           <input id="adoptName" maxlength="14" style="width:100%; box-sizing:border-box; font-size:1rem; padding:10px 12px; margin:8px 0 12px; border-radius:10px; border:1px solid var(--line); background:var(--bubble); color:var(--ink);">
           <div class="optrow"><button id="adoptGo" style="flex:1;"></button><button id="adoptX" style="flex:1;"></button></div>
+        </div>
+      </div>
+      <div class="settings" id="dogP" hidden>
+        <div class="box">
+          <h3 id="dogPTitle"></h3>
+          <div class="optrow"><button id="cmdSit" style="flex:1;"></button><button id="cmdDown" style="flex:1;"></button><button id="cmdStay" style="flex:1;"></button></div>
+          <div class="optrow"><button id="cmdCome" style="flex:1;"></button><button id="cmdFollow" style="flex:1;"></button></div>
+          <button class="close" id="dogPX"></button>
         </div>
       </div>
       <div class="settings" id="tpass" hidden>
