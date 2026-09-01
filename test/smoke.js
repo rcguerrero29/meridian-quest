@@ -633,6 +633,7 @@ const CANDIDATES = [
     out.decorOk = typeof DECOR === 'undefined' || DECOR.every(d => !!DECODRAW[d.deco]);
     // the pack declares a default camera and the facades declare their windows
     out.camdef = typeof CAMDEF !== 'undefined' ? CAMDEF : null;
+    out.cams = CAMS.slice();
     out.facadeWin = ['B', 'Q', 'Z'].every(g => TILES[g] && Array.isArray(TILES[g].win));
     // the lit-windows pass renders under a mocked night clock without throwing
     out.winPass = (() => {
@@ -664,7 +665,9 @@ const CANDIDATES = [
   if (!front.bfs.blocked) fails.push('bfsStep pathed into a wall');
   if (!front.decalPruned) fails.push('expired ground decal not pruned');
   if (front.decorOk !== true) fails.push('DECOR references unknown deco art');
-  if (!['top', 'front', 'iso'].includes(front.camdef)) fails.push('CAMDEF missing or invalid: ' + front.camdef);
+  // the engine's own CAMS list is the single source of truth — this used to be a
+  // third hand-written whitelist and it went stale the moment 3D was added.
+  if (!front.cams.includes(front.camdef)) fails.push('CAMDEF missing or invalid: ' + front.camdef);
   if (!front.facadeWin) fails.push('facade tiles missing win metadata');
   if (front.winPass !== true) fails.push('lit-windows pass threw: ' + front.winPass);
   if (!front.threeOk) fails.push('three.js not loaded (vendor/three.min.js missing?)');
@@ -807,6 +810,27 @@ const CANDIDATES = [
     'agility', 'swipe3d', 'exited', 'card', 'sonnyHome', 'langOk'].forEach(k => {
     if (park[k] !== true) fails.push('park: ' + k + ' failed (' + JSON.stringify(park[k]) + ')');
   });
+
+  // ---- the camera the pack asks for is the camera you get, and it sticks ----
+  const cam = await page.evaluate(() => {
+    const problems = [];
+    if (typeof CAMDEF !== 'undefined' && !CAMS.includes(CAMDEF))
+      problems.push(`CAMDEF "${CAMDEF}" is not a camera the engine accepts`);
+    if (typeof CAMDEF !== 'undefined' && camMode !== CAMDEF && !localStorage.getItem('mqcam'))
+      problems.push(`the pack asked for camera "${CAMDEF}" and booted into "${camMode}"`);
+    // every camera must survive a save/restore round trip — camSet writes it, boot reads it.
+    // These were two separate whitelists and both omitted "3d", so a 3D choice was
+    // written and then silently discarded on the next load.
+    CAMS.forEach(m => {
+      camSet(m);
+      let stored = null; try { stored = localStorage.getItem('mqcam'); } catch (e) {}
+      if (stored !== m) problems.push(`camera "${m}" was not stored`);
+      if (!CAMS.includes(stored)) problems.push(`camera "${m}" is stored but boot would reject it`);
+    });
+    camSet(CAMDEF);
+    return problems;
+  });
+  fails.push(...cam);
 
   // ---- portability: the shared engine must not know one pack's content ----
   // The engine is never forked — AJ's game is a different content pack on the same

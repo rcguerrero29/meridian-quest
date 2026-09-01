@@ -273,9 +273,14 @@ let camXg=0,camYg=0;
    animals render as upright billboards at their projected feet, depth by painter's
    sort. Ships as a Settings camera toggle beside top-down; admin painting stays
    top-down-only (tap→tile math differs). */
-/* the default camera is content's call (CAMDEF); a device's stored choice wins */
-let camMode=(typeof CAMDEF!=="undefined"&&["top","front","iso"].includes(CAMDEF))?CAMDEF:"top";
-try{const cm0=localStorage.getItem("mqcam");if(cm0==="iso"||cm0==="front"||cm0==="top")camMode=cm0;}catch(e){}
+/* the default camera is content's call (CAMDEF); a device's stored choice wins.
+   ONE list, used for both — they were two hand-written whitelists and both omitted
+   "3d", so camSet() happily SAVED a 3D choice that boot then refused to read back:
+   picking 3D and reloading silently dropped you to another camera, and CAMDEF="3d"
+   was ignored outright. */
+const CAMS=["top","front","iso","3d"];
+let camMode=(typeof CAMDEF!=="undefined"&&CAMS.includes(CAMDEF))?CAMDEF:"top";
+try{const cm0=localStorage.getItem("mqcam");if(CAMS.includes(cm0))camMode=cm0;}catch(e){}
 const ISW=44,ISH=22;
 let ISOCOL=null;
 const IZH={"#":20,B:20,Q:17,Z:17,U:20,W:12,V:10,D:9,K:9,T:8,S:13,H:8,I:9,A:9,P:11,F:7,G:9,C:7,X:8,"1":10,"~":2,"9":11};

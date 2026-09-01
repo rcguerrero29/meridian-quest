@@ -2,9 +2,11 @@
 const GAMEV="mq-v42";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
-/* default camera for this pack (owner + AJ pick, 2026-08-31): the front-profile
-   2.5D view greets new players; a device's own Settings choice always wins */
-const CAMDEF="front";
+/* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
+   default"); front-profile 2.5D was the previous default (owner + AJ, 2026-08-31)
+   and is still one tap away. A device's own Settings choice always wins, and the
+   renderer falls back to front-profile by itself if 3D cannot run on the device. */
+const CAMDEF="3d";
 const MAXXP=350;
 /* Districts: a district's quest pack, and how many answers play its ending.
    `need` is deliberately LOWER than the pack size — the city is a template, so the
