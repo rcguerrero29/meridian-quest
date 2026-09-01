@@ -5,7 +5,7 @@
    Requires vendor/three.min.js — the only dependency this project has ever taken
    (owner-confirmed 2026-08-31). No WebGL → draw() falls back to the front camera. */
 "use strict";
-const T3={renderer:null,scene:null,cam:null,group:null,amb:null,sun:null,
+const T3={renderer:null,scene:null,cam:null,group:null,amb:null,sun:null,lastW:0,
   builtKey:"",dirty:0,fail:false,yaw:0,pool:[],tintables:[],tint:null}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
 function t3Invalidate(){T3.dirty++;} /* growth, theme edits — anything that reshapes tiles */
 /* bake a glyph's art through TILEDRAW by borrowing the global ctx */
@@ -26,11 +26,22 @@ function t3Tex(c,ground){const t=new THREE.CanvasTexture(c);
     t.anisotropy=T3.renderer.capabilities.getMaxAnisotropy();
   }else{t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;}
   return t;}
+function t3Resize(){ /* THE blur fix: the 2D canvases render tiny on purpose (pixel art,
+   CSS-stretched with image-rendering:pixelated). 3D must NOT — it renders at the
+   element's real on-screen size, full device resolution, smooth scaling. */
+  if(!T3.renderer)return;
+  const c3=T3.renderer.domElement;
+  c3.style.imageRendering="auto";
+  const wCss=c3.clientWidth||document.getElementById("vp").clientWidth||360;
+  const hCss=Math.round(wCss*VH/VW);
+  T3.renderer.setPixelRatio(Math.min(3,window.devicePixelRatio||1));
+  T3.renderer.setSize(wCss,hCss,false);
+  if(T3.cam){T3.cam.aspect=wCss/hCss;T3.cam.updateProjectionMatrix();}
+}
 function t3Init(){
   const c3=document.getElementById("cv3");
   T3.renderer=new THREE.WebGLRenderer({canvas:c3,antialias:true});
-  T3.renderer.setPixelRatio(Math.min(3,window.devicePixelRatio||1));
-  T3.renderer.setSize(VW,VH,false);
+  t3Resize();
   T3.scene=new THREE.Scene();
   T3.scene.background=new THREE.Color(0x241F2E);
   T3.cam=new THREE.PerspectiveCamera(50,VW/VH,0.1,120);
@@ -216,6 +227,8 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
   if(T3.fail)return false;
   if(!T3.renderer){try{t3Init();}catch(e){T3.fail=true;return false;}}
   try{
+    const c3=T3.renderer.domElement;
+    if(Math.abs((c3.clientWidth||0)-T3.lastW)>2){T3.lastW=c3.clientWidth||0;t3Resize();}
     const key=world+"|"+themeName+"|"+T3.dirty;
     if(T3.builtKey!==key)t3Build(key);
     const hx=fx+0.5,hz=fy+0.5;

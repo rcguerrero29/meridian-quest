@@ -240,6 +240,7 @@ function sizeCanvas(){
   cv.width=VW*scale; cv.height=VH*scale;
   ctx.setTransform(scale,0,0,scale,0,0);
   const c3=$("cv3");if(c3)c3.style.height=cv.style.height;
+  if(typeof t3Resize==="function")try{t3Resize();}catch(e){}
 }
 window.addEventListener("resize",sizeCanvas);
 const C={floor:"#E7DFC8",floorAlt:"#E1D8BE",rug:"#C9B7E8",wall:"#453D57",wallTop:"#5A5170",
@@ -1115,6 +1116,10 @@ function dogWhim(cr,now){ /* his own clock: mostly naps and songs. Digging was a
   puppy phase (owner canon) — it stays in the repertoire, barely. In the park:
   zoomies through the agility course, and the ancient greeting between dogs. */
   const r=Math.random(),park=cr.world==="pk";
+  if(cr.friend&&cr.world===cr.friend.w){ /* beside the favorite person: mostly adoration */
+    const f=(WORLDS[cr.world].npcs||[]).find(n=>n.key===cr.friend.key);
+    if(f&&Math.abs(f.x-cr.x)+Math.abs(f.y-cr.y)<=2&&Math.random()<0.4){
+      cr.happyT=now+2200;cr.face=Math.sign(f.x-cr.x)||cr.face;cr.sit=true;cr.next=now+2800;return;}}
   const other=park?CRIT.find(o=>o!==cr&&isDog(o)&&o.world==="pk"&&!o.task
     &&Math.abs(o.x-cr.x)+Math.abs(o.y-cr.y)<=7):null;
   if(r<0.42){cr.layT=now+3800+Math.random()*3200;cr.sit=false;cr.next=cr.layT;}
@@ -1494,6 +1499,7 @@ function loop(ts){
         world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
         warpT=performance.now()+450;portalT=performance.now()+900;
         save();setWorldTag();toast(T().arrive[world],2200);
+        dogsRoam(world); /* unseen pups drift toward their favorite townsperson */
         if(fromW==="pk"&&world!=="pk")parkExit();} /* crossing back over the rainbow: the recap */
       else if(pch==="Y"&&ts>portalT){portalT=performance.now()+900;held=null;openTravel();}
       else{save();checkTalk();tryStep();}
@@ -1565,8 +1571,8 @@ function fredCheck(){ /* now the generic animal-interaction check: every creatur
   const loveOK=dogT; /* you can always tell him */
   $("love").hidden=!loveOK;
   if(loveOK)$("love").textContent=T().loveLb||"💗";
-  /* 🎓 commands: anywhere in the park with a dog present — Come works from afar */
-  const cmdOK=world==="pk"&&CRIT.some(c=>isDog(c)&&c.world==="pk");
+  /* 🎓 commands: anywhere in the park (Come works from afar), or beside a roaming dog */
+  const cmdOK=(world==="pk"&&CRIT.some(c=>isDog(c)&&c.world==="pk"))||dogT;
   $("cmd").hidden=!cmdOK;
   if(cmdOK)$("cmd").textContent=T().cmdLb||"🎓";
   let adoptOK=false;
@@ -2599,14 +2605,49 @@ myNpcs=myNpcs.filter(r=>{try{return spawnCustom(r);}catch(e){return false;}});
 const parkPrefs={band:{},dogs:[],train:{}};
 try{const p0=JSON.parse(localStorage.getItem("mqpark")||"{}");
   if(p0&&typeof p0==="object"){parkPrefs.band=(p0.band&&typeof p0.band==="object")?p0.band:{};
-    parkPrefs.dogs=Array.isArray(p0.dogs)?p0.dogs.slice(0,4):[];
+    parkPrefs.dogs=Array.isArray(p0.dogs)?p0.dogs.slice(0,24):[]; /* no adoption limit (owner) — just a sanity ceiling */
     parkPrefs.train=(p0.train&&typeof p0.train==="object")?p0.train:{};}}catch(e){}
 function parkPersist(){try{localStorage.setItem("mqpark",JSON.stringify(parkPrefs));}catch(e){}}
+/* every adopted dog befriends one particular townsperson (owner ask) — and some
+   dogs roam the city to hang out at their friend's side */
+const FRIENDW=["st","me","lc","lo"];
+function pickFriend(){ /* only townsfolk with room beside them for a dog */
+  for(let i=0;i<12;i++){
+    const w=FRIENDW[Math.floor(Math.random()*FRIENDW.length)];
+    const ns=WORLDS[w].npcs;if(!ns.length)continue;
+    const fr={w,key:ns[Math.floor(Math.random()*ns.length)].key};
+    if(friendSpot(fr))return fr;
+  }
+  return null;}
+function friendSpot(fr){
+  const w=fr&&WORLDS[fr.w];if(!w)return null;
+  const f=w.npcs.find(n=>n.key===fr.key);if(!f)return null;
+  return [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,-1],[1,-1],[-1,1]]
+    .map(d=>[f.x+d[0],f.y+d[1]])
+    .find(([x,y])=>x>0&&y>0&&x<w.W-1&&y<w.H-1&&!SOLID.has(w.grid[y][x])&&w.grid[y][x]!=="N")||null;}
+function dogRecord(cr){return cr&&cr.name?parkPrefs.dogs.find(d=>sanName(d.n)===cr.name):null;}
+function dogPlace(cr,rec){ /* the park, or the friend's side */
+  if((rec.rehomed||rec.out)&&rec.friend){
+    const s=friendSpot(rec.friend);
+    if(s){cr.world=rec.friend.w;cr.x=s[0];cr.y=s[1];cr.fx=s[0];cr.fy=s[1];cr.home=[s[0],s[1]];return;}}
+  cr.world="pk";cr.x=rec.x|0;cr.y=rec.y|0;cr.fx=cr.x;cr.fy=cr.y;cr.home=[cr.x,cr.y];}
+function dogsRoam(newW){ /* rolled at every door: unseen dogs drift between the park
+  and their friend's side; rehomed dogs live with their friend for good */
+  let dirty=false;
+  CRIT.forEach(cr=>{const rec=isDog(cr)?dogRecord(cr):null;
+    if(!rec||!rec.friend||cr.world===newW||cr.task||(LEASH&&LEASH.cr===cr))return;
+    if(rec.rehomed){if(cr.world!==rec.friend.w)dogPlace(cr,rec);return;}
+    if(Math.random()<0.3){rec.out=!rec.out;dogPlace(cr,rec);dirty=true;}});
+  if(dirty)parkPersist();}
 parkPrefs.dogs.forEach(d0=>{const n=sanName(d0.n);if(!n)return;
   const k=DOGK.has(d0.k)?d0.k:"beagle";
-  CRIT.push({kind:k,world:"pk",x:d0.x|0,y:d0.y|0,fx:d0.x|0,fy:d0.y|0,
-    c:hexOK(d0.c)?d0.c:"#E8C46A",
-    name:n,egg:eggFor(n),moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false,home:[d0.x|0,d0.y|0]});});
+  if(!d0.friend)d0.friend=pickFriend(); /* older pups get a friend assigned */
+  const cr={kind:k,world:"pk",x:d0.x|0,y:d0.y|0,fx:d0.x|0,fy:d0.y|0,
+    c:hexOK(d0.c)?d0.c:"#E8C46A",friend:d0.friend,
+    name:n,egg:eggFor(n),moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false,home:[d0.x|0,d0.y|0]};
+  dogPlace(cr,d0);
+  CRIT.push(cr);});
+parkPersist();
 CRIT.forEach(cr=>{if(cr.kind==="beagle"&&cr.name&&parkPrefs.band[cr.name])cr.band=parkPrefs.band[cr.name];});
 $("leash").addEventListener("click",()=>{
   if(!DOGK.has(petTarget)||!petCrit||world==="pk")return;
@@ -2673,8 +2714,7 @@ function adoptPaint(){
 }
 document.querySelectorAll("#adoptBreeds button").forEach(b=>b.addEventListener("click",()=>{
   adoptB=b.dataset.b;adoptC=BREEDS[adoptB][0];adoptPaint();}));
-$("adopt").addEventListener("click",()=>{
-  if(parkPrefs.dogs.length>=4){toast(T().parkFull,2600);return;}
+$("adopt").addEventListener("click",()=>{ /* no limit — the city rehomes, it never deletes */
   $("adoptTitle").textContent=T().adoptAsk;$("adoptGo").textContent=T().adoptGo;$("adoptX").textContent=T().adoptX;
   $("lbBreed").textContent=T().adoptBreed;$("lbCoat").textContent=T().adoptColor;
   adoptB="beagle";adoptC="#E8C46A";adoptPaint();
@@ -2690,9 +2730,10 @@ $("adoptGo").addEventListener("click",()=>{
   const spot=[[17,4],[19,4],[17,2],[19,2],[16,3],[20,3]].find(([x,y])=>
     !SOLID.has(w9.grid[y][x])&&!(x===px&&y===py)&&!CRIT.some(c=>c.world==="pk"&&c.x===x&&c.y===y))||[17,4];
   const[ax,ay]=spot;
-  CRIT.push({kind:adoptB,world:"pk",x:ax,y:ay,fx:ax,fy:ay,c:adoptC,
+  const fr=pickFriend(); /* every pup gets one particular person in this city */
+  CRIT.push({kind:adoptB,world:"pk",x:ax,y:ay,fx:ax,fy:ay,c:adoptC,friend:fr,
     name:n,egg:eggFor(n),moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false,home:[ax,ay]});
-  parkPrefs.dogs.push({n,x:ax,y:ay,k:adoptB,c:adoptC});parkPersist();
+  parkPrefs.dogs.push({n,x:ax,y:ay,k:adoptB,c:adoptC,friend:fr});parkPersist();
   toast(T().adoptDone(n),3200);
 });
 $("adoptX").addEventListener("click",()=>{$("adoptP").hidden=true;});
@@ -2728,12 +2769,49 @@ $("cmd").addEventListener("click",()=>{
   $("dogPTitle").textContent="🎓 "+(c.name||"🐶");
   [["cmdSit","sit"],["cmdDown","down"],["cmdStay","stay"],["cmdCome","come"],["cmdFollow","follow"]]
     .forEach(([id])=>$(id).textContent=T()[id]);
+  const rec=dogRecord(c); /* Sonny and other originals: no rename, no rehome */
+  $("cmdRen").hidden=$("cmdReh").hidden=!rec;
+  if(rec){$("cmdRen").textContent=T().renameLb;$("cmdReh").textContent=T().rehomeLb;}
   $("dogPX").textContent=T().adoptX;
   $("dogP").hidden=false;
 });
 [["cmdSit","sit"],["cmdDown","down"],["cmdStay","stay"],["cmdCome","come"],["cmdFollow","follow"]]
   .forEach(([id,k])=>$(id).addEventListener("click",()=>dogCmd(k)));
 $("dogPX").addEventListener("click",()=>{$("dogP").hidden=true;});
+/* rename (anyone but Sonny) and rehome (nobody is ever deleted) — owner asks */
+let renTarget=null;
+$("cmdRen").addEventListener("click",()=>{
+  const c=nearestDog(),rec=c&&dogRecord(c);if(!rec)return;
+  $("dogP").hidden=true;renTarget=c;
+  $("renTitle").textContent=T().renameAsk;$("renGo").textContent=T().renGo;$("renX").textContent=T().adoptX;
+  $("renName").value=c.name||"";$("renP").hidden=false;$("renName").focus();
+});
+$("renGo").addEventListener("click",()=>{
+  const c=renTarget;renTarget=null;$("renP").hidden=true;
+  if(!c)return;
+  const n=sanName($("renName").value);
+  if(!n||n===c.name)return;
+  if(CRIT.some(o=>isDog(o)&&o!==c&&(o.name||"").toLowerCase()===n.toLowerCase())){
+    toast(T().dupDog(n),2600);return;}
+  const rec=dogRecord(c);if(!rec)return;
+  const old=c.name;
+  if(parkPrefs.band[old]!==undefined){parkPrefs.band[n]=parkPrefs.band[old];delete parkPrefs.band[old];}
+  if(parkPrefs.train[old]!==undefined){parkPrefs.train[n]=parkPrefs.train[old];delete parkPrefs.train[old];}
+  rec.n=n;c.name=n;c.egg=eggFor(n);parkPersist();
+  toast("✏️ "+T().renameDone(n),2800);
+});
+$("renX").addEventListener("click",()=>{renTarget=null;$("renP").hidden=true;});
+$("cmdReh").addEventListener("click",()=>{
+  const c=nearestDog(),rec=c&&dogRecord(c);if(!rec)return;
+  $("dogP").hidden=true;
+  if(!rec.friend)rec.friend=pickFriend();
+  rec.rehomed=true;rec.out=false;parkPersist();
+  if(LEASH&&LEASH.cr===c)LEASH=null;
+  c.follow=false;c.task=null;
+  dogPlace(c,rec);
+  const fname=rec.friend?npcName(rec.friend.key).split(" ·")[0]:"…";
+  toast("🏡 "+T().rehomeDone(c.name,fname),3600);
+});
 /* a save that closed the app mid-park: make sure a dog is there when it reopens */
 function parkRescue(){
   if(world==="pk"&&!CRIT.some(c=>isDog(c)&&c.world==="pk")){

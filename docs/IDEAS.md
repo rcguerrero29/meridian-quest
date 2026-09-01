@@ -467,6 +467,23 @@ front cameras. Original wish list below, kept for the record:
   the 2D one — the "movement not working" bug).
 - **The face heart is smaller**, still tip-to-nose.
 
+**v2.1 (2026-09-01, mq-v39) — owner playtest round 4, all shipped:**
+- **3D blur ROOT-CAUSED and fixed:** the 3D canvas was inheriting the 2D pixel-art
+  pipeline — a tiny backing store stretched by CSS with `image-rendering:pixelated`.
+  3D now renders at the element's true on-screen size at device pixel ratio with
+  smooth scaling (`t3Resize`, re-run on viewport changes). Night street verified
+  crisp at dpr 2.
+- **Dogs roam the city:** every adopted dog gets ONE particular NPC friend
+  (assigned at adoption, persisted). Each time you take a door, unseen dogs may
+  drift between the park and their friend's side; beside their person they mostly
+  sit and adore them (hearts). Legacy dogs get friends assigned at boot.
+- **Rename** any adopted dog (never Sonny) — records (bandana, training) migrate
+  with the name; duplicates refused.
+- **No adoption limit.** The 4-dog cap is gone (24 sanity ceiling in storage).
+  **Rehome instead of delete (owner law):** the dog moves in with its NPC friend
+  permanently, stays in the world and the save, and can still be visited, walked,
+  and un-rehomed by leashing it back to the park. Nobody is ever deleted.
+
 **PLANNED — dress Sonny via Xochi (owner ask, next build):** the wardrobe already
 does pets (Frederick's bandana/collar/cape via `WEAR`; Canela's tab and `wearCat`).
 Generalize it to named beagles: a `wr` field on the critter's stored record
