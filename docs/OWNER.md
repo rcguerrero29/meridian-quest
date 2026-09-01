@@ -84,6 +84,20 @@ preference that outlives one phase; cite the date and their words.
   but i dont understand why i would miss any practice."* Corollaries: never build a
   quest log (a list is a backlog, a person is an invitation); the ❗ carries no count,
   colour or age; and the mural's paint only ever goes on.
+- **This repo is worked by several models in parallel — treat every session as one
+  member of a team, never the only author.** *(2026-09-01, owner: "i am using multiple
+  models so treat this as a team effort.")* `main` moves while you work. Consequences,
+  all learned the hard way on 2026-09-01 when a branch cut from a stale base spent a
+  session reading code that had been fixed twice on `main`:
+  - **Before planning or reading code, look at what else exists.** `git fetch origin`,
+    then `git log --oneline HEAD..origin/main` (what landed without you) and
+    `git branch -r` (who else is mid-flight). A finding taken from a stale base is
+    worse than no finding — it is a confident wrong answer.
+  - **Merge `main` in BEFORE investigating anything**, not after. Investigate the code
+    that actually ships.
+  - **Version pins collide.** Two branches will both bump to the same `mq-vN`. On a
+    merge, resolve FORWARD to a new number rather than picking a side.
+  - **Never assume the owner can see your work.** Only `main` deploys. Say so.
 - **The engine may never name a pack's content.** *(2026-09-01.)* No business, NPC,
   cat, street or quest index from any one story may appear in `engine/`. The engine
   knows mechanisms — raise staged tiles, open a fitting room, drop a storefront ribbon

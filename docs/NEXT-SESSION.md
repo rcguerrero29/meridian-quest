@@ -10,8 +10,23 @@ current: each session rewrites the queue before signing off.)*
    2026-08-31; both planner skills now read it before planning.
 1. Read `docs/HANDOFF.md` (state + shipping rules), `docs/CITY.md` (city ledger),
    and this queue. Skim `docs/IDEAS.md` §6-9 for the designed-but-unbuilt backlog.
+1b. **DIVERGENCE CHECK — do this before reading a single line of engine code.**
+   Other models are working this repo at the same time (docs/OWNER.md → Settled).
+   Run all three, every session:
+   ```
+   git fetch origin
+   git log --oneline HEAD..origin/main     # landed without you — merge it in FIRST
+   git log --oneline origin/main..HEAD     # yours, and NOT deployed yet
+   git branch -r                           # who else is mid-flight
+   ```
+   If the first command prints anything, **merge `origin/main` before investigating**.
+   On 2026-09-01 a session spent a round root-causing a 3D bug from a base that
+   predated two fixes for it already sitting on `main`. Stale reading is worse than
+   no reading. Expect `mq-vN` pins to collide on the merge; resolve FORWARD.
 2. Work on a `claude/...` session branch; merge to `main` only when the owner says
    (main auto-deploys to GitHub Pages; installed PWAs update after one refresh).
+   **The owner sees `main` and nothing else** — if work is not merged, say so plainly
+   rather than reporting a version number they cannot load.
 3. Every ship: `npm install playwright-core` once, `node test/smoke.js` green,
    EN/ES in lockstep, bump `CACHE` in `sw.js`.
 

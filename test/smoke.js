@@ -811,6 +811,42 @@ const CANDIDATES = [
     if (park[k] !== true) fails.push('park: ' + k + ' failed (' + JSON.stringify(park[k]) + ')');
   });
 
+  // ---- maps and doors must be structurally plausible, not just reachable ----
+  // Added 2026-09-01 after the owner asked why TDD had not caught "broken doors and
+  // non-realistic maps". Honest result: it would NOT have — every door in the shipped
+  // maps passes these rules, so what looks wrong is RENDERING, not layout. Kept as a
+  // guard so a future map edit cannot introduce the structural version of the problem.
+  // (First draft of these rules produced 10 findings and all 10 were false positives:
+  // a door on the map edge opens to the outside, and a portal may be stairs or the
+  // trolley rather than a door. A test that cries wolf is worse than no test.)
+  const maps = await page.evaluate(() => {
+    const problems = [];
+    const open1 = c => c === null || !SOLID.has(c);   // off-map counts as outside
+    Object.entries(WORLDS).forEach(([id, w]) => {
+      for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+        const ch = w.rows[y][x];
+        if (!DOORSET.has(ch)) continue;
+        const N = y > 0 ? w.rows[y-1][x] : null, S = y < w.H-1 ? w.rows[y+1][x] : null;
+        const E = x < w.W-1 ? w.rows[y][x+1] : null, W = x > 0 ? w.rows[y][x-1] : null;
+        const sides = [N, S, E, W];
+        if (!sides.some(c => c !== null && SOLID.has(c)))
+          problems.push(`${id} (${x},${y}) '${ch}': a door with no wall beside it`);
+        if (!(open1(N) && open1(S)) && !(open1(E) && open1(W)))
+          problems.push(`${id} (${x},${y}) '${ch}': a door you cannot walk through`);
+        if (sides.every(c => c !== null && !SOLID.has(c)))
+          problems.push(`${id} (${x},${y}) '${ch}': a door set into nothing (open on all four sides)`);
+        sides.forEach((c, i) => { if (c !== null && DOORSET.has(c))
+          problems.push(`${id} (${x},${y}) '${ch}': doors side by side with '${c}' (${'NSEW'[i]}) — reads as a hole`); });
+      }
+    });
+    // a portal need not be a door (stairs, the trolley) but you must be able to stand on it
+    Object.entries(PORTALS).forEach(([from, m]) => Object.keys(m).forEach(ch => {
+      if (SOLID.has(ch)) problems.push(`PORTAL ${from}:'${ch}' is a solid tile — unreachable`);
+    }));
+    return problems;
+  });
+  fails.push(...maps);
+
   // ---- the camera the pack asks for is the camera you get, and it sticks ----
   const cam = await page.evaluate(() => {
     const problems = [];
