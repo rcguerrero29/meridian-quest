@@ -239,16 +239,25 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 function clearSave(){try{localStorage.removeItem("mq1");}catch(e){}}
 /* toasts */
 let toastT=null,toastQ=[],tickerT=null;
-function toast(msg,ms){const el=$("toast");
-  /* the activity ticker mirrors the last message in the top corner and lingers,
-     so short interactions can be re-read after the toast fades (owner ask) */
-  const tk=$("ticker");tk.textContent=msg;tk.hidden=false;
-  clearTimeout(tickerT);tickerT=setTimeout(()=>{tk.hidden=true;},10000);
+const tickerLines=[];
+function toast(msg,ms){const el=$("toast"),dur=ms||2600;
+  /* The activity ticker mirrors recent messages so a short interaction can be re-read
+     after the toast fades (owner ask). Owner, 2026-09-01: keep the last TWO, and hold
+     them only "a bit longer than the initial toast" — it used to sit for a flat 10s,
+     which is why it was still on screen showing the same words as the live toast. */
+  const tk=$("ticker");
+  tickerLines.push(msg);while(tickerLines.length>2)tickerLines.shift();
+  tk.textContent="";
+  tickerLines.forEach((m,i)=>{const d=document.createElement("div");d.textContent=m;
+    if(i<tickerLines.length-1)d.className="prev";   /* the older one, dimmed */
+    tk.appendChild(d);});
+  tk.hidden=false;
+  clearTimeout(tickerT);tickerT=setTimeout(()=>{tk.hidden=true;tickerLines.length=0;},dur+1800);
   if(el.classList.contains("on")){toastQ.push([msg,ms]);return;}
   el.textContent=msg;el.classList.add("on");
   clearTimeout(toastT);toastT=setTimeout(()=>{el.classList.remove("on");
     if(toastQ.length){const[m,d]=toastQ.shift();setTimeout(()=>toast(m,d),300);}},ms||2600);}
-$("ticker").addEventListener("click",()=>{$("ticker").hidden=true;});
+$("ticker").addEventListener("click",()=>{$("ticker").hidden=true;tickerLines.length=0;});
 let lastBump=0;
 const pendingAt=n=>n.q.find(qi=>!done.has(qi)&&qOpen(qi));
 /* ---------- canvas ---------- */
@@ -454,13 +463,38 @@ TILEDRAW["A"]=rc=>{const{sx,sy,x,y}=rc; /* drafting table: tilted board, bluepri
       ctx.fillStyle="#2E5FA8";ctx.beginPath();ctx.moveTo(sx+7,sy+18.6);ctx.lineTo(sx+25,sy+15.4);ctx.lineTo(sx+25,sy+8);ctx.lineTo(sx+7,sy+11);ctx.closePath();ctx.fill();
       ctx.strokeStyle="#DDE8F5";ctx.lineWidth=0.8;
       ctx.beginPath();ctx.moveTo(sx+9,sy+12);ctx.lineTo(sx+22,sy+10);ctx.moveTo(sx+9,sy+14.5);ctx.lineTo(sx+22,sy+12.5);ctx.moveTo(sx+9,sy+17);ctx.lineTo(sx+18,sy+15.4);ctx.stroke();};
+/* Produce silhouettes for the mercado. Five coloured dots of identical size read as
+   "generic dots" at tile scale (owner, 2026-09-01: "the fruits are too general in
+   shape"), so each item gets its own OUTLINE instead — the shape carries the meaning,
+   not the colour. Sized for a 32px tile: simple, high-contrast, no interior detail. */
+function produce(px,py,kind,scale){
+  const g=ctx,k=scale||1;
+  if(kind==="banana"){g.strokeStyle="#E8C33A";g.lineWidth=1.9*k;g.lineCap="round";
+    g.beginPath();g.arc(px,py+1.2*k,3*k,Math.PI*0.12,Math.PI*0.92);g.stroke();g.lineCap="butt";return;}
+  if(kind==="chile"){g.fillStyle="#4E9A3E";g.beginPath();g.moveTo(px-1*k,py-1.6*k);
+    g.quadraticCurveTo(px+2.6*k,py+0.2*k,px+0.4*k,py+3.2*k);
+    g.quadraticCurveTo(px-1.2*k,py+1*k,px-1*k,py-1.6*k);g.fill();
+    g.fillStyle="#2F6B27";g.fillRect(px-2.2*k,py-2.8*k,3.2*k,1.4*k);return;}
+  if(kind==="tomato"){g.fillStyle="#C0392B";g.beginPath();g.arc(px,py+0.6*k,2.5*k,0,7);g.fill();
+    g.fillStyle="#3E7A34";g.fillRect(px-1.5*k,py-2.4*k,3*k,1.3*k);return;}
+  if(kind==="carrot"){g.fillStyle="#E0662B";g.beginPath();g.moveTo(px-2*k,py-1*k);
+    g.lineTo(px+2*k,py-1*k);g.lineTo(px,py+3.4*k);g.closePath();g.fill();
+    g.fillStyle="#3E7A34";g.fillRect(px-1.7*k,py-2.8*k,3.4*k,1.5*k);return;}
+  /* grapes: a cluster, which is unmistakable even at four pixels across */
+  g.fillStyle="#8E5BA6";[[0,-1.2],[-1.7,0.5],[1.7,0.5],[0,2.1]].forEach(d=>{
+    g.beginPath();g.arc(px+d[0]*k,py+d[1]*k,1.35*k,0,7);g.fill();});
+}
 TILEDRAW["Z"]=rc=>{const{sx,sy,x,y}=rc; /* El Mercado facade: green stall front, striped awning, produce window */
       ctx.fillStyle="#4E7A4A";ctx.fillRect(sx,sy,TS,TS);
       for(let i=0;i<4;i++){ctx.fillStyle=i%2?"#F2E8D8":"#C98A2D";ctx.fillRect(sx+i*8,sy,8,7);}
       ctx.fillStyle="#385C36";ctx.fillRect(sx,sy+7,TS,2);
-      ctx.fillStyle="#EFE3C4";ctx.fillRect(sx+7,sy+13,18,11);
-      [[11,17,"#C0392B"],[16,17,"#E0A430"],[21,17,"#7A9A4E"],[13,21,"#D77FA8"],[19,21,"#E0662B"]].forEach(f=>{
-        ctx.fillStyle=f[2];ctx.beginPath();ctx.arc(sx+f[0],sy+f[1],2.2,0,7);ctx.fill();});};
+      ctx.fillStyle="#EFE3C4";ctx.fillRect(sx+4,sy+12,24,13);
+      /* THREE items, not five: at ~5px each five crowded the window into mush, the
+         grape cluster collapsed into a purple diamond, and a second row put the banana
+         and the carrot on top of each other. One row, bigger, fully spaced — legibility
+         beats density at 32px. Verified by rendering the tile at 4x and looking. */
+      [[9.5,18.5,"tomato"],[17,18.5,"banana"],[24.5,18.5,"chile"]]
+        .forEach(f=>produce(sx+f[0],sy+f[1],f[2],1.3));};
 TILEDRAW["S"]=rc=>{const{sx,sy,x,y}=rc; /* shelving: three loaded shelves */
       ctx.fillStyle="#8A6F4D";ctx.fillRect(sx+2,sy+2,TS-4,TS-4);
       ctx.fillStyle="#6E5638";[6,14,22].forEach(yy=>ctx.fillRect(sx+2,sy+yy,TS-4,2));
@@ -469,8 +503,8 @@ TILEDRAW["S"]=rc=>{const{sx,sy,x,y}=rc; /* shelving: three loaded shelves */
 TILEDRAW["H"]=rc=>{const{sx,sy,x,y}=rc; /* produce crate */
       ctx.fillStyle="#B0895B";ctx.fillRect(sx+3,sy+10,TS-6,TS-14);
       ctx.fillStyle="#8B6A42";ctx.fillRect(sx+3,sy+16,TS-6,2);ctx.fillRect(sx+15,sy+10,2,TS-14);
-      [[9,9,"#C0392B"],[16,7,"#7A9A4E"],[23,9,"#E0A430"]].forEach(f=>{
-        ctx.fillStyle=f[2];ctx.beginPath();ctx.arc(sx+f[0],sy+f[1],3.2,0,7);ctx.fill();});};
+      [[9,9,"tomato"],[16,7,"chile"],[23,9,"banana"]]
+        .forEach(f=>produce(sx+f[0],sy+f[1],f[2],1.3));};
 TILEDRAW["I"]=rc=>{const{sx,sy,x,y}=rc; /* mercado counter: worn wood, scale on top */
       ctx.fillStyle="#A8825A";ctx.fillRect(sx+2,sy+6,TS-4,TS-10);
       ctx.fillStyle="#8B6A42";ctx.fillRect(sx+2,sy+6,TS-4,3);
