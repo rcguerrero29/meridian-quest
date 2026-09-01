@@ -1109,10 +1109,12 @@ function drawBeagle(g,cr,sx,sy){ /* a lemon beagle: white coat, lemon saddle, fl
   g.fillStyle=lemon; /* lemon crown over the brow — a lemon beagle wears his color up top */
   g.beginPath();g.arc(cx+7,sy+14.4+dy+hy,3.7,Math.PI,Math.PI*2);g.fill();
   g.fillRect(cx+3.3,sy+14.4+dy+hy,7.4,1.6);
-  g.fillStyle=white; /* Sonny canon: the white heart on his face, above and between the eyes */
-  g.beginPath();g.arc(cx+5.9,sy+12.7+dy+hy,0.8,0,7);g.arc(cx+7.2,sy+12.7+dy+hy,0.8,0,7);g.fill();
-  g.beginPath();g.moveTo(cx+5.1,sy+13+dy+hy);g.lineTo(cx+6.55,sy+14.5+dy+hy);g.lineTo(cx+8,sy+13+dy+hy);
-  g.closePath();g.fill();
+  g.fillStyle=white; /* Sonny canon: the heart on his face — tip pointing to his nose,
+     the two bumps back on either side. A perfect heart, just angled forward. */
+  g.save();g.translate(cx+6.7,sy+13+dy+hy);g.rotate(-0.75);
+  g.beginPath();g.arc(-0.75,-0.55,0.85,0,7);g.arc(0.75,-0.55,0.85,0,7);g.fill();
+  g.beginPath();g.moveTo(-1.57,-0.2);g.lineTo(0,1.75);g.lineTo(1.57,-0.2);g.closePath();g.fill();
+  g.restore();
   g.fillStyle=lemon; /* floppy ear */
   g.beginPath();g.roundRect(cx+2.2,sy+13.2+dy+hy,3.4,7.5,2);g.fill();
   g.fillStyle=white; /* ear freckles */
