@@ -442,13 +442,24 @@ behavior flags), all engine-generic so any dog can opt in:
 Owner, verbatim: *"we will want a mini game one day to split off and be free
 marketting for a new game for pet caring only."*
 
+**Shape signed by the owner, 2026-08-31:**
+- **Sonny stars in the PREVIEW.** The mini game inside Meridian Quest is the
+  marketing hook, and its intro runs *via Sonny* — he is the face that pulls
+  players toward the new game.
+- **The preview mini game has SOME customization** (a taste of it — scope to be
+  decided at its design sitting: likely the pet's name, look, an accessory).
+- **The spin-off becomes its own game and grows FULLY customizable eventually** —
+  your own pet, not just Sonny. Customization depth is the product ladder:
+  preview = a taste, standalone v1 = more, eventually = your pet entirely.
 - **What it is:** a standalone pet-caring game — Sonny's program grown into a whole
   loop (feed, fetch, walks, grooming, the janitor economy) — published as its own
   free PWA that points people at Meridian Quest and the studio.
 - **Why the architecture is ready:** the engine/content split means this is a new
   content pack, not a fork — `content/petcare/` with its own maps, strings, config,
-  and the beagle/ball/decal systems already engine-generic. Same $0 hosting model.
-- **Sequencing:** after AJ's game gets its pack (she's first in line for a split-off),
-  and worth a `/nacho` + `/don-guero` sitting of its own for loop and cast.
-  A name, a star dog (Sonny, presumably), and the marketing hook are owner decisions
-  for that sitting — nothing signed yet.
+  and the beagle/ball/decal systems already engine-generic. The wardrobe/creator
+  systems are the customization seams. Same $0 hosting model.
+- **Sequencing:** after AJ's game gets its pack (she's first in line for a
+  split-off), and worth a `/nacho` + `/don-guero` sitting of its own for loop and
+  cast. Still open for that sitting: the game's name, where the preview lives in
+  the city (Sonny's own corner? a parcel?), and exactly which customizations the
+  preview offers vs. holds back for the standalone.
