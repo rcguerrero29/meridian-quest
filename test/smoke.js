@@ -252,6 +252,24 @@ const CANDIDATES = [
       if (!tovar || pendingAt(tovar) === undefined) problems.push('an unanswered quest lost its marker when its district closed'); }
     if (!qOpen(16)) problems.push('the new chapter\'s quests are not on offer');
 
+    // a quest answered after its district's Saturday gets its reframe line, at the
+    // opening node only. Content's call: no `late` field, no line, nothing breaks.
+    if (!qLate(0)) problems.push('a Week One quest does not read as late once the mercado opened');
+    if (qLate(16)) problems.push('the district being played reads as late');
+    { const q = AQ()[0], had = q.late, el = document.getElementById('npcLate');
+      q.late = 'REFRAME-PROBE';
+      questStart(0);
+      if (el.hidden) problems.push('the late reframe line did not show');
+      if (el.textContent !== 'REFRAME-PROBE') problems.push('the late reframe line showed the wrong text');
+      node = Object.keys(q.nodes).find(k => k !== q.start);
+      if (node) { nodeShow(); if (!el.hidden) problems.push('the reframe line repeated on a follow-up step'); }
+      delete q.late; if (had !== undefined) q.late = had;
+      questStart(16);
+      if (!el.hidden) problems.push('a quest with no late line still showed one');
+      cur = null; curQ = null; node = null;
+      document.getElementById('card').hidden = true;
+      document.getElementById('world').hidden = false; }
+
     done = new Set(); chSeen = 0; hearts = 3; marks = {}; applyGrowth();
     world = 'hq'; px = fx = 10; py = fy = 11;
     return problems;

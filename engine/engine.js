@@ -149,6 +149,11 @@ const qChapter=qi=>{const L=CHS();for(let i=0;i<L.length;i++)if(L[i].quests.inde
    This was `c>=chSeen`, which had it backwards: it closed everything you walked
    past and left unopened districts nominally answerable. */
 const qOpen=qi=>{const c=qChapter(qi);return c<0||c<=chSeen;};
+/* Answering a quest long after its district played its Saturday. Content may give any
+   quest a `late` line for this — one line, in the NPC's voice, acknowledging only that
+   time passed and never what happened in it (a reframe that names events goes stale
+   itself). Quests belonging to no district (Frederick's) never count as late. */
+const qLate=qi=>{const c=qChapter(qi);return c>=0&&c<chSeen;};
 const mercadoOpen=()=>chSeen>=1;   /* opens once you take the Monday handover */
 /* ---------- state ---------- */
 const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"};
@@ -1480,6 +1485,9 @@ function nodeShow(){
   const q=curQ,t=q.nodes[node];
   $("qtag").textContent=`${T().quest}: ${q.title}${node!==q.start?T().followup:""}`;
   $("npcAv").textContent=NPCE[q.npc];$("npcName").textContent=npcName(q.npc);$("npcSay").textContent=t.say;
+  /* one line before the opening node, and only there — never on a follow-up step */
+  const late=(node===q.start&&q.late&&qLate(cur))?q.late:"";
+  $("npcLate").textContent=late;$("npcLate").hidden=!late;
   $("cdxLb").textContent=T().codexLb;$("codex").textContent=t.codex;$("q").textContent=t.q;
   const box=$("choices");box.innerHTML="";
   const list=[...t.ch].sort(()=>Math.random()-0.5); /* shuffled every time — no more middle-answer tell */
