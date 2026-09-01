@@ -1,7 +1,10 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
-const GAMEV="mq-v30";
+const GAMEV="mq-v31";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
+/* default camera for this pack (owner + AJ pick, 2026-08-31): the front-profile
+   2.5D view greets new players; a device's own Settings choice always wins */
+const CAMDEF="front";
 const MAXXP=350;
 /* Chapters: a district's quest pack, and how many of them close it.
    `need` is deliberately LOWER than the pack size — the city is a template, so the

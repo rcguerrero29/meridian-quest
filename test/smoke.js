@@ -587,6 +587,18 @@ const CANDIDATES = [
     out.decalPruned = DECALS.length === n0;
     // every DECOR row points at art the engine (or the pack) actually has
     out.decorOk = typeof DECOR === 'undefined' || DECOR.every(d => !!DECODRAW[d.deco]);
+    // the pack declares a default camera and the facades declare their windows
+    out.camdef = typeof CAMDEF !== 'undefined' ? CAMDEF : null;
+    out.facadeWin = ['B', 'Q', 'Z'].every(g => TILES[g] && Array.isArray(TILES[g].win));
+    // the lit-windows pass renders under a mocked night clock without throwing
+    out.winPass = (() => {
+      const RD = Date;
+      try {
+        Date = class extends RD { getHours() { return 22; } getMinutes() { return 0; } };
+        drawWindows(CW(), 0, 0);
+        Date = RD; return true;
+      } catch (e) { Date = RD; return String(e); }
+    })();
     // the ball button exists and Sonny's strings are in both languages
     out.ballBtn = !!document.getElementById('ball');
     out.langOk = ['ballLb', 'fetchYes', 'fetchNo', 'howl', 'beagleTreat', 'camFront']
@@ -600,6 +612,9 @@ const CANDIDATES = [
   if (front.fetch14 !== 8) fails.push(`fetch across two cycles: ${front.fetch14}/14, expected 8`);
   if (!front.decalPruned) fails.push('expired ground decal not pruned');
   if (front.decorOk !== true) fails.push('DECOR references unknown deco art');
+  if (!['top', 'front', 'iso'].includes(front.camdef)) fails.push('CAMDEF missing or invalid: ' + front.camdef);
+  if (!front.facadeWin) fails.push('facade tiles missing win metadata');
+  if (front.winPass !== true) fails.push('lit-windows pass threw: ' + front.winPass);
   if (!front.ballBtn) fails.push('ball button missing from the HUD');
   if (!front.langOk) fails.push('Sonny/camera strings missing in EN or ES');
 

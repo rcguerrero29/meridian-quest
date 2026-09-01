@@ -343,8 +343,13 @@ building drew its own roof strip = banding) → the strip draws only where a run
 starts, so building interiors connect cleanly. **The ladder to "even better",
 in order of cost, for when AJ wants the next rung:**
 1. *(shipped)* grounding + clean rooflines — this wave.
-2. **Per-kind art wave**: lit windows on `facade` tiles at night, awning shadows,
-   fence posts at run ends, door frames casting onto the floor. A session.
+2. *(SHIPPED mq-v31)* **Per-kind art wave**: lit windows on `facade` tiles at
+   dusk/night (TILES `win` rects; a hashed few stay dark; punches through the
+   night wash; shared `drawWindows` pass runs in top-down AND front), awning
+   shadows (TILES `awn`), fence posts at run ends. Door light spills already
+   existed in `drawDaylight` and work in the front camera unchanged. Same
+   commit: **front-profile is now the default camera** via the new `CAMDEF`
+   content seam (owner + AJ pick — see OWNER.md Settled).
 3. **2× sprite detail**: keep TS=32 but draw at double internal resolution
    (crisper curves, outlines, dithered shading) — renderer-only, art-heavy.
 4. **Real sprite sheets**: hand-drawn PNG tiles/actors replacing canvas-drawn art.

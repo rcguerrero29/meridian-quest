@@ -251,7 +251,9 @@ let camXg=0,camYg=0;
    animals render as upright billboards at their projected feet, depth by painter's
    sort. Ships as a Settings camera toggle beside top-down; admin painting stays
    top-down-only (tap→tile math differs). */
-let camMode="top";try{const cm0=localStorage.getItem("mqcam");if(cm0==="iso"||cm0==="front")camMode=cm0;}catch(e){}
+/* the default camera is content's call (CAMDEF); a device's stored choice wins */
+let camMode=(typeof CAMDEF!=="undefined"&&["top","front","iso"].includes(CAMDEF))?CAMDEF:"top";
+try{const cm0=localStorage.getItem("mqcam");if(cm0==="iso"||cm0==="front"||cm0==="top")camMode=cm0;}catch(e){}
 const ISW=44,ISH=22;
 let ISOCOL=null;
 const IZH={"#":20,B:20,Q:17,Z:17,U:20,W:12,V:10,D:9,K:9,T:8,S:13,H:8,I:9,A:9,P:11,F:7,G:9,C:7,X:8,"1":10};
@@ -470,7 +472,9 @@ const TILES={};
 SOLID.forEach(g=>TILES[g]={lift:7,kind:"prop"});
 Object.assign(TILES,{
   "#":{lift:13,kind:"wall"},U:{lift:13,kind:"wall"},
-  B:{lift:13,kind:"facade"},Q:{lift:13,kind:"facade"},Z:{lift:13,kind:"facade"},
+  B:{lift:13,kind:"facade",win:[[5,10,8,9],[19,10,8,9]]},
+  Q:{lift:13,kind:"facade",win:[[8,14,16,10]],awn:9},
+  Z:{lift:13,kind:"facade",win:[[7,13,18,11]],awn:9},
   D:{lift:6,kind:"furniture"},K:{lift:6,kind:"furniture"},T:{lift:6,kind:"furniture"},
   A:{lift:6,kind:"furniture"},S:{lift:9,kind:"furniture"},H:{lift:5,kind:"furniture"},
   I:{lift:6,kind:"furniture"},W:{lift:8,kind:"appliance"},V:{lift:8,kind:"appliance"},
@@ -565,6 +569,13 @@ function drawFront(){
         ctx.beginPath();ctx.ellipse(sx+16,sy+27.5,11,3.2,0,0,7);ctx.fill();
       }
       const tf=TILEDRAW[ch]||TILEDRAW[gch];if(tf)tf({sx,sy,x,y,canopy:queueCanopy});
+      if(m.awn)ctx.fillStyle="rgba(15,12,20,.18)",ctx.fillRect(sx,sy+m.awn,TS,3); /* the awning shades its facade */
+      if(kd==="fence"){ /* posts where a run ends — a fence has ends, not edges */
+        const post=pxx=>{ctx.fillStyle=tc("#6E5334");ctx.fillRect(pxx,sy-2,4.5,TS+2);
+          ctx.fillStyle="rgba(255,255,255,.15)";ctx.fillRect(pxx,sy-2,4.5,1.5);};
+        if(x===0||w.grid[y][x-1]!==gch)post(sx+0.5);
+        if(x===w.W-1||w.grid[y][x+1]!==gch)post(sx+TS-5);
+      }
     }});
   }
   const act=(gx,gy,fn)=>{const sx=gx*TS-camX,sy=gy*TS-camY;
@@ -607,6 +618,7 @@ function drawFront(){
   });
   drawAmbient(w,camX,camY);
   drawDaylight(w,camX,camY);
+  drawWindows(w,camX,camY);
 }
 function draw(){
   if(camMode==="iso"){drawIso();return;}
@@ -681,6 +693,7 @@ function draw(){
   drawPerson(ctx,fx*TS-camX,fy*TS-camY,look,{dir,bob:moving?Math.sin(bob)*2:0,moving});
   drawAmbient(w,camX,camY);
   drawDaylight(w,camX,camY);
+  drawWindows(w,camX,camY);
 }
 /* wave-2 lighting: the world knows what time it is. Sunset theme keeps golden hour
    always; otherwise the device clock sets the mood — cool night wash with warm light
@@ -705,6 +718,28 @@ function drawDaylight(w,camX,camY){
       g2.addColorStop(0,"rgba(255,214,130,.22)");g2.addColorStop(1,"rgba(255,214,130,0)");
       ctx.fillStyle=g2;ctx.fillRect(sx-8,sy+12,TS+16,TS+8);
     }
+  }
+}
+/* lit windows: at dusk and after dark, tiles whose TILES row declares `win` rects
+   glow warm — most of them; a hashed few stay dark because somebody is out. Runs
+   after the night wash so the light punches through it. Shared by every camera. */
+function drawWindows(w,camX,camY){
+  const dnow=new Date(),hr=dnow.getHours()+dnow.getMinutes()/60;
+  const night=hr>=20.5||hr<6,edge=!night&&(hr>=18||hr<8);
+  if(!(night||edge||themeName==="sunset"))return;
+  const a=night?0.5:0.28;
+  const x0=Math.floor(camX/TS),y0=Math.floor(camY/TS);
+  for(let y=y0;y<=Math.min(w.H-1,y0+9);y++)for(let x=x0;x<=Math.min(w.W-1,x0+11);x++){
+    const m=TILES[w.grid[y][x]]||TILES[w.rows[y][x]];
+    if(!m||!m.win)continue;
+    const hsh=(x*2654435761+y*40503)>>>0;
+    if((hsh&7)<2)continue;
+    const sx=x*TS-camX,sy=y*TS-camY;
+    if(sx<-TS||sy<-TS||sx>VW||sy>VH)continue;
+    ctx.globalAlpha=a*(0.85+0.15*Math.sin(Date.now()/700+hsh%13));
+    m.win.forEach(wn=>{ctx.fillStyle="#FFD98A";ctx.fillRect(sx+wn[0],sy+wn[1],wn[2],wn[3]);
+      ctx.fillStyle="rgba(255,255,255,.35)";ctx.fillRect(sx+wn[0]+1,sy+wn[1]+1,wn[2]*0.35,2);});
+    ctx.globalAlpha=1;
   }
 }
 /* ambient layer: a handful of drifting theme particles — fairy motes, forest petals,
