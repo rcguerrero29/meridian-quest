@@ -115,6 +115,24 @@ would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
+- ✅ **❗La oficina** — signed 2026-09-02: opens bare, the barrio furnishes it.
+- ✅ **❗La palabra** — signed 2026-09-02: the word is the reward. Under ❗El giro the five
+  terms become the TRADE's vocabulary, not the role's.
+- ✅ **❗El papel** — signed 2026-09-02: template **06 Process & Exception Map** gets
+  written. ⚠️ `docs/templates/README.md` already assigns template 01 to the taller's
+  process map — **two templates would claim one artifact.** Nacho's read is that they are
+  genuinely different documents (01 is what you write BEFORE you understand the work; 06
+  is what you hand over AFTER) and both should exist, but the README's "Taught by" column
+  must be corrected and 06 given a row. **Flagged, not guessed.**
+- ✅ **❗La despedida** — signed 2026-09-02 (owner deferred the call to /nacho): a
+  district's Saturday is a goodbye at the door, declared per district as
+  `ending:{mode:"doorstep"|"panel"|"quiet"}`. `panel` is kept so nothing regresses.
+  **Hard build-order dependency: needs the office. No office, no doorstep.**
+- ✅ **❗El giro** — signed 2026-09-02: **industry leads, role follows.** `industry:` is
+  ADDED beside `role:`. This dissolves the `principal`/Limpieza collision rather than
+  patching it — the same craft appearing in two very different rooms is PROOF the skill
+  transfers, which is the most valuable thing a portfolio can show.
+
 - ✅ **El Mercado** — signed 2026-08-31. Full build + engine seam, AI PM pack.
   See "Phase 1 plan (SIGNED)" below.
 - ✅ **Which AI role first** — signed 2026-08-31: **AI product manager** leads.
@@ -206,8 +224,13 @@ stays live until the Phase 2 refactor lands.
   map** — how work flows, where a human must sign, which step cannot be taken back ·
   it carries "never automate the irreversible step" out of the game and into a meeting,
   and no other business in the city teaches it.
-- 2026-09-01 · ❗La pared: where the record lives · **OWNER COUNTER-PROPOSAL, not yet
-  specced: an office that becomes yours.** Owner: *"i think an office should become mine
+- 2026-09-02 · ❗La oficina · **SIGNED — the office opens bare and the barrio furnishes
+  it.** `f2` (20x14, portal already wired from HQ) opens with two things: the old AI
+  lead's empty desk and a north window onto the trolley line. Each business then ships
+  ONE piece of furniture with its own pack, declared in that district's own data so
+  nobody re-opens `f2`'s map five times. Supersedes the counter-proposal below.
+- 2026-09-01 · ❗La pared: where the record lives · **counter-proposal, now SIGNED above
+  as ❗La oficina.** Original note kept: Owner: *"i think an office should become mine
   somewhere so i can access these."* Supersedes the mural-wall-only option. For whoever
   specs it: **`f2` already exists** — "Floor 2 · Expansion", portal wired from HQ at
   `PORTALS.hq["1"]`, arrive text *"Quiet up here… for now."* An empty floor with a door,

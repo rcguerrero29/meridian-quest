@@ -30,9 +30,20 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
 - **A day may end. It may never close anything.** Days are light and memory, not
   containers for content. If a day's ending changes what the player CAN DO, it is
   a week wearing a hat. *(signed 2026-09-01, ❗El día)*
-- **Endings play in the world, not in a curtain.** No cutscene takes control to
-  tell the player they did well; the street changes and they walk through it.
-  *(signed 2026-09-01, ❗El listón)*
+- **La inauguración plays in the world, not in a curtain** — the CITY's final ceremony,
+  and only that. *(signed 2026-09-01, ❗El listón; SCOPE CORRECTED 2026-09-02 — the
+  session, not the owner, generalised it to every ending in the game and then cited it
+  against `finish()`. See docs/OWNER.md.)* A DISTRICT's Saturday is a separate call.
+- **A district's Saturday is a goodbye at the door.** *(2026-09-02, ❗La despedida —
+  the owner deferred the call to /nacho.)* Reaching `need` ends nothing: it puts a ❗
+  over that business's owner, and walking up to them IS the ending. Three to five spoken
+  beats keyed to the grade, an object in your hands, the role said out loud once, and
+  the phone call to the next neighbour placed before you are off the lot. The long
+  version waits in your office as a letter, re-readable forever. Nothing takes control;
+  the ❗ waits as long as you do. Declared per district as
+  `ending:{mode:"doorstep"|"panel"|"quiet"}` — never hardcoded, so a pack picks its own.
+  **Hard dependency: this needs the office. If `f2` is not furnished, districts keep
+  `mode:"panel"`.**
 - **No practice is ever missed.** Every quest stays answerable forever; a quest the
   world outgrows gets rewritten, never removed. *(owner, 2026-09-01: "i dont
   understand why i would miss any practice, if anything got stale.")* The shipped
@@ -123,6 +134,30 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   hoja-de-maíz stockout), because the more time passes the truer those get. Frederick
   has none and never will — his quest belongs to no district, so the seam can never
   fire, and he already reopens his folder for a treat, which is the joke.
+- **La despedida** (2026-09-02). The city learned how to say goodbye. A district's
+  ending stopped being a screen and became a doorway. The street grows while you stand
+  there — the mural panel takes colour, the rails advance, ground breaks on the next lot.
+  The paragraph that used to be the epilogue screen is filed in your office beside the
+  furniture that business sent you. **The grade asymmetry is the design:** at grade 3 the
+  letter is short, because they already said it to your face; at grade 1 it is the
+  longest of the three, because a letter can be honest in a way a doorstep goodbye
+  cannot. A rough run sends you home with the most words — "consequences over scolding"
+  and "learning beats punishment" doing the same job at once. **The goodbye is the only
+  thing that grows the city, and it never expires.**
+- **El oficio y el giro** (2026-09-02, owner's steer: *"lets focus on highlighting and
+  learning the AI with how it can help diff industries"*). Five job titles become five
+  trades. A role is a label; an industry is a room with a smell — and every memorable
+  beat this pack has produced came out of a trade, not a title: the paper book, the photo
+  estimate, the four hundred kilos of PESCADO, the notario false-friend. The role does
+  not leave; it shrinks to one line in a character's mouth and stays a lens on the report.
+  Each pack now owes an **industry card** (the trade, where the money is, the three places
+  AI touches it and the one place it must not), **five terms in that trade's own
+  vocabulary** (a shop says *comeback*, a bakery says *stockout*, a cleaning company says
+  *punch list*), **one deliverable**, **one plain sales sentence** the owner could say to
+  a real prospect, and **one role line**. The gradient survives as the **grain**, not the
+  spine — what each room teaches best — and the referral chain, never a lock, keeps the
+  order. **The one danger:** five clients can read as a list instead of an arc. Barrio
+  Norte, the franchise's shadow and the second lap are what make them chapters.
 - **The second lap** — what "more training" means after the ribbon. The franchise's
   shadow and doubled foot traffic hand every neighbor a *second-order* problem, the
   kind you only get after the first thing worked: Chelo's bot misses the ten angry
@@ -135,6 +170,16 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
 
 ## Open threads (promises already on the wall)
 
+- **La ventanilla** — the city's own record, kept by a government NPC, separate from the
+  player's office. *(Owner steer 2026-09-02.)* Two documents that do not quite agree is
+  the truest thing you can say about a barrio: your office holds what the neighbours said
+  about you; the window holds what the city has on paper. Three laws, all load-bearing:
+  she is **not a villain and not an obstacle** (a *ventanilla* clerk on the barrio's side
+  and bound by paperwork — the comedy is she needs the form, the warmth is she wants you
+  to pass); she **speaks only about what is filed, never about what is missing**, past
+  tense only, or she becomes a quest log with a face; and she is **droppable like the
+  franchise**. She is also the natural voice for Barrio Norte, which is a public works
+  project — the promise keeps a face without becoming a place.
 - **Barrio Norte** — PROMOTED to the city's through-line. The northbound track
   advances a visible segment per finished business and the sound gets closer.
   Never a place you visit — it stays a promise (kept free for multiplayer/AJ).
@@ -322,6 +367,29 @@ hired you for. Three fixes, now canon:
   room in Meridian that closed behind you; twelve opens the street with four quests
   still answerable and puts every reframe line into default play. Owner: *"drop it to
   12 but doesnt have to happen in the office"* — which is what `need` already meant.
+
+- 2026-09-02 · ❗La oficina · **the office opens bare and the barrio furnishes it** —
+  the old lead's empty desk and a north window, then one piece per business · the mystery
+  pays off in furniture instead of a cutscene, and the room visibly fills.
+- 2026-09-02 · ❗La palabra · **the word is the reward** — a term enters through whoever
+  NEEDS it, in the beat after a right answer; wrong answers stay funny and earn nothing ·
+  vocabulary is given, never tested. Under ❗El giro the five terms are the TRADE's
+  vocabulary, not the role's.
+- 2026-09-02 · ❗El papel · **template 06 Process & Exception Map gets written** · a real
+  artifact consultants hand over, so it earns a place in the owner's work folder.
+- 2026-09-02 · ❗La despedida · **the goodbye at the door**, declared per district
+  (`doorstep`/`panel`/`quiet`) · the inauguración's grammar on a smaller instrument, so
+  the finale keeps its size. `panel` is KEPT, not deleted — nothing regresses, and AJ can
+  pick another shape.
+- 2026-09-02 · ❗El giro · **industry leads, role follows** · `industry:` is ADDED beside
+  `role:`, never in place of it — the signed role summary in the report stays, and the
+  `principal`/Limpieza "implementation lead" collision stops being a bug the moment
+  districts are told apart by the business rather than the job title.
+- 2026-09-02 · Scope correction, recorded not silently fixed · ❗El listón was signed
+  about the CITY's finale; the session generalised it to every ending in the owner's name
+  and cited it against `finish()`. Corrected in OWNER.md and here — including the
+  Principles bullet, which the first correction pass MISSED and which is the one a
+  planner reads and stops at.
 
 ## Bible vs. game text — RESOLVED 2026-09-01 (the open-city items only)
 
