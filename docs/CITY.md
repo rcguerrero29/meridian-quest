@@ -5,7 +5,7 @@ standing rules; anything Settled there is a permit, not a question. The `/don-gu
 next phase on Opus 5, and brings open decisions to the owner as side quests. Every
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
-**Phase: 2 (planned 2026-08-31 — parcel NOT yet planned, pack NOT built)** · Ledger
+**Phase: 2 — Taller Herrera (parcel planned 2026-09-01, three decisions signed, NOT built)** · Ledger
 opened 2026-08-30. **Deployed: `mq-v44` on `main`, 2026-09-01.**
 
 ## Purpose
@@ -78,6 +78,40 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
   before); the mercado's produce is identifiable; the ticker keeps two messages.
   Three test tools now exist: `smoke.js`, `shots.js` (scene screenshots) and
   `tilesheet.js` (**the cold read** — every tile alone, labelled only by its glyph).
+
+- 2026-09-01 — **Phase 2 parcel planned: Taller Herrera**, `st` southeast lot. Ribbon
+  row 13 x18-28 with a roll-up door `%` at x23, apron props on row 14 (Tacho's Caprice
+  at x19, tires at x25 — positions forced by the reachability audit, not taste).
+  Interior `ta` 20x12: three lift bays, a parts wall, Yesenia's counter two steps inside
+  the door, the office nook, a waiting corner. Cast `t`/`y`/`m`, Tuerca moved in from
+  Calle Dos. Quests 24-31, `need` 5, role: automation / solutions consultant. Seven new
+  glyphs (`= % 6 7 8 0 i`), all pack-side in a NEW `content/meridian/art.js` — the first
+  real use of the TILEART/TILEMETA seam.
+
+## ⚠️ THE CEILING — the roadmap promises four more businesses; the code holds two
+
+Verified in the engine on 2026-09-01, not inferred. The ledger's "one business per
+phase, Phases 2-5" cannot run as written until three things generalize:
+
+- **`finish()` has exactly two epilogue sets.** `engine/engine.js:1821` —
+  `const E=last?[t.mepi1,t.mepi2,t.mepi3]:[t.epi1,t.epi2,t.epi3]`. Add a third district
+  and the taller prints the mercado's ending while the mercado prints Week One's.
+  → every district declares its own `epi:[k3,k2,k1]` and `open:"<toastKey>"`.
+- **The handover doorstep is hardcoded to the mercado's front step.**
+  `engine/engine.js:1834` — `px=fx=6;py=fy=12`. → each ribbon declares its `doorstep`.
+- **`GROWTH.ribbon` is singular.** `ribbonUp()` at :162 and `applyRibbon()` at :3032
+  handle exactly one storefront. → `ribbons[]`, with a `g.ribbons||(g.ribbon?[g.ribbon]:[])`
+  shim so AJ's pack and older declarations keep working.
+
+None of these name the taller, so they stay legal under "the engine may never name a
+pack's content" — they are the seam that has to be paid once, exactly like the
+DOORS/TOWNLBL extraction was for El Mercado. **This is the real cost of Phase 2, and it
+is bigger than the shop.**
+
+Also from the same measuring pass, smaller but real: the uppercase tile alphabet is
+**fully consumed** (A-Z), so new glyphs are digits and symbols from here; and `NPCLOOK`
+is keyed by station **letter, globally**, with 20 of 23 usable letters spent — Phase 3
+would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
@@ -160,6 +194,31 @@ stays live until the Phase 2 refactor lands.
 
 *(format: date · quest title · choice · one-line why — append only)*
 
+- 2026-09-01 · ❗El taller: the shop's footprint · **shop plus an apron** — one door and
+  one interior like the mercado, and the ribbon also drops the Caprice and a tire stack
+  on the sidewalk · it reads as an auto shop before you open anything, and the sitting
+  stays spent on the eight quests.
+- 2026-09-01 · ❗El recado: do the taller's jobs leave the shop · **six inside, two out**
+  — the parts run to Calle Dos, the cousin's software demo where Doña Chelo can overhear
+  · uses maps that already exist and makes the referral run both ways: she vouched for
+  you, now she is watching.
+- 2026-09-01 · ❗El papel: the document the taller hands you · **a process-and-exception
+  map** — how work flows, where a human must sign, which step cannot be taken back ·
+  it carries "never automate the irreversible step" out of the game and into a meeting,
+  and no other business in the city teaches it.
+- 2026-09-01 · ❗La pared: where the record lives · **OWNER COUNTER-PROPOSAL, not yet
+  specced: an office that becomes yours.** Owner: *"i think an office should become mine
+  somewhere so i can access these."* Supersedes the mural-wall-only option. For whoever
+  specs it: **`f2` already exists** — "Floor 2 · Expansion", portal wired from HQ at
+  `PORTALS.hq["1"]`, arrive text *"Quiet up here… for now."* An empty floor with a door,
+  waiting for a purpose. Fits Settled "HQ is the onboarding", and gives the terminology
+  work (glossary, filled deliverable drafts) a room rather than a menu. Nacho's mural
+  keeps the CITY's record; the office is the player's own. **Needs a parcel spec from
+  /don-guero before it can be built.**
+- 2026-09-01 · ❗Orden (Don Güero's call, not a survey) · **the 3D/world sitting ships
+  BEFORE Taller Herrera** · new storefront art must not be judged against a renderer
+  that lays doors on the floor, and two branches repainting tiles at once is a merge
+  that eats a session.
 - 2026-08-30 · Cartridge model · saves stay on-device, Trolley Pass is the link
   cable · zero-maintenance rule. *(imported from HANDOFF)*
 - 2026-08-30 · Retry-until-correct · quests complete only on the right answer ·

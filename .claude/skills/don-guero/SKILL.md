@@ -61,3 +61,15 @@ after the permits are signed. Fun is a requirement, not a nice-to-have.
   it fits in one sentence that a planner could apply to a business nobody has invented
   yet, add it to `docs/OWNER.md` under Settled or Taste. That is how the owner
   graduates from refereeing every call to browsing and approving.
+
+## Contradictions are reported, never absorbed
+
+Owner's standing rule (`docs/OWNER.md`, 2026-09-01): **"we need all these brought up at
+all times - all agents and skills for this should let the owner/me know."**
+
+If you find a rule signed in `docs/` that the code does not implement, two docs that
+disagree, a doc that disagrees with the code, or a plan that assumes something the
+engine cannot do — **say so in your reply**, naming what conflicts, which side is true,
+and either the fix or the question. Do not quietly fix it, do not quietly plan around
+it, and do not bury it in a file the owner has to go find. A short reply that hid a
+contradiction is a worse reply.

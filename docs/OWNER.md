@@ -98,6 +98,17 @@ preference that outlives one phase; cite the date and their words.
   - **Version pins collide.** Two branches will both bump to the same `mq-vN`. On a
     merge, resolve FORWARD to a new number rather than picking a side.
   - **Never assume the owner can see your work.** Only `main` deploys. Say so.
+- **Surface every contradiction, every time — never silently.** *(2026-09-01, owner:
+  "lets make sure we fix or ask me about this contradiction, we need all these brought
+  up at all times - all agents and skills for this should let the owner/me know
+  please.")* A contradiction is any of: a rule signed in `docs/` that the code does not
+  implement; two docs that disagree; a doc that disagrees with the code; or a plan that
+  assumes something the engine cannot currently do. When one is found, the owner is
+  told **in the reply, not only in a file** — with what conflicts, which side is true,
+  and either the fix or the question. Three things are forbidden: quietly fixing it and
+  moving on, quietly planning around it, and burying it in a document the owner has to
+  go find. This applies to every agent, every skill and every session, and it outranks
+  keeping a reply short.
 - **New art gets a cold read before it ships.** *(2026-09-01, owner: the legibility
   pass "should ride with the 3d work but after that be a regular thing".)* Any change
   to a tile, sprite, facade, prop or palette runs `node test/tilesheet.js` — every tile
