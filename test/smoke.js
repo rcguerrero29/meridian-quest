@@ -633,6 +633,62 @@ const CANDIDATES = [
   if (!front.ballBtn) fails.push('ball button missing from the HUD');
   if (!front.langOk) fails.push('Sonny/camera strings missing in EN or ES');
 
+  // ---- 7. El Parque: leash → rainbow bridge → chill session → recap card ----
+  const park = await page.evaluate(async () => {
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const out = {};
+    const w = WORLDS.pk;
+    out.pkOk = !!w && w.W === 24 && w.H === 12 && !!PORTALS.pk && !!PORTALS.pk['2'];
+    // the lawn is reachable from the bridge entry (a dog's-eye flood)
+    const rs = dogReach({ world: 'pk', x: 2, y: 6 });
+    out.lawnReach = !!rs[4 * w.W + 17] && !!rs[3 * w.W + 17]; // beside the doghouse
+    out.waterBlocked = !rs[1 * w.W + 3]; // river tiles are not walkable
+    // Sonny lives on the street
+    const sonny = CRIT.find(c => c.kind === 'beagle' && c.name === 'Sonny');
+    out.sonny = !!sonny && sonny.world === 'st';
+    if (!sonny) return out;
+    // leash him: stand adjacent, press the button, ride the 900ms transition
+    world = 'st'; px = fx = 21; py = fy = 11; setWorldTag();
+    sonny.x = 22; sonny.y = 11; sonny.fx = 22; sonny.fy = 11; sonny.moving = false; sonny.task = null;
+    petCrit = sonny; petTarget = 'beagle';
+    document.getElementById('leash').click();
+    await sleep(1200);
+    out.inPark = world === 'pk' && sonny.world === 'pk' && sonny.follow === true;
+    // a treat in the park counts toward the recap
+    petCrit = sonny; petTarget = 'beagle';
+    document.getElementById('treat').click();
+    out.treatCounted = PARK.t === 1;
+    // bandana cycles and persists
+    petCrit = sonny; petTarget = 'beagle';
+    document.getElementById('band').click();
+    out.band = !!sonny.band;
+    out.bandStored = !!(JSON.parse(localStorage.getItem('mqpark') || '{}').band || {}).Sonny;
+    // adopt a dog by name
+    document.getElementById('adoptTitle').textContent = '';
+    document.getElementById('adoptName').value = 'Nube';
+    document.getElementById('adoptGo').click();
+    out.adopted = CRIT.some(c => c.kind === 'beagle' && c.name === 'Nube' && c.world === 'pk');
+    out.adoptStored = (JSON.parse(localStorage.getItem('mqpark') || '{}').dogs || []).length === 1;
+    // walk out over the bridge: land on the exit tile and let the portal fire
+    px = fx = 1; py = fy = 6; moving = true; mt = 1; dir = 'left'; px = 0; portalT = 0;
+    await sleep(300);
+    out.exited = world === 'st';
+    out.card = !document.getElementById('parkCard').hidden;
+    out.sonnyHome = sonny.world === 'st' && sonny.follow === false;
+    document.getElementById('pkClose').click();
+    // strings in both languages
+    out.langOk = !!(['leashLb', 'parkArrive', 'parkTitle', 'parkSum', 'parkLove', 'parkTeaser',
+      'adoptLb', 'adoptAsk', 'adoptDone', 'bandLb', 'parkFull']
+      .every(k => UI.en[k] && UI.es[k]) && UI.en.locs.pk && UI.es.locs.pk && UI.en.arrive.pk && UI.es.arrive.pk);
+    // cleanup so this section leaves no park residue for reruns
+    localStorage.removeItem('mqpark');
+    return out;
+  });
+  ['pkOk', 'lawnReach', 'waterBlocked', 'sonny', 'inPark', 'treatCounted', 'band', 'bandStored',
+    'adopted', 'adoptStored', 'exited', 'card', 'sonnyHome', 'langOk'].forEach(k => {
+    if (park[k] !== true) fails.push('park: ' + k + ' failed (' + JSON.stringify(park[k]) + ')');
+  });
+
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);

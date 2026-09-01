@@ -92,7 +92,23 @@ const WORLD_DEFS={
      "#WV................#",
      "#..r..........y....#",
      "#..................#",
-     "##########L#########"]
+     "##########L#########"],
+ /* El Parque 🌈 — Sonny's park, reached only on the leash (no street door).
+    A river (~) runs down the west side; the rainbow bridge (^) crosses it at the
+    exit row. The doghouse (9) is where adoptions happen. This map is the preview
+    of the pet-care spin-off (IDEAS §13) and its future starting map. */
+ pk:["FFF~~FFFFFFFFFFFFFFFFFFF",
+     "F..~~...g....J.....b...F",
+     "F..~~..................F",
+     "F..~~....b....g...9....F",
+     "F..~~..................F",
+     "F..~~.....P......g.....F",
+     "2..^^..................F",
+     "F..~~....g....b........F",
+     "F..~~..........g...J...F",
+     "F..~~..J...............F",
+     "F..~~......g.....b.....F",
+     "FFF~~FFFFFFFFFFFFFFFFFFF"]
 };
 const PORTALS={hq:{"1":{to:"f2",x:17,y:11,dir:"left"},"E":{to:"st",x:14,y:1,dir:"down"}},
                f2:{"1":{to:"hq",x:16,y:5,dir:"left"}},
@@ -100,7 +116,8 @@ const PORTALS={hq:{"1":{to:"f2",x:17,y:11,dir:"left"},"E":{to:"st",x:14,y:1,dir:
                ex:{"2":{to:"st",x:28,y:1,dir:"left"}},
                lc:{"L":{to:"st",x:6,y:4,dir:"up"}},
                lo:{"O":{to:"st",x:21,y:4,dir:"up"}},
-               me:{"M":{to:"st",x:6,y:12,dir:"up"}}};
+               me:{"M":{to:"st",x:6,y:12,dir:"up"}},
+               pk:{"2":{to:"st",x:22,y:10,dir:"down"}}};
 /* city growth: helping La Obra visibly advances the construction site */
 const OBRA=[[],
  [[6,17,"#"],[6,22,"#"],[6,26,"#"],[8,16,"#"],[8,20,"#"],[8,25,"#"]],
@@ -118,8 +135,8 @@ const MERCADO=[[13,1,"Z"],[13,2,"Z"],[13,3,"Z"],[13,4,"Z"],[13,5,"Z"],[13,6,"M"]
    content edit: give it a door glyph, a mini-map colour, a label, and a dot.
    (The full per-glyph tile registry is queued with the graphics-prep refactor.) */
 const DOORS="+ELOM";                       /* glyphs painted as a door */
-const SOLIDX="ZSHI";                       /* solid glyphs this pack adds */
-const MAPCOL={Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C"};
+const SOLIDX="ZSHI~9";                     /* solid glyphs this pack adds (~ water, 9 doghouse) */
+const MAPCOL={Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D"};
 /* mini-map labels. `when` reads the city's flags: obra 0-2, mercado bool. */
 const TOWNLBL=[
  {x:15,y:0.75,s:10,c:"#F2E8D8",en:"MERIDIAN HQ  (⇧ FLOOR 2)",es:"MERIDIAN HQ  (⇧ PISO 2)"},
@@ -143,7 +160,8 @@ const CRITTERS=[
  {kind:"butterfly",world:"ex",x:10,y:0,c:"#8FC7E8"},
  {kind:"colibri",world:"st",x:16,y:4,c:"#3FA88F"},
  {kind:"gato",world:"ex",x:20,y:5,c:"#8B8F98"},
- {kind:"gato",world:"me",x:15,y:9,c:"#7A6A55"}   /* Frijol — the bodega cat, pettable */
+ {kind:"gato",world:"me",x:15,y:9,c:"#7A6A55"},  /* Frijol — the bodega cat, pettable */
+ {kind:"beagle",world:"st",x:22,y:11,c:"#E8C46A",name:"Sonny",egg:"sonny"} /* the star himself */
 ];
 /* one-off place identity as data (IDEAS §10): the engine's DECODRAW vocabulary
    (sign, mural) renders these in every camera, so no landmark ever squares off.
