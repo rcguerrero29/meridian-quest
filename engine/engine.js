@@ -154,7 +154,12 @@ const qOpen=qi=>{const c=qChapter(qi);return c<0||c<=chSeen;};
    time passed and never what happened in it (a reframe that names events goes stale
    itself). Quests belonging to no district (Frederick's) never count as late. */
 const qLate=qi=>{const c=qChapter(qi);return c>=0&&c<chSeen;};
-const mercadoOpen=()=>chSeen>=1;   /* opens once you take the Monday handover */
+/* GROWTH is content's declaration of what the city builds as it is earned. The engine
+   knows the mechanism and never the names — see content/meridian/config.js. */
+const GRW=()=>(typeof GROWTH!=="undefined"&&GROWTH)?GROWTH:{};
+/* a district's storefront ribbon is up once that district has opened. Was
+   `mercadoOpen`, which named one pack's business inside the shared engine. */
+const ribbonUp=()=>{const r=GRW().ribbon;return !!(r&&r.tiles)&&chSeen>=r.district;};
 /* ---------- state ---------- */
 const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"};
 let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
@@ -517,7 +522,7 @@ Object.assign(TILES,{
   A:{lift:6,kind:"furniture"},S:{lift:9,kind:"furniture"},H:{lift:5,kind:"furniture"},
   I:{lift:6,kind:"furniture"},W:{lift:8,kind:"appliance"},V:{lift:8,kind:"appliance"},
   F:{lift:5,kind:"fence"},G:{lift:5,kind:"fence"},
-  C:{lift:3,kind:"marker"},X:{lift:6,kind:"obra"},
+  C:{lift:3,kind:"marker"},X:{lift:6,kind:"site"},
   P:{lift:6,kind:"nature"},J:{lift:0,kind:"tree"},
   "~":{lift:0,kind:"water"},"9":{lift:7,kind:"prop"}});
 if(typeof TILEMETA!=="undefined")Object.entries(TILEMETA).forEach(([g,m])=>TILES[g]={...(TILES[g]||{}),...m});
@@ -1400,7 +1405,8 @@ window.addEventListener("keyup",e=>{if(KEYS[e.key]&&held===KEYS[e.key])held=null
 $("talk").addEventListener("click",()=>{
   const tb=$("talk");
   if(tb.dataset.chatn){
-    if(tb.dataset.chatn==="xochi"){openWardrobe();return;} /* post-quest, Xochi runs the fitting room */
+    /* content nominates who runs the fitting room; the engine just opens it */
+    if(tb.dataset.chatn===GRW().wardrobeNpc){openWardrobe();return;}
     const L=chillLines(tb.dataset.chatn)||(T().chat||{})[tb.dataset.chatn]||[];
     if(L.length)toast("💬 "+L[Math.floor(Math.random()*L.length)],2800);return;}
   questStart(+tb.dataset.qi);});
@@ -1525,8 +1531,9 @@ function pick(c,btn,t){
   if(o.r!=="bad"&&lvlIdx()!==before){$("levelup").textContent=T().lvlUp+lvlName();$("levelup").hidden=false;}
   if(cur>=0){
     if(solved){done.add(cur);
-      if(cur===12||cur===13){applyObra();setTimeout(()=>toast(T().obraUp,2800),700);}}
-    if(cur===15&&qFirst)setTimeout(()=>toast(T().wdUnlockToast,3400),700);}
+      {const g=GRW().staged;
+       if(g&&g.quests.indexOf(cur)>=0){applyStaged();setTimeout(()=>toast(T().growthUp,2800),700);}}}
+    if(cur===GRW().wardrobeQuest&&qFirst)setTimeout(()=>toast(T().wdUnlockToast,3400),700);}
   else if(solved&&node==="b"){fredQ=2;wear.bandana=wear.bandana||"#C0392B";setTimeout(()=>toast(T().fredDoneToast,3000),600);}
   save();
   $("next").textContent=(livesOn()&&hearts<=0)?T().nextDoom:(chDue()?T().nextEnd:T().nextBack);
@@ -1641,7 +1648,9 @@ function applyCtl(){
   try{localStorage.setItem("mqctl",ctl);}catch(e){}
 }
 $("gear").addEventListener("click",()=>{
-  $("openWd").hidden=!(done.has(15)||qa[15]!==undefined); /* the wardrobe is extra — any attempt at Xochi's quest opens it */
+  /* the wardrobe is extra — any ATTEMPT at the quest content nominates opens it */
+  {const wq=GRW().wardrobeQuest;
+   $("openWd").hidden=!(wq!==undefined&&(done.has(wq)||qa[wq]!==undefined));}
   $("settings").hidden=false;held=null;});
 $("openWd").addEventListener("click",()=>{$("settings").hidden=true;openWardrobe();});
 $("closeSet").addEventListener("click",()=>{$("settings").hidden=true;});
@@ -2199,7 +2208,10 @@ function drawTown(){
   for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
     g2.fillStyle=col[w.rows[y][x]]||"#D5D2C6";g2.fillRect(x*s,y*s,s,s);}
   const es=lang==="es";
-  const flags={obra:(done.has(12)?1:0)+(done.has(13)?1:0),mercado:mercadoOpen()};
+  /* the flags TOWNLBL predicates read: how many stages are up, and whether the
+     ribbon is out. Generic on purpose — a pack names its own labels, not the engine. */
+  const gs=GRW().staged;
+  const flags={stage:gs?gs.quests.filter(i=>done.has(i)).length:0,ribbon:ribbonUp()};
   g2.textAlign="center";
   (typeof TOWNLBL!=="undefined"?TOWNLBL:[]).forEach(l=>{
     if(l.when&&!l.when(flags))return;
@@ -2616,42 +2628,53 @@ function rebuildWorld(id){
     if(defs[ch]){const n=w.npcs.find(m=>m.key===ch);if(n){n.x=x;n.y=y;}}}));
   w.npcs.forEach(n=>{if(w.grid[n.y]&&w.grid[n.y][n.x]!==undefined)w.grid[n.y][n.x]="N";});
 }
-/* El Mercado's facade goes up when Week One closes. */
-function applyMercado(){
-  if(typeof MERCADO==="undefined"||!mercadoOpen())return;
-  const w=WORLDS.st;
-  MERCADO.forEach(([y,x,ch])=>{
-    if(!w.grid[y]||w.grid[y][x]==="N")return;
-    w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);w.grid[y][x]=ch;});
-}
 /* The city is a pure function of progress: rewind the street, then build back
    exactly what has been earned. So "New game +" really does hand you an empty lot —
    no Studio you did not raise, no mercado you did not open. */
-function applyGrowth(){rebuildWorld("st");applyObra();applyMercado();
+function applyGrowth(){
+  const g=GRW();
+  new Set([g.staged&&g.staged.world,g.ribbon&&g.ribbon.world].filter(Boolean))
+    .forEach(id=>{if(WORLDS[id])rebuildWorld(id);});
+  applyStaged();applyRibbon();
   if(typeof t3Invalidate==="function")t3Invalidate();} /* the 3D camera rebuilds its meshes */
-function applyObra(){const s=(done.has(12)?1:0)+(done.has(13)?1:0);
-  const w=WORLDS.st;
-  for(let k=1;k<=s;k++)OBRA[k].forEach(([y,x,ch])=>{
+function applyStaged(){
+  const g=GRW().staged;if(!g||!g.tiles)return;
+  const w=WORLDS[g.world];if(!w)return;
+  const s=g.quests.filter(i=>done.has(i)).length;
+  for(let k=1;k<=s;k++)(g.tiles[k]||[]).forEach(([y,x,ch])=>{
     if(w.grid[y][x]!=="N"&&w.rows[y][x]!=="L"){w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);w.grid[y][x]=ch;}});
-  if(s>=2){
-    /* the finished building is solid; its inside becomes the Studio (lo). Lupe moves streetside next to Güero. */
-    const lu=w.npcs.find(n=>n.key==="e");
-    if(lu&&!(lu.x===7&&lu.y===7)){
-      if(w.grid[lu.y]&&w.grid[lu.y][lu.x]==="N"){w.grid[lu.y][lu.x]="B";
-        w.rows[lu.y]=w.rows[lu.y].slice(0,lu.x)+"B"+w.rows[lu.y].slice(lu.x+1);}
-      lu.x=7;lu.y=7;w.grid[7][7]="N";
-    }
-    for(let y=6;y<=8;y++)for(let x=15;x<=28;x++){
-      if(w.grid[y][x]!=="N"){w.rows[y]=w.rows[y].slice(0,x)+"B"+w.rows[y].slice(x+1);w.grid[y][x]="B";}}
+  if(s>=g.quests.length&&g.done){
+    const mv=g.done.moveNpc;                  /* whoever content says steps out front */
+    if(mv){const n=w.npcs.find(m=>m.key===mv.key);
+      if(n&&!(n.x===mv.x&&n.y===mv.y)){
+        if(w.grid[n.y]&&w.grid[n.y][n.x]==="N"){w.grid[n.y][n.x]="B";
+          w.rows[n.y]=w.rows[n.y].slice(0,n.x)+"B"+w.rows[n.y].slice(n.x+1);}
+        n.x=mv.x;n.y=mv.y;w.grid[mv.y][mv.x]="N";}}
+    const sl=g.done.seal;                     /* the finished building becomes solid */
+    if(sl)for(let y=sl.y0;y<=sl.y1;y++)for(let x=sl.x0;x<=sl.x1;x++){
+      if(w.grid[y]&&w.grid[y][x]!==undefined&&w.grid[y][x]!=="N"){
+        w.rows[y]=w.rows[y].slice(0,x)+sl.tile+w.rows[y].slice(x+1);w.grid[y][x]=sl.tile;}}
   }
-  /* the site can grow over the tile the hero stands on — step them out to the Studio's
-     front door. Belt-and-braces: the same rescue fires if growth ever CUTS OFF the tile
-     they stand on (walkable but enclosed), so no future OBRA stage can wall anyone in. */
-  if(world==="st"&&(isSolid(px,py)||!obraReach(px,py))){px=fx=21;py=fy=4;dir="down";held=null;moving=false;}
-  if(SOLID.has(w.grid[PIG.y][PIG.x])){PIG.x=PIG.fx=4;PIG.y=PIG.fy=1;PIG.moving=false;} /* Paloma will not be bricked into the Studio */
+  /* a stage can grow over the tile the hero stands on — step them out to the doorstep
+     content nominated. Belt-and-braces: the same rescue fires if growth ever CUTS OFF
+     that tile (walkable but enclosed), so no future stage can wall anyone in. */
+  const sf=g.safe;
+  if(sf&&world===g.world&&(isSolid(px,py)||!growthReach(px,py))){
+    px=fx=sf.x;py=fy=sf.y;dir="down";held=null;moving=false;}
+  if(SOLID.has(w.grid[PIG.y][PIG.x])){PIG.x=PIG.fx=4;PIG.y=PIG.fy=1;PIG.moving=false;} /* Paloma will not be bricked in */
 }
-function obraReach(tx,ty){ /* BFS from the Studio's doorstep — open ground at every stage */
-  const w=WORLDS.st,seen=new Set(["21,4"]),q=[[21,4]];
+/* a district's storefront ribbon: dropped once that district has opened */
+function applyRibbon(){
+  const r=GRW().ribbon;if(!r||!r.tiles||!ribbonUp())return;
+  const w=WORLDS[r.world];if(!w)return;
+  r.tiles.forEach(([y,x,ch])=>{
+    if(!w.grid[y]||w.grid[y][x]==="N")return;
+    w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);w.grid[y][x]=ch;});
+}
+function growthReach(tx,ty){ /* BFS from the doorstep content nominated — open ground at every stage */
+  const g=GRW().staged,sf=g&&g.safe;if(!sf)return true;
+  const w=WORLDS[g.world];if(!w)return true;
+  const seen=new Set([sf.x+","+sf.y]),q=[[sf.x,sf.y]];
   while(q.length){const[x,y]=q.shift();
     if(x===tx&&y===ty)return true;
     [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{const nx=x+dx,ny=y+dy,k=nx+","+ny;

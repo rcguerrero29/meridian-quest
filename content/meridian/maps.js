@@ -143,10 +143,10 @@ const MAPCOL={Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#
 const TOWNLBL=[
  {x:15,y:0.75,s:10,c:"#F2E8D8",en:"MERIDIAN HQ  (⇧ FLOOR 2)",es:"MERIDIAN HQ  (⇧ PISO 2)"},
  {x:6.5,y:5.75,s:10,c:"#F2E8D8",en:"LA COCINA",es:"LA COCINA"},
- {x:22,y:7.7,s:10,c:"#3A2F17",en:"🚧 SITE",es:"🚧 OBRA",when:f=>f.obra<2},
- {x:22,y:7.7,s:10,c:"#F2E8D8",en:"LA OBRA · STUDIO",es:"LA OBRA · ESTUDIO",when:f=>f.obra>=2},
- {x:6,y:13.7,s:9,c:"#6B5210",en:"LOT: EL MERCADO",es:"LOTE: EL MERCADO",when:f=>!f.mercado},
- {x:6,y:13.75,s:9,c:"#F2E8D8",en:"EL MERCADO ROBLES",es:"EL MERCADO ROBLES",when:f=>f.mercado},
+ {x:22,y:7.7,s:10,c:"#3A2F17",en:"🚧 SITE",es:"🚧 OBRA",when:f=>f.stage<2},
+ {x:22,y:7.7,s:10,c:"#F2E8D8",en:"LA OBRA · STUDIO",es:"LA OBRA · ESTUDIO",when:f=>f.stage>=2},
+ {x:6,y:13.7,s:9,c:"#6B5210",en:"LOT: EL MERCADO",es:"LOTE: EL MERCADO",when:f=>!f.ribbon},
+ {x:6,y:13.75,s:9,c:"#F2E8D8",en:"EL MERCADO ROBLES",es:"EL MERCADO ROBLES",when:f=>f.ribbon},
  {x:25.5,y:13.7,s:9,c:"#6B5210",en:"RESERVED LOT",es:"LOTE RESERVADO"},
  {x:27,y:1.7,s:8,c:"#6B5210",en:"CALLE DOS →",es:"CALLE DOS →"},
  {x:0.5,y:1.8,s:8,c:"#6B5210",dx:3,en:"🚋",es:"🚋"}

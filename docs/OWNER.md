@@ -84,6 +84,23 @@ preference that outlives one phase; cite the date and their words.
   but i dont understand why i would miss any practice."* Corollaries: never build a
   quest log (a list is a backlog, a person is an invitation); the ❗ carries no count,
   colour or age; and the mural's paint only ever goes on.
+- **The engine may never name a pack's content.** *(2026-09-01.)* No business, NPC,
+  cat, street or quest index from any one story may appear in `engine/`. The engine
+  knows mechanisms — raise staged tiles, open a fitting room, drop a storefront ribbon
+  — and content declares which quests, which NPC, which tiles. `node test/smoke.js`
+  enforces it: a Meridian name in engine code fails the build. This is the teeth on
+  *"if a feature cannot be turned off for AJ, it is built wrong."*
+- **Learning is the deliverable, not a side effect.** *(2026-09-01, owner: "i need to
+  really learn and implement AI best practices and for roles. I need to know
+  documentation and terminology and to teach it to my people.")* A quest is not done
+  when it teaches a judgment call — it is done when the player could **run the meeting
+  and name the thing.** So every pack owes three things beyond the story: the real
+  **terminology** a practitioner would use, said by a character in plain speech and
+  captured verbatim in the codex; the **documentation** that role actually produces,
+  as a real artifact (`docs/templates/`, the decision report); and enough that the
+  owner can **teach it onward** — the report is a portfolio, and the codex is a
+  curriculum. If a quest cannot survive the question *"what would I call this in front
+  of my team?"*, it is not finished.
 - **Endings play in the world, not in a curtain.** *(2026-09-01, ❗El listón.)* No
   cutscene takes control to tell the player they did well. The street changes, they
   walk through it, and anything longer — speeches, the report read aloud — is

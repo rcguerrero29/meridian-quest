@@ -90,9 +90,9 @@ const CANDIDATES = [
 
     if (auditReach().length) problems.push('boot reachability: ' + auditReach().join(' | '));
     // post-construction: the Studio (and Xochi) must be reachable once La Obra completes
-    done.add(12); done.add(13); world = 'st'; px = fx = 2; py = fy = 10; applyObra();
+    done.add(12); done.add(13); world = 'st'; px = fx = 2; py = fy = 10; applyStaged();
     if (auditReach().length) problems.push('post-obra reachability: ' + auditReach().join(' | '));
-    if (isSolid(px, py)) problems.push('applyObra left the hero inside a wall');
+    if (isSolid(px, py)) problems.push('the staged build left the hero inside a wall');
     done = new Set(); world = 'hq'; px = fx = 10; py = fy = 11;
     return { problems, quests: QEN.length, maxXP: max };
   });
@@ -169,7 +169,7 @@ const CANDIDATES = [
     if (!(merc.need < merc.quests.length)) problems.push('mercado `need` must be lower than its pack size');
     done = new Set(); chSeen = 0; hearts = 3; applyGrowth();
     if (chDue()) problems.push('chapter reported due on a fresh save');
-    if (mercadoOpen()) problems.push('El Mercado open before Week One closed');
+    if (ribbonUp()) problems.push('El Mercado open before the first district closed');
     if (WORLDS.st.rows[13][6] === 'M') problems.push('mercado door on the street before it was earned');
 
     week1.quests.forEach(i => done.add(i));
@@ -182,7 +182,7 @@ const CANDIDATES = [
     if (hearts !== 3) problems.push('the new week did not restore hearts');
     if (world !== 'st') problems.push('handover did not put the hero on the street: ' + world);
     if (isSolid(px, py)) problems.push('handover dropped the hero inside a wall');
-    if (!mercadoOpen()) problems.push('El Mercado did not open on the handover');
+    if (!ribbonUp()) problems.push('El Mercado did not open on the handover');
     if (WORLDS.st.rows[13][6] !== 'M') problems.push('mercado door missing from the street');
     // Week One included La Obra, so the Studio must be standing and Lupe streetside
     if (WORLDS.st.rows[5][21] !== 'O') problems.push('Studio door missing after a rewind + rebuild');
@@ -206,7 +206,7 @@ const CANDIDATES = [
     document.getElementById('end').hidden = true;
     done = new Set(); chSeen = 0; hearts = 3; applyGrowth();
     world = 'hq'; px = fx = 10; py = fy = 11;
-    if (mercadoOpen()) problems.push('replay left El Mercado standing');
+    if (ribbonUp()) problems.push('replay left El Mercado standing');
     // ...and a district that has not opened yet is not answerable from the street
     if (qOpen(16)) problems.push('an unopened district\'s quests were already on offer');
     if (!qOpen(0)) problems.push('the opening district is not on offer at the start');
@@ -244,7 +244,7 @@ const CANDIDATES = [
     if (xp !== 0) problems.push('burnout changed XP');
     if (!done.has(12) || !done.has(13)) problems.push('burnout erased answered quests');
     if (WORLDS.st.rows[5][21] !== 'O') problems.push('burnout tore down the Studio');
-    if (!mercadoOpen()) problems.push('burnout did not open the next district');
+    if (!ribbonUp()) problems.push('burnout did not open the next district');
     // owner's law (docs/OWNER.md, 2026-09-01): no practice is ever missed. Ending a
     // district's ARC never closes its quests — they stay answerable, and the ❗ stays up.
     if (!qOpen(0)) problems.push('a Week One quest closed behind the player');
@@ -727,6 +727,31 @@ const CANDIDATES = [
     'adopted', 'adoptStored', 'exited', 'card', 'sonnyHome', 'langOk'].forEach(k => {
     if (park[k] !== true) fails.push('park: ' + k + ' failed (' + JSON.stringify(park[k]) + ')');
   });
+
+  // ---- portability: the shared engine must not know one pack's content ----
+  // The engine is never forked — AJ's game is a different content pack on the same
+  // engine (docs/OWNER.md). So a Meridian name or a Meridian quest index living in
+  // engine/ is a bug for her pack, not a style nit. This is the guard that keeps the
+  // GROWTH/TILEART/DOORS seams from quietly leaking back.
+  {
+    const NAMES = ['mercado', 'chelo', 'nando', 'perla', 'chava', 'frijol', 'obra',
+                   'cocina', 'xochi', 'lupe', 'guero', 'rosa', 'chuy', 'tovar', 'priya',
+                   'canela', 'robles', 'jacaranda'];
+    // engine3d is the same engine, so it is held to the same rule
+    for (const f of ['engine/engine.js', 'engine/engine3d.js']) {
+      const src = fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
+      // blank out comments first — block comments span lines, so this cannot be
+      // done per-line. Newlines are preserved so reported line numbers stay true.
+      const bare = src.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' '))
+                      .replace(/\/\/[^\n]*/g, '');
+      bare.split('\n').forEach((code, i) => {
+        NAMES.forEach(n => {
+          if (new RegExp(n, 'i').test(code))
+            fails.push(`portability: ${f}:${i + 1} names "${n}" in code — content belongs in the pack`);
+        });
+      });
+    }
+  }
 
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }

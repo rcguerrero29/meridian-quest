@@ -415,6 +415,21 @@ what conflicts, why it is not Nacho's to decide, and the options. Owner's instru
    give chat a `when` predicate like `TOWNLBL` already has (a build, Don Güero prices
    it). Until decided, Phase 2's crew lines get written under the free rule.
 
+5. **Terminology and teaching are under-served against the owner's stated need.**
+   *(2026-09-01: "i need to really learn and implement AI best practices and for roles.
+   I need to know documentation and terminology and to teach it to my people.")* The
+   codex teaches judgment beautifully and mostly avoids naming things — which was a
+   deliberate anti-homework choice and is now in tension with a stated goal. A player
+   finishes El Mercado having practised scoping, prioritisation and honest review
+   without ever meeting the words *acceptance criteria*, *drift*, *human-in-the-loop*
+   or *success metric*. Options: leave the codex as-is and put terminology in the
+   exported report only (safest for comfort, weakest for teaching); let characters use
+   the real term once, in plain speech, the way Yesenia is already written to define
+   the consultant's role for her nephew (recommended shape — it is a scene, not a
+   glossary); or add a glossary surface in the world (the mural wall, a codex index)
+   that fills as terms are met. Nacho's call on the writing, Don Güero's on any new
+   surface, the owner's on how far to push it.
+
 **Dead text, flagged so it is not resurrected stale:** `vmTitle` / `vmHQ` / `vmSt` /
 `vmLc` / `vmSite0` / `vmSite2` / `vmPlots` / `vmHere` in `content/meridian/strings.js`
 are referenced nowhere in the engine — `TOWNLBL` in `maps.js` replaced them during the
