@@ -381,7 +381,8 @@ what conflicts, why it is not Nacho's to decide, and the options. Owner's instru
    the board, they stay answerable forever, and all 24 reframe lines are live in
    default play. Owner's clarification, which was already true of the data: *"doesnt
    have to happen in the office"* — `need` is a count over the whole district, and
-   week1 spans HQ (0-9, 14), La Cocina (10, 11), La Obra (12, 13) and the Studio (15).
+   the district (id `principal` since 2026-09-01, formerly `week1`) spans HQ (0-9, 14),
+   La Cocina (10, 11), La Obra (12, 13) and the Studio (15).
    Any twelve, from anywhere, in any order.
    **What is still open, and it is smaller:** eleven of the sixteen are HQ quests, so a
    player who works the office hard can reach twelve having answered just one barrio
@@ -400,13 +401,14 @@ what conflicts, why it is not Nacho's to decide, and the options. Owner's instru
    as a "rough patch" beat any mode can reach; or retire them with the calendar.
    Blocked on whether hearts returns as a real mini-game.
 
-3. **Which calendar survives into the reusable template.** Weeks One and Two are canon
-   in Meridian's fiction and appear in `epi2`, both quest-file headers and the district
-   id `week1`. The engine is never forked, so AJ's planner will read `week1` as a
-   template concept and inherit a calendar her story does not have. Options: keep the
-   words as Meridian-only flavour and rename the id to something place-shaped; retire
-   the words in text and keep the id; or keep both and document that the calendar is
-   content, not structure.
+3. **Which calendar survives into the reusable template.** *(Half resolved
+   2026-09-01: the district id was renamed `week1` → `principal`, so a planner reading
+   the pack no longer inherits a calendar from the structure.)* Still open: Weeks One
+   and Two remain canon in Meridian's **fiction** and appear in `epi2` and both
+   quest-file headers. Options for the words: keep them as Meridian-only flavour that
+   AJ's pack simply does not copy; retire them from the text too; or keep them and
+   document explicitly that the calendar is content, never structure. Lowest-stakes of
+   the four — the structural half, which was the one that could mislead, is done.
 
 4. **Ambient chat has no state.** Every `chat` and `chill` line renders forever
    regardless of what the player has done — which is why Beto and Chava needed

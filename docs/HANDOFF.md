@@ -195,8 +195,8 @@ The split must keep PEERS, sanitizeSave, and the CSP in `engine/` territory.
      (`petGato`/`gato` strings). **Left for later**: folding DOG/CAT/PIG/LORO
      into the same registry (they carry special interactions — treats, wardrobe,
      quest hooks), koi for a game with water.
-   - **Construction hardening**: `applyObra`'s rescue now also fires if growth
-     cuts off (not just covers) the hero's tile (`obraReach` BFS), and Paloma
+   - **Construction hardening**: the staged build's rescue now also fires if growth
+     cuts off (not just covers) the hero's tile (BFS), and Paloma
      gets relocated instead of bricked into the Studio.
    Comfort themes, the admin theme editor, and CI contrast/tap-target audits had
    already shipped earlier the same day.

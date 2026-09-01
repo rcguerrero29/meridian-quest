@@ -3,6 +3,29 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
+## ⚠️ STATE OF PLAY — read this first (written 2026-09-01)
+
+**Nothing from the 2026-09-01 story/open-city session is deployed.** The branch
+`claude/career-training-story-plot-tj707h` is **17 commits ahead of `main`** and 0
+behind. `main` is what GitHub Pages serves, so the owner **cannot see any of it** —
+they said so directly ("i havent been able to see v41"). Merging to `main` is the
+owner's call and has not been given. Do not quote a version number to them without
+first checking what `main` actually serves.
+
+Working tree at sign-off: clean, smoke green, `mq-v44`, `sw.js` and `GAMEV` in lockstep.
+
+**What that branch contains, in one breath:** the open city (districts open and stay
+open, `need` 16→12), 24 `late` reframe lines EN+ES, nine continuity fixes, nine
+rewritten strings, the GROWTH seam that took Meridian's names out of the engine plus a
+portability guard that fails the build if they come back, 3D as the default camera and
+the three-drifted-whitelists bug that would have silently undone it, camera-aware
+movement with quarter-turn rotation, produce you can identify, a two-line ticker — and
+three test tools: `smoke.js`, `shots.js` (scene screenshots), `tilesheet.js` (the cold
+read). All three verified to run at sign-off.
+
+**Everything else this session produced is a PLAN, deliberately not built** — the owner
+said so repeatedly. See `docs/IDEAS.md` §15.
+
 ## Resume ritual
 
 0. **Read `docs/OWNER.md`** — the owner's standing rules (settled decisions, taste,
@@ -113,7 +136,8 @@ always-on 🐾 paw menu with the cross-city whistle; WASD-vs-typing fix.
    **What is left for the customization pass is written up in `docs/STORY.md` →
    "Bible vs. game text — OPEN"** — four items, each with options: the burnout
    epilogues belong to a mode that ships off; which calendar survives into the
-   reusable template (`week1` as an id will mislead AJ's planner); ambient chat has no
+   reusable template (the `week1` ID half is DONE — renamed `principal`; the words in the
+   fiction remain open); ambient chat has no
    state; and Nacho's preferred Week One split (office 0-9 / barrio 10-15 as two
    districts with two Saturdays) which would make the barrio floor structural instead
    of arithmetic — queued for the Taller Herrera session.

@@ -24,7 +24,7 @@ Map the stop number (or symptom) to code before guessing:
 | Symptom area | Look in |
 |---|---|
 | Theme/colors, particles, world tint | `engine/engine.js` — `setCanvasTint`, `tc()`, `npcWhimsy`, `drawAmbient`, `THEMES` |
-| Stuck / walled in / construction | `engine/engine.js` — `applyObra`, `obraReach`; stage data in `content/meridian/maps.js` (`OBRA`) |
+| Stuck / walled in / construction | `engine/engine.js` — `applyStaged`, `growthReach`; stage data in `content/meridian/maps.js` (`OBRA`), wired by `GROWTH` in `config.js` |
 | Quest logic, XP, hearts, retries | `engine/engine.js` — `pick`, `awardXP`; quest text in `content/meridian/quests.{en,es}.js` |
 | Trees, beds, map layout, critter spawns | `content/meridian/maps.js` (glyphs: `J` tree, `b` bed, `g` grass; `CRITTERS`) |
 | Animal behavior/drawing | `engine/engine.js` — DOG/CAT/PIG/LORO blocks, `critUpdate`, `drawButterfly/Colibri/Gato` |

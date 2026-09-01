@@ -855,7 +855,10 @@ drop the hero at a list of spots and screenshot the viewport per camera into `sh
 - ❌ **The rainbow bridge is a flat rainbow stripe painted on the ground** that does not
   even span the river — it reads as a smear on the floor, not a crossing. Confirms
   §15.4: there is no bridge object in any camera.
-- ⚠️ **The activity ticker and the toast show the same text at the same time**, and the
+- ✅ **FIXED at mq-v44** — the ticker held ONE message for a flat 10s, so it sat there
+  showing the same words as the live toast. It now keeps the last TWO (older dimmed) and
+  expires with the toast plus 1.8s. Original finding kept below for the record:
+- ~~⚠️ **The activity ticker and the toast show the same text at the same time**, and the
   ticker is a large translucent block over roughly a third of the view. Both cameras.
   The ticker is a deliberate owner-requested feature (mirror the last message so it can
   be re-read after the toast fades) — so this is a design call, not a bug: either make

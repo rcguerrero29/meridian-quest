@@ -55,7 +55,7 @@ to Lupe INSIDE the site fence when you answer the second one correctly.
 you are stepped out to the new Studio's front door — never walled in, no admin rescue
 needed. The toast announces the progress. Note: stage 1 (after the FIRST of the two
 quests) only swaps girders for frames — subtle on purpose; stage 2 is the big change.
-*(engine: applyObra + rescue)*
+*(engine: applyStaged + rescue)*
 
 **8 · The Studio.** Enter the new O door. Meet Xochi, do "The collar drop", then talk
 to her again.
