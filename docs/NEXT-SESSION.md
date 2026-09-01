@@ -3,27 +3,27 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## ⚠️ STATE OF PLAY — read this first (written 2026-09-01)
+## STATE OF PLAY — read this first (2026-09-01)
 
-**Nothing from the 2026-09-01 story/open-city session is deployed.** The branch
-`claude/career-training-story-plot-tj707h` is **17 commits ahead of `main`** and 0
-behind. `main` is what GitHub Pages serves, so the owner **cannot see any of it** —
-they said so directly ("i havent been able to see v41"). Merging to `main` is the
-owner's call and has not been given. Do not quote a version number to them without
-first checking what `main` actually serves.
+**MERGED AND DEPLOYED.** The 2026-09-01 story/open-city work is on `main` at
+**`mq-v44`** (owner gave the word). GitHub Pages serves `main`, so it is live after the
+usual ~minute of lag; installed PWAs pick it up on the next refresh.
 
-Working tree at sign-off: clean, smoke green, `mq-v44`, `sw.js` and `GAMEV` in lockstep.
+**Still true and still the trap:** several models work this repo at once. `main` moved
+under this session once already today — a branch cut from a stale base spent a round
+root-causing a 3D bug that had already been fixed twice on `main`. Do the divergence
+check in step 1b below before reading a single line of engine code, and never quote a
+version number to the owner without checking what `main` actually serves.
 
-**What that branch contains, in one breath:** the open city (districts open and stay
-open, `need` 16→12), 24 `late` reframe lines EN+ES, nine continuity fixes, nine
-rewritten strings, the GROWTH seam that took Meridian's names out of the engine plus a
-portability guard that fails the build if they come back, 3D as the default camera and
-the three-drifted-whitelists bug that would have silently undone it, camera-aware
-movement with quarter-turn rotation, produce you can identify, a two-line ticker — and
-three test tools: `smoke.js`, `shots.js` (scene screenshots), `tilesheet.js` (the cold
-read). All three verified to run at sign-off.
+**What went in, in one breath:** the open city (districts open and stay open, `need`
+16→12), 24 `late` reframe lines EN+ES, nine continuity fixes, nine rewritten strings,
+the GROWTH seam that took Meridian's names out of the engine plus a portability guard
+that fails the build if they come back, 3D as the default camera and the
+three-drifted-whitelists bug that would have silently undone it, camera-aware movement
+with quarter-turn rotation, produce you can identify, a two-line ticker — and three test
+tools: `smoke.js`, `shots.js` (scene screenshots), `tilesheet.js` (the cold read).
 
-**Everything else this session produced is a PLAN, deliberately not built** — the owner
+**Everything else that session produced is a PLAN, deliberately not built** — the owner
 said so repeatedly. See `docs/IDEAS.md` §15.
 
 ## Resume ritual
