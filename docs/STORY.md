@@ -50,6 +50,17 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   mural repaints — but a late answer may never scrape colour off a panel already
   earned. Derived from "nothing is ever taken away"; recorded so nobody freezes the
   grade at Saturday, and nobody lets a rusty return trip cost the player a wall.
+- **A quest may depend on another quest only if the same person gives both.** The
+  station queues (`WNPC` / `STATIONS`) serve one NPC's quests in order, so "one more
+  thing…" is always safe inside a character. Nothing enforces order between two
+  characters. Cross-NPC callbacks get written as general law, not as history — quest 0
+  says "'Sounds right' is *how* Free Churro Friday happens," which reads as
+  foreshadowing or as lore in either order. Copy that technique. *(2026-09-01, from
+  the continuity pass.)*
+- **Every ambient line must be true forever.** Chat has no state — Beto promised
+  groceries in two weeks for a year, and Chava's catchphrase outlived the quest that
+  fixed him. A townsperson's line is written to survive its own resolution or it is
+  written differently. *(2026-09-01.)*
 - EN and ES are equals, written with sazón, never machine-flat.
 
 ## The arc so far
@@ -101,6 +112,17 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   next one. The second lap is **the callback** — a neighbor phones *you*, by name.
   A business's second-order quest only opens after its own Saturday, so the barrio
   deepens instead of accumulating and "more training" reads as a promotion.
+- **La línea tardía** (2026-09-01, built). The law grew a voice. Every quest in the
+  city can now open with one line from its own NPC that acknowledges only that time
+  passed — never what happened in it, or the reframe goes stale with the world.
+  Twenty-four of them, EN+ES. The grammar is fixed and it is the whole discipline:
+  **the neighbor is still interested, never still waiting on you.** "I never closed
+  that folder" is a door; "you never answered me" is a bill. No *finally*, no
+  *took you long enough*. Two carve-outs, both earned: a line may report a cycle the
+  quest itself already declared (Tovar's monthly doc churn, the mercado's annual
+  hoja-de-maíz stockout), because the more time passes the truer those get. Frederick
+  has none and never will — his quest belongs to no district, so the seam can never
+  fire, and he already reopens his folder for a treat, which is the joke.
 - **The second lap** — what "more training" means after the ribbon. The franchise's
   shadow and doubled foot traffic hand every neighbor a *second-order* problem, the
   kind you only get after the first thing worked: Chelo's bot misses the ten angry
@@ -130,7 +152,9 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   exactly like the player's — except every entry is the *impressive* answer. He
   fine-tuned something he shouldn't have because he was building the biggest thing
   on the list, and that is what had always got him praised. He never appears on
-  screen. His name is on Chelo's wall by the register, in older handwriting.
+  screen. His name is on Chelo's wall by the register, in older handwriting — now
+  planted in quest 23's honest-review beat as well as in `mepi2`, so every player who
+  tells her the truth sees it, not only the grade-2 ones.
 - **Frederick's fame** — the barrio's media department; his DMs fill with
   questions meant for the businesses (the wrong-channel gag, with a real lesson
   under it). He hosts the inauguración. Sonny is the intern.
@@ -288,6 +312,12 @@ hired you for. Three fixes, now canon:
   doing to the player what Taller Herrera is about to teach him to stop doing to
   customers: never automate the irreversible step.
 
+- 2026-09-01 · ❗La carpeta · **one reframe line, from the neighbor, in their voice**
+  — signed with a condition: *"make sure all the story lines essentially make sense —
+  you can explain any erroneous or conflicting info in text and make a note."* 24 lines
+  EN+ES shipped; nine continuity breaks fixed in the text; four unresolved items
+  written to the OPEN list below.
+
 ## Bible vs. game text — RESOLVED 2026-09-01
 
 Everything logged here on 2026-09-01 as signed-not-built is now shipped (sw `mq-v38`,
@@ -334,3 +364,47 @@ lines in the pack).
 
 **Flagged to Don Güero's lane:** `docs/CITY.md` still describes districts as things
 that "close". His file, his call — but the word is now load-bearing and wrong.
+
+## Bible vs. game text — OPEN (for the customization pass)
+
+Contradictions found 2026-09-01 that cannot be settled by rewriting a line. Each names
+what conflicts, why it is not Nacho's to decide, and the options. Owner's instruction:
+*"make a note so that during customization we clear the goals and this topic."*
+
+1. **Where Week One's Saturday belongs.** `week1` is one sixteen-quest district with
+   `need:16`, so its ending only fires on a full sweep and none of its quests can ever
+   be answered late in default play — the one place in Meridian that closes behind you,
+   in the city that just made "you can always come back" the law. It also gates El
+   Mercado behind 16/16, and it means sixteen of the twenty-four reframe lines only
+   render for a player who burns out in a stakes mode that ships turned off. Options:
+   leave it; drop the bar to ~12; or split the office (0-9) from the first three barrio
+   businesses (10-15) into two districts with two endings and two mural panels.
+   **Blocked on ❗La puerta.**
+
+2. **The burnout epilogues belong to a mode that ships off.** `goTitle`, `goEpi` and
+   `mgoEpi` only play when stakes are `hearts`, which is admin-only; `goEpi` still
+   frames the loss as "the week," which is retired. Three good strings currently
+   unreachable in normal play. Options: keep them as hearts-only flavour; rewrite them
+   as a "rough patch" beat any mode can reach; or retire them with the calendar.
+   Blocked on whether hearts returns as a real mini-game.
+
+3. **Which calendar survives into the reusable template.** Weeks One and Two are canon
+   in Meridian's fiction and appear in `epi2`, both quest-file headers and the district
+   id `week1`. The engine is never forked, so AJ's planner will read `week1` as a
+   template concept and inherit a calendar her story does not have. Options: keep the
+   words as Meridian-only flavour and rename the id to something place-shaped; retire
+   the words in text and keep the id; or keep both and document that the calendar is
+   content, not structure.
+
+4. **Ambient chat has no state.** Every `chat` and `chill` line renders forever
+   regardless of what the player has done — which is why Beto and Chava needed
+   rewriting rather than conditioning. Options: make "write chat that cannot go stale"
+   the standing rule for every future pack (free, and it is the rule as of today); or
+   give chat a `when` predicate like `TOWNLBL` already has (a build, Don Güero prices
+   it). Until decided, Phase 2's crew lines get written under the free rule.
+
+**Dead text, flagged so it is not resurrected stale:** `vmTitle` / `vmHQ` / `vmSt` /
+`vmLc` / `vmSite0` / `vmSite2` / `vmPlots` / `vmHere` in `content/meridian/strings.js`
+are referenced nowhere in the engine — `TOWNLBL` in `maps.js` replaced them during the
+Phase 1 seam extraction. Only `vmPlots` is factually wrong now ("Reserved lots — El
+Mercado & more"). Deleting or reviving them is Don Güero's lane.

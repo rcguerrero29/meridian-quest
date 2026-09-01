@@ -198,7 +198,12 @@ function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat
 function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks};
   try{localStorage.setItem("mq1",JSON.stringify(st));}catch(e){}
   if(NET.enabled)NET.sync(st);}
-function setWorldTag(){$("worldTag").textContent=T().locs[world]+(world==="hq"?" · ❗":"");}
+/* The ❗ on the world tag means what it means everywhere else: somebody in here has
+   something to say. Never a count, never an age (docs/OWNER.md — no practice is ever
+   missed, and a badge with a number on it is a backlog). It was hardcoded to hq, so
+   the office kept promising a quest long after its last one was answered. */
+const worldPending=id=>(WORLDS[id]?WORLDS[id].npcs:[]).some(n=>n.q&&pendingAt(n)!==undefined);
+function setWorldTag(){$("worldTag").textContent=T().locs[world]+(worldPending(world)?" · ❗":"");}
 /* Boundary sanitizer: every save that crosses a trust boundary — Trolley Pass links
    today, NET payloads tomorrow — is coerced to known-good shapes here. Numbers clamp,
    strings trim, colors must be hex, unknown keys drop, non-numeric qa keys (e.g.

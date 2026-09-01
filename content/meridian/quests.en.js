@@ -14,7 +14,7 @@ const FQEN={npc:"fred",title:"🐾 Personal side quest: Frederick's Files",start
         {t:"Monthly batch day: AI drafts captions, you approve, a scheduler posts",out:{r:"ok",concept:"Batching & scheduling",why:"One hour a month, AI does the writing, human keeps the judgment, the scheduler does the remembering. Frederick's brand: consistent.",beat:"First scheduled post hits 200 likes. Frederick remains humble."}},
         {t:"Let AI auto-post as Frederick, unsupervised",out:{r:"bad",concept:"Batching & scheduling",why:"Unsupervised auto-posting is how brands die. No review, no floor.",beat:"Within the hour, Frederick's account endorses a crypto scheme."}}]}}};
 const QEN=[
- {npc:"tovar",title:"The 500-doc chatbot",start:"a",nodes:{
+ {npc:"tovar",title:"The 500-doc chatbot",late:"Corporate has rewritten the manual a few times since I brought you this. The question has not moved.",start:"a",nodes:{
   a:{say:"Store managers call me all day with policy questions. I want a chatbot on these 500 docs — and corporate rewrites them every month.",
      codex:"Two ways to give a model knowledge: train it into the model itself (slow, costly, frozen once done) — or keep it in a searchable index the model reads at answer time, fresh the moment a doc updates.",
      q:"The docs change monthly. Where does the knowledge live?",
@@ -27,35 +27,35 @@ const QEN=[
      ch:[{t:"Answer anyway from general knowledge — it usually sounds right",out:{r:"bad",concept:"Grounding & refusal",why:"“Sounds right” is how Free Churro Friday happens. An ungated answer with no source is a hallucination waiting for a customer.",beat:"Camila, from three desks away: “Don't you dare.”"}},
          {t:"Say “I don't have that policy” and route the question to the ops team",out:{r:"ok",concept:"Grounding & refusal",why:"A grounded bot that admits the gap — and hands a human the question — builds trust and shows ops which docs are missing.",beat:"The ops director nods slowly. “The bot knows what it doesn't know. Unlike my nephew.”"}},
          {t:"Make the bot apologize and end the chat",out:{r:"mid",concept:"Grounding & refusal",why:"Safe, but a dead end — no human routing means the manager's real question dies in the chat. Half credit: nothing false, nothing helpful.",beat:"Shipped with incidents. The manager calls the ops director anyway."}}]}}},
- {npc:"camila",title:"Free Churro Friday",start:"a",nodes:{
+ {npc:"camila",title:"Free Churro Friday",late:"The churro thing outlived its Friday. People still bring it up, and I still don't have a fix I like.",start:"a",nodes:{
   a:{say:"The pilot bot just promised a manager ‘Free Churro Friday — all locations.’ That policy does not exist. Managers are already asking about it.",
      codex:"Models generate plausible text — when they don't know, plausible means invented. Asking nicely or lowering randomness reduces variety, not fabrication. What works: answers may only come from retrieved documents, with a citation.",
      q:"How do you kill the imaginary churros?",
      ch:[{t:"Add “don't make things up” to the instructions",out:{r:"mid",concept:"Hallucination control",why:"It helps at the margins — and fails the day it matters. Instructions nudge; they don't gate. Half credit for trying the cheap fix first.",beat:"The bot invents ‘Taco Tuesday Amnesty’ a week later."}},
          {t:"Set randomness to zero",out:{r:"bad",concept:"Hallucination control",why:"Temperature zero makes the bot confidently wrong the same way every time. Determinism isn't truth.",beat:"Camila: “Now it promises churros CONSISTENTLY.”"}},
          {t:"Ground every answer in retrieved text — no source, no answer",out:{r:"ok",concept:"Hallucination control",why:"Grounding treats the cause: the bot states only what a real document says, cites it, or admits it doesn't have the policy.",beat:"Camila drafts the official Death of Churro Friday memo. There is grief."}}]}}},
- {npc:"legal",title:"The 300-page contract",start:"a",nodes:{
+ {npc:"legal",title:"The 300-page contract",late:"The agreement got renewed since I asked you. Same three hundred pages. Same page two hundred.",start:"a",nodes:{
   a:{say:"I need Q&A over the 300-page franchise agreement. The prototype nails page 20 and faceplants on page 200.",
      codex:"Every request has a token budget — you pay for every word sent, every time — and models attend unevenly across very long inputs: the middle sags. Less, better-chosen text beats everything-and-hope.",
      q:"How do you cover all 300 pages?",
      ch:[{t:"Chunk the contract; retrieve only sections relevant to each question",out:{r:"ok",concept:"Context windows & chunking",why:"Retrieval sends the three pages that matter instead of billing legal for all 300 every time — and quality holds on page 200 like it does on page 20.",beat:"Dana closes her laptop satisfied, which legal-ly speaking is a hug."}},
          {t:"Query a one-time summary instead",out:{r:"mid",concept:"Context windows & chunking",why:"Works for “what's the gist” — fails the clause-level questions contracts exist for. Half credit: fine as a companion, wrong as the answer.",beat:"Dana: “The summary says ‘standard terms apply.’ WHICH terms, bot?”"}},
          {t:"Buy a giant context window and send all 300 pages every time",out:{r:"bad",concept:"Context windows & chunking",why:"The middle still sags, and now every parking question costs a full contract's worth of tokens.",beat:"Marcus appears. He heard the word ‘buy.’"}}]}}},
- {npc:"marcus",title:"The morning report",start:"a",nodes:{
+ {npc:"marcus",title:"The morning report",late:"Forty minutes a morning, times every morning since. The number got worse on its own. Sit down.",start:"a",nodes:{
   a:{say:"Someone spends 40 minutes every morning pulling sales numbers, formatting the report, emailing leadership. Can your… robot… handle it?",
      codex:"A plain model call only writes text — it can't touch a database or send email. Hand it tools (run query, send email) and it can decide which tool, in what order: that's an agent. Fixed steps live in code; judgment lives in the model.",
      q:"How does the morning report automate?",
      ch:[{t:"One giant ‘do the report’ prompt",out:{r:"bad",concept:"Agents & tool use",why:"A beautiful report full of imaginary numbers — no tools, no data access, pure fiction in a spreadsheet costume.",beat:"Leadership compliments the formatting. Then reads the numbers."}},
          {t:"An agent with tools: query → format → send",out:{r:"ok",concept:"Agents & tool use",why:"Real data through real tools, orchestrated by the model. Forty minutes becomes zero.",beat:"Marcus: “If the robot breaks, it's coming out of your budget.” He's smiling. Probably."}},
          {t:"Tell Marcus robots aren't ready",out:{r:"bad",concept:"Agents & tool use",why:"They've been ready. The CFO asking you for automation is not the person to underdeliver to.",beat:"Marcus writes something in a small notebook. You don't like the notebook."}}]}}},
- {npc:"marcus",title:"The invoice",start:"a",nodes:{
+ {npc:"marcus",title:"The invoice",late:"The invoice kept arriving. It has friends now.",start:"a",nodes:{
   a:{say:"This invoice. Ten thousand support tickets a month, all answered by the most expensive model money can buy. Most of them ask where their order is.",
      codex:"Models come in sizes and prices; small ones do simple work for pennies. Systems can flag their own low-confidence answers — so easy tickets go cheap, and only hard ones escalate to the flagship.",
      q:"How do you cut the bill without cutting quality?",
      ch:[{t:"Everything to the cheapest model, accept the drop",out:{r:"mid",concept:"Model routing & cost design",why:"The bill collapses — and so does quality exactly on the hard tickets that decide whether customers stay. Half credit: right instinct, no escape hatch.",beat:"Refund disputes now answered by a model that thinks a churro is a shoe."}},
          {t:"Cheap model first; escalate hard or unsure tickets to premium",out:{r:"ok",concept:"Model routing & cost design",why:"The cheap model earns its keep on “where's my order”; the flagship earns its price on the gnarly 10%. Same quality where it matters, fraction of the spend.",beat:"Marcus initials the invoice. From Marcus, that's fireworks."}},
          {t:"Ask the vendor for a discount",out:{r:"bad",concept:"Model routing & cost design",why:"A discount on the wrong architecture is still the wrong architecture, now with a longer contract.",beat:"The vendor sends a fruit basket. Marcus sends it back."}}]}}},
- {npc:"priya",title:"The 98% quote-bot",start:"a",nodes:{
+ {npc:"priya",title:"The 98% quote-bot",late:"Quote-bot is still 98%. Finance still has the folder. None of this got easier while we weren't looking at it.",start:"a",nodes:{
   a:{say:"Quote-bot is 98% right and auto-sends everything. Here's the other 2% — real customers, prices that lose real money. Sales loves it. Finance found the 2%.",
      codex:"Automation level should match cost-of-error: full auto where mistakes are cheap, human review where they're expensive. Confidence scores sort which is which — only the uncertain outputs wait for a person.",
      q:"Ship it, gate it, or kill it?",
@@ -68,28 +68,28 @@ const QEN=[
      ch:[{t:"Every quote — humans re-check all of it",out:{r:"mid",concept:"Confidence thresholds",why:"Safe but self-defeating: you've rebuilt the 40-hour job with extra steps. Half credit — no losses, no leverage.",beat:"The reviewer now reviews quotes about reviewing."}},
          {t:"Only low-confidence quotes and any quote above a price ceiling",out:{r:"ok",concept:"Confidence thresholds",why:"Confidence catches the model's own doubt; the price ceiling catches the expensive mistakes it's confidently wrong about. Two nets, minimal drag.",beat:"Sales keeps its speed, finance keeps its sleep, Priya almost smiles."}},
          {t:"A random 10% sample",out:{r:"mid",concept:"Confidence thresholds",why:"Sampling measures error rate — it doesn't stop errors. Fine for monitoring, wrong as the only gate. Half credit.",beat:"The 2% waves at you from the un-sampled 90%."}}]}}},
- {npc:"cto",title:"Bayview's notes",start:"a",nodes:{
+ {npc:"cto",title:"Bayview's notes",late:"Bayview called back. The notes piled up in the meantime — the one thing paperwork is reliable at.",start:"a",nodes:{
   a:{say:"Our doctors drown in paperwork. I want AI summaries of visit notes — but every note is full of patient data, and I need to not end up in the news.",
      codex:"Health data is regulated. Two keys make LLM work possible: mask patient identifiers before the model sees text, and use an enterprise endpoint covered by a signed agreement (BAA) that permits health data. Consumer AI endpoints are never covered.",
      q:"How do you deliver the summaries?",
      ch:[{t:"Send raw notes to a consumer AI tool",out:{r:"bad",concept:"PII/PHI governance",why:"That's the career-ending option — a reportable breach with a timestamp.",beat:"Somewhere, a compliance officer wakes in a cold sweat, unsure why."}},
          {t:"Mask identifiers + BAA-covered endpoint + log everything",out:{r:"ok",concept:"PII/PHI governance",why:"The model sees only what it needs, on infrastructure that's allowed to see it, with an audit trail. The standard, defensible path.",beat:"Dr. Okafor: “Finally. Someone who's done this in healthcare before.”"}},
          {t:"Refuse: AI can't touch health data",out:{r:"mid",concept:"PII/PHI governance",why:"Zero risk, zero help — and someone less careful will say yes instead. Half credit for caution without craft.",beat:"The doctors keep drowning, but compliantly."}}]}}},
- {npc:"junior",title:"Theo's prompt",start:"a",nodes:{
+ {npc:"junior",title:"Theo's prompt",late:"The prompt is still sitting in a branch with my name on it. I stopped giving my mom a date.",start:"a",nodes:{
   a:{say:"I reworded the support bot's prompt and the demo got WAY better! Can we ship today? Please? I already told my mom.",
      codex:"One good demo is an anecdote. Prompt changes routinely fix one case and silently break five others. Teams keep an eval set — real past cases with known good answers — and score every change against it before shipping. Unit tests, but for AI.",
      q:"Does Theo's prompt ship today?",
      ch:[{t:"Ship it — you both saw it improve",out:{r:"bad",concept:"Evals & regression testing",why:"The demo showed one case. The eval would have shown the two refund flows it broke. Now customers get to find them.",beat:"Theo's mom is proud. The refund queue is not."}},
          {t:"Run the eval set; ship tomorrow if the score holds",out:{r:"ok",concept:"Evals & regression testing",why:"One hour of eval catches what demos hide — it finds two broken refund cases. Theo ships tomorrow, correctly, and learns the ritual.",beat:"Theo buys Priya coffee for a week. Growth arc initiated."}},
          {t:"Ask another AI which prompt is better",out:{r:"mid",concept:"Evals & regression testing",why:"AI-as-judge is a real technique — inside an eval harness with defined criteria. As a vibes oracle, it's a coin with opinions. Half credit.",beat:"The judge model says both prompts are “great!” It says that about everything."}}]}}},
- {npc:"tovar",title:"The laminated plan",start:"a",nodes:{
+ {npc:"tovar",title:"The laminated plan",late:"Theo's plan is still laminated. That is the only part of it that aged well.",start:"a",nodes:{
   a:{say:"One more thing — managers want meeting transcription inside the app. Theo has a six-month plan to build speech-to-text from scratch. He laminated it.",
      codex:"Some AI capabilities are commodities — transcription, translation, OCR — sold as excellent APIs for cents. Differentiation lives in what your product does with the output, not in rebuilding the commodity.",
      q:"Six months to build, or…?",
      ch:[{t:"Build speech-to-text from scratch",out:{r:"bad",concept:"Build vs buy",why:"Six months rebuilding what costs cents per minute, to reach quality the API already beats. Nobody will notice — except Marcus.",beat:"The lamination was the best part of the plan."}},
          {t:"Integrate a proven transcription API; build the features on top",out:{r:"ok",concept:"Build vs buy",why:"Two weeks to integrate, then the team builds what managers actually asked for — the stuff on top of the transcript. Build the last mile, buy the commodity.",beat:"Theo un-laminates the plan. Quietly."}},
          {t:"Hire human transcribers",out:{r:"bad",concept:"Build vs buy",why:"Slower, costlier, and doesn't scale past the third meeting. It's 2026.",beat:"The job posting gets three applicants. All bots."}}]}}},
- {npc:"ceo",title:"The 8-second silence",start:"a",nodes:{
+ {npc:"ceo",title:"The 8-second silence",late:"I kept the recording. I still count the seconds when I play it. It is still eight.",start:"a",nodes:{
   a:{say:"Final demo. Your phone agent gives brilliant answers… eight seconds after callers stop talking. I counted. Twice. Callers hang up.",
      codex:"In real-time AI, people judge time-to-first-word, not time-to-full-answer. Two levers: stream the reply so speech starts as it generates, and open with a small fast model while heavier reasoning catches up behind it.",
      q:"Kill the eight-second silence:",
@@ -102,7 +102,7 @@ const QEN=[
      ch:[{t:"Average total response time",out:{r:"mid",concept:"Latency metrics",why:"Real but wrong headline — a slow-but-streaming answer FEELS instant, and this metric can't see that. Half credit; keep it secondary.",beat:"The dashboard says ‘slower.’ The callers say ‘finally.’"}},
          {t:"Time-to-first-word",out:{r:"ok",concept:"Latency metrics",why:"That's the moment the silence ends — the thing callers judge. Track total time and quality beside it, headline this.",beat:"Sub-second. The CEO puts his watch away. Priya smiles. Witnesses confirm."}},
          {t:"Number of callers who hang up",out:{r:"mid",concept:"Latency metrics",why:"A great outcome metric — but it's a lagging alarm, not a steering wheel. Half credit.",beat:"“Good news: hang-ups down. Bad news: we learned it a week late.”"}}]}}},
- {npc:"rosa",title:"The phone never stops",start:"a",nodes:{
+ {npc:"rosa",title:"The phone never stops",late:"The phone never got tired, mijo. I did, a little.",start:"a",nodes:{
   a:{say:"Mijo, the phone rings all day — orders, questions, “¿tienen birria?” I miss half the calls while I'm cooking. They tell me a robot can answer. Fine. But can it take orders WITHOUT ruining them?",
      codex:"A voice agent can take phone orders — the trick is structure. Speech gets matched into a structured order (items, sizes, extras, price) against the real menu, then read back to the caller to confirm before it counts. Free-text guessing is how you end up with three surprise birrias.",
      q:"How should the phone agent take orders?",
@@ -117,7 +117,7 @@ const QEN=[
          {t:"Turn the robot off at night",out:{r:"mid",concept:"Agent guardrails",why:"That dodges the failure by dodging the revenue. Half credit — safe, but small.",beat:"The night owls order pizza instead. Traitors."}},
          {t:"Let it improvise — the customer is always right",out:{r:"bad",concept:"Agent guardrails",why:"An agent without limits will promise 200 birrias and a mariachi. The cost of error is unbounded.",beat:"Somewhere, Marcus feels a disturbance he cannot explain."}},
          {t:"Make the robot upsell everything to boost revenue",out:{r:"bad",concept:"Agent guardrails",why:"An agent optimizing revenue without limits torches trust — what it may OFFER is a guardrail decision too.",beat:"An abuelita ordering one coffee gets offered the party platter. Twice."}}]}}},
- {npc:"chuy",title:"Prep for Friday",start:"a",nodes:{
+ {npc:"chuy",title:"Prep for Friday",late:"A lot of Fridays went by since I asked you. I guessed on every one of them.",start:"a",nodes:{
   a:{say:"Every Friday I guess how much barbacoa to prep. Guess low — we run out by 8pm and people cry. Guess high — Sunday me eats sad leftovers for three days. There has to be a better way, ¿no?",
      codex:"Forecasting beats gut feeling: average the last several Fridays, adjust for what's different this week (payday, weather, events), and track how wrong you were to improve each week. Overproduction is money in the trash; running out is customers in the trash.",
      q:"How much barbacoa for Friday?",
@@ -125,7 +125,7 @@ const QEN=[
          {t:"Average the last 8 Fridays, adjust for payday and weather, track the error weekly",out:{r:"ok",concept:"Demand forecasting",why:"A simple forecast plus error tracking gets smarter every single week. This is data science in an apron.",beat:"Chuy tapes the forecast to the walk-in. It becomes law."}},
          {t:"Double everything and sell leftovers Saturday",out:{r:"bad",concept:"Demand forecasting",why:"Waste as a strategy — the margin dies quietly in the walk-in fridge.",beat:"A tower of Sunday barbacoa. Even Frederick, visiting, declines."}},
          {t:"Buy a big AI forecasting platform first",out:{r:"mid",concept:"Demand forecasting",why:"Tools before data discipline is backwards — the simple average with error tracking wins until the data earns a platform. Half credit.",beat:"The platform's onboarding call runs longer than Friday service."}}]}}},
- {npc:"guero",title:"The estimate",start:"a",nodes:{
+ {npc:"guero",title:"The estimate",late:"Jefe! Thirty photos, and the client wants the number today. That sentence has not changed once since the first time I said it.",start:"a",nodes:{
   a:{say:"Jefe! A client wants a remodel quote for a storefront across town. She sent thirty photos and wants the number TODAY. Old days, I'd drive over, measure for two hours, and guess the rest. You're the AI person — impress me.",
      codex:"Vision models can read measurements from photos: wall areas, fixtures, damage, materials. The reliable pattern is AI-drafted line items from the photos — quantities, materials, labor — with a human checking prices and the weird corners before it goes out. Fast AND defensible.",
      q:"How does the quote get built?",
@@ -140,7 +140,7 @@ const QEN=[
          {t:"A written change order — price and timeline impact, AI-drafted, client-approved before work starts",out:{r:"ok",concept:"Change orders",why:"The AI turns the estimate into a change order in minutes; the client signs knowing exactly what it costs. Everyone stays friends AND solvent.",beat:"The client signs. Don Güero frames the change order like a diploma."}},
          {t:"Refuse all changes — the contract is the contract",out:{r:"mid",concept:"Change orders",why:"Protects the margin, loses the relationship — and remodels ALWAYS change. Half credit for spine, zero for flexibility.",beat:"The client calls someone else for the next job. And the next."}},
          {t:"Do it, and quietly add it to the final invoice",out:{r:"bad",concept:"Change orders",why:"Surprise charges are how trust — and occasionally court dates — get lost and found. Paper first, work second.",beat:"The final invoice starts a shouting match in two languages."}}]}}},
- {npc:"lupe",title:"Permit purgatory",start:"a",nodes:{
+ {npc:"lupe",title:"Permit purgatory",late:"The permits waited. Permits are good at that. My Sundays are the ones that noticed.",start:"a",nodes:{
   a:{say:"Three projects are sitting dead because the permits aren't filed. Same forms, same city, every time — owner info, scope, drawings list, fees. I spend my Sundays copying the same data into the same boxes. There has to be dignity somewhere in this.",
      codex:"Repetitive paperwork is document automation's home turf: the project data already exists, so AI can fill the standard forms from it and track each permit's status. The human reviews before filing — a wrong permit is worse than a slow one.",
      q:"How do the permits get done?",
@@ -148,7 +148,7 @@ const QEN=[
          {t:"AI fills the forms from the project data, Lupe reviews before filing, a tracker follows each permit's status",out:{r:"ok",concept:"Document automation",why:"The data exists once, the forms fill themselves, the human signs off, and nothing gets lost in purgatory again. Sundays return to Lupe.",beat:"Three permits filed by lunch. Lupe takes an actual weekend. The city is confused."}},
          {t:"Keep doing them by hand — it's tradition",out:{r:"mid",concept:"Document automation",why:"It works, slowly, and eats the estimator who should be estimating. Half credit for reliability, at the cost of Sundays.",beat:"Lupe's coffee goes cold over form B-247. Again."}},
          {t:"Outsource all permits to a consulting firm",out:{r:"mid",concept:"Document automation",why:"It works — at a fee, forever, and the capability never comes in-house. Half credit: delegated, not solved.",beat:"The consultant uses the same AI tool. Lupe watches, invoiced."}}]}}},
- {npc:"priya",title:"Say it so it's true",start:"a",nodes:{
+ {npc:"priya",title:"Say it so it's true",late:"The bot has said a lot of confident things since I flagged this. Marketing still loves the tone.",start:"a",nodes:{
   a:{say:"The support bot's answers SOUND great — confident, polished, wrong maybe one time in ten. Nobody can tell which time. Marketing loves the tone. I hate the tone. Fix the wording.",
      codex:"Trust is built with calibrated language: instructions that make the bot cite its source, mark uncertain answers as uncertain, and say 'I don't know' when nothing supports an answer. 'Be accurate' is a vibe — cite, qualify, and refuse are behaviors.",
      q:"What goes in the bot's instructions?",
@@ -163,7 +163,7 @@ const QEN=[
          {t:"“I can't verify the current count. As of the last update it was 38 — here's where the live list is.”",out:{r:"ok",concept:"Verifiable claims",why:"Confirms the known, names the unknown, hands over the path. That wording IS the trust product.",beat:"Priya reads it twice. “Ship the wording.” The highest praise she knows."}},
          {t:"“I cannot answer that question.”",out:{r:"mid",concept:"Verifiable claims",why:"Honest but lazy — refusing everything unverifiable throws away the partial truth you DO have. Half credit.",beat:"The caller asks a human, who reads them the same last update."}},
          {t:"Answer normally, tuck “estimates may vary” at the end",out:{r:"mid",concept:"Verifiable claims",why:"Uncertainty in the footnote is certainty in the headline. Placement is part of wording. Half credit.",beat:"Nobody reads footnote three. Ever."}}]}}},
- {npc:"xochi",title:"The collar drop",start:"a",nodes:{
+ {npc:"xochi",title:"The collar drop",late:"The brief is still pinned over my table. I keep adding names to it.",start:"a",nodes:{
   a:{say:"Ah, the AI person! Look — La Obra builds the barrio, I dress it. I want a collar line for the neighborhood's pets: Frederick, Canela, the whole cast. I can sketch, but these AI image tools… how do we DESIGN with them without losing the craft?",
      codex:"Image models are variation engines, not designers. The working pattern: the designer sets the brief, AI generates dozens of directions, the human curates and refines the winners — and a pick only becomes real once it's a structured spec (a tech pack): materials, measurements, colorways. Taste stays human; the machine does volume.",
      q:"How does the collar line get designed?",
@@ -179,7 +179,7 @@ const QEN=[
          {t:"Everything free, forever, for everyone",out:{r:"mid",concept:"Curation as QA",why:"Generous — and unsustainable. Free is a launch tactic, not a plan; the line dies when the work can't pay for itself. Half credit for heart.",beat:"Month two: Xochi quietly takes a mural commission to fund collar three."}}]}}},
  /* ---------- El Mercado Robles · the AI product manager pack (Week Two, chapter one) ----------
     Doña Chelo wants everything at once. The job is deciding what actually gets built. */
- {npc:"chelo",title:"Everything at once",start:"a",nodes:{
+ {npc:"chelo",title:"Everything at once",late:"The list is still on the counter, mijo. I keep adding to it — that is the only part of this list that works.",start:"a",nodes:{
   a:{say:"Mijo, siéntate. I made a list. An app for orders. A robot for the phone. Something that knows when the tomatoes turn. A thing for Instagram. A machine that tells me what to buy Monday. My nephew says I need a website. Also the printer is broken.",
      codex:"Eleven wants is not a roadmap. The first build is the one where the pain is frequent, measurable, and owned by somebody who will actually use the fix — not the one that sounds most impressive in the retelling. Everything else goes on the list and waits its turn.",
      q:"Where do you start?",
@@ -193,7 +193,7 @@ const QEN=[
      ch:[{t:"How many of the forty it has to handle before Chelo calls it worth keeping",out:{r:"ok",concept:"Definition of done",why:"That number is the whole project. It tells you what to build, when to stop, and — the part everyone skips — when to admit it did not work.",beat:"Chelo thinks. “If it takes thirty and it does not lie, I keep it.” Write that on the wall."}},
          {t:"Which model to use",out:{r:"bad",concept:"Definition of done",why:"The model is the cheapest decision here and the easiest to change later. Picking it first is choosing the hammer before you have looked at the wall.",beat:"Nando, warily: “…is that the thing my cousin has on his phone?”"}},
          {t:"The name and the logo",out:{r:"mid",concept:"Definition of done",why:"It will matter for the abuelas who have to trust it — but naming a thing before defining it is how you end up with a beautifully branded nothing. Half credit.",beat:"Perla has already drawn a logo. It is, admittedly, excellent."}}]}}},
- {npc:"chelo",title:"The abuela test",start:"a",nodes:{
+ {npc:"chelo",title:"The abuela test",late:"Doña Meche has called every Tuesday since. She has never once thought about an app.",start:"a",nodes:{
   a:{say:"Perla says the phone thing should be an app. Mijo — my customers are señoras who answer a cell phone like it is a landline. Doña Meche calls me to ask if I have masa. She has called me every Tuesday for nine years.",
      codex:"The user you have is not the user in the pitch. A tool that needs a download, an account and a data plan gets used by people who already had all three. Meet people on the channel they already use, or accept that you built for a different neighborhood.",
      q:"How do Doña Meche's questions get answered?",
@@ -201,7 +201,7 @@ const QEN=[
          {t:"The same phone number she already calls — the bot answers, a human takes over when it cannot",out:{r:"ok",concept:"Meeting the user where they are",why:"Zero new behavior asked of a nine-year customer. The channel stays the same; only what happens after the second ring changes. And the handoff means a miss costs a transfer, not a customer.",beat:"Meche never learns that anything changed. That is the entire point."}},
          {t:"Teach the customers to use WhatsApp",out:{r:"mid",concept:"Meeting the user where they are",why:"Some will — half the barrio is already there. But “first, change your customers” is a plan with a very long first step. Half credit.",beat:"Doña Chelo, flatly: “You teach her. I will watch.”"}},
          {t:"Put a sign on the door with the hours",out:{r:"mid",concept:"Meeting the user where they are",why:"Cheap, real, and it kills the calls from people standing at the door. Meche is not standing at the door. Half credit for trying the cheapest fix first.",beat:"The sign goes up. The phone rings. It is Meche."}}]}}},
- {npc:"nando",title:"Nando's shortcut",start:"a",nodes:{
+ {npc:"nando",title:"Nando's shortcut",late:"Truck still comes. I still photograph every box. Forty minutes, every time, all this time.",start:"a",nodes:{
   a:{say:"Before you change anything — I already do this. Truck comes, I photo every box, pictures go in a folder by date, counts go in a spreadsheet on my phone. Forty minutes. It has never been wrong.",
      codex:"The workaround IS the requirements document. Somebody already solved the problem badly-but-correctly, and every quirk in their process encodes a real constraint. Replace it without reading it and the rollout dies the usual death: the tool ships, the human keeps the spreadsheet, and now there are two systems.",
      q:"What do you do with Nando's spreadsheet?",
@@ -214,7 +214,7 @@ const QEN=[
      ch:[{t:"Read the invoices automatically; Nando confirms the counts on screen in one pass",out:{r:"ok",concept:"Automating the step, not the job",why:"Thirty minutes becomes five, Nando still lays eyes on every delivery, and the check that catches a short shipment stays exactly where it has always been — in his head.",beat:"Nando reads it twice. “And I still say yes or no?” Yes. “Okay. Okay, that is fine.”"}},
          {t:"Full automation — invoice in, inventory updated, no human step",out:{r:"bad",concept:"Automating the step, not the job",why:"The fish guy writes PESCADO and a number. There is no version of this where nobody looks. Remove the check and the first bad delivery becomes a permanent wrong number.",beat:"The system confidently receives 400 kilos of PESCADO. It was 40."}},
          {t:"Make the vendors send proper digital invoices",out:{r:"mid",concept:"Automating the step, not the job",why:"The correct long-term fix, and completely outside your control. You cannot ship a project whose first step is “nine other businesses change how they work.” Half credit — start asking, do not wait.",beat:"Nando laughs for a full six seconds. “The fish guy. Digital invoices. The FISH guy.”"}}]}}},
- {npc:"perla",title:"The line at the register",start:"a",nodes:{
+ {npc:"perla",title:"The line at the register",late:"Okay so — people still ask me both things. I started keeping count. It is a lot of times.",start:"a",nodes:{
   a:{say:"Okay so — everyone asks me if we take the card for under five dollars and it is SO annoying. Can the AI do that? Also sometimes people ask what is in the mole and I have to go find Doña Chelo, but that is like twice a week.",
      codex:"The loudest request is rarely the biggest one. Reach times frequency times cost-per-miss beats whoever asked most recently and with the most feeling. And the good news: a question asked constantly with one unchanging answer is usually not an AI problem at all.",
      q:"Which one do you build?",
@@ -222,7 +222,7 @@ const QEN=[
          {t:"The mole question — rarer, but only Chelo can answer it and she is not always here",out:{r:"ok",concept:"Prioritizing by reach",why:"Twice a week, but each miss costs a walk, an interruption, and sometimes a sale that leaves. It is the question where the knowledge is trapped in one person's head — which is precisely what these tools are for.",beat:"Chelo, from the back, without looking up: “Finally. Somebody asks the ingredients ninety times a year and I am the only recipe.”"}},
          {t:"Both, at the same time",out:{r:"mid",concept:"Prioritizing by reach",why:"You can, and one of them takes an afternoon — but “both” is how a two-week project becomes a two-month project. Sequence them: sign today, mole this month. Half credit.",beat:"Perla writes BOTH on the whiteboard and underlines it twice. Ambition noted."}},
          {t:"Neither — register questions are not worth automating",out:{r:"bad",concept:"Prioritizing by reach",why:"There is a real one hiding in there. Dismissing the counter because the loudest request was trivial is how you miss the thing only one person in the building knows.",beat:"Perla stops bringing you problems. This is worse than it sounds."}}]}}},
- {npc:"nando",title:"The label problem",start:"a",nodes:{
+ {npc:"nando",title:"The label problem",late:"It has been reading invoices this whole time. It read 12 as 112 again — in case you thought it got bored of that.",start:"a",nodes:{
   a:{say:"It is reading the invoices now. Mostly great. But last Tuesday it read 12 as 112, and Chelo ordered against a number that was not real.",
      codex:"“How accurate is it?” is the wrong question. The right one: how accurate does it need to be before it is worth using, and what happens on the misses that remain? Every system has an error budget. You either design it deliberately or discover it in production.",
      q:"What do you set before touching the model?",
@@ -235,15 +235,15 @@ const QEN=[
      ch:[{t:"Flag the low-confidence reads for Nando to check; everything else flows through",out:{r:"ok",concept:"Designing for failure",why:"The machine does the ninety-seven and raises its hand on the rest. Nando's attention goes exactly where it is worth something, and a wrong number gets caught the same day instead of at month end.",beat:"Nando's paper towel now reads: ASKED ME 4. WAS RIGHT TO ASK 4."}},
          {t:"Accept the three — 97% is great",out:{r:"bad",concept:"Designing for failure",why:"97% is great as a headline and terrible as a plan, because the three are not random. They are the messy invoices — which come from the vendor most likely to short you.",beat:"The fish guy's invoices are, statistically, all three."}},
          {t:"Have Nando double-check all of them anyway",out:{r:"mid",concept:"Designing for failure",why:"Safe — and you just rebuilt his forty minutes. If a human reads every row, the machine saved nothing but typing. Half credit: the caution is right, the target is wrong.",beat:"Nando: “So I read all of them. Like before. But now there is a screen.”"}}]}}},
- {npc:"perla",title:"Tamal season",start:"a",nodes:{
+ {npc:"perla",title:"Tamal season",late:"December came. December went. We ran out of hoja de maíz, and Chelo said never again, again.",start:"a",nodes:{
   a:{say:"December is coming. Every year we run out of hoja de maíz and every year Chelo says never again. Somebody told her AI can predict how much we will need.",
      codex:"A forecast is a model trained on history. If the history lives in a notebook, three people's memories and a spreadsheet that started in March, there is nothing to train on — and a confident prediction built on four data points is worse than an honest guess, because people believe it.",
      q:"Doña Chelo wants the December forecast. What do you tell her?",
      ch:[{t:"Build it — it is the highest-value thing she has asked for",out:{r:"bad",concept:"Sequencing",why:"You would be forecasting from a spreadsheet six months old and a season nobody logged. The output will look authoritative and be fiction, and she will order against it.",beat:"The model predicts a calm December. It is, of course, December."}},
-         {t:"Not yet — the invoice data starts collecting now, and the forecast becomes real next season",out:{r:"ok",concept:"Sequencing",why:"“Not yet, and here is what makes it possible” is the most useful sentence a PM owns. It names the dependency, starts the clock on it, and refuses to sell a number nobody can stand behind.",beat:"Chelo, dryly: “So this year I guess, like always.” Yes. But this year you write down what she guesses."}},
+         {t:"Not yet — start writing down what she buys now, and the forecast becomes real next season",out:{r:"ok",concept:"Sequencing",why:"“Not yet, and here is what makes it possible” is the most useful sentence a PM owns. It names the dependency, starts the clock on it, and refuses to sell a number nobody can stand behind.",beat:"Chelo, dryly: “So this year I guess, like always.” Yes. But this year you write down what she guesses."}},
          {t:"Use last December from the notebook",out:{r:"mid",concept:"Sequencing",why:"One year of handwritten history is real and better than nothing — as a reference, not a forecast. Say “last year we used this much” and stop talking. Half credit for using what exists.",beat:"The notebook says ¿6 cajas? 8? — with the question mark. Chelo defends the question mark."}},
          {t:"Buy a forecasting tool",out:{r:"bad",concept:"Sequencing",why:"A tool with no data has the same problem as a model with no data, except this one renews annually.",beat:"Marcus, from another timezone, senses a subscription and stirs."}}]}}},
- {npc:"chava",title:"Everything is chile",start:"a",nodes:{
+ {npc:"chava",title:"Everything is chile",late:"Still chile, güey. The button did not move by itself.",start:"a",nodes:{
   a:{say:"Yeah, I heard. Chelo says I am breaking the data. Look — there is a line. The chile button is right here. The carne button is four screens in. You want me to make an abuela wait while I go find it?",
      codex:"Bad data almost always has a reasonable human behind it. Somebody is measured on speed, the correct action is slow, so they take the fast wrong one — reliably, every time. No model, no cleaning script and no dashboard survives a source where the wrong answer is the easy one. Fix the four screens.",
      q:"Six months of sales say this store sells almost exclusively chile. What is the move?",
@@ -251,8 +251,8 @@ const QEN=[
          {t:"Retrain Chava — he needs to use the right buttons",out:{r:"mid",concept:"Fixing the source",why:"He knows the right button. He is making a defensible choice under a real constraint: the line. Training against an incentive loses to the incentive every single time. Half credit — the standard is right, the lever is wrong.",beat:"Chava listens, nods, agrees completely, and rings the next one as chile."}},
          {t:"Put the six things this counter actually sells on the first screen",out:{r:"ok",concept:"Fixing the source",why:"Make the correct action the fastest one and the data fixes itself, permanently, with no rules to maintain. This is the whole job: the model was never the problem. The fourth screen was.",beat:"Chava rings carne without looking down. “Huh.” This is the highest praise available."}},
          {t:"Add a second person at the counter",out:{r:"mid",concept:"Fixing the source",why:"It does solve the line — for the price of a salary, to avoid moving a button. Sometimes headcount is the answer; here it is an expensive way to dodge a menu layout. Half credit.",beat:"Marcus, distantly, feels a payroll line appear and does not care for it."}}]}}},
- {npc:"chelo",title:"The Monday number",start:"a",nodes:{
-  a:{say:"It has been a month. Your phone thing answers, what, thirty of the forty? Nando's invoices go faster. Chava presses the right button now. So tell me straight, mijo — did it work?",
+ {npc:"chelo",title:"The Monday number",late:"The register does not care what month it is, mijo, and neither do I. Sit. The question kept.",start:"a",nodes:{
+  a:{say:"It has been a month since we started. Your phone thing answers, what, thirty of the forty? Everything else, people tell me is going fine. People always tell me that, mijo. So tell me straight — did it work?",
      codex:"Model metrics answer “is it behaving?”. Business metrics answer “did it matter?”. They come apart constantly: a bot can answer 94% of calls correctly and save nobody a single minute, if the calls it misses are the ones that needed a person anyway. Report the second number, in her units, not yours.",
      q:"How do you answer her?",
      ch:[{t:"94% accuracy, 0.8 second response, 31 of 40 calls handled",out:{r:"mid",concept:"Business metric vs model metric",why:"All true, all real, and none of it answers the question she asked. She runs a store; accuracy is not a thing she can bank or spend. Half credit for measuring anything at all.",beat:"Chelo looks at the numbers for a long moment. “And?”"}},
@@ -261,7 +261,7 @@ const QEN=[
   b:{say:"Nine hours. Okay. Now the other one — the thing that reads the tomato invoices. Be honest with me.",
      codex:"The hardest deliverable is the one that says stop. A pilot that did not pay off is information, and killing it cheaply is a win you should be able to say out loud. The alternative is a graveyard of half-live projects quietly billing somebody forever.",
      q:"The invoice reader saves Nando twenty minutes a week and costs you an hour a week to maintain. What goes in the report?",
-     ch:[{t:"That it costs more than it saves, and the recommendation is to turn it off",out:{r:"ok",concept:"Honest review",why:"Naming your own project as the one to kill is what makes every other number you report believable. And it is not a failure — you now know exactly which part was worth keeping.",beat:"Chelo is quiet. Then: “You just told me to stop paying you for something.” She writes your name on the wall by the register."}},
+     ch:[{t:"That it costs more than it saves, and the recommendation is to turn it off",out:{r:"ok",concept:"Honest review",why:"Naming your own project as the one to kill is what makes every other number you report believable. And it is not a failure — you now know exactly which part was worth keeping.",beat:"Chelo is quiet. Then: “You just told me to stop paying you for something.” She writes your name on the wall by the register — under a name in older handwriting."}},
          {t:"Leave it running — it is already built and it is not hurting anything",out:{r:"bad",concept:"Honest review",why:"It costs an hour a week forever, it will drift, and one day it will be wrong while nobody is watching. “Already built” is the most expensive reason to keep anything.",beat:"Eleven months later the fish guy changes his handwriting. Nobody notices for six weeks."}},
          {t:"Report the twenty minutes saved and leave the maintenance cost out",out:{r:"bad",concept:"Honest review",why:"That is not a report, it is a sales pitch with a spreadsheet on it. The first time she finds the missing hour, every number you ever gave her is worth nothing.",beat:"Nando knows. Nando always knows."}},
          {t:"Hand it to Nando to maintain himself",out:{r:"mid",concept:"Honest review",why:"Sometimes exactly right — the person closest to the work should own the tool. But handing an hour a week of upkeep to somebody who did not ask for it is a cost transfer dressed as a handoff. Half credit: ask him first.",beat:"Nando, evenly: “Is this the part where it becomes my problem?”"}}]}}}

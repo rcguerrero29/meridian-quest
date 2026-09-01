@@ -270,6 +270,16 @@ const CANDIDATES = [
       document.getElementById('card').hidden = true;
       document.getElementById('world').hidden = false; }
 
+    // the ❗ on the world tag means what it means everywhere: somebody in here has
+    // something to say. It was hardcoded to hq, so the office promised one forever.
+    { const el = document.getElementById('worldTag'), keep = new Set(done);
+      world = 'hq'; setWorldTag();
+      if (!el.textContent.includes('❗')) problems.push('the office hides its ❗ while quests are still open there');
+      WORLDS.hq.npcs.forEach(n => (n.q || []).forEach(qi => done.add(qi)));
+      setWorldTag();
+      if (el.textContent.includes('❗')) problems.push('the office still promises a ❗ with nothing left to answer');
+      done = keep; setWorldTag(); }
+
     done = new Set(); chSeen = 0; hearts = 3; marks = {}; applyGrowth();
     world = 'hq'; px = fx = 10; py = fy = 11;
     return problems;
