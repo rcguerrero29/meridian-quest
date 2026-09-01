@@ -468,3 +468,56 @@ marketting for a new game for pet caring only."*
   cast. Still open for that sitting: the game's name, where the preview lives in
   the city (Sonny's own corner? a parcel?), and exactly which customizations the
   preview offers vs. holds back for the standalone.
+
+## 14. The 3D plan (owner-requested 2026-08-31 — PLAN ONLY, nothing built)
+
+**The strategy in one line:** we do not rebuild the art for 3D — we put the
+existing 2D art INSIDE 3D. The school is "HD-2D" (Octopath Traveler, Don't
+Starve): a true-3D world of extruded blocks wearing our tile art as textures,
+with the people and animals as flat pixel-art billboards standing in it. Every
+pixel AJ knows survives; the camera finally moves.
+
+**Why this codebase is unusually ready (nothing so far was wasted):**
+- Entities-as-data is the whole ballgame: maps are glyph grids, actors are data,
+  TILES already says each glyph's `lift` (height), `kind`, and `win`dows.
+  A 3D renderer is one more reader of the same model — like drawFront was.
+- TILEDRAW already renders any glyph to canvas — pointed at an offscreen canvas,
+  that IS the texture factory. Zero new art required for v1.
+- The renderer seam exists: `camMode` dispatch + `CAMDEF`. 3D ships as camera #4.
+- Game logic (input, saves, quests, collision) never changes. 4-direction walking
+  in a 3D world is the charm of the genre, not a limitation.
+
+**The library decision (the only new dependency this project has ever taken):**
+vendor **three.js** (single minified file, ~170KB gzipped) into `vendor/`, listed
+in sw.js ASSETS so it caches offline. Still $0, still no build step, still one
+`<script>` tag. Raw WebGL is out (a month of work for less); CSS-3D is out
+(janky at this scale). Decision to CONFIRM with the owner at build time.
+
+**Build order (2-3 sittings, each ends walkable):**
+1. **Texture bridge + world mesh.** Offscreen canvas per glyph → `CanvasTexture`
+   (NearestFilter — crisp pixels), rebuilt on theme change so `tc()` theming still
+   works. Ground = textured plane per world; solids = instanced boxes, height
+   from `TILES.lift` (13px ≈ 1.2 units), facade texture on the south face, roof
+   color from `roofCol` on top. End state: fly-through of Meridian Street.
+2. **Actors + camera.** People/animals render to small canvases (the existing
+   drawPerson/drawDog/drawBeagle calls, unchanged) → billboarded sprites anchored
+   at their feet; hero input untouched. Camera: low orbit behind/above the hero
+   (~40°), smooth follow, drag-to-orbit — the "flip the camera" wish from the iso
+   playtest, finally real. WebGL missing → fall back to the front camera.
+3. **Lighting + polish.** Ambient + one directional light driven by the same
+   time-of-day clock; `TILES.win` rects become emissive window quads at night;
+   door spills become a few point lights (capped); themes tint ambient/fog.
+   Decals (Sonny's holes), DECOR, emotes and ❗ ride the sprite pass.
+   Then the iso verdict: 3D subsumes it — likely retire the diamond.
+
+**Costs & risks, honestly:** three.js is the repo's biggest asset ever (~170KB gz
+— fine on Pages, but the first real payload cost); old-phone perf needs the
+instanced path (our maps are small — 30×16 — so headroom is large); battery use
+rises in 3D; and depth bugs move from painter's-sort (our problem) to the z-buffer
+(the GPU's problem — an upgrade). Sprite-in-3D can look "cardboard" from steep
+angles — capping camera pitch fixes that, same as the genre does.
+
+**Sequencing (recommended):** rung ③ of the graphics ladder FIRST (2× sprite
+detail — visible immediately in every camera, and those better sprites become the
+3D billboards for free), then 3D per this plan. The pet-care spin-off inherits 3D
+automatically the day it lands, since it's the same engine.

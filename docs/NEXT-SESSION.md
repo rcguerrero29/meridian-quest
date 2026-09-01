@@ -90,14 +90,19 @@ as a per-client profile. Build them only when a real engagement needs them.
 signed-not-built gap (open-city refactor + per-business hearts) → then the four
 business packs.** Item 3 below is therefore the head of the queue.
 
-3. **Graphics: the front-profile pivot — ①② SHIPPED 2026-08-31 (mq-v29).**
-   `TILES` glyph metadata + `DECOR` instance seam + the front-profile 2.5D camera
-   are live as a third Settings → Camera option (details in IDEAS §10). REMAINING:
-   ③ occlusion fallbacks only if real play needs them (lifts are modest; nothing
-   hid in testing), ④ **owner + AJ pick the default camera** — then polish or
-   retire diamond-iso accordingly. A per-`kind` facade art wave (lit windows at
-   night on `facade` tiles) is now cheap if wanted. (Emote-in-iso regression:
-   FIXED same session it was reported — drawEmote is shared by all cameras.)
+3. **Graphics — where it stands end of 2026-08-31:** front-profile camera SHIPPED
+   (mq-v29) and is now the DEFAULT (mq-v31, `CAMDEF` seam, owner+AJ signed —
+   OWNER.md Settled). Ladder rungs ① grounding/rooflines and ② lit windows /
+   awning shadows / fence posts SHIPPED (mq-v30/31). Owner verdict on rung ②:
+   too subtle — "i dont see much of any improvements". **HEAD OF QUEUE: rung ③,
+   2× sprite detail** — same tile size, every sprite redrawn at double internal
+   detail; visible at any hour in every camera. Ship in chunks so the owner can
+   react early: (a) people + animals FIRST (AJ looks at Sonny, not walls),
+   (b) facades/doors, (c) props/furniture. Then: **the 3D plan is written —
+   IDEAS §14** (HD-2D school: three.js extruded world wearing the existing tile
+   art as textures, actors as pixel billboards; 2-3 sittings; rung ③ sprites
+   become the 3D billboards for free). Confirm the three.js vendoring decision
+   with the owner before starting 3D. Iso retires when 3D lands, most likely.
 3b. **Sonny's program — SHIPPED v1 2026-08-31 (mq-v29,** IDEAS §11): 🎾 ball with
    fetch at exactly 4/7 (shuffled per-dog cycle), treats with tail liftoff, howl,
    lay down, dig holes, infrequent disappearing 💩 (`DECALS` engine seam). The
@@ -109,9 +114,13 @@ business packs.** Item 3 below is therefore the head of the queue.
 
 ## State snapshot (2026-08-31)
 
-- `main` = deployed through `mq-v29`: the stakes/grade layer (reviewed & merged, see
-  REVIEW-ME.md), the front-profile 2.5D camera + TILES/DECOR seams, and Sonny's
-  program v1. The don-guero branch is fully merged; nothing is waiting on a branch.
+- `main` = deployed through `mq-v31`: the stakes/grade layer (reviewed & merged, see
+  REVIEW-ME.md), the front-profile 2.5D camera (now the DEFAULT via `CAMDEF`) +
+  TILES/DECOR/DECALS seams, Sonny's program v1 with a real howl, and the rung-②
+  lighting wave. The don-guero branch is fully merged; nothing waits on a branch.
+- Pet-care spin-off shape signed (IDEAS §13): Sonny fronts the preview mini game
+  inside Meridian, some customization there, full customization in the standalone.
+- The 3D plan is written and signed off as PLAN ONLY: IDEAS §14.
 - Default-branch setting on GitHub still points at an old `claude/...` branch —
   owner intends to flip it to `main` (repo Settings → General → Default branch).
 - Engine/content split holds. Seams: `CRITTERS`, `CHILL`, `EGGS`, `CHATTER`, `MUSIC`,
