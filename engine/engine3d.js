@@ -254,8 +254,12 @@ function t3Leash(){ /* the blue leash exists in 3D too, while it's on */
   pos.setXYZ(1,dog.fx+0.5,0.35,dog.fy+0.5);
   pos.needsUpdate=true;T3.leashLn.visible=true;
 }
-/* ↻ — the camera-flip wish from the iso playtest, finally real: eight stops */
+/* ↻ — the camera-flip wish from the iso playtest. QUARTER turns, four stops: N/E/S/W
+   as originally planned (docs/IDEAS.md). It shipped as eight 45° stops, and a 4-way
+   movement grid cannot be driven from a 45°-rotated camera — at those four odd stops
+   NO swipe the player can make corresponds to a straight move on screen, which is
+   exactly why the owner reported "some directions are broken when i rotate". */
 (function(){
   const b=document.getElementById("rot3d");
-  if(b)b.addEventListener("click",()=>{T3.yaw+=Math.PI/4;});
+  if(b)b.addEventListener("click",()=>{T3.yaw+=Math.PI/2;});
 })();

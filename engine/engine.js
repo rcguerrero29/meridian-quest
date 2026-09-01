@@ -1498,10 +1498,27 @@ function drawPerson(g,sx,sy,lk,o){
 }
 /* ---------- movement ---------- */
 const DIRS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+/* One quarter-turn of the camera, as a rename of the four directions. */
+const TURN={up:"left",left:"down",down:"right",right:"up"};
+/* The 3D camera can be turned; the grid cannot. Input is screen-space intent ("I
+   swiped up"), so it must be rotated into a WORLD direction by the camera's current
+   quarter-turn — otherwise "up" keeps walking north no matter where you are standing.
+   engine.js referenced T3 exactly zero times before this, which was the whole bug.
+   Bare identifier on purpose: T3 is a top-level const in engine3d.js, so it is a
+   lexical global and NOT a property of window — a `window.T3` guard reads undefined
+   and fails silently. No-op in the 2D cameras and if 3D never initialised. */
+function worldDir(d){
+  if(camMode!=="3d"||typeof T3==="undefined"||!T3||T3.fail)return d;
+  let q=((Math.round(T3.yaw/(Math.PI/2))%4)+4)%4;
+  while(q-->0)d=TURN[d];
+  return d;
+}
 function tryStep(){
   if(moving||!held)return;
   if(performance.now()<warpT)return;
-  dir=held;const[dx,dy]=DIRS[held],nx=px+dx,ny=py+dy;
+  /* `dir` becomes the WORLD direction, so sprite facing and the move interpolation
+     at the bottom of loop() (which reads DIRS[dir]) stay in step with the actual move. */
+  dir=worldDir(held);const[dx,dy]=DIRS[dir],nx=px+dx,ny=py+dy;
   if(isSolid(nx,ny)){
     const w=CW();
     const ch=(ny>=0&&ny<w.H&&nx>=0&&nx<w.W)?w.rows[ny][nx]:"#";

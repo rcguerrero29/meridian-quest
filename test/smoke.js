@@ -811,6 +811,53 @@ const CANDIDATES = [
     if (park[k] !== true) fails.push('park: ' + k + ' failed (' + JSON.stringify(park[k]) + ')');
   });
 
+  // ---- swiping "up" must walk up the SCREEN at every camera rotation ----
+  // The bug this locks out: engine.js referenced T3 zero times, so movement was pure
+  // world-space and ignored the 3D camera's yaw. Un-rotated it was an exact identity
+  // (which is why it felt fine), and every turn of the ↻ button desynced it.
+  const rot = await page.evaluate(() => {
+    const problems = [];
+    const before = { cam: camMode, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0, px, py, world };
+    camSet('3d');
+    // an open patch to walk on, so a wall never masks a wrong direction
+    world = 'st'; px = fx = 6; py = fy = 12; moving = false; held = null;
+    // screen-up, screen-right etc. must map to these world deltas per quarter-turn
+    const EXPECT = [
+      { yaw: 0,            up: [0,-1], right: [1,0]  },
+      { yaw: Math.PI / 2,  up: [-1,0], right: [0,-1] },
+      { yaw: Math.PI,      up: [0,1],  right: [-1,0] },
+      { yaw: 3*Math.PI/2,  up: [1,0],  right: [0,1]  },
+    ];
+    EXPECT.forEach(({ yaw, up, right }) => {
+      T3.yaw = yaw;
+      [['up', up], ['right', right]].forEach(([intent, want]) => {
+        const wd = worldDir(intent), got = DIRS[wd];
+        if (got[0] !== want[0] || got[1] !== want[1])
+          problems.push(`at yaw ${Math.round(yaw*180/Math.PI)}° swiping "${intent}" moves [${got}] — expected [${want}]`);
+        // and the facing the renderer interpolates with must BE that world direction,
+        // or the hero slides one way while walking another
+        if (DIRS[wd][0] !== got[0] || DIRS[wd][1] !== got[1])
+          problems.push(`at yaw ${Math.round(yaw*180/Math.PI)}° facing desyncs from the move`);
+      });
+      // a full turn must come back to itself
+      if (worldDir(worldDir(worldDir(worldDir('up')))) !== 'up')
+        problems.push(`four quarter-turns from yaw ${yaw} did not return to "up"`);
+    });
+    // the ↻ button must step in QUARTER turns — a 4-way grid cannot be driven from 45°
+    T3.yaw = 0;
+    const btn = document.getElementById('rot3d');
+    if (!btn) problems.push('the 3D rotate button is missing');
+    else { btn.click(); if (Math.abs(T3.yaw - Math.PI/2) > 1e-9)
+      problems.push(`↻ stepped ${(T3.yaw*180/Math.PI).toFixed(1)}° — must be 90°, or half the stops are unmappable`); }
+    // the 2D cameras must be completely unaffected
+    camSet('front'); T3.yaw = Math.PI / 2;
+    if (worldDir('up') !== 'up') problems.push('camera rotation leaked into a 2D camera');
+    T3.yaw = before.yaw; camSet(before.cam);
+    world = before.world; px = fx = before.px; py = fy = before.py; held = null; moving = false;
+    return problems;
+  });
+  fails.push(...rot);
+
   // ---- maps and doors must be structurally plausible, not just reachable ----
   // Added 2026-09-01 after the owner asked why TDD had not caught "broken doors and
   // non-realistic maps". Honest result: it would NOT have — every door in the shipped
