@@ -9,10 +9,10 @@ const STATIONS={p:{npc:"priya",q:[5,14]},j:{npc:"junior",q:[7]},c:{npc:"ceo",q:[
 const WNPC={hq:STATIONS,lc:{r:{npc:"rosa",q:[10]},y:{npc:"chuy",q:[11]}},st:{f:{npc:"guero",q:[12]},e:{npc:"lupe",q:[13]}},
             ex:{w:{npc:"beto",q:[],chat:1},x:{npc:"kike",q:[],chat:1},z:{npc:"mari",q:[],chat:1}},
             /* the four parcels — quest queues filled when their packs land */
-            ta:{t:{npc:"tacho",q:[]},y:{npc:"yesenia",q:[]},m:{npc:"moy",q:[]}},
-            pa:{l:{npc:"licha",q:[]},t:{npc:"tito",q:[]},s:{npc:"sol",q:[]}},
-            li:{v:{npc:"vero",q:[]},c:{npc:"chente",q:[]},k:{npc:"karla",q:[]}},
-            no:{n:{npc:"nolasco",q:[]},e:{npc:"bere",q:[]}},
+            ta:{t:{npc:"tacho",q:[24,28,30]},y:{npc:"yesenia",q:[27,29,31]},m:{npc:"moy",q:[25,26]}},
+            pa:{l:{npc:"licha",q:[32,36,39]},t:{npc:"tito",q:[34,37]},s:{npc:"sol",q:[33,35,38]}},
+            li:{v:{npc:"vero",q:[40,44,45,47]},c:{npc:"chente",q:[41,43,46]},k:{npc:"karla",q:[42]}},
+            no:{n:{npc:"nolasco",q:[48,50,52,55]},e:{npc:"bere",q:[49,51,53,54]}},
             lo:{d:{npc:"xochi",q:[15],chat:1}},
             me:{s:{npc:"chelo",q:[16,17,23]},n:{npc:"nando",q:[18,20]},
                 u:{npc:"perla",q:[19,21]},v:{npc:"chava",q:[22],chat:1}}};

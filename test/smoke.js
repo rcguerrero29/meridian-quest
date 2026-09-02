@@ -86,6 +86,12 @@ const CANDIDATES = [
       assigned.add(qi); if (!QEN[qi]) problems.push('WNPC references missing quest ' + qi);
     })));
     QEN.forEach((_, i) => { if (!assigned.has(i)) problems.push('quest ' + i + ' unassigned'); });
+    // every district's Saturday is written in both languages: three endings, the burnout,
+    // and the toast that opens the next lot (or says nothing opens). A chapter wired
+    // to a missing key would print "undefined" on the one screen the player waited for.
+    CHS().forEach((c, i) => { const k = epiKeys(i, i === CHS().length - 1);
+      [k.pre + '1', k.pre + '2', k.pre + '3', k.go, k.open].forEach(key => {
+        if (typeof UI.en[key] !== 'string' || typeof UI.es[key] !== 'string') problems.push('district ' + c.id + ': strings.js has no ' + key + ' in both languages'); }); });
     Object.values(WORLDS).forEach(w => w.npcs.forEach(n => { if (!lookOf(n)) problems.push('no look for ' + n.npc + ' (' + n.key + ')'); }));
 
     if (auditReach().length) problems.push('boot reachability: ' + auditReach().join(' | '));
@@ -538,6 +544,7 @@ const CANDIDATES = [
     const r = CHAPTERS.find(c => c.quests.includes(1));
     if (!r || !r.role) problems.push('the chapter holding quest 1 declares no role');
     else if (!txt.includes(r.role[lang])) problems.push('report does not name the role a played quest trains');
+    else if (r.industry && !txt.includes(r.industry[lang] + ' · ' + r.role[lang])) problems.push('report does not put the industry before the role');
     return problems;
   });
   fails.push(...roles);
@@ -1228,8 +1235,13 @@ const CANDIDATES = [
     delete L[0].epi; delete L[0].open;
     let k = epiKeys(0, false);
     if (k.pre !== 'epi' || k.go !== 'goEpi' || k.open !== 'weekTwoToast') problems.push(`undeclared first district: ${JSON.stringify(k)}`);
-    k = epiKeys(L.length - 1, true);
+    // the last district used to be the mercado, whose declared keys happen to equal the
+    // fallback; now it is whoever closes the city, so strip its declaration before asking
+    const li = L.length - 1, kl = { epi: L[li].epi, go: L[li].go, open: L[li].open };
+    delete L[li].epi; delete L[li].go; delete L[li].open;
+    k = epiKeys(li, true);
     if (k.pre !== 'mepi' || k.go !== 'mgoEpi' || k.open !== 'endStayToast') problems.push(`undeclared last district: ${JSON.stringify(k)}`);
+    Object.entries(kl).forEach(([f, v]) => { if (v === undefined) delete L[li][f]; else L[li][f] = v; });
     L[0].epi = 'mepi'; L[0].open = 'endStayToast';
     k = epiKeys(0, false);
     if (k.pre !== 'mepi' || k.open !== 'endStayToast') problems.push(`declared keys ignored: ${JSON.stringify(k)}`);
@@ -1654,7 +1666,7 @@ const CANDIDATES = [
                    'cocina', 'xochi', 'lupe', 'guero', 'rosa', 'chuy', 'tovar', 'priya',
                    'canela', 'robles', 'jacaranda', 'muertos', 'otono', 'otoño', 'nacho',
                    'tacho', 'yesenia', 'moy', 'licha', 'tito', 'vero', 'chente', 'karla', 'nolasco', 'bere',
-                   'espiga', 'velazquez', 'tuerca', 'concha', 'cloro'];
+                   'espiga', 'velazquez', 'tuerca', 'bolillo', 'pelusa', 'timbre', 'taller'];
     // engine3d is the same engine, so it is held to the same rule
     for (const f of ['engine/engine.js', 'engine/engine3d.js']) {
       const src = fs.readFileSync(path.join(__dirname, '..', f), 'utf8');

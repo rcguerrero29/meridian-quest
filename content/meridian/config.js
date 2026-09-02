@@ -1,5 +1,5 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
-const GAMEV="mq-v50";
+const GAMEV="mq-v51";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -7,7 +7,7 @@ const LEVELS=[0,45,90,120];
    and is still one tap away. A device's own Settings choice always wins, and the
    renderer falls back to front-profile by itself if 3D cannot run on the device. */
 const CAMDEF="3d";
-const MAXXP=350;
+const MAXXP=830;
 /* Districts: a district's quest pack, and how many answers play its ending.
    `need` is deliberately LOWER than the pack size — the city is a template, so the
    bar is data, not a constant in the engine. Retune it here.
@@ -90,8 +90,31 @@ const CHAPTERS=[
     third district never prints another one's Saturday. */
  {id:"principal",quests:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],need:12,
   epi:"epi",go:"goEpi",open:"weekTwoToast",
+  industry:{en:"Enterprise IT",es:"TI empresarial"},
   role:{en:"AI Implementation Lead",es:"Líder de Implementación de IA"}},
  {id:"mercado",quests:[16,17,18,19,20,21,22,23],           need:5,
-  epi:"mepi",go:"mgoEpi",open:"endStayToast",
-  role:{en:"AI Product Manager",es:"Product Manager de IA"}}
+  epi:"mepi",go:"mgoEpi",open:"tallerToast",
+  industry:{en:"Grocery retail",es:"Abarrotes"},
+  role:{en:"AI Product Manager",es:"Product Manager de IA"}},
+ /* Las cuatro puertas (2026-09-02): each district's Saturday phones the next lot from
+    inside its own ending strings (the engine cannot grade a toast), and its `open`
+    toast announces the lot. The last door opens nothing — la inauguración is later.
+    `industry` is the room the role is practised in (❗El giro): the report prints
+    "industry · role" so five engagements read as five trades, not one title. */
+ {id:"taller",quests:[24,25,26,27,28,29,30,31],need:5,
+  epi:"tepi",go:"tgoEpi",open:"espigaToast",
+  industry:{en:"Auto repair",es:"Taller mecánico"},
+  role:{en:"AI Solutions Architect",es:"Arquitecto de Soluciones de IA"}},
+ {id:"espiga",quests:[32,33,34,35,36,37,38,39],need:5,
+  epi:"eepi",go:"egoEpi",open:"velazquezToast",
+  industry:{en:"Bakery",es:"Panadería"},
+  role:{en:"Operations Analyst",es:"Analista de Operaciones"}},
+ {id:"velazquez",quests:[40,41,42,43,44,45,46,47],need:5,
+  epi:"vepi",go:"vgoEpi",open:"nolascoToast",
+  industry:{en:"Commercial cleaning",es:"Limpieza comercial"},
+  role:{en:"AI Adoption Lead",es:"Líder de Adopción de IA"}},
+ {id:"nolasco",quests:[48,49,50,51,52,53,54,55],need:5,
+  epi:"nepi",go:"ngoEpi",open:"lastToast",
+  industry:{en:"Tax & notary",es:"Impuestos y notaría"},
+  role:{en:"Prompt & Solutions Engineer",es:"Ingeniero de Prompts y Soluciones"}}
 ];

@@ -259,9 +259,9 @@ const CRITTERS=[
  {kind:"butterfly",world:"ex",x:13,y:3,c:"#8FC7E8"},
  {kind:"colibri",world:"st",x:16,y:4,c:"#3FA88F"},
  {kind:"gato",world:"st",x:22,y:14,c:"#8B8F98",name:"Tuerca"}, /* the street cat picked the taller's lot before the shop did */
- {kind:"gato",world:"pa",x:2,y:3,c:"#E3C08A",name:"Concha"},
- {kind:"gato",world:"li",x:16,y:7,c:"#F2F0EA",name:"Cloro"},
- {kind:"gato",world:"no",x:2,y:2,c:"#3A3A40",name:"Expediente"},
+ {kind:"gato",world:"pa",x:2,y:3,c:"#E3C08A",name:"Bolillo"}, /* he lives in the flour bin */
+ {kind:"gato",world:"li",x:16,y:7,c:"#F2F0EA",name:"Pelusa"}, /* she rides in the van */
+ {kind:"gato",world:"no",x:2,y:2,c:"#3A3A40",name:"Timbre"} /* she sits where the doorbell would be */,
  {kind:"gato",world:"me",x:15,y:9,c:"#7A6A55"},  /* Frijol — the bodega cat, pettable */
  {kind:"beagle",world:"st",x:22,y:11,c:"#E8C46A",name:"Sonny",egg:"sonny"} /* the star himself */
 ];

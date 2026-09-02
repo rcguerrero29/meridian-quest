@@ -5,6 +5,18 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-02, late)
 
+**NEWEST — 2026-09-02, night: the rest of the story is written and wired, `mq-v51` on
+`main`.** Owner: *"i want the rest of the story for my ai practice... now please if
+possible."* Nacho planned all four districts (`docs/story/las-cuatro-puertas.md` — the
+plan, and at its top the four calls made with his picks); four writer agents drafted the
+32 quests (24-55) EN+ES against a validator that enforces the mercado's shape; CHAPTERS
+now carries six districts, each with its own three endings, burnout and next-lot toast;
+`MAXXP` is 830; the report prints *industry · role*; templates 06 and 07 exist; the cats
+are Tuerca, Bolillo, Pelusa, Timbre. **Not built, on purpose and written down:** ❗El
+recado (a quest played away from its lot), any world change keyed to a grade, the window's
+view advancing. **The next gate is a human playing the mercado** — the four new packs copy
+its shape and will be revised against what the owner says after playing it. Then S6.
+
 **MERGED TO `main` at `mq-v46`.** The branch carried the whole **S0 sitting (el 3D y el
 mundo, `mq-v45`)** and then **S2 v1 — the room upstairs**; the owner said *"merge
 everything once you have the first version of the room work"*, so both are live. A phone

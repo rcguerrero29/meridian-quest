@@ -6,7 +6,7 @@ next phase on Opus 5, and brings open decisions to the owner as side quests. Eve
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
 **Phase: 2 — Taller Herrera (parcel planned 2026-09-01, three decisions signed, NOT built)** · Ledger
-opened 2026-08-30. **Deployed: `mq-v46` on `main`, 2026-09-02** (S0 + S2 v1).
+opened 2026-08-30. **Deployed: `mq-v51` on `main`, 2026-09-02** (S0 + S2 v1 + the four parcels, written and wired).
 
 ## Purpose
 
@@ -122,7 +122,26 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
   glyphs (`= % 6 7 8 0 i`), all pack-side in a NEW `content/meridian/art.js` — the first
   real use of the TILEART/TILEMETA seam.
 
+- 2026-09-02 — **Las cuatro puertas: all four parcels written and wired.** The four lots
+  Don Güero laid in the morning carry their packs by night: 32 quests (24-55) EN+ES in the
+  mercado's shape, `need` 5 each, 120 XP a pack (`MAXXP` 350 → 830). CHAPTERS declares
+  `taller`, `espiga`, `velazquez`, `nolasco` with their own three endings, burnout and
+  next-lot toast (`tepi`/`eepi`/`vepi`/`nepi`, `*goEpi`, `espigaToast` …); the mercado's
+  Saturday now announces the taller instead of the placeholder "city is yours" line.
+  Stations: Tacho 24/28/30, Yesenia 27/29/31, Moy 25/26 · Licha 32/36/39, Sol 33/35/38,
+  Tito 34/37 · Vero 40/44/45/47, Chente 41/43/46, Karla 42 · Nolasco 48/50/52/55, Bere
+  49/51/53/54. ❗El recado (two taller quests played off the lot) is NOT built — every quest
+  stands at its own person's station; a second station for a person elsewhere is the seam,
+  priced later. `industry:` is built beside `role:`; the report prints *industry · role*.
+  The cats took Nacho's names (Bolillo, Pelusa, Timbre). Templates 06 and 07 written,
+  01 and 04 assigned. The smoke test now fails a district whose Saturday is missing a
+  string in either language.
+
 ## ⚠️ THE CEILING — the roadmap promises four more businesses; the code holds two
+
+**AMENDED 2026-09-02, night: the code now holds six districts.** Every item below that
+blocked a third district is struck; what remains (a grade the world can read, the tile
+alphabet) shapes what a pack may promise, not whether it can exist.
 
 Verified in the engine on 2026-09-01, not inferred. The ledger's "one business per
 phase, Phases 2-5" cannot run as written until three things generalize:
@@ -184,7 +203,7 @@ would have none left unless looks key by npc instead.
   terms become the TRADE's vocabulary, not the role's.
 - ✅ **❗El papel** — signed 2026-09-02: template **06 Process & Exception Map** gets
   written. ⚠️ `docs/templates/README.md` already assigns template 01 to the taller's
-  process map — **two templates would claim one artifact.** Nacho's read is that they are
+  process map — **two templates would claim one artifact.** Nacho's read is that they are *(Stale since 2026-09-02: the README freed 01 the same day; 01 is the panadería's now, 06 the taller's — struck by Nacho's reading.)*
   genuinely different documents (01 is what you write BEFORE you understand the work; 06
   is what you hand over AFTER) and both should exist, but the README's "Taught by" column
   must be corrected and 06 given a row. **Flagged, not guessed.**
@@ -386,6 +405,17 @@ stays live until the Phase 2 refactor lands.
   shipped, no new district this session.
 - 2026-08-31 · ❗Entrada: a staging area for new players · **skipped — Meridian Labs HQ
   is the onboarding** · Priya, Frederick and the early quests already do that job.
+
+- 2026-09-02 · ❗Las cuatro puertas (ledger side) · **all four parcels carry their packs
+  the same day they were laid** · the owner asked for the rest of the story now; the seam
+  work of the morning (per-district endings, looks by npc id, ribbons, doorsteps) is what
+  made "wire four districts" a content change. What is NOT built and is written down as
+  such: ❗El recado (a quest played away from its lot), the grade-read world (Tuerca on the
+  Caprice is words only, Nacho's H), the view advancing per finished business.
+- 2026-09-02 · The mercado gate · **waived for the writing, not for the playing** · S4 was
+  gated on a human playing the mercado; the owner's "now please" wrote the packs anyway.
+  The first human play of the mercado is still the next thing that should happen, and the
+  four packs will be revised against it.
 
 ## Phase 1 plan (drafted 2026-08-30 · **SIGNED 2026-08-31**)
 

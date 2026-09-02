@@ -20,12 +20,13 @@ Two audiences, one file:
 
 | # | Template | The call it captures | Taught by |
 |---|---|---|---|
-| 01 | Process Discovery Notes | Map the work **before** you understand it | *(unassigned — freed 2026-09-02; 01 and 06 are different documents)* |
-| 06 | Process & Exception Map | How work flows, who signs, which step can't be taken back | Taller Herrera (❗El papel, signed 2026-09-02, **planned not written**) |
+| 01 | Process Discovery Notes | Map the work **before** you understand it | Panadería La Espiga — *The thirty conchas* (assigned 2026-09-02: where the number is born, filled at 4am) |
+| 06 | Process & Exception Map | How work flows, who signs, which step can't be taken back | Taller Herrera — *The Saturday* (❗El papel; written 2026-09-02) |
 | 02 | Recommendation Memo | What to build first, and why not the rest | El Mercado — *Everything at once* |
 | 03 | Acceptance Criteria & Error Budget | What "working" means before you build it | El Mercado — *The label problem* |
-| 04 | Pilot Review | Did it pay off — and should we stop? | El Mercado — *The Monday number* |
+| 04 | Pilot Review | Did it pay off — and should we stop? | El Mercado — *The Monday number*; Limpieza Velázquez — *The Saturday: the van* (the same paper in two rooms is the proof the skill travels) |
 | 05 | Decision Log | The running record of calls and why | The decision report export |
+| 07 | What It Answers, What It Refuses, Who It Hands To | Scope as three lists, tested, in both languages | Nolasco Tax & Notario — *The Saturday: the file cabinet* (written 2026-09-02) |
 
 Each one exists twice:
 

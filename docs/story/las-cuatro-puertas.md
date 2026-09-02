@@ -2,6 +2,170 @@
 
 *Nacho's plan for the four remaining businesses, written at the auto shop's depth so four writers could draft the quests from it. Owner: "i want the rest of the story for my ai practice... now please if possible." Kept verbatim; the decision log records what was picked from its open questions.*
 
+## Decisions taken on this plan (main session, 2026-09-02)
+
+The owner's word was *"now please if possible — any outstanding questions?"*, so the four
+questions below were answered with Nacho's own picks and the packs were written the same
+day. Each is one line to flip if the owner disagrees.
+
+1. **Tuerca is a she.** The two shared street-cat lines in `strings.js` stopped saying
+   *he* (four cats now, two sexes, one set of lines). Bolillo is a he, as Nacho wrote him.
+2. **The franchise is never named:** "the place with the drive-through" / *el del
+   autoservicio*, a one-stop chain under one roof.
+3. **Paper:** 06 for the taller (written today), 01 reused by the panadería, 04 reused by
+   the cleaners, and a new **07 — What it answers, what it refuses, who it hands to** for
+   Nolasco (written today). `docs/templates/README.md` carries the assignments.
+4. **Calle Dos opens one door at a time.** Already how the ribbons are ordered; Licha's
+   referral to Vero stays face to face inside her endings.
+
+Also taken: the three new cats carry Nacho's names (Bolillo, Pelusa, Timbre) instead of
+Don Güero's placeholders (Concha, Cloro, Expediente) — the names carry story, and the
+maps were laid the same morning. `❗El giro` is now built: `industry:` sits beside
+`role:` in every chapter and the report prints *industry · role*. The mercado-played gate
+(contradiction L) was waived by the owner's *"now please"*; the packs are written and
+wired, and the first human play of the mercado is still the next thing that should happen.
+
+---
+
+# The rest of the story — four districts, ready to write
+
+Read in full: `/home/user/meridian-quest/docs/OWNER.md`, `/home/user/meridian-quest/docs/STORY.md`, `/home/user/meridian-quest/docs/CITY.md`, `/home/user/meridian-quest/docs/BACKLOG.md`, `/home/user/meridian-quest/docs/templates/README.md`, `/home/user/meridian-quest/content/meridian/quests.en.js` (the eight mercado quests), the mercado half of `/home/user/meridian-quest/content/meridian/quests.es.js`, `/home/user/meridian-quest/content/meridian/strings.js`, `/home/user/meridian-quest/content/meridian/npcs.js`, `/home/user/meridian-quest/content/meridian/config.js`, and the XP rule in `/home/user/meridian-quest/test/smoke.js`.
+
+**The count, so the smoke test stays green.** `MAXXP` = 10 per quest + 10 per choice that has `next`. Every pack below has exactly four two-node quests, like the mercado: **120 XP per pack**, so `MAXXP` goes 350 → 470 → 590 → 710 → 830. Indices: taller 24-31, espiga 32-39, velázquez 40-47, nolasco 48-55. `need: 5` everywhere.
+
+**One law that applies to all four packs, found while reading:** the engine cannot key a toast by grade (BACKLOG §1: "GROWTH cannot read a grade"), so ❗La carta — *the grade is what the previous owner says about you* — can only live in the three ending strings, which ARE grade-keyed. Every pack's referral therefore goes out inside its `epi1/2/3`, and the mercado's three endings need one sentence each appended (written below under the taller's door). The "next lot opens" toast stays grade-blind.
+
+---
+
+## 1 · Taller Herrera (quests 24-31)
+
+### The industry card
+- **Trade.** Independent auto repair: three lifts, one master mechanic, a service writer, an apprentice.
+- **Where the money is.** Billed labor hours and parts markup. A lift earning is money; a lift with a car on it waiting for a part, a signature or a phone call is money leaking. The shop is bottlenecked by paper, not by hands.
+- **AI touches it in three places.** (1) Intake and the estimate *draft* — photo and description to line items and hours. (2) Parts — reorder points, supplier lookups, the deposit on old parts. (3) The paper around the mechanic — write-ups, "your car's ready" messages, warranty and recall lookups.
+- **The one place it must not.** The diagnosis and the sign-off. The number that goes on the paper and the sound in the engine stay with Tacho.
+- **Five trade words** (each given by the person who needs it, in the beat after a right answer): **repair order / la orden** (Yesenia, q24) · **book time / las horas de manual** (Tacho, q25) · **core charge / el core** (Moy, q26) · **write-up / la hoja del trabajo** (Yesenia, q27) · **comeback / el regreso** (Tacho, q28).
+- **Deliverable.** Template **06 Process & Exception Map** (signed ❗El papel; not yet written).
+- **Sales sentence.** "I'll map how a car moves through your shop, take the typing off your people, and put a name next to every step that can't be undone."
+- **Role line** (Yesenia, who reads job postings for her nephew): "He's the one who figures out what the machine should do and what it shouldn't." / "Es el que decide qué le toca a la máquina y qué no."
+
+### The door
+Cold open at the mercado, not the taller. Chelo on the landline — the same one from quest 16. What she says is the grade, and it lives in her endings. **Append to the shipped strings:**
+- `mepi1` + EN: "Before you're out the door she's on the landline. 'Tacho. He told me to stop paying him for something. Send him your worst.'" · ES: "Antes de que salgas ya está en el teléfono de la pared. 'Tacho. Me dijo que dejara de pagarle por algo. Mándale lo peor que tengas.'"
+- `mepi2` + EN: "On the landline, later: 'Tacho. Half of what he did works. That's more than the last one.'" · ES: "En el teléfono de la pared, más tarde: 'Tacho. La mitad de lo que hizo sirve. Es más que el anterior.'"
+- `mepi3` + EN: "A week later she phones Tacho and says one thing: 'He's honest about what he doesn't know. Start there.'" · ES: "Una semana después le habla a Tacho y le dice una sola cosa: 'Es honesto con lo que no sabe. Empieza por ahí.'"
+
+**The taller's opening toast** (goes on `mercado.open`, replacing the placeholder `endStayToast`): EN "Eight in the morning. The roll-up door on the southeast lot is halfway up and a Caprice is on the sidewalk. Don Tacho is on the phone with Doña Chelo, and he doesn't look happy about it. Nothing behind you closes." · ES "Ocho de la mañana. La cortina del lote sureste está a medio subir y hay un Caprice en la banqueta. Don Tacho está al teléfono con Doña Chelo, y no se ve contento. Atrás de ti no se cierra nada."
+
+Quest 24 opens on the bible's exchange: *"I don't need a computer guy." / "I didn't say he was for you. Yesenia's book is full."*
+
+### The cast and their wants
+- **Don Tacho** — wants his hands to stay the last word. Not anti-machine; anti-being-replaced-by-a-guess. His real fear, said once and quietly in q28: not that the phone will be wrong, but that it will be right often enough that Moy stops learning to listen. Short declaratives, car facts, states consequences instead of objections. Calls you **joven**, never mijo. ES: blunter and funnier than EN — *la mera verdad, ¿cómo la ves?, ándale.*
+- **Yesenia** — wants to stop being a bottleneck she never asked to be. Her book is the only place the schedule exists; it is not disorganized, it is encrypted. Fastest talker in the city, narrates in the order things happen. Exactly one tired moment (q31). Calls you **compa**.
+- **Moy** — wants to be trusted. Already uses AI on his phone, already burned by it; uses the vocabulary slightly wrong and nobody corrects him unkindly. Arc: hides the phone → writes the shop's one rule about it. Calls you **profe**, half-joking, and by q31 not joking. ES: *o sea, le hice un prompt al carro.*
+- **Tuerca** — the street cat from Calle Dos, moved in uninvited. Sleeps on the Caprice. See contradiction C: the bible says *she*, the shipped street-cat lines say *he*.
+
+### The escalation — eight quests
+Stations: Tacho 24, 28, 30 · Yesenia 27, 29, 31 · Moy 25, 26. Two leave the shop (❗El recado): 26 at Calle Dos, 30 on the street in front of the mercado where Chelo can overhear. Two-node quests: 24, 26, 27, 31.
+
+**24 · The door / La puerta** — Tacho · 2 nodes
+Three cars on lifts, a fourth waiting "because the paper isn't ready." He doesn't need a computer guy.
+*The loudest objection is not the bottleneck; find the constraint before you pitch.*
+a — bad: pitch the intake app (you answered a question nobody asked; the bays are full, the paper is what's waiting — beat: Tacho goes back under the Caprice mid-sentence) · **next**: "Show me how a car gets from the street to a lift" · mid: "Chelo sent me, trust me" (a referral opens a door; it doesn't say where the work is — beat: "Chelo also sent me a guy who sells ice. It's a shop, joven, not a church.") · bad: offer to fix the tablet (it isn't broken, it's unused — you just put the fight back on the man; beat: Moy from bay two: "It works, profe. That's the problem.")
+b — Yesenia's book: date in, what they said it was, what Tacho said it was, parts ordered, parts here, done, called, paid. "If I'm sick, the shop doesn't know what's on the lifts." *A single point of failure with a person's name on it is a workaround too — read it before you replace it.* bad: digitize the book this week (you'd copy her columns without knowing why each exists; beat: the first digital version has no column for "what they SAID it was," and Tacho asks where it went) · **ok**: read a week of it with her and write down what each column is for → word **repair order**: "That column? Every shop calls it the RO. The one paper that follows the car. Nobody's ever asked me what the columns mean, compa. Nobody." · mid: hire a second service writer (a salary to make the bottleneck two people wide).
+
+**25 · The photo estimate / El presupuesto por foto** — Moy · 1 node
+A customer texts a photo of a crumpled bumper; Moy ran it through his phone and already texted back "around $1,200."
+*An estimate is a promise with a price on it. Automate the draft, never the commitment.*
+bad: let the $1,200 stand — the tool is usually close (the phone can't see the bracket behind the bumper; when it's $1,900 the customer remembers $1,200; beat: the customer arrives with a screenshot; Tacho reads it and says nothing, which is louder) · **ok**: AI drafts line items from the photo; Tacho looks at the car before any number leaves the shop → word **book time**: "The guide says three point two hours for that bumper. That's book time. The paper says what I saw. Now you know why I don't text numbers, joven." · mid: ban phone estimates entirely (safe, and you lose the customer who needed a ballpark by five) · mid: send the photo's line items with "estimate, not a quote" in the footer (uncertainty in the footer is certainty in the headline — rhymes with *Say it so it's true*). Frederick beat for a wrong answer: the same customer has DM'd Frederick the bumper photo asking for a price.
+
+**26 · The parts run / El mandado de las refacciones** — Moy, at Calle Dos · 2 nodes
+Moy walks to the parts place twice a day because the shop finds out it's out of something when Tacho's hand is already in the engine. A supplier once shipped the wrong alternator and the shop paid the deposit twice. Moy wants ordering automated.
+*Automate the boring step all the way; keep a human on the irreversible one. Money leaving is irreversible; typing is not.*
+a — bad: full auto — stock hits the reorder point, the system orders (the system that reorders can't tell wrong from low; beat: three alternators arrive. All wrong. All with a core charge.) · **next**: the system watches stock and drafts the order; a person hits send · mid: keep walking to Calle Dos (it works; it costs a mechanic-in-training two hours a day).
+b — Yesenia won't approve every bottle of wiper fluid. Where's the line? *Draw it at what can't be undone — money out, a part returned, a promise made — and let everything else flow.* mid: everything waits for Yesenia (the bottleneck with a screen) · **ok**: consumables flow; anything over a dollar ceiling, anything with a deposit on the old part, and any new part number waits for a person → word **core charge**: "The old part's a deposit. Send the wrong one back and you pay it twice. That's the core." Beat: Moy writes CORE on his hand in marker. Old-lead plant: in the parts binder, a sheet in older handwriting — a fully automated ordering plan, no human on send. · bad: Moy approves from his phone between lifts (the fast wrong action; beat: he approves an order from under a car. It's for a car that left yesterday.) · mid: ask the supplier to stop sending wrong parts (right, and outside your control — Nando's fish guy).
+
+**27 · The tablet, again / La tableta, otra vez** — Yesenia · 2 nodes
+The tablet bought last year for write-ups lives in a drawer. Tacho will not touch it. Yesenia retypes what he tells her. Everyone has tried.
+*The lever is the workflow, not the person.*
+a — bad: train Tacho again, patiently (he isn't confused, he's decided; beat: he sits through the whole training, then wipes his hands on it) · **next**: change who touches what — Moy narrates at the lift, Yesenia confirms, Tacho signs the paper he already signs · mid: buy a bigger tablet (a real fix for a man whose objection is buttons; his isn't) · mid: hire someone to type for him (a salary to route around a signature).
+b — Tacho signs the paper. Does the paper change? *Capture the data where it's born; keep the signature where it lives.* **ok**: the paper becomes a printout of what Moy narrated; Tacho signs that → word **write-up**: "That's the write-up. It used to be me. Twice." Beat: Tacho reads it, corrects one word, signs. "Fine." (❗Tacho: he never comes around, and that's the win.) · bad: skip the signature, the narration's enough (you removed the only step where the master mechanic reads the job before the customer does; beat: a write-up goes out saying "replaced alternator." It was the belt.) · mid: he signs on the tablet with a stylus (you moved the fight one inch).
+
+**28 · The sound / El ruido** — Tacho · 1 node
+A Corolla from the survey crew comes in with a noise. Moy plugs in his phone: "wheel bearing, left front." Tacho listens for four seconds with the hood up: "belt tensioner." Nobody raises their voice.
+*Not "AI can't" — here the cost of being wrong is a car on a freeway, so the confidence bar is a different bar.*
+bad: trust the code, the phone has the data (a code says where the computer noticed something, not what's wrong; beat: the Corolla comes back on a tow truck. Tacho says nothing. Moy hears it anyway.) · **ok**: the phone reads codes and suggests; Tacho's ear decides; Moy writes down both so he learns where the phone is wrong → word **comeback**: "A car that comes back is a comeback. That's the number I run this shop on. Write both down, Moy. In a year you'll hear it too." — and, quieter, to you: "I'm not scared it's wrong, joven. I'm scared it's right enough he stops listening." · mid: take the phone away from Moy (you just banned the tool from the only person who'll be here in ten years; the tools are already inside the building) · mid: the phone drives, Tacho double-checks every car (Tacho doing every diagnosis with an extra step).
+
+**29 · The one it shouldn't have answered / La que no debió contestar** — Yesenia · 1 node
+The new intake assistant — the thing that takes "what's wrong with your car" and books a slot — was asked "is this covered under my warranty?" and said "Yes, most likely." It isn't.
+*Scope is a list, not a mood. "That one's for Yesenia" is a feature, not a failure.* (Nolasco, planted three phases early.)
+mid: add "don't answer warranty questions" to its instructions (instructions nudge, they don't gate — Free Churro Friday) · **ok**: a short list of what it may do — describe the problem, book a slot, quote hours — and everything else goes to Yesenia with the customer's question attached (beat: the next warranty question gets "That one's for Yesenia — she'll call you before noon." Yesenia: "It's polite. It's more polite than me.") · bad: turn it off (the fix for one wrong answer is a boundary, not an off switch; you gave forty calls a day back to a counter that had them; beat: the phone rings. It's a warranty question.) · mid: let it answer but add "check your paperwork" (cover isn't candor).
+
+**30 · The cousin's platform / La plataforma del primo** — Tacho, in front of the mercado · 2 nodes
+Cousin Rigo sells shop-management software: intake, estimates, parts, texting, a dashboard. $400 a month. "Everything you built, but professional." Tacho: "¿Cómo la ves?"
+*Build vs buy vs don't. Buy when it beats what you built for less than what keeping yours costs — and not before.* (The counterweight to the mercado; rhymes with *The Monday number*.)
+a — bad: buy it, it does everything (everything is the price; the shop uses three of forty features and pays for forty, forever; beat: Chelo, from behind the produce, not looking up: "Forever is the expensive word.") · **next**: compare what the shop actually uses against what it costs to keep running · mid: never buy anything (a real answer for a three-bay shop, said too early) · bad: buy it because Rigo is family (family is a reason for dinner, not for software; beat: Rigo's demo crashes on the word "Caprice").
+b — Your thing costs two hours a month to keep. Rigo's replaces the parts draft and the texting and adds a scheduling board Yesenia actually wants. *Buy the piece that beats what you built, keep what works, say no to the rest — and write the number down.* **ok**: buy only the scheduling board (beat: Tacho: "You told my cousin no to my face." It isn't a complaint.) · bad: migrate everything now (a migration is a second rollout; beat: the book comes back out of the drawer) · mid: wait a year (deferring isn't deciding).
+
+**31 · The Saturday / El sábado** — Yesenia · 2 nodes
+Six o'clock. The book is on the counter. She asks what she should do with it. Her one tired moment: "Four years, compa. I'd like to go home at six once and see what it looks like."
+*The last deliverable is the map — how work flows, who signs, which step can't be undone — so the shop owns the process, not the consultant.*
+a — bad: throw the book away, the system has it (the book is a year of exceptions nobody typed; beat: Tacho lifts it out of the bin without a word) · **next**: close it and shelve it next to Tacho's manuals; the map goes on the wall · mid: keep it running in parallel forever (Nando's secret spreadsheet, with a name on it).
+b — What goes on the wall? *A process map is one page: the steps, the person at each, the three that need a signature, the steps that can't be taken back circled — left where the next person can read it.* mid: the full manual, forty pages, every screen (nobody reads forty pages in a shop) · **ok**: one page — how a car moves, who touches what, the irreversible steps circled (this is template 06; beat: Yesenia tapes it by the counter and writes under it, "If you're reading this, I'm at lunch." Xochi plant: the shop shirts arrive the same day, Tuerca embroidered on the pocket, Yesenia's idea.) · bad: nothing on the wall, it's all in the system (a system nobody can read from the door is the book, digitized; beat: the internet goes out on a Tuesday. Everyone looks at Yesenia.)
+
+### The three endings (strings `tepi1/2/3`), toast, burnout
+**Grade 3 — EN.** "Saturday, six o'clock. The book is on the shelf next to Tacho's manuals, spine out, closed. Yesenia leaves at six for the first time in four years and Tacho says so out loud, which from him is a parade. Moy is at the counter teaching the intake flow to the kid from the tire place. Tacho hands you a key to the side door — 'for when the trolley opens and you need somewhere to sit' — and picks up the shop phone before you're off the lot. 'Licha. The computer guy. He didn't sell me anything. Ask him what you throw away.' Tuerca is asleep on the hood of the Caprice. 'That's Tuerca. She lives here now. I didn't decide it.'"
+**ES.** "Sábado, seis de la tarde. El libro está en la repisa junto a los manuales de Tacho, con el lomo hacia afuera, cerrado. Yesenia se va a las seis por primera vez en cuatro años y Tacho lo dice en voz alta, que viniendo de él es desfile. Moy está en el mostrador enseñándole la entrada de carros al chavo de la llantera. Tacho te da una llave de la puerta de al lado — 'para cuando abra el tranvía y necesites dónde sentarte' — y levanta el teléfono del taller antes de que salgas del lote. 'Licha. El de las computadoras. No me vendió nada. Pregúntale qué tiras.' Tuerca duerme sobre el cofre del Caprice. 'Esa es Tuerca. Ya vive aquí. Yo no lo decidí.'"
+
+**Grade 2 — EN.** "Saturday, six o'clock. Half of it stuck. Yesenia still keeps the book — only for the jobs she doesn't trust the system with yet, and the pile is thinner every week. Tacho wipes his hands and gives you the truest line in the building: 'You didn't sell me anything. That's why I let you stay.' He phones Licha on Monday and says less than that. Tuerca has moved onto the Caprice anyway; nobody asked her either."
+**ES.** "Sábado, seis de la tarde. La mitad pegó. Yesenia todavía lleva el libro — nomás para los trabajos que aún no le confía al sistema, y el montón se adelgaza cada semana. Tacho se limpia las manos y te suelta la frase más cierta de todo el edificio: 'No me vendiste nada. Por eso te dejé quedarte.' El lunes le habla a Licha y le dice menos que eso. Tuerca de todos modos ya se subió al Caprice; a ella tampoco le preguntaron."
+
+**Grade 1 — EN.** "Saturday, six o'clock. The intake assistant is switched off and the book is exactly as thick as it was. Nothing broke, nothing burned, and Tacho is kind, which is worse and better than angry: 'You came, you looked, and you were honest about what you didn't know. Most of them lie in the first ten minutes.' Moy walks you to the gate and asks, quietly, if he should stop using the phone thing. You tell him no. You tell him what to check. A week later Tacho phones Licha and says one sentence about you; it's a fair one. Tuerca moves in anyway."
+**ES.** "Sábado, seis de la tarde. El asistente de entrada está apagado y el libro está exactamente igual de grueso. Nada se rompió, nada se quemó, y Tacho es amable, que es peor y mejor que enojado: 'Viniste, miraste, y fuiste honesto con lo que no sabías. La mayoría miente en los primeros diez minutos.' Moy te acompaña a la reja y te pregunta, bajito, si debería dejar de usar lo del teléfono. Le dices que no. Le dices qué revisar. Una semana después Tacho le habla a Licha y dice una sola frase de ti; es justa. Tuerca se muda de todos modos."
+
+**Toast (`taller.open`, the espiga's lot opens).** EN "Five in the morning on Calle Dos. The lights are on at the west lot and the ovens are already hot — Doña Licha got a phone call. Nothing behind you closes." · ES "Cinco de la mañana en Calle Dos. Hay luz en el lote del poniente y los hornos ya están calientes — a Doña Licha le llegó una llamada. Atrás de ti no se cierra nada."
+
+**Burnout (`tgoEpi`, hearts only).** EN "Saturday. Tacho doesn't take the side-door key back, because he never gave it. 'You learned on my floor. Floors are for that.' The book is on the counter with a page in your handwriting, and the roll-up door goes up at seven." · ES "Sábado. Tacho no te quita la llave de la puerta de al lado, porque nunca te la dio. 'Aprendiste en mi piso. Para eso son los pisos.' El libro sigue en el mostrador con una hoja con tu letra, y la cortina sube a las siete."
+
+### Late lines
+- 24 Tacho — EN "The door still goes up at seven, joven. I still don't need a computer guy. Come look anyway." · ES "La cortina sigue subiendo a las siete, joven. Sigo sin necesitar un computólogo. Pásale a ver de todos modos."
+- 25 Moy — EN "Profe, the bumper photo's still on my phone. So's the number I shouldn't have texted." · ES "Profe, todavía tengo la foto de la defensa en el cel. Y el número que no debí mandar."
+- 26 Moy — EN "I still walk to Calle Dos for parts. My legs have opinions now." · ES "Todavía voy a pie a Calle Dos por las refacciones. Mis piernas ya tienen opiniones."
+- 27 Yesenia — EN "The tablet's in the drawer, compa. Same drawer. It's very well rested." · ES "La tableta sigue en el cajón, compa. El mismo cajón. Está bien descansada."
+- 28 Tacho — EN "Cars still make noises. Phones still have opinions about them. Pop the hood." · ES "Los carros siguen haciendo ruidos. Los teléfonos siguen opinando. Abre el cofre."
+- 29 Yesenia — EN "It answered another warranty question while you were gone. Politely. Wrong, but politely." · ES "Contestó otra pregunta de garantía mientras no estabas. Con educación. Mal, pero con educación."
+- 30 Tacho — EN "My cousin still calls on Sundays. The price went up. Everything he does goes up." · ES "Mi primo sigue llamando los domingos. Ya subió el precio. Todo lo de él sube."
+- 31 Yesenia — EN "The book's on the counter, compa. I never decided what to do with it. I'm asking you." · ES "El libro sigue en el mostrador, compa. Nunca decidí qué hacer con él. Te estoy preguntando a ti."
+
+### Continuity threads planted
+Old lead's page: the parts binder (q26). Xochi: shop shirts with Tuerca on the pocket (q31 beat). Frederick: the bumper photo in his DMs (q25). Cat: Tuerca, on the Caprice, in every ending. Trolley: the survey crew's Corolla (q28); Tacho's side-door key is "for when the trolley opens." Franchise: none here — the taller is the one district without a shadow, on purpose; Rigo's platform is the temptation. Office furniture (BACKLOG §6): the dog bed — reconciled as the bed Tacho bought Tuerca that she refused; "Take it upstairs. For the dog." Frederick uses it. See contradiction J.
+
+---
+
+## 2 · Panadería La Espiga (quests 32-39)
+
+### The industry card
+- **Trade.** Neighborhood bakery. Pan dulce and bolillo from four in the morning, cakes to order, rosca in January, pan de muerto in the fall.
+- **Where the money is.** Volume of cheap pieces baked before anyone buys. The margin lives between what's thrown out at close and what sold out before the after-school rush. The fat is in cakes and the two seasons.
+- **AI touches it in three places.** (1) The morning count — trays per item from the close-out strips, the weather, payday, the school calendar. (2) Cake intake — date, size, flavor, the name spelled right, the deposit. (3) The close-out tally and sold-out times — turning Sol's paper strip into the history a forecast eats.
+- **The one place it must not.** The decision at the oven. The sheet suggests; Tito bakes. And the two once-a-year breads, which have no history worth a machine.
+- **Five trade words.** **sold-out time / la hora del "se acabó"** (Sol, q32) · **par / el par** (Licha, q33) · **bake sheet / la lista de horneado** (Tito, q34) · **merma** (Licha, q36 — waste, the bakery's own word in both languages) · **day-old / pan de ayer** (Tito, q37).
+- **Deliverable.** Template **01 Process Discovery Notes** — freed on 2026-09-02, nobody claims it, and an ops analyst's first paper is exactly "where does this number come from." Filled at 4am. (Alternative: a new 07 forecast scorecard — see question 3.)
+- **Sales sentence.** "I'll turn what your counter already counts at close into tomorrow's bake list — and tell you every week how wrong it was, and in which direction."
+- **Role line** (Sol, reading it off her phone): "An ops analyst. It's the person who tells you the number was wrong before it costs you." / "Analista de operaciones. Es quien te dice que el número estaba mal antes de que te cueste."
+
+### The door
+Cold open at the taller. Tacho on the shop phone (the grade is in `tepi1/2/3` above). Licha at the panadería at five in the morning, flour on the receiver: "Then what's he for?" Tacho: "Ask him what you throw away." She hangs up and counts the day-old rack. Quest 32's `say`: Licha holding a tray of yesterday's conchas — "Don Tacho says you don't sell anything. Good. I don't need anything sold. I need to know why I threw away thirty conchas on Tuesday and ran out by nine on Wednesday."
+
+### The cast and their wants
+- **Doña Licha** — wants to stop throwing bread away and stop running out, both at once, which she knows is impossible; what she actually wants is to stop being surprised. Her real fear (q39, late): that if a sheet knows the number, her hands will forget it — Tacho's fear in a gentler key: not being replaced, not being needed at four. Speaks formally, **usted** to you and no nickname at all until the Saturday, when she says **vecino** once. ES: her mother's Spanish — *oiga, fíjese, criatura* to Sol.
+- **Tito** — night baker, fifties. Wants to sleep, and to share the 3:45 decision with someone. Counts in trays and hours; says almost nothing else. Calls you **cuate**.
+- **Sol** — counter, twenty, dry and precise, the accidental data source (Perla's rhyme, flipped: Perla was loud, Sol is exact). Wants the counter to stop being where the blame lands — "we ran out" and "we have too much" both land on her. Calls you **consultor**, with audible quotation marks, and drops the quotation marks in q38.
+- **Bolillo** — the bakery cat, lives in the flour bin. Nobody has ever gotten him out of it.
+
+### The escalation — eight quests
+Stations: Licha 32, 36, 39 · Sol 33, 35, 38 · Tito 34, 37. Two-node quests: 32, 34, 37, 39.
+
 **32 · The thirty conchas / Las treinta conchas** — Licha · 2 nodes
 Tuesday thirty conchas in the trash; Wednesday sold out by nine. She wants a machine that tells her the number.
 *Before you forecast, find where the number is born — a forecast is only as good as the count it eats.*

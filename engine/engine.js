@@ -2587,7 +2587,8 @@ function roleOf(e){
   if(qi===-2){const i=AQ().findIndex(q=>q.title===e.quest);qi=i<0?-2:i;}
   if(qi<0)return null;
   for(let i=0;i<L.length;i++)
-    if(L[i].quests.indexOf(qi)>=0&&L[i].role)return L[i].role[lang]||L[i].role.en;
+    if(L[i].quests.indexOf(qi)>=0&&L[i].role){const c=L[i],ind=c.industry&&(c.industry[lang]||c.industry.en);
+      return (ind?ind+" · ":"")+(c.role[lang]||c.role.en);} /* industry leads, role follows (❗El giro) */
   return null;
 }
 /* The decision report: play data → a portfolio document. One section per quest, one
