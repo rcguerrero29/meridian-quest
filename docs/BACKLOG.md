@@ -23,7 +23,7 @@ quest packs and forgot the engine seam, the office, the ceremony and the second 
 
 | # | Sitting | Cost | What you would see |
 |---|---|---|---|
-| **S0** | El 3D y el mundo | one long | doors that stand up, sharp 3D, a real bridge, La Cocina reads as a restaurant, autumn arrives on its own |
+| **S0** | ~~El 3D y el mundo~~ | **shipped 2026-09-02** (branch, not merged) | doors that stand up, sharp 3D, La Cocina reads as a restaurant, autumn arrives on its own. *Not* the bridge arch — that waits on elevation |
 | **S1** | **La cimentación** | one | **nothing** — and that is said out loud. The whole engine seam, paid once |
 | **S2** | La oficina (`f2`) | one | the room upstairs becomes yours and starts filling |
 | **S3** | Taller Herrera | one | the southeast lot opens; the first pack on the new machinery |
@@ -96,6 +96,7 @@ engine, all landing in **S1**, none of them naming a business.
 | **Industries vs roles** — should the industry lead and the job role follow? | reframes what every pack owes |
 | **The city's record to a government NPC** — separating the player's portfolio from the city's memory | new, a story surface |
 | **The Día de Muertos palette** — six bridge colours in `config.js` are a draft; say yes or change them | S0 shipped the seam with them in |
+| **Merge S0 to `main`** — seven engine/content commits on the branch at `mq-v45`; nothing is playable for the owner until this | the owner's word |
 | **Elevation** — walking *over* the bridge needs actors to have a height | deliberately deferred: build it when a *second* thing needs it (stairs, rooftops, the trolley platform), not for one park tile |
 
 ---

@@ -3,28 +3,37 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-01)
+## STATE OF PLAY — read this first (2026-09-02)
 
-**MERGED AND DEPLOYED.** The 2026-09-01 story/open-city work is on `main` at
-**`mq-v44`** (owner gave the word). GitHub Pages serves `main`, so it is live after the
-usual ~minute of lag; installed PWAs pick it up on the next refresh.
+**ON THE BRANCH, NOT MERGED.** `claude/career-training-story-plot-tj707h` carries the
+whole **S0 sitting (el 3D y el mundo)** at **`mq-v45`**, pinned forward from `main`'s
+`mq-v44` so a merge invalidates installed PWAs. **The owner sees `main` and nothing
+else** — until they say "merge", none of this is playable on their phone.
 
-**Still true and still the trap:** several models work this repo at once. `main` moved
-under this session once already today — a branch cut from a stale base spent a round
-root-causing a 3D bug that had already been fixed twice on `main`. Do the divergence
-check in step 1b below before reading a single line of engine code, and never quote a
-version number to the owner without checking what `main` actually serves.
+**What S0 shipped, in one breath, each with a test that was red before the fix:**
+a door you walk straight back into lets you back in (a standing check with an
+anti-ping-pong hold); doors stand *in* their walls in 3D, with a lintel above and light
+under them, and walls have a face on every side; 3D textures bake at the screen's
+resolution (the measured blur root cause) and re-bake when the screen changes; the
+seasons seam — a season changes colour, never design — with one Día de Muertos season
+by the calendar and a Settings override, bridge first; and the storefront legibility
+pass — La Cocina has a bowl in the window, every door says where it leads, the desk,
+table and scale read cold. Before/after screenshots were looked at for every one.
 
-**What went in, in one breath:** the open city (districts open and stay open, `need`
-16→12), 24 `late` reframe lines EN+ES, nine continuity fixes, nine rewritten strings,
-the GROWTH seam that took Meridian's names out of the engine plus a portability guard
-that fails the build if they come back, 3D as the default camera and the
-three-drifted-whitelists bug that would have silently undone it, camera-aware movement
-with quarter-turn rotation, produce you can identify, a two-line ticker — and three test
-tools: `smoke.js`, `shots.js` (scene screenshots), `tilesheet.js` (the cold read).
+**Two things wait on the owner:** (1) *merge to `main`* — their call; (2) *the Día de
+Muertos palette* — six colours in `content/meridian/config.js` are a draft. Either is
+one word.
 
-**Everything else that session produced is a PLAN, deliberately not built** — the owner
-said so repeatedly. See `docs/IDEAS.md` §15.
+**Deliberately not in S0:** the bridge arch (needs elevation, §15.10, which waits for
+a second thing that needs it) and one new finding — a wall between the camera and the
+hero hides all but the head (§15.3, backlog §3 #10).
+
+**Next is S1 — la cimentación** (backlog §1): the engine ceiling. Nothing visible ships
+from it and that is said out loud. Then S2, the office.
+
+**Still true and still the trap:** several models work this repo at once. Do the
+divergence check in step 1b below before reading a single line of engine code, and
+never quote a version number to the owner without checking what `main` actually serves.
 
 ## The backlog lives in `docs/BACKLOG.md`
 
