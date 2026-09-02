@@ -173,6 +173,7 @@ function awardXP(amt){runXP+=amt;const k=cur,prev=qa[k]||0;
   if(runXP>prev){xp+=runXP-prev;qa[k]=runXP;}else qa[k]=prev;}
 let px=10,py=11,fx=10,fy=11,dir="down",moving=false,mt=0,held=null,bob=0;
 let warpT=0,portalT=0; /* post-warp grace: warpT blocks input, portalT blocks re-triggering — kills door ping-pong */
+let portalHold=""; /* the tile a warp SET YOU DOWN on ("world:x,y"): tryPortal ignores it until you step off */
 /* Frederick's wardrobe — Xochi's collar line. Cosmetics are data; drawDog reads `wear`. */
 const WEAR={bandana:["#C0392B","#7A3FE0","#E0B45C","#2AA47C","#3E8ED0"],
             collar:["#E0B45C","#C0392B","#7A3FE0","#2AA47C"],
@@ -1563,6 +1564,28 @@ function tryStep(){
   }
   moving=true;mt=0;px=nx;py=ny;
 }
+/* A door is checked whenever you are STANDING on it, not only on the frame a step ends.
+   Before this, walking out of HQ and straight back in was swallowed: the step ended
+   inside portalT's 900ms anti-ping-pong window, the tile was rejected once and never
+   looked at again, and the door ignored you until you stepped off and back on.
+   Ping-pong is still impossible: a warp records the tile it set you down on in
+   portalHold, and that tile is ignored until you leave it — so this holds even for a
+   pack whose doorstep IS a portal tile (validateWorlds only warns about that).
+   Y, the trolley stop, deliberately stays step-only: a menu you dismissed must not
+   reopen under your feet. Returns true if it warped. */
+function tryPortal(ts){
+  const key=world+":"+px+","+py;
+  if(portalHold&&portalHold!==key)portalHold="";
+  const pch=CW().rows[py][px];
+  if(portalHold||ts<=portalT||!(PORTALS[world]&&PORTALS[world][pch]))return false;
+  const p=PORTALS[world][pch],fromW=world;
+  world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
+  warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
+  save();setWorldTag();toast(T().arrive[world],2200);
+  dogsRoam(world); /* unseen pups drift toward their favorite townsperson */
+  if(fromW==="pk"&&world!=="pk")parkExit(); /* crossing back over the rainbow: the recap */
+  return true;
+}
 let last=0;
 function loop(ts){
   const dt=Math.min(50,ts-last);last=ts;
@@ -1570,18 +1593,12 @@ function loop(ts){
     mt+=dt/240;bob+=dt/70;
     if(mt>=1){moving=false;fx=px;fy=py;
       const pch=CW().rows[py][px];
-      if(ts>portalT&&PORTALS[world]&&PORTALS[world][pch]){const p=PORTALS[world][pch];
-        const fromW=world;
-        world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
-        warpT=performance.now()+450;portalT=performance.now()+900;
-        save();setWorldTag();toast(T().arrive[world],2200);
-        dogsRoam(world); /* unseen pups drift toward their favorite townsperson */
-        if(fromW==="pk"&&world!=="pk")parkExit();} /* crossing back over the rainbow: the recap */
+      if(tryPortal(ts)){}
       else if(pch==="Y"&&ts>portalT){portalT=performance.now()+900;held=null;openTravel();}
       else{save();checkTalk();tryStep();}
     }
     else{const[dx,dy]=DIRS[dir];fx=px-dx*(1-mt);fy=py-dy*(1-mt);}
-  }else tryStep();
+  }else if(!tryPortal(ts))tryStep(); /* standing on a door whose cooldown just ran out: go through */
   dogUpdate(dt,ts);catUpdate(dt,ts);pigUpdate(dt,ts);loroTick(ts);critUpdate(dt,ts);ballUpdate(dt,ts);fredCheck();
   if(!$("world").hidden)draw();
   requestAnimationFrame(loop);
@@ -2454,7 +2471,7 @@ function openTravel(){
     if(d.w===world){b.disabled=true;b.style.opacity=".55";}
     else b.addEventListener("click",()=>{$("travel").hidden=true;
       world=d.w;px=fx=d.x;py=fy=d.y;held=null;dir=d.dir;
-      warpT=performance.now()+450;portalT=performance.now()+900;
+      warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
       save();setWorldTag();toast(T().arrive[world],2200);});
     list.appendChild(b);});
   const s=document.createElement("button");s.className="opt";s.disabled=true;s.style.opacity=".45";
@@ -2752,7 +2769,7 @@ $("leash").addEventListener("click",()=>{
     c.world="pk";c.x=3;c.y=6;c.fx=3;c.fy=6;c.home=[8,6];c.follow=true;c.task=null;c.sit=false;
     c.leashT=performance.now()+6500; /* the leash shows for the bridge crossing, then he's loose */
     if(BALL)BALL=null;
-    warpT=performance.now()+450;portalT=performance.now()+900;
+    warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
     save();setWorldTag();hud();checkTalk();
     setTimeout(()=>toast(T().parkArrive,3400),700);
   },900);

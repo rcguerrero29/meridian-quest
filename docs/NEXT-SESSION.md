@@ -54,8 +54,8 @@ something ships or a decision lands.**
    predated two fixes for it already sitting on `main`. Stale reading is worse than
    no reading. Expect `mq-vN` pins to collide on the merge; resolve FORWARD.
 1c. **THE 3D/WORLD SESSION is queued and fully specced — `docs/IDEAS.md` §15.**
-   Do it as ONE sitting, in this order: the doorway re-entry bug (§15.6a, keep the
-   anti-ping-pong guard, its failing test goes in with the fix) → doors facing the
+   Do it as ONE sitting, in this order: ~~the doorway re-entry bug~~ (**done 2026-09-02**,
+   §15.6a — `tryPortal()` + `portalHold`, test in smoke) → doors facing the
    wrong way in 3D and the orientation-blind walls behind them (§15.3) → the blur bake
    at device resolution (§15.1, the measured root cause, ~1h) → the rainbow bridge
    arch + Day of the Dead palette (§15.4, needs an owner sign-off on the palette).

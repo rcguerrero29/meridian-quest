@@ -775,7 +775,23 @@ And CI's version lockstep proves `sw.js` and `config.js` *agree*, never that the
 
 ---
 
-### 15.6 THE DOORWAY BUG — reproduced 2026-09-01, NOT fixed
+### 15.6 THE DOORWAY BUG — (a) FIXED 2026-09-02, (b) settled as design
+
+**(a) shipped 2026-09-02, first item of the S0 sitting.** Option 1 below, generalised:
+`tryPortal(ts)` in `engine/engine.js` checks the tile under your feet on BOTH the
+step-completion path and the standing path of `loop()`, so a door whose cooldown runs
+out while you stand on it simply fires. Ping-pong stays impossible: every warp records
+the tile it set you down on in `portalHold`, and that tile is inert until you leave it —
+which also covers a future pack whose doorstep IS a portal (today that is only a boot
+warning). `Y`, the trolley stop, deliberately stays step-only: a menu you dismissed must
+not reopen under your feet. The test that was "deliberately NOT committed" is now in
+`test/smoke.js` (*a door you walk straight back into must let you back in*), with two
+guards: the hold, and the stop. It reproduced the bug a second way by accident — a warp
+from the park section 700ms earlier swallowed the control step — which is the same bug
+wearing a different hat, and the standing check fixes both.
+
+*The original record, kept as written:*
+
 
 Owner: *"what also happens when the character doesnt quite move but turn in place or
 close to it infront of an entrance, this was also behaving weird."* Two separate real

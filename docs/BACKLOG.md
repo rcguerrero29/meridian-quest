@@ -76,7 +76,7 @@ engine, all landing in **S1**, none of them naming a business.
 |---|---|---|---|
 | 1 | **3D blur** — every texture baked at 1× while the screen renders at up to 3× | ~1h | measured 2.9×–4.0× magnification. `IDEAS.md` §15.1 |
 | 2 | **Doors lie flat in 3D** — 6 of 16 face the wrong way, all in HQ, the first room anyone sees | minutes | and the walls behind them are untextured slabs — the deeper cause. §15.3 |
-| 3 | **The doorway ignores you** for ~900ms after you come through, and never re-checks | ~20m | walk out of HQ, turn round, walk back — nothing. §15.6 |
+| 3 | ~~**The doorway ignores you** for ~900ms after you come through, and never re-checks~~ | **shipped 2026-09-02** | S0 item 1. A standing check with an anti-ping-pong hold; test in `smoke.js`. §15.6 |
 | 4 | **La Cocina does not read as a restaurant** — a red building, an awning, two blank windows, no food cue | minutes | the mercado reads correctly *because* it has produce. §15.8 |
 | 5 | **All five doors are pixel-identical** | ~1h | nothing tells you which door leads somewhere |
 | 6 | **The rainbow bridge is a flat stripe** that does not span the river | a sitting | there is no bridge object in any camera. §15.4 |
