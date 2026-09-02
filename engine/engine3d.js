@@ -263,7 +263,9 @@ function t3Actors(){
       else if(cr.kind==="chi")drawChi(g,cr,2,6);}});});
   if(BALL&&BALL.world===world)list.push({x:BALL.fx,y:BALL.fy,f:g=>drawBall(g,2,6,BALL.phase,BALL.t)});
   list.push({x:fx,y:fy,f:g=>drawPerson(g,2,6,look,{dir,bob:moving?Math.sin(bob)*2:0,moving})});
-  doorMarks().forEach(d=>list.push({x:d.x,y:d.y,f:g=>drawDoorMark(g,2,22,0)}));
+  /* the door marker rides the same pool, lifted above the wall line so the door slab
+     does not hide it */
+  doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,f:g=>drawDoorMark(g,2,30,0)}));
   const old=ctx;
   list.forEach((a,i)=>{
     const p=t3Sprite(i);
@@ -276,7 +278,7 @@ function t3Actors(){
        wall behind them (owner: "head disappearance near walls") */
     const ax=a.x+0.5,az=a.y+0.5;
     const ddx=T3.cam.position.x-ax,ddz=T3.cam.position.z-az,dl=Math.hypot(ddx,ddz)||1;
-    p.spr.position.set(ax+ddx/dl*0.34,0,az+ddz/dl*0.34);
+    p.spr.position.set(ax+ddx/dl*0.34,a.h||0,az+ddz/dl*0.34);
     p.spr.scale.set(36/32*1.12,40/32*1.12,1);
     p.spr.material.color.copy(T3.tint);
     p.spr.visible=true;p.live=true;
