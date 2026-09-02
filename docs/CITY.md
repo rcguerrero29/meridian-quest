@@ -62,6 +62,15 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
   seam (`INTERVIEW` in `content/meridian/room.js`, read by the engine as shapes only);
   Nacho moved upstairs; the ❗ rule extended to "has something to say" in every camera;
   Export gained *The room*; the version on the opening page. Shipped with S0 at `mq-v46`.
+- 2026-09-02 — **La ventana del norte**: `f2` got its window. Three panes of a new `|`
+  glyph in `f2` row 0 above the old lead's desk, declared pack-side in the FIRST
+  `content/meridian/art.js` (TILEART + TILEMETA + SOLIDX + MAPCOL) — no engine change for
+  the tile, and a pack that ships no art.js gets no window. The pane looks north: the back
+  lot, the road out of the barrio and the graded line on the horizon — Barrio Norte stays
+  a promise you can now SEE. Sky takes the season through `art()`. Güero's `window` step
+  stopped promising and started asking what you want framed, and its "the street" option
+  — impossible on a north wall — was replaced. "Who is the room for" opens his form. On
+  the branch at `mq-v47`.
 - 2026-08-31 — **World upgrade wave 1**: draw() tile chain became the TILEDRAW
   registry (28 glyphs + doors as data; content packs override via TILEART) — the
   entities-as-data law now covers ART. Visible: per-tile floor variation, walls cast
@@ -119,7 +128,18 @@ would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
-- ✅ **❗La oficina** — signed 2026-09-02: opens bare, the barrio furnishes it.
+- ✅ **❗La oficina** — signed 2026-09-02: opens bare, the barrio furnishes it. Built
+  bare the same day (S2 v1), with the interview.
+- ✅ **❗La ventana** — signed and built 2026-09-02. ⚠️ The ❗La oficina entry in the
+  decision log read "a north window onto the trolley line"; the trolley runs SOUTH of HQ.
+  Amended in place with a dated note.
+- ⏳ **La vía que se acerca** — the window's view advancing a stage per finished business
+  (the second progress bar beside Nacho's mural). Content-only on top of the built tile;
+  a third of a sitting. **Waits on S1**, because it is not testable until districts close.
+- ⏳ **Furniture deliveries may be GROUPS, not single tiles** — surfaced by "who is the
+  room for": ❗La oficina's "one piece per business" is a *set* for a team room (a table
+  and its chairs). One line in S1's furniture registry; expensive to retrofit after five
+  packs have declared their piece.
 - ✅ **❗La palabra** — signed 2026-09-02: the word is the reward. Under ❗El giro the five
   terms become the TRADE's vocabulary, not the role's.
 - ✅ **❗El papel** — signed 2026-09-02: template **06 Process & Exception Map** gets
@@ -223,6 +243,17 @@ stays live until the Phase 2 refactor lands.
   window tile exists; both are owner calls in `docs/rooms/aj-office.md` §8. His geography
   correction stands: the trolley runs south of HQ, so a north window cannot look "onto
   the trolley line".
+- 2026-09-02 · ❗La ventana: how much window on the north wall · **three panes, season
+  sky** (Don Güero's pick, Nacho agreed; owner delegated: "maybe /nacho and /don-guero can
+  work something cool out") · one pane is invisible from the stairs and the staged version
+  cannot be tested until districts close — the band grows into it later as a content edit,
+  with no new glyph and no redraw. The floor light under it was skipped: content cannot
+  wrap the engine's floor drawing without a seam for it.
+- 2026-09-02 · ❗Quién sube: whose room is it · **Don Güero asks it, first line of his
+  form** (owner: "that should be a question in the creation - who is the room for") · the
+  answer changes the furniture math, not the mood, so it belongs to the builder — and it
+  RETIRES owner call #4 in docs/rooms/aj-office.md §8, because the sheet now states whose
+  room it is instead of the build session guessing.
 - 2026-09-01 · ❗El taller: the shop's footprint · **shop plus an apron** — one door and
   one interior like the mercado, and the ribbon also drops the Caprice and a tire stack
   on the sidewalk · it reads as an auto shop before you open anything, and the sitting

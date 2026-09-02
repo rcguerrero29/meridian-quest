@@ -14,8 +14,9 @@
 
    Dialogue: Nacho (story director) wrote the words, 2026-09-02; trimmed for a
    phone by three reviewers: a host speaks two sentences, an answer fits one line,
-   the office has stairs and no door, nobody is addressed as "jefe", and the
-   window is a promise with no date on it. Lines an AJ pack should rewrite:
+   the office has stairs and no door, nobody is addressed as "jefe". The window
+   is real since 2026-09-02 (art.js) — Güero's line states a fact, and the three
+   views are all north-true. Lines an AJ pack should rewrite:
    Xochi and Rosa are Meridian people; "somebody's mom" is deliberately nobody's.
    ============================================================================ */
 const INTERVIEW={
@@ -81,7 +82,7 @@ const INTERVIEW={
        q:{en:"First look from the stairs — what do they see?",es:"Primera mirada desde las escaleras — ¿qué ven?"},
        opts:[{en:"Plants. So many it's basically outside.",es:"Plantas. Tantas que ya casi es la calle."},
              {en:"A wall covered in paper — everything I'm working on.",es:"Una pared llena de papeles — todo lo que estoy haciendo."},
-             {en:"One big window, and the whole street behind it.",es:"Una ventana grande, y atrás toda la calle."}]},
+             {en:"The window. Straight down the room, and nothing in the way.",es:"La ventana. Derechito al fondo, y nada estorbando."}]},
       {id:"sound",
        say:{en:"Close your eyes a second. I do this before every wall, don't laugh.",
             es:"Cierra los ojos tantito. Yo hago esto antes de cada pared, no te rías."},
@@ -101,32 +102,44 @@ const INTERVIEW={
              {en:"No clock. I don't want to know.",es:"Reloj no. No quiero saber la hora."},
              {en:"No mess. Everything has a place.",es:"Desorden no. Todo tiene su lugar."}]}
      ],
-     done:{en:"Nacho tears the sheet off his pad and pins it to the wall above the old desk. “That's the plan for your room. Güero's got the boring half.”",
-           es:"Nacho arranca la hoja de su cuaderno y la clava en la pared, arriba del escritorio viejo. «Ese es el plan de tu cuarto. Güero tiene la parte aburrida.»"}},
+     done:{en:"Nacho pins the sheet to the frame of the new window, where the north light hits it. “My wall downstairs faces the street — everything you already did. This one faces what's coming.”",
+           es:"Nacho clava la hoja en el marco de la ventana nueva, donde le pega la luz del norte. «Mi pared de allá abajo ve a la calle — todo lo que ya hiciste. Ésta ve lo que viene.»"}},
     /* Don Güero also keeps his post on the street (WNPC.st "f", quest 12) — two rooms
        in the data, never two on screen. His colours are the street's, from NPCLOOK. */
     {id:"guero",emoji:"👷",name:{en:"Don Güero · Foreman, La Obra",es:"Don Güero · Maestro de Obra"},
      world:"f2",x:12,y:8,look:(typeof NPCLOOK!=="undefined"&&NPCLOOK.f)||{shirt:"#E0A430",skin:"#C08356",hair:"#8E8E96",style:"short"},
      talk:{en:"The work order",es:"La orden de trabajo"},
      steps:[
+      /* line one of any work order — owner, 2026-09-02: "that should be a question in the
+         creation - who is the room for". A count, not a feeling: it changes what every
+         other line on Güero's form means. (Nacho + Don Güero.) */
+      {id:"forwho",
+       say:{en:"Nacho does feelings, I do corners. Before I write anything down, I need to know how many people this room is for.",
+            es:"Nacho ve los sentimientos, yo veo las esquinas. Antes de anotar nada, necesito saber para cuánta gente es este cuarto."},
+       why:{en:"It's line one of any work order. A must-have for one person and a must-have for four are not the same object.",
+            es:"Es el primer renglón de cualquier orden de trabajo. Lo que necesita uno y lo que necesitan cuatro no es el mismo mueble."},
+       q:{en:"Who is this room for?",es:"¿Para quién es este cuarto?"},
+       opts:[{en:"Mine. One desk, one chair, and nobody follows me up.",es:"Mío. Un escritorio, una silla, y que nadie me siga."},
+             {en:"Ours. My people work up here too; I get here first.",es:"Nuestro. Aquí también trabaja mi gente; yo nomás llego primero."},
+             {en:"Whoever's around. If you climbed the stairs, you're in.",es:"El que caiga. Si subiste las escaleras, ya estás dentro."}]},
       {id:"must",
-       say:{en:"Nacho does feelings, I do corners. I can't build a feeling, so we start with the thing I can order today.",
-            es:"Nacho ve los sentimientos, yo veo las esquinas. Un sentimiento no se construye, así que empezamos por lo que sí puedo pedir hoy."},
+       say:{en:"Good — now I know the size of it. A feeling I can't build, so give me the one thing I can order.",
+            es:"Bueno — ya sé de qué tamaño es. Un sentimiento no se construye, así que dame lo único que sí puedo pedir."},
        why:{en:"A work order is a wish written down so somebody else can do it. “Cozy” can't be built; “a couch under the window” gets delivered.",
             es:"Una orden de trabajo es un deseo escrito para que otro lo haga. «Acogedor» no se construye; «un sillón bajo la ventana» sí llega."},
-       q:{en:"One thing that HAS to be in here. First line on the form.",es:"Una cosa que SÍ o SÍ va aquí. Primer renglón del formato."},
+       q:{en:"One thing that HAS to be in here. Next line on the form.",es:"Una cosa que SÍ o SÍ va aquí. Siguiente renglón del formato."},
        opts:[{en:"A couch. A real one you can lie down on.",es:"Un sillón. De los buenos, para acostarse."},
              {en:"A big table in the middle for spreading things out.",es:"Una mesa grande en medio, para regar todo."},
              {en:"A bed in the corner for the dog.",es:"Una cama en la esquina para el perro."}]},
       {id:"window",
-       say:{en:"That north wall is the only one in this building with nothing behind it, so I'm going to cut a window in it. You get to say where it points.",
-            es:"Esa pared norte es la única del edificio sin nada atrás, así que le voy a abrir una ventana. Tú decides para dónde ve."},
+       say:{en:"The window's in — three panes, north wall, right over that desk. Nothing's built between it and the horizon yet, so you tell me what it looks at.",
+            es:"La ventana ya quedó — tres hojas, pared norte, justo arriba de ese escritorio. Entre ella y el horizonte no hay nada construido todavía, así que tú dime qué se ve."},
        why:{en:"A window is the cheapest way to put a room inside a world. Whatever's out there becomes part of the room for free.",
             es:"Una ventana es la manera más barata de meter un cuarto en un mundo. Lo que esté allá afuera se vuelve parte del cuarto gratis."},
-       q:{en:"The new window. What do you want to see out of it?",es:"La ventana nueva. ¿Qué quieres ver por ahí?"},
-       opts:[{en:"The street. All of it, all day.",es:"La calle. Toda, todo el día."},
-             {en:"The rails going north. I want to watch the line get closer.",es:"Los rieles que van al norte. Quiero ver cómo se acerca la línea."},
-             {en:"Trees. Just green and sky.",es:"Árboles. Nomás verde y cielo."}]},
+       q:{en:"Your window, your view. What do you want out there?",es:"Tu ventana, tu vista. ¿Qué quieres que haya allá?"},
+       opts:[{en:"The old road out, and whoever's coming down it.",es:"El camino viejo que sale, y quien venga bajando por él."},
+             {en:"The stakes up north. I want to watch it get closer.",es:"Las estacas del norte. Quiero ver cómo se acerca la línea."},
+             {en:"Nothing built yet. Sky, rooftops, and one bird if I'm lucky.",es:"Nada construido. Cielo, azoteas, y un pájaro si bien me va."}]},
       {id:"seat",
        say:{en:"Boring half now — the boring half saves me a demolition in March. You come up the stairs, four steps, and you sit… where?",
             es:"Ahora la parte aburrida — es la que me ahorra una demolición en marzo. Subes las escaleras, cuatro pasos, y te sientas… ¿dónde?"},
@@ -141,8 +154,8 @@ const INTERVIEW={
             es:"Último renglón del formato, y ya te dejo en paz y me pongo a pedir cosas."},
        why:{en:"Rooms are for people. A plan that forgets who else stands in it builds a beautiful place nobody fits in.",
             es:"Los cuartos son para gente. Un plano que se olvida de quién más se para adentro construye un lugar precioso donde no cabe nadie."},
-       q:{en:"Who else is ever up here?",es:"¿Quién más sube aquí?"},
-       opts:[{en:"Nobody. This one's mine.",es:"Nadie. Este es mío."},
+       q:{en:"Anybody else who needs a seat up here?",es:"¿Alguien más que necesite dónde sentarse aquí arriba?"},
+       opts:[{en:"Nobody. If they're comfortable, they stay.",es:"Nadie. Si están cómodos, se quedan."},
              {en:"One chair, for whoever needs to sit and talk.",es:"Una silla, para el que necesite sentarse a platicar."},
              {en:"Animals. The dog, the cats, whoever wanders up.",es:"Animales. El perro, los gatos, el que se suba."}]}
      ],

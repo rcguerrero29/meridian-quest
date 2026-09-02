@@ -5,8 +5,10 @@ game. Written for whoever builds the next piece of this room, and for AJ, who an
 questions on her phone. Plain words on purpose.*
 
 **Where things stand:** v1 is in the game. The room opens bare, two neighbours ask what it
-should be, and the game writes a sheet the owner can copy. Nothing in the room changes yet
-when she answers — that is the next job, and it waits on the engine work called S1 in
+should be, and the game writes a sheet the owner can copy. **Later the same day the north
+window was cut** (three panes over the old desk, Nacho + Don Güero's joint call) and
+"who is the room for" became Don Güero's first question. Nothing else in the room changes
+yet when she answers — that is the next job, and it waits on the engine work called S1 in
 `docs/BACKLOG.md`.
 
 ---
@@ -21,8 +23,9 @@ delivers what you asked for.
 
 You come up the stairs in the southeast corner. The room opens away from you to the
 northwest: floor, walls, and far off under the north wall a single desk with nothing on
-it but a monitor. Two people stand in the open floor a few steps from the stairs, a red
-mark over each — Don Güero with a clipboard, Nacho with a sketch pad.
+it but a monitor, and above the desk three panes of window with north light in them. Two
+people stand in the open floor a few steps from the stairs, a red mark over each — Don
+Güero with a clipboard, Nacho with a sketch pad.
 
 **Cold read, 2026-09-02, 3D from the stairs (`shots/10-f2-stairs-3d.png`):** a stranger
 says *"an empty room with a table and two people."* Not "an office". That is correct for
@@ -38,12 +41,12 @@ re-take this frame and re-read it.
 | `D` | The old lead's desk | (10,1), alone under the north wall | **Load-bearing.** The room is inherited, not empty. Nacho's first question is about it. |
 | `1` | The stairs | (18,11) | The only way in or out. The office has no door, so every line says *stairs*. |
 | — | Nacho and Don Güero | (15,8) and (12,8) | Placed by `content/meridian/room.js`, not by a map letter. Both are in frame from the stairs in 3D. |
+| `\|` ×3 | The north window | (9,0) (10,0) (11,0), in the wall over the desk | **Built 2026-09-02.** The only honest view north of HQ: the back lot, the old road out of the barrio, two roofs, a pole, and on the horizon the graded line where the northbound trolley is being laid. Barrio Norte stays a promise you can now *see*. Declared in `content/meridian/art.js`; the sky takes the season's colour, the view never changes with it. Cold read passed alone on the tile sheet. |
 
 **Deliberately absent, and why:** moving boxes (the only crate tile in the pack is El
 Mercado's produce crate — it draws a tomato, a chile and a banana, and two of them by the
-stairs read as *groceries*, not *moving in*); the north window (no window tile exists
-yet, so Don Güero promises it out loud instead of standing next to it); the rug, plants
-and spare desks from the old map (bare means bare).
+stairs read as *groceries*, not *moving in*); the rug, plants and spare desks from the
+old map (bare means bare).
 
 ## 4. What changes, and when
 
@@ -79,21 +82,23 @@ Every row is 20 characters; the world validator warns at boot if one is not.
 
 ## 6. New glyphs needed
 
-None for v1. When the window is built: one window tile (`|` was Don Güero's pick) in a
-new `content/meridian/art.js`, declared through `TILEART`/`TILEMETA`. The engine reads
-that seam today; the file does not exist yet — the first new glyph creates it. Every new
-tile gets the cold read (`node test/tilesheet.js`) before it ships.
+One, built: `|` the window, in `content/meridian/art.js` (the pack's first tile file),
+declared through `TILEART`/`TILEMETA`, solid via `SOLIDX`, coloured on the map via
+`MAPCOL`. It passed the cold read (`node test/tilesheet.js`) alone. Later, content-only:
+the view advancing a stage per finished business (stakes → graded roadbed → rail) — four
+drawings, four cold reads, and it cannot be tested until districts close (S1).
 
 ## 7. The interview — as it plays in the game
 
 **Who asks, and what.** Nacho asks how the room should *feel* (five questions: the old
 desk, what you come up here to do, the first look from the stairs, what it sounds like,
-the one thing that never comes in). Don Güero asks what has to be *built* (four: the
-must-have, where the window points, where your desk faces, who else is ever up here).
+the one thing that never comes in). Don Güero asks what has to be *built* (five: **who
+the room is for** — the owner's own addition, line one of his work order — then the
+must-have, what the window looks at, where your desk faces, who else needs a seat).
 
-**How the twelve questions in the skill map onto the nine in the game:** 1 and 2 are
-answered by the story itself (the room is inherited; the desk question is the part that
-is hers) · 3 → *first look* · 4 → *must-have* (Güero) and *never* (Nacho) · 5 → *sound*
+**How the twelve questions in the skill map onto the ten in the game:** 1 → *who is
+this room for* (Güero, first); 2 is answered by the story itself (the room is inherited;
+the desk question is the part that is hers) · 3 → *first look* · 4 → *must-have* (Güero) and *never* (Nacho) · 5 → *sound*
 (smell stays on paper) · 6 → *what you come up here to do* · 7 dropped (the report and
 the letters already answer it) · 8 dropped as a question, kept as Güero's promise
 ("everybody brings one piece") · 9 folded into *sound* · 10 → *window* · 11 → *where you
@@ -119,18 +124,20 @@ say "build it". The sheet is the interview record; nobody re-asks her.
 
 ## 8. Open questions — the owner's calls
 
-1. **The window.** Shipped as Don Güero's promise, no date on it. Build it now (new tile,
-   cold read) or later? And what does it look out on — the north road toward Barrio
-   Norte (his pick; the trolley actually runs *south* of HQ, so "onto the trolley line"
-   as signed is the wrong wall), the street, or trees?
+1. ~~**The window.**~~ **Answered 2026-09-02** — the owner handed it to Nacho and Don Güero
+   together (*"maybe /nacho and /don-guero can work something cool out"*). Their joint
+   call: north wall, three panes over the desk, the view is the way to Barrio Norte, the
+   season repaints the sky and never the view. Built the same day. Still open on top of
+   it, for later: the view advancing as businesses finish.
 2. **Bare or mid-move.** Shipped bare, exactly as signed. Don Güero wanted moving-in
    debris (boxes, a cone, the coffee counter); Nacho wanted bare. Debris needs a box tile
    that passes the cold read first.
 3. **Nacho off the street.** Shipped: Nacho stands upstairs only (the mural stays). The
    alternative is a Nacho on the street *and* one upstairs.
-4. **Whose room.** Shipped: her answers live on the phone that gave them; the room in
-   everybody's game is the same bare room. The alternative is that her sheet becomes the
-   plan for Meridian's office itself, for every player.
+4. ~~**Whose room.**~~ **Retired 2026-09-02** — the owner asked for "who is the room for"
+   as a question in the game, so the sheet now *says* whose room it is (mine / ours /
+   whoever's around) instead of a build session guessing. Her answers still live only on
+   the phone that gave them.
 
 Also shipped without asking, easy to flip: the ❗ over both neighbours while a question
 is unanswered (the badge means *this neighbour has something to say*, and they do).
