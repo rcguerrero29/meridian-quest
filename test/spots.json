@@ -125,5 +125,62 @@
   "x": 10,
   "y": 11,
   "cam": "top"
+ },
+ {
+  "name": "23-taller-inside-3d",
+  "w": "ta",
+  "x": 10,
+  "y": 10,
+  "cam": "3d",
+  "ch": 99
+ },
+ {
+  "name": "24-espiga-inside-3d",
+  "w": "pa",
+  "x": 10,
+  "y": 8,
+  "cam": "3d",
+  "ch": 99
+ },
+ {
+  "name": "25-velazquez-inside-3d",
+  "w": "li",
+  "x": 10,
+  "y": 8,
+  "cam": "3d",
+  "ch": 99
+ },
+ {
+  "name": "26-nolasco-inside-3d",
+  "w": "no",
+  "x": 12,
+  "y": 6,
+  "cam": "3d",
+  "ch": 99
+ },
+ {
+  "name": "27-taller-lot-3d",
+  "w": "st",
+  "x": 23,
+  "y": 11,
+  "cam": "3d",
+  "yaw": 3.14159,
+  "ch": 99
+ },
+ {
+  "name": "28-calle-dos-shops-3d",
+  "w": "ex",
+  "x": 9,
+  "y": 3,
+  "cam": "3d",
+  "ch": 99
+ },
+ {
+  "name": "29-notario-door-3d",
+  "w": "st",
+  "x": 25,
+  "y": 3,
+  "cam": "3d",
+  "ch": 99
  }
 ]

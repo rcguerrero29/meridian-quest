@@ -29,11 +29,12 @@ const CAND=[process.env.CHROMIUM_PATH,'/opt/pw-browsers/chromium_headless_shell-
   const SPOTS = JSON.parse(fs.readFileSync(path.resolve(__dirname,'spots.json'),'utf8'));
   const OUT=path.resolve(__dirname,'..','shots');fs.mkdirSync(OUT,{recursive:true});
   for (const s of SPOTS) {
-    await pg.evaluate(([w,x,y,cam,yaw])=>{
+    await pg.evaluate(([w,x,y,cam,yaw,ch])=>{
+      if(ch!==undefined){chSeen=ch;applyGrowth();} /* a spot may raise the city further (ch = districts opened) */
       camSet(cam); world=w; px=fx=x; py=fy=y; moving=false; held=null; dir='down';
       if(cam==='3d'&&typeof T3!=='undefined'&&T3) T3.yaw=yaw;
       setWorldTag(); checkTalk();
-    }, [s.w,s.x,s.y,s.cam,s.yaw||0]);
+    }, [s.w,s.x,s.y,s.cam,s.yaw||0,s.ch]);
     await pg.waitForTimeout(700);
     const el = await pg.$('#vp');
     await el.screenshot({ path:path.join(OUT,`${s.name}.png`) });
