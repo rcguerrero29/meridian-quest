@@ -21,18 +21,22 @@ const WORLD_DEFS={
     by content/meridian/room.js, not by a letter here. The north window (three "|"
     panes over the desk, declared in art.js) looks north: the road out of the barrio
     and the line being laid — Nacho + Don Güero, 2026-09-02. */
+ /* MID-MOVE since 2026-09-02 (owner: "for the move it should be mid"): four taped boxes
+    (□, art.js), one of Don Güero's cones and a plant still in its pot. The arrival tile
+    (17,11) and the sight line from the stairs to the window stay clear — Nacho's
+    "nothing in the way" is an answer a player can pick, so it has to be true. */
  f2:["#########|||########",
      "#.........D........#",
+     "#.................P#",
+     "#..................#",
+     "#..................#",
+     "#..............□...#",
      "#..................#",
      "#..................#",
      "#..................#",
-     "#..................#",
-     "#..................#",
-     "#..................#",
-     "#..................#",
-     "#..................#",
-     "#..................#",
-     "#.................1#",
+     "#...............C..#",
+     "#................□□#",
+     "#.............□...1#",
      "#..................#",
      "####################"],
  st:["BBBBBBBBBBBBBBEBBBBBBBBBBBBBBB",
@@ -152,9 +156,10 @@ const DOORLOOK={E:{wood:"#4F5474",wood2:"#5F6588",frame:"#2E3147",glass:true}, /
                 L:{wood:"#B5432F",wood2:"#C9553F",frame:"#6E2A1E",glass:true}, /* La Cocina: terracotta */
                 O:{wood:"#C98A2D",wood2:"#E0A430",frame:"#6B4A17",glass:true}, /* La Obra · Studio: site yellow */
                 M:{wood:"#4E7A4A",wood2:"#5F8F5A",frame:"#2C4A2A",glass:true}}; /* El Mercado: stall green */
-const SOLIDX="ZSHI~9|";                    /* solid glyphs this pack adds (~ water, 9 doghouse, | window) */
+const SOLIDX="ZSHI~9|□";                   /* solid glyphs this pack adds (~ water, 9 doghouse, | window, □ moving box) */
 const MAPCOL={Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D",
-              "|":"#6E638A"}; /* window: shades to the wall-top colour, so 3D gives it no darker cap */
+              "|":"#6E638A",  /* window: shades to the wall-top colour, so 3D gives it no darker cap */
+              "□":"#C8A277"}; /* moving box: cardboard, paler than the produce crate so the map never confuses them */
 /* mini-map labels. `when` reads the city's flags: obra 0-2, mercado bool. */
 const TOWNLBL=[
  {x:15,y:0.75,s:10,c:"#F2E8D8",en:"MERIDIAN HQ  (⇧ FLOOR 2)",es:"MERIDIAN HQ  (⇧ PISO 2)"},

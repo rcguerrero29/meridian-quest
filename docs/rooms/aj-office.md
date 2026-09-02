@@ -30,8 +30,8 @@ Güero with a clipboard, Nacho with a sketch pad.
 **Cold read, 2026-09-02, 3D from the stairs (`shots/10-f2-stairs-3d.png`):** a stranger
 says *"an empty room with a table and two people."* Not "an office". That is correct for
 today: the room is signed to open bare (`docs/STORY.md` → ❗La oficina), and the barrio's
-furniture is what turns it into an office. Nacho's conversation is literally titled *An
-empty room*, so the frame and the fiction agree. When the first piece of furniture lands,
+furniture is what turns it into an office. Nacho's conversation was titled *An empty
+room*; with the boxes it is *Before you unpack*. When the first piece of furniture lands,
 re-take this frame and re-read it.
 
 ## 3. The props, and why each is there
@@ -41,12 +41,16 @@ re-take this frame and re-read it.
 | `D` | The old lead's desk | (10,1), alone under the north wall | **Load-bearing.** The room is inherited, not empty. Nacho's first question is about it. |
 | `1` | The stairs | (18,11) | The only way in or out. The office has no door, so every line says *stairs*. |
 | — | Nacho and Don Güero | (15,8) and (12,8) | Placed by `content/meridian/room.js`, not by a map letter. Both are in frame from the stairs in 3D. |
+| `□` ×4 | Taped moving boxes | (15,5), (17,10), (18,10), (14,11) | **Load-bearing since mid-move.** Yours, not the old lead's. The pack's second glyph (`art.js`): cardboard, a taped cross, a label — never the produce crate. Low and solid. The plan is that gifts land ON these tiles, so the room empties as it fills (Don Güero's proposal, not yet built). |
+| `C` | Don Güero's cone | (16,9) | The foreman was up here measuring. Three pixels tall, blocks no view. |
+| `P` | A plant, still in its pot | (18,2) | Somebody carried it up and set it where the light is. Nobody has decided anything yet. |
 | `\|` ×3 | The north window | (9,0) (10,0) (11,0), in the wall over the desk | **Built 2026-09-02.** The only honest view north of HQ: the back lot, the old road out of the barrio, two roofs, a pole, and on the horizon the graded line where the northbound trolley is being laid. Barrio Norte stays a promise you can now *see*. Declared in `content/meridian/art.js`; the sky takes the season's colour, the view never changes with it. Cold read passed alone on the tile sheet. |
 
-**Deliberately absent, and why:** moving boxes (the only crate tile in the pack is El
-Mercado's produce crate — it draws a tomato, a chile and a banana, and two of them by the
-stairs read as *groceries*, not *moving in*); the rug, plants and spare desks from the
-old map (bare means bare).
+**Deliberately absent, and why:** a rolled rug (a rug lying flat reads as *furnished*,
+which fights the point — it is Limpieza Velázquez's delivery instead); the coffee counter
+(furnishing, not moving — El Mercado's gift); the spare desks from the old map. **Standing
+rule from here:** nothing taller than a plant goes in the corridor from the stairs to the
+desk. Wall pieces go on the north wall outside the panes and on the west wall.
 
 ## 4. What changes, and when
 
@@ -61,18 +65,18 @@ time (S1 in the backlog). Do not build a separate path for it.
 ## 5. The grid — 20 wide, 14 tall
 
 ```
-####################
+#########|||########
 #.........D........#
+#.................P#
+#..................#
+#..................#
+#..............□...#
 #..................#
 #..................#
 #..................#
-#..................#
-#..................#
-#..................#
-#..................#
-#..................#
-#..................#
-#.................1#
+#...............C..#
+#................□□#
+#.............□...1#
 #..................#
 ####################
 ```
@@ -82,9 +86,11 @@ Every row is 20 characters; the world validator warns at boot if one is not.
 
 ## 6. New glyphs needed
 
-One, built: `|` the window, in `content/meridian/art.js` (the pack's first tile file),
-declared through `TILEART`/`TILEMETA`, solid via `SOLIDX`, coloured on the map via
-`MAPCOL`. It passed the cold read (`node test/tilesheet.js`) alone. Later, content-only:
+Two, built, both in `content/meridian/art.js` (the pack's first tile file), declared
+through `TILEART`/`TILEMETA`, solid via `SOLIDX`, coloured on the map via `MAPCOL`: `|`
+the window and `□` the taped moving box. Both passed the cold read (`node
+test/tilesheet.js`) alone. The taller's reserved characters (`0 6 7 8 = % i`) were not
+spent. Later, content-only:
 the view advancing a stage per finished business (stakes → graded roadbed → rail) — four
 drawings, four cold reads, and it cannot be tested until districts close (S1).
 
@@ -129,9 +135,10 @@ say "build it". The sheet is the interview record; nobody re-asks her.
    call: north wall, three panes over the desk, the view is the way to Barrio Norte, the
    season repaints the sky and never the view. Built the same day. Still open on top of
    it, for later: the view advancing as businesses finish.
-2. **Bare or mid-move.** Shipped bare, exactly as signed. Don Güero wanted moving-in
-   debris (boxes, a cone, the coffee counter); Nacho wanted bare. Debris needs a box tile
-   that passes the cold read first.
+2. ~~**Bare or mid-move.**~~ **Answered 2026-09-02 — mid-move** (*"i think for the move it
+   should be mid and we can have don guero provide estimates and possible furniture to
+   furnish"*). Built the same day on a box tile that passed the cold read. The furniture
+   catalogue with Don Güero's estimates is in `docs/BACKLOG.md` §6.
 3. **Nacho off the street.** Shipped: Nacho stands upstairs only (the mural stays). The
    alternative is a Nacho on the street *and* one upstairs.
 4. ~~**Whose room.**~~ **Retired 2026-09-02** — the owner asked for "who is the room for"
@@ -149,3 +156,15 @@ appear in: `invite`, `ui.hint` (both languages), Nacho's closing line, and Güer
 line. "Somebody's mom" is deliberately nobody's. There is no hero-gender field in the
 engine, so the Spanish avoids *jefe/jefa* on purpose. A pack that ships no `room.js`
 gets no interview, no tab and no storage key — tested.
+
+## 10. Don Güero's four questions after the mid-move build
+
+1. **The boxes as the room fills.** His pick: each gift lands *on* a box tile, so the room
+   empties as it fills, and Limpieza's gift is hauling the last two away. Costs nothing
+   (a delivery can write any tile). Not built yet — it rides with the first delivery.
+2. **The couch: one tile or two.** Two half-drawings make a real couch and prove the
+   first group delivery; one tile is a loveseat. A quarter of a sitting versus an eighth.
+3. **Who sends what.** His pick: assign all nine now, in the ledger, so the sight line is
+   protected and no two businesses send a bookshelf. The catalogue is the proposal.
+4. **Nacho's talk title.** *An empty room* was false with boxes in it; shipped as *Before
+   you unpack* / *Antes de desempacar*, Güero's suggestion. Nacho may rename it.

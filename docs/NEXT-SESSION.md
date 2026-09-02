@@ -37,10 +37,16 @@ bookend instead of repeating. Nacho's closing line pins the sheet to the window 
 A player who finished the interview before gets the ❗ back over Güero — he has a new
 question, which is the badge meaning what it always means.
 
-**Deliberately not in v1:** nothing changes in the room while she answers (needs S1's
-plural delivery seam); no moving boxes (the only crate tile is a produce crate and reads
-as groceries); the window's view advancing a stage per finished business (content-only
-later, but not testable until districts close).
+**And later still (branch, `mq-v48`):** the owner chose MID-MOVE — four taped boxes on the
+pack's second glyph (`□`, cold-read clean), Don Güero's cone, a plant in its pot; the
+sight line from the stairs to the window and the arrival tile stay clear, under test.
+Don Güero's furniture catalogue with per-piece estimates is `docs/BACKLOG.md` §6; his
+four follow-up questions are `docs/rooms/aj-office.md` §10. The two limits the owner
+thought were fixed (the 200-entry record, one storefront) are fixed now.
+
+**Deliberately not yet:** nothing changes in the room while she answers (the deliveries —
+an eighth of a sitting of engine work, the rest is drawing); the window's view advancing a
+stage per finished business (content-only, but not testable until districts close).
 
 **Still true and still the trap:** several models work this repo at once. Do the
 divergence check in step 1b below before reading a single line of engine code, and never

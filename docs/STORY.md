@@ -176,7 +176,7 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   *clients, not chapters*: a real client calls you back.
 - **El cuarto de arriba** (2026-09-02). The office stopped being a promise and became a
   bare room with two people in it. Nacho came up from the street with his sketch pad,
-  Güero with his clipboard, and between them they ask the player nine questions that
+  Güero with his clipboard, and between them they ask the player ten questions that
   have no wrong answer — the first conversation in the city that grades nothing. The
   payoff is paper: the sheet pinned above the old desk, the carbon copy handed up the
   stairs. *"Everybody brings one piece — that's how it works here"* is the promise the
@@ -411,6 +411,8 @@ hired you for. Three fixes, now canon:
 - 2026-09-02 · ❗La oficina · **the office opens bare and the barrio furnishes it** —
   the old lead's empty desk and a north window, then one piece per business · the mystery
   pays off in furniture instead of a cutscene, and the room visibly fills.
+  *Amended 2026-09-02 by the owner: the office opens MID-MOVE — taped boxes, a cone, a
+  plant in its pot; the furnishing rule is unchanged ("for the move it should be mid").*
 - 2026-09-02 · ❗La palabra · **the word is the reward** — a term enters through whoever
   NEEDS it, in the beat after a right answer; wrong answers stay funny and earn nothing ·
   vocabulary is given, never tested. Under ❗El giro the five terms are the TRADE's
@@ -426,7 +428,7 @@ hired you for. Three fixes, now canon:
   `principal`/Limpieza "implementation lead" collision stops being a bug the moment
   districts are told apart by the business rather than the job title.
 - 2026-09-02 · ❗El cuarto de arriba · **the office opens bare and two neighbours ask what
-  it should be** — Nacho (feel) and Don Güero (build), nine questions, no wrong answers,
+  it should be** — Nacho (feel) and Don Güero (build), ten questions, no wrong answers,
   no XP, nothing in the report; the answers become a sheet the player copies · the owner
   wanted AJ to design the office through the characters with no API, and a sheet she can
   hand over IS the back-and-forth. Nacho leaves the street to stand upstairs. The window is
@@ -445,6 +447,10 @@ hired you for. Three fixes, now canon:
   closing question is sharpened to seating so the two bookend instead of repeating. Nine
   questions become ten; an existing player gets the ❗ back over Güero, which is the badge
   meaning what it always means.
+- 2026-09-02 · ❗La mudanza · **the office opens mid-move** (owner: "for the move it should
+  be mid") · your own boxes at your feet and the old lead's desk untouched is a better
+  first line than an empty floor: "Look at it before it's yours" now has something to look
+  at. Nacho's talk retitled *Before you unpack* (Don Güero's words; Nacho may rename).
 - 2026-09-02 · Corrections carried, not absorbed · the mural deco sits at st(20,0), on the
   south-facing avenue wall EAST of HQ's entrance, not on HQ's own face (Nacho); the ledger's
   "a north window onto the trolley line" was the wrong wall and is amended in place with

@@ -54,7 +54,7 @@ const INTERVIEW={
        stand where the stairs let you out can SEE them in 3D (arrival is (17,11)). */
     {id:"nacho",emoji:"🖌️",name:{en:"Nacho · Mural Painter",es:"Nacho · Muralista"},
      world:"f2",x:15,y:8,look:{shirt:"#4B7FB3",skin:"#C08356",hair:"#26202B",style:"afro"},
-     talk:{en:"An empty room",es:"Un cuarto vacío"},
+     talk:{en:"Before you unpack",es:"Antes de desempacar"}, /* was "An empty room" — it is not, since the boxes (Don Güero's proposal; Nacho may rename) */
      steps:[
       {id:"desk",
        say:{en:"Look at it before it's yours. That desk was his — the one before you — and nobody's moved it.",

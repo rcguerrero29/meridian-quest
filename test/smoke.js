@@ -1187,13 +1187,22 @@ const CANDIDATES = [
     const $ = id => document.getElementById(id);
     if (typeof INTERVIEW === 'undefined' || typeof RM !== 'function' || !RM()) return ['no INTERVIEW declared by the pack (content/meridian/room.js)'];
     const I = RM(), U = I.ui[lang];
-    // the office opens bare, as signed: walls, floor, the old lead's desk, the stairs
+    // the office opens MID-MOVE (owner 2026-09-02: "for the move it should be mid"), and
+    // nothing else: the old lead's desk, the stairs, the three window panes, four taped
+    // moving boxes on the pack's own glyph, one of Don Güero's cones, a plant still in
+    // its pot. Don Güero's grid; the arrival tile and the sight line from the stairs to
+    // the window stay clear because Nacho's "nothing in the way" is an answer a player
+    // can pick, so it has to be true.
     const f2 = WORLDS.f2.rows;
     if (f2.length !== 14 || f2.some(r => r.length !== 20)) problems.push('f2 is not 20 wide x 14 tall');
     const glyphs = {}; f2.forEach(r => [...r].forEach(c => { glyphs[c] = (glyphs[c] || 0) + 1; }));
-    if (glyphs['D'] !== 1) problems.push(`the office should hold exactly one desk, found ${glyphs['D'] || 0}`);
+    const want = { D: 1, '□': 4, C: 1, P: 1, '1': 1 };
+    Object.entries(want).forEach(([c, n]) => { if (glyphs[c] !== n) problems.push(`the office should hold ${n} '${c}', found ${glyphs[c] || 0}`); });
     if (f2[11][18] !== '1') problems.push('the stairs moved — the portal from HQ lands at (17,11) beside them');
-    Object.keys(glyphs).forEach(c => { if (!'#.D1|'.includes(c)) problems.push(`the office is not bare: it holds '${c}'`); });
+    Object.keys(glyphs).forEach(c => { if (!'#.D1|□CP'.includes(c)) problems.push(`the office holds something unplanned: '${c}'`); });
+    if (f2[11][17] !== '.') problems.push('the arrival tile (17,11) is blocked');
+    [[16,10],[15,9],[14,8],[13,7],[12,6],[11,5],[11,4],[10,3],[10,2]].forEach(([x, y]) => {
+      if (f2[y][x] !== '.') problems.push(`the sight line from the stairs to the window is blocked at (${x},${y}) by '${f2[y][x]}'`); });
     // ---- la ventana del norte (Don Güero + Nacho, 2026-09-02): three panes IN the north wall,
     // over the old desk, declared by the pack (art.js) and never by the engine ----
     if (f2[0] !== '#########|||########') problems.push(`the north wall should carry three panes over the desk, got "${f2[0]}"`);
@@ -1202,11 +1211,16 @@ const CANDIDATES = [
     if (!TILES['|'] || TILES['|'].kind !== 'wall' || TILES['|'].lift !== TILES['#'].lift) problems.push('the window must be a wall-kind tile as tall as the wall beside it, or 3D shows a notch');
     if (!SOLID.has('|')) problems.push('the window is walkable — SOLIDX must carry it');
     if (!MAPCOL['|']) problems.push('the window has no colour on the village map');
-    // the cold-read sheet draws every tile with no scene: the art must tolerate that
+    // the moving box: the pack's second glyph — solid, low, its own colour on the map
+    if (typeof TILEART === 'undefined' || typeof TILEART['□'] !== 'function') problems.push('the pack declares no drawing for the moving box (TILEART["□"])');
+    if (!TILES['□'] || TILES['□'].kind !== 'prop' || !(TILES['□'].lift > 0 && TILES['□'].lift <= 6)) problems.push('the moving box must be a low prop (it must not block the view)');
+    if (!SOLID.has('□')) problems.push('the moving box is walkable — SOLIDX must carry it');
+    if (!MAPCOL['□'] || MAPCOL['□'] === MAPCOL['H']) problems.push('the moving box needs its own colour on the village map, not the produce crate\'s');
+    // the cold-read sheet draws every tile with no scene: the art must tolerate that, in both box variants
     try { const t = document.createElement('canvas'); t.width = 32; t.height = 32; const o = ctx; ctx = t.getContext('2d');
-      TILEDRAW['|']({ sx: 0, sy: 0, x: 10, y: 0, canopy: () => {} }); ctx = o; } catch (e) { problems.push('the window art throws when drawn alone: ' + e.message); }
-    // the engine's own glyph table must not have learned it — content declares, engine reads
-    // (checked by the portability guard for names; here for the glyph itself)
+      TILEDRAW['|']({ sx: 0, sy: 0, x: 10, y: 0, canopy: () => {} });
+      TILEDRAW['□']({ sx: 0, sy: 0, x: 1, y: 1, canopy: () => {} }); TILEDRAW['□']({ sx: 0, sy: 0, x: 1, y: 2, canopy: () => {} });
+      ctx = o; } catch (e) { problems.push('the pack art throws when drawn alone: ' + e.message); }
     // shape: everything a pack must declare, EN and ES in lockstep
     const keys = o => Object.keys(o).sort().join(',');
     if (keys(I.ui.en) !== keys(I.ui.es)) problems.push('INTERVIEW.ui EN/ES keys differ');
