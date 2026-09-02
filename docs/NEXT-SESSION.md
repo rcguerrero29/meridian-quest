@@ -28,9 +28,19 @@ stands on the street — one Nacho, upstairs.
 the room from her words. Spec, cold read and the four open owner calls:
 `docs/rooms/aj-office.md`.
 
+**Later the same day (on the branch at `mq-v47`, not merged):** the owner handed the
+window to Nacho and Don Güero together. Built: three panes in the north wall over the old
+desk, the pack's first tile file (`content/meridian/art.js`), the view north toward
+Barrio Norte, the sky taking the season. And "who is the room for" became Don Güero's
+first question (ten questions now); his last question was sharpened to seating so the two
+bookend instead of repeating. Nacho's closing line pins the sheet to the window frame.
+A player who finished the interview before gets the ❗ back over Güero — he has a new
+question, which is the badge meaning what it always means.
+
 **Deliberately not in v1:** nothing changes in the room while she answers (needs S1's
 plural delivery seam); no moving boxes (the only crate tile is a produce crate and reads
-as groceries); no window tile (Güero promises it, no date).
+as groceries); the window's view advancing a stage per finished business (content-only
+later, but not testable until districts close).
 
 **Still true and still the trap:** several models work this repo at once. Do the
 divergence check in step 1b below before reading a single line of engine code, and never

@@ -314,6 +314,9 @@ try{const cm0=localStorage.getItem("mqcam");if(CAMS.includes(cm0))camMode=cm0;}c
 const ISW=44,ISH=22;
 let ISOCOL=null;
 const IZH={"#":20,B:20,Q:17,Z:17,U:20,W:12,V:10,D:9,K:9,T:8,S:13,H:8,I:9,A:9,P:11,F:7,G:9,C:7,X:8,"1":10,"~":2,"9":11};
+/* a pack-declared tile takes its iso height from its declared lift (lift 13 ≈ 20px, the
+   wall) — this table used to be the only source, so a content window stood 6px short */
+const izh=g=>IZH[g]||((TILES[g]&&TILES[g].lift)?Math.round(TILES[g].lift*1.5):14);
 const shadeHex=(h,amt)=>amt>=0?mixHex(h,"#FFFFFF",amt):mixHex(h,"#000000",-amt);
 function isoDiamond(cx,cy,col){ctx.fillStyle=col;ctx.beginPath();
   ctx.moveTo(cx,cy-ISH/2);ctx.lineTo(cx+ISW/2,cy);ctx.lineTo(cx,cy+ISH/2);ctx.lineTo(cx-ISW/2,cy);
@@ -372,7 +375,7 @@ function drawIso(){
       [[-9,-1,9],[9,-1,9],[0,-7,10]].forEach(q=>{ctx.beginPath();ctx.arc(cx+q[0]+t2,cy-16+q[1],q[2],0,7);ctx.fill();});
       ctx.fillStyle="#B08FE0";[[-8,-4],[4,-9],[8,0],[-2,-2]].forEach(q=>{
         ctx.beginPath();ctx.arc(cx+q[0]+t2,cy-16+q[1],1.6,0,7);ctx.fill();});}});
-    else R.push({d:x+y,f:()=>isoBlock(cx,cy,ISOCOL[gch]||ISOCOL[w.rows[y][x]]||C.wall,IZH[gch]||IZH[w.rows[y][x]]||14)});
+    else R.push({d:x+y,f:()=>isoBlock(cx,cy,ISOCOL[gch]||ISOCOL[w.rows[y][x]]||C.wall,IZH[gch]||izh(w.rows[y][x]))});
   }
   const bill=(gx,gy,fn)=>{const[cx,cy]=P(gx,gy);
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};

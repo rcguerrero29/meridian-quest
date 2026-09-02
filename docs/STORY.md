@@ -181,6 +181,16 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   payoff is paper: the sheet pinned above the old desk, the carbon copy handed up the
   stairs. *"Everybody brings one piece — that's how it works here"* is the promise the
   barrio now owes, one business at a time, and her must-have is the first piece.
+- **La ventana del norte** (2026-09-02). The office got the one view in Meridian that
+  looks at something that hasn't happened yet. Three panes in the north wall over the old
+  lead's desk: the back lot, an old road leaving the barrio, two warehouse roofs, a power
+  pole — and on the horizon the survey stakes and graded dirt where the line is being
+  laid. Not Barrio Norte. The WAY to it. The room the barrio is furnishing for you looks
+  at the thing the whole city is getting ready for, and the sheet you filled out is pinned
+  to the frame in front of it. **The city's two progress bars now face opposite
+  directions and you sit between them:** the mural on the avenue is what the street sees
+  of what you already did; the window upstairs is what you see of what's coming. The
+  season may repaint the sky at the glass; it may never change what is out there.
 
 ## Open threads (promises already on the wall)
 
@@ -211,6 +221,12 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   where you know everybody, which is the whole reason it is comfortable. If the
   owner ever wants a fifth-and-beyond expansion, this is the sanctioned place —
   after the second lap, not instead of it.
+  **The window is now its only surface** (2026-09-02). The promise is visible from `f2`
+  and nowhere else, which is what keeps it a promise: you can watch it, you cannot walk
+  there. Two laws follow. The view may advance a stage as businesses finish (stakes →
+  graded roadbed → rail) — the second progress bar. And the view may NEVER show Barrio
+  Norte itself: no buildings on that horizon, ever, in any season. The moment the
+  skyline arrives, the promise is spent.
 - **The mural is the record's room** — one panel per finished business on Calle
   Principal, the decision report on the wall underneath. Unfinished business is
   left in charcoal outline, unjudged and paintable forever. This is OWNER.md's
@@ -417,6 +433,23 @@ hired you for. Three fixes, now canon:
   promised, not built — no window tile exists, and the trolley runs south of HQ, so "onto
   the trolley line" was the wrong wall (Don Güero). Four owner calls in
   `docs/rooms/aj-office.md` §8.
+- 2026-09-02 · ❗La ventana · **north wall, three panes, the way to Barrio Norte** —
+  the owner deferred the call to /nacho and /don-guero together ("i dont care that much
+  about the window but maybe /nacho and /don-guero can work something cool out") · the
+  window is cut, so Güero's line goes from promise to fact and the three answers are all
+  north-true; the season repaints the sky, never the view. Nacho's closing line pins the
+  sheet to the window frame: mural south = what you did, window north = what's coming.
+- 2026-09-02 · ❗Para quién · **Don Güero asks it, first line of his work order** —
+  owner: "i guess that should be a question in the creation - who is the room for" · it is
+  a count, not a feeling, and it changes the meaning of every other line on his form. His
+  closing question is sharpened to seating so the two bookend instead of repeating. Nine
+  questions become ten; an existing player gets the ❗ back over Güero, which is the badge
+  meaning what it always means.
+- 2026-09-02 · Corrections carried, not absorbed · the mural deco sits at st(20,0), on the
+  south-facing avenue wall EAST of HQ's entrance, not on HQ's own face (Nacho); the ledger's
+  "a north window onto the trolley line" was the wrong wall and is amended in place with
+  a dated note (Don Güero); the smoke test was written one commit ahead of the pack it
+  tests, on purpose — red first.
 - 2026-09-02 · Scope correction, recorded not silently fixed · ❗El listón was signed
   about the CITY's finale; the session generalised it to every ending in the owner's name
   and cited it against `finish()`. Corrected in OWNER.md and here — including the

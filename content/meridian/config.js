@@ -1,5 +1,5 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
-const GAMEV="mq-v46";
+const GAMEV="mq-v47";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -60,7 +60,8 @@ const GROWTH={
    `bridge` is the proving run; jacaranda, awnings and the light wash widen it later. */
 const SEASONS={
   muertos:{label:{en:"Día de Muertos",es:"Día de Muertos"},from:[10,18],to:[11,3],
-    art:{bridge:["#E0483C","#F07C24","#F2B705","#E8478F","#7B4BA8","#2FA5A0"]}}
+    art:{bridge:["#E0483C","#F07C24","#F2B705","#E8478F","#7B4BA8","#2FA5A0"],
+         sky:"#E8A24A"}} /* the north window's sky at dusk — Don Güero, 2026-09-02; draft like the rest */
 };
 const CHAPTERS=[
  /* need:12 of 16 — ANY twelve, from anywhere in the district. week1 is not "the

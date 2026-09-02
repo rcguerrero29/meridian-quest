@@ -51,7 +51,8 @@ engine, all landing in **S1**, none of them naming a business.
 | `NPCLOOK` is one flat global table | `npcs.js:14`, `engine.js:1949` | the taller's cast collides with Tovar, Chuy and Marcus — Don Tacho would wear Tovar's colours |
 | `GROWTH` cannot read a grade | `engine.js:3004`, `:3031` | the taller's endings change the world (cat on the Caprice, assistant switched off) and the code has no idea how well you did |
 | the report truncates at 200 entries | `engine.js:2495` | a five-district city is ~85 decision points before retries; restart never clears it. **Your earliest districts vanish from the portfolio, silently** |
-| the uppercase tile alphabet is spent | `engine.js:10` | new glyphs must be digits and symbols from here |
+| the uppercase tile alphabet is spent | `engine.js:10` | new glyphs must be digits and symbols from here — the first, `\|` the window, lives in `content/meridian/art.js` (2026-09-02) |
+| **a delivery is one tile** | S1's furniture registry, not yet written | surfaced by "who is the room for": a team room's one piece is a *set* (a table and its chairs). Let a delivery be a group of tiles from the start — cheap now, expensive after five packs declare theirs (Don Güero) |
 
 ---
 
@@ -84,6 +85,7 @@ engine, all landing in **S1**, none of them naming a business.
 | 7 | ~~Desk reads as a cardboard box; table reads as a dartboard; the mercado scale is illegible~~ | **shipped 2026-09-02** | desk with a monitor; gingham table with plates and chairs; a dial-and-tray scale. §15.8 |
 | 8 | **`LEVELS` saturates at 120 XP** while MAXXP is 350 → ~470 | small | you hit "AI Legend" a third of the way through Week One |
 | 9 | **Error log** — 3D failure is swallowed in four places and leaves no trace | ~55 lines | designed in full. §15.5 |
+| 10 | **Lit windows never light in 3D** — the night glow on facades runs only in the flat cameras, and 3D is the default | small | found by Don Güero while pricing the office window (2026-09-02); the window deliberately does not use it. Build it in 3D or write it down as known |
 | 10 | **A wall between you and the camera hides you** — stand just north of an interior wall in 3D and only your head shows | ~1h | found 2026-09-02 by the eyeball pass, pre-existing. Fade the wall, lower walls, or raise the camera — not chosen. §15.3 |
 
 ---
@@ -92,7 +94,7 @@ engine, all landing in **S1**, none of them naming a business.
 
 | Question | Who is waiting |
 |---|---|
-| **The room upstairs — four calls** (`docs/rooms/aj-office.md` §8): the window (build now or keep the promise, and what it faces — the trolley runs *south* of HQ, so "onto the trolley line" as signed is the wrong wall); bare or mid-move; Nacho off the street; whose room the sheet designs | shipped with a pick on each; one word flips any of them |
+| **The room upstairs — two calls left** (`docs/rooms/aj-office.md` §8): bare or mid-move; Nacho off the street. *(The window was handed to Nacho + Don Güero and built 2026-09-02; "whose room" retired — the interview now asks it.)* | shipped with a pick on each; one word flips either |
 | **How does a district's Saturday present itself?** Deferred to /nacho; must be content-declared so a pack can choose differently | blocks S1's ending refactor |
 | **Industries vs roles** — should the industry lead and the job role follow? | reframes what every pack owes |
 | **The city's record to a government NPC** — separating the player's portfolio from the city's memory | new, a story surface |
