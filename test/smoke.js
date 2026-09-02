@@ -86,7 +86,7 @@ const CANDIDATES = [
       assigned.add(qi); if (!QEN[qi]) problems.push('WNPC references missing quest ' + qi);
     })));
     QEN.forEach((_, i) => { if (!assigned.has(i)) problems.push('quest ' + i + ' unassigned'); });
-    Object.values(WORLDS).forEach(w => w.npcs.forEach(n => { if (!NPCLOOK[n.key]) problems.push('NPCLOOK missing ' + n.key); }));
+    Object.values(WORLDS).forEach(w => w.npcs.forEach(n => { if (!lookOf(n)) problems.push('no look for ' + n.npc + ' (' + n.key + ')'); }));
 
     if (auditReach().length) problems.push('boot reachability: ' + auditReach().join(' | '));
     // post-construction: the Studio (and Xochi) must be reachable once La Obra completes
@@ -190,17 +190,26 @@ const CANDIDATES = [
       if (!lu || lu.x !== 7 || lu.y !== 7) problems.push('Lupe did not move streetside after a rewind + rebuild'); }
     if (auditReach().length) problems.push('post-mercado reachability: ' + auditReach().join(' | '));
 
-    // the district closes at `need`, not at the full pack
-    merc.quests.slice(0, merc.need).forEach(i => done.add(i));
-    if (!chDue()) problems.push('district did not close at its `need` threshold');
-    finish();
-    if (document.getElementById('endGo').hidden) problems.push('no way off the final ending screen');
-    if (document.getElementById('endGo').textContent !== UI[lang].endStay)
-      problems.push('final chapter still offers a handover instead of returning to the city');
-    document.getElementById('endGo').click();
+    // every district from the mercado on closes at `need`, not at the full pack; every one
+    // but the last hands over to the next lot, and the last returns you to the city
+    for (let ci = 1; ci < CHAPTERS.length; ci++) {
+      const c = CHAPTERS[ci], last = ci === CHAPTERS.length - 1;
+      if (!(c.need < c.quests.length)) problems.push(`district ${c.id}: need must be lower than its pack size`);
+      c.quests.slice(0, c.need).forEach(i => done.add(i));
+      if (!chDue()) problems.push(`district ${c.id} did not close at its need threshold`);
+      finish();
+      if (!document.getElementById('epi').textContent) problems.push(`district ${c.id}: no ending text`);
+      if (document.getElementById('endGo').hidden) problems.push(`district ${c.id}: no way off the ending screen`);
+      const wantStay = document.getElementById('endGo').textContent === UI[lang].endStay;
+      if (last && !wantStay) problems.push('final district still offers a handover instead of returning to the city');
+      if (!last && wantStay) problems.push(`district ${c.id} offered "stay" with districts still to come`);
+      document.getElementById('endGo').click();
+      if (chSeen !== ci + 1) problems.push(`district ${c.id}: the cursor did not advance`);
+      if (isSolid(px, py)) problems.push(`district ${c.id}: the handover dropped the hero inside a wall`);
+      if (!last && auditReach().length) problems.push(`after ${c.id}: ` + auditReach().join(' | '));
+    }
     if (chSeen !== CHAPTERS.length) problems.push('final acknowledgement did not close the last chapter');
     if (chDue()) problems.push('an ending is still due after the last chapter closed');
-    if (isSolid(px, py)) problems.push('returning to the city dropped the hero inside a wall');
 
     // rewind: a fresh run must not inherit a shop it never earned
     document.getElementById('end').hidden = true;
@@ -1250,6 +1259,62 @@ const CANDIDATES = [
   });
   fails.push(...looks);
 
+  // ---- the whole city raised: every lot, door, room, cat and gift holds up ----
+  // Don Güero's four parcels (2026-09-02). Raise every storefront at once and check what
+  // the boot-time audit cannot: rooms behind doors that do not exist yet.
+  const city = await page.evaluate(() => {
+    const problems = [];
+    const keep = { chSeen, world, px, py, done: new Set(done) };
+    const g = GROWTH;
+    if (!Array.isArray(g.ribbons) || g.ribbons.length < 5) problems.push('the pack declares fewer than five storefronts');
+    chSeen = 99; applyGrowth();
+    if (auditReach().length) problems.push('with every lot raised: ' + auditReach().join(' | '));
+    ribbons().filter(r => r.doorstep).forEach(r => {
+      const w = WORLDS[r.world];
+      const doorTile = r.tiles.find(([y, x, ch]) => DOORSET.has(ch));
+      if (!doorTile) { problems.push(`${r.id}: no door in its storefront`); return; }
+      const [dy, dx, dch] = doorTile;
+      if (w.rows[dy][dx] !== dch) problems.push(`${r.id}: the door did not land at (${dx},${dy})`);
+      const p = PORTALS[r.world] && PORTALS[r.world][dch];
+      if (!p) { problems.push(`${r.id}: door '${dch}' has no portal`); return; }
+      const inside = WORLDS[p.to]; if (!inside) { problems.push(`${r.id}: leads to a missing world ${p.to}`); return; }
+      if (SOLID.has(inside.grid[p.y][p.x]) || inside.grid[p.y][p.x] === 'N') problems.push(`${r.id}: arrival (${p.x},${p.y}) in ${p.to} is blocked`);
+      const back = Object.values(PORTALS[p.to] || {}).find(q => q.to === r.world);
+      if (!back) problems.push(`${r.id}: no way back to the street from ${p.to}`);
+      else if (SOLID.has(w.grid[back.y][back.x])) problems.push(`${r.id}: the way back lands on a solid tile`);
+      if (r.doorstep.world !== r.world || SOLID.has(w.grid[r.doorstep.y][r.doorstep.x])) problems.push(`${r.id}: the doorstep is not a standable street tile`);
+    });
+    Object.entries(WORLDS).forEach(([id, w]) => {
+      for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+        const ch = w.rows[y][x]; if (!DOORSET.has(ch)) continue;
+        const N = y > 0 ? w.rows[y-1][x] : null, S = y < w.H-1 ? w.rows[y+1][x] : null, E = x < w.W-1 ? w.rows[y][x+1] : null, W = x > 0 ? w.rows[y][x-1] : null;
+        const open1 = c => c === null || !SOLID.has(c);
+        if (![N, S, E, W].some(c => c !== null && SOLID.has(c))) problems.push(`${id} (${x},${y}) '${ch}': a raised door with no wall beside it`);
+        if (!(open1(N) && open1(S)) && !(open1(E) && open1(W))) problems.push(`${id} (${x},${y}) '${ch}': a raised door you cannot walk through`);
+        [N, S, E, W].forEach(c => { if (c !== null && DOORSET.has(c)) problems.push(`${id} (${x},${y}) '${ch}': raised doors side by side`); });
+      }
+    });
+    (typeof CRITTERS !== 'undefined' ? CRITTERS : []).forEach(c => { const w = WORLDS[c.world];
+      if (!w) problems.push(`critter in a missing world ${c.world}`);
+      else if (SOLID.has(w.grid[c.y][c.x]) || w.grid[c.y][c.x] === 'N') problems.push(`${c.kind} ${c.name || ''} at ${c.world} (${c.x},${c.y}) sits on a blocked tile`); });
+    const f2 = WORLDS.f2;
+    ribbons().filter(r => r.world === 'f2').forEach(r => r.tiles.forEach(([y, x, ch]) => {
+      if (f2.rows[y][x] !== ch) problems.push(`${r.id}: gift '${ch}' did not land at (${x},${y})`);
+      if (x === 17 && y === 11) problems.push(`${r.id}: a gift on the arrival tile`);
+      if ([[16,10],[15,9],[14,8],[13,7],[12,6],[11,5],[11,4],[10,3],[10,2]].some(([sx, sy]) => sx === x && sy === y) && (TILES[ch] || {}).lift > 6) problems.push(`${r.id}: a tall gift on the sight line`);
+    }));
+    if (!f2.npcs.some(n => roomHosts[n.npc])) problems.push('the room hosts vanished when the office was rebuilt');
+    if (typeof drawTown === 'function') { try { drawTown(); } catch (e) { problems.push('the town plan throws with every lot raised: ' + e.message); } }
+    ['=', '%', '6', '7', '8', '0', 'i', '&', '!', '▣', '▯', '⊔', '○'].forEach(gch => { try {
+      const t = document.createElement('canvas'); t.width = 32; t.height = 32; const o = ctx; ctx = t.getContext('2d');
+      (TILEDRAW[gch])({ sx: 0, sy: 0, x: 1, y: 1, canopy: () => {} }); if (TILESIDE[gch]) TILESIDE[gch]({ sx: 0, sy: 0, x: 1, y: 1, canopy: () => {} }); ctx = o;
+    } catch (e) { problems.push(`tile '${gch}' throws when drawn alone: ${e.message}`); } });
+    chSeen = keep.chSeen; done = keep.done; applyGrowth();
+    world = keep.world; px = fx = keep.px; py = fy = keep.py;
+    return problems;
+  });
+  fails.push(...city);
+
   // ---- the record keeps every decision — it never silently drops your earliest work ----
   // Owner 2026-09-02: "I thought we fixed this 200 entries thing". It was not fixed: the
   // play log was cut to its last 200 entries on every write, so a five-district city
@@ -1277,14 +1342,16 @@ const CANDIDATES = [
   // (the old singular ribbon still works), each with its own doorstep.
   const ribs = await page.evaluate(() => {
     const problems = [];
-    const g = GROWTH, keep = { ribbons: g.ribbons, chSeen, world, px, py, done: new Set(done), hearts };
+    const g = GROWTH, keep = { ribbons: g.ribbons, ribbon: g.ribbon, chSeen, world, px, py, done: new Set(done), hearts };
     const st = () => WORLDS.st.rows[1][1];
     if (typeof ribbons !== 'function') return ['the engine has no ribbons() list'];
-    // the singular declaration still counts as a list of one
-    if (ribbons().length !== 1 || ribbons()[0] !== g.ribbon) problems.push('the old singular ribbon is not read as a list of one');
-    if (!g.ribbon.doorstep || g.ribbon.doorstep.x !== 6 || g.ribbon.doorstep.y !== 12) problems.push('the pack does not declare the mercado\'s doorstep (the engine used to hardcode it)');
+    const merc = ribbons().find(r => r.district === 1);
+    if (!merc || !merc.doorstep || merc.doorstep.x !== 6 || merc.doorstep.y !== 12) problems.push('the pack does not declare the mercado\'s doorstep (the engine used to hardcode it)');
+    // the old singular declaration still counts as a list of one (AJ's pack, older saves)
+    delete g.ribbons; g.ribbon = merc;
+    if (ribbons().length !== 1 || ribbons()[0] !== merc) problems.push('the old singular ribbon is not read as a list of one');
     // two storefronts: each rises when its own district opens
-    g.ribbons = [g.ribbon, { world: 'st', district: 2, tiles: [[1, 1, 'P']], doorstep: { world: 'st', x: 1, y: 2, dir: 'up' } }];
+    g.ribbons = [merc, { world: 'st', district: 2, tiles: [[1, 1, 'P']], doorstep: { world: 'st', x: 1, y: 2, dir: 'up' } }];
     done = new Set(); chSeen = 0; applyGrowth();
     if (ribbonUp()) problems.push('a storefront is up before any district opened');
     chSeen = 1; applyGrowth();
@@ -1293,19 +1360,20 @@ const CANDIDATES = [
     chSeen = 2; applyGrowth();
     if (!ribbonUp(g.ribbons[1]) || st() !== 'P') problems.push('the second storefront never rose — the city still stops at one');
     // the handover doorstep comes from the storefront that just opened, not from the engine
-    delete g.ribbons; chSeen = 0; applyGrowth();
+    g.ribbons = [merc]; chSeen = 0; applyGrowth();
     world = 'hq'; px = fx = 10; py = fy = 11; document.getElementById('end').hidden = false;
     document.getElementById('endGo').click();
     if (chSeen !== 1) problems.push('the handover did not open the next district');
     if (world !== 'st' || px !== 6 || py !== 12) problems.push(`the handover left you at ${world} (${px},${py}) — expected the declared doorstep st (6,12)`);
     // with no doorstep declared, the handover leaves you where you were
-    const ds = g.ribbon.doorstep; delete g.ribbon.doorstep;
+    const ds = merc.doorstep; delete merc.doorstep;
     chSeen = 0; applyGrowth(); world = 'hq'; px = fx = 10; py = fy = 11;
     document.getElementById('end').hidden = false; document.getElementById('endGo').click();
     if (world !== 'hq' || px !== 10 || py !== 11) problems.push('with no doorstep declared the engine still walked you somewhere of its own choosing');
-    g.ribbon.doorstep = ds;
+    merc.doorstep = ds;
     // put the city back
     if (keep.ribbons) g.ribbons = keep.ribbons; else delete g.ribbons;
+    if (keep.ribbon) g.ribbon = keep.ribbon; else delete g.ribbon;
     done = keep.done; chSeen = keep.chSeen; hearts = keep.hearts; applyGrowth();
     world = keep.world; px = fx = keep.px; py = fy = keep.py;
     document.getElementById('end').hidden = true; document.getElementById('world').hidden = false; setWorldTag(); checkTalk();
@@ -1584,7 +1652,9 @@ const CANDIDATES = [
   {
     const NAMES = ['mercado', 'chelo', 'nando', 'perla', 'chava', 'frijol', 'obra',
                    'cocina', 'xochi', 'lupe', 'guero', 'rosa', 'chuy', 'tovar', 'priya',
-                   'canela', 'robles', 'jacaranda', 'muertos', 'otono', 'otoño', 'nacho'];
+                   'canela', 'robles', 'jacaranda', 'muertos', 'otono', 'otoño', 'nacho',
+                   'tacho', 'yesenia', 'moy', 'licha', 'tito', 'vero', 'chente', 'karla', 'nolasco', 'bere',
+                   'espiga', 'velazquez', 'tuerca', 'concha', 'cloro'];
     // engine3d is the same engine, so it is held to the same rule
     for (const f of ['engine/engine.js', 'engine/engine3d.js']) {
       const src = fs.readFileSync(path.join(__dirname, '..', f), 'utf8');

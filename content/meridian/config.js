@@ -44,7 +44,20 @@ const GROWTH={
   /* a district's storefront ribbon, applied once that district has opened. `doorstep`
      is where the handover stands you — the mercado's front step. A pack may declare
      `ribbons:[…]` instead (one per storefront); this singular form still works. */
-  ribbon:{world:"st",district:1,tiles:MERCADO,doorstep:{world:"st",x:6,y:12,dir:"down"}},
+  ribbons:[
+   {id:"me",world:"st",district:1,tiles:MERCADO,  doorstep:{world:"st",x:6, y:12,dir:"down"}},
+   {id:"ta",world:"st",district:2,tiles:TALLER,   doorstep:{world:"st",x:23,y:12,dir:"down"}},
+   {id:"pa",world:"ex",district:3,tiles:ESPIGA,   doorstep:{world:"ex",x:6, y:1, dir:"down"}},
+   {id:"li",world:"ex",district:4,tiles:VELAZQUEZ,doorstep:{world:"ex",x:12,y:1, dir:"down"}},
+   {id:"no",world:"st",district:5,tiles:NOLASCO,  doorstep:{world:"st",x:25,y:1, dir:"down"}},
+   /* gifts upstairs — a delivery IS a storefront aimed at f2, and each lands on a moving box
+      (❗La caja). No doorstep on a gift, so the handover never stands you upstairs. */
+   {id:"gift-me",world:"f2",district:2,tiles:[[11,2,"K"],[11,3,"K"]]},
+   {id:"gift-ta",world:"f2",district:3,tiles:[[11,14,"○"]]},
+   {id:"gift-pa",world:"f2",district:4,tiles:[[2,11,"⊔"]]},
+   {id:"gift-li",world:"f2",district:5,tiles:[[5,15,"."],[10,18,"."]]},
+   {id:"gift-no",world:"f2",district:6,tiles:[[9,18,"▯"],[10,17,"."]]}
+  ],
   /* any attempt at this quest opens the wardrobe — the extra, not the quest */
   wardrobeQuest:15,
   /* and who runs the fitting room once it is open */
