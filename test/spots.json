@@ -62,5 +62,47 @@
   "x": 17,
   "y": 11,
   "cam": "top"
+ },
+ {
+  "name": "14-cocina-3d",
+  "w": "lc",
+  "x": 8,
+  "y": 6,
+  "cam": "3d"
+ },
+ {
+  "name": "15-street-fence-3d",
+  "w": "st",
+  "x": 19,
+  "y": 7,
+  "cam": "3d"
+ },
+ {
+  "name": "16-cocina-front",
+  "w": "lc",
+  "x": 8,
+  "y": 6,
+  "cam": "front"
+ },
+ {
+  "name": "17-street-doors-3d",
+  "w": "st",
+  "x": 14,
+  "y": 3,
+  "cam": "3d"
+ },
+ {
+  "name": "18-park-fence-3d",
+  "w": "pk",
+  "x": 5,
+  "y": 4,
+  "cam": "3d"
+ },
+ {
+  "name": "19-calle-dos-gate-3d",
+  "w": "ex",
+  "x": 6,
+  "y": 6,
+  "cam": "3d"
  }
 ]

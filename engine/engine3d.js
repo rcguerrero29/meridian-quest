@@ -36,15 +36,22 @@ function t3CheckK(){ /* a DPR change (fullscreen, a window dragged between monit
    t: a pinned clock for the artist (rc.t). An animated glyph — the door's pulsing
    light — bakes the same frame every build, at its brightest; the pulse itself is
    animated in 3D by t3Glow, not frozen at whatever the bake happened to catch. */
-function t3BakeGlyph(g,opaque,base,raw){
+function t3BakeGlyph(g,opaque,base,raw,side,frame,x,y){
   const K=T3.K,c=document.createElement("canvas");c.width=32*K;c.height=32*K;
   const old=ctx;ctx=c.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
   try{
     if(opaque){ctx.fillStyle=raw?(base||C.wall):tc(base||C.wall);ctx.fillRect(0,0,32,32);}
-    const tf=TILEDRAW[g];if(tf)tf({sx:0,sy:0,x:0,y:0,t:380*Math.PI/2,canopy:()=>{}});
+    /* a standing cutout wears its SIDE view (TILESIDE), never its top-down drawing. x,y
+       reach the artist so a drawing that varies by tile (a box stacked on odd tiles, a
+       coffee machine every third counter tile) varies here too. */
+    const tf=side?sideArt(g):TILEDRAW[g];if(tf)tf({sx:0,sy:0,x:x|0,y:y|0,t:380*Math.PI/2,canopy:()=>{}});
+    /* a light frame baked around a door face, so it reads against a dark wall from across
+       the room (owner, 2026-09-02: "hard to see some doors") */
+    if(frame){ctx.fillStyle=frame;ctx.fillRect(0,0,32,3);ctx.fillRect(0,29,32,3);ctx.fillRect(0,0,3,32);ctx.fillRect(29,0,3,32);}
   }finally{ctx=old;}
   return c;
 }
+const DOORLIGHT="#E8D6B0"; /* the door frame colour in 3D: warm sand against the dark wall */
 function t3Tex(c,ground){const t=new THREE.CanvasTexture(c);
   t.magFilter=THREE.NearestFilter; /* crisp pixels up close */
   if(ground&&T3.renderer){ /* the floor at glancing angles was the blur (owner) —
@@ -130,13 +137,13 @@ function t3Build(key){
     const cx=x+0.5,cz=y+0.5;
     if(DOORSET.has(w.rows[y][x])&&!SOLID.has(gch)){ /* a door stands IN its wall — you walk through it */
       const g=w.rows[y][x];
-      flatTex[g]=flatTex[g]||t3Tex(t3BakeGlyph(g,true,C.doorFrame,true));
+      flatTex[g]=flatTex[g]||t3Tex(t3BakeGlyph(g,true,C.doorFrame,true,false,DOORLIGHT));
       /* which way the wall runs: walls north and south of the door → the door faces east-west.
          The old plane had no rotation at all, so 6 of HQ's doors stood 90° off their wall. */
       const ns=sol(x,y-1)&&sol(x,y+1)&&!(sol(x-1,y)&&sol(x+1,y));
       /* a thin box, not a plane: edge-on at the two side stops a plane vanished; a slab
          shows its jamb. Art on both broad faces, frame colour on the four edges. */
-      const jamb=new THREE.MeshLambertMaterial({color:new THREE.Color(C.doorFrame)});
+      const jamb=new THREE.MeshLambertMaterial({color:new THREE.Color(DOORLIGHT)}); /* the jamb is the frame's edge — light, like the frame */
       const art=new THREE.MeshLambertMaterial({map:flatTex[g]});
       const door=new THREE.Mesh(new THREE.BoxGeometry(1,1,0.14),[jamb,jamb,jamb,jamb,art,art]);
       door.position.set(cx,0.5,cz);door.rotation.y=ns?Math.PI/2:0;
@@ -150,15 +157,15 @@ function t3Build(key){
         lin.position.set(cx,(1+h)/2,cz);lin.userData={lintel:true,x,y};grp.add(lin);}
       /* light under the door — the 2D "this one opens" pulse, alive in 3D instead of
          baked at a random brightness */
-      const gm=new THREE.MeshBasicMaterial({color:0xFFE9A8,transparent:true,opacity:0.35,depthWrite:false});
-      const gl=new THREE.Mesh(new THREE.PlaneGeometry(ns?0.44:0.72,ns?0.72:0.44),gm); /* spills a step either side */
+      const gm=new THREE.MeshBasicMaterial({color:0xFFE9A8,transparent:true,opacity:0.5,depthWrite:false});
+      const gl=new THREE.Mesh(new THREE.PlaneGeometry(ns?0.6:1.0,ns?1.0:0.6),gm); /* light spills out of a door — the pool is what you see from across a room */
       gl.rotation.x=-Math.PI/2;gl.position.set(cx,0.012,cz);gl.userData={glow:true,x,y};
       T3.glows.push(gm);grp.add(gl);
       continue;
     }
     if("345".includes(w.rows[y][x])&&!SOLID.has(gch)){ /* agility gear: walkable cutouts */
       const g=w.rows[y][x];
-      flatTex[g]=flatTex[g]||t3Tex(t3BakeGlyph(g,false));
+      flatTex[g]=flatTex[g]||t3Tex(t3BakeGlyph(g,false,null,false,true));
       const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[g]}));
       s.center.set(0.5,0.06);s.scale.set(1.05,1.05,1);s.position.set(cx,0,cz);
       T3.tintables.push(s.material);grp.add(s);
@@ -177,7 +184,7 @@ function t3Build(key){
         kd==="wall"?[face,face,top,side,face,face]:[side,side,top,side,face,face]);
       box.position.set(cx,h/2,cz);box.userData={wall:kd==="wall",g:gch,x,y};grp.add(box);
     }else if(kd==="fence"){
-      flatTex[gch]=flatTex[gch]||t3Tex(t3BakeGlyph(gch,false));
+      flatTex[gch]=flatTex[gch]||t3Tex(t3BakeGlyph(gch,false,null,false,true));
       const p=new THREE.Mesh(new THREE.PlaneGeometry(1,0.8),
         new THREE.MeshLambertMaterial({map:flatTex[gch],side:THREE.DoubleSide,transparent:true,alphaTest:0.3}));
       p.position.set(cx,0.4,cz);grp.add(p);
@@ -199,9 +206,12 @@ function t3Build(key){
       const cs=new THREE.Sprite(new THREE.SpriteMaterial({map:T3.canopyTex}));
       cs.scale.set(1.7,1.7,1);cs.position.set(cx,1.05,cz);
       T3.tintables.push(cs.material);grp.add(cs);
-    }else{ /* furniture, props, appliances, the doghouse: standing cutouts */
-      flatTex[gch]=flatTex[gch]||t3Tex(t3BakeGlyph(gch,false));
-      const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[gch]}));
+    }else{ /* furniture, props, appliances, the doghouse: standing cutouts, drawn for the front.
+              One bake per glyph AND per (x+y) mod 6 — enough for any parity an artist uses,
+              at most six pictures per glyph — so a drawing that varies by tile still varies. */
+      const vk=gch+"|"+(((x+y)%6)+6)%6;
+      flatTex[vk]=flatTex[vk]||t3Tex(t3BakeGlyph(gch,false,null,false,true,null,x,y));
+      const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[vk]}));
       s.center.set(0.5,0.06);s.scale.set(1.05,1.05,1);
       s.position.set(cx,0,cz);
       T3.tintables.push(s.material);grp.add(s);

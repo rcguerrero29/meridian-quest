@@ -1107,6 +1107,30 @@ const CANDIDATES = [
            if (iso.unknown !== 14) fails.push('iso lost its 14px default for an undeclared glyph'); }
   }
 
+  // ---- a piece of furniture is drawn for the camera that sees it ----
+  // Owner 2026-09-02: "some furniture still looks bad like the table and fences and the
+  // coffee machine". Root cause, from the frames: every prop was drawn from ABOVE and
+  // then stood up as a cutout in the front and 3D cameras — a gingham table stood up is
+  // a dartboard. The professional fix is a second drawing per prop, made for the view
+  // that sees it standing (HD-2D games draw every object from the front, never from
+  // above). TILESIDE holds those; a glyph without one falls back to its top-down art;
+  // a pack adds or overrides its own through TILEART_SIDE.
+  const side = await page.evaluate(() => {
+    const problems = [];
+    if (typeof TILESIDE === 'undefined' || typeof sideArt !== 'function') return ['the engine has no side-view registry (TILESIDE / sideArt)'];
+    ['T', 'K', 'V'].forEach(g => { if (typeof TILESIDE[g] !== 'function') problems.push(`no side view for '${g}'`); });
+    if (sideArt('T') === TILEDRAW['T']) problems.push('the table\'s side view is its top-down drawing');
+    if (sideArt('P') !== TILEDRAW['P']) problems.push('a glyph with no side view must fall back to its top-down drawing');
+    Object.keys(TILESIDE).forEach(g => { try {
+      const t = document.createElement('canvas'); t.width = 32; t.height = 32; const o = ctx; ctx = t.getContext('2d');
+      TILESIDE[g]({ sx: 0, sy: 0, x: 1, y: 1, canopy: () => {} }); ctx = o;
+      const d = t.getContext('2d').getImageData(0, 0, 32, 32).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) n++;
+      if (n < 100) problems.push(`the side view of '${g}' paints almost nothing`);
+    } catch (e) { problems.push(`the side view of '${g}' throws: ${e.message}`); } });
+    return problems;
+  });
+  fails.push(...side);
+
   // ---- the record keeps every decision — it never silently drops your earliest work ----
   // Owner 2026-09-02: "I thought we fixed this 200 entries thing". It was not fixed: the
   // play log was cut to its last 200 entries on every write, so a five-district city

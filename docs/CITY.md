@@ -86,6 +86,12 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
   decision instead of its last 200. Owner: *"I thought we fixed this 200 entries thing
   and not stopping at a certain amount of store fronts"* — it was not fixed when they
   said it; it is now. Both under test.
+- 2026-09-02 — **Muebles de frente**: the front and 3D cameras stop standing top-down art
+  up like cardboard signs. `TILESIDE` holds a second drawing per prop for the cameras that
+  see it standing (table, counter with a coffee machine every third tile, stove), the
+  barricade `G` is an orange board with white stripes instead of a ladder, and every door
+  in 3D wears a light frame with a bigger pool of light under it. Owner's report:
+  "hard to see some doors" and "the table and fences and the coffee machine". IDEAS §15.11.
 - 2026-08-31 — **World upgrade wave 1**: draw() tile chain became the TILEDRAW
   registry (28 glyphs + doors as data; content packs override via TILEART) — the
   entities-as-data law now covers ART. Visible: per-tile floor variation, walls cast

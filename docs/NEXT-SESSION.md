@@ -44,6 +44,11 @@ Don Güero's furniture catalogue with per-piece estimates is `docs/BACKLOG.md` �
 four follow-up questions are `docs/rooms/aj-office.md` §10. The two limits the owner
 thought were fixed (the 200-entry record, one storefront) are fixed now.
 
+**Also on this branch (`mq-v49`):** the owner's two visual reports answered — doors in 3D
+get a light frame and a bigger light pool; furniture gets side views (`TILESIDE`, IDEAS
+§15.11) starting with the table, the counter and the stove, and the barricade no longer
+reads as a ladder. Any other prop the owner names gets a side view the same way.
+
 **Deliberately not yet:** nothing changes in the room while she answers (the deliveries —
 an eighth of a sitting of engine work, the rest is drawing); the window's view advancing a
 stage per finished business (content-only, but not testable until districts close).

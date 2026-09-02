@@ -445,8 +445,12 @@ TILEDRAW["g"]=rc=>{const{sx,sy,x,y}=rc; /* grass tuft on the floor tile */
       ctx.strokeStyle=tc("#5FA86A");ctx.lineWidth=1.6;ctx.lineCap="round";
       [[8,0],[13,-2],[18,1],[23,-1]].forEach(p=>{ctx.beginPath();
         ctx.moveTo(sx+p[0],sy+24);ctx.quadraticCurveTo(sx+p[0]+p[1],sy+18,sx+p[0]+p[1]*1.6,sy+13);ctx.stroke();});};
-TILEDRAW["G"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#C98A2D";ctx.fillRect(sx+4,sy+2,4,TS-4);ctx.fillRect(sx+24,sy+2,4,TS-4);
-      ctx.fillRect(sx+4,sy+6,24,4);ctx.fillRect(sx+4,sy+22,24,4);};
+TILEDRAW["G"]=rc=>{const{sx,sy,x,y}=rc; /* a construction barricade: an orange board with white stripes on
+      two legs. It was an orange frame with two rails, which stood up in 3D as a ladder (owner). */
+      ctx.fillStyle="#C25A1E";ctx.fillRect(sx+5,sy+14,4,15);ctx.fillRect(sx+23,sy+14,4,15);   /* legs */
+      ctx.fillRect(sx+5,sy+21,22,2.5);                                                      /* the lower rail */
+      ctx.fillStyle="#E0662B";ctx.fillRect(sx+2,sy+7,28,8);                                   /* the board */
+      ctx.fillStyle="#F4F1EA";for(let i=0;i<3;i++){const x0=sx+5+i*8;ctx.beginPath();ctx.moveTo(x0,sy+15);ctx.lineTo(x0+4,sy+7);ctx.lineTo(x0+7,sy+7);ctx.lineTo(x0+3,sy+15);ctx.closePath();ctx.fill();}};
 TILEDRAW["C"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#E0662B";ctx.beginPath();ctx.moveTo(sx+16,sy+8);ctx.lineTo(sx+23,sy+26);ctx.lineTo(sx+9,sy+26);ctx.closePath();ctx.fill();
       ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+11.5,sy+17,9,3);};
 TILEDRAW["X"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#E7C25A";ctx.fillRect(sx+4,sy+4,TS-8,TS-12);ctx.fillStyle="#6B5210";
@@ -622,6 +626,40 @@ DOORSET.forEach(dch=>TILEDRAW[dch]=rc=>{const{sx,sy}=rc;
       ctx.globalAlpha=1;
     });
 if(typeof TILEART!=="undefined")Object.assign(TILEDRAW,TILEART);
+/* ---------- TILESIDE — a tile drawn for the cameras that see it STANDING ----------
+   The front-profile camera and the 3D cutouts used to stand the top-down drawing up
+   like a cardboard sign: a gingham table became a dartboard, a counter a grey square
+   with a cup (owner, 2026-09-02). HD-2D games draw every object from the front, never
+   from above. A glyph without a side view falls back to its top-down art; a content
+   pack adds or overrides through TILEART_SIDE. The cold-read sheet draws both. */
+const TILESIDE={};
+TILESIDE["T"]=rc=>{const{sx,sy}=rc; /* a restaurant table from the front: chair backs behind, gingham over the edge, plates, legs */
+      ctx.fillStyle="#5E3B20";ctx.fillRect(sx+2,sy+7,5,15);ctx.fillRect(sx+25,sy+7,5,15);
+      ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+3,sy+13,26,4);
+      ctx.fillStyle="#C0392B";for(let i=0;i<7;i+=2)ctx.fillRect(sx+3+i*4,sy+13,4,4);
+      ctx.fillStyle="#E8DCC8";ctx.fillRect(sx+3,sy+17,26,6);
+      ctx.fillStyle="#C0392B";for(let i=1;i<7;i+=2)ctx.fillRect(sx+3+i*4,sy+17,4,3);
+      ctx.fillStyle="#FFFFFF";[10,22].forEach(px=>{ctx.beginPath();ctx.ellipse(sx+px,sy+12.5,4,1.6,0,0,7);ctx.fill();});
+      ctx.fillStyle="#7A4E2C";ctx.fillRect(sx+5,sy+23,3,7);ctx.fillRect(sx+24,sy+23,3,7);};
+TILESIDE["K"]=rc=>{const{sx,sy,x,y}=rc; /* a counter from the front. A coffee machine on every third
+      tile (a run of fourteen machines is not a counter); the rest carry a cup and a napkin stand. */
+      ctx.fillStyle=tc(C.counter);ctx.fillRect(sx+1,sy+16,30,14);
+      ctx.fillStyle="#9AA4B0";ctx.fillRect(sx+1,sy+14,30,3);
+      ctx.fillStyle="#6E7884";ctx.fillRect(sx+4,sy+21,8,6);ctx.fillRect(sx+20,sy+21,8,6);
+      if(((x|0)+(y|0))%3===2){
+        ctx.fillStyle="#3A3F46";ctx.fillRect(sx+9,sy+3,14,11);ctx.fillStyle="#23272C";ctx.fillRect(sx+9,sy+3,14,3);
+        ctx.fillStyle="#E0662B";ctx.fillRect(sx+11,sy+7,2,2);
+        ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+14,sy+10,5,4);ctx.fillRect(sx+19,sy+11,1.5,2);}
+      else{ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+7,sy+10,5,4);ctx.fillRect(sx+12,sy+11,1.5,2);   /* a cup */
+        ctx.fillStyle="#C9B7A0";ctx.fillRect(sx+19,sy+9,6,5);ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+20,sy+7,4,3);}};
+TILESIDE["V"]=rc=>{const{sx,sy}=rc; /* a stove from the front: burners over the edge, knobs, the oven window */
+      ctx.fillStyle="#3A3F46";ctx.fillRect(sx+3,sy+8,26,22);
+      ctx.fillStyle="#23272C";ctx.fillRect(sx+3,sy+6,26,3);[[9,6],[16,6],[23,6]].forEach(p=>{ctx.beginPath();ctx.ellipse(sx+p[0],sy+p[1],3.2,1.4,0,0,7);ctx.fill();});
+      ctx.fillStyle="#E0662B";ctx.fillRect(sx+14,sy+6,4,1.2);
+      ctx.fillStyle="#AEB6BE";[8,13,19,24].forEach(px=>{ctx.beginPath();ctx.arc(sx+px,sy+12,1.6,0,7);ctx.fill();});
+      ctx.fillStyle="#1B1E22";ctx.fillRect(sx+7,sy+16,18,10);ctx.fillStyle="#AEB6BE";ctx.fillRect(sx+7,sy+15,18,1.2);};
+if(typeof TILEART_SIDE!=="undefined")Object.assign(TILESIDE,TILEART_SIDE);
+const sideArt=g=>TILESIDE[g]||TILEDRAW[g];
 /* ---------- TILES: glyph-class metadata (IDEAS §10 step ①) ----------
    What a tile IS — one row per glyph — so any camera derives drawing from meaning
    instead of meaning living in one renderer's pixels. `lift` is how tall the tile
@@ -728,7 +766,9 @@ function drawFront(){
         ctx.fillStyle="rgba(15,12,20,.16)";
         ctx.beginPath();ctx.ellipse(sx+16,sy+27.5,11,3.2,0,0,7);ctx.fill();
       }
-      const tf=TILEDRAW[ch]||TILEDRAW[gch];if(tf)tf({sx,sy,x,y,canopy:queueCanopy});
+      const face=kd==="wall"||kd==="facade";
+      const tf=face?(TILEDRAW[ch]||TILEDRAW[gch]):(sideArt(ch)||sideArt(gch)); /* a wall wears its face; a prop is seen standing */
+      if(tf)tf({sx,sy,x,y,canopy:queueCanopy});
       if(m.awn)ctx.fillStyle="rgba(15,12,20,.18)",ctx.fillRect(sx,sy+m.awn,TS,3); /* the awning shades its facade */
       if(kd==="fence"){ /* posts where a run ends — a fence has ends, not edges */
         const post=pxx=>{ctx.fillStyle=tc("#6E5334");ctx.fillRect(pxx,sy-2,4.5,TS+2);

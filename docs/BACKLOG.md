@@ -87,6 +87,8 @@ engine, all landing in **S1**, none of them naming a business.
 | 8 | **`LEVELS` saturates at 120 XP** while MAXXP is 350 → ~470 | small | you hit "AI Legend" a third of the way through Week One |
 | 9 | **Error log** — 3D failure is swallowed in four places and leaves no trace | ~55 lines | designed in full. §15.5 |
 | 10 | **Lit windows never light in 3D** — the night glow on facades runs only in the flat cameras, and 3D is the default | small | found by Don Güero while pricing the office window (2026-09-02); the window deliberately does not use it. Build it in 3D or write it down as known |
+| 11 | ~~**Doors hard to see in 3D**~~ | **shipped 2026-09-02** | a light frame baked around every door face and on the jamb, and a bigger, brighter pool of light under it. Owner: "it is now hard to see some doors". §15.11. *Still open:* a marker over a door when you stand near it |
+| 12 | ~~**Furniture stood up as cutouts** — the table read as a dartboard, the counter as a grey sign, the barricade as a ladder~~ | **first slice shipped 2026-09-02** | `TILESIDE`: a second drawing per prop for the cameras that see it standing; table, counter, stove done, barricade redrawn. The rest read acceptably in the frames and get a side view the moment the owner reports one. §15.11 |
 | 10 | **A wall between you and the camera hides you** — stand just north of an interior wall in 3D and only your head shows | ~1h | found 2026-09-02 by the eyeball pass, pre-existing. Fade the wall, lower walls, or raise the camera — not chosen. §15.3 |
 
 ---

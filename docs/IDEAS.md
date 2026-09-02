@@ -1113,3 +1113,39 @@ bridge. Do not build it for one park tile alone; build it when a second thing ne
 or when the owner says the arch is worth it on its own.
 
 **Not a blocker for §15.9.** Seasons are pure colour and can ship without any of this.
+
+### 15.11 PROPS DRAWN FOR THE CAMERA THAT SEES THEM — BUILT 2026-09-02 (first slice)
+
+**The owner's report:** *"some furniture still looks bad like the table and fences and
+the coffee machine"*, and *"it is now hard to see some doors"*.
+
+**Root cause, from the frames (`shots/14-cocina-3d.png` before the fix):** every prop is
+drawn once, from ABOVE, and the front-profile and 3D cameras stood that same picture up
+like a cardboard sign. A gingham table from above is a disc; stood up it is a dartboard.
+A counter from above is a grey square with a cup on it; stood up it is a grey sign.
+
+**How the professionals do it:** HD-2D games (Octopath Traveler and its family) never
+draw an object from above. Every object has ONE sprite drawn from the front, at a slight
+three-quarter, and the camera is pitched so that sprite reads as standing in the world.
+Doors get three things: a frame that contrasts with the wall, light spilling out of the
+doorway onto the floor, and a marker or label when you are near.
+
+**Built:** `TILESIDE` — a second drawing per prop for the cameras that see it standing.
+`sideArt(g)` returns the side view or falls back to the top-down art. The front camera
+and the 3D cutouts (and fence planes) use it; walls and facades keep their face art. A
+pack adds or overrides with `TILEART_SIDE`. The cold-read sheet now writes a second
+image, `shots/13b-side-tiles.png`. First slice: the table `T`, the counter `K` (a coffee
+machine every third tile — fourteen in a row was not a counter), the stove `V`. The
+barricade `G` was redrawn in both views (an orange board with white stripes on two legs;
+it was an orange frame that stood up as a ladder). Doors in 3D: a warm sand frame baked
+around the door face and on the jamb, and the light pool under the door grown from
+0.72×0.44 at 35% to 1.0×0.6 at 50%.
+
+**Still drawn from above and stood up, and judged acceptable in the frames:** `D` desk
+(already three-quarter since S0), `P` plant, `C` cone, `X` site sign, `H` crate, `S`
+shelves, `I` scale, `A` drafting table, `U` panel, `9` doghouse, `□` box, `W` fridge,
+`F` picket fence (reads as a fence in the park, `shots/18-park-fence-3d.png`), `1` stairs.
+Any of these the owner reports gets a side view the same way — one drawing, one cold read.
+
+**Not done:** a marker or label over a door when you stand near it (the third door
+affordance). The talk bar already names people; a door could get the same treatment.
