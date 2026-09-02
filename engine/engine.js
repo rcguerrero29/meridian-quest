@@ -55,6 +55,23 @@ function addChill(c){ /* {name:{en,es},world,x,y,look} → chat NPC; returns key
   w.grid[y][x]="N";
   return key;}
 (typeof CHILL!=="undefined"?CHILL:[]).forEach(c=>addChill(c));
+/* ---------- the room interview seam ----------
+   A pack may declare INTERVIEW (content/<pack>/room.js): people who stand in a room and
+   ask questions with no right answer, whose answers become a plain sheet the player
+   can copy. The engine reads only SHAPES — hosts, steps, opts, ui — never a name. A
+   pack that declares nothing gets nothing: no people, no tab, no storage key (the AJ
+   law). Owner, 2026-09-02: "AJ can interact through the characters ... i dont want an
+   api setup" — the sheet IS the back-and-forth. */
+const RM=()=>(typeof INTERVIEW!=="undefined"&&INTERVIEW&&Array.isArray(INTERVIEW.hosts)&&INTERVIEW.ui)?INTERVIEW:null;
+const RMU=()=>{const r=RM();return r?(r.ui[lang]||r.ui.en||{}):{};};
+const roomHosts={}; /* chill key → host declaration */
+let roomAns={};      /* "host:step" → {pick|text|out, hist[]} — per device, never in the save */
+try{if(RM()){const r0=JSON.parse(localStorage.getItem("mqroom")||"{}");
+  if(r0&&typeof r0==="object"&&r0.a&&typeof r0.a==="object")roomAns=r0.a;}}catch(e){}
+function roomPersist(){if(!RM())return;try{localStorage.setItem("mqroom",JSON.stringify({v:1,a:roomAns}));}catch(e){}}
+(RM()?RM().hosts:[]).forEach(h=>{const k=addChill(h);if(k)roomHosts[k]=h;
+  else console.warn("ROOM host "+h.id+" cannot stand at "+h.world+" ("+h.x+","+h.y+") — solid or taken");});
+const roomPending=n=>{const h=roomHosts[n.npc];return !!h&&h.steps.some(s=>!roomAns[h.id+":"+s.id]);};
 const chillLines=k=>{
   if(CHILLEGG[k])return EGGSAFE[CHILLEGG[k]].lines[lang];
   if(String(k).startsWith("~c"))
@@ -208,7 +225,7 @@ function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,p
    something to say. Never a count, never an age (docs/OWNER.md — no practice is ever
    missed, and a badge with a number on it is a backlog). It was hardcoded to hq, so
    the office kept promising a quest long after its last one was answered. */
-const worldPending=id=>(WORLDS[id]?WORLDS[id].npcs:[]).some(n=>n.q&&pendingAt(n)!==undefined);
+const worldPending=id=>(WORLDS[id]?WORLDS[id].npcs:[]).some(n=>hasSay(n));
 function setWorldTag(){$("worldTag").textContent=T().locs[world]+(worldPending(world)?" · ❗":"");}
 /* Boundary sanitizer: every save that crosses a trust boundary — Trolley Pass links
    today, NET payloads tomorrow — is coerced to known-good shapes here. Numbers clamp,
@@ -261,6 +278,9 @@ function toast(msg,ms){const el=$("toast"),dur=ms||2600;
 $("ticker").addEventListener("click",()=>{$("ticker").hidden=true;tickerLines.length=0;});
 let lastBump=0;
 const pendingAt=n=>n.q.find(qi=>!done.has(qi)&&qOpen(qi));
+/* "this neighbour has something to say" — the ❗ means one thing forever (STORY.md), and
+   a host with an unanswered question has something to say too */
+const hasSay=n=>pendingAt(n)!==undefined||roomPending(n);
 /* ---------- canvas ---------- */
 const cv=$("cv");let ctx=cv.getContext("2d"); /* let: the 3D baker borrows ctx to render tile art into textures */
 const VW=10*TS,VH=8*TS;
@@ -358,7 +378,7 @@ function drawIso(){
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
   w.npcs.forEach(n=>bill(n.x,n.y,(bx,by)=>{
     drawPerson(ctx,bx,by,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
-    if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
+    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     else drawEmote(n,bx,by);}));
   if(world==="hq")bill(DOG.fx,DOG.fy,(bx,by)=>drawDog(ctx,bx,by));
@@ -716,7 +736,7 @@ function drawFront(){
     if(sx<-TS||sy<-TS-16||sx>VW||sy>VH)return;R.push({d:gy+0.55,f:()=>fn(sx,sy)});};
   w.npcs.forEach(n=>act(n.x,n.y,(sx,sy)=>{
     drawPerson(ctx,sx,sy,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
-    if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
+    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     else drawEmote(n,sx,sy);}));
   PEERS.forEach(p=>{if(p.w!==world)return;
@@ -803,7 +823,7 @@ function draw(){
     const sx=n.x*TS-camX,sy=n.y*TS-camY;
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
     drawPerson(ctx,sx,sy,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
-    if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
+    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     else drawEmote(n,sx,sy);
   });
@@ -1616,7 +1636,7 @@ function tryPortal(ts){
   const p=PORTALS[world][pch],fromW=world;
   world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
   warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
-  save();setWorldTag();toast(T().arrive[world],2200);
+  save();setWorldTag();toast(T().arrive[world],2200);roomInvite();
   dogsRoam(world); /* unseen pups drift toward their favorite townsperson */
   if(fromW==="pk"&&world!=="pk")parkExit(); /* crossing back over the rainbow: the recap */
   return true;
@@ -1640,9 +1660,12 @@ function loop(ts){
 }
 function checkTalk(){
   const n=CW().npcs.find(n=>Math.abs(n.x-px)+Math.abs(n.y-py)===1&&(pendingAt(n)!==undefined||n.chat));
-  if(n){const qi=pendingAt(n),tb=$("talk");
+  if(n){const qi=pendingAt(n),tb=$("talk"),rh=roomHosts[n.npc];
     if(qi!==undefined){tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${AQ()[qi].title}”`;
       tb.dataset.qi=qi;delete tb.dataset.chatn;}
+    else if(rh){ /* a host says what the talk is about, like a quest does */
+      tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${rh.talk[lang]||rh.talk.en}”`;
+      tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
     else{tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]}`;
       tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
     tb.hidden=false;}
@@ -1665,6 +1688,7 @@ window.addEventListener("keyup",e=>{if(KEYS[e.key]&&held===KEYS[e.key])held=null
 $("talk").addEventListener("click",()=>{
   const tb=$("talk");
   if(tb.dataset.chatn){
+    if(roomHosts[tb.dataset.chatn]){roomStart(roomHosts[tb.dataset.chatn],tb.dataset.chatn);return;}
     /* content nominates who runs the fitting room; the engine just opens it */
     if(tb.dataset.chatn===GRW().wardrobeNpc){openWardrobe();return;}
     const L=chillLines(tb.dataset.chatn)||(T().chat||{})[tb.dataset.chatn]||[];
@@ -1759,6 +1783,7 @@ function questStart(qi){cur=qi;curQ=AQ()[qi];node=curQ.start;qLvl0=lvlIdx();runX
 function fredQuestStart(){cur=-1;curQ=FQ();node=curQ.start;qLvl0=lvlIdx();runXP=0;qFirst=qa[-1]===undefined;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
 function nodeShow(){
   const q=curQ,t=q.nodes[node];
+  roomHide();$("codex").parentElement.hidden=false; /* a quest card never shows the interview's parts */
   $("qtag").textContent=`${T().quest}: ${q.title}${node!==q.start?T().followup:""}`;
   $("npcAv").textContent=NPCE[q.npc];$("npcName").textContent=npcName(q.npc);$("npcSay").textContent=t.say;
   /* one line before the opening node, and only there — never on a follow-up step */
@@ -1808,6 +1833,108 @@ $("next").addEventListener("click",()=>{
   if(chDue()){wasFs=false;finish(livesOn()&&hearts<=0);return;}
   $("card").hidden=true;$("world").hidden=false;restoreFs();checkTalk();
 });
+/* ---------- the room interview: a card with no right answer ----------
+   Same card the quests use, none of their machinery: no pick(), no XP, no marks, no play
+   log, no verdict, no shuffle (there is no right answer to hide, and a phone user wants
+   the escape button in the same place every time). A mis-tap costs nothing: Cancel is a
+   no-op, an empty box over an earlier answer is ignored, and re-answering keeps the old
+   answer as history — nothing the player made is taken away. */
+let roomH=null,roomK=null,roomI=0;
+const RMIDS=["rmWhy","rmLater","rmAsk","rmSheet","rmBar"];
+function roomHide(){RMIDS.forEach(id=>{const el=$(id);if(el)el.hidden=true;});}
+function roomStart(h,key){
+  roomH=h;roomK=key;
+  exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;
+  const i=h.steps.findIndex(s=>!roomAns[h.id+":"+s.id]);
+  if(i<0)roomDone();else roomShow(i);
+}
+function roomCard(){ /* the quest card's parts a design talk never uses */
+  $("verdict").hidden=true;$("next").hidden=true;$("levelup").hidden=true;$("npcLate").hidden=true;
+  $("codex").parentElement.hidden=true;roomHide();
+  const U=RMU(),h=roomH;
+  $("qtag").textContent=U.tag||"";$("npcAv").textContent=h.emoji||"";$("npcName").textContent=h.name[lang]||h.name.en;
+}
+function roomShow(i){
+  roomI=i;const h=roomH,s=h.steps[i],U=RMU(),L=k=>(k&&(k[lang]||k.en))||"",a=roomAns[h.id+":"+s.id];
+  roomCard();
+  $("npcSay").textContent=L(s.say);$("q").textContent=L(s.q);
+  const box=$("choices");box.innerHTML="";
+  s.opts.forEach((o,idx)=>{const b=document.createElement("button");b.textContent=L(o);
+    if(a&&a.pick===idx)b.classList.add("was");
+    b.addEventListener("click",()=>roomAnswer(idx));box.appendChild(b);});
+  if(s.free!==false){const b=document.createElement("button");b.textContent=U.free||"…";b.className="free";
+    if(a&&a.text)b.classList.add("was");
+    b.addEventListener("click",()=>roomAsk());box.appendChild(b);}
+  $("rmWhy").textContent=L(s.why);$("rmWhy").hidden=!L(s.why);
+  $("rmLater").textContent=U.later||"";$("rmLater").hidden=false;
+  hud();window.scrollTo({top:0});
+}
+function roomRecord(s,rec){
+  const k=roomH.id+":"+s.id,old=roomAns[k];
+  if(old&&(old.text||(old.pick!==undefined&&old.pick!==null))){
+    rec.hist=(old.hist||[]).concat([old.text?{text:old.text}:{pick:old.pick}]).slice(-5);}
+  roomAns[k]=rec;roomPersist();toast(RMU().noted||"✓",1200);
+}
+function roomNext(){const i=roomI+1;setTimeout(()=>{if(!roomH)return;if(i>=roomH.steps.length)roomDone();else roomShow(i);},350);}
+function roomAnswer(idx){[...$("choices").children].forEach(b=>b.disabled=true);
+  roomRecord(roomH.steps[roomI],{pick:idx});roomNext();}
+function roomAsk(){const U=RMU(),a=roomAns[roomH.id+":"+roomH.steps[roomI].id];
+  $("rmTitle").textContent=U.freeTitle||"";$("rmLb").textContent=U.freeLb||"";
+  $("rmOk").textContent=U.ok||"OK";$("rmCancel").textContent=U.cancel||"×";
+  $("rmText").value=(a&&a.text)||"";$("rmAsk").hidden=false;$("rmText").focus();
+  try{$("rmAsk").scrollIntoView({block:"nearest"});}catch(e){}}
+$("rmCancel").addEventListener("click",()=>{$("rmAsk").hidden=true;});
+$("rmOk").addEventListener("click",()=>{
+  if(!roomH)return;
+  const s=roomH.steps[roomI],k=roomH.id+":"+s.id,text=sanLine($("rmText").value),old=roomAns[k];
+  $("rmAsk").hidden=true;
+  if(text){roomRecord(s,{pick:null,text});roomNext();return;}
+  if(old)return;                                  /* an empty box over an earlier answer changes nothing */
+  roomRecord(s,{pick:null,text:"",out:true});roomNext(); /* "I'll tell you this one out loud" */
+});
+$("rmText").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("rmOk").click();}});
+$("rmLater").addEventListener("click",()=>roomEnd());
+function roomDone(){
+  const h=roomH,U=RMU();
+  roomCard();
+  $("npcSay").textContent=h.done[lang]||h.done.en;$("q").textContent="";$("choices").innerHTML="";
+  $("rmSheet").textContent=roomSheet();$("rmSheet").hidden=false;
+  $("rmCopy").textContent=U.copy||"Copy";$("rmAgain").textContent=U.again||"↻";$("rmBack").textContent=U.back||T().nextBack;
+  $("rmBar").hidden=false;hud();window.scrollTo({top:0});
+}
+$("rmAgain").addEventListener("click",()=>{if(roomH)roomShow(0);});
+$("rmBack").addEventListener("click",()=>roomEnd());
+$("rmCopy").addEventListener("click",()=>{const v=roomSheet(),U=RMU();
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(v):Promise.reject())
+    .then(()=>toast(U.copied||"✓",2200))
+    .catch(()=>{try{const r=document.createRange();r.selectNodeContents($("rmSheet"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}catch(e){}
+      toast(U.copyFail||"",2600);});});
+function roomEnd(){roomH=null;roomHide();$("codex").parentElement.hidden=false;
+  $("card").hidden=true;$("world").hidden=false;restoreFs();checkTalk();}
+/* the arrival nudge: while a host in this room still has a question, say who is waiting */
+function roomInvite(){const I=RM();if(!I||!I.invite)return;
+  const w=WORLDS[world];if(!w||!w.npcs.some(n=>roomPending(n)))return;
+  setTimeout(()=>toast(I.invite[lang]||I.invite.en,3200),2300);}
+/* the sheet: plain text, no Markdown marks — the player reads it on the card, the owner
+   copies it. Labels follow the language; the player's own words are printed as typed. */
+function roomSheet(){
+  const I=RM();if(!I)return "";
+  const U=RMU(),L=k=>(k&&(k[lang]||k.en))||"",out=[],miss=[];
+  const first=n=>L(n).split(" ·")[0];
+  out.push(L(I.title)+" — "+L(I.place));
+  out.push(heroName+" · "+(U.by||"")+" "+I.hosts.map(h=>first(h.name)).join(" & ")+" · "+new Date().toLocaleDateString(lang==="es"?"es-MX":"en-US"));
+  I.hosts.forEach(h=>{out.push("");out.push("== "+first(h.name)+" · "+L(h.talk)+" ==");
+    h.steps.forEach(s=>{const a=roomAns[h.id+":"+s.id],q=L(s.q);
+      if(!a){miss.push(q);return;}
+      const ans=a.text?"“"+a.text+"”":a.out?(U.saidOut||""):(a.pick!==null&&a.pick!==undefined&&s.opts[a.pick])?L(s.opts[a.pick]):"";
+      out.push(q);out.push("   "+ans);
+      if(a.hist&&a.hist.length){const prev=a.hist.map(p=>p.text?"“"+p.text+"”":s.opts[p.pick]?L(s.opts[p.pick]):"").filter(Boolean);
+        if(prev.length)out.push("   ("+(U.earlier||"earlier")+": "+prev.join(" / ")+")");}});});
+  out.push("");out.push("== "+(U.unanswered||"")+" ==");
+  out.push(miss.length?miss.map(q=>"· "+q).join("\n"):(U.none||""));
+  out.push("");out.push(U.foot||"");
+  return out.join("\n");
+}
 /* ---------- character creator ---------- */
 const SWATCH={shirt:["#8B5CF6","#E0A430","#2AA47C","#C2543F","#3E8ED0","#B04A78"],
   skin:["#F1CDA9","#E5AC82","#C08356","#8C5A33"],
@@ -2467,8 +2594,9 @@ function icsData(){
 }
 function renderExport(){
   $("exArea").value=exMode==="care"?T().carePack(heroName,treats,petCfg)
-                   :exMode==="rep"?decisionReport():exportData();
-  $("exHint").textContent=exMode==="care"?T().careHint:exMode==="rep"?T().repHint:T().expHint;
+                   :exMode==="rep"?decisionReport():exMode==="room"?roomSheet():exportData();
+  $("exHint").textContent=exMode==="care"?T().careHint:exMode==="rep"?T().repHint:exMode==="room"?(RMU().hint||""):T().expHint;
+  $("exTabRoom").setAttribute("aria-pressed",exMode==="room"?"true":"false");
   $("exTabJson").setAttribute("aria-pressed",exMode==="json"?"true":"false");
   $("exTabCare").setAttribute("aria-pressed",exMode==="care"?"true":"false");
   $("exTabRep").setAttribute("aria-pressed",exMode==="rep"?"true":"false");
@@ -2480,10 +2608,13 @@ function renderExport(){
 }
 $("openExp").addEventListener("click",()=>{$("settings").hidden=true;
   $("exTabCare").hidden=fredQ<1;if(fredQ<1)exMode="json";
+  /* the room tab exists only when the pack declares an interview; its label is content */
+  const rm=!!RM();$("exTabRoom").hidden=!rm;if(rm)$("exTabRoom").textContent=RMU().tab||"";else if(exMode==="room")exMode="json";
   renderExport();$("exporter").hidden=false;});
 $("exTabJson").addEventListener("click",()=>{exMode="json";renderExport();});
 $("exTabCare").addEventListener("click",()=>{exMode="care";renderExport();});
 $("exTabRep").addEventListener("click",()=>{exMode="rep";renderExport();});
+$("exTabRoom").addEventListener("click",()=>{exMode="room";renderExport();});
 $("exDl").addEventListener("click",()=>{
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([decisionReport()],{type:"text/markdown"}));
@@ -2760,6 +2891,9 @@ try{(JSON.parse(localStorage.getItem("mqedits")||"[]")).forEach(e2=>{
    (e.g. Sonny) joins as a beagle critter instead of a person. */
 const NPCSTYLES=["cap","long","curly","spiky","pony","afro","buzz","braids","buns","broccoli","fade","mullet"];
 const sanName=s2=>String(s2||"").replace(/[\u0000-\u001f<>]/g,"").trim().slice(0,24);
+/* a typed line for the room sheet: control characters out, everything else as typed —
+   it is only ever shown through textContent, so a "<3" stays a "<3" */
+const sanLine=s2=>String(s2||"").replace(/[\u0000-\u001f]/g,"").trim().slice(0,140);
 const hexOK=v=>typeof v==="string"&&/^#[0-9A-Fa-f]{6}$/.test(v);
 function randLook(){const pick=a=>a[Math.floor(Math.random()*a.length)];
   return {shirt:pick(SWATCH.shirt),skin:pick(SWATCH.skin),hair:pick(SWATCH.hair),style:pick(NPCSTYLES)};}

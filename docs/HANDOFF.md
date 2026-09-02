@@ -28,7 +28,8 @@ offline after first load. Since the engine/content split (2026-08-30) the game i
 Load order matters and is fixed in `index.html`: `qr.js` → content pack → engine.
 Everything is plain `<script>` tags sharing the global scope — content files are pure
 `const` data, the engine reads them. **A new gifted game = a new `content/<game>/`
-folder + a copy of `index.html` pointing its six content script tags at it.**
+folder + a copy of `index.html` pointing its seven content script tags at it** (the
+seventh, `room.js`, is optional — a pack that omits it gets no room interview).**
 
 - **24 quests** (indices 0–23) + Frederick's secret side quest, fully bilingual EN/ES.
   MAXXP = 350 (10 per node). Quests 16–23 are El Mercado's **AI product manager** pack.

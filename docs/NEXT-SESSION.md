@@ -3,37 +3,43 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-02)
+## STATE OF PLAY — read this first (2026-09-02, late)
 
-**ON THE BRANCH, NOT MERGED.** `claude/career-training-story-plot-tj707h` carries the
-whole **S0 sitting (el 3D y el mundo)** at **`mq-v45`**, pinned forward from `main`'s
-`mq-v44` so a merge invalidates installed PWAs. **The owner sees `main` and nothing
-else** — until they say "merge", none of this is playable on their phone.
+**MERGED TO `main` at `mq-v46`.** The branch carried the whole **S0 sitting (el 3D y el
+mundo, `mq-v45`)** and then **S2 v1 — the room upstairs**; the owner said *"merge
+everything once you have the first version of the room work"*, so both are live. A phone
+that has the game installed picks up `mq-v46` on its next open. **The version now shows
+on the opening page** (and still in Settings), so nobody has to guess what a phone loaded.
 
-**What S0 shipped, in one breath, each with a test that was red before the fix:**
-a door you walk straight back into lets you back in (a standing check with an
-anti-ping-pong hold); doors stand *in* their walls in 3D, with a lintel above and light
-under them, and walls have a face on every side; 3D textures bake at the screen's
-resolution (the measured blur root cause) and re-bake when the screen changes; the
-seasons seam — a season changes colour, never design — with one Día de Muertos season
-by the calendar and a Settings override, bridge first; and the storefront legibility
-pass — La Cocina has a bowl in the window, every door says where it leads, the desk,
-table and scale read cold. Before/after screenshots were looked at for every one.
+**What the room work shipped, each with a test that was red first:** Floor 2 opens
+bare — one desk under the north wall, the stairs, nothing else (as signed). Nacho and
+Don Güero stand a few steps from the stairs, with a ❗ while they still have a question.
+Between them they ask nine questions with no wrong answers, no XP, nothing in the
+career report: Nacho asks how the room should feel, Güero asks what has to be built.
+Answers live on the phone (`mqroom`), never in the save, never touched by restart. After
+the last question the sheet appears on the card with **Copy the sheet**, and it is also
+under Settings → Export → *The room*. Everything with a name is in
+`content/meridian/room.js`; the engine reads only shapes, and a pack with no `room.js`
+gets no people, no tab and no storage key (tested with the file blocked). Nacho no longer
+stands on the street — one Nacho, upstairs.
 
-**Two things wait on the owner:** (1) *merge to `main`* — their call; (2) *the Día de
-Muertos palette* — six colours in `content/meridian/config.js` are a draft. Either is
-one word.
+**How the back-and-forth works, with no API:** AJ answers on her phone → the owner taps
+*Copy the sheet* → pastes it to Claude with `/room-design` → the build session furnishes
+the room from her words. Spec, cold read and the four open owner calls:
+`docs/rooms/aj-office.md`.
 
-**Deliberately not in S0:** the bridge arch (needs elevation, §15.10, which waits for
-a second thing that needs it) and one new finding — a wall between the camera and the
-hero hides all but the head (§15.3, backlog §3 #10).
-
-**Next is S1 — la cimentación** (backlog §1): the engine ceiling. Nothing visible ships
-from it and that is said out loud. Then S2, the office.
+**Deliberately not in v1:** nothing changes in the room while she answers (needs S1's
+plural delivery seam); no moving boxes (the only crate tile is a produce crate and reads
+as groceries); no window tile (Güero promises it, no date).
 
 **Still true and still the trap:** several models work this repo at once. Do the
-divergence check in step 1b below before reading a single line of engine code, and
-never quote a version number to the owner without checking what `main` actually serves.
+divergence check in step 1b below before reading a single line of engine code, and never
+quote a version number to the owner without checking what `main` actually serves. This
+session's own resume summary lost the S0 sitting once — the branch knew, the summary did
+not. `git log` first, always.
+
+**Next is S1 — la cimentación** (backlog §1): the engine ceiling. Nothing visible ships
+from it and that is said out loud. It is now also what the office waits on.
 
 ## The backlog lives in `docs/BACKLOG.md`
 

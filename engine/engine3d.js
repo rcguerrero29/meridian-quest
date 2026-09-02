@@ -227,7 +227,7 @@ function t3Actors(){
   const w=CW();
   w.npcs.forEach(n=>list.push({x:n.x,y:n.y,f:(g)=>{
     drawPerson(g,2,6,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
-    if(pendingAt(n)!==undefined){g.font="700 13px sans-serif";g.fillStyle="#E0B45C";g.textAlign="center";
+    if(hasSay(n)){g.font="700 13px sans-serif";g.fillStyle="#E0B45C";g.textAlign="center";
       g.fillText("❗",18,10+Math.sin(Date.now()/250)*2);g.textAlign="start";}
     else drawEmote(n,2,6); /* townsfolk stay busy in 3D too */
   }}));

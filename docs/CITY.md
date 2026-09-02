@@ -6,7 +6,7 @@ next phase on Opus 5, and brings open decisions to the owner as side quests. Eve
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
 **Phase: 2 — Taller Herrera (parcel planned 2026-09-01, three decisions signed, NOT built)** · Ledger
-opened 2026-08-30. **Deployed: `mq-v44` on `main`, 2026-09-01.**
+opened 2026-08-30. **Deployed: `mq-v46` on `main`, 2026-09-02** (S0 + S2 v1).
 
 ## Purpose
 
@@ -58,6 +58,10 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 
 ## Growth history (append)
 
+- 2026-09-02 — **The room upstairs (S2 v1)**: Floor 2 relaid bare; the room-interview
+  seam (`INTERVIEW` in `content/meridian/room.js`, read by the engine as shapes only);
+  Nacho moved upstairs; the ❗ rule extended to "has something to say" in every camera;
+  Export gained *The room*; the version on the opening page. Shipped with S0 at `mq-v46`.
 - 2026-08-31 — **World upgrade wave 1**: draw() tile chain became the TILEDRAW
   registry (28 glyphs + doors as data; content packs override via TILEART) — the
   entities-as-data law now covers ART. Visible: per-tile floor variation, walls cast
@@ -212,6 +216,13 @@ stays live until the Phase 2 refactor lands.
 
 *(format: date · quest title · choice · one-line why — append only)*
 
+- 2026-09-02 · ❗El cuarto de arriba: what stands in Floor 2 on day one · **bare, as
+  signed** — one desk, the stairs, and Nacho and Don Güero placed by content, not by a
+  map letter · Don Güero's moving-in debris was declined for now because the only crate
+  tile is El Mercado's produce crate (it reads as groceries), and the window because no
+  window tile exists; both are owner calls in `docs/rooms/aj-office.md` §8. His geography
+  correction stands: the trolley runs south of HQ, so a north window cannot look "onto
+  the trolley line".
 - 2026-09-01 · ❗El taller: the shop's footprint · **shop plus an apron** — one door and
   one interior like the mercado, and the ribbon also drops the Caprice and a tire stack
   on the sidewalk · it reads as an auto shop before you open anything, and the sitting

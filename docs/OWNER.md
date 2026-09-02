@@ -13,6 +13,16 @@ preference that outlives one phase; cite the date and their words.
 
 ## Settled — never re-ask
 
+- **AJ talks to the characters; there is no API.** *(2026-09-02)* Owner: *"lets make it
+  so that AJ can interact through the characters with you if possible ... i dont want an
+  api setup as its just aj but maybe we will have to have a back and forth if she
+  prefers that first."* So a design conversation happens IN the game, with no network:
+  the characters ask, the answers stay on the phone, and the game writes a plain sheet
+  with a Copy button that the owner hands to Claude. That sheet is the back-and-forth.
+  Declared per pack (`content/<pack>/room.js`); a pack that declares nothing gets nothing.
+- **The version shows on the opening page.** *(2026-09-02)* Owner: *"move the version
+  to the first/opening page so i know which im using. also keep in settings but i want
+  it there."* Both places, same string, checked by the smoke test.
 - **The city grows; it never resets.** Nothing the player earned is ever taken away.
   Restarting is a tool in Settings, not a story beat. *(2026-08-31)*
 - **Learning beats punishment.** "This is for story mode so no big deal just so i

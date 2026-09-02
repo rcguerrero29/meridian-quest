@@ -52,7 +52,7 @@ const CANDIDATES = [
 
   // ---- 1. boot: no JS errors, no validator warnings (WORLD/PORTAL/REACH) ----
   if (pageErrors.length) fails.push('page errors: ' + pageErrors.join(' | '));
-  const valWarns = warns.filter(w => /^(WORLD|PORTAL|REACH)/.test(w));
+  const valWarns = warns.filter(w => /^(WORLD|PORTAL|REACH|ROOM)/.test(w));
   if (valWarns.length) fails.push('validator warnings: ' + valWarns.join(' | '));
 
   // ---- 2. static invariants inside the page ----
@@ -1098,6 +1098,207 @@ const CANDIDATES = [
   });
   fails.push(...doorLook);
 
+  // ---- the room upstairs: two neighbours ask, nothing is graded, the sheet is hers ----
+  // Owner 2026-09-02: "lets make it so that AJ can interact through the characters with
+  // you if possible ... i dont want an api setup". So: the characters ask IN the game,
+  // her answers are kept on the phone, and the game writes a plain sheet with a Copy
+  // button that the owner hands to Claude. Everything with a name lives in
+  // content/meridian/room.js (INTERVIEW); the engine reads only shapes, and a pack
+  // that declares nothing gets nothing (the AJ law). Three skeptics shaped this test:
+  // the box and the sheet must be ON SCREEN while the card is up (the old panels live
+  // inside the hidden world panel), answers keep their written order (no shuffle — there
+  // is no right answer to hide), a mis-tap costs nothing, and a fruit crate is not a
+  // moving box, so the room opens bare, exactly as signed.
+  const room = await page.evaluate(async () => {
+    const problems = [];
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const $ = id => document.getElementById(id);
+    if (typeof INTERVIEW === 'undefined' || typeof RM !== 'function' || !RM()) return ['no INTERVIEW declared by the pack (content/meridian/room.js)'];
+    const I = RM(), U = I.ui[lang];
+    // the office opens bare, as signed: walls, floor, the old lead's desk, the stairs
+    const f2 = WORLDS.f2.rows;
+    if (f2.length !== 14 || f2.some(r => r.length !== 20)) problems.push('f2 is not 20 wide x 14 tall');
+    const glyphs = {}; f2.forEach(r => [...r].forEach(c => { glyphs[c] = (glyphs[c] || 0) + 1; }));
+    if (glyphs['D'] !== 1) problems.push(`the office should hold exactly one desk, found ${glyphs['D'] || 0}`);
+    if (f2[11][18] !== '1') problems.push('the stairs moved — the portal from HQ lands at (17,11) beside them');
+    Object.keys(glyphs).forEach(c => { if (!'#.D1'.includes(c)) problems.push(`the office is not bare: it holds '${c}'`); });
+    // shape: everything a pack must declare, EN and ES in lockstep
+    const keys = o => Object.keys(o).sort().join(',');
+    if (keys(I.ui.en) !== keys(I.ui.es)) problems.push('INTERVIEW.ui EN/ES keys differ');
+    ['title', 'place', 'invite'].forEach(k => { if (!I[k] || !I[k].en || !I[k].es) problems.push(`INTERVIEW.${k} needs en and es`); });
+    const ids = new Set();
+    I.hosts.forEach(h => {
+      if (ids.has(h.id)) problems.push(`host id ${h.id} repeated`); ids.add(h.id);
+      if (!h.emoji || !h.name || !h.name.en || !h.name.es || !h.look || !h.talk || !h.talk.en || !h.talk.es) problems.push(`host ${h.id} is missing emoji/name/look/talk`);
+      if (!WORLDS[h.world]) problems.push(`host ${h.id} stands in a world that does not exist: ${h.world}`);
+      if (!h.done || !h.done.en || !h.done.es) problems.push(`host ${h.id} has no closing line`);
+      const sids = new Set();
+      (h.steps || []).forEach(s => {
+        if (sids.has(s.id)) problems.push(`host ${h.id} step ${s.id} repeated`); sids.add(s.id);
+        ['say', 'why', 'q'].forEach(k => { if (!s[k] || !s[k].en || !s[k].es) problems.push(`${h.id}:${s.id} ${k} needs en and es`); });
+        if (!s.opts || s.opts.length < 2 || s.opts.some(o => !o.en || !o.es)) problems.push(`${h.id}:${s.id} needs 2+ answers in both languages`);
+        // phone rules: a host speaks two sentences, an answer fits on one line
+        if (s.say && s.say.en && s.say.en.split(/[.!?…]["”]?\s+/).filter(Boolean).length > 3) problems.push(`${h.id}:${s.id} say runs past two sentences`);
+        (s.opts || []).forEach(o => { if (o.en && o.en.split(/\s+/).length > 12) problems.push(`${h.id}:${s.id} answer "${o.en}" is over 12 words`); });
+        // stairs, not a door: f2's only way out is the stairs
+        ['say', 'q'].forEach(k => { if (s[k] && /\bthat door\b|\bthe door\b/i.test(s[k].en)) problems.push(`${h.id}:${s.id} says "door" — the office has stairs`); });
+      });
+      if (!(h.steps || []).length) problems.push(`host ${h.id} has no steps`);
+    });
+    // placed: every host stands in its world as a chat person, and the city stays reachable
+    I.hosts.forEach(h => {
+      const n = WORLDS[h.world].npcs.find(n => n.x === h.x && n.y === h.y && n.chat);
+      if (!n) problems.push(`host ${h.id} is not standing at ${h.world} (${h.x},${h.y})`);
+      else if (!roomHosts[n.npc] || roomHosts[n.npc].id !== h.id) problems.push(`the person at ${h.world} (${h.x},${h.y}) is not registered as host ${h.id}`);
+    });
+    if (auditReach().length) problems.push('hosts broke reachability: ' + auditReach().join(' | '));
+    const nachos = Object.values(WORLDS).flatMap(w => w.npcs).filter(n => CHILLN[n.npc] && /nacho/i.test(CHILLN[n.npc].en)).length;
+    if (nachos !== 1) problems.push(`Nacho stands in ${nachos} places — expected once, upstairs`);
+    // stand beside the first host
+    const h0 = I.hosts[0], key0 = Object.keys(roomHosts).find(k => roomHosts[k].id === h0.id);
+    const before = { world, px, py, xp, marks: JSON.stringify(marks), dl: dlog.length, done: done.size };
+    localStorage.removeItem('mqroom'); Object.keys(roomAns).forEach(k => delete roomAns[k]);
+    world = h0.world; px = fx = h0.x - 1; py = fy = h0.y; moving = false; held = null; portalT = 0; portalHold = '';
+    $('card').hidden = true; $('world').hidden = false; $('settings').hidden = true;
+    checkTalk();
+    const tb = $('talk');
+    if (tb.hidden) problems.push('standing beside a host shows no Talk button');
+    else if (!tb.textContent.includes(h0.talk[lang])) problems.push(`the Talk button does not say what the talk is about: "${tb.textContent}"`);
+    const n0 = WORLDS[h0.world].npcs.find(n => n.npc === key0);
+    if (!n0 || !hasSay(n0)) problems.push('a host with unanswered questions does not count as having something to say (no ❗)');
+    if (!worldPending(h0.world)) problems.push('the world where hosts wait is not marked pending');
+    tb.click();
+    if ($('card').hidden || !$('world').hidden) problems.push('Talk did not open the card');
+    if ($('qtag').textContent !== U.tag) problems.push(`card eyebrow is "${$('qtag').textContent}", expected "${U.tag}"`);
+    const s0 = h0.steps[0];
+    if ($('npcSay').textContent !== s0.say[lang]) problems.push('first step does not show the host\'s first line');
+    if ($('npcName').textContent !== h0.name[lang]) problems.push('the card does not name the host');
+    if ($('q').textContent !== s0.q[lang]) problems.push('first step does not show its question');
+    let btns = [...$('choices').children];
+    if (btns.length !== s0.opts.length + 1) problems.push(`expected ${s0.opts.length} answers + say-it-my-way, got ${btns.length} buttons`);
+    s0.opts.forEach((o, i) => { if (btns[i] && btns[i].textContent !== o[lang]) problems.push(`answers are not in written order (button ${i})`); });
+    if (btns.length && btns[btns.length - 1].textContent !== U.free) problems.push('say-it-my-way is not the last answer button');
+    if ($('rmLater').hidden || $('choices').contains($('rmLater'))) problems.push('"that\'s enough for now" must sit below the answers, outside them');
+    if (!$('verdict').hidden || !$('next').hidden || !$('levelup').hidden) problems.push('the interview card shows quest chrome (verdict/next/levelup)');
+    if (!$('codex').parentElement.hidden) problems.push('the gold lesson box is showing on a design talk');
+    if ($('rmWhy').hidden || $('rmWhy').textContent !== s0.why[lang]) problems.push('the "why I\'m asking" line is missing below the answers');
+    // a tap saves the WRITTEN index, is acknowledged, and advances
+    btns[1].click(); await wait(450);
+    const rec = () => JSON.parse(localStorage.getItem('mqroom') || '{}');
+    let st = rec();
+    if (!st.a || !st.a[h0.id + ':' + s0.id] || st.a[h0.id + ':' + s0.id].pick !== 1) problems.push('tapping the second answer did not save pick=1 under mqroom');
+    if (!tickerLines.includes(U.noted)) problems.push('a tap was not acknowledged ("Written down.")');
+    if ($('q').textContent !== h0.steps[1].q[lang]) problems.push('a tap did not advance to the next question');
+    // say it my way: the box is ON SCREEN while the world panel is hidden; Cancel changes nothing
+    btns = [...$('choices').children]; btns[btns.length - 1].click();
+    if ($('rmAsk').hidden || $('rmAsk').offsetParent === null) problems.push('say-it-my-way opened nothing visible (the box must live inside the card, not the hidden world panel)');
+    if (document.activeElement !== $('rmText')) problems.push('the text box did not take focus');
+    $('rmText').value = 'nope'; $('rmCancel').click();
+    st = rec();
+    if (st.a[h0.id + ':' + h0.steps[1].id]) problems.push('Cancel recorded an answer');
+    if ($('q').textContent !== h0.steps[1].q[lang]) problems.push('Cancel moved off the question');
+    if (!$('rmAsk').hidden) problems.push('Cancel left the box open');
+    // typed words are kept verbatim (a <3 stays a <3) and advance
+    btns = [...$('choices').children]; btns[btns.length - 1].click();
+    $('rmText').value = "  <3 warm like abuela's kitchen  "; $('rmOk').click(); await wait(450);
+    st = rec();
+    const a1 = st.a[h0.id + ':' + h0.steps[1].id];
+    if (!a1 || a1.text !== "<3 warm like abuela's kitchen") problems.push('typed words were not kept verbatim: ' + JSON.stringify(a1));
+    if ($('q').textContent !== h0.steps[2].q[lang]) problems.push('a typed answer did not advance');
+    // an empty OK on a fresh question means "I'll tell you out loud"
+    btns = [...$('choices').children]; btns[btns.length - 1].click(); $('rmText').value = '   '; $('rmOk').click(); await wait(450);
+    st = rec();
+    if (!st.a[h0.id + ':' + h0.steps[2].id] || !st.a[h0.id + ':' + h0.steps[2].id].out) problems.push('an empty OK on a fresh question was not recorded as "tell you out loud"');
+    if ($('q').textContent !== h0.steps[3].q[lang]) problems.push('"tell you out loud" did not advance');
+    // "that's enough for now" leaves with everything kept; coming back resumes where she was
+    $('rmLater').click();
+    if (!$('card').hidden || $('world').hidden) problems.push('"that\'s enough for now" did not return to the room');
+    if (Object.keys(rec().a).length !== 3) problems.push('leaving early lost answers');
+    checkTalk(); tb.click();
+    if ($('q').textContent !== h0.steps[3].q[lang]) problems.push('talking again did not resume at the first unanswered question');
+    // finish this host with first answers
+    for (let i = 3; i < h0.steps.length; i++) { [...$('choices').children][0].click(); await wait(450); }
+    if ($('npcSay').textContent !== h0.done[lang]) problems.push('after the last answer the host did not say the closing line');
+    if ($('rmSheet').hidden || $('rmSheet').offsetParent === null) problems.push('the sheet is not shown on the card after the closing line');
+    const sheet = $('rmSheet').textContent;
+    if (!sheet.includes(s0.opts[1][lang])) problems.push('the sheet does not print the tapped answer verbatim');
+    if (!sheet.includes("<3 warm like abuela's kitchen")) problems.push('the sheet does not print her typed words verbatim');
+    if (!sheet.includes(U.saidOut)) problems.push('the sheet does not say which answer she wants to give out loud');
+    if (!sheet.includes(heroName)) problems.push('the sheet does not carry the player\'s name');
+    if (/(^|\n)#|\*\*/.test(sheet)) problems.push('the sheet shows Markdown marks to the player');
+    if ($('rmBar').hidden || $('rmCopy').hidden || $('rmBack').hidden || $('rmAgain').hidden) problems.push('the sheet card is missing Copy / Ask me again / Back');
+    if (!$('next').hidden) problems.push('the quest Next button appeared on the interview (it can trigger a chapter ending)');
+    if (hasSay(n0)) problems.push('a host with every question answered still shows ❗');
+    const h1 = I.hosts[1];
+    if (h1) {
+      const n1 = WORLDS[h1.world].npcs.find(n => roomHosts[n.npc] && roomHosts[n.npc].id === h1.id);
+      if (!n1 || !hasSay(n1)) problems.push('the second host lost the ❗ before being answered');
+      if (!sheet.includes(U.unanswered)) problems.push('the sheet does not list what is still unanswered');
+    }
+    // nothing was graded, paid, or logged
+    if (xp !== before.xp || JSON.stringify(marks) !== before.marks || dlog.length !== before.dl || done.size !== before.done) problems.push('the interview touched XP, marks, the play log or done — it must grade nothing');
+    // "ask me again" starts over with her earlier tap marked; a new tap keeps the old one as history
+    $('rmAgain').click();
+    if ($('q').textContent !== s0.q[lang]) problems.push('"ask me again" did not start from the first question');
+    btns = [...$('choices').children];
+    if (!btns[1] || !btns[1].classList.contains('was')) problems.push('her earlier answer is not marked when re-asked');
+    btns[0].click(); await wait(450);
+    const a0 = rec().a[h0.id + ':' + s0.id];
+    if (!a0 || a0.pick !== 0 || !a0.hist || !a0.hist.length) problems.push('re-answering overwrote the earlier tap without keeping it');
+    $('rmLater').click();
+    // the other language re-labels the sheet; her words stay
+    const lang0 = lang; lang = lang0 === 'en' ? 'es' : 'en'; applyLang();
+    const sheet2 = roomSheet();
+    if (!sheet2.includes(s0.q[lang]) || !sheet2.includes("<3 warm like abuela's kitchen")) problems.push('the sheet in the other language lost a label or her words');
+    lang = lang0; applyLang();
+    // Export gains a "The room" tab, labelled, showing the same sheet
+    $('openExp').click();
+    if ($('exTabRoom').hidden || $('exTabRoom').textContent !== U.tab) problems.push('Export has no "The room" tab');
+    $('exTabRoom').click();
+    if ($('exArea').value !== roomSheet()) problems.push('the Export tab does not show the sheet');
+    $('exClose').click();
+    // restart never wipes it (nothing you make gets taken away)
+    const keep = localStorage.getItem('mqroom');
+    const b = $('replay'); b.click(); b.click();
+    if (localStorage.getItem('mqroom') !== keep) problems.push('restart touched her answers');
+    // put things back
+    world = before.world; px = fx = before.px; py = fy = before.py; held = null; moving = false; hearts = 3;
+    $('card').hidden = true; $('world').hidden = false; $('settings').hidden = true; setWorldTag(); checkTalk();
+    return problems;
+  });
+  fails.push(...room);
+
+  // ---- the off switch: a pack that declares no interview gets no interview ----
+  // Same engine, room.js blocked at load: no page error, no hosts, no tab, no storage.
+  {
+    const ctx2 = await browser.newContext();
+    const p2 = await ctx2.newPage({ viewport: { width: 480, height: 900 } });
+    const errs = [], w2 = [];
+    p2.on('pageerror', e => errs.push(e.message));
+    p2.on('console', m => { if (m.type() === 'warning') w2.push(m.text()); });
+    await p2.route('**', r => { const u = r.request().url(); if (!u.startsWith('file://') || /content\/meridian\/room\.js$/.test(u)) return r.abort(); r.continue(); });
+    await p2.goto(index); await p2.waitForTimeout(1200);
+    if (errs.length) fails.push('with no INTERVIEW declared the page errors: ' + errs.join(' | '));
+    if (w2.some(w => /^ROOM/.test(w))) fails.push('with no INTERVIEW declared the engine still warns about hosts');
+    const off = await p2.evaluate(() => {
+      const problems = [];
+      if (typeof INTERVIEW !== 'undefined') return ['room.js still loaded — the off-switch test is not testing anything'];
+      if (typeof RM !== 'function' || typeof roomHosts === 'undefined') return ['the engine has no room seam (RM / roomHosts)'];
+      if (RM()) problems.push('RM() is not empty with no pack declaration');
+      if (Object.values(WORLDS).some(w => w.npcs.some(n => roomHosts[n.npc]))) problems.push('hosts were placed with nothing declared');
+      if (localStorage.getItem('mqroom')) problems.push('mqroom was written with nothing declared');
+      document.querySelector('.classes button[data-c="architect"]').click(); document.getElementById('begin').click();
+      document.getElementById('openExp').click();
+      if (!document.getElementById('exTabRoom').hidden) problems.push('the Export tab "The room" shows with nothing declared');
+      document.getElementById('exClose').click();
+      world = 'f2'; px = fx = 11; py = fy = 8; checkTalk();
+      if (!document.getElementById('talk').hidden) problems.push('a Talk button appeared upstairs with nobody declared');
+      return problems;
+    });
+    fails.push(...off);
+    await ctx2.close();
+  }
+
   // ---- the version is on the opening page, not only buried in Settings ----
   // Owner 2026-09-02: "move the version to the first/opening page so i know which im
   // using. also keep in settings but i want it there." Both must show GAMEV exactly.
@@ -1141,7 +1342,7 @@ const CANDIDATES = [
   {
     const NAMES = ['mercado', 'chelo', 'nando', 'perla', 'chava', 'frijol', 'obra',
                    'cocina', 'xochi', 'lupe', 'guero', 'rosa', 'chuy', 'tovar', 'priya',
-                   'canela', 'robles', 'jacaranda', 'muertos', 'otono', 'otoño'];
+                   'canela', 'robles', 'jacaranda', 'muertos', 'otono', 'otoño', 'nacho'];
     // engine3d is the same engine, so it is held to the same rule
     for (const f of ['engine/engine.js', 'engine/engine3d.js']) {
       const src = fs.readFileSync(path.join(__dirname, '..', f), 'utf8');

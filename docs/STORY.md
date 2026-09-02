@@ -174,6 +174,13 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   20, Nolasco's intake fills with strangers (refusal and escalation under new PII
   pressure). Zero new parcels, zero new cast, zero new maps. The truest version of
   *clients, not chapters*: a real client calls you back.
+- **El cuarto de arriba** (2026-09-02). The office stopped being a promise and became a
+  bare room with two people in it. Nacho came up from the street with his sketch pad,
+  Güero with his clipboard, and between them they ask the player nine questions that
+  have no wrong answer — the first conversation in the city that grades nothing. The
+  payoff is paper: the sheet pinned above the old desk, the carbon copy handed up the
+  stairs. *"Everybody brings one piece — that's how it works here"* is the promise the
+  barrio now owes, one business at a time, and her must-have is the first piece.
 
 ## Open threads (promises already on the wall)
 
@@ -402,6 +409,14 @@ hired you for. Three fixes, now canon:
   `role:`, never in place of it — the signed role summary in the report stays, and the
   `principal`/Limpieza "implementation lead" collision stops being a bug the moment
   districts are told apart by the business rather than the job title.
+- 2026-09-02 · ❗El cuarto de arriba · **the office opens bare and two neighbours ask what
+  it should be** — Nacho (feel) and Don Güero (build), nine questions, no wrong answers,
+  no XP, nothing in the report; the answers become a sheet the player copies · the owner
+  wanted AJ to design the office through the characters with no API, and a sheet she can
+  hand over IS the back-and-forth. Nacho leaves the street to stand upstairs. The window is
+  promised, not built — no window tile exists, and the trolley runs south of HQ, so "onto
+  the trolley line" was the wrong wall (Don Güero). Four owner calls in
+  `docs/rooms/aj-office.md` §8.
 - 2026-09-02 · Scope correction, recorded not silently fixed · ❗El listón was signed
   about the CITY's finale; the session generalised it to every ending in the owner's name
   and cited it against `finish()`. Corrected in OWNER.md and here — including the

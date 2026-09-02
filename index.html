@@ -129,6 +129,19 @@
   .choices button.right{border-color:var(--good); background:var(--good-bg);}
   .choices button.wrong{border-color:var(--bad); background:var(--bad-bg);}
   .choices button.midpick{border-color:var(--mid); background:var(--mid-bg);}
+  /* the room interview: no right answer, so no shuffle and no green/red — "say it my way"
+     is dashed, an earlier answer is outlined, and "that's enough" is a quiet link below */
+  .choices button.free{border-style:dashed; color:var(--muted);}
+  .choices button.was{box-shadow:inset 0 0 0 2px var(--accent);}
+  .why{font-style:italic; color:var(--muted); font-size:.85rem; margin:12px 2px 0;}
+  .rmlater{display:block; margin:12px auto 0; background:none; border:none; color:var(--muted); font-family:'IBM Plex Sans',sans-serif; font-size:.82rem; text-decoration:underline; cursor:pointer;}
+  .rmask{margin-top:12px; padding:12px; border:1.5px solid var(--line); border-radius:10px; background:var(--bg);}
+  .rmask b{display:block; margin-bottom:4px;}
+  .rmask label{display:block; font-size:.82rem; color:var(--muted); margin-bottom:6px;}
+  .rmask textarea{width:100%; box-sizing:border-box; font-family:'IBM Plex Sans',sans-serif; font-size:.95rem; border-radius:8px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); padding:8px; margin-bottom:8px; resize:none;}
+  .rmsheet{white-space:pre-wrap; font-family:'IBM Plex Mono',monospace; font-size:.74rem; line-height:1.45; background:var(--gold-bg); border:1px solid var(--gold); border-radius:10px; padding:12px 14px; margin:12px 0; user-select:text; -webkit-user-select:text;}
+  .rmbar{display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;}
+  .rmbar .opt{flex:1;}
   .verdict{margin-top:14px; border-radius:10px; padding:13px;}
   .verdict.ok{background:var(--good-bg);} .verdict.no{background:var(--bad-bg);} .verdict.mid{background:var(--mid-bg);}
   .verdict h2{font-family:'Unbounded',sans-serif; font-size:.9rem; margin:0 0 6px;}
@@ -351,7 +364,7 @@
       <div class="settings" id="exporter" hidden>
         <div class="box">
           <h3 id="exTitle"></h3>
-          <div class="optrow"><button id="exTabJson"></button><button id="exTabRep"></button><button id="exTabCare" hidden></button></div>
+          <div class="optrow"><button id="exTabJson"></button><button id="exTabRep"></button><button id="exTabCare" hidden></button><button id="exTabRoom" hidden></button></div>
           <label id="exHint"></label>
           <div id="careForm" hidden style="display:flex; gap:8px; margin-bottom:10px;">
             <input id="petName" type="text" maxlength="16" style="flex:2;">
@@ -473,6 +486,13 @@
     <div class="codex"><b id="cdxLb"></b><p id="codex"></p></div>
     <p class="q" id="q"></p>
     <div class="choices" id="choices"></div>
+    <!-- the room interview (content-declared INTERVIEW): these live INSIDE the card because the
+         world panel — and every dialog in it — is hidden while a card is up -->
+    <div class="rmask" id="rmAsk" hidden><b id="rmTitle"></b><label for="rmText" id="rmLb"></label><textarea id="rmText" maxlength="140" rows="2" autocomplete="off"></textarea><div class="rmbar"><button class="opt" id="rmOk"></button><button class="opt" id="rmCancel"></button></div></div>
+    <p class="why" id="rmWhy" hidden></p>
+    <button class="rmlater" id="rmLater" hidden></button>
+    <div class="rmsheet" id="rmSheet" hidden></div>
+    <div class="rmbar" id="rmBar" hidden><button class="opt" id="rmCopy"></button><button class="opt" id="rmAgain"></button><button class="opt" id="rmBack"></button></div>
     <div id="verdict" hidden></div>
     <div class="levelup" id="levelup" hidden></div>
     <button class="btn" id="next" hidden></button>
@@ -492,6 +512,7 @@
 <script src="content/meridian/npcs.js"></script>
 <script src="content/meridian/maps.js"></script>
 <script src="content/meridian/config.js"></script>
+<script src="content/meridian/room.js"></script>
 <script src="vendor/three.min.js"></script>
 <script src="engine/engine.js"></script>
 <script src="engine/engine3d.js"></script>

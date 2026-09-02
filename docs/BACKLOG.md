@@ -25,7 +25,7 @@ quest packs and forgot the engine seam, the office, the ceremony and the second 
 |---|---|---|---|
 | **S0** | ~~El 3D y el mundo~~ | **shipped 2026-09-02** (branch, not merged) | doors that stand up, sharp 3D, La Cocina reads as a restaurant, autumn arrives on its own. *Not* the bridge arch — that waits on elevation |
 | **S1** | **La cimentación** | one | **nothing** — and that is said out loud. The whole engine seam, paid once |
-| **S2** | La oficina (`f2`) | one | the room upstairs becomes yours and starts filling |
+| **S2** | ~~La oficina (`f2`)~~ | **v1 shipped 2026-09-02** (`mq-v46`, merged) | the room opens bare, Nacho and Don Güero ask nine questions with no wrong answers, and the sheet is hers — `docs/rooms/aj-office.md`. *Not yet:* the furniture arriving (needs S1) |
 | **S3** | Taller Herrera | one | the southeast lot opens; the first pack on the new machinery |
 | **S4** | La Espiga + Velázquez | one long | *two* storefronts on Calle Dos in one sitting |
 | **S5** | Nolasco Tax & Notario | one | the walkup opens; the man who reads your report |
@@ -45,12 +45,12 @@ engine, all landing in **S1**, none of them naming a business.
 
 | What | Where | Why it blocks |
 |---|---|---|
-| `finish()` has exactly two epilogue sets | `engine.js:1821` | a third district prints the wrong ending — the taller would play the mercado's Saturday |
-| the handover doorstep is hardcoded | `engine.js:1834` | `px=fx=6;py=fy=12` is the mercado's front step, sitting in the engine |
+| `finish()` has exactly two epilogue sets | `engine.js:2000` *(line numbers checked 2026-09-02; they drift)* | a third district prints the wrong ending — the taller would play the mercado's Saturday |
+| the handover doorstep is hardcoded | `engine.js:2013` | `px=fx=6;py=fy=12` is the mercado's front step, sitting in the engine |
 | `GROWTH.ribbon` is singular | `engine.js:162`, `:3032` | one storefront, full stop |
 | `NPCLOOK` is one flat global table | `npcs.js:14`, `engine.js:1949` | the taller's cast collides with Tovar, Chuy and Marcus — Don Tacho would wear Tovar's colours |
 | `GROWTH` cannot read a grade | `engine.js:3004`, `:3031` | the taller's endings change the world (cat on the Caprice, assistant switched off) and the code has no idea how well you did |
-| the report truncates at 200 entries | `engine.js:2273` | a five-district city is ~85 decision points before retries; restart never clears it. **Your earliest districts vanish from the portfolio, silently** |
+| the report truncates at 200 entries | `engine.js:2495` | a five-district city is ~85 decision points before retries; restart never clears it. **Your earliest districts vanish from the portfolio, silently** |
 | the uppercase tile alphabet is spent | `engine.js:10` | new glyphs must be digits and symbols from here |
 
 ---
@@ -59,13 +59,13 @@ engine, all landing in **S1**, none of them naming a business.
 
 | Item | Cost | Notes |
 |---|---|---|
-| **The office (`f2`)** — opens bare with the old lead's desk and a north window; the barrio furnishes it one piece per business | S2 | furniture declared in each district's own data, or the map gets re-opened five times |
+| **The office (`f2`)** — opens bare with the old lead's desk; the barrio furnishes it one piece per business | **bare + the interview shipped (S2 v1)**; furniture waits on S1 | furniture declared in each district's own data, or the map gets re-opened five times. The north window is a promise in Don Güero's mouth until a window tile passes the cold read |
 | **The word is the reward** — a term enters through whoever *needs* it, in the beat after you get it right; pins to the office wall | S1 registries + content | retrofitting Week One and El Mercado is **a third of a sitting**, not free |
 | **Template 06 — Process & Exception Map** | small | the taller's deliverable; not one of the existing five |
 | **La sombra** — the franchise offers *you* a job; nobody's business is harmed | S6/S7 | ships as content a pack may omit entirely |
 | **Spot-the-flaw** — the one new quest format | S1 | one format only, and the owner sees it before anything is mass-produced |
 | ~~**Seasons** — one autumn season on a Día de Muertos palette, auto by date with an override~~ | **seam shipped 2026-09-02** | bridge only, as signed. **Palette is a draft — owner signs it off** (one line in `config.js`). Widening to jacaranda/awnings/light is the next `art()` keys |
-| **`/room-design` skill** — interview a person about ONE room, produce a build-ready spec | drafted 2026-09-02 | the bridge between `game-brief` (asks about a whole game) and `game-world-expansion` (builds a place). First job: `f2`. Owner wants AJ using it, and a virtual office for the team |
+| **`/room-design` skill** — interview a person about ONE room, produce a build-ready spec | drafted 2026-09-02; **first job done** (`docs/rooms/aj-office.md`) | the bridge between `game-brief` (asks about a whole game) and `game-world-expansion` (builds a place). The interview now also runs IN the game (`content/<pack>/room.js`): AJ answers on her phone, the owner copies the sheet, the build session reads it. A virtual office for the team is the second use |
 | **Meridian's storefront art out of the engine** — `Q`, `Z`, `I`, the produce helper and the DOORLOOK colours are Meridian's, drawn in `engine/engine.js`; the `TILEART` seam exists and Meridian does not use it | S1 | found 2026-09-02 while fixing legibility. Not a bug for the player; a bug for AJ's pack |
 | **`/role-pack` skill** — turns a role into a district: curriculum, words, quests, paper, and a coverage report | before S4 | Nacho and Don Güero proposed it independently. Built with `skill-creator`, measured against the hand-written taller |
 
@@ -92,6 +92,7 @@ engine, all landing in **S1**, none of them naming a business.
 
 | Question | Who is waiting |
 |---|---|
+| **The room upstairs — four calls** (`docs/rooms/aj-office.md` §8): the window (build now or keep the promise, and what it faces — the trolley runs *south* of HQ, so "onto the trolley line" as signed is the wrong wall); bare or mid-move; Nacho off the street; whose room the sheet designs | shipped with a pick on each; one word flips any of them |
 | **How does a district's Saturday present itself?** Deferred to /nacho; must be content-declared so a pack can choose differently | blocks S1's ending refactor |
 | **Industries vs roles** — should the industry lead and the job role follow? | reframes what every pack owes |
 | **The city's record to a government NPC** — separating the player's portfolio from the city's memory | new, a story surface |

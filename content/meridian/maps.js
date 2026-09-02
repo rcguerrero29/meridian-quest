@@ -15,16 +15,21 @@ const WORLD_DEFS={
      "#......#.......+...#",
      "#.a....+.......#####",
      "##########E#########"],
+ /* Floor 2 opens BARE, as signed (STORY.md ❗La oficina, 2026-09-02): the old lead's
+    desk alone under the north wall, the stairs, and nothing else — the barrio furnishes
+    it one piece per business, and the two neighbours who ask what goes in it are placed
+    by content/meridian/room.js, not by a letter here. The north window is a promise in
+    Don Güero's mouth until a window tile passes the cold read. */
  f2:["####################",
+     "#.........D........#",
      "#..................#",
-     "#..D..D....D..D....#",
      "#..................#",
-     "#....RR......P.....#",
-     "#....RR............#",
      "#..................#",
-     "#.....X......X.....#",
      "#..................#",
-     "#..P............D..#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
      "#..................#",
      "#.................1#",
      "#..................#",

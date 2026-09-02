@@ -80,7 +80,8 @@ memory. Write down their phrasing verbatim — their words are the design materi
    validator warns at boot.
 6. **New glyphs needed**, with a note that the uppercase alphabet is fully consumed in
    Meridian — new tiles are digits and symbols, declared in `content/<pack>/art.js` via
-   `TILEART`/`TILEMETA`, never in `engine/`.
+   `TILEART`/`TILEMETA`, never in `engine/`. (The engine reads that seam; Meridian has
+   no `art.js` yet — the first new glyph creates it.)
 7. **Open questions** the person still has to answer.
 
 ## Gates before it ships
@@ -89,18 +90,32 @@ memory. Write down their phrasing verbatim — their words are the design materi
   its glyph. If a newcomer cannot name it, the art is not done.
 - `node test/shots.js` — aim `test/spots.json` at the room and look at the first frame
   from every entrance a player might use.
-- `node test/smoke.js` — reachability: every walkable tile reachable, every prop and NPC
-  with a reachable adjacent tile.
+- `node test/smoke.js` — reachability: every walkable tile reachable and every person
+  with a reachable neighbour. **Props are not checked** — check them by hand or by script
+  (Don Güero caught this claim, 2026-09-02).
 - Then hand it to the person who designed it and watch them walk in.
 
-## First job queued
+## Two ways to run the interview
 
-**Floor 2 (`f2`), the player's office** — 20 wide × 14 tall, portal already wired from
-HQ, arrive text *"Quiet up here… for now."* Signed shape: opens bare with the old AI
-lead's empty desk and a north window onto the trolley line; the barrio furnishes it one
-piece per business. Four surfaces eventually: the file cabinet (your report), the
-glossary wall (words you have met, in the handwriting of whoever said them), the
-deliverables table, your desk. See `docs/STORY.md` → La despedida and `docs/BACKLOG.md` → S2.
+**In person** — ask the twelve questions above and write the spec.
+
+**In the game** (shipped 2026-09-02) — the pack declares `INTERVIEW` in
+`content/<pack>/room.js`: hosts who stand in the room, their questions with three
+tappable answers each plus "say it my way", and the words on the card. The engine runs
+it as an unscored conversation and writes a plain sheet with a Copy button (also under
+Settings → Export → *The room*). The person answers on their own phone; the owner copies
+the sheet and pastes it here. **Treat the sheet as the interview record** — do not
+re-ask what it already answers; ask only what it lists under *Not answered yet* and
+anything marked *wants to tell you this one out loud*. Reference: Meridian's
+`content/meridian/room.js` (Nacho asks feel, Don Güero asks build).
+
+## First job — done (v1, 2026-09-02)
+
+**Floor 2 (`f2`), the player's office** — spec and cold read in `docs/rooms/aj-office.md`.
+Shipped bare as signed (one desk, the stairs), with the two hosts and the nine-question
+interview. The window is a promise until a window tile passes the cold read; the
+furniture arrives per business once the engine can hold more than one delivery (S1).
+Four owner calls are listed in that file's §8.
 
 **Owner's second use, noted not specced:** a virtual office for the team and for AJ,
 built from the same template.

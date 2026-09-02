@@ -32,9 +32,9 @@ const NPCACT={priya:["🛠️","💻"],marcus:["📊","🧮"],camila:["🎧","�
 /* chill townsfolk: chat-only characters with no quests — they just vibe. The engine
    spawns them at boot; their chatter comes from UI.chill (strings.js) unless a name
    matches an egg below. The owner can create more in admin mode (🧍 brush). */
+/* Nacho moved upstairs on 2026-09-02 — he hosts the room interview (room.js) and a
+   barrio with two Nachos is a bug, so his street body is gone. The mural stays. */
 const CHILL=[
- {name:{en:"Nacho · Mural Painter",es:"Nacho · Muralista"},world:"st",x:24,y:12,
-  look:{shirt:"#4B7FB3",skin:"#C08356",hair:"#26202B",style:"afro"}},
  {name:{en:"Yola · Paletera",es:"Yola · Paletera"},world:"ex",x:17,y:0,
   look:{shirt:"#D77FA8",skin:"#E5AC82",hair:"#171219",style:"braids"}}
 ];
