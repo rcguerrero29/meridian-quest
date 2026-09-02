@@ -144,6 +144,13 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   cannot. A rough run sends you home with the most words — "consequences over scolding"
   and "learning beats punishment" doing the same job at once. **The goodbye is the only
   thing that grows the city, and it never expires.**
+- **Meridian Labs is the sixth trade** (2026-09-02, ❗El giro). HQ becomes corporate /
+  enterprise IT — the one industry the owner has actually worked in. Every quest now
+  lands under an industry, the report reads as six engagements instead of five plus an
+  orphan, and the `principal`/Limpieza "implementation lead" collision dissolves rather
+  than being patched: the same craft in two very different rooms is proof the skill
+  transfers. Cost accepted: Meridian Labs stops being neutral home base and becomes a
+  client with a *giro* — softened by the player's desk moving upstairs to `f2` anyway.
 - **El oficio y el giro** (2026-09-02, owner's steer: *"lets focus on highlighting and
   learning the AI with how it can help diff industries"*). Five job titles become five
   trades. A role is a label; an industry is a room with a smell — and every memorable
@@ -180,6 +187,16 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   tense only, or she becomes a quest log with a face; and she is **droppable like the
   franchise**. She is also the natural voice for Barrio Norte, which is a public works
   project — the promise keeps a face without becoming a place.
+  **SIGNED 2026-09-02, and it relaxes Nacho's second law:** she MAY speak about what is
+  missing — but only when the player walks to her window and asks. Nothing ever pushes a
+  list at you; you went looking for it, so it is help and not homework. Owner's words:
+  *"quest log with a face could be good, she could develop some ai stuff, but we mostly
+  avoid it since im not interested in gov work."* So **government is not a trade the city
+  trains**: she stays small, is not a district, and trains no role. Her ask-only
+  behaviour is **content-declared and customisable** — the owner wants it swappable for
+  AJ's game and for fun quests. Against `docs/OWNER.md`'s "never build a quest log", she
+  is the named exception, and the distinction is the whole reason it holds: the rule bans
+  a list that FINDS you, not a clerk you CHOOSE to visit.
 - **Barrio Norte** — PROMOTED to the city's through-line. The northbound track
   advances a visible segment per finished business and the sound gets closer.
   Never a place you visit — it stays a promise (kept free for multiplayer/AJ).

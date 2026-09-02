@@ -65,6 +65,7 @@ engine, all landing in **S1**, none of them naming a business.
 | **La sombra** — the franchise offers *you* a job; nobody's business is harmed | S6/S7 | ships as content a pack may omit entirely |
 | **Spot-the-flaw** — the one new quest format | S1 | one format only, and the owner sees it before anything is mass-produced |
 | **Seasons** — one autumn season on a Día de Muertos palette, auto by date with an override | S0 | bridge-only first as the proving run |
+| **`/room-design` skill** — interview a person about ONE room, produce a build-ready spec | drafted 2026-09-02 | the bridge between `game-brief` (asks about a whole game) and `game-world-expansion` (builds a place). First job: `f2`. Owner wants AJ using it, and a virtual office for the team |
 | **`/role-pack` skill** — turns a role into a district: curriculum, words, quests, paper, and a coverage report | before S4 | Nacho and Don Güero proposed it independently. Built with `skill-creator`, measured against the hand-written taller |
 
 ---
