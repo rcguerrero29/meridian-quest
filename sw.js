@@ -4,7 +4,7 @@ const ASSETS = ["./", "./index.html", "./qr.js", "./manifest.webmanifest", "./ic
   "./engine/engine.js", "./engine/engine3d.js", "./vendor/three.min.js",
   "./content/meridian/strings.js", "./content/meridian/quests.en.js", "./content/meridian/quests.es.js",
   "./content/meridian/npcs.js", "./content/meridian/maps.js", "./content/meridian/config.js",
-  "./content/meridian/room.js"];
+  "./content/meridian/art.js", "./content/meridian/room.js"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

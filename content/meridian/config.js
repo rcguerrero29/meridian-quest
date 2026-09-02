@@ -60,7 +60,8 @@ const GROWTH={
    `bridge` is the proving run; jacaranda, awnings and the light wash widen it later. */
 const SEASONS={
   muertos:{label:{en:"Día de Muertos",es:"Día de Muertos"},from:[10,18],to:[11,3],
-    art:{bridge:["#E0483C","#F07C24","#F2B705","#E8478F","#7B4BA8","#2FA5A0"]}}
+    art:{bridge:["#E0483C","#F07C24","#F2B705","#E8478F","#7B4BA8","#2FA5A0"],
+         sky:"#E8A24A"}} /* the north window's sky at dusk — Don Güero, 2026-09-02; draft like the rest */
 };
 const CHAPTERS=[
  /* need:12 of 16 — ANY twelve, from anywhere in the district. week1 is not "the

@@ -97,13 +97,13 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 Verified in the engine on 2026-09-01, not inferred. The ledger's "one business per
 phase, Phases 2-5" cannot run as written until three things generalize:
 
-- **`finish()` has exactly two epilogue sets.** `engine/engine.js:1821` —
+- **`finish()` has exactly two epilogue sets.** `engine/engine.js:2000` *(line numbers re-checked 2026-09-02; they drift — BACKLOG §1 is kept current)* —
   `const E=last?[t.mepi1,t.mepi2,t.mepi3]:[t.epi1,t.epi2,t.epi3]`. Add a third district
   and the taller prints the mercado's ending while the mercado prints Week One's.
   → every district declares its own `epi:[k3,k2,k1]` and `open:"<toastKey>"`.
 - **The handover doorstep is hardcoded to the mercado's front step.**
-  `engine/engine.js:1834` — `px=fx=6;py=fy=12`. → each ribbon declares its `doorstep`.
-- **`GROWTH.ribbon` is singular.** `ribbonUp()` at :162 and `applyRibbon()` at :3032
+  `engine/engine.js:2013` — `px=fx=6;py=fy=12`. → each ribbon declares its `doorstep`.
+- **`GROWTH.ribbon` is singular.** `ribbonUp()` at :179 and `applyRibbon()` at :3263
   handle exactly one storefront. → `ribbons[]`, with a `g.ribbons||(g.ribbon?[g.ribbon]:[])`
   shim so AJ's pack and older declarations keep working.
 
@@ -237,7 +237,9 @@ stays live until the Phase 2 refactor lands.
   and no other business in the city teaches it.
 - 2026-09-02 · ❗La oficina · **SIGNED — the office opens bare and the barrio furnishes
   it.** `f2` (20x14, portal already wired from HQ) opens with two things: the old AI
-  lead's empty desk and a north window onto the trolley line. Each business then ships
+  lead's empty desk and a north window onto the road out of the barrio *(amended
+  2026-09-02: it was signed as "onto the trolley line", but the trolley runs SOUTH of HQ —
+  Don Güero's correction; the decision-log entry of that date is the record)*. Each business then ships
   ONE piece of furniture with its own pack, declared in that district's own data so
   nobody re-opens `f2`'s map five times. Supersedes the counter-proposal below.
 - 2026-09-01 · ❗La pared: where the record lives · **counter-proposal, now SIGNED above

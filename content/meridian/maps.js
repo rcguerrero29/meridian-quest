@@ -18,9 +18,10 @@ const WORLD_DEFS={
  /* Floor 2 opens BARE, as signed (STORY.md ❗La oficina, 2026-09-02): the old lead's
     desk alone under the north wall, the stairs, and nothing else — the barrio furnishes
     it one piece per business, and the two neighbours who ask what goes in it are placed
-    by content/meridian/room.js, not by a letter here. The north window is a promise in
-    Don Güero's mouth until a window tile passes the cold read. */
- f2:["####################",
+    by content/meridian/room.js, not by a letter here. The north window (three "|"
+    panes over the desk, declared in art.js) looks north: the road out of the barrio
+    and the line being laid — Nacho + Don Güero, 2026-09-02. */
+ f2:["#########|||########",
      "#.........D........#",
      "#..................#",
      "#..................#",
@@ -151,8 +152,9 @@ const DOORLOOK={E:{wood:"#4F5474",wood2:"#5F6588",frame:"#2E3147",glass:true}, /
                 L:{wood:"#B5432F",wood2:"#C9553F",frame:"#6E2A1E",glass:true}, /* La Cocina: terracotta */
                 O:{wood:"#C98A2D",wood2:"#E0A430",frame:"#6B4A17",glass:true}, /* La Obra · Studio: site yellow */
                 M:{wood:"#4E7A4A",wood2:"#5F8F5A",frame:"#2C4A2A",glass:true}}; /* El Mercado: stall green */
-const SOLIDX="ZSHI~9";                     /* solid glyphs this pack adds (~ water, 9 doghouse) */
-const MAPCOL={Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D"};
+const SOLIDX="ZSHI~9|";                    /* solid glyphs this pack adds (~ water, 9 doghouse, | window) */
+const MAPCOL={Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D",
+              "|":"#6E638A"}; /* window: shades to the wall-top colour, so 3D gives it no darker cap */
 /* mini-map labels. `when` reads the city's flags: obra 0-2, mercado bool. */
 const TOWNLBL=[
  {x:15,y:0.75,s:10,c:"#F2E8D8",en:"MERIDIAN HQ  (⇧ FLOOR 2)",es:"MERIDIAN HQ  (⇧ PISO 2)"},

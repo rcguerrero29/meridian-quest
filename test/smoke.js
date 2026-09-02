@@ -1098,6 +1098,15 @@ const CANDIDATES = [
   });
   fails.push(...doorLook);
 
+  // ---- iso reads a pack tile's declared height (Don Güero, 2026-09-02: a declared lift:13
+  // window rendered 6px short of the wall beside it because IZH was a hardcoded table) ----
+  {
+    const iso = await page.evaluate(() => typeof izh === 'function' ? { win: izh('|'), wall: izh('#'), unknown: izh('¤') } : null);
+    if (!iso) fails.push('iso has no izh() height lookup that reads TILES.lift');
+    else { if (iso.win !== iso.wall) fails.push(`iso draws the window ${iso.win} tall and the wall ${iso.wall} — a notch in the north wall`);
+           if (iso.unknown !== 14) fails.push('iso lost its 14px default for an undeclared glyph'); }
+  }
+
   // ---- the room upstairs: two neighbours ask, nothing is graded, the sheet is hers ----
   // Owner 2026-09-02: "lets make it so that AJ can interact through the characters with
   // you if possible ... i dont want an api setup". So: the characters ask IN the game,
@@ -1121,7 +1130,20 @@ const CANDIDATES = [
     const glyphs = {}; f2.forEach(r => [...r].forEach(c => { glyphs[c] = (glyphs[c] || 0) + 1; }));
     if (glyphs['D'] !== 1) problems.push(`the office should hold exactly one desk, found ${glyphs['D'] || 0}`);
     if (f2[11][18] !== '1') problems.push('the stairs moved — the portal from HQ lands at (17,11) beside them');
-    Object.keys(glyphs).forEach(c => { if (!'#.D1'.includes(c)) problems.push(`the office is not bare: it holds '${c}'`); });
+    Object.keys(glyphs).forEach(c => { if (!'#.D1|'.includes(c)) problems.push(`the office is not bare: it holds '${c}'`); });
+    // ---- la ventana del norte (Don Güero + Nacho, 2026-09-02): three panes IN the north wall,
+    // over the old desk, declared by the pack (art.js) and never by the engine ----
+    if (f2[0] !== '#########|||########') problems.push(`the north wall should carry three panes over the desk, got "${f2[0]}"`);
+    f2.slice(1).forEach((r, i) => { if (r.includes('|')) problems.push(`a window pane off the north wall at row ${i + 1}`); });
+    if (typeof TILEART === 'undefined' || typeof TILEART['|'] !== 'function') problems.push('the pack declares no drawing for the window (TILEART["|"])');
+    if (!TILES['|'] || TILES['|'].kind !== 'wall' || TILES['|'].lift !== TILES['#'].lift) problems.push('the window must be a wall-kind tile as tall as the wall beside it, or 3D shows a notch');
+    if (!SOLID.has('|')) problems.push('the window is walkable — SOLIDX must carry it');
+    if (!MAPCOL['|']) problems.push('the window has no colour on the village map');
+    // the cold-read sheet draws every tile with no scene: the art must tolerate that
+    try { const t = document.createElement('canvas'); t.width = 32; t.height = 32; const o = ctx; ctx = t.getContext('2d');
+      TILEDRAW['|']({ sx: 0, sy: 0, x: 10, y: 0, canopy: () => {} }); ctx = o; } catch (e) { problems.push('the window art throws when drawn alone: ' + e.message); }
+    // the engine's own glyph table must not have learned it — content declares, engine reads
+    // (checked by the portability guard for names; here for the glyph itself)
     // shape: everything a pack must declare, EN and ES in lockstep
     const keys = o => Object.keys(o).sort().join(',');
     if (keys(I.ui.en) !== keys(I.ui.es)) problems.push('INTERVIEW.ui EN/ES keys differ');
