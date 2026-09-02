@@ -2587,7 +2587,8 @@ function roleOf(e){
   if(qi===-2){const i=AQ().findIndex(q=>q.title===e.quest);qi=i<0?-2:i;}
   if(qi<0)return null;
   for(let i=0;i<L.length;i++)
-    if(L[i].quests.indexOf(qi)>=0&&L[i].role)return L[i].role[lang]||L[i].role.en;
+    if(L[i].quests.indexOf(qi)>=0&&L[i].role){const c=L[i],ind=c.industry&&(c.industry[lang]||c.industry.en);
+      return (ind?ind+" · ":"")+(c.role[lang]||c.role.en);} /* industry leads, role follows (❗El giro) */
   return null;
 }
 /* The decision report: play data → a portfolio document. One section per quest, one
@@ -2735,7 +2736,8 @@ function drawTown(){
   /* the flags TOWNLBL predicates read: how many stages are up, and whether the
      ribbon is out. Generic on purpose — a pack names its own labels, not the engine. */
   const gs=GRW().staged;
-  const flags={stage:gs?gs.quests.filter(i=>done.has(i)).length:0,ribbon:ribbonUp()};
+  const flags={stage:gs?gs.quests.filter(i=>done.has(i)).length:0,ribbon:ribbonUp(),up:{}};
+  ribbons().forEach(r=>{if(r.id)flags.up[r.id]=ribbonUp(r);}); /* one flag PER storefront, by the pack's own id */
   g2.textAlign="center";
   (typeof TOWNLBL!=="undefined"?TOWNLBL:[]).forEach(l=>{
     if(l.when&&!l.when(flags))return;

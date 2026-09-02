@@ -13,6 +13,13 @@ preference that outlives one phase; cite the date and their words.
 
 ## Settled — never re-ask
 
+- **The whole story is written; the four story calls are Nacho's picks until the owner
+  flips one.** *(2026-09-02)* Owner: *"ok i want the rest of the story for my ai practice...
+  when can i have that? now please if possible - any outstanding questions?"* Read as: write
+  it now, answer the open questions with the planner's recommendation, record each so it is
+  one line to flip. The calls and where they live: `docs/story/las-cuatro-puertas.md`, top.
+  Do not re-ask them; do bring them up once, in one line, the first time the owner plays a
+  district they touch.
 - **AJ talks to the characters; there is no API.** *(2026-09-02)* Owner: *"lets make it
   so that AJ can interact through the characters with you if possible ... i dont want an
   api setup as its just aj but maybe we will have to have a back and forth if she

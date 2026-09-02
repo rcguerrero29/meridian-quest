@@ -107,6 +107,56 @@ const WORLD_DEFS={
     A river (~) runs down the west side; the rainbow bridge (^) crosses it at the
     exit row. The doghouse (9) is where adoptions happen. This map is the preview
     of the pet-care spin-off (IDEAS §13) and its future starting map. */
+ /* ---------- the four parcels (Don Güero, 2026-09-02) ---------- */
+ /* Taller Herrera: three lifts with painted bays along the north, parts wall NE, Yesenia
+    two steps inside the door with her counter, the office nook SW, a waiting corner SE. */
+ ta:["####################",
+     "#.............SSSS.#",
+     "#i7i.i7i.i7i.......#",
+     "#..................#",
+     "#...t......m.....8.#",
+     "#8.................#",
+     "#..................#",
+     "#S.................#",
+     "#D........yKKK.RR..#",
+     "#..............⊔⊔P.#",
+     "#..................#",
+     "##########%#########"],
+ /* Panadería La Espiga: ovens NW, bread racks along the north, the proofing fridge NE,
+    the counter west with Sol at its end, two café tables. */
+ pa:["####################",
+     "#▣▣.....S.S.S.S...W#",
+     "#..................#",
+     "#..l.........t.....#",
+     "#..................#",
+     "#KKKK..........T...#",
+     "#....s.............#",
+     "#..P.........T...P.#",
+     "#..................#",
+     "##########@#########"],
+ /* Limpieza Velázquez: schedule boards on the north wall, two desks, supply shelves,
+    supply boxes and a wet-floor cone, Chente on the floor with the crew. */
+ li:["####################",
+     "#UU.UU.......S.S.S.#",
+     "#..................#",
+     "#.D......D.........#",
+     "#.k......v.........#",
+     "#..................#",
+     "#...........□□.C...#",
+     "#.RR....c..........#",
+     "#.P..............P.#",
+     "##########*#########"],
+ /* Nolasco Tax & Notario: a walkup. Cabinets and the licenciado's desk NW, a north
+    window onto the same back lot as f2, Bere's intake counter SW, a waiting rug with two
+    chairs, and the stairs in the SE corner — the way down. */
+ no:["#######|########",
+     "#▯▯.D....S.S...#",
+     "#...n..........#",
+     "#............P.#",
+     "#..............#",
+     "#KK......RR....#",
+     "#Pe......⊔⊔..1.#",
+     "################"],
  pk:["FFF~~FFFFFFFFFFFFFFFFFFF",
      "F..~~...g....J.....b...F",
      "F..~~..................F",
@@ -127,7 +177,25 @@ const PORTALS={hq:{"1":{to:"f2",x:17,y:11,dir:"left"},"E":{to:"st",x:14,y:1,dir:
                lc:{"L":{to:"st",x:6,y:4,dir:"up"}},
                lo:{"O":{to:"st",x:21,y:4,dir:"up"}},
                me:{"M":{to:"st",x:6,y:12,dir:"up"}},
-               pk:{"2":{to:"st",x:22,y:10,dir:"down"}}};
+               pk:{"2":{to:"st",x:22,y:10,dir:"down"}},
+               /* the four parcels: each street door → its interior; each interior door → its doorstep */
+               ta:{"%":{to:"st",x:23,y:12,dir:"up"}},
+               pa:{"@":{to:"ex",x:6,y:1,dir:"down"}},
+               li:{"*":{to:"ex",x:12,y:1,dir:"down"}},
+               no:{"1":{to:"st",x:25,y:1,dir:"down"}}};
+PORTALS.st["%"]={to:"ta",x:10,y:10,dir:"up"};
+PORTALS.st["$"]={to:"no",x:12,y:6,dir:"left"};
+PORTALS.ex["@"]={to:"pa",x:10,y:8,dir:"up"};
+PORTALS.ex["*"]={to:"li",x:10,y:8,dir:"up"};
+/* the four storefront ribbons — each rises when its district opens (GROWTH.ribbons) */
+const TALLER=[[13,18,"="],[13,19,"="],[13,20,"="],[13,21,"="],[13,22,"="],[13,23,"%"],
+              [13,24,"="],[13,25,"="],[13,26,"="],[13,27,"="],[13,28,"="],
+              [14,19,"6"],[14,25,"0"]];                   /* the Caprice and the tire stack on the apron */
+const ESPIGA=[[0,4,"&"],[0,5,"&"],[0,6,"@"],[0,7,"&"],[0,8,"&"],
+              [1,4,"."],[1,5,"."],[1,6,"."],[1,7,"."],[1,8,"."]];   /* a sidewalk poured over the road */
+const VELAZQUEZ=[[0,10,"!"],[0,11,"!"],[0,12,"*"],[0,13,"!"],[0,14,"!"],
+                 [1,10,"."],[1,11,"."],[1,12,"."],[1,13,"."],[1,14,"."]];
+const NOLASCO=[[0,25,"$"]];                                /* one door in the avenue wall; the climb is inside */
 /* city growth: helping La Obra visibly advances the construction site */
 const OBRA=[[],
  [[6,17,"#"],[6,22,"#"],[6,26,"#"],[8,16,"#"],[8,20,"#"],[8,25,"#"]],
@@ -146,7 +214,7 @@ const MERCADO=[[13,1,"Z"],[13,2,"Z"],[13,3,"Z"],[13,4,"Z"],[13,5,"Z"],[13,6,"M"]
    The engine hardcodes nothing about Meridian's buildings. A new business is a
    content edit: give it a door glyph, a mini-map colour, a label, and a dot.
    (The full per-glyph tile registry is queued with the graphics-prep refactor.) */
-const DOORS="+ELOM";                       /* glyphs painted as a door */
+const DOORS="+ELOM%@*$";                       /* glyphs painted as a door */
 /* DOORLOOK — what tells one door from another, by glyph. The engine draws one door
    body; this colours it for where it leads, so a shop entrance is not the same brown
    as an office door (the cold read, IDEAS §15.8, found all five pixel-identical).
@@ -155,34 +223,45 @@ const DOORS="+ELOM";                       /* glyphs painted as a door */
 const DOORLOOK={E:{wood:"#4F5474",wood2:"#5F6588",frame:"#2E3147",glass:true}, /* Meridian HQ: the office's blue-grey */
                 L:{wood:"#B5432F",wood2:"#C9553F",frame:"#6E2A1E",glass:true}, /* La Cocina: terracotta */
                 O:{wood:"#C98A2D",wood2:"#E0A430",frame:"#6B4A17",glass:true}, /* La Obra · Studio: site yellow */
-                M:{wood:"#4E7A4A",wood2:"#5F8F5A",frame:"#2C4A2A",glass:true}}; /* El Mercado: stall green */
-const SOLIDX="ZSHI~9|□";                   /* solid glyphs this pack adds (~ water, 9 doghouse, | window, □ moving box) */
+                M:{wood:"#4E7A4A",wood2:"#5F8F5A",frame:"#2C4A2A",glass:true}, /* El Mercado: stall green */
+                "%":{wood:"#7C8590",wood2:"#8E98A3",frame:"#3A3F46"},           /* Taller: steel — TILEART draws the roll-up over it */
+                "@":{wood:"#D9A441",wood2:"#E8B85A",frame:"#7A4E17",glass:true}, /* La Espiga: wheat */
+                "*":{wood:"#3FA3A0",wood2:"#52B8B4",frame:"#1F5A58",glass:true}, /* Velázquez: teal */
+                "$":{wood:"#6E2F4A",wood2:"#84405E",frame:"#3A1728",glass:true}}; /* Nolasco: burgundy, frosted */
+const SOLIDX="ZSHI~9|□=6780&!▣▯⊔○";        /* solid glyphs this pack adds (~ water, 9 doghouse, | window, □ box, and the four parcels' tiles) */
 const MAPCOL={Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D",
               "|":"#6E638A",  /* window: shades to the wall-top colour, so 3D gives it no darker cap */
-              "□":"#C8A277"}; /* moving box: cardboard, paler than the produce crate so the map never confuses them */
+              "□":"#C8A277",  /* moving box: cardboard, paler than the produce crate so the map never confuses them */
+              "=":"#6E6A73","%":"#E0B45C","6":"#7A2E2E","7":"#5A6470","8":"#B3352B","0":"#2E2E33",
+              "&":"#D9A441","!":"#3FA3A0","▣":"#4A4F57","▯":"#7C8590","⊔":"#8A6F4D","○":"#7A5C8A"};
 /* mini-map labels. `when` reads the city's flags: obra 0-2, mercado bool. */
 const TOWNLBL=[
  {x:15,y:0.75,s:10,c:"#F2E8D8",en:"MERIDIAN HQ  (⇧ FLOOR 2)",es:"MERIDIAN HQ  (⇧ PISO 2)"},
  {x:6.5,y:5.75,s:10,c:"#F2E8D8",en:"LA COCINA",es:"LA COCINA"},
  {x:22,y:7.7,s:10,c:"#3A2F17",en:"🚧 SITE",es:"🚧 OBRA",when:f=>f.stage<2},
  {x:22,y:7.7,s:10,c:"#F2E8D8",en:"LA OBRA · STUDIO",es:"LA OBRA · ESTUDIO",when:f=>f.stage>=2},
- {x:6,y:13.7,s:9,c:"#6B5210",en:"LOT: EL MERCADO",es:"LOTE: EL MERCADO",when:f=>!f.ribbon},
- {x:6,y:13.75,s:9,c:"#F2E8D8",en:"EL MERCADO ROBLES",es:"EL MERCADO ROBLES",when:f=>f.ribbon},
- {x:25.5,y:13.7,s:9,c:"#6B5210",en:"RESERVED LOT",es:"LOTE RESERVADO"},
+ {x:6,y:13.7,s:9,c:"#6B5210",en:"LOT: EL MERCADO",es:"LOTE: EL MERCADO",when:f=>!(f.up&&f.up.me)},
+ {x:6,y:13.75,s:9,c:"#F2E8D8",en:"EL MERCADO ROBLES",es:"EL MERCADO ROBLES",when:f=>f.up&&f.up.me},
+ {x:25.5,y:13.7,s:9,c:"#6B5210",en:"RESERVED LOT",es:"LOTE RESERVADO",when:f=>!(f.up&&f.up.ta)},
+ {x:23,y:13.75,s:9,c:"#F2E8D8",en:"TALLER HERRERA",es:"TALLER HERRERA",when:f=>f.up&&f.up.ta},
+ {x:25.5,y:0.75,s:8,c:"#F2E8D8",en:"NOTARIO ⇧",es:"NOTARIO ⇧",when:f=>f.up&&f.up.no},
  {x:27,y:1.7,s:8,c:"#6B5210",en:"CALLE DOS →",es:"CALLE DOS →"},
  {x:0.5,y:1.8,s:8,c:"#6B5210",dx:3,en:"🚋",es:"🚋"}
 ];
 /* "you are here" on the town plan, for worlds that are interiors of the street */
-const MAPDOT={hq:[14,0],f2:[14,0],lc:[6,5],lo:[21,5],ex:[29,1],me:[6,13]};
+const MAPDOT={ta:[23,13],pa:[29,1],li:[29,1],no:[25,0],hq:[14,0],f2:[14,0],lc:[6,5],lo:[21,5],ex:[29,1],me:[6,13]};
 /* ---------- trolley fast travel: the streets never dead-end, they connect ---------- */
 const TRV=[{w:"st",x:1,y:1,dir:"right"},{w:"ex",x:22,y:3,dir:"left"}];
 /* ambient critters: kinds live in the engine (butterfly, colibri, gato); spawns are
    content. Each wanders a small radius around home; the gato is pettable. */
 const CRITTERS=[
  {kind:"butterfly",world:"st",x:6,y:12,c:"#E4A7D8"},
- {kind:"butterfly",world:"ex",x:10,y:0,c:"#8FC7E8"},
+ {kind:"butterfly",world:"ex",x:13,y:3,c:"#8FC7E8"},
  {kind:"colibri",world:"st",x:16,y:4,c:"#3FA88F"},
- {kind:"gato",world:"ex",x:20,y:5,c:"#8B8F98"},
+ {kind:"gato",world:"st",x:22,y:14,c:"#8B8F98",name:"Tuerca"}, /* the street cat picked the taller's lot before the shop did */
+ {kind:"gato",world:"pa",x:2,y:3,c:"#E3C08A",name:"Bolillo"}, /* he lives in the flour bin */
+ {kind:"gato",world:"li",x:16,y:7,c:"#F2F0EA",name:"Pelusa"}, /* she rides in the van */
+ {kind:"gato",world:"no",x:2,y:2,c:"#3A3A40",name:"Timbre"} /* she sits where the doorbell would be */,
  {kind:"gato",world:"me",x:15,y:9,c:"#7A6A55"},  /* Frijol — the bodega cat, pettable */
  {kind:"beagle",world:"st",x:22,y:11,c:"#E8C46A",name:"Sonny",egg:"sonny"} /* the star himself */
 ];

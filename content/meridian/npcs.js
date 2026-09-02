@@ -1,17 +1,29 @@
 /* Meridian Quest content pack — NPC roster: emoji, names (EN/ES), looks, and world placement. */
-const NPCE={priya:"🛠️",marcus:"💼",camila:"🎧",tovar:"🌮",legal:"⚖️",cto:"🏥",junior:"🐣",ceo:"👑",fred:"🐕",rosa:"🌶️",chuy:"👨‍🍳",guero:"👷",lupe:"📐",beto:"🔨",kike:"🧱",mari:"🏗️",xochi:"🧵",chelo:"🧺",nando:"📦",perla:"🧾",chava:"🔪"};
+const NPCE={tacho:"🔧",yesenia:"📒",moy:"📱",licha:"🥖",tito:"🌙",sol:"🧁",vero:"🧹",chente:"🪣",karla:"🗓️",nolasco:"📑",bere:"🗂️",priya:"🛠️",marcus:"💼",camila:"🎧",tovar:"🌮",legal:"⚖️",cto:"🏥",junior:"🐣",ceo:"👑",fred:"🐕",rosa:"🌶️",chuy:"👨‍🍳",guero:"👷",lupe:"📐",beto:"🔨",kike:"🧱",mari:"🏗️",xochi:"🧵",chelo:"🧺",nando:"📦",perla:"🧾",chava:"🔪"};
 const NPCN={
- en:{priya:"Priya · Engineering Lead",marcus:"Marcus · CFO",camila:"Camila · Customer Success",tovar:"Ops Director · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · Bayview CTO",junior:"Theo · Junior PM",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Good Boy",rosa:"Doña Rosa · Owner, La Cocina",chuy:"Chuy · Head Cook",guero:"Don Güero · Foreman, La Obra",lupe:"Lupe · Estimator & Permits",beto:"Beto · Crew, La Obra",kike:"Kike · Mason",mari:"Mari · Crane Operator",xochi:"Xochi · Designer",chelo:"Doña Chelo · Owner, El Mercado Robles",nando:"Nando · Receiving",perla:"Perla · Counter",chava:"Chava · Carnicero"},
- es:{priya:"Priya · Líder de Ingeniería",marcus:"Marcus · CFO",camila:"Camila · Éxito del Cliente",tovar:"Director de Operaciones · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · CTO de Bayview",junior:"Theo · PM Junior",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Buen Chico",rosa:"Doña Rosa · Dueña de La Cocina",chuy:"Chuy · Jefe de Cocina",guero:"Don Güero · Maestro de Obra",lupe:"Lupe · Presupuestos y Permisos",beto:"Beto · Cuadrilla de La Obra",kike:"Kike · Albañil",mari:"Mari · Operadora de Grúa",xochi:"Xochi · Diseñadora",chelo:"Doña Chelo · Dueña de El Mercado Robles",nando:"Nando · Recibo de Mercancía",perla:"Perla · Caja",chava:"Chava · Carnicero"}};
+ en:{tacho:"Don Tacho · Master Mechanic, Taller Herrera",yesenia:"Yesenia · Service Writer",moy:"Moy · Apprentice",licha:"Doña Licha · Baker, La Espiga",tito:"Tito · Night Baker",sol:"Sol · Counter",vero:"Doña Vero · Owner, Limpieza Velázquez",chente:"Chente · Crew Lead",karla:"Karla · Scheduler",nolasco:"Lic. Nolasco · Tax & Notary",bere:"Bere · Intake",priya:"Priya · Engineering Lead",marcus:"Marcus · CFO",camila:"Camila · Customer Success",tovar:"Ops Director · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · Bayview CTO",junior:"Theo · Junior PM",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Good Boy",rosa:"Doña Rosa · Owner, La Cocina",chuy:"Chuy · Head Cook",guero:"Don Güero · Foreman, La Obra",lupe:"Lupe · Estimator & Permits",beto:"Beto · Crew, La Obra",kike:"Kike · Mason",mari:"Mari · Crane Operator",xochi:"Xochi · Designer",chelo:"Doña Chelo · Owner, El Mercado Robles",nando:"Nando · Receiving",perla:"Perla · Counter",chava:"Chava · Carnicero"},
+ es:{tacho:"Don Tacho · Maestro Mecánico, Taller Herrera",yesenia:"Yesenia · Recepción de Servicio",moy:"Moy · Aprendiz",licha:"Doña Licha · Panadera, La Espiga",tito:"Tito · Panadero de noche",sol:"Sol · Mostrador",vero:"Doña Vero · Dueña, Limpieza Velázquez",chente:"Chente · Jefe de cuadrilla",karla:"Karla · Turnos",nolasco:"Lic. Nolasco · Impuestos y Notary Public",bere:"Bere · Recepción",priya:"Priya · Líder de Ingeniería",marcus:"Marcus · CFO",camila:"Camila · Éxito del Cliente",tovar:"Director de Operaciones · Tovar's Tacos",legal:"Dana · Legal",cto:"Dr. Okafor · CTO de Bayview",junior:"Theo · PM Junior",ceo:"CEO · Tovar's Tacos",fred:"Frederick · Buen Chico",rosa:"Doña Rosa · Dueña de La Cocina",chuy:"Chuy · Jefe de Cocina",guero:"Don Güero · Maestro de Obra",lupe:"Lupe · Presupuestos y Permisos",beto:"Beto · Cuadrilla de La Obra",kike:"Kike · Albañil",mari:"Mari · Operadora de Grúa",xochi:"Xochi · Diseñadora",chelo:"Doña Chelo · Dueña de El Mercado Robles",nando:"Nando · Recibo de Mercancía",perla:"Perla · Caja",chava:"Chava · Carnicero"}};
 /* npc letter -> npc key + quest queue */
 const STATIONS={p:{npc:"priya",q:[5,14]},j:{npc:"junior",q:[7]},c:{npc:"ceo",q:[9]},l:{npc:"legal",q:[2]},
                 t:{npc:"tovar",q:[0,8]},a:{npc:"camila",q:[1]},h:{npc:"cto",q:[6]},m:{npc:"marcus",q:[3,4]}};
 const WNPC={hq:STATIONS,lc:{r:{npc:"rosa",q:[10]},y:{npc:"chuy",q:[11]}},st:{f:{npc:"guero",q:[12]},e:{npc:"lupe",q:[13]}},
             ex:{w:{npc:"beto",q:[],chat:1},x:{npc:"kike",q:[],chat:1},z:{npc:"mari",q:[],chat:1}},
+            /* the four parcels — quest queues filled when their packs land */
+            ta:{t:{npc:"tacho",q:[24,28,30]},y:{npc:"yesenia",q:[27,29,31]},m:{npc:"moy",q:[25,26]}},
+            pa:{l:{npc:"licha",q:[32,36,39]},t:{npc:"tito",q:[34,37]},s:{npc:"sol",q:[33,35,38]}},
+            li:{v:{npc:"vero",q:[40,44,45,47]},c:{npc:"chente",q:[41,43,46]},k:{npc:"karla",q:[42]}},
+            no:{n:{npc:"nolasco",q:[48,50,52,55]},e:{npc:"bere",q:[49,51,53,54]}},
             lo:{d:{npc:"xochi",q:[15],chat:1}},
             me:{s:{npc:"chelo",q:[16,17,23]},n:{npc:"nando",q:[18,20]},
                 u:{npc:"perla",q:[19,21]},v:{npc:"chava",q:[22],chat:1}}};
-const NPCLOOK={p:{shirt:"#C2543F",skin:"#B97E52",hair:"#171219",style:"long"},j:{shirt:"#3E8ED0",skin:"#EFC49A",hair:"#7A4A22",style:"curly"},
+/* looks keyed by WHO (npc id) win over the map letter — the four casts wear their own colours */
+const NPCLOOK={tacho:{shirt:"#3A3F46",skin:"#B97E52",hair:"#8E8E96",style:"buzz"},yesenia:{shirt:"#B3352B",skin:"#D9995F",hair:"#171219",style:"long"},
+  moy:{shirt:"#2AA47C",skin:"#C08356",hair:"#26202B",style:"curly"},licha:{shirt:"#D9A441",skin:"#E5AC82",hair:"#8E8E96",style:"braids"},
+  tito:{shirt:"#31446E",skin:"#8C5A33",hair:"#171219",style:"cap"},sol:{shirt:"#E8B85A",skin:"#F1CDA9",hair:"#7A4A22",style:"curly"},
+  vero:{shirt:"#3FA3A0",skin:"#C08356",hair:"#26202B",style:"long"},chente:{shirt:"#1F5A58",skin:"#B97E52",hair:"#171219",style:"buzz"},
+  karla:{shirt:"#52B8B4",skin:"#E5AC82",hair:"#241B26",style:"braids"},nolasco:{shirt:"#6E2F4A",skin:"#D9995F",hair:"#5C5C66",style:"buzz",outfit:"formal"},
+  bere:{shirt:"#84405E",skin:"#EFC49A",hair:"#2C1C12",style:"long"},
+  p:{shirt:"#C2543F",skin:"#B97E52",hair:"#171219",style:"long"},j:{shirt:"#3E8ED0",skin:"#EFC49A",hair:"#7A4A22",style:"curly"},
   c:{shirt:"#2C2637",skin:"#D9995F",hair:"#5C5C66",style:"cap",outfit:"formal"},l:{shirt:"#25423C",skin:"#F0C9A6",hair:"#2C1C12",style:"long",outfit:"formal"},
   t:{shirt:"#D08A2E",skin:"#C08356",hair:"#1E1620",style:"cap"},a:{shirt:"#B04A78",skin:"#8C5A33",hair:"#241B26",style:"curly"},
   h:{shirt:"#31446E",skin:"#E8B98C",hair:"#403830",style:"buzz",outfit:"formal"},m:{shirt:"#3A415C",skin:"#F1CDA9",hair:"#8E8E96",style:"buzz",outfit:"formal"},
@@ -24,7 +36,9 @@ const NPCLOOK={p:{shirt:"#C2543F",skin:"#B97E52",hair:"#171219",style:"long"},j:
   u:{shirt:"#5B8FC9",skin:"#E5AC82",hair:"#171219",style:"pony"},
   v:{shirt:"#F0EEE6",skin:"#8C5A33",hair:"#26202B",style:"buzz"}};
 /* activity emotes: what each townsperson is visibly up to between conversations */
-const NPCACT={priya:["🛠️","💻"],marcus:["📊","🧮"],camila:["🎧","💬"],tovar:["🌮","📋"],
+const NPCACT={tacho:["🔧","👂"],yesenia:["📒","📞"],moy:["📱","🔩"],licha:["🥖","🔥"],tito:["🌙","🥐"],sol:["🧁","☕"],
+ vero:["🧹","📋"],chente:["🪣","🚐"],karla:["🗓️","📲"],nolasco:["📑","🖊️"],bere:["🗂️","📞"],
+ priya:["🛠️","💻"],marcus:["📊","🧮"],camila:["🎧","💬"],tovar:["🌮","📋"],
  legal:["⚖️","📄"],cto:["🩺","📋"],junior:["📝","☕"],ceo:["📈","👑"],
  rosa:["🌶️","🍲"],chuy:["🍳","🔪"],guero:["📐","🧱"],lupe:["📋","✏️"],
  beto:["🔨","🧱"],kike:["🧱","🎵"],mari:["🏗️","📻"],xochi:["🧵","✂️"],

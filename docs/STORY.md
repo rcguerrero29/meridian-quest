@@ -192,6 +192,25 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   of what you already did; the window upstairs is what you see of what's coming. The
   season may repaint the sky at the glass; it may never change what is out there.
 
+- **Las cuatro puertas** (2026-09-02, written and wired, `docs/story/las-cuatro-puertas.md`).
+  The rest of the city has a story, and the game carries it: Taller Herrera (quests 24-31,
+  the paper around the mechanic — *repair order, book time, core charge, write-up,
+  comeback*), Panadería La Espiga (32-39, the number born at 4am — *sold-out time, par,
+  bake sheet, merma, day-old*), Limpieza Velázquez (40-47, a tool that counts work and
+  never watches people — *walkthrough, punch list, route sheet, re-clean, scope*), Nolasco
+  Tax & Notario (48-55, what a machine must refuse, and the man who reads your file —
+  *acknowledgment, intake, engagement letter, ITIN, extension*). Each district opens by
+  the previous owner's word, said inside that owner's ending because the engine cannot
+  grade a toast: Chelo phones Tacho (three sentences appended to `mepi1/2/3`), Tacho
+  phones Licha, Licha says it to Vero across her counter, Vero sends you to Nolasco with
+  an envelope. Nolasco's door opens nothing — la inauguración is a later sitting. Four
+  cats now: Tuerca (she), Bolillo (he, the flour bin), Pelusa (the van), Timbre (the
+  doorbell). The old lead's four pages are placed; the reveal is Nolasco's. The
+  franchise is never named — "the place with the drive-through" — and lands as drift, a
+  bid request and strangers at intake before it ever makes an offer. Every district ends
+  the way the mercado did: somebody says what they think of you, phones the next
+  neighbour, and a cat moves in.
+
 ## Open threads (promises already on the wall)
 
 - **La ventanilla** — the city's own record, kept by a government NPC, separate from the
@@ -240,17 +259,27 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   screen. His name is on Chelo's wall by the register, in older handwriting — now
   planted in quest 23's honest-review beat as well as in `mepi2`, so every player who
   tells her the truth sees it, not only the grade-2 ones.
+  **All four pages placed (2026-09-02):** the parts binder (q26), the laminated card by
+  the oven, the checklist in the glovebox (his rollout), the fifth page in Nolasco's
+  folder. Nolasco is the one who reads them together.
 - **Frederick's fame** — the barrio's media department; his DMs fill with
   questions meant for the businesses (the wrong-channel gag, with a real lesson
-  under it). He hosts the inauguración. Sonny is the intern.
-- **The three cats** — the street cat has no business. She picks the taller and
-  Don Tacho does not object. Her name is Tuerca. Every new business gets a cat.
+  under it). He hosts the inauguración. Sonny is the intern. **Four wrong-channel beats
+  planted (2026-09-02)**, one per pack; Nolasco's grade-3 ending names him host.
+- **The four cats** — the street cat has no business. She picks the taller and
+  Don Tacho does not object. Her name is Tuerca. Every new business gets a cat, and
+  now every business has one (2026-09-02): Bolillo in La Espiga's flour bin (a he),
+  Pelusa in Vero's van, Timbre where Nolasco's doorbell would be. Each sits in the
+  endings and nowhere in the rules.
 - **Xochi's line** — she outfits the city one business at a time: shop shirts,
   aprons, crew uniforms, one good jacket. Proof this is a barrio, not four shops.
+  **Paid across four packs (2026-09-02):** shop shirts with Tuerca on the pocket (q31),
+  aprons with a pocket for Sol's strip, crew shirts nine of nine, and \"Do you own a
+  jacket?\" — the jacket is for la inauguración.
 - ~~**The reserved lot**~~ — Taller Herrera, Phase 2.
 - ~~**Week Two, chapter two+**~~ — retired with weeks.
 
-## Phase 2 — Taller Herrera (planned 2026-09-01, ready to write)
+## Phase 2 — Taller Herrera (planned 2026-09-01 · **written 2026-09-02** — the finished plan for all four districts is `docs/story/las-cuatro-puertas.md`; this section is the earlier draft, kept)
 
 Automation / solutions consultant. Cast: **Don Tacho** (master mechanic, refuses
 the tablet), **Yesenia** (service writer, runs a paper book), **Moy** (apprentice,
@@ -461,6 +490,26 @@ hired you for. Three fixes, now canon:
   and cited it against `finish()`. Corrected in OWNER.md and here — including the
   Principles bullet, which the first correction pass MISSED and which is the one a
   planner reads and stops at.
+
+- 2026-09-02 · ❗Las cuatro puertas · **the rest of the story written and wired the same
+  day** — owner: "i want the rest of the story for my ai practice... now please if
+  possible" · Nacho planned all four districts at the auto shop's depth; four writers
+  drafted 32 quests EN+ES in the mercado's exact shape against a validator; the four open
+  calls were answered with Nacho's picks (Tuerca is a she; the franchise is "the place
+  with the drive-through"; paper 06/01/04 and a new 07; Calle Dos one door at a time) and
+  are one line each to flip. Nacho's Bolillo is a he — the "every cat is she" rule was the
+  session's over-reach, not Nacho's, and was corrected before the espiga was written.
+- 2026-09-02 · ❗La carta · **the referral lives inside the previous owner's ending** ·
+  the engine cannot grade a toast, so the grade-keyed sentence is the ending's last line;
+  three sentences appended to `mepi1/2/3` so Chelo phones Tacho. The "next lot opens"
+  toast stays grade-blind, as it must.
+- 2026-09-02 · ❗El giro · **built** — `industry:` beside `role:` in every chapter; the
+  report prints *industry · role* ("Auto repair · AI Solutions Architect"), so five
+  engagements read as five trades. Week One stays one industry (Enterprise IT) until the
+  Week One split is decided — open item 1 stands.
+- 2026-09-02 · The cats' names · **Nacho's over Don Güero's placeholders** (Bolillo,
+  Pelusa, Timbre for Concha, Cloro, Expediente) · the names carry story; the maps were laid
+  the same morning and nobody had met the cats yet.
 
 ## Bible vs. game text — RESOLVED 2026-09-01 (the open-city items only)
 

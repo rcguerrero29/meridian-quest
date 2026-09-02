@@ -23,18 +23,20 @@ quest packs and forgot the engine seam, the office, the ceremony and the second 
 
 | # | Sitting | Cost | What you would see |
 |---|---|---|---|
-| **S0** | ~~El 3D y el mundo~~ | **shipped 2026-09-02** (branch, not merged) | doors that stand up, sharp 3D, La Cocina reads as a restaurant, autumn arrives on its own. *Not* the bridge arch — that waits on elevation |
+| **S0** | ~~El 3D y el mundo~~ | **shipped 2026-09-02** (merged at `mq-v46`) | doors that stand up, sharp 3D, La Cocina reads as a restaurant, autumn arrives on its own. *Not* the bridge arch — that waits on elevation |
 | **S1** | **La cimentación** | one | **nothing** — and that is said out loud. The whole engine seam, paid once |
 | **S2** | ~~La oficina (`f2`)~~ | **shipped 2026-09-02** (v1 at `mq-v46`; window, mid-move and the tenth question the same day) | the room opens mid-move, Nacho and Don Güero ask ten questions with no wrong answers, the sheet is the player's — `docs/rooms/aj-office.md`. *Not yet:* the furniture arriving (§6 below; the engine part is an eighth of a sitting) |
-| **S3** | Taller Herrera | one | the southeast lot opens; the first pack on the new machinery |
-| **S4** | La Espiga + Velázquez | one long | *two* storefronts on Calle Dos in one sitting |
-| **S5** | Nolasco Tax & Notario | one | the walkup opens; the man who reads your report |
+| **S3** | ~~Taller Herrera~~ | **written and wired 2026-09-02** (`mq-v51`) | the southeast lot opens on the mercado's Saturday; quests 24-31; template 06 |
+| **S4** | ~~La Espiga + Velázquez~~ | **written and wired 2026-09-02** (`mq-v51`) | Calle Dos opens one door at a time — the bakery on the taller's Saturday, the cleaners on the bakery's; quests 32-47 |
+| **S5** | ~~Nolasco Tax & Notario~~ | **written and wired 2026-09-02** (`mq-v51`) | the walkup opens on the cleaners' Saturday; quests 48-55; template 07. His Saturday opens nothing — S6 is next |
 | **S6** | La inauguración + la mañana siguiente | one | the street dressed, the mural full, the day turning over while you sleep |
 | **S7** | La segunda vuelta | half | five neighbours phone *you* |
 
-**Playtest gates:** `/playtest` after S2, S3 and S6. **S4 does not begin until the
-mercado has been human-played** — nobody has played it yet, and it is the shape every
-later pack copies.
+**Playtest gates:** `/playtest` after S2, S3 and S6. ~~**S4 does not begin until the
+mercado has been human-played**~~ — waived for the *writing* by the owner on 2026-09-02
+("now please"). Nobody has played the mercado yet, and it is the shape every later pack
+copies: **the first human play of the mercado is the next gate**, and the four new packs
+get revised against it.
 
 ---
 
@@ -49,11 +51,11 @@ engine, all landing in **S1**, none of them naming a business.
 | ~~the handover doorstep is hardcoded~~ | **shipped 2026-09-02** | each storefront declares its own `doorstep`; with none declared you stay where you were |
 | ~~`GROWTH.ribbon` is singular~~ | **shipped 2026-09-02** | `ribbons[]`, one per storefront, each rising on its own district; the old singular still works. Owner: "I thought we fixed this" — it was not, now it is |
 | ~~`NPCLOOK` is one flat global table~~ | **shipped 2026-09-02** | a look is keyed by npc id first (`NPCLOOK.tacho`), map letter second — the taller's cast wears its own colours |
-| `GROWTH` cannot read a grade | `engine.js:3004`, `:3031` | the taller's endings change the world (cat on the Caprice, assistant switched off) and the code has no idea how well you did |
+| `GROWTH` cannot read a grade | the growth code in `engine.js` (anchor by function, the lines drift) | the taller's endings change the world (cat on the Caprice, assistant switched off) and the code has no idea how well you did. **Written around it 2026-09-02:** all four packs' endings are words only; the world looks the same at every grade (Nacho's contradiction H) |
 | ~~the report truncates at 200 entries~~ | **shipped 2026-09-02** | the record keeps every decision; if the phone refuses the write it says so once instead of dropping the oldest. Owner: "I thought we fixed this 200 entries thing" — it was not, now it is |
 | the uppercase tile alphabet is spent | `engine.js:10` | new glyphs must be digits and symbols from here — the first, `\|` the window, lives in `content/meridian/art.js` (2026-09-02) |
 | ~~a delivery is one tile~~ | **answered by the architecture** (Don Güero, later the same day) | a storefront's `tiles` has always been a list, and a furniture delivery IS a storefront aimed at `f2` — a group costs nothing extra. What remains is ART for a piece wider than one tile (the couch) |
-| **the town plan has one flag for all storefronts** | the `flags` object in the map-drawing code | a second lot cannot have its own label until each storefront carries an `id`. A sixteenth of a sitting (Don Güero, 2026-09-02) |
+| ~~**the town plan has one flag for all storefronts**~~ | **shipped 2026-09-02** | each storefront carries an `id` and the town plan reads `f.up.<id>`; the four parcels label themselves |
 
 ---
 
@@ -63,7 +65,7 @@ engine, all landing in **S1**, none of them naming a business.
 |---|---|---|
 | **The office (`f2`)** — opens bare with the old lead's desk; the barrio furnishes it one piece per business | **bare + the interview shipped (S2 v1)**; furniture waits on S1 | furniture declared in each district's own data, or the map gets re-opened five times. The north window is a promise in Don Güero's mouth until a window tile passes the cold read |
 | **The word is the reward** — a term enters through whoever *needs* it, in the beat after you get it right; pins to the office wall | S1 registries + content | retrofitting Week One and El Mercado is **a third of a sitting**, not free |
-| **Template 06 — Process & Exception Map** | small | the taller's deliverable; not one of the existing five |
+| ~~**Template 06 — Process & Exception Map**~~ | **written 2026-09-02** | the taller's deliverable, plus **07 — What it answers, what it refuses, who it hands to** for Nolasco; 01 assigned to the panadería, 04 shared with the cleaners (`docs/templates/README.md`) |
 | **La sombra** — the franchise offers *you* a job; nobody's business is harmed | S6/S7 | ships as content a pack may omit entirely |
 | **Spot-the-flaw** — the one new quest format | S1 | one format only, and the owner sees it before anything is mass-produced |
 | ~~**Seasons** — one autumn season on a Día de Muertos palette, auto by date with an override~~ | **seam shipped 2026-09-02** | bridge only, as signed. **Palette is a draft — owner signs it off** (one line in `config.js`). Widening to jacaranda/awnings/light is the next `art()` keys |
@@ -84,7 +86,7 @@ engine, all landing in **S1**, none of them naming a business.
 | 5 | ~~**All five doors are pixel-identical**~~ | **shipped 2026-09-02** | `DOORLOOK` in the pack colours each door for its destination; shop doors get glass. Smoke test bakes every door and fails on a twin. §15.8 |
 | 6 | **The rainbow bridge is a flat stripe** that does not span the river | a sitting | there is no bridge object in any camera. §15.4 |
 | 7 | ~~Desk reads as a cardboard box; table reads as a dartboard; the mercado scale is illegible~~ | **shipped 2026-09-02** | desk with a monitor; gingham table with plates and chairs; a dial-and-tray scale. §15.8 |
-| 8 | **`LEVELS` saturates at 120 XP** while MAXXP is 350 → ~470 | small | you hit "AI Legend" a third of the way through Week One |
+| 8 | **`LEVELS` saturates at 120 XP** while MAXXP is now 830 | small, but a trap | you hit "AI Legend" a third of the way through Week One. **Not retuned on 2026-09-02 on purpose:** raising a threshold demotes a saved player from AI Legend, and nothing is ever taken away — add levels above, never move the ones below, and the names are the pack's (`levels` in strings.js) |
 | 9 | **Error log** — 3D failure is swallowed in four places and leaves no trace | ~55 lines | designed in full. §15.5 |
 | 10 | **Lit windows never light in 3D** — the night glow on facades runs only in the flat cameras, and 3D is the default | small | found by Don Güero while pricing the office window (2026-09-02); the window deliberately does not use it. Build it in 3D or write it down as known |
 | 11 | ~~**Doors hard to see in 3D**~~ | **shipped 2026-09-02** | a light frame baked around every door face and on the jamb, a bigger pool of light under it, and a bouncing marker over any door that leads somewhere when you are within three steps (owner: "i think we should have a marker"). §15.11, §15.12 |
@@ -99,9 +101,11 @@ engine, all landing in **S1**, none of them naming a business.
 
 | Question | Who is waiting |
 |---|---|
+| **The four story calls were made with Nacho's picks** (`docs/story/las-cuatro-puertas.md`, top): Tuerca a she; the franchise unnamed; paper 06/01/04/07; Calle Dos one door at a time. Any to flip? | one line each; the packs are written |
+| **Play the mercado**, then the taller — the packs were written before anyone played the shape they copy | the four new packs, for revision |
 | **The room upstairs — one call left** (`docs/rooms/aj-office.md` §8): Nacho off the street. *(Window: built. Whose room: the interview asks it. Mid-move: chosen and built 2026-09-02.)* Plus Don Güero's four after the build (§10 there): gifts land on the boxes; the couch one tile or two; assign who-sends-what now; Nacho's talk title | shipped with a pick on each; one word flips any |
 | **How does a district's Saturday present itself?** Deferred to /nacho; must be content-declared so a pack can choose differently | blocks S1's ending refactor |
-| **Industries vs roles** — should the industry lead and the job role follow? | reframes what every pack owes |
+| ~~**Industries vs roles**~~ — built 2026-09-02: `industry:` beside `role:`, the report prints *industry · role* | Week One is still one industry (Enterprise IT) until the Week One split is decided |
 | **The city's record to a government NPC** — separating the player's portfolio from the city's memory | new, a story surface |
 | **The Día de Muertos palette** — six bridge colours in `config.js` are a draft; say yes or change them | S0 shipped the seam with them in |
 | **Merge S0 to `main`** — seven engine/content commits on the branch at `mq-v45`; nothing is playable for the owner until this | the owner's word |
