@@ -6,8 +6,30 @@
    (owner-confirmed 2026-08-31). No WebGL → draw() falls back to the front camera. */
 "use strict";
 const T3={renderer:null,scene:null,cam:null,group:null,amb:null,sun:null,lastW:0,
-  builtKey:"",dirty:0,fail:false,yaw:0,pool:[],tintables:[],tint:null,glows:[]}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
+  builtKey:"",dirty:0,fail:false,yaw:0,pool:[],tintables:[],tint:null,glows:[],K:1}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
 function t3Invalidate(){T3.dirty++;} /* growth, theme edits — anything that reshapes tiles */
+/* THE BLUR (IDEAS §15.1, measured): every texture was baked at 32px a tile while the
+   renderer output at up to 3x device pixels — a 2.9x–4.0x magnification of the art.
+   Raising the output resolution and adding mipmaps (the two earlier fixes) cannot
+   sharpen a texture that is being magnified. K is the one factor: bake everything at
+   K× and draw through a K× transform, so the 2D artists never know. It follows the
+   renderer's real pixel ratio, clamped to what the GPU can hold: the largest world's
+   ground is one texture, and it must fit maxTextureSize and a sane texel budget. */
+function t3Factor(){
+  if(!T3.renderer)return 1;
+  let K=Math.min(3,Math.max(1,Math.round(T3.renderer.getPixelRatio()||1)));
+  const cap=T3.renderer.capabilities,maxTex=(cap&&cap.maxTextureSize)||2048;
+  let maxW=0,maxA=0;Object.values(WORLDS).forEach(w=>{maxW=Math.max(maxW,w.W*32,w.H*32);maxA=Math.max(maxA,w.W*w.H*1024);});
+  while(K>1&&(maxW*K>maxTex||maxA*K*K>6e6))K--; /* 6M texels ≈ 24MB RGBA before mipmaps */
+  return K;
+}
+function t3CheckK(){ /* a DPR change (fullscreen, a window dragged between monitors) re-bakes */
+  const K=t3Factor();
+  if(K===T3.K)return;
+  T3.K=K;T3.dirty++;
+  if(T3.canopyTex){T3.canopyTex.dispose();T3.canopyTex=null;}
+  T3.pool.forEach(p=>{p.c.width=36*K;p.c.height=40*K;p.tex.needsUpdate=true;});
+}
 /* bake a glyph's art through TILEDRAW by borrowing the global ctx.
    raw: fill the base UNtinted — door art paints its own C.doorFrame untinted, and a
    tinted base behind it showed as a 2px theme-coloured border round every 3D door.
@@ -15,8 +37,8 @@ function t3Invalidate(){T3.dirty++;} /* growth, theme edits — anything that re
    light — bakes the same frame every build, at its brightest; the pulse itself is
    animated in 3D by t3Glow, not frozen at whatever the bake happened to catch. */
 function t3BakeGlyph(g,opaque,base,raw){
-  const c=document.createElement("canvas");c.width=32;c.height=32;
-  const old=ctx;ctx=c.getContext("2d");
+  const K=T3.K,c=document.createElement("canvas");c.width=32*K;c.height=32*K;
+  const old=ctx;ctx=c.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
   try{
     if(opaque){ctx.fillStyle=raw?(base||C.wall):tc(base||C.wall);ctx.fillRect(0,0,32,32);}
     const tf=TILEDRAW[g];if(tf)tf({sx:0,sy:0,x:0,y:0,t:380*Math.PI/2,canopy:()=>{}});
@@ -71,8 +93,8 @@ function t3Build(key){
   const w=CW();
   /* the ground: the whole floor pass baked to one texture — checker, speckle,
      walkable art, water. Exactly the pixels the 2D cameras stand on. */
-  const gc=document.createElement("canvas");gc.width=w.W*32;gc.height=w.H*32;
-  const old=ctx;ctx=gc.getContext("2d");
+  const K=T3.K,gc=document.createElement("canvas");gc.width=w.W*32*K;gc.height=w.H*32*K;
+  const old=ctx;ctx=gc.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
   try{
     for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
       const ch=w.rows[y][x],sx=x*32,sy=y*32;
@@ -164,8 +186,8 @@ function t3Build(key){
         new THREE.MeshLambertMaterial({color:0x6E4A2C}));
       trunk.position.set(cx,0.35,cz);grp.add(trunk);
       if(!T3.canopyTex){ /* one jacaranda canopy, baked by hand */
-        const cc=document.createElement("canvas");cc.width=40;cc.height=40;
-        const g2=cc.getContext("2d");
+        const cc=document.createElement("canvas");cc.width=40*K;cc.height=40*K;
+        const g2=cc.getContext("2d");g2.scale(K,K);
         g2.fillStyle="#4E8A58";
         [[11,24,10],[29,24,10],[20,16,12]].forEach(q=>{g2.beginPath();g2.arc(q[0],q[1],q[2],0,7);g2.fill();});
         g2.fillStyle="#639C6C";
@@ -191,7 +213,7 @@ function t3Build(key){
 function t3Sprite(i){
   let p=T3.pool[i];
   if(!p){
-    const c=document.createElement("canvas");c.width=36;c.height=40;
+    const c=document.createElement("canvas");c.width=36*T3.K;c.height=40*T3.K;
     const tex=t3Tex(c);
     const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
     spr.center.set(0.5,0.1);
@@ -227,7 +249,7 @@ function t3Actors(){
   const old=ctx;
   list.forEach((a,i)=>{
     const p=t3Sprite(i);
-    p.g.setTransform(1,0,0,1,0,0);p.g.clearRect(0,0,36,40);
+    p.g.setTransform(T3.K,0,0,T3.K,0,0);p.g.clearRect(0,0,36,40);
     ctx=p.g; /* the 2D artists paint straight onto the billboard */
     try{a.f(p.g);}catch(e){}
     ctx=old;
@@ -261,6 +283,7 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
   try{
     const c3=T3.renderer.domElement;
     if(Math.abs((c3.clientWidth||0)-T3.lastW)>2){T3.lastW=c3.clientWidth||0;t3Resize();}
+    t3CheckK();
     const key=world+"|"+themeName+"|"+T3.dirty;
     if(T3.builtKey!==key)t3Build(key);
     const hx=fx+0.5,hz=fy+0.5;

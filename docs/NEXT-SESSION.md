@@ -57,8 +57,8 @@ something ships or a decision lands.**
    Do it as ONE sitting, in this order: ~~the doorway re-entry bug~~ (**done 2026-09-02**,
    §15.6a — `tryPortal()` + `portalHold`, test in smoke) → ~~doors facing the
    wrong way in 3D and the orientation-blind walls behind them~~ (**done 2026-09-02**,
-   §15.3 — one new finding logged there: a wall between you and the camera) → the blur bake
-   at device resolution (§15.1, the measured root cause, ~1h) → the rainbow bridge
+   §15.3 — one new finding logged there: a wall between you and the camera) → ~~the blur bake
+   at device resolution~~ (**done 2026-09-02**, §15.1 — K at every bake site) → the rainbow bridge
    arch + Day of the Dead palette (§15.4, needs an owner sign-off on the palette).
    Use `node test/shots.js` before AND after — it is the only check that can see a door
    lying on the floor.

@@ -984,6 +984,53 @@ const CANDIDATES = [
   });
   fails.push(...doors3d);
 
+  // ---- 3D textures are baked at the screen's resolution, not at 1x ----
+  // The blur (IDEAS §15.1, measured): every 3D texture was baked at 32px a tile while
+  // the renderer output at up to 3x device pixels — a 2.9x–4.0x magnification of the
+  // source art. The two earlier "blur fixes" on main raised the OUTPUT resolution and
+  // added mipmaps; neither can sharpen a texture that is being magnified. The fix is
+  // one factor K = the renderer's pixel ratio, applied at every bake site.
+  const bake = await page.evaluate(() => {
+    const problems = [];
+    const before = { cam: camMode, world, px, py };
+    camSet('3d'); world = 'hq'; px = fx = 10; py = fy = 11; moving = false; held = null;
+    if (!draw3d() || T3.fail) { problems.push('3D did not render headless — the bakes could not be checked'); return problems; }
+    // headless is 1x, where the old 1x bake was accidentally right — so stand in for a
+    // retina phone: tell the renderer it draws at 2x and everything must re-bake at 2x
+    const pr0 = T3.renderer.getPixelRatio();
+    T3.renderer.setPixelRatio(2); draw3d();
+    const K = T3.K;
+    if (K !== 2) { problems.push(`renderer at 2x but the bake factor is ${K}`); T3.renderer.setPixelRatio(pr0); return problems; }
+    const w = CW();
+    let ground = 0, tiles = 0, canopy = 0;
+    T3.group.traverse(o => {
+      const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
+      ms.forEach(m => {
+        if (!m.map || !m.map.image) return;
+        const im = m.map.image, u = o.userData || {};
+        if (im.width === w.W * 32 * K && im.height === w.H * 32 * K) { ground++; return; }
+        if (im.width === 40 * K && im.height === 40 * K) { canopy++; return; }
+        if (im.width === 32 * K && im.height === 32 * K) { tiles++; return; }
+        problems.push(`a ${u.door ? 'door' : u.wall ? 'wall' : 'prop'} texture is ${im.width}x${im.height} — not ${32 * K}x${32 * K} (K=${K})`);
+      });
+    });
+    if (!ground) problems.push(`the ground texture is not ${w.W * 32 * K}x${w.H * 32 * K} (K=${K})`);
+    if (!tiles) problems.push('no tile texture found at K resolution');
+    // actors: the live billboards must be baked at K too, or people go soft while walls stay sharp
+    const live = T3.pool.filter(p => p.live);
+    if (!live.length) problems.push('no live actor billboards after a draw');
+    live.forEach(p => { if (p.c.width !== 36 * K || p.c.height !== 40 * K)
+      problems.push(`an actor billboard is ${p.c.width}x${p.c.height} — not ${36 * K}x${40 * K}`); });
+    // and back: a DPR change (fullscreen, a window dragged between monitors) re-bakes both ways
+    T3.renderer.setPixelRatio(pr0); draw3d();
+    if (T3.K !== Math.min(3, Math.max(1, Math.round(pr0)))) problems.push(`back at ${pr0}x the bake factor stayed ${T3.K}`);
+    const g1 = T3.group.children.find(o => o.material && o.material.map && o.material.map.image.width === w.W * 32 * T3.K);
+    if (!g1) problems.push('the ground did not re-bake when the pixel ratio changed back');
+    camSet(before.cam); world = before.world; px = fx = before.px; py = fy = before.py; held = null; moving = false;
+    return problems;
+  });
+  fails.push(...bake);
+
   // ---- the camera the pack asks for is the camera you get, and it sticks ----
   const cam = await page.evaluate(() => {
     const problems = [];

@@ -74,7 +74,7 @@ engine, all landing in **S1**, none of them naming a business.
 
 | # | Thing | Cost | Detail |
 |---|---|---|---|
-| 1 | **3D blur** — every texture baked at 1× while the screen renders at up to 3× | ~1h | measured 2.9×–4.0× magnification. `IDEAS.md` §15.1 |
+| 1 | ~~**3D blur** — every texture baked at 1× while the screen renders at up to 3×~~ | **shipped 2026-09-02** | S0 item 3. One factor K at every bake site, re-bakes on a DPR change; test in `smoke.js`. §15.1 |
 | 2 | ~~**Doors lie flat in 3D** — 6 of 16 face the wrong way, all in HQ~~ | **shipped 2026-09-02** | S0 item 2. Doors turned to their wall, thin boxes with a lintel and a breathing floor light; walls textured on all four sides. §15.3 |
 | 3 | ~~**The doorway ignores you** for ~900ms after you come through, and never re-checks~~ | **shipped 2026-09-02** | S0 item 1. A standing check with an anti-ping-pong hold; test in `smoke.js`. §15.6 |
 | 4 | **La Cocina does not read as a restaurant** — a red building, an awning, two blank windows, no food cue | minutes | the mercado reads correctly *because* it has produce. §15.8 |

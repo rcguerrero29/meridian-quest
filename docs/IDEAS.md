@@ -633,7 +633,22 @@ reuses that workflow, give each dimension its own verify criterion.
 
 ---
 
-### 15.1 THE BLUR — root cause found, fix specified, NOT BUILT
+### 15.1 THE BLUR — BUILT 2026-09-02 (S0 item 3), exactly as specified below
+
+**Shipped:** `t3Factor()` in `engine/engine3d.js` picks `K` from the renderer's real
+pixel ratio (1–3), clamped so the largest world's ground fits `maxTextureSize` and a
+6M-texel budget (~24 MB before mipmaps). Every bake site — glyph, ground, canopy, the
+actor billboards — is `K×` with a `setTransform(K,0,0,K,0,0)` so the 2D artists are
+untouched. `t3CheckK()` runs every frame: a DPR change (fullscreen, a window dragged to
+another monitor) re-bakes the world and resizes the billboard canvases — the "baked
+once and never re-baked" note at the bottom is closed too. Test in `smoke.js` (*3D
+textures are baked at the screen's resolution, not at 1x*): headless is 1× where the
+old bake was accidentally right, so the test tells the renderer it draws at 2×, checks
+every texture and billboard re-baked at 2×, then goes back to 1× and checks again.
+Before/after at 2×: `shots/` — the pigeon becomes a bird, the jacaranda becomes leaves.
+
+*The original record, kept as written:*
+
 
 **This is the answer.** Every 3D texture is baked at **1x logical resolution** (32 px
 per tile) while the renderer outputs at device pixel ratio up to 3x. That is a hard
