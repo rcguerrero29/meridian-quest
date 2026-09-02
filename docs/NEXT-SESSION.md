@@ -3,28 +3,50 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-01)
+## STATE OF PLAY — read this first (2026-09-02, late)
 
-**MERGED AND DEPLOYED.** The 2026-09-01 story/open-city work is on `main` at
-**`mq-v44`** (owner gave the word). GitHub Pages serves `main`, so it is live after the
-usual ~minute of lag; installed PWAs pick it up on the next refresh.
+**MERGED TO `main` at `mq-v46`.** The branch carried the whole **S0 sitting (el 3D y el
+mundo, `mq-v45`)** and then **S2 v1 — the room upstairs**; the owner said *"merge
+everything once you have the first version of the room work"*, so both are live. A phone
+that has the game installed picks up `mq-v46` on its next open. **The version now shows
+on the opening page** (and still in Settings), so nobody has to guess what a phone loaded.
 
-**Still true and still the trap:** several models work this repo at once. `main` moved
-under this session once already today — a branch cut from a stale base spent a round
-root-causing a 3D bug that had already been fixed twice on `main`. Do the divergence
-check in step 1b below before reading a single line of engine code, and never quote a
-version number to the owner without checking what `main` actually serves.
+**What the room work shipped, each with a test that was red first:** Floor 2 opens
+bare — one desk under the north wall, the stairs, nothing else (as signed). Nacho and
+Don Güero stand a few steps from the stairs, with a ❗ while they still have a question.
+Between them they ask nine questions with no wrong answers, no XP, nothing in the
+career report: Nacho asks how the room should feel, Güero asks what has to be built.
+Answers live on the phone (`mqroom`), never in the save, never touched by restart. After
+the last question the sheet appears on the card with **Copy the sheet**, and it is also
+under Settings → Export → *The room*. Everything with a name is in
+`content/meridian/room.js`; the engine reads only shapes, and a pack with no `room.js`
+gets no people, no tab and no storage key (tested with the file blocked). Nacho no longer
+stands on the street — one Nacho, upstairs.
 
-**What went in, in one breath:** the open city (districts open and stay open, `need`
-16→12), 24 `late` reframe lines EN+ES, nine continuity fixes, nine rewritten strings,
-the GROWTH seam that took Meridian's names out of the engine plus a portability guard
-that fails the build if they come back, 3D as the default camera and the
-three-drifted-whitelists bug that would have silently undone it, camera-aware movement
-with quarter-turn rotation, produce you can identify, a two-line ticker — and three test
-tools: `smoke.js`, `shots.js` (scene screenshots), `tilesheet.js` (the cold read).
+**How the back-and-forth works, with no API:** AJ answers on her phone → the owner taps
+*Copy the sheet* → pastes it to Claude with `/room-design` → the build session furnishes
+the room from her words. Spec, cold read and the four open owner calls:
+`docs/rooms/aj-office.md`.
 
-**Everything else that session produced is a PLAN, deliberately not built** — the owner
-said so repeatedly. See `docs/IDEAS.md` §15.
+**Deliberately not in v1:** nothing changes in the room while she answers (needs S1's
+plural delivery seam); no moving boxes (the only crate tile is a produce crate and reads
+as groceries); no window tile (Güero promises it, no date).
+
+**Still true and still the trap:** several models work this repo at once. Do the
+divergence check in step 1b below before reading a single line of engine code, and never
+quote a version number to the owner without checking what `main` actually serves. This
+session's own resume summary lost the S0 sitting once — the branch knew, the summary did
+not. `git log` first, always.
+
+**Next is S1 — la cimentación** (backlog §1): the engine ceiling. Nothing visible ships
+from it and that is said out loud. It is now also what the office waits on.
+
+## The backlog lives in `docs/BACKLOG.md`
+
+*El changarrito de Don Güero* — one ranked list of everything queued, with costs, so
+nobody has to reconcile `IDEAS.md`, `CITY.md` and this file to find out what is next.
+Opened 2026-09-02 at the owner's ask. **Read it before planning; update it when
+something ships or a decision lands.**
 
 ## Resume ritual
 
@@ -47,18 +69,20 @@ said so repeatedly. See `docs/IDEAS.md` §15.
    predated two fixes for it already sitting on `main`. Stale reading is worse than
    no reading. Expect `mq-vN` pins to collide on the merge; resolve FORWARD.
 1c. **THE 3D/WORLD SESSION is queued and fully specced — `docs/IDEAS.md` §15.**
-   Do it as ONE sitting, in this order: the doorway re-entry bug (§15.6a, keep the
-   anti-ping-pong guard, its failing test goes in with the fix) → doors facing the
-   wrong way in 3D and the orientation-blind walls behind them (§15.3) → the blur bake
-   at device resolution (§15.1, the measured root cause, ~1h) → the rainbow bridge
+   Do it as ONE sitting, in this order: ~~the doorway re-entry bug~~ (**done 2026-09-02**,
+   §15.6a — `tryPortal()` + `portalHold`, test in smoke) → ~~doors facing the
+   wrong way in 3D and the orientation-blind walls behind them~~ (**done 2026-09-02**,
+   §15.3 — one new finding logged there: a wall between you and the camera) → ~~the blur bake
+   at device resolution~~ (**done 2026-09-02**, §15.1 — K at every bake site) → the rainbow bridge
    arch + Day of the Dead palette (§15.4, needs an owner sign-off on the palette).
    Use `node test/shots.js` before AND after — it is the only check that can see a door
    lying on the floor.
-   **Ride-alongs the owner assigned to this same sitting:** the storefront legibility
-   fixes (§15.8 — La Cocina must say "restaurant", the five identical doors must differ
-   by destination, and the desk/table/scale props) and the `SEASONS` seam (§15.9 — one
+   **Ride-alongs the owner assigned to this same sitting:** ~~the storefront legibility
+   fixes~~ (**done 2026-09-02**, §15.8 — bowl in La Cocina's window, `DOORLOOK` per door,
+   desk/table/scale redrawn; all re-read cold) and the `SEASONS` seam (§15.9 — one
    autumn season on the Día de Muertos palette, auto by date with a Settings override,
-   bridge only as the proving run). Elevation (§15.10) is NOT in this sitting — it waits
+   bridge only as the proving run — **seam done 2026-09-02**, palette awaiting sign-off).
+   Elevation (§15.10) is NOT in this sitting — it waits
    for a second thing that needs it.
    **After this sitting the cold read is permanent**, not a one-off: it is step 2b of
    the shipping checklist in `docs/HANDOFF.md` and a Settled rule in `docs/OWNER.md`.
@@ -197,8 +221,9 @@ always-on 🐾 paw menu with the cross-city whistle; WASD-vs-typing fix.
 
 ## State snapshot (2026-09-01)
 
-- `main` = deployed through `mq-v40` (everything in the shipped list above).
-  Nothing waits on a branch.
+- `main` = deployed through **`mq-v44`** (2026-09-01). Nothing waits on a branch.
+  *(This line said `mq-v40` and contradicted the state-of-play block at the top of this
+  same file — caught in the 2026-09-01 contradiction sweep.)*
 - Pet-care spin-off shape signed (IDEAS §13): Sonny fronts the preview mini game
   inside Meridian, some customization there, full customization in the standalone.
 - The 3D plan is written and signed off as PLAN ONLY: IDEAS §14.

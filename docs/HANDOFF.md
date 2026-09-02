@@ -28,7 +28,8 @@ offline after first load. Since the engine/content split (2026-08-30) the game i
 Load order matters and is fixed in `index.html`: `qr.js` → content pack → engine.
 Everything is plain `<script>` tags sharing the global scope — content files are pure
 `const` data, the engine reads them. **A new gifted game = a new `content/<game>/`
-folder + a copy of `index.html` pointing its six content script tags at it.**
+folder + a copy of `index.html` pointing its seven content script tags at it** (the
+seventh, `room.js`, is optional — a pack that omits it gets no room interview).**
 
 - **24 quests** (indices 0–23) + Frederick's secret side quest, fully bilingual EN/ES.
   MAXXP = 350 (10 per node). Quests 16–23 are El Mercado's **AI product manager** pack.
@@ -38,12 +39,14 @@ folder + a copy of `index.html` pointing its six content script tags at it.**
   lots, and station NPCs (Lupe) return to their map positions while chill townsfolk keep
   the spots they were placed on. Add a new parcel by adding its stage list and one line
   to `applyGrowth`.
-- **Chapters** (`CHAPTERS` in `config.js`): each district declares its quest indices and
-  how many close it. Week One needs all 16; El Mercado needs **5 of its 8** — the bar is
-  deliberately below the pack size so the city stays a template, and the smoke test
-  enforces that. When a chapter closes, its epilogue runs; if another chapter follows,
-  the end screen offers **▶ Monday — Week Two**, which restores three hearts, drops the
-  hero on the street outside El Mercado, and raises its facade.
+- **Districts** (`CHAPTERS` in `config.js`): each declares its quest indices and how
+  many play its ENDING. `principal` needs 12 of 16, El Mercado 5 of 8 — deliberately
+  below the pack size so the city stays a template, and the smoke test enforces it.
+  **Reaching the bar closes NOTHING** (docs/OWNER.md — no practice is ever missed): the
+  epilogue runs, the next lot breaks ground, and every quest stays answerable forever.
+  The end screen's forward button reads **▶ Out to the street**; weeks are retired.
+  *(Corrected 2026-09-01 — this paragraph said "Week One needs all 16" and "▶ Monday —
+  Week Two" long after both stopped being true.)*
 - **21 NPCs** across 7 maps (hq, f2, st, ex, lc, lo, me). The Studio (`lo`) and its
   designer **Xochi** (quest 15, "The collar drop") unlock only after both La Obra
   quests (12, 13) are answered correctly.
@@ -53,15 +56,16 @@ folder + a copy of `index.html` pointing its six content script tags at it.**
   every attempt. XP is farm-proof: `qa` records the
   best XP already paid per quest and retries pay only the difference; the verdict
   header shows the actual delta (and no XP claim when nothing new was earned).
-- **Hearts are a grade and a clock, never a wipe** (owner decision, 2026-08-31). Bad
-  picks cost hearts; at zero the **chapter ends where it stands** — the quests you left
-  unanswered stay unanswered and its NPCs drop their ❗ for good — and Monday comes
-  anyway with three fresh hearts and the city untouched. Nothing is ever erased and the
-  save is never deleted. A chapter finished properly is graded on hearts (3 = flawless /
-  2 = strong / ≤1 = survived); a chapter that ran out gets its own burnout ending.
+- **Stakes are an optional layer; the grade is always on underneath.** `STAKES` ships
+  as `{mode:"none"}` — hearts are OFF by default and admin-toggleable. `gradeOf()`
+  picks every ending from how many quests landed first try. **Running out of hearts
+  ends a district's ARC, never its quests** — nothing drops its ❗, nothing is erased,
+  the save is never deleted. *(Corrected 2026-09-01: this said unanswered quests "stay
+  unanswered and its NPCs drop their ❗ for good", which is the exact negation of the
+  Settled rule "no practice is ever missed" and of `qOpen` in the engine.)*
 - **Restarting is a tool, not a story beat** (owner decision, 2026-08-31). "New game +"
   lives in ⚙️ Settings behind a two-tap confirm; the ending screens only ever move you
-  forward (**▶ Monday — Week Two**, or **↩ Back to the city** after the last chapter).
+  forward (**▶ Out to the street**, or **↩ Back to the city** after the last district).
 - **Wardrobe** (the one exception to correctness-gating, by owner decision: cosmetics
   are extra): ANY attempt at Xochi's quest reveals a 🧵 Wardrobe button in ⚙️ Settings;
   beating the quest also makes talking to Xochi open it. Dresses **Frederick**

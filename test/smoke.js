@@ -52,7 +52,7 @@ const CANDIDATES = [
 
   // ---- 1. boot: no JS errors, no validator warnings (WORLD/PORTAL/REACH) ----
   if (pageErrors.length) fails.push('page errors: ' + pageErrors.join(' | '));
-  const valWarns = warns.filter(w => /^(WORLD|PORTAL|REACH)/.test(w));
+  const valWarns = warns.filter(w => /^(WORLD|PORTAL|REACH|ROOM)/.test(w));
   if (valWarns.length) fails.push('validator warnings: ' + valWarns.join(' | '));
 
   // ---- 2. static invariants inside the page ----
@@ -894,6 +894,425 @@ const CANDIDATES = [
   });
   fails.push(...maps);
 
+  // ---- a door you are standing on must fire once its cooldown ends ----
+  // The bug: portals were only ever checked on the frame a STEP ENDS. Walk out of HQ,
+  // turn round, walk back — that step lands inside portalT's 900ms anti-ping-pong
+  // window, so the tile is looked at once, rejected, and never looked at again. The
+  // door ignores you until you step off it and step on again. The fix is a standing
+  // check, not a shorter cooldown (a shorter cooldown moves the dead window, it does
+  // not remove it). No wall-clock walking here: the first version of this test went
+  // red and green on the same code depending on how fast headless Chromium ran.
+  const reenter = await page.evaluate(async () => {
+    const problems = [];
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const before = { cam: camMode, world, px, py };
+    camSet('top');
+    // 1. the ordinary case: a step that ENDS on HQ's front door goes through it
+    world = 'hq'; px = fx = 10; py = fy = 13; moving = true; mt = 1; held = null; portalT = 0; portalHold = '';
+    await wait(250);
+    if (world !== 'st' || px !== 14 || py !== 1) problems.push(`a step ending on HQ’s door left you in ${world} (${px},${py}) — expected the doorstep st (14,1)`);
+    // 2. the bug: standing on the street door, arrived DURING the cooldown
+    world = 'st'; px = fx = 14; py = fy = 0; moving = false; held = null; portalHold = '';
+    portalT = performance.now() + 100000;
+    await wait(250);
+    if (world !== 'st') problems.push('the door fired inside its anti-ping-pong window');
+    portalT = 0;                        // the window closes while you are still standing there
+    await wait(400);
+    if (world !== 'hq') problems.push('standing on a door after its cooldown ended, nothing re-checked the ground under your feet');
+    // 3. the guard that makes the standing check safe: the tile a warp SET YOU DOWN on
+    //    never fires until you step off it — even if a pack lands you on a portal
+    world = 'hq'; px = fx = 10; py = fy = 13; moving = false; held = null; portalT = 0;
+    portalHold = 'hq:10,13';
+    await wait(250);
+    if (world !== 'hq') problems.push('the tile a warp set you down on fired by itself — that is the ping-pong the cooldown existed to stop');
+    portalHold = '';                    // …and once the hold is gone, the same tile is a door again
+    await wait(250);
+    if (world !== 'st') problems.push('with the hold cleared, standing on the door still did nothing');
+    // Y (the trolley stop) must stay step-only: a menu you dismissed must not reopen under your feet
+    world = 'st'; px = fx = 0; py = fy = 1; moving = false; held = null; portalT = 0; portalHold = '';
+    document.getElementById('travel').hidden = true;
+    await wait(250);
+    if (!document.getElementById('travel').hidden) problems.push('the trolley menu reopened under your feet while you stood still');
+    camSet(before.cam);
+    world = before.world; px = fx = before.px; py = fy = before.py;
+    held = null; moving = false; portalT = 0; portalHold = ''; setWorldTag();
+    return problems;
+  });
+  fails.push(...reenter);
+
+  // ---- in 3D a door stands in its wall, and a wall has a face on every side ----
+  // What the eyeball pass saw (IDEAS §15.3): the door plane had no rotation, so every
+  // door in a north-south wall stood 90° off its wall, floating; every north-south wall
+  // in HQ was a bare purple slab because only the ±Z faces of the box carried the art;
+  // a paper-thin door vanished at the two edge-on camera stops; and a slot showed above
+  // every door because the plane was 1 unit tall in a 1.1-unit wall.
+  const doors3d = await page.evaluate(() => {
+    const problems = [];
+    const before = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
+    camSet('3d'); world = 'hq'; px = fx = 10; py = fy = 11; moving = false; held = null;
+    if (!draw3d() || T3.fail) { problems.push('3D did not render headless — the doors could not be checked'); return problems; }
+    const w = CW();
+    const solid = (x, y) => (x < 0 || y < 0 || x >= w.W || y >= w.H) ? true : SOLID.has(w.grid[y][x]); // off-map is a wall
+    let want = 0;
+    for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (DOORSET.has(w.rows[y][x]) && !SOLID.has(w.grid[y][x])) want++;
+    let doors = 0, lintels = 0, glows = 0;
+    T3.group.children.forEach(o => {
+      const u = o.userData || {};
+      if (u.door) {
+        doors++;
+        const ns = solid(u.x, u.y - 1) && solid(u.x, u.y + 1) && !(solid(u.x - 1, u.y) && solid(u.x + 1, u.y));
+        const rot = Math.abs(o.rotation.y), exp = ns ? Math.PI / 2 : 0;
+        if (Math.abs(rot - exp) > 1e-6)
+          problems.push(`hq door (${u.x},${u.y}) is turned ${Math.round(rot * 180 / Math.PI)}° but its wall runs ${ns ? 'north-south' : 'east-west'}`);
+        if (!(o.geometry.parameters && o.geometry.parameters.depth > 0))
+          problems.push(`hq door (${u.x},${u.y}) has no thickness — it vanishes edge-on`);
+      }
+      if (u.lintel) lintels++;
+      if (u.glow) glows++;
+      if (u.wall) {
+        const ms = Array.isArray(o.material) ? o.material : [o.material];
+        const bare = [0, 1, 4, 5].filter(i => !ms[i] || !ms[i].map);
+        if (bare.length) problems.push(`wall '${u.g}' at (${u.x},${u.y}) is a bare slab on ${bare.length} of its 4 sides`);
+      }
+    });
+    if (doors !== want) problems.push(`hq has ${want} doors on the map and ${doors} standing in 3D`);
+    if (lintels < doors) problems.push(`${doors - lintels} of hq's ${doors} doors have a see-through slot above them (no lintel)`);
+    if (glows < doors) problems.push(`${doors - glows} of hq's ${doors} doors do not say "this one opens" in 3D`);
+    T3.yaw = before.yaw; camSet(before.cam);
+    world = before.world; px = fx = before.px; py = fy = before.py; held = null; moving = false;
+    return problems;
+  });
+  fails.push(...doors3d);
+
+  // ---- 3D textures are baked at the screen's resolution, not at 1x ----
+  // The blur (IDEAS §15.1, measured): every 3D texture was baked at 32px a tile while
+  // the renderer output at up to 3x device pixels — a 2.9x–4.0x magnification of the
+  // source art. The two earlier "blur fixes" on main raised the OUTPUT resolution and
+  // added mipmaps; neither can sharpen a texture that is being magnified. The fix is
+  // one factor K = the renderer's pixel ratio, applied at every bake site.
+  const bake = await page.evaluate(() => {
+    const problems = [];
+    const before = { cam: camMode, world, px, py };
+    camSet('3d'); world = 'hq'; px = fx = 10; py = fy = 11; moving = false; held = null;
+    if (!draw3d() || T3.fail) { problems.push('3D did not render headless — the bakes could not be checked'); return problems; }
+    // headless is 1x, where the old 1x bake was accidentally right — so stand in for a
+    // retina phone: tell the renderer it draws at 2x and everything must re-bake at 2x
+    const pr0 = T3.renderer.getPixelRatio();
+    T3.renderer.setPixelRatio(2); draw3d();
+    const K = T3.K;
+    if (K !== 2) { problems.push(`renderer at 2x but the bake factor is ${K}`); T3.renderer.setPixelRatio(pr0); return problems; }
+    const w = CW();
+    let ground = 0, tiles = 0, canopy = 0;
+    T3.group.traverse(o => {
+      const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
+      ms.forEach(m => {
+        if (!m.map || !m.map.image) return;
+        const im = m.map.image, u = o.userData || {};
+        if (im.width === w.W * 32 * K && im.height === w.H * 32 * K) { ground++; return; }
+        if (im.width === 40 * K && im.height === 40 * K) { canopy++; return; }
+        if (im.width === 32 * K && im.height === 32 * K) { tiles++; return; }
+        problems.push(`a ${u.door ? 'door' : u.wall ? 'wall' : 'prop'} texture is ${im.width}x${im.height} — not ${32 * K}x${32 * K} (K=${K})`);
+      });
+    });
+    if (!ground) problems.push(`the ground texture is not ${w.W * 32 * K}x${w.H * 32 * K} (K=${K})`);
+    if (!tiles) problems.push('no tile texture found at K resolution');
+    // actors: the live billboards must be baked at K too, or people go soft while walls stay sharp
+    const live = T3.pool.filter(p => p.live);
+    if (!live.length) problems.push('no live actor billboards after a draw');
+    live.forEach(p => { if (p.c.width !== 36 * K || p.c.height !== 40 * K)
+      problems.push(`an actor billboard is ${p.c.width}x${p.c.height} — not ${36 * K}x${40 * K}`); });
+    // and back: a DPR change (fullscreen, a window dragged between monitors) re-bakes both ways
+    T3.renderer.setPixelRatio(pr0); draw3d();
+    if (T3.K !== Math.min(3, Math.max(1, Math.round(pr0)))) problems.push(`back at ${pr0}x the bake factor stayed ${T3.K}`);
+    const g1 = T3.group.children.find(o => o.material && o.material.map && o.material.map.image.width === w.W * 32 * T3.K);
+    if (!g1) problems.push('the ground did not re-bake when the pixel ratio changed back');
+    camSet(before.cam); world = before.world; px = fx = before.px; py = fy = before.py; held = null; moving = false;
+    return problems;
+  });
+  fails.push(...bake);
+
+  // ---- seasons: a season changes colour, never design (IDEAS §15.9) ----
+  // The bridge's six bands were literal hex inside the engine, which is why no palette
+  // could ever reach them. Now world art goes through art(key, fallback); a season is
+  // content (SEASONS in the pack's config) that overrides art keys, arriving on its own
+  // by date with a Settings override. The engine must not know a season's name.
+  const season = await page.evaluate(() => {
+    const problems = [];
+    if (typeof art !== 'function' || typeof seasonNow !== 'function' || typeof seasonSet !== 'function') {
+      problems.push('the season seam (art / seasonNow / seasonSet) is missing'); return problems; }
+    if (typeof SEASONS === 'undefined' || !Object.keys(SEASONS).length) { problems.push('the pack declares no SEASONS'); return problems; }
+    const [id, S] = Object.entries(SEASONS)[0];
+    const pick0 = seasonPick;
+    // off: the fallback is what you get, and the bridge paints its year-round bands
+    seasonSet('off');
+    if (art('bridge', 'X') !== 'X') problems.push('with the season off, art() did not return the fallback');
+    const bake = () => { const c = document.createElement('canvas'); c.width = 32; c.height = 32;
+      const o = ctx; ctx = c.getContext('2d'); try { TILEDRAW['^']({ sx: 0, sy: 0, x: 0, y: 0, canopy: () => {} }); } finally { ctx = o; }
+      const d = ctx === o ? c.getContext('2d').getImageData(16, 5, 1, 1).data : null;
+      return '#' + [d[0], d[1], d[2]].map(v => v.toString(16).padStart(2, '0')).join(''); };
+    const off = bake();
+    // forced on: the pack's palette reaches the bridge, and only the colours changed
+    seasonSet(id);
+    if (seasonNow() !== id) problems.push(`forcing season "${id}" did not make it current`);
+    if (art('bridge', 'X') !== S.art.bridge) problems.push('with the season forced, art("bridge") is not the pack palette');
+    const on = bake();
+    if (on.toLowerCase() !== S.art.bridge[0].toLowerCase()) problems.push(`the bridge's first band is ${on}, not the season's ${S.art.bridge[0]}`);
+    if (on === off) problems.push('the season changed nothing on the bridge');
+    // auto by date: inside the window it arrives on its own; outside, it is gone
+    seasonSet('auto');
+    const [fm, fd] = S.from, [tm, td] = S.to;
+    if (seasonNow(new Date(2026, fm - 1, fd)) !== id) problems.push('auto: the first day of the window is not in season');
+    if (seasonNow(new Date(2026, tm - 1, td)) !== id) problems.push('auto: the last day of the window is not in season');
+    if (seasonNow(new Date(2026, 5, 15)) !== null) problems.push('auto: mid-June is in season');
+    // the choice persists, and a change re-bakes the 3D world
+    seasonSet('off');
+    let stored = null; try { stored = localStorage.getItem('mqseason'); } catch (e) {}
+    if (stored !== 'off') problems.push('the season choice did not persist');
+    const d0 = (typeof T3 !== 'undefined' && T3) ? T3.dirty : 0;
+    seasonSet(id);
+    if (typeof T3 !== 'undefined' && T3 && T3.dirty === d0) problems.push('changing the season did not tell the 3D camera to rebuild');
+    // the Settings row exists and is built from content, not hardcoded
+    const row = document.getElementById('seasonRow');
+    if (!row) problems.push('no #seasonRow in Settings');
+    else if (![...row.querySelectorAll('button')].some(b => b.dataset.sn === id)) problems.push(`Settings has no button for season "${id}"`);
+    seasonSet(pick0);
+    return problems;
+  });
+  fails.push(...season);
+
+  // ---- a door says where it leads ----
+  // The cold read (IDEAS §15.8) found all five door glyphs pixel-identical: an office
+  // door, a shop entrance and the mercado's door were the same brown, so nothing told a
+  // newcomer which one goes somewhere. The body stays shared in the engine; DOORLOOK in
+  // the pack colours each door for its destination.
+  const doorLook = await page.evaluate(() => {
+    const problems = [];
+    if (typeof DOORLOOK === 'undefined') { problems.push('the pack declares no DOORLOOK — every door is the same brown'); return problems; }
+    const bake = g => { const c = document.createElement('canvas'); c.width = 32; c.height = 32;
+      const o = ctx; ctx = c.getContext('2d'); try { TILEDRAW[g]({ sx: 0, sy: 0, x: 0, y: 0, t: 0, canopy: () => {} }); } finally { ctx = o; }
+      return c.getContext('2d').getImageData(0, 0, 32, 32).data.join(','); };
+    const seen = {};
+    [...DOORSET].forEach(g => { const k = bake(g); if (seen[k]) problems.push(`doors '${seen[k]}' and '${g}' are pixel-identical`); else seen[k] = g; });
+    Object.keys(DOORLOOK).forEach(g => { if (!DOORSET.has(g)) problems.push(`DOORLOOK names '${g}', which is not a door glyph`); });
+    return problems;
+  });
+  fails.push(...doorLook);
+
+  // ---- the room upstairs: two neighbours ask, nothing is graded, the sheet is hers ----
+  // Owner 2026-09-02: "lets make it so that AJ can interact through the characters with
+  // you if possible ... i dont want an api setup". So: the characters ask IN the game,
+  // her answers are kept on the phone, and the game writes a plain sheet with a Copy
+  // button that the owner hands to Claude. Everything with a name lives in
+  // content/meridian/room.js (INTERVIEW); the engine reads only shapes, and a pack
+  // that declares nothing gets nothing (the AJ law). Three skeptics shaped this test:
+  // the box and the sheet must be ON SCREEN while the card is up (the old panels live
+  // inside the hidden world panel), answers keep their written order (no shuffle — there
+  // is no right answer to hide), a mis-tap costs nothing, and a fruit crate is not a
+  // moving box, so the room opens bare, exactly as signed.
+  const room = await page.evaluate(async () => {
+    const problems = [];
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const $ = id => document.getElementById(id);
+    if (typeof INTERVIEW === 'undefined' || typeof RM !== 'function' || !RM()) return ['no INTERVIEW declared by the pack (content/meridian/room.js)'];
+    const I = RM(), U = I.ui[lang];
+    // the office opens bare, as signed: walls, floor, the old lead's desk, the stairs
+    const f2 = WORLDS.f2.rows;
+    if (f2.length !== 14 || f2.some(r => r.length !== 20)) problems.push('f2 is not 20 wide x 14 tall');
+    const glyphs = {}; f2.forEach(r => [...r].forEach(c => { glyphs[c] = (glyphs[c] || 0) + 1; }));
+    if (glyphs['D'] !== 1) problems.push(`the office should hold exactly one desk, found ${glyphs['D'] || 0}`);
+    if (f2[11][18] !== '1') problems.push('the stairs moved — the portal from HQ lands at (17,11) beside them');
+    Object.keys(glyphs).forEach(c => { if (!'#.D1'.includes(c)) problems.push(`the office is not bare: it holds '${c}'`); });
+    // shape: everything a pack must declare, EN and ES in lockstep
+    const keys = o => Object.keys(o).sort().join(',');
+    if (keys(I.ui.en) !== keys(I.ui.es)) problems.push('INTERVIEW.ui EN/ES keys differ');
+    ['title', 'place', 'invite'].forEach(k => { if (!I[k] || !I[k].en || !I[k].es) problems.push(`INTERVIEW.${k} needs en and es`); });
+    const ids = new Set();
+    I.hosts.forEach(h => {
+      if (ids.has(h.id)) problems.push(`host id ${h.id} repeated`); ids.add(h.id);
+      if (!h.emoji || !h.name || !h.name.en || !h.name.es || !h.look || !h.talk || !h.talk.en || !h.talk.es) problems.push(`host ${h.id} is missing emoji/name/look/talk`);
+      if (!WORLDS[h.world]) problems.push(`host ${h.id} stands in a world that does not exist: ${h.world}`);
+      if (!h.done || !h.done.en || !h.done.es) problems.push(`host ${h.id} has no closing line`);
+      const sids = new Set();
+      (h.steps || []).forEach(s => {
+        if (sids.has(s.id)) problems.push(`host ${h.id} step ${s.id} repeated`); sids.add(s.id);
+        ['say', 'why', 'q'].forEach(k => { if (!s[k] || !s[k].en || !s[k].es) problems.push(`${h.id}:${s.id} ${k} needs en and es`); });
+        if (!s.opts || s.opts.length < 2 || s.opts.some(o => !o.en || !o.es)) problems.push(`${h.id}:${s.id} needs 2+ answers in both languages`);
+        // phone rules: a host speaks two sentences, an answer fits on one line
+        if (s.say && s.say.en && s.say.en.split(/[.!?…]["”]?\s+/).filter(Boolean).length > 3) problems.push(`${h.id}:${s.id} say runs past two sentences`);
+        (s.opts || []).forEach(o => { if (o.en && o.en.split(/\s+/).length > 12) problems.push(`${h.id}:${s.id} answer "${o.en}" is over 12 words`); });
+        // stairs, not a door: f2's only way out is the stairs
+        ['say', 'q'].forEach(k => { if (s[k] && /\bthat door\b|\bthe door\b/i.test(s[k].en)) problems.push(`${h.id}:${s.id} says "door" — the office has stairs`); });
+      });
+      if (!(h.steps || []).length) problems.push(`host ${h.id} has no steps`);
+    });
+    // placed: every host stands in its world as a chat person, and the city stays reachable
+    I.hosts.forEach(h => {
+      const n = WORLDS[h.world].npcs.find(n => n.x === h.x && n.y === h.y && n.chat);
+      if (!n) problems.push(`host ${h.id} is not standing at ${h.world} (${h.x},${h.y})`);
+      else if (!roomHosts[n.npc] || roomHosts[n.npc].id !== h.id) problems.push(`the person at ${h.world} (${h.x},${h.y}) is not registered as host ${h.id}`);
+    });
+    if (auditReach().length) problems.push('hosts broke reachability: ' + auditReach().join(' | '));
+    const nachos = Object.values(WORLDS).flatMap(w => w.npcs).filter(n => CHILLN[n.npc] && /nacho/i.test(CHILLN[n.npc].en)).length;
+    if (nachos !== 1) problems.push(`Nacho stands in ${nachos} places — expected once, upstairs`);
+    // stand beside the first host
+    const h0 = I.hosts[0], key0 = Object.keys(roomHosts).find(k => roomHosts[k].id === h0.id);
+    const before = { world, px, py, xp, marks: JSON.stringify(marks), dl: dlog.length, done: done.size };
+    localStorage.removeItem('mqroom'); Object.keys(roomAns).forEach(k => delete roomAns[k]);
+    world = h0.world; px = fx = h0.x - 1; py = fy = h0.y; moving = false; held = null; portalT = 0; portalHold = '';
+    $('card').hidden = true; $('world').hidden = false; $('settings').hidden = true;
+    checkTalk();
+    const tb = $('talk');
+    if (tb.hidden) problems.push('standing beside a host shows no Talk button');
+    else if (!tb.textContent.includes(h0.talk[lang])) problems.push(`the Talk button does not say what the talk is about: "${tb.textContent}"`);
+    const n0 = WORLDS[h0.world].npcs.find(n => n.npc === key0);
+    if (!n0 || !hasSay(n0)) problems.push('a host with unanswered questions does not count as having something to say (no ❗)');
+    if (!worldPending(h0.world)) problems.push('the world where hosts wait is not marked pending');
+    tb.click();
+    if ($('card').hidden || !$('world').hidden) problems.push('Talk did not open the card');
+    if ($('qtag').textContent !== U.tag) problems.push(`card eyebrow is "${$('qtag').textContent}", expected "${U.tag}"`);
+    const s0 = h0.steps[0];
+    if ($('npcSay').textContent !== s0.say[lang]) problems.push('first step does not show the host\'s first line');
+    if ($('npcName').textContent !== h0.name[lang]) problems.push('the card does not name the host');
+    if ($('q').textContent !== s0.q[lang]) problems.push('first step does not show its question');
+    let btns = [...$('choices').children];
+    if (btns.length !== s0.opts.length + 1) problems.push(`expected ${s0.opts.length} answers + say-it-my-way, got ${btns.length} buttons`);
+    s0.opts.forEach((o, i) => { if (btns[i] && btns[i].textContent !== o[lang]) problems.push(`answers are not in written order (button ${i})`); });
+    if (btns.length && btns[btns.length - 1].textContent !== U.free) problems.push('say-it-my-way is not the last answer button');
+    if ($('rmLater').hidden || $('choices').contains($('rmLater'))) problems.push('"that\'s enough for now" must sit below the answers, outside them');
+    if (!$('verdict').hidden || !$('next').hidden || !$('levelup').hidden) problems.push('the interview card shows quest chrome (verdict/next/levelup)');
+    if (!$('codex').parentElement.hidden) problems.push('the gold lesson box is showing on a design talk');
+    if ($('rmWhy').hidden || $('rmWhy').textContent !== s0.why[lang]) problems.push('the "why I\'m asking" line is missing below the answers');
+    // a tap saves the WRITTEN index, is acknowledged, and advances
+    btns[1].click(); await wait(450);
+    const rec = () => JSON.parse(localStorage.getItem('mqroom') || '{}');
+    let st = rec();
+    if (!st.a || !st.a[h0.id + ':' + s0.id] || st.a[h0.id + ':' + s0.id].pick !== 1) problems.push('tapping the second answer did not save pick=1 under mqroom');
+    if (!tickerLines.includes(U.noted)) problems.push('a tap was not acknowledged ("Written down.")');
+    if ($('q').textContent !== h0.steps[1].q[lang]) problems.push('a tap did not advance to the next question');
+    // say it my way: the box is ON SCREEN while the world panel is hidden; Cancel changes nothing
+    btns = [...$('choices').children]; btns[btns.length - 1].click();
+    if ($('rmAsk').hidden || $('rmAsk').offsetParent === null) problems.push('say-it-my-way opened nothing visible (the box must live inside the card, not the hidden world panel)');
+    if (document.activeElement !== $('rmText')) problems.push('the text box did not take focus');
+    $('rmText').value = 'nope'; $('rmCancel').click();
+    st = rec();
+    if (st.a[h0.id + ':' + h0.steps[1].id]) problems.push('Cancel recorded an answer');
+    if ($('q').textContent !== h0.steps[1].q[lang]) problems.push('Cancel moved off the question');
+    if (!$('rmAsk').hidden) problems.push('Cancel left the box open');
+    // typed words are kept verbatim (a <3 stays a <3) and advance
+    btns = [...$('choices').children]; btns[btns.length - 1].click();
+    $('rmText').value = "  <3 warm like abuela's kitchen  "; $('rmOk').click(); await wait(450);
+    st = rec();
+    const a1 = st.a[h0.id + ':' + h0.steps[1].id];
+    if (!a1 || a1.text !== "<3 warm like abuela's kitchen") problems.push('typed words were not kept verbatim: ' + JSON.stringify(a1));
+    if ($('q').textContent !== h0.steps[2].q[lang]) problems.push('a typed answer did not advance');
+    // an empty OK on a fresh question means "I'll tell you out loud"
+    btns = [...$('choices').children]; btns[btns.length - 1].click(); $('rmText').value = '   '; $('rmOk').click(); await wait(450);
+    st = rec();
+    if (!st.a[h0.id + ':' + h0.steps[2].id] || !st.a[h0.id + ':' + h0.steps[2].id].out) problems.push('an empty OK on a fresh question was not recorded as "tell you out loud"');
+    if ($('q').textContent !== h0.steps[3].q[lang]) problems.push('"tell you out loud" did not advance');
+    // "that's enough for now" leaves with everything kept; coming back resumes where she was
+    $('rmLater').click();
+    if (!$('card').hidden || $('world').hidden) problems.push('"that\'s enough for now" did not return to the room');
+    if (Object.keys(rec().a).length !== 3) problems.push('leaving early lost answers');
+    checkTalk(); tb.click();
+    if ($('q').textContent !== h0.steps[3].q[lang]) problems.push('talking again did not resume at the first unanswered question');
+    // finish this host with first answers
+    for (let i = 3; i < h0.steps.length; i++) { [...$('choices').children][0].click(); await wait(450); }
+    if ($('npcSay').textContent !== h0.done[lang]) problems.push('after the last answer the host did not say the closing line');
+    if ($('rmSheet').hidden || $('rmSheet').offsetParent === null) problems.push('the sheet is not shown on the card after the closing line');
+    const sheet = $('rmSheet').textContent;
+    if (!sheet.includes(s0.opts[1][lang])) problems.push('the sheet does not print the tapped answer verbatim');
+    if (!sheet.includes("<3 warm like abuela's kitchen")) problems.push('the sheet does not print her typed words verbatim');
+    if (!sheet.includes(U.saidOut)) problems.push('the sheet does not say which answer she wants to give out loud');
+    if (!sheet.includes(heroName)) problems.push('the sheet does not carry the player\'s name');
+    if (/(^|\n)#|\*\*/.test(sheet)) problems.push('the sheet shows Markdown marks to the player');
+    if ($('rmBar').hidden || $('rmCopy').hidden || $('rmBack').hidden || $('rmAgain').hidden) problems.push('the sheet card is missing Copy / Ask me again / Back');
+    if (!$('next').hidden) problems.push('the quest Next button appeared on the interview (it can trigger a chapter ending)');
+    if (hasSay(n0)) problems.push('a host with every question answered still shows ❗');
+    const h1 = I.hosts[1];
+    if (h1) {
+      const n1 = WORLDS[h1.world].npcs.find(n => roomHosts[n.npc] && roomHosts[n.npc].id === h1.id);
+      if (!n1 || !hasSay(n1)) problems.push('the second host lost the ❗ before being answered');
+      if (!sheet.includes(U.unanswered)) problems.push('the sheet does not list what is still unanswered');
+    }
+    // nothing was graded, paid, or logged
+    if (xp !== before.xp || JSON.stringify(marks) !== before.marks || dlog.length !== before.dl || done.size !== before.done) problems.push('the interview touched XP, marks, the play log or done — it must grade nothing');
+    // "ask me again" starts over with her earlier tap marked; a new tap keeps the old one as history
+    $('rmAgain').click();
+    if ($('q').textContent !== s0.q[lang]) problems.push('"ask me again" did not start from the first question');
+    btns = [...$('choices').children];
+    if (!btns[1] || !btns[1].classList.contains('was')) problems.push('her earlier answer is not marked when re-asked');
+    btns[0].click(); await wait(450);
+    const a0 = rec().a[h0.id + ':' + s0.id];
+    if (!a0 || a0.pick !== 0 || !a0.hist || !a0.hist.length) problems.push('re-answering overwrote the earlier tap without keeping it');
+    $('rmLater').click();
+    // the other language re-labels the sheet; her words stay
+    const lang0 = lang; lang = lang0 === 'en' ? 'es' : 'en'; applyLang();
+    const sheet2 = roomSheet();
+    if (!sheet2.includes(s0.q[lang]) || !sheet2.includes("<3 warm like abuela's kitchen")) problems.push('the sheet in the other language lost a label or her words');
+    lang = lang0; applyLang();
+    // Export gains a "The room" tab, labelled, showing the same sheet
+    $('openExp').click();
+    if ($('exTabRoom').hidden || $('exTabRoom').textContent !== U.tab) problems.push('Export has no "The room" tab');
+    $('exTabRoom').click();
+    if ($('exArea').value !== roomSheet()) problems.push('the Export tab does not show the sheet');
+    $('exClose').click();
+    // restart never wipes it (nothing you make gets taken away)
+    const keep = localStorage.getItem('mqroom');
+    const b = $('replay'); b.click(); b.click();
+    if (localStorage.getItem('mqroom') !== keep) problems.push('restart touched her answers');
+    // put things back
+    world = before.world; px = fx = before.px; py = fy = before.py; held = null; moving = false; hearts = 3;
+    $('card').hidden = true; $('world').hidden = false; $('settings').hidden = true; setWorldTag(); checkTalk();
+    return problems;
+  });
+  fails.push(...room);
+
+  // ---- the off switch: a pack that declares no interview gets no interview ----
+  // Same engine, room.js blocked at load: no page error, no hosts, no tab, no storage.
+  {
+    const ctx2 = await browser.newContext();
+    const p2 = await ctx2.newPage({ viewport: { width: 480, height: 900 } });
+    const errs = [], w2 = [];
+    p2.on('pageerror', e => errs.push(e.message));
+    p2.on('console', m => { if (m.type() === 'warning') w2.push(m.text()); });
+    await p2.route('**', r => { const u = r.request().url(); if (!u.startsWith('file://') || /content\/meridian\/room\.js$/.test(u)) return r.abort(); r.continue(); });
+    await p2.goto(index); await p2.waitForTimeout(1200);
+    if (errs.length) fails.push('with no INTERVIEW declared the page errors: ' + errs.join(' | '));
+    if (w2.some(w => /^ROOM/.test(w))) fails.push('with no INTERVIEW declared the engine still warns about hosts');
+    const off = await p2.evaluate(() => {
+      const problems = [];
+      if (typeof INTERVIEW !== 'undefined') return ['room.js still loaded — the off-switch test is not testing anything'];
+      if (typeof RM !== 'function' || typeof roomHosts === 'undefined') return ['the engine has no room seam (RM / roomHosts)'];
+      if (RM()) problems.push('RM() is not empty with no pack declaration');
+      if (Object.values(WORLDS).some(w => w.npcs.some(n => roomHosts[n.npc]))) problems.push('hosts were placed with nothing declared');
+      if (localStorage.getItem('mqroom')) problems.push('mqroom was written with nothing declared');
+      document.querySelector('.classes button[data-c="architect"]').click(); document.getElementById('begin').click();
+      document.getElementById('openExp').click();
+      if (!document.getElementById('exTabRoom').hidden) problems.push('the Export tab "The room" shows with nothing declared');
+      document.getElementById('exClose').click();
+      world = 'f2'; px = fx = 11; py = fy = 8; checkTalk();
+      if (!document.getElementById('talk').hidden) problems.push('a Talk button appeared upstairs with nobody declared');
+      return problems;
+    });
+    fails.push(...off);
+    await ctx2.close();
+  }
+
+  // ---- the version is on the opening page, not only buried in Settings ----
+  // Owner 2026-09-02: "move the version to the first/opening page so i know which im
+  // using. also keep in settings but i want it there." Both must show GAMEV exactly.
+  const ver = await page.evaluate(() => {
+    const problems = [];
+    const a = document.getElementById('verIntro'), b = document.getElementById('verTag');
+    if (!a) problems.push('no #verIntro on the opening page');
+    else if (!a.textContent.includes(GAMEV)) problems.push(`opening page shows "${a.textContent}", not ${GAMEV}`);
+    else if (!document.getElementById('intro').contains(a)) problems.push('#verIntro is not inside the intro panel');
+    if (!b || !b.textContent.includes(GAMEV)) problems.push('Settings no longer shows the version');
+    return problems;
+  });
+  fails.push(...ver);
+
   // ---- the camera the pack asks for is the camera you get, and it sticks ----
   const cam = await page.evaluate(() => {
     const problems = [];
@@ -923,7 +1342,7 @@ const CANDIDATES = [
   {
     const NAMES = ['mercado', 'chelo', 'nando', 'perla', 'chava', 'frijol', 'obra',
                    'cocina', 'xochi', 'lupe', 'guero', 'rosa', 'chuy', 'tovar', 'priya',
-                   'canela', 'robles', 'jacaranda'];
+                   'canela', 'robles', 'jacaranda', 'muertos', 'otono', 'otoño', 'nacho'];
     // engine3d is the same engine, so it is held to the same rule
     for (const f of ['engine/engine.js', 'engine/engine3d.js']) {
       const src = fs.readFileSync(path.join(__dirname, '..', f), 'utf8');

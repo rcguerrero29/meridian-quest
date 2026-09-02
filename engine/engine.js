@@ -55,6 +55,23 @@ function addChill(c){ /* {name:{en,es},world,x,y,look} → chat NPC; returns key
   w.grid[y][x]="N";
   return key;}
 (typeof CHILL!=="undefined"?CHILL:[]).forEach(c=>addChill(c));
+/* ---------- the room interview seam ----------
+   A pack may declare INTERVIEW (content/<pack>/room.js): people who stand in a room and
+   ask questions with no right answer, whose answers become a plain sheet the player
+   can copy. The engine reads only SHAPES — hosts, steps, opts, ui — never a name. A
+   pack that declares nothing gets nothing: no people, no tab, no storage key (the AJ
+   law). Owner, 2026-09-02: "AJ can interact through the characters ... i dont want an
+   api setup" — the sheet IS the back-and-forth. */
+const RM=()=>(typeof INTERVIEW!=="undefined"&&INTERVIEW&&Array.isArray(INTERVIEW.hosts)&&INTERVIEW.ui)?INTERVIEW:null;
+const RMU=()=>{const r=RM();return r?(r.ui[lang]||r.ui.en||{}):{};};
+const roomHosts={}; /* chill key → host declaration */
+let roomAns={};      /* "host:step" → {pick|text|out, hist[]} — per device, never in the save */
+try{if(RM()){const r0=JSON.parse(localStorage.getItem("mqroom")||"{}");
+  if(r0&&typeof r0==="object"&&r0.a&&typeof r0.a==="object")roomAns=r0.a;}}catch(e){}
+function roomPersist(){if(!RM())return;try{localStorage.setItem("mqroom",JSON.stringify({v:1,a:roomAns}));}catch(e){}}
+(RM()?RM().hosts:[]).forEach(h=>{const k=addChill(h);if(k)roomHosts[k]=h;
+  else console.warn("ROOM host "+h.id+" cannot stand at "+h.world+" ("+h.x+","+h.y+") — solid or taken");});
+const roomPending=n=>{const h=roomHosts[n.npc];return !!h&&h.steps.some(s=>!roomAns[h.id+":"+s.id]);};
 const chillLines=k=>{
   if(CHILLEGG[k])return EGGSAFE[CHILLEGG[k]].lines[lang];
   if(String(k).startsWith("~c"))
@@ -173,6 +190,7 @@ function awardXP(amt){runXP+=amt;const k=cur,prev=qa[k]||0;
   if(runXP>prev){xp+=runXP-prev;qa[k]=runXP;}else qa[k]=prev;}
 let px=10,py=11,fx=10,fy=11,dir="down",moving=false,mt=0,held=null,bob=0;
 let warpT=0,portalT=0; /* post-warp grace: warpT blocks input, portalT blocks re-triggering — kills door ping-pong */
+let portalHold=""; /* the tile a warp SET YOU DOWN on ("world:x,y"): tryPortal ignores it until you step off */
 /* Frederick's wardrobe — Xochi's collar line. Cosmetics are data; drawDog reads `wear`. */
 const WEAR={bandana:["#C0392B","#7A3FE0","#E0B45C","#2AA47C","#3E8ED0"],
             collar:["#E0B45C","#C0392B","#7A3FE0","#2AA47C"],
@@ -207,7 +225,7 @@ function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,p
    something to say. Never a count, never an age (docs/OWNER.md — no practice is ever
    missed, and a badge with a number on it is a backlog). It was hardcoded to hq, so
    the office kept promising a quest long after its last one was answered. */
-const worldPending=id=>(WORLDS[id]?WORLDS[id].npcs:[]).some(n=>n.q&&pendingAt(n)!==undefined);
+const worldPending=id=>(WORLDS[id]?WORLDS[id].npcs:[]).some(n=>hasSay(n));
 function setWorldTag(){$("worldTag").textContent=T().locs[world]+(worldPending(world)?" · ❗":"");}
 /* Boundary sanitizer: every save that crosses a trust boundary — Trolley Pass links
    today, NET payloads tomorrow — is coerced to known-good shapes here. Numbers clamp,
@@ -260,6 +278,9 @@ function toast(msg,ms){const el=$("toast"),dur=ms||2600;
 $("ticker").addEventListener("click",()=>{$("ticker").hidden=true;tickerLines.length=0;});
 let lastBump=0;
 const pendingAt=n=>n.q.find(qi=>!done.has(qi)&&qOpen(qi));
+/* "this neighbour has something to say" — the ❗ means one thing forever (STORY.md), and
+   a host with an unanswered question has something to say too */
+const hasSay=n=>pendingAt(n)!==undefined||roomPending(n);
 /* ---------- canvas ---------- */
 const cv=$("cv");let ctx=cv.getContext("2d"); /* let: the 3D baker borrows ctx to render tile art into textures */
 const VW=10*TS,VH=8*TS;
@@ -357,7 +378,7 @@ function drawIso(){
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
   w.npcs.forEach(n=>bill(n.x,n.y,(bx,by)=>{
     drawPerson(ctx,bx,by,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
-    if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
+    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     else drawEmote(n,bx,by);}));
   if(world==="hq")bill(DOG.fx,DOG.fy,(bx,by)=>drawDog(ctx,bx,by));
@@ -436,20 +457,41 @@ TILEDRAW["Y"]=rc=>{const{sx,sy,x,y}=rc; /* trolley stop: pole + sign + bench —
       ctx.fillStyle="#F2E8D8";ctx.font="700 7px monospace";ctx.fillText("MQT",sx+4,sy+9);
       ctx.fillStyle="#8A6B3F";ctx.fillRect(sx+14,sy+21,15,3);
       ctx.fillRect(sx+15,sy+24,2,5);ctx.fillRect(sx+26,sy+24,2,5);};
-TILEDRAW["Q"]=rc=>{const{sx,sy,x,y}=rc; /* La Cocina storefront: terracotta facade + striped awning + window */
+TILEDRAW["Q"]=rc=>{const{sx,sy,x,y}=rc; /* restaurant storefront: terracotta facade + striped awning +
+      a window with a steaming bowl in it. The cold read (IDEAS §15.8) saw "a red building,
+      an awning, two blank windows" — the mullion split the window into two blanks and
+      nothing said food. The mercado reads because it shows produce; this shows a meal. */
       ctx.fillStyle="#A8503A";ctx.fillRect(sx,sy,TS,TS);
       for(let i=0;i<4;i++){ctx.fillStyle=i%2?"#F2E8D8":"#C0392B";ctx.fillRect(sx+i*8,sy,8,7);}
       ctx.fillStyle="#7A3527";ctx.fillRect(sx,sy+7,TS,2);
-      ctx.fillStyle="#F5DFA9";ctx.fillRect(sx+8,sy+14,16,10);
-      ctx.fillStyle="#7A3527";ctx.fillRect(sx+15,sy+14,2,10);};
-TILEDRAW["D"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc(C.desk);ctx.fillRect(sx+2,sy+8,TS-4,TS-12);ctx.fillStyle=tc(C.deskTop);ctx.fillRect(sx+2,sy+4,TS-4,8);
-      ctx.fillStyle="#DDE4EA";ctx.fillRect(sx+8,sy+6,10,5);};
+      ctx.fillStyle="#F5DFA9";ctx.fillRect(sx+7,sy+11,18,14); /* one window */
+      ctx.fillStyle="#C0392B";ctx.beginPath();ctx.arc(sx+16,sy+20,5,0,Math.PI);ctx.fill(); /* the bowl */
+      ctx.fillStyle="#E8A05A";ctx.fillRect(sx+11.5,sy+19,9,1.6); /* what's in it */
+      ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+11,sy+19.6,10,1); /* rim */
+      ctx.fillStyle="#B9B2A6";[13,16,19].forEach((wx,i)=>ctx.fillRect(sx+wx,sy+13+(i%2)*1.2,1.2,3.6)); /* steam */
+      produce(sx+23,sy+14,"chile",0.75);};
+TILEDRAW["D"]=rc=>{const{sx,sy,x,y}=rc; /* a desk: top, two legs, a monitor on it, a sheet of paper.
+      The cold read saw a cardboard box with a label. */
+      ctx.fillStyle=tc(C.desk);ctx.fillRect(sx+5,sy+18,3,10);ctx.fillRect(sx+24,sy+18,3,10); /* legs */
+      ctx.fillStyle=tc(C.deskTop);ctx.fillRect(sx+2,sy+13,TS-4,5); /* top */
+      ctx.fillStyle=tc(C.desk);ctx.fillRect(sx+2,sy+18,TS-4,1.5); /* apron */
+      ctx.fillStyle="#2B2F38";ctx.fillRect(sx+10,sy+3,12,9);ctx.fillRect(sx+15,sy+12,2,1.5);ctx.fillRect(sx+13,sy+13,6,1); /* monitor + stand */
+      ctx.fillStyle="#7FB3D5";ctx.fillRect(sx+11,sy+4,10,7); /* screen */
+      ctx.fillStyle="#DDE4EA";ctx.fillRect(sx+23,sy+14,5,3);}; /* paper */
 TILEDRAW["K"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc(C.counter);ctx.fillRect(sx+2,sy+6,TS-4,TS-10);ctx.font="12px serif";ctx.fillText("☕",sx+9,sy+22);};
 TILEDRAW["P"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=C.pot;ctx.fillRect(sx+10,sy+18,12,10);ctx.fillStyle=C.plant;
       ctx.beginPath();ctx.arc(sx+16,sy+13,8,0,7);ctx.fill();};
-TILEDRAW["T"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#7A4E2C";ctx.beginPath();ctx.arc(sx+16,sy+16,11,0,7);ctx.fill();
-      ctx.fillStyle="#F2E8D8";ctx.beginPath();ctx.arc(sx+16,sy+16,9,0,7);ctx.fill();
-      ctx.fillStyle="#C0392B";ctx.beginPath();ctx.arc(sx+16,sy+16,3,0,7);ctx.fill();};
+TILEDRAW["T"]=rc=>{const{sx,sy,x,y}=rc; /* a restaurant table: gingham cloth, two plates, a chair
+      either side. The cold read saw a dartboard (cream disc, red dot); without the chairs
+      the gingham disc could pass for a pizza. */
+      ctx.fillStyle="#5E3B20";ctx.fillRect(sx+0.5,sy+11,3.5,10);ctx.fillRect(sx+28,sy+11,3.5,10); /* chairs */
+      ctx.fillStyle="#7A4E2C";ctx.beginPath();ctx.arc(sx+16,sy+16,12,0,7);ctx.fill();
+      ctx.save();ctx.beginPath();ctx.arc(sx+16,sy+16,10.5,0,7);ctx.clip();
+      ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+4,sy+4,24,24);
+      ctx.fillStyle="#C0392B";for(let i=0;i<6;i++)for(let j=0;j<6;j++)if((i+j)%2===0)ctx.fillRect(sx+4+i*4,sy+4+j*4,4,4);
+      ctx.restore();
+      [[11,16],[21,16]].forEach(([qx,qy])=>{ctx.fillStyle="#FFF";ctx.beginPath();ctx.arc(sx+qx,sy+qy,3.6,0,7);ctx.fill();
+        ctx.fillStyle="#C9CDD2";ctx.beginPath();ctx.arc(sx+qx,sy+qy,2.2,0,7);ctx.fill();});};
 TILEDRAW["W"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#AEB6BE";ctx.fillRect(sx+4,sy+2,TS-8,TS-4);
       ctx.fillStyle="#8E969E";ctx.fillRect(sx+4,sy+14,TS-8,2);
       ctx.fillStyle="#5F676F";ctx.fillRect(sx+21,sy+5,3,7);ctx.fillRect(sx+21,sy+18,3,7);};
@@ -505,11 +547,16 @@ TILEDRAW["H"]=rc=>{const{sx,sy,x,y}=rc; /* produce crate */
       ctx.fillStyle="#8B6A42";ctx.fillRect(sx+3,sy+16,TS-6,2);ctx.fillRect(sx+15,sy+10,2,TS-14);
       [[9,9,"tomato"],[16,7,"chile"],[23,9,"banana"]]
         .forEach(f=>produce(sx+f[0],sy+f[1],f[2],1.3));};
-TILEDRAW["I"]=rc=>{const{sx,sy,x,y}=rc; /* mercado counter: worn wood, scale on top */
+TILEDRAW["I"]=rc=>{const{sx,sy,x,y}=rc; /* shop counter: worn wood, and a produce scale you can read —
+      dial with a needle, post, tray, a tomato on the tray. The cold read saw a brown box with a grey smudge. */
       ctx.fillStyle="#A8825A";ctx.fillRect(sx+2,sy+6,TS-4,TS-10);
       ctx.fillStyle="#8B6A42";ctx.fillRect(sx+2,sy+6,TS-4,3);
-      ctx.fillStyle="#C9CDD2";ctx.fillRect(sx+11,sy+11,10,6);
-      ctx.fillStyle="#5F676F";ctx.fillRect(sx+14,sy+9,4,2);};
+      ctx.fillStyle="#5F676F";ctx.fillRect(sx+15,sy+13,2,7); /* post */
+      ctx.fillStyle="#C9CDD2";ctx.fillRect(sx+9,sy+20,14,2.5); /* tray */
+      ctx.fillStyle="#EEF0F2";ctx.beginPath();ctx.arc(sx+16,sy+10,4.4,0,7);ctx.fill(); /* dial */
+      ctx.strokeStyle="#5F676F";ctx.lineWidth=1;ctx.beginPath();ctx.arc(sx+16,sy+10,4.4,0,7);ctx.stroke();
+      ctx.strokeStyle="#C0392B";ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(sx+16,sy+10);ctx.lineTo(sx+18.6,sy+7.6);ctx.stroke(); /* needle */
+      produce(sx+12.5,sy+18,"tomato",0.85);};
 TILEDRAW["U"]=rc=>{const{sx,sy,x,y}=rc; /* blueprint wall panel */
       ctx.fillStyle=tc(C.wall);ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle=tc(C.wallTop);ctx.fillRect(sx,sy,TS,6);
       ctx.fillStyle="#2E5FA8";ctx.fillRect(sx+4,sy+9,TS-8,18);
@@ -522,9 +569,11 @@ TILEDRAW["~"]=rc=>{const{sx,sy,x,y}=rc; /* river water: cool blue, drifting glin
       const ph=Math.sin(Date.now()/900+x*3+y*5);
       ctx.fillRect(sx+4,sy+8+ph*2,11,2);ctx.fillRect(sx+17,sy+21-ph*2,10,2);
       ctx.fillStyle="rgba(255,255,255,.25)";ctx.fillRect(sx+7,sy+9+ph*2,4,1);};
-TILEDRAW["^"]=rc=>{const{sx,sy}=rc; /* the rainbow bridge: walk the whole spectrum */
+const BRIDGE_BANDS=["#D95B5B","#E0A430","#E7C25A","#7A9A4E","#5E93BC","#8B6FC8"]; /* year-round */
+TILEDRAW["^"]=rc=>{const{sx,sy}=rc; /* the rainbow bridge: walk the whole spectrum.
+      The six bands are the one thing a season may recolour; planks and rails are design */
       ctx.fillStyle="#C9B99A";ctx.fillRect(sx,sy,TS,TS); /* plank base */
-      ["#D95B5B","#E0A430","#E7C25A","#7A9A4E","#5E93BC","#8B6FC8"].forEach((cc,i)=>{
+      art("bridge",BRIDGE_BANDS).forEach((cc,i)=>{
         ctx.fillStyle=cc;ctx.fillRect(sx,sy+3+i*4.4,TS,4.4);});
       ctx.globalAlpha=0.22;ctx.fillStyle="#FFF";ctx.fillRect(sx,sy+3,TS,2);ctx.globalAlpha=1;
       ctx.fillStyle="#8A6F4D";ctx.fillRect(sx,sy,TS,2.5);ctx.fillRect(sx,sy+TS-2.5,TS,2.5); /* rails */};
@@ -547,15 +596,22 @@ TILEDRAW["9"]=rc=>{const{sx,sy}=rc; /* the doghouse: red roof, dark door, a bone
       ctx.fillStyle="#F6F2E8";ctx.fillRect(sx+13,sy+14.5,6,1.6);
       ctx.beginPath();ctx.arc(sx+12.6,sy+15.3,1.2,0,7);ctx.arc(sx+19.4,sy+15.3,1.2,0,7);ctx.fill();};
 DOORSET.forEach(dch=>TILEDRAW[dch]=rc=>{const{sx,sy}=rc;
-      ctx.fillStyle=C.doorFrame;ctx.fillRect(sx+2,sy,TS-4,TS);
-      ctx.fillStyle=C.doorWood;ctx.fillRect(sx+4,sy+2,11,TS-4);
-      ctx.fillStyle=C.doorWood2;ctx.fillRect(sx+17,sy+2,11,TS-4);
+      /* one door body, shared; DOORLOOK (content) colours it for where it leads and may
+         give it a window, so a shop entrance and an office door stop being the same brown
+         (the cold read found all five pixel-identical). An unlisted glyph is the plain door. */
+      const dl=(typeof DOORLOOK!=="undefined"&&DOORLOOK[dch])||{};
+      ctx.fillStyle=dl.frame||C.doorFrame;ctx.fillRect(sx+2,sy,TS-4,TS);
+      ctx.fillStyle=dl.wood||C.doorWood;ctx.fillRect(sx+4,sy+2,11,TS-4);
+      ctx.fillStyle=dl.wood2||C.doorWood2;ctx.fillRect(sx+17,sy+2,11,TS-4);
       ctx.fillStyle="rgba(0,0,0,.15)";ctx.fillRect(sx+15,sy+2,2,TS-4);
+      if(dl.glass){ctx.fillStyle="#D7E6EE";ctx.fillRect(sx+6,sy+5,7,9);ctx.fillRect(sx+19,sy+5,7,9);
+        ctx.fillStyle="rgba(255,255,255,.55)";ctx.fillRect(sx+7,sy+6,2,7);ctx.fillRect(sx+20,sy+6,2,7);}
       ctx.fillStyle="#E0B45C";
       ctx.beginPath();ctx.arc(sx+12.5,sy+17,1.7,0,7);ctx.fill();
       ctx.beginPath();ctx.arc(sx+19.5,sy+17,1.7,0,7);ctx.fill();
-      /* light under the door, gently pulsing: this one opens (doors were reading as walls) */
-      ctx.globalAlpha=0.25+0.2*Math.sin(Date.now()/380);
+      /* light under the door, gently pulsing: this one opens (doors were reading as walls).
+         rc.t is a pinned clock for bakes (3D), so a baked door is the same frame every build */
+      ctx.globalAlpha=0.25+0.2*Math.sin((rc.t!==undefined?rc.t:Date.now())/380);
       ctx.fillStyle="#FFE9A8";ctx.fillRect(sx+4,sy+TS-3,TS-8,2);
       ctx.globalAlpha=1;
     });
@@ -680,7 +736,7 @@ function drawFront(){
     if(sx<-TS||sy<-TS-16||sx>VW||sy>VH)return;R.push({d:gy+0.55,f:()=>fn(sx,sy)});};
   w.npcs.forEach(n=>act(n.x,n.y,(sx,sy)=>{
     drawPerson(ctx,sx,sy,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
-    if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
+    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     else drawEmote(n,sx,sy);}));
   PEERS.forEach(p=>{if(p.w!==world)return;
@@ -767,7 +823,7 @@ function draw(){
     const sx=n.x*TS-camX,sy=n.y*TS-camY;
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
     drawPerson(ctx,sx,sy,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
-    if(pendingAt(n)!==undefined){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
+    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     else drawEmote(n,sx,sy);
   });
@@ -1563,6 +1619,28 @@ function tryStep(){
   }
   moving=true;mt=0;px=nx;py=ny;
 }
+/* A door is checked whenever you are STANDING on it, not only on the frame a step ends.
+   Before this, walking out of HQ and straight back in was swallowed: the step ended
+   inside portalT's 900ms anti-ping-pong window, the tile was rejected once and never
+   looked at again, and the door ignored you until you stepped off and back on.
+   Ping-pong is still impossible: a warp records the tile it set you down on in
+   portalHold, and that tile is ignored until you leave it — so this holds even for a
+   pack whose doorstep IS a portal tile (validateWorlds only warns about that).
+   Y, the trolley stop, deliberately stays step-only: a menu you dismissed must not
+   reopen under your feet. Returns true if it warped. */
+function tryPortal(ts){
+  const key=world+":"+px+","+py;
+  if(portalHold&&portalHold!==key)portalHold="";
+  const pch=CW().rows[py][px];
+  if(portalHold||ts<=portalT||!(PORTALS[world]&&PORTALS[world][pch]))return false;
+  const p=PORTALS[world][pch],fromW=world;
+  world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
+  warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
+  save();setWorldTag();toast(T().arrive[world],2200);roomInvite();
+  dogsRoam(world); /* unseen pups drift toward their favorite townsperson */
+  if(fromW==="pk"&&world!=="pk")parkExit(); /* crossing back over the rainbow: the recap */
+  return true;
+}
 let last=0;
 function loop(ts){
   const dt=Math.min(50,ts-last);last=ts;
@@ -1570,27 +1648,24 @@ function loop(ts){
     mt+=dt/240;bob+=dt/70;
     if(mt>=1){moving=false;fx=px;fy=py;
       const pch=CW().rows[py][px];
-      if(ts>portalT&&PORTALS[world]&&PORTALS[world][pch]){const p=PORTALS[world][pch];
-        const fromW=world;
-        world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
-        warpT=performance.now()+450;portalT=performance.now()+900;
-        save();setWorldTag();toast(T().arrive[world],2200);
-        dogsRoam(world); /* unseen pups drift toward their favorite townsperson */
-        if(fromW==="pk"&&world!=="pk")parkExit();} /* crossing back over the rainbow: the recap */
+      if(tryPortal(ts)){}
       else if(pch==="Y"&&ts>portalT){portalT=performance.now()+900;held=null;openTravel();}
       else{save();checkTalk();tryStep();}
     }
     else{const[dx,dy]=DIRS[dir];fx=px-dx*(1-mt);fy=py-dy*(1-mt);}
-  }else tryStep();
+  }else if(!tryPortal(ts))tryStep(); /* standing on a door whose cooldown just ran out: go through */
   dogUpdate(dt,ts);catUpdate(dt,ts);pigUpdate(dt,ts);loroTick(ts);critUpdate(dt,ts);ballUpdate(dt,ts);fredCheck();
   if(!$("world").hidden)draw();
   requestAnimationFrame(loop);
 }
 function checkTalk(){
   const n=CW().npcs.find(n=>Math.abs(n.x-px)+Math.abs(n.y-py)===1&&(pendingAt(n)!==undefined||n.chat));
-  if(n){const qi=pendingAt(n),tb=$("talk");
+  if(n){const qi=pendingAt(n),tb=$("talk"),rh=roomHosts[n.npc];
     if(qi!==undefined){tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${AQ()[qi].title}”`;
       tb.dataset.qi=qi;delete tb.dataset.chatn;}
+    else if(rh){ /* a host says what the talk is about, like a quest does */
+      tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${rh.talk[lang]||rh.talk.en}”`;
+      tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
     else{tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]}`;
       tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
     tb.hidden=false;}
@@ -1613,6 +1688,7 @@ window.addEventListener("keyup",e=>{if(KEYS[e.key]&&held===KEYS[e.key])held=null
 $("talk").addEventListener("click",()=>{
   const tb=$("talk");
   if(tb.dataset.chatn){
+    if(roomHosts[tb.dataset.chatn]){roomStart(roomHosts[tb.dataset.chatn],tb.dataset.chatn);return;}
     /* content nominates who runs the fitting room; the engine just opens it */
     if(tb.dataset.chatn===GRW().wardrobeNpc){openWardrobe();return;}
     const L=chillLines(tb.dataset.chatn)||(T().chat||{})[tb.dataset.chatn]||[];
@@ -1707,6 +1783,7 @@ function questStart(qi){cur=qi;curQ=AQ()[qi];node=curQ.start;qLvl0=lvlIdx();runX
 function fredQuestStart(){cur=-1;curQ=FQ();node=curQ.start;qLvl0=lvlIdx();runXP=0;qFirst=qa[-1]===undefined;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
 function nodeShow(){
   const q=curQ,t=q.nodes[node];
+  roomHide();$("codex").parentElement.hidden=false; /* a quest card never shows the interview's parts */
   $("qtag").textContent=`${T().quest}: ${q.title}${node!==q.start?T().followup:""}`;
   $("npcAv").textContent=NPCE[q.npc];$("npcName").textContent=npcName(q.npc);$("npcSay").textContent=t.say;
   /* one line before the opening node, and only there — never on a follow-up step */
@@ -1756,6 +1833,108 @@ $("next").addEventListener("click",()=>{
   if(chDue()){wasFs=false;finish(livesOn()&&hearts<=0);return;}
   $("card").hidden=true;$("world").hidden=false;restoreFs();checkTalk();
 });
+/* ---------- the room interview: a card with no right answer ----------
+   Same card the quests use, none of their machinery: no pick(), no XP, no marks, no play
+   log, no verdict, no shuffle (there is no right answer to hide, and a phone user wants
+   the escape button in the same place every time). A mis-tap costs nothing: Cancel is a
+   no-op, an empty box over an earlier answer is ignored, and re-answering keeps the old
+   answer as history — nothing the player made is taken away. */
+let roomH=null,roomK=null,roomI=0;
+const RMIDS=["rmWhy","rmLater","rmAsk","rmSheet","rmBar"];
+function roomHide(){RMIDS.forEach(id=>{const el=$(id);if(el)el.hidden=true;});}
+function roomStart(h,key){
+  roomH=h;roomK=key;
+  exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;
+  const i=h.steps.findIndex(s=>!roomAns[h.id+":"+s.id]);
+  if(i<0)roomDone();else roomShow(i);
+}
+function roomCard(){ /* the quest card's parts a design talk never uses */
+  $("verdict").hidden=true;$("next").hidden=true;$("levelup").hidden=true;$("npcLate").hidden=true;
+  $("codex").parentElement.hidden=true;roomHide();
+  const U=RMU(),h=roomH;
+  $("qtag").textContent=U.tag||"";$("npcAv").textContent=h.emoji||"";$("npcName").textContent=h.name[lang]||h.name.en;
+}
+function roomShow(i){
+  roomI=i;const h=roomH,s=h.steps[i],U=RMU(),L=k=>(k&&(k[lang]||k.en))||"",a=roomAns[h.id+":"+s.id];
+  roomCard();
+  $("npcSay").textContent=L(s.say);$("q").textContent=L(s.q);
+  const box=$("choices");box.innerHTML="";
+  s.opts.forEach((o,idx)=>{const b=document.createElement("button");b.textContent=L(o);
+    if(a&&a.pick===idx)b.classList.add("was");
+    b.addEventListener("click",()=>roomAnswer(idx));box.appendChild(b);});
+  if(s.free!==false){const b=document.createElement("button");b.textContent=U.free||"…";b.className="free";
+    if(a&&a.text)b.classList.add("was");
+    b.addEventListener("click",()=>roomAsk());box.appendChild(b);}
+  $("rmWhy").textContent=L(s.why);$("rmWhy").hidden=!L(s.why);
+  $("rmLater").textContent=U.later||"";$("rmLater").hidden=false;
+  hud();window.scrollTo({top:0});
+}
+function roomRecord(s,rec){
+  const k=roomH.id+":"+s.id,old=roomAns[k];
+  if(old&&(old.text||(old.pick!==undefined&&old.pick!==null))){
+    rec.hist=(old.hist||[]).concat([old.text?{text:old.text}:{pick:old.pick}]).slice(-5);}
+  roomAns[k]=rec;roomPersist();toast(RMU().noted||"✓",1200);
+}
+function roomNext(){const i=roomI+1;setTimeout(()=>{if(!roomH)return;if(i>=roomH.steps.length)roomDone();else roomShow(i);},350);}
+function roomAnswer(idx){[...$("choices").children].forEach(b=>b.disabled=true);
+  roomRecord(roomH.steps[roomI],{pick:idx});roomNext();}
+function roomAsk(){const U=RMU(),a=roomAns[roomH.id+":"+roomH.steps[roomI].id];
+  $("rmTitle").textContent=U.freeTitle||"";$("rmLb").textContent=U.freeLb||"";
+  $("rmOk").textContent=U.ok||"OK";$("rmCancel").textContent=U.cancel||"×";
+  $("rmText").value=(a&&a.text)||"";$("rmAsk").hidden=false;$("rmText").focus();
+  try{$("rmAsk").scrollIntoView({block:"nearest"});}catch(e){}}
+$("rmCancel").addEventListener("click",()=>{$("rmAsk").hidden=true;});
+$("rmOk").addEventListener("click",()=>{
+  if(!roomH)return;
+  const s=roomH.steps[roomI],k=roomH.id+":"+s.id,text=sanLine($("rmText").value),old=roomAns[k];
+  $("rmAsk").hidden=true;
+  if(text){roomRecord(s,{pick:null,text});roomNext();return;}
+  if(old)return;                                  /* an empty box over an earlier answer changes nothing */
+  roomRecord(s,{pick:null,text:"",out:true});roomNext(); /* "I'll tell you this one out loud" */
+});
+$("rmText").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$("rmOk").click();}});
+$("rmLater").addEventListener("click",()=>roomEnd());
+function roomDone(){
+  const h=roomH,U=RMU();
+  roomCard();
+  $("npcSay").textContent=h.done[lang]||h.done.en;$("q").textContent="";$("choices").innerHTML="";
+  $("rmSheet").textContent=roomSheet();$("rmSheet").hidden=false;
+  $("rmCopy").textContent=U.copy||"Copy";$("rmAgain").textContent=U.again||"↻";$("rmBack").textContent=U.back||T().nextBack;
+  $("rmBar").hidden=false;hud();window.scrollTo({top:0});
+}
+$("rmAgain").addEventListener("click",()=>{if(roomH)roomShow(0);});
+$("rmBack").addEventListener("click",()=>roomEnd());
+$("rmCopy").addEventListener("click",()=>{const v=roomSheet(),U=RMU();
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(v):Promise.reject())
+    .then(()=>toast(U.copied||"✓",2200))
+    .catch(()=>{try{const r=document.createRange();r.selectNodeContents($("rmSheet"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}catch(e){}
+      toast(U.copyFail||"",2600);});});
+function roomEnd(){roomH=null;roomHide();$("codex").parentElement.hidden=false;
+  $("card").hidden=true;$("world").hidden=false;restoreFs();checkTalk();}
+/* the arrival nudge: while a host in this room still has a question, say who is waiting */
+function roomInvite(){const I=RM();if(!I||!I.invite)return;
+  const w=WORLDS[world];if(!w||!w.npcs.some(n=>roomPending(n)))return;
+  setTimeout(()=>toast(I.invite[lang]||I.invite.en,3200),2300);}
+/* the sheet: plain text, no Markdown marks — the player reads it on the card, the owner
+   copies it. Labels follow the language; the player's own words are printed as typed. */
+function roomSheet(){
+  const I=RM();if(!I)return "";
+  const U=RMU(),L=k=>(k&&(k[lang]||k.en))||"",out=[],miss=[];
+  const first=n=>L(n).split(" ·")[0];
+  out.push(L(I.title)+" — "+L(I.place));
+  out.push(heroName+" · "+(U.by||"")+" "+I.hosts.map(h=>first(h.name)).join(" & ")+" · "+new Date().toLocaleDateString(lang==="es"?"es-MX":"en-US"));
+  I.hosts.forEach(h=>{out.push("");out.push("== "+first(h.name)+" · "+L(h.talk)+" ==");
+    h.steps.forEach(s=>{const a=roomAns[h.id+":"+s.id],q=L(s.q);
+      if(!a){miss.push(q);return;}
+      const ans=a.text?"“"+a.text+"”":a.out?(U.saidOut||""):(a.pick!==null&&a.pick!==undefined&&s.opts[a.pick])?L(s.opts[a.pick]):"";
+      out.push(q);out.push("   "+ans);
+      if(a.hist&&a.hist.length){const prev=a.hist.map(p=>p.text?"“"+p.text+"”":s.opts[p.pick]?L(s.opts[p.pick]):"").filter(Boolean);
+        if(prev.length)out.push("   ("+(U.earlier||"earlier")+": "+prev.join(" / ")+")");}});});
+  out.push("");out.push("== "+(U.unanswered||"")+" ==");
+  out.push(miss.length?miss.map(q=>"· "+q).join("\n"):(U.none||""));
+  out.push("");out.push(U.foot||"");
+  return out.join("\n");
+}
 /* ---------- character creator ---------- */
 const SWATCH={shirt:["#8B5CF6","#E0A430","#2AA47C","#C2543F","#3E8ED0","#B04A78"],
   skin:["#F1CDA9","#E5AC82","#C08356","#8C5A33"],
@@ -1963,6 +2142,48 @@ function applyTheme(){
   try{localStorage.setItem("mqtheme",themeName);}catch(e){}
 }
 try{darkMq.addEventListener("change",applyTheme);}catch(e){}
+/* ---------- SEASONS: a second palette layer, for WORLD ART, kept apart from THEMES ----------
+   THEMES is UI chrome and never reaches a tile; art(key, fallback) is how world art asks
+   whether a season has recoloured it. The pack declares SEASONS (names, dates, colours);
+   the engine never learns a name (the portability guard enforces it). seasonPick is the
+   player's Settings choice: "auto" (by the calendar), "off" (year-round), or a season id.
+   A pack with no SEASONS behaves exactly as before — art() always returns the fallback. */
+let seasonPick="auto";try{seasonPick=localStorage.getItem("mqseason")||"auto";}catch(e){}
+const seasonMemo={day:"",id:null}; /* the calendar is read once a day, not once a tile */
+const SEAS=()=>typeof SEASONS!=="undefined"&&SEASONS?SEASONS:{};
+function seasonNow(now){ /* the current season id, or null. `now` is for tests. */
+  const S=SEAS();
+  if(seasonPick==="off")return null;
+  if(seasonPick!=="auto")return S[seasonPick]?seasonPick:null;
+  const d=now||new Date(),key=d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();
+  if(!now&&seasonMemo.day===key)return seasonMemo.id;
+  const m=d.getMonth()+1,dd=d.getDate(),md=m*100+dd;
+  let id=null;
+  Object.entries(S).some(([k,v])=>{if(!v.from||!v.to)return false;
+    const a=v.from[0]*100+v.from[1],b=v.to[0]*100+v.to[1];
+    const inW=a<=b?(md>=a&&md<=b):(md>=a||md<=b); /* a window may wrap the new year */
+    if(inW)id=k;return inW;});
+  if(!now){const was=seasonMemo.id;seasonMemo.day=key;seasonMemo.id=id;
+    if(was!==id&&seasonMemo.day&&typeof t3Invalidate==="function")t3Invalidate();} /* it turned over at midnight */
+  return id;
+}
+function art(key,fb){const id=seasonNow(),v=id&&SEAS()[id].art;return v&&v[key]!==undefined?v[key]:fb;}
+function seasonSet(pick){
+  seasonPick=pick;seasonMemo.day="";
+  try{localStorage.setItem("mqseason",pick);}catch(e){}
+  if(typeof t3Invalidate==="function")t3Invalidate();
+  seasonRowBuild();
+}
+function seasonRowBuild(){ /* the row is built from content: auto, year-round, then each declared season by its own name */
+  const row=$("seasonRow"),lb=$("lbSeason");if(!row)return;
+  const S=SEAS(),ids=Object.keys(S),t=T();
+  if(lb)lb.hidden=!ids.length;row.hidden=!ids.length;
+  row.innerHTML="";
+  [["auto",t.seasonAuto],["off",t.seasonOff]].concat(ids.map(k=>[k,(S[k].label&&(S[k].label[lang]||S[k].label.en))||k]))
+    .forEach(([k,label])=>{const b=document.createElement("button");b.dataset.sn=k;b.textContent=label;
+      b.setAttribute("aria-pressed",seasonPick===k?"true":"false");
+      b.addEventListener("click",()=>seasonSet(k));row.appendChild(b);});
+}
 document.querySelectorAll("#themeRow button,#thCustom").forEach(b=>b.addEventListener("click",()=>{themeName=b.dataset.th;applyTheme();}));
 /* --- contrast math (same WCAG formula the CI audit uses) --- */
 const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
@@ -2199,6 +2420,7 @@ function applyLang(){
   $("lbStakes").textContent=t.lbStakes;$("stkNone").textContent=t.stkNone;$("stkHearts").textContent=t.stkHearts;
   $("lbTheme").textContent=t.lbTheme;
   $("lbCam").textContent=t.lbCam;
+  if($("lbSeason")){$("lbSeason").textContent=t.lbSeason;seasonRowBuild();}
   document.querySelectorAll("#camRow button").forEach(b=>{
     b.textContent=b.dataset.cam==="top"?t.camTop:b.dataset.cam==="front"?(t.camFront||"⬆ 2.5D")
                  :b.dataset.cam==="3d"?(t.cam3d||"⛰ 3D"):t.camIso;
@@ -2372,8 +2594,9 @@ function icsData(){
 }
 function renderExport(){
   $("exArea").value=exMode==="care"?T().carePack(heroName,treats,petCfg)
-                   :exMode==="rep"?decisionReport():exportData();
-  $("exHint").textContent=exMode==="care"?T().careHint:exMode==="rep"?T().repHint:T().expHint;
+                   :exMode==="rep"?decisionReport():exMode==="room"?roomSheet():exportData();
+  $("exHint").textContent=exMode==="care"?T().careHint:exMode==="rep"?T().repHint:exMode==="room"?(RMU().hint||""):T().expHint;
+  $("exTabRoom").setAttribute("aria-pressed",exMode==="room"?"true":"false");
   $("exTabJson").setAttribute("aria-pressed",exMode==="json"?"true":"false");
   $("exTabCare").setAttribute("aria-pressed",exMode==="care"?"true":"false");
   $("exTabRep").setAttribute("aria-pressed",exMode==="rep"?"true":"false");
@@ -2385,10 +2608,13 @@ function renderExport(){
 }
 $("openExp").addEventListener("click",()=>{$("settings").hidden=true;
   $("exTabCare").hidden=fredQ<1;if(fredQ<1)exMode="json";
+  /* the room tab exists only when the pack declares an interview; its label is content */
+  const rm=!!RM();$("exTabRoom").hidden=!rm;if(rm)$("exTabRoom").textContent=RMU().tab||"";else if(exMode==="room")exMode="json";
   renderExport();$("exporter").hidden=false;});
 $("exTabJson").addEventListener("click",()=>{exMode="json";renderExport();});
 $("exTabCare").addEventListener("click",()=>{exMode="care";renderExport();});
 $("exTabRep").addEventListener("click",()=>{exMode="rep";renderExport();});
+$("exTabRoom").addEventListener("click",()=>{exMode="room";renderExport();});
 $("exDl").addEventListener("click",()=>{
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([decisionReport()],{type:"text/markdown"}));
@@ -2454,7 +2680,7 @@ function openTravel(){
     if(d.w===world){b.disabled=true;b.style.opacity=".55";}
     else b.addEventListener("click",()=>{$("travel").hidden=true;
       world=d.w;px=fx=d.x;py=fy=d.y;held=null;dir=d.dir;
-      warpT=performance.now()+450;portalT=performance.now()+900;
+      warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
       save();setWorldTag();toast(T().arrive[world],2200);});
     list.appendChild(b);});
   const s=document.createElement("button");s.className="opt";s.disabled=true;s.style.opacity=".45";
@@ -2665,6 +2891,9 @@ try{(JSON.parse(localStorage.getItem("mqedits")||"[]")).forEach(e2=>{
    (e.g. Sonny) joins as a beagle critter instead of a person. */
 const NPCSTYLES=["cap","long","curly","spiky","pony","afro","buzz","braids","buns","broccoli","fade","mullet"];
 const sanName=s2=>String(s2||"").replace(/[\u0000-\u001f<>]/g,"").trim().slice(0,24);
+/* a typed line for the room sheet: control characters out, everything else as typed —
+   it is only ever shown through textContent, so a "<3" stays a "<3" */
+const sanLine=s2=>String(s2||"").replace(/[\u0000-\u001f]/g,"").trim().slice(0,140);
 const hexOK=v=>typeof v==="string"&&/^#[0-9A-Fa-f]{6}$/.test(v);
 function randLook(){const pick=a=>a[Math.floor(Math.random()*a.length)];
   return {shirt:pick(SWATCH.shirt),skin:pick(SWATCH.skin),hair:pick(SWATCH.hair),style:pick(NPCSTYLES)};}
@@ -2752,7 +2981,7 @@ $("leash").addEventListener("click",()=>{
     c.world="pk";c.x=3;c.y=6;c.fx=3;c.fy=6;c.home=[8,6];c.follow=true;c.task=null;c.sit=false;
     c.leashT=performance.now()+6500; /* the leash shows for the bridge crossing, then he's loose */
     if(BALL)BALL=null;
-    warpT=performance.now()+450;portalT=performance.now()+900;
+    warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
     save();setWorldTag();hud();checkTalk();
     setTimeout(()=>toast(T().parkArrive,3400),700);
   },900);
@@ -3083,7 +3312,9 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("tpSkip").addEventListener("click",()=>{stripPassHash();$("tpFound").hidden=true;});
 })();
 applyAdmin();applyStakes();applyLang();applyCtl();applyTheme();camSet(camMode);
-$("verTag").textContent="Meridian Quest · "+(typeof GAMEV!=="undefined"?GAMEV:"dev");
+/* the version shows on the opening page AND in Settings (owner 2026-09-02: "so i know
+   which im using") — the number a phone actually loaded, not the one a branch claims */
+[$("verTag"),$("verIntro")].forEach(el=>{if(el)el.textContent="Meridian Quest · "+(typeof GAMEV!=="undefined"?GAMEV:"dev");});
 try{if(sessionStorage.getItem("mqupd")==="1"){sessionStorage.removeItem("mqupd");
   setTimeout(()=>toast("⬆️ "+(typeof GAMEV!=="undefined"?GAMEV:"")+" — "+T().updToast,3200),900);}}catch(e){}
 if(NET.enabled)NET.boot();

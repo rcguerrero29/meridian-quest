@@ -633,7 +633,22 @@ reuses that workflow, give each dimension its own verify criterion.
 
 ---
 
-### 15.1 THE BLUR — root cause found, fix specified, NOT BUILT
+### 15.1 THE BLUR — BUILT 2026-09-02 (S0 item 3), exactly as specified below
+
+**Shipped:** `t3Factor()` in `engine/engine3d.js` picks `K` from the renderer's real
+pixel ratio (1–3), clamped so the largest world's ground fits `maxTextureSize` and a
+6M-texel budget (~24 MB before mipmaps). Every bake site — glyph, ground, canopy, the
+actor billboards — is `K×` with a `setTransform(K,0,0,K,0,0)` so the 2D artists are
+untouched. `t3CheckK()` runs every frame: a DPR change (fullscreen, a window dragged to
+another monitor) re-bakes the world and resizes the billboard canvases — the "baked
+once and never re-baked" note at the bottom is closed too. Test in `smoke.js` (*3D
+textures are baked at the screen's resolution, not at 1x*): headless is 1× where the
+old bake was accidentally right, so the test tells the renderer it draws at 2×, checks
+every texture and billboard re-baked at 2×, then goes back to 1× and checks again.
+Before/after at 2×: `shots/` — the pigeon becomes a bird, the jacaranda becomes leaves.
+
+*The original record, kept as written:*
+
 
 **This is the answer.** Every 3D texture is baked at **1x logical resolution** (32 px
 per tile) while the renderer outputs at device pixel ratio up to 3x. That is a hard
@@ -710,7 +725,32 @@ be there, because `dir` feeds both sprite facing and the move interpolation.
 
 ---
 
-### 15.3 DOORS — planned, NOT built (owner: "i dont want to build that yet")
+### 15.3 DOORS — BUILT 2026-09-02 (S0 item 2); one new finding logged below
+
+**Shipped, all in `engine/engine3d.js` `t3Build()`, test in `smoke.js` (*in 3D a door
+stands in its wall, and a wall has a face on every side*), before/after in `shots/`:**
+1. A door is turned to match its wall — walls north and south of it → it faces east-west.
+2. A `wall` box wears its art on all four sides; a `facade` keeps plain ends (a
+   building's corners are not its front). Every north-south wall in HQ has a face now.
+3. The door is a thin box (1 × 1 × 0.14), art on both broad faces, frame colour on the
+   edges, with a **lintel** above it cut from the neighbouring wall — the slot is gone,
+   and because the door is thinner than the wall, the wall's side shows as a recess.
+4. The "this one opens" light is a floor strip under the door, breathing on the same
+   clock as the 2D art (`t3Glow`). The bake itself is pinned to one frame via `rc.t`,
+   so a door bakes identically every build and shots are comparable.
+5. Edge-on at the two side stops a box shows its jamb instead of vanishing.
+6. The door bakes on an untinted base, so the 2px theme-coloured border is gone.
+
+**New finding from the eyeball pass (pre-existing, NOT this change):** stand on the
+north side of an interior wall — HQ (8,12), the wall is row 13 — and at the default
+stop the wall hides everything but your head. The camera is 6.2 high at 7.4 back, so
+its line to your feet crosses the wall's top (1.1) at about 0.94. The 0.34 pull toward
+the camera does not clear it. Options, cheapest first: fade any wall box between the
+camera and the hero; lower walls to ~0.9; raise the camera. None chosen — it is a
+separate item (backlog §3).
+
+*The original record, kept as written:*
+
 
 The maps are **not** the problem — the smoke suite now proves every shipped door is
 structurally sound. The wrongness is entirely in `engine3d.js:98-124`.
@@ -775,7 +815,23 @@ And CI's version lockstep proves `sw.js` and `config.js` *agree*, never that the
 
 ---
 
-### 15.6 THE DOORWAY BUG — reproduced 2026-09-01, NOT fixed
+### 15.6 THE DOORWAY BUG — (a) FIXED 2026-09-02, (b) settled as design
+
+**(a) shipped 2026-09-02, first item of the S0 sitting.** Option 1 below, generalised:
+`tryPortal(ts)` in `engine/engine.js` checks the tile under your feet on BOTH the
+step-completion path and the standing path of `loop()`, so a door whose cooldown runs
+out while you stand on it simply fires. Ping-pong stays impossible: every warp records
+the tile it set you down on in `portalHold`, and that tile is inert until you leave it —
+which also covers a future pack whose doorstep IS a portal (today that is only a boot
+warning). `Y`, the trolley stop, deliberately stays step-only: a menu you dismissed must
+not reopen under your feet. The test that was "deliberately NOT committed" is now in
+`test/smoke.js` (*a door you walk straight back into must let you back in*), with two
+guards: the hold, and the stop. It reproduced the bug a second way by accident — a warp
+from the park section 700ms earlier swallowed the control step — which is the same bug
+wearing a different hat, and the standing check fixes both.
+
+*The original record, kept as written:*
+
 
 Owner: *"what also happens when the character doesnt quite move but turn in place or
 close to it infront of an entrance, this was also behaving weird."* Two separate real
@@ -881,7 +937,20 @@ bench), coffee cup, potted plant, fridge, stove, shelving, drafting table, bluep
 wall, river, stairs, flower bed, scaffolding — and the produce crate, now that the
 fruit has silhouettes instead of coloured dots.
 
-**Fails the cold read — NOT fixed, pending the owner's call on scheduling:**
+**All five FIXED 2026-09-02 (S0 item 5 — the owner assigned the legibility pass to the
+3D/world sitting).** Re-read cold on the new sheet: `Q` a red building with a steaming
+bowl and a chile in the window; `D` a desk with a monitor and a sheet of paper; `T` a
+round gingham table with two plates and a chair either side (without the chairs it could
+pass for a pizza — so the chairs); `I` a dial-and-tray scale weighing a tomato; the five
+doors are five different doors, and the four shop doors have glass. The door seam is
+`DOORLOOK` in `content/meridian/maps.js` — the engine draws one body, the pack colours
+it for where it leads — guarded by a smoke test that bakes every door glyph and fails
+if any two are pixel-identical. Note for S1: `Q`, `Z`, `I` and friends are Meridian's
+own storefront art living in `engine/engine.js`; the `TILEART` seam exists for a pack
+to own them and Meridian does not use it yet (backlog §2).
+
+*The findings as first written:*
+
 
 1. **`Q` — La Cocina's storefront does not say "restaurant".** A red building, an
    awning, two blank cream windows. No food cue anywhere. The mercado (`Z`) now reads
@@ -908,7 +977,22 @@ legibility pass is its own sitting or rides along with the 3D/world session in �
 
 ---
 
-### 15.9 SEASONS — the design is constant, the palette is the season (owner, 2026-09-01)
+### 15.9 SEASONS — SEAM BUILT 2026-09-02 (S0 item 4), bridge as the proving run
+
+**Shipped:** `SEASONS` in `content/meridian/config.js` (one season, `muertos`, Oct 18 –
+Nov 3, a DRAFT palette the owner signs off); in the engine `art(key, fallback)`,
+`seasonNow()` (by the calendar, read once a day, turning over at midnight re-bakes 3D),
+`seasonSet()` (persists as `mqseason`, re-bakes 3D) and a Settings row built from
+content — *by the calendar · year-round · Día de Muertos*. `TILEDRAW["^"]` paints its
+six bands through `art("bridge", BRIDGE_BANDS)`; planks and rails stay design. The
+portability guard now also bans `muertos`/`otono` from the engine. Test in `smoke.js`
+(*a season changes colour, never design*): off → fallback; forced → the pack palette
+reaches the bridge pixel; auto → first and last day in, mid-June out; persists; 3D
+rebuilds; the row has the season's button. **Not yet widened** — jacaranda, awnings and
+the light wash are the next `art()` keys once the owner has seen the bridge.
+
+*The original record, kept as written:*
+
 
 Owner's answer to the bridge-palette question, and it is better than any of the three
 options I offered: *"add another mode for fall/halloween and thats where the rainbow

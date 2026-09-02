@@ -6,15 +6,42 @@
    (owner-confirmed 2026-08-31). No WebGL → draw() falls back to the front camera. */
 "use strict";
 const T3={renderer:null,scene:null,cam:null,group:null,amb:null,sun:null,lastW:0,
-  builtKey:"",dirty:0,fail:false,yaw:0,pool:[],tintables:[],tint:null}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
+  builtKey:"",dirty:0,fail:false,yaw:0,pool:[],tintables:[],tint:null,glows:[],K:1}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
 function t3Invalidate(){T3.dirty++;} /* growth, theme edits — anything that reshapes tiles */
-/* bake a glyph's art through TILEDRAW by borrowing the global ctx */
-function t3BakeGlyph(g,opaque,base){
-  const c=document.createElement("canvas");c.width=32;c.height=32;
-  const old=ctx;ctx=c.getContext("2d");
+/* THE BLUR (IDEAS §15.1, measured): every texture was baked at 32px a tile while the
+   renderer output at up to 3x device pixels — a 2.9x–4.0x magnification of the art.
+   Raising the output resolution and adding mipmaps (the two earlier fixes) cannot
+   sharpen a texture that is being magnified. K is the one factor: bake everything at
+   K× and draw through a K× transform, so the 2D artists never know. It follows the
+   renderer's real pixel ratio, clamped to what the GPU can hold: the largest world's
+   ground is one texture, and it must fit maxTextureSize and a sane texel budget. */
+function t3Factor(){
+  if(!T3.renderer)return 1;
+  let K=Math.min(3,Math.max(1,Math.round(T3.renderer.getPixelRatio()||1)));
+  const cap=T3.renderer.capabilities,maxTex=(cap&&cap.maxTextureSize)||2048;
+  let maxW=0,maxA=0;Object.values(WORLDS).forEach(w=>{maxW=Math.max(maxW,w.W*32,w.H*32);maxA=Math.max(maxA,w.W*w.H*1024);});
+  while(K>1&&(maxW*K>maxTex||maxA*K*K>6e6))K--; /* 6M texels ≈ 24MB RGBA before mipmaps */
+  return K;
+}
+function t3CheckK(){ /* a DPR change (fullscreen, a window dragged between monitors) re-bakes */
+  const K=t3Factor();
+  if(K===T3.K)return;
+  T3.K=K;T3.dirty++;
+  if(T3.canopyTex){T3.canopyTex.dispose();T3.canopyTex=null;}
+  T3.pool.forEach(p=>{p.c.width=36*K;p.c.height=40*K;p.tex.needsUpdate=true;});
+}
+/* bake a glyph's art through TILEDRAW by borrowing the global ctx.
+   raw: fill the base UNtinted — door art paints its own C.doorFrame untinted, and a
+   tinted base behind it showed as a 2px theme-coloured border round every 3D door.
+   t: a pinned clock for the artist (rc.t). An animated glyph — the door's pulsing
+   light — bakes the same frame every build, at its brightest; the pulse itself is
+   animated in 3D by t3Glow, not frozen at whatever the bake happened to catch. */
+function t3BakeGlyph(g,opaque,base,raw){
+  const K=T3.K,c=document.createElement("canvas");c.width=32*K;c.height=32*K;
+  const old=ctx;ctx=c.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
   try{
-    if(opaque){ctx.fillStyle=tc(base||C.wall);ctx.fillRect(0,0,32,32);}
-    const tf=TILEDRAW[g];if(tf)tf({sx:0,sy:0,x:0,y:0,canopy:()=>{}});
+    if(opaque){ctx.fillStyle=raw?(base||C.wall):tc(base||C.wall);ctx.fillRect(0,0,32,32);}
+    const tf=TILEDRAW[g];if(tf)tf({sx:0,sy:0,x:0,y:0,t:380*Math.PI/2,canopy:()=>{}});
   }finally{ctx=old;}
   return c;
 }
@@ -61,13 +88,13 @@ function t3Dispose(obj){
 function t3Build(key){
   T3.builtKey=key;
   if(T3.group){T3.scene.remove(T3.group);t3Dispose(T3.group);}
-  T3.tintables=[];
+  T3.tintables=[];T3.glows=[];
   const grp=T3.group=new THREE.Group();
   const w=CW();
   /* the ground: the whole floor pass baked to one texture — checker, speckle,
      walkable art, water. Exactly the pixels the 2D cameras stand on. */
-  const gc=document.createElement("canvas");gc.width=w.W*32;gc.height=w.H*32;
-  const old=ctx;ctx=gc.getContext("2d");
+  const K=T3.K,gc=document.createElement("canvas");gc.width=w.W*32*K;gc.height=w.H*32*K;
+  const old=ctx;ctx=gc.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
   try{
     for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
       const ch=w.rows[y][x],sx=x*32,sy=y*32;
@@ -90,17 +117,43 @@ function t3Build(key){
   ground.rotation.x=-Math.PI/2;ground.position.set(w.W/2,0,w.H/2);
   grp.add(ground);
   /* the standing world: boxes wear the facade art, everything else is a cutout */
-  const faceTex={},flatTex={};
+  const faceTex={},flatTex={},wallMat={};
   const baseOf=g=>BASECOL[g]||(typeof MAPCOL!=="undefined"&&MAPCOL[g])||C.wall;
+  const wallH=g=>0.55+((TILES[g]||{}).lift|0)*0.042; /* lift 13 ≈ 1.1 units tall */
+  const wallMats=g=>wallMat[g]||(wallMat[g]={ /* one material set per glyph, shared by every box of it */
+    side:new THREE.MeshLambertMaterial({color:new THREE.Color(shadeHex(baseOf(g),-0.22))}),
+    top:new THREE.MeshLambertMaterial({color:new THREE.Color(tc(roofCol(g)))}),
+    face:new THREE.MeshLambertMaterial({map:faceTex[g]=faceTex[g]||t3Tex(t3BakeGlyph(g,true,baseOf(g)))})});
+  const sol=(ax,ay)=>ax<0||ay<0||ax>=w.W||ay>=w.H||SOLID.has(w.grid[ay][ax]); /* off-map counts as wall */
   for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
     const gch=w.grid[y][x];
     const cx=x+0.5,cz=y+0.5;
-    if(DOORSET.has(w.rows[y][x])&&!SOLID.has(gch)){ /* a door stands up — you walk through it */
+    if(DOORSET.has(w.rows[y][x])&&!SOLID.has(gch)){ /* a door stands IN its wall — you walk through it */
       const g=w.rows[y][x];
-      flatTex[g]=flatTex[g]||t3Tex(t3BakeGlyph(g,true,C.doorFrame));
-      const door=new THREE.Mesh(new THREE.PlaneGeometry(1,1),
-        new THREE.MeshLambertMaterial({map:flatTex[g],side:THREE.DoubleSide}));
-      door.position.set(cx,0.5,cz);grp.add(door);
+      flatTex[g]=flatTex[g]||t3Tex(t3BakeGlyph(g,true,C.doorFrame,true));
+      /* which way the wall runs: walls north and south of the door → the door faces east-west.
+         The old plane had no rotation at all, so 6 of HQ's doors stood 90° off their wall. */
+      const ns=sol(x,y-1)&&sol(x,y+1)&&!(sol(x-1,y)&&sol(x+1,y));
+      /* a thin box, not a plane: edge-on at the two side stops a plane vanished; a slab
+         shows its jamb. Art on both broad faces, frame colour on the four edges. */
+      const jamb=new THREE.MeshLambertMaterial({color:new THREE.Color(C.doorFrame)});
+      const art=new THREE.MeshLambertMaterial({map:flatTex[g]});
+      const door=new THREE.Mesh(new THREE.BoxGeometry(1,1,0.14),[jamb,jamb,jamb,jamb,art,art]);
+      door.position.set(cx,0.5,cz);door.rotation.y=ns?Math.PI/2:0;
+      door.userData={door:true,x,y};grp.add(door);
+      /* the lintel: the wall beside the door is taller than the door, so without this a
+         see-through slot ran along the top of every doorway */
+      const nbG=[[x-1,y],[x+1,y],[x,y-1],[x,y+1]].map(([ax,ay])=>w.grid[ay]&&w.grid[ay][ax])
+        .find(c=>c&&TILES[c]&&(TILES[c].kind==="wall"||TILES[c].kind==="facade"));
+      if(nbG&&wallH(nbG)>1){const h=wallH(nbG),wm=wallMats(nbG);
+        const lin=new THREE.Mesh(new THREE.BoxGeometry(1,h-1,1),[wm.side,wm.side,wm.top,wm.side,wm.side,wm.side]);
+        lin.position.set(cx,(1+h)/2,cz);lin.userData={lintel:true,x,y};grp.add(lin);}
+      /* light under the door — the 2D "this one opens" pulse, alive in 3D instead of
+         baked at a random brightness */
+      const gm=new THREE.MeshBasicMaterial({color:0xFFE9A8,transparent:true,opacity:0.35,depthWrite:false});
+      const gl=new THREE.Mesh(new THREE.PlaneGeometry(ns?0.44:0.72,ns?0.72:0.44),gm); /* spills a step either side */
+      gl.rotation.x=-Math.PI/2;gl.position.set(cx,0.012,cz);gl.userData={glow:true,x,y};
+      T3.glows.push(gm);grp.add(gl);
       continue;
     }
     if("345".includes(w.rows[y][x])&&!SOLID.has(gch)){ /* agility gear: walkable cutouts */
@@ -115,13 +168,14 @@ function t3Build(key){
     const m=TILES[gch]||{lift:7,kind:"prop"},kd=m.kind;
     if(kd==="water")continue; /* painted into the ground */
     if(kd==="wall"||kd==="facade"){
-      const h=0.55+(m.lift|0)*0.042; /* lift 13 ≈ 1.1 units tall */
-      faceTex[gch]=faceTex[gch]||t3Tex(t3BakeGlyph(gch,true,baseOf(gch)));
-      const side=new THREE.MeshLambertMaterial({color:new THREE.Color(shadeHex(baseOf(gch),-0.22))});
-      const top=new THREE.MeshLambertMaterial({color:new THREE.Color(tc(roofCol(gch)))});
-      const face=new THREE.MeshLambertMaterial({map:faceTex[gch]});
-      const box=new THREE.Mesh(new THREE.BoxGeometry(1,h,1),[side,side,top,side,face,face]);
-      box.position.set(cx,h/2,cz);grp.add(box);
+      const h=wallH(gch),{side,top,face}=wallMats(gch);
+      /* a wall wears its art on all four sides: it runs either way and is seen from any
+         of the four camera stops — with art on ±Z only, every north-south wall in HQ was
+         a bare slab. A facade keeps plain ends: those are a building's corners, not its
+         front, and the storefront art is drawn for the street side. */
+      const box=new THREE.Mesh(new THREE.BoxGeometry(1,h,1),
+        kd==="wall"?[face,face,top,side,face,face]:[side,side,top,side,face,face]);
+      box.position.set(cx,h/2,cz);box.userData={wall:kd==="wall",g:gch,x,y};grp.add(box);
     }else if(kd==="fence"){
       flatTex[gch]=flatTex[gch]||t3Tex(t3BakeGlyph(gch,false));
       const p=new THREE.Mesh(new THREE.PlaneGeometry(1,0.8),
@@ -132,8 +186,8 @@ function t3Build(key){
         new THREE.MeshLambertMaterial({color:0x6E4A2C}));
       trunk.position.set(cx,0.35,cz);grp.add(trunk);
       if(!T3.canopyTex){ /* one jacaranda canopy, baked by hand */
-        const cc=document.createElement("canvas");cc.width=40;cc.height=40;
-        const g2=cc.getContext("2d");
+        const cc=document.createElement("canvas");cc.width=40*K;cc.height=40*K;
+        const g2=cc.getContext("2d");g2.scale(K,K);
         g2.fillStyle="#4E8A58";
         [[11,24,10],[29,24,10],[20,16,12]].forEach(q=>{g2.beginPath();g2.arc(q[0],q[1],q[2],0,7);g2.fill();});
         g2.fillStyle="#639C6C";
@@ -159,7 +213,7 @@ function t3Build(key){
 function t3Sprite(i){
   let p=T3.pool[i];
   if(!p){
-    const c=document.createElement("canvas");c.width=36;c.height=40;
+    const c=document.createElement("canvas");c.width=36*T3.K;c.height=40*T3.K;
     const tex=t3Tex(c);
     const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
     spr.center.set(0.5,0.1);
@@ -173,7 +227,7 @@ function t3Actors(){
   const w=CW();
   w.npcs.forEach(n=>list.push({x:n.x,y:n.y,f:(g)=>{
     drawPerson(g,2,6,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
-    if(pendingAt(n)!==undefined){g.font="700 13px sans-serif";g.fillStyle="#E0B45C";g.textAlign="center";
+    if(hasSay(n)){g.font="700 13px sans-serif";g.fillStyle="#E0B45C";g.textAlign="center";
       g.fillText("❗",18,10+Math.sin(Date.now()/250)*2);g.textAlign="start";}
     else drawEmote(n,2,6); /* townsfolk stay busy in 3D too */
   }}));
@@ -195,7 +249,7 @@ function t3Actors(){
   const old=ctx;
   list.forEach((a,i)=>{
     const p=t3Sprite(i);
-    p.g.setTransform(1,0,0,1,0,0);p.g.clearRect(0,0,36,40);
+    p.g.setTransform(T3.K,0,0,T3.K,0,0);p.g.clearRect(0,0,36,40);
     ctx=p.g; /* the 2D artists paint straight onto the billboard */
     try{a.f(p.g);}catch(e){}
     ctx=old;
@@ -229,17 +283,23 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
   try{
     const c3=T3.renderer.domElement;
     if(Math.abs((c3.clientWidth||0)-T3.lastW)>2){T3.lastW=c3.clientWidth||0;t3Resize();}
+    t3CheckK();
     const key=world+"|"+themeName+"|"+T3.dirty;
     if(T3.builtKey!==key)t3Build(key);
     const hx=fx+0.5,hz=fy+0.5;
     T3.cam.position.set(hx+Math.sin(T3.yaw)*7.4,6.2,hz+Math.cos(T3.yaw)*7.4);
     T3.cam.lookAt(hx,0.4,hz);
     t3Light();
+    t3Glow();
     t3Actors();
     t3Leash();
     T3.renderer.render(T3.scene,T3.cam);
     return true;
   }catch(e){T3.fail=true;return false;}
+}
+function t3Glow(){ /* the light under every door breathes — same clock as the 2D art */
+  const a=0.25+0.2*Math.sin(Date.now()/380);
+  T3.glows.forEach(m=>{m.opacity=a;});
 }
 function t3Leash(){ /* the blue leash exists in 3D too, while it's on */
   const dog=CRIT.find(c=>c.leashT>performance.now()&&c.world===world);

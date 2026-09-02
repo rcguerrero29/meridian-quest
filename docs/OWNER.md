@@ -13,6 +13,16 @@ preference that outlives one phase; cite the date and their words.
 
 ## Settled — never re-ask
 
+- **AJ talks to the characters; there is no API.** *(2026-09-02)* Owner: *"lets make it
+  so that AJ can interact through the characters with you if possible ... i dont want an
+  api setup as its just aj but maybe we will have to have a back and forth if she
+  prefers that first."* So a design conversation happens IN the game, with no network:
+  the characters ask, the answers stay on the phone, and the game writes a plain sheet
+  with a Copy button that the owner hands to Claude. That sheet is the back-and-forth.
+  Declared per pack (`content/<pack>/room.js`); a pack that declares nothing gets nothing.
+- **The version shows on the opening page.** *(2026-09-02)* Owner: *"move the version
+  to the first/opening page so i know which im using. also keep in settings but i want
+  it there."* Both places, same string, checked by the smoke test.
 - **The city grows; it never resets.** Nothing the player earned is ever taken away.
   Restarting is a tool in Settings, not a story beat. *(2026-08-31)*
 - **Learning beats punishment.** "This is for story mode so no big deal just so i
@@ -98,6 +108,25 @@ preference that outlives one phase; cite the date and their words.
   - **Version pins collide.** Two branches will both bump to the same `mq-vN`. On a
     merge, resolve FORWARD to a new number rather than picking a side.
   - **Never assume the owner can see your work.** Only `main` deploys. Say so.
+- **Arc-level tension is a declarable layer a pack may omit.** *(2026-09-01, ❗La
+  sombra. Owner: "it comes for me but it is custom in case we have aJ wanting a version
+  to focus on the calming/comfort.")* Meridian's late arc has a franchise that makes the
+  player a job offer — nobody's business is harmed, and the temptation is the story. But
+  the whole thread ships as **content**, declared per pack and droppable, so a pack can
+  run the same city with no antagonist and no offer and lose nothing structural. This is
+  the AJ law ("if a feature cannot be turned off for AJ, it is built wrong") pointed at
+  *story pressure* rather than mechanics: comfort is the floor, tension is opt-in.
+- **Surface every contradiction, every time — never silently.** *(2026-09-01, owner:
+  "lets make sure we fix or ask me about this contradiction, we need all these brought
+  up at all times - all agents and skills for this should let the owner/me know
+  please.")* A contradiction is any of: a rule signed in `docs/` that the code does not
+  implement; two docs that disagree; a doc that disagrees with the code; or a plan that
+  assumes something the engine cannot currently do. When one is found, the owner is
+  told **in the reply, not only in a file** — with what conflicts, which side is true,
+  and either the fix or the question. Three things are forbidden: quietly fixing it and
+  moving on, quietly planning around it, and burying it in a document the owner has to
+  go find. This applies to every agent, every skill and every session, and it outranks
+  keeping a reply short.
 - **New art gets a cold read before it ships.** *(2026-09-01, owner: the legibility
   pass "should ride with the 3d work but after that be a regular thing".)* Any change
   to a tile, sprite, facade, prop or palette runs `node test/tilesheet.js` — every tile
@@ -139,11 +168,23 @@ preference that outlives one phase; cite the date and their words.
   owner can **teach it onward** — the report is a portfolio, and the codex is a
   curriculum. If a quest cannot survive the question *"what would I call this in front
   of my team?"*, it is not finished.
-- **Endings play in the world, not in a curtain.** *(2026-09-01, ❗El listón.)* No
-  cutscene takes control to tell the player they did well. The street changes, they
-  walk through it, and anything longer — speeches, the report read aloud — is
-  walk-up dialogue they may elect to hear or skip. Owner's words: *"we make the
-  player notice for 5 seconds then the game goes back to normal."*
+- **La inauguración plays in the world, not in a curtain.** *(2026-09-01, ❗El listón.
+  SCOPE CORRECTED 2026-09-02 — see below.)* The city's FINAL ceremony: the street
+  changes, the player walks through it, and anything longer — speeches, the report read
+  aloud — is walk-up dialogue they may elect to hear or skip. Owner's exact words:
+  *"we make the player notice for 5 seconds then the game goes back to normal to
+  continue with more training."*
+  - **⚠️ Scope correction, owner-prompted (*"When did I ban a curtain like that?"*).**
+    The owner said this about ONE scene — the city's finale. The session generalised it
+    into a law covering EVERY district ending, in the owner's name, and then cited it to
+    call the existing end panel a contradiction. **That generalisation was the session's,
+    not the owner's.** The rule above is now scoped to what was actually said.
+  - **Still open, deferred to /nacho** *(owner: "It is probably something I can defer to
+    nacho. I think we can try one thing but it shouldn't be hard coded so it can be
+    customized. We just need to be aware of points in the game that are affected.")*
+    How a DISTRICT's ending presents itself is a story-craft call, not a settled law.
+    Whatever is chosen ships as **content-declared, per district** — never hardcoded —
+    and the session must list every point in the game the choice touches.
 
 ## Asking someone what game they want
 

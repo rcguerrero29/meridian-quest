@@ -15,16 +15,21 @@ const WORLD_DEFS={
      "#......#.......+...#",
      "#.a....+.......#####",
      "##########E#########"],
+ /* Floor 2 opens BARE, as signed (STORY.md ❗La oficina, 2026-09-02): the old lead's
+    desk alone under the north wall, the stairs, and nothing else — the barrio furnishes
+    it one piece per business, and the two neighbours who ask what goes in it are placed
+    by content/meridian/room.js, not by a letter here. The north window is a promise in
+    Don Güero's mouth until a window tile passes the cold read. */
  f2:["####################",
+     "#.........D........#",
      "#..................#",
-     "#..D..D....D..D....#",
      "#..................#",
-     "#....RR......P.....#",
-     "#....RR............#",
      "#..................#",
-     "#.....X......X.....#",
      "#..................#",
-     "#..P............D..#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
      "#..................#",
      "#.................1#",
      "#..................#",
@@ -137,6 +142,15 @@ const MERCADO=[[13,1,"Z"],[13,2,"Z"],[13,3,"Z"],[13,4,"Z"],[13,5,"Z"],[13,6,"M"]
    content edit: give it a door glyph, a mini-map colour, a label, and a dot.
    (The full per-glyph tile registry is queued with the graphics-prep refactor.) */
 const DOORS="+ELOM";                       /* glyphs painted as a door */
+/* DOORLOOK — what tells one door from another, by glyph. The engine draws one door
+   body; this colours it for where it leads, so a shop entrance is not the same brown
+   as an office door (the cold read, IDEAS §15.8, found all five pixel-identical).
+   `glass` gives a door a window — shops have one, an interior door does not.
+   A glyph not listed is the plain interior door. */
+const DOORLOOK={E:{wood:"#4F5474",wood2:"#5F6588",frame:"#2E3147",glass:true}, /* Meridian HQ: the office's blue-grey */
+                L:{wood:"#B5432F",wood2:"#C9553F",frame:"#6E2A1E",glass:true}, /* La Cocina: terracotta */
+                O:{wood:"#C98A2D",wood2:"#E0A430",frame:"#6B4A17",glass:true}, /* La Obra · Studio: site yellow */
+                M:{wood:"#4E7A4A",wood2:"#5F8F5A",frame:"#2C4A2A",glass:true}}; /* El Mercado: stall green */
 const SOLIDX="ZSHI~9";                     /* solid glyphs this pack adds (~ water, 9 doghouse) */
 const MAPCOL={Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D"};
 /* mini-map labels. `when` reads the city's flags: obra 0-2, mercado bool. */

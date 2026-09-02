@@ -5,7 +5,8 @@ standing rules; anything Settled there is a permit, not a question. The `/don-gu
 next phase on Opus 5, and brings open decisions to the owner as side quests. Every
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
-**Phase: 2 (planned 2026-08-31 — building)** · Ledger opened 2026-08-30.
+**Phase: 2 — Taller Herrera (parcel planned 2026-09-01, three decisions signed, NOT built)** · Ledger
+opened 2026-08-30. **Deployed: `mq-v46` on `main`, 2026-09-02** (S0 + S2 v1).
 
 ## Purpose
 
@@ -57,13 +58,84 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 
 ## Growth history (append)
 
+- 2026-09-02 — **The room upstairs (S2 v1)**: Floor 2 relaid bare; the room-interview
+  seam (`INTERVIEW` in `content/meridian/room.js`, read by the engine as shapes only);
+  Nacho moved upstairs; the ❗ rule extended to "has something to say" in every camera;
+  Export gained *The room*; the version on the opening page. Shipped with S0 at `mq-v46`.
 - 2026-08-31 — **World upgrade wave 1**: draw() tile chain became the TILEDRAW
   registry (28 glyphs + doors as data; content packs override via TILEART) — the
   entities-as-data law now covers ART. Visible: per-tile floor variation, walls cast
   shadows, walk-cycle arm swing, per-person blinking, doors glow underneath. Plus:
   /nacho story director, tune picker, NPC activity emotes, NPC edit panel.
 
+- 2026-09-01 — **The open city SHIPPED, and the story caught up with it.** `qOpen`
+  had `c>=chSeen`, which closed every district behind the player; it is now `c<=chSeen`
+  — districts open and stay open, forever. `need` for the first district dropped 16→12
+  so its Saturday plays with quests still on the board. 24 `late` reframe lines (EN+ES)
+  give a neighbour one line when you answer them long after. Nine continuity breaks
+  fixed; nine strings rewritten (the three "Roll credits" and the intro card that
+  threatened a reset that cannot happen). **`GROWTH` moved Meridian's names OUT of the
+  engine** — quests 12/13 raising La Obra, quest 15 opening the wardrobe and "district 1
+  is El Mercado" were all hardcoded, so AJ's pack would have inherited them; a smoke
+  guard now fails the build if any content name reappears in `engine/`. 3D is the
+  default camera; movement follows the camera when you rotate (it never consulted it
+  before); the mercado's produce is identifiable; the ticker keeps two messages.
+  Three test tools now exist: `smoke.js`, `shots.js` (scene screenshots) and
+  `tilesheet.js` (**the cold read** — every tile alone, labelled only by its glyph).
+
+- 2026-09-01 — **Phase 2 parcel planned: Taller Herrera**, `st` southeast lot. Ribbon
+  row 13 x18-28 with a roll-up door `%` at x23, apron props on row 14 (Tacho's Caprice
+  at x19, tires at x25 — positions forced by the reachability audit, not taste).
+  Interior `ta` 20x12: three lift bays, a parts wall, Yesenia's counter two steps inside
+  the door, the office nook, a waiting corner. Cast `t`/`y`/`m`, Tuerca moved in from
+  Calle Dos. Quests 24-31, `need` 5, role: automation / solutions consultant. Seven new
+  glyphs (`= % 6 7 8 0 i`), all pack-side in a NEW `content/meridian/art.js` — the first
+  real use of the TILEART/TILEMETA seam.
+
+## ⚠️ THE CEILING — the roadmap promises four more businesses; the code holds two
+
+Verified in the engine on 2026-09-01, not inferred. The ledger's "one business per
+phase, Phases 2-5" cannot run as written until three things generalize:
+
+- **`finish()` has exactly two epilogue sets.** `engine/engine.js:1821` —
+  `const E=last?[t.mepi1,t.mepi2,t.mepi3]:[t.epi1,t.epi2,t.epi3]`. Add a third district
+  and the taller prints the mercado's ending while the mercado prints Week One's.
+  → every district declares its own `epi:[k3,k2,k1]` and `open:"<toastKey>"`.
+- **The handover doorstep is hardcoded to the mercado's front step.**
+  `engine/engine.js:1834` — `px=fx=6;py=fy=12`. → each ribbon declares its `doorstep`.
+- **`GROWTH.ribbon` is singular.** `ribbonUp()` at :162 and `applyRibbon()` at :3032
+  handle exactly one storefront. → `ribbons[]`, with a `g.ribbons||(g.ribbon?[g.ribbon]:[])`
+  shim so AJ's pack and older declarations keep working.
+
+None of these name the taller, so they stay legal under "the engine may never name a
+pack's content" — they are the seam that has to be paid once, exactly like the
+DOORS/TOWNLBL extraction was for El Mercado. **This is the real cost of Phase 2, and it
+is bigger than the shop.**
+
+Also from the same measuring pass, smaller but real: the uppercase tile alphabet is
+**fully consumed** (A-Z), so new glyphs are digits and symbols from here; and `NPCLOOK`
+is keyed by station **letter, globally**, with 20 of 23 usable letters spent — Phase 3
+would have none left unless looks key by npc instead.
+
 ## Pending proposals (⏳ = needs an owner decision via side quest)
+
+- ✅ **❗La oficina** — signed 2026-09-02: opens bare, the barrio furnishes it.
+- ✅ **❗La palabra** — signed 2026-09-02: the word is the reward. Under ❗El giro the five
+  terms become the TRADE's vocabulary, not the role's.
+- ✅ **❗El papel** — signed 2026-09-02: template **06 Process & Exception Map** gets
+  written. ⚠️ `docs/templates/README.md` already assigns template 01 to the taller's
+  process map — **two templates would claim one artifact.** Nacho's read is that they are
+  genuinely different documents (01 is what you write BEFORE you understand the work; 06
+  is what you hand over AFTER) and both should exist, but the README's "Taught by" column
+  must be corrected and 06 given a row. **Flagged, not guessed.**
+- ✅ **❗La despedida** — signed 2026-09-02 (owner deferred the call to /nacho): a
+  district's Saturday is a goodbye at the door, declared per district as
+  `ending:{mode:"doorstep"|"panel"|"quiet"}`. `panel` is kept so nothing regresses.
+  **Hard build-order dependency: needs the office. No office, no doorstep.**
+- ✅ **❗El giro** — signed 2026-09-02: **industry leads, role follows.** `industry:` is
+  ADDED beside `role:`. This dissolves the `principal`/Limpieza collision rather than
+  patching it — the same craft appearing in two very different rooms is PROOF the skill
+  transfers, which is the most valuable thing a portfolio can show.
 
 - ✅ **El Mercado** — signed 2026-08-31. Full build + engine seam, AI PM pack.
   See "Phase 1 plan (SIGNED)" below.
@@ -144,6 +216,43 @@ stays live until the Phase 2 refactor lands.
 
 *(format: date · quest title · choice · one-line why — append only)*
 
+- 2026-09-02 · ❗El cuarto de arriba: what stands in Floor 2 on day one · **bare, as
+  signed** — one desk, the stairs, and Nacho and Don Güero placed by content, not by a
+  map letter · Don Güero's moving-in debris was declined for now because the only crate
+  tile is El Mercado's produce crate (it reads as groceries), and the window because no
+  window tile exists; both are owner calls in `docs/rooms/aj-office.md` §8. His geography
+  correction stands: the trolley runs south of HQ, so a north window cannot look "onto
+  the trolley line".
+- 2026-09-01 · ❗El taller: the shop's footprint · **shop plus an apron** — one door and
+  one interior like the mercado, and the ribbon also drops the Caprice and a tire stack
+  on the sidewalk · it reads as an auto shop before you open anything, and the sitting
+  stays spent on the eight quests.
+- 2026-09-01 · ❗El recado: do the taller's jobs leave the shop · **six inside, two out**
+  — the parts run to Calle Dos, the cousin's software demo where Doña Chelo can overhear
+  · uses maps that already exist and makes the referral run both ways: she vouched for
+  you, now she is watching.
+- 2026-09-01 · ❗El papel: the document the taller hands you · **a process-and-exception
+  map** — how work flows, where a human must sign, which step cannot be taken back ·
+  it carries "never automate the irreversible step" out of the game and into a meeting,
+  and no other business in the city teaches it.
+- 2026-09-02 · ❗La oficina · **SIGNED — the office opens bare and the barrio furnishes
+  it.** `f2` (20x14, portal already wired from HQ) opens with two things: the old AI
+  lead's empty desk and a north window onto the trolley line. Each business then ships
+  ONE piece of furniture with its own pack, declared in that district's own data so
+  nobody re-opens `f2`'s map five times. Supersedes the counter-proposal below.
+- 2026-09-01 · ❗La pared: where the record lives · **counter-proposal, now SIGNED above
+  as ❗La oficina.** Original note kept: Owner: *"i think an office should become mine
+  somewhere so i can access these."* Supersedes the mural-wall-only option. For whoever
+  specs it: **`f2` already exists** — "Floor 2 · Expansion", portal wired from HQ at
+  `PORTALS.hq["1"]`, arrive text *"Quiet up here… for now."* An empty floor with a door,
+  waiting for a purpose. Fits Settled "HQ is the onboarding", and gives the terminology
+  work (glossary, filled deliverable drafts) a room rather than a menu. Nacho's mural
+  keeps the CITY's record; the office is the player's own. **Needs a parcel spec from
+  /don-guero before it can be built.**
+- 2026-09-01 · ❗Orden (Don Güero's call, not a survey) · **the 3D/world sitting ships
+  BEFORE Taller Herrera** · new storefront art must not be judged against a renderer
+  that lays doors on the floor, and two branches repainting tiles at once is a merge
+  that eats a session.
 - 2026-08-30 · Cartridge model · saves stay on-device, Trolley Pass is the link
   cable · zero-maintenance rule. *(imported from HANDOFF)*
 - 2026-08-30 · Retry-until-correct · quests complete only on the right answer ·
@@ -161,9 +270,11 @@ stays live until the Phase 2 refactor lands.
   accept a longer session** · the portfolio artifact is the point of the gym.
 - 2026-08-31 · ❗Semana: when is the mercado · **Monday of Week Two — chapter one**
   · the epilogues already promise Week Two; this cashes that check.
-- 2026-08-31 · ❗Corazones: what zero hearts costs · **the week, not the city** — the
-  chapter ends where it stands, unanswered quests stay unanswered and close for good,
-  Monday comes with three fresh hearts · a teaching game must never delete the gym.
+- 2026-08-31 · ❗Corazones: what zero hearts costs · ~~the week, not the city — the
+  chapter ends where it stands, unanswered quests stay unanswered and close for good~~
+  · **SUPERSEDED 2026-09-01 by "no practice is ever missed"** (docs/OWNER.md → Settled):
+  ending a district's arc never closes its quests. Only the "never delete the gym" half
+  survives, and it is now absolute.
 - 2026-08-31 · ❗Botón: where restart lives · **⚙️ Settings, behind a two-tap confirm**
   · the story never sends you there; it is a testing tool, so it stops sitting next to
   the button that continues the story.
