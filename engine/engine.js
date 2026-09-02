@@ -176,7 +176,10 @@ const qLate=qi=>{const c=qChapter(qi);return c>=0&&c<chSeen;};
 const GRW=()=>(typeof GROWTH!=="undefined"&&GROWTH)?GROWTH:{};
 /* a district's storefront ribbon is up once that district has opened. Was
    `mercadoOpen`, which named one pack's business inside the shared engine. */
-const ribbonUp=()=>{const r=GRW().ribbon;return !!(r&&r.tiles)&&chSeen>=r.district;};
+const ribbons=()=>{const g=GRW();return g.ribbons||(g.ribbon?[g.ribbon]:[]);}; /* the old singular `ribbon` still works */
+/* ribbonUp(r): is THIS storefront up; ribbonUp(): is ANY. It used to hold exactly one —
+   the city stopped at one storefront (owner, 2026-09-02). */
+const ribbonUp=r=>r?(!!(r&&r.tiles)&&chSeen>=r.district):ribbons().some(x=>ribbonUp(x));
 /* ---------- state ---------- */
 const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"};
 let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
@@ -2013,7 +2016,11 @@ $("endGo").addEventListener("click",()=>{
   const last=chSeen>=CHS().length-1;
   chSeen=Math.min(chSeen+1,CHS().length);hearts=startHearts();
   applyGrowth();
-  if(!last){world="st";px=fx=6;py=fy=12;dir="down";}
+  /* the handover doorstep: the storefront that just opened says where you stand. It was
+     the mercado's front step, hardcoded here in the shared engine; with nothing declared
+     you simply stay where you were. */
+  const rd=ribbons().find(r=>r.district===chSeen&&r.doorstep);
+  if(!last&&rd){const d=rd.doorstep;if(d.world&&WORLDS[d.world])world=d.world;px=fx=d.x|0;py=fy=d.y|0;dir=d.dir||"down";}
   if(isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
   wasFs=false;
   save();$("end").hidden=true;$("world").hidden=false;setWorldTag();hud();checkTalk();
@@ -2495,8 +2502,13 @@ function nodeConcept(){const n=(curQ&&curQ.nodes[node])||{},c=(n.ch||[]).find(x=
 function logDecision(o,c){const n=(curQ&&curQ.nodes[node])||{};
   dlog.push({t:Date.now(),quest:curQ.title,qi:cur,npc:curQ.npc,ask:n.q||"",pick:c?c.t:"",
              concept:o.concept||"",why:o.why||"",result:o.r});
-  dlog=dlog.slice(-200);
-  try{localStorage.setItem("mqdlog",JSON.stringify(dlog));}catch(e){}}
+  /* the record keeps EVERY decision — it used to be cut to the last 200, which would have
+     dropped a player's first districts from the portfolio without a word (owner,
+     2026-09-02: "I thought we fixed this 200 entries thing"). If the phone refuses the
+     write, the in-memory record stands and the failure is said once, not hidden. */
+  try{localStorage.setItem("mqdlog",JSON.stringify(dlog));}
+  catch(e){if(!dlogWarned){dlogWarned=true;console.warn("RECORD: the phone refused to store the play log ("+dlog.length+" entries) — it stays in memory this session");}}}
+let dlogWarned=false;
 /* Which job a quest was practice for. Chapters declare their role in content;
    entries logged before roles existed are matched back by title. */
 function roleOf(e){
@@ -3229,7 +3241,7 @@ function rebuildWorld(id){
    no Studio you did not raise, no mercado you did not open. */
 function applyGrowth(){
   const g=GRW();
-  new Set([g.staged&&g.staged.world,g.ribbon&&g.ribbon.world].filter(Boolean))
+  new Set([g.staged&&g.staged.world,...ribbons().map(r=>r.world)].filter(Boolean))
     .forEach(id=>{if(WORLDS[id])rebuildWorld(id);});
   applyStaged();applyRibbon();
   if(typeof t3Invalidate==="function")t3Invalidate();} /* the 3D camera rebuilds its meshes */
@@ -3261,11 +3273,11 @@ function applyStaged(){
 }
 /* a district's storefront ribbon: dropped once that district has opened */
 function applyRibbon(){
-  const r=GRW().ribbon;if(!r||!r.tiles||!ribbonUp())return;
-  const w=WORLDS[r.world];if(!w)return;
-  r.tiles.forEach(([y,x,ch])=>{
-    if(!w.grid[y]||w.grid[y][x]==="N")return;
-    w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);w.grid[y][x]=ch;});
+  ribbons().forEach(r=>{if(!r.tiles||!ribbonUp(r))return;
+    const w=WORLDS[r.world];if(!w)return;
+    r.tiles.forEach(([y,x,ch])=>{
+      if(!w.grid[y]||w.grid[y][x]==="N")return;
+      w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);w.grid[y][x]=ch;});});
 }
 function growthReach(tx,ty){ /* BFS from the doorstep content nominated — open ground at every stage */
   const g=GRW().staged,sf=g&&g.safe;if(!sf)return true;

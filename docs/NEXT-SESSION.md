@@ -37,10 +37,16 @@ bookend instead of repeating. Nacho's closing line pins the sheet to the window 
 A player who finished the interview before gets the ❗ back over Güero — he has a new
 question, which is the badge meaning what it always means.
 
-**Deliberately not in v1:** nothing changes in the room while she answers (needs S1's
-plural delivery seam); no moving boxes (the only crate tile is a produce crate and reads
-as groceries); the window's view advancing a stage per finished business (content-only
-later, but not testable until districts close).
+**And later still (branch, `mq-v48`):** the owner chose MID-MOVE — four taped boxes on the
+pack's second glyph (`□`, cold-read clean), Don Güero's cone, a plant in its pot; the
+sight line from the stairs to the window and the arrival tile stay clear, under test.
+Don Güero's furniture catalogue with per-piece estimates is `docs/BACKLOG.md` §6; his
+four follow-up questions are `docs/rooms/aj-office.md` §10. The two limits the owner
+thought were fixed (the 200-entry record, one storefront) are fixed now.
+
+**Deliberately not yet:** nothing changes in the room while she answers (the deliveries —
+an eighth of a sitting of engine work, the rest is drawing); the window's view advancing a
+stage per finished business (content-only, but not testable until districts close).
 
 **Still true and still the trap:** several models work this repo at once. Do the
 divergence check in step 1b below before reading a single line of engine code, and never
@@ -48,8 +54,15 @@ quote a version number to the owner without checking what `main` actually serves
 session's own resume summary lost the S0 sitting once — the branch knew, the summary did
 not. `git log` first, always.
 
-**Next is S1 — la cimentación** (backlog §1): the engine ceiling. Nothing visible ships
-from it and that is said out loud. It is now also what the office waits on.
+**Three of the ceiling's seven items fell on 2026-09-02** because the owner asked ("I
+thought we fixed this 200 entries thing and not stopping at a certain amount of store
+fronts"): the record keeps every decision, storefronts are a list (`ribbons[]`, the old
+singular still works), and each storefront declares its own handover doorstep. Still
+standing, and still what a THIRD district needs before it can end: per-district epilogues
+(`finish()` has two sets), the `NPCLOOK` letter collision, and `GROWTH` reading a grade.
+
+**Next is S1 — la cimentación** (backlog §1), now smaller. Nothing visible ships from it
+and that is said out loud. It is also what the office furniture waits on.
 
 ## The backlog lives in `docs/BACKLOG.md`
 

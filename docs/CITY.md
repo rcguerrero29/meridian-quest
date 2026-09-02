@@ -71,6 +71,21 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
   stopped promising and started asking what you want framed, and its "the street" option
   — impossible on a north wall — was replaced. "Who is the room for" opens his form. On
   the branch at `mq-v47`.
+- 2026-09-02 — **La mudanza (`f2` a medio mudar)**: the office stopped opening bare.
+  Four taped moving boxes (`□`, the pack's SECOND glyph, `content/meridian/art.js` — one
+  drawing, two silhouettes by tile parity), one of Don Güero's cones (`C`) and a plant
+  still in its pot (`P`). The desk, the stairs and the three panes never moved. The sight
+  line from the stairs to the window stays clear (Nacho's "nothing in the way" is an
+  answer a player can pick, so it has to be true), the arrival tile (17,11) stays clear,
+  and every walkable tile stays reachable. Owner: *"i think for the move it should be
+  mid and we can have don guero provide estimates and possible furniture to furnish"* —
+  the furniture catalogue with per-piece estimates is `docs/BACKLOG.md` §6.
+- 2026-09-02 — **Se acabó el tope**: the city stopped stopping at one storefront and
+  the record stopped forgetting. `GROWTH.ribbons[]` with a shim so the singular `ribbon`
+  still works, each storefront carrying its own `doorstep`; and the play log keeps EVERY
+  decision instead of its last 200. Owner: *"I thought we fixed this 200 entries thing
+  and not stopping at a certain amount of store fronts"* — it was not fixed when they
+  said it; it is now. Both under test.
 - 2026-08-31 — **World upgrade wave 1**: draw() tile chain became the TILEDRAW
   registry (28 glyphs + doors as data; content packs override via TILEART) — the
   entities-as-data law now covers ART. Visible: per-tile floor variation, walls cast
@@ -110,11 +125,14 @@ phase, Phases 2-5" cannot run as written until three things generalize:
   `const E=last?[t.mepi1,t.mepi2,t.mepi3]:[t.epi1,t.epi2,t.epi3]`. Add a third district
   and the taller prints the mercado's ending while the mercado prints Week One's.
   → every district declares its own `epi:[k3,k2,k1]` and `open:"<toastKey>"`.
-- **The handover doorstep is hardcoded to the mercado's front step.**
-  `engine/engine.js:2013` — `px=fx=6;py=fy=12`. → each ribbon declares its `doorstep`.
-- **`GROWTH.ribbon` is singular.** `ribbonUp()` at :179 and `applyRibbon()` at :3263
-  handle exactly one storefront. → `ribbons[]`, with a `g.ribbons||(g.ribbon?[g.ribbon]:[])`
-  shim so AJ's pack and older declarations keep working.
+- ~~**The handover doorstep is hardcoded to the mercado's front step.**~~ **Lifted 2026-09-02:**
+  each ribbon declares its `doorstep`; the engine walks you nowhere of its own choosing.
+- ~~**`GROWTH.ribbon` is singular.**~~ **Lifted 2026-09-02:** `ribbons[]`, one per storefront,
+  each rising on its own district, with the `g.ribbons||(g.ribbon?[g.ribbon]:[])` shim so
+  AJ's pack and older declarations keep working. The record's 200-entry cap went the same day.
+- **STILL OPEN, new (Don Güero, 2026-09-02):** the town plan's `flags` carry ONE boolean for
+  all storefronts, so a second lot cannot have its own label until each storefront carries
+  an `id`. A sixteenth of a sitting. Anchor by the function, not the line — they drift.
 
 None of these name the taller, so they stay legal under "the engine may never name a
 pack's content" — they are the seam that has to be paid once, exactly like the
@@ -128,8 +146,23 @@ would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
-- ✅ **❗La oficina** — signed 2026-09-02: opens bare, the barrio furnishes it. Built
-  bare the same day (S2 v1), with the interview.
+- ✅ **❗La oficina** — signed 2026-09-02: the barrio furnishes it, one piece per
+  business. Built the same day (S2 v1), with the interview. ⚠️ **AMENDED 2026-09-02 by
+  the owner: the office opens MID-MOVE, not bare** (*"i think for the move it should be
+  mid"*). The furnishing rule is untouched; only the day-one state changed. Retires owner
+  call #2 in `docs/rooms/aj-office.md` §8.
+- ✅ **La vía que se acerca** — approved in principle 2026-09-02 (owner: *"I do like the
+  idea of seeing a neighborhood incoming"*). Content-only on top of the built window, a
+  third of a sitting; still **waits on S1**, because it cannot be tested until districts
+  close.
+- ✅ **Furniture deliveries may be GROUPS** — answered by architecture, not by a build: a
+  storefront's `tiles` has always been a list. What remains open is ART for a piece wider
+  than one tile (❗El sillón).
+- ⏳ **❗El reparto** — which business sends which piece: assign all nine now (Don Güero's
+  pick; the catalogue in `docs/BACKLOG.md` §6 is the proposal) or let each pack pick.
+- ⏳ **❗El sillón** — the couch: one tile (a loveseat, an eighth) or two (a real one, a
+  quarter, and the city's first group delivery).
+- ⏳ **❗La caja** — gifts land ON the box tiles as the room fills (Don Güero's pick; free).
 - ✅ **❗La ventana** — signed and built 2026-09-02. ⚠️ The ❗La oficina entry in the
   decision log read "a north window onto the trolley line"; the trolley runs SOUTH of HQ.
   Amended in place with a dated note.
@@ -254,6 +287,20 @@ stays live until the Phase 2 refactor lands.
   answer changes the furniture math, not the mood, so it belongs to the builder — and it
   RETIRES owner call #4 in docs/rooms/aj-office.md §8, because the sheet now states whose
   room it is instead of the build session guessing.
+- 2026-09-02 · ❗La mudanza: bare or mid-move · **MID-MOVE, and Don Güero prices the
+  furniture** (owner: *"i think for the move it should be mid and we can have don guero
+  provide estimates and possible furniture to furnish"*) · supersedes the "opens bare"
+  half of ❗La oficina and retires owner call #2. One new glyph `□` (the taller's
+  reservations `0 6 7 8 = % i` are NOT spent), four boxes, a cone, a plant; the window
+  sight line and the arrival tile stay clear. Nacho's talk title became *Before you
+  unpack* (Güero's suggestion; Nacho may rename).
+- 2026-09-02 · ❗Quién sube (asked again): whose office is it · **the owner's own room —
+  and still a template** (owner: *"In this case it is mine but of course this is to be a
+  template for the skill"*) · `f2` is the owner's office in Meridian's pack;
+  `content/<pack>/room.js` stays the copyable interview so AJ's pack asks its own person.
+- 2026-09-02 · ❗La vía que se acerca: the window's view advancing · **approved in
+  principle** (owner: *"I do like the idea of seeing a neighborhood incoming"*) · four
+  drawings, four cold reads, content-only; held until districts close so it can be tested.
 - 2026-09-01 · ❗El taller: the shop's footprint · **shop plus an apron** — one door and
   one interior like the mercado, and the ribbon also drops the Caprice and a tire stack
   on the sidewalk · it reads as an auto shop before you open anything, and the sitting

@@ -17,6 +17,16 @@
         promise you can now SEE. The sky takes the season through art("sky").
         The sill is the load-bearing detail: a framed rectangle without one reads as
         a picture on the wall; a sill reads as a window (cold read: test/tilesheet.js).
+
+   Second glyph, 2026-09-02 — la mudanza:
+   "□"  a taped moving box. The office opens MID-MOVE (owner: "for the move it should
+        be mid"), and the only crate the engine had is El Mercado's produce crate — a
+        tomato, a chile and a banana, which read as groceries. This one is cardboard:
+        a taped cross over the seam and a label. One glyph, two silhouettes by tile
+        parity (the engine's own idiom): even tiles a single box, odd tiles a shorter
+        box with a smaller carton on top, so a stack never looks stamped. Solid, low
+        (lift 5, like the crate) so it never blocks the view. No floor and no drop
+        shadow here — the engine paints both under every prop. (Don Güero's spec.)
    ============================================================================ */
 const TILEART={
   "|":rc=>{const{sx,sy}=rc;
@@ -37,8 +47,20 @@ const TILEART={
     ctx.fillStyle="#2B2536";ctx.fillRect(sx+15.5,sy+10,1.2,15);ctx.fillRect(sx+6,sy+17,20,1.2);
     /* the sill, overhanging, with its shadow */
     ctx.fillStyle="#8A8296";ctx.fillRect(sx+2,sy+27,28,3);
-    ctx.fillStyle="#332C44";ctx.fillRect(sx+2,sy+30,28,1);}
+    ctx.fillStyle="#332C44";ctx.fillRect(sx+2,sy+30,28,1);},
+  "□":rc=>{const{sx,sy,x,y}=rc;
+    const stacked=((x|0)+(y|0))%2===1,t=stacked?4:0; /* odd tiles: a shorter box with a carton on top */
+    ctx.fillStyle="#C8A277";ctx.fillRect(sx+4,sy+11+t,24,17-t);            /* the box */
+    ctx.fillStyle="#A8814F";ctx.fillRect(sx+24,sy+11+t,4,17-t);            /* one corner turns, so it is a box not a card */
+    ctx.fillStyle="#D8B589";ctx.fillRect(sx+4,sy+8+t,11,4);ctx.fillRect(sx+17,sy+8+t,11,4); /* two flaps; the gap is the seam */
+    ctx.fillStyle="#EDE4D2";ctx.fillRect(sx+14.5,sy+7+t,3,9);ctx.fillRect(sx+4,sy+9.5+t,24,2.5); /* the taped cross — the whole read */
+    ctx.fillStyle="#F6F2E8";ctx.fillRect(sx+8,sy+17+t,10,7-(stacked?1:0));  /* the label */
+    ctx.fillStyle="#6B5B45";ctx.fillRect(sx+9,sy+19+t,8,1);ctx.fillRect(sx+9,sy+21+t,5,1); /* writing */
+    if(stacked){ctx.fillStyle="#D0AC7C";ctx.fillRect(sx+7,sy+4,16,11);      /* the carton on top, one pixel off square */
+      ctx.fillStyle="#B08E5E";ctx.fillRect(sx+7,sy+7.5,16,1.6);
+      ctx.fillStyle="#EDE4D2";ctx.fillRect(sx+14,sy+4,2.5,7);}}
 };
 const TILEMETA={
-  "|":{lift:13,kind:"wall"}
+  "|":{lift:13,kind:"wall"},
+  "□":{lift:5,kind:"prop"}
 };

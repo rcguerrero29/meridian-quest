@@ -25,7 +25,7 @@ quest packs and forgot the engine seam, the office, the ceremony and the second 
 |---|---|---|---|
 | **S0** | ~~El 3D y el mundo~~ | **shipped 2026-09-02** (branch, not merged) | doors that stand up, sharp 3D, La Cocina reads as a restaurant, autumn arrives on its own. *Not* the bridge arch — that waits on elevation |
 | **S1** | **La cimentación** | one | **nothing** — and that is said out loud. The whole engine seam, paid once |
-| **S2** | ~~La oficina (`f2`)~~ | **v1 shipped 2026-09-02** (`mq-v46`, merged) | the room opens bare, Nacho and Don Güero ask nine questions with no wrong answers, and the sheet is hers — `docs/rooms/aj-office.md`. *Not yet:* the furniture arriving (needs S1) |
+| **S2** | ~~La oficina (`f2`)~~ | **shipped 2026-09-02** (v1 at `mq-v46`; window, mid-move and the tenth question the same day) | the room opens mid-move, Nacho and Don Güero ask ten questions with no wrong answers, the sheet is the player's — `docs/rooms/aj-office.md`. *Not yet:* the furniture arriving (§6 below; the engine part is an eighth of a sitting) |
 | **S3** | Taller Herrera | one | the southeast lot opens; the first pack on the new machinery |
 | **S4** | La Espiga + Velázquez | one long | *two* storefronts on Calle Dos in one sitting |
 | **S5** | Nolasco Tax & Notario | one | the walkup opens; the man who reads your report |
@@ -46,13 +46,14 @@ engine, all landing in **S1**, none of them naming a business.
 | What | Where | Why it blocks |
 |---|---|---|
 | `finish()` has exactly two epilogue sets | `engine.js:2000` *(line numbers checked 2026-09-02; they drift)* | a third district prints the wrong ending — the taller would play the mercado's Saturday |
-| the handover doorstep is hardcoded | `engine.js:2013` | `px=fx=6;py=fy=12` is the mercado's front step, sitting in the engine |
-| `GROWTH.ribbon` is singular | `engine.js:162`, `:3032` | one storefront, full stop |
+| ~~the handover doorstep is hardcoded~~ | **shipped 2026-09-02** | each storefront declares its own `doorstep`; with none declared you stay where you were |
+| ~~`GROWTH.ribbon` is singular~~ | **shipped 2026-09-02** | `ribbons[]`, one per storefront, each rising on its own district; the old singular still works. Owner: "I thought we fixed this" — it was not, now it is |
 | `NPCLOOK` is one flat global table | `npcs.js:14`, `engine.js:1949` | the taller's cast collides with Tovar, Chuy and Marcus — Don Tacho would wear Tovar's colours |
 | `GROWTH` cannot read a grade | `engine.js:3004`, `:3031` | the taller's endings change the world (cat on the Caprice, assistant switched off) and the code has no idea how well you did |
-| the report truncates at 200 entries | `engine.js:2495` | a five-district city is ~85 decision points before retries; restart never clears it. **Your earliest districts vanish from the portfolio, silently** |
+| ~~the report truncates at 200 entries~~ | **shipped 2026-09-02** | the record keeps every decision; if the phone refuses the write it says so once instead of dropping the oldest. Owner: "I thought we fixed this 200 entries thing" — it was not, now it is |
 | the uppercase tile alphabet is spent | `engine.js:10` | new glyphs must be digits and symbols from here — the first, `\|` the window, lives in `content/meridian/art.js` (2026-09-02) |
-| **a delivery is one tile** | S1's furniture registry, not yet written | surfaced by "who is the room for": a team room's one piece is a *set* (a table and its chairs). Let a delivery be a group of tiles from the start — cheap now, expensive after five packs declare theirs (Don Güero) |
+| ~~a delivery is one tile~~ | **answered by the architecture** (Don Güero, later the same day) | a storefront's `tiles` has always been a list, and a furniture delivery IS a storefront aimed at `f2` — a group costs nothing extra. What remains is ART for a piece wider than one tile (the couch) |
+| **the town plan has one flag for all storefronts** | the `flags` object in the map-drawing code | a second lot cannot have its own label until each storefront carries an `id`. A sixteenth of a sitting (Don Güero, 2026-09-02) |
 
 ---
 
@@ -94,13 +95,55 @@ engine, all landing in **S1**, none of them naming a business.
 
 | Question | Who is waiting |
 |---|---|
-| **The room upstairs — two calls left** (`docs/rooms/aj-office.md` §8): bare or mid-move; Nacho off the street. *(The window was handed to Nacho + Don Güero and built 2026-09-02; "whose room" retired — the interview now asks it.)* | shipped with a pick on each; one word flips either |
+| **The room upstairs — one call left** (`docs/rooms/aj-office.md` §8): Nacho off the street. *(Window: built. Whose room: the interview asks it. Mid-move: chosen and built 2026-09-02.)* Plus Don Güero's four after the build (§10 there): gifts land on the boxes; the couch one tile or two; assign who-sends-what now; Nacho's talk title | shipped with a pick on each; one word flips any |
 | **How does a district's Saturday present itself?** Deferred to /nacho; must be content-declared so a pack can choose differently | blocks S1's ending refactor |
 | **Industries vs roles** — should the industry lead and the job role follow? | reframes what every pack owes |
 | **The city's record to a government NPC** — separating the player's portfolio from the city's memory | new, a story surface |
 | **The Día de Muertos palette** — six bridge colours in `config.js` are a draft; say yes or change them | S0 shipped the seam with them in |
 | **Merge S0 to `main`** — seven engine/content commits on the branch at `mq-v45`; nothing is playable for the owner until this | the owner's word |
 | **Elevation** — walking *over* the bridge needs actors to have a height | deliberately deferred: build it when a *second* thing needs it (stairs, rooftops, the trolley platform), not for one park tile |
+
+---
+
+## 6 · El catálogo de muebles — what each business could send upstairs, priced
+
+*Don Güero, 2026-09-02, at the owner's ask: "we can have don guero provide estimates and
+possible furniture to furnish." One piece per business is signed; this is what the pieces
+could be and what each costs. Nothing here is built. Two rules decide every row: one
+glyph per tile, nothing sits on top of anything; and the game cannot read the sheet at
+runtime — the build session reads it and writes the pack's data.*
+
+**How a delivery works, in the engine that exists today:** a delivery IS a storefront
+aimed at Floor 2 — *"when district N's goodbye is acknowledged, write these tiles into
+`f2`."* Same machinery as El Mercado's ribbon, one number different. A group (a table and
+its chairs) is just more entries in the same list. The whole city's deliveries cost about
+**an eighth of a sitting in engine work**; everything else is drawing, paid by whichever
+business sends the piece inside its own sitting.
+
+| Business (trade) | Candidate piece | Art today? | One tile or a group | Where in `f2` | Estimate |
+|---|---|---|---|---|---|
+| **Meridian Labs** (corporate IT) | Your own desk — a second desk, so the old one stops being the only one | `D` exists | one | (12,2), east of the old desk | a sixteenth |
+| Meridian Labs (alt) | The glossary wall — the words you learned, pinned | new wall-kind glyph | group of 2 | north wall, west of the panes | three sixteenths |
+| **Tovar** (restaurant chain) | The couch — a chain remodel, and one lands upstairs | new | **the group case:** one tile = a loveseat, two = one you can lie on | west wall; or under the window if the sheet says the old desk goes | an eighth (1) / a quarter (2) |
+| **La Cocina** (Doña Rosa) | The big table — "spread it all out" | `T` exists (gingham, plates, a chair) | one | (10,7), dead centre, off the sight line | a sixteenth |
+| **La Obra / the Studio** | The deliverables wall — plans pinned where you can see them | `U` exists (blueprint panel, wall-kind) | group of 2 | north wall run | a sixteenth |
+| The Studio (Xochi, alt) | The rug | `R` exists, walkable | group of 2–4 | in front of the couch, never under the table | a sixteenth |
+| **El Mercado** (Doña Chelo) | The coffee corner — with something to eat, because it's Chelo | `K` exists | group of 2 | southwest corner | a sixteenth |
+| **Taller Herrera** (Don Tacho) | The dog bed — the shop dog's spare, hauled up | new | one | (14,11) — a box becomes it | three sixteenths |
+| **Panadería La Espiga** (Doña Licha) | The guest chair — answers "somebody else needs a seat" | new — the most reusable glyph in this list | one | (11,2), beside the desk | three sixteenths |
+| **Limpieza Velázquez** (Doña Vero) | They haul the empties — the last boxes go, the floor is clean | no art: the delivery writes floor over the box tiles | group of 2 | (15,5) and (18,10) | a sixteenth, and the best feeling per peso here |
+| **Nolasco Tax & Notario** | The file cabinet where the report lives — the paperwork man gives the record a body | new | one | (17,10) — the box by the stairs becomes it | three sixteenths |
+| anybody, the cheap gift | Plants | `P` exists | one each | (1,1), (18,1) | a thirty-second |
+| anybody, honest warning | Bookshelf | `S` exists, but it reads as store shelving | one | (2,1) | a sixteenth as-is; three sixteenths for real books |
+
+**Totals, honestly:** every business delivering = four to five new drawings, about half a
+sitting of art in all, plus roughly a third of a sitting of placement and hooks — but
+nobody pays that as a lump. Each business pays an eighth to a quarter inside its own
+sitting. **Standing rule:** nothing taller than a plant in the corridor from the stairs to
+the window; wall pieces go on the north wall outside the panes and on the west wall.
+
+**Ledger correction carried:** Nolasco is a walkup off Calle Principal, not Calle Dos.
+Calle Dos holds two parcels: La Espiga west, Velázquez east.
 
 ---
 

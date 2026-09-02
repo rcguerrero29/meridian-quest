@@ -1107,6 +1107,69 @@ const CANDIDATES = [
            if (iso.unknown !== 14) fails.push('iso lost its 14px default for an undeclared glyph'); }
   }
 
+  // ---- the record keeps every decision — it never silently drops your earliest work ----
+  // Owner 2026-09-02: "I thought we fixed this 200 entries thing". It was not fixed: the
+  // play log was cut to its last 200 entries on every write, so a five-district city
+  // would lose its first districts from the portfolio without a word. Nothing you make
+  // is taken away — the cap is gone, and a storage failure is warned about, not hidden.
+  const keep = await page.evaluate(() => {
+    const problems = [];
+    const before = { dlog: dlog.slice(), stored: localStorage.getItem('mqdlog'), cur, curQ, node };
+    dlog = []; cur = 0; curQ = AQ()[0]; node = curQ.start;
+    const c = curQ.nodes[node].ch.find(x => x.out) || curQ.nodes[node].ch[0];
+    for (let i = 0; i < 260; i++) logDecision(c.out || { r: 'ok', concept: 'x', why: 'y' }, c);
+    if (dlog.length !== 260) problems.push(`logged 260 decisions, the record holds ${dlog.length}`);
+    let stored = []; try { stored = JSON.parse(localStorage.getItem('mqdlog') || '[]'); } catch (e) {}
+    if (stored.length !== 260) problems.push(`the phone stored ${stored.length} of 260 decisions`);
+    dlog = before.dlog; cur = before.cur; curQ = before.curQ; node = before.node;
+    if (before.stored === null) localStorage.removeItem('mqdlog'); else localStorage.setItem('mqdlog', before.stored);
+    return problems;
+  });
+  fails.push(...keep);
+
+  // ---- the city can raise more than one storefront, and each says where you stand ----
+  // Owner 2026-09-02: "not stopping at a certain amount of store fronts" — it was still
+  // stopping at one: GROWTH.ribbon held a single storefront, and the handover walked you
+  // to the mercado's front step, hardcoded in the engine. Now a pack declares ribbons[]
+  // (the old singular ribbon still works), each with its own doorstep.
+  const ribs = await page.evaluate(() => {
+    const problems = [];
+    const g = GROWTH, keep = { ribbons: g.ribbons, chSeen, world, px, py, done: new Set(done), hearts };
+    const st = () => WORLDS.st.rows[1][1];
+    if (typeof ribbons !== 'function') return ['the engine has no ribbons() list'];
+    // the singular declaration still counts as a list of one
+    if (ribbons().length !== 1 || ribbons()[0] !== g.ribbon) problems.push('the old singular ribbon is not read as a list of one');
+    if (!g.ribbon.doorstep || g.ribbon.doorstep.x !== 6 || g.ribbon.doorstep.y !== 12) problems.push('the pack does not declare the mercado\'s doorstep (the engine used to hardcode it)');
+    // two storefronts: each rises when its own district opens
+    g.ribbons = [g.ribbon, { world: 'st', district: 2, tiles: [[1, 1, 'P']], doorstep: { world: 'st', x: 1, y: 2, dir: 'up' } }];
+    done = new Set(); chSeen = 0; applyGrowth();
+    if (ribbonUp()) problems.push('a storefront is up before any district opened');
+    chSeen = 1; applyGrowth();
+    if (!ribbonUp(g.ribbons[0])) problems.push('the first storefront did not rise on its district');
+    if (ribbonUp(g.ribbons[1]) || st() === 'P') problems.push('the second storefront rose a district early');
+    chSeen = 2; applyGrowth();
+    if (!ribbonUp(g.ribbons[1]) || st() !== 'P') problems.push('the second storefront never rose — the city still stops at one');
+    // the handover doorstep comes from the storefront that just opened, not from the engine
+    delete g.ribbons; chSeen = 0; applyGrowth();
+    world = 'hq'; px = fx = 10; py = fy = 11; document.getElementById('end').hidden = false;
+    document.getElementById('endGo').click();
+    if (chSeen !== 1) problems.push('the handover did not open the next district');
+    if (world !== 'st' || px !== 6 || py !== 12) problems.push(`the handover left you at ${world} (${px},${py}) — expected the declared doorstep st (6,12)`);
+    // with no doorstep declared, the handover leaves you where you were
+    const ds = g.ribbon.doorstep; delete g.ribbon.doorstep;
+    chSeen = 0; applyGrowth(); world = 'hq'; px = fx = 10; py = fy = 11;
+    document.getElementById('end').hidden = false; document.getElementById('endGo').click();
+    if (world !== 'hq' || px !== 10 || py !== 11) problems.push('with no doorstep declared the engine still walked you somewhere of its own choosing');
+    g.ribbon.doorstep = ds;
+    // put the city back
+    if (keep.ribbons) g.ribbons = keep.ribbons; else delete g.ribbons;
+    done = keep.done; chSeen = keep.chSeen; hearts = keep.hearts; applyGrowth();
+    world = keep.world; px = fx = keep.px; py = fy = keep.py;
+    document.getElementById('end').hidden = true; document.getElementById('world').hidden = false; setWorldTag(); checkTalk();
+    return problems;
+  });
+  fails.push(...ribs);
+
   // ---- the room upstairs: two neighbours ask, nothing is graded, the sheet is hers ----
   // Owner 2026-09-02: "lets make it so that AJ can interact through the characters with
   // you if possible ... i dont want an api setup". So: the characters ask IN the game,
@@ -1124,13 +1187,22 @@ const CANDIDATES = [
     const $ = id => document.getElementById(id);
     if (typeof INTERVIEW === 'undefined' || typeof RM !== 'function' || !RM()) return ['no INTERVIEW declared by the pack (content/meridian/room.js)'];
     const I = RM(), U = I.ui[lang];
-    // the office opens bare, as signed: walls, floor, the old lead's desk, the stairs
+    // the office opens MID-MOVE (owner 2026-09-02: "for the move it should be mid"), and
+    // nothing else: the old lead's desk, the stairs, the three window panes, four taped
+    // moving boxes on the pack's own glyph, one of Don Güero's cones, a plant still in
+    // its pot. Don Güero's grid; the arrival tile and the sight line from the stairs to
+    // the window stay clear because Nacho's "nothing in the way" is an answer a player
+    // can pick, so it has to be true.
     const f2 = WORLDS.f2.rows;
     if (f2.length !== 14 || f2.some(r => r.length !== 20)) problems.push('f2 is not 20 wide x 14 tall');
     const glyphs = {}; f2.forEach(r => [...r].forEach(c => { glyphs[c] = (glyphs[c] || 0) + 1; }));
-    if (glyphs['D'] !== 1) problems.push(`the office should hold exactly one desk, found ${glyphs['D'] || 0}`);
+    const want = { D: 1, '□': 4, C: 1, P: 1, '1': 1 };
+    Object.entries(want).forEach(([c, n]) => { if (glyphs[c] !== n) problems.push(`the office should hold ${n} '${c}', found ${glyphs[c] || 0}`); });
     if (f2[11][18] !== '1') problems.push('the stairs moved — the portal from HQ lands at (17,11) beside them');
-    Object.keys(glyphs).forEach(c => { if (!'#.D1|'.includes(c)) problems.push(`the office is not bare: it holds '${c}'`); });
+    Object.keys(glyphs).forEach(c => { if (!'#.D1|□CP'.includes(c)) problems.push(`the office holds something unplanned: '${c}'`); });
+    if (f2[11][17] !== '.') problems.push('the arrival tile (17,11) is blocked');
+    [[16,10],[15,9],[14,8],[13,7],[12,6],[11,5],[11,4],[10,3],[10,2]].forEach(([x, y]) => {
+      if (f2[y][x] !== '.') problems.push(`the sight line from the stairs to the window is blocked at (${x},${y}) by '${f2[y][x]}'`); });
     // ---- la ventana del norte (Don Güero + Nacho, 2026-09-02): three panes IN the north wall,
     // over the old desk, declared by the pack (art.js) and never by the engine ----
     if (f2[0] !== '#########|||########') problems.push(`the north wall should carry three panes over the desk, got "${f2[0]}"`);
@@ -1139,11 +1211,16 @@ const CANDIDATES = [
     if (!TILES['|'] || TILES['|'].kind !== 'wall' || TILES['|'].lift !== TILES['#'].lift) problems.push('the window must be a wall-kind tile as tall as the wall beside it, or 3D shows a notch');
     if (!SOLID.has('|')) problems.push('the window is walkable — SOLIDX must carry it');
     if (!MAPCOL['|']) problems.push('the window has no colour on the village map');
-    // the cold-read sheet draws every tile with no scene: the art must tolerate that
+    // the moving box: the pack's second glyph — solid, low, its own colour on the map
+    if (typeof TILEART === 'undefined' || typeof TILEART['□'] !== 'function') problems.push('the pack declares no drawing for the moving box (TILEART["□"])');
+    if (!TILES['□'] || TILES['□'].kind !== 'prop' || !(TILES['□'].lift > 0 && TILES['□'].lift <= 6)) problems.push('the moving box must be a low prop (it must not block the view)');
+    if (!SOLID.has('□')) problems.push('the moving box is walkable — SOLIDX must carry it');
+    if (!MAPCOL['□'] || MAPCOL['□'] === MAPCOL['H']) problems.push('the moving box needs its own colour on the village map, not the produce crate\'s');
+    // the cold-read sheet draws every tile with no scene: the art must tolerate that, in both box variants
     try { const t = document.createElement('canvas'); t.width = 32; t.height = 32; const o = ctx; ctx = t.getContext('2d');
-      TILEDRAW['|']({ sx: 0, sy: 0, x: 10, y: 0, canopy: () => {} }); ctx = o; } catch (e) { problems.push('the window art throws when drawn alone: ' + e.message); }
-    // the engine's own glyph table must not have learned it — content declares, engine reads
-    // (checked by the portability guard for names; here for the glyph itself)
+      TILEDRAW['|']({ sx: 0, sy: 0, x: 10, y: 0, canopy: () => {} });
+      TILEDRAW['□']({ sx: 0, sy: 0, x: 1, y: 1, canopy: () => {} }); TILEDRAW['□']({ sx: 0, sy: 0, x: 1, y: 2, canopy: () => {} });
+      ctx = o; } catch (e) { problems.push('the pack art throws when drawn alone: ' + e.message); }
     // shape: everything a pack must declare, EN and ES in lockstep
     const keys = o => Object.keys(o).sort().join(',');
     if (keys(I.ui.en) !== keys(I.ui.es)) problems.push('INTERVIEW.ui EN/ES keys differ');
