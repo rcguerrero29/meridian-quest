@@ -437,20 +437,41 @@ TILEDRAW["Y"]=rc=>{const{sx,sy,x,y}=rc; /* trolley stop: pole + sign + bench —
       ctx.fillStyle="#F2E8D8";ctx.font="700 7px monospace";ctx.fillText("MQT",sx+4,sy+9);
       ctx.fillStyle="#8A6B3F";ctx.fillRect(sx+14,sy+21,15,3);
       ctx.fillRect(sx+15,sy+24,2,5);ctx.fillRect(sx+26,sy+24,2,5);};
-TILEDRAW["Q"]=rc=>{const{sx,sy,x,y}=rc; /* La Cocina storefront: terracotta facade + striped awning + window */
+TILEDRAW["Q"]=rc=>{const{sx,sy,x,y}=rc; /* restaurant storefront: terracotta facade + striped awning +
+      a window with a steaming bowl in it. The cold read (IDEAS §15.8) saw "a red building,
+      an awning, two blank windows" — the mullion split the window into two blanks and
+      nothing said food. The mercado reads because it shows produce; this shows a meal. */
       ctx.fillStyle="#A8503A";ctx.fillRect(sx,sy,TS,TS);
       for(let i=0;i<4;i++){ctx.fillStyle=i%2?"#F2E8D8":"#C0392B";ctx.fillRect(sx+i*8,sy,8,7);}
       ctx.fillStyle="#7A3527";ctx.fillRect(sx,sy+7,TS,2);
-      ctx.fillStyle="#F5DFA9";ctx.fillRect(sx+8,sy+14,16,10);
-      ctx.fillStyle="#7A3527";ctx.fillRect(sx+15,sy+14,2,10);};
-TILEDRAW["D"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc(C.desk);ctx.fillRect(sx+2,sy+8,TS-4,TS-12);ctx.fillStyle=tc(C.deskTop);ctx.fillRect(sx+2,sy+4,TS-4,8);
-      ctx.fillStyle="#DDE4EA";ctx.fillRect(sx+8,sy+6,10,5);};
+      ctx.fillStyle="#F5DFA9";ctx.fillRect(sx+7,sy+11,18,14); /* one window */
+      ctx.fillStyle="#C0392B";ctx.beginPath();ctx.arc(sx+16,sy+20,5,0,Math.PI);ctx.fill(); /* the bowl */
+      ctx.fillStyle="#E8A05A";ctx.fillRect(sx+11.5,sy+19,9,1.6); /* what's in it */
+      ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+11,sy+19.6,10,1); /* rim */
+      ctx.fillStyle="#B9B2A6";[13,16,19].forEach((wx,i)=>ctx.fillRect(sx+wx,sy+13+(i%2)*1.2,1.2,3.6)); /* steam */
+      produce(sx+23,sy+14,"chile",0.75);};
+TILEDRAW["D"]=rc=>{const{sx,sy,x,y}=rc; /* a desk: top, two legs, a monitor on it, a sheet of paper.
+      The cold read saw a cardboard box with a label. */
+      ctx.fillStyle=tc(C.desk);ctx.fillRect(sx+5,sy+18,3,10);ctx.fillRect(sx+24,sy+18,3,10); /* legs */
+      ctx.fillStyle=tc(C.deskTop);ctx.fillRect(sx+2,sy+13,TS-4,5); /* top */
+      ctx.fillStyle=tc(C.desk);ctx.fillRect(sx+2,sy+18,TS-4,1.5); /* apron */
+      ctx.fillStyle="#2B2F38";ctx.fillRect(sx+10,sy+3,12,9);ctx.fillRect(sx+15,sy+12,2,1.5);ctx.fillRect(sx+13,sy+13,6,1); /* monitor + stand */
+      ctx.fillStyle="#7FB3D5";ctx.fillRect(sx+11,sy+4,10,7); /* screen */
+      ctx.fillStyle="#DDE4EA";ctx.fillRect(sx+23,sy+14,5,3);}; /* paper */
 TILEDRAW["K"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc(C.counter);ctx.fillRect(sx+2,sy+6,TS-4,TS-10);ctx.font="12px serif";ctx.fillText("☕",sx+9,sy+22);};
 TILEDRAW["P"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=C.pot;ctx.fillRect(sx+10,sy+18,12,10);ctx.fillStyle=C.plant;
       ctx.beginPath();ctx.arc(sx+16,sy+13,8,0,7);ctx.fill();};
-TILEDRAW["T"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#7A4E2C";ctx.beginPath();ctx.arc(sx+16,sy+16,11,0,7);ctx.fill();
-      ctx.fillStyle="#F2E8D8";ctx.beginPath();ctx.arc(sx+16,sy+16,9,0,7);ctx.fill();
-      ctx.fillStyle="#C0392B";ctx.beginPath();ctx.arc(sx+16,sy+16,3,0,7);ctx.fill();};
+TILEDRAW["T"]=rc=>{const{sx,sy,x,y}=rc; /* a restaurant table: gingham cloth, two plates, a chair
+      either side. The cold read saw a dartboard (cream disc, red dot); without the chairs
+      the gingham disc could pass for a pizza. */
+      ctx.fillStyle="#5E3B20";ctx.fillRect(sx+0.5,sy+11,3.5,10);ctx.fillRect(sx+28,sy+11,3.5,10); /* chairs */
+      ctx.fillStyle="#7A4E2C";ctx.beginPath();ctx.arc(sx+16,sy+16,12,0,7);ctx.fill();
+      ctx.save();ctx.beginPath();ctx.arc(sx+16,sy+16,10.5,0,7);ctx.clip();
+      ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+4,sy+4,24,24);
+      ctx.fillStyle="#C0392B";for(let i=0;i<6;i++)for(let j=0;j<6;j++)if((i+j)%2===0)ctx.fillRect(sx+4+i*4,sy+4+j*4,4,4);
+      ctx.restore();
+      [[11,16],[21,16]].forEach(([qx,qy])=>{ctx.fillStyle="#FFF";ctx.beginPath();ctx.arc(sx+qx,sy+qy,3.6,0,7);ctx.fill();
+        ctx.fillStyle="#C9CDD2";ctx.beginPath();ctx.arc(sx+qx,sy+qy,2.2,0,7);ctx.fill();});};
 TILEDRAW["W"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#AEB6BE";ctx.fillRect(sx+4,sy+2,TS-8,TS-4);
       ctx.fillStyle="#8E969E";ctx.fillRect(sx+4,sy+14,TS-8,2);
       ctx.fillStyle="#5F676F";ctx.fillRect(sx+21,sy+5,3,7);ctx.fillRect(sx+21,sy+18,3,7);};
@@ -506,11 +527,16 @@ TILEDRAW["H"]=rc=>{const{sx,sy,x,y}=rc; /* produce crate */
       ctx.fillStyle="#8B6A42";ctx.fillRect(sx+3,sy+16,TS-6,2);ctx.fillRect(sx+15,sy+10,2,TS-14);
       [[9,9,"tomato"],[16,7,"chile"],[23,9,"banana"]]
         .forEach(f=>produce(sx+f[0],sy+f[1],f[2],1.3));};
-TILEDRAW["I"]=rc=>{const{sx,sy,x,y}=rc; /* mercado counter: worn wood, scale on top */
+TILEDRAW["I"]=rc=>{const{sx,sy,x,y}=rc; /* shop counter: worn wood, and a produce scale you can read —
+      dial with a needle, post, tray, a tomato on the tray. The cold read saw a brown box with a grey smudge. */
       ctx.fillStyle="#A8825A";ctx.fillRect(sx+2,sy+6,TS-4,TS-10);
       ctx.fillStyle="#8B6A42";ctx.fillRect(sx+2,sy+6,TS-4,3);
-      ctx.fillStyle="#C9CDD2";ctx.fillRect(sx+11,sy+11,10,6);
-      ctx.fillStyle="#5F676F";ctx.fillRect(sx+14,sy+9,4,2);};
+      ctx.fillStyle="#5F676F";ctx.fillRect(sx+15,sy+13,2,7); /* post */
+      ctx.fillStyle="#C9CDD2";ctx.fillRect(sx+9,sy+20,14,2.5); /* tray */
+      ctx.fillStyle="#EEF0F2";ctx.beginPath();ctx.arc(sx+16,sy+10,4.4,0,7);ctx.fill(); /* dial */
+      ctx.strokeStyle="#5F676F";ctx.lineWidth=1;ctx.beginPath();ctx.arc(sx+16,sy+10,4.4,0,7);ctx.stroke();
+      ctx.strokeStyle="#C0392B";ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(sx+16,sy+10);ctx.lineTo(sx+18.6,sy+7.6);ctx.stroke(); /* needle */
+      produce(sx+12.5,sy+18,"tomato",0.85);};
 TILEDRAW["U"]=rc=>{const{sx,sy,x,y}=rc; /* blueprint wall panel */
       ctx.fillStyle=tc(C.wall);ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle=tc(C.wallTop);ctx.fillRect(sx,sy,TS,6);
       ctx.fillStyle="#2E5FA8";ctx.fillRect(sx+4,sy+9,TS-8,18);
@@ -550,10 +576,16 @@ TILEDRAW["9"]=rc=>{const{sx,sy}=rc; /* the doghouse: red roof, dark door, a bone
       ctx.fillStyle="#F6F2E8";ctx.fillRect(sx+13,sy+14.5,6,1.6);
       ctx.beginPath();ctx.arc(sx+12.6,sy+15.3,1.2,0,7);ctx.arc(sx+19.4,sy+15.3,1.2,0,7);ctx.fill();};
 DOORSET.forEach(dch=>TILEDRAW[dch]=rc=>{const{sx,sy}=rc;
-      ctx.fillStyle=C.doorFrame;ctx.fillRect(sx+2,sy,TS-4,TS);
-      ctx.fillStyle=C.doorWood;ctx.fillRect(sx+4,sy+2,11,TS-4);
-      ctx.fillStyle=C.doorWood2;ctx.fillRect(sx+17,sy+2,11,TS-4);
+      /* one door body, shared; DOORLOOK (content) colours it for where it leads and may
+         give it a window, so a shop entrance and an office door stop being the same brown
+         (the cold read found all five pixel-identical). An unlisted glyph is the plain door. */
+      const dl=(typeof DOORLOOK!=="undefined"&&DOORLOOK[dch])||{};
+      ctx.fillStyle=dl.frame||C.doorFrame;ctx.fillRect(sx+2,sy,TS-4,TS);
+      ctx.fillStyle=dl.wood||C.doorWood;ctx.fillRect(sx+4,sy+2,11,TS-4);
+      ctx.fillStyle=dl.wood2||C.doorWood2;ctx.fillRect(sx+17,sy+2,11,TS-4);
       ctx.fillStyle="rgba(0,0,0,.15)";ctx.fillRect(sx+15,sy+2,2,TS-4);
+      if(dl.glass){ctx.fillStyle="#D7E6EE";ctx.fillRect(sx+6,sy+5,7,9);ctx.fillRect(sx+19,sy+5,7,9);
+        ctx.fillStyle="rgba(255,255,255,.55)";ctx.fillRect(sx+7,sy+6,2,7);ctx.fillRect(sx+20,sy+6,2,7);}
       ctx.fillStyle="#E0B45C";
       ctx.beginPath();ctx.arc(sx+12.5,sy+17,1.7,0,7);ctx.fill();
       ctx.beginPath();ctx.arc(sx+19.5,sy+17,1.7,0,7);ctx.fill();

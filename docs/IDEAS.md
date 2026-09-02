@@ -937,7 +937,20 @@ bench), coffee cup, potted plant, fridge, stove, shelving, drafting table, bluep
 wall, river, stairs, flower bed, scaffolding — and the produce crate, now that the
 fruit has silhouettes instead of coloured dots.
 
-**Fails the cold read — NOT fixed, pending the owner's call on scheduling:**
+**All five FIXED 2026-09-02 (S0 item 5 — the owner assigned the legibility pass to the
+3D/world sitting).** Re-read cold on the new sheet: `Q` a red building with a steaming
+bowl and a chile in the window; `D` a desk with a monitor and a sheet of paper; `T` a
+round gingham table with two plates and a chair either side (without the chairs it could
+pass for a pizza — so the chairs); `I` a dial-and-tray scale weighing a tomato; the five
+doors are five different doors, and the four shop doors have glass. The door seam is
+`DOORLOOK` in `content/meridian/maps.js` — the engine draws one body, the pack colours
+it for where it leads — guarded by a smoke test that bakes every door glyph and fails
+if any two are pixel-identical. Note for S1: `Q`, `Z`, `I` and friends are Meridian's
+own storefront art living in `engine/engine.js`; the `TILEART` seam exists for a pack
+to own them and Meridian does not use it yet (backlog §2).
+
+*The findings as first written:*
+
 
 1. **`Q` — La Cocina's storefront does not say "restaurant".** A red building, an
    awning, two blank cream windows. No food cue anywhere. The mercado (`Z`) now reads

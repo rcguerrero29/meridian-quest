@@ -66,6 +66,7 @@ engine, all landing in **S1**, none of them naming a business.
 | **Spot-the-flaw** — the one new quest format | S1 | one format only, and the owner sees it before anything is mass-produced |
 | ~~**Seasons** — one autumn season on a Día de Muertos palette, auto by date with an override~~ | **seam shipped 2026-09-02** | bridge only, as signed. **Palette is a draft — owner signs it off** (one line in `config.js`). Widening to jacaranda/awnings/light is the next `art()` keys |
 | **`/room-design` skill** — interview a person about ONE room, produce a build-ready spec | drafted 2026-09-02 | the bridge between `game-brief` (asks about a whole game) and `game-world-expansion` (builds a place). First job: `f2`. Owner wants AJ using it, and a virtual office for the team |
+| **Meridian's storefront art out of the engine** — `Q`, `Z`, `I`, the produce helper and the DOORLOOK colours are Meridian's, drawn in `engine/engine.js`; the `TILEART` seam exists and Meridian does not use it | S1 | found 2026-09-02 while fixing legibility. Not a bug for the player; a bug for AJ's pack |
 | **`/role-pack` skill** — turns a role into a district: curriculum, words, quests, paper, and a coverage report | before S4 | Nacho and Don Güero proposed it independently. Built with `skill-creator`, measured against the hand-written taller |
 
 ---
@@ -77,10 +78,10 @@ engine, all landing in **S1**, none of them naming a business.
 | 1 | ~~**3D blur** — every texture baked at 1× while the screen renders at up to 3×~~ | **shipped 2026-09-02** | S0 item 3. One factor K at every bake site, re-bakes on a DPR change; test in `smoke.js`. §15.1 |
 | 2 | ~~**Doors lie flat in 3D** — 6 of 16 face the wrong way, all in HQ~~ | **shipped 2026-09-02** | S0 item 2. Doors turned to their wall, thin boxes with a lintel and a breathing floor light; walls textured on all four sides. §15.3 |
 | 3 | ~~**The doorway ignores you** for ~900ms after you come through, and never re-checks~~ | **shipped 2026-09-02** | S0 item 1. A standing check with an anti-ping-pong hold; test in `smoke.js`. §15.6 |
-| 4 | **La Cocina does not read as a restaurant** — a red building, an awning, two blank windows, no food cue | minutes | the mercado reads correctly *because* it has produce. §15.8 |
-| 5 | **All five doors are pixel-identical** | ~1h | nothing tells you which door leads somewhere |
+| 4 | ~~**La Cocina does not read as a restaurant**~~ | **shipped 2026-09-02** | a steaming bowl and a chile in one window. §15.8 |
+| 5 | ~~**All five doors are pixel-identical**~~ | **shipped 2026-09-02** | `DOORLOOK` in the pack colours each door for its destination; shop doors get glass. Smoke test bakes every door and fails on a twin. §15.8 |
 | 6 | **The rainbow bridge is a flat stripe** that does not span the river | a sitting | there is no bridge object in any camera. §15.4 |
-| 7 | Desk reads as a cardboard box; table reads as a dartboard; the mercado scale is illegible | minutes each | §15.8 |
+| 7 | ~~Desk reads as a cardboard box; table reads as a dartboard; the mercado scale is illegible~~ | **shipped 2026-09-02** | desk with a monitor; gingham table with plates and chairs; a dial-and-tray scale. §15.8 |
 | 8 | **`LEVELS` saturates at 120 XP** while MAXXP is 350 → ~470 | small | you hit "AI Legend" a third of the way through Week One |
 | 9 | **Error log** — 3D failure is swallowed in four places and leaves no trace | ~55 lines | designed in full. §15.5 |
 | 10 | **A wall between you and the camera hides you** — stand just north of an interior wall in 3D and only your head shows | ~1h | found 2026-09-02 by the eyeball pass, pre-existing. Fade the wall, lower walls, or raise the camera — not chosen. §15.3 |

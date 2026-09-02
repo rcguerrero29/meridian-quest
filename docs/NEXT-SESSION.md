@@ -62,9 +62,9 @@ something ships or a decision lands.**
    arch + Day of the Dead palette (§15.4, needs an owner sign-off on the palette).
    Use `node test/shots.js` before AND after — it is the only check that can see a door
    lying on the floor.
-   **Ride-alongs the owner assigned to this same sitting:** the storefront legibility
-   fixes (§15.8 — La Cocina must say "restaurant", the five identical doors must differ
-   by destination, and the desk/table/scale props) and the `SEASONS` seam (§15.9 — one
+   **Ride-alongs the owner assigned to this same sitting:** ~~the storefront legibility
+   fixes~~ (**done 2026-09-02**, §15.8 — bowl in La Cocina's window, `DOORLOOK` per door,
+   desk/table/scale redrawn; all re-read cold) and the `SEASONS` seam (§15.9 — one
    autumn season on the Día de Muertos palette, auto by date with a Settings override,
    bridge only as the proving run — **seam done 2026-09-02**, palette awaiting sign-off).
    Elevation (§15.10) is NOT in this sitting — it waits

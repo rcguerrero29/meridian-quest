@@ -1080,6 +1080,24 @@ const CANDIDATES = [
   });
   fails.push(...season);
 
+  // ---- a door says where it leads ----
+  // The cold read (IDEAS §15.8) found all five door glyphs pixel-identical: an office
+  // door, a shop entrance and the mercado's door were the same brown, so nothing told a
+  // newcomer which one goes somewhere. The body stays shared in the engine; DOORLOOK in
+  // the pack colours each door for its destination.
+  const doorLook = await page.evaluate(() => {
+    const problems = [];
+    if (typeof DOORLOOK === 'undefined') { problems.push('the pack declares no DOORLOOK — every door is the same brown'); return problems; }
+    const bake = g => { const c = document.createElement('canvas'); c.width = 32; c.height = 32;
+      const o = ctx; ctx = c.getContext('2d'); try { TILEDRAW[g]({ sx: 0, sy: 0, x: 0, y: 0, t: 0, canopy: () => {} }); } finally { ctx = o; }
+      return c.getContext('2d').getImageData(0, 0, 32, 32).data.join(','); };
+    const seen = {};
+    [...DOORSET].forEach(g => { const k = bake(g); if (seen[k]) problems.push(`doors '${seen[k]}' and '${g}' are pixel-identical`); else seen[k] = g; });
+    Object.keys(DOORLOOK).forEach(g => { if (!DOORSET.has(g)) problems.push(`DOORLOOK names '${g}', which is not a door glyph`); });
+    return problems;
+  });
+  fails.push(...doorLook);
+
   // ---- the camera the pack asks for is the camera you get, and it sticks ----
   const cam = await page.evaluate(() => {
     const problems = [];
