@@ -1031,6 +1031,55 @@ const CANDIDATES = [
   });
   fails.push(...bake);
 
+  // ---- seasons: a season changes colour, never design (IDEAS §15.9) ----
+  // The bridge's six bands were literal hex inside the engine, which is why no palette
+  // could ever reach them. Now world art goes through art(key, fallback); a season is
+  // content (SEASONS in the pack's config) that overrides art keys, arriving on its own
+  // by date with a Settings override. The engine must not know a season's name.
+  const season = await page.evaluate(() => {
+    const problems = [];
+    if (typeof art !== 'function' || typeof seasonNow !== 'function' || typeof seasonSet !== 'function') {
+      problems.push('the season seam (art / seasonNow / seasonSet) is missing'); return problems; }
+    if (typeof SEASONS === 'undefined' || !Object.keys(SEASONS).length) { problems.push('the pack declares no SEASONS'); return problems; }
+    const [id, S] = Object.entries(SEASONS)[0];
+    const pick0 = seasonPick;
+    // off: the fallback is what you get, and the bridge paints its year-round bands
+    seasonSet('off');
+    if (art('bridge', 'X') !== 'X') problems.push('with the season off, art() did not return the fallback');
+    const bake = () => { const c = document.createElement('canvas'); c.width = 32; c.height = 32;
+      const o = ctx; ctx = c.getContext('2d'); try { TILEDRAW['^']({ sx: 0, sy: 0, x: 0, y: 0, canopy: () => {} }); } finally { ctx = o; }
+      const d = ctx === o ? c.getContext('2d').getImageData(16, 5, 1, 1).data : null;
+      return '#' + [d[0], d[1], d[2]].map(v => v.toString(16).padStart(2, '0')).join(''); };
+    const off = bake();
+    // forced on: the pack's palette reaches the bridge, and only the colours changed
+    seasonSet(id);
+    if (seasonNow() !== id) problems.push(`forcing season "${id}" did not make it current`);
+    if (art('bridge', 'X') !== S.art.bridge) problems.push('with the season forced, art("bridge") is not the pack palette');
+    const on = bake();
+    if (on.toLowerCase() !== S.art.bridge[0].toLowerCase()) problems.push(`the bridge's first band is ${on}, not the season's ${S.art.bridge[0]}`);
+    if (on === off) problems.push('the season changed nothing on the bridge');
+    // auto by date: inside the window it arrives on its own; outside, it is gone
+    seasonSet('auto');
+    const [fm, fd] = S.from, [tm, td] = S.to;
+    if (seasonNow(new Date(2026, fm - 1, fd)) !== id) problems.push('auto: the first day of the window is not in season');
+    if (seasonNow(new Date(2026, tm - 1, td)) !== id) problems.push('auto: the last day of the window is not in season');
+    if (seasonNow(new Date(2026, 5, 15)) !== null) problems.push('auto: mid-June is in season');
+    // the choice persists, and a change re-bakes the 3D world
+    seasonSet('off');
+    let stored = null; try { stored = localStorage.getItem('mqseason'); } catch (e) {}
+    if (stored !== 'off') problems.push('the season choice did not persist');
+    const d0 = (typeof T3 !== 'undefined' && T3) ? T3.dirty : 0;
+    seasonSet(id);
+    if (typeof T3 !== 'undefined' && T3 && T3.dirty === d0) problems.push('changing the season did not tell the 3D camera to rebuild');
+    // the Settings row exists and is built from content, not hardcoded
+    const row = document.getElementById('seasonRow');
+    if (!row) problems.push('no #seasonRow in Settings');
+    else if (![...row.querySelectorAll('button')].some(b => b.dataset.sn === id)) problems.push(`Settings has no button for season "${id}"`);
+    seasonSet(pick0);
+    return problems;
+  });
+  fails.push(...season);
+
   // ---- the camera the pack asks for is the camera you get, and it sticks ----
   const cam = await page.evaluate(() => {
     const problems = [];
@@ -1060,7 +1109,7 @@ const CANDIDATES = [
   {
     const NAMES = ['mercado', 'chelo', 'nando', 'perla', 'chava', 'frijol', 'obra',
                    'cocina', 'xochi', 'lupe', 'guero', 'rosa', 'chuy', 'tovar', 'priya',
-                   'canela', 'robles', 'jacaranda'];
+                   'canela', 'robles', 'jacaranda', 'muertos', 'otono', 'otoño'];
     // engine3d is the same engine, so it is held to the same rule
     for (const f of ['engine/engine.js', 'engine/engine3d.js']) {
       const src = fs.readFileSync(path.join(__dirname, '..', f), 'utf8');

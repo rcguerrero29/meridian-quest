@@ -64,7 +64,7 @@ engine, all landing in **S1**, none of them naming a business.
 | **Template 06 — Process & Exception Map** | small | the taller's deliverable; not one of the existing five |
 | **La sombra** — the franchise offers *you* a job; nobody's business is harmed | S6/S7 | ships as content a pack may omit entirely |
 | **Spot-the-flaw** — the one new quest format | S1 | one format only, and the owner sees it before anything is mass-produced |
-| **Seasons** — one autumn season on a Día de Muertos palette, auto by date with an override | S0 | bridge-only first as the proving run |
+| ~~**Seasons** — one autumn season on a Día de Muertos palette, auto by date with an override~~ | **seam shipped 2026-09-02** | bridge only, as signed. **Palette is a draft — owner signs it off** (one line in `config.js`). Widening to jacaranda/awnings/light is the next `art()` keys |
 | **`/room-design` skill** — interview a person about ONE room, produce a build-ready spec | drafted 2026-09-02 | the bridge between `game-brief` (asks about a whole game) and `game-world-expansion` (builds a place). First job: `f2`. Owner wants AJ using it, and a virtual office for the team |
 | **`/role-pack` skill** — turns a role into a district: curriculum, words, quests, paper, and a coverage report | before S4 | Nacho and Don Güero proposed it independently. Built with `skill-creator`, measured against the hand-written taller |
 
@@ -94,6 +94,7 @@ engine, all landing in **S1**, none of them naming a business.
 | **How does a district's Saturday present itself?** Deferred to /nacho; must be content-declared so a pack can choose differently | blocks S1's ending refactor |
 | **Industries vs roles** — should the industry lead and the job role follow? | reframes what every pack owes |
 | **The city's record to a government NPC** — separating the player's portfolio from the city's memory | new, a story surface |
+| **The Día de Muertos palette** — six bridge colours in `config.js` are a draft; say yes or change them | S0 shipped the seam with them in |
 | **Elevation** — walking *over* the bridge needs actors to have a height | deliberately deferred: build it when a *second* thing needs it (stairs, rooftops, the trolley platform), not for one park tile |
 
 ---

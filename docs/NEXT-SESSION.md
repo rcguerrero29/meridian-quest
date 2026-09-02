@@ -66,7 +66,8 @@ something ships or a decision lands.**
    fixes (§15.8 — La Cocina must say "restaurant", the five identical doors must differ
    by destination, and the desk/table/scale props) and the `SEASONS` seam (§15.9 — one
    autumn season on the Día de Muertos palette, auto by date with a Settings override,
-   bridge only as the proving run). Elevation (§15.10) is NOT in this sitting — it waits
+   bridge only as the proving run — **seam done 2026-09-02**, palette awaiting sign-off).
+   Elevation (§15.10) is NOT in this sitting — it waits
    for a second thing that needs it.
    **After this sitting the cold read is permanent**, not a one-off: it is step 2b of
    the shipping checklist in `docs/HANDOFF.md` and a Settled rule in `docs/OWNER.md`.

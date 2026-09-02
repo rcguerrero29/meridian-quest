@@ -523,9 +523,11 @@ TILEDRAW["~"]=rc=>{const{sx,sy,x,y}=rc; /* river water: cool blue, drifting glin
       const ph=Math.sin(Date.now()/900+x*3+y*5);
       ctx.fillRect(sx+4,sy+8+ph*2,11,2);ctx.fillRect(sx+17,sy+21-ph*2,10,2);
       ctx.fillStyle="rgba(255,255,255,.25)";ctx.fillRect(sx+7,sy+9+ph*2,4,1);};
-TILEDRAW["^"]=rc=>{const{sx,sy}=rc; /* the rainbow bridge: walk the whole spectrum */
+const BRIDGE_BANDS=["#D95B5B","#E0A430","#E7C25A","#7A9A4E","#5E93BC","#8B6FC8"]; /* year-round */
+TILEDRAW["^"]=rc=>{const{sx,sy}=rc; /* the rainbow bridge: walk the whole spectrum.
+      The six bands are the one thing a season may recolour; planks and rails are design */
       ctx.fillStyle="#C9B99A";ctx.fillRect(sx,sy,TS,TS); /* plank base */
-      ["#D95B5B","#E0A430","#E7C25A","#7A9A4E","#5E93BC","#8B6FC8"].forEach((cc,i)=>{
+      art("bridge",BRIDGE_BANDS).forEach((cc,i)=>{
         ctx.fillStyle=cc;ctx.fillRect(sx,sy+3+i*4.4,TS,4.4);});
       ctx.globalAlpha=0.22;ctx.fillStyle="#FFF";ctx.fillRect(sx,sy+3,TS,2);ctx.globalAlpha=1;
       ctx.fillStyle="#8A6F4D";ctx.fillRect(sx,sy,TS,2.5);ctx.fillRect(sx,sy+TS-2.5,TS,2.5); /* rails */};
@@ -1981,6 +1983,48 @@ function applyTheme(){
   try{localStorage.setItem("mqtheme",themeName);}catch(e){}
 }
 try{darkMq.addEventListener("change",applyTheme);}catch(e){}
+/* ---------- SEASONS: a second palette layer, for WORLD ART, kept apart from THEMES ----------
+   THEMES is UI chrome and never reaches a tile; art(key, fallback) is how world art asks
+   whether a season has recoloured it. The pack declares SEASONS (names, dates, colours);
+   the engine never learns a name (the portability guard enforces it). seasonPick is the
+   player's Settings choice: "auto" (by the calendar), "off" (year-round), or a season id.
+   A pack with no SEASONS behaves exactly as before — art() always returns the fallback. */
+let seasonPick="auto";try{seasonPick=localStorage.getItem("mqseason")||"auto";}catch(e){}
+const seasonMemo={day:"",id:null}; /* the calendar is read once a day, not once a tile */
+const SEAS=()=>typeof SEASONS!=="undefined"&&SEASONS?SEASONS:{};
+function seasonNow(now){ /* the current season id, or null. `now` is for tests. */
+  const S=SEAS();
+  if(seasonPick==="off")return null;
+  if(seasonPick!=="auto")return S[seasonPick]?seasonPick:null;
+  const d=now||new Date(),key=d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();
+  if(!now&&seasonMemo.day===key)return seasonMemo.id;
+  const m=d.getMonth()+1,dd=d.getDate(),md=m*100+dd;
+  let id=null;
+  Object.entries(S).some(([k,v])=>{if(!v.from||!v.to)return false;
+    const a=v.from[0]*100+v.from[1],b=v.to[0]*100+v.to[1];
+    const inW=a<=b?(md>=a&&md<=b):(md>=a||md<=b); /* a window may wrap the new year */
+    if(inW)id=k;return inW;});
+  if(!now){const was=seasonMemo.id;seasonMemo.day=key;seasonMemo.id=id;
+    if(was!==id&&seasonMemo.day&&typeof t3Invalidate==="function")t3Invalidate();} /* it turned over at midnight */
+  return id;
+}
+function art(key,fb){const id=seasonNow(),v=id&&SEAS()[id].art;return v&&v[key]!==undefined?v[key]:fb;}
+function seasonSet(pick){
+  seasonPick=pick;seasonMemo.day="";
+  try{localStorage.setItem("mqseason",pick);}catch(e){}
+  if(typeof t3Invalidate==="function")t3Invalidate();
+  seasonRowBuild();
+}
+function seasonRowBuild(){ /* the row is built from content: auto, year-round, then each declared season by its own name */
+  const row=$("seasonRow"),lb=$("lbSeason");if(!row)return;
+  const S=SEAS(),ids=Object.keys(S),t=T();
+  if(lb)lb.hidden=!ids.length;row.hidden=!ids.length;
+  row.innerHTML="";
+  [["auto",t.seasonAuto],["off",t.seasonOff]].concat(ids.map(k=>[k,(S[k].label&&(S[k].label[lang]||S[k].label.en))||k]))
+    .forEach(([k,label])=>{const b=document.createElement("button");b.dataset.sn=k;b.textContent=label;
+      b.setAttribute("aria-pressed",seasonPick===k?"true":"false");
+      b.addEventListener("click",()=>seasonSet(k));row.appendChild(b);});
+}
 document.querySelectorAll("#themeRow button,#thCustom").forEach(b=>b.addEventListener("click",()=>{themeName=b.dataset.th;applyTheme();}));
 /* --- contrast math (same WCAG formula the CI audit uses) --- */
 const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
@@ -2217,6 +2261,7 @@ function applyLang(){
   $("lbStakes").textContent=t.lbStakes;$("stkNone").textContent=t.stkNone;$("stkHearts").textContent=t.stkHearts;
   $("lbTheme").textContent=t.lbTheme;
   $("lbCam").textContent=t.lbCam;
+  if($("lbSeason")){$("lbSeason").textContent=t.lbSeason;seasonRowBuild();}
   document.querySelectorAll("#camRow button").forEach(b=>{
     b.textContent=b.dataset.cam==="top"?t.camTop:b.dataset.cam==="front"?(t.camFront||"⬆ 2.5D")
                  :b.dataset.cam==="3d"?(t.cam3d||"⛰ 3D"):t.camIso;

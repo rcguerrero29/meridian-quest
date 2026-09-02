@@ -964,7 +964,22 @@ legibility pass is its own sitting or rides along with the 3D/world session in �
 
 ---
 
-### 15.9 SEASONS — the design is constant, the palette is the season (owner, 2026-09-01)
+### 15.9 SEASONS — SEAM BUILT 2026-09-02 (S0 item 4), bridge as the proving run
+
+**Shipped:** `SEASONS` in `content/meridian/config.js` (one season, `muertos`, Oct 18 –
+Nov 3, a DRAFT palette the owner signs off); in the engine `art(key, fallback)`,
+`seasonNow()` (by the calendar, read once a day, turning over at midnight re-bakes 3D),
+`seasonSet()` (persists as `mqseason`, re-bakes 3D) and a Settings row built from
+content — *by the calendar · year-round · Día de Muertos*. `TILEDRAW["^"]` paints its
+six bands through `art("bridge", BRIDGE_BANDS)`; planks and rails stay design. The
+portability guard now also bans `muertos`/`otono` from the engine. Test in `smoke.js`
+(*a season changes colour, never design*): off → fallback; forced → the pack palette
+reaches the bridge pixel; auto → first and last day in, mid-June out; persists; 3D
+rebuilds; the row has the season's button. **Not yet widened** — jacaranda, awnings and
+the light wash are the next `art()` keys once the owner has seen the bridge.
+
+*The original record, kept as written:*
+
 
 Owner's answer to the bridge-palette question, and it is better than any of the three
 options I offered: *"add another mode for fall/halloween and thats where the rainbow

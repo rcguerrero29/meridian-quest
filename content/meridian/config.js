@@ -48,6 +48,20 @@ const GROWTH={
   /* and who runs the fitting room once it is open */
   wardrobeNpc:"xochi"
 };
+/* SEASONS — a season changes COLOUR, never design (owner, 2026-09-01: "if someone
+   changes the palette, it can change but keep the general design"). The engine knows
+   only that there is a current season and that it may override world-art keys through
+   art(key, fallback); the names, dates and colours live here. Arrives on its own by
+   the calendar (`from`/`to` are [month, day], inclusive, and may wrap the new year);
+   Settings offers "by the calendar", "year-round", or any season by name.
+   One season, named for Día de Muertos (signed 2026-09-01, IDEAS §15.9) — the bridge
+   is a memorial crossing, so the palette is remembrance: cempasúchil orange, papel
+   picado pink and purple, candle yellow, teal. DRAFT palette — the owner signs it off.
+   `bridge` is the proving run; jacaranda, awnings and the light wash widen it later. */
+const SEASONS={
+  muertos:{label:{en:"Día de Muertos",es:"Día de Muertos"},from:[10,18],to:[11,3],
+    art:{bridge:["#E0483C","#F07C24","#F2B705","#E8478F","#7B4BA8","#2FA5A0"]}}
+};
 const CHAPTERS=[
  /* need:12 of 16 — ANY twelve, from anywhere in the district. week1 is not "the
     office": it spans HQ (0-9, 14), La Cocina (10, 11), La Obra (12, 13) and the
