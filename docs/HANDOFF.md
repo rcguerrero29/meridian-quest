@@ -121,7 +121,7 @@ completion/interaction data worth tracking across devices, revisit Phase 2 in
    it.** Two tools, both cheap, added 2026-09-01 because automated tests proved the
    maps were sound while a door lay flat on the floor and a whole restaurant was
    unidentifiable:
-   - `node test/tilesheet.js` — **the cold read.** Renders every tile at 4x labelled
+   - `node test/tilesheet.js` (two sheets: `13-all-tiles.png` top-down, `13b-side-tiles.png` the side views the front and 3D cameras stand up) — **the cold read.** Renders every tile at 4x labelled
      ONLY by its glyph. Write down what each one says to you BEFORE checking what it
      was meant to be. If a newcomer could not name it, the art is not done.
    - `node test/shots.js` — the scene pass. Screenshots listed spots per camera into

@@ -46,5 +46,31 @@ const CAND=[process.env.CHROMIUM_PATH,'/opt/pw-browsers/chromium_headless_shell-
   });
   await pg.waitForTimeout(400);
   await (await pg.$('#sheet')).screenshot({path:path.resolve(__dirname,'..','shots','13-all-tiles.png')});
+  /* the side views — what the front and 3D cameras stand up. Same cold read: name it alone. */
+  await pg.evaluate(()=>{
+    document.getElementById('sheet').remove();
+    const glyphs=Object.keys(TILESIDE);
+    const COLS=8,CELL=108,PAD=10,rows=Math.max(1,Math.ceil(glyphs.length/COLS));
+    const c=document.createElement('canvas');c.id='sheet';
+    c.width=COLS*CELL+PAD*2;c.height=rows*CELL+PAD*2;
+    c.style.cssText=`position:fixed;left:0;top:0;z-index:99999;background:#EFE9DE;image-rendering:pixelated;width:${c.width}px;height:${c.height}px;`;
+    document.body.appendChild(c);
+    const g=c.getContext('2d');g.imageSmoothingEnabled=false;
+    const old=ctx;
+    glyphs.forEach((gl,i)=>{
+      const cx=PAD+(i%COLS)*CELL, cy=PAD+Math.floor(i/COLS)*CELL;
+      const t=document.createElement('canvas');t.width=32;t.height=32;
+      ctx=t.getContext('2d');
+      try{ TILESIDE[gl]({sx:0,sy:0,x:1,y:1,canopy:()=>{}}); }catch(e){}
+      ctx=old;
+      g.fillStyle='#FFF';g.fillRect(cx+4,cy+4,84,84);
+      g.drawImage(t,0,0,32,32,cx+6,cy+6,80,80);
+      g.fillStyle='#221F2B';g.font='700 16px monospace';
+      g.fillText(JSON.stringify(gl)+' side',cx+6,cy+104);
+    });
+    ctx=old;
+  });
+  await pg.waitForTimeout(300);
+  await (await pg.$('#sheet')).screenshot({path:path.resolve(__dirname,'..','shots','13b-side-tiles.png')});
   await b.close();console.log('sheet written');
 })();
