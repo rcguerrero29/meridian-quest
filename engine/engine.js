@@ -3178,7 +3178,9 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("tpSkip").addEventListener("click",()=>{stripPassHash();$("tpFound").hidden=true;});
 })();
 applyAdmin();applyStakes();applyLang();applyCtl();applyTheme();camSet(camMode);
-$("verTag").textContent="Meridian Quest · "+(typeof GAMEV!=="undefined"?GAMEV:"dev");
+/* the version shows on the opening page AND in Settings (owner 2026-09-02: "so i know
+   which im using") — the number a phone actually loaded, not the one a branch claims */
+[$("verTag"),$("verIntro")].forEach(el=>{if(el)el.textContent="Meridian Quest · "+(typeof GAMEV!=="undefined"?GAMEV:"dev");});
 try{if(sessionStorage.getItem("mqupd")==="1"){sessionStorage.removeItem("mqupd");
   setTimeout(()=>toast("⬆️ "+(typeof GAMEV!=="undefined"?GAMEV:"")+" — "+T().updToast,3200),900);}}catch(e){}
 if(NET.enabled)NET.boot();

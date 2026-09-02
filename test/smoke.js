@@ -1098,6 +1098,20 @@ const CANDIDATES = [
   });
   fails.push(...doorLook);
 
+  // ---- the version is on the opening page, not only buried in Settings ----
+  // Owner 2026-09-02: "move the version to the first/opening page so i know which im
+  // using. also keep in settings but i want it there." Both must show GAMEV exactly.
+  const ver = await page.evaluate(() => {
+    const problems = [];
+    const a = document.getElementById('verIntro'), b = document.getElementById('verTag');
+    if (!a) problems.push('no #verIntro on the opening page');
+    else if (!a.textContent.includes(GAMEV)) problems.push(`opening page shows "${a.textContent}", not ${GAMEV}`);
+    else if (!document.getElementById('intro').contains(a)) problems.push('#verIntro is not inside the intro panel');
+    if (!b || !b.textContent.includes(GAMEV)) problems.push('Settings no longer shows the version');
+    return problems;
+  });
+  fails.push(...ver);
+
   // ---- the camera the pack asks for is the camera you get, and it sticks ----
   const cam = await page.evaluate(() => {
     const problems = [];
