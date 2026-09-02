@@ -36,13 +36,15 @@ function t3CheckK(){ /* a DPR change (fullscreen, a window dragged between monit
    t: a pinned clock for the artist (rc.t). An animated glyph — the door's pulsing
    light — bakes the same frame every build, at its brightest; the pulse itself is
    animated in 3D by t3Glow, not frozen at whatever the bake happened to catch. */
-function t3BakeGlyph(g,opaque,base,raw,side,frame){
+function t3BakeGlyph(g,opaque,base,raw,side,frame,x,y){
   const K=T3.K,c=document.createElement("canvas");c.width=32*K;c.height=32*K;
   const old=ctx;ctx=c.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
   try{
     if(opaque){ctx.fillStyle=raw?(base||C.wall):tc(base||C.wall);ctx.fillRect(0,0,32,32);}
-    /* a standing cutout wears its SIDE view (TILESIDE), never its top-down drawing */
-    const tf=side?sideArt(g):TILEDRAW[g];if(tf)tf({sx:0,sy:0,x:0,y:0,t:380*Math.PI/2,canopy:()=>{}});
+    /* a standing cutout wears its SIDE view (TILESIDE), never its top-down drawing. x,y
+       reach the artist so a drawing that varies by tile (a box stacked on odd tiles, a
+       coffee machine every third counter tile) varies here too. */
+    const tf=side?sideArt(g):TILEDRAW[g];if(tf)tf({sx:0,sy:0,x:x|0,y:y|0,t:380*Math.PI/2,canopy:()=>{}});
     /* a light frame baked around a door face, so it reads against a dark wall from across
        the room (owner, 2026-09-02: "hard to see some doors") */
     if(frame){ctx.fillStyle=frame;ctx.fillRect(0,0,32,3);ctx.fillRect(0,29,32,3);ctx.fillRect(0,0,3,32);ctx.fillRect(29,0,3,32);}
@@ -204,9 +206,12 @@ function t3Build(key){
       const cs=new THREE.Sprite(new THREE.SpriteMaterial({map:T3.canopyTex}));
       cs.scale.set(1.7,1.7,1);cs.position.set(cx,1.05,cz);
       T3.tintables.push(cs.material);grp.add(cs);
-    }else{ /* furniture, props, appliances, the doghouse: standing cutouts, drawn for the front */
-      flatTex[gch]=flatTex[gch]||t3Tex(t3BakeGlyph(gch,false,null,false,true));
-      const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[gch]}));
+    }else{ /* furniture, props, appliances, the doghouse: standing cutouts, drawn for the front.
+              One bake per glyph AND per (x+y) mod 6 — enough for any parity an artist uses,
+              at most six pictures per glyph — so a drawing that varies by tile still varies. */
+      const vk=gch+"|"+(((x+y)%6)+6)%6;
+      flatTex[vk]=flatTex[vk]||t3Tex(t3BakeGlyph(gch,false,null,false,true,null,x,y));
+      const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[vk]}));
       s.center.set(0.5,0.06);s.scale.set(1.05,1.05,1);
       s.position.set(cx,0,cz);
       T3.tintables.push(s.material);grp.add(s);
