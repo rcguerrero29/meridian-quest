@@ -110,11 +110,11 @@ phase, Phases 2-5" cannot run as written until three things generalize:
   `const E=last?[t.mepi1,t.mepi2,t.mepi3]:[t.epi1,t.epi2,t.epi3]`. Add a third district
   and the taller prints the mercado's ending while the mercado prints Week One's.
   → every district declares its own `epi:[k3,k2,k1]` and `open:"<toastKey>"`.
-- **The handover doorstep is hardcoded to the mercado's front step.**
-  `engine/engine.js:2013` — `px=fx=6;py=fy=12`. → each ribbon declares its `doorstep`.
-- **`GROWTH.ribbon` is singular.** `ribbonUp()` at :179 and `applyRibbon()` at :3263
-  handle exactly one storefront. → `ribbons[]`, with a `g.ribbons||(g.ribbon?[g.ribbon]:[])`
-  shim so AJ's pack and older declarations keep working.
+- ~~**The handover doorstep is hardcoded to the mercado's front step.**~~ **Lifted 2026-09-02:**
+  each ribbon declares its `doorstep`; the engine walks you nowhere of its own choosing.
+- ~~**`GROWTH.ribbon` is singular.**~~ **Lifted 2026-09-02:** `ribbons[]`, one per storefront,
+  each rising on its own district, with the `g.ribbons||(g.ribbon?[g.ribbon]:[])` shim so
+  AJ's pack and older declarations keep working. The record's 200-entry cap went the same day.
 
 None of these name the taller, so they stay legal under "the engine may never name a
 pack's content" — they are the seam that has to be paid once, exactly like the

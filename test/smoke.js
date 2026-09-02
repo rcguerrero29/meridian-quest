@@ -1107,6 +1107,69 @@ const CANDIDATES = [
            if (iso.unknown !== 14) fails.push('iso lost its 14px default for an undeclared glyph'); }
   }
 
+  // ---- the record keeps every decision — it never silently drops your earliest work ----
+  // Owner 2026-09-02: "I thought we fixed this 200 entries thing". It was not fixed: the
+  // play log was cut to its last 200 entries on every write, so a five-district city
+  // would lose its first districts from the portfolio without a word. Nothing you make
+  // is taken away — the cap is gone, and a storage failure is warned about, not hidden.
+  const keep = await page.evaluate(() => {
+    const problems = [];
+    const before = { dlog: dlog.slice(), stored: localStorage.getItem('mqdlog'), cur, curQ, node };
+    dlog = []; cur = 0; curQ = AQ()[0]; node = curQ.start;
+    const c = curQ.nodes[node].ch.find(x => x.out) || curQ.nodes[node].ch[0];
+    for (let i = 0; i < 260; i++) logDecision(c.out || { r: 'ok', concept: 'x', why: 'y' }, c);
+    if (dlog.length !== 260) problems.push(`logged 260 decisions, the record holds ${dlog.length}`);
+    let stored = []; try { stored = JSON.parse(localStorage.getItem('mqdlog') || '[]'); } catch (e) {}
+    if (stored.length !== 260) problems.push(`the phone stored ${stored.length} of 260 decisions`);
+    dlog = before.dlog; cur = before.cur; curQ = before.curQ; node = before.node;
+    if (before.stored === null) localStorage.removeItem('mqdlog'); else localStorage.setItem('mqdlog', before.stored);
+    return problems;
+  });
+  fails.push(...keep);
+
+  // ---- the city can raise more than one storefront, and each says where you stand ----
+  // Owner 2026-09-02: "not stopping at a certain amount of store fronts" — it was still
+  // stopping at one: GROWTH.ribbon held a single storefront, and the handover walked you
+  // to the mercado's front step, hardcoded in the engine. Now a pack declares ribbons[]
+  // (the old singular ribbon still works), each with its own doorstep.
+  const ribs = await page.evaluate(() => {
+    const problems = [];
+    const g = GROWTH, keep = { ribbons: g.ribbons, chSeen, world, px, py, done: new Set(done), hearts };
+    const st = () => WORLDS.st.rows[1][1];
+    if (typeof ribbons !== 'function') return ['the engine has no ribbons() list'];
+    // the singular declaration still counts as a list of one
+    if (ribbons().length !== 1 || ribbons()[0] !== g.ribbon) problems.push('the old singular ribbon is not read as a list of one');
+    if (!g.ribbon.doorstep || g.ribbon.doorstep.x !== 6 || g.ribbon.doorstep.y !== 12) problems.push('the pack does not declare the mercado\'s doorstep (the engine used to hardcode it)');
+    // two storefronts: each rises when its own district opens
+    g.ribbons = [g.ribbon, { world: 'st', district: 2, tiles: [[1, 1, 'P']], doorstep: { world: 'st', x: 1, y: 2, dir: 'up' } }];
+    done = new Set(); chSeen = 0; applyGrowth();
+    if (ribbonUp()) problems.push('a storefront is up before any district opened');
+    chSeen = 1; applyGrowth();
+    if (!ribbonUp(g.ribbons[0])) problems.push('the first storefront did not rise on its district');
+    if (ribbonUp(g.ribbons[1]) || st() === 'P') problems.push('the second storefront rose a district early');
+    chSeen = 2; applyGrowth();
+    if (!ribbonUp(g.ribbons[1]) || st() !== 'P') problems.push('the second storefront never rose — the city still stops at one');
+    // the handover doorstep comes from the storefront that just opened, not from the engine
+    delete g.ribbons; chSeen = 0; applyGrowth();
+    world = 'hq'; px = fx = 10; py = fy = 11; document.getElementById('end').hidden = false;
+    document.getElementById('endGo').click();
+    if (chSeen !== 1) problems.push('the handover did not open the next district');
+    if (world !== 'st' || px !== 6 || py !== 12) problems.push(`the handover left you at ${world} (${px},${py}) — expected the declared doorstep st (6,12)`);
+    // with no doorstep declared, the handover leaves you where you were
+    const ds = g.ribbon.doorstep; delete g.ribbon.doorstep;
+    chSeen = 0; applyGrowth(); world = 'hq'; px = fx = 10; py = fy = 11;
+    document.getElementById('end').hidden = false; document.getElementById('endGo').click();
+    if (world !== 'hq' || px !== 10 || py !== 11) problems.push('with no doorstep declared the engine still walked you somewhere of its own choosing');
+    g.ribbon.doorstep = ds;
+    // put the city back
+    if (keep.ribbons) g.ribbons = keep.ribbons; else delete g.ribbons;
+    done = keep.done; chSeen = keep.chSeen; hearts = keep.hearts; applyGrowth();
+    world = keep.world; px = fx = keep.px; py = fy = keep.py;
+    document.getElementById('end').hidden = true; document.getElementById('world').hidden = false; setWorldTag(); checkTalk();
+    return problems;
+  });
+  fails.push(...ribs);
+
   // ---- the room upstairs: two neighbours ask, nothing is graded, the sheet is hers ----
   // Owner 2026-09-02: "lets make it so that AJ can interact through the characters with
   // you if possible ... i dont want an api setup". So: the characters ask IN the game,

@@ -46,11 +46,11 @@ engine, all landing in **S1**, none of them naming a business.
 | What | Where | Why it blocks |
 |---|---|---|
 | `finish()` has exactly two epilogue sets | `engine.js:2000` *(line numbers checked 2026-09-02; they drift)* | a third district prints the wrong ending — the taller would play the mercado's Saturday |
-| the handover doorstep is hardcoded | `engine.js:2013` | `px=fx=6;py=fy=12` is the mercado's front step, sitting in the engine |
-| `GROWTH.ribbon` is singular | `engine.js:162`, `:3032` | one storefront, full stop |
+| ~~the handover doorstep is hardcoded~~ | **shipped 2026-09-02** | each storefront declares its own `doorstep`; with none declared you stay where you were |
+| ~~`GROWTH.ribbon` is singular~~ | **shipped 2026-09-02** | `ribbons[]`, one per storefront, each rising on its own district; the old singular still works. Owner: "I thought we fixed this" — it was not, now it is |
 | `NPCLOOK` is one flat global table | `npcs.js:14`, `engine.js:1949` | the taller's cast collides with Tovar, Chuy and Marcus — Don Tacho would wear Tovar's colours |
 | `GROWTH` cannot read a grade | `engine.js:3004`, `:3031` | the taller's endings change the world (cat on the Caprice, assistant switched off) and the code has no idea how well you did |
-| the report truncates at 200 entries | `engine.js:2495` | a five-district city is ~85 decision points before retries; restart never clears it. **Your earliest districts vanish from the portfolio, silently** |
+| ~~the report truncates at 200 entries~~ | **shipped 2026-09-02** | the record keeps every decision; if the phone refuses the write it says so once instead of dropping the oldest. Owner: "I thought we fixed this 200 entries thing" — it was not, now it is |
 | the uppercase tile alphabet is spent | `engine.js:10` | new glyphs must be digits and symbols from here — the first, `\|` the window, lives in `content/meridian/art.js` (2026-09-02) |
 | **a delivery is one tile** | S1's furniture registry, not yet written | surfaced by "who is the room for": a team room's one piece is a *set* (a table and its chairs). Let a delivery be a group of tiles from the start — cheap now, expensive after five packs declare theirs (Don Güero) |
 

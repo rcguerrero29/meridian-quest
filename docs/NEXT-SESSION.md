@@ -48,8 +48,15 @@ quote a version number to the owner without checking what `main` actually serves
 session's own resume summary lost the S0 sitting once — the branch knew, the summary did
 not. `git log` first, always.
 
-**Next is S1 — la cimentación** (backlog §1): the engine ceiling. Nothing visible ships
-from it and that is said out loud. It is now also what the office waits on.
+**Three of the ceiling's seven items fell on 2026-09-02** because the owner asked ("I
+thought we fixed this 200 entries thing and not stopping at a certain amount of store
+fronts"): the record keeps every decision, storefronts are a list (`ribbons[]`, the old
+singular still works), and each storefront declares its own handover doorstep. Still
+standing, and still what a THIRD district needs before it can end: per-district epilogues
+(`finish()` has two sets), the `NPCLOOK` letter collision, and `GROWTH` reading a grade.
+
+**Next is S1 — la cimentación** (backlog §1), now smaller. Nothing visible ships from it
+and that is said out loud. It is also what the office furniture waits on.
 
 ## The backlog lives in `docs/BACKLOG.md`
 

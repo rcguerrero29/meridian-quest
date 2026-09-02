@@ -41,8 +41,10 @@ const GROWTH={
     /* applied once every stage is up */
     done:{moveNpc:{key:"e",x:7,y:7},                 /* Lupe moves streetside */
           seal:{y0:6,y1:8,x0:15,x1:28,tile:"B"}}},   /* the finished building is solid */
-  /* a district's storefront ribbon, applied once that district has opened */
-  ribbon:{world:"st",district:1,tiles:MERCADO},
+  /* a district's storefront ribbon, applied once that district has opened. `doorstep`
+     is where the handover stands you — the mercado's front step. A pack may declare
+     `ribbons:[…]` instead (one per storefront); this singular form still works. */
+  ribbon:{world:"st",district:1,tiles:MERCADO,doorstep:{world:"st",x:6,y:12,dir:"down"}},
   /* any attempt at this quest opens the wardrobe — the extra, not the quest */
   wardrobeQuest:15,
   /* and who runs the fitting room once it is open */
