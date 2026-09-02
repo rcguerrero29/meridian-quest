@@ -127,7 +127,8 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 Verified in the engine on 2026-09-01, not inferred. The ledger's "one business per
 phase, Phases 2-5" cannot run as written until three things generalize:
 
-- **`finish()` has exactly two epilogue sets.** `engine/engine.js:2000` *(line numbers re-checked 2026-09-02; they drift — BACKLOG §1 is kept current)* —
+- ~~**`finish()` has exactly two epilogue sets.**~~ **Lifted 2026-09-02:** a district declares
+  `epi`/`go`/`open` in CHAPTERS; the old two-set rule is the fallback. Was `engine/engine.js:2000` —
   `const E=last?[t.mepi1,t.mepi2,t.mepi3]:[t.epi1,t.epi2,t.epi3]`. Add a third district
   and the taller prints the mercado's ending while the mercado prints Week One's.
   → every district declares its own `epi:[k3,k2,k1]` and `open:"<toastKey>"`.

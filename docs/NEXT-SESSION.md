@@ -49,6 +49,14 @@ get a light frame and a bigger light pool; furniture gets side views (`TILESIDE`
 §15.11) starting with the table, the counter and the stove, and the barricade no longer
 reads as a ladder. Any other prop the owner names gets a side view the same way.
 
+**Also (branch, `mq-v50`):** four reports from the owner's phone fixed (IDEAS §15.12): the
+pigeon no longer steals the tap meant for Don Güero, a marker floats over doors you are
+near, construction fences stand along their run in 3D. And two more ceiling items fell
+for the four new districts: per-district ending strings (`CHAPTERS[i].epi/go/open`) and
+looks keyed by npc id. **The rest of the story is in production** — Nacho's four-district
+plan and Don Güero's four lots were commissioned this sitting; see the state of the
+branch and `docs/story/` when they land.
+
 **Deliberately not yet:** nothing changes in the room while she answers (the deliveries —
 an eighth of a sitting of engine work, the rest is drawing); the window's view advancing a
 stage per finished business (content-only, but not testable until districts close).

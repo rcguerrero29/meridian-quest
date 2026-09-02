@@ -1,5 +1,5 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
-const GAMEV="mq-v49";
+const GAMEV="mq-v50";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -72,8 +72,13 @@ const CHAPTERS=[
     2026-09-01 (❗La puerta) because 16/16 meant Week One's ending only fired on a
     full sweep — making HQ the one place in Meridian you could not come back to, in
     the city whose law is that you always can. */
+ /* epi: the prefix of this district's three ending strings in strings.js (epi1..3);
+    go: its burnout ending; open: the toast when the next lot opens. Declared here so a
+    third district never prints another one's Saturday. */
  {id:"principal",quests:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],need:12,
+  epi:"epi",go:"goEpi",open:"weekTwoToast",
   role:{en:"AI Implementation Lead",es:"Líder de Implementación de IA"}},
  {id:"mercado",quests:[16,17,18,19,20,21,22,23],           need:5,
+  epi:"mepi",go:"mgoEpi",open:"endStayToast",
   role:{en:"AI Product Manager",es:"Product Manager de IA"}}
 ];

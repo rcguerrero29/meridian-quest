@@ -1131,6 +1131,125 @@ const CANDIDATES = [
   });
   fails.push(...side);
 
+  // ---- a person with something to say beats an animal for the button ----
+  // Owner 2026-09-02: "i get logs of the crosswalk while im trying to talk who i thought was
+  // don guero". The crosswalk line is the pigeon's. She wanders the street, and when she
+  // stepped beside the player the pet button appeared next to Talk; tap the wrong one and
+  // you get the bird. A quest person adjacent now hides the animal button.
+  const yield_ = await page.evaluate(() => {
+    const problems = [];
+    const before = { world, px, py, pig: { x: PIG.x, y: PIG.y, m: PIG.moving } };
+    world = 'st'; px = fx = 4; py = fy = 8; moving = false; held = null;   // below Don Güero at (4,7)
+    document.getElementById('card').hidden = true; document.getElementById('world').hidden = false;
+    PIG.x = 3; PIG.y = 8; PIG.moving = false;                                  // the pigeon beside you too
+    checkTalk(); fredCheck();
+    const talk = document.getElementById('talk'), treat = document.getElementById('treat');
+    if (talk.hidden || talk.dataset.qi === undefined) problems.push('standing beside Don Güero shows no quest Talk button');
+    if (!treat.hidden) problems.push('the pigeon still takes a button while a quest person is adjacent');
+    px = fx = 6; py = fy = 9; PIG.x = 6; PIG.y = 10; checkTalk(); fredCheck();   // away from him, bird still beside you
+    if (treat.hidden) problems.push('with nobody to talk to, the pigeon lost her button');
+    world = before.world; px = fx = before.px; py = fy = before.py; PIG.x = before.pig.x; PIG.y = before.pig.y; PIG.moving = before.pig.m;
+    checkTalk(); fredCheck();
+    return problems;
+  });
+  fails.push(...yield_);
+
+  // ---- a fence stands along its run in 3D, and a corner has two panels ----
+  // Owner 2026-09-02: the construction fences "are sideways ... laying around instead of
+  // fencing in construction". Every fence tile was a flat panel facing south, so a
+  // north-south run showed as a row of edge-on slats.
+  const fence3d = await page.evaluate(() => {
+    const problems = [];
+    const before = { cam: camMode, world, px, py };
+    camSet('3d'); world = 'st'; px = fx = 13; py = fy = 6; moving = false; held = null;
+    if (!draw3d() || T3.fail) { problems.push('3D did not render headless — fences could not be checked'); camSet(before.cam); return problems; }
+    const w = CW();
+    const isF = (x, y) => y >= 0 && y < w.H && x >= 0 && x < w.W && (TILES[w.rows[y][x]] || {}).kind === 'fence';
+    const seen = {};
+    T3.group.children.forEach(o => { const u = o.userData || {}; if (!u.fence) return;
+      const k = u.x + ',' + u.y; seen[k] = seen[k] || []; seen[k].push(Math.abs(o.rotation.y)); });
+    let checked = 0;
+    for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (isF(x, y)) {
+      const ns = isF(x, y - 1) || isF(x, y + 1), ew = isF(x - 1, y) || isF(x + 1, y);
+      const rots = seen[x + ',' + y] || [];
+      if (!rots.length) { problems.push(`fence at (${x},${y}) has no panel in 3D`); continue; }
+      checked++;
+      const wantNS = ns && !ew, corner = ns && ew;
+      if (corner) { if (rots.length < 2) problems.push(`fence corner at (${x},${y}) has one panel — it needs two`); }
+      else if (wantNS && !rots.some(r => Math.abs(r - Math.PI / 2) < 1e-6)) problems.push(`fence at (${x},${y}) runs north-south but its panel faces south`);
+      else if (!wantNS && !rots.some(r => r < 1e-6)) problems.push(`fence at (${x},${y}) runs east-west but its panel is turned`);
+    }
+    if (!checked) problems.push('no fence tiles found on the street map');
+    camSet(before.cam); world = before.world; px = fx = before.px; py = fy = before.py;
+    return problems;
+  });
+  fails.push(...fence3d);
+
+  // ---- a marker floats over a door you are near, and only over doors that lead somewhere ----
+  // Owner 2026-09-02: "i think we should have a marker- would be good." The third door
+  // affordance: within three steps of a door that goes somewhere, a bouncing arrow.
+  const marks = await page.evaluate(() => {
+    const problems = [];
+    if (typeof doorMarks !== 'function' || typeof drawDoorMark !== 'function') return ['no doorMarks()/drawDoorMark() in the engine'];
+    const before = { world, px, py };
+    world = 'hq'; px = fx = 10; py = fy = 11;                   // two steps from the front door at (10,13)
+    let m = doorMarks();
+    if (!m.some(d => d.x === 10 && d.y === 13)) problems.push('two steps from HQ\'s front door, no marker');
+    if (m.some(d => !PORTALS.hq[d.ch])) problems.push('a marker over a door that leads nowhere');
+    px = fx = 8; py = fy = 12;                                   // beside an interior door "+" at (7,12)
+    m = doorMarks();
+    if (m.some(d => d.ch === '+')) problems.push('interior doors (no portal) got a marker');
+    px = fx = 10; py = fy = 5;                                   // far away
+    if (doorMarks().some(d => d.y === 13)) problems.push('the front door is marked from eight steps away');
+    try { const t = document.createElement('canvas'); t.width = 64; t.height = 64; drawDoorMark(t.getContext('2d'), 16, 30, 0); }
+    catch (e) { problems.push('drawDoorMark throws: ' + e.message); }
+    world = before.world; px = fx = before.px; py = fy = before.py;
+    return problems;
+  });
+  fails.push(...marks);
+
+  // ---- a district declares its own ending strings and its own "next lot" toast ----
+  // The engine held exactly two ending sets (Week One's and the mercado's), so a third
+  // district would print the wrong Saturday. Now a district may say which strings are
+  // its own; with nothing declared the old two-set behaviour stands.
+  const epis = await page.evaluate(() => {
+    const problems = [];
+    if (typeof epiKeys !== 'function') return ['no epiKeys() in the engine'];
+    const L = CHS(), k0 = L[0].epi, o0 = L[0].open;
+    delete L[0].epi; delete L[0].open;
+    let k = epiKeys(0, false);
+    if (k.pre !== 'epi' || k.go !== 'goEpi' || k.open !== 'weekTwoToast') problems.push(`undeclared first district: ${JSON.stringify(k)}`);
+    k = epiKeys(L.length - 1, true);
+    if (k.pre !== 'mepi' || k.go !== 'mgoEpi' || k.open !== 'endStayToast') problems.push(`undeclared last district: ${JSON.stringify(k)}`);
+    L[0].epi = 'mepi'; L[0].open = 'endStayToast';
+    k = epiKeys(0, false);
+    if (k.pre !== 'mepi' || k.open !== 'endStayToast') problems.push(`declared keys ignored: ${JSON.stringify(k)}`);
+    if (k0 === undefined) delete L[0].epi; else L[0].epi = k0;
+    if (o0 === undefined) delete L[0].open; else L[0].open = o0;
+    // Meridian's own districts declare theirs, so the fallback is never what ships
+    if (!L.every(c => c.epi && c.open)) problems.push('a Meridian district relies on the engine fallback for its ending strings');
+    L.forEach(c => ['1', '2', '3'].forEach(n => { if (!UI.en[c.epi + n] || !UI.es[c.epi + n]) problems.push(`district ${c.id}: ending string ${c.epi + n} missing in EN or ES`); }));
+    return problems;
+  });
+  fails.push(...epis);
+
+  // ---- a person's look is keyed by who they are, not by the map letter ----
+  // NPCLOOK was one flat table keyed by station letter, shared by every world — the
+  // taller's cast would have worn Tovar's colours. Now the npc id wins; the letter stays
+  // as the fallback so nothing shipped changes.
+  const looks = await page.evaluate(() => {
+    const problems = [];
+    if (typeof lookOf !== 'function') return ['no lookOf() in the engine'];
+    const n = WORLDS.st.npcs.find(x => x.npc === 'guero');
+    if (!n) return ['Don Güero is not on the street'];
+    if (lookOf(n) !== NPCLOOK[n.key]) problems.push('with no per-person look, the letter look must be used');
+    NPCLOOK.guero = { shirt: '#123456', skin: '#C08356', hair: '#000000', style: 'buzz' };
+    if (lookOf(n) !== NPCLOOK.guero) problems.push('a look keyed by npc id is ignored');
+    delete NPCLOOK.guero;
+    return problems;
+  });
+  fails.push(...looks);
+
   // ---- the record keeps every decision — it never silently drops your earliest work ----
   // Owner 2026-09-02: "I thought we fixed this 200 entries thing". It was not fixed: the
   // play log was cut to its last 200 entries on every write, so a five-district city

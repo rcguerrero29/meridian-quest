@@ -104,5 +104,26 @@
   "x": 6,
   "y": 6,
   "cam": "3d"
+ },
+ {
+  "name": "20-lot-fence-3d",
+  "w": "st",
+  "x": 13,
+  "y": 6,
+  "cam": "3d"
+ },
+ {
+  "name": "21-hq-door-marker-3d",
+  "w": "hq",
+  "x": 10,
+  "y": 11,
+  "cam": "3d"
+ },
+ {
+  "name": "22-hq-door-marker-top",
+  "w": "hq",
+  "x": 10,
+  "y": 11,
+  "cam": "top"
  }
 ]

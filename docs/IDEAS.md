@@ -1149,3 +1149,22 @@ Any of these the owner reports gets a side view the same way — one drawing, on
 
 **Not done:** a marker or label over a door when you stand near it (the third door
 affordance). The talk bar already names people; a door could get the same treatment.
+
+### 15.12 FOUR REPORTS FROM THE OWNER'S PHONE — BUILT 2026-09-02
+
+- **"logs of the crosswalk while im trying to talk to who i thought was don guero."** The
+  crosswalk line is the pigeon's ("The pigeon judges your crosswalk technique"). She
+  wanders the street; when she stepped beside the player at Don Güero's side, her pet
+  button appeared next to Talk and took the tap. **Fix:** a person with a quest beside you
+  hides the animal buttons. Step away to pet her.
+- **"i think we should have a marker."** The third door affordance: within three steps of
+  a door that leads somewhere, a bouncing arrow floats over it, in every camera
+  (`doorMarks()` / `drawDoorMark()`; the 3D one rides the actor-sprite pool). Interior
+  doors that go nowhere get nothing.
+- **"the fences in the construction … are sideways … laying around."** Every fence
+  panel in 3D faced south, so a north-south run showed as edge-on slats. **Fix:** a panel
+  stands along its run; a corner gets two panels. Under test on the street map.
+- **Two of the engine ceiling's remaining items fell** because the next four districts
+  need them: a district names its own ending strings and its own "next lot" toast
+  (`CHAPTERS[i].epi/go/open`, with the old two-set rule as the fallback), and a person's
+  look is keyed by who they are (`lookOf(n)`: npc id first, map letter second).

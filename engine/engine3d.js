@@ -185,9 +185,16 @@ function t3Build(key){
       box.position.set(cx,h/2,cz);box.userData={wall:kd==="wall",g:gch,x,y};grp.add(box);
     }else if(kd==="fence"){
       flatTex[gch]=flatTex[gch]||t3Tex(t3BakeGlyph(gch,false,null,false,true));
-      const p=new THREE.Mesh(new THREE.PlaneGeometry(1,0.8),
-        new THREE.MeshLambertMaterial({map:flatTex[gch],side:THREE.DoubleSide,transparent:true,alphaTest:0.3}));
-      p.position.set(cx,0.4,cz);grp.add(p);
+      /* a fence panel stands ALONG its run: a north-south run turns across X, a corner gets
+         two panels. Every panel used to face south, so a north-south run showed as a row
+         of edge-on slats "laying around" (owner, 2026-09-02). */
+      const fk=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&(TILES[w.rows[ay][ax]]||{}).kind==="fence";
+      const nsRun=fk(x,y-1)||fk(x,y+1),ewRun=fk(x-1,y)||fk(x+1,y);
+      const fm=new THREE.MeshLambertMaterial({map:flatTex[gch],side:THREE.DoubleSide,transparent:true,alphaTest:0.3});
+      const panel=rot=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(1,0.8),fm);
+        p.position.set(cx,0.4,cz);p.rotation.y=rot;p.userData={fence:true,x,y};grp.add(p);};
+      if(nsRun&&!ewRun)panel(Math.PI/2);else panel(0);
+      if(nsRun&&ewRun)panel(Math.PI/2);
     }else if(kd==="tree"){
       const trunk=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.7,0.16),
         new THREE.MeshLambertMaterial({color:0x6E4A2C}));
@@ -236,7 +243,7 @@ function t3Actors(){
   const list=[];
   const w=CW();
   w.npcs.forEach(n=>list.push({x:n.x,y:n.y,f:(g)=>{
-    drawPerson(g,2,6,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
+    drawPerson(g,2,6,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(hasSay(n)){g.font="700 13px sans-serif";g.fillStyle="#E0B45C";g.textAlign="center";
       g.fillText("❗",18,10+Math.sin(Date.now()/250)*2);g.textAlign="start";}
     else drawEmote(n,2,6); /* townsfolk stay busy in 3D too */
@@ -256,6 +263,7 @@ function t3Actors(){
       else if(cr.kind==="chi")drawChi(g,cr,2,6);}});});
   if(BALL&&BALL.world===world)list.push({x:BALL.fx,y:BALL.fy,f:g=>drawBall(g,2,6,BALL.phase,BALL.t)});
   list.push({x:fx,y:fy,f:g=>drawPerson(g,2,6,look,{dir,bob:moving?Math.sin(bob)*2:0,moving})});
+  doorMarks().forEach(d=>list.push({x:d.x,y:d.y,f:g=>drawDoorMark(g,2,22,0)}));
   const old=ctx;
   list.forEach((a,i)=>{
     const p=t3Sprite(i);

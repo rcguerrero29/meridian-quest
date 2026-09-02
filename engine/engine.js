@@ -383,7 +383,7 @@ function drawIso(){
   const bill=(gx,gy,fn)=>{const[cx,cy]=P(gx,gy);
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
   w.npcs.forEach(n=>bill(n.x,n.y,(bx,by)=>{
-    drawPerson(ctx,bx,by,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
+    drawPerson(ctx,bx,by,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     else drawEmote(n,bx,by);}));
@@ -400,6 +400,7 @@ function drawIso(){
       else if(cr.kind==="chi")drawChi(ctx,cr,bx,by);});});
   if(BALL&&BALL.world===world)bill(BALL.fx,BALL.fy,(bx,by)=>drawBall(ctx,bx,by,BALL.phase,BALL.t));
   bill(fx,fy,(bx,by)=>drawPerson(ctx,bx,by,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
+  doorMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawDoorMark(ctx,bx,by,0)));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
   /* shared time-of-day wash (door spills are top-down-only for now) */
   const dnow=new Date(),hr=dnow.getHours()+dnow.getMinutes()/60;
@@ -781,7 +782,7 @@ function drawFront(){
   const act=(gx,gy,fn)=>{const sx=gx*TS-camX,sy=gy*TS-camY;
     if(sx<-TS||sy<-TS-16||sx>VW||sy>VH)return;R.push({d:gy+0.55,f:()=>fn(sx,sy)});};
   w.npcs.forEach(n=>act(n.x,n.y,(sx,sy)=>{
-    drawPerson(ctx,sx,sy,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
+    drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     else drawEmote(n,sx,sy);}));
@@ -804,6 +805,7 @@ function drawFront(){
     else if(cr.kind==="chi")drawChi(ctx,cr,sx,sy);});});
   if(BALL&&BALL.world===world)act(BALL.fx,BALL.fy,(sx,sy)=>drawBall(ctx,sx,sy,BALL.phase,BALL.t));
   act(fx,fy,(sx,sy)=>drawPerson(ctx,sx,sy,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
+  doorMarks().forEach(d=>act(d.x,d.y,(sx,sy)=>drawDoorMark(ctx,sx,sy,14)));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
   CRIT.forEach(cr=>{if(cr.leashT>performance.now()&&cr.world===world)drawLeash(cr,camX,camY);});
   trees.forEach(([sx,sy])=>{ /* canopy pass, shared shape with top-down */
@@ -868,7 +870,7 @@ function draw(){
   w.npcs.forEach(n=>{
     const sx=n.x*TS-camX,sy=n.y*TS-camY;
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
-    drawPerson(ctx,sx,sy,npcWhimsy(n.key),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
+    drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     else drawEmote(n,sx,sy);
@@ -1704,6 +1706,18 @@ function loop(ts){
   if(!$("world").hidden)draw();
   requestAnimationFrame(loop);
 }
+/* the door marker — the third door affordance (owner, 2026-09-02: "i think we should have a
+   marker"). Within three steps of a door that LEADS somewhere, a bouncing arrow floats over
+   it in every camera. Doors that are only decoration (no portal) get nothing. */
+function doorMarks(){const w=CW(),out=[],P=PORTALS[world];if(!P)return out;
+  for(let y=Math.max(0,py-3);y<=Math.min(w.H-1,py+3);y++)for(let x=Math.max(0,px-3);x<=Math.min(w.W-1,px+3);x++){
+    const ch=w.rows[y][x];if(Math.abs(x-px)+Math.abs(y-py)<=3&&DOORSET.has(ch)&&P[ch])out.push({x,y,ch});}
+  return out;}
+function drawDoorMark(g,bx,by,up){ /* bx,by: the tile's top-left in that camera; up: extra lift above the wall */
+  const dy=Math.sin(Date.now()/300)*2.5;
+  g.font="700 15px sans-serif";g.textAlign="center";g.lineWidth=3;g.lineJoin="round";
+  g.strokeStyle="#2B2536";g.fillStyle="#FFE9A8";
+  g.strokeText("⬇",bx+16,by-4-(up|0)+dy);g.fillText("⬇",bx+16,by-4-(up|0)+dy);g.textAlign="start";}
 function checkTalk(){
   const n=CW().npcs.find(n=>Math.abs(n.x-px)+Math.abs(n.y-py)===1&&(pendingAt(n)!==undefined||n.chat));
   if(n){const qi=pendingAt(n),tb=$("talk"),rh=roomHosts[n.npc];
@@ -1743,7 +1757,11 @@ $("talk").addEventListener("click",()=>{
 let petTarget=null,petCrit=null;
 function fredCheck(){ /* now the generic animal-interaction check: every creature is reachable and greetable */
   let tgt=null,label="";
-  if(!$("world").hidden&&!moving){
+  /* a person with a quest beside you wins the buttons — the pigeon wandered next to the
+     player at Don Güero's side and her button took the tap meant for him (owner,
+     2026-09-02: "logs of the crosswalk while im trying to talk"). Step away to pet her. */
+  const personFirst=!$("talk").hidden&&$("talk").dataset.qi!==undefined;
+  if(!$("world").hidden&&!moving&&!personFirst){
     if(world==="hq"&&!DOG.moving&&Math.abs(DOG.x-px)+Math.abs(DOG.y-py)===1){tgt="fred";label=T().treatLb;}
     else if(world==="lc"&&!CAT.moving&&Math.abs(CAT.x-px)+Math.abs(CAT.y-py)===1){tgt="cat";label=T().petCat;}
     else if(world==="st"&&!PIG.moving&&Math.abs(PIG.x-px)+Math.abs(PIG.y-py)===1){tgt="pig";label=T().petPig;}
@@ -2043,8 +2061,11 @@ function finish(burnout){
   $("endScore").textContent=burnout?t.goScore(xp,done.size,AQ().length)
                            :livesOn()?t.endScore(xp,MAXXP,Math.max(0,hearts))
                            :t.endGrade(xp,MAXXP,t.grades[g-1]);
-  const E=last?[t.mepi1,t.mepi2,t.mepi3]:[t.epi1,t.epi2,t.epi3];
-  $("epi").textContent = burnout?(last?t.mgoEpi:t.goEpi) : g>=3?E[0] : g===2?E[1] : E[2];
+  /* a district names its own ending strings (CHAPTERS[i].epi = the prefix of three keys,
+     .go = the burnout key); with nothing declared the old two-set rule stands. The engine
+     held exactly two sets, so a third district printed the wrong Saturday. */
+  const K=epiKeys(i,last),E=[t[K.pre+"1"],t[K.pre+"2"],t[K.pre+"3"]];
+  $("epi").textContent = burnout?t[K.go] : g>=3?E[0] : g===2?E[1] : E[2];
   $("endGo").textContent=last?t.endStay:t.endGo;$("endGo").hidden=false;
   $("end").hidden=false;
 }
@@ -2052,8 +2073,11 @@ function finish(burnout){
    layer. It closes nothing: every quest you walked past is still on offer, and the
    district you just finished stays open behind you. After the last one you keep the
    city and wander it. */
+function epiKeys(i,last){const c=CHS()[i]||{};
+  return {pre:c.epi||(last?"mepi":"epi"),go:c.go||(c.epi?c.epi+"Go":(last?"mgoEpi":"goEpi")),
+          open:c.open||(last?"endStayToast":"weekTwoToast")};}
 $("endGo").addEventListener("click",()=>{
-  const last=chSeen>=CHS().length-1;
+  const last=chSeen>=CHS().length-1;const K=epiKeys(Math.min(chSeen,CHS().length-1),last);
   chSeen=Math.min(chSeen+1,CHS().length);hearts=startHearts();
   applyGrowth();
   /* the handover doorstep: the storefront that just opened says where you stand. It was
@@ -2064,7 +2088,7 @@ $("endGo").addEventListener("click",()=>{
   if(isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
   wasFs=false;
   save();$("end").hidden=true;$("world").hidden=false;setWorldTag();hud();checkTalk();
-  toast(last?T().endStayToast:T().weekTwoToast,4000);
+  toast(T()[K.open]||(last?T().endStayToast:T().weekTwoToast),4000);
 });
 /* Wiping a city is never one tap. The story never sends you here — this is a tool. */
 $("replay").addEventListener("click",()=>{
@@ -2175,8 +2199,13 @@ function setCanvasTint(){
 }
 const tc=h=>{if(!tintCol)return h;let v=tintCache.get(h);
   if(!v){v=mixHex(h,tintCol,tintDark?0.22:0.16);tintCache.set(h,v);}return v;};
-const npcWhimsy=k2=>{if(!tintCol)return NPCLOOK[k2];let v=npcLookCache[k2];
-  if(!v){v={...NPCLOOK[k2],shirt:mixHex(NPCLOOK[k2].shirt,tintCol,0.4)};npcLookCache[k2]=v;}return v;};
+/* a person's look: by who they are (npc id) first, by their map letter second. NPCLOOK was
+   one flat table keyed by letter, shared by every world — a fourth cast would have worn the
+   first cast's colours. */
+const lookOf=n=>(n&&n.npc&&NPCLOOK[n.npc])||NPCLOOK[n&&n.key!==undefined?n.key:n];
+const npcWhimsy=n=>{const base=lookOf(n),k2=(n&&n.npc&&NPCLOOK[n.npc])?n.npc:(n&&n.key!==undefined?n.key:n);
+  if(!tintCol)return base;let v=npcLookCache[k2];
+  if(!v){v={...base,shirt:mixHex(base.shirt,tintCol,0.4)};npcLookCache[k2]=v;}return v;};
 function applyTheme(){
   if(themeName==="custom"&&!customTheme)themeName="meridian";
   const t2=themeName==="custom"?customTheme:THEMES[themeName],root=document.documentElement;
