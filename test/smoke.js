@@ -894,48 +894,48 @@ const CANDIDATES = [
   });
   fails.push(...maps);
 
-  // ---- a door you walk straight back into must let you back in ----
+  // ---- a door you are standing on must fire once its cooldown ends ----
   // The bug: portals were only ever checked on the frame a STEP ENDS. Walk out of HQ,
   // turn round, walk back — that step lands inside portalT's 900ms anti-ping-pong
   // window, so the tile is looked at once, rejected, and never looked at again. The
-  // door ignores you until you step off it and step on again. Nothing in the engine
-  // re-checked the ground under your feet, so the fix is a standing check, not a
-  // shorter cooldown (a shorter cooldown just moves the dead window, it does not
-  // remove it).
+  // door ignores you until you step off it and step on again. The fix is a standing
+  // check, not a shorter cooldown (a shorter cooldown moves the dead window, it does
+  // not remove it). No wall-clock walking here: the first version of this test went
+  // red and green on the same code depending on how fast headless Chromium ran.
   const reenter = await page.evaluate(async () => {
     const problems = [];
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const before = { cam: camMode, world, px, py };
-    camSet('top');            // yaw-free, so a held direction maps 1:1 to a world step
-    world = 'hq'; px = fx = 10; py = fy = 12; moving = false; held = null;
-    warpT = portalT = 0;      // a clean control step: no cooldown left over from an earlier section
-    held = 'down';            // onto HQ's front door at (10,13)
-    for (let i = 0; i < 60 && world !== 'st'; i++) await wait(50);
-    held = null;
-    if (world !== 'st') problems.push('walking onto HQ’s front door did not take you outside');
-    else {
-      if (px !== 14 || py !== 1) problems.push(`came out of HQ at (${px},${py}) — expected the doorstep (14,1)`);
-      const t0 = performance.now();
-      held = 'up';            // straight back in, DURING the anti-ping-pong window
-      for (let i = 0; i < 60 && world !== 'hq'; i++) await wait(50);
-      held = null;
-      if (world !== 'hq') problems.push('turned round, walked back into HQ, and the door ignored you');
-      else if (performance.now() - t0 > 2500) problems.push('the door let you back in, but took over 2.5s');
-    }
-    // the guard that makes a standing check safe: the tile a warp SET YOU DOWN on is
-    // inert until you leave it, even with the cooldown over and even if it is a door
-    world = 'st'; px = fx = 14; py = fy = 0; moving = false; held = null;
-    portalT = 0; portalHold = 'st:14,0';
-    if (tryPortal(performance.now())) problems.push('the tile a warp set you down on fired again — that is ping-pong');
-    portalHold = '';
-    if (!tryPortal(performance.now()) || world !== 'hq') problems.push('a door you walked onto, cooldown over, did not fire');
-    // the trolley stop is a menu, not a door: it must never reopen under your feet
+    camSet('top');
+    // 1. the ordinary case: a step that ENDS on HQ's front door goes through it
+    world = 'hq'; px = fx = 10; py = fy = 13; moving = true; mt = 1; held = null; portalT = 0; portalHold = '';
+    await wait(250);
+    if (world !== 'st' || px !== 14 || py !== 1) problems.push(`a step ending on HQ’s door left you in ${world} (${px},${py}) — expected the doorstep st (14,1)`);
+    // 2. the bug: standing on the street door, arrived DURING the cooldown
+    world = 'st'; px = fx = 14; py = fy = 0; moving = false; held = null; portalHold = '';
+    portalT = performance.now() + 100000;
+    await wait(250);
+    if (world !== 'st') problems.push('the door fired inside its anti-ping-pong window');
+    portalT = 0;                        // the window closes while you are still standing there
+    await wait(400);
+    if (world !== 'hq') problems.push('standing on a door after its cooldown ended, nothing re-checked the ground under your feet');
+    // 3. the guard that makes the standing check safe: the tile a warp SET YOU DOWN on
+    //    never fires until you step off it — even if a pack lands you on a portal
+    world = 'hq'; px = fx = 10; py = fy = 13; moving = false; held = null; portalT = 0;
+    portalHold = 'hq:10,13';
+    await wait(250);
+    if (world !== 'hq') problems.push('the tile a warp set you down on fired by itself — that is the ping-pong the cooldown existed to stop');
+    portalHold = '';                    // …and once the hold is gone, the same tile is a door again
+    await wait(250);
+    if (world !== 'st') problems.push('with the hold cleared, standing on the door still did nothing');
+    // Y (the trolley stop) must stay step-only: a menu you dismissed must not reopen under your feet
     world = 'st'; px = fx = 0; py = fy = 1; moving = false; held = null; portalT = 0; portalHold = '';
-    await wait(1100);
-    if (!document.getElementById('travel').hidden) problems.push('the trolley menu opened while you stood still on the stop');
+    document.getElementById('travel').hidden = true;
+    await wait(250);
+    if (!document.getElementById('travel').hidden) problems.push('the trolley menu reopened under your feet while you stood still');
     camSet(before.cam);
     world = before.world; px = fx = before.px; py = fy = before.py;
-    held = null; moving = false; setWorldTag();
+    held = null; moving = false; portalT = 0; portalHold = ''; setWorldTag();
     return problems;
   });
   fails.push(...reenter);
