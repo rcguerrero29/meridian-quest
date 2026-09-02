@@ -1,6 +1,8 @@
 [
- {"name":"01-hq-3d","w":"hq","x":10,"y":10,"cam":"3d"},
- {"name":"03-street-3d","w":"st","x":8,"y":11,"cam":"3d"},
- {"name":"09-mercado-front","w":"st","x":6,"y":11,"cam":"front"},
- {"name":"07-park-bridge-3d","w":"pk","x":8,"y":8,"cam":"3d"}
+ {"name": "01-hq-3d", "w": "hq", "x": 10, "y": 10, "cam": "3d"},
+ {"name": "02-hq-ns-door-3d", "w": "hq", "x": 8, "y": 12, "cam": "3d"},
+ {"name": "02b-hq-ns-door-3d-yaw90", "w": "hq", "x": 8, "y": 12, "cam": "3d", "yaw": 1.5708},
+ {"name": "03-street-3d", "w": "st", "x": 8, "y": 11, "cam": "3d"},
+ {"name": "07-park-bridge-3d", "w": "pk", "x": 8, "y": 8, "cam": "3d"},
+ {"name": "09-mercado-front", "w": "st", "x": 6, "y": 11, "cam": "front"}
 ]

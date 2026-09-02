@@ -940,6 +940,50 @@ const CANDIDATES = [
   });
   fails.push(...reenter);
 
+  // ---- in 3D a door stands in its wall, and a wall has a face on every side ----
+  // What the eyeball pass saw (IDEAS §15.3): the door plane had no rotation, so every
+  // door in a north-south wall stood 90° off its wall, floating; every north-south wall
+  // in HQ was a bare purple slab because only the ±Z faces of the box carried the art;
+  // a paper-thin door vanished at the two edge-on camera stops; and a slot showed above
+  // every door because the plane was 1 unit tall in a 1.1-unit wall.
+  const doors3d = await page.evaluate(() => {
+    const problems = [];
+    const before = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
+    camSet('3d'); world = 'hq'; px = fx = 10; py = fy = 11; moving = false; held = null;
+    if (!draw3d() || T3.fail) { problems.push('3D did not render headless — the doors could not be checked'); return problems; }
+    const w = CW();
+    const solid = (x, y) => (x < 0 || y < 0 || x >= w.W || y >= w.H) ? true : SOLID.has(w.grid[y][x]); // off-map is a wall
+    let want = 0;
+    for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (DOORSET.has(w.rows[y][x]) && !SOLID.has(w.grid[y][x])) want++;
+    let doors = 0, lintels = 0, glows = 0;
+    T3.group.children.forEach(o => {
+      const u = o.userData || {};
+      if (u.door) {
+        doors++;
+        const ns = solid(u.x, u.y - 1) && solid(u.x, u.y + 1) && !(solid(u.x - 1, u.y) && solid(u.x + 1, u.y));
+        const rot = Math.abs(o.rotation.y), exp = ns ? Math.PI / 2 : 0;
+        if (Math.abs(rot - exp) > 1e-6)
+          problems.push(`hq door (${u.x},${u.y}) is turned ${Math.round(rot * 180 / Math.PI)}° but its wall runs ${ns ? 'north-south' : 'east-west'}`);
+        if (!(o.geometry.parameters && o.geometry.parameters.depth > 0))
+          problems.push(`hq door (${u.x},${u.y}) has no thickness — it vanishes edge-on`);
+      }
+      if (u.lintel) lintels++;
+      if (u.glow) glows++;
+      if (u.wall) {
+        const ms = Array.isArray(o.material) ? o.material : [o.material];
+        const bare = [0, 1, 4, 5].filter(i => !ms[i] || !ms[i].map);
+        if (bare.length) problems.push(`wall '${u.g}' at (${u.x},${u.y}) is a bare slab on ${bare.length} of its 4 sides`);
+      }
+    });
+    if (doors !== want) problems.push(`hq has ${want} doors on the map and ${doors} standing in 3D`);
+    if (lintels < doors) problems.push(`${doors - lintels} of hq's ${doors} doors have a see-through slot above them (no lintel)`);
+    if (glows < doors) problems.push(`${doors - glows} of hq's ${doors} doors do not say "this one opens" in 3D`);
+    T3.yaw = before.yaw; camSet(before.cam);
+    world = before.world; px = fx = before.px; py = fy = before.py; held = null; moving = false;
+    return problems;
+  });
+  fails.push(...doors3d);
+
   // ---- the camera the pack asks for is the camera you get, and it sticks ----
   const cam = await page.evaluate(() => {
     const problems = [];

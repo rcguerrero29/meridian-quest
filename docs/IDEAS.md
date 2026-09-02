@@ -710,7 +710,32 @@ be there, because `dir` feeds both sprite facing and the move interpolation.
 
 ---
 
-### 15.3 DOORS — planned, NOT built (owner: "i dont want to build that yet")
+### 15.3 DOORS — BUILT 2026-09-02 (S0 item 2); one new finding logged below
+
+**Shipped, all in `engine/engine3d.js` `t3Build()`, test in `smoke.js` (*in 3D a door
+stands in its wall, and a wall has a face on every side*), before/after in `shots/`:**
+1. A door is turned to match its wall — walls north and south of it → it faces east-west.
+2. A `wall` box wears its art on all four sides; a `facade` keeps plain ends (a
+   building's corners are not its front). Every north-south wall in HQ has a face now.
+3. The door is a thin box (1 × 1 × 0.14), art on both broad faces, frame colour on the
+   edges, with a **lintel** above it cut from the neighbouring wall — the slot is gone,
+   and because the door is thinner than the wall, the wall's side shows as a recess.
+4. The "this one opens" light is a floor strip under the door, breathing on the same
+   clock as the 2D art (`t3Glow`). The bake itself is pinned to one frame via `rc.t`,
+   so a door bakes identically every build and shots are comparable.
+5. Edge-on at the two side stops a box shows its jamb instead of vanishing.
+6. The door bakes on an untinted base, so the 2px theme-coloured border is gone.
+
+**New finding from the eyeball pass (pre-existing, NOT this change):** stand on the
+north side of an interior wall — HQ (8,12), the wall is row 13 — and at the default
+stop the wall hides everything but your head. The camera is 6.2 high at 7.4 back, so
+its line to your feet crosses the wall's top (1.1) at about 0.94. The 0.34 pull toward
+the camera does not clear it. Options, cheapest first: fade any wall box between the
+camera and the hero; lower walls to ~0.9; raise the camera. None chosen — it is a
+separate item (backlog §3).
+
+*The original record, kept as written:*
+
 
 The maps are **not** the problem — the smoke suite now proves every shipped door is
 structurally sound. The wrongness is entirely in `engine3d.js:98-124`.

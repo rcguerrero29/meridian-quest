@@ -555,8 +555,9 @@ DOORSET.forEach(dch=>TILEDRAW[dch]=rc=>{const{sx,sy}=rc;
       ctx.fillStyle="#E0B45C";
       ctx.beginPath();ctx.arc(sx+12.5,sy+17,1.7,0,7);ctx.fill();
       ctx.beginPath();ctx.arc(sx+19.5,sy+17,1.7,0,7);ctx.fill();
-      /* light under the door, gently pulsing: this one opens (doors were reading as walls) */
-      ctx.globalAlpha=0.25+0.2*Math.sin(Date.now()/380);
+      /* light under the door, gently pulsing: this one opens (doors were reading as walls).
+         rc.t is a pinned clock for bakes (3D), so a baked door is the same frame every build */
+      ctx.globalAlpha=0.25+0.2*Math.sin((rc.t!==undefined?rc.t:Date.now())/380);
       ctx.fillStyle="#FFE9A8";ctx.fillRect(sx+4,sy+TS-3,TS-8,2);
       ctx.globalAlpha=1;
     });
