@@ -45,10 +45,10 @@ engine, all landing in **S1**, none of them naming a business.
 
 | What | Where | Why it blocks |
 |---|---|---|
-| `finish()` has exactly two epilogue sets | `engine.js:2000` *(line numbers checked 2026-09-02; they drift)* | a third district prints the wrong ending — the taller would play the mercado's Saturday |
+| ~~`finish()` has exactly two epilogue sets~~ | **shipped 2026-09-02** | a district declares `epi`/`go`/`open` — its own three endings, burnout line and next-lot toast; the old rule is the fallback |
 | ~~the handover doorstep is hardcoded~~ | **shipped 2026-09-02** | each storefront declares its own `doorstep`; with none declared you stay where you were |
 | ~~`GROWTH.ribbon` is singular~~ | **shipped 2026-09-02** | `ribbons[]`, one per storefront, each rising on its own district; the old singular still works. Owner: "I thought we fixed this" — it was not, now it is |
-| `NPCLOOK` is one flat global table | `npcs.js:14`, `engine.js:1949` | the taller's cast collides with Tovar, Chuy and Marcus — Don Tacho would wear Tovar's colours |
+| ~~`NPCLOOK` is one flat global table~~ | **shipped 2026-09-02** | a look is keyed by npc id first (`NPCLOOK.tacho`), map letter second — the taller's cast wears its own colours |
 | `GROWTH` cannot read a grade | `engine.js:3004`, `:3031` | the taller's endings change the world (cat on the Caprice, assistant switched off) and the code has no idea how well you did |
 | ~~the report truncates at 200 entries~~ | **shipped 2026-09-02** | the record keeps every decision; if the phone refuses the write it says so once instead of dropping the oldest. Owner: "I thought we fixed this 200 entries thing" — it was not, now it is |
 | the uppercase tile alphabet is spent | `engine.js:10` | new glyphs must be digits and symbols from here — the first, `\|` the window, lives in `content/meridian/art.js` (2026-09-02) |
@@ -87,7 +87,9 @@ engine, all landing in **S1**, none of them naming a business.
 | 8 | **`LEVELS` saturates at 120 XP** while MAXXP is 350 → ~470 | small | you hit "AI Legend" a third of the way through Week One |
 | 9 | **Error log** — 3D failure is swallowed in four places and leaves no trace | ~55 lines | designed in full. §15.5 |
 | 10 | **Lit windows never light in 3D** — the night glow on facades runs only in the flat cameras, and 3D is the default | small | found by Don Güero while pricing the office window (2026-09-02); the window deliberately does not use it. Build it in 3D or write it down as known |
-| 11 | ~~**Doors hard to see in 3D**~~ | **shipped 2026-09-02** | a light frame baked around every door face and on the jamb, and a bigger, brighter pool of light under it. Owner: "it is now hard to see some doors". §15.11. *Still open:* a marker over a door when you stand near it |
+| 11 | ~~**Doors hard to see in 3D**~~ | **shipped 2026-09-02** | a light frame baked around every door face and on the jamb, a bigger pool of light under it, and a bouncing marker over any door that leads somewhere when you are within three steps (owner: "i think we should have a marker"). §15.11, §15.12 |
+| 13 | ~~**The pigeon steals the tap** meant for Don Güero~~ | **shipped 2026-09-02** | a person with a quest beside you hides the animal buttons. §15.12 |
+| 14 | ~~**Construction fences lie sideways in 3D**~~ | **shipped 2026-09-02** | a fence panel stands along its run; corners get two. §15.12 |
 | 12 | ~~**Furniture stood up as cutouts** — the table read as a dartboard, the counter as a grey sign, the barricade as a ladder~~ | **first slice shipped 2026-09-02** | `TILESIDE`: a second drawing per prop for the cameras that see it standing; table, counter, stove done, barricade redrawn. The rest read acceptably in the frames and get a side view the moment the owner reports one. §15.11 |
 | 10 | **A wall between you and the camera hides you** — stand just north of an interior wall in 3D and only your head shows | ~1h | found 2026-09-02 by the eyeball pass, pre-existing. Fade the wall, lower walls, or raise the camera — not chosen. §15.3 |
 
