@@ -1168,3 +1168,63 @@ affordance). The talk bar already names people; a door could get the same treatm
   need them: a district names its own ending strings and its own "next lot" toast
   (`CHAPTERS[i].epi/go/open`, with the old two-set rule as the fallback), and a person's
   look is keyed by who they are (`lookOf(n)`: npc id first, map letter second).
+
+### 15.13 SIX REPORTS FROM THE OWNER'S LAPTOP AND PHONE — BUILT 2026-09-03
+
+Owner, playing `mq-v51` on a Mac browser and a phone: *"upon the completion of the first
+part and it says out on the street again … stuck in the initial page … 'Joystick or arrow
+keys to roam'"* · *"on a laptop i would like to use the keys"* · *"a building appears after
+finishing the permits conversation but it is not a smooth switch"* · *"most art only have
+one display from any direction"* · *"Sonny is picking up the ball with his butt"* · *"at
+370xp there isn't anyone to talk to"*. Every one reproduced in headless Chromium first;
+every fix has a test that was red before it.
+
+1. **The Saturday played again, then the street was blank.** Two bugs under one report.
+   `sanitizeSave()` — the loader every Continue and every Trolley Pass goes through —
+   never carried `cs` (districts claimed) or `mk` (the grades). So every Continue reset
+   the district counter to zero: with Week One's twelve done, `chDue()` was true again and
+   the ending replayed ("out on the street **again**"). Then the boot path that goes
+   straight into an ending never called `sizeCanvas()`, so after "Out to the street" the
+   canvas kept its hidden-time height of **0px**: the HUD and the control hint showed over
+   nothing. Fixed: the loader carries `cs`, `mk` and `so`; every return to the street goes
+   through `showWorld()`, which sizes the canvas; the boot-into-ending path applies the
+   control scheme. **Saves damaged by the bug are repaired at Continue:** a save with no
+   version stamp (`v`) rebuilds the counter from what was played — a district counts as
+   claimed when its need is met AND the next district was started, so a Saturday never
+   seen still plays once and one already seen does not replay. The owner's own save will
+   play the mercado's Saturday once more (its counter was reset), and that Saturday now
+   ends with Chelo phoning Tacho and the toast that opens the taller. **Grades already lost
+   cannot be rebuilt** — the report starts marking again from here.
+2. **Keys on a laptop.** Arrows and WASD already walked; capitals (caps lock, shift) and
+   physical key codes (a non-QWERTY layout) did not. `keyDir()` reads `key` then `code`.
+   Enter still talks to the person in front of you.
+3. **The building popped in.** The staged build was applied the instant the pick landed,
+   while the card covered the street, so the site had already changed when the card closed.
+   Now the change waits for the card and lands behind a short dark curtain (`#veil`, 0.42s
+   each way) with the "taking shape" toast after — `growthPend` + `curtain()`. If the same
+   pick closes the district, the ending's own scene cut takes over and the curtain is
+   skipped.
+4. **One face from every direction.** In 3D, furniture stood as camera-facing cutouts —
+   a billboard by definition shows one face. Best practice in 2.5D pixel games: **billboards
+   for round and organic things, boxes for boxy ones.** Furniture, appliances and anything
+   content marks `box:true` now stand as a box when the pack drew a side view (`TILESIDE`):
+   the side art wraps all four faces, measured to the drawn height so nothing floats, and
+   the top-down art is the lid. Tables, counters, the stove, the pack's shelves, cabinet,
+   bench, coffee machine and the moving boxes are boxes; a plant, a cone, a pile of tires
+   stay cutouts, which is the right shape for them. Shots `26`–`28` walk around La Cocina
+   and Floor 2. **Still one-faced, on purpose:** the HQ desk `D` and the other engine
+   furniture without a side view (`A H I S W`) — draw the side and they stand up as boxes
+   with no further code.
+5. **Sonny's ball.** The 2D painters mirror an animal by its WORLD facing (`face` = ±x);
+   a billboard always shows its painted face to the camera. Turn the camera to the north
+   stop and a dog trotting to world +x was painted facing screen-right while +x was now
+   screen-LEFT — so the ball he carries, placed at world +x, sat behind him. Facing is a
+   screen-space fact: `t3ScreenFace()` derives it from the camera stop and the actor's
+   velocity, and the hero's direction goes through `t3ScreenDir()` so a hero walking toward
+   the north camera shows their face, not their back.
+6. **"Nobody to talk to at 370 XP."** 370 = everything `mq-v50` had (Week One 230, the
+   mercado 120, Frederick's side quest 20). `mq-v51` added the four districts, but a lot
+   that opened while the phone was away was never announced. Now `lateOpenToast()` says it
+   once at Continue — the toast the district would have played — only while nobody there
+   has been talked to; seen toasts persist as `so`.
+

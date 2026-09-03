@@ -131,10 +131,11 @@ Object.assign(TILEART,TILE_PROPS,{
     ctx.fillStyle="#CFE9E8";ctx.fillRect(sx+5,sy+12,22,14);
     ctx.fillStyle="#3FA3A0";ctx.fillRect(sx+9,sy+19,7,5);ctx.fillRect(sx+20,sy+13,1.5,9);ctx.fillRect(sx+17,sy+21,8,3);}
 });
-const TILEART_SIDE=Object.assign({},TILE_PROPS); /* the props stand up wearing the same drawing */
+const TILEART_SIDE=Object.assign({},TILE_PROPS);
+TILEART_SIDE["□"]=TILEART["□"]; /* cardboard and tape read the same from the side — it stands as a real box in 3D */ /* the props stand up wearing the same drawing */
 const TILEMETA={
   "|":{lift:13,kind:"wall"},
-  "□":{lift:5,kind:"prop"},
+  "□":{lift:5,kind:"prop",box:true},
   "=":{lift:13,kind:"facade",win:[[6,8,7,6],[19,8,7,6]]},
   "6":{lift:8,kind:"prop"},"7":{lift:12,kind:"prop"},"8":{lift:9,kind:"furniture"},"0":{lift:6,kind:"prop"},
   "&":{lift:13,kind:"facade",win:[[7,12,18,11]],awn:9},

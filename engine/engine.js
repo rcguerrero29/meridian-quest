@@ -184,6 +184,7 @@ const ribbonUp=r=>r?(!!(r&&r.tiles)&&chSeen>=r.district):ribbons().some(x=>ribbo
 const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"};
 let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
 let chSeen=0,replayTimer=null;
+let seenOpen=new Set(); /* opening toasts this save has heard, so a lot that opened while the phone was away is announced once (saved as `so`) */
 let xp=0,hearts=3,cls="",heroName="Rookie",look={shirt:"#8B5CF6",skin:"#E5AC82",hair:"#26202B",style:"cap",outfit:"casual"},done=new Set(),cur=null,curQ=null,node=null,treats=0,fredQ=0,qLvl0=0;
 /* retry-until-correct: `done` = answered right; `qa` maps quest -> best XP already
    awarded across attempts (retries only pay the difference, so nothing farms) + doubles
@@ -221,7 +222,7 @@ function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
   $("status").textContent=`${hs}  ${xp}XP`.trim();}
 /* save */
-function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks};
+function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],v:2};
   try{localStorage.setItem("mq1",JSON.stringify(st));}catch(e){}
   if(NET.enabled)NET.sync(st);}
 /* The ❗ on the world tag means what it means everywhere else: somebody in here has
@@ -249,9 +250,18 @@ function sanitizeSave(s){
   const qa={};
   if(s.qa&&typeof s.qa==="object")Object.keys(s.qa).slice(0,64).forEach(k2=>{
     const ki=num(k2,-1,98,null);if(ki!==null)qa[ki]=num(s.qa[k2],0,99,0);});
+  /* cs (districts claimed), mk (grades) and so (opening toasts seen) were NOT carried
+     through here, so every Continue reset the district counter to zero: the last ending
+     played again on the next open and the grades vanished (owner, 2026-09-03: "it says
+     out on the street again"). v stamps a save written after the fix. */
+  const mk={};
+  if(s.mk&&typeof s.mk==="object")Object.keys(s.mk).slice(0,128).forEach(k2=>{
+    const ki=num(k2,0,98,null);if(ki!==null)mk[ki]=num(s.mk[k2],1,3,1);});
+  const so=Array.isArray(s.so)?s.so.filter(v=>typeof v==="string").slice(0,32).map(v=>v.slice(0,32)):[];
   return{n,c:str2(s.c,24,""),lk,xp:num(s.xp,0,999,0),he:num(s.he,0,3,3),d,
     px:num(s.px,0,63,10),py:num(s.py,0,63,11),tr:num(s.tr,0,9999,0),fq:num(s.fq,0,3,0),
-    w:str2(s.w,4,"hq"),wr:wearIn("wr"),wc:wearIn("wc"),qa};
+    w:str2(s.w,4,"hq"),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,
+    v:s.v===undefined?undefined:num(s.v,0,99,0)};
 }
 function loadSave(){try{return sanitizeSave(JSON.parse(localStorage.getItem("mq1")||""));}catch(e){return null;}}
 /* belt & suspenders: flush progress when the tab is backgrounded or closed (only once a run exists) */
@@ -1739,13 +1749,15 @@ document.querySelectorAll(".dpad button[data-d]").forEach(b=>{
   b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);
   b.addEventListener("pointercancel",off);b.addEventListener("pointerleave",off);
 });
-const KEYS={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right"};
+const KEYS={ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right",w:"up",s:"down",a:"left",d:"right",
+            W:"up",S:"down",A:"left",D:"right",KeyW:"up",KeyS:"down",KeyA:"left",KeyD:"right"};
+const keyDir=e=>KEYS[e.key]||KEYS[e.code]; /* a laptop keyboard: arrows or WASD, whatever the layout or caps lock says */
 window.addEventListener("keydown",e=>{
   const t2=e.target; /* typing a dog's name is not walking — "shadow" has a w, an a, an s and a d */
   if(t2&&(t2.tagName==="INPUT"||t2.tagName==="TEXTAREA"))return;
-  if(!$("world").hidden&&KEYS[e.key]){held=KEYS[e.key];e.preventDefault();}
+  if(!$("world").hidden&&keyDir(e)){held=keyDir(e);e.preventDefault();}
   if(e.key==="Enter"&&!$("talk").hidden&&!$("world").hidden)$("talk").click();});
-window.addEventListener("keyup",e=>{if(KEYS[e.key]&&held===KEYS[e.key])held=null;});
+window.addEventListener("keyup",e=>{if(keyDir(e)&&held===keyDir(e))held=null;});
 $("talk").addEventListener("click",()=>{
   const tb=$("talk");
   if(tb.dataset.chatn){
@@ -1887,7 +1899,7 @@ function pick(c,btn,t){
   if(cur>=0){
     if(solved){done.add(cur);
       {const g=GRW().staged;
-       if(g&&g.quests.indexOf(cur)>=0){applyStaged();setTimeout(()=>toast(T().growthUp,2800),700);}}}
+       if(g&&g.quests.indexOf(cur)>=0)growthPend=true;}} /* applied behind the curtain when the card closes */
     if(cur===GRW().wardrobeQuest&&qFirst)setTimeout(()=>toast(T().wdUnlockToast,3400),700);}
   else if(solved&&node==="b"){fredQ=2;wear.bandana=wear.bandana||"#C0392B";setTimeout(()=>toast(T().fredDoneToast,3000),600);}
   save();
@@ -1896,7 +1908,9 @@ function pick(c,btn,t){
 }
 $("next").addEventListener("click",()=>{
   if(chDue()){wasFs=false;finish(livesOn()&&hearts<=0);return;}
-  $("card").hidden=true;$("world").hidden=false;restoreFs();checkTalk();
+  $("card").hidden=true;showWorld();restoreFs();checkTalk();
+  /* the site grows behind a short curtain, after the card — not mid-sentence */
+  if(growthPend){growthPend=false;curtain(()=>{applyStaged();if(typeof t3Invalidate==="function")t3Invalidate();},()=>toast(T().growthUp,2800));}
 });
 /* ---------- the room interview: a card with no right answer ----------
    Same card the quests use, none of their machinery: no pick(), no XP, no marks, no play
@@ -1975,7 +1989,7 @@ $("rmCopy").addEventListener("click",()=>{const v=roomSheet(),U=RMU();
     .catch(()=>{try{const r=document.createRange();r.selectNodeContents($("rmSheet"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}catch(e){}
       toast(U.copyFail||"",2600);});});
 function roomEnd(){roomH=null;roomHide();$("codex").parentElement.hidden=false;
-  $("card").hidden=true;$("world").hidden=false;restoreFs();checkTalk();}
+  $("card").hidden=true;showWorld();restoreFs();checkTalk();}
 /* the arrival nudge: while a host in this room still has a question, say who is waiting */
 function roomInvite(){const I=RM();if(!I||!I.invite)return;
   const w=WORLDS[world];if(!w||!w.npcs.some(n=>roomPending(n)))return;
@@ -2030,10 +2044,15 @@ function pvDraw(){const g=$("pv").getContext("2d");g.setTransform(1.6,0,0,1.6,5,
   g.clearRect(-6,-16,70,80);drawPerson(g,0,0,look,{dir:"down"});}
 $("pvtog").addEventListener("click",()=>{const bx=$("pvbox");bx.classList.toggle("dark");
   $("pvtog").textContent=bx.classList.contains("dark")?"☀️":"🌙";});
+/* Every return to the street goes through here. A save that booted straight into an
+   ending (Continue → the Saturday → "Out to the street") never passed enterWorld, so the
+   canvas kept its hidden-time height of 0px and the player stood in front of a blank
+   viewport with only the control hint showing (owner, 2026-09-03, Mac browser). */
+function showWorld(){$("world").hidden=false;sizeCanvas();}
 function enterWorld(fresh){
   $("intro").hidden=true;$("creator").hidden=true;
-  $("hud").hidden=false;$("xpbarwrap").hidden=false;$("world").hidden=false;
-  sizeCanvas();applyCtl();hud();setWorldTag();checkTalk();
+  $("hud").hidden=false;$("xpbarwrap").hidden=false;showWorld();
+  applyCtl();hud();setWorldTag();checkTalk();
   if(fresh){toast(T().tut1,3000);
     setTimeout(()=>toast(T().tut2,3800),3300);}
 }
@@ -2088,7 +2107,8 @@ $("endGo").addEventListener("click",()=>{
   if(!last&&rd){const d=rd.doorstep;if(d.world&&WORLDS[d.world])world=d.world;px=fx=d.x|0;py=fy=d.y|0;dir=d.dir||"down";}
   if(isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
   wasFs=false;
-  save();$("end").hidden=true;$("world").hidden=false;setWorldTag();hud();checkTalk();
+  growthPend=false;seenOpen.add(K.open);
+  save();$("end").hidden=true;showWorld();applyCtl();setWorldTag();hud();checkTalk();
   toast(T()[K.open]||(last?T().endStayToast:T().weekTwoToast),4000);
 });
 /* Wiping a city is never one tap. The story never sends you here — this is a tool. */
@@ -2100,9 +2120,19 @@ $("replay").addEventListener("click",()=>{
   clearTimeout(replayTimer);replayTimer=null;$("replay").textContent=T().replay;
   xp=0;hearts=startHearts();done=new Set();qa={};marks={};chSeen=0;world="hq";px=fx=10;py=fy=11;dir="down";
   applyGrowth();save();
-  $("settings").hidden=true;$("end").hidden=true;$("card").hidden=true;$("world").hidden=false;
+  seenOpen=new Set();
+  $("settings").hidden=true;$("end").hidden=true;$("card").hidden=true;showWorld();
   setWorldTag();hud();checkTalk();
   toast(T().replayToast(heroName),2500);});
+/* ---------- the curtain ----------
+   A map change the player is standing next to happens behind a short dark curtain: the
+   build was applied the instant the pick landed, so the site had already changed when
+   the card closed — "a building appears ... not a smooth switch" (owner, 2026-09-03). */
+let growthPend=false;
+function curtain(apply,after){const v=$("veil");
+  if(!v){apply();if(after)after();return;}
+  held=null;v.classList.add("on");
+  setTimeout(()=>{try{apply();}finally{v.classList.remove("on");}if(after)setTimeout(after,450);},460);}
 /* ---------- controls scheme ---------- */
 let ctl="swipe";try{ctl=localStorage.getItem("mqctl")||"swipe";}catch(e){}
 if(!["swipe","joy","pad"].includes(ctl))ctl="swipe";
@@ -3362,13 +3392,31 @@ function growthReach(tx,ty){ /* BFS from the doorstep content nominated — open
       seen.add(k);q.push([nx,ny]);});}
   return false;
 }
+/* A lot that opened while this phone was away — an update landed, a pass was boarded —
+   is announced once, with the toast its district would have played, and only while
+   nobody there has been talked to yet. Never a list, never a count. */
+function lateOpenToast(){
+  if(chSeen<1)return;
+  const L=CHS(),i=Math.min(chSeen,L.length)-1,K=epiKeys(i,i>=L.length-1),nx=L[chSeen];
+  if(!nx||seenOpen.has(K.open)||nx.quests.some(q=>done.has(q)))return;
+  seenOpen.add(K.open);save();
+  setTimeout(()=>toast(T()[K.open]||"",4200),1400);
+}
 /* ---------- boot ---------- */
 const SV=loadSave();
 if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").textContent=T().contBtn(SV.n,SV.xp,SV.d.length);
   $("continueBtn").addEventListener("click",()=>{
     heroName=SV.n;cls=SV.c||"";look=SV.lk||look;xp=SV.xp||0;hearts=SV.he??3;done=new Set(SV.d||[]);
-    treats=SV.tr||0;fredQ=SV.fq||0;chSeen=SV.cs||0;
+    treats=SV.tr||0;fredQ=SV.fq||0;chSeen=SV.cs||0;seenOpen=new Set(SV.so||[]);
+    /* a save written before v2 lost cs on every Continue. Rebuild it from what was played:
+       a district counts as claimed when its need is met AND the next district has been
+       started — so a Saturday never seen is still played, and one seen is not replayed. */
+    if(SV.v===undefined){const L=CHS();let n=0;
+      for(let i=0;i<L.length;i++){const c=L[i],nx=L[i+1];
+        if(c.quests.filter(q=>done.has(q)).length<c.need)break;
+        if(!nx||!nx.quests.some(q=>done.has(q)))break;n=i+1;}
+      chSeen=Math.max(chSeen,n);}
     marks=(SV.mk&&typeof SV.mk==="object")?SV.mk:{}; /* pre-grade saves start unmarked */
     wear=(SV.wr&&typeof SV.wr==="object")?{bandana:null,collar:null,cape:null,...SV.wr}
         :{bandana:fredQ>=2?"#C0392B":null,collar:null,cape:null}; /* pre-wardrobe saves: keep the earned red bandana */
@@ -3378,8 +3426,8 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
     px=fx=SV.px??10;py=fy=SV.py??11;
     applyGrowth();parkRescue();
     if(px>=CW().W||py>=CW().H||isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
-    if(chDue()){finish(livesOn()&&hearts<=0);$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;hud();}
-    else enterWorld(false);
+    if(chDue()){finish(livesOn()&&hearts<=0);$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;applyCtl();hud();}
+    else{enterWorld(false);lateOpenToast();}
   });
 }
 /* Trolley Pass arrival: a #save= hash offers to board; never overwrites without the tap */

@@ -5,6 +5,17 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-02, late)
 
+**NEWEST — 2026-09-03: six playtest reports fixed, `mq-v52` on `main`** (IDEAS §15.13).
+The big one: `sanitizeSave()` dropped the district counter and the grades, so every
+Continue reset `chSeen` to zero — the last Saturday replayed on the next open, and the boot
+path into an ending never sized the canvas (a blank street under the control hint). Fixed,
+with damaged saves repaired at Continue and a smoke section that plays the whole sequence.
+Also: laptop keys (capitals, key codes), the growth curtain, 3D furniture as boxes when a
+side view exists, animals painted for the camera stop (Sonny's ball), and a one-time toast
+for a lot that opened while the phone was away. **The owner's own save will play the
+mercado's Saturday once more** (its counter was reset by the bug); after "Out to the
+street" the taller's toast points at the southeast lot. Then play the taller.
+
 **NEWEST — 2026-09-02, night: the rest of the story is written and wired, `mq-v51` on
 `main`.** Owner: *"i want the rest of the story for my ai practice... now please if
 possible."* Nacho planned all four districts (`docs/story/las-cuatro-puertas.md` — the

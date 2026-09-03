@@ -54,6 +54,8 @@
   .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:var(--accent); margin:0 0 12px;}
   .worldpanel{padding:12px;}
   .viewport{position:relative; border-radius:10px; overflow:hidden; background:#241F2E; touch-action:none;}
+  #veil{position:absolute; inset:0; background:#0B0A12; opacity:0; transition:opacity .42s ease; pointer-events:none; z-index:5;}
+  #veil.on{opacity:1;}
   .settings .box{touch-action:pan-y;}
   .tlsearch{display:flex; gap:8px; margin-bottom:10px;}
   .tlsearch input{flex:1; box-sizing:border-box; font-family:'IBM Plex Mono',monospace; font-size:.8rem; padding:8px 10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink);}
@@ -237,6 +239,7 @@
     <div class="viewport" id="vp">
       <canvas id="cv"></canvas>
       <canvas id="cv3" hidden></canvas>
+      <div id="veil" aria-hidden="true"></div>
       <button id="rot3d" hidden aria-label="Rotate camera" style="position:absolute; right:12px; top:58px; width:40px; height:40px; border:none; border-radius:50%; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.15rem; cursor:pointer; backdrop-filter:blur(2px);">↻</button>
       <div class="dpad" id="dpad" hidden>
         <button class="blank"></button><button data-d="up" aria-label="Up">▲</button><button class="blank"></button>
