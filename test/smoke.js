@@ -1770,6 +1770,42 @@ const CANDIDATES = [
     await page.click('#continueBtn'); await page.waitForTimeout(300);
   }
 
+  // ---- 21. the activity record holds, sits left, and every spoken line is signed ----
+  {
+    const r = await page.evaluate(async () => {
+      const problems = [], tk = document.getElementById('ticker');
+      // it lives on the left rail now, under the XP pill, not over theright  buttons
+      const cs = getComputedStyle(tk);
+      if (cs.left !== '10px') problems.push('the record is not on the left rail: left=' + cs.left);
+      if (cs.right === '10px') problems.push('the record is still pinned right');
+      // every spoken line carries the speaker
+      if (typeof sayAs !== 'function') problems.push('no sayAs()');
+      else {
+        const line = sayAs('chelo', 'the tomatoes turn on Tuesday');
+        if (!line.includes(npcName('chelo').split(' ·')[0])) problems.push('a spoken line is unsigned: ' + line);
+        if (!line.includes('the tomatoes turn on Tuesday')) problems.push('sayAs dropped the line');
+      }
+      // three activities: the oldest is pushed out, the last two stay
+      tk.hidden = true; tickerLines.length = 0;
+      toast('ONE', 300); toast('TWO', 300); toast('THREE', 300);
+      if (tickerLines.length !== 2 || tickerLines[0] !== 'TWO' || tickerLines[1] !== 'THREE')
+        problems.push('the record does not keep exactly the last two: ' + JSON.stringify(tickerLines));
+      return problems;
+    });
+    fails.push(...r);
+    // no timer: it is still on screen long after the toast under it has gone
+    await page.waitForTimeout(5200);
+    const held = await page.evaluate(() => ({ hidden: document.getElementById('ticker').hidden, lines: tickerLines.length }));
+    if (held.hidden || held.lines !== 2) fails.push('the record cleared itself on a timer: ' + JSON.stringify(held));
+    // tapping it is still how it goes away
+    await page.evaluate(() => document.getElementById('ticker').click());
+    const tapped = await page.evaluate(() => ({ hidden: document.getElementById('ticker').hidden, lines: tickerLines.length }));
+    if (!tapped.hidden || tapped.lines !== 0) fails.push('tapping the record did not dismiss it: ' + JSON.stringify(tapped));
+    // a tile's flavour line is NOT signed — the crosswalk is not a person
+    const flav = await page.evaluate(() => { tickerLines.length = 0; const f = (UI.en.flavor['-'] || UI.en.flavor['.'] || ['x'])[0]; toast(f, 300); return tickerLines[0]; });
+    if (/^💬 [^:]+:/.test(flav || '')) fails.push('a tile flavour line was signed as if a person said it: ' + flav);
+  }
+
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);
