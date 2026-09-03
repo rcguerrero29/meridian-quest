@@ -1806,6 +1806,92 @@ const CANDIDATES = [
     if (/^💬 [^:]+:/.test(flav || '')) fails.push('a tile flavour line was signed as if a person said it: ' + flav);
   }
 
+  // ---- 22. la junta, batch A+B: the stairwell speaks, the arrow finds the stairs,
+  //          the barrio picks its tools back up ----
+  {
+    // the marker asks "does this lead somewhere", not "is it in the DOORS list"
+    const marks = await page.evaluate(() => {
+      world = 'hq'; px = fx = 16; py = fy = 5; moving = false; held = null;
+      const m = doorMarks();
+      return { has: m.some(d => d.x === 17 && d.y === 5 && d.ch === '1'), all: m.map(d => d.ch).join('') };
+    });
+    if (!marks.has) fails.push('the HQ stairs still wear no marker: ' + JSON.stringify(marks));
+    const bogus = await page.evaluate(() => doorMarks().filter(d => !PORTALS[world][d.ch]).length);
+    if (bogus) fails.push('the marker offered ' + bogus + ' tiles that lead nowhere');
+
+    // the doorstep nudge: the room on the other side says who is waiting, once
+    const nudge = await page.evaluate(async () => {
+      const out = {};
+      roomAns = {}; nudgeW = ''; nudged = new Set(); tickerLines.length = 0;
+      document.getElementById('world').hidden = false;
+      world = 'hq'; px = fx = 16; py = fy = 5;
+      out.pendingUpstairs = worldPending('f2');
+      portalNudge();
+      out.first = tickerLines[tickerLines.length - 1] || '';
+      tickerLines.length = 0;
+      portalNudge();
+      out.second = tickerLines.length;
+      out.invite = (RM() && RM().invite && RM().invite.en) || '';
+      nudgeW = ''; nudged = new Set(); tickerLines.length = 0;
+      RM().hosts.forEach(h => h.steps.forEach(st => { roomAns[h.id + ':' + st.id] = 'x'; }));
+      portalNudge();
+      out.quiet = tickerLines.length;
+      roomAns = {};
+      return out;
+    });
+    if (!nudge.pendingUpstairs) fails.push('the engine does not know somebody is waiting upstairs');
+    if (nudge.first !== nudge.invite) fails.push('the stairwell did not speak the pack invite: ' + JSON.stringify(nudge.first));
+    if (nudge.second !== 0) fails.push('the doorstep nudge repeats itself - that is a to-do list');
+    if (nudge.quiet !== 0) fails.push('the doorstep spoke about a room where nobody is waiting');
+
+    const generic = await page.evaluate(() => typeof UI.en.waitingAt === 'function' && typeof UI.es.waitingAt === 'function'
+      ? [UI.en.waitingAt('X'), UI.es.waitingAt('X')] : null);
+    if (!generic || !generic[0].includes('X') || !generic[1].includes('X')) fails.push('waitingAt is missing or drops the place name in one language');
+
+    // the job icon is drawn BESIDE the mark, never instead of it
+    {
+      const src = fs.readFileSync(path.join(__dirname, '..', 'engine', 'engine.js'), 'utf8')
+                + fs.readFileSync(path.join(__dirname, '..', 'engine', 'engine3d.js'), 'utf8');
+      if (/else[ \t\n]+drawEmote\(/.test(src)) fails.push('a camera still hides a trade behind the mark');
+      const n = (src.replace(/function drawEmote\(/g, 'DEF(').match(/drawEmote\(n,/g) || []).length;
+      if (n !== 4) fails.push('expected the job icon on all four camera paths, found ' + n);
+    }
+    // the icon's window is identity-sized now, not a 2.4s-in-13 flicker
+    {
+      const src = fs.readFileSync(path.join(__dirname, '..', 'engine', 'engine.js'), 'utf8');
+      const win = src.match(/ph=\(\(nw\/1000\)[^;]*;[\s\S]{0,600}?if\(ph>=([\d.]+)\)return;/);
+      if (!win) fails.push('could not read the job-icon window');
+      else if (parseFloat(win[1]) < 5) fails.push('the job icon is still a flicker: ' + win[1] + 's of every 13');
+    }
+
+    // the theme stops washing the barrio into one shirt
+    const tint = await page.evaluate(() => {
+      const n = WORLDS.hq.npcs[0], base = lookOf(n);
+      const clear = () => Object.keys(npcLookCache).forEach(k => delete npcLookCache[k]);
+      clear(); tintCol = '#FF0000';
+      const got = npcWhimsy(n).shirt;
+      clear(); tintCol = null;
+      return { got, at15: mixHex(base.shirt, '#FF0000', 0.15), at40: mixHex(base.shirt, '#FF0000', 0.4) };
+    });
+    if (tint.got !== tint.at15) fails.push('the shirt tint is not 0.15 (got ' + tint.got + ', 0.15 = ' + tint.at15 + ', old 0.4 = ' + tint.at40 + ')');
+
+    const gold = await page.evaluate(() => (typeof MAPCOL !== 'undefined' && MAPCOL['1']) || null);
+    if (!gold || gold.toUpperCase() !== '#E0B45C') fails.push('the map legend says stairs are gold; the plan paints them ' + gold);
+
+    const gifts = await page.evaluate(() => {
+      const f2 = WORLDS.f2, boxes = [];
+      for (let y = 0; y < f2.H; y++) for (let x = 0; x < f2.W; x++) if (f2.rows0[y][x] === '□') boxes.push(x + ',' + y);
+      const no = ribbons().find(r => r.id === 'gift-no');
+      return { boxes, no: no && no.tiles, onBox: !!(no && no.tiles.every(t => boxes.includes(t[1] + ',' + t[0]))) };
+    });
+    if (!gifts.onBox) fails.push('the file cabinet does not land on the box by the stairs: ' + JSON.stringify(gifts));
+
+    const flav = await page.evaluate(() => ['□', '|'].filter(g => !(UI.en.flavor[g] && UI.es.flavor[g])));
+    if (flav.length) fails.push('no flavour line in both languages for: ' + flav.join(' '));
+
+    await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; camSet('3d'); nudgeW = ''; nudged = new Set(); });
+  }
+
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);

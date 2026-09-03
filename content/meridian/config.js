@@ -1,5 +1,5 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
-const GAMEV="mq-v53";
+const GAMEV="mq-v54";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -56,7 +56,7 @@ const GROWTH={
    {id:"gift-ta",world:"f2",district:3,tiles:[[11,14,"○"]]},
    {id:"gift-pa",world:"f2",district:4,tiles:[[2,11,"⊔"]]},
    {id:"gift-li",world:"f2",district:5,tiles:[[5,15,"."],[10,18,"."]]},
-   {id:"gift-no",world:"f2",district:6,tiles:[[9,18,"▯"],[10,17,"."]]}
+   {id:"gift-no",world:"f2",district:6,tiles:[[10,17,"▯"]]}  /* the file cabinet IS the box by the stairs (BACKLOG §6); it used to land on bare floor and clear the box instead */
   ],
   /* any attempt at this quest opens the wardrobe — the extra, not the quest */
   wardrobeQuest:15,
