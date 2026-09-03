@@ -1228,3 +1228,24 @@ every fix has a test that was red before it.
    once at Continue — the toast the district would have played — only while nobody there
    has been talked to; seen toasts persist as `so`.
 
+### 15.14 THE RECORD HOLDS, AND EVERY SPOKEN LINE IS SIGNED — BUILT 2026-09-03
+
+Owner: *"the activity record should only delete after two activities, the timer is too
+fast and i dont see a reason that if it is on the other side- left that it isnt crowding
+the screen"* and *"its hard to tell people apart, should they have their name when they
+speak?"*
+
+- **The record has no timer.** It kept the last two lines already (signed 2026-09-01) but
+  a timer wiped both ~4.5s after the last message, which is what read as "too fast". A
+  line now leaves only when two newer lines push it out, or when the player taps the
+  record away (tapping to dismiss was already there). It moved to the **left rail** at
+  `top:44px`, tucked under the XP pill, where the owner judged it does not crowd — the
+  right side carries the map, fullscreen, theme and rotate buttons.
+- **Every spoken line carries its speaker.** `sayAs()` prefixes an ambient line with the
+  person's short name (`💬 Chelo: …`), in whichever language is running. The Talk button
+  already named them; the line that came back did not, so a barrio of people who sound
+  alike on a phone screen was unattributable. **Tile flavour stays unsigned on purpose** —
+  the crosswalk is not a person, and that distinction is now what tells the two apart.
+  Visual distinctiveness (silhouette, colour, who reads as who at ten tiles) is a separate
+  problem, and it goes to the 2026-09-03 *meeting of the minds*.
+

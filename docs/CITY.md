@@ -6,7 +6,7 @@ next phase on Opus 5, and brings open decisions to the owner as side quests. Eve
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
 **Phase: 2 — Taller Herrera (parcel planned 2026-09-01, three decisions signed, NOT built)** · Ledger
-opened 2026-08-30. **Deployed: `mq-v52` on `main`, 2026-09-03** (the four parcels written and wired at v51; six playtest fixes at v52 — IDEAS §15.13).
+opened 2026-08-30. **Deployed: `mq-v53` on `main`, 2026-09-03** (the four parcels written and wired at v51; six playtest fixes at v52 — IDEAS §15.13).
 
 ## Purpose
 

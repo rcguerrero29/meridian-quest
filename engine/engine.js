@@ -215,6 +215,8 @@ let PEERS=[];
 const T=()=>UI[lang];
 const AQ=()=>lang==="es"?QES:QEN;
 const npcName=k=>CHILLN[k]?CHILLN[k][lang]:NPCN[lang][k];
+const shortName=k=>String(npcName(k)||"").split(" ·")[0];   /* the name without its job title */
+const sayAs=(k,line)=>{const n=shortName(k);return "💬 "+(n?n+": ":"")+line;}; /* every spoken line is signed */
 const lvlIdx=()=>{let i=0;LEVELS.forEach((t2,j)=>{if(xp>=t2)i=j;});return i;};
 const lvlName=()=>T().levels[lvlIdx()];
 function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat(Math.max(0,startHearts()-Math.max(0,hearts)))):"";
@@ -269,13 +271,15 @@ window.addEventListener("pagehide",()=>{if(!$("hud").hidden)save();});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&!$("hud").hidden)save();});
 function clearSave(){try{localStorage.removeItem("mq1");}catch(e){}}
 /* toasts */
-let toastT=null,toastQ=[],tickerT=null;
+let toastT=null,toastQ=[];
 const tickerLines=[];
-function toast(msg,ms){const el=$("toast"),dur=ms||2600;
-  /* The activity ticker mirrors recent messages so a short interaction can be re-read
-     after the toast fades (owner ask). Owner, 2026-09-01: keep the last TWO, and hold
-     them only "a bit longer than the initial toast" — it used to sit for a flat 10s,
-     which is why it was still on screen showing the same words as the live toast. */
+function toast(msg,ms){const el=$("toast");
+  /* The activity record mirrors recent messages so a short interaction can be re-read
+     after the toast fades (owner ask). Owner, 2026-09-01: keep the last TWO. Owner,
+     2026-09-03: "should only delete after two activities, the timer is too fast" — so
+     there is NO timer at all now. A line leaves when two newer lines have pushed it out,
+     or when the player taps the record away. It sits on the LEFT rail, under the XP pill,
+     where the owner judged it does not crowd the screen. */
   const tk=$("ticker");
   tickerLines.push(msg);while(tickerLines.length>2)tickerLines.shift();
   tk.textContent="";
@@ -283,7 +287,6 @@ function toast(msg,ms){const el=$("toast"),dur=ms||2600;
     if(i<tickerLines.length-1)d.className="prev";   /* the older one, dimmed */
     tk.appendChild(d);});
   tk.hidden=false;
-  clearTimeout(tickerT);tickerT=setTimeout(()=>{tk.hidden=true;tickerLines.length=0;},dur+1800);
   if(el.classList.contains("on")){toastQ.push([msg,ms]);return;}
   el.textContent=msg;el.classList.add("on");
   clearTimeout(toastT);toastT=setTimeout(()=>{el.classList.remove("on");
@@ -1765,7 +1768,11 @@ $("talk").addEventListener("click",()=>{
     /* content nominates who runs the fitting room; the engine just opens it */
     if(tb.dataset.chatn===GRW().wardrobeNpc){openWardrobe();return;}
     const L=chillLines(tb.dataset.chatn)||(T().chat||{})[tb.dataset.chatn]||[];
-    if(L.length)toast("💬 "+L[Math.floor(Math.random()*L.length)],2800);return;}
+    /* A line with nobody's name on it is a line you cannot place: half the barrio sounds
+       alike on a phone screen (owner, 2026-09-03: "its hard to tell people apart, should
+       they have their name when they speak?"). Tile flavour stays unsigned on purpose —
+       the crosswalk is not a person. */
+    if(L.length)toast(sayAs(tb.dataset.chatn,L[Math.floor(Math.random()*L.length)]),2800);return;}
   questStart(+tb.dataset.qi);});
 let petTarget=null,petCrit=null;
 function fredCheck(){ /* now the generic animal-interaction check: every creature is reachable and greetable */
