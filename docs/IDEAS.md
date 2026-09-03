@@ -1249,3 +1249,43 @@ speak?"*
   Visual distinctiveness (silhouette, colour, who reads as who at ten tiles) is a separate
   problem, and it goes to the 2026-09-03 *meeting of the minds*.
 
+### 15.15 LA JUNTA, BATCH A+B — THE STAIRWELL SPEAKS AND THE BARRIO PICKS ITS TOOLS BACK UP — BUILT 2026-09-03
+
+The first build out of `/meeting-of-da-minds`. Owner: *"ok start with what you would build."*
+
+- **The doorstep nudge** (`portalNudge()`, engine.js). The engine has always been able to
+  answer *"is somebody waiting in that room?"* for ANY room — `worldPending(id)` — but it had
+  only ever been asked about the room the player was already standing in. Asked about the
+  room on the OTHER SIDE of a door you are standing beside, the stairwell says
+  *"Nacho and Don Güero are waiting"* — the pack's own `INTERVIEW.invite` when the waiting
+  person is a room host, otherwise the pack's generic `waitingAt(place)` line with the
+  place's own name. **Said once per room per visit**: a thing said once is a doorway, a
+  thing said every time is the to-do list the owner banned.
+- **The stair arrow.** `doorMarks()` asked two questions — *is this glyph in `DOORS`* and
+  *does this tile lead somewhere*. The second is the whole question; the first is what left
+  the stairs, the only way to the office, as the one portal in the city wearing no marker.
+  Deleted. **Adding the stair glyphs to `DOORS` instead** — the obvious fix — would have
+  repainted them as a brown door in five places and stood a door slab in the stairwell.
+- **Not enough on its own, and this is the lesson.** `doorMarks()` only reaches three tiles;
+  HQ spawns you thirteen from the stairs. The arrow alone would have changed nothing from
+  where the owner actually stood. Found by the meeting's completeness critic, verified in the
+  code, and the reason the nudge exists.
+- **The barrio picks its tools back up.** Every camera drew a person's trade emoji only in
+  the `else` of *"does this person have something to say"* (engine.js ×3, engine3d.js ×1), so
+  the 28 people who give you work were exactly the people whose job you never saw. Drawn
+  beside the mark now. The window widened from 2.4s of every 13 to 6s — this icon is
+  identity, not decoration — and the theme's shirt tint dropped 0.4 → 0.15, because mixing
+  nearly half the theme colour into every shirt in town erased the one difference twenty
+  neighbours had. **Look at this before drawing anything: it is the control experiment for
+  the whole "tell people apart" problem.**
+- **Three small truths repaired.** The plan paints the stairs the gold its own legend has
+  always promised (one `MAPCOL` line). Nolasco's file cabinet lands ON the box by the stairs,
+  as `BACKLOG` §6 signed, instead of on bare floor while clearing the box. The office's boxes
+  and window got flavour lines in both languages — it was the only silent room in the city.
+- **A correction to the meeting's own minutes.** The panel reported *"the config says each
+  gift lands on a moving box; exactly one of five does."* Checked against Don Güero's
+  catalogue: only three deliveries were ever meant to touch a box (the taller's dog bed, the
+  cleaners hauling the empties away, Nolasco's cabinet). The mercado's coffee corner and the
+  panadería's guest chair were always placed elsewhere by design. **One gift was wrong, not
+  four** — and Limpieza clearing two boxes is the signed beat, not a bug.
+

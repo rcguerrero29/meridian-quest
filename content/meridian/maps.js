@@ -229,7 +229,8 @@ const DOORLOOK={E:{wood:"#4F5474",wood2:"#5F6588",frame:"#2E3147",glass:true}, /
                 "*":{wood:"#3FA3A0",wood2:"#52B8B4",frame:"#1F5A58",glass:true}, /* Velázquez: teal */
                 "$":{wood:"#6E2F4A",wood2:"#84405E",frame:"#3A1728",glass:true}}; /* Nolasco: burgundy, frosted */
 const SOLIDX="ZSHI~9|□=6780&!▣▯⊔○";        /* solid glyphs this pack adds (~ water, 9 doghouse, | window, □ box, and the four parcels' tiles) */
-const MAPCOL={Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D",
+const MAPCOL={"1":"#E0B45C",  /* the legend says "doors & stairs in gold" and the plan painted them grey */
+  Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D",
               "|":"#6E638A",  /* window: shades to the wall-top colour, so 3D gives it no darker cap */
               "□":"#C8A277",  /* moving box: cardboard, paler than the produce crate so the map never confuses them */
               "=":"#6E6A73","%":"#E0B45C","6":"#7A2E2E","7":"#5A6470","8":"#B3352B","0":"#2E2E33",
@@ -266,7 +267,10 @@ const CRITTERS=[
  {kind:"beagle",world:"st",x:22,y:11,c:"#E8C46A",name:"Sonny",egg:"sonny"} /* the star himself */
 ];
 /* one-off place identity as data (IDEAS §10): the engine's DECODRAW vocabulary
-   (sign, mural) renders these in every camera, so no landmark ever squares off.
+   (sign, mural) renders these in the top-down and front cameras ONLY — NOT in iso and NOT
+   in 3D, which is the camera the game boots into. (Corrected 2026-09-03, la junta: this
+   comment used to claim every camera, which is most likely why nobody noticed the mural
+   was invisible where it is played. Adding the two missing passes is queued.)
    Packs can add art via DECOART. */
 const DECOR=[
  {world:"st",x:20,y:0,deco:"mural"}   /* Nacho's mural on the avenue wall */

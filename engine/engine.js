@@ -32,10 +32,14 @@ const DEFACT=["💬","☕"]; /* fallback activity emotes for anyone NPCACT does 
 function drawEmote(n,sx,sy){ /* shared by every camera — townsfolk stay busy from any angle */
   const acts=(typeof NPCACT!=="undefined"&&NPCACT[n.npc])||DEFACT;
   const nw=Date.now(),ph=((nw/1000)+n.x*7.3+n.y*13.7)%13;
-  if(ph>=2.4)return;
+  /* Drawn BESIDE the ❗ now, never instead of it (owner, 2026-09-03: "its hard to tell
+     people apart"). The `else` on all four camera paths meant the 28 people who give you
+     work were the only ones in town whose trade you never saw. The window widened from
+     2.4s of every 13 to 6s: this icon is now identity, not decoration. */
+  if(ph>=6)return;
   const em=acts[Math.floor((nw/13000+n.x+n.y)%acts.length)];
   ctx.font="10px serif";ctx.textAlign="center";
-  ctx.globalAlpha=ph<0.3?ph/0.3:ph>2.1?(2.4-ph)/0.3:1;
+  ctx.globalAlpha=ph<0.3?ph/0.3:ph>5.7?(6-ph)/0.3:1;
   ctx.fillText(em,sx+25,sy+1-Math.sin(ph*2.1)*1.6);
   ctx.globalAlpha=1;ctx.textAlign="start";
 }
@@ -399,7 +403,7 @@ function drawIso(){
     drawPerson(ctx,bx,by,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
-    else drawEmote(n,bx,by);}));
+    drawEmote(n,bx,by);}));
   if(world==="hq")bill(DOG.fx,DOG.fy,(bx,by)=>drawDog(ctx,bx,by));
   if(world==="lc")bill(CAT.fx,CAT.fy,(bx,by)=>drawCat(ctx,bx,by));
   if(world==="st"){bill(PIG.fx,PIG.fy,(bx,by)=>drawPigeon(ctx,bx,by));bill(LORO.x,LORO.y,(bx,by)=>drawLoro(ctx,bx,by));}
@@ -798,7 +802,7 @@ function drawFront(){
     drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
-    else drawEmote(n,sx,sy);}));
+    drawEmote(n,sx,sy);}));
   PEERS.forEach(p=>{if(p.w!==world)return;
     act(p.x,p.y,(sx,sy)=>{drawPerson(ctx,sx,sy,p.look||look,{dir:p.dir||"down"});
       ctx.font="600 8px monospace";ctx.textAlign="center";
@@ -886,7 +890,7 @@ function draw(){
     drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
-    else drawEmote(n,sx,sy);
+    drawEmote(n,sx,sy);
   });
   PEERS.forEach(p=>{
     if(p.w!==world)return;
@@ -1725,14 +1729,45 @@ function loop(ts){
    it in every camera. Doors that are only decoration (no portal) get nothing. */
 function doorMarks(){const w=CW(),out=[],P=PORTALS[world];if(!P)return out;
   for(let y=Math.max(0,py-3);y<=Math.min(w.H-1,py+3);y++)for(let x=Math.max(0,px-3);x<=Math.min(w.W-1,px+3);x++){
-    const ch=w.rows[y][x];if(Math.abs(x-px)+Math.abs(y-py)<=3&&DOORSET.has(ch)&&P[ch])out.push({x,y,ch});}
+    const ch=w.rows[y][x];if(Math.abs(x-px)+Math.abs(y-py)<=3&&P[ch])out.push({x,y,ch});}
+  /* It used to ask DOORSET.has(ch) as well, which is how the STAIRS — the only way to the
+     office — ended up as the one portal in the city wearing no marker (owner, 2026-09-03:
+     "it is hard knowing where to go"). P[ch] already means "this tile leads somewhere",
+     which is the whole question. Adding the stair glyphs to DOORS instead would have
+     repainted them as a brown door in five places, and stood a door slab in the stairwell. */
   return out;}
 function drawDoorMark(g,bx,by,up){ /* bx,by: the tile's top-left in that camera; up: extra lift above the wall */
   const dy=Math.sin(Date.now()/300)*2.5;
   g.font="700 15px sans-serif";g.textAlign="center";g.lineWidth=3;g.lineJoin="round";
   g.strokeStyle="#2B2536";g.fillStyle="#FFE9A8";
   g.strokeText("⬇",bx+16,by-4-(up|0)+dy);g.fillText("⬇",bx+16,by-4-(up|0)+dy);g.textAlign="start";}
+/* The doorstep nudge. The engine has always been able to answer "is somebody waiting in
+   that room?" for ANY room — worldPending(id) — but it had only ever been asked about the
+   room the player was already standing in. Asked about the room on the OTHER SIDE of a
+   door you are standing beside, the stairwell tells you Nacho and Don Güero are up there,
+   in the pack's own words, in every camera, with no new art. Said once per room per visit:
+   a thing said once is a doorway; a thing said every time is a to-do list. */
+let nudgeW="",nudged=new Set();
+function portalNudge(){
+  if($("world").hidden)return;
+  if(nudgeW!==world){nudgeW=world;nudged=new Set();}
+  const P=PORTALS[world];if(!P)return;
+  const w=CW();
+  for(let y=Math.max(0,py-1);y<=Math.min(w.H-1,py+1);y++)for(let x=Math.max(0,px-1);x<=Math.min(w.W-1,px+1);x++){
+    if(Math.abs(x-px)+Math.abs(y-py)>1)continue;
+    const ch=w.rows[y][x],d=P[ch]&&P[ch].to;
+    if(!d||!WORLDS[d]||nudged.has(d)||!worldPending(d))continue;
+    nudged.add(d);
+    /* if the waiting person is a room host, the pack's own invite names them */
+    const I=RM(),hosts=(WORLDS[d].npcs||[]).some(n=>roomPending(n));
+    const line=(hosts&&I&&I.invite)?(I.invite[lang]||I.invite.en)
+              :(typeof T().waitingAt==="function"?T().waitingAt(T().locs[d]||d):"");
+    if(line)toast(line,3400);
+    return;
+  }
+}
 function checkTalk(){
+  portalNudge();
   const n=CW().npcs.find(n=>Math.abs(n.x-px)+Math.abs(n.y-py)===1&&(pendingAt(n)!==undefined||n.chat));
   if(n){const qi=pendingAt(n),tb=$("talk"),rh=roomHosts[n.npc];
     if(qi!==undefined){tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${AQ()[qi].title}”`;
@@ -2243,7 +2278,9 @@ const tc=h=>{if(!tintCol)return h;let v=tintCache.get(h);
 const lookOf=n=>(n&&n.npc&&NPCLOOK[n.npc])||NPCLOOK[n&&n.key!==undefined?n.key:n];
 const npcWhimsy=n=>{const base=lookOf(n),k2=(n&&n.npc&&NPCLOOK[n.npc])?n.npc:(n&&n.key!==undefined?n.key:n);
   if(!tintCol)return base;let v=npcLookCache[k2];
-  if(!v){v={...base,shirt:mixHex(base.shirt,tintCol,0.4)};npcLookCache[k2]=v;}return v;};
+  if(!v){v={...base,shirt:mixHex(base.shirt,tintCol,0.15)};npcLookCache[k2]=v;}return v;};
+/* 0.4 mixed nearly half the theme colour into every shirt in town, which erased the one
+   difference twenty neighbours had. 0.15 keeps the theme's mood and gives the shirts back. */
 function applyTheme(){
   if(themeName==="custom"&&!customTheme)themeName="meridian";
   const t2=themeName==="custom"?customTheme:THEMES[themeName],root=document.documentElement;
