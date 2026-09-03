@@ -8,6 +8,21 @@
 const T3={renderer:null,scene:null,cam:null,group:null,amb:null,sun:null,lastW:0,
   builtKey:"",dirty:0,fail:false,yaw:0,pool:[],tintables:[],tint:null,glows:[],K:1}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
 function t3Invalidate(){T3.dirty++;} /* growth, theme edits — anything that reshapes tiles */
+/* ---------- which way is screen-right? ----------
+   Billboards always show their painted face to the camera, but the painters mirror an
+   animal by its WORLD facing (`face` = ±x). Turn the camera to the north stop and a dog
+   trotting to world +x is painted facing screen-right while +x is now screen-LEFT — so
+   the ball he carries, placed at world +x, sat behind him ("Sonny is picking up the ball
+   with his butt", owner 2026-09-03). Facing is a screen-space fact; derive it from the
+   camera stop and the actor's velocity, not from the map. */
+const t3Q=()=>((Math.round(T3.yaw/(Math.PI/2))%4)+4)%4;
+const T3RIGHT=[[1,0],[0,-1],[-1,0],[0,1]]; /* screen-right in world units at stops 0..3: +x, north, -x, south */
+function t3ScreenFace(a){
+  const q=t3Q(),[rx,rz]=T3RIGHT[q],v=(a.dx||0)*rx+(a.dy||0)*rz;
+  if(v)return v>0?1:-1;
+  return q===2?-(a.face||1):(a.face||1); /* standing still: mirror only at the opposite stop */
+}
+function t3ScreenDir(d){let n=(4-t3Q())%4;while(n-->0)d=TURN[d];return d;} /* a world direction as the camera sees it */
 /* THE BLUR (IDEAS §15.1, measured): every texture was baked at 32px a tile while the
    renderer output at up to 3x device pixels — a 2.9x–4.0x magnification of the art.
    Raising the output resolution and adding mipmaps (the two earlier fixes) cannot
@@ -124,7 +139,27 @@ function t3Build(key){
   ground.rotation.x=-Math.PI/2;ground.position.set(w.W/2,0,w.H/2);
   grp.add(ground);
   /* the standing world: boxes wear the facade art, everything else is a cutout */
-  const faceTex={},flatTex={},wallMat={};
+  const faceTex={},flatTex={},wallMat={},boxMat={};
+  /* Furniture, appliances and anything content marks `box:true` stand as a BOX when the
+     pack drew a side view for them: the side art on all four faces (measured to the drawn
+     height, so nothing floats), the top-down art on the lid. A cutout showed one face from
+     every camera stop — a table looked the same walked around ("most art only have one
+     display from any direction", owner 2026-09-03). Round or leggy things with no side view
+     stay cutouts; that is the right shape for a plant, a cone, a pile of tires. */
+  const t3Boxy=(g,m)=>!!(m.box||m.kind==="furniture"||m.kind==="appliance")&&typeof TILESIDE!=="undefined"&&!!TILESIDE[g];
+  const t3BoxMats=(g,x,y)=>{
+    const vk=g+"|"+(((x+y)%6)+6)%6;if(boxMat[vk])return boxMat[vk];
+    const sc=t3BakeGlyph(g,false,null,false,true,null,x,y);
+    const d=sc.getContext("2d").getImageData(0,0,sc.width,sc.height).data;
+    let top=sc.height;
+    for(let r=0;r<sc.height&&top===sc.height;r++)for(let c2=0;c2<sc.width;c2++)if(d[(r*sc.width+c2)*4+3]>40){top=r;break;}
+    const frac=Math.max(0.15,Math.min(1,(sc.height-top)/sc.height)),h=frac*1.05;
+    const st=t3Tex(sc);st.repeat.set(1,frac); /* only the drawn rows wrap the box */
+    const side=new THREE.MeshLambertMaterial({map:st,transparent:true,alphaTest:0.3});
+    const lid=new THREE.MeshLambertMaterial({map:t3Tex(t3BakeGlyph(g,true,roofCol(g),false,false,null,x,y))});
+    T3.tintables.push(side,lid);
+    return boxMat[vk]={mats:[side,side,lid,side,side,side],h};
+  };
   const baseOf=g=>BASECOL[g]||(typeof MAPCOL!=="undefined"&&MAPCOL[g])||C.wall;
   const wallH=g=>0.55+((TILES[g]||{}).lift|0)*0.042; /* lift 13 ≈ 1.1 units tall */
   const wallMats=g=>wallMat[g]||(wallMat[g]={ /* one material set per glyph, shared by every box of it */
@@ -213,6 +248,10 @@ function t3Build(key){
       const cs=new THREE.Sprite(new THREE.SpriteMaterial({map:T3.canopyTex}));
       cs.scale.set(1.7,1.7,1);cs.position.set(cx,1.05,cz);
       T3.tintables.push(cs.material);grp.add(cs);
+    }else if(t3Boxy(gch,m)){
+      const b=t3BoxMats(gch,x,y);
+      const box=new THREE.Mesh(new THREE.BoxGeometry(0.92,b.h,0.92),b.mats);
+      box.position.set(cx,b.h/2,cz);box.userData={box:true,g:gch,x,y};grp.add(box);
     }else{ /* furniture, props, appliances, the doghouse: standing cutouts, drawn for the front.
               One bake per glyph AND per (x+y) mod 6 — enough for any parity an artist uses,
               at most six pictures per glyph — so a drawing that varies by tile still varies. */
@@ -248,13 +287,13 @@ function t3Actors(){
       g.fillText("❗",18,10+Math.sin(Date.now()/250)*2);g.textAlign="start";}
     else drawEmote(n,2,6); /* townsfolk stay busy in 3D too */
   }}));
-  PEERS.forEach(p=>{if(p.w===world)list.push({x:p.x,y:p.y,f:g=>drawPerson(g,2,6,p.look||look,{dir:p.dir||"down"})});});
-  if(world==="hq")list.push({x:DOG.fx,y:DOG.fy,f:g=>drawDog(g,2,6)});
-  if(world==="lc")list.push({x:CAT.fx,y:CAT.fy,f:g=>drawCat(g,2,6)});
-  if(world==="st"){list.push({x:PIG.fx,y:PIG.fy,f:g=>drawPigeon(g,2,6)});
+  PEERS.forEach(p=>{if(p.w===world)list.push({x:p.x,y:p.y,f:g=>drawPerson(g,2,6,p.look||look,{dir:t3ScreenDir(p.dir||"down")})});});
+  if(world==="hq")list.push({x:DOG.fx,y:DOG.fy,fc:DOG,f:g=>drawDog(g,2,6)});
+  if(world==="lc")list.push({x:CAT.fx,y:CAT.fy,fc:CAT,f:g=>drawCat(g,2,6)});
+  if(world==="st"){list.push({x:PIG.fx,y:PIG.fy,fc:PIG,f:g=>drawPigeon(g,2,6)});
     list.push({x:LORO.x,y:LORO.y,f:g=>drawLoro(g,2,6)});}
   CRIT.forEach(cr=>{if(cr.world!==world)return;
-    list.push({x:cr.fx,y:cr.fy,f:g=>{
+    list.push({x:cr.fx,y:cr.fy,fc:cr,f:g=>{
       if(cr.kind==="butterfly")drawButterfly(g,cr,2,6);
       else if(cr.kind==="colibri")drawColibri(g,cr,2,6);
       else if(cr.kind==="gato")drawGato(g,cr,2,6);
@@ -262,7 +301,7 @@ function t3Actors(){
       else if(cr.kind==="lab")drawLab(g,cr,2,6);
       else if(cr.kind==="chi")drawChi(g,cr,2,6);}});});
   if(BALL&&BALL.world===world)list.push({x:BALL.fx,y:BALL.fy,f:g=>drawBall(g,2,6,BALL.phase,BALL.t)});
-  list.push({x:fx,y:fy,f:g=>drawPerson(g,2,6,look,{dir,bob:moving?Math.sin(bob)*2:0,moving})});
+  list.push({x:fx,y:fy,f:g=>drawPerson(g,2,6,look,{dir:t3ScreenDir(dir),bob:moving?Math.sin(bob)*2:0,moving})});
   /* the door marker rides the same pool, lifted above the wall line so the door slab
      does not hide it */
   doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,f:g=>drawDoorMark(g,2,30,0)}));
@@ -271,7 +310,9 @@ function t3Actors(){
     const p=t3Sprite(i);
     p.g.setTransform(T3.K,0,0,T3.K,0,0);p.g.clearRect(0,0,36,40);
     ctx=p.g; /* the 2D artists paint straight onto the billboard */
-    try{a.f(p.g);}catch(e){}
+    if(a.fc){const f0=a.fc.face;a.fc.face=t3ScreenFace(a.fc); /* painted for the camera, not the map */
+      try{a.f(p.g);}catch(e){}a.fc.face=f0;}
+    else{try{a.f(p.g);}catch(e){}}
     ctx=old;
     p.tex.needsUpdate=true;
     /* pull each billboard a step toward the camera so heads stop sinking into the

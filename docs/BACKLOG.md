@@ -94,6 +94,12 @@ engine, all landing in **S1**, none of them naming a business.
 | 14 | ~~**Construction fences lie sideways in 3D**~~ | **shipped 2026-09-02** | a fence panel stands along its run; corners get two. §15.12 |
 | 12 | ~~**Furniture stood up as cutouts** — the table read as a dartboard, the counter as a grey sign, the barricade as a ladder~~ | **first slice shipped 2026-09-02** | `TILESIDE`: a second drawing per prop for the cameras that see it standing; table, counter, stove done, barricade redrawn. The rest read acceptably in the frames and get a side view the moment the owner reports one. §15.11 |
 | 10 | **A wall between you and the camera hides you** — stand just north of an interior wall in 3D and only your head shows | ~1h | found 2026-09-02 by the eyeball pass, pre-existing. Fade the wall, lower walls, or raise the camera — not chosen. §15.3 |
+| 15 | ~~**The Saturday replays on every open; the street is blank after it**~~ | **shipped 2026-09-03** | the save loader dropped the district counter and the grades; the boot-into-ending path never sized the canvas. Damaged saves repaired at Continue. §15.13 |
+| 16 | ~~**Keys on a laptop** (caps lock, non-QWERTY)~~ | **shipped 2026-09-03** | `keyDir()` reads key then code. §15.13 |
+| 17 | ~~**The building pops in after the permits quest**~~ | **shipped 2026-09-03** | the stage lands behind a short curtain after the card closes. §15.13 |
+| 18 | ~~**Furniture shows one face from every direction in 3D**~~ | **first slice shipped 2026-09-03** | boxes for furniture with a side view; the HQ desk and `A H I S W` still need a side drawing to stand as boxes. §15.13 |
+| 19 | ~~**Sonny carries the ball behind him at the north stop**~~ | **shipped 2026-09-03** | animals and the hero are painted for the camera stop, not the map. §15.13 |
+| 20 | **Grades lost by the save bug cannot be rebuilt** | none | marks made after `mq-v52` persist; a report written before it may show fewer clean calls than were made |
 
 ---
 

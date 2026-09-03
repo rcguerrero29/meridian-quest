@@ -182,5 +182,29 @@
   "y": 3,
   "cam": "3d",
   "ch": 99
+ },
+ {
+  "name": "26-cocina-3d-north",
+  "w": "lc",
+  "x": 8,
+  "y": 6,
+  "cam": "3d",
+  "yaw": 3.1416
+ },
+ {
+  "name": "27-cocina-3d-east",
+  "w": "lc",
+  "x": 8,
+  "y": 6,
+  "cam": "3d",
+  "yaw": 1.5708
+ },
+ {
+  "name": "28-f2-boxes-3d-north",
+  "w": "f2",
+  "x": 15,
+  "y": 7,
+  "cam": "3d",
+  "yaw": 3.1416
  }
 ]

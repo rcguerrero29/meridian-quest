@@ -1683,6 +1683,93 @@ const CANDIDATES = [
     }
   }
 
+  // ---- 20. the owner's 2026-09-03 phone/laptop reports, each red first ----
+  {
+    const r = await page.evaluate(() => {
+      const problems = [];
+      // the save loader must carry the district counter, the grades and the toasts seen
+      const sv = sanitizeSave({ n: 'Keep', cs: 2, mk: { 1: 3, 2: 1 }, so: ['tallerToast'], v: 2 });
+      if (!sv || sv.cs !== 2) problems.push('sanitizeSave drops cs (the district counter) — the last ending replays on every open');
+      if (!sv || !sv.mk || sv.mk[1] !== 3) problems.push('sanitizeSave drops mk (the grades)');
+      if (!sv || !sv.so || sv.so[0] !== 'tallerToast') problems.push('sanitizeSave drops so (opening toasts seen)');
+      if (!sv || sv.v !== 2) problems.push('sanitizeSave drops the save version');
+      // keys: capitals and physical key codes walk too
+      if (typeof keyDir !== 'function' || keyDir({ key: 'W' }) !== 'up' || keyDir({ key: 'Dead', code: 'KeyA' }) !== 'left') problems.push('WASD with caps lock or a non-QWERTY layout does not walk');
+      // 3D: an animal is painted for the camera stop, not the map
+      if (typeof t3ScreenFace !== 'function' || typeof T3 === 'undefined' || !T3) problems.push('no t3ScreenFace');
+      else { const y0 = T3.yaw;
+        T3.yaw = 0; if (t3ScreenFace({ face: 1 }) !== 1) problems.push('screen face at the south stop');
+        T3.yaw = Math.PI; if (t3ScreenFace({ face: 1 }) !== -1) problems.push('a dog facing world +x is still painted facing screen-right from the north stop (the ball behind him)');
+        T3.yaw = Math.PI / 2; if (t3ScreenFace({ face: -1, dx: 0, dy: -1 }) !== 1) problems.push('a dog walking north with the camera east should face screen-right');
+        if (t3ScreenDir('up') !== 'right' || t3ScreenDir('left') !== 'up') problems.push('hero direction world→screen at the east stop: ' + t3ScreenDir('up') + '/' + t3ScreenDir('left'));
+        T3.yaw = Math.PI; if (t3ScreenDir('up') !== 'down') problems.push('hero walking toward the north camera shows their back');
+        T3.yaw = y0; }
+      // the curtain: the veil goes up, the change lands behind it, the veil comes down
+      if (!document.getElementById('veil')) problems.push('no #veil for the growth curtain');
+      return problems;
+    });
+    fails.push(...r);
+    const curt = await page.evaluate(() => new Promise(res => {
+      let applied = false; const v = document.getElementById('veil');
+      curtain(() => { applied = v.classList.contains('on'); }, () => res({ applied, down: !v.classList.contains('on') }));
+      setTimeout(() => res({ timeout: true }), 3000);
+    }));
+    if (curt.timeout || !curt.applied || !curt.down) fails.push('the growth curtain did not apply the change behind the veil: ' + JSON.stringify(curt));
+    // 3D: furniture with a side view stands as a box (La Cocina's tables), a plant stays a cutout
+    const b3 = await page.evaluate(async () => {
+      if (typeof T3 === 'undefined' || !T3 || T3.fail) return null;
+      camSet('3d'); world = 'lc'; px = fx = 2; py = fy = 2; moving = false; held = null;
+      await new Promise(r => setTimeout(r, 700));
+      if (!T3.group) return { none: true };
+      let boxes = 0, boxG = new Set(); T3.group.traverse(o => { if (o.userData && o.userData.box) { boxes++; boxG.add(o.userData.g); } });
+      return { boxes, glyphs: [...boxG].join('') };
+    });
+    if (b3 === null) { /* no WebGL here: the shape rule is still checked by the code path above */ }
+    else if (b3.none || b3.boxes < 1) fails.push('La Cocina\'s tables do not stand as boxes in 3D: ' + JSON.stringify(b3));
+    else if (b3.glyphs.includes('P')) fails.push('a plant became a box');
+    await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; camSet('3d'); });
+
+    // Continue with a Saturday due: it plays once, the street is not blank, the counter persists
+    // pagehide writes the loaded hero over anything injected, so inject on a page with nobody loaded
+    const inject = async sv => { await page.reload(); await page.waitForTimeout(500);
+      await page.evaluate(sv => localStorage.setItem('mq1', JSON.stringify(sv)), sv);
+      await page.reload(); await page.waitForTimeout(900); };
+    await page.evaluate(() => localStorage.setItem('mqctl', 'joy'));
+    await inject({ n: 'Keep', c: '', lk: {}, xp: 230, he: 3, d: [0,1,2,3,4,5,6,7,8,9,10,11,12], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 0, mk: {}, so: [], v: 2 });
+    await page.click('#continueBtn'); await page.waitForTimeout(300);
+    let st = await page.evaluate(() => ({ end: $('end').hidden }));
+    if (st.end) fails.push('a Saturday due at Continue did not play');
+    await page.click('#endGo'); await page.waitForTimeout(400);
+    st = await page.evaluate(() => ({ end: $('end').hidden, world: $('world').hidden, h: parseFloat(cv.style.height) || 0, joy: $('joy').hidden, cs: chSeen, saved: (JSON.parse(localStorage.getItem('mq1')) || {}).cs }));
+    if (!st.end || st.world) fails.push('after "Out to the street" the world is not showing');
+    if (!(st.h > 0)) fails.push('the street is blank after a Saturday claimed from Continue (canvas height ' + st.h + ')');
+    if (st.joy) fails.push('the joystick is missing after a Saturday claimed from Continue');
+    if (st.cs !== 1 || st.saved !== 1) fails.push('the district counter did not persist: memory ' + st.cs + ', saved ' + st.saved);
+    await page.reload(); await page.waitForTimeout(900);
+    await page.click('#continueBtn'); await page.waitForTimeout(300);
+    st = await page.evaluate(() => ({ end: $('end').hidden, cs: chSeen }));
+    if (!st.end) fails.push('the Saturday played again on the next open');
+    if (st.cs !== 1) fails.push('chSeen after reopening: ' + st.cs);
+    // a pre-fix save: played through the mercado, counter reset to 0 by the bug. Week One is
+    // counted as claimed (the mercado was started); the mercado's Saturday is still due
+    await inject({ n: 'Keep', c: '', lk: {}, xp: 350, he: 3, d: [...Array(24).keys()], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 0, mk: {}, so: [] });
+    await page.click('#continueBtn'); await page.waitForTimeout(300);
+    st = await page.evaluate(() => ({ end: $('end').hidden, cs: chSeen, epi: $('epi').textContent.slice(0, 40) }));
+    if (st.cs !== 1) fails.push('a damaged save was not rebuilt: chSeen ' + st.cs);
+    if (st.end) fails.push('the mercado Saturday, never claimed on the damaged save, did not play');
+    if (!/^Saturday, closing/.test(st.epi)) fails.push('the wrong Saturday played for the damaged save: ' + st.epi);
+    await page.click('#endGo'); await page.waitForTimeout(400);
+    st = await page.evaluate(() => ({ cs: chSeen, seen: seenOpen.has('tallerToast'), v: (JSON.parse(localStorage.getItem('mq1')) || {}).v }));
+    if (st.cs !== 2 || !st.seen || st.v !== 2) fails.push('after the mercado Saturday: ' + JSON.stringify(st));
+    // a lot that opened while the phone was away is announced once at Continue
+    await inject({ n: 'Keep', c: '', lk: {}, xp: 350, he: 3, d: [...Array(24).keys()], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 2, mk: {}, so: [], v: 2 });
+    await page.click('#continueBtn'); await page.waitForTimeout(1900);
+    st = await page.evaluate(() => ({ seen: seenOpen.has('tallerToast'), saved: (JSON.parse(localStorage.getItem('mq1')) || {}).so }));
+    if (!st.seen || !(st.saved || []).includes('tallerToast')) fails.push('the taller opening while away was not announced once: ' + JSON.stringify(st));
+    await page.reload(); await page.waitForTimeout(900);
+    await page.click('#continueBtn'); await page.waitForTimeout(300);
+  }
+
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);
