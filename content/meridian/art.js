@@ -131,9 +131,32 @@ Object.assign(TILEART,TILE_PROPS,{
     ctx.fillStyle="#CFE9E8";ctx.fillRect(sx+5,sy+12,22,14);
     ctx.fillStyle="#3FA3A0";ctx.fillRect(sx+9,sy+19,7,5);ctx.fillRect(sx+20,sy+13,1.5,9);ctx.fillRect(sx+17,sy+21,8,3);}
 });
+/* ---- the office wall: blank paper, and the paper that earned its place ----
+   Both are WALL tiles like the window, so the 3D camera paints them on the wall face.
+   `▭` hangs from day one and says nothing (owner's call, 2026-09-03: "blank paper,
+   unlabelled"); a district's ribbon swaps it for `▤` when its document exists. */
+TILEART["▭"]=rc=>{const{sx,sy}=rc;
+  ctx.fillStyle=C.wall;ctx.fillRect(sx,sy,32,32);
+  ctx.fillStyle="rgba(0,0,0,.22)";ctx.fillRect(sx+9,sy+8,15,19);
+  ctx.fillStyle="#EFE7D2";ctx.fillRect(sx+8,sy+7,15,19);
+  ctx.fillStyle="#DCD2B8";ctx.fillRect(sx+8,sy+7,15,2);};
+TILEART["▤"]=rc=>{const{sx,sy}=rc;
+  ctx.fillStyle=C.wall;ctx.fillRect(sx,sy,32,32);
+  /* three sheets, stapled, the top one square to the wall */
+  ctx.fillStyle="rgba(0,0,0,.25)";ctx.fillRect(sx+9,sy+7,16,20);
+  ctx.fillStyle="#E4DAC0";ctx.fillRect(sx+7,sy+6,16,20);
+  ctx.fillStyle="#EFE7D2";ctx.fillRect(sx+8,sy+5,16,20);
+  ctx.fillStyle="#F7F2E4";ctx.fillRect(sx+8,sy+4,15,20);
+  ctx.fillStyle="#2E5FA8";ctx.fillRect(sx+10,sy+6,11,2);            /* the header bar */
+  ctx.fillStyle="#9A9384";                                           /* lines of type */
+  [10,13,16,19].forEach((r,i)=>ctx.fillRect(sx+10,sy+r-0.5,(i%2?8:11),1));
+  ctx.fillStyle="#C0392B";ctx.fillRect(sx+16,sy+19,5,3);             /* the stamp */
+  ctx.fillStyle="#9AA1A8";ctx.fillRect(sx+9,sy+5,4,1.6);};           /* the staple */
+
 const TILEART_SIDE=Object.assign({},TILE_PROPS);
 TILEART_SIDE["□"]=TILEART["□"]; /* cardboard and tape read the same from the side — it stands as a real box in 3D */ /* the props stand up wearing the same drawing */
-const TILEMETA={
+const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
+  
   "|":{lift:13,kind:"wall"},
   "□":{lift:5,kind:"prop",box:true},
   "=":{lift:13,kind:"facade",win:[[6,8,7,6],[19,8,7,6]]},

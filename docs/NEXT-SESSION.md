@@ -5,6 +5,16 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-02, late)
 
+**NEWEST — 2026-09-03 late, `mq-v55`: the city produces paper you can read.** A new pack file
+`content/meridian/docs.js` (READS + DOCS), a cream breathing marker that never clears, a Read
+button that always answers, and a full-screen stapled-paper reader with Copy and Download as
+markdown. Six blank sheets hang in the office from day one; each district's Saturday pins its
+real document over one, filled from the player's actual answers. The old lead's desk is the
+machine: the note in the lid, the complete file, and the glossary. **The meeting was wrong that
+the record could not fill a memo** — `logDecision` has always stored the pick. See IDEAS §15.16.
+**Still open from la junta:** settings folding into four groups, the four-camera screenshot loop,
+decor in iso and 3D, the grade seam, and the mural.
+
 **NEWEST — 2026-09-03, la junta.** First `/meeting-of-da-minds`: Nacho, Don Güero, **Pili
 la piñatera** (new standing expert, 3D and readability) and two guests answered the owner's
 six open questions; an engine-loyal reader cross-examined; a critic found four real errors in

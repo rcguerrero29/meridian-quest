@@ -305,6 +305,7 @@ function t3Actors(){
   /* the door marker rides the same pool, lifted above the wall line so the door slab
      does not hide it */
   doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,f:g=>drawDoorMark(g,2,30,0)}));
+  if(typeof readMarks==="function")readMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.15,f:g=>drawReadMark(g,2,30,0)}));
   const old=ctx;
   list.forEach((a,i)=>{
     const p=t3Sprite(i);

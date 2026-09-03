@@ -1419,16 +1419,21 @@ const CANDIDATES = [
     const f2 = WORLDS.f2.rows;
     if (f2.length !== 14 || f2.some(r => r.length !== 20)) problems.push('f2 is not 20 wide x 14 tall');
     const glyphs = {}; f2.forEach(r => [...r].forEach(c => { glyphs[c] = (glyphs[c] || 0) + 1; }));
-    const want = { D: 1, '□': 4, C: 1, P: 1, '1': 1 };
+    // the wall now carries six sheets of blank paper — the office's own record, pinned
+    // from day one and unlabelled (owner's call, 2026-09-03), each swapped for a stapled
+    // document by its district's ribbon.
+    const want = { D: 1, '□': 4, C: 1, P: 1, '1': 1, '▭': 6 };
     Object.entries(want).forEach(([c, n]) => { if (glyphs[c] !== n) problems.push(`the office should hold ${n} '${c}', found ${glyphs[c] || 0}`); });
     if (f2[11][18] !== '1') problems.push('the stairs moved — the portal from HQ lands at (17,11) beside them');
-    Object.keys(glyphs).forEach(c => { if (!'#.D1|□CP'.includes(c)) problems.push(`the office holds something unplanned: '${c}'`); });
+    Object.keys(glyphs).forEach(c => { if (!'#.D1|□CP▭▤'.includes(c)) problems.push(`the office holds something unplanned: '${c}'`); });
     if (f2[11][17] !== '.') problems.push('the arrival tile (17,11) is blocked');
     [[16,10],[15,9],[14,8],[13,7],[12,6],[11,5],[11,4],[10,3],[10,2]].forEach(([x, y]) => {
       if (f2[y][x] !== '.') problems.push(`the sight line from the stairs to the window is blocked at (${x},${y}) by '${f2[y][x]}'`); });
     // ---- la ventana del norte (Don Güero + Nacho, 2026-09-02): three panes IN the north wall,
     // over the old desk, declared by the pack (art.js) and never by the engine ----
-    if (f2[0] !== '#########|||########') problems.push(`the north wall should carry three panes over the desk, got "${f2[0]}"`);
+    if (f2[0].slice(9, 12) !== '|||') problems.push(`the three panes must stay over the desk, got "${f2[0]}"`);
+    if ([...f2[0]].some((c, i) => (i >= 9 && i <= 11) ? false : !'#▭▤'.includes(c))) problems.push(`the north wall holds something that is not wall or paper: "${f2[0]}"`);
+    if (f2[0].length !== 20) problems.push('the north wall is not 20 wide');
     f2.slice(1).forEach((r, i) => { if (r.includes('|')) problems.push(`a window pane off the north wall at row ${i + 1}`); });
     if (typeof TILEART === 'undefined' || typeof TILEART['|'] !== 'function') problems.push('the pack declares no drawing for the window (TILEART["|"])');
     if (!TILES['|'] || TILES['|'].kind !== 'wall' || TILES['|'].lift !== TILES['#'].lift) problems.push('the window must be a wall-kind tile as tall as the wall beside it, or 3D shows a notch');
@@ -1890,6 +1895,119 @@ const CANDIDATES = [
     if (flav.length) fails.push('no flavour line in both languages for: ' + flav.join(' '));
 
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; camSet('3d'); nudgeW = ''; nudged = new Set(); });
+  }
+
+  // ---- 23. the paper the city produces: readable objects, the wall, the machine ----
+  {
+    const st = await page.evaluate(() => {
+      const problems = [];
+      if (typeof READS === 'undefined' || typeof DOCS === 'undefined') return ['the pack declares no READS / DOCS'];
+      // every readable spot points at a real document, in a real world, on a real tile
+      READS.forEach(r => {
+        if (!DOCS[r.doc]) problems.push('a readable spot points at a missing document: ' + r.doc);
+        const w = WORLDS[r.world];
+        if (!w) problems.push('a readable spot is in a world that does not exist: ' + r.world);
+        else if (!w.rows[r.y] || w.rows[r.y][r.x] === undefined) problems.push('a readable spot is off the map: ' + r.world + ' ' + r.x + ',' + r.y);
+      });
+      // every document builds in both languages, without throwing, and titles exist in both
+      const keep = lang;
+      ['en', 'es'].forEach(L => { lang = L;
+        Object.keys(DOCS).forEach(id => {
+          const d = DOCS[id];
+          if (!d.title || !d.title.en || !d.title.es) problems.push('document ' + id + ' has no title in both languages');
+          const secs = docSections(id);
+          if (!Array.isArray(secs) || !secs.length) problems.push('document ' + id + ' built nothing in ' + L);
+          const md = docMarkdown(id);
+          if (!md || md.indexOf('# ') !== 0) problems.push('document ' + id + ' produced no markdown in ' + L);
+        });
+      });
+      lang = keep;
+      if (!DOCUI.en || !DOCUI.es) problems.push('DOCUI is missing a language');
+      return problems;
+    });
+    fails.push(...st);
+
+    // the marker is there, and it does NOT clear once read — a thing you can read is a place
+    const mk = await page.evaluate(() => {
+      world = 'f2'; px = fx = 10; py = fy = 2; moving = false; held = null;
+      const before = readMarks().length;
+      docOpen('file'); document.getElementById('docClose').click();
+      return { before, after: readMarks().length, marks: readMarks().map(r => r.doc) };
+    });
+    if (!mk.before) fails.push('no read marker beside the machine on the desk');
+    if (mk.after !== mk.before) fails.push('the read marker cleared once read — that is a checklist, not a place');
+
+    // the button appears one step away, names the document, and opens it
+    const btn = await page.evaluate(() => {
+      document.getElementById('world').hidden = false;
+      world = 'f2'; px = fx = 10; py = fy = 2; moving = false; checkTalk();
+      const b = document.getElementById('read');
+      const out = { hidden: b.hidden, label: b.textContent, doc: b.dataset.doc };
+      b.click();
+      out.readerOpen = !document.getElementById('reader').hidden;
+      out.title = document.getElementById('docTitle').textContent;
+      out.body = document.getElementById('docBody').textContent.slice(0, 400);
+      document.getElementById('docClose').click();
+      out.closed = document.getElementById('reader').hidden;
+      // and it is NOT offered from across the room
+      px = fx = 10; py = fy = 8; checkTalk();
+      out.farHidden = document.getElementById('read').hidden;
+      return out;
+    });
+    if (btn.hidden) fails.push('no Read button beside a readable thing');
+    if (!btn.readerOpen) fails.push('pressing Read opened nothing');
+    if (!btn.title) fails.push('the document opened with no title');
+    if (!/logged in|sesión abierta|desk|escritorio/i.test(btn.title + btn.body)) fails.push('the machine did not open the lead\'s file: ' + btn.title);
+    if (!btn.closed) fails.push('the reader would not close');
+    if (!btn.farHidden) fails.push('the Read button offers a thing you are not standing next to');
+
+    // a district you have not worked is blank paper that says so, and never lists work
+    const blankDoc = await page.evaluate(() => {
+      const keepD = new Set(done), keepL = dlog.slice();
+      done = new Set(); dlog.length = 0;
+      const secs = docSections('taller'), md = docMarkdown('taller');
+      done = keepD; dlog.length = 0; keepL.forEach(e => dlog.push(e));
+      return { n: secs.length, txt: JSON.stringify(secs), md };
+    });
+    if (blankDoc.n > 3) fails.push('an unworked document is not blank paper: ' + blankDoc.n + ' sections');
+    if (/Client|Cliente|Calls of record/.test(blankDoc.txt)) fails.push('an unworked document lists an engagement that never happened');
+
+    // a district you HAVE worked prints your real answers, with the retry count
+    const filled = await page.evaluate(() => {
+      const keepL = dlog.slice(), keepD = new Set(done);
+      dlog.length = 0;
+      const ta = CHAPTERS.find(c => c.id === 'taller'), qi = ta.quests[0];
+      dlog.push({ t: 1, quest: AQ()[qi].title, qi, npc: 'tacho', ask: 'PROBE-ASK', pick: 'PROBE-WRONG', concept: 'PROBE-CONCEPT', why: 'PROBE-WHY', result: 'bad' });
+      dlog.push({ t: 2, quest: AQ()[qi].title, qi, npc: 'tacho', ask: 'PROBE-ASK', pick: 'PROBE-RIGHT', concept: 'PROBE-CONCEPT', why: 'PROBE-WHY', result: 'ok' });
+      done.add(qi);
+      const md = docMarkdown('taller');
+      docOpen('taller');
+      const body = document.getElementById('docBody').textContent;
+      document.getElementById('docClose').click();
+      dlog.length = 0; keepL.forEach(e => dlog.push(e)); done = keepD;
+      return { md, body };
+    });
+    if (!/PROBE-RIGHT/.test(filled.body)) fails.push('the document does not show the answer you actually picked');
+    if (/PROBE-WRONG/.test(filled.body)) fails.push('the document shows a superseded answer as the answer of record');
+    if (!/\(2\)/.test(filled.body)) fails.push('the document hides that it took two tries');
+    if (!/PROBE-RIGHT/.test(filled.md) || !/^# /.test(filled.md)) fails.push('the exported markdown is not the same document');
+    if (!/PROBE-CONCEPT/.test(filled.md)) fails.push('the exported markdown drops the concept it taught');
+
+    // the wall: six sheets of blank paper, and a district's ribbon pins its page over one
+    const wall = await page.evaluate(() => {
+      // count the blanks from the pristine map: paint only ever goes on, so a poster this
+      // session already pinned will not go back to paper
+      const before = (WORLDS.f2.rows0.join('').match(/▭/g) || []).length;
+      const keep = chSeen; chSeen = 99; applyGrowth();
+      const after = { blank: (WORLDS.f2.rows.join('').match(/▭/g) || []).length,
+                      posted: (WORLDS.f2.rows.join('').match(/▤/g) || []).length };
+      chSeen = keep; applyGrowth();
+      return { before, after };
+    });
+    if (wall.before !== 6) fails.push('the office wall does not start with six blank sheets: ' + wall.before);
+    if (wall.after.posted !== 6) fails.push('a closed city does not pin all six documents: ' + JSON.stringify(wall.after));
+
+    await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; checkTalk(); });
   }
 
   await browser.close();

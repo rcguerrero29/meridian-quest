@@ -1,10 +1,10 @@
 /* Meridian Quest service worker — cache-first, offline-capable */
-const CACHE = "mq-v54";
+const CACHE = "mq-v55";
 const ASSETS = ["./", "./index.html", "./qr.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   "./engine/engine.js", "./engine/engine3d.js", "./vendor/three.min.js",
   "./content/meridian/strings.js", "./content/meridian/quests.en.js", "./content/meridian/quests.es.js",
   "./content/meridian/npcs.js", "./content/meridian/maps.js", "./content/meridian/config.js",
-  "./content/meridian/art.js", "./content/meridian/room.js"];
+  "./content/meridian/art.js", "./content/meridian/room.js", "./content/meridian/docs.js"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

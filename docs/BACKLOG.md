@@ -193,8 +193,8 @@ session verified the critic against the code; costs are the cross-examined ones.
 | A4 | Date the ventanilla deferral · fix the false "renders in every camera" decor comment · correct the stale ideas-log lines | minutes | Nothing visible; the docs stop lying to the next planner |
 | ~~B~~ | **SHIPPED 2026-09-03.** **The barrio picks its tools back up:** draw the job emoji BESIDE the ❗ instead of instead of it (4 sites), widen the window, shirt tint 0.4 → 0.15 | minutes | 31 people get their trade back. **Then look before drawing anything** — this is the control experiment for the whole "tell people apart" problem |
 | C | Four-camera screenshot loop in `test/shots.js` · decor drawn in iso and 3D | an hour or two | Retires the whole class of "invisible in the camera you play in" bug |
-| D | **Readable objects**: a persistent cream marker (never ❗), a Read button, a panel — plus the old lead's laptop, EN+ES | a sitting | You walk to a machine and find out what "the assistant" actually is |
-| E | Six posters as wall glyphs delivered by ribbons · settings folded into four groups | a sitting | Tacho's signed repair order hangs itself on your office wall |
+| ~~D~~ | **SHIPPED 2026-09-03 (mq-v55).** **Readable objects**: a persistent cream marker (never ❗), a Read button, a panel — plus the old lead's laptop, EN+ES | a sitting | You walk to a machine and find out what "the assistant" actually is |
+| ~~E~~ | **SHIPPED 2026-09-03 — posters only; the settings folding is still open.** Six posters as wall glyphs delivered by ribbons · settings folded into four groups | a sitting | Tacho's signed repair order hangs itself on your office wall |
 | F | **The world may read a grade**: add per-district `gradeOf` to the `flags` object `drawTown` already hands content | an hour or two (NOT a sitting — `gradeOf` and `flags` both exist) | Unblocks the mural and the honest half of the office |
 | G | The mural: six panels, colour by grade, blank plaster until earned | more than a sitting | The record becomes a room, not a menu |
 
