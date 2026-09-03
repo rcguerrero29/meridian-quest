@@ -5,6 +5,17 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-02, late)
 
+**NEWEST — 2026-09-03, la junta.** First `/meeting-of-da-minds`: Nacho, Don Güero, **Pili
+la piñatera** (new standing expert, 3D and readability) and two guests answered the owner's
+six open questions; an engine-loyal reader cross-examined; a critic found four real errors in
+the chair's plan, all verified in the code by the session. **Read
+`docs/meetings/2026-09-03-la-junta.md` corrections section before building any of it** — the
+build order in `docs/BACKLOG.md` §7 is the corrected one. Headlines: the stair arrow alone does
+NOT solve wayfinding (`doorMarks` only reaches 3 tiles; the answer is `roomInvite()` asked about
+a portal's destination); the grade seam is three-quarters built already; the office gifts empty
+the room instead of filling it; and **the engine hardcodes 35 world ids**, so no pack-safety
+claim in this project has ever been audited. Nothing was built — the owner sees the readout first.
+
 **NEWEST — 2026-09-03: six playtest reports fixed, `mq-v52` on `main`** (IDEAS §15.13).
 The big one: `sanitizeSave()` dropped the district counter and the grades, so every
 Continue reset `chSeen` to zero — the last Saturday replayed on the next open, and the boot

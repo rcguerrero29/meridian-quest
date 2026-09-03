@@ -55,7 +55,8 @@ engine, all landing in **S1**, none of them naming a business.
 | ~~the report truncates at 200 entries~~ | **shipped 2026-09-02** | the record keeps every decision; if the phone refuses the write it says so once instead of dropping the oldest. Owner: "I thought we fixed this 200 entries thing" — it was not, now it is |
 | the uppercase tile alphabet is spent | `engine.js:10` | new glyphs must be digits and symbols from here — the first, `\|` the window, lives in `content/meridian/art.js` (2026-09-02) |
 | ~~a delivery is one tile~~ | **answered by the architecture** (Don Güero, later the same day) | a storefront's `tiles` has always been a list, and a furniture delivery IS a storefront aimed at `f2` — a group costs nothing extra. What remains is ART for a piece wider than one tile (the couch) |
-| ~~**the town plan has one flag for all storefronts**~~ | **shipped 2026-09-02** | each storefront carries an `id` and the town plan reads `f.up.<id>`; the four parcels label themselves |
+| **the engine hardcodes 35 world ids** (`world===\"st\"` ×11, `\"pk\"` ×11, `\"lc\"` ×5, `\"hq\"` ×5, `\"lo\"` ×3, `f2`, `ex`) plus the dog/cat/pigeon pinned to `hq`/`lc`/`st` | `engine/engine.js` throughout | AJ's pack inherits Meridian's world ids. The portability guard (`test/smoke.js:1664`) is a 39-proper-noun blocklist: it catches \"chelo\" and misses \"hq\", so every pack-safety claim to date is unaudited. Found by the completeness critic, la junta 2026-09-03 |
+\1 | **shipped 2026-09-02** | each storefront carries an `id` and the town plan reads `f.up.<id>`; the four parcels label themselves |
 
 ---
 
@@ -176,3 +177,24 @@ Calle Dos holds two parcels: La Espiga west, Velázquez east.
 *Detail lives in `docs/IDEAS.md` (§15 especially), `docs/CITY.md` (the ledger and the
 decision log) and `docs/STORY.md` (the bible). This file is the index — if it disagrees
 with those, they are right and this needs updating.*
+
+---
+
+## 7 · La junta 2026-09-03 — the queue the meeting produced
+
+Full minutes and evidence: `docs/meetings/2026-09-03-la-junta.md`. Order corrected after the
+session verified the critic against the code; costs are the cross-examined ones.
+
+| # | Batch | Cost | What the owner would see |
+|---|---|---|---|
+| A1 | **The stairwell speaks.** `roomInvite()` asked about a portal's DESTINATION when you stand beside it | an hour or two | Walk past the stairs in HQ and the game says "Nacho and Don Güero are waiting" — the real fix for "hard knowing where to go" |
+| A2 | Door arrow stops excluding stairs (drop `DOORSET.has(ch)` in `doorMarks`) · stairs painted gold on the plan (one `MAPCOL` line) · flavour lines for the office's stairs, boxes and window | minutes | The staircase wears the same gold arrow every door has; the office stops being the only silent room |
+| A3 | The five office gifts land where they were signed to land (`docs/rooms/aj-office.md` §10) | minutes | Finishing a district fills the room instead of emptying it |
+| A4 | Date the ventanilla deferral · fix the false "renders in every camera" decor comment · correct the stale ideas-log lines | minutes | Nothing visible; the docs stop lying to the next planner |
+| B | **The barrio picks its tools back up:** draw the job emoji BESIDE the ❗ instead of instead of it (4 sites), widen the window, shirt tint 0.4 → 0.15 | minutes | 31 people get their trade back. **Then look before drawing anything** — this is the control experiment for the whole "tell people apart" problem |
+| C | Four-camera screenshot loop in `test/shots.js` · decor drawn in iso and 3D | an hour or two | Retires the whole class of "invisible in the camera you play in" bug |
+| D | **Readable objects**: a persistent cream marker (never ❗), a Read button, a panel — plus the old lead's laptop, EN+ES | a sitting | You walk to a machine and find out what "the assistant" actually is |
+| E | Six posters as wall glyphs delivered by ribbons · settings folded into four groups | a sitting | Tacho's signed repair order hangs itself on your office wall |
+| F | **The world may read a grade**: add per-district `gradeOf` to the `flags` object `drawTown` already hands content | an hour or two (NOT a sitting — `gradeOf` and `flags` both exist) | Unblocks the mural and the honest half of the office |
+| G | The mural: six panels, colour by grade, blank plaster until earned | more than a sitting | The record becomes a room, not a menu |
+
