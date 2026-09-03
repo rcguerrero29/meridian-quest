@@ -1289,3 +1289,55 @@ The first build out of `/meeting-of-da-minds`. Owner: *"ok start with what you w
   panadería's guest chair were always placed elsewhere by design. **One gift was wrong, not
   four** — and Limpieza clearing two boxes is the signed beat, not a bug.
 
+### 15.16 THE PAPER THIS CITY PRODUCES — READABLE OBJECTS, THE WALL, THE MACHINE — BUILT 2026-09-03
+
+Owner: *"we should be able to keep names on people and give us a way to interact with things
+even if they just say an npc line that way we know the button or key is working"* · *"it
+should mimic a stapled poster template of things we produced"* · *"this is just like a tile i
+zoom in into and fills my page like a pdf, in fact thats what it can be just one that looks
+like it got stapled"* · *"so the laptop then becomes for the overflow"* · *"make sure we also
+create realistic docs so we can export for ai consulting"*.
+
+**The structural problem it fixes:** Meridian could only ever be read by talking to somebody.
+The engine had a function that finds people and a function that finds animals; nothing found a
+thing. Every explanation the city owned was locked inside a person.
+
+- **A new pack file, `content/meridian/docs.js`.** `READS` says where a readable thing stands;
+  `DOCS` says what it holds — a title, a template number, and `build(R)` turning the play
+  record into sections. The engine renders the sections and knows nothing about bakeries.
+  A pack that declares neither gets no marker, no button and no panel.
+- **The marker is a cream card that BREATHES**, never the bouncing ❗, drawn in all four
+  cameras. **It does not clear once read.** A mark that disappears when you tick it is a
+  checklist painted on the world; a thing you can read is a place, not a task. (The critic's
+  catch at la junta, and it is now a project law.)
+- **The Read button answers every press**, even on blank paper — silence reads as a broken
+  control, which is what the owner actually asked for.
+- **The reader is a page, not a tile.** Full-screen paper: a staple at the top-left, the
+  template number, the client header, and the body — the same `.md` the Copy and Download
+  buttons produce, so one description drives the page and the export. Two renderers that can
+  disagree are two documents.
+- **Documents are filled from your real play.** `logDecision` has always stored the exact
+  answer you picked, the question, the concept and the reasoning — **the meeting was wrong
+  that it did not**, and nothing had to be added. The answer of record is the LAST time you
+  answered a question, with the retry count shown, because the second try is where the
+  learning is. A field you never answered is left blank, which is the templates' own rule.
+- **Six sheets of blank paper hang on the office wall from day one**, unlabelled (the owner's
+  call over an empty frame: a labelled empty frame is a to-do list in your own office). Each
+  district's Saturday pins its own document over one, through the same ribbon machinery that
+  delivers the furniture. Labs → 05 Decision Log · El Mercado → 02 Recommendation Memo ·
+  Taller Herrera → 06 Process & Exception Map · La Espiga → 01 Discovery Notes · Limpieza
+  Velázquez → 04 Pilot Review · Nolasco → 07 Answers/Refuses/Hands to.
+- **The old lead's desk is the machine.** It already had a monitor and it already sat under
+  the window, so no second object was invented. It holds the note taped inside the lid, the
+  complete file (every document, including the ones on the wall), 03 Acceptance Criteria, and
+  **the glossary** — the trade words the city taught you, in one place you can look up twice.
+  That is the repair for 85 codex lines that were written once, shown once and destroyed.
+- **Export for real work:** every document copies and downloads as markdown that mirrors
+  `docs/templates/` section for section, so a filled one goes straight into a client folder.
+
+**Two engine bugs found while building it, worth remembering.** `.settings` is declared after
+the reader's own rule in the stylesheet, so it silently overrode `position:fixed` with
+`absolute` — and because the reader lives inside `#vp`, hiding the world collapsed its parent
+to 0×0 and the panel rendered at zero size with all its content present. **A panel that is
+"open" and invisible is a stacking-context bug, not a content bug.**
+

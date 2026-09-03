@@ -106,6 +106,7 @@
   .treat{bottom:72px !important; background:#B5773A !important; color:#FFF !important;}
   #ball{bottom:128px !important; background:#7A9A4E !important;}
   #leash{bottom:184px !important; background:#2E5FA8 !important;}
+  .read{bottom:240px !important; background:#F6EFDC !important; color:#2B2536 !important; box-shadow:0 2px 10px rgba(0,0,0,.35), inset 0 0 0 2px #C9BFA6 !important;}
   #band{bottom:184px !important; background:#D77FA8 !important;}
   #adopt{bottom:184px !important; background:#4E7A4A !important;}
   #love{bottom:240px !important; background:#C4586B !important;}
@@ -119,6 +120,36 @@
   /* the reframe line on a quest answered long after its district's Saturday: the
      neighbour is still interested, never still waiting on you */
   .bubble p.late{font-style:italic; color:var(--muted); font-size:.87rem; margin-bottom:6px;}
+  .settings.reader{position:fixed; inset:0; z-index:60; display:block; overflow-y:auto;
+    padding:14px 10px 28px; background:rgba(16,13,24,.88);}
+  .paper{position:relative; max-width:640px; margin:0 auto; background:#F7F2E4; color:#2A2620;
+    border-radius:3px; padding:30px 24px 20px; box-shadow:0 10px 34px rgba(0,0,0,.5);
+    font-family:'IBM Plex Mono',monospace; font-size:.78rem; line-height:1.55;}
+  .paper::before{content:""; position:absolute; inset:0; border-radius:3px; pointer-events:none;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.10), inset 0 30px 40px -34px rgba(0,0,0,.18);}
+  .staple{position:absolute; top:13px; left:20px; width:15px; height:4px; background:#9AA1A8;
+    border-radius:1px; transform:rotate(-8deg); box-shadow:0 1px 0 rgba(0,0,0,.35), 20px 1px 0 -1px rgba(0,0,0,.10);}
+  .paper h2{font-family:'Unbounded',sans-serif; font-size:.98rem; line-height:1.3; margin:6px 0 2px; color:#1E1A16;}
+  .paper .dsub{font-style:italic; color:#6B6355; margin:0 0 14px; font-size:.72rem;}
+  .paper .dtmpl{margin:0; font-size:.62rem; letter-spacing:.09em; text-transform:uppercase; color:#8A8170;}
+  .paper .dh{font-family:'Unbounded',sans-serif; font-size:.76rem; margin:18px 0 6px; color:#1E1A16;
+    border-bottom:1px solid #D8CFB8; padding-bottom:4px;}
+  .paper .dp{margin:6px 0;}
+  .paper .dnote{margin:10px 0; padding:8px 10px; background:#EFE7D2; border-left:3px solid #C2A15A; font-style:italic; color:#5A5245;}
+  .paper .dblank{margin:7px 0; display:flex; gap:8px; align-items:baseline;}
+  .paper .dblank .dline{flex:1; border-bottom:1px dashed #B7AD95; min-height:1em;}
+  .paper .dkv{display:grid; grid-template-columns:auto 1fr; gap:3px 12px; margin:8px 0;}
+  .paper .dkv b{color:#6B6355; font-weight:600;}
+  .paper .dtable{width:100%; border-collapse:collapse; margin:10px 0; font-size:.72rem;}
+  .paper .dtable th{text-align:left; border-bottom:1.5px solid #C6BCA2; padding:5px 6px; color:#5A5245;}
+  .paper .dtable td{border-bottom:1px solid #E2D9C2; padding:5px 6px; vertical-align:top;}
+  .paper .dq{margin:10px 0; padding:9px 11px; background:#FFFCF2; border-left:3px solid #C6BCA2;}
+  .paper .dq.ok{border-left-color:#4E8A58;} .paper .dq.mid{border-left-color:#C2A15A;} .paper .dq.bad{border-left-color:#B0533E;}
+  .paper .dq b{display:block; color:#1E1A16; margin-bottom:4px;}
+  .paper .dpick{margin:0; font-weight:600;}
+  .paper .dwhy{margin:5px 0 0; color:#6B6355; font-size:.72rem;}
+  .paper .ddocs{display:flex; flex-wrap:wrap; gap:7px; margin:10px 0;}
+  .paper .docbar{margin-top:22px; padding-top:14px; border-top:1px dashed #C6BCA2;}
   .codex{background:var(--gold-bg); border:1px solid var(--gold); border-radius:10px; padding:11px 14px; margin:12px 0;}
   .codex b{display:block; font-family:'IBM Plex Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:4px;}
   .codex p{margin:0; font-size:.88rem;}
@@ -268,6 +299,7 @@
       <button class="talk treat" id="treat" hidden></button>
       <button class="talk treat" id="ball" hidden></button>
       <button class="talk treat" id="leash" hidden></button>
+      <button class="talk read" id="read" hidden></button>
       <button class="talk treat" id="band" hidden></button>
       <button class="talk treat" id="adopt" hidden></button>
       <button class="talk treat" id="love" hidden></button>
@@ -362,6 +394,18 @@
           <div class="tlsearch"><input id="tlSearch" type="text"><button id="tlFind">🔍</button></div>
           <textarea id="tlArea" spellcheck="false"></textarea>
           <div class="optrow"><button id="tlApply"></button><button id="tlClose"></button></div>
+        </div>
+      </div>
+      <div class="settings reader" id="reader" hidden>
+        <div class="paper" id="paperSheet">
+          <div class="staple" aria-hidden="true"></div>
+          <p class="dtmpl" id="docTmpl" hidden></p>
+          <h2 id="docTitle"></h2>
+          <p class="dsub" id="docSub"></p>
+          <div id="docBody"></div>
+          <div class="optrow docbar">
+            <button id="docCopy"></button><button id="docDl"></button><button id="docClose"></button>
+          </div>
         </div>
       </div>
       <div class="settings" id="exporter" hidden>
@@ -517,6 +561,7 @@
 <script src="content/meridian/art.js"></script>
 <script src="content/meridian/config.js"></script>
 <script src="content/meridian/room.js"></script>
+<script src="content/meridian/docs.js"></script>
 <script src="vendor/three.min.js"></script>
 <script src="engine/engine.js"></script>
 <script src="engine/engine3d.js"></script>

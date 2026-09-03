@@ -418,6 +418,7 @@ function drawIso(){
   if(BALL&&BALL.world===world)bill(BALL.fx,BALL.fy,(bx,by)=>drawBall(ctx,bx,by,BALL.phase,BALL.t));
   bill(fx,fy,(bx,by)=>drawPerson(ctx,bx,by,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
   doorMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawDoorMark(ctx,bx,by,0)));
+  readMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawReadMark(ctx,bx,by,0)));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
   /* shared time-of-day wash (door spills are top-down-only for now) */
   const dnow=new Date(),hr=dnow.getHours()+dnow.getMinutes()/60;
@@ -823,6 +824,7 @@ function drawFront(){
   if(BALL&&BALL.world===world)act(BALL.fx,BALL.fy,(sx,sy)=>drawBall(ctx,sx,sy,BALL.phase,BALL.t));
   act(fx,fy,(sx,sy)=>drawPerson(ctx,sx,sy,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
   doorMarks().forEach(d=>act(d.x,d.y,(sx,sy)=>drawDoorMark(ctx,sx,sy,14)));
+  readMarks().forEach(d=>act(d.x,d.y,(sx,sy)=>drawReadMark(ctx,sx,sy,14)));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
   CRIT.forEach(cr=>{if(cr.leashT>performance.now()&&cr.world===world)drawLeash(cr,camX,camY);});
   trees.forEach(([sx,sy])=>{ /* canopy pass, shared shape with top-down */
@@ -919,6 +921,7 @@ function draw(){
   if(BALL&&BALL.world===world)drawBall(ctx,BALL.fx*TS-camX,BALL.fy*TS-camY,BALL.phase,BALL.t);
   drawPerson(ctx,fx*TS-camX,fy*TS-camY,look,{dir,bob:moving?Math.sin(bob)*2:0,moving});
   doorMarks().forEach(d=>drawDoorMark(ctx,d.x*TS-camX,d.y*TS-camY,0)); /* the top camera draws its own people — the marker too */
+  readMarks().forEach(d=>drawReadMark(ctx,d.x*TS-camX,d.y*TS-camY,0));
   CRIT.forEach(cr=>{if(cr.leashT>performance.now()&&cr.world===world)drawLeash(cr,camX,camY);});
   drawAmbient(w,camX,camY);
   drawDaylight(w,camX,camY);
@@ -1727,6 +1730,110 @@ function loop(ts){
 /* the door marker — the third door affordance (owner, 2026-09-02: "i think we should have a
    marker"). Within three steps of a door that LEADS somewhere, a bouncing arrow floats over
    it in every camera. Doors that are only decoration (no portal) get nothing. */
+/* Everything a document may read, handed over as plain data so a pack never reaches into
+   engine internals — and so AJ's pack can build entirely different paper from the same play. */
+function docCtx(){
+  const L=CHS(),d=new Date(),p2=n=>String(n).padStart(2,"0");
+  return {
+    hero:heroName, lang,
+    dateStr:d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()),
+    decisions:dlog.map(e=>({quest:e.quest,qi:e.qi,npc:e.npc,ask:e.ask,pick:e.pick,
+                            concept:e.concept,why:e.why,result:e.result})),
+    done:[...done], marks:{...marks},
+    districts:L.map((c,i)=>({id:c.id,quests:(c.quests||[]).slice(),need:c.need,
+      closed:chSeen>i, grade:gradeOf(c),
+      role:c.role&&(c.role[lang]||c.role.en), industry:c.industry&&(c.industry[lang]||c.industry.en)})),
+  };
+}
+/* sections → the page, and → markdown, from ONE description. Two renderers that can
+   disagree are two documents. */
+function docSections(id){const d=DC()[id];if(!d||typeof d.build!=="function")return null;
+  try{return d.build(docCtx())||[];}catch(e){console.warn("DOC: "+id+" failed to build",e);return [];}}
+function docTitle(id){const d=DC()[id]||{};return (d.title&&(d.title[lang]||d.title.en))||id;}
+function docMarkdown(id){
+  const secs=docSections(id);if(!secs)return "";
+  const d=DC()[id]||{},out=["# "+docTitle(id)];
+  const sub=d.sub&&(d.sub[lang]||d.sub.en);if(sub)out.push("*"+sub+"*");
+  if(d.tmpl)out.push("",(DCU().tmplLb?DCU().tmplLb(d.tmpl):"Template "+d.tmpl)+" · docs/templates/");
+  out.push("");
+  secs.forEach(s2=>{
+    if(s2.h)out.push("## "+s2.h,"");
+    else if(s2.p)out.push(s2.p,"");
+    else if(s2.note)out.push("> "+s2.note,"");
+    else if(s2.blank)out.push("**"+s2.blank+":** ___","");
+    else if(s2.kv)out.push(...s2.kv.map(r=>"- **"+r[0]+":** "+(r[1]||"___")),"");
+    else if(s2.t){out.push("| "+s2.t.head.join(" | ")+" |","|"+s2.t.head.map(()=>"---").join("|")+"|",
+      ...s2.t.rows.map(r=>"| "+r.map(c=>String(c==null?"":c).replace(/\|/g,"\\|")).join(" | ")+" |"),"");}
+    else if(s2.q){const q=s2.q;
+      out.push("**"+q.ask+"**","",
+        "> "+q.pick+(q.tries>1?"  _("+q.tries+" tries)_":""),"",
+        (q.concept?"*"+q.concept+"* — ":"")+(q.why||""),"");}
+    else if(s2.docs)out.push(...s2.docs.map(k=>"- "+docTitle(k)),"");
+  });
+  return out.join("\n");
+}
+function docOpen(id){
+  const secs=docSections(id);if(!secs)return;
+  const d=DC()[id]||{},body=$("docBody");
+  docCur=id;body.innerHTML="";
+  const el=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;
+    if(txt!==undefined)n.textContent=txt;body.appendChild(n);return n;};
+  $("docTitle").textContent=docTitle(id);
+  $("docSub").textContent=(d.sub&&(d.sub[lang]||d.sub.en))||"";
+  $("docTmpl").textContent=d.tmpl?(DCU().tmplLb?DCU().tmplLb(d.tmpl):d.tmpl):"";
+  $("docTmpl").hidden=!d.tmpl;
+  secs.forEach(s2=>{
+    if(s2.h)el("h3","dh",s2.h);
+    else if(s2.p)el("p","dp",s2.p);
+    else if(s2.note)el("p","dnote",s2.note);
+    else if(s2.blank){const r=el("p","dblank");
+      r.innerHTML='<b></b> <span class="dline"></span>';r.querySelector("b").textContent=s2.blank+":";}
+    else if(s2.kv){const t=el("div","dkv");
+      s2.kv.forEach(row=>{const k=document.createElement("b"),v=document.createElement("span");
+        k.textContent=row[0];v.textContent=row[1]||"—";t.appendChild(k);t.appendChild(v);});}
+    else if(s2.t){const tb=document.createElement("table");tb.className="dtable";
+      const hr=tb.insertRow();s2.t.head.forEach(h=>{const th=document.createElement("th");th.textContent=h;hr.appendChild(th);});
+      s2.t.rows.forEach(r=>{const tr=tb.insertRow();r.forEach(c=>{const td=tr.insertCell();td.textContent=c==null?"":String(c);});});
+      body.appendChild(tb);}
+    else if(s2.q){const q=s2.q,w=el("div","dq"+(q.r==="ok"?" ok":q.r==="mid"?" mid":" bad"));
+      const a=document.createElement("b");a.textContent=q.ask;w.appendChild(a);
+      const pk=document.createElement("p");pk.className="dpick";
+      pk.textContent=q.pick+(q.tries>1?"  ("+q.tries+")":"");w.appendChild(pk);
+      if(q.why){const wy=document.createElement("p");wy.className="dwhy";
+        wy.textContent=(q.concept?q.concept+" — ":"")+q.why;w.appendChild(wy);}}
+    else if(s2.docs){const row=el("div","ddocs");
+      s2.docs.forEach(k=>{if(!DC()[k])return;const b=document.createElement("button");
+        b.className="opt";b.textContent=docTitle(k);
+        b.addEventListener("click",()=>docOpen(k));row.appendChild(b);});}
+  });
+  body.scrollTop=0;
+  exitFsForCard();$("reader").hidden=false;held=null;   /* overlays the world, like Settings — hiding it collapses the panel's parent */
+}
+let docCur=null;
+/* ---------- READS / DOCS — a thing you can read without talking to anybody ----------
+   The city could only ever be read by finding the right person. A pack declares READS
+   (where a readable thing stands) and DOCS (what it says), and the engine renders the
+   sections; it never knows what a bakery is. A pack that declares neither gets no marker,
+   no button and no panel — tested. Owner, 2026-09-03: "give us a way to interact with
+   things ... obviously i would need a marker to know its interactive". */
+const RD=()=>(typeof READS!=="undefined"&&Array.isArray(READS))?READS:[];
+const DC=()=>(typeof DOCS!=="undefined"&&DOCS)?DOCS:{};
+const DCU=()=>((typeof DOCUI!=="undefined"&&DOCUI[lang])||(typeof DOCUI!=="undefined"&&DOCUI.en)||{});
+const readAt=(x,y)=>RD().find(r=>r.world===world&&r.x===x&&r.y===y&&DC()[r.doc]);
+/* the mark NEVER clears once read: a mark that disappears when you tick it is a checklist
+   painted on the world, and this city does not have those. A thing you can read is a place. */
+function readMarks(){const out=[];
+  RD().forEach(r=>{if(r.world!==world)return;
+    if(Math.abs(r.x-px)+Math.abs(r.y-py)<=3&&DC()[r.doc])out.push(r);});
+  return out;}
+function drawReadMark(g,bx,by,up){ /* a cream card that BREATHES — never the bouncing ❗ */
+  const b=0.85+Math.sin(Date.now()/620)*0.15,w=13,h=10,x=bx+16-w/2,y=by-6-(up|0);
+  g.save();g.globalAlpha=b;
+  g.fillStyle="#2B2536";g.fillRect(x-1.5,y-1.5,w+3,h+3);
+  g.fillStyle="#F6EFDC";g.fillRect(x,y,w,h);
+  g.fillStyle="#B9AE95";g.fillRect(x+2,y+2.5,w-6,1);g.fillRect(x+2,y+5,w-4,1);g.fillRect(x+2,y+7.5,w-7,1);
+  g.fillStyle="#C9BFA6";g.beginPath();g.moveTo(x+w-4,y);g.lineTo(x+w,y);g.lineTo(x+w,y+4);g.closePath();g.fill();
+  g.restore();}
 function doorMarks(){const w=CW(),out=[],P=PORTALS[world];if(!P)return out;
   for(let y=Math.max(0,py-3);y<=Math.min(w.H-1,py+3);y++)for(let x=Math.max(0,px-3);x<=Math.min(w.W-1,px+3);x++){
     const ch=w.rows[y][x];if(Math.abs(x-px)+Math.abs(y-py)<=3&&P[ch])out.push({x,y,ch});}
@@ -1768,6 +1875,7 @@ function portalNudge(){
 }
 function checkTalk(){
   portalNudge();
+  checkRead();
   const n=CW().npcs.find(n=>Math.abs(n.x-px)+Math.abs(n.y-py)===1&&(pendingAt(n)!==undefined||n.chat));
   if(n){const qi=pendingAt(n),tb=$("talk"),rh=roomHosts[n.npc];
     if(qi!==undefined){tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${AQ()[qi].title}”`;
@@ -1779,6 +1887,19 @@ function checkTalk(){
       tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
     tb.hidden=false;}
   else $("talk").hidden=true;
+}
+/* the Read button: a readable thing one step away. It answers EVERY time it is pressed —
+   silence reads as a broken control (owner, 2026-09-03: "even if they just say an npc line
+   that way we know the button or key is working"). */
+function checkRead(){
+  const b=$("read");if(!b)return;
+  let hit=null;
+  if(!$("world").hidden&&!moving)
+    [[0,0],[0,-1],[0,1],[-1,0],[1,0]].some(([dx,dy])=>{const r=readAt(px+dx,py+dy);if(r)hit=r;return !!r;});
+  b.hidden=!hit;
+  if(hit){b.dataset.doc=hit.doc;
+    const d=DC()[hit.doc],t=(d.title&&(d.title[lang]||d.title.en))||"";
+    b.textContent=(DCU().read||"📄")+(t?" — "+t.split(" — ")[0]:"");}
 }
 /* controls */
 document.querySelectorAll(".dpad button[data-d]").forEach(b=>{
@@ -1796,6 +1917,19 @@ window.addEventListener("keydown",e=>{
   if(!$("world").hidden&&keyDir(e)){held=keyDir(e);e.preventDefault();}
   if(e.key==="Enter"&&!$("talk").hidden&&!$("world").hidden)$("talk").click();});
 window.addEventListener("keyup",e=>{if(keyDir(e)&&held===keyDir(e))held=null;});
+$("read").addEventListener("click",()=>{const id=$("read").dataset.doc;if(id)docOpen(id);});
+$("docClose").addEventListener("click",()=>{$("reader").hidden=true;restoreFs();checkTalk();});
+$("docCopy").addEventListener("click",()=>{const v=docMarkdown(docCur);
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(v):Promise.reject())
+    .then(()=>toast(DCU().copied||"✓",2000))
+    .catch(()=>{try{const r=document.createRange();r.selectNodeContents($("docBody"));
+      const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}catch(e){}});});
+$("docDl").addEventListener("click",()=>{
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([docMarkdown(docCur)],{type:"text/markdown"}));
+  a.download=(String(docCur||"document").replace(/[^a-z0-9]+/gi,"-"))+".md";
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);});
 $("talk").addEventListener("click",()=>{
   const tb=$("talk");
   if(tb.dataset.chatn){
@@ -2563,6 +2697,8 @@ function applyLang(){
   $("begin").textContent=t.begin;
   setWorldTag();
   $("openExp").textContent=t.expBtn;$("exTitle").textContent=t.expTitle;$("exHint").textContent=t.expHint;
+  {const u=DCU();$("docClose").textContent=u.close||"✕";$("docCopy").textContent=u.copy||"📋";
+   $("docDl").textContent=u.dl||"⬇️";if(!$("read").hidden&&!$("world").hidden)checkRead();}
   $("exCopy").textContent=t.expCopy;$("exClose").textContent=t.tlClose;
   $("exTabJson").textContent=t.exTabJson;$("exTabCare").textContent=t.exTabCare;$("exIcs").textContent=t.exIcs;
   $("exTabRep").textContent=t.exTabRep;$("exDl").textContent=t.exDl;

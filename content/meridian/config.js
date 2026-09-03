@@ -1,5 +1,5 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
-const GAMEV="mq-v54";
+const GAMEV="mq-v55";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -52,6 +52,14 @@ const GROWTH={
    {id:"no",world:"st",district:5,tiles:NOLASCO,  doorstep:{world:"st",x:25,y:1, dir:"down"}},
    /* gifts upstairs — a delivery IS a storefront aimed at f2, and each lands on a moving box
       (❗La caja). No doorstep on a gift, so the handover never stands you upstairs. */
+ /* the wall: blank paper from day one, and a district's Saturday pins its own page over it.
+    The document behind it is DOCS[<id>] in content/meridian/docs.js. */
+ {id:"poster-labs",world:"f2",district:1,tiles:[[0,2,"▤"]]},
+ {id:"poster-me",world:"f2",district:2,tiles:[[0,4,"▤"]]},
+ {id:"poster-ta",world:"f2",district:3,tiles:[[0,6,"▤"]]},
+ {id:"poster-pa",world:"f2",district:4,tiles:[[0,13,"▤"]]},
+ {id:"poster-li",world:"f2",district:5,tiles:[[0,15,"▤"]]},
+ {id:"poster-no",world:"f2",district:6,tiles:[[0,17,"▤"]]},
    {id:"gift-me",world:"f2",district:2,tiles:[[11,2,"K"],[11,3,"K"]]},
    {id:"gift-ta",world:"f2",district:3,tiles:[[11,14,"○"]]},
    {id:"gift-pa",world:"f2",district:4,tiles:[[2,11,"⊔"]]},
