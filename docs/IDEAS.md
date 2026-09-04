@@ -1590,3 +1590,63 @@ city met the pavement on a hard bright line. A gradient baked into a texture tha
 being built costs no draw call and plants the whole city at once. Ambient light does not reach
 the corner where a wall meets the ground — that gradient is most of what says *this is standing
 here*.
+
+### §15.27 — The other session's recommendations, reviewed (2026-09-04)
+
+Owner: *"i had another session give us recommendations for next steps to make more realistic, did
+you review?"* **The honest answer was no.** They are not repo files — they are two published
+artifacts, and this session had not opened them. Worse, `docs/ASKS.md` carried a row saying
+FitCheck was *"not among the account's eight published artifacts... nothing to inherit."* That was
+true when it was checked and false by the time the owner asked. Both are now read; the ASKS row is
+corrected. **The lesson: an answer with a date on it is a claim about that date, and this project
+now publishes artifacts faster than a session's snapshot of them stays true. Check the artifact
+list, not the memory of it.**
+
+**What the two artifacts are.** *FitCheck Salvage Manifest* (2026-09-03) is a source-level teardown
+of the FitCheck iOS app — 121 Swift files, 33,409 lines, 22 agents — sorting what survives the trip
+into a game project. *Bones to Meshes* (2026-09-04) is a working prototype of the one asset it rates
+highest: an SDF prop forge that turns a list of line-segments-with-radii into a watertight mesh.
+
+**The headline recommendation does not fit this game, and here is exactly why.** `sdf-prop-forge`
+produces *untextured, un-UV'd, unrigged organic shells* — the artifact says so itself. Meridian's
+3D camera has **no mesh pipeline at all**: `engine/engine3d.js` builds the entire world from
+`BoxGeometry`, `PlaneGeometry` and `Sprite`, textured with 32×32 canvas glyphs baked at runtime.
+There is no glTF loader, no UV stage, and the only vendored dependency is `three.min.js`. Dropping a
+smooth organic mesh into that would not read as "more realistic" — it would read as a different
+game's asset, because Meridian's realism comes from *value structure and standing geometry*, not
+from polygon count. The two fixes that actually moved the needle this week (the light ladder, the
+contact shadow) touched no art at all.
+
+That is a judgement about **this** pack, not about the tool. The forge is a real capability, and
+the place it earns its keep is a creature or a hero prop in a pack that wants organic shapes —
+AJ's, or Sonny's own game. Its `--bake-to-js` mode (a typed-array ES module, no asset fetch) is
+exactly right for an offline PWA. **Filed as available, not as next.**
+
+**What IS directly applicable, and was adopted:**
+
+- **"A constraints list is a world bible; mark the stale line."** The manifest praises a doc that
+  pairs its constraints with an explicit *stale below this line* divider, and names counter-evidence
+  in the same repo — a testing doc claiming 41 tests against a reality of 169. **Meridian had the
+  identical failure this week:** `NEXT-SESSION.md` claimed `main` was at `mq-v44` when it was at
+  `v61`, and `CITY.md`'s header said Phase 2 was "NOT built" while four districts were written,
+  wired and deployed. Both are now corrected with the correction dated in place. The rule this
+  project takes from it: **a doc that records a version, a count, or a built/not-built state must
+  name where the truth lives** — for the version that is `CACHE` in `sw.js`, and when the two
+  disagree, `sw.js` wins. That sentence is now in `NEXT-SESSION.md`.
+- **"Dump generator state, copy-pasteable."** A static snapshot of every internal number a
+  generator computed, disproportionately valuable for LLM-assisted procedural work — the difference
+  between describing a bad output in prose and handing over the state that produced it. This lands
+  squarely on `BUILDTPL`/`resolveBuild`/`bldRng`: when a template builds something wrong, the seed
+  and the resolved picks should be dumpable in one action.
+- **"Flag an auto-correction, never silently rewrite."** `buildSafe()` already refuses; the idea
+  adds that it should *say what it refused and why* rather than quietly declining.
+- **`spec-gate`.** The manifest's sharpest observation about this account's skills: *"nothing today
+  tells you whether pack v3 beats pack v2."* True. `test/smoke.js` proves the pack is structurally
+  sound; nothing scores it.
+
+**One correction back to the manifest.** It reads this project's skill trio as having a stark gap —
+*"nothing produces 3D assets, and nothing validates."* The second half is wrong for Meridian
+specifically: `test/smoke.js` is ~32 numbered sections and every assertion added this week was
+verified to fail against broken code before being kept, `test/tilesheet.js` is a cold-read gate, and
+`test/shots.js --cams` sweeps four cameras. What is missing is not validation — it is *comparative*
+validation across content-pack versions, which is a narrower and more interesting gap.
