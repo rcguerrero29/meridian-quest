@@ -21,6 +21,8 @@ Object.keys(WORLD_DEFS).forEach(id=>{
 });
 const CW=()=>WORLDS[world];
 const isSolid=(x,y)=>{const w=CW();return x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N";};
+/* the same question about a world you are not standing in — used by the discoverability audit */
+const isSolidAt=(id,x,y)=>{const w=WORLDS[id];return !w||x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N";};
 /* ---------- townsfolk on the move ----------
    Anyone with NO quests drifts around their own corner. A quest-giver never moves: a person
    you are looking for has to be where you left them, which is the entire reason the doorstep
@@ -277,7 +279,7 @@ function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
   $("status").textContent=`${hs}  ${xp}XP`.trim();}
 /* save */
-function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],v:2};
+function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],bl:bldPicks,v:2};
   try{localStorage.setItem("mq1",JSON.stringify(st));}catch(e){}
   if(NET.enabled)NET.sync(st);}
 /* The ❗ on the world tag means what it means everywhere else: somebody in here has
@@ -313,9 +315,16 @@ function sanitizeSave(s){
   if(s.mk&&typeof s.mk==="object")Object.keys(s.mk).slice(0,128).forEach(k2=>{
     const ki=num(k2,0,98,null);if(ki!==null)mk[ki]=num(s.mk[k2],1,3,1);});
   const so=Array.isArray(s.so)?s.so.filter(v=>typeof v==="string").slice(0,32).map(v=>v.slice(0,32)):[];
+  /* the faces of the houses already built: {buildId:{partId:optionId}}. Pinned so a template
+     that gains options later does not reshape a street somebody already knows. */
+  const bl={};
+  if(s.bl&&typeof s.bl==="object")Object.keys(s.bl).slice(0,200).forEach(k=>{
+    const v=s.bl[k];if(!v||typeof v!=="object")return;const o={};
+    Object.keys(v).slice(0,32).forEach(pk=>{if(typeof v[pk]==="string")o[String(pk).slice(0,32)]=v[pk].slice(0,32);});
+    o&&(bl[String(k).slice(0,40)]=o);});
   return{n,c:str2(s.c,24,""),lk,xp:num(s.xp,0,999,0),he:num(s.he,0,3,3),d,
     px:num(s.px,0,63,10),py:num(s.py,0,63,11),tr:num(s.tr,0,9999,0),fq:num(s.fq,0,3,0),
-    w:str2(s.w,4,"hq"),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,
+    w:str2(s.w,4,"hq"),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,bl,
     v:s.v===undefined?undefined:num(s.v,0,99,0)};
 }
 function loadSave(){try{return sanitizeSave(JSON.parse(localStorage.getItem("mq1")||""));}catch(e){return null;}}
@@ -1870,7 +1879,7 @@ let docCur=null;
    sections; it never knows what a bakery is. A pack that declares neither gets no marker,
    no button and no panel — tested. Owner, 2026-09-03: "give us a way to interact with
    things ... obviously i would need a marker to know its interactive". */
-const RD=()=>(typeof READS!=="undefined"&&Array.isArray(READS))?READS:[];
+const RD=()=>((typeof READS!=="undefined"&&Array.isArray(READS))?READS:[]).concat(bldReads||[]);
 const DC=()=>(typeof DOCS!=="undefined"&&DOCS)?DOCS:{};
 const DCU=()=>((typeof DOCUI!=="undefined"&&DOCUI[lang])||(typeof DOCUI!=="undefined"&&DOCUI.en)||{});
 const readAt=(x,y)=>RD().find(r=>r.world===world&&r.x===x&&r.y===y&&DC()[r.doc]);
@@ -3614,7 +3623,7 @@ function applyGrowth(){
   const g=GRW();
   new Set([g.staged&&g.staged.world,...ribbons().map(r=>r.world)].filter(Boolean))
     .forEach(id=>{if(WORLDS[id])rebuildWorld(id);});
-  applyStaged();applyRibbon();
+  applyStaged();applyRibbon();applyBuilds();
   if(typeof t3Invalidate==="function")t3Invalidate();} /* the 3D camera rebuilds its meshes */
 function applyStaged(){
   const g=GRW().staged;if(!g||!g.tiles)return;
@@ -3641,6 +3650,98 @@ function applyStaged(){
   if(sf&&world===g.world&&(isSolid(px,py)||!growthReach(px,py))){
     px=fx=sf.x;py=fy=sf.y;dir="down";held=null;moving=false;}
   if(SOLID.has(w.grid[PIG.y][PIG.x])){PIG.x=PIG.fx=4;PIG.y=PIG.fy=1;PIG.moving=false;} /* Paloma will not be bricked in */
+}
+/* ---------- BUILDS — construction from a template, with variation ----------
+   Don Güero is handed a template and builds from it, changing a few things each time
+   (owner, 2026-09-03: "assign him a house template that he can build and just add some
+   random customizations"). No network, no model: a template is content, and the engine
+   only resolves choices and stamps tiles.
+
+   Four architectural commitments, because this has to carry more than a casita later:
+
+   1. DETERMINISTIC. Variation comes from a seeded generator, never Math.random. The same
+      lot builds the same house on every device, every reload, every session — which is the
+      only way saves, screenshots and a future multiplayer can agree on what the city looks
+      like.
+   2. RESOLVED PICKS ARE REMEMBERED (save key `bl`). Once a house is built, its choices are
+      pinned, so a later content edit that adds options does NOT silently reshape houses
+      somebody already lives beside. New lots get the new options; old lots keep their faces.
+   3. PARTS RESOLVE IN ORDER AND SEE EACH OTHER. A part may declare `when(ctx)` and read
+      `ctx.pick` (what earlier parts chose) and `ctx.flags` (worldFlags — district grades and
+      all). That is the hook for "the roof depends on the door", "this block is richer once
+      the taller opens", and anything else a pack invents later, with no engine change.
+   4. NOTHING IS STAMPED THAT BREAKS THE CITY. Every build is validated before a single tile
+      lands: inside the map, never over a person, never over a portal, and no portal in that
+      world may lose its last standable neighbour. A refused build is announced, not silent.
+
+   A template: {id, size:{w,h}, parts:[Part]}
+   A Part:     {id, when?(ctx), tiles?:[[dy,dx,glyph]], reads?:[{x,y,doc}], pick?:[Option]}
+   An Option:  {id, w?:weight, tiles?:[...], reads?:[...]}
+   Tiles are relative to the build's own corner, so a template can be dropped anywhere. */
+const BLD=()=>(typeof BUILDTPL!=="undefined"&&BUILDTPL)?BUILDTPL:{};
+const BLDS=()=>(typeof BUILDS!=="undefined"&&Array.isArray(BUILDS))?BUILDS:[];
+let bldPicks={};            /* buildId -> {partId: optionId}, saved so a house keeps its face */
+let bldReads=[];            /* readable things a build put into the world */
+let bldWarned=false;
+function bldHash(s){let h=2166136261>>>0;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+  return h>>>0;}
+function bldRng(seed){let a=bldHash(String(seed))||1;
+  return ()=>{a^=a<<13;a>>>=0;a^=a>>>17;a^=a<<5;a>>>=0;return a/4294967296;};}
+/* a template plus a lot becomes a concrete list of tiles — and the list of choices that made it */
+function resolveBuild(b){
+  const T=BLD()[b.tpl];if(!T)return null;
+  const rnd=bldRng(b.seed!==undefined?b.seed:(b.id+"|"+b.world+"|"+b.x+","+b.y));
+  const saved=bldPicks[b.id]||null,pick={},tiles=[],reads=[];
+  (T.parts||[]).forEach(part=>{
+    const ctx={pick,build:b,tpl:T,flags:worldFlags()};
+    if(typeof part.when==="function"){let ok=false;try{ok=!!part.when(ctx);}catch(e){ok=false;}if(!ok)return;}
+    let src=part;
+    if(part.pick&&part.pick.length){
+      let opt=saved&&saved[part.id]&&part.pick.find(o=>o.id===saved[part.id]);
+      if(!opt){const tot=part.pick.reduce((s,o)=>s+(o.w||1),0);let r=rnd()*tot;
+        opt=part.pick.find(o=>(r-=(o.w||1))<0)||part.pick[part.pick.length-1];}
+      pick[part.id]=opt.id;src=opt;
+    }
+    (src.tiles||[]).forEach(t=>tiles.push([b.y+t[0],b.x+t[1],t[2]]));
+    (src.reads||[]).forEach(r=>reads.push({world:b.world,x:b.x+(r.x|0),y:b.y+(r.y|0),doc:r.doc}));
+  });
+  return {id:b.id,world:b.world,tpl:b.tpl,pick,tiles,reads};
+}
+/* refuse anything that would wall the city in. Cheap, and it runs before a tile is written. */
+function buildSafe(spec){
+  const w=WORLDS[spec.world];if(!w)return "no such world: "+spec.world;
+  for(const [y,x,ch] of spec.tiles){
+    if(y<0||x<0||y>=w.H||x>=w.W)return "off the map at "+x+","+y;
+    if(w.grid[y][x]==="N")return "somebody is standing at "+x+","+y;
+    if(DOORSET.has(w.rows[y][x])&&(PORTALS[spec.world]||{})[w.rows[y][x]])
+      return "it would build over the door at "+x+","+y;
+  }
+  /* simulate, then check every portal in this world still has somewhere to stand */
+  const g=w.grid.map(r=>r.slice()),rows=w.rows.slice();
+  spec.tiles.forEach(([y,x,ch])=>{g[y][x]=ch;rows[y]=rows[y].slice(0,x)+ch+rows[y].slice(x+1);});
+  const P=PORTALS[spec.world]||{};
+  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
+    if(!P[rows[y][x]])continue;
+    const ok=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{const nx=x+dx,ny=y+dy;
+      return nx>=0&&ny>=0&&nx<w.W&&ny<w.H&&!SOLID.has(g[ny][nx])&&g[ny][nx]!=="N";});
+    if(!ok)return "it would seal the door at "+x+","+y;
+  }
+  return null;
+}
+function applyBuilds(){
+  bldReads=[];
+  BLDS().forEach(b=>{
+    const spec=resolveBuild(b);
+    if(!spec){if(!bldWarned){bldWarned=true;console.warn("WORLD: no template named "+b.tpl);}return;}
+    const bad=buildSafe(spec);
+    if(bad){console.warn("WORLD: refused to build "+b.id+" — "+bad);return;}
+    const w=WORLDS[spec.world];
+    spec.tiles.forEach(([y,x,ch])=>{
+      w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);w.grid[y][x]=ch;});
+    bldPicks[b.id]=spec.pick;
+    spec.reads.forEach(r=>bldReads.push(r));
+  });
 }
 /* a district's storefront ribbon: dropped once that district has opened */
 function applyRibbon(){
@@ -3680,6 +3781,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").addEventListener("click",()=>{
     heroName=SV.n;cls=SV.c||"";look=SV.lk||look;xp=SV.xp||0;hearts=SV.he??3;done=new Set(SV.d||[]);
     treats=SV.tr||0;fredQ=SV.fq||0;chSeen=SV.cs||0;seenOpen=new Set(SV.so||[]);
+    bldPicks=(SV.bl&&typeof SV.bl==="object")?SV.bl:{};   /* the houses keep the faces they were built with */
     /* a save written before v2 lost cs on every Continue. Rebuild it from what was played:
        a district counts as claimed when its need is met AND the next district has been
        started — so a Saturday never seen is still played, and one seen is not replayed. */

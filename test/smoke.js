@@ -2213,6 +2213,165 @@ const CANDIDATES = [
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; checkTalk(); });
   }
 
+  // ---- 27. Don Güero builds from a template: same lot, same house, every time ----
+  {
+    const b = await page.evaluate(() => {
+      const problems = [];
+      if (typeof BUILDTPL === 'undefined' || typeof BUILDS === 'undefined') return ['the pack declares no templates'];
+      if (typeof resolveBuild !== 'function' || typeof buildSafe !== 'function') return ['the engine has no build seam'];
+      // DETERMINISTIC: the same lot resolves to the same house every time it is asked
+      BUILDS.forEach(bd => {
+        const a = resolveBuild(bd), c = resolveBuild(bd);
+        if (!a) { problems.push('no template for ' + bd.id); return; }
+        if (JSON.stringify(a.pick) !== JSON.stringify(c.pick)) problems.push(bd.id + ' builds differently each time it is asked');
+        if (!a.tiles.length) problems.push(bd.id + ' built nothing');
+        a.tiles.forEach(t => { if (t[1] < bd.x || t[1] >= bd.x + BUILDTPL[bd.tpl].size.w || t[0] < bd.y || t[0] >= bd.y + BUILDTPL[bd.tpl].size.h)
+          problems.push(bd.id + ' put a tile outside its own footprint at ' + t[1] + ',' + t[0]); });
+      });
+      // VARIATION: different seeds on the same template give different houses
+      const t = BUILDS[0].tpl, faces = new Set();
+      for (let i = 0; i < 24; i++) faces.add(JSON.stringify(resolveBuild({ id: 'probe' + i, tpl: t, world: BUILDS[0].world, x: 16, y: 0, seed: 'seed' + i }).pick));
+      if (faces.size < 3) problems.push('the template only ever builds ' + faces.size + ' house(s) — that is not variation');
+      // PARTS SEE EACH OTHER: the yard never appears when the door is on the edge
+      // the yard part declares when(c => c.pick.door !== 'left'), so a left-hand door means no yard
+      let sawSkip = false;
+      for (let i = 0; i < 80; i++) { const r = resolveBuild({ id: 'p' + i, tpl: 'casita', world: 'ex', x: 0, y: 0, seed: 'x' + i });
+        if (r.pick.door === 'left') { sawSkip = true;
+          if (r.pick.yard !== undefined) problems.push('a pot was put where the door swings'); } }
+      if (!sawSkip) problems.push('never rolled the door that skips the yard — the when() rule is untested');
+      // PINNED: a saved pick survives a template that gains a new option
+      const one = BUILDS[0];
+      const before = resolveBuild(one).pick;
+      bldPicks[one.id] = { ...before, door: before.door === 'left' ? 'right' : 'left' };
+      const after = resolveBuild(one).pick;
+      if (after.door !== bldPicks[one.id].door) problems.push('a house did not keep the face it was built with');
+      delete bldPicks[one.id];
+      // SAFE: a build that would seal a door, stand on a person or leave the map is refused
+      const w = WORLDS.ex;
+      const doorTile = []; for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if ((PORTALS.ex || {})[w.rows[y][x]]) doorTile.push([y, x]);
+      if (!doorTile.length) problems.push('no door on Calle Dos to test against');
+      else {
+        const [dy, dx] = doorTile[0];
+        const seal = { id: 'evil', world: 'ex', tpl: 'casita', pick: {}, reads: [],
+          tiles: [[dy + 1, dx, '▩'], [dy - 1, dx, '▩'], [dy, dx + 1, '▩'], [dy, dx - 1, '▩']].filter(t => t[0] >= 0 && t[1] >= 0) };
+        if (!buildSafe(seal)) problems.push('a build that seals a door was allowed');
+      }
+      const npc = w.npcs[0];
+      if (npc && !buildSafe({ id: 'e2', world: 'ex', tiles: [[npc.y, npc.x, '▩']], reads: [] })) problems.push('a build was allowed to stand on somebody');
+      if (!buildSafe({ id: 'e3', world: 'ex', tiles: [[999, 999, '▩']], reads: [] })) problems.push('a build was allowed off the map');
+      return problems;
+    });
+    fails.push(...b);
+
+    // the houses are actually standing, and the street still works around them
+    const street = await page.evaluate(() => {
+      const problems = [];
+      chSeen = 99; applyGrowth();
+      const w = WORLDS.ex, row = w.rows[0];
+      // parts stamp in order and later parts overwrite earlier ones (the door lands on the
+      // shell), so fold the list the way applyBuilds does before comparing to the street
+      BUILDS.forEach(bd => { const spec = resolveBuild(bd), fold = {};
+        spec.tiles.forEach(([y, x, ch]) => { fold[x + ',' + y] = ch; });
+        Object.entries(fold).forEach(([k, ch]) => { const [x, y] = k.split(',').map(Number);
+          if (w.rows[y][x] !== ch) problems.push(bd.id + ' is not standing: expected ' + ch + ' at ' + x + ',' + y + ', found ' + w.rows[y][x]); }); });
+      if (!/[▦▩▨]/.test(row)) problems.push('no house on Calle Dos: ' + row);
+      // the two lots did not come out identical
+      const a = resolveBuild(BUILDS[0]).pick, c = resolveBuild(BUILDS[1]).pick;
+      if (JSON.stringify(a) === JSON.stringify(c)) problems.push('both lots built the same house');
+      if (auditReach().length) problems.push('the houses broke reachability: ' + auditReach().join(' | '));
+      return problems;
+    });
+    fails.push(...street);
+
+    // every glyph a template can lay is a real, declared, drawable tile
+    const gl = await page.evaluate(() => {
+      const problems = [], seen = new Set();
+      Object.values(BUILDTPL).forEach(t => (t.parts || []).forEach(p => {
+        const opts = p.pick || [p];
+        opts.forEach(o => (o.tiles || []).forEach(t2 => seen.add(t2[2])));
+      }));
+      seen.forEach(g => {
+        if (g === '.') return;
+        if (!TILEDRAW[g] && !TILEART[g]) problems.push('a template lays a glyph nothing can draw: ' + g);
+        if (SOLID.has(g) && !TILES[g]) problems.push('a solid template glyph has no metadata: ' + g);
+      });
+      return problems;
+    });
+    fails.push(...gl);
+    await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; checkTalk(); });
+  }
+
+  // ---- 28. DISCOVERABILITY: stand where the game puts you, in every world ----
+  // Twice now a feature shipped working and invisible — the stairs (2026-09-03) and the
+  // office posters (same day) — because it was only ever checked from on top of the thing.
+  // This is the general form of that bug, checked for every world the pack declares.
+  {
+    const disc = await page.evaluate(() => {
+      const problems = [];
+      // where a player can appear in a world: through any portal that leads there, the
+      // trolley, and the place a new hero starts
+      const arrivals = {};
+      const add = (w, x, y) => { if (!WORLDS[w]) return; (arrivals[w] = arrivals[w] || []).push([x, y]); };
+      Object.values(PORTALS).forEach(P => Object.values(P).forEach(p => { if (p.to) add(p.to, p.x, p.y); }));
+      (typeof TRV !== 'undefined' ? TRV : []).forEach(d => add(d.w, d.x, d.y));
+      add('hq', 10, 11);                    // where a new hero starts
+      add('pk', 2, 6);                      // the park is entered on a leash, not through a door
+      const keep = { world, px, py };
+      Object.keys(WORLDS).forEach(id => {
+        const spots = arrivals[id] || [];
+        if (!spots.length) { problems.push('no way into ' + id + ' — nothing points at it'); return; }
+        // the pack names the place, in both languages, so arriving says where you are
+        if (!UI.en.locs[id] || !UI.es.locs[id]) problems.push(id + ' has no name in both languages');
+        if (!UI.en.arrive[id] || !UI.es.arrive[id]) problems.push(id + ' says nothing when you walk in, in one or both languages');
+        const reads = (typeof READS !== 'undefined' ? READS : []).filter(r => r.world === id);
+        spots.forEach(([sx, sy]) => {
+          world = id; px = fx = sx; py = fy = sy; moving = false; held = null;
+          // you cannot arrive inside a wall
+          if (isSolid(sx, sy)) problems.push('arriving in ' + id + ' at ' + sx + ',' + sy + ' puts you inside something');
+          // everything readable in this room announces itself from where you land
+          if (reads.length && readMarks().length !== reads.length)
+            problems.push('arriving in ' + id + ' at ' + sx + ',' + sy + ': only ' + readMarks().length + ' of ' + reads.length + ' readable things are marked');
+          // every person with something to say is either in this room or behind a door that says so
+          const waiting = (WORLDS[id].npcs || []).filter(n => hasSay(n));
+          if (waiting.length && !worldPending(id)) problems.push(id + ' has someone waiting that worldPending() cannot see');
+        });
+      });
+      world = keep.world; px = fx = keep.px; py = fy = keep.py;
+      return problems;
+    });
+    fails.push(...disc);
+
+    // and the doorstep nudge covers every portal whose far side has somebody waiting
+    const nudges = await page.evaluate(() => {
+      const problems = [];
+      const keep = { world, px, py };
+      Object.entries(PORTALS).forEach(([from, P]) => {
+        const w = WORLDS[from]; if (!w) return;
+        Object.entries(P).forEach(([g, p]) => {
+          if (!WORLDS[p.to]) return;
+          for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+            if (w.rows[y][x] !== g) continue;
+            // stand beside the door and ask: if somebody is waiting through it, are we told?
+            const spot = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(d => [x + d[0], y + d[1]])
+              .find(([nx, ny]) => nx >= 0 && ny >= 0 && nx < w.W && ny < w.H && !isSolidAt(from, nx, ny));
+            if (!spot) { problems.push('the door ' + g + ' in ' + from + ' at ' + x + ',' + y + ' has nowhere to stand'); continue; }
+            if (!worldPending(p.to)) continue;
+            world = from; px = fx = spot[0]; py = fy = spot[1];
+            nudgeW = ''; nudged = new Set(); tickerLines.length = 0;
+            document.getElementById('world').hidden = false;
+            portalNudge();
+            if (!tickerLines.length) problems.push('standing beside the door to ' + p.to + ' (where somebody is waiting) says nothing');
+          }
+        });
+      });
+      world = keep.world; px = fx = keep.px; py = fy = keep.py;
+      nudgeW = ''; nudged = new Set();
+      return problems;
+    });
+    fails.push(...nudges);
+    await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; checkTalk(); });
+  }
+
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);

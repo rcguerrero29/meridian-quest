@@ -246,3 +246,77 @@ const DECOART={
     f(sx,sy,muralInk(d.c||"#C0392B",g));
     if(g>=3){ctx.fillStyle="rgba(255,255,255,.5)";ctx.fillRect(sx+4,sy+4,2,2);ctx.fillRect(sx+27,sy+6,2,2);}},
 };
+
+/* ---------- the casita vocabulary — what Don Güero builds from ----------
+   Three faces of a small Calle Dos house. A template composes them; adding a fourth here is
+   how the street gets more variety, with no engine change and no new code anywhere.
+   Solid, wall-tall, so 3D wraps the art onto the box like every other facade. */
+const CASA_WALL="#C9A77C", CASA_TRIM="#8A6B48", CASA_ROOF="#9E5442";
+function casaBase(sx,sy,wall){
+  ctx.fillStyle=wall||CASA_WALL;ctx.fillRect(sx,sy,32,32);
+  ctx.fillStyle=CASA_ROOF;ctx.fillRect(sx,sy,32,5);                 /* tile roof edge */
+  ctx.fillStyle="rgba(0,0,0,.18)";ctx.fillRect(sx,sy+5,32,2);
+  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx,sy+29,32,3);              /* the wet line at the bottom */
+}
+TILEART["▦"]=rc=>{const{sx,sy}=rc;                                   /* the door */
+  casaBase(sx,sy);
+  ctx.fillStyle="#5B3A22";ctx.fillRect(sx+11,sy+14,10,15);
+  ctx.fillStyle="#3E2716";ctx.fillRect(sx+11,sy+14,10,2);
+  ctx.fillStyle="#E0B45C";ctx.fillRect(sx+18,sy+21,2,2);             /* the handle */
+  ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+9,sy+29,14,3);};           /* the step */
+TILEART["▩"]=rc=>{const{sx,sy}=rc;                                   /* the window */
+  casaBase(sx,sy);
+  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+7,sy+11,18,14);
+  ctx.fillStyle="#A9C6E0";ctx.fillRect(sx+9,sy+13,14,10);
+  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+15,sy+13,2,10);            /* the bar down the middle */
+  ctx.fillStyle="#7A9A4E";ctx.fillRect(sx+8,sy+24,16,3);};           /* the plant on the sill */
+TILEART["▨"]=rc=>{const{sx,sy}=rc;                                   /* the blank wall, with a lamp */
+  casaBase(sx,sy,"#BE9A72");
+  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+15,sy+9,2,4);
+  ctx.fillStyle="#E8D6B0";ctx.fillRect(sx+12,sy+12,8,5);
+  ctx.fillStyle="rgba(232,214,176,.28)";ctx.fillRect(sx+10,sy+17,12,7);};
+Object.assign(TILEMETA,{
+  "▦":{lift:13,kind:"facade"},
+  "▩":{lift:13,kind:"facade"},
+  "▨":{lift:13,kind:"facade"},
+});
+
+/* ---------- BUILDTPL — the templates themselves ----------
+   `casita`: a four-tile house front on Calle Dos with a swept strip of sidewalk in front.
+   What varies: which tile holds the door, whether the far end is a window or a blank wall
+   with a lamp, and what the family left out front. Later parts can read earlier ones — the
+   yard only appears when the door is not on the very edge, because nobody puts a pot where
+   the door swings. */
+const BUILDTPL={
+  casita:{
+    id:"casita", size:{w:3,h:2},
+    parts:[
+      {id:"shell", tiles:[[0,0,"▩"],[0,1,"▩"],[0,2,"▩"],
+                          [1,0,"."],[1,1,"."],[1,2,"."]]},
+      {id:"door", pick:[
+        {id:"middle", w:3, tiles:[[0,1,"▦"]]},
+        {id:"left",   w:2, tiles:[[0,0,"▦"]]},
+        {id:"right",  w:2, tiles:[[0,2,"▦"]]},
+      ]},
+      {id:"end", pick:[
+        {id:"window", w:2, tiles:[]},
+        {id:"lamp",   w:1, tiles:[[0,2,"▨"]]},
+      ]},
+      /* nobody puts a pot where the door swings, so the yard reads what the door chose */
+      {id:"yard", when:c=>c.pick.door!=="left", pick:[
+        {id:"none",  w:2, tiles:[]},
+        {id:"plant", w:2, tiles:[[1,0,"P"]]},
+        {id:"chair", w:1, tiles:[[1,0,"C"]]},
+      ]},
+    ],
+  },
+};
+
+/* the lots Don Güero has been given. Same template, different seeds, different houses. */
+const BUILDS=[
+  /* the two ends of Calle Dos. Neither lot displaces a tree or a neighbour — the engine
+     refuses a build that would, and it caught exactly that on the first attempt: the first
+     lot was drawn over Yola the paletera, who has stood on that corner since August. */
+  {id:"casita-w", tpl:"casita", world:"ex", x:0,  y:0, seed:"calle-dos-poniente"},
+  {id:"casita-e", tpl:"casita", world:"ex", x:21, y:0, seed:"calle-dos-oriente"},
+];

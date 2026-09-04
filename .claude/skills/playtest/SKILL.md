@@ -42,6 +42,22 @@ before and after any fix; bump `CACHE` in `sw.js` when shipping. Full process:
 - Landmark props (doors, cones, storefronts) intentionally ignore the theme tint.
 - The player's own outfit, all skin/hair, and animal fur never take the whimsy tint.
 
+## Two habits, both learned the hard way (2026-09-03)
+
+**1 · Walk in from the door.** Build the thing, then stand on the tile the game actually
+puts the player on and ask whether it announces itself. This exact bug shipped twice in one
+day: the stairs to the office wore no marker, and then the office posters were pinned,
+working, and invisible from the arrival tile because their marker only reached three tiles.
+A feature that works and cannot be found has not shipped. `test/smoke.js` §28 is the
+generalised guard — for every world, from every way in, everything readable must be marked,
+the place must name itself in both languages, and a door with somebody waiting behind it
+must say so. **Add to that audit whenever a new kind of affordance appears.**
+
+**2 · Quote the ask, then log it.** Every request in the owner's message gets a verbatim row
+in `docs/ASKS.md` before building starts, and only leaves the open table when it ships or
+the owner is told plainly why not. Paraphrase is how requirements die: *"the activity record
+should only delete after two activities"* is a rule; "improve the ticker" is a mood.
+
 ## Contradictions are reported, never absorbed
 
 Owner's standing rule (`docs/OWNER.md`, 2026-09-01): **"we need all these brought up at

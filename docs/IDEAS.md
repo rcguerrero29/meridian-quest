@@ -1454,3 +1454,47 @@ realistic. not perfect but so if needed it can be upgraded."* Removed the same d
 is now in `docs/OWNER.md` as settled. The test is data-driven rather than a promise: **every
 trolley destination must be a world that actually contains a trolley tile.** Rails or no stop.
 
+### 15.22 EL MAESTRO CONSTRUCTOR — BUILDING FROM A TEMPLATE — BUILT 2026-09-03
+
+Owner: *"one day we want to assign him a house template that he can build and just add some
+random customizations"* and *"design it but make sure the architecture is able to handle more
+complexity in the future."*
+
+A **template** is content (`BUILDTPL`); a **lot** is content (`BUILDS`); the engine only
+resolves choices and stamps tiles. No network, no model — the thing the owner actually wanted
+was never a chatbot.
+
+    template  {id, size:{w,h}, parts:[Part]}
+    Part      {id, when?(ctx), tiles?:[[dy,dx,glyph]], reads?:[{x,y,doc}], pick?:[Option]}
+    Option    {id, w?:weight, tiles?, reads?}
+
+**The four commitments that make it carry weight later:**
+
+1. **Deterministic.** Variation comes from a seeded generator (FNV-1a → xorshift), never
+   `Math.random`. The same lot builds the same house on every device and every reload — the
+   only way saves, screenshots and any future multiplayer can agree what the city looks like.
+2. **Resolved picks are pinned in the save** (`bl`). Add options to a template next year and
+   houses somebody already lives beside keep their faces; only new lots get the new options.
+3. **Parts resolve in order and see each other.** A part declares `when(ctx)` and reads
+   `ctx.pick` (what earlier parts chose) and `ctx.flags` (`worldFlags()` — district grades and
+   all). The casita already uses it: no pot goes where the door swings. That is the hook for
+   "the roof depends on the door" and "this block is richer once the taller opens", with no
+   engine change.
+4. **Nothing is stamped that breaks the city.** `buildSafe()` runs first: inside the map, never
+   over a person, never over a portal, and no door in that world may lose its last standable
+   neighbour. A refusal is announced, never silent. **It earned its keep on the first run** —
+   it refused to build the west casita because Yola the paletera has stood on that corner
+   since August. The lot moved; she stayed.
+
+**Shipped with it:** three casita glyphs (door, window, blank wall with a lamp), one `casita`
+template, and two lots at the ends of Calle Dos that visibly differ — one with the door in the
+middle and a plant out front, one with the door on the left, a lamp on the end, and no yard
+(because the door swings there). A test asserts the same seed always builds the same house,
+that different seeds build different houses, that the `when` rule is actually exercised, that a
+pinned pick survives, and that sealing a door, standing on a person or leaving the map are all
+refused.
+
+**Not yet, and named so nobody assumes otherwise:** builds emit tiles and readables, not decor;
+storefront growth is still hand-written tile lists rather than templates; and Don Güero cannot
+yet *talk about* what he built.
+
