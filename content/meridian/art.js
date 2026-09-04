@@ -165,3 +165,84 @@ const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   "!":{lift:13,kind:"facade",win:[[5,11,22,12]]},
   "▣":{lift:10,kind:"appliance"},"▯":{lift:9,kind:"furniture"},"⊔":{lift:6,kind:"furniture"},"○":{lift:3,kind:"prop"}
 };
+
+/* ---------- DECOART — the mural on Calle Principal ----------
+   Nacho's wall, east of HQ's door. Seven tiles: his own Meridian Quest piece, then one panel
+   per business. A panel nobody has worked yet is BABY BLUE PLASTER — the owner's call
+   (2026-09-03): comforting, part of the painting, and it never reads as a list of things you
+   have not done. When you begin a district the panel gets its colour; how bright it is comes
+   from the grade the engine hands over in worldFlags(). Paint only ever goes on.
+
+   All of this is content: the engine renders decor in four cameras and knows nothing about
+   bakeries. AJ's pack draws its own wall, or declares no DECOR at all and has a plain one. */
+
+const PLASTER="#C6DCEA";               /* baby blue — the wall under everything */
+const PLASTER_D="#AFCADC";
+
+function muralGround(sx,sy){
+  ctx.fillStyle=PLASTER;ctx.fillRect(sx,sy,32,32);
+  /* trowel marks, so it reads as plaster and not a flat rectangle */
+  ctx.fillStyle=PLASTER_D;
+  [[2,5,11,1],[16,9,9,1],[6,17,13,1],[19,24,8,1],[3,28,10,1]].forEach(q=>ctx.fillRect(sx+q[0],sy+q[1],q[2],q[3]));
+  ctx.fillStyle="rgba(255,255,255,.18)";ctx.fillRect(sx,sy,32,3);
+}
+/* how loud a panel is painted: 0 = not begun (plaster only), 1 = pale, 2 = solid, 3 = full */
+const muralInk=(hex,g)=>{
+  if(g>=3)return hex;
+  const m=/^#(..)(..)(..)$/.exec(hex);if(!m)return hex;
+  const mix=g>=2?0.22:0.48;                                  /* toward the plaster */
+  const p=[0xC6,0xDC,0xEA];
+  return "#"+[1,2,3].map(i=>Math.round(parseInt(m[i],16)*(1-mix)+p[i-1]*mix).toString(16).padStart(2,"0")).join("");
+};
+const muralGrade=id=>{try{const f=worldFlags();return (f.grade&&f.grade[id])|0;}catch(e){return 0;}};
+
+/* the panel pictograms — one per business, drawn inside a 32x32 tile on the plaster */
+const PANELART={
+  principal:(sx,sy,c)=>{ /* Meridian Labs: a tower and a window grid */
+    ctx.fillStyle=c;ctx.fillRect(sx+9,sy+8,14,19);
+    ctx.fillStyle=PLASTER;[0,1,2].forEach(r=>[0,1].forEach(k=>ctx.fillRect(sx+12+k*6,sy+11+r*5,3,3)));},
+  mercado:(sx,sy,c)=>{ /* El Mercado: a basket of produce */
+    ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(sx+8,sy+16);ctx.lineTo(sx+24,sy+16);
+    ctx.lineTo(sx+21,sy+27);ctx.lineTo(sx+11,sy+27);ctx.closePath();ctx.fill();
+    ctx.fillStyle=PLASTER;[10,14,18].forEach((x,i)=>ctx.fillRect(sx+x,sy+19+(i%2),3,5));
+    ctx.fillStyle=c;[[12,12],[16,10],[20,12]].forEach(q=>{ctx.beginPath();ctx.arc(sx+q[0],sy+q[1],3,0,7);ctx.fill();});},
+  taller:(sx,sy,c)=>{ /* Taller Herrera: a wrench across a wheel */
+    ctx.strokeStyle=c;ctx.lineWidth=3;ctx.beginPath();ctx.arc(sx+16,sy+18,7,0,7);ctx.stroke();
+    ctx.lineWidth=4;ctx.lineCap="round";ctx.beginPath();ctx.moveTo(sx+9,sy+26);ctx.lineTo(sx+23,sy+9);ctx.stroke();
+    ctx.fillStyle=c;ctx.beginPath();ctx.arc(sx+23,sy+8,4,0,7);ctx.fill();
+    ctx.fillStyle=PLASTER;ctx.beginPath();ctx.arc(sx+24,sy+6,2,0,7);ctx.fill();},
+  espiga:(sx,sy,c)=>{ /* La Espiga: a wheat ear over a loaf */
+    ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(sx+16,sy+24,9,4,0,0,7);ctx.fill();
+    ctx.strokeStyle=c;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(sx+16,sy+19);ctx.lineTo(sx+16,sy+6);ctx.stroke();
+    ctx.fillStyle=c;[0,1,2,3].forEach(i=>{[-1,1].forEach(k=>{
+      ctx.beginPath();ctx.ellipse(sx+16+k*4,sy+8+i*3,3,1.8,k*0.7,0,7);ctx.fill();});});},
+  velazquez:(sx,sy,c)=>{ /* Limpieza Velázquez: a bucket and a mop */
+    ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(sx+7,sy+16);ctx.lineTo(sx+19,sy+16);
+    ctx.lineTo(sx+17,sy+27);ctx.lineTo(sx+9,sy+27);ctx.closePath();ctx.fill();
+    ctx.strokeStyle=c;ctx.lineWidth=2;ctx.beginPath();ctx.arc(sx+13,sy+15,6,Math.PI,0);ctx.stroke();
+    ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx+24,sy+6);ctx.lineTo(sx+24,sy+22);ctx.stroke();
+    ctx.fillStyle=c;ctx.fillRect(sx+21,sy+22,7,5);},
+  nolasco:(sx,sy,c)=>{ /* Nolasco: a stamp coming down on a page */
+    ctx.fillStyle=c;ctx.fillRect(sx+8,sy+15,14,12);
+    ctx.fillStyle=PLASTER;[18,21,24].forEach((y,i)=>ctx.fillRect(sx+10,sy+y-2,10-i*2,1.4));
+    ctx.fillStyle=c;ctx.fillRect(sx+12,sy+7,10,4);ctx.fillRect(sx+15,sy+3,4,4);},
+};
+
+const DECOART={
+  /* Nacho's own piece: the city's name on the wall, always here, never earned */
+  mural:(sx,sy)=>{
+    muralGround(sx,sy);
+    ctx.fillStyle="#E8A24A";ctx.beginPath();ctx.arc(sx+16,sy+13,7,Math.PI,0);ctx.fill();   /* a sun over the street */
+    ctx.fillStyle="#C0392B";ctx.fillRect(sx+4,sy+20,24,3);
+    ctx.fillStyle="#2E5FA8";ctx.fillRect(sx+4,sy+24,24,3);
+    ctx.fillStyle="#4E8A58";ctx.fillRect(sx+4,sy+28,24,2);
+    ctx.fillStyle="#3A2F17";ctx.font="700 6px sans-serif";ctx.textAlign="center";
+    ctx.fillText("MERIDIAN",sx+16,sy+7);ctx.textAlign="start";},
+  /* one panel per business: plaster until you begin, then colour that brightens with the grade */
+  panel:(sx,sy,d)=>{
+    muralGround(sx,sy);
+    const g=muralGrade(d.id),f=PANELART[d.id];
+    if(!g||!f)return;                       /* not begun: comforting blue, and nothing else */
+    f(sx,sy,muralInk(d.c||"#C0392B",g));
+    if(g>=3){ctx.fillStyle="rgba(255,255,255,.5)";ctx.fillRect(sx+4,sy+4,2,2);ctx.fillRect(sx+27,sy+6,2,2);}},
+};

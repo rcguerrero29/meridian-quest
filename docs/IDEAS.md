@@ -1363,3 +1363,33 @@ to 0×0 and the panel rendered at zero size with all its content present. **A pa
 cameras is invisible where it counts, and the sweep is how that is caught instead of
 rediscovered in a meeting.
 
+### 15.18 THE MURAL, THE HONEST GRADE, AND PEOPLE WHO WALK — BUILT 2026-09-03
+
+- **`worldFlags()`** is now the one place the world learns about your play: how far the
+  construction got, which storefronts are up, and **per district: how many quests you have
+  answered, whether it closed, and its grade**. The town plan's labels and the mural both
+  read it, and a pack gets the facts without reaching into engine internals.
+- **`grade` is 0 until you have answered something.** `gradeOf()` alone returns **3** for a
+  district with nothing answered — it is a clean rate over zero calls — so a world reading it
+  raw would paint an untouched city as flawless work. **Not begun is not the same as done
+  well.** This was the session's question to decide, not the owner's; it has one right answer.
+- **The mural is seven tiles on the avenue wall**, east of HQ's door: Nacho's own MERIDIAN
+  piece (a sun and three stripes, never earned, always there) and one panel per business.
+  A district you have not begun is **baby blue plaster** — the owner's call, 2026-09-03:
+  comforting, part of the painting, and it can never read as a list of things you have not
+  done. Begin a district and its panel takes colour; **how bright it is comes from the
+  grade** — pale at 1, solid at 2, full with a highlight at 3. Paint only ever goes on.
+  All seven are content (`DECOART` in `art.js`, `DECOR` in `maps.js`); the engine draws decor
+  in four cameras and knows nothing about bakeries.
+- **Townsfolk walk.** Anyone with **no quests** drifts within three tiles of where the pack
+  put them, one step at a time, interpolated. **A quest-giver never moves** — a person you are
+  looking for has to be where you left them, which is the whole reason the doorstep nudge
+  exists — and neither do room hosts. A wanderer never steps onto a door, never onto the tile
+  you are standing on, and holds still while you are beside them so a conversation is never a
+  chase. The grid bookkeeping moves with them, so they stay solid and never share a tile.
+- **The owner's "they can test our world for free" idea, made deterministic.** A random walk
+  only notices a bad map if it happens to wander that way. `auditWander()` runs at boot and
+  warns if anyone the pack placed has **nowhere to step at all** — and the smoke test already
+  fails the build on a `WORLD:` warning. Same insight, caught every run instead of by luck.
+  (The stronger check the project already had, `auditReach()`, still walks every tile.)
+
