@@ -313,7 +313,7 @@ function t3Sprite(i){
 function t3Actors(){
   const list=[];
   const w=CW();
-  w.npcs.forEach(n=>list.push({x:n.x,y:n.y,f:(g)=>{
+  w.npcs.forEach(n=>list.push({x:n.fx===undefined?n.x:n.fx,y:n.fy===undefined?n.y:n.fy,f:(g)=>{
     drawPerson(g,2,6,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(hasSay(n)){g.font="700 13px sans-serif";g.fillStyle="#E0B45C";g.textAlign="center";
       g.fillText("❗",18,10+Math.sin(Date.now()/250)*2);g.textAlign="start";}

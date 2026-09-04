@@ -2067,6 +2067,98 @@ const CANDIDATES = [
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; camSet('3d'); });
   }
 
+  // ---- 25. the mural, the honest grade, and townsfolk who walk ----
+  {
+    const g = await page.evaluate(() => {
+      const problems = [];
+      if (typeof worldFlags !== 'function') return ['no worldFlags()'];
+      const keepD = new Set(done), keepM = { ...marks };
+      // nothing answered anywhere: every grade is 0, NOT a flawless 3
+      done = new Set(); marks = {};
+      let f = worldFlags();
+      CHAPTERS.forEach(c => { if (f.grade[c.id] !== 0) problems.push('an untouched district grades ' + f.grade[c.id] + ' — not begun is not done well'); });
+      // one clean answer: the district gets a real grade
+      const ta = CHAPTERS.find(c => c.id === 'taller');
+      done.add(ta.quests[0]); marks[ta.quests[0]] = 1;
+      f = worldFlags();
+      if (f.grade.taller !== 3) problems.push('a clean call did not grade the district: ' + f.grade.taller);
+      if (f.grade.mercado !== 0) problems.push('answering in one district graded another');
+      if (f.answered.taller !== 1) problems.push('worldFlags miscounts answered quests');
+      done = keepD; marks = keepM;
+      return problems;
+    });
+    fails.push(...g);
+
+    // the wall: Nacho's piece plus one panel per district, all on solid tiles with street below
+    const mural = await page.evaluate(() => {
+      const problems = [];
+      const panels = DECOS.filter(d => d.deco === 'panel');
+      if (panels.length !== CHAPTERS.length) problems.push('the mural has ' + panels.length + ' panels for ' + CHAPTERS.length + ' districts');
+      panels.forEach(d => {
+        if (!CHAPTERS.some(c => c.id === d.id)) problems.push('a mural panel names a district that does not exist: ' + d.id);
+        const w = WORLDS[d.world];
+        if (!SOLID.has(w.grid[d.y][d.x])) problems.push('a mural panel is painted on thin air at ' + d.x + ',' + d.y);
+        if (SOLID.has(w.grid[d.y + 1][d.x])) problems.push('nobody can stand in front of the panel at ' + d.x + ',' + d.y);
+      });
+      if (!DECOS.some(d => d.deco === 'mural')) problems.push('the signature mural is gone');
+      if (typeof DECODRAW.panel !== 'function') problems.push('the pack draws no panel');
+      return problems;
+    });
+    fails.push(...mural);
+
+    // an unbegun panel is plaster and nothing else; a graded one paints
+    const paint = await page.evaluate(() => {
+      const c = document.createElement('canvas'); c.width = c.height = 32;
+      const g2 = c.getContext('2d'), old = ctx;
+      const shot = () => { const d = g2.getImageData(0, 0, 32, 32).data; const seen = new Set();
+        for (let i = 0; i < d.length; i += 4) seen.add(d[i] + ',' + d[i + 1] + ',' + d[i + 2]); return seen; };
+      const keepD = new Set(done), keepM = { ...marks };
+      const panel = DECOS.find(d => d.deco === 'panel' && d.id === 'taller');
+      ctx = g2;
+      done = new Set(); marks = {};
+      g2.clearRect(0, 0, 32, 32); DECODRAW.panel(0, 0, panel); const blank = shot();
+      const ta = CHAPTERS.find(c2 => c2.id === 'taller');
+      ta.quests.forEach(q => { done.add(q); marks[q] = 1; });
+      g2.clearRect(0, 0, 32, 32); DECODRAW.panel(0, 0, panel); const painted = shot();
+      ctx = old; done = keepD; marks = keepM;
+      return { blankColours: blank.size, paintedColours: painted.size };
+    });
+    if (paint.blankColours > 4) fails.push('an unbegun panel is not plain plaster: ' + paint.blankColours + ' colours');
+    if (paint.paintedColours <= paint.blankColours) fails.push('a worked district did not paint its panel');
+
+    // townsfolk: people with no quests move, people with quests never do
+    const walk = await page.evaluate(async () => {
+      const problems = [];
+      if (typeof wanderUpdate !== 'function') return ['nobody can walk'];
+      const bad = auditWander();
+      if (bad.length) problems.push('somebody was placed with nowhere to walk: ' + bad.join(' '));
+      world = 'ex'; px = fx = 1; py = fy = 8; moving = false; held = null;
+      document.getElementById('card').hidden = true; document.getElementById('reader').hidden = true;
+      const w = WORLDS.ex;
+      const movers = w.npcs.filter(n => wanders(n)), fixed = w.npcs.filter(n => !wanders(n));
+      if (!movers.length) return ['no townsfolk with time on their hands in this world'];
+      const before = w.npcs.map(n => n.x + ',' + n.y);
+      for (let i = 0; i < 300; i++) { wanderUpdate(60); await new Promise(r => setTimeout(r, 4)); }
+      const after = w.npcs.map(n => n.x + ',' + n.y);
+      const movedAny = w.npcs.some((n, i) => before[i] !== after[i]);
+      if (!movedAny) problems.push('nobody moved in 300 ticks');
+      fixed.forEach(n => { const i = w.npcs.indexOf(n);
+        if (before[i] !== after[i]) problems.push('a quest-giver wandered off: ' + (n.npc || n.key)); });
+      movers.forEach(n => { if (Math.abs(n.x - n.hx) + Math.abs(n.y - n.hy) > WANDER_R)
+        problems.push((n.npc || n.key) + ' left their corner'); });
+      // nobody is standing inside a wall, on a door, or on the player, and the grid agrees
+      w.npcs.forEach(n => {
+        if (SOLID.has(w.rows[n.y][n.x])) problems.push((n.npc || n.key) + ' walked into a wall');
+        if (DOORSET.has(w.rows[n.y][n.x])) problems.push((n.npc || n.key) + ' is standing in a doorway');
+        if (w.grid[n.y][n.x] !== 'N') problems.push('the grid lost track of ' + (n.npc || n.key)); });
+      const spots = new Set(w.npcs.map(n => n.x + ',' + n.y));
+      if (spots.size !== w.npcs.length) problems.push('two people are standing on the same tile');
+      return problems;
+    });
+    fails.push(...walk);
+    await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; checkTalk(); });
+  }
+
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);

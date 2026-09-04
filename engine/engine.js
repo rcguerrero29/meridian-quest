@@ -21,6 +21,55 @@ Object.keys(WORLD_DEFS).forEach(id=>{
 });
 const CW=()=>WORLDS[world];
 const isSolid=(x,y)=>{const w=CW();return x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N";};
+/* ---------- townsfolk on the move ----------
+   Anyone with NO quests drifts around their own corner. A quest-giver never moves: a person
+   you are looking for has to be where you left them, which is the entire reason the doorstep
+   nudge exists. Room hosts never move either. Owner, 2026-09-03: "why cant they walk around?
+   then they can test our world for free" — the walking is for life; the free test is the boot
+   check below, which is deterministic where a random walk would only be lucky.
+   A wanderer stays within WANDER_R of where the pack put them, never steps onto a door, never
+   onto the tile you are standing on, and holds still while you are beside them so a
+   conversation is never a chase. */
+const WANDER_R=3, WANDER_MS=420;
+function wanders(n){return !!n&&(!n.q||!n.q.length)&&
+  !(typeof roomHosts!=="undefined"&&roomHosts&&roomHosts[n.npc]);}
+function wanderInit(){Object.values(WORLDS).forEach(w=>w.npcs.forEach(n=>{
+  n.fx=n.x;n.fy=n.y;n.hx=n.x;n.hy=n.y;n.wnext=0;n.mv=null;n.mt=0;n.face=1;}));}
+function wanderUpdate(dt){
+  const w=CW();if(!w||!$("card").hidden||!$("reader").hidden)return;
+  const now=performance.now();
+  w.npcs.forEach(n=>{
+    if(n.mv){
+      n.mt=Math.min(1,(n.mt||0)+dt/WANDER_MS);
+      n.fx=n.x+(n.mv[0]-n.x)*n.mt;n.fy=n.y+(n.mv[1]-n.y)*n.mt;
+      if(n.mt>=1){
+        if(w.grid[n.y])w.grid[n.y][n.x]=".";
+        n.x=n.mv[0];n.y=n.mv[1];n.fx=n.x;n.fy=n.y;
+        if(w.grid[n.y])w.grid[n.y][n.x]="N";
+        n.mv=null;n.wnext=now+1600+Math.random()*3200;}
+      return;}
+    if(!wanders(n)||now<n.wnext)return;
+    if(Math.abs(n.x-px)+Math.abs(n.y-py)<=1){n.wnext=now+1500;return;}
+    const opts=[[1,0],[-1,0],[0,1],[0,-1]].map(d=>[n.x+d[0],n.y+d[1]]).filter(([x,y])=>
+      x>=0&&y>=0&&x<w.W&&y<w.H&&!SOLID.has(w.grid[y][x])&&w.grid[y][x]!=="N"
+      &&!DOORSET.has(w.rows[y][x])
+      &&Math.abs(x-n.hx)+Math.abs(y-n.hy)<=WANDER_R
+      &&!(x===px&&y===py));
+    if(!opts.length){n.wnext=now+2500;return;}
+    const t=opts[(Math.random()*opts.length)|0];
+    n.face=t[0]>n.x?1:t[0]<n.x?-1:n.face;
+    n.mv=t;n.mt=0;
+  });
+}
+/* the free test, made deterministic: a person the pack placed with nowhere to step is a map
+   bug, and it is caught at boot rather than whenever a random walk happens to notice. */
+function auditWander(){const bad=[];
+  Object.entries(WORLDS).forEach(([id,w])=>w.npcs.forEach(n=>{
+    if(!wanders(n))return;
+    const ok=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{const x=n.x+dx,y=n.y+dy;
+      return x>=0&&y>=0&&x<w.W&&y<w.H&&!SOLID.has(w.grid[y][x])&&w.grid[y][x]!=="N";});
+    if(!ok)bad.push(id+":"+(n.npc||n.key)+"@"+n.x+","+n.y);}));
+  return bad;}
 /* ---------- chill townsfolk ----------
    Chat-only characters with no quests — they just vibe. The content pack ships some
    (CHILL) and the owner can create more in admin mode (➕ brush, stored per device).
@@ -399,7 +448,7 @@ function drawIso(){
   }
   const bill=(gx,gy,fn)=>{const[cx,cy]=P(gx,gy);
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
-  w.npcs.forEach(n=>bill(n.x,n.y,(bx,by)=>{
+  w.npcs.forEach(n=>bill(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(bx,by)=>{
     drawPerson(ctx,bx,by,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
@@ -804,7 +853,7 @@ function drawFront(){
   }
   const act=(gx,gy,fn)=>{const sx=gx*TS-camX,sy=gy*TS-camY;
     if(sx<-TS||sy<-TS-16||sx>VW||sy>VH)return;R.push({d:gy+0.55,f:()=>fn(sx,sy)});};
-  w.npcs.forEach(n=>act(n.x,n.y,(sx,sy)=>{
+  w.npcs.forEach(n=>act(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(sx,sy)=>{
     drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
@@ -892,7 +941,7 @@ function draw(){
       ctx.beginPath();ctx.arc(cxT+p[0],cyT+p[1],1.7,0,7);ctx.fill();});
   });
   w.npcs.forEach(n=>{
-    const sx=n.x*TS-camX,sy=n.y*TS-camY;
+    const sx=(n.fx===undefined?n.x:n.fx)*TS-camX,sy=(n.fy===undefined?n.y:n.fy)*TS-camY;
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
     drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
@@ -1728,7 +1777,7 @@ function loop(ts){
     }
     else{const[dx,dy]=DIRS[dir];fx=px-dx*(1-mt);fy=py-dy*(1-mt);}
   }else if(!tryPortal(ts))tryStep(); /* standing on a door whose cooldown just ran out: go through */
-  dogUpdate(dt,ts);catUpdate(dt,ts);pigUpdate(dt,ts);loroTick(ts);critUpdate(dt,ts);ballUpdate(dt,ts);fredCheck();
+  dogUpdate(dt,ts);catUpdate(dt,ts);pigUpdate(dt,ts);loroTick(ts);critUpdate(dt,ts);ballUpdate(dt,ts);wanderUpdate(dt);fredCheck();
   if(!$("world").hidden)draw();
   requestAnimationFrame(loop);
 }
@@ -2957,6 +3006,22 @@ $("exCopy").addEventListener("click",()=>{const v=$("exArea").value;
    pack (MAPCOL / TOWNLBL / MAPDOT). A new business shows up on the plan without a
    line of engine change. */
 const BASECOL={"≈":"#4A4B52","-":"#9A9B9E",".":"#D5D2C6","B":"#5C4A50","Q":"#B0563A","F":"#B0895B","G":"#C98A2D","C":"#E0662B","X":"#E7C25A","P":"#3E7C4F","E":"#E0B45C","L":"#E0B45C","O":"#E0B45C","1":"#8A8474","2":"#E0B45C","Y":"#C0392B","J":"#639C6C","b":"#D77FA8","g":"#9DBB77"};
+/* ---------- worldFlags — everything the world is allowed to know about your play ----------
+   One place, handed to content: the town plan's labels read it, and so does any decor that
+   changes with what you have done. `grade[id]` is 1-3 once you have answered ANYTHING in a
+   district and **0 before that** — gradeOf() alone returns 3 for a district with nothing
+   answered (a clean rate over zero calls), so a world reading it raw would paint an untouched
+   city as flawless work. Not begun is not the same as done well. */
+function worldFlags(){
+  const gs=GRW().staged,L=CHS();
+  const f={stage:gs?gs.quests.filter(i=>done.has(i)).length:0,ribbon:ribbonUp(),up:{},grade:{},closed:{},answered:{}};
+  ribbons().forEach(r=>{if(r.id)f.up[r.id]=ribbonUp(r);}); /* one flag PER storefront, by the pack's own id */
+  L.forEach((c,i)=>{const n=(c.quests||[]).filter(q=>done.has(q)).length;
+    f.answered[c.id]=n;
+    f.grade[c.id]=n?gradeOf(c):0;
+    f.closed[c.id]=chSeen>i;});
+  return f;
+}
 function drawTown(){
   const mc=$("mapcv"),g2=mc.getContext("2d"),w=WORLDS.st,s=10;
   mc.width=w.W*s;mc.height=w.H*s+14;
@@ -2965,11 +3030,7 @@ function drawTown(){
   for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
     g2.fillStyle=col[w.rows[y][x]]||"#D5D2C6";g2.fillRect(x*s,y*s,s,s);}
   const es=lang==="es";
-  /* the flags TOWNLBL predicates read: how many stages are up, and whether the
-     ribbon is out. Generic on purpose — a pack names its own labels, not the engine. */
-  const gs=GRW().staged;
-  const flags={stage:gs?gs.quests.filter(i=>done.has(i)).length:0,ribbon:ribbonUp(),up:{}};
-  ribbons().forEach(r=>{if(r.id)flags.up[r.id]=ribbonUp(r);}); /* one flag PER storefront, by the pack's own id */
+  const flags=worldFlags();   /* the same facts the mural reads */
   g2.textAlign="center";
   (typeof TOWNLBL!=="undefined"?TOWNLBL:[]).forEach(l=>{
     if(l.when&&!l.when(flags))return;
@@ -3605,6 +3666,8 @@ function lateOpenToast(){
   setTimeout(()=>toast(T()[K.open]||"",4200),1400);
 }
 /* ---------- boot ---------- */
+wanderInit();
+{const bad=auditWander();if(bad.length)console.warn("WORLD: nowhere to walk for "+bad.join(" | "));}
 const SV=loadSave();
 if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").textContent=T().contBtn(SV.n,SV.xp,SV.d.length);
