@@ -252,10 +252,11 @@ const TOWNLBL=[
 /* "you are here" on the town plan, for worlds that are interiors of the street */
 const MAPDOT={ta:[23,13],pa:[29,1],li:[29,1],no:[25,0],hq:[14,0],f2:[14,0],lc:[6,5],lo:[21,5],ex:[29,1],me:[6,13]};
 /* ---------- trolley fast travel: the streets never dead-end, they connect ---------- */
-/* Where the Trolley Pass can put you. The office is on the list so the two people who help
-   you design this place are never more than a couple of taps away (owner, 2026-09-03: "i want
-   both nacho and don guero at my beck and call"). */
-const TRV=[{w:"st",x:1,y:1,dir:"right"},{w:"ex",x:22,y:3,dir:"left"},{w:"f2",x:17,y:11,dir:"up"}];
+/* Where the Trolley Pass can put you: STREET STOPS ONLY. A trolley does not stop on the
+   second floor of a building — the office came off this list on 2026-09-03 ("i dont like that
+   i go from a train to a floor. dont do that. i asked to make the world realistic"). You reach
+   the office the way you would reach an office: through the front door and up the stairs. */
+const TRV=[{w:"st",x:1,y:1,dir:"right"},{w:"ex",x:22,y:3,dir:"left"}];
 /* ambient critters: kinds live in the engine (butterfly, colibri, gato); spawns are
    content. Each wanders a small radius around home; the gato is pettable. */
 const CRITTERS=[

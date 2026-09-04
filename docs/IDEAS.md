@@ -1421,3 +1421,36 @@ ever taken away — so the quest moved with him instead of being deleted.
 their quest with them and give it to somebody who would plausibly have written it, then let
 that person name them out loud. Deleting the quest is what "nothing is ever taken away" forbids.
 
+### 15.20 THE OWNER COULD NOT FIND HIS OWN POSTERS — BUILT 2026-09-03
+
+*"i still couldnt find my posters and laptop... ive achieved things in the game."*
+
+**Reproduced before touching anything, with a save shaped like his** (Week One and the mercado
+played, two Saturdays claimed). The result: **two posters were correctly pinned to the wall and
+the whole system worked — and standing on the arrival tile by the stairs, `readMarks()` returned
+ZERO.** Nothing in the room said any of it existed.
+
+The cause was a number I copied from the door marker without thinking: readable things wore
+their mark only within **three tiles**. The office is 20 wide and the game drops you in the
+far corner, so the wall was eleven tiles away and silent. **A marker that only appears once you
+are already touching the thing is not a marker.**
+
+- **Every readable in the room you are standing in wears its mark now**, no distance limit.
+  Paper on a wall is visible from the doorway; that is what a wall is for. The door arrow keeps
+  its three tiles on purpose — a door is a place you walk to, not a thing you read.
+- **The room says what is in it when you walk in.** `arrive.f2` now names the wall where your
+  work goes and the machine still logged in on the desk, in both languages.
+- A test stands on the arrival tile and fails if any readable thing in the office is unmarked.
+
+**The lesson, and it is the second time this exact shape has bitten:** *check the feature from
+the tile the game actually puts the player on.* The stairs bug was this. This was this. Build a
+thing, then walk in from the door like a stranger and see whether it announces itself.
+
+### 15.21 A TROLLEY DOES NOT STOP ON THE SECOND FLOOR — REVERSED 2026-09-03
+
+The office was added to the Trolley Pass list to make Nacho and Don Güero quick to reach.
+Owner: *"i dont like that i go from a train to a floor. dont do that. i asked to make the world
+realistic. not perfect but so if needed it can be upgraded."* Removed the same day, and the rule
+is now in `docs/OWNER.md` as settled. The test is data-driven rather than a promise: **every
+trolley destination must be a world that actually contains a trolley tile.** Rails or no stop.
+
