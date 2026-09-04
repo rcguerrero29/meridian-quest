@@ -5,6 +5,21 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-02, late)
 
+**NEWEST — 2026-09-03, `mq-v60`: templates, and two process fixes the owner asked for.**
+Owner: *"i keep seeing you miss testing opportunities and requirements are falling through."*
+Both were true, and both now have machinery rather than good intentions:
+- **`docs/ASKS.md`** — every ask, quoted verbatim, with where it landed. Fill it in BEFORE
+  building. An ask answered in conversation and never built is still open.
+- **Smoke §28, the discoverability audit** — for every world, from every way in, everything
+  readable is marked, the place names itself in both languages, and a door with somebody
+  waiting behind it says so. This is the general form of the two bugs that shipped on
+  2026-09-03 (the invisible stairs, the invisible posters).
+
+**And the feature:** `BUILDTPL` / `BUILDS` — Don Güero builds from a template with seeded
+variation (IDEAS §15.22). Deterministic, picks pinned in the save, parts that read each
+other, and every build validated before a tile lands — which immediately refused to build
+the first casita on top of Yola the paletera. Two casitas stand at the ends of Calle Dos.
+
 **NEWEST — 2026-09-03, `mq-v56`:** settings became four drawers that remember what you keep
 open (actions stay outside them, guarded by a test); decor is drawn in ALL FOUR cameras, with a
 mural on a solid tile treated as paint on that wall's open face in 3D; and

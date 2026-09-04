@@ -228,8 +228,8 @@ const DOORLOOK={E:{wood:"#4F5474",wood2:"#5F6588",frame:"#2E3147",glass:true}, /
                 "@":{wood:"#D9A441",wood2:"#E8B85A",frame:"#7A4E17",glass:true}, /* La Espiga: wheat */
                 "*":{wood:"#3FA3A0",wood2:"#52B8B4",frame:"#1F5A58",glass:true}, /* Velázquez: teal */
                 "$":{wood:"#6E2F4A",wood2:"#84405E",frame:"#3A1728",glass:true}}; /* Nolasco: burgundy, frosted */
-const SOLIDX="ZSHI~9|□=6780&!▣▯⊔○▭▤";        /* solid glyphs this pack adds (~ water, 9 doghouse, | window, □ box, and the four parcels' tiles) */
-const MAPCOL={"1":"#E0B45C","▭":"#6E6A80","▤":"#E8DFC4",  /* the legend says "doors & stairs in gold" and the plan painted them grey */
+const SOLIDX="ZSHI~9|□=6780&!▣▯⊔○▭▤▦▩▨";        /* solid glyphs this pack adds (~ water, 9 doghouse, | window, □ box, and the four parcels' tiles) */
+const MAPCOL={"1":"#E0B45C","▭":"#6E6A80","▤":"#E8DFC4","▦":"#9E5442","▩":"#C9A77C","▨":"#BE9A72",  /* the legend says "doors & stairs in gold" and the plan painted them grey */
   Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D",
               "|":"#6E638A",  /* window: shades to the wall-top colour, so 3D gives it no darker cap */
               "□":"#C8A277",  /* moving box: cardboard, paler than the produce crate so the map never confuses them */

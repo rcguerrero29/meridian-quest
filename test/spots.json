@@ -213,5 +213,19 @@
   "x": 20,
   "y": 2,
   "cam": "3d"
+ },
+ {
+  "name": "40-casita-west-front",
+  "w": "ex",
+  "x": 1,
+  "y": 3,
+  "cam": "front"
+ },
+ {
+  "name": "41-casita-east-3d",
+  "w": "ex",
+  "x": 22,
+  "y": 3,
+  "cam": "3d"
  }
 ]
