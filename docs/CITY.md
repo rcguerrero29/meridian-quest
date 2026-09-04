@@ -196,6 +196,16 @@ would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
+- ⏳ **❗La caja de escalera — now BLOCKING, and the reason changed** *(2026-09-04, second pass)*.
+  The owner asked for stairs that are "part of the building... not just portal images". The shape
+  is settled: a SOLID stair shaft beside the walkable head, `lift:13`, the only body in this engine
+  as tall as the `#` next to it, and every glyph it needs (`◢ ◤ ◥ ◣ ▲ ▼ ◺ ◸ ⌂ ⊓`) is unused. What
+  stops it is **siting, and it is worse than it looked**: the one tile at HQ that could take a
+  shaft, (17,4), is already `#` — but it is the **south wall of the small room at x17-18/y1-3, and
+  the CEO stands in it at (17,2) carrying quest 9.** A wall-kind box wears its art on all four
+  faces, so a flight there hangs a staircase on the inside wall of a room the player must walk into
+  for a quest. Reachability is untouched, which is exactly why a reachability check passes it. Not
+  built; the owner picks the site.
 - ⏳ **❗La caja de escalera** *(Don Güero, 2026-09-04)* — HQ's stair is at (17,5); Floor 2's is
   at (18,11), same 20×14 building, six rows apart. You climb in the north-east alcove and arrive
   in the south-east corner. Stacking them makes the building a building — but it re-opens a

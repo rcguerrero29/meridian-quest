@@ -1650,3 +1650,45 @@ specifically: `test/smoke.js` is ~32 numbered sections and every assertion added
 verified to fail against broken code before being kept, `test/tilesheet.js` is a cold-read gate, and
 `test/shots.js --cams` sweeps four cameras. What is missing is not validation — it is *comparative*
 validation across content-pack versions, which is a narrower and more interesting gap.
+
+
+### §15.28 — Walkable, but an object: the third tile category earns its keep (2026-09-04)
+
+`stand:true` shipped at `mq-v63` for the stairs. Two more of the owner's reports turned out to be
+the *same* bug wearing different clothes, and one of them was the inverse:
+
+- *"the bus stop is also just a painting on the floor."* `Y` was walkable with no `TILES` row and
+  no profile, so the front camera and the 3D ground bake painted its plan view onto the pavement.
+- *"a cone shouldnt make me have to go around it."* `C` was **solid** — so it stood up correctly
+  and blocked you. The two objects had precisely the wrong properties swapped: the thing you should
+  be able to walk past was a wall, and the thing that should stand was a decal.
+
+Both are now `stand` tiles, which is the whole point of a third category: *walkable, but an object.*
+
+**The trap that cost the most, and it was mine.** Making the cone non-solid deleted it from the
+isometric camera, because the iso block pass runs for `SOLID` glyphs only. My first fix was to let
+`stand` tiles into that pass — which is wrong in a way that looks right: **`isoBlock()` paints two
+flat faces and a diamond top and never touches the tile's art.** The trolley stop went from a red
+floor diamond to a featureless red pillar, and every metadata assertion still passed. The real fix
+is a separate billboard pass that draws `sideArt(g)` at `d = x+y+0.35`, between the blocks at that
+depth and the people. **The lesson: "it appears in all four cameras" and "it is drawn correctly in
+all four cameras" are different claims, and only a test that counts which drawing each camera calls
+can tell them apart.** Smoke now counts those calls.
+
+### §15.29 — There were two ways the world could change, and only one of them arrived (2026-09-04)
+
+`tryPortal` (a door) had grown a list of things that must happen on arrival. `openTravel` (the
+trolley) changed `world`, `px` and `py` and did none of them. So the dog you had walked across town
+with was still standing at the stop, still set to follow, and every cone you had kicked stayed
+kicked. Nobody had noticed because the trolley was added for travel, not for state.
+
+Both now call one `worldArrived()`. **The rule: when a second path can do the same thing as the
+first, the shared work moves into a function before the second path is written — not after somebody
+reports the dog.** A test that walks through a door proves nothing about a trolley; the wiring is
+the thing to assert, and it now is, per route.
+
+**A related habit this session kept catching:** three separate tests here passed while proving
+nothing, because they called the feature's function directly instead of driving the path a player
+drives. `dogsFollow()` worked while no door called it; `kickProp()` worked while no step reached it.
+Every feature test now has a companion assertion that goes through `tryStep`, `tryPortal` or a real
+button click — and each of those was verified to fail with the wiring cut.

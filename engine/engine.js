@@ -7,7 +7,10 @@
    ========================================================= */
 const FQ=()=>lang==="es"?FQES:FQEN;
 const TS=32;
-const SOLID=new Set(["#","D","K","P","B","F","G","C","X","T","W","V","A","U","Q","J"]);
+/* "C" (the traffic cone) left this set on 2026-09-04. Owner: "I think a cone shouldnt make me
+   have to go around it. i should be able to kick it." A cone is not a wall — it is a thing one
+   person moves with a foot. It is a `stand` tile now: walkable, still drawn standing. */
+const SOLID=new Set(["#","D","K","P","B","F","G","X","T","W","V","A","U","Q","J"]);
 /* the content seam: a pack adds its own solid glyphs and declares which are doors */
 (typeof SOLIDX!=="undefined"?SOLIDX:"").split("").forEach(c=>SOLID.add(c));
 const DOORSET=new Set((typeof DOORS!=="undefined"?DOORS:"+ELO").split(""));
@@ -397,7 +400,7 @@ let ISOCOL=null;
 /* No "1" here on purpose: drawIso's block pass runs only for SOLID glyphs, and the stairs are
    walkable, so IZH["1"]=10 sat here being read by nothing at all. Deleted 2026-09-04 rather
    than corrected — a number that disagrees with the drawing will be trusted by somebody. */
-const IZH={"#":20,B:20,Q:17,Z:17,U:20,W:12,V:10,D:9,K:9,T:8,S:13,H:8,I:9,A:9,P:11,F:7,G:9,C:7,X:8,"~":2,"9":11};
+const IZH={"#":20,B:20,Q:17,Z:17,U:20,W:12,V:10,D:9,K:9,T:8,S:13,H:8,I:9,A:9,P:11,F:7,G:9,X:8,"~":2,"9":11};   /* C dropped 2026-09-04: it stopped being solid, and this pass runs for solids only */
 /* a pack-declared tile takes its iso height from its declared lift (lift 13 ≈ 20px, the
    wall) — this table used to be the only source, so a content window stood 6px short */
 const izh=g=>IZH[g]||((TILES[g]&&TILES[g].lift)?Math.round(TILES[g].lift*1.5):14);
@@ -439,7 +442,7 @@ function drawIso(){
       ctx.fillStyle=f[2];ctx.beginPath();ctx.arc(cx+f[0],cy+f[1],2,0,7);ctx.fill();});}
     else if(ch==="g"){ctx.strokeStyle=tc("#5FA86A");ctx.lineWidth=1.4;ctx.lineCap="round";
       [[-6,0],[0,-2],[6,1]].forEach(q=>{ctx.beginPath();ctx.moveTo(cx+q[0],cy+q[1]+3);ctx.lineTo(cx+q[0]+1.5,cy+q[1]-5);ctx.stroke();});}
-    else if(DOORSET.has(ch)||ch==="Y"||ch==="2"||ch==="1"&&!SOLID.has(ch)){
+    else if(DOORSET.has(ch)||ch==="2"){ /* Y and 1 dropped 2026-09-04: they stand as real blocks now */
       if(DOORSET.has(ch)){ctx.save();ctx.translate(cx,cy);ctx.scale(0.55,0.55);ctx.translate(-cx,-cy);
         isoDiamond(cx,cy,"#E0B45C");ctx.restore();
         ctx.globalAlpha=0.25+0.2*Math.sin(Date.now()/380);isoDiamond(cx,cy,"#FFE9A8");ctx.globalAlpha=1;}
@@ -460,6 +463,17 @@ function drawIso(){
       ctx.fillStyle="#B08FE0";[[-8,-4],[4,-9],[8,0],[-2,-2]].forEach(q=>{
         ctx.beginPath();ctx.arc(cx+q[0]+t2,cy-16+q[1],1.6,0,7);ctx.fill();});}});
     else R.push({d:x+y,f:()=>isoBlock(cx,cy,ISOCOL[gch]||ISOCOL[w.rows[y][x]]||C.wall,IZH[gch]||izh(w.rows[y][x]))});
+  }
+  /* STANDING TILES. A `stand` tile is walkable, so the block pass above skips it — and
+     isoBlock paints flat faces and a diamond top, never the art, so routing them THERE turns a
+     trolley stop into a coloured slab (tried it, 2026-09-04). They billboard their profile
+     instead, exactly like an actor, between the blocks at this depth and the people. */
+  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
+    const g=w.rows[y][x];if(!standsUp(g))continue;
+    const[cx,cy]=P(x,y);
+    if(cx<-ISW||cx>VW+ISW||cy<-ISH-40||cy>VH+ISH+40)continue;
+    const tf=sideArt(g);if(!tf)continue;
+    R.push({d:x+y+0.35,f:()=>tf({sx:cx-16,sy:cy-25,x,y,canopy:()=>{}})});
   }
   const bill=(gx,gy,fn)=>{const[cx,cy]=P(gx,gy);
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
@@ -572,13 +586,6 @@ TILEDRAW["1"]=rc=>{const{sx,sy}=rc; /* STAIRS, from above. Four flat grey bars b
 };
 TILEDRAW["2"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#E0B45C";ctx.font="700 15px sans-serif";ctx.textAlign="center";
       ctx.fillText("»",sx+16,sy+21);ctx.textAlign="start";};
-TILEDRAW["Y"]=rc=>{const{sx,sy,x,y}=rc; /* trolley stop: pole + sign + bench — the town's transit spine */
-      ctx.fillStyle="#3B3F45";ctx.fillRect(sx+6,sy+5,3,22);
-      ctx.fillStyle="#C0392B";ctx.fillRect(sx+2,sy+2,15,9);
-      ctx.strokeStyle="rgba(15,12,20,.4)";ctx.lineWidth=1;ctx.strokeRect(sx+2,sy+2,15,9);
-      ctx.fillStyle="#F2E8D8";ctx.font="700 7px monospace";ctx.fillText("MQT",sx+4,sy+9);
-      ctx.fillStyle="#8A6B3F";ctx.fillRect(sx+14,sy+21,15,3);
-      ctx.fillRect(sx+15,sy+24,2,5);ctx.fillRect(sx+26,sy+24,2,5);};
 TILEDRAW["Q"]=rc=>{const{sx,sy,x,y}=rc; /* restaurant storefront: terracotta facade + striped awning +
       a window with a steaming bowl in it. The cold read (IDEAS §15.8) saw "a red building,
       an awning, two blank windows" — the mullion split the window into two blanks and
@@ -788,6 +795,19 @@ TILESIDE["1"]=rc=>{const{sx,sy}=rc; /* STAIRS in profile — the stepped diagona
   ctx.beginPath();ctx.moveTo(sx+2,sy+20.7);ctx.lineTo(sx+29,sy+2.3);ctx.stroke();
   ctx.lineCap="butt";ctx.lineWidth=1;
 };
+TILESIDE["C"]=rc=>{const{sx,sy}=rc; /* a cone from the side is the same cone — what the flat
+      version was missing is a BASE and a shadow, which is all that ever said "standing on the road"
+      instead of "painted on it". */
+  ctx.fillStyle="rgba(15,12,20,.20)";
+  ctx.beginPath();ctx.ellipse(sx+16,sy+29.4,10,2.4,0,0,7);ctx.fill();     /* CONTACT SHADOW */
+  ctx.fillStyle="#C2541F";ctx.fillRect(sx+5,sy+26,22,3.4);                /* the square base, darker than the cone */
+  ctx.fillStyle="#E0662B";ctx.beginPath();
+  ctx.moveTo(sx+16,sy+5);ctx.lineTo(sx+23.5,sy+26);ctx.lineTo(sx+8.5,sy+26);ctx.closePath();ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,.16)";ctx.beginPath();                  /* the lit face — key light upper-left */
+  ctx.moveTo(sx+16,sy+5);ctx.lineTo(sx+16,sy+26);ctx.lineTo(sx+8.5,sy+26);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+10.5,sy+16,11,3.4);             /* the retroreflective band */
+  ctx.fillStyle="rgba(15,12,20,.18)";ctx.fillRect(sx+10.5,sy+19.4,11,1);
+};
 TILESIDE["V"]=rc=>{const{sx,sy}=rc; /* a stove from the front: burners over the edge, knobs, the oven window */
       ctx.fillStyle="#3A3F46";ctx.fillRect(sx+3,sy+8,26,22);
       ctx.fillStyle="#23272C";ctx.fillRect(sx+3,sy+6,26,3);[[9,6],[16,6],[23,6]].forEach(p=>{ctx.beginPath();ctx.ellipse(sx+p[0],sy+p[1],3.2,1.4,0,0,7);ctx.fill();});
@@ -812,7 +832,7 @@ Object.assign(TILES,{
   A:{lift:6,kind:"furniture"},S:{lift:9,kind:"furniture"},H:{lift:5,kind:"furniture"},
   I:{lift:6,kind:"furniture"},W:{lift:8,kind:"appliance"},V:{lift:8,kind:"appliance"},
   F:{lift:5,kind:"fence"},G:{lift:5,kind:"fence"},
-  C:{lift:3,kind:"marker"},X:{lift:6,kind:"site"},
+  C:{lift:6,kind:"marker",stand:true,light:true},X:{lift:6,kind:"site"},   /* light: you kick it, you do not walk around it */
   P:{lift:6,kind:"nature"},J:{lift:0,kind:"tree"},
   "~":{lift:0,kind:"water"},"9":{lift:7,kind:"prop"},
   /* `stand`: walkable, but an OBJECT — not paint on the floor. The engine had exactly two
@@ -1281,7 +1301,7 @@ function drawLoro(g,sx,sy){
    The content pack declares spawns in CRITTERS [{kind,world,x,y,c}]; the engine owns
    the kinds. Critters wander a small radius around home, never block the hero, and
    the street cat is pettable via the same button as the named animals. */
-const CRIT=(typeof CRITTERS!=="undefined"?CRITTERS:[]).map(c=>({...c,fx:c.x,fy:c.y,moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false,home:[c.x,c.y]}));
+const CRIT=(typeof CRITTERS!=="undefined"?CRITTERS:[]).map(c=>({...c,fx:c.x,fy:c.y,moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false,holdT:0,stayT:0,home:[c.x,c.y]}));
 function critFree(cr,x,y){const w=WORLDS[cr.world];
   return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")
     &&!(world===cr.world&&x===px&&y===py)
@@ -1354,6 +1374,84 @@ function bfsStep(cr,tx,ty){
     }
   }
   return null;
+}
+/* ---------- through the door with you ----------
+   Owner, 2026-09-04: "sonny should be able to follow me anywhere. but when i tell him to stay and
+   sit he can stop following." and "sometimes he will follow just for fun."
+
+   A critter in a world you are not standing in only idles (see the critter update), so a dog could
+   never cross a threshold — the leash was the only thing that had ever moved one between worlds.
+   This is that same move, decided by the dog instead of by a button. Three rules make it read as a
+   dog rather than a mechanic: he has to have BEEN near the door (no teleporting from across town),
+   a command to hold overrules it (a command the world ignores is not a command), and when he is
+   not on follow he only tags along from right at your heel, and only sometimes. */
+const FOLLOW_REACH=4;    /* how close to the door he had to be to notice you leaving */
+const FOLLOW_WHIM=0.22;  /* off-duty: he just comes, because he felt like it */
+/* somewhere beside you he could actually stand — reachable, not a wall, not your tile, not
+   already taken by another dog coming through with him */
+function dogSpotNear(tx,ty,taken){
+  const w=CW(),rs=dogReach({world:world,x:tx,y:ty});
+  const ok=(x,y)=>x>=0&&y>=0&&x<w.W&&y<w.H&&rs[y*w.W+x]&&!(x===tx&&y===ty)&&
+    !(taken&&taken.some(t=>t[0]===x&&t[1]===y))&&!CRIT.some(c=>c.world===world&&c.x===x&&c.y===y);
+  for(const[dx,dy]of[[0,1],[1,0],[-1,0],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]])
+    if(ok(tx+dx,ty+dy))return[tx+dx,ty+dy];
+  for(let r=2;r<=5;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++)
+    if(Math.abs(dx)+Math.abs(dy)===r&&ok(tx+dx,ty+dy))return[tx+dx,ty+dy];
+  return null;
+}
+function dogsFollow(fromW,fromX,fromY){
+  const now=performance.now(),taken=[];
+  CRIT.forEach(c=>{
+    if(!isDog(c)||c.world!==fromW)return;
+    if(c.holdT>now||c.stayT>now)return;      /* told to sit, lie down or stay: he holds, and you leave without him */
+    const d=Math.abs(c.x-fromX)+Math.abs(c.y-fromY);
+    if(c.follow?d>FOLLOW_REACH:!(d<=1&&Math.random()<FOLLOW_WHIM))return;
+    const spot=dogSpotNear(px,py,taken);
+    if(!spot)return;                          /* nowhere to put him — he waits where he is, never stranded in a wall */
+    taken.push(spot);
+    c.world=world;c.x=spot[0];c.y=spot[1];c.fx=c.x;c.fy=c.y;
+    c.home=[c.x,c.y];c.task=null;c.sit=false;c.layT=0;c.moving=false;c.mt=0;c.next=now+340;
+    if(BALL&&BALL.dog===c)BALL=null;          /* the ball stays in the room it was thrown in */
+  });
+}
+/* ---------- light props: things you kick ----------
+   Owner, 2026-09-04: "I think a cone shouldnt make me have to go around it. i should be able to
+   kick it. sonny should be even able to rip it and they'll just reappear when i leave the screen
+   for now."
+
+   A light prop is walkable, so it can never block you and can never seal a room — the whole class
+   of "a prop got kicked in front of a door" is impossible by construction rather than by a check.
+   Edits are recorded so leaving the room puts every one of them back, which is the owner's own
+   scope: FOR NOW, the street tidies itself the moment you are not looking. No save key. */
+const isLight=g=>!!(TILES[g]&&TILES[g].light);
+let propEdits=[];   /* [world,x,y,glyphBefore] — oldest first, replayed backwards to undo */
+function propSet(wid,x,y,g){const w=WORLDS[wid];if(!w||!w.grid[y])return;
+  propEdits.push([wid,x,y,w.grid[y][x]]);
+  w.grid[y][x]=g;w.rows[y]=w.rows[y].slice(0,x)+g+w.rows[y].slice(x+1);
+  if(typeof t3Invalidate==="function")t3Invalidate();}   /* the 3D floor is baked once per build */
+function propsReset(){for(let i=propEdits.length-1;i>=0;i--){
+    const [wid,x,y,g]=propEdits[i],w=WORLDS[wid];
+    if(!w||!w.grid[y])continue;
+    w.grid[y][x]=g;w.rows[y]=w.rows[y].slice(0,x)+g+w.rows[y].slice(x+1);}
+  if(propEdits.length&&typeof t3Invalidate==="function")t3Invalidate();
+  propEdits=[];}
+/* somewhere a kicked prop can come to rest: open floor, nobody standing there, no door under it,
+   and never on top of another prop */
+function propFree(x,y){const w=CW();
+  if(x<0||y<0||x>=w.W||y>=w.H)return false;
+  const g=w.grid[y][x];
+  if(SOLID.has(g)||g==="N"||isLight(g))return false;
+  if(PORTALS[world]&&PORTALS[world][w.rows[y][x]])return false;
+  if(x===px&&y===py)return false;
+  return !CRIT.some(c=>c.world===world&&c.x===x&&c.y===y);}
+function kickProp(x,y,dx,dy){
+  const w=CW(),g=w.grid[y]&&w.grid[y][x];
+  if(!isLight(g))return;
+  /* it skitters ahead of your foot; if that is blocked it squirts sideways; if everything is
+     blocked it just stays put and you walk over it, which is what happens to a real cone. */
+  const tries=[[dx,dy],[dy,dx],[-dy,-dx]];
+  for(const t of tries){const tx=x+t[0],ty=y+t[1];
+    if(propFree(tx,ty)){propSet(world,x,y,".");propSet(world,tx,ty,g);return;}}
 }
 function dogReach(cr){ /* every tile a dog can actually stand on — throws stay honest */
   const w=WORLDS[cr.world],seen=new Uint8Array(w.W*w.H),q=[[cr.x,cr.y]];
@@ -1431,6 +1529,19 @@ function dogWhim(cr,now){ /* his own clock: mostly naps and songs. Digging was a
   puppy phase (owner canon) — it stays in the repertoire, barely. In the park:
   zoomies through the agility course, and the ancient greeting between dogs. */
   const r=Math.random(),park=cr.world==="pk";
+  /* the cone. Owner, 2026-09-04: "sonny should be even able to rip it." Checked before the rest of
+     the repertoire so a cone right under his nose beats a nap — but it is one roll in twenty-five,
+     so it stays a thing that happened once and not a thing he does. It comes back when you leave
+     the room, like every other light prop. */
+  if(typeof isLight==="function"&&Math.random()<0.04){
+    const near=[[1,0],[-1,0],[0,1],[0,-1],[0,0]]
+      .map(d=>[cr.x+d[0],cr.y+d[1]])
+      .find(q=>{const w=WORLDS[cr.world];
+        return w&&w.grid[q[1]]&&isLight(w.grid[q[1]][q[0]]);});
+    if(near){propSet(cr.world,near[0],near[1],".");
+      cr.face=Math.sign(near[0]-cr.x)||cr.face;cr.happyT=now+2200;cr.sit=false;cr.layT=0;cr.next=now+2600;
+      if(cr.world===world)toast("🐶 "+(T().ripToast||"…"),2400);
+      return;}}
   if(cr.friend&&cr.world===cr.friend.w){ /* beside the favorite person: mostly adoration */
     const f=(WORLDS[cr.world].npcs||[]).find(n=>n.key===cr.friend.key);
     if(f&&Math.abs(f.x-cr.x)+Math.abs(f.y-cr.y)<=2&&Math.random()<0.4){
@@ -1817,6 +1928,7 @@ function tryStep(){
       toast(F[ch][Math.floor(Math.random()*F[ch].length)],2000);}
     return;
   }
+  kickProp(nx,ny,dx,dy); /* a cone is a thing you nudge with a foot, not a wall to go around */
   moving=true;mt=0;px=nx;py=ny;
 }
 /* A door is checked whenever you are STANDING on it, not only on the frame a step ends.
@@ -1828,16 +1940,26 @@ function tryStep(){
    pack whose doorstep IS a portal tile (validateWorlds only warns about that).
    Y, the trolley stop, deliberately stays step-only: a menu you dismissed must not
    reopen under your feet. Returns true if it warped. */
+/* ---------- arriving somewhere ----------
+   There are TWO ways the world changes under you: a door (tryPortal) and the trolley
+   (openTravel). Everything that must happen on arrival lives here, in one place, because when it
+   did not, the trolley quietly skipped it — you rode from Meridian Street to Calle Dos and the dog
+   you had been walking with was still standing at the stop, still set to follow. */
+function worldArrived(fromW,fromX,fromY){
+  warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
+  save();setWorldTag();toast(T().arrive[world],2200);
+  propsReset();                    /* "they'll just reappear when i leave the screen" — the owner's scope */
+  dogsFollow(fromW,fromX,fromY);   /* a dog at your heels comes with you */
+  dogsRoam(world);                 /* unseen pups drift toward their favorite townsperson */
+}
 function tryPortal(ts){
   const key=world+":"+px+","+py;
   if(portalHold&&portalHold!==key)portalHold="";
   const pch=CW().rows[py][px];
   if(portalHold||ts<=portalT||!(PORTALS[world]&&PORTALS[world][pch]))return false;
-  const p=PORTALS[world][pch],fromW=world;
+  const p=PORTALS[world][pch],fromW=world,fromX=px,fromY=py;
   world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
-  warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
-  save();setWorldTag();toast(T().arrive[world],2200);roomInvite();
-  dogsRoam(world); /* unseen pups drift toward their favorite townsperson */
+  worldArrived(fromW,fromX,fromY);roomInvite();
   if(fromW==="pk"&&world!=="pk")parkExit(); /* crossing back over the rainbow: the recap */
   return true;
 }
@@ -3171,18 +3293,19 @@ function openTravel(){
     b.textContent=(d.w===world?"◉ ":"🚋 ")+T().locs[d.w]+(d.w===world?" · "+t.here:"");
     if(d.w===world){b.disabled=true;b.style.opacity=".55";}
     else b.addEventListener("click",()=>{$("travel").hidden=true;
+      const fromW=world,fromX=px,fromY=py;
       world=d.w;px=fx=d.x;py=fy=d.y;held=null;dir=d.dir;
-      warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
-      save();setWorldTag();toast(T().arrive[world],2200);});
+      worldArrived(fromW,fromX,fromY);});
     list.appendChild(b);});
   const s=document.createElement("button");s.className="opt";s.disabled=true;s.style.opacity=".45";
   s.textContent="🏗️ "+t.soon;list.appendChild(s);
   $("travel").hidden=false;
 }
 $("tvClose").addEventListener("click",()=>{$("travel").hidden=true;
-  /* step back off the stop so it can re-trigger later */
-  if(world==="st"){px=fx=1;py=fy=1;dir="right";}
-  if(world==="ex"){px=fx=22;py=fy=3;dir="left";}
+  /* step back off the stop so it can re-trigger later. TRV already declares where each stop
+     stands you — reading it here means the engine stops naming this pack's two worlds. */
+  const d=(typeof TRV!=="undefined"?TRV:[]).find(t=>t.w===world);
+  if(d){px=fx=d.x;py=fy=d.y;dir=d.dir||"down";}
   checkTalk();});
 /* ---------- Xochi's wardrobe: equippable pet cosmetics, unlocked by the Designer quest ---------- */
 let wdPet="fred";
@@ -3564,7 +3687,7 @@ function dogCmd(kind){
   const key=c.name||"dog";
   parkPrefs.train[key]=parkPrefs.train[key]||{};
   const tr=parkPrefs.train[key],reps=tr[kind]||0;
-  if(kind==="follow"){c.follow=!c.follow;c.stayT=0;
+  if(kind==="follow"){c.follow=!c.follow;c.stayT=0;c.holdT=0;
     toast("🐶 "+(c.follow?T().followOn:T().followOff),2400);return;}
   const p=(kind==="come"?0.7:0.5)+0.1*Math.min(4,reps)+(dogFed(c)?0.25:0);
   const now=performance.now();
@@ -3572,10 +3695,12 @@ function dogCmd(kind){
     if(L.length)toast("🐶 "+L[Math.floor(Math.random()*L.length)],2600);return;}
   tr[kind]=reps+1;parkPersist();
   c.task=null;c.layT=0;
-  if(kind==="sit"){c.sit=true;c.next=now+4500;toast("🐶 "+T().cmdOkSit,2200);}
-  else if(kind==="down"){c.layT=now+5200;c.next=c.layT;toast("🐶 "+T().cmdOkDown,2200);}
-  else if(kind==="stay"){c.stayT=now+9000;c.sit=true;toast("🐶 "+T().cmdOkStay,2200);}
-  else if(kind==="come"){c.stayT=0;c.sit=false;
+  /* holdT is what makes "stay and sit" mean he does NOT come through the door after you.
+     Follow stays ON — you are not made to re-train him — he is simply holding right now. */
+  if(kind==="sit"){c.sit=true;c.next=now+4500;c.holdT=now+4500;toast("🐶 "+T().cmdOkSit,2200);}
+  else if(kind==="down"){c.layT=now+5200;c.next=c.layT;c.holdT=c.layT;toast("🐶 "+T().cmdOkDown,2200);}
+  else if(kind==="stay"){c.stayT=now+9000;c.sit=true;c.holdT=c.stayT;toast("🐶 "+T().cmdOkStay,2200);}
+  else if(kind==="come"){c.stayT=0;c.holdT=0;c.sit=false;
     if(c.world!==world){ /* the whistle carries across the whole city */
       const w=CW(),rs=dogReach({world,x:px,y:py}),opts=[];
       for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
