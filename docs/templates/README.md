@@ -90,6 +90,11 @@ Per the owner's standing rule (`docs/OWNER.md`): **these are content, not engine
 ## Status
 
 Templates: **written, usable by hand, in both neutral and branded form.** In-game
-filled-in export of 01–04: **not built** — the decision report (05) is the only one the
-game generates today. Recorded so nobody reads this folder and assumes the game already
-produces all five.
+filled-in export: **01 through 07, all seven, live today** — each is a `DOCS` entry in
+`content/meridian/docs.js` that fills itself from the player's own decisions and exports
+as markdown from the reader (Copy / Download). 01 espiga · 02 mercado · 03 accept ·
+04 velázquez · 05 labs · 06 taller · 07 nolasco.
+
+*(Corrected 2026-09-04. This paragraph said "01–04 not built, the decision report (05) is
+the only one the game generates" — written before `mq-v55` and never updated. It was the
+paragraph a planner reads and stops at, and it undersold six of seven.)*

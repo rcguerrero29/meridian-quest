@@ -934,7 +934,7 @@ meaning alone. Findings from the first pass, judged cold before checking intent:
 **Reads instantly — leave alone:** agility hurdle, tunnel, weave poles, doghouse,
 fence, traffic cone, the yellow/black construction barrier, the MQT stop (pole + sign +
 bench), coffee cup, potted plant, fridge, stove, shelving, drafting table, blueprint
-wall, river, stairs, flower bed, scaffolding — and the produce crate, now that the
+wall, river, ~~stairs~~, flower bed, scaffolding — and the produce crate, now that the
 fruit has silhouettes instead of coloured dots.
 
 **All five FIXED 2026-09-02 (S0 item 5 — the owner assigned the legibility pass to the
@@ -1144,8 +1144,17 @@ around the door face and on the jamb, and the light pool under the door grown fr
 **Still drawn from above and stood up, and judged acceptable in the frames:** `D` desk
 (already three-quarter since S0), `P` plant, `C` cone, `X` site sign, `H` crate, `S`
 shelves, `I` scale, `A` drafting table, `U` panel, `9` doghouse, `□` box, `W` fridge,
-`F` picket fence (reads as a fence in the park, `shots/18-park-fence-3d.png`), `1` stairs.
+`F` picket fence (reads as a fence in the park, `shots/18-park-fence-3d.png`).
 Any of these the owner reports gets a side view the same way — one drawing, one cold read.
+
+**`1` stairs was on that list and did not belong there (struck 2026-09-04).** It was never
+stood up in any camera, because it *cannot be* today: `"1"` is in neither `SOLID`
+(`engine/engine.js`) nor the pack's `SOLIDX`, and a non-solid glyph never reaches `sideArt()`.
+The front camera and the 3D ground bake both paint its top-down art flat onto the floor, and
+the iso pass skips it and draws a gold lozenge — so `IZH["1"]=10` has never once been read.
+Every other glyph in the list above is solid; the stairs were the one exception and the doc
+did not say so. Owner, 2026-09-04: *"those stairs are trash. not realistic."* He was cold-
+reading a tile that three of four cameras were drawing as a rug.
 
 **Not done:** a marker or label over a door when you stand near it (the third door
 affordance). The talk bar already names people; a door could get the same treatment.
@@ -1535,3 +1544,49 @@ every test stay — **the ability was the ask**. Restoring the two lots is two c
 `art.js`. The standing rule when a parcel is genuinely developed: **the interior and the portal
 come first, then the house goes on the list.**
 
+
+
+### §15.25 — A walkable thing that has to stand up (2026-09-04)
+
+Owner: *"those stairs are trash. not realistic. can we have realistic building designs."*
+
+**The drawing was never the problem. The stairs were lying down.** The engine had exactly two
+categories of tile — flat ground art, or solid standing geometry — and a staircase is neither:
+you walk *onto* it, and it has to stand up. Because `"1"` is in neither `SOLID` nor the pack's
+`SOLIDX`, the front camera and the 3D ground bake both painted its **top-down** art flat onto
+the floor, and the iso pass skipped it and drew a gold lozenge. One camera out of four was
+honest, and it was not the one the game boots into. `IZH["1"]=10` had never been read by
+anything, because the iso block pass runs for `SOLID` glyphs only.
+
+**The fix is a third category, and it is one word of metadata:** `stand:true` on a tile means
+*walkable, but an object*. The renderers each do the best they can with it — the 3D pass gives
+it the walkable-cutout sprite that the agility gear already used, and the front camera stands it
+with a contact shadow **if it has a profile drawing**, leaving anything without one exactly as
+it was. It also retired a hardcoded `"345"` glyph list from `engine3d.js`: engine code naming a
+content pack's glyphs is the portability law wearing a different hat.
+
+**The lesson that outlives the stairs:** when a thing reads wrong in three cameras and right in
+one, do not redraw it. Ask which category the engine put it in. A cold read that fails in every
+camera is an art problem; a cold read that fails in *some* cameras is a plumbing problem, and
+redrawing it makes four cameras' worth of work out of a one-line fix.
+
+### §15.26 — Two numbers decided that no building in Meridian had faces (2026-09-04)
+
+The 3D scene ran **ambient 0.95 against a sun of 0.5**. Do the Lambert arithmetic on a box with
+the sun at (14,22,8): top `1.35`, east `1.21`, south `1.10` — all three clipped to white — and
+west and north both **exactly 0.95**. Every face of every building rendered the same value from
+every angle. That is the whole reason the city read as painted flats, and **no amount of art
+would have fixed it**, because it is not an art problem.
+
+`0.66 / 0.42` lands the same faces at `1.00 / 0.88 / 0.78 / 0.66`: a real ladder, nothing
+clipped, no drawing touched. Night was already fine (0.6/0.15 never clipped) and is left alone.
+Smoke §32 now does this arithmetic on every run and fails if any face clips or if the spread
+collapses — the invariant is *a building must have faces*, and it is cheaper to assert than to
+re-notice.
+
+**And the second half: everything floated.** Both 2D cameras have always darkened the floor in
+front of a solid; the 3D ground bake never looked at its neighbours, so every building in the
+city met the pavement on a hard bright line. A gradient baked into a texture that is already
+being built costs no draw call and plants the whole city at once. Ambient light does not reach
+the corner where a wall meets the ground — that gradient is most of what says *this is standing
+here*.

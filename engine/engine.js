@@ -239,6 +239,8 @@ const ribbonUp=r=>r?(!!(r&&r.tiles)&&chSeen>=r.district):ribbons().some(x=>ribbo
 const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"};
 let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
 let chSeen=0,replayTimer=null;
+let handedDocs=new Set(); /* paper a person has actually held out to you, so the office file
+   records what you were GIVEN as exactly as it records what you wrote (saved as `hd`) */
 let seenOpen=new Set(); /* opening toasts this save has heard, so a lot that opened while the phone was away is announced once (saved as `so`) */
 let xp=0,hearts=3,cls="",heroName="Rookie",look={shirt:"#8B5CF6",skin:"#E5AC82",hair:"#26202B",style:"cap",outfit:"casual"},done=new Set(),cur=null,curQ=null,node=null,treats=0,fredQ=0,qLvl0=0;
 /* retry-until-correct: `done` = answered right; `qa` maps quest -> best XP already
@@ -279,7 +281,7 @@ function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
   $("status").textContent=`${hs}  ${xp}XP`.trim();}
 /* save */
-function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],bl:bldPicks,v:2};
+function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],hd:[...handedDocs],bl:bldPicks,v:2};
   try{localStorage.setItem("mq1",JSON.stringify(st));}catch(e){}
   if(NET.enabled)NET.sync(st);}
 /* The ❗ on the world tag means what it means everywhere else: somebody in here has
@@ -315,6 +317,7 @@ function sanitizeSave(s){
   if(s.mk&&typeof s.mk==="object")Object.keys(s.mk).slice(0,128).forEach(k2=>{
     const ki=num(k2,0,98,null);if(ki!==null)mk[ki]=num(s.mk[k2],1,3,1);});
   const so=Array.isArray(s.so)?s.so.filter(v=>typeof v==="string").slice(0,32).map(v=>v.slice(0,32)):[];
+  const hd=Array.isArray(s.hd)?s.hd.filter(v=>typeof v==="string").slice(0,64).map(v=>v.slice(0,40)):[];
   /* the faces of the houses already built: {buildId:{partId:optionId}}. Pinned so a template
      that gains options later does not reshape a street somebody already knows. */
   const bl={};
@@ -324,7 +327,7 @@ function sanitizeSave(s){
     o&&(bl[String(k).slice(0,40)]=o);});
   return{n,c:str2(s.c,24,""),lk,xp:num(s.xp,0,999,0),he:num(s.he,0,3,3),d,
     px:num(s.px,0,63,10),py:num(s.py,0,63,11),tr:num(s.tr,0,9999,0),fq:num(s.fq,0,3,0),
-    w:str2(s.w,4,"hq"),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,bl,
+    w:str2(s.w,4,"hq"),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,hd,bl,
     v:s.v===undefined?undefined:num(s.v,0,99,0)};
 }
 function loadSave(){try{return sanitizeSave(JSON.parse(localStorage.getItem("mq1")||""));}catch(e){return null;}}
@@ -391,7 +394,10 @@ let camMode=(typeof CAMDEF!=="undefined"&&CAMS.includes(CAMDEF))?CAMDEF:"top";
 try{const cm0=localStorage.getItem("mqcam");if(CAMS.includes(cm0))camMode=cm0;}catch(e){}
 const ISW=44,ISH=22;
 let ISOCOL=null;
-const IZH={"#":20,B:20,Q:17,Z:17,U:20,W:12,V:10,D:9,K:9,T:8,S:13,H:8,I:9,A:9,P:11,F:7,G:9,C:7,X:8,"1":10,"~":2,"9":11};
+/* No "1" here on purpose: drawIso's block pass runs only for SOLID glyphs, and the stairs are
+   walkable, so IZH["1"]=10 sat here being read by nothing at all. Deleted 2026-09-04 rather
+   than corrected — a number that disagrees with the drawing will be trusted by somebody. */
+const IZH={"#":20,B:20,Q:17,Z:17,U:20,W:12,V:10,D:9,K:9,T:8,S:13,H:8,I:9,A:9,P:11,F:7,G:9,C:7,X:8,"~":2,"9":11};
 /* a pack-declared tile takes its iso height from its declared lift (lift 13 ≈ 20px, the
    wall) — this table used to be the only source, so a content window stood 6px short */
 const izh=g=>IZH[g]||((TILES[g]&&TILES[g].lift)?Math.round(TILES[g].lift*1.5):14);
@@ -480,7 +486,7 @@ function drawIso(){
      (found at la junta, 2026-09-03). */
   DECOS.forEach(d=>{if(d.world!==world)return;const f=DECODRAW[d.deco];if(!f)return;
     bill(d.x,d.y,(bx,by)=>f(bx,by,d));});
-  doorMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawDoorMark(ctx,bx,by,0)));
+  doorMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawDoorMark(ctx,bx,by,0,d.mark)));
   readMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawReadMark(ctx,bx,by,0)));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
   /* shared time-of-day wash (door spills are top-down-only for now) */
@@ -538,8 +544,32 @@ TILEDRAW["C"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#E0662B";ctx.beginPath();c
 TILEDRAW["X"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#E7C25A";ctx.fillRect(sx+4,sy+4,TS-8,TS-12);ctx.fillStyle="#6B5210";
       ctx.font="14px serif";ctx.textAlign="center";ctx.fillText("🚧",sx+16,sy+19);ctx.textAlign="start";
       ctx.fillStyle="#8B6A42";ctx.fillRect(sx+14,sy+24,4,6);};
-TILEDRAW["1"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#8A8474";for(let i=0;i<4;i++){ctx.fillStyle=i%2?"#9A947F":"#7E7867";ctx.fillRect(sx+3,sy+4+i*6,TS-6,6);}
-      ctx.fillStyle="#4A331F";ctx.fillRect(sx+2,sy+2,2,TS-4);ctx.fillRect(sx+28,sy+2,2,TS-4);};
+TILEDRAW["1"]=rc=>{const{sx,sy}=rc; /* STAIRS, from above. Four flat grey bars between two brown
+      posts read as a five-bar GATE — and as the trolley track "-" and the agility hurdle "3",
+      which are the same shape: three glyphs, one shape language, three meanings. A flight reads
+      in PLAN from three things and none of them is stripes: stringers that CONVERGE (two lines
+      going away from you), a hard NOSING shadow under every tread, and a dark HEAD at the far
+      end — the opening you climb into. The flight rises NORTH, up-screen: one convention for the
+      whole city, the way every facade faces south. */
+  ctx.fillStyle="rgba(15,12,20,.22)";ctx.fillRect(sx+4,sy+29.5,24,2);        /* the bottom step casts onto the floor */
+  ctx.fillStyle="#241F2E";ctx.fillRect(sx+8,sy+3,16,7);                      /* HEAD — the dark opening at the top */
+  const TR=["#C6BEAA","#B9B19D","#ACA490","#9F9783","#928A76"];              /* light at your feet, dark under the floor above */
+  for(let i=0;i<5;i++){                                                      /* i=0 is the step nearest you */
+    const t=i/4,ty=sy+26-i*4,ix=sx+5+t*3,iw=22-t*6;                          /* the run narrows as it goes away */
+    ctx.fillStyle=TR[i];ctx.fillRect(ix,ty,iw,4);                            /* TREAD — the surface you stand on */
+    ctx.fillStyle="rgba(15,12,20,.42)";ctx.fillRect(ix,ty+3,iw,1);           /* NOSING shadow — the one line that says "step" */
+  }
+  ctx.fillStyle="#7A5A32";ctx.beginPath();                                   /* STRINGER, left — lit; the city's key is upper-left */
+  ctx.moveTo(sx+2,sy+30);ctx.lineTo(sx+5,sy+30);ctx.lineTo(sx+8.5,sy+8);ctx.lineTo(sx+6,sy+8);ctx.closePath();ctx.fill();
+  ctx.fillStyle="#4A331F";ctx.beginPath();                                   /* STRINGER, right — shaded */
+  ctx.moveTo(sx+30,sy+30);ctx.lineTo(sx+27,sy+30);ctx.lineTo(sx+23.5,sy+8);ctx.lineTo(sx+26,sy+8);ctx.closePath();ctx.fill();
+  ctx.lineCap="round";
+  ctx.strokeStyle="rgba(15,12,20,.28)";ctx.lineWidth=2;                      /* the handrail's shadow across the treads — the depth cue */
+  ctx.beginPath();ctx.moveTo(sx+9,sy+26);ctx.lineTo(sx+11.5,sy+9);ctx.stroke();
+  ctx.strokeStyle="#A88650";ctx.lineWidth=2;                                 /* HANDRAIL, one side only — two rails at 32px is noise */
+  ctx.beginPath();ctx.moveTo(sx+7,sy+26);ctx.lineTo(sx+9.5,sy+9);ctx.stroke();
+  ctx.lineCap="butt";ctx.lineWidth=1;                                        /* ctx is shared — hand it back clean */
+};
 TILEDRAW["2"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle="#E0B45C";ctx.font="700 15px sans-serif";ctx.textAlign="center";
       ctx.fillText("»",sx+16,sy+21);ctx.textAlign="start";};
 TILEDRAW["Y"]=rc=>{const{sx,sy,x,y}=rc; /* trolley stop: pole + sign + bench — the town's transit spine */
@@ -734,6 +764,30 @@ TILESIDE["K"]=rc=>{const{sx,sy,x,y}=rc; /* a counter from the front. A coffee ma
         ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+14,sy+10,5,4);ctx.fillRect(sx+19,sy+11,1.5,2);}
       else{ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+7,sy+10,5,4);ctx.fillRect(sx+12,sy+11,1.5,2);   /* a cup */
         ctx.fillStyle="#C9B7A0";ctx.fillRect(sx+19,sy+9,6,5);ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+20,sy+7,4,3);}};
+TILESIDE["1"]=rc=>{const{sx,sy}=rc; /* STAIRS in profile — the stepped diagonal, a silhouette
+      nothing else in this city has. It rises to the RIGHT and always will, at every camera stop:
+      facing is a screen-space fact (t3ScreenFace), and a flight turned to match the map would
+      climb into the camera at two of the four stops. The plan view recedes north, this one climbs
+      right, and nobody ever sees both at once. Five steps, about 34° — a real pitch. The VALUE
+      STACK is the read: light on the treads (they face the sky), mid on the risers, dark under
+      every nosing. */
+  ctx.fillStyle="rgba(15,12,20,.18)";                                        /* CONTACT SHADOW — without it the flight hovers */
+  ctx.beginPath();ctx.ellipse(sx+16,sy+30.4,14,2.2,0,0,7);ctx.fill();
+  for(let i=0;i<5;i++){
+    const x0=sx+3+i*5,ty=sy+27-i*3.4,wd=i===4?7:5;                           /* the last step widens into the LANDING */
+    ctx.fillStyle="#8A8474";ctx.fillRect(x0,ty,wd,sy+30-ty);                 /* RISER + the closed mass under it */
+    ctx.fillStyle="#C6BEAA";ctx.fillRect(x0-1.5,ty,wd+1.5,2.2);              /* TREAD, overhanging 1.5px — that lip is the NOSING */
+    ctx.fillStyle="rgba(15,12,20,.42)";ctx.fillRect(x0-1.5,ty+2.2,wd+1.5,1.1); /* the nosing's shadow on the riser below */
+  }
+  ctx.fillStyle="rgba(15,12,20,.14)";ctx.fillRect(sx+2,sy+26,28,4);          /* the flight darkens where it meets the floor */
+  ctx.fillStyle="#5E4326";ctx.fillRect(sx+1.5,sy+17,2.5,13);                 /* NEWEL post — the bottom of a flight has a stop */
+  ctx.strokeStyle="#6E5334";ctx.lineWidth=1.8;                               /* three balusters, on the nosings they stand on */
+  [[4,19.3,27],[15,11.8,20.2],[26,4.4,13.4]].forEach(p=>{
+    ctx.beginPath();ctx.moveTo(sx+p[0],sy+p[1]);ctx.lineTo(sx+p[0],sy+p[2]);ctx.stroke();});
+  ctx.strokeStyle="#8A6A3A";ctx.lineWidth=2.4;ctx.lineCap="round";           /* HANDRAIL — parallel to the nosings */
+  ctx.beginPath();ctx.moveTo(sx+2,sy+20.7);ctx.lineTo(sx+29,sy+2.3);ctx.stroke();
+  ctx.lineCap="butt";ctx.lineWidth=1;
+};
 TILESIDE["V"]=rc=>{const{sx,sy}=rc; /* a stove from the front: burners over the edge, knobs, the oven window */
       ctx.fillStyle="#3A3F46";ctx.fillRect(sx+3,sy+8,26,22);
       ctx.fillStyle="#23272C";ctx.fillRect(sx+3,sy+6,26,3);[[9,6],[16,6],[23,6]].forEach(p=>{ctx.beginPath();ctx.ellipse(sx+p[0],sy+p[1],3.2,1.4,0,0,7);ctx.fill();});
@@ -760,8 +814,22 @@ Object.assign(TILES,{
   F:{lift:5,kind:"fence"},G:{lift:5,kind:"fence"},
   C:{lift:3,kind:"marker"},X:{lift:6,kind:"site"},
   P:{lift:6,kind:"nature"},J:{lift:0,kind:"tree"},
-  "~":{lift:0,kind:"water"},"9":{lift:7,kind:"prop"}});
+  "~":{lift:0,kind:"water"},"9":{lift:7,kind:"prop"},
+  /* `stand`: walkable, but an OBJECT — not paint on the floor. The engine had exactly two
+     categories, flat ground art or solid geometry, and a staircase is neither: you walk onto
+     it and it has to stand up. Without this the front camera and the 3D ground bake paint a
+     stair's top-down art flat onto the floor, which is why it read as a gate lying down
+     (owner, 2026-09-04: "those stairs are trash"). Replaces a hardcoded "345" glyph list
+     that lived in engine3d.js — engine code naming a pack's glyphs is the portability law
+     wearing a different hat. */
+  "1":{lift:9,kind:"stair",stand:true},
+  "3":{lift:8,kind:"gear",stand:true},"4":{lift:8,kind:"gear",stand:true},"5":{lift:8,kind:"gear",stand:true}});
 if(typeof TILEMETA!=="undefined")Object.entries(TILEMETA).forEach(([g,m])=>TILES[g]={...(TILES[g]||{}),...m});
+/* walkable, but drawn standing. `standsUp` also asks whether there IS a side drawing: a tile
+   flagged `stand` with no profile has nothing to stand up, and the front camera leaves it
+   exactly as it was rather than standing its floor plan on edge. */
+const stands=g=>{const m=TILES[g];return !!(m&&m.stand);};
+const standsUp=g=>stands(g)&&!!TILESIDE[g];
 const roofCol=g=>({"#":C.wallTop,U:C.wallTop,B:"#6E5A60",Q:"#7A3527",Z:"#385C36",D:C.deskTop,K:C.counter,
   W:"#8E969E",V:"#23272C"})[g]||shadeHex(BASECOL[g]||(typeof MAPCOL!=="undefined"&&MAPCOL[g])||C.wall,-0.18);
 /* ---------- DECOR: instance metadata (IDEAS §10 step ①b) ----------
@@ -820,7 +888,7 @@ function drawFront(){
     const hsh=(x*374761393+y*668265263+world.charCodeAt(0)*69069)>>>0;
     if((hsh&7)<2){ctx.globalAlpha=0.05;ctx.fillStyle="#000";ctx.fillRect(sx,sy,TS,TS);ctx.globalAlpha=1;}
     if(hsh%11===3){ctx.globalAlpha=0.08;ctx.fillStyle="#FFF";ctx.fillRect(sx+(hsh>>3)%26+2,sy+(hsh>>5)%26+2,2,2);ctx.globalAlpha=1;}
-    if(!SOLID.has(w.grid[y][x])){const tf=TILEDRAW[ch];if(tf)tf({sx,sy,x,y,canopy:queueCanopy});}
+    if(!SOLID.has(w.grid[y][x])&&!standsUp(ch)){const tf=TILEDRAW[ch];if(tf)tf({sx,sy,x,y,canopy:queueCanopy});}
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
       ctx.fillStyle="rgba(15,12,20,.16)";ctx.fillRect(sx,sy,TS,8);}
   }
@@ -832,7 +900,7 @@ function drawFront(){
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
     R.push({d:d.y+0.05,f:()=>f(sx,sy,d)});}); /* after its row's facade, before actors */
   for(let y=Math.max(0,y0-1);y<=yEnd;y++)for(let x=x0;x<=xEnd;x++){
-    const gch=w.grid[y][x];if(!SOLID.has(gch))continue;
+    const gch=w.grid[y][x];if(!SOLID.has(gch)&&!standsUp(gch))continue;
     const ch=w.rows[y][x],sx=x*TS-camX,sy=y*TS-camY;
     R.push({d:y,f:()=>{
       const m=TILES[gch]||TILES[ch]||{lift:7,kind:"prop"},L=m.lift|0,kd=m.kind;
@@ -886,7 +954,7 @@ function drawFront(){
     else if(cr.kind==="chi")drawChi(ctx,cr,sx,sy);});});
   if(BALL&&BALL.world===world)act(BALL.fx,BALL.fy,(sx,sy)=>drawBall(ctx,sx,sy,BALL.phase,BALL.t));
   act(fx,fy,(sx,sy)=>drawPerson(ctx,sx,sy,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
-  doorMarks().forEach(d=>act(d.x,d.y,(sx,sy)=>drawDoorMark(ctx,sx,sy,14)));
+  doorMarks().forEach(d=>act(d.x,d.y,(sx,sy)=>drawDoorMark(ctx,sx,sy,14,d.mark)));
   readMarks().forEach(d=>act(d.x,d.y,(sx,sy)=>drawReadMark(ctx,sx,sy,14)));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
   CRIT.forEach(cr=>{if(cr.leashT>performance.now()&&cr.world===world)drawLeash(cr,camX,camY);});
@@ -983,7 +1051,7 @@ function draw(){
   });
   if(BALL&&BALL.world===world)drawBall(ctx,BALL.fx*TS-camX,BALL.fy*TS-camY,BALL.phase,BALL.t);
   drawPerson(ctx,fx*TS-camX,fy*TS-camY,look,{dir,bob:moving?Math.sin(bob)*2:0,moving});
-  doorMarks().forEach(d=>drawDoorMark(ctx,d.x*TS-camX,d.y*TS-camY,0)); /* the top camera draws its own people — the marker too */
+  doorMarks().forEach(d=>drawDoorMark(ctx,d.x*TS-camX,d.y*TS-camY,0,d.mark)); /* the top camera draws its own people — the marker too */
   readMarks().forEach(d=>drawReadMark(ctx,d.x*TS-camX,d.y*TS-camY,0));
   CRIT.forEach(cr=>{if(cr.leashT>performance.now()&&cr.world===world)drawLeash(cr,camX,camY);});
   drawAmbient(w,camX,camY);
@@ -1802,7 +1870,7 @@ function docCtx(){
     dateStr:d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()),
     decisions:dlog.map(e=>({quest:e.quest,qi:e.qi,npc:e.npc,ask:e.ask,pick:e.pick,
                             concept:e.concept,why:e.why,result:e.result})),
-    done:[...done], marks:{...marks},
+    done:[...done], marks:{...marks}, handed:[...handedDocs],
     districts:L.map((c,i)=>({id:c.id,quests:(c.quests||[]).slice(),need:c.need,
       closed:chSeen>i, grade:gradeOf(c),
       role:c.role&&(c.role[lang]||c.role.en), industry:c.industry&&(c.industry[lang]||c.industry.en)})),
@@ -1810,12 +1878,17 @@ function docCtx(){
 }
 /* sections → the page, and → markdown, from ONE description. Two renderers that can
    disagree are two documents. */
-function docSections(id){const d=DC()[id];if(!d||typeof d.build!=="function")return null;
+/* A document is named one of two ways: an id into the pack's DOCS (shared paper — a poster,
+   the file on the desk), or the document itself, written where it is used (a one-off artifact a
+   character hands over and nobody else ever sees). Everything downstream goes through here, so
+   neither kind is a special case. */
+function docDef(id){return id&&typeof id==="object"?id:(DC()[id]||null);}
+function docSections(id){const d=docDef(id);if(!d||typeof d.build!=="function")return null;
   try{return d.build(docCtx())||[];}catch(e){console.warn("DOC: "+id+" failed to build",e);return [];}}
-function docTitle(id){const d=DC()[id]||{};return (d.title&&(d.title[lang]||d.title.en))||id;}
+function docTitle(id){const d=docDef(id)||{};return (d.title&&(d.title[lang]||d.title.en))||(typeof id==="string"?id:"");}
 function docMarkdown(id){
   const secs=docSections(id);if(!secs)return "";
-  const d=DC()[id]||{},out=["# "+docTitle(id)];
+  const d=docDef(id)||{},out=["# "+docTitle(id)];
   const sub=d.sub&&(d.sub[lang]||d.sub.en);if(sub)out.push("*"+sub+"*");
   if(d.tmpl)out.push("",(DCU().tmplLb?DCU().tmplLb(d.tmpl):"Template "+d.tmpl)+" · docs/templates/");
   out.push("");
@@ -1835,10 +1908,10 @@ function docMarkdown(id){
   });
   return out.join("\n");
 }
-function docOpen(id){
+function docOpen(id,from){
   const secs=docSections(id);if(!secs)return;
-  const d=DC()[id]||{},body=$("docBody");
-  docCur=id;body.innerHTML="";
+  const d=docDef(id)||{},body=$("docBody");
+  docCur=id;docBack=from==="card"?"card":null;body.innerHTML="";
   const el=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;
     if(txt!==undefined)n.textContent=txt;body.appendChild(n);return n;};
   $("docTitle").textContent=docTitle(id);
@@ -1867,12 +1940,15 @@ function docOpen(id){
     else if(s2.docs){const row=el("div","ddocs");
       s2.docs.forEach(k=>{if(!DC()[k])return;const b=document.createElement("button");
         b.className="opt";b.textContent=docTitle(k);
-        b.addEventListener("click",()=>docOpen(k));row.appendChild(b);});}
+        b.addEventListener("click",()=>docOpen(k,docBack));row.appendChild(b);});}
   });
   body.scrollTop=0;
-  exitFsForCard();$("reader").hidden=false;held=null;   /* overlays the world, like Settings — hiding it collapses the panel's parent */
+  /* a document handed over inside a quest must NOT re-run exitFsForCard: questStart already
+     ran it, and a second call records wasFs=false, so the player never gets fullscreen back. */
+  if(docBack!=="card")exitFsForCard();
+  $("reader").hidden=false;held=null;   /* overlays the world, like Settings — hiding it collapses the panel's parent */
 }
-let docCur=null;
+let docCur=null,docBack=null;   /* "card" while a document is being read inside a quest */
 /* ---------- READS / DOCS — a thing you can read without talking to anybody ----------
    The city could only ever be read by finding the right person. A pack declares READS
    (where a readable thing stands) and DOCS (what it says), and the engine renders the
@@ -1905,18 +1981,22 @@ function drawReadMark(g,bx,by,up){ /* a cream card that BREATHES — never the b
   g.restore();}
 function doorMarks(){const w=CW(),out=[],P=PORTALS[world];if(!P)return out;
   for(let y=Math.max(0,py-3);y<=Math.min(w.H-1,py+3);y++)for(let x=Math.max(0,px-3);x<=Math.min(w.W-1,px+3);x++){
-    const ch=w.rows[y][x];if(Math.abs(x-px)+Math.abs(y-py)<=3&&P[ch])out.push({x,y,ch});}
+    const ch=w.rows[y][x];if(Math.abs(x-px)+Math.abs(y-py)<=3&&P[ch])out.push({x,y,ch,mark:P[ch].mark||""});}
   /* It used to ask DOORSET.has(ch) as well, which is how the STAIRS — the only way to the
      office — ended up as the one portal in the city wearing no marker (owner, 2026-09-03:
      "it is hard knowing where to go"). P[ch] already means "this tile leads somewhere",
      which is the whole question. Adding the stair glyphs to DOORS instead would have
      repainted them as a brown door in five places, and stood a door slab in the stairwell. */
   return out;}
-function drawDoorMark(g,bx,by,up){ /* bx,by: the tile's top-left in that camera; up: extra lift above the wall */
-  const dy=Math.sin(Date.now()/300)*2.5;
+function drawDoorMark(g,bx,by,up,mark){ /* bx,by: the tile's top-left in that camera; up: extra lift above the wall */
+  /* On a door the arrow points AT the tile — "this one". On a STAIRCASE the same arrow is
+     read as direction, so a down arrow on a flight that climbs is the marker language
+     contradicting itself in the first room anyone sees. A portal says which way it goes
+     (`mark:"up"`); everything that does not say keeps pointing at itself. */
+  const dy=Math.sin(Date.now()/300)*2.5,ar=mark==="up"?"⬆":"⬇";
   g.font="700 15px sans-serif";g.textAlign="center";g.lineWidth=3;g.lineJoin="round";
   g.strokeStyle="#2B2536";g.fillStyle="#FFE9A8";
-  g.strokeText("⬇",bx+16,by-4-(up|0)+dy);g.fillText("⬇",bx+16,by-4-(up|0)+dy);g.textAlign="start";}
+  g.strokeText(ar,bx+16,by-4-(up|0)+dy);g.fillText(ar,bx+16,by-4-(up|0)+dy);g.textAlign="start";}
 /* The doorstep nudge. The engine has always been able to answer "is somebody waiting in
    that room?" for ANY room — worldPending(id) — but it had only ever been asked about the
    room the player was already standing in. Asked about the room on the OTHER SIDE of a
@@ -1984,10 +2064,17 @@ window.addEventListener("keydown",e=>{
   const t2=e.target; /* typing a dog's name is not walking — "shadow" has a w, an a, an s and a d */
   if(t2&&(t2.tagName==="INPUT"||t2.tagName==="TEXTAREA"))return;
   if(!$("world").hidden&&keyDir(e)){held=keyDir(e);e.preventDefault();}
-  if(e.key==="Enter"&&!$("talk").hidden&&!$("world").hidden)$("talk").click();});
+  if(e.key==="Enter"&&!$("talk").hidden&&!$("world").hidden)$("talk").click();
+  /* Escape puts the paper down, wherever you have scrolled to */
+  if(e.key==="Escape"&&!$("reader").hidden){e.preventDefault();$("docClose").click();}});
 window.addEventListener("keyup",e=>{if(keyDir(e)&&held===keyDir(e))held=null;});
 $("read").addEventListener("click",()=>{const id=$("read").dataset.doc;if(id)docOpen(id);});
-$("docClose").addEventListener("click",()=>{$("reader").hidden=true;restoreFs();checkTalk();});
+$("npcDoc").addEventListener("click",()=>{if(npcHeld)docOpen(npcHeld,"card");});
+$("docClose").addEventListener("click",()=>{$("reader").hidden=true;
+  /* handed over by a person mid-quest: close returns to them, not to the street. checkTalk()
+     here would light the talk button and nudge lines behind a card the player is still in. */
+  if(docBack==="card"){docBack=null;window.scrollTo({top:0});return;}
+  restoreFs();checkTalk();});
 $("docCopy").addEventListener("click",()=>{const v=docMarkdown(docCur);
   (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(v):Promise.reject())
     .then(()=>toast(DCU().copied||"✓",2000))
@@ -2100,7 +2187,7 @@ function exitFsForCard(){wasFs=$("vp").classList.contains("fs");
   if(wasFs){$("vp").classList.remove("fs");document.body.classList.remove("noscroll");
     if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});setTimeout(sizeCanvas,60);}}
 function restoreFs(){if(wasFs){$("vp").classList.add("fs");document.body.classList.add("noscroll");setTimeout(sizeCanvas,60);}}
-let qFirst=false;
+let qFirst=false,npcHeld=null;   /* the document the person on screen is holding out, if any */
 function questStart(qi){cur=qi;curQ=AQ()[qi];node=curQ.start;qLvl0=lvlIdx();runXP=0;qFirst=qa[qi]===undefined;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
 function fredQuestStart(){cur=-1;curQ=FQ();node=curQ.start;qLvl0=lvlIdx();runXP=0;qFirst=qa[-1]===undefined;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
 function nodeShow(){
@@ -2111,6 +2198,15 @@ function nodeShow(){
   /* one line before the opening node, and only there — never on a follow-up step */
   const late=(node===q.start&&q.late&&qLate(cur))?q.late:"";
   $("npcLate").textContent=late;$("npcLate").hidden=!late;
+  /* some people do not describe the paperwork, they hand it to you. A node may name a document
+     (an id into the pack's DOCS, or the document written inline) and the card holds it out. */
+  const hd=t.doc&&docSections(t.doc)?t.doc:null;
+  $("npcDoc").hidden=!hd;
+  if(hd){const D=docDef(hd)||{},L=D.hand&&(D.hand[lang]||D.hand.en);
+    /* the button says what the PAPER is, not what the person does — the player is the one
+       pressing it, and the speaker is already named two lines above it on the card. */
+    $("npcDoc").textContent=L||DCU().read||docTitle(hd);npcHeld=hd;
+    if(typeof hd==="string"&&!handedDocs.has(hd)){handedDocs.add(hd);save();}}else npcHeld=null;
   $("cdxLb").textContent=T().codexLb;$("codex").textContent=t.codex;$("q").textContent=t.q;
   const box=$("choices");box.innerHTML="";
   const list=[...t.ch].sort(()=>Math.random()-0.5); /* shuffled every time — no more middle-answer tell */
@@ -2366,7 +2462,7 @@ $("replay").addEventListener("click",()=>{
   clearTimeout(replayTimer);replayTimer=null;$("replay").textContent=T().replay;
   xp=0;hearts=startHearts();done=new Set();qa={};marks={};chSeen=0;world="hq";px=fx=10;py=fy=11;dir="down";
   applyGrowth();save();
-  seenOpen=new Set();
+  seenOpen=new Set();handedDocs=new Set();
   $("settings").hidden=true;$("end").hidden=true;$("card").hidden=true;showWorld();
   setWorldTag();hud();checkTalk();
   toast(T().replayToast(heroName),2500);});
@@ -3796,7 +3892,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").textContent=T().contBtn(SV.n,SV.xp,SV.d.length);
   $("continueBtn").addEventListener("click",()=>{
     heroName=SV.n;cls=SV.c||"";look=SV.lk||look;xp=SV.xp||0;hearts=SV.he??3;done=new Set(SV.d||[]);
-    treats=SV.tr||0;fredQ=SV.fq||0;chSeen=SV.cs||0;seenOpen=new Set(SV.so||[]);
+    treats=SV.tr||0;fredQ=SV.fq||0;chSeen=SV.cs||0;seenOpen=new Set(SV.so||[]);handedDocs=new Set(SV.hd||[]);
     bldPicks=(SV.bl&&typeof SV.bl==="object")?SV.bl:{};   /* the houses keep the faces they were built with */
     /* a save written before v2 lost cs on every Continue. Rebuild it from what was played:
        a district counts as claimed when its need is met AND the next district has been

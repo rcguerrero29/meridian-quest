@@ -18,7 +18,11 @@ Both were true, and both now have machinery rather than good intentions:
 **And the feature:** `BUILDTPL` / `BUILDS` — Don Güero builds from a template with seeded
 variation (IDEAS §15.22). Deterministic, picks pinned in the save, parts that read each
 other, and every build validated before a tile lands — which immediately refused to build
-the first casita on top of Yola the paletera. Two casitas stand at the ends of Calle Dos.
+the first casita on top of Yola the paletera. **No casita stands on the street** — both came
+back off at `mq-v61`, owner: *"noone asked me to make them i was saying it is just an ability"*
+and *"i cant enter the houses."* `BUILDS` is an empty array with the restore lines in a
+comment; the ability is tested and unbuilt, which is where it stays until a house can be
+entered.
 
 **NEWEST — 2026-09-03, `mq-v56`:** settings became four drawers that remember what you keep
 open (actions stay outside them, guarded by a test); decor is drawn in ALL FOUR cameras, with a
@@ -323,9 +327,10 @@ always-on 🐾 paw menu with the cross-city whistle; WASD-vs-typing fix.
 
 ## State snapshot (2026-09-01)
 
-- `main` = deployed through **`mq-v44`** (2026-09-01). Nothing waits on a branch.
-  *(This line said `mq-v40` and contradicted the state-of-play block at the top of this
-  same file — caught in the 2026-09-01 contradiction sweep.)*
+- `main` = deployed through **`mq-v61`** (2026-09-03). Nothing waits on a branch.
+  *(This line has now been stale twice: it said `mq-v40` when the truth was v44, caught in
+  the 2026-09-01 sweep, and said `v44` when the truth was v61, caught 2026-09-04. The
+  version of record is `CACHE` in `sw.js`; when those two disagree, `sw.js` is right.)*
 - Pet-care spin-off shape signed (IDEAS §13): Sonny fronts the preview mini game
   inside Meridian, some customization there, full customization in the standalone.
 - The 3D plan is written and signed off as PLAN ONLY: IDEAS §14.

@@ -42,6 +42,8 @@ activities"* is a rule; "improve the ticker" is a mood. Quote the rule.
 | *"give it to lupe and just let her introduce/talk about him"* | `mq-v58` Lupe carries both La Obra quests and names him in her first line |
 | *"i dont like that i go from a train to a floor"* | `mq-v59` reversed; the rule is in `OWNER.md`; a test requires rails at every stop |
 | *"i still couldnt find my posters and laptop"* | `mq-v59` every readable in the room is marked, and the room says what is in it |
+| *"those stairs are trash. not realistic. can we have realistic building designs"* | `mq-v63` the stairs stand up in every camera — the drawing was only half of it, they were **lying down**; plus the light ladder and the contact shadow, so a building has faces and meets the ground. Don Güero's ranked parts list (stoop, reja, corner, cornice, sidewalk) and the `local` storefront template are still open |
+| *"nacho can you create like actual fake documents instead of like oh this is what chela and juanita said. no she says it and shows a fake doc- the important ones are the ones for AI roles but lets help me see it and live it"* | `mq-v62` six documents a character puts in your hands mid-quest — Chelo's eleven-item list, the invoice evaluation run, the incident transcript with "be helpful" printed as the root cause, ten weeks of forecast against the trash, the old lead's rollout plan, Bere's fifty-two. They go in the office file and stay there |
 
 ## Refused, reversed, or answered instead of built
 

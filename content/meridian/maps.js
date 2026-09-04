@@ -170,7 +170,7 @@ const WORLD_DEFS={
      "F..~~......g.....b.....F",
      "FFF~~FFFFFFFFFFFFFFFFFFF"]
 };
-const PORTALS={hq:{"1":{to:"f2",x:17,y:11,dir:"left"},"E":{to:"st",x:14,y:1,dir:"down"}},
+const PORTALS={hq:{"1":{to:"f2",x:17,y:11,dir:"left",mark:"up"},"E":{to:"st",x:14,y:1,dir:"down"}},   /* the only flight in the city that CLIMBS — its arrow says so */
                f2:{"1":{to:"hq",x:16,y:5,dir:"left"}},
                st:{"E":{to:"hq",x:10,y:12,dir:"up"},"L":{to:"lc",x:10,y:10,dir:"up"},"O":{to:"lo",x:10,y:8,dir:"up"},"M":{to:"me",x:10,y:10,dir:"up"},"2":{to:"ex",x:1,y:3,dir:"right"}},
                ex:{"2":{to:"st",x:28,y:1,dir:"left"}},
