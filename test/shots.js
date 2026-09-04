@@ -28,17 +28,27 @@ const CAND=[process.env.CHROMIUM_PATH,'/opt/pw-browsers/chromium_headless_shell-
   await pg.evaluate(()=>{ CHAPTERS[0].quests.forEach(i=>done.add(i)); chSeen=1; applyGrowth(); });
   const SPOTS = JSON.parse(fs.readFileSync(path.resolve(__dirname,'spots.json'),'utf8'));
   const OUT=path.resolve(__dirname,'..','shots');fs.mkdirSync(OUT,{recursive:true});
+  /* --cams: shoot EVERY spot in all four cameras instead of the one it names.
+     The game boots in 3D, and anything drawn in only some cameras is invisible where it
+     counts — the mural sat on Calle Principal for days, drawn only top-down and front.
+     One flag turns the whole spot list into a four-camera sweep, which is how that class
+     of bug gets caught instead of rediscovered (la junta, 2026-09-03). */
+  const ALLCAMS = process.argv.includes('--cams');
+  const CAMS = ['top','front','iso','3d'];
   for (const s of SPOTS) {
-    await pg.evaluate(([w,x,y,cam,yaw,ch])=>{
-      if(ch!==undefined){chSeen=ch;applyGrowth();} /* a spot may raise the city further (ch = districts opened) */
-      camSet(cam); world=w; px=fx=x; py=fy=y; moving=false; held=null; dir='down';
-      if(cam==='3d'&&typeof T3!=='undefined'&&T3) T3.yaw=yaw;
-      setWorldTag(); checkTalk();
-    }, [s.w,s.x,s.y,s.cam,s.yaw||0,s.ch]);
-    await pg.waitForTimeout(700);
-    const el = await pg.$('#vp');
-    await el.screenshot({ path:path.join(OUT,`${s.name}.png`) });
-    console.log('shot', s.name);
+    const shots = ALLCAMS ? CAMS.map(c=>({cam:c, name:`${s.name}--${c}`})) : [{cam:s.cam, name:s.name}];
+    for (const sh of shots) {
+      await pg.evaluate(([w,x,y,cam,yaw,ch])=>{
+        if(ch!==undefined){chSeen=ch;applyGrowth();} /* a spot may raise the city further (ch = districts opened) */
+        camSet(cam); world=w; px=fx=x; py=fy=y; moving=false; held=null; dir='down';
+        if(cam==='3d'&&typeof T3!=='undefined'&&T3) T3.yaw=yaw;
+        setWorldTag(); checkTalk();
+      }, [s.w,s.x,s.y,sh.cam,s.yaw||0,s.ch]);
+      await pg.waitForTimeout(700);
+      const el = await pg.$('#vp');
+      await el.screenshot({ path:path.join(OUT,`${sh.name}.png`) });
+      console.log('shot', sh.name);
+    }
   }
   await b.close();
 })();

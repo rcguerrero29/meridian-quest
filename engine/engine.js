@@ -417,6 +417,11 @@ function drawIso(){
       else if(cr.kind==="chi")drawChi(ctx,cr,bx,by);});});
   if(BALL&&BALL.world===world)bill(BALL.fx,BALL.fy,(bx,by)=>drawBall(ctx,bx,by,BALL.phase,BALL.t));
   bill(fx,fy,(bx,by)=>drawPerson(ctx,bx,by,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
+  /* decor stands up here too. It used to be drawn ONLY top-down and front, so every landmark
+     the pack declares — the mural among them — was invisible in the two cameras people play in
+     (found at la junta, 2026-09-03). */
+  DECOS.forEach(d=>{if(d.world!==world)return;const f=DECODRAW[d.deco];if(!f)return;
+    bill(d.x,d.y,(bx,by)=>f(bx,by,d));});
   doorMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawDoorMark(ctx,bx,by,0)));
   readMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawReadMark(ctx,bx,by,0)));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
@@ -2309,6 +2314,22 @@ function curtain(apply,after){const v=$("veil");
   if(!v){apply();if(after)after();return;}
   held=null;v.classList.add("on");
   setTimeout(()=>{try{apply();}finally{v.classList.remove("on");}if(after)setTimeout(after,450);},460);}
+/* ---------- the settings drawers ----------
+   A settings panel you have to scroll is a settings panel you stop reading. Four groups,
+   each opening and closing like a drawer, and the phone remembers which ones YOU keep open
+   (owner, 2026-09-03: "each setting can also just expand or close like a drawer ... use best
+   gaming practices"). Controls opens by default because it is the one a new player needs;
+   the action buttons underneath are not settings and never hide. */
+const DRAWERS=["drwCtl","drwLook","drwSound","drwGame"];
+function drawersInit(){
+  let open={};try{open=JSON.parse(localStorage.getItem("mqdrawers")||"null")||{drwCtl:true};}catch(e){open={drwCtl:true};}
+  DRAWERS.forEach(id=>{const d=$(id);if(!d)return;
+    d.open=!!open[id];
+    d.addEventListener("toggle",()=>{
+      const st={};DRAWERS.forEach(k=>{const e2=$(k);if(e2)st[k]=e2.open;});
+      try{localStorage.setItem("mqdrawers",JSON.stringify(st));}catch(e){}});});
+}
+drawersInit();
 /* ---------- controls scheme ---------- */
 let ctl="swipe";try{ctl=localStorage.getItem("mqctl")||"swipe";}catch(e){}
 if(!["swipe","joy","pad"].includes(ctl))ctl="swipe";
@@ -2704,6 +2725,7 @@ function applyLang(){
   $("exTabRep").textContent=t.exTabRep;$("exDl").textContent=t.exDl;
   if(!replayTimer)$("replay").textContent=t.replay;
   $("mapTitle").textContent=t.mapTitle;$("mapClose").textContent=t.tlClose;
+  ["Ctl","Look","Sound","Game"].forEach(k=>{const el=$("drw"+k+"Lb");if(el)el.textContent=t["drw"+k]||k;});
   $("setTitle").textContent=t.setTitle;$("lbCtl").textContent=t.lbCtl;
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;

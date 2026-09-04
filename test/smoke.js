@@ -2010,6 +2010,63 @@ const CANDIDATES = [
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; checkTalk(); });
   }
 
+  // ---- 24. drawers that remember, and decor drawn in every camera ----
+  {
+    const dr = await page.evaluate(() => {
+      const problems = [], ids = ['drwCtl', 'drwLook', 'drwSound', 'drwGame'];
+      ids.forEach(id => { if (!document.getElementById(id)) problems.push('no settings drawer: ' + id); });
+      // every control still lives inside exactly one drawer, and none was lost in the move
+      ['lbCtl', 'optSwipe', 'optJoy', 'optPad', 'lbTheme', 'themeRow', 'camRow', 'seasonRow',
+       'lbMusic', 'tuneRow', 'musMute', 'musVol', 'optEn', 'optEs', 'stkRow', 'admOff', 'admOn']
+        .forEach(k => { const el = document.getElementById(k);
+          if (!el) { problems.push('a settings control vanished: ' + k); return; }
+          if (!el.closest('details.drawer')) problems.push(k + ' is not in a drawer'); });
+      // the buttons that DO things are not settings and must never hide behind a drawer
+      ['openExp', 'openLab', 'openTp', 'openMp', 'replay', 'closeSet'].forEach(k => {
+        const el = document.getElementById(k);
+        if (el && el.closest('details.drawer')) problems.push(k + ' was buried in a drawer — it is an action, not a setting'); });
+      // both languages name every drawer
+      ids.forEach(id => { const k = 'drw' + id.slice(3);
+        if (!UI.en[k] || !UI.es[k]) problems.push('drawer ' + id + ' has no label in both languages'); });
+      return problems;
+    });
+    fails.push(...dr);
+    // closing one and reopening the game remembers it
+    await page.evaluate(() => { document.getElementById('drwCtl').open = false; document.getElementById('drwSound').open = true; });
+    await page.waitForTimeout(120);
+    const saved = await page.evaluate(() => { try { return JSON.parse(localStorage.getItem('mqdrawers')); } catch (e) { return null; } });
+    if (!saved || saved.drwCtl !== false || saved.drwSound !== true) fails.push('the drawers did not remember which are open: ' + JSON.stringify(saved));
+
+    // decor is drawn in all four cameras — the mural was invisible in the two people play in
+    const dec = await page.evaluate(() => {
+      const problems = [];
+      if (typeof DECOS === 'undefined' || !DECOS.length) return ['the pack declares no DECOR to check'];
+      const src = drawIso.toString() + draw.toString() + drawFront.toString();
+      ['drawIso', 'draw', 'drawFront'].forEach(() => {});
+      if (!/DECOS/.test(drawIso.toString())) problems.push('the iso camera still skips decor');
+      if (!/DECOS/.test(draw.toString()) && !/drawDecor/.test(draw.toString())) problems.push('the top camera skips decor');
+      if (!/DECOS/.test(drawFront.toString())) problems.push('the front camera skips decor');
+      return problems;
+    });
+    fails.push(...dec);
+    // 3D: the mural becomes a real object on the wall it is painted on
+    const d3 = await page.evaluate(async () => {
+      if (typeof T3 === 'undefined' || !T3 || T3.fail) return null;
+      const d = DECOS.find(x => x.world === 'st'); if (!d) return { none: true };
+      camSet('3d'); world = 'st'; px = fx = d.x; py = fy = Math.min(d.y + 3, WORLDS.st.H - 2);
+      moving = false; held = null;
+      await new Promise(r => setTimeout(r, 800));
+      if (!T3.group) return { none: true };
+      let hit = null; T3.group.traverse(o => { if (o.userData && o.userData.deco) hit = { deco: o.userData.deco, y: +o.position.y.toFixed(2), isSprite: o.isSprite === true }; });
+      return { hit, onSolid: SOLID.has(WORLDS.st.grid[d.y][d.x]) };
+    });
+    if (d3 && !d3.none) {
+      if (!d3.hit) fails.push('decor is still missing from 3D — the camera the game boots into');
+      else if (d3.onSolid && d3.hit.isSprite) fails.push('a mural on a wall became a billboard instead of paint on the wall');
+    }
+    await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; camSet('3d'); });
+  }
+
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);
