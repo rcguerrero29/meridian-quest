@@ -196,5 +196,5 @@ session verified the critic against the code; costs are the cross-examined ones.
 | ~~D~~ | **SHIPPED 2026-09-03 (mq-v55).** **Readable objects**: a persistent cream marker (never ❗), a Read button, a panel — plus the old lead's laptop, EN+ES | a sitting | You walk to a machine and find out what "the assistant" actually is |
 | ~~E~~ | **SHIPPED 2026-09-03 — posters at mq-v55, the settings drawers at mq-v56.** Six posters as wall glyphs delivered by ribbons · settings folded into four groups | a sitting | Tacho's signed repair order hangs itself on your office wall |
 | F | **The world may read a grade**: add per-district `gradeOf` to the `flags` object `drawTown` already hands content | an hour or two (NOT a sitting — `gradeOf` and `flags` both exist) | Unblocks the mural and the honest half of the office |
-| G | The mural: six panels, colour by grade, blank plaster until earned | more than a sitting | The record becomes a room, not a menu |
+| ~~G~~ | **SHIPPED 2026-09-03 (mq-v57)** — seven tiles: Nacho's own MERIDIAN piece plus one panel per business, **baby blue** plaster until begun (the owner changed blank to baby blue), colour brightening with the grade | a sitting | The record became a room |
 
