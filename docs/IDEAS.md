@@ -1341,3 +1341,25 @@ the reader's own rule in the stylesheet, so it silently overrode `position:fixed
 to 0×0 and the panel rendered at zero size with all its content present. **A panel that is
 "open" and invisible is a stacking-context bug, not a content bug.**
 
+### 15.17 DRAWERS, AND DECOR THAT EXISTS IN EVERY CAMERA — BUILT 2026-09-03
+
+- **Settings became four drawers** (Controls · Picture · Sound · Game), each opening and
+  closing, and the phone remembers which ones you keep open (`mqdrawers`). Controls opens by
+  default because it is the one a new player needs. **The buttons that DO something — Export,
+  the tile lab, the Trolley Pass, multiplayer, wipe — are actions, not settings, and stay
+  visible below the drawers**; a test guards that nobody buries them later. Owner: *"each
+  setting can also just expand or close like a drawer — you use best gaming practices"*.
+- **Decor is drawn in all four cameras.** It was drawn top-down and front only, so every
+  landmark the pack declares was invisible in iso and in the 3D the game boots into — which is
+  why the mural read as "four stripes nobody noticed". In 3D a decor declared on a **solid**
+  tile is treated as *paint*: a plane on that box's open face, so a mural stays on its wall
+  from every camera stop. A decor on open ground gets a billboard, because it is an object
+  that stands. (Pili's rule: flat things on walls, billboards for things that stand.)
+- **`node test/shots.js --cams`** shoots every spot in all four cameras instead of the one it
+  names — 29 spots × 4. The mural sat unseen for days precisely because each spot was only ever
+  photographed in one camera. A new spot watches the mural from Calle Principal.
+
+**The rule this makes permanent: FOUR CAMERAS OR IT DOES NOT EXIST.** Anything drawn for some
+cameras is invisible where it counts, and the sweep is how that is caught instead of
+rediscovered in a meeting.
+

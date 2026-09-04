@@ -263,6 +263,38 @@ function t3Build(key){
       T3.tintables.push(s.material);grp.add(s);
     }
   }
+  /* Decor: the pack's landmarks. A flat thing declared on a SOLID tile is paint — it goes on
+     that box's open face as a plane, so a mural stays on its wall from every camera stop.
+     A decor on open ground is an object, so it gets a billboard. (Pili's rule: flat on walls,
+     billboards for things that stand.) */
+  if(typeof DECOS!=="undefined")DECOS.forEach(d=>{
+    if(d.world!==world)return;
+    const f=(typeof DECODRAW!=="undefined")&&DECODRAW[d.deco];if(!f)return;
+    const c=document.createElement("canvas");c.width=32*K;c.height=32*K;
+    const o2=ctx;ctx=c.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
+    try{f(0,0,d);}catch(e){}finally{ctx=o2;}
+    const tex=t3Tex(c),cx=d.x+0.5,cz=d.y+0.5;
+    const onWall=d.x>=0&&d.y>=0&&d.y<w.H&&d.x<w.W&&SOLID.has(w.grid[d.y][d.x]);
+    if(onWall){
+      const face=[[0,1,0],[0,-1,Math.PI],[1,0,Math.PI/2],[-1,0,-Math.PI/2]]
+        .find(([ox,oz])=>{const nx=d.x+ox,ny=d.y+oz;
+          return ny>=0&&ny<w.H&&nx>=0&&nx<w.W&&!SOLID.has(w.grid[ny][nx]);});
+      if(!face)return;                       /* buried on all four sides: nobody can see it */
+      const h=wallH(w.grid[d.y][d.x]);
+      const m=new THREE.MeshLambertMaterial({map:tex,transparent:true,alphaTest:0.25,side:THREE.DoubleSide});
+      const pl=new THREE.Mesh(new THREE.PlaneGeometry(0.94,0.94),m);
+      pl.position.set(cx+face[0]*0.505,Math.min(h-0.5,0.62),cz+face[1]*0.505);
+      pl.rotation.y=face[2];
+      pl.userData={deco:d.deco,x:d.x,y:d.y};
+      T3.tintables.push(m);grp.add(pl);
+    }else{
+      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex}));
+      sp.center.set(0.5,0.06);sp.scale.set(1.05,1.05,1);sp.position.set(cx,0,cz);
+      sp.userData={deco:d.deco,x:d.x,y:d.y};
+      T3.tintables.push(sp.material);grp.add(sp);
+    }
+  });
+
   T3.scene.add(grp);
 }
 /* actors: a pool of live-canvas sprites, repainted by the 2D artists every frame */

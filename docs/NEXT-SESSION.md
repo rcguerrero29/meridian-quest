@@ -5,6 +5,13 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-02, late)
 
+**NEWEST — 2026-09-03, `mq-v56`:** settings became four drawers that remember what you keep
+open (actions stay outside them, guarded by a test); decor is drawn in ALL FOUR cameras, with a
+mural on a solid tile treated as paint on that wall's open face in 3D; and
+`node test/shots.js --cams` sweeps every spot in every camera. **Left from la junta:** the grade
+seam (small — `gradeOf` and the `flags` object both already exist) and then the mural's six
+panels. See IDEAS §15.17.
+
 **NEWEST — 2026-09-03 late, `mq-v55`: the city produces paper you can read.** A new pack file
 `content/meridian/docs.js` (READS + DOCS), a cream breathing marker that never clears, a Read
 button that always answers, and a full-screen stapled-paper reader with Copy and Download as

@@ -206,5 +206,12 @@
   "y": 7,
   "cam": "3d",
   "yaw": 3.1416
+ },
+ {
+  "name": "32-mural-calle-principal",
+  "w": "st",
+  "x": 20,
+  "y": 2,
+  "cam": "3d"
  }
 ]
