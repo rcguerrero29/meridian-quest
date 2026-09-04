@@ -2220,7 +2220,10 @@ const CANDIDATES = [
       if (typeof BUILDTPL === 'undefined' || typeof BUILDS === 'undefined') return ['the pack declares no templates'];
       if (typeof resolveBuild !== 'function' || typeof buildSafe !== 'function') return ['the engine has no build seam'];
       // DETERMINISTIC: the same lot resolves to the same house every time it is asked
-      BUILDS.forEach(bd => {
+      // every template resolves the same way twice, and stays inside its own footprint
+      const probes = Object.keys(BUILDTPL).map(t => ({ id: 'det-' + t, tpl: t, world: 'ex', x: 0, y: 0, seed: 'det' }))
+        .concat(BUILDS);
+      probes.forEach(bd => {
         const a = resolveBuild(bd), c = resolveBuild(bd);
         if (!a) { problems.push('no template for ' + bd.id); return; }
         if (JSON.stringify(a.pick) !== JSON.stringify(c.pick)) problems.push(bd.id + ' builds differently each time it is asked');
@@ -2229,8 +2232,8 @@ const CANDIDATES = [
           problems.push(bd.id + ' put a tile outside its own footprint at ' + t[1] + ',' + t[0]); });
       });
       // VARIATION: different seeds on the same template give different houses
-      const t = BUILDS[0].tpl, faces = new Set();
-      for (let i = 0; i < 24; i++) faces.add(JSON.stringify(resolveBuild({ id: 'probe' + i, tpl: t, world: BUILDS[0].world, x: 16, y: 0, seed: 'seed' + i }).pick));
+      const t = Object.keys(BUILDTPL)[0], faces = new Set();
+      for (let i = 0; i < 24; i++) faces.add(JSON.stringify(resolveBuild({ id: 'probe' + i, tpl: t, world: 'ex', x: 16, y: 0, seed: 'seed' + i }).pick));
       if (faces.size < 3) problems.push('the template only ever builds ' + faces.size + ' house(s) — that is not variation');
       // PARTS SEE EACH OTHER: the yard never appears when the door is on the edge
       // the yard part declares when(c => c.pick.door !== 'left'), so a left-hand door means no yard
@@ -2240,7 +2243,7 @@ const CANDIDATES = [
           if (r.pick.yard !== undefined) problems.push('a pot was put where the door swings'); } }
       if (!sawSkip) problems.push('never rolled the door that skips the yard — the when() rule is untested');
       // PINNED: a saved pick survives a template that gains a new option
-      const one = BUILDS[0];
+      const one = BUILDS[0] || { id: 'pin-probe', tpl: t, world: 'ex', x: 0, y: 0, seed: 'pin' };
       const before = resolveBuild(one).pick;
       bldPicks[one.id] = { ...before, door: before.door === 'left' ? 'right' : 'left' };
       const after = resolveBuild(one).pick;
@@ -2263,21 +2266,24 @@ const CANDIDATES = [
     });
     fails.push(...b);
 
-    // the houses are actually standing, and the street still works around them
+    // if the pack places any lots, they must actually stand and not break the street.
+    // Placing lots is optional: the ability is the feature (owner, 2026-09-03 — the two
+    // demo casitas came back off the street because nobody asked for them and you could
+    // not walk into them).
     const street = await page.evaluate(() => {
       const problems = [];
       chSeen = 99; applyGrowth();
-      const w = WORLDS.ex, row = w.rows[0];
+      if (!BUILDS.length) { if (auditReach().length) problems.push('reachability broke with no lots placed'); return problems; }
+      const w = WORLDS[BUILDS[0].world], row = w.rows[BUILDS[0].y];
       // parts stamp in order and later parts overwrite earlier ones (the door lands on the
       // shell), so fold the list the way applyBuilds does before comparing to the street
       BUILDS.forEach(bd => { const spec = resolveBuild(bd), fold = {};
         spec.tiles.forEach(([y, x, ch]) => { fold[x + ',' + y] = ch; });
         Object.entries(fold).forEach(([k, ch]) => { const [x, y] = k.split(',').map(Number);
           if (w.rows[y][x] !== ch) problems.push(bd.id + ' is not standing: expected ' + ch + ' at ' + x + ',' + y + ', found ' + w.rows[y][x]); }); });
-      if (!/[▦▩▨]/.test(row)) problems.push('no house on Calle Dos: ' + row);
-      // the two lots did not come out identical
-      const a = resolveBuild(BUILDS[0]).pick, c = resolveBuild(BUILDS[1]).pick;
-      if (JSON.stringify(a) === JSON.stringify(c)) problems.push('both lots built the same house');
+      if (!/[▦▩▨]/.test(row)) problems.push('a lot was declared but no house stands on it: ' + row);
+      if (BUILDS.length > 1) { const a = resolveBuild(BUILDS[0]).pick, c = resolveBuild(BUILDS[1]).pick;
+        if (JSON.stringify(a) === JSON.stringify(c)) problems.push('two lots built the same house'); }
       if (auditReach().length) problems.push('the houses broke reachability: ' + auditReach().join(' | '));
       return problems;
     });
@@ -2370,6 +2376,43 @@ const CANDIDATES = [
     });
     fails.push(...nudges);
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; checkTalk(); });
+  }
+
+  // ---- 29. a delivery says where it landed ----
+  // The owner finished districts, pages were pinned to his office wall exactly as designed,
+  // and he asked three times where they were. A thing that arrives while you are looking at
+  // a different screen has to say so.
+  {
+    const say = await page.evaluate(() => {
+      const problems = [];
+      if (typeof ribbonSay !== 'function') return ['deliveries cannot speak'];
+      // every ribbon that puts something in a room you are not standing in should say so
+      // A ribbon WITH a doorstep walks you to what it built, so its district's toast covers it.
+      // A ribbon WITHOUT one lands somewhere you are not standing — that one has to say where.
+      ribbons().filter(r => r.tiles && r.id && !r.doorstep).forEach(r => {
+        if (!r.say) problems.push('the delivery "' + r.id + '" lands somewhere you are not standing and says nothing');
+        else if (!r.say.en || !r.say.es) problems.push('the delivery "' + r.id + '" only speaks one language');
+        else if (!/upstairs|office|arriba|oficina/i.test(r.say.en + r.say.es)) problems.push('the delivery "' + r.id + '" does not say WHERE it landed');
+      });
+      // said once, ever
+      const keepSeen = new Set(seenOpen), keepCh = chSeen;
+      seenOpen = new Set(); chSeen = 99; applyGrowth(); tickerLines.length = 0;
+      ribbonSay();
+      const firstMarked = [...seenOpen].filter(k => k.indexOf('r:') === 0).length;
+      const before = seenOpen.size;
+      ribbonSay();
+      if (seenOpen.size !== before) problems.push('a delivery announced itself twice');
+      if (!firstMarked) problems.push('no delivery was announced at all with the whole city open');
+      seenOpen = keepSeen; chSeen = keepCh; applyGrowth();
+      return problems;
+    });
+    fails.push(...say);
+    // and the line actually reaches the player
+    await page.evaluate(() => { seenOpen = new Set(); chSeen = 99; applyGrowth(); tickerLines.length = 0; ribbonSay(); });
+    await page.waitForTimeout(1900);
+    const heard = await page.evaluate(() => tickerLines.slice());
+    if (!heard.length) fails.push('a delivery was announced but the player never heard it');
+    await page.evaluate(() => { tickerLines.length = 0; document.getElementById('ticker').hidden = true; });
   }
 
   await browser.close();

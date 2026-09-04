@@ -13,6 +13,16 @@ preference that outlives one phase; cite the date and their words.
 
 ## Settled — never re-ask
 
+- **Build the ability, not the thing — unless the thing was asked for.** *(2026-09-03)* Owner,
+  after two demo houses appeared on Calle Dos: *"noone asked me to make them i was saying it is
+  just an ability."* A capability can ship on its own; placing content in the world is a
+  separate decision that belongs to the owner. And **nothing goes into the world that the
+  player cannot use**: a house you cannot enter is scenery pretending to be a place.
+- **If a feature changes a room the player is not standing in, the game says so at the moment
+  it happens.** *(2026-09-03, after "where are these posters" was asked three times.)* A marker
+  only helps somebody already in the room. Deliveries name the room they landed in; the smoke
+  test fails a delivery that lands silently.
+
 - **The world stays realistic — not perfect, but never nonsense.** *(2026-09-03)* Owner, on a
   trolley that could drop you on the second floor of a building: *"i dont like that i go from a
   train to a floor. dont do that. i asked to make the world realistic. not perfect but so if

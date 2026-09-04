@@ -2355,6 +2355,7 @@ $("endGo").addEventListener("click",()=>{
   growthPend=false;seenOpen.add(K.open);
   save();$("end").hidden=true;showWorld();applyCtl();setWorldTag();hud();checkTalk();
   toast(T()[K.open]||(last?T().endStayToast:T().weekTwoToast),4000);
+  ribbonSay();   /* and what landed while that Saturday played */
 });
 /* Wiping a city is never one tap. The story never sends you here — this is a tool. */
 $("replay").addEventListener("click",()=>{
@@ -3651,6 +3652,21 @@ function applyStaged(){
     px=fx=sf.x;py=fy=sf.y;dir="down";held=null;moving=false;}
   if(SOLID.has(w.grid[PIG.y][PIG.x])){PIG.x=PIG.fx=4;PIG.y=PIG.fy=1;PIG.moving=false;} /* Paloma will not be bricked in */
 }
+/* A storefront, a gift or a page on your wall may say ONE line the first time it lands.
+   Nothing in the city announced its own deliveries: the owner finished districts, pages were
+   pinned to his office wall exactly as designed, and he asked three times where they were
+   (2026-09-03). A thing that arrives while you are looking at a different screen has to say
+   so. Said once ever — the seen list is saved — and never as a list of what is left. */
+function ribbonSay(){
+  const lines=[];
+  ribbons().forEach(r=>{
+    if(!r.id||!r.say||!ribbonUp(r))return;
+    const k="r:"+r.id;if(seenOpen.has(k))return;
+    seenOpen.add(k);lines.push(r.say[lang]||r.say.en);});
+  if(!lines.length)return;
+  save();
+  lines.slice(0,3).forEach((m,i)=>setTimeout(()=>toast(m,3800),1500+i*1100));
+}
 /* ---------- BUILDS — construction from a template, with variation ----------
    Don Güero is handed a template and builds from it, changing a few things each time
    (owner, 2026-09-03: "assign him a house template that he can build and just add some
@@ -3800,7 +3816,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
     applyGrowth();parkRescue();
     if(px>=CW().W||py>=CW().H||isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
     if(chDue()){finish(livesOn()&&hearts<=0);$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;applyCtl();hud();}
-    else{enterWorld(false);lateOpenToast();}
+    else{enterWorld(false);lateOpenToast();ribbonSay();}   /* anything that arrived while the phone was away */
   });
 }
 /* Trolley Pass arrival: a #save= hash offers to board; never overwrites without the tap */

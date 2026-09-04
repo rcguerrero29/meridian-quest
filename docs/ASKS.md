@@ -19,7 +19,8 @@ activities"* is a rule; "improve the ticker" is a mood. Quote the rule.
 
 | Asked | Verbatim | State |
 |---|---|---|
-| 2026-09-03 | *"eventually they would be the game building assistants"* → **El maestro constructor**: Don Güero given a house template he builds from with variations | **Foundation shipped `mq-v60`** (templates, variation, safety, two casitas on Calle Dos). Still open: templates for whole storefronts so growth stops being hand-written tile lists, and Don Güero *talking about* what he built |
+| 2026-09-03 | *"eventually they would be the game building assistants"* → **El maestro constructor**: Don Güero given a house template he builds from with variations | **The ability shipped `mq-v60`.** The two demo houses came back off the street at `mq-v61` — *"noone asked me to make them... it is just an ability"* — and because you cannot enter them. Still open: an enterable house (interior + portal first), templates for whole storefronts, and Don Güero *talking about* what he built |
+| 2026-09-03 | *"i cant enter the houses"* | Open as a rule, not a bug: nothing goes into the world the player cannot use. Recorded in `OWNER.md` |
 | 2026-09-03 | *"i think in terms of how it looks will be a good goal"* — the art bible: silhouettes, a hat-and-apron vocabulary, per-character signature idles | Not started. Pili's first assignment |
 | 2026-09-02 | *"i want the rest of the story for my ai practice"* → the four districts | Written and wired (`mq-v51`). **Never human-played.** The next real gate |
 | 2026-08-31 | ❗La ventanilla — the clerk with the city's record | Signed, deferral dated 2026-09-03, not built |

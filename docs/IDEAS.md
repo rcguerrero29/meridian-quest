@@ -1498,3 +1498,40 @@ refused.
 storefront growth is still hand-written tile lists rather than templates; and Don Güero cannot
 yet *talk about* what he built.
 
+### 15.23 A DELIVERY THAT LANDS SILENTLY IS A DELIVERY NOBODY FINDS — BUILT 2026-09-03
+
+*"also, i am confused.. where are these posters..."* — **the third time this was asked.** Twice
+I answered with directions. The third time is not a comprehension problem, it is a design bug,
+and here it is:
+
+**Nothing in the city ever announced its own deliveries.** A district's Saturday plays, its
+toast says a new lot opened on the street, and meanwhile a page is pinned to a wall on a floor
+the player is not standing on. The pinning was correct, the reading worked, the marker was
+right — and there was **no moment at which the game said it had happened**.
+
+- **A ribbon may now declare `say:{en,es}`**, one line, spoken once ever (the seen list is
+  saved), when it first lands. Deliveries name the room: *"Your memo for El Mercado went up on
+  the office wall — second sheet from the left, upstairs."*
+- Spoken after the Saturday's own toast, and also at Continue for anything that arrived while
+  the phone was away.
+- **The test is the rule, generically stated:** a ribbon WITH a `doorstep` walks you to what it
+  built, so its district's toast covers it; a ribbon WITHOUT one lands somewhere you are not
+  standing, and it **must** say where, in both languages. All six posters and all five office
+  gifts now do. The suite fails if a future delivery is added silently.
+
+**The habit this belongs to** (with §15.20's "walk in from the door"): *if a feature changes a
+room the player is not in, the game has to tell them at the moment it happens.* A marker only
+helps somebody already in the room.
+
+### 15.24 THE HOUSES CAME BACK OFF THE STREET — 2026-09-03
+
+*"noone asked me to make them i was saying it is just an ability but they look cute."* Correct
+on both counts, and there was a second problem: **you cannot walk into them.** A house with a
+door that does not open is the same unrealistic shortcut as a trolley stopping on a second
+floor, which the owner had rejected an hour earlier.
+
+`BUILDS` is empty. The template, the three casita glyphs, the resolver, the safety check and
+every test stay — **the ability was the ask**. Restoring the two lots is two commented lines in
+`art.js`. The standing rule when a parcel is genuinely developed: **the interior and the portal
+come first, then the house goes on the list.**
+
