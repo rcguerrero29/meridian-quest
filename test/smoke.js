@@ -71,8 +71,11 @@ const CANDIDATES = [
     if (keys(NPCN.en) !== keys(NPCN.es)) problems.push('NPCN keys differ');
     Object.keys(NPCN.en).forEach(k => { if (!NPCE[k]) problems.push('NPCE missing emoji: ' + k); });
 
+    /* the doc id is part of a quest's shape: a node that hands over paper in English and not
+       in Spanish is exactly the drift a shared DOCS entry exists to make impossible. */
     const shape = q => q.npc + '|' + q.start + '|' + Object.entries(q.nodes).map(([k, n]) =>
-      k + ':' + n.ch.map(c => c.next ? '>' + c.next : c.out.r).join(',')).join(';');
+      k + ':' + n.ch.map(c => c.next ? '>' + c.next : c.out.r).join(',') +
+      (n.doc ? '#' + n.doc : '')).join(';');
     if (QEN.length !== QES.length) problems.push('quest count EN=' + QEN.length + ' ES=' + QES.length);
     QEN.forEach((q, i) => { if (QES[i] && shape(q) !== shape(QES[i])) problems.push('quest ' + i + ' EN/ES shape mismatch'); });
     if (shape(FQEN) !== shape(FQES)) problems.push('fred quest EN/ES shape mismatch');
@@ -2413,6 +2416,143 @@ const CANDIDATES = [
     const heard = await page.evaluate(() => tickerLines.slice());
     if (!heard.length) fails.push('a delivery was announced but the player never heard it');
     await page.evaluate(() => { tickerLines.length = 0; document.getElementById('ticker').hidden = true; });
+  }
+
+  // ---- 30. paper a person hands you ----
+  // The owner, 2026-09-04: "no she says it and shows a fake doc- the important ones are the
+  // ones for AI roles but lets help me see it and live it." A node may name a document. This
+  // section is here because a mistyped id would show a button that opens nothing, and because
+  // closing that document has to put you back in front of the person, not out on the street.
+  {
+    const paper = await page.evaluate(() => {
+      const problems = [];
+      if (typeof docDef !== 'function') return ['a person cannot hand over paper at all'];
+
+      // every document named by a node, in BOTH languages, actually builds
+      ['en', 'es'].forEach(L => {
+        const keep = lang; lang = L;
+        const Q = L === 'en' ? QEN : QES, F = L === 'en' ? FQEN : FQES;
+        Q.concat([F]).forEach((q, qi) => Object.keys(q.nodes).forEach(k => {
+          const d = q.nodes[k].doc; if (!d) return;
+          const secs = docSections(d);
+          const nm = L + ' quest ' + qi + ' node ' + k;
+          if (!secs) problems.push(nm + ' hands over a document that does not exist: ' + JSON.stringify(d));
+          else if (!secs.length) problems.push(nm + ' hands over an empty sheet');
+          if (!docTitle(d)) problems.push(nm + ' hands over paper with no title');
+        }));
+        lang = keep;
+      });
+
+      // a document written inline is as real as one in DOCS — the seam takes both
+      const inline = { title: { en: 'PROBE SHEET', es: 'HOJA PROBE' },
+                       build: () => [{ h: 'PROBE' }, { p: 'one line' }] };
+      if (!docSections(inline)) problems.push('a document written inline does not build');
+      if (docTitle(inline) !== 'PROBE SHEET') problems.push('an inline document loses its title');
+      if (!/PROBE/.test(docMarkdown(inline))) problems.push('an inline document cannot be exported');
+
+      // handed over inside a quest: the way back is the card, and fullscreen survives.
+      // The street's talk check is the tell — it belongs to the world, and running it while
+      // the player is still in a conversation lights the talk button and fires doorstep lines
+      // behind the card. Count the calls; do not guess from side effects.
+      const realTalk = checkTalk; let talkRan = 0;
+      checkTalk = function () { talkRan++; return realTalk.apply(this, arguments); };
+      const wasFsBefore = wasFs, vp = document.getElementById('vp');
+      const hadFs = vp.classList.contains('fs');
+      vp.classList.add('fs');            // pretend the player is playing fullscreen, as on a phone
+      questStart(0);
+      if (wasFs !== true) problems.push('a quest did not record that the player was fullscreen');
+      docOpen(inline, 'card');
+      if (wasFs !== true) problems.push('opening paper mid-quest threw away the way back to fullscreen');
+      if (document.getElementById('reader').hidden) problems.push('the paper never opened');
+      if (document.getElementById('card').hidden) problems.push('the card vanished behind the paper');
+      // MEASURE it, never trust .hidden. The reader used to live inside #vp, inside #world, and a
+      // quest hides #world — so this panel reported hidden:false at 0x0 and rendered nothing at
+      // all. Every assertion above passed while the player saw a blank screen (found 2026-09-04).
+      const rb = document.getElementById('reader').getBoundingClientRect();
+      if (rb.width < 200 || rb.height < 200)
+        problems.push('the paper opened into a collapsed container — ' + Math.round(rb.width) + 'x' + Math.round(rb.height) + '; check what the reader is nested inside');
+      const cb = document.getElementById('docClose').getBoundingClientRect();
+      if (cb.bottom > rb.height + 1 || cb.width < 10)
+        problems.push('the way out of a long document is off-screen; the action bar must stay in reach');
+      talkRan = 0;
+      document.getElementById('docClose').click();
+      if (!document.getElementById('reader').hidden) problems.push('the paper would not close');
+      if (document.getElementById('card').hidden) problems.push('closing the paper left the conversation');
+      if (!document.getElementById('world').hidden) problems.push('closing the paper dumped the player on the street');
+      if (talkRan) problems.push('closing paper handed over mid-quest ran the street check behind the card');
+      if (docBack) problems.push('the way back was never cleared — the next document would think it came from a quest');
+
+      // read off a wall, and the way back is the street, talk check and all
+      talkRan = 0;
+      docOpen('file');
+      if (docBack) problems.push('a wall document thinks somebody handed it to you');
+      document.getElementById('docClose').click();
+      if (!talkRan) problems.push('closing a wall document no longer returns the player to the street');
+
+      checkTalk = realTalk;
+      wasFs = wasFsBefore;
+      if (!hadFs) vp.classList.remove('fs');
+      document.body.classList.remove('noscroll');
+      return problems;
+    });
+    fails.push(...paper);
+
+    // and when a node names paper, the card holds it out, labelled with what the PAPER is
+    const held = await page.evaluate(() => {
+      const probe = { hand: { en: 'PROBE TAKE IT', es: 'PROBE TOMALA' },
+                      title: { en: 'PROBE SHEET', es: 'HOJA PROBE' }, build: () => [{ p: 'x' }] };
+      const q = AQ()[0], k = q.start, had = q.nodes[k].doc;
+      q.nodes[k].doc = probe; questStart(0);
+      const b = document.getElementById('npcDoc'), out = { hidden: b.hidden, txt: b.textContent };
+      // a document with no `hand` label still gets a working button, not a blank one
+      q.nodes[k].doc = { title: { en: 'BARE', es: 'BARE' }, build: () => [{ p: 'x' }] };
+      nodeShow(); out.bare = document.getElementById('npcDoc').textContent;
+      q.nodes[k].doc = had; nodeShow();
+      out.gone = document.getElementById('npcDoc').hidden;
+      return out;
+    });
+    if (held.hidden) fails.push('a node named a document and the card did not hold it out');
+    if (held.txt && held.txt.indexOf('PROBE TAKE IT') < 0) fails.push('the held-out paper is not labelled with what it is: ' + held.txt);
+    if (!held.bare) fails.push('a document with no hand label gives the player a blank button');
+    if (!held.gone) fails.push('a node with no document still shows a sheet from the node before');
+    await page.evaluate(() => { document.getElementById('card').hidden = true; showWorld(); });
+
+    // the shipped pack hands over SHARED documents, never one written inside a node.
+    // The engine takes both (docDef, tested above) so the architecture can grow; the CONTENT
+    // stays disciplined, because a document written inside a quest lives in two language
+    // files and nothing in this build compares its prose.
+    const discipline = await page.evaluate(() => {
+      const problems = [];
+      [['en', QEN.concat([FQEN])], ['es', QES.concat([FQES])]].forEach(([L, list]) =>
+        list.forEach((q, i) => Object.keys(q.nodes).forEach(k => {
+          const d = q.nodes[k].doc; if (!d) return;
+          const nm = L + ' quest ' + i + ' node ' + k;
+          if (typeof d !== 'string') problems.push(nm + ' writes a document inline; it belongs in DOCS, where both languages sit on one line');
+          else if (!DC()[d]) problems.push(nm + ' names a document DOCS does not have: ' + d);
+        })));
+      return problems;
+    });
+    fails.push(...discipline);
+
+    // paper you were handed reaches the office file, and survives a save/load round trip
+    const record = await page.evaluate(() => {
+      const problems = [], keep = [...handedDocs];
+      handedDocs = new Set();
+      const before = JSON.stringify(docSections('file'));
+      if (/handed you|la gente te dio/.test(before)) problems.push('the office file lists handed paper before any was handed');
+      questStart(16);                       // Chelo's list is on this quest's opening node
+      if (!handedDocs.has('lista-chelo')) problems.push('a document was held out and the file never recorded it');
+      save();
+      const round = sanitizeSave(JSON.parse(localStorage.getItem('mq1')));
+      if (!round || (round.hd || []).indexOf('lista-chelo') < 0) problems.push('handed paper does not survive being saved and loaded back');
+      const after = JSON.stringify(docSections('file'));
+      if (!/handed you|la gente te dio/.test(after)) problems.push('the office file does not show what people handed you');
+      if (after.indexOf('lista-chelo') < 0) problems.push('the file records the pile but not the page');
+      handedDocs = new Set(keep);
+      return problems;
+    });
+    fails.push(...record);
+    await page.evaluate(() => { document.getElementById('card').hidden = true; showWorld(); });
   }
 
   await browser.close();

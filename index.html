@@ -129,6 +129,15 @@
     box-shadow:inset 0 0 0 1px rgba(0,0,0,.10), inset 0 30px 40px -34px rgba(0,0,0,.18);}
   .staple{position:absolute; top:13px; left:20px; width:15px; height:4px; background:#9AA1A8;
     border-radius:1px; transform:rotate(-8deg); box-shadow:0 1px 0 rgba(0,0,0,.35), 20px 1px 0 -1px rgba(0,0,0,.10);}
+  /* a document held out inside a conversation — the same sheet the reader opens, folded small.
+     Same cream, same staple, so opening it reads as picking up the thing she is holding. */
+  .handed{display:inline-flex; align-items:center; gap:8px; margin:11px 0 1px; padding:9px 13px;
+    background:#F7F2E4; color:#2A2620; border:1px solid #C9BFA6; border-radius:2px; position:relative;
+    font-family:'IBM Plex Mono',monospace; font-size:.72rem; line-height:1.35; text-align:left;
+    cursor:pointer; box-shadow:0 2px 9px rgba(0,0,0,.32);}
+  .handed::before{content:""; position:absolute; top:-2px; left:10px; width:13px; height:3px;
+    background:#9AA1A8; border-radius:1px; transform:rotate(-8deg); box-shadow:0 1px 0 rgba(0,0,0,.30);}
+  .handed:hover,.handed:focus-visible{background:#FFFAEC; box-shadow:0 3px 12px rgba(0,0,0,.38);}
   .paper h2{font-family:'Unbounded',sans-serif; font-size:.98rem; line-height:1.3; margin:6px 0 2px; color:#1E1A16;}
   .paper .dsub{font-style:italic; color:#6B6355; margin:0 0 14px; font-size:.72rem;}
   .paper .dtmpl{margin:0; font-size:.62rem; letter-spacing:.09em; text-transform:uppercase; color:#8A8170;}
@@ -149,7 +158,13 @@
   .paper .dpick{margin:0; font-weight:600;}
   .paper .dwhy{margin:5px 0 0; color:#6B6355; font-size:.72rem;}
   .paper .ddocs{display:flex; flex-wrap:wrap; gap:7px; margin:10px 0;}
-  .paper .docbar{margin-top:22px; padding-top:14px; border-top:1px dashed #C6BCA2;}
+  /* the way out rides along. The reader scrolls the whole sheet, so on a long document —
+     Chelo's eleven-item list, Bere's fifty-two — Close, Copy and Download sat below the
+     fold and you had to scroll a table to put the paper down. Sticky keeps all three in
+     reach at any scroll position, and the cream matches the sheet so it still reads as paper. */
+  .paper .docbar{margin-top:22px; padding:14px 0 12px; border-top:1px dashed #C6BCA2;
+    position:sticky; bottom:0; background:#F7F2E4;
+    box-shadow:0 -14px 16px -10px #F7F2E4, 0 14px 0 0 #F7F2E4;}
   .codex{background:var(--gold-bg); border:1px solid var(--gold); border-radius:10px; padding:11px 14px; margin:12px 0;}
   .codex b{display:block; font-family:'IBM Plex Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:4px;}
   .codex p{margin:0; font-size:.88rem;}
@@ -423,18 +438,6 @@
           <div class="optrow"><button id="tlApply"></button><button id="tlClose"></button></div>
         </div>
       </div>
-      <div class="settings reader" id="reader" hidden>
-        <div class="paper" id="paperSheet">
-          <div class="staple" aria-hidden="true"></div>
-          <p class="dtmpl" id="docTmpl" hidden></p>
-          <h2 id="docTitle"></h2>
-          <p class="dsub" id="docSub"></p>
-          <div id="docBody"></div>
-          <div class="optrow docbar">
-            <button id="docCopy"></button><button id="docDl"></button><button id="docClose"></button>
-          </div>
-        </div>
-      </div>
       <div class="settings" id="exporter" hidden>
         <div class="box">
           <h3 id="exTitle"></h3>
@@ -554,9 +557,27 @@
     <p class="hint" id="ctlHint"></p>
   </div>
 
+  <!-- The reader sits OUTSIDE #world on purpose. It used to live inside #vp, which is inside
+       #world — and a quest hides #world, so a document a character handed you opened into a
+       display:none subtree: correct state, correct button, nothing on screen. It is
+       position:fixed and overlays everything, so it belongs at the top level where neither
+       the street nor a conversation can collapse it. (Found 2026-09-04 by measuring the
+       panel's box instead of trusting its .hidden flag.) -->
+  <div class="settings reader" id="reader" hidden>
+    <div class="paper" id="paperSheet">
+      <div class="staple" aria-hidden="true"></div>
+      <p class="dtmpl" id="docTmpl" hidden></p>
+      <h2 id="docTitle"></h2>
+      <p class="dsub" id="docSub"></p>
+      <div id="docBody"></div>
+      <div class="optrow docbar">
+        <button id="docCopy"></button><button id="docDl"></button><button id="docClose"></button>
+      </div>
+    </div>
+  </div>
   <div class="panel" id="card" hidden>
     <p class="eyebrow" id="qtag"></p>
-    <div class="npc"><div class="avatar" id="npcAv"></div><div class="bubble"><b id="npcName"></b><p id="npcLate" class="late" hidden></p><p id="npcSay"></p></div></div>
+    <div class="npc"><div class="avatar" id="npcAv"></div><div class="bubble"><b id="npcName"></b><p id="npcLate" class="late" hidden></p><p id="npcSay"></p><button id="npcDoc" class="handed" hidden></button></div></div>
     <div class="codex"><b id="cdxLb"></b><p id="codex"></p></div>
     <p class="q" id="q"></p>
     <div class="choices" id="choices"></div>

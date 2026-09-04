@@ -19,6 +19,7 @@ activities"* is a rule; "improve the ticker" is a mood. Quote the rule.
 
 | Asked | Verbatim | State |
 |---|---|---|
+| 2026-09-04 | *"those stairs are trash. not realistic. can we have realistic building designs"* | Logged before building. Don Güero + Pili's brief |
 | 2026-09-03 | *"eventually they would be the game building assistants"* → **El maestro constructor**: Don Güero given a house template he builds from with variations | **The ability shipped `mq-v60`.** The two demo houses came back off the street at `mq-v61` — *"noone asked me to make them... it is just an ability"* — and because you cannot enter them. Still open: an enterable house (interior + portal first), templates for whole storefronts, and Don Güero *talking about* what he built |
 | 2026-09-03 | *"i cant enter the houses"* | Open as a rule, not a bug: nothing goes into the world the player cannot use. Recorded in `OWNER.md` |
 | 2026-09-03 | *"i think in terms of how it looks will be a good goal"* — the art bible: silhouettes, a hat-and-apron vocabulary, per-character signature idles | Not started. Pili's first assignment |
@@ -42,6 +43,7 @@ activities"* is a rule; "improve the ticker" is a mood. Quote the rule.
 | *"give it to lupe and just let her introduce/talk about him"* | `mq-v58` Lupe carries both La Obra quests and names him in her first line |
 | *"i dont like that i go from a train to a floor"* | `mq-v59` reversed; the rule is in `OWNER.md`; a test requires rails at every stop |
 | *"i still couldnt find my posters and laptop"* | `mq-v59` every readable in the room is marked, and the room says what is in it |
+| *"nacho can you create like actual fake documents instead of like oh this is what chela and juanita said. no she says it and shows a fake doc- the important ones are the ones for AI roles but lets help me see it and live it"* | `mq-v62` six documents a character puts in your hands mid-quest — Chelo's eleven-item list, the invoice evaluation run, the incident transcript with "be helpful" printed as the root cause, ten weeks of forecast against the trash, the old lead's rollout plan, Bere's fifty-two. They go in the office file and stay there |
 
 ## Refused, reversed, or answered instead of built
 

@@ -239,6 +239,8 @@ const ribbonUp=r=>r?(!!(r&&r.tiles)&&chSeen>=r.district):ribbons().some(x=>ribbo
 const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"};
 let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
 let chSeen=0,replayTimer=null;
+let handedDocs=new Set(); /* paper a person has actually held out to you, so the office file
+   records what you were GIVEN as exactly as it records what you wrote (saved as `hd`) */
 let seenOpen=new Set(); /* opening toasts this save has heard, so a lot that opened while the phone was away is announced once (saved as `so`) */
 let xp=0,hearts=3,cls="",heroName="Rookie",look={shirt:"#8B5CF6",skin:"#E5AC82",hair:"#26202B",style:"cap",outfit:"casual"},done=new Set(),cur=null,curQ=null,node=null,treats=0,fredQ=0,qLvl0=0;
 /* retry-until-correct: `done` = answered right; `qa` maps quest -> best XP already
@@ -279,7 +281,7 @@ function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
   $("status").textContent=`${hs}  ${xp}XP`.trim();}
 /* save */
-function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],bl:bldPicks,v:2};
+function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],hd:[...handedDocs],bl:bldPicks,v:2};
   try{localStorage.setItem("mq1",JSON.stringify(st));}catch(e){}
   if(NET.enabled)NET.sync(st);}
 /* The ❗ on the world tag means what it means everywhere else: somebody in here has
@@ -315,6 +317,7 @@ function sanitizeSave(s){
   if(s.mk&&typeof s.mk==="object")Object.keys(s.mk).slice(0,128).forEach(k2=>{
     const ki=num(k2,0,98,null);if(ki!==null)mk[ki]=num(s.mk[k2],1,3,1);});
   const so=Array.isArray(s.so)?s.so.filter(v=>typeof v==="string").slice(0,32).map(v=>v.slice(0,32)):[];
+  const hd=Array.isArray(s.hd)?s.hd.filter(v=>typeof v==="string").slice(0,64).map(v=>v.slice(0,40)):[];
   /* the faces of the houses already built: {buildId:{partId:optionId}}. Pinned so a template
      that gains options later does not reshape a street somebody already knows. */
   const bl={};
@@ -324,7 +327,7 @@ function sanitizeSave(s){
     o&&(bl[String(k).slice(0,40)]=o);});
   return{n,c:str2(s.c,24,""),lk,xp:num(s.xp,0,999,0),he:num(s.he,0,3,3),d,
     px:num(s.px,0,63,10),py:num(s.py,0,63,11),tr:num(s.tr,0,9999,0),fq:num(s.fq,0,3,0),
-    w:str2(s.w,4,"hq"),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,bl,
+    w:str2(s.w,4,"hq"),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,hd,bl,
     v:s.v===undefined?undefined:num(s.v,0,99,0)};
 }
 function loadSave(){try{return sanitizeSave(JSON.parse(localStorage.getItem("mq1")||""));}catch(e){return null;}}
@@ -1802,7 +1805,7 @@ function docCtx(){
     dateStr:d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()),
     decisions:dlog.map(e=>({quest:e.quest,qi:e.qi,npc:e.npc,ask:e.ask,pick:e.pick,
                             concept:e.concept,why:e.why,result:e.result})),
-    done:[...done], marks:{...marks},
+    done:[...done], marks:{...marks}, handed:[...handedDocs],
     districts:L.map((c,i)=>({id:c.id,quests:(c.quests||[]).slice(),need:c.need,
       closed:chSeen>i, grade:gradeOf(c),
       role:c.role&&(c.role[lang]||c.role.en), industry:c.industry&&(c.industry[lang]||c.industry.en)})),
@@ -1810,12 +1813,17 @@ function docCtx(){
 }
 /* sections → the page, and → markdown, from ONE description. Two renderers that can
    disagree are two documents. */
-function docSections(id){const d=DC()[id];if(!d||typeof d.build!=="function")return null;
+/* A document is named one of two ways: an id into the pack's DOCS (shared paper — a poster,
+   the file on the desk), or the document itself, written where it is used (a one-off artifact a
+   character hands over and nobody else ever sees). Everything downstream goes through here, so
+   neither kind is a special case. */
+function docDef(id){return id&&typeof id==="object"?id:(DC()[id]||null);}
+function docSections(id){const d=docDef(id);if(!d||typeof d.build!=="function")return null;
   try{return d.build(docCtx())||[];}catch(e){console.warn("DOC: "+id+" failed to build",e);return [];}}
-function docTitle(id){const d=DC()[id]||{};return (d.title&&(d.title[lang]||d.title.en))||id;}
+function docTitle(id){const d=docDef(id)||{};return (d.title&&(d.title[lang]||d.title.en))||(typeof id==="string"?id:"");}
 function docMarkdown(id){
   const secs=docSections(id);if(!secs)return "";
-  const d=DC()[id]||{},out=["# "+docTitle(id)];
+  const d=docDef(id)||{},out=["# "+docTitle(id)];
   const sub=d.sub&&(d.sub[lang]||d.sub.en);if(sub)out.push("*"+sub+"*");
   if(d.tmpl)out.push("",(DCU().tmplLb?DCU().tmplLb(d.tmpl):"Template "+d.tmpl)+" · docs/templates/");
   out.push("");
@@ -1835,10 +1843,10 @@ function docMarkdown(id){
   });
   return out.join("\n");
 }
-function docOpen(id){
+function docOpen(id,from){
   const secs=docSections(id);if(!secs)return;
-  const d=DC()[id]||{},body=$("docBody");
-  docCur=id;body.innerHTML="";
+  const d=docDef(id)||{},body=$("docBody");
+  docCur=id;docBack=from==="card"?"card":null;body.innerHTML="";
   const el=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;
     if(txt!==undefined)n.textContent=txt;body.appendChild(n);return n;};
   $("docTitle").textContent=docTitle(id);
@@ -1867,12 +1875,15 @@ function docOpen(id){
     else if(s2.docs){const row=el("div","ddocs");
       s2.docs.forEach(k=>{if(!DC()[k])return;const b=document.createElement("button");
         b.className="opt";b.textContent=docTitle(k);
-        b.addEventListener("click",()=>docOpen(k));row.appendChild(b);});}
+        b.addEventListener("click",()=>docOpen(k,docBack));row.appendChild(b);});}
   });
   body.scrollTop=0;
-  exitFsForCard();$("reader").hidden=false;held=null;   /* overlays the world, like Settings — hiding it collapses the panel's parent */
+  /* a document handed over inside a quest must NOT re-run exitFsForCard: questStart already
+     ran it, and a second call records wasFs=false, so the player never gets fullscreen back. */
+  if(docBack!=="card")exitFsForCard();
+  $("reader").hidden=false;held=null;   /* overlays the world, like Settings — hiding it collapses the panel's parent */
 }
-let docCur=null;
+let docCur=null,docBack=null;   /* "card" while a document is being read inside a quest */
 /* ---------- READS / DOCS — a thing you can read without talking to anybody ----------
    The city could only ever be read by finding the right person. A pack declares READS
    (where a readable thing stands) and DOCS (what it says), and the engine renders the
@@ -1984,10 +1995,17 @@ window.addEventListener("keydown",e=>{
   const t2=e.target; /* typing a dog's name is not walking — "shadow" has a w, an a, an s and a d */
   if(t2&&(t2.tagName==="INPUT"||t2.tagName==="TEXTAREA"))return;
   if(!$("world").hidden&&keyDir(e)){held=keyDir(e);e.preventDefault();}
-  if(e.key==="Enter"&&!$("talk").hidden&&!$("world").hidden)$("talk").click();});
+  if(e.key==="Enter"&&!$("talk").hidden&&!$("world").hidden)$("talk").click();
+  /* Escape puts the paper down, wherever you have scrolled to */
+  if(e.key==="Escape"&&!$("reader").hidden){e.preventDefault();$("docClose").click();}});
 window.addEventListener("keyup",e=>{if(keyDir(e)&&held===keyDir(e))held=null;});
 $("read").addEventListener("click",()=>{const id=$("read").dataset.doc;if(id)docOpen(id);});
-$("docClose").addEventListener("click",()=>{$("reader").hidden=true;restoreFs();checkTalk();});
+$("npcDoc").addEventListener("click",()=>{if(npcHeld)docOpen(npcHeld,"card");});
+$("docClose").addEventListener("click",()=>{$("reader").hidden=true;
+  /* handed over by a person mid-quest: close returns to them, not to the street. checkTalk()
+     here would light the talk button and nudge lines behind a card the player is still in. */
+  if(docBack==="card"){docBack=null;window.scrollTo({top:0});return;}
+  restoreFs();checkTalk();});
 $("docCopy").addEventListener("click",()=>{const v=docMarkdown(docCur);
   (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(v):Promise.reject())
     .then(()=>toast(DCU().copied||"✓",2000))
@@ -2100,7 +2118,7 @@ function exitFsForCard(){wasFs=$("vp").classList.contains("fs");
   if(wasFs){$("vp").classList.remove("fs");document.body.classList.remove("noscroll");
     if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});setTimeout(sizeCanvas,60);}}
 function restoreFs(){if(wasFs){$("vp").classList.add("fs");document.body.classList.add("noscroll");setTimeout(sizeCanvas,60);}}
-let qFirst=false;
+let qFirst=false,npcHeld=null;   /* the document the person on screen is holding out, if any */
 function questStart(qi){cur=qi;curQ=AQ()[qi];node=curQ.start;qLvl0=lvlIdx();runXP=0;qFirst=qa[qi]===undefined;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
 function fredQuestStart(){cur=-1;curQ=FQ();node=curQ.start;qLvl0=lvlIdx();runXP=0;qFirst=qa[-1]===undefined;exitFsForCard();$("world").hidden=true;$("card").hidden=false;held=null;nodeShow();}
 function nodeShow(){
@@ -2111,6 +2129,15 @@ function nodeShow(){
   /* one line before the opening node, and only there — never on a follow-up step */
   const late=(node===q.start&&q.late&&qLate(cur))?q.late:"";
   $("npcLate").textContent=late;$("npcLate").hidden=!late;
+  /* some people do not describe the paperwork, they hand it to you. A node may name a document
+     (an id into the pack's DOCS, or the document written inline) and the card holds it out. */
+  const hd=t.doc&&docSections(t.doc)?t.doc:null;
+  $("npcDoc").hidden=!hd;
+  if(hd){const D=docDef(hd)||{},L=D.hand&&(D.hand[lang]||D.hand.en);
+    /* the button says what the PAPER is, not what the person does — the player is the one
+       pressing it, and the speaker is already named two lines above it on the card. */
+    $("npcDoc").textContent=L||DCU().read||docTitle(hd);npcHeld=hd;
+    if(typeof hd==="string"&&!handedDocs.has(hd)){handedDocs.add(hd);save();}}else npcHeld=null;
   $("cdxLb").textContent=T().codexLb;$("codex").textContent=t.codex;$("q").textContent=t.q;
   const box=$("choices");box.innerHTML="";
   const list=[...t.ch].sort(()=>Math.random()-0.5); /* shuffled every time — no more middle-answer tell */
@@ -2366,7 +2393,7 @@ $("replay").addEventListener("click",()=>{
   clearTimeout(replayTimer);replayTimer=null;$("replay").textContent=T().replay;
   xp=0;hearts=startHearts();done=new Set();qa={};marks={};chSeen=0;world="hq";px=fx=10;py=fy=11;dir="down";
   applyGrowth();save();
-  seenOpen=new Set();
+  seenOpen=new Set();handedDocs=new Set();
   $("settings").hidden=true;$("end").hidden=true;$("card").hidden=true;showWorld();
   setWorldTag();hud();checkTalk();
   toast(T().replayToast(heroName),2500);});
@@ -3796,7 +3823,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").textContent=T().contBtn(SV.n,SV.xp,SV.d.length);
   $("continueBtn").addEventListener("click",()=>{
     heroName=SV.n;cls=SV.c||"";look=SV.lk||look;xp=SV.xp||0;hearts=SV.he??3;done=new Set(SV.d||[]);
-    treats=SV.tr||0;fredQ=SV.fq||0;chSeen=SV.cs||0;seenOpen=new Set(SV.so||[]);
+    treats=SV.tr||0;fredQ=SV.fq||0;chSeen=SV.cs||0;seenOpen=new Set(SV.so||[]);handedDocs=new Set(SV.hd||[]);
     bldPicks=(SV.bl&&typeof SV.bl==="object")?SV.bl:{};   /* the houses keep the faces they were built with */
     /* a save written before v2 lost cs on every Continue. Rebuild it from what was played:
        a district counts as claimed when its need is met AND the next district has been

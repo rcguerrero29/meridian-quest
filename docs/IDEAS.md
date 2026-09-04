@@ -934,7 +934,7 @@ meaning alone. Findings from the first pass, judged cold before checking intent:
 **Reads instantly — leave alone:** agility hurdle, tunnel, weave poles, doghouse,
 fence, traffic cone, the yellow/black construction barrier, the MQT stop (pole + sign +
 bench), coffee cup, potted plant, fridge, stove, shelving, drafting table, blueprint
-wall, river, stairs, flower bed, scaffolding — and the produce crate, now that the
+wall, river, ~~stairs~~, flower bed, scaffolding — and the produce crate, now that the
 fruit has silhouettes instead of coloured dots.
 
 **All five FIXED 2026-09-02 (S0 item 5 — the owner assigned the legibility pass to the
@@ -1144,8 +1144,17 @@ around the door face and on the jamb, and the light pool under the door grown fr
 **Still drawn from above and stood up, and judged acceptable in the frames:** `D` desk
 (already three-quarter since S0), `P` plant, `C` cone, `X` site sign, `H` crate, `S`
 shelves, `I` scale, `A` drafting table, `U` panel, `9` doghouse, `□` box, `W` fridge,
-`F` picket fence (reads as a fence in the park, `shots/18-park-fence-3d.png`), `1` stairs.
+`F` picket fence (reads as a fence in the park, `shots/18-park-fence-3d.png`).
 Any of these the owner reports gets a side view the same way — one drawing, one cold read.
+
+**`1` stairs was on that list and did not belong there (struck 2026-09-04).** It was never
+stood up in any camera, because it *cannot be* today: `"1"` is in neither `SOLID`
+(`engine/engine.js`) nor the pack's `SOLIDX`, and a non-solid glyph never reaches `sideArt()`.
+The front camera and the 3D ground bake both paint its top-down art flat onto the floor, and
+the iso pass skips it and draws a gold lozenge — so `IZH["1"]=10` has never once been read.
+Every other glyph in the list above is solid; the stairs were the one exception and the doc
+did not say so. Owner, 2026-09-04: *"those stairs are trash. not realistic."* He was cold-
+reading a tile that three of four cameras were drawing as a rug.
 
 **Not done:** a marker or label over a door when you stand near it (the third door
 affordance). The talk bar already names people; a door could get the same treatment.
