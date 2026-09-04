@@ -1876,9 +1876,15 @@ const DCU=()=>((typeof DOCUI!=="undefined"&&DOCUI[lang])||(typeof DOCUI!=="undef
 const readAt=(x,y)=>RD().find(r=>r.world===world&&r.x===x&&r.y===y&&DC()[r.doc]);
 /* the mark NEVER clears once read: a mark that disappears when you tick it is a checklist
    painted on the world, and this city does not have those. A thing you can read is a place. */
+/* Every readable thing in the room you are standing in wears its mark — no distance limit.
+   Paper on a wall is visible from the doorway; that is what a wall is for. It used to be
+   three tiles, which meant the owner walked into his own office, stood at the stairs where
+   the game puts you, and saw nothing at all (2026-09-03: "i still couldnt find my posters
+   and laptop... ive achieved things in the game"). A marker that only appears once you are
+   already touching the thing is not a marker. The door arrow keeps its three tiles: a door
+   is a place you walk to, not a thing you read. */
 function readMarks(){const out=[];
-  RD().forEach(r=>{if(r.world!==world)return;
-    if(Math.abs(r.x-px)+Math.abs(r.y-py)<=3&&DC()[r.doc])out.push(r);});
+  RD().forEach(r=>{if(r.world===world&&DC()[r.doc])out.push(r);});
   return out;}
 function drawReadMark(g,bx,by,up){ /* a cream card that BREATHES — never the bouncing ❗ */
   const b=0.85+Math.sin(Date.now()/620)*0.15,w=13,h=10,x=bx+16-w/2,y=by-6-(up|0);

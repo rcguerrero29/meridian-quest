@@ -13,6 +13,14 @@ preference that outlives one phase; cite the date and their words.
 
 ## Settled — never re-ask
 
+- **The world stays realistic — not perfect, but never nonsense.** *(2026-09-03)* Owner, on a
+  trolley that could drop you on the second floor of a building: *"i dont like that i go from a
+  train to a floor. dont do that. i asked to make the world realistic. not perfect but so if
+  needed it can be upgraded."* A shortcut that breaks how a place actually works is not a
+  shortcut, it is a bug with a menu. Convenience is bought by building the real thing — a door,
+  a stair, a sign — never by teleporting past it. "Upgradeable" is the bar: a rough version of
+  the true thing beats a polished version of a fake one.
+
 - **The whole story is written; the four story calls are Nacho's picks until the owner
   flips one.** *(2026-09-02)* Owner: *"ok i want the rest of the story for my ai practice...
   when can i have that? now please if possible - any outstanding questions?"* Read as: write

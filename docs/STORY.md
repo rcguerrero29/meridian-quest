@@ -401,14 +401,21 @@ hired you for. Three fixes, now canon:
   introduce/talk about him right away" · the estimate was always the estimator's paper, and
   deleting the quest instead of moving it would have broken "nothing is ever taken away".
   A character can leave a tile without leaving the story.
-- 2026-09-03 · ❗A la orden · **the office is on the Trolley Pass list** · owner: "i want both
-  nacho and don guero at my beck and call, eventually they would be the game building
-  assistants" · in-game they are now a couple of taps from any stop. The larger idea — the two
-  of them as live assistants who rebuild the game while you talk to them — needs a network
-  call, and the owner has ruled out an API ("i dont want an api setup as its just aj").
-  **Signed as a direction, unbuildable as written.** What exists instead: `/nacho`,
-  `/don-guero`, `/pili` and `/meeting-of-da-minds` outside the game, and the room interview
-  inside it.
+- 2026-09-03 · ❗A la orden · **REVERSED THE SAME DAY, and the session's note corrected.**
+  The office was put on the Trolley Pass list so the pair were a couple of taps away. The owner
+  killed it in one line: *"i dont like that i go from a train to a floor. dont do that. i asked
+  to make the world realistic."* A trolley stops where there are rails; you reach an office
+  through its front door and up its stairs. Removed, with a test that every trolley destination
+  is a world that actually holds a trolley stop.
+- 2026-09-03 · ❗El maestro constructor · **what "game building assistants" actually means, in
+  the owner's own correction.** The session had recorded the no-API decision as "it is only AJ".
+  Wrong: *"well its not that its just aj, its just us building but one day we want to assign him
+  a house template that he can build and just add some random customizations."* So the ambition
+  is **not** a chatbot in the game. It is **Don Güero given a house template he can build from,
+  varying it each time** — procedural building from a declared template, which needs no network
+  at all and is exactly the kind of thing this engine's content seams are for. A pack would
+  declare a template (footprint, door, windows, roof, the pieces that may vary and their range)
+  and Don Güero would instantiate it on a lot. **Buildable offline. Not yet designed.**
 
 *(date · decision · one-line why — append only; /nacho fills it)*
 

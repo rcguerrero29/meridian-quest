@@ -1937,6 +1937,12 @@ const CANDIDATES = [
       return { before, after: readMarks().length, marks: readMarks().map(r => r.doc) };
     });
     if (!mk.before) fails.push('no read marker beside the machine on the desk');
+    // and every readable in the room is marked from where the game puts you, not from on top of it
+    const far = await page.evaluate(() => {
+      world = 'f2'; px = fx = 17; py = fy = 11; moving = false; held = null;   // the arrival tile by the stairs
+      return { seen: readMarks().length, total: READS.filter(r => r.world === 'f2').length };
+    });
+    if (far.seen !== far.total) fails.push('standing where the game drops you in the office, only ' + far.seen + ' of ' + far.total + ' readable things wear a marker');
     if (mk.after !== mk.before) fails.push('the read marker cleared once read — that is a checklist, not a place');
 
     // the button appears one step away, names the document, and opens it
@@ -2183,24 +2189,27 @@ const CANDIDATES = [
         if (!/G(ü|u)ero/.test(first)) problems.push('Lupe does not introduce Don Güero in ' + L);
       });
       // the office is somewhere the Trolley Pass will take you
-      if (!TRV.some(d => d.w === 'f2')) problems.push('the office is not on the travel list');
+      // A trolley stops where there are rails. Every destination must be a world that actually
+      // holds a trolley tile — which is why the office came off the list (owner, 2026-09-03:
+      // "i dont like that i go from a train to a floor... i asked to make the world realistic").
+      TRV.forEach(d => { const w = WORLDS[d.w];
+        if (!w) return;
+        if (!w.rows.join('').includes('Y')) problems.push('the trolley stops somewhere with no trolley stop in it: ' + d.w); });
+      if (TRV.some(d => d.w === 'f2')) problems.push('the office is back on the trolley list');
       TRV.forEach(d => { const w = WORLDS[d.w];
         if (!w) problems.push('travel points at a world that does not exist: ' + d.w);
         else if (SOLID.has(w.grid[d.y][d.x]) || w.grid[d.y][d.x] === 'N') problems.push('travel drops you inside something at ' + d.w); });
       return problems;
     });
     fails.push(...cast);
-    // riding to the office actually lands you there, beside the pair
-    const ride = await page.evaluate(async () => {
-      const d = TRV.find(x => x.w === 'f2');
-      world = d.w; px = fx = d.x; py = fy = d.y; moving = false; held = null; dir = d.dir;
-      checkTalk();
-      const near = WORLDS.f2.npcs.filter(n => Math.abs(n.x - px) + Math.abs(n.y - py) <= 8)
-        .map(n => (roomHosts[n.npc] || {}).id).filter(Boolean);
-      return { world, solid: isSolid(px, py), near };
+    // the pair are still upstairs, reached the way you reach an office: the door and the stairs
+    const pair = await page.evaluate(() => {
+      const ids = WORLDS.f2.npcs.map(n => (roomHosts[n.npc] || {}).id).filter(Boolean);
+      world = 'f2'; px = fx = 17; py = fy = 11; moving = false;
+      return { ids, arrive: (UI.en.arrive.f2 || '') + '|' + (UI.es.arrive.f2 || '') };
     });
-    if (ride.solid) fails.push('the trolley drops you inside a wall in the office');
-    if (!ride.near.includes('nacho') || !ride.near.includes('guero')) fails.push('the office landing is not near the pair: ' + JSON.stringify(ride.near));
+    if (!pair.ids.includes('nacho') || !pair.ids.includes('guero')) fails.push('the pair are not upstairs: ' + JSON.stringify(pair.ids));
+    if (!/wall/i.test(pair.arrive) || !/pared/i.test(pair.arrive)) fails.push('walking into the office does not mention the wall in both languages');
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; checkTalk(); });
   }
 
