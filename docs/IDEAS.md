@@ -1393,3 +1393,31 @@ rediscovered in a meeting.
   fails the build on a `WORLD:` warning. Same insight, caught every run instead of by luck.
   (The stronger check the project already had, `auditReach()`, still walks every tile.)
 
+### 15.19 ONE DON GÜERO — BUILT 2026-09-03
+
+Owner: *"ok give it to lupe and just let her introduce/talk about him right away."*
+
+He stood on the street (quest 12) and upstairs in the office at the same time. Removing the
+street body would have orphaned a quest, which breaks the owner's own rule that nothing is
+ever taken away — so the quest moved with him instead of being deleted.
+
+- **Lupe carries both La Obra quests now** (12 and 13). She is *Lupe · Estimator & Permits*,
+  so *The estimate* was arguably always hers to write; Don Güero is the man who sends her
+  everything he does not want to write down.
+- **She introduces him in her first breath**, EN and ES: *"The man up the ladder in the yellow
+  shirt is Don Güero, he runs this site, and he sends me everything he does not want to write
+  down."* He is present in the fiction and absent from the tile — the same treatment Nacho got
+  when his street body came down and his mural stayed.
+- The second node keeps him in the room too: *"Don Güero already told her yes — he tells
+  everybody yes, that is why he is not allowed to answer the phone."*
+- His map letter `f` at st(4,7) is plain pavement now. `NPCLOOK.f` stays: room.js still reads
+  it for his colours upstairs.
+- **The office joined the Trolley Pass list** so the two people who help you design this place
+  are a couple of taps from anywhere with a stop (owner: *"i want both nacho and don guero at
+  my beck and call"*). A test checks every travel destination drops you somewhere you can
+  actually stand, and that the office landing is beside the pair.
+
+**The rule this makes explicit: a character can leave a tile without leaving the story.** Take
+their quest with them and give it to somebody who would plausibly have written it, then let
+that person name them out loud. Deleting the quest is what "nothing is ever taken away" forbids.
+
