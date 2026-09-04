@@ -313,10 +313,12 @@ const BUILDTPL={
 };
 
 /* the lots Don Güero has been given. Same template, different seeds, different houses. */
-const BUILDS=[
-  /* the two ends of Calle Dos. Neither lot displaces a tree or a neighbour — the engine
-     refuses a build that would, and it caught exactly that on the first attempt: the first
-     lot was drawn over Yola the paletera, who has stood on that corner since August. */
-  {id:"casita-w", tpl:"casita", world:"ex", x:0,  y:0, seed:"calle-dos-poniente"},
-  {id:"casita-e", tpl:"casita", world:"ex", x:21, y:0, seed:"calle-dos-oriente"},
-];
+/* NO LOTS ARE BUILT. The ability is the thing that was asked for — "it is just an ability"
+   (owner, 2026-09-03) — and two casitas went up on Calle Dos that nobody asked for and that
+   you cannot walk into. A house with a door you cannot open is the same unrealistic shortcut
+   as a trolley that stops on a second floor. The template, the glyphs and the engine seam all
+   stay, tested; when a parcel is genuinely developed, the house gets an interior and a portal
+   FIRST, and then it goes in this list. Restoring the two casitas is two lines:
+     {id:"casita-w", tpl:"casita", world:"ex", x:0,  y:0, seed:"calle-dos-poniente"},
+     {id:"casita-e", tpl:"casita", world:"ex", x:21, y:0, seed:"calle-dos-oriente"},  */
+const BUILDS=[];
