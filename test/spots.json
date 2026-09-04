@@ -234,5 +234,33 @@
   "x": 17,
   "y": 6,
   "cam": "front"
+ },
+ {
+  "name": "48-busstop-st",
+  "w": "st",
+  "x": 1,
+  "y": 2,
+  "cam": "front"
+ },
+ {
+  "name": "49-busstop-ex",
+  "w": "ex",
+  "x": 22,
+  "y": 4,
+  "cam": "3d"
+ },
+ {
+  "name": "50-cone-street",
+  "w": "st",
+  "x": 5,
+  "y": 4,
+  "cam": "front"
+ },
+ {
+  "name": "51-barriers-street",
+  "w": "st",
+  "x": 19,
+  "y": 7,
+  "cam": "3d"
  }
 ]

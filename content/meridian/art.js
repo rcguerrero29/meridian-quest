@@ -102,6 +102,15 @@ const TILE_PROPS={
     ctx.fillStyle="#6E5334";ctx.fillRect(sx+7,sy+9,18,4);ctx.fillRect(sx+7,sy+9,3,8);ctx.fillRect(sx+22,sy+9,3,8);
     ctx.fillStyle="#8A6F4D";ctx.fillRect(sx+7,sy+16,18,6);
     ctx.fillStyle="#5E3B20";ctx.fillRect(sx+8,sy+22,3,8);ctx.fillRect(sx+21,sy+22,3,8);},
+  /* the trolley stop. It lived in the engine, where its drawing spelled MQT — a pack name in
+     engine code, which is the one thing the portability law forbids. Moved here 2026-09-04. */
+  "Y":rc=>{const{sx,sy,x,y}=rc; /* trolley stop: pole + sign + bench — the town's transit spine */
+      ctx.fillStyle="#3B3F45";ctx.fillRect(sx+6,sy+5,3,22);
+      ctx.fillStyle="#C0392B";ctx.fillRect(sx+2,sy+2,15,9);
+      ctx.strokeStyle="rgba(15,12,20,.4)";ctx.lineWidth=1;ctx.strokeRect(sx+2,sy+2,15,9);
+      ctx.fillStyle="#F2E8D8";ctx.font="700 7px monospace";ctx.fillText("MQT",sx+4,sy+9);
+      ctx.fillStyle="#8A6B3F";ctx.fillRect(sx+14,sy+21,15,3);
+      ctx.fillRect(sx+15,sy+24,2,5);ctx.fillRect(sx+26,sy+24,2,5);},
   "○":rc=>{const{sx,sy}=rc; /* the dog bed */
     ctx.fillStyle="#7A5C8A";ctx.beginPath();ctx.ellipse(sx+16,sy+21,13,7,0,0,7);ctx.fill();
     ctx.fillStyle="#9A7CAA";ctx.beginPath();ctx.ellipse(sx+16,sy+21,9,4,0,0,7);ctx.fill();
@@ -154,6 +163,28 @@ TILEART["▤"]=rc=>{const{sx,sy}=rc;
   ctx.fillStyle="#9AA1A8";ctx.fillRect(sx+9,sy+5,4,1.6);};           /* the staple */
 
 const TILEART_SIDE=Object.assign({},TILE_PROPS);
+TILEART_SIDE["Y"]=rc=>{const{sx,sy}=rc; /* THE TROLLEY STOP, STANDING. It was walkable with no TILES
+      row and no profile, so the front camera and the 3D ground bake painted its top-down art flat
+      onto the pavement — owner, 2026-09-04: "the bus stop is also just a painting on the floor."
+      Same bug class as the stairs, same fix: a `stand` tile with a side view. What makes a stop
+      read as TRANSIT and not as a lamp post is the sign held out ACROSS the pole, at head height,
+      with a bench under it. */
+  ctx.fillStyle="rgba(15,12,20,.18)";                                        /* CONTACT SHADOW — plants pole and bench on the pavement */
+  ctx.beginPath();ctx.ellipse(sx+17,sy+30.2,13,2.1,0,0,7);ctx.fill();
+  ctx.fillStyle="#6E5334";ctx.fillRect(sx+17,sy+23,2,7);ctx.fillRect(sx+27.5,sy+23,2,7); /* BENCH LEGS */
+  ctx.fillStyle="#7A5C36";ctx.fillRect(sx+16.5,sy+15,1.8,7);ctx.fillRect(sx+28,sy+15,1.8,7); /* back uprights */
+  ctx.fillStyle="#8A6B3F";ctx.fillRect(sx+16,sy+16,14,2.2);                  /* BACK RAIL */
+  ctx.fillStyle="#8A6B3F";ctx.fillRect(sx+15,sy+21,15.5,2.6);                /* SEAT SLAT */
+  ctx.fillStyle="rgba(255,255,255,.16)";ctx.fillRect(sx+15,sy+21,15.5,1);    /* the sun catches the seat edge — key light upper-left */
+  ctx.fillStyle="rgba(15,12,20,.30)";ctx.fillRect(sx+15,sy+23.2,15.5,1);     /* shadow under the seat, so it is a plank and not a stripe */
+  ctx.fillStyle="#3B3F45";ctx.fillRect(sx+8,sy+4,3.2,26);                    /* POLE */
+  ctx.fillStyle="rgba(255,255,255,.18)";ctx.fillRect(sx+8,sy+4,1,26);        /* its lit edge */
+  ctx.fillStyle="#2A2D33";ctx.fillRect(sx+6.5,sy+28.8,6,1.8);                /* the base plate it is bolted to */
+  ctx.fillStyle="#2A2D33";ctx.fillRect(sx+2,sy+2,19,11.5);                   /* SIGN BACKING — gives the board thickness */
+  ctx.fillStyle="#C0392B";ctx.fillRect(sx+2.6,sy+2.6,17.8,10.3);
+  ctx.fillStyle="rgba(255,255,255,.14)";ctx.fillRect(sx+2.6,sy+2.6,17.8,1.2);
+  ctx.fillStyle="#F2E8D8";ctx.font="700 7px monospace";ctx.fillText("MQT",sx+5,sy+10);
+};
 TILEART_SIDE["□"]=TILEART["□"]; /* cardboard and tape read the same from the side — it stands as a real box in 3D */ /* the props stand up wearing the same drawing */
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   
@@ -163,7 +194,8 @@ const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   "6":{lift:8,kind:"prop"},"7":{lift:12,kind:"prop"},"8":{lift:9,kind:"furniture"},"0":{lift:6,kind:"prop"},
   "&":{lift:13,kind:"facade",win:[[7,12,18,11]],awn:9},
   "!":{lift:13,kind:"facade",win:[[5,11,22,12]]},
-  "▣":{lift:10,kind:"appliance"},"▯":{lift:9,kind:"furniture"},"⊔":{lift:6,kind:"furniture"},"○":{lift:3,kind:"prop"}
+  "▣":{lift:10,kind:"appliance"},"▯":{lift:9,kind:"furniture"},"⊔":{lift:6,kind:"furniture"},"○":{lift:3,kind:"prop"},
+  "Y":{lift:13,kind:"transit",stand:true}   /* walkable, but a real object: nothing reads lift for a stand tile, it is a height class */
 };
 
 /* ---------- DECOART — the mural on Calle Principal ----------
@@ -306,7 +338,7 @@ const BUILDTPL={
       {id:"yard", when:c=>c.pick.door!=="left", pick:[
         {id:"none",  w:2, tiles:[]},
         {id:"plant", w:2, tiles:[[1,0,"P"]]},
-        {id:"chair", w:1, tiles:[[1,0,"C"]]},
+        {id:"chair", w:1, tiles:[[1,0,"⊔"]]},   /* "⊔" is the guest chair; this said "C", which is the TRAFFIC CONE — inert only because BUILDS is empty, and a kickable cone in somebody's front yard once it is not (found 2026-09-04) */
       ]},
     ],
   },

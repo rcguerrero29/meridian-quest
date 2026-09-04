@@ -328,6 +328,12 @@ always-on 🐾 paw menu with the cross-city whistle; WASD-vs-typing fix.
 ## State snapshot (2026-09-01)
 
 - `main` = deployed through **`mq-v61`** (2026-09-03). Nothing waits on a branch.
+- **Anything in this file that records a version, a count, or a built/not-built state must say
+  where the truth lives** — a doc that states a fact without naming its source goes stale
+  silently, and this one has done it twice. For the version, the source is `CACHE` in `sw.js`.
+  For what is built, the source is the code, not the plan. (Borrowed 2026-09-04 from the
+  FitCheck salvage manifest, which caught the same failure in another repo: a doc claiming 41
+  tests against a reality of 169. IDEAS §15.27.)
   *(This line has now been stale twice: it said `mq-v40` when the truth was v44, caught in
   the 2026-09-01 sweep, and said `v44` when the truth was v61, caught 2026-09-04. The
   version of record is `CACHE` in `sw.js`; when those two disagree, `sw.js` is right.)*

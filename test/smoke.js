@@ -2610,6 +2610,12 @@ const CANDIDATES = [
     {
       const eng = fs.readFileSync(path.resolve(__dirname, '..', 'engine', 'engine3d.js'), 'utf8');
       if (/"345"/.test(eng)) fails.push('engine3d.js still hardcodes a pack glyph list ("345") instead of asking the tile');
+      const bare = f => fs.readFileSync(path.resolve(__dirname, '..', 'engine', f), 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+      ['engine.js', 'engine3d.js'].forEach(f => {
+        if (/\bMQT\b/.test(bare(f)))
+          fails.push('engine/' + f + ' spells this pack\'s transit brand — a pack name in engine code is the one thing the portability law forbids');
+      });
     }
   }
 
@@ -2648,6 +2654,217 @@ const CANDIDATES = [
       if (!/CONTACT SHADOW/.test(g3) || !/createLinearGradient/.test(g3))
         fails.push('the 3D ground no longer darkens where a solid meets it — every building floats in the camera the game boots into');
     }
+  }
+
+  // ---- 33. the dog comes through the door ----
+  // Owner, 2026-09-04: "sonny should be able to follow me anywhere. but when i tell him to stay
+  // and sit he can stop following." + "sometimes he will follow just for fun."
+  // A critter in a world you are not in only idles, so no dog had ever crossed a threshold.
+  {
+    const dog = await page.evaluate(() => {
+      const problems = [];
+      if (typeof dogsFollow !== 'function') return ['a dog cannot cross a door at all'];
+      const sonny = CRIT.find(c => isDog(c) && c.name === 'Sonny');
+      if (!sonny) return ['Sonny is not in the world'];
+
+      const keep = { w: sonny.world, x: sonny.x, y: sonny.y, f: sonny.follow, h: sonny.holdT, s: sonny.stayT,
+                     pw: world, px: px, py: py };
+      const put = (w2, x, y) => { sonny.world = w2; sonny.x = x; sonny.y = y; sonny.fx = x; sonny.fy = y; };
+      // stand on hq's stairs and cross to the office, with the dog at your heel
+      const cross = () => { world = 'hq'; px = fx = 17; py = fy = 6;
+        put('hq', 17, 7); sonny.moving = false;
+        const fw = world, fx0 = px, fy0 = py;
+        world = 'f2'; px = fx = 17; py = fy = 11;            // where hq's stair portal lands you
+        dogsFollow(fw, fx0, fy0); };
+
+      // 1. following: he comes
+      sonny.follow = true; sonny.holdT = 0; sonny.stayT = 0;
+      cross();
+      if (sonny.world !== 'f2') problems.push('a dog on follow did not come through the door');
+      const w2 = WORLDS['f2'];
+      if (sonny.world === 'f2') {
+        if (SOLID.has(w2.grid[sonny.y][sonny.x])) problems.push('the dog arrived inside a wall');
+        if (sonny.x === px && sonny.y === py) problems.push('the dog arrived standing on the player');
+        if (Math.abs(sonny.x - px) + Math.abs(sonny.y - py) > 5) problems.push('the dog arrived across the room instead of beside you');
+        if (sonny.fx !== sonny.x || sonny.fy !== sonny.y) problems.push('the dog arrived mid-slide and will skate to his tile');
+      }
+
+      // 2. told to STAY: he stays, even though you left the room
+      sonny.follow = true; sonny.stayT = performance.now() + 9000; sonny.holdT = sonny.stayT;
+      cross();
+      if (sonny.world !== 'hq') problems.push('a dog told to stay was dragged through the door anyway');
+
+      // 3. told to SIT: same — the owner grouped them
+      sonny.follow = true; sonny.stayT = 0; sonny.holdT = performance.now() + 4000;
+      cross();
+      if (sonny.world !== 'hq') problems.push('a dog told to sit was dragged through the door anyway');
+
+      // 4. not following and far from the door: he stays put, always
+      sonny.follow = false; sonny.holdT = 0; sonny.stayT = 0;
+      let dragged = 0;
+      for (let i = 0; i < 40; i++) {
+        world = 'hq'; px = fx = 17; py = fy = 6;
+        put('hq', 10, 12);                                   // across the room
+        const fw = world, fx0 = px, fy0 = py;
+        world = 'f2'; px = fx = 17; py = fy = 11;
+        dogsFollow(fw, fx0, fy0);
+        if (sonny.world === 'f2') dragged++;
+      }
+      if (dragged) problems.push('a dog across the room followed you through a door ' + dragged + '/40 times — he cannot teleport to the door');
+
+      // 5. not following but AT YOUR HEEL: sometimes, for fun — not never, not always
+      sonny.follow = false; sonny.holdT = 0; sonny.stayT = 0;
+      let came = 0;
+      for (let i = 0; i < 300; i++) { cross(); if (sonny.world === 'f2') came++; }
+      if (came === 0) problems.push('an off-duty dog at your heel never once came along for fun');
+      if (came === 300) problems.push('an off-duty dog came along every single time — that is a shadow, not a dog');
+
+      // 5b. AND IT IS ACTUALLY WIRED TO THE DOOR. Everything above calls dogsFollow() directly,
+      // which proves the function works and NOT that walking through a door ever calls it. Drive
+      // the real path: stand on the portal tile and let tryPortal() run.
+      {
+        const hq = WORLDS['hq']; let sx = -1, sy = -1;
+        for (let y = 0; y < hq.H; y++) for (let x = 0; x < hq.W; x++) if (hq.rows[y][x] === '1') { sx = x; sy = y; }
+        if (sx < 0) problems.push('no stair tile in hq to test the door with');
+        else {
+          world = 'hq'; px = fx = sx; py = fy = sy;
+          put('hq', sx, sy + 1); sonny.follow = true; sonny.holdT = 0; sonny.stayT = 0; sonny.moving = false;
+          portalHold = ''; portalT = 0;
+          const warped = tryPortal(performance.now() + 5000);
+          if (!warped) problems.push('standing on the stairs did not travel — the wiring test proves nothing');
+          else if (sonny.world === 'hq') problems.push('walking through a door does not bring the dog: dogsFollow is never called from tryPortal');
+        }
+      }
+
+      // 5c. THE TROLLEY IS ALSO A WAY THE WORLD CHANGES. It is a second world switch that does not
+      // go through tryPortal, and it silently skipped every arrival step — you rode across town and
+      // the dog you were walking with was still standing at the stop.
+      {
+        world = 'st'; px = fx = 1; py = fy = 1;
+        put('st', 1, 2); sonny.follow = true; sonny.holdT = 0; sonny.stayT = 0; sonny.moving = false;
+        openTravel();
+        const btn = [...document.querySelectorAll('#tvList button')].find(b2 => !b2.disabled);
+        if (!btn) problems.push('the trolley offered nowhere to go, so this proves nothing');
+        else {
+          btn.click();
+          if (world === 'st') problems.push('the trolley did not travel');
+          else if (sonny.world === 'st') problems.push('the trolley left the dog standing at the stop — it does not arrive the way a door does');
+        }
+        document.getElementById('travel').hidden = true;
+      }
+
+      // 6. the whistle still reaches him wherever he is
+      put('pk', 5, 5); sonny.follow = false;
+      world = 'hq'; px = fx = 10; py = fy = 11;
+      const found = nearestDog();
+      if (found !== sonny) problems.push('the paw menu can no longer reach the dog in another world');
+
+      sonny.world = keep.w; sonny.x = sonny.fx = keep.x; sonny.y = sonny.fy = keep.y;
+      sonny.follow = keep.f; sonny.holdT = keep.h; sonny.stayT = keep.s;
+      world = keep.pw; px = fx = keep.px; py = fy = keep.py;
+      return problems;
+    });
+    fails.push(...dog);
+  }
+
+  // ---- 34. a cone is a thing you kick ----
+  // Owner, 2026-09-04: "I think a cone shouldnt make me have to go around it. i should be able to
+  // kick it. sonny should be even able to rip it and they'll just reappear when i leave the screen
+  // for now."
+  {
+    const prop = await page.evaluate(() => {
+      const problems = [];
+      if (typeof isLight !== 'function' || typeof kickProp !== 'function') return ['nothing can be kicked'];
+      if (!isLight('C')) problems.push('the cone is not a light prop');
+      if (SOLID.has('C')) problems.push('the cone still blocks you — you must still walk around it');
+      if (!TILESIDE['C']) problems.push('the cone has no profile, so the front camera lays it back down on the road');
+      // things that SHOULD still stop you
+      ['#', 'B', 'Q', 'Z', 'W', 'V', 'J'].forEach(g => { if (isLight(g)) problems.push('"' + g + '" became kickable and should not have'); });
+
+      const keep = { w: world, x: px, y: py };
+      // FREEZE THE DOGS FIRST. dogWhim() can now rip a light prop, and the page's live loop keeps
+      // running between the assertions below — so a dog could destroy the cone this section is
+      // measuring and the failure would look like a broken reset. Park every dog off-world and
+      // hold it; the rip is tested deliberately at the end, on purpose, with one dog put back.
+      const dogState = CRIT.filter(isDog).map(c => ({ c: c, w: c.world, x: c.x, y: c.y, n: c.next, h: c.holdT }));
+      dogState.forEach(d => { d.c.world = '__frozen'; d.c.next = performance.now() + 6e5; d.c.holdT = performance.now() + 6e5; });
+      const w = WORLDS['st'];
+      let cx = -1, cy = -1;
+      for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (w.grid[y][x] === 'C') { cx = x; cy = y; }
+      const thaw = () => dogState.forEach(d => { d.c.world = d.w; d.c.x = d.c.fx = d.x; d.c.y = d.c.fy = d.y; d.c.next = d.n; d.c.holdT = d.h; });
+      if (cx < 0) { thaw(); problems.push('no cone on the street to kick'); return problems; }
+
+      world = 'st';
+      // 1. it moves when you kick it, and the tile you kicked from is clear
+      const before = propEdits.length;
+      px = fx = cx; py = fy = cy - 1;                        // stand north of it, kick south
+      kickProp(cx, cy, 0, 1);
+      const moved = w.grid[cy][cx] !== 'C';
+      if (!moved) problems.push('kicking the cone did not move it');
+      if (moved && w.grid[cy + 1] && w.grid[cy + 1][cx] !== 'C' &&
+          !(w.grid[cy][cx + 1] === 'C' || w.grid[cy][cx - 1] === 'C'))
+        problems.push('the cone left its tile and landed nowhere');
+
+      // 2. leaving the room puts it back exactly
+      propsReset();
+      if (w.grid[cy][cx] !== 'C') problems.push('the cone did not reappear when the room reset');
+      if (propEdits.length !== 0) problems.push('the prop edit log was not cleared, so it will grow forever');
+      if (propEdits.length !== before) problems.push('reset left the log in a different state than it started');
+
+      // 3. a kicked cone can never come to rest on a door, an NPC, or the player
+      const bad = [];
+      for (let i = 0; i < 200; i++) {
+        const dirs = [[1,0],[-1,0],[0,1],[0,-1]][i % 4];
+        px = fx = cx - dirs[0]; py = fy = cy - dirs[1];
+        kickProp(cx, cy, dirs[0], dirs[1]);
+        for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+          if (w.grid[y][x] !== 'C') continue;
+          if (PORTALS.st && PORTALS.st[w.rows[y][x]]) bad.push('a cone came to rest on a door');
+          if (w.grid[y][x] === 'N') bad.push('a cone came to rest on a person');
+          if (x === px && y === py) bad.push('a cone came to rest on the player');
+        }
+        propsReset();
+      }
+      if (bad.length) problems.push(bad[0] + ' (' + bad.length + ' times in 200 kicks)');
+
+      // 3b. AND WALKING INTO IT ACTUALLY KICKS IT. Everything above calls kickProp() directly,
+      // which proves the function works and NOT that a step ever reaches it. Drive the real path:
+      // hold a direction and let tryStep() run, the way a player does.
+      {
+        propsReset();
+        // the top camera so held-direction maps 1:1 to world direction, and clear the warp
+        // cooldown a previous section left behind — tryStep refuses to move inside it
+        const keepCam = camMode; camSet('top'); warpT = 0; portalHold = '';
+        px = fx = cx; py = fy = cy - 1; world = 'st'; moving = false; dir = 'down';
+        held = 'down';
+        tryStep();
+        if (px !== cx || py !== cy) problems.push('walking into the cone did not move the player onto its tile — it is still a wall in practice');
+        if (w.grid[cy][cx] === 'C') problems.push('walking into the cone did not kick it: kickProp is never reached from tryStep');
+        held = null; moving = false; camSet(keepCam);
+        propsReset();
+      }
+
+      // 4. the cone still exists in every camera — it stopped being solid, and the iso block pass
+      //    only ever ran for solids, so this is exactly where it would silently disappear
+      if (typeof standsUp !== 'function' || !standsUp('C'))
+        problems.push('the cone is neither solid nor standing, so the iso and front cameras drop it');
+
+      // 5. the dog can take one, and it comes back too
+      const sonny = CRIT.find(c => isDog(c) && c.name === 'Sonny');
+      if (sonny) {
+        sonny.world = 'st'; sonny.x = cx; sonny.y = cy - 1; sonny.next = 0; sonny.holdT = 0;
+        let ripped = false;
+        for (let i = 0; i < 400 && !ripped; i++) { dogWhim(sonny, performance.now()); ripped = w.grid[cy][cx] !== 'C'; }
+        if (!ripped) problems.push('the dog can never rip a cone even standing on top of one');
+        propsReset();
+        if (w.grid[cy][cx] !== 'C') problems.push('a ripped cone never comes back');
+      }
+
+      thaw();
+      world = keep.w; px = fx = keep.x; py = fy = keep.y;
+      return problems;
+    });
+    fails.push(...prop);
   }
 
   await browser.close();
