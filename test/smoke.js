@@ -1155,14 +1155,16 @@ const CANDIDATES = [
   const yield_ = await page.evaluate(() => {
     const problems = [];
     const before = { world, px, py, pig: { x: PIG.x, y: PIG.y, m: PIG.moving } };
-    world = 'st'; px = fx = 4; py = fy = 8; moving = false; held = null;   // below Don Güero at (4,7)
+    // Lupe carries both La Obra quests since 2026-09-03 (Don Güero stands upstairs only)
+    const lu = WORLDS.st.npcs.find(x => x.npc === 'lupe');
+    world = 'st'; px = fx = lu.x; py = fy = lu.y + 1; moving = false; held = null;
     document.getElementById('card').hidden = true; document.getElementById('world').hidden = false;
-    PIG.x = 3; PIG.y = 8; PIG.moving = false;                                  // the pigeon beside you too
+    PIG.x = lu.x - 1; PIG.y = lu.y + 1; PIG.moving = false;                    // the pigeon beside you too
     checkTalk(); fredCheck();
     const talk = document.getElementById('talk'), treat = document.getElementById('treat');
-    if (talk.hidden || talk.dataset.qi === undefined) problems.push('standing beside Don Güero shows no quest Talk button');
+    if (talk.hidden || talk.dataset.qi === undefined) problems.push('standing beside the quest-giver shows no quest Talk button');
     if (!treat.hidden) problems.push('the pigeon still takes a button while a quest person is adjacent');
-    px = fx = 6; py = fy = 9; PIG.x = 6; PIG.y = 10; checkTalk(); fredCheck();   // away from him, bird still beside you
+    px = fx = 6; py = fy = 9; PIG.x = 6; PIG.y = 10; checkTalk(); fredCheck();   // away from her, bird still beside you
     if (treat.hidden) problems.push('with nobody to talk to, the pigeon lost her button');
     world = before.world; px = fx = before.px; py = fy = before.py; PIG.x = before.pig.x; PIG.y = before.pig.y; PIG.moving = before.pig.m;
     checkTalk(); fredCheck();
@@ -1261,12 +1263,12 @@ const CANDIDATES = [
   const looks = await page.evaluate(() => {
     const problems = [];
     if (typeof lookOf !== 'function') return ['no lookOf() in the engine'];
-    const n = WORLDS.st.npcs.find(x => x.npc === 'guero');
-    if (!n) return ['Don Güero is not on the street'];
+    const n = WORLDS.st.npcs.find(x => x.npc === 'lupe');
+    if (!n) return ['Lupe is not on the street'];
     if (lookOf(n) !== NPCLOOK[n.key]) problems.push('with no per-person look, the letter look must be used');
-    NPCLOOK.guero = { shirt: '#123456', skin: '#C08356', hair: '#000000', style: 'buzz' };
-    if (lookOf(n) !== NPCLOOK.guero) problems.push('a look keyed by npc id is ignored');
-    delete NPCLOOK.guero;
+    NPCLOOK.lupe = { shirt: '#123456', skin: '#C08356', hair: '#000000', style: 'buzz' };
+    if (lookOf(n) !== NPCLOOK.lupe) problems.push('a look keyed by npc id is ignored');
+    delete NPCLOOK.lupe;
     return problems;
   });
   fails.push(...looks);
@@ -2156,6 +2158,49 @@ const CANDIDATES = [
       return problems;
     });
     fails.push(...walk);
+    await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; checkTalk(); });
+  }
+
+  // ---- 26. one Don Güero, and the pair are a couple of taps away ----
+  {
+    const cast = await page.evaluate(() => {
+      const problems = [];
+      // he stands upstairs only now; nobody is left on the street wearing his name
+      const street = WORLDS.st.npcs.filter(n => n.npc === 'guero');
+      if (street.length) problems.push('Don Güero is still standing on the street');
+      // room hosts are placed as townsfolk, so the map key is generated — look at the declaration
+      const host = Object.values(roomHosts || {}).some(h => h.id === 'guero');
+      if (!host) problems.push('Don Güero is not upstairs either — he has left the game');
+      // his quest went with him: Lupe carries both La Obra quests and no quest is orphaned
+      const lu = WORLDS.st.npcs.find(n => n.npc === 'lupe');
+      if (!lu) problems.push('Lupe is gone from La Obra');
+      else { if (lu.q.indexOf(12) < 0 || lu.q.indexOf(13) < 0) problems.push('Lupe does not carry both La Obra quests: ' + JSON.stringify(lu.q)); }
+      ['en', 'es'].forEach(L => {
+        const Q = L === 'en' ? QEN : QES;
+        if (Q[12].npc !== 'lupe') problems.push('quest 12 is still given by ' + Q[12].npc + ' in ' + L);
+        // she names him in her first breath, so he is introduced rather than merely absent
+        const first = Q[12].nodes[Q[12].start].say;
+        if (!/G(ü|u)ero/.test(first)) problems.push('Lupe does not introduce Don Güero in ' + L);
+      });
+      // the office is somewhere the Trolley Pass will take you
+      if (!TRV.some(d => d.w === 'f2')) problems.push('the office is not on the travel list');
+      TRV.forEach(d => { const w = WORLDS[d.w];
+        if (!w) problems.push('travel points at a world that does not exist: ' + d.w);
+        else if (SOLID.has(w.grid[d.y][d.x]) || w.grid[d.y][d.x] === 'N') problems.push('travel drops you inside something at ' + d.w); });
+      return problems;
+    });
+    fails.push(...cast);
+    // riding to the office actually lands you there, beside the pair
+    const ride = await page.evaluate(async () => {
+      const d = TRV.find(x => x.w === 'f2');
+      world = d.w; px = fx = d.x; py = fy = d.y; moving = false; held = null; dir = d.dir;
+      checkTalk();
+      const near = WORLDS.f2.npcs.filter(n => Math.abs(n.x - px) + Math.abs(n.y - py) <= 8)
+        .map(n => (roomHosts[n.npc] || {}).id).filter(Boolean);
+      return { world, solid: isSolid(px, py), near };
+    });
+    if (ride.solid) fails.push('the trolley drops you inside a wall in the office');
+    if (!ride.near.includes('nacho') || !ride.near.includes('guero')) fails.push('the office landing is not near the pair: ' + JSON.stringify(ride.near));
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; checkTalk(); });
   }
 

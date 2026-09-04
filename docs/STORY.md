@@ -396,6 +396,20 @@ hired you for. Three fixes, now canon:
 
 ## Decision log
 
+- 2026-09-03 · ❗Un solo Don Güero · **he stands upstairs only; Lupe carries quests 12 and 13
+  and introduces him in her first line** · owner: "ok give it to lupe and just let her
+  introduce/talk about him right away" · the estimate was always the estimator's paper, and
+  deleting the quest instead of moving it would have broken "nothing is ever taken away".
+  A character can leave a tile without leaving the story.
+- 2026-09-03 · ❗A la orden · **the office is on the Trolley Pass list** · owner: "i want both
+  nacho and don guero at my beck and call, eventually they would be the game building
+  assistants" · in-game they are now a couple of taps from any stop. The larger idea — the two
+  of them as live assistants who rebuild the game while you talk to them — needs a network
+  call, and the owner has ruled out an API ("i dont want an api setup as its just aj").
+  **Signed as a direction, unbuildable as written.** What exists instead: `/nacho`,
+  `/don-guero`, `/pili` and `/meeting-of-da-minds` outside the game, and the room interview
+  inside it.
+
 *(date · decision · one-line why — append only; /nacho fills it)*
 
 - 2026-09-01 · ❗La vía · **good news with a shadow** — the trolley brings customers

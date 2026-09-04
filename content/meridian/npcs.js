@@ -6,7 +6,7 @@ const NPCN={
 /* npc letter -> npc key + quest queue */
 const STATIONS={p:{npc:"priya",q:[5,14]},j:{npc:"junior",q:[7]},c:{npc:"ceo",q:[9]},l:{npc:"legal",q:[2]},
                 t:{npc:"tovar",q:[0,8]},a:{npc:"camila",q:[1]},h:{npc:"cto",q:[6]},m:{npc:"marcus",q:[3,4]}};
-const WNPC={hq:STATIONS,lc:{r:{npc:"rosa",q:[10]},y:{npc:"chuy",q:[11]}},st:{f:{npc:"guero",q:[12]},e:{npc:"lupe",q:[13]}},
+const WNPC={hq:STATIONS,lc:{r:{npc:"rosa",q:[10]},y:{npc:"chuy",q:[11]}},st:{e:{npc:"lupe",q:[12,13]}}   /* Don Güero stands upstairs only now (owner, 2026-09-03). Lupe carries both La Obra quests and introduces him in her first breath — she is the estimator, so the estimate was always hers to write. */,
             ex:{w:{npc:"beto",q:[],chat:1},x:{npc:"kike",q:[],chat:1},z:{npc:"mari",q:[],chat:1}},
             /* the four parcels — quest queues filled when their packs land */
             ta:{t:{npc:"tacho",q:[24,28,30]},y:{npc:"yesenia",q:[27,29,31]},m:{npc:"moy",q:[25,26]}},
