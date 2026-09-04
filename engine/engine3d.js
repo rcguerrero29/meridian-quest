@@ -5,6 +5,7 @@
    Requires vendor/three.min.js — the only dependency this project has ever taken
    (owner-confirmed 2026-08-31). No WebGL → draw() falls back to the front camera. */
 "use strict";
+const DAY_AMB=0.66,DAY_SUN=0.42;   /* see the note at the lights: these two numbers are what gives a building faces */
 const T3={renderer:null,scene:null,cam:null,group:null,amb:null,sun:null,lastW:0,
   builtKey:"",dirty:0,fail:false,yaw:0,pool:[],tintables:[],tint:null,glows:[],K:1}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
 function t3Invalidate(){T3.dirty++;} /* growth, theme edits — anything that reshapes tiles */
@@ -94,8 +95,13 @@ function t3Init(){
   T3.scene=new THREE.Scene();
   T3.scene.background=new THREE.Color(0x241F2E);
   T3.cam=new THREE.PerspectiveCamera(50,VW/VH,0.1,120);
-  T3.amb=new THREE.AmbientLight(0xffffff,0.95);
-  T3.sun=new THREE.DirectionalLight(0xfff2dd,0.5);
+  /* DAY_AMB/DAY_SUN: with the old 0.95/0.5 the Lambert sum came out top 1.35, east 1.21,
+     south 1.10 — all clipped to white — and west and north both exactly 0.95. Every face of
+     every building in the city rendered the same value, which is why they read as painted
+     flats. 0.66/0.42 lands them at 1.00 / 0.88 / 0.78 / 0.66: a real ladder, nothing clipped,
+     and no art touched. Night already had a ladder and is left alone. */
+  T3.amb=new THREE.AmbientLight(0xffffff,DAY_AMB);
+  T3.sun=new THREE.DirectionalLight(0xfff2dd,DAY_SUN);
   T3.sun.position.set(14,22,8);
   T3.scene.add(T3.amb,T3.sun);
   T3.tint=new THREE.Color(0xffffff);
@@ -129,8 +135,24 @@ function t3Build(key){
       const gch=w.grid[y][x],m=TILES[gch];
       const water=m&&m.kind==="water";
       if(!SOLID.has(gch)||water){
-        if(!DOORSET.has(ch)&&!"345".includes(ch)){const tf=TILEDRAW[ch]||(water?TILEDRAW[gch]:null);
-          if(tf)tf({sx,sy,x,y,canopy:()=>{}});} /* agility gear stands up instead */
+        if(!DOORSET.has(ch)&&!stands(ch)){const tf=TILEDRAW[ch]||(water?TILEDRAW[gch]:null);
+          if(tf)tf({sx,sy,x,y,canopy:()=>{}});} /* a `stand` tile is drawn standing, not baked into the floor */
+        /* CONTACT SHADOW. Both 2D cameras darken the floor in front of a solid; the 3D ground
+           never looked at its neighbours, so every building in the city met the pavement on a
+           hard bright line and read as pasted on. Ambient light does not reach into the corner
+           where a wall meets the ground — that gradient is most of what says "this thing is
+           standing here". Baked into a texture already being built, so it costs no draw call. */
+        const dark=(dx,dy)=>{
+          const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=w.W||ny>=w.H)return;
+          if(!SOLID.has(w.grid[ny][nx]))return;
+          const D=9;                                   /* how far the darkness reaches from the wall */
+          /* run the gradient FROM the shared edge outward, so it is darkest in the corner */
+          const ex=dx>0?sx+32:sx, ey=dy>0?sy+32:sy;
+          const g2=ctx.createLinearGradient(ex,ey,ex+dx*-D,ey+dy*-D);
+          g2.addColorStop(0,"rgba(15,12,20,.26)");g2.addColorStop(1,"rgba(15,12,20,0)");
+          ctx.fillStyle=g2;
+          ctx.fillRect(dx>0?sx+32-D:sx, dy>0?sy+32-D:sy, dx?D:32, dy?D:32);};
+        dark(0,-1);dark(0,1);dark(-1,0);dark(1,0);   /* a wall on any side reaches onto this tile */
       }
     }
   }finally{ctx=old;}
@@ -198,7 +220,7 @@ function t3Build(key){
       T3.glows.push(gm);grp.add(gl);
       continue;
     }
-    if("345".includes(w.rows[y][x])&&!SOLID.has(gch)){ /* agility gear: walkable cutouts */
+    if(stands(w.rows[y][x])&&!SOLID.has(gch)){ /* walkable cutouts: agility gear, and the stairs */
       const g=w.rows[y][x];
       flatTex[g]=flatTex[g]||t3Tex(t3BakeGlyph(g,false,null,false,true));
       const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[g]}));
@@ -336,7 +358,7 @@ function t3Actors(){
   list.push({x:fx,y:fy,f:g=>drawPerson(g,2,6,look,{dir:t3ScreenDir(dir),bob:moving?Math.sin(bob)*2:0,moving})});
   /* the door marker rides the same pool, lifted above the wall line so the door slab
      does not hide it */
-  doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,f:g=>drawDoorMark(g,2,30,0)}));
+  doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,f:g=>drawDoorMark(g,2,30,0,d.mark)}));
   if(typeof readMarks==="function")readMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.15,f:g=>drawReadMark(g,2,30,0)}));
   const old=ctx;
   list.forEach((a,i)=>{
@@ -362,8 +384,8 @@ function t3Actors(){
 function t3Light(){
   const dnow=new Date(),hr=dnow.getHours()+dnow.getMinutes()/60;
   const night=hr>=20.5||hr<6,edge=!night&&(hr>=18||hr<8);
-  let ambI=0.95,ambC=0xffffff,sunI=0.5,tint=0xffffff,bg=0x241F2E;
-  if(themeName==="sunset"||edge){ambC=0xffe3c4;tint=0xfff0dd;sunI=0.6;bg=0x2E2130;}
+  let ambI=DAY_AMB,ambC=0xffffff,sunI=DAY_SUN,tint=0xffffff,bg=0x241F2E;
+  if(themeName==="sunset"||edge){ambC=0xffe3c4;tint=0xfff0dd;ambI=DAY_AMB-0.06;sunI=DAY_SUN+0.08;bg=0x2E2130;} /* a low sun rakes harder, and still must not clip */
   if(night){ambI=0.6;ambC=0xaebbe8;tint=0xc7cfea;sunI=0.15;bg=0x14121F;}
   T3.amb.intensity=ambI;T3.amb.color.set(ambC);
   T3.sun.intensity=sunI;

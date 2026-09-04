@@ -5,7 +5,12 @@ standing rules; anything Settled there is a permit, not a question. The `/don-gu
 next phase on Opus 5, and brings open decisions to the owner as side quests. Every
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
-**Phase: 2 — Taller Herrera (parcel planned 2026-09-01, three decisions signed, NOT built)** · Ledger
+**Phase: 2.5 — la obra de albañilería (construction standard, `mq-v63`)** · Ledger
+
+*(Corrected 2026-09-04. This line read "Phase: 2 — Taller Herrera … NOT built" while the
+growth history below recorded all four parcels written and wired at `mq-v51` and the deployed
+pin was `mq-v61`. The words "NOT built" were load-bearing and false: anyone planning from
+this header would have planned a city that already exists.)*
 opened 2026-08-30. **Deployed: `mq-v61` on `main`, 2026-09-03** (the four parcels written and wired at v51; six playtest fixes at v52 — IDEAS §15.13).
 
 ## Purpose
@@ -25,7 +30,15 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
 | La Cocina | `lc` | Doña Rosa's restaurant. 2 quests, Canela. |
 | The Studio | `lo` | Xochi's design studio (unlocks after La Obra quests). |
 | Calle Dos | `ex` | Construction crew pen (Beto, Kike, Mari), Yola's cart, canal trees, street cat, trolley east terminus. |
-| El Mercado Robles | `me` | Doña Chelo's abarrotes on the st SW lot. 8 AI-PM quests (16-23), 4 NPCs, Frijol the bodega cat. Opens Monday of Week Two. |
+| El Mercado Robles | `me` | Doña Chelo's abarrotes on the st SW lot. 8 AI-PM quests (16-23), 4 NPCs, Frijol the bodega cat. |
+| Taller Herrera | `ta` | Tacho's shop off Calle Principal. AI-ops practice. Written and wired `mq-v51`. |
+| Panadería La Espiga | `pa` | Licha's bakery off Calle Dos. Forecasting and drift. Written and wired `mq-v51`. |
+| Limpieza Velázquez | `li` | Chente's crew off Calle Dos. Adoption and rollout. Written and wired `mq-v51`. |
+| Nolasco Tax & Notario | `no` | Bere and the licenciado, upstairs off the avenue. Scope and refusal. Written and wired `mq-v51`. |
+
+*(Rows added 2026-09-04. The table ended at El Mercado while four more districts were written,
+wired and deployed; "Opens Monday of Week Two" was also left over from before weeks were
+retired. **None of the four has ever been human-played** — that is the open gate, not the wiring.)*
 
 ## Open parcels
 
@@ -137,6 +150,17 @@ calls, in the game's codex style (bilingual EN/ES, retry-until-correct).
   01 and 04 assigned. The smoke test now fails a district whose Saturday is missing a
   string in either language.
 
+### Verified 2026-09-04 — a walkable tile could never be drawn standing
+
+The front camera (`engine.js`) and the 3D ground bake (`engine3d.js`) painted every non-solid
+tile with its **top-down** art flat on the floor, and the iso depth pass skipped it entirely. So
+anything walkable that should have height — a stair, a ramp, a low platform, a kerb — had no path
+at all, and `IZH["1"]=10` sat being read by nothing. **Partly closed the same day** by a third
+tile category (`stand:true`, IDEAS §15.25): a walkable tile that is an object, drawn standing
+from a profile drawing. What is still open is genuine elevation (§15.10) — walking *up* a flight
+in view, rooftops, the fire escape. A portal stair does not need it, because it is only ever
+seen from the side.
+
 ## ⚠️ THE CEILING — the roadmap promises four more businesses; the code holds two
 
 **AMENDED 2026-09-02, night: the code now holds six districts.** Every item below that
@@ -171,6 +195,27 @@ is keyed by station **letter, globally**, with 20 of 23 usable letters spent —
 would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
+
+- ⏳ **❗La caja de escalera** *(Don Güero, 2026-09-04)* — HQ's stair is at (17,5); Floor 2's is
+  at (18,11), same 20×14 building, six rows apart. You climb in the north-east alcove and arrive
+  in the south-east corner. Stacking them makes the building a building — but it re-opens a
+  sentence already signed (f2's clear sight line from the stairs to the window, and the clear
+  arrival tile at (17,11)). His recommendation: stack, and re-sign the sight line in one line.
+- ⏳ **❗El zaguán** *(Don Güero, 2026-09-04)* — Nolasco is a walkup, and today its street door
+  and its staircase are the same connection wearing two different clothes: you go **up** through
+  a door and come back **down** through stairs. `maps.js` records the rule it breaks, thirty
+  lines below the code that breaks it. His recommendation: draw the climb at both ends (half an
+  hour) rather than build a stair-hall world (a third of a sitting).
+- ⏳ **❗La cortina** *(Don Güero, 2026-09-04)* — a roll-up gate that comes down at night is the
+  most realistic thing on his list and the first that could take something away from the player.
+  His recommendation: **art only, never solid** — the gate drops in the picture, the door still
+  opens, the light still spills.
+- ⏳ **❗El local** *(Don Güero, 2026-09-04)* — `BUILDTPL.local`, a 6×3 storefront with `interior`
+  and `link` parts and `buildSafe()` **refusing any build with no way in**, which turns "nothing
+  goes into the world the player cannot use" from a rule a session must remember into one the
+  engine enforces. Ships as an ability; whether a lot is developed with it is the owner's call.
+  Honest limit he named: a template cannot invent a world — `WORLDS` is built at load, so the
+  pack declares the interior shell up front.
 
 - ✅ **❗La oficina** — signed 2026-09-02: the barrio furnishes it, one piece per
   business. Built the same day (S2 v1), with the interview. ⚠️ **AMENDED 2026-09-02 by

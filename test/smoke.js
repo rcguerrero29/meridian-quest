@@ -2555,6 +2555,101 @@ const CANDIDATES = [
     await page.evaluate(() => { document.getElementById('card').hidden = true; showWorld(); });
   }
 
+  // ---- 31. a staircase stands up ----
+  // Owner, 2026-09-04: "those stairs are trash. not realistic." The drawing was only half of
+  // it — "1" is walkable, and the engine had exactly two categories, flat ground art or solid
+  // geometry. So the front camera and the 3D ground bake painted the stair's TOP-DOWN art flat
+  // onto the floor and the iso pass drew a gold lozenge: it read as a gate lying down in three
+  // of four cameras, and 3D is the one the game boots into.
+  {
+    const stairs = await page.evaluate(() => {
+      const problems = [];
+      if (typeof stands !== 'function') return ['a walkable tile can never be drawn standing'];
+      if (!stands('1')) problems.push('the stairs are not flagged as a thing that stands up');
+      if (!TILESIDE['1']) problems.push('the stairs have no profile drawing, so nothing can stand them up');
+      if (!TILES['1'] || TILES['1'].kind !== 'stair') problems.push('the stairs do not say what they are');
+      if (IZH['1'] !== undefined) problems.push('IZH["1"] is back; the iso block pass runs for SOLID glyphs only, so it is a number nothing reads');
+
+      // the decisive test: which drawing does each camera actually CALL near the stairs?
+      const spy = g => { const plan = TILEDRAW[g], side = TILESIDE[g], n = { plan: 0, side: 0 };
+        TILEDRAW[g] = rc => { n.plan++; return plan(rc); };
+        TILESIDE[g] = rc => { n.side++; return side(rc); };
+        n.restore = () => { TILEDRAW[g] = plan; TILESIDE[g] = side; }; return n; };
+      const keepW = world, keepX = px, keepY = py, keepC = camMode, keepFx = fx, keepFy = fy;
+      // the camera follows fx/fy, not px/py — move both or the stairs are off-screen and every
+      // count below is zero for the wrong reason
+      world = 'hq'; px = fx = 17; py = fy = 6;       // standing at the foot of HQ's flight
+
+      const f = spy('1'); camSet('front'); drawFront();
+      if (f.plan) problems.push('the front camera still paints the stairs flat on the floor (' + f.plan + ' calls)');
+      if (!f.side) problems.push('the front camera never draws the stairs standing');
+      f.restore();
+
+      const t = spy('1'); camSet('top'); draw();
+      if (!t.plan) problems.push('the top camera lost the stairs entirely — it is the one camera a plan view is right for');
+      t.restore();
+
+      world = keepW; px = keepX; py = keepY; fx = keepFx; fy = keepFy; camSet(keepC);
+      return problems;
+    });
+    fails.push(...stairs);
+
+    // the arrow over a portal points the way that portal goes
+    const arrow = await page.evaluate(() => {
+      const problems = [], keepW = world, keepX = px, keepY = py;
+      const markAt = (w2, x, y) => { world = w2; px = x; py = y;
+        const d = doorMarks().find(m => m.ch === '1'); return d ? (d.mark || 'down') : null; };
+      if (markAt('hq', 17, 6) !== 'up') problems.push('HQ\'s stairs climb to the office and their marker still points down');
+      if (markAt('f2', 17, 11) !== 'down') problems.push('the office stairs go down and their marker does not say so');
+      world = keepW; px = keepX; py = keepY;
+      return problems;
+    });
+    fails.push(...arrow);
+
+    // and the engine stopped naming a content pack's glyphs to decide how to draw them
+    {
+      const eng = fs.readFileSync(path.resolve(__dirname, '..', 'engine', 'engine3d.js'), 'utf8');
+      if (/"345"/.test(eng)) fails.push('engine3d.js still hardcodes a pack glyph list ("345") instead of asking the tile');
+    }
+  }
+
+  // ---- 32. a building has faces ----
+  // Pili, 2026-09-04: ambient 0.95 against a sun of 0.5 put three of a box's five faces at or
+  // past full brightness and left the other two identical, so every building in the city
+  // rendered as one flat colour from every angle. That is not an art problem and no drawing
+  // fixes it. This section is arithmetic, not pixels: it holds the light to a real ladder.
+  {
+    const light = await page.evaluate(() => {
+      const problems = [];
+      if (typeof DAY_AMB === 'undefined' || typeof DAY_SUN === 'undefined')
+        return ['the daylight is no longer named, so nothing can check it'];
+      const L = [14, 22, 8], n = Math.hypot(L[0], L[1], L[2]), d = L.map(v => v / n);
+      const faces = { top: [0, 1, 0], east: [1, 0, 0], west: [-1, 0, 0], north: [0, 0, -1], south: [0, 0, 1] };
+      const lit = {};
+      Object.keys(faces).forEach(k => {
+        const v = faces[k], dot = Math.max(0, v[0] * d[0] + v[1] * d[1] + v[2] * d[2]);
+        lit[k] = DAY_AMB + DAY_SUN * dot;
+      });
+      // nothing may clip: a face past 1.0 is white, and two white faces are one face
+      Object.keys(lit).forEach(k => { if (lit[k] > 1.001)
+        problems.push('the ' + k + ' face of every building clips to white at ' + lit[k].toFixed(2) + ' — raise nothing, lower the ambient'); });
+      // and there has to be a real ladder, or the box is a flat cutout again
+      const spread = lit.top - lit.north;
+      if (spread < 0.22) problems.push('a building\'s lightest and darkest faces are only ' + spread.toFixed(2) + ' apart; it will read as wallpaper');
+      if (Math.abs(lit.east - lit.south) < 0.04) problems.push('two side faces of a building are the same value');
+      if (DAY_AMB < 0.4) problems.push('the shadow side is so dark the city stops reading as daylight');
+      return problems;
+    });
+    fails.push(...light);
+
+    // and the 3D ground plants what stands on it, the way both 2D cameras already do
+    {
+      const g3 = fs.readFileSync(path.resolve(__dirname, '..', 'engine', 'engine3d.js'), 'utf8');
+      if (!/CONTACT SHADOW/.test(g3) || !/createLinearGradient/.test(g3))
+        fails.push('the 3D ground no longer darkens where a solid meets it — every building floats in the camera the game boots into');
+    }
+  }
+
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);

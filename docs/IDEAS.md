@@ -1544,3 +1544,49 @@ every test stay — **the ability was the ask**. Restoring the two lots is two c
 `art.js`. The standing rule when a parcel is genuinely developed: **the interior and the portal
 come first, then the house goes on the list.**
 
+
+
+### §15.25 — A walkable thing that has to stand up (2026-09-04)
+
+Owner: *"those stairs are trash. not realistic. can we have realistic building designs."*
+
+**The drawing was never the problem. The stairs were lying down.** The engine had exactly two
+categories of tile — flat ground art, or solid standing geometry — and a staircase is neither:
+you walk *onto* it, and it has to stand up. Because `"1"` is in neither `SOLID` nor the pack's
+`SOLIDX`, the front camera and the 3D ground bake both painted its **top-down** art flat onto
+the floor, and the iso pass skipped it and drew a gold lozenge. One camera out of four was
+honest, and it was not the one the game boots into. `IZH["1"]=10` had never been read by
+anything, because the iso block pass runs for `SOLID` glyphs only.
+
+**The fix is a third category, and it is one word of metadata:** `stand:true` on a tile means
+*walkable, but an object*. The renderers each do the best they can with it — the 3D pass gives
+it the walkable-cutout sprite that the agility gear already used, and the front camera stands it
+with a contact shadow **if it has a profile drawing**, leaving anything without one exactly as
+it was. It also retired a hardcoded `"345"` glyph list from `engine3d.js`: engine code naming a
+content pack's glyphs is the portability law wearing a different hat.
+
+**The lesson that outlives the stairs:** when a thing reads wrong in three cameras and right in
+one, do not redraw it. Ask which category the engine put it in. A cold read that fails in every
+camera is an art problem; a cold read that fails in *some* cameras is a plumbing problem, and
+redrawing it makes four cameras' worth of work out of a one-line fix.
+
+### §15.26 — Two numbers decided that no building in Meridian had faces (2026-09-04)
+
+The 3D scene ran **ambient 0.95 against a sun of 0.5**. Do the Lambert arithmetic on a box with
+the sun at (14,22,8): top `1.35`, east `1.21`, south `1.10` — all three clipped to white — and
+west and north both **exactly 0.95**. Every face of every building rendered the same value from
+every angle. That is the whole reason the city read as painted flats, and **no amount of art
+would have fixed it**, because it is not an art problem.
+
+`0.66 / 0.42` lands the same faces at `1.00 / 0.88 / 0.78 / 0.66`: a real ladder, nothing
+clipped, no drawing touched. Night was already fine (0.6/0.15 never clipped) and is left alone.
+Smoke §32 now does this arithmetic on every run and fails if any face clips or if the spread
+collapses — the invariant is *a building must have faces*, and it is cheaper to assert than to
+re-notice.
+
+**And the second half: everything floated.** Both 2D cameras have always darkened the floor in
+front of a solid; the 3D ground bake never looked at its neighbours, so every building in the
+city met the pavement on a hard bright line. A gradient baked into a texture that is already
+being built costs no draw call and plants the whole city at once. Ambient light does not reach
+the corner where a wall meets the ground — that gradient is most of what says *this is standing
+here*.
