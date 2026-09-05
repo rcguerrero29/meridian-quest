@@ -5,7 +5,7 @@ standing rules; anything Settled there is a permit, not a question. The `/don-gu
 next phase on Opus 5, and brings open decisions to the owner as side quests. Every
 signed decision gets logged here — a recorded decision is a permit, not a suggestion.
 
-**Phase: 2.5 — la obra de albañilería (construction standard, `mq-v63`)** · Ledger
+**Phase: 2.5 — la obra de albañilería (construction standard)** · Ledger · *deployed version: see `CACHE` in `sw.js`, which is the source of truth*
 
 *(Corrected 2026-09-04. This line read "Phase: 2 — Taller Herrera … NOT built" while the
 growth history below recorded all four parcels written and wired at `mq-v51` and the deployed
@@ -42,9 +42,18 @@ retired. **None of the four has ever been human-played** — that is the open ga
 
 ## Open parcels
 
+*(Corrected 2026-09-05, Don Güero. Three of the four entries below described lots that were
+developed at `mq-v51` and are in `maps.js` today — a planner reading this list would have built
+on top of a business that already exists.)*
+
 - ~~**st southwest lot**~~ — **built 2026-08-31**: El Mercado Robles.
-- **st southeast lot** — signposted "RESERVED LOT". Unassigned. Next obvious parcel.
-- **Calle Dos frontage** (`ex` rows 0/9) — room for small storefronts along the canal.
+- ~~**st southeast lot**~~ — **built 2026-09-02**: Taller Herrera (ribbon on row 13, x18–28).
+- ~~**Calle Dos frontage, `ex` row 0**~~ — **built 2026-09-02**: La Espiga (x4–8) and Limpieza
+  Velázquez (x10–14). A short gap remains at x15–23.
+- **`ex` row 10 — the canal-side south frontage**, entered from the lane at row 9. The largest
+  genuinely open parcel left. (The old entry said "rows 0/9"; row 9 is the *street*, not a lot.)
+  ⏳ ❗El solar.
+- **`st` row 15 — the south fence line**, entered from row 14 between the jacarandas.
 - **New maps** — the engine takes new worlds as data (`WORLD_DEFS` + portal); a
   bigger business can be its own interior, like La Cocina.
 

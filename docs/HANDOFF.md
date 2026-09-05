@@ -31,8 +31,11 @@ Everything is plain `<script>` tags sharing the global scope — content files a
 folder + a copy of `index.html` pointing its seven content script tags at it** (the
 seventh, `room.js`, is optional — a pack that omits it gets no room interview).**
 
-- **24 quests** (indices 0–23) + Frederick's secret side quest, fully bilingual EN/ES.
-  MAXXP = 350 (10 per node). Quests 16–23 are El Mercado's **AI product manager** pack.
+- **56 quests** + Frederick's secret side quest, fully bilingual EN/ES. `MAXXP = 830`
+  (`content/meridian/config.js`, which is the source of truth for both numbers).
+  Six districts, each training a different AI role.
+  *(Corrected 2026-09-05: this said 24 quests and MAXXP 350, written before `mq-v51` wired the
+  four new districts. Do not restate a count here — name the file that holds it.)*
 - **Growth is a pure function of progress**: `applyGrowth()` rewinds Calle Principal to
   its shipped map (`rebuildWorld`) and then rebuilds exactly what the run has earned —
   La Obra's stages, then El Mercado's facade. So "New game +" really does hand you empty
@@ -47,7 +50,9 @@ seventh, `room.js`, is optional — a pack that omits it gets no room interview)
   The end screen's forward button reads **▶ Out to the street**; weeks are retired.
   *(Corrected 2026-09-01 — this paragraph said "Week One needs all 16" and "▶ Monday —
   Week Two" long after both stopped being true.)*
-- **21 NPCs** across 7 maps (hq, f2, st, ex, lc, lo, me). The Studio (`lo`) and its
+- **NPCs across twelve worlds** — the roster lives in `content/meridian/npcs.js` and the
+  placements in `WNPC` (`content/meridian/maps.js`); count them there, not here.
+  *(Corrected 2026-09-05: this said 21 across 7 maps.)* The Studio (`lo`) and its
   designer **Xochi** (quest 15, "The collar drop") unlock only after both La Obra
   quests (12, 13) are answered correctly.
 - **Retry-until-correct** (owner decision, 2026-08-30): a quest completes only on the
