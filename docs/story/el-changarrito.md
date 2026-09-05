@@ -28,10 +28,10 @@ and the label picks the body:
 | `tier: high` | a **named person** with a look and a title | stands still at a declared tile, wears ❗, opens a document (title, body, labels, age) with a **Done** button | `addChill()` + a `doc` + one button section (§4 B2) |
 | `tier: normal` | **townsfolk** — a face from the shared pool, first name only | wears ❗, says the title in one line, Done from the card | `addChill()` with `chat` |
 | `tier: low` | **nobody** — a pinned note on the board at the window | listed, read, closed from the board | a `READ` whose `DOC` is built from the record |
-| animals | **never** | a butterfly, a cat, the pigeon carry no task. They may carry a *note* ("Sonny found a permit under the bench") only if the owner asks | engine-owned critters, unchanged |
+| animals | **never a task** | a butterfly, a cat, the pigeon carry nothing. **Sonny is the exception the owner named on the first walk** (2026-09-05, §9): he comes with his whole mini game — follows you, sit / lie / stay, the ball, the cone — and may carry a *note*, never a task | `CRITTERS` in the town's pack; a `pk` room so the leash warp has somewhere to go |
 
-Sonny only gets more if a game is built around him — his own world, his own rules. Not
-here. The engine's animals are pinned to Meridian's world ids anyway (`DOG` in `hq`,
+~~Sonny only gets more if a game is built around him.~~ **Amended by the owner after the first
+walk (§9): "include sonny... he has a whole mini game already."** He comes as he is. The engine's animals are pinned to Meridian's world ids anyway (`DOG` in `hq`,
 `CAT` in `lc`, the pigeon and parrot in `st`, `engine.js:1153, 1208, 1252, 1284`): if the
 Changarrito names a street `st`, Paloma and the parrot show up uninvited unless their
 coordinates are solid there. That is a quirk to place around, not a feature to design on.
@@ -325,3 +325,96 @@ practice goal." Written as rules the tests can hold.*
    obvious second resident. He is a planner, not a task-carrier — he keeps his weight.
 5. **A read-only Pages copy, ever?** Only after step 1. Default: no; the laptop is enough
    for an audience of one.
+
+---
+
+## 9 · The first walk — playtest of 2a, 2026-09-05, planned not built
+
+*The owner ran the town from `localhost` an hour after 2a merged and came back with four
+things. Each is written here first, at their ask ("only write that into the plans first").
+None is built. Where a finding changes an earlier rule, the rule is amended above and the
+amendment is theirs.*
+
+### 9.1 · "There are no buildings other than the first"
+
+True. The street is a road with plants, because 2a was *el pueblo quieto* — people first.
+A street with nothing standing on it reads as a lot, not a town. **Change to 2b:** the street
+gets facades before it gets the clerk.
+
+- **Buildings are data the engine already draws.** `B` is a solid building face, `E` a door;
+  the pack's `DOORLOOK` colours each door; `DECOR` hangs a sign or a mural; `TILEART` paints a
+  window. Meridian's street is built from exactly these glyphs. The town's `st` rows change;
+  the engine does not.
+- **What stands there, in order of when it earns its walls:** la ventanilla's window (2b, the
+  clerk's building — the first one with a door); Don Güero's stall as a proper storefront at
+  the top of the street instead of a room you wake up in; **a park** (§9.4) as the second block
+  through the east door; and one facade per *label* — `ask`, `decision`, `bug` — so a person
+  stands in front of the building that matches what they carry. The last is the cheap, honest
+  way to give the street a skyline that means something: three facades, no interiors, and a
+  person's tier still picks the body.
+- **What it must not become:** interiors for their own sake. A door the player cannot open is
+  the rule ❗La reja exists for (#9). Every door on the street either opens or is a window.
+- **Cost:** a quarter sitting for the rows, doors and signs; the owner doubts it ships — it is
+  smaller than that doubt. Art for a facade that is not Meridian's is the only new drawing.
+
+### 9.2 · "Have a human friendly explanation and ability to request more context"
+
+The reader opens the issue as filed: a heading, the body as paragraphs, the facts. The body is
+written for the repo, not for a person standing in a street. **Two changes.**
+
+- **A plain-words paragraph first, by convention.** Every issue a session files starts its
+  body with one paragraph under the line `In plain words:` — what this is, why it matters,
+  what "done" looks like — in the language of the street, no file names. The reader shows that
+  paragraph as the person's first line and the rest under *the paperwork*. Issues #3–#34 get
+  the paragraph added when 2b ships (an edit to the body, no code). The convention goes into
+  `CLAUDE.md` so every future session writes it.
+- **"Ask for more context" is the first thing the town ever writes.** A button on the person's
+  document: *Pídeme más contexto*. It files a comment on the issue — `más contexto, por favor`
+  — which needs `issues: write`, so it lands in **Part 3** with the token. The next session
+  finds the comment and answers it *as a comment*, in plain words; the town reads comments the
+  same way it reads issues — **author-filtered** (the answer is posted by the owner's account,
+  so it passes; a stranger's comment does not) — and the person says the answer the next time
+  you talk. Until Part 3, the same ask is a sheet: *Copy* the person's document and paste it
+  into a session with "explain this to me."
+
+### 9.3 · "Allow these characters to talk more than once since their quest is ongoing"
+
+Today a person opens their document every time you press Talk — repeatable, but the same
+thing each time. An ongoing quest should sound ongoing. **Change to 2b:** a person has three
+lines and cycles through them, and the document stays one button away.
+
+1. **The plain words** (§9.2) — what this is.
+2. **The paperwork** — number, labels, how long it has stood there ("filed twelve days ago").
+3. **What's next** — the last comment on the issue if there is one (author-filtered), else
+   "nobody has answered yet — ask me for more context."
+
+Then back to 1. The cycle is per person and per visit, kept in the town's own storage under
+its prefix, never in the save. This is the `CHATTER`/`chillLines` shape the engine already
+has for townsfolk, fed from the record instead of a static list; the hook is content, not
+engine.
+
+### 9.4 · "Include Sonny — he has a whole mini game already"
+
+The owner reverses the earlier rule, and the reversal is theirs (§1, amended). Sonny comes
+as he is: he follows you through doors and the trolley, sit / lie / stay hold him, off duty
+he tags along, he rips the cone (`mq-v64`). He carries **no task** — the rule of weight holds
+for him too — but he may carry a *note*, and the street is livelier for a dog on it.
+
+- **How:** one `CRITTERS` entry in the town's pack — `{kind:"beagle", world:"st", name:"Sonny",
+  egg:"sonny"}` — the same declaration Meridian makes. No engine change.
+- **The one thing that needs a room:** the leash warps the world to `pk` (`engine.js` ~3595),
+  and the town has no `pk`. Either Sonny is never leashed here (the leash button hidden when
+  the pack declares no `pk`), or **the town gets a park** — which §9.1 wanted anyway. The park
+  is the second block: through the east door, a `pk` room with the dog society's rules already
+  in the engine. Recommended: the park. It answers two findings with one room.
+- **What he is for, here:** a walk between people is nicer with a dog. If the owner wants
+  more — Sonny finds a note, Sonny sits by the person whose issue is oldest — those are
+  *notes*, and they come after the board exists.
+
+### 9.5 · What changes in the parts
+
+| Part | Was | Now |
+|---|---|---|
+| **2b** | the window, the board, the permits, the refetch loop, shots, a town smoke | **plus:** facades on the street (9.1); the plain-words paragraph shown first and added to #3–#34 (9.2); three lines per person, cycling (9.3); Sonny on the street and the park through the east door (9.4). Cost: one sitting becomes **one and a half** |
+| **3** | file a request, Done, the token, the test split | **plus:** *ask for more context* as a comment (9.2), and people say the last comment as their third line (9.3) |
+| `CLAUDE.md` | — | the `In plain words:` convention for every issue a session files (9.2) |
