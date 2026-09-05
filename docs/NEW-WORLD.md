@@ -54,7 +54,9 @@ content/<name>/
 **Optional — guarded by `typeof`, the engine simply does less without them:**
 `GAMEV CAMDEF STAKES GROWTH SEASONS CHAPTERS INTERVIEW CRITTERS EGGS CHATTER CHILL NPCACT TRV
 DECOR DECOART READS DOCS DOCUI BUILDTPL BUILDS TILEART TILEART_SIDE TILEMETA MAPCOL MAPDOT
-TOWNLBL DOORS DOORLOOK SOLIDX`. A world with none of these is a walkable town with people and
+TOWNLBL DOORS DOORLOOK SOLIDX` — and, since `mq-v65`, **`STOREPFX`** (config.js): the prefix on
+every storage key. Optional in the engine, **required in practice for any second world served
+from the same origin**, or it loads the first world's save and overwrites it (§8). A world with none of these is a walkable town with people and
 quests. Everything else is a layer you add when its answer arrives.
 
 ## 2 · The switch — honest state: there is no pack selector
@@ -132,3 +134,39 @@ trolley, device saves, the offline installable app, QR save transfer, procedural
 easter eggs, pettable animals, a dog who follows you through doors, light props you can kick,
 the stapled-paper reader, build templates with seeded variation, and the admin tools for
 placing townsfolk by hand. None of it needs a line written for a second world.
+
+## 8 · What 2026-09-05 added to this template *(El Changarrito, the first world built from it)*
+
+The backlog town — `docs/story/el-changarrito.md` — is the first second world, and building
+its foundations changed four answers above. A world started after this date inherits them.
+
+- **`STOREPFX` is the first line of a new `config.js`.** `mq-v65` put every storage key the
+  engine touches (51 sites) behind `SK()`. Meridian's prefix is `"mq"`; a second world
+  declares its own (`"ch"` for the town) or, on the same origin, it opens the first world's
+  hero and then overwrites that save. GitHub Pages serves every project site on an account
+  from **one origin**; `localStorage` is per-origin. The guarantee test fails a literal key.
+- **The switch is a folder.** §2 said there is no pack selector; the chosen answer is a
+  second `index.html` in its own folder (`changarrito/`) that loads `../engine/` and its own
+  `content/`. Nothing is copied, one CI covers both, and the first world's index is untouched.
+- **A service worker is per world, and optional.** A world that ships to players carries its
+  own `sw.js` with its own `CACHE` name and its own `PFX` — the worker now deletes only caches
+  it owns, serves only its own origin, and never stores a non-ok response. A world that runs
+  only on `localhost` for one person **registers no worker at all**.
+- **The public build's guarantee is a test, and it is the first world's.** `test/smoke.js`
+  asserts the tracked shell of the *public* game mentions no API host or token, reads no URL
+  query, keeps a pinned CSP, and that no URL flag turns admin on. A second world that widens
+  its own CSP (to read GitHub, say) does it in **its** index, never the public one.
+- **Three parts, not nine steps, when the world is tooling.** Foundations that ship to the
+  first world behaviour-identical → the world itself, read-only → the world talks back. Each
+  part is a PR that ends green. The nine steps of §5 still apply inside part two.
+- **The rule of weight travels.** If the world reads a ledger (issues, a task list), a label
+  picks the body: a named person carries a real task, townsfolk a small one, a note on a board
+  the rest, and animals nothing. `el-changarrito.md` §1.
+- **What a second world must never do to the first** — five rules, `el-changarrito.md` §7½:
+  the first world's purpose is fixed; every engine change is behaviour-identical for it and
+  proven the same day; its content is never edited for another world's sake; its public build
+  knows nothing about a personal one; sittings are ranked by the owner, not by the new world.
+- **Two reviews before a word of code.** An engineering feasibility pass and a threat model,
+  both against the real code with file:line, both adversarial to the plan. They found the
+  storage collision, the cache poisoning and the hosting mistake the plan had written in. Run
+  them for any world that touches a network.
