@@ -349,7 +349,8 @@ in order of cost, for when AJ wants the next rung:**
    shadows (TILES `awn`), fence posts at run ends. Door light spills already
    existed in `drawDaylight` and work in the front camera unchanged. Same
    commit: **front-profile is now the default camera** via the new `CAMDEF`
-   content seam (owner + AJ pick — see OWNER.md Settled).
+   content seam (owner + AJ pick — see OWNER.md Settled). *(Superseded 2026-09-01:
+   `CAMDEF` is `"3d"` at the owner's ask; front-profile is the fallback.)*
 3. **2× sprite detail**: keep TS=32 but draw at double internal resolution
    (crisper curves, outlines, dithered shading) — renderer-only, art-heavy.
 4. **Real sprite sheets**: hand-drawn PNG tiles/actors replacing canvas-drawn art.

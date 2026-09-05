@@ -233,6 +233,9 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   AJ's game and for fun quests. Against `docs/OWNER.md`'s "never build a quest log", she
   is the named exception, and the distinction is the whole reason it holds: the rule bans
   a list that FINDS you, not a clerk you CHOOSE to visit.
+  **Deferral dated 2026-09-03 (la junta):** SIGNED means the design is agreed, not that
+  she exists. She is in no file — no name, no look, no world, no glyph — and stays
+  deferred until a sitting is priced for her. Do not read SIGNED as shipped.
 - **Barrio Norte** — PROMOTED to the city's through-line. The northbound track
   advances a visible segment per finished business and the sound gets closer.
   Never a place you visit — it stays a promise (kept free for multiplayer/AJ).
