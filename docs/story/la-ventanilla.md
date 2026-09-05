@@ -5,6 +5,8 @@ character, but dont build, just make sure to point out places where we need tags
 something in case we would like to track those." Everything below is designed against the
 code as it stands at `mq-v64`; every seam names a real file and a real function.*
 
+**2026-09-05, later the same day:** she gets her first street in the split-out backlog town — `docs/story/el-changarrito.md`, planned with an engineering review and a threat model. §5 below was corrected by that review.
+
 **The one-line version:** she is the only character in the city who knows what the *repo*
 has on file — a permit awaiting your signature (an open PR), the version the city is running
 (`sw.js` `CACHE`), the asks still on the wall — and she says it in her own voice, ask-only,
@@ -80,11 +82,11 @@ Two greps find everything: `grep -rn ventanilla content docs` and
 | 1 | **Her person** | `content/meridian/npcs.js` — `NPCE` (emoji), `NPCLOOK` (look, keyed by id), the EN/ES title tables | one entry each; site from §3 | `ventanilla` |
 | 2 | **Her words** | `content/meridian/npcs.js` say-lines, EN+ES in lockstep | a small function of the record → lines, never a static list. Past tense only | `ventanilla` |
 | 3 | **The record source** | `engine/engine.js` beside the `NET` seam (~265) | a sibling seam: `RECORD={enabled:false,fetch(){}}`; content declares `RECORDSRC="./status.json"`. Same rule as `NET`: this is THE place the engine reads a file, nowhere else | `city record` |
-| 4 | **Her window is a readable thing** | `engine/engine.js` READS/DOCS (~2076, ~2162) | one engine change: a `DOCS` entry may be a **function of the record**, not only a string. The marker, Read button and panel already exist | `city record` |
+| 4 | **Her window is a readable thing** | `engine/engine.js` READS/DOCS (~2076, ~2162) | ~~one engine change~~ **corrected 2026-09-05: no engine change.** `DOCS` entries are already functions — `docSections()` calls `d.build(docCtx())` (`engine.js` ~2008) — so content closes over the record today. The marker, Read button and panel already exist | `ventanilla` |
 | 5 | **Fetching it** | `index.html` line 10, the CSP | **no change in the public build** — `status.json` is same-origin, `connect-src 'self'` already allows it | — |
-| 6 | **Caching it** | `sw.js` (`CACHE`, the fetch handler ~21) | the worker is cache-first; `status.json` must be **network-first with cache fallback** or she is stale forever. One path carved out | `city record` |
+| 6 | **Caching it** | `sw.js` (`CACHE`, the fetch handler ~21) | the worker is cache-first; `status.json` must be **network-first with cache fallback** or she is stale forever. **And the real bug found 2026-09-05:** `sw.js` ~25-28 stores non-ok responses and answers a failed JSON fetch with `index.html` — fix `if(!res.ok)return res` before the put, in the same commit | `city record` |
 | 7 | **Writing it** | `.github/workflows/` | today Pages serves branch `main`; CI cannot add a file without a commit. Switch Pages to an **Actions deploy** (`upload-pages-artifact`) and write `status.json` in that job from the GitHub API. Name the step "write the city record" | `city record` |
-| 8 | **What she has told you** | `engine/engine.js` `save()` (~287), `sanitizeSave()` | a seen-once set `vt`, like `so`. **The `mq-v52` lesson:** a key the loader does not carry is a key that is lost — add it to the loader in the same commit | `city record` |
+| 8 | **What she has told you** | ~~`save()`, `sanitizeSave()`~~ | ~~a seen-once set `vt`~~ **retired 2026-09-05:** PR and issue numbers grow without bound and the loader clamps every list (`so` to 32). Nothing about the record enters the save — **a permit merged is a permit seen.** The `mq-v52` lesson still stands for any key that *is* added | — |
 | 9 | **The outbound sheet** (you → the build session) | `content/meridian/room.js` pattern; `docs.js` Copy/Download | a second READ at her window: *File a request* → pick from the open side quests + free text → **Copy the sheet**, paste into a session. No network | `ventanilla` |
 | 10 | **Tests** | `test/smoke.js`, `test/shots.js` + `spots.json` | (a) a pack with no `RECORDSRC` gets no clerk, no window, no marker; (b) the loader round-trips `vt`; (c) the portability guard still passes; (d) her window in all four cameras | `city record` |
 | 11 | **The ledger** | `CITY.md`, `ASKS.md`, `BACKLOG.md` §2, `STORY.md` open thread | rows point here | `ventanilla` |
@@ -123,7 +125,7 @@ auth, and nothing sensitive may ever be gated on it.
 2. **No secret ever enters the repo.** Not in code, not in a comment, not in CI. A token
    is never a save key (`sanitizeSave()` whitelists keys, so a `#save=` link can never
    carry it) and never rides `NET.sync()`.
-3. **The personal build is two gitignored files and no service worker.**
+3. **The personal build is two files in a committed `changarrito/` folder, run from `localhost`, and no service worker.** *(First draft said gitignored — a gitignored file cannot be served, and the files hold no secret; the token is what must stay out, and it lives in the browser only.)*
    `index.local.html` — a copy of `index.html` whose CSP is
    `script-src 'self'` (the `'unsafe-inline'` exists only for the SW-registration
    snippet, and there is no SW here) and `connect-src 'self' https://api.github.com`, plus

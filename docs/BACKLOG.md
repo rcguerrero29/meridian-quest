@@ -201,3 +201,23 @@ session verified the critic against the code; costs are the cross-examined ones.
 | ~~F~~ | **SHIPPED 2026-09-04 (mq-v57), struck 2026-09-05.** `worldFlags()` hands content `grade[id]` per district — 0 until you begin, never a phantom 3 — and the mural reads it through `muralGrade()`. Landed in the same commit as G and was never struck | an hour or two | The mural brightens with how well you did |
 | ~~G~~ | **SHIPPED 2026-09-03 (mq-v57)** — seven tiles: Nacho's own MERIDIAN piece plus one panel per business, **baby blue** plaster until begun (the owner changed blank to baby blue), colour brightening with the grade | a sitting | The record became a room |
 
+
+---
+
+## 8 · Found by the two expert reviews, 2026-09-05 — Meridian's own, whether or not the town is built
+
+Full context: `docs/story/el-changarrito.md` §4–§6 and `docs/story/la-ventanilla.md` §5. Each row
+cites the line as it stood at `mq-v64`. None is player-visible today; every one is a trap for
+the next pack or the next fetch.
+
+| # | Thing | Cost | Detail |
+|---|---|---|---|
+| 1 | **The quest verdict card is an `innerHTML` sink for content strings** | minutes | `engine.js:2359` builds `concept / why / beat` with innerHTML. Trusted pack text today; the only DOM sink that takes pack text unescaped. Rebuild with `textContent` |
+| 2 | **The service worker stores non-ok responses and answers a failed JSON fetch with `index.html`** | minutes + a Node test | `sw.js:25-28`. A 403 becomes the permanent answer for that URL. `sw.js` has no runtime test (it cannot register from `file://`) — test its source |
+| 3 | **Twenty literal storage keys in the engine** (`"mq1"`, `mqlang`, `mqadmin`, `mqroom`, `mqnpcs`, `mqcam`, `mqtheme`, `mqpark`…) | half a sitting | any second pack on the same origin loads and then overwrites Meridian's save. A pack-declared `STOREPFX`, default `"mq"`, and a smoke assertion that no literal remains. Blocks every second world, AJ's included |
+| 4 | **The portability guard's NAMES list omits `meridian`** | minutes | `test/smoke.js:1674-1679`; `engine.js:4062, 3391, 3191, 2697` print the game's name from the engine. The guard misses the one word it exists for |
+| 5 | **`ci.yml` has no `permissions:` block and an unpinned `npm install playwright`** | minutes | a bad dependency in CI with a write `GITHUB_TOKEN` can push to `main`, which Pages serves. `permissions: contents: read`; pin the version |
+| 6 | **`PEERS` looks are not validated**, contrary to the comment at `engine.js:271-273` | minutes | `p.look` is passed raw to `drawPerson` at 958, 1048 and `engine3d.js:344`. Dormant until `NET` fills it; the comment lies now |
+| 7 | **`bl` keys unfiltered in the loader** | one line | `engine.js:3325-3330` — a crafted `#save=` link can set `__proto__` on a local object. Contained; still one `if` |
+| 8 | **`auditReach()` runs once at boot, not after a runtime spawn** | small | `engine.js:174`. `addChill()`/`spawnCustom()` can wall the hero after boot with no check |
+| 9 | **The public build's guarantee has no test** | half a sitting | nothing asserts that `index.html`, `engine/`, `content/` contain no `api.github.com`, no `location.search`, and that `?dev=1&admin=1` leaves `admin === false`. `el-changarrito.md` §5 R7 lists the assertions |
