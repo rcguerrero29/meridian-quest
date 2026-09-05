@@ -204,6 +204,8 @@ session verified the critic against the code; costs are the cross-examined ones.
 
 ---
 
+**2026-09-05 · The ledger moved to GitHub issues #3–#34** (labels: `ask` / `decision` / `bug`; `tier: high / normal / low`; `ventanilla`; `changarrito`). This file stays as the narrative index; an issue is the unit of tracking from here. Close the issue, then strike the row.
+
 ## 8 · Found by the two expert reviews, 2026-09-05 — Meridian's own, whether or not the town is built
 
 Full context: `docs/story/el-changarrito.md` §4–§6 and `docs/story/la-ventanilla.md` §5. Each row

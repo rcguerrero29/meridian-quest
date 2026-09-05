@@ -227,7 +227,7 @@ These are Meridian's, whether or not the Changarrito is ever built. Rows added t
 
 | Step | What | Cost | Ships to Meridian? |
 |---|---|---|---|
-| 0 | **Labels and the ledger.** Create `tier: high / normal / low`, `ask`, `decision`, `ventanilla`; turn the open ❗ asks into issues. The street is empty without this | minutes | no (GitHub only) |
+| ~~0~~ | **DONE 2026-09-05.** Labels `tier: high / normal / low`, `ask`, `decision`, `bug`, `ventanilla`, `changarrito`; the open ❗ asks, the standing bugs and the nine engine findings are issues #3–#34. The street has its first residents | minutes | no (GitHub only) |
 | 1 | **Engine hygiene:** `STOREPFX` (B3), the SW carve-out (B5), the `innerHTML` rebuild at `2359`, the R7 smoke assertions, `ci.yml` hygiene. Each with a red-first test | 1 | **yes** — behaviour-identical for players, and the public build's guarantee gets its first tests |
 | 2 | **The pack**, NEW-WORLD's build order: `hq` spawn room, `st` street, empty quest tables, `UI`, names/emoji/looks, levels | 1 | no |
 | 3 | **`RECORD` seam + GitHub fetch**: conditional requests, last-good copy, `pull_request` filter, owner filter, rate-limit readout | ½ | the seam yes, the fetch no |
