@@ -5,8 +5,9 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-05)
 
-**Deployed:** whatever `CACHE` in `sw.js` says — `mq-v65` at the time of writing (Part 1 of El
-Changarrito: engine hygiene, behaviour-identical; `docs/story/el-changarrito.md` §7); that file is
+**Deployed:** whatever `CACHE` in `sw.js` says — `mq-v66` at the time of writing (Part 2a of El
+Changarrito: the town exists at `changarrito/`, run from localhost; the engine gained the RECORD
+seam and `removeChill`; `docs/story/el-changarrito.md` §7); that file is
 the truth, this line is not. **The ledger is GitHub issues #3–#34 from 2026-09-05** — read them
 before this file. `main` and `claude/career-training-story-plot-tj707h` are in sync.
 Working tree clean. Smoke green across five consecutive runs.
