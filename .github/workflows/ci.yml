@@ -1,4 +1,6 @@
 name: CI
+permissions:
+  contents: read   # the smoke test reads; nothing in CI may push
 on:
   push:
   pull_request:
@@ -13,7 +15,7 @@ jobs:
           node-version: 22
       - name: Install Playwright + Chromium
         run: |
-          npm install playwright
+          npm install playwright@1.63.0
           npx playwright install --with-deps chromium
       - name: Branded templates match neutral + brand.yml
         run: node docs/templates/build-branded.js --check

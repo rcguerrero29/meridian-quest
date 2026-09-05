@@ -5,6 +5,12 @@
    maps, config), loaded BEFORE this file. A new gifted game is
    a new content folder — this file stays untouched.
    ========================================================= */
+/* storage prefix — every localStorage key the engine touches goes through SK(). A pack may
+   declare STOREPFX so two packs on one origin keep separate saves (GitHub Pages serves every
+   project site on an account from ONE origin, and localStorage is per-origin, not per-path).
+   Default "mq": Meridian's keys are unchanged, byte for byte. Guarded by the smoke suite:
+   no literal key may remain in engine/. */
+const SK=k=>((typeof STOREPFX==="string"&&STOREPFX)||"mq")+k;
 const FQ=()=>lang==="es"?FQES:FQEN;
 const TS=32;
 /* "C" (the traffic cone) left this set on 2026-09-04. Owner: "I think a cone shouldnt make me
@@ -124,9 +130,9 @@ const RM=()=>(typeof INTERVIEW!=="undefined"&&INTERVIEW&&Array.isArray(INTERVIEW
 const RMU=()=>{const r=RM();return r?(r.ui[lang]||r.ui.en||{}):{};};
 const roomHosts={}; /* chill key → host declaration */
 let roomAns={};      /* "host:step" → {pick|text|out, hist[]} — per device, never in the save */
-try{if(RM()){const r0=JSON.parse(localStorage.getItem("mqroom")||"{}");
+try{if(RM()){const r0=JSON.parse(localStorage.getItem(SK("room"))||"{}");
   if(r0&&typeof r0==="object"&&r0.a&&typeof r0.a==="object")roomAns=r0.a;}}catch(e){}
-function roomPersist(){if(!RM())return;try{localStorage.setItem("mqroom",JSON.stringify({v:1,a:roomAns}));}catch(e){}}
+function roomPersist(){if(!RM())return;try{localStorage.setItem(SK("room"),JSON.stringify({v:1,a:roomAns}));}catch(e){}}
 (RM()?RM().hosts:[]).forEach(h=>{const k=addChill(h);if(k)roomHosts[k]=h;
   else console.warn("ROOM host "+h.id+" cannot stand at "+h.world+" ("+h.x+","+h.y+") — solid or taken");});
 const roomPending=n=>{const h=roomHosts[n.npc];return !!h&&h.steps.some(s=>!roomAns[h.id+":"+s.id]);};
@@ -190,7 +196,7 @@ const chClosed=c=>c.quests.filter(i=>done.has(i)).length>=c.need;
    progress, the city or the save, and neither may harm a character (docs/OWNER.md). */
 const STK=()=>(typeof STAKES!=="undefined"&&STAKES)?STAKES:{mode:"none",hearts:3};
 let stakesAdmin=null;                       /* admin override, per device, never in the save */
-try{const m=localStorage.getItem("mqstakes");if(m)stakesAdmin={mode:m};}catch(e){}
+try{const m=localStorage.getItem(SK("stakes"));if(m)stakesAdmin={mode:m};}catch(e){}
 function stakesCfg(){
   if(stakesAdmin)return{...STK(),...stakesAdmin};
   const L=CHS(),c=L[Math.min(chSeen,L.length-1)];
@@ -240,7 +246,7 @@ const ribbons=()=>{const g=GRW();return g.ribbons||(g.ribbon?[g.ribbon]:[]);}; /
 const ribbonUp=r=>r?(!!(r&&r.tiles)&&chSeen>=r.district):ribbons().some(x=>ribbonUp(x));
 /* ---------- state ---------- */
 const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"};
-let lang="en";try{lang=localStorage.getItem("mqlang")||"en";}catch(e){}
+let lang="en";try{lang=localStorage.getItem(SK("lang"))||"en";}catch(e){}
 let chSeen=0,replayTimer=null;
 let handedDocs=new Set(); /* paper a person has actually held out to you, so the office file
    records what you were GIVEN as exactly as it records what you wrote (saved as `hd`) */
@@ -269,8 +275,10 @@ const $=id=>document.getElementById(id);
 const NET={enabled:false,boot(){},sync(state){}};
 /* Co-presence hook: peers render like NPCs. Empty until NET fills it. Peer shape:
    {id,name,w,x,y,dir,look} — treat every field as UNTRUSTED network data: names are
-   length-clamped and drawn as canvas text only (never DOM), looks pass the same color
-   validation as saves. See docs/IDEAS.md §4 for the peer security rules. */
+   length-clamped and drawn as canvas text only (never DOM). NOTE (2026-09-05 review): looks
+   are NOT validated on this path yet — `p.look` reaches drawPerson raw — so whatever fills
+   PEERS must run each look through the save loader's colour checks first. PEERS are also not
+   drawn in the iso camera. See docs/IDEAS.md §4 and docs/story/el-changarrito.md §4 B1. */
 let PEERS=[];
 const T=()=>UI[lang];
 const AQ=()=>lang==="es"?QES:QEN;
@@ -285,7 +293,7 @@ function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat
   $("status").textContent=`${hs}  ${xp}XP`.trim();}
 /* save */
 function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],hd:[...handedDocs],bl:bldPicks,v:2};
-  try{localStorage.setItem("mq1",JSON.stringify(st));}catch(e){}
+  try{localStorage.setItem(SK("1"),JSON.stringify(st));}catch(e){}
   if(NET.enabled)NET.sync(st);}
 /* The ❗ on the world tag means what it means everywhere else: somebody in here has
    something to say. Never a count, never an age (docs/OWNER.md — no practice is ever
@@ -325,6 +333,7 @@ function sanitizeSave(s){
      that gains options later does not reshape a street somebody already knows. */
   const bl={};
   if(s.bl&&typeof s.bl==="object")Object.keys(s.bl).slice(0,200).forEach(k=>{
+    if(k==="__proto__"||k==="constructor"||k==="prototype")return; /* a #save= link may not reach the prototype */
     const v=s.bl[k];if(!v||typeof v!=="object")return;const o={};
     Object.keys(v).slice(0,32).forEach(pk=>{if(typeof v[pk]==="string")o[String(pk).slice(0,32)]=v[pk].slice(0,32);});
     o&&(bl[String(k).slice(0,40)]=o);});
@@ -333,11 +342,11 @@ function sanitizeSave(s){
     w:str2(s.w,4,"hq"),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,hd,bl,
     v:s.v===undefined?undefined:num(s.v,0,99,0)};
 }
-function loadSave(){try{return sanitizeSave(JSON.parse(localStorage.getItem("mq1")||""));}catch(e){return null;}}
+function loadSave(){try{return sanitizeSave(JSON.parse(localStorage.getItem(SK("1"))||""));}catch(e){return null;}}
 /* belt & suspenders: flush progress when the tab is backgrounded or closed (only once a run exists) */
 window.addEventListener("pagehide",()=>{if(!$("hud").hidden)save();});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"&&!$("hud").hidden)save();});
-function clearSave(){try{localStorage.removeItem("mq1");}catch(e){}}
+function clearSave(){try{localStorage.removeItem(SK("1"));}catch(e){}}
 /* toasts */
 let toastT=null,toastQ=[];
 const tickerLines=[];
@@ -394,7 +403,7 @@ let camXg=0,camYg=0;
    was ignored outright. */
 const CAMS=["top","front","iso","3d"];
 let camMode=(typeof CAMDEF!=="undefined"&&CAMS.includes(CAMDEF))?CAMDEF:"top";
-try{const cm0=localStorage.getItem("mqcam");if(CAMS.includes(cm0))camMode=cm0;}catch(e){}
+try{const cm0=localStorage.getItem(SK("cam"));if(CAMS.includes(cm0))camMode=cm0;}catch(e){}
 const ISW=44,ISH=22;
 let ISOCOL=null;
 /* No "1" here on purpose: drawIso's block pass runs only for SOLID glyphs, and the stairs are
@@ -512,7 +521,7 @@ function drawIso(){
   if(wash){ctx.fillStyle=wash;ctx.fillRect(0,0,VW,VH);}
 }
 function camSet(m){camMode=m;
-  try{localStorage.setItem("mqcam",m);}catch(e){}
+  try{localStorage.setItem(SK("cam"),m);}catch(e){}
   document.querySelectorAll("#camRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.cam===camMode?"true":"false"));
   const is3=camMode==="3d",c3=$("cv3");
   if(c3)c3.hidden=!is3;
@@ -2353,10 +2362,16 @@ function pick(c,btn,t){
   const gained=xp-xp0; /* the header claims only what this pick actually paid — retries after partial credit pay the difference */
   logDecision(o,c);
   const solved=o.r==="ok";
-  const retry=!solved&&(!livesOn()||hearts>0)?`<p class="beat">${cur>=0?T().retryNote:T().retryNoteFred}</p>`:"";
+  const retryText=!solved&&(!livesOn()||hearts>0)?(cur>=0?T().retryNote:T().retryNoteFred):"";
   const v=$("verdict");
   v.className="verdict "+(o.r==="ok"?"ok":o.r==="mid"?"mid":"no");
-  v.innerHTML=`<h2>${(o.r==="ok"?T().okH:o.r==="mid"?T().midH:T().badH)+(gained>0?` +${gained} XP`:"")}</h2><span class="concept">${o.concept}</span><p>${o.why}</p><p class="beat">${o.beat}</p>${retry}`;
+  /* pack text is DATA: built with textContent so a quest's words can never become markup
+     (the one place the engine used to interpolate pack strings into innerHTML) */
+  v.replaceChildren();
+  const el=(tag,cls,txt)=>{const x=document.createElement(tag);if(cls)x.className=cls;x.textContent=txt||"";v.appendChild(x);};
+  el("h2",null,(o.r==="ok"?T().okH:o.r==="mid"?T().midH:T().badH)+(gained>0?` +${gained} XP`:""));
+  el("span","concept",o.concept);el("p",null,o.why);el("p","beat",o.beat);
+  if(retryText)el("p","beat",retryText);
   v.hidden=false;hud();
   if(o.r!=="bad"&&lvlIdx()!==before){$("levelup").textContent=T().lvlUp+lvlName();$("levelup").hidden=false;}
   if(cur>=0){
@@ -2605,16 +2620,16 @@ function curtain(apply,after){const v=$("veil");
    the action buttons underneath are not settings and never hide. */
 const DRAWERS=["drwCtl","drwLook","drwSound","drwGame"];
 function drawersInit(){
-  let open={};try{open=JSON.parse(localStorage.getItem("mqdrawers")||"null")||{drwCtl:true};}catch(e){open={drwCtl:true};}
+  let open={};try{open=JSON.parse(localStorage.getItem(SK("drawers"))||"null")||{drwCtl:true};}catch(e){open={drwCtl:true};}
   DRAWERS.forEach(id=>{const d=$(id);if(!d)return;
     d.open=!!open[id];
     d.addEventListener("toggle",()=>{
       const st={};DRAWERS.forEach(k=>{const e2=$(k);if(e2)st[k]=e2.open;});
-      try{localStorage.setItem("mqdrawers",JSON.stringify(st));}catch(e){}});});
+      try{localStorage.setItem(SK("drawers"),JSON.stringify(st));}catch(e){}});});
 }
 drawersInit();
 /* ---------- controls scheme ---------- */
-let ctl="swipe";try{ctl=localStorage.getItem("mqctl")||"swipe";}catch(e){}
+let ctl="swipe";try{ctl=localStorage.getItem(SK("ctl"))||"swipe";}catch(e){}
 if(!["swipe","joy","pad"].includes(ctl))ctl="swipe";
 function applyCtl(){
   $("joy").hidden=(ctl!=="joy");$("dpad").hidden=(ctl!=="pad");
@@ -2622,7 +2637,7 @@ function applyCtl(){
   $("optJoy").setAttribute("aria-pressed",ctl==="joy"?"true":"false");
   $("optPad").setAttribute("aria-pressed",ctl==="pad"?"true":"false");
   $("ctlHint").textContent=ctl==="swipe"?T().hintSwipe:(ctl==="joy"?T().hintJoy:T().hintPad);
-  try{localStorage.setItem("mqctl",ctl);}catch(e){}
+  try{localStorage.setItem(SK("ctl"),ctl);}catch(e){}
 }
 $("gear").addEventListener("click",()=>{
   /* the wardrobe is extra — any ATTEMPT at the quest content nominates opens it */
@@ -2686,15 +2701,15 @@ function sanitizeTheme(t2){
    mqpals=[{n,light,dark}...] + mqpal=active index; legacy mqcustom migrates in. */
 let PALS=[],palIdx=0;
 try{
-  const raw=JSON.parse(localStorage.getItem("mqpals")||"null");
+  const raw=JSON.parse(localStorage.getItem(SK("pals"))||"null");
   if(Array.isArray(raw))raw.slice(0,8).forEach(e2=>{const t2=sanitizeTheme(e2);
     if(t2)PALS.push({n:String(e2.n||"Custom").slice(0,18),light:t2.light,dark:t2.dark});});
 }catch(e){}
-if(!PALS.length){try{const old=sanitizeTheme(JSON.parse(localStorage.getItem("mqcustom")||"null"));
+if(!PALS.length){try{const old=sanitizeTheme(JSON.parse(localStorage.getItem(SK("custom"))||"null"));
   if(old)PALS.push({n:"Custom 1",light:old.light,dark:old.dark});}catch(e){}}
-try{palIdx=Math.min(PALS.length-1,Math.max(0,parseInt(localStorage.getItem("mqpal")||"0")||0));}catch(e){}
+try{palIdx=Math.min(PALS.length-1,Math.max(0,parseInt(localStorage.getItem(SK("pal"))||"0")||0));}catch(e){}
 let customTheme=PALS[palIdx]||null;
-let themeName="meridian";try{themeName=localStorage.getItem("mqtheme")||"meridian";}catch(e){}
+let themeName="meridian";try{themeName=localStorage.getItem(SK("theme"))||"meridian";}catch(e){}
 if(!THEMES.hasOwnProperty(themeName)&&themeName!=="custom")themeName="meridian";
 const darkMq=window.matchMedia("(prefers-color-scheme: dark)");
 /* canvas theming: the world follows the theme. Big-surface colors (floors, walls,
@@ -2731,7 +2746,7 @@ function applyTheme(){
   if(customTheme)$("thCustom").textContent="\u2728 "+customTheme.n;
   setCanvasTint();
   if(MUSIC.timer)musRetime(); /* tempo follows the theme */
-  try{localStorage.setItem("mqtheme",themeName);}catch(e){}
+  try{localStorage.setItem(SK("theme"),themeName);}catch(e){}
 }
 try{darkMq.addEventListener("change",applyTheme);}catch(e){}
 /* ---------- SEASONS: a second palette layer, for WORLD ART, kept apart from THEMES ----------
@@ -2740,7 +2755,7 @@ try{darkMq.addEventListener("change",applyTheme);}catch(e){}
    the engine never learns a name (the portability guard enforces it). seasonPick is the
    player's Settings choice: "auto" (by the calendar), "off" (year-round), or a season id.
    A pack with no SEASONS behaves exactly as before — art() always returns the fallback. */
-let seasonPick="auto";try{seasonPick=localStorage.getItem("mqseason")||"auto";}catch(e){}
+let seasonPick="auto";try{seasonPick=localStorage.getItem(SK("season"))||"auto";}catch(e){}
 const seasonMemo={day:"",id:null}; /* the calendar is read once a day, not once a tile */
 const SEAS=()=>typeof SEASONS!=="undefined"&&SEASONS?SEASONS:{};
 function seasonNow(now){ /* the current season id, or null. `now` is for tests. */
@@ -2762,7 +2777,7 @@ function seasonNow(now){ /* the current season id, or null. `now` is for tests. 
 function art(key,fb){const id=seasonNow(),v=id&&SEAS()[id].art;return v&&v[key]!==undefined?v[key]:fb;}
 function seasonSet(pick){
   seasonPick=pick;seasonMemo.day="";
-  try{localStorage.setItem("mqseason",pick);}catch(e){}
+  try{localStorage.setItem(SK("season"),pick);}catch(e){}
   if(typeof t3Invalidate==="function")t3Invalidate();
   seasonRowBuild();
 }
@@ -2804,8 +2819,8 @@ function autoFixTheme(){ /* backgrounds are the designer's; text adjusts to stay
 /* open the editor on the variant the player is actually SEEING — editing the light
    palette while the phone displays dark reads as "my colors don't change" */
 let teMode=darkMq.matches?"dark":"light";
-function saveCustom(){try{localStorage.setItem("mqpals",JSON.stringify(PALS));
-  localStorage.setItem("mqpal",String(palIdx));}catch(e){}}
+function saveCustom(){try{localStorage.setItem(SK("pals"),JSON.stringify(PALS));
+  localStorage.setItem(SK("pal"),String(palIdx));}catch(e){}}
 function meridianVars(mode){ /* read the built-in palette out of the stylesheet */
   const root=document.documentElement,prev=root.dataset.theme;
   THEME_KEYS.forEach(k2=>root.style.removeProperty("--"+k2));
@@ -2886,19 +2901,19 @@ $("teClose").addEventListener("click",()=>{$("themeEd").hidden=true;
    rules), sleeps when the tab hides, and lives behind 🎵 volume/mute in Settings. */
 const MUSIC={ctx:null,master:null,timer:null,step:0,mel:2};
 let musOn=true,musVol=0.6;
-try{musOn=localStorage.getItem("mqmus")!=="0";}catch(e){}
-try{const v=parseFloat(localStorage.getItem("mqvol"));if(!isNaN(v))musVol=Math.min(1,Math.max(0,v));}catch(e){}
+try{musOn=localStorage.getItem(SK("mus"))!=="0";}catch(e){}
+try{const v=parseFloat(localStorage.getItem(SK("vol")));if(!isNaN(v))musVol=Math.min(1,Math.max(0,v));}catch(e){}
 const MUSDEF={
  meridian:{bpm:76,root:57,scale:[0,3,5,7,10],lead:"triangle",pad:"sine",bright:900},  /* A min pent — lo-fi office */
  forest:{bpm:84,root:64,scale:[0,2,4,7,9],lead:"triangle",pad:"triangle",bright:1500},/* E maj pent — marimba woods */
  fairy:{bpm:64,root:73,scale:[0,2,4,7,9],lead:"sine",pad:"sine",bright:2800},         /* C#5 maj pent — little bells */
  sunset:{bpm:58,root:55,scale:[0,2,4,7,9],lead:"sine",pad:"sine",bright:800}};        /* G maj pent — warm dusk */
 /* tune picker: Auto follows the theme; or pin one of the four tunes (owner ask) */
-let musTune="default";try{musTune=localStorage.getItem("mqtune")||"default";}catch(e){}
+let musTune="default";try{musTune=localStorage.getItem(SK("tune"))||"default";}catch(e){}
 if(!MUSDEF[musTune]&&musTune!=="default")musTune="default";
 const musDef=()=>MUSDEF[musTune]||MUSDEF[themeName]||MUSDEF.meridian;
 function musTuneSet(tn){musTune=tn;
-  try{localStorage.setItem("mqtune",tn);}catch(e){}
+  try{localStorage.setItem(SK("tune"),tn);}catch(e){}
   document.querySelectorAll("#tuneRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tn===musTune?"true":"false"));
   if(MUSIC.timer)musRetime();
   if(musOn)setTimeout(musChirp,120);}
@@ -2952,7 +2967,7 @@ function musApply(){
   $("musMute").textContent=musOn?T().musOn:T().musOff;
   $("musMute").setAttribute("aria-pressed",musOn?"true":"false");
   $("musVol").value=Math.round(musVol*100);
-  try{localStorage.setItem("mqmus",musOn?"1":"0");localStorage.setItem("mqvol",String(musVol));}catch(e){}
+  try{localStorage.setItem(SK("mus"),musOn?"1":"0");localStorage.setItem(SK("vol"),String(musVol));}catch(e){}
   if(musOn)musStart();else musStop();
 }
 function musChirp(){ /* instant audible proof the audio path works (owner: "no tune") */
@@ -3042,7 +3057,7 @@ function applyLang(){
   if(!$("world").hidden){applyCtl();checkTalk();}
   if(!$("creator").hidden){buildOpts("rowStyle",t.styles,"style");buildOpts("rowOutfit",t.outfits,"outfit");}
   if(!$("hud").hidden)hud();
-  try{localStorage.setItem("mqlang",lang);}catch(e){}
+  try{localStorage.setItem(SK("lang"),lang);}catch(e){}
 }
 $("optEn").addEventListener("click",()=>{lang="en";applyLang();});
 $("optEs").addEventListener("click",()=>{lang="es";applyLang();});
@@ -3050,7 +3065,7 @@ $("langQuick").addEventListener("click",()=>{lang=(lang==="en"?"es":"en");applyL
 /* ---------- text lab (edit names, titles, bump lines) ---------- */
 function labData(){return {npcNames:{...NPCN[lang]},titles:AQ().map(q=>q.title),flavor:JSON.parse(JSON.stringify(T().flavor))};}
 function applyText(){
-  try{const o=JSON.parse(localStorage.getItem("mqtext_"+lang)||"null");if(!o)return;
+  try{const o=JSON.parse(localStorage.getItem(SK("text_")+lang)||"null");if(!o)return;
     if(o.npcNames)Object.assign(NPCN[lang],o.npcNames);
     if(o.titles)AQ().forEach((q,i)=>{if(o.titles[i])q.title=o.titles[i];});
     if(o.flavor)Object.assign(UI[lang].flavor,o.flavor);
@@ -3061,7 +3076,7 @@ $("openLab").addEventListener("click",()=>{
 $("tlClose").addEventListener("click",()=>{$("textlab").hidden=true;});
 $("tlApply").addEventListener("click",()=>{
   try{const o=JSON.parse($("tlArea").value);
-    localStorage.setItem("mqtext_"+lang,JSON.stringify(o));
+    localStorage.setItem(SK("text_")+lang,JSON.stringify(o));
     applyText();applyLang();$("textlab").hidden=true;toast(T().tlOk,2000);
   }catch(e){toast(T().tlErr,2600);}
 });
@@ -3081,7 +3096,7 @@ function tlFindNext(){
 $("tlFind").addEventListener("click",tlFindNext);
 $("tlSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();tlFindNext();}});
 /* ---------- export skeleton (v1): play data → JSON; future: typed docs, email, convo export ---------- */
-let dlog=[];try{dlog=JSON.parse(localStorage.getItem("mqdlog")||"[]");}catch(e){}
+let dlog=[];try{dlog=JSON.parse(localStorage.getItem(SK("dlog"))||"[]");}catch(e){}
 /* choices that advance carry no concept of their own — the node's siblings do */
 function nodeConcept(){const n=(curQ&&curQ.nodes[node])||{},c=(n.ch||[]).find(x=>x.out&&x.out.concept);return c?c.out.concept:"";}
 function logDecision(o,c){const n=(curQ&&curQ.nodes[node])||{};
@@ -3091,7 +3106,7 @@ function logDecision(o,c){const n=(curQ&&curQ.nodes[node])||{};
      dropped a player's first districts from the portfolio without a word (owner,
      2026-09-02: "I thought we fixed this 200 entries thing"). If the phone refuses the
      write, the in-memory record stands and the failure is said once, not hidden. */
-  try{localStorage.setItem("mqdlog",JSON.stringify(dlog));}
+  try{localStorage.setItem(SK("dlog"),JSON.stringify(dlog));}
   catch(e){if(!dlogWarned){dlogWarned=true;console.warn("RECORD: the phone refused to store the play log ("+dlog.length+" entries) — it stays in memory this session");}}}
 let dlogWarned=false;
 /* Which job a quest was practice for. Chapters declare their role in content;
@@ -3168,8 +3183,8 @@ function exportData(){return JSON.stringify({schema:"meridian-export-v1",exporte
    a care sheet you can copy, plus recurring reminders as a downloadable .ics */
 let exMode="json";
 let petCfg={n:"Frederick",am:"07:30",pm:"18:00"};
-try{const p=JSON.parse(localStorage.getItem("mqpet")||"null");if(p&&p.n)petCfg=p;}catch(e){}
-function petSave(){try{localStorage.setItem("mqpet",JSON.stringify(petCfg));}catch(e){}}
+try{const p=JSON.parse(localStorage.getItem(SK("pet"))||"null");if(p&&p.n)petCfg=p;}catch(e){}
+function petSave(){try{localStorage.setItem(SK("pet"),JSON.stringify(petCfg));}catch(e){}}
 let petEggSeen=null;
 ["petName","petAm","petPm"].forEach((id,i)=>$(id).addEventListener("input",()=>{
   const v=$(id).value.trim();
@@ -3402,14 +3417,14 @@ $("fsbtn").addEventListener("click",()=>{
   setTimeout(sizeCanvas,80);
 });
 document.addEventListener("fullscreenchange",()=>{setTimeout(sizeCanvas,80);});
-try{admin=localStorage.getItem("mqadmin")==="1";}catch(e){}
+try{admin=localStorage.getItem(SK("admin"))==="1";}catch(e){}
 function applyAdmin(){
   $("brushes").hidden=!admin;
   $("teOpen").hidden=!admin; /* the theme editor is admin-mode tooling; the ✨ Custom result is for everyone */
   $("stkRow").hidden=!admin;$("lbStakes").hidden=!admin;
   $("admOn").setAttribute("aria-pressed",admin?"true":"false");
   $("admOff").setAttribute("aria-pressed",admin?"false":"true");
-  try{localStorage.setItem("mqadmin",admin?"1":"0");}catch(e){}
+  try{localStorage.setItem(SK("admin"),admin?"1":"0");}catch(e){}
 }
 $("admOn").addEventListener("click",()=>{admin=true;applyAdmin();toast(T().admToast,3400);});
 /* Stakes toggle — admin tooling. Hearts are off by default in an open world, but they
@@ -3423,7 +3438,7 @@ function applyStakes(){
 }
 function setStakes(m){
   stakesAdmin={mode:m};
-  try{localStorage.setItem("mqstakes",m);}catch(e){}
+  try{localStorage.setItem(SK("stakes"),m);}catch(e){}
   if(m==="hearts"&&hearts<=0)hearts=startHearts();
   applyStakes();save();toast(T().stkToast(m),3000);
 }
@@ -3444,17 +3459,17 @@ function setTile(x,y,ch){
   const prev=w.rows[y][x];
   w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);
   w.grid[y][x]=ch;
-  try{const ed=JSON.parse(localStorage.getItem("mqedits")||"[]");ed.push({m:world,x,y,ch,prev});
-    localStorage.setItem("mqedits",JSON.stringify(ed.slice(-400)));}catch(e){}
+  try{const ed=JSON.parse(localStorage.getItem(SK("edits"))||"[]");ed.push({m:world,x,y,ch,prev});
+    localStorage.setItem(SK("edits"),JSON.stringify(ed.slice(-400)));}catch(e){}
 }
 $("undoBtn").addEventListener("click",()=>{
-  let ed=[];try{ed=JSON.parse(localStorage.getItem("mqedits")||"[]");}catch(e){}
+  let ed=[];try{ed=JSON.parse(localStorage.getItem(SK("edits"))||"[]");}catch(e){}
   if(!ed.length){toast(T().undoEmpty,1500);return;}
   const e2=ed.pop(),w=WORLDS[e2.m||"hq"];
   const back=(e2.prev!==undefined&&e2.prev!==null)?e2.prev:w.rows0[e2.y][e2.x];
   w.rows[e2.y]=w.rows[e2.y].slice(0,e2.x)+back+w.rows[e2.y].slice(e2.x+1);
   if(w.grid[e2.y][e2.x]!=="N")w.grid[e2.y][e2.x]=back;
-  try{localStorage.setItem("mqedits",JSON.stringify(ed));}catch(e){}
+  try{localStorage.setItem(SK("edits"),JSON.stringify(ed));}catch(e){}
   toast(T().undoToast,1200);
 });
 function paintAt(clientX,clientY){
@@ -3496,7 +3511,7 @@ function swEnd(e){
   });
   el.addEventListener("pointerup",swEnd);el.addEventListener("pointercancel",swEnd);
 });
-try{(JSON.parse(localStorage.getItem("mqedits")||"[]")).forEach(e2=>{
+try{(JSON.parse(localStorage.getItem(SK("edits"))||"[]")).forEach(e2=>{
   const w=WORLDS[e2&&(e2.m||"hq")];if(!w)return;
   if(e2&&w.grid[e2.y]&&w.grid[e2.y][e2.x]!=="N"&&!(e2.x<=0||e2.y<=0||e2.x>=w.W-1||e2.y>=w.H-1)){
     w.rows[e2.y]=w.rows[e2.y].slice(0,e2.x)+e2.ch+w.rows[e2.y].slice(e2.x+1);w.grid[e2.y][e2.x]=e2.ch;}});}catch(e){}
@@ -3513,8 +3528,8 @@ const hexOK=v=>typeof v==="string"&&/^#[0-9A-Fa-f]{6}$/.test(v);
 function randLook(){const pick=a=>a[Math.floor(Math.random()*a.length)];
   return {shirt:pick(SWATCH.shirt),skin:pick(SWATCH.skin),hair:pick(SWATCH.hair),style:pick(NPCSTYLES)};}
 let myNpcs=[];
-try{myNpcs=(JSON.parse(localStorage.getItem("mqnpcs")||"[]")||[]).slice(0,12);}catch(e){}
-function npcPersist(){try{localStorage.setItem("mqnpcs",JSON.stringify(myNpcs.slice(0,12)));}catch(e){}}
+try{myNpcs=(JSON.parse(localStorage.getItem(SK("npcs"))||"[]")||[]).slice(0,12);}catch(e){}
+function npcPersist(){try{localStorage.setItem(SK("npcs"),JSON.stringify(myNpcs.slice(0,12)));}catch(e){}}
 function spawnCustom(rec){
   const name=sanName(rec.n);if(!name)return false;
   const w=WORLDS[rec.w];if(!w)return false;
@@ -3539,11 +3554,11 @@ myNpcs=myNpcs.filter(r=>{try{return spawnCustom(r);}catch(e){return false;}});
    The park holds the preview customization: bandanas, and adopting your own
    dog (who gets the full beagle program). All per-device, in `mqpark`. */
 const parkPrefs={band:{},dogs:[],train:{}};
-try{const p0=JSON.parse(localStorage.getItem("mqpark")||"{}");
+try{const p0=JSON.parse(localStorage.getItem(SK("park"))||"{}");
   if(p0&&typeof p0==="object"){parkPrefs.band=(p0.band&&typeof p0.band==="object")?p0.band:{};
     parkPrefs.dogs=Array.isArray(p0.dogs)?p0.dogs.slice(0,24):[]; /* no adoption limit (owner) — just a sanity ceiling */
     parkPrefs.train=(p0.train&&typeof p0.train==="object")?p0.train:{};}}catch(e){}
-function parkPersist(){try{localStorage.setItem("mqpark",JSON.stringify(parkPrefs));}catch(e){}}
+function parkPersist(){try{localStorage.setItem(SK("park"),JSON.stringify(parkPrefs));}catch(e){}}
 /* every adopted dog befriends one particular townsperson (owner ask) — and some
    dogs roam the city to hang out at their friend's side */
 const FRIENDW=["st","me","lc","lo"];
@@ -4050,8 +4065,8 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("tpBoard").textContent=t.tpBoard;$("tpSkip").textContent=t.tpSkip;
   $("tpFound").hidden=false;
   $("tpBoard").addEventListener("click",()=>{
-    try{localStorage.setItem("mq1",JSON.stringify(pass.s));
-      if(pass.l)localStorage.setItem("mqlang",pass.l);}catch(e){}
+    try{localStorage.setItem(SK("1"),JSON.stringify(pass.s));
+      if(pass.l)localStorage.setItem(SK("lang"),pass.l);}catch(e){}
     stripPassHash();location.reload();
   });
   $("tpSkip").addEventListener("click",()=>{stripPassHash();$("tpFound").hidden=true;});
@@ -4060,7 +4075,7 @@ applyAdmin();applyStakes();applyLang();applyCtl();applyTheme();camSet(camMode);
 /* the version shows on the opening page AND in Settings (owner 2026-09-02: "so i know
    which im using") — the number a phone actually loaded, not the one a branch claims */
 [$("verTag"),$("verIntro")].forEach(el=>{if(el)el.textContent="Meridian Quest · "+(typeof GAMEV!=="undefined"?GAMEV:"dev");});
-try{if(sessionStorage.getItem("mqupd")==="1"){sessionStorage.removeItem("mqupd");
+try{if(sessionStorage.getItem(SK("upd"))==="1"){sessionStorage.removeItem(SK("upd"));
   setTimeout(()=>toast("⬆️ "+(typeof GAMEV!=="undefined"?GAMEV:"")+" — "+T().updToast,3200),900);}}catch(e){}
 if(NET.enabled)NET.boot();
 requestAnimationFrame(ts=>{last=ts;loop(ts);});

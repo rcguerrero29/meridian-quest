@@ -102,6 +102,11 @@ preference that outlives one phase; cite the date and their words.
   device's own Settings choice always wins over the default. Top-down and iso remain as
   options. *(2026-08-31; amended 2026-09-05 — the code had said 3D since 09-01)*
 - **EN/ES in lockstep**, retry-until-correct, saves stay on-device.
+- **Meridian's purpose is fixed: practice for AI roles.** Any second world on this engine
+  (El Changarrito, AJ's pack) is a different game; every engine change it needs is
+  behaviour-identical for Meridian's players and proven so by the smoke suite the same day;
+  Meridian's content is never edited for another world's sake; the public build knows
+  nothing about a personal one (tested). `docs/story/el-changarrito.md` §7½. *(2026-09-05)*
 - **Fun is a requirement**, not a nice-to-have.
 - **HQ is the onboarding.** No separate tutorial or staging area. *(2026-08-31)*
 - **The barrio is the player's reference letter.** *(2026-09-01, ❗La carta.)* A
