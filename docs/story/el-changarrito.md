@@ -178,6 +178,21 @@ The repo is **public** and issues are open. That one fact shapes everything.
 | R9b | CI: `npm install playwright` unpinned, no `permissions:` block, so `GITHUB_TOKEN` may be read-write | Medium | `permissions: contents: read` at the top of `ci.yml`; pin playwright | no |
 | R3 | The `#save=` share link — checked: parsed through `sanitizeSave`, never touches `innerHTML`, needs a tap. No injection path today. One nit: `bl` keys are not filtered (`__proto__`) | Low | one `if` in the `bl` loop (`3325-3330`) | no |
 
+**How it is served, exactly — the one place a local server bites.** `localhost` is not
+reachable from the internet; publishing this plan exposes nothing. But a local server
+started carelessly listens on *every* interface, and on a café or hotel network that is
+the whole room. So: **bind to the loopback address explicitly** —
+`python3 -m http.server 8765 --bind 127.0.0.1` (bare `python3 -m http.server` binds
+`0.0.0.0`). Never a tunnel (ngrok and friends) in front of it. Nothing in the repo links to
+it, and the port number is not a secret — every developer runs one.
+
+**What *is* public: the issues.** The town writes to a public repo. Anything typed into
+"file a request" is on the internet the moment it is filed — a client's name, a password
+pasted by mistake, a private note. That is the normal risk of this design, and the rule is
+simple: the town is for the game's backlog, not for private notes. If private notes are
+ever wanted, the security review's alternative stands: a **private ledger repo** the town
+writes to and sessions read, where outsiders cannot write at all.
+
 **On hosting, the two reviews disagreed, and both are right about different things.**
 Engineering: a `changarrito/` folder in this repo, because a separate repo gives no
 isolation (same origin either way), the engine loads by path with no copy drift, one CI
