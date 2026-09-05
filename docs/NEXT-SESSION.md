@@ -3,7 +3,103 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-02, late)
+## STATE OF PLAY — read this first (2026-09-05)
+
+**Deployed:** whatever `CACHE` in `sw.js` says — `mq-v64` at the time of writing; that file is
+the truth, this line is not. `main` and `claude/career-training-story-plot-tj707h` are in sync.
+Working tree clean. Smoke green across five consecutive runs.
+
+### What shipped this session, newest first (2026-09-04 → 05)
+
+- **`mq-v64` — the dog comes with you, the stop stands, the cone gets kicked.** Sonny follows
+  through any door he was near, and through the trolley; sit / lie / stay make him hold and you
+  leave without him; off duty he tags along ~1 in 5 from right at your heel. The MQT trolley
+  stop and the traffic cone had each other's properties swapped (the stop was a decal, the cone
+  was a wall) — both are `stand` tiles now. The cone is `light`: walk into it and it skitters
+  ahead of your foot; Sonny rips one ~1 in 25 whims; everything resets when you leave the room
+  (no save key — the owner's own scope, *"for now"*). Two ways the world could change and only
+  one arrived: `openTravel` (the trolley) skipped every arrival step until both routes were
+  made to call one `worldArrived()`. The trolley stop's art moved out of the engine — it
+  spelled this pack's brand in engine code — and a test now forbids it coming back.
+  **The mistake undone:** making the cone non-solid deleted it from the iso camera; the first
+  fix routed stand tiles into `isoBlock()`, which paints flat faces and never the art — a
+  featureless pillar that every metadata check waved through. Replaced with a billboard pass;
+  smoke now counts *which drawing* each camera calls (IDEAS §15.28–29).
+- **`mq-v63` — the stairs stand up, and a building has faces.** The stairs were never badly
+  drawn; they were *lying down* — walkable, so three of four cameras painted the top-down art
+  flat on the floor. A third tile category, `stand:true` (walkable, but an object), fixed it
+  and retired a hardcoded `"345"` glyph list from engine3d.js. Pili redrew the stairs in plan
+  and profile; HQ's arrow now points *up*. And two numbers meant no building had faces: 3D
+  ambient 0.95 / sun 0.5 clipped three of five faces to white; now 0.66/0.42 plus a baked
+  contact shadow, held by arithmetic in smoke §32 (IDEAS §15.25–26).
+- **`mq-v62` — paper a neighbour puts in your hands.** Six documents characters hand over
+  mid-quest at the nodes where the answer is *in* the paper: Chelo's eleven-item list, the
+  invoice evaluation run, the incident transcript with "be helpful" as the root cause, ten
+  weeks of bakery forecast, the old lead's glovebox rollout plan, Bere's fifty-two. `doc:"id"`
+  on a node → the stapled-paper reader with Copy/Download. Handed paper is recorded (save key
+  `hd`) and listed in the office file under *What people handed you*. Three real bugs found by
+  measuring, not trusting flags — the reader opened at 0×0 inside a hidden panel.
+- **Ledger corrections**, each verified against code before changing a word: `CITY.md` header
+  and open-parcels list (three of four "open" lots had businesses on them), `HANDOFF.md`
+  (claimed 24 quests / MAXXP 350 against 56 / 830), `maps.js` DECOR comment, `IDEAS.md` §15.8
+  and §15.11 on the stairs, `templates/README.md` (undersold six of seven generated templates),
+  `ASKS.md`'s "FitCheck: nothing to inherit" row (true when written, false when asked).
+
+### Decisions the owner made this session (verbatim, in `docs/ASKS.md`)
+
+- **Office:** *"ok for now we are ok with the office. i think we can def improve but for now
+  its ok"* — parked, not dropped.
+- **Staircase:** *"i think that we can make the building bigger, fit in a proper staircase.
+  move it out of a tiny room if needed."* — supersedes "its own hall"; enlarge HQ. **Not
+  built** (*"dont build"*). Recorded in `CITY.md` ❗La caja de escalera.
+- **House template:** the casita's door `▦` is a solid wall drawn as a door — in `SOLIDX`, in
+  no `DOORS`, in no `PORTALS` — which is the whole of *"i cant enter the houses."* Agreed
+  direction (Don Güero and the session independently): close it honestly as a reja, and give
+  `buildSafe()` teeth — a build may not draw a door it cannot open. Not built.
+- **The other session's recommendations** (FitCheck Salvage Manifest, Bones to Meshes): read,
+  assessed in IDEAS §15.27 — the SDF prop forge is *not now* for a pixel-art game with no mesh
+  pipeline; the stale-docs rule from the manifest was adopted.
+
+### Open, and waiting on the owner
+
+- ❗La caja de escalera — where the enlarged HQ puts a proper flight (Don Güero sites it).
+- ❗El escalón de Dana — Legal stands in the stair hall; leave her (recommended).
+- ❗El solar de la Calle Dos — `ex` row 10, the last real frontage; leave on the shelf (recommended).
+- ❗El zaguán — Nolasco: up through a door, down through stairs.
+- ❗El portero — what a refused build says, and to whom.
+- **The four newest districts have never been human-played.** Still the real gate.
+
+### Written this session, no code
+
+- `docs/NEW-WORLD.md` — the template for starting another world/town/city: the nine files,
+  which globals are required vs optional (verified by `typeof` guards), the three hardcoded
+  switch points, the engine debt a second world hits (62 hardcoded world ids), the rules
+  that travel, a build order.
+- `docs/PROMPTS.md` — the three smallest prompts that make a better version of this exercise,
+  each tied to the failure its absence caused here.
+- `docs/meetings/2026-09-05-el-experto.md` — the second meeting: Don Güero and Nacho briefed
+  a gaming expert (a guest with no lane to defend); two verifiers cross-examined his top six
+  against the engine and the owner's rules. One call per item, a build order, 23 reported
+  contradictions, and the learning: *a queue is a gate with a face; write every quest as if
+  it could come last; every solid piece wears its drawing on all four sides; a staircase is
+  length, enclosure and the same footprint on both floors — never height.*
+- `docs/IDEAS.md` §15.25–15.29 — the stand tile, the light ladder, the salvage review, the
+  iso slab mistake, and "two ways the world changes, one arrived".
+
+### The lessons that outlive the session
+
+1. **Measure, never trust a flag.** `.hidden=false` at 0×0 passed every assertion.
+2. **A test that calls the function proves the function, not the wiring.** Drive `tryStep`,
+   `tryPortal`, or a real click; break the wire and watch it fail.
+3. **When a thing reads wrong in some cameras and right in one, it is plumbing, not art.**
+4. **"It appears in all four cameras" ≠ "it is drawn right in all four."** Count the calls.
+5. **A doc that records a version or a built/not-built state must name where the truth
+   lives**, or it goes stale silently — twice now.
+6. **Every ask is quoted verbatim before building.** Paraphrase is how requirements die.
+
+---
+
+## STATE OF PLAY — earlier state of play (2026-09-02, late)
 
 **NEWEST — 2026-09-03, `mq-v60`: templates, and two process fixes the owner asked for.**
 Owner: *"i keep seeing you miss testing opportunities and requirements are falling through."*
