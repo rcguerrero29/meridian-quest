@@ -93,48 +93,88 @@ Two greps find everything: `grep -rn ventanilla content docs` and
 
 ## 5 · The personal build — "a sole backdoor for us" answered
 
+*Rewritten 2026-09-05 after a security review against the code. The first draft said
+"risk: low." It was low for the token in isolation and wrong about everything the token
+feeds. The corrections are marked.*
+
 **What game developers actually do.** Debug menus are compiled *out* of release builds;
 live-ops consoles are separate apps behind real auth. Nobody hides a channel in the shipped
 client, because the shipped client is the one thing every player has a copy of. A static
 site makes that literal: there is no hidden anything — view source.
 
-**This game already has both halves of the right pattern:**
-- **Admin mode** (`engine.js` ~3396): per device, in `localStorage` (`mqadmin`), never in
-  the save, never in the URL. A flag that lives only on your phone.
-- **The `NET` seam** (`engine.js` ~265, `IDEAS.md` §4): *"a future game plugs a backend in
-  HERE and nowhere else."* Empty on purpose, waiting.
+**What this engine already has for it:** the `NET` seam (`engine.js` ~265, `IDEAS.md` §4):
+*"a future game plugs a backend in HERE and nowhere else."* Empty on purpose, waiting.
+~~Admin mode is the other half~~ — **corrected:** admin mode is a Settings button any
+player can press (`index.html` ~403, `engine.js` ~3405). It is per-device tooling, not
+auth, and nothing sensitive may ever be gated on it.
 
-**The design — four rules, then the mechanics.**
+**The design — seven rules, then what "connected" means.**
 
+0. **The personal build is served from an origin nothing else uses.** `localhost` on a
+   port reserved for it, from a gitignored folder. **Never `rcguerrero29.github.io`** —
+   every project site on the account shares that one origin, so a token stored there is
+   readable by the public game and by every future Pages project; every future DOM bug in
+   the public game would become a token-theft bug. Never `file://` (Chrome shares
+   `localStorage` across all local files). *This rule was missing from the first draft and
+   is the one that makes the others hold.*
 1. **The public build never changes.** CSP stays `connect-src 'self'`. Not one branch of
-   engine or content behaves differently for you. No `?dev=1`. That is the actual risk here
-   — not the token, the temptation to make the public build *know about* the private one.
-2. **No secret ever enters the repo.** Not in code, not in a comment, not in CI variables
-   the game can read.
-3. **The personal build is two gitignored files.** `index.local.html` — a copy of
-   `index.html` with `connect-src` widened to exactly `https://api.github.com` and one extra
-   script tag; and `content/meridian/net.local.js`, which fills `NET` and `RECORD`:
-   `boot()` reads a token you typed once into `localStorage`, `RECORD.fetch()` reads GitHub
-   directly (open PRs, issues) instead of `status.json`. Both files in `.gitignore`; a smoke
-   assertion fails if any *tracked* file references `net.local`.
-4. **The token is the smallest one that works.** A GitHub fine-grained PAT, **this repo
-   only**, permissions `issues: write` + `pull_requests: read`, 30-day expiry, revocable in
-   one click. If it leaks, the whole blast radius is: someone can open issues on this repo.
+   engine or content behaves differently for you. No `?dev=1`, no `?admin=1` — the engine
+   reads `location` only for `#save=` today, and a smoke assertion keeps it that way.
+2. **No secret ever enters the repo.** Not in code, not in a comment, not in CI. A token
+   is never a save key (`sanitizeSave()` whitelists keys, so a `#save=` link can never
+   carry it) and never rides `NET.sync()`.
+3. **The personal build is two gitignored files and no service worker.**
+   `index.local.html` — a copy of `index.html` whose CSP is
+   `script-src 'self'` (the `'unsafe-inline'` exists only for the SW-registration
+   snippet, and there is no SW here) and `connect-src 'self' https://api.github.com`, plus
+   one extra script tag; and `content/meridian/net.local.js`, which fills `NET` and
+   `RECORD`. **No `sw.js`:** the public worker caches every GET from any origin
+   (`sw.js` ~22-29) and would freeze the town at first load with private data at rest.
+4. **The token is read-only until the day it isn't.** Fine-grained PAT, **this repo
+   only**, 30-day expiry: `pull_requests: read` + `issues: read` for v1. Add
+   `issues: write` only when "file a request" ships. **Corrected blast radius:**
+   `issues: write` also edits, closes, labels and comments as you — and if anything starts
+   an agent from an issue, a leaked token starts agents. That is why rule 5 exists.
+5. **Nothing starts a session from an issue unless the issue's author is you.** Gate on
+   `issue.user.login == owner`, never on a label (a label is one API call away for anyone
+   holding the token). No `pull_request_target` or `issue_comment` triggers. Sessions run
+   with their normal permission prompts. The prompt says issue text is data. *The repo is
+   public and issues are open: without this rule, anyone on the internet can put
+   instructions in front of an agent that has repo write.*
+6. **The town only reads what you wrote.** Fetch with `?creator=<owner>` and drop anything
+   else client-side, comments and fork PRs included. Titles through `sanName()`
+   (`engine.js` ~3507), bodies through a `sanLine()`-style clamp with bidi and zero-width
+   characters stripped; rendered as plain text via `textContent` or canvas only; **never
+   Markdown-to-HTML, and never through the one `innerHTML` sink that takes content strings
+   (`engine.js` ~2359, the quest verdict card)** — that sink is trusted-content-only today
+   and should be rebuilt with `textContent` regardless.
 
 **What "connected to you" honestly means.**
-- **You → Claude.** The personal build files a GitHub issue from her window ("side quest:
-  …"). A routine on this account, or a `claude-code-action` job on `issues: opened`, starts
-  a session on it. That session has the repo, the docs and this plan — it is the real thing.
+- **You → Claude.** The personal build files a GitHub issue from her window. A routine or
+  a job starts a session on it **only under rule 5**. That session has the repo, the docs
+  and this plan.
 - **Claude → you.** Sessions already write to the repo; CI writes `status.json`; sessions
-  can comment on the issue, and in the personal build she reads the issue thread too.
-  Outside the game, a scheduled routine pushes a phone notification when a PR is green.
+  comment on the issue; outside the game a scheduled routine pushes a phone notification
+  when a PR is green.
+- **Merging a PR from inside the game (v2) — do not build.** Merging needs
+  `contents: write`, and Pages serves `main`: that token would mean "publish JavaScript to
+  every player, cached by their service worker." Merge from GitHub, behind 2FA.
 - **A live chat box with Claude inside the game** is a different product: the Claude API
-  behind a relay *you host* that holds the key, with a monthly cost and its own auth. Not
-  now, and not required for any of the above.
+  behind a relay *you host*. Not now, and not required for any of the above.
 
-**Risk verdict: low**, and the risk is not where it looks. Rules 1 and 3 are what keep it
-low; rule 4 is what makes the worst case boring. **Cost:** a quarter sitting, most of it
-writing rules 1–4 into `OWNER.md` and the smoke assertion; `NET` already exists.
+**Risk verdict — corrected.** *Medium as first drafted; low only with rules 0–6, and
+rule 0 and rule 5 do most of the work.* The risk was never the token. It is (a) where the
+token lives, and (b) the pipeline the token feeds — a public repo's issues in front of a
+write-capable agent. **Cost:** a quarter sitting for the two files and the local server,
+plus a quarter for the smoke assertions (rule 1, rule 3, rule 6) and two CI hygiene lines
+(`permissions: contents: read` at the top of `ci.yml`; pin `playwright`).
+
+**The smoke assertions the guarantee needs** (over `git ls-files`, so a gitignored file
+cannot satisfy them): tracked `index.html`, `engine/`, `content/`, `sw.js`, `qr.js` and
+the manifest contain none of `api.github.com`, `net.local`, `github_pat`, `Authorization`;
+`engine/` contains no `location.search` or `URLSearchParams`; the public CSP equals a
+pinned literal; loading `index.html?dev=1&admin=1#admin=1` leaves `admin === false`;
+`.gitignore` lists both personal files. The grep must exclude `docs/`.
 
 ---
 
