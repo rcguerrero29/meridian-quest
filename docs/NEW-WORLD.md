@@ -24,6 +24,10 @@ Then open a bible and a ledger on day one, empty:
 - `docs/OWNER.md` — the owner's standing rules. Meridian's are a good default; the ones that
   travel to any story are marked *(travels)* below.
 
+**One question the interview must ask the owner, every time (2026-09-05): "keep Sonny?"** He is
+the owner's recurring dog, not the engine's; he appears in the owner's worlds by choice, and a
+world for someone else gets its own dog, or none. Ask before declaring a new world's `CRITTERS`.
+
 ## 1 · The folder — nine files, and which ones the engine actually needs
 
 ```

@@ -1,0 +1,7 @@
+[
+  {"name":"town-stall","w":"hq","x":10,"y":11,"cam":"3d"},
+  {"name":"town-street-west","w":"st","x":5,"y":4,"cam":"3d"},
+  {"name":"town-window","w":"st","x":9,"y":2,"cam":"3d"},
+  {"name":"town-street-east","w":"st","x":24,"y":4,"cam":"3d"},
+  {"name":"town-park","w":"pk","x":8,"y":6,"cam":"3d"}
+]

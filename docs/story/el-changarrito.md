@@ -28,10 +28,10 @@ and the label picks the body:
 | `tier: high` | a **named person** with a look and a title | stands still at a declared tile, wears ❗, opens a document (title, body, labels, age) with a **Done** button | `addChill()` + a `doc` + one button section (§4 B2) |
 | `tier: normal` | **townsfolk** — a face from the shared pool, first name only | wears ❗, says the title in one line, Done from the card | `addChill()` with `chat` |
 | `tier: low` | **nobody** — a pinned note on the board at the window | listed, read, closed from the board | a `READ` whose `DOC` is built from the record |
-| animals | **never** | a butterfly, a cat, the pigeon carry no task. They may carry a *note* ("Sonny found a permit under the bench") only if the owner asks | engine-owned critters, unchanged |
+| animals | **never a task** | a butterfly, a cat, the pigeon carry nothing. **Sonny is the exception the owner named on the first walk** (2026-09-05, §9): he comes with his whole mini game — follows you, sit / lie / stay, the ball, the cone — and may carry a *note*, never a task | `CRITTERS` in the town's pack; a `pk` room so the leash warp has somewhere to go |
 
-Sonny only gets more if a game is built around him — his own world, his own rules. Not
-here. The engine's animals are pinned to Meridian's world ids anyway (`DOG` in `hq`,
+~~Sonny only gets more if a game is built around him.~~ **Amended by the owner after the first
+walk (§9): "include sonny... he has a whole mini game already."** He comes as he is. The engine's animals are pinned to Meridian's world ids anyway (`DOG` in `hq`,
 `CAT` in `lc`, the pigeon and parrot in `st`, `engine.js:1153, 1208, 1252, 1284`): if the
 Changarrito names a street `st`, Paloma and the parrot show up uninvited unless their
 coordinates are solid there. That is a quirk to place around, not a feature to design on.
@@ -247,7 +247,7 @@ the extent it claims. Cost in sittings is the reviews' figure.*
 |---|---|---|---|---|
 | **1** | **Los cimientos** — the foundations | `STOREPFX` and `SK()` for every storage key (B3); the service worker serves only its own origin, never caches a non-ok response, deletes only its own caches (B5); the verdict card renders pack text with `textContent` (R1a); the loader refuses prototype keys (R3); `ci.yml` gets `permissions: contents: read` and a pinned playwright (R9b); **the public build's guarantee becomes a test** (R7: no API host, no token, no URL query read, pinned CSP, no literal keys, no innerHTML interpolation, no URL flag turns admin on). Version `mq-v65` | **yes** — behaviour-identical for players; the smoke suite proves 56 quests / 830 XP / every invariant before and after | 1 |
 | ~~**2a**~~ | **BUILT 2026-09-05 (mq-v66).** El pueblo, quieto — the town, still | the `changarrito/` folder: its own `index.html` (CSP `script-src 'self'; connect-src 'self' https://api.github.com`, **no service worker**), `content/changarrito/` per NEW-WORLD (`hq` + `st`, empty quest tables, its own `UI`, `STOREPFX="ch"`, its own version `CHV`), **`changarrito/README.md` with the one command to run it**; the `RECORD` seam beside `NET`; owner-only reads of open issues with `ETag` and a last-good copy; **issues → people** by tier (`tier: high` a named person with a document, `tier: normal` townsfolk) through `addChill()` with B2's hooks, `removeChill`, reach re-audited after placement. Read-only; **no token**. *You can walk your backlog.* | the `RECORD` seam, B2 hooks 1–3, `removeChill`, the reach re-audit — all behind typeof guards. **`mq-v66`** | 1 |
-| **2b** | **La ventanilla y los permisos** — the clerk and the permits | la ventanilla's window as a READ: the board of `tier: low` notes and the **permits** (open PRs with green/mergeable, the N+1 fetch); the refetch loop with add/remove diff (a closed issue's person leaves); her lines EN+ES; `test/shots.js` spots for the town in four cameras; a light town smoke in CI. *The street changes while you watch.* | B2 hooks 4–5 if any engine change is needed; otherwise none. `mq-v67` **only if `engine/` changed** | 1 |
+| ~~**2b**~~ | **BUILT 2026-09-05 (content only; engine unchanged, still mq-v66).** La ventanilla y los permisos — the clerk and the permits, plus the first walk's four (§9) | la ventanilla's window as a READ: the board of `tier: low` notes and the **permits** (open PRs with green/mergeable, the N+1 fetch); the refetch loop with add/remove diff (a closed issue's person leaves); her lines EN+ES; `test/shots.js` spots for the town in four cameras; a light town smoke in CI. *The street changes while you watch.* | B2 hooks 4–5 if any engine change is needed; otherwise none. `mq-v67` **only if `engine/` changed** | 1 |
 | **3** | **La ventanilla habla** — the clerk talks back | *File a request* (the interview's free-text step → `POST /issues` with a label) and **Done** (`PATCH` close) — the first day a token exists, read + `issues: write`, 30-day, this repo, typed once into the town's own storage; the engine smoke split from Meridian's (NEW-WORLD §3), a second smoke pointed at the town, a second `run:` in `ci.yml`, both packs' names in the portability guard, `meridian` added to it and the four engine-printed names moved into content (#27) | the test split and the guard | 2 |
 
 **Step 0 (labels, the ledger in issues #3–#34) is done. Part 1 built 2026-09-05 (PR #35).**
@@ -325,3 +325,220 @@ practice goal." Written as rules the tests can hold.*
    obvious second resident. He is a planner, not a task-carrier — he keeps his weight.
 5. **A read-only Pages copy, ever?** Only after step 1. Default: no; the laptop is enough
    for an audience of one.
+
+---
+
+## 9 · The first walk — playtest of 2a, 2026-09-05, planned not built
+
+*The owner ran the town from `localhost` an hour after 2a merged and came back with four
+things. Each is written here first, at their ask ("only write that into the plans first").
+None is built. Where a finding changes an earlier rule, the rule is amended above and the
+amendment is theirs.*
+
+### 9.1 · "There are no buildings other than the first"
+
+True. The street is a road with plants, because 2a was *el pueblo quieto* — people first.
+A street with nothing standing on it reads as a lot, not a town. **Change to 2b:** the street
+gets facades before it gets the clerk.
+
+- **Buildings are data the engine already draws.** `B` is a solid building face, `E` a door;
+  the pack's `DOORLOOK` colours each door; `DECOR` hangs a sign or a mural; `TILEART` paints a
+  window. Meridian's street is built from exactly these glyphs. The town's `st` rows change;
+  the engine does not.
+- **What stands there, in order of when it earns its walls:** la ventanilla's window (2b, the
+  clerk's building — the first one with a door); Don Güero's stall as a proper storefront at
+  the top of the street instead of a room you wake up in; **a park** (§9.4) as the second block
+  through the east door; and one facade per *label* — `ask`, `decision`, `bug` — so a person
+  stands in front of the building that matches what they carry. The last is the cheap, honest
+  way to give the street a skyline that means something: three facades, no interiors, and a
+  person's tier still picks the body.
+- **What it must not become:** interiors for their own sake. A door the player cannot open is
+  the rule ❗La reja exists for (#9). Every door on the street either opens or is a window.
+- **Cost:** a quarter sitting for the rows, doors and signs; the owner doubts it ships — it is
+  smaller than that doubt. Art for a facade that is not Meridian's is the only new drawing.
+
+### 9.2 · "Have a human friendly explanation and ability to request more context"
+
+The reader opens the issue as filed: a heading, the body as paragraphs, the facts. The body is
+written for the repo, not for a person standing in a street. **Two changes.**
+
+- **A plain-words paragraph first, by convention.** Every issue a session files starts its
+  body with one paragraph under the line `In plain words:` — what this is, why it matters,
+  what "done" looks like — in the language of the street, no file names. The reader shows that
+  paragraph as the person's first line and the rest under *the paperwork*. Issues #3–#34 get
+  the paragraph added when 2b ships (an edit to the body, no code). The convention goes into
+  `CLAUDE.md` so every future session writes it.
+- **"Ask for more context" is the first thing the town ever writes.** A button on the person's
+  document: *Pídeme más contexto*. It files a comment on the issue — `más contexto, por favor`
+  — which needs `issues: write`, so it lands in **Part 3** with the token. The next session
+  finds the comment and answers it *as a comment*, in plain words; the town reads comments the
+  same way it reads issues — **author-filtered** (the answer is posted by the owner's account,
+  so it passes; a stranger's comment does not) — and the person says the answer the next time
+  you talk. Until Part 3, the same ask is a sheet: *Copy* the person's document and paste it
+  into a session with "explain this to me."
+
+### 9.3 · "Allow these characters to talk more than once since their quest is ongoing"
+
+Today a person opens their document every time you press Talk — repeatable, but the same
+thing each time. An ongoing quest should sound ongoing. **Change to 2b:** a person has three
+lines and cycles through them, and the document stays one button away.
+
+1. **The plain words** (§9.2) — what this is.
+2. **The paperwork** — number, labels, how long it has stood there ("filed twelve days ago").
+3. **What's next** — the last comment on the issue if there is one (author-filtered), else
+   "nobody has answered yet — ask me for more context."
+
+Then back to 1. The cycle is per person and per visit, kept in the town's own storage under
+its prefix, never in the save. This is the `CHATTER`/`chillLines` shape the engine already
+has for townsfolk, fed from the record instead of a static list; the hook is content, not
+engine.
+
+### 9.4 · "Include Sonny — he has a whole mini game already"
+
+The owner reverses the earlier rule, and the reversal is theirs (§1, amended). Sonny comes
+as he is: he follows you through doors and the trolley, sit / lie / stay hold him, off duty
+he tags along, he rips the cone (`mq-v64`). He carries **no task** — the rule of weight holds
+for him too — but he may carry a *note*, and the street is livelier for a dog on it.
+
+- **How:** one `CRITTERS` entry in the town's pack — `{kind:"beagle", world:"st", name:"Sonny",
+  egg:"sonny"}` — the same declaration Meridian makes. No engine change.
+- **The one thing that needs a room:** the leash warps the world to `pk` (`engine.js` ~3595),
+  and the town has no `pk`. Either Sonny is never leashed here (the leash button hidden when
+  the pack declares no `pk`), or **the town gets a park** — which §9.1 wanted anyway. The park
+  is the second block: through the east door, a `pk` room with the dog society's rules already
+  in the engine. Recommended: the park. It answers two findings with one room.
+- **What he is for, here:** a walk between people is nicer with a dog. If the owner wants
+  more — Sonny finds a note, Sonny sits by the person whose issue is oldest — those are
+  *notes*, and they come after the board exists.
+
+**Sonny is the owner's dog, not the engine's** (owner, 2026-09-05: "sonny is the recurring dog
+for me, in new custom games it can be different"). He recurs in the owner's worlds — Meridian,
+this town — by the owner's choice each time. A new world for someone else gets its own dog, or
+none. **Until that is a setting, a session asks the owner "keep Sonny?" before drawing a new
+world's animals.** Written into `NEW-WORLD.md` §0.
+
+### 9.5 · What changes in the parts
+
+| Part | Was | Now |
+|---|---|---|
+| **2b** | the window, the board, the permits, the refetch loop, shots, a town smoke | **plus:** facades on the street (9.1); the plain-words paragraph shown first and added to #3–#34 (9.2); three lines per person, cycling (9.3); Sonny on the street and the park through the east door (9.4). Cost: one sitting becomes **one and a half** |
+| **3** | file a request, Done, the token, the test split | **plus:** *ask for more context* as a comment (9.2), and people say the last comment as their third line (9.3) |
+| `CLAUDE.md` | — | the `In plain words:` convention for every issue a session files (9.2) |
+
+---
+
+## 10 · The second walk — playtest of 2b, 2026-09-05, planned not built
+
+*The owner walked 2b and came back with five things. Written first, built later. Where a
+finding is a class of bug, the plan names the class and the test that would have caught it.*
+
+### 10.1 · "Lorenzo is floating"
+
+Lorenzo is the parrot. The engine pins him to tile (17,5) of **any** world named `st`
+(`LORO` in `engine.js`, the same pinning as the pigeon at (4,1) and Frederick at (12,5) in
+`hq`). In Meridian there is a perch under that tile; in the town it is bare road, and a parrot
+drawn at perch height over nothing floats. **The class:** engine-owned animals with hardcoded
+coordinates and no test that the tile under them carries what they need (#25's family).
+
+- **Fix, engine (the honest one):** pinned animals become content — a pack declares
+  `CRITTERS` for the parrot and the pigeon the way it already does for Sonny; a pack that
+  declares none gets none. `DOG` (Frederick) is Meridian's story and moves to Meridian's
+  pack too. Behaviour-identical for Meridian: its pack declares all three where they are.
+- **Fix, content (the stopgap the town can ship alone):** a sign post at (17,5) so he has a
+  perch, and `.` stays under the pigeon.
+- **The test (`docs/REGRESSION.md` R1):** every animal the engine draws must stand on a tile
+  whose declared `lift` matches the animal's drawn height, in all four cameras; and no
+  animal may be drawn in a world whose pack did not declare it. Red first on the town.
+
+### 10.2 · "Make sure regression tests are updated — for Meridian and for the templates"
+
+Done as a map, not a promise: `docs/REGRESSION.md` lists what every suite holds today,
+what each finding of the last five days should have been caught by, and the gaps. The short
+version of the gaps: the animal-perch class (10.1); the engine smoke has never been split
+from Meridian's (NEW-WORLD §3, still true — the town got its own suite instead of a shared
+one); the branded templates check (`build-branded.js --check`) covers the docs templates and
+nothing checks that a **generated** template (07 for Nolasco, 06 for the taller) still matches
+the quest that hands it over; a four-camera pixel check exists only as `shots.js`, which no
+CI runs; and nothing asserts the town's index stays a known-diff of the public one beyond a
+line count. Each gap has a proposed assertion and a cost in the doc.
+
+### 10.3 · "The teller plans bug triage and tracking presentations for future clients"
+
+La ventanilla becomes the reporting surface. She already builds documents live from the
+record and the reader already exports Markdown (Copy / Download). **Part 4 — La ventanilla
+presenta:**
+
+- **Two documents at her window, generated from the record:** *Bug triage* — open `bug`
+  issues by tier, age, and what's next, with a recommended order; *Tracking* — what closed
+  since a date, what merged (permits), what is waiting on the owner, what is waiting on a
+  session. Both Copy/Download as Markdown today; a session turns either into a deck with the
+  repo's own `deliverable` / `pptx` skills (the Pelaez brand exists there).
+- **For clients:** the record's `owner/repo` is one line in the town's config. A **client
+  town** is the same folder pointed at their repo — read-only with no token if public, a
+  per-repo token if private, never a token that can write to code. The rule of weight and
+  the author filter travel unchanged. One town per client, each on its own port, each with
+  its own storage prefix (`STOREPFX` per client), so their saves never meet.
+- **Reports and presentations, to the standard of the trade** (owner, 2026-09-05: "using the
+  best practices for ppts, xcel, charts, cycle time, etc"). The record is the data; the
+  outputs are: a **spreadsheet** (one row per issue and per PR: number, title, labels, tier,
+  opened, closed, age, first-response time, cycle time, merge lead time — built with the
+  repo's `xlsx` skill, formulas not pasted numbers); **charts** built to the `dataviz` skill's
+  rules (one system, readable in light and dark, no chartjunk): cycle time over time, age
+  distribution of what is open, throughput per week, open-vs-closed by label, PR lead time;
+  a **deck** built with the `pptx` / `deliverable` skills in the Pelaez brand, one message per
+  slide, the chart on the slide and the table in the appendix; and the **Markdown** she
+  already exports. **The metrics, defined once:** *cycle time* = opened → closed;
+  *lead time* (PRs) = opened → merged; *first response* = opened → the owner's first comment;
+  *age* = opened → today for what is still open; *throughput* = closed per week. Each report
+  states its date range and the count of filed things it was built from.
+- **What she must never do:** speak about what is not filed. A presentation is a document
+  of filed things with dates; the recommendation lines are labelled as the session's, not
+  the record's.
+
+### 10.4 · "The request has areas to add notes, questions, things to consider, areas affected"
+
+The issue body gets a shape, and the form in Part 3 fills it. **The template, top to bottom:**
+
+```
+In plain words: <what this is, why it matters, what done looks like — no file names>
+Notes: <the owner's, in their words>
+Questions to consider: <a session writes these; the owner answers in comments>
+Areas affected: <files, worlds, characters — a session fills this from the code>
+Done when: <one line>
+```
+
+- The reader shows each heading as a section; the three-line cycle (§9.3) reads *In plain
+  words* first, then *the paperwork*, then *what's next* — and a fourth line, *Questions*,
+  appears only when the section is non-empty.
+- **Who writes what:** the owner writes *In plain words*, *Notes* and *Done when* from the
+  form; a session fills *Questions to consider* and *Areas affected* when it first reads the
+  issue, as an edit to the body under those headings (never above the owner's words), and
+  says so in a comment. `CLAUDE.md` gets the template.
+- **Part 3's form** has the four owner fields and a label picker (10.5). The sheet it posts
+  is the template verbatim.
+
+### 10.5 · "Buildings organised by labels; choose any and find; a search to include or tag the tags"
+
+The street already stands people in front of the face that matches their first label
+(§9.1). Three more steps:
+
+- **A facade per label the owner adds.** Today three faces (ask / decision / bug) are
+  hand-placed. Next: the town reads the repo's label list and gives each label a face and a
+  colour from a small palette, in label order, so a new label is a new building the next
+  refetch. Capacity rule: past six faces the street gets a second block, not a seventh face.
+- **Choose any and find.** At la ventanilla's window, a *filter*: pick one or more labels
+  and only those people stand; everyone else waits on the board. Plus a text search over
+  titles. Both are read-only and live in the town's own storage under its prefix; they
+  ship in **Part 3** with the form, because the window is being built then anyway.
+- **Tag the tags.** Adding or removing a label from the game is a write (`issues: write`) —
+  Part 3, with the token. A person's document gets *+ label / − label* under the paperwork;
+  the street re-stands them the next refetch.
+
+### 10.6 · What changes in the parts
+
+| Part | Was | Now |
+|---|---|---|
+| **3** | file a request, Done, *ask for more context*, the token, the test split | **plus:** the request form with the four owner fields and a label picker (10.4); the filter and the search at the window (10.5); *+ label / − label* (10.5); Lorenzo's perch as content (10.1 stopgap). Cost: two sittings becomes **two and a half** |
+| **4 — La ventanilla presenta** | — | the triage and tracking documents; the client-town config; the deck path through the repo's own skills (10.3). **One sitting** |
+| **Engine, its own PR** | — | pinned animals become content, with the perch test (10.1). Behaviour-identical for Meridian. **Half a sitting**, and it closes a piece of #25 |
+| **Tests, its own PR** | — | the gaps in `docs/REGRESSION.md`, each red first. **One sitting** |

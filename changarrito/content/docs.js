@@ -27,5 +27,20 @@ const DOCUI = {
 };
 
 /* where a readable thing stands. A wall poster is read from the tile in front of it. */
-const READS = []; /* the board and the window arrive in 2b */
-const DOCS = {};
+/* what is readable on the street: the board on city hall's wall, beside la ventanilla */
+const READS = [
+  { world: "st", x: 8, y: 0, doc: "board" }
+];
+/* the documents are built live from the record (content/record.js) — every open is fresh */
+const DOCS = {
+  window: {
+    title: { en: "What the city has on file", es: "Lo que la ciudad tiene en el expediente" },
+    sub:   { en: "Filed things only. Past tense. Ask and she answers.", es: "Solo lo archivado. En pasado. Pregunta y contesta." },
+    build: () => RECORDSRC.windowDoc()
+  },
+  board: {
+    title: { en: "The board — notes", es: "El tablero — notas" },
+    sub:   { en: "The small things, pinned. Nobody stands for these.", es: "Las cosas chicas, prendidas. Nadie las carga." },
+    build: () => RECORDSRC.boardDoc()
+  }
+};

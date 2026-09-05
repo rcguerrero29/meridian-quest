@@ -51,3 +51,6 @@ for future personalized "gifted games" (shared engine + per-game content packs).
 
 **El Changarrito** — the owner's backlog as a street, a second world on the same engine, run from
 `localhost` only: `changarrito/README.md`.
+
+**For a Claude session:** `CLAUDE.md` is read automatically and says where the instructions
+live — `docs/NEXT-SESSION.md` first, then `docs/ASKS.md`, then the GitHub issues.
