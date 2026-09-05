@@ -4,9 +4,32 @@ A second world on the Meridian engine, for one player. Every open GitHub issue *
 `rcguerrero29/meridian-quest` is a person on the street; the `tier:` label picks who they are.
 Plan and rules: `docs/story/el-changarrito.md`.
 
-## Run it (from the repo folder, on your laptop)
+## Where it lives — one folder, always the same
+
+`~/code/meridian-quest` — a `code` folder in your home directory, the repo inside it
+(Mac/Linux: `/Users/<you>/code/meridian-quest`; Windows: `C:\Users\<you>\code\meridian-quest`,
+using Git Bash). `pwd` prints where you are; it should end in `/code/meridian-quest`.
+
+**First time only:**
 
 ```
+mkdir -p ~/code
+cd ~/code
+git clone https://github.com/rcguerrero29/meridian-quest.git
+cd meridian-quest
+```
+
+**If you mess it up:** nothing precious is in the folder — it is a copy of GitHub. Your save
+and the issue cache live in the browser, tied to the address `127.0.0.1:8765`, not to the
+folder. So the reset is safe and total: `cd ~/code && rm -rf meridian-quest && git clone
+https://github.com/rcguerrero29/meridian-quest.git`. Two rules: always port 8765 (a different
+port is a different address to the browser, and your save will not follow), and never edit
+files in that folder by hand — every change goes through a session and a PR.
+
+## Run it (from that folder, every time)
+
+```
+cd ~/code/meridian-quest
 git pull
 python3 -m http.server 8765 --bind 127.0.0.1
 ```
