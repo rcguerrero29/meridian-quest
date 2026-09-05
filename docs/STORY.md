@@ -236,6 +236,8 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   **Deferral dated 2026-09-03 (la junta):** SIGNED means the design is agreed, not that
   she exists. She is in no file — no name, no look, no world, no glyph — and stays
   deferred until a sitting is priced for her. Do not read SIGNED as shipped.
+  **Planned 2026-09-05:** `docs/story/la-ventanilla.md` — what she reads, where she could
+  stand, every seam she touches with its tag, and the personal build (❗La puerta trasera).
 - **Barrio Norte** — PROMOTED to the city's through-line. The northbound track
   advances a visible segment per finished business and the sound gets closer.
   Never a place you visit — it stays a promise (kept free for multiplayer/AJ).

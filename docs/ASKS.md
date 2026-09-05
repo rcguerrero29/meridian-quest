@@ -19,6 +19,8 @@ activities"* is a rule; "improve the ticker" is a mood. Quote the rule.
 
 | Asked | Verbatim | State |
 |---|---|---|
+| 2026-09-05 | *"keep planning this little character, but dont build , just make sure to point out places wehre we need tags or something in case we would like to track those."* | **Planned, not built.** `docs/story/la-ventanilla.md` — eleven seams, each with a file, an anchor and a grep-able tag (`ventanilla` in content/docs, `city record` in engine/sw/CI); three sub-asks: ❗El solar de la ventanilla (siting, Don Güero), ❗El expediente (what `status.json` holds), ❗La puerta trasera (below) |
+| 2026-09-05 | *"could we build a sole backdoor for us to have you connected to my personal version? is this too risky? i feel like thats how game developers do it..."* | **❗La puerta trasera — designed, not built** (`la-ventanilla.md` §5). Verdict: low risk *if* four rules hold — the public build never changes, no secret in the repo, the personal build is two gitignored files that fill the existing `NET` seam, the token is one-repo/issues-only/30-day. What devs do is a dev build compiled out of release, not a hidden channel in the shipped client |
 | 2026-09-05 | *"we should have a gaming expert agent get the low down from don guero and nacho about the game state and try to get more recs."* | Logged before doing. Running as a meeting: two briefings → the expert → adversarial verify → readout. `docs/meetings/2026-09-05-el-experto.md` |
 | 2026-09-05 | *"i think that we can make the building bigger, fit in a proper staircase. move it out of a tiny room if needed."* | **Decision recorded, not built** (*"dont build"*). Supersedes yesterday's "its own hall" plan — the owner wants a real staircase and is willing to enlarge HQ (20×14) to get it. Expert weighs in; siting is Don Güero's |
 | 2026-09-05 | *"i want to make sure we have a template for any other custom game in case we want to start a new "world"/town/city."* | Logged before doing. `docs/NEW-WORLD.md` |
@@ -30,7 +32,7 @@ activities"* is a rule; "improve the ticker" is a mood. Quote the rule.
 | 2026-09-03 | *"i cant enter the houses"* | Open as a rule, not a bug: nothing goes into the world the player cannot use. Recorded in `OWNER.md` |
 | 2026-09-03 | *"i think in terms of how it looks will be a good goal"* — the art bible: silhouettes, a hat-and-apron vocabulary, per-character signature idles | Not started. Pili's first assignment |
 | 2026-09-02 | *"i want the rest of the story for my ai practice"* → the four districts | Written and wired (`mq-v51`). **Never human-played.** The next real gate |
-| 2026-08-31 | ❗La ventanilla — the clerk with the city's record | Signed, deferral dated 2026-09-03, not built |
+| 2026-08-31 | ❗La ventanilla — the clerk with the city's record | Signed, deferral dated 2026-09-03, **planned 2026-09-05** (`docs/story/la-ventanilla.md`), not built |
 
 ## Shipped, this session
 
