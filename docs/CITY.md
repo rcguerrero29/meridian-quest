@@ -487,8 +487,8 @@ stays live until the Phase 2 refactor lands.
   Caprice is words only, Nacho's H), the view advancing per finished business.
 - 2026-09-02 · The mercado gate · **waived for the writing, not for the playing** · S4 was
   gated on a human playing the mercado; the owner's "now please" wrote the packs anyway.
-  The first human play of the mercado is still the next thing that should happen, and the
-  four packs will be revised against it.
+  *(Corrected 2026-09-05: the mercado WAS played; the `mq-v52` save bug erased the record.
+  The first human play of the four newer packs is the gate, and they will be revised against it.)*
 
 ## Phase 1 plan (drafted 2026-08-30 · **SIGNED 2026-08-31**)
 
