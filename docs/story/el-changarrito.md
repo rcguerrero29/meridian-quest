@@ -411,6 +411,12 @@ for him too — but he may carry a *note*, and the street is livelier for a dog 
   more — Sonny finds a note, Sonny sits by the person whose issue is oldest — those are
   *notes*, and they come after the board exists.
 
+**Sonny is the owner's dog, not the engine's** (owner, 2026-09-05: "sonny is the recurring dog
+for me, in new custom games it can be different"). He recurs in the owner's worlds — Meridian,
+this town — by the owner's choice each time. A new world for someone else gets its own dog, or
+none. **Until that is a setting, a session asks the owner "keep Sonny?" before drawing a new
+world's animals.** Written into `NEW-WORLD.md` §0.
+
 ### 9.5 · What changes in the parts
 
 | Part | Was | Now |
@@ -472,6 +478,19 @@ presenta:**
   per-repo token if private, never a token that can write to code. The rule of weight and
   the author filter travel unchanged. One town per client, each on its own port, each with
   its own storage prefix (`STOREPFX` per client), so their saves never meet.
+- **Reports and presentations, to the standard of the trade** (owner, 2026-09-05: "using the
+  best practices for ppts, xcel, charts, cycle time, etc"). The record is the data; the
+  outputs are: a **spreadsheet** (one row per issue and per PR: number, title, labels, tier,
+  opened, closed, age, first-response time, cycle time, merge lead time — built with the
+  repo's `xlsx` skill, formulas not pasted numbers); **charts** built to the `dataviz` skill's
+  rules (one system, readable in light and dark, no chartjunk): cycle time over time, age
+  distribution of what is open, throughput per week, open-vs-closed by label, PR lead time;
+  a **deck** built with the `pptx` / `deliverable` skills in the Pelaez brand, one message per
+  slide, the chart on the slide and the table in the appendix; and the **Markdown** she
+  already exports. **The metrics, defined once:** *cycle time* = opened → closed;
+  *lead time* (PRs) = opened → merged; *first response* = opened → the owner's first comment;
+  *age* = opened → today for what is still open; *throughput* = closed per week. Each report
+  states its date range and the count of filed things it was built from.
 - **What she must never do:** speak about what is not filed. A presentation is a document
   of filed things with dates; the recommendation lines are labelled as the session's, not
   the record's.
