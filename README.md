@@ -48,3 +48,6 @@ Current state, decisions, and the roadmap live in [docs/HANDOFF.md](docs/HANDOFF
 See [docs/APPROACH.md](docs/APPROACH.md) — the decision record covering why the game
 moved out of the artifact workflow and how this repo is meant to grow into a template
 for future personalized "gifted games" (shared engine + per-game content packs).
+
+**El Changarrito** — the owner's backlog as a street, a second world on the same engine, run from
+`localhost` only: `changarrito/README.md`.

@@ -21,3 +21,5 @@ jobs:
         run: node docs/templates/build-branded.js --check
       - name: Headless smoke test
         run: node test/smoke.js
+      - name: El Changarrito smoke
+        run: node test/town.smoke.js

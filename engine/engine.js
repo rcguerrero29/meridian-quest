@@ -42,7 +42,7 @@ const isSolidAt=(id,x,y)=>{const w=WORLDS[id];return !w||x<0||y<0||x>=w.W||y>=w.
    onto the tile you are standing on, and holds still while you are beside them so a
    conversation is never a chase. */
 const WANDER_R=3, WANDER_MS=420;
-function wanders(n){return !!n&&(!n.q||!n.q.length)&&
+function wanders(n){return !!n&&!n.doc&&(!n.q||!n.q.length)&&
   !(typeof roomHosts!=="undefined"&&roomHosts&&roomHosts[n.npc]);}
 function wanderInit(){Object.values(WORLDS).forEach(w=>w.npcs.forEach(n=>{
   n.fx=n.x;n.fy=n.y;n.hx=n.x;n.hy=n.y;n.wnext=0;n.mv=null;n.mt=0;n.face=1;}));}
@@ -118,6 +118,12 @@ function addChill(c){ /* {name:{en,es},world,x,y,look} → chat NPC; returns key
   w.npcs.push({key,x,y,npc:key,q:[],chat:1});
   w.grid[y][x]="N";
   return key;}
+function removeChill(key){ /* the inverse addChill never had — a person the record placed goes home */
+  for(const id of Object.keys(WORLDS)){const w=WORLDS[id],i=w.npcs.findIndex(n=>n.key===key);
+    if(i<0)continue;const n=w.npcs[i];w.npcs.splice(i,1);
+    if(w.grid[n.y]&&w.grid[n.y][n.x]==="N")w.grid[n.y][n.x]=w.rows[n.y][n.x]; /* the glyph the map had, not "." */
+    delete CHILLN[key];delete NPCLOOK[key];delete CHILLEGG[key];return true;}
+  return false;}
 (typeof CHILL!=="undefined"?CHILL:[]).forEach(c=>addChill(c));
 /* ---------- the room interview seam ----------
    A pack may declare INTERVIEW (content/<pack>/room.js): people who stand in a room and
@@ -280,6 +286,16 @@ const NET={enabled:false,boot(){},sync(state){}};
    PEERS must run each look through the save loader's colour checks first. PEERS are also not
    drawn in the iso camera. See docs/IDEAS.md §4 and docs/story/el-changarrito.md §4 B1. */
 let PEERS=[];
+/* RECORD seam — the city's record (docs/story/la-ventanilla.md §4, el-changarrito.md §4).
+   A pack may declare RECORDSRC = {enabled, boot()}: the engine calls boot() once after NET and
+   never again. What the record holds and where it comes from is the pack's business — a
+   same-origin file, or an API the pack's OWN index allows (the public build's CSP allows
+   neither, by test). People a record places come and go through addChill()/removeChill();
+   a placed person may carry a `doc` (an inline document for docOpen) and then wears the mark,
+   stands still, and opens it when talked to. The engine never learns what a permit is. */
+const RECORD=(typeof RECORDSRC==="object"&&RECORDSRC)||{enabled:false,boot(){}};
+/* the game's name is the pack's (config.js GAMENAME); the engine prints it and never owns it */
+const GN=()=>typeof GAMENAME==="string"?GAMENAME:"";
 const T=()=>UI[lang];
 const AQ=()=>lang==="es"?QES:QEN;
 const npcName=k=>CHILLN[k]?CHILLN[k][lang]:NPCN[lang][k];
@@ -373,7 +389,7 @@ let lastBump=0;
 const pendingAt=n=>n.q.find(qi=>!done.has(qi)&&qOpen(qi));
 /* "this neighbour has something to say" — the ❗ means one thing forever (STORY.md), and
    a host with an unanswered question has something to say too */
-const hasSay=n=>pendingAt(n)!==undefined||roomPending(n);
+const hasSay=n=>pendingAt(n)!==undefined||roomPending(n)||!!(n&&n.doc); /* a document to hand you counts as something to say */
 /* ---------- canvas ---------- */
 const cv=$("cv");let ctx=cv.getContext("2d"); /* let: the 3D baker borrows ctx to render tile art into textures */
 const VW=10*TS,VH=8*TS;
@@ -2160,6 +2176,9 @@ function checkTalk(){
   if(n){const qi=pendingAt(n),tb=$("talk"),rh=roomHosts[n.npc];
     if(qi!==undefined){tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${AQ()[qi].title}”`;
       tb.dataset.qi=qi;delete tb.dataset.chatn;}
+    else if(n.doc){ /* a person the record placed names the document they carry */
+      tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${docTitle(n.doc)}”`;
+      tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
     else if(rh){ /* a host says what the talk is about, like a quest does */
       tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${rh.talk[lang]||rh.talk.en}”`;
       tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
@@ -2220,6 +2239,8 @@ $("docDl").addEventListener("click",()=>{
 $("talk").addEventListener("click",()=>{
   const tb=$("talk");
   if(tb.dataset.chatn){
+    const dn=CW().npcs.find(m=>m.npc===tb.dataset.chatn);
+    if(dn&&dn.doc){docOpen(dn.doc);return;} /* a person the record placed hands you the document */
     if(roomHosts[tb.dataset.chatn]){roomStart(roomHosts[tb.dataset.chatn],tb.dataset.chatn);return;}
     /* content nominates who runs the fitting room; the engine just opens it */
     if(tb.dataset.chatn===GRW().wardrobeNpc){openWardrobe();return;}
@@ -3203,7 +3224,7 @@ function icsData(){
   const ev=T().careEvents(petCfg.n);
   const rows=[[ev[0],month1,"FREQ=MONTHLY"],[ev[1],soon,"FREQ=WEEKLY;INTERVAL=8"],[ev[2],month1,"FREQ=MONTHLY;INTERVAL=3"],
               [ev[3],soon,"FREQ=YEARLY"],[ev[4],sat,"FREQ=MONTHLY"]];
-  return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Meridian Quest//Care Pack//ES-EN",
+  return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//"+GN()+"//Care Pack//ES-EN",
     ...rows.flatMap((r,i)=>["BEGIN:VEVENT","UID:mq-care-"+i+"@meridian-quest","DTSTAMP:"+stamp,
       "DTSTART;VALUE=DATE:"+day(r[1]),"RRULE:"+r[2],"SUMMARY:"+r[0],"END:VEVENT"]),
     "END:VCALENDAR"].join("\r\n");
@@ -3403,7 +3424,7 @@ $("openMp").addEventListener("click",()=>{const t=T();
   $("settings").hidden=true;$("mpanel").hidden=false;held=null;});
 $("mpClose").addEventListener("click",()=>{$("mpanel").hidden=true;});
 $("tpClose").addEventListener("click",()=>{$("tpass").hidden=true;});
-$("tpShare").addEventListener("click",()=>{navigator.share({title:"Meridian Quest",url:passURL()}).catch(()=>{});});
+$("tpShare").addEventListener("click",()=>{navigator.share({title:GN(),url:passURL()}).catch(()=>{});});
 $("tpCopy").addEventListener("click",()=>{const u=passURL();
   (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(u):Promise.reject())
     .then(()=>toast(T().tpCopied,1600)).catch(()=>{});});
@@ -4074,9 +4095,10 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
 applyAdmin();applyStakes();applyLang();applyCtl();applyTheme();camSet(camMode);
 /* the version shows on the opening page AND in Settings (owner 2026-09-02: "so i know
    which im using") — the number a phone actually loaded, not the one a branch claims */
-[$("verTag"),$("verIntro")].forEach(el=>{if(el)el.textContent="Meridian Quest · "+(typeof GAMEV!=="undefined"?GAMEV:"dev");});
+[$("verTag"),$("verIntro")].forEach(el=>{if(el)el.textContent=GN()+" · "+(typeof GAMEV!=="undefined"?GAMEV:"dev");});
 try{if(sessionStorage.getItem(SK("upd"))==="1"){sessionStorage.removeItem(SK("upd"));
   setTimeout(()=>toast("⬆️ "+(typeof GAMEV!=="undefined"?GAMEV:"")+" — "+T().updToast,3200),900);}}catch(e){}
 if(NET.enabled)NET.boot();
+if(RECORD.enabled){try{RECORD.boot();}catch(err){console.warn("RECORD: boot failed",err);}}
 requestAnimationFrame(ts=>{last=ts;loop(ts);});
 sizeCanvas();
