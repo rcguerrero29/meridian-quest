@@ -271,10 +271,11 @@ const CRITTERS=[
  {kind:"beagle",world:"st",x:22,y:11,c:"#E8C46A",name:"Sonny",egg:"sonny"} /* the star himself */
 ];
 /* one-off place identity as data (IDEAS §10): the engine's DECODRAW vocabulary
-   (sign, mural) renders these in the top-down and front cameras ONLY — NOT in iso and NOT
-   in 3D, which is the camera the game boots into. (Corrected 2026-09-03, la junta: this
-   comment used to claim every camera, which is most likely why nobody noticed the mural
-   was invisible where it is played. Adding the two missing passes is queued.)
+   (sign, mural) renders these in ALL FOUR cameras: top (engine.js drawDecor), front (the
+   depth pass), iso (the billboard pass) and 3D (engine3d.js, a plane on the wall's first open
+   face). (This comment claimed every camera, was corrected on 2026-09-03 to say iso and 3D
+   were "queued" — and the two passes then shipped at `mq-v56` without the comment being
+   updated again. Re-checked against the code 2026-09-05: all four exist.)
    Packs can add art via DECOART. */
 const DECOR=[
  {world:"st",x:20,y:0,deco:"mural"},   /* Nacho's own piece — the city's name, never earned */
