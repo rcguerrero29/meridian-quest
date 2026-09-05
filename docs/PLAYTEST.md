@@ -21,7 +21,8 @@ The intro toast explains movement. *(engine: boot, character creator)*
 
 **2 · The first calls.** Talk to Priya (🛠️) and take "The 98% quote-bot". Answer
 wrong once on purpose — then retry until right.
-*See:* a wrong pick costs a heart, shows the verdict + codex but never reveals the
+*See:* a wrong pick is marked against that quest (hearts are off unless the pack's
+`STAKES` turns them on), shows the verdict + codex but never reveals the
 right answer; the NPC keeps the ❗ until you solve it; retrying pays only the XP
 difference. *(engine: retry rules, XP math)*
 
@@ -68,8 +69,9 @@ Mari — chat only), a blue butterfly, and the crew's grey street cat in the pen
 up: "🐾 Pet the street cat"). *(content: ex map + critters)*
 
 **10 · Feria de logros.** Finish the remaining office quests (Floor 2 stairs are in
-the corner office). When the last one completes, the week ends.
-*See:* the ending matches your hearts (3 = flawless / 2 = strong / ≤1 = survived);
+the corner office). When the last one completes, the chapter closes.
+*See:* the ending matches your grade — the share of quests you solved clean (9 in 10 =
+flawless / 6 in 10 = strong / fewer = survived); hearts never pick it;
 the epilogue teases Week Two. *(engine: endings)*
 
 **11 · Take it with you.** ⚙️ Settings → 🎫 Trolley Pass.
@@ -100,7 +102,7 @@ naming your hero or Frederick's care-pack pet something legendary too.
 
 **14 · Week Two opens.** Finish all of Week One, claim your title — the epilogue now
 offers **▶ Monday — Week Two**. Take it.
-*See:* three fresh hearts, and Doña Chelo unlocking the gate on the southwest lot —
+*See:* Doña Chelo unlocking the gate on the southwest lot —
 **El Mercado Robles grows onto the lot as the chapter begins** (the empty lot is real:
 a new game hands it back). Inside: Doña Chelo, Nando, Perla, Chava (everything is
 chile), Frijol the bodega cat. Eight quests (16-23) put you in the **AI product

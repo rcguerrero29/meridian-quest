@@ -96,9 +96,11 @@ preference that outlives one phase; cite the date and their words.
   5 prompt/solutions engineer.
 - **Entities as data.** Characters, critters, tiles, buildings are declared as data so
   graphics can be re-rendered wholesale without changing what things are.
-- **Front-profile 2.5D is the pack's default camera** (owner + AJ, 2026-08-31;
-  `CAMDEF` in config.js — content's call, per pack). A device's own Settings choice
-  always wins over the default. Top-down and iso remain as options. *(2026-08-31)*
+- **3D is the pack's default camera** (owner, 2026-09-01: *"please make 3d default"*;
+  `CAMDEF` in config.js — content's call, per pack). Front-profile 2.5D was the pick on
+  2026-08-31 (owner + AJ) and is now the fallback when 3D cannot run on a device. A
+  device's own Settings choice always wins over the default. Top-down and iso remain as
+  options. *(2026-08-31; amended 2026-09-05 — the code had said 3D since 09-01)*
 - **EN/ES in lockstep**, retry-until-correct, saves stay on-device.
 - **Fun is a requirement**, not a nice-to-have.
 - **HQ is the onboarding.** No separate tutorial or staging area. *(2026-08-31)*

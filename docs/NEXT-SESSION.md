@@ -44,6 +44,9 @@ Working tree clean. Smoke green across five consecutive runs.
   (claimed 24 quests / MAXXP 350 against 56 / 830), `maps.js` DECOR comment, `IDEAS.md` §15.8
   and §15.11 on the stairs, `templates/README.md` (undersold six of seven generated templates),
   `ASKS.md`'s "FitCheck: nothing to inherit" row (true when written, false when asked).
+  Then la junta's A4 batch closed (2026-09-05): the ventanilla deferral dated in `STORY.md`,
+  `OWNER.md` and `IDEAS.md` now say 3D is the default camera, `config.js`'s gifts comment
+  matches the five gifts, and `PLAYTEST.md` no longer grades the ending by hearts.
 
 ### Decisions the owner made this session (verbatim, in `docs/ASKS.md`)
 

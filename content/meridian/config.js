@@ -50,8 +50,10 @@ const GROWTH={
    {id:"pa",world:"ex",district:3,tiles:ESPIGA,   doorstep:{world:"ex",x:6, y:1, dir:"down"}},
    {id:"li",world:"ex",district:4,tiles:VELAZQUEZ,doorstep:{world:"ex",x:12,y:1, dir:"down"}},
    {id:"no",world:"st",district:5,tiles:NOLASCO,  doorstep:{world:"st",x:25,y:1, dir:"down"}},
-   /* gifts upstairs — a delivery IS a storefront aimed at f2, and each lands on a moving box
-      (❗La caja). No doorstep on a gift, so the handover never stands you upstairs. */
+   /* gifts upstairs — a delivery IS a storefront aimed at f2. Two land where a box stood
+      (Tacho's, Nolasco's), Vero's crew hauls two boxes away, and Chelo's corner and Licha's
+      chair land on open floor (BACKLOG §6; corrected 2026-09-05 — this comment used to say
+      each one lands on a box). No doorstep on a gift, so the handover never stands you upstairs. */
  /* the wall: blank paper from day one, and a district's Saturday pins its own page over it.
     The document behind it is DOCS[<id>] in content/meridian/docs.js. */
  {id:"poster-labs",world:"f2",district:1,tiles:[[0,2,"▤"]],
