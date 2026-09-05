@@ -19,14 +19,16 @@ const CAND=[process.env.CHROMIUM_PATH,'/opt/pw-browsers/chromium_headless_shell-
   const b = await chromium.launch({ executablePath: exe });
   const pg = await b.newPage({ viewport:{width:480,height:900}, deviceScaleFactor:2 });
   await pg.route('**', r => r.request().url().startsWith('file://') ? r.continue() : r.abort());
-  await pg.goto('file://' + path.resolve(__dirname,'..','index.html'));
+  /* --index <file> --spots <file>: shoot another world on the same engine (El Changarrito) */
+  const arg=(k,d)=>{const i=process.argv.indexOf(k);return i>0&&process.argv[i+1]?process.argv[i+1]:d;};
+  await pg.goto('file://' + path.resolve(__dirname,'..',arg('--index','index.html')));
   await pg.waitForTimeout(1200);
   await pg.click('.classes button[data-c="architect"]');
   await pg.click('#begin');
   await pg.waitForTimeout(400);
   // open the whole city so storefronts exist
-  await pg.evaluate(()=>{ CHAPTERS[0].quests.forEach(i=>done.add(i)); chSeen=1; applyGrowth(); });
-  const SPOTS = JSON.parse(fs.readFileSync(path.resolve(__dirname,'spots.json'),'utf8'));
+  await pg.evaluate(()=>{ if(typeof CHAPTERS!=='undefined'&&CHAPTERS.length&&typeof applyGrowth==='function'){CHAPTERS[0].quests.forEach(i=>done.add(i)); chSeen=1; applyGrowth();} });
+  const SPOTS = JSON.parse(fs.readFileSync(path.resolve(__dirname,path.basename(arg('--spots','spots.json'))),'utf8'));
   const OUT=path.resolve(__dirname,'..','shots');fs.mkdirSync(OUT,{recursive:true});
   /* --cams: shoot EVERY spot in all four cameras instead of the one it names.
      The game boots in 3D, and anything drawn in only some cameras is invisible where it
