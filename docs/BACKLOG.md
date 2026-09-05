@@ -34,9 +34,12 @@ quest packs and forgot the engine seam, the office, the ceremony and the second 
 
 **Playtest gates:** `/playtest` after S2, S3 and S6. ~~**S4 does not begin until the
 mercado has been human-played**~~ — waived for the *writing* by the owner on 2026-09-02
-("now please"). Nobody has played the mercado yet, and it is the shape every later pack
-copies: **the first human play of the mercado is the next gate**, and the four new packs
-get revised against it.
+("now please"). **Corrected 2026-09-05:** the owner HAD played the mercado — the save bug
+fixed at `mq-v52` dropped the district counter and the grades on every Continue, so the game
+itself lost the record (IDEAS §15.13). What has never happened is a *graded* run (marks only
+survive from `mq-v52` on) and any human play of the four newer packs: **the first human play
+of the taller, La Espiga, Velázquez and Nolasco is the next gate**, and they get revised
+against it.
 
 ---
 
@@ -109,7 +112,7 @@ engine, all landing in **S1**, none of them naming a business.
 | Question | Who is waiting |
 |---|---|
 | **The four story calls were made with Nacho's picks** (`docs/story/las-cuatro-puertas.md`, top): Tuerca a she; the franchise unnamed; paper 06/01/04/07; Calle Dos one door at a time. Any to flip? | one line each; the packs are written |
-| **Play the mercado**, then the taller — the packs were written before anyone played the shape they copy | the four new packs, for revision |
+| **Play the taller**, then Calle Dos and Nolasco — written before anyone played them. *(The mercado was played; the `mq-v52` save bug ate the grades, so a graded run of it is still worth one sitting of yours)* | the four new packs, for revision |
 | **The room upstairs — one call left** (`docs/rooms/aj-office.md` §8): Nacho off the street. *(Window: built. Whose room: the interview asks it. Mid-move: chosen and built 2026-09-02.)* Plus Don Güero's four after the build (§10 there): gifts land on the boxes; the couch one tile or two; assign who-sends-what now; Nacho's talk title | shipped with a pick on each; one word flips any |
 | **How does a district's Saturday present itself?** Deferred to /nacho; must be content-declared so a pack can choose differently | blocks S1's ending refactor |
 | ~~**Industries vs roles**~~ — built 2026-09-02: `industry:` beside `role:`, the report prints *industry · role* | Week One is still one industry (Enterprise IT) until the Week One split is decided |
@@ -195,6 +198,6 @@ session verified the critic against the code; costs are the cross-examined ones.
 | ~~C~~ | **SHIPPED 2026-09-03 (mq-v56).** Four-camera screenshot loop in `test/shots.js` · decor drawn in iso and 3D | an hour or two | Retires the whole class of "invisible in the camera you play in" bug |
 | ~~D~~ | **SHIPPED 2026-09-03 (mq-v55).** **Readable objects**: a persistent cream marker (never ❗), a Read button, a panel — plus the old lead's laptop, EN+ES | a sitting | You walk to a machine and find out what "the assistant" actually is |
 | ~~E~~ | **SHIPPED 2026-09-03 — posters at mq-v55, the settings drawers at mq-v56.** Six posters as wall glyphs delivered by ribbons · settings folded into four groups | a sitting | Tacho's signed repair order hangs itself on your office wall |
-| F | **The world may read a grade**: add per-district `gradeOf` to the `flags` object `drawTown` already hands content | an hour or two (NOT a sitting — `gradeOf` and `flags` both exist) | Unblocks the mural and the honest half of the office |
+| ~~F~~ | **SHIPPED 2026-09-04 (mq-v57), struck 2026-09-05.** `worldFlags()` hands content `grade[id]` per district — 0 until you begin, never a phantom 3 — and the mural reads it through `muralGrade()`. Landed in the same commit as G and was never struck | an hour or two | The mural brightens with how well you did |
 | ~~G~~ | **SHIPPED 2026-09-03 (mq-v57)** — seven tiles: Nacho's own MERIDIAN piece plus one panel per business, **baby blue** plaster until begun (the owner changed blank to baby blue), colour brightening with the grade | a sitting | The record became a room |
 
