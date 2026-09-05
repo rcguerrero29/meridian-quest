@@ -205,6 +205,15 @@ would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
+- ⏳ **❗La caja de escalera — RE-OPENED BY THE OWNER, 2026-09-05.** His words: *"i think that
+  we can make the building bigger, fit in a proper staircase. move it out of a tiny room if
+  needed."* That supersedes both earlier readings (the shaft at `hq(18,5)` inside the existing
+  3×3 hall, and the retired stacking idea). The owner wants a REAL staircase and is willing to
+  enlarge HQ (20×14 today) to get one. **Not built** — *"dont build"*. The expert panel of
+  2026-09-05 (`docs/meetings/2026-09-05-el-experto.md`) was asked for the smallest enlargement
+  that earns a proper flight; Don Güero sites it. What "proper" can mean without elevation
+  (IDEAS §15.10): a hall wide enough for a landing, a flight, a return, and a well upstairs —
+  masonry you walk beside, with the portal as the last step.
 - ⏳ **❗La caja de escalera — now BLOCKING, and the reason changed** *(2026-09-04, second pass)*.
   The owner asked for stairs that are "part of the building... not just portal images". The shape
   is settled: a SOLID stair shaft beside the walkable head, `lift:13`, the only body in this engine
