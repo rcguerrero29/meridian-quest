@@ -238,22 +238,45 @@ These are Meridian's, whether or not the Changarrito is ever built. Rows added t
 
 ---
 
-## 7 · Build order and cost
+## 7 · Build order — three parts (the owner's ask, 2026-09-05: "break it up in 3 parts")
 
-| Step | What | Cost | Ships to Meridian? |
-|---|---|---|---|
-| ~~0~~ | **DONE 2026-09-05.** Labels `tier: high / normal / low`, `ask`, `decision`, `bug`, `ventanilla`, `changarrito`; the open ❗ asks, the standing bugs and the nine engine findings are issues #3–#34. The street has its first residents | minutes | no (GitHub only) |
-| 1 | **Engine hygiene:** `STOREPFX` (B3), the SW carve-out (B5), the `innerHTML` rebuild at `2359`, the R7 smoke assertions, `ci.yml` hygiene. Each with a red-first test | 1 | **yes** — behaviour-identical for players, and the public build's guarantee gets its first tests |
-| 2 | **The pack**, NEW-WORLD's build order: `hq` spawn room, `st` street, empty quest tables, `UI`, names/emoji/looks, levels | 1 | no |
-| 3 | **`RECORD` seam + GitHub fetch**: conditional requests, last-good copy, `pull_request` filter, owner filter, rate-limit readout | ½ | the seam yes, the fetch no |
-| 4 | **Issues → people**: label → tier → body; placement on declared stand tiles; add/remove diff on refetch; Done → close; B2's five hooks; `removeChill` | ½–1 | the hooks yes |
-| 5 | **File a request**: the interview's free-text step → `POST /issues` with a label. Needs `issues: write` — the token upgrade happens here, not before | ½ | no |
-| 6 | **Tests and CI**: split the engine smoke from Meridian's (NEW-WORLD §3); a second smoke pointed at the town; a second `run:` in `ci.yml`; both packs' names in the guard | 1 | yes |
-| | **v1 total** | **~5 sittings** | |
+*Nine steps folded into three deliverables. Each part ends green, merged, and playable to
+the extent it claims. Cost in sittings is the reviews' figure.*
 
-**The owner's ranking still holds:** none of steps 2–6 before the four newer districts
-have been played. Step 0 costs minutes and makes the ledger better either way. Step 1 is
-Meridian's own debt and can go whenever a sitting is free.
+| Part | Name | What ships | Ships to Meridian? | Cost |
+|---|---|---|---|---|
+| **1** | **Los cimientos** — the foundations | `STOREPFX` and `SK()` for every storage key (B3); the service worker serves only its own origin, never caches a non-ok response, deletes only its own caches (B5); the verdict card renders pack text with `textContent` (R1a); the loader refuses prototype keys (R3); `ci.yml` gets `permissions: contents: read` and a pinned playwright (R9b); **the public build's guarantee becomes a test** (R7: no API host, no token, no URL query read, pinned CSP, no literal keys, no innerHTML interpolation, no URL flag turns admin on). Version `mq-v65` | **yes** — behaviour-identical for players; the smoke suite proves 56 quests / 830 XP / every invariant before and after | 1 |
+| **2** | **El pueblo** — the town | the `changarrito/` folder: its own `index.html` (CSP `script-src 'self'; connect-src 'self' https://api.github.com`, no service worker) and a content pack per NEW-WORLD (`hq` + `st`, empty quest tables, its own `UI`, `STOREPFX="ch"`); the `RECORD` seam beside `NET`; owner-only reads with `ETag` and a last-good copy; **issues → people** by tier through `addChill()` with B2's hooks, `removeChill`, reach re-audited after placement; la ventanilla's window with the board and the permits; `python3 -m http.server 8765 --bind 127.0.0.1`. **Read-only; no token needed** (60 unauthenticated requests/hour is enough) | the `RECORD` seam and B2's hooks, behind typeof guards | 2 |
+| **3** | **La ventanilla habla** — the clerk talks back | *File a request* (the interview's free-text step → `POST /issues` with a label) and **Done** (`PATCH` close) — the first day a token exists, read + `issues: write`, 30-day, this repo, typed once into the town's own storage; the engine smoke split from Meridian's (NEW-WORLD §3), a second smoke pointed at the town, a second `run:` in `ci.yml`, both packs' names in the portability guard, `meridian` added to it and the four engine-printed names moved into content (#27) | the test split and the guard | 2 |
+
+**Step 0 (labels, the ledger in issues #3–#34) is done.** Nine steps, if the owner wants
+them finer: 1a keys + SW, 1b verdict card + loader + CI, 1c the guarantee test; 2a the
+folder and pack, 2b `RECORD` + fetch, 2c issues → people + the window; 3a file-a-request,
+3b Done + the token, 3c tests and CI. Each is a PR on its own.
+
+---
+
+## 7½ · What the town must never do to Meridian
+
+*The owner, 2026-09-05: "ensure we maintain the original mq AI role and implementation
+practice goal." Written as rules the tests can hold.*
+
+1. **Meridian's purpose is unchanged: practice for AI roles — the calls a product manager,
+   an implementation lead, a prompt engineer makes — in a barrio that phones you back.**
+   The Changarrito is tooling for one person. It trains no role, carries no curriculum,
+   awards no grade that means anything about the player. It is never a district of
+   Meridian and never a chapter in its story.
+2. **Every engine change the town needs is behaviour-identical for Meridian's players**, and
+   the smoke suite proves it the same day: same quest count, same MAXXP, every invariant,
+   the four cameras, the save round-trip. A change that alters what a Meridian player sees
+   is a Meridian change and goes through Meridian's own gates (`/playtest`, the owner).
+3. **Meridian's content is never edited for the town's sake.** `content/meridian/` is
+   Meridian's. The town has its own pack; what it shares is `engine/`.
+4. **The public build knows nothing about the town.** Enforced by the guarantee test in
+   `test/smoke.js` from Part 1 on: no API host, no token, no URL-driven behaviour, a pinned
+   CSP. The town is never linked from Meridian.
+5. **Sittings are ranked by the owner, not by the town.** The four newer districts still
+   want their first human play; the town does not jump that queue by being fun to build.
 
 ---
 

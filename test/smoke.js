@@ -2867,6 +2867,57 @@ const CANDIDATES = [
     fails.push(...prop);
   }
 
+  // ---- the public build's guarantee (docs/story/el-changarrito.md §5 R7) ----
+  // Meridian's public build must not know about any personal build: no API host, no
+  // token, no URL-driven behaviour, a pinned CSP, every storage key through SK(), pack
+  // text never interpolated into innerHTML, and a service worker that serves only its
+  // own shell. Each line here was red once, or would have been the day it mattered.
+  {
+    const { execSync } = require('child_process');
+    const root = path.resolve(__dirname, '..');
+    let tracked = [];
+    try { tracked = execSync('git ls-files', { cwd: root }).toString().split('\n').filter(Boolean); }
+    catch (e) { fails.push('guarantee: git ls-files unavailable — the guard needs the tracked list, not the working tree'); }
+    const shell = tracked.filter(f => ['index.html', 'sw.js', 'qr.js', 'manifest.webmanifest'].includes(f)
+                                   || f.startsWith('engine/') || f.startsWith('content/'));
+    for (const f of shell) {
+      const src = fs.readFileSync(path.join(root, f), 'utf8');
+      ['api.github.com', 'net.local', 'github_pat', 'Authorization'].forEach(w => {
+        if (src.includes(w)) fails.push(`guarantee: ${f} mentions "${w}" — the public build must not`);
+      });
+    }
+    for (const f of tracked.filter(f => f.startsWith('engine/'))) {
+      const src = fs.readFileSync(path.join(root, f), 'utf8');
+      // the one allowed mention: stripPassHash() writes the URL back with its query intact,
+      // it reads nothing. Anything else that touches the query is URL-driven behaviour.
+      const q = src.replace(/location\.pathname\+location\.search/g, '');
+      if (/location\.search|URLSearchParams/.test(q))
+        fails.push(`guarantee: ${f} reads the URL query — no URL-driven behaviour in the public build`);
+      const lit = src.match(/localStorage\.(get|set|remove)Item\(\s*["']/g);
+      if (lit) fails.push(`guarantee: ${f} has ${lit.length} literal storage key(s) — every key goes through SK()`);
+      src.split('\n').forEach((line, i) => {
+        if (/innerHTML\s*=/.test(line) && /\$\{/.test(line))
+          fails.push(`guarantee: ${f}:${i + 1} interpolates into innerHTML — pack text is data, use textContent`);
+      });
+    }
+    const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+    const csp = (html.match(/http-equiv="Content-Security-Policy" content="([^"]*)"/) || [])[1];
+    const PINNED = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'";
+    if (csp !== PINNED) fails.push('guarantee: index.html CSP differs from the pinned literal — widen it in a personal build only');
+    const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+    if (!/res\.ok/.test(sw)) fails.push('guarantee: sw.js caches responses without checking res.ok');
+    if (!/self\.location\.origin/.test(sw)) fails.push('guarantee: sw.js does not restrict itself to its own origin');
+    if (!/startsWith\(PFX\)/.test(sw)) fails.push('guarantee: sw.js activate would delete caches it does not own');
+    // no URL can turn admin mode on: load with every flag a reader might guess, expect nothing
+    await page.evaluate(() => { try { localStorage.removeItem('mqadmin'); } catch (e) {} });
+    await page.goto(index + '?dev=1&admin=1#admin=1');
+    await page.waitForTimeout(800);
+    const adm = await page.evaluate(() => ({ admin: typeof admin === 'undefined' ? null : admin,
+                                              brushes: document.getElementById('brushes').hidden }));
+    if (adm.admin !== false || adm.brushes !== true)
+      fails.push(`guarantee: a URL flag changed admin mode (admin=${adm.admin}, brushes hidden=${adm.brushes})`);
+  }
+
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);
