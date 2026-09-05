@@ -418,3 +418,108 @@ for him too — but he may carry a *note*, and the street is livelier for a dog 
 | **2b** | the window, the board, the permits, the refetch loop, shots, a town smoke | **plus:** facades on the street (9.1); the plain-words paragraph shown first and added to #3–#34 (9.2); three lines per person, cycling (9.3); Sonny on the street and the park through the east door (9.4). Cost: one sitting becomes **one and a half** |
 | **3** | file a request, Done, the token, the test split | **plus:** *ask for more context* as a comment (9.2), and people say the last comment as their third line (9.3) |
 | `CLAUDE.md` | — | the `In plain words:` convention for every issue a session files (9.2) |
+
+---
+
+## 10 · The second walk — playtest of 2b, 2026-09-05, planned not built
+
+*The owner walked 2b and came back with five things. Written first, built later. Where a
+finding is a class of bug, the plan names the class and the test that would have caught it.*
+
+### 10.1 · "Lorenzo is floating"
+
+Lorenzo is the parrot. The engine pins him to tile (17,5) of **any** world named `st`
+(`LORO` in `engine.js`, the same pinning as the pigeon at (4,1) and Frederick at (12,5) in
+`hq`). In Meridian there is a perch under that tile; in the town it is bare road, and a parrot
+drawn at perch height over nothing floats. **The class:** engine-owned animals with hardcoded
+coordinates and no test that the tile under them carries what they need (#25's family).
+
+- **Fix, engine (the honest one):** pinned animals become content — a pack declares
+  `CRITTERS` for the parrot and the pigeon the way it already does for Sonny; a pack that
+  declares none gets none. `DOG` (Frederick) is Meridian's story and moves to Meridian's
+  pack too. Behaviour-identical for Meridian: its pack declares all three where they are.
+- **Fix, content (the stopgap the town can ship alone):** a sign post at (17,5) so he has a
+  perch, and `.` stays under the pigeon.
+- **The test (`docs/REGRESSION.md` R1):** every animal the engine draws must stand on a tile
+  whose declared `lift` matches the animal's drawn height, in all four cameras; and no
+  animal may be drawn in a world whose pack did not declare it. Red first on the town.
+
+### 10.2 · "Make sure regression tests are updated — for Meridian and for the templates"
+
+Done as a map, not a promise: `docs/REGRESSION.md` lists what every suite holds today,
+what each finding of the last five days should have been caught by, and the gaps. The short
+version of the gaps: the animal-perch class (10.1); the engine smoke has never been split
+from Meridian's (NEW-WORLD §3, still true — the town got its own suite instead of a shared
+one); the branded templates check (`build-branded.js --check`) covers the docs templates and
+nothing checks that a **generated** template (07 for Nolasco, 06 for the taller) still matches
+the quest that hands it over; a four-camera pixel check exists only as `shots.js`, which no
+CI runs; and nothing asserts the town's index stays a known-diff of the public one beyond a
+line count. Each gap has a proposed assertion and a cost in the doc.
+
+### 10.3 · "The teller plans bug triage and tracking presentations for future clients"
+
+La ventanilla becomes the reporting surface. She already builds documents live from the
+record and the reader already exports Markdown (Copy / Download). **Part 4 — La ventanilla
+presenta:**
+
+- **Two documents at her window, generated from the record:** *Bug triage* — open `bug`
+  issues by tier, age, and what's next, with a recommended order; *Tracking* — what closed
+  since a date, what merged (permits), what is waiting on the owner, what is waiting on a
+  session. Both Copy/Download as Markdown today; a session turns either into a deck with the
+  repo's own `deliverable` / `pptx` skills (the Pelaez brand exists there).
+- **For clients:** the record's `owner/repo` is one line in the town's config. A **client
+  town** is the same folder pointed at their repo — read-only with no token if public, a
+  per-repo token if private, never a token that can write to code. The rule of weight and
+  the author filter travel unchanged. One town per client, each on its own port, each with
+  its own storage prefix (`STOREPFX` per client), so their saves never meet.
+- **What she must never do:** speak about what is not filed. A presentation is a document
+  of filed things with dates; the recommendation lines are labelled as the session's, not
+  the record's.
+
+### 10.4 · "The request has areas to add notes, questions, things to consider, areas affected"
+
+The issue body gets a shape, and the form in Part 3 fills it. **The template, top to bottom:**
+
+```
+In plain words: <what this is, why it matters, what done looks like — no file names>
+Notes: <the owner's, in their words>
+Questions to consider: <a session writes these; the owner answers in comments>
+Areas affected: <files, worlds, characters — a session fills this from the code>
+Done when: <one line>
+```
+
+- The reader shows each heading as a section; the three-line cycle (§9.3) reads *In plain
+  words* first, then *the paperwork*, then *what's next* — and a fourth line, *Questions*,
+  appears only when the section is non-empty.
+- **Who writes what:** the owner writes *In plain words*, *Notes* and *Done when* from the
+  form; a session fills *Questions to consider* and *Areas affected* when it first reads the
+  issue, as an edit to the body under those headings (never above the owner's words), and
+  says so in a comment. `CLAUDE.md` gets the template.
+- **Part 3's form** has the four owner fields and a label picker (10.5). The sheet it posts
+  is the template verbatim.
+
+### 10.5 · "Buildings organised by labels; choose any and find; a search to include or tag the tags"
+
+The street already stands people in front of the face that matches their first label
+(§9.1). Three more steps:
+
+- **A facade per label the owner adds.** Today three faces (ask / decision / bug) are
+  hand-placed. Next: the town reads the repo's label list and gives each label a face and a
+  colour from a small palette, in label order, so a new label is a new building the next
+  refetch. Capacity rule: past six faces the street gets a second block, not a seventh face.
+- **Choose any and find.** At la ventanilla's window, a *filter*: pick one or more labels
+  and only those people stand; everyone else waits on the board. Plus a text search over
+  titles. Both are read-only and live in the town's own storage under its prefix; they
+  ship in **Part 3** with the form, because the window is being built then anyway.
+- **Tag the tags.** Adding or removing a label from the game is a write (`issues: write`) —
+  Part 3, with the token. A person's document gets *+ label / − label* under the paperwork;
+  the street re-stands them the next refetch.
+
+### 10.6 · What changes in the parts
+
+| Part | Was | Now |
+|---|---|---|
+| **3** | file a request, Done, *ask for more context*, the token, the test split | **plus:** the request form with the four owner fields and a label picker (10.4); the filter and the search at the window (10.5); *+ label / − label* (10.5); Lorenzo's perch as content (10.1 stopgap). Cost: two sittings becomes **two and a half** |
+| **4 — La ventanilla presenta** | — | the triage and tracking documents; the client-town config; the deck path through the repo's own skills (10.3). **One sitting** |
+| **Engine, its own PR** | — | pinned animals become content, with the perch test (10.1). Behaviour-identical for Meridian. **Half a sitting**, and it closes a piece of #25 |
+| **Tests, its own PR** | — | the gaps in `docs/REGRESSION.md`, each red first. **One sitting** |
