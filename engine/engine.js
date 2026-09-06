@@ -836,7 +836,14 @@ const STAIRH=0.16; /* one step's rise, in tile units — three treads and a head
 function stairRun(w,x,y){const row=(w&&w.rows&&w.rows[y])||"";if(row[x]!=="≡"&&row[x]!=="▲")return null;
   let a=x;while(a-1>=0&&row[a-1]==="≡")a--;let b=x;while(b+1<row.length&&(row[b+1]==="≡"||row[b+1]==="▲"))b++;
   const up=row[b]==="▲",well=row[a-1]==="▼";const i=x-a,L=b-a+1;return {i,L,up:up&&!well,well};}
-function stairLift(w,x,y){const r=stairRun(w,x,y);if(!r||!r.up)return 0;return STAIRH*(r.i+1);}
+/* how far below the floor a tile of the WELL sits (#62, the way down): the ▼ is the deepest,
+   each tread one step up toward the floor, the tile east of the last tread is the floor itself.
+   A climbing flight's tiles are 0 here — they rise, they do not sink. */
+function wellDepth(w,x,y){const row=(w&&w.rows&&w.rows[y])||"";
+  if(row[x]==="▼"){let L=0;while(row[x+1+L]==="≡")L++;return L?STAIRH*(L+1):0;}
+  const r=stairRun(w,x,y);if(!r||!r.well)return 0;return STAIRH*(r.L-r.i);}
+/* the height anyone standing on (x,y) stands at: up a climbing tread, DOWN a well tread */
+function stairLift(w,x,y){const r=stairRun(w,x,y);if(r&&r.up)return STAIRH*(r.i+1);return -wellDepth(w,x,y);}
 TILEDRAW["≡"]=rc=>{const{sx,sy,x,y}=rc; /* a tread from above on a flight that runs east: two risers a tile,
   the nosing shadow on the east edge; a climbing flight lightens step by step, a well darkens */
   const r=stairRun(CW(),x,y)||{i:0,L:1,up:true,well:false};const t=r.L>1?r.i/(r.L-1):0;
