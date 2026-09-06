@@ -999,6 +999,12 @@ const CANDIDATES = [
     const through = T3.pool.filter(p => p.live && p.spr.material.depthTest === false);
     if (through.length !== 1) problems.push(`${through.length} billboards draw through walls — the hero, and only the hero, must`);
     if (through.length === 1 && through[0].spr.renderOrder < 1) problems.push('the hero billboard is not drawn last');
+    // #24 (mq-v74): a 3D failure leaves a trace — once in the console, the last one under the prefix
+    { const n0 = T3.errors.length; t3Note('test', new Error('boom')); t3Note('test', new Error('boom'));
+      if (T3.errors.length !== n0 + 1) problems.push('t3Note does not log once per distinct message (' + (T3.errors.length - n0) + ')');
+      const last = JSON.parse(localStorage.getItem(SK('err3d')) || 'null');
+      if (!last || last.where !== 'test' || !/boom/.test(last.msg) || last.v !== GAMEV) problems.push('the last 3D error is not kept under the prefix with the version');
+      T3.errors.pop(); localStorage.removeItem(SK('err3d')); }
     if (lintels < doors) problems.push(`${doors - lintels} of hq's ${doors} doors have a see-through slot above them (no lintel)`);
     if (glows < doors) problems.push(`${doors - glows} of hq's ${doors} doors do not say "this one opens" in 3D`);
     T3.yaw = before.yaw; camSet(before.cam);
@@ -1698,6 +1704,8 @@ const CANDIDATES = [
         // tables (PLDEF, ANIDEF) are the one place the ids may live.
         if (/\bworld\s*(?:===|!==|=|:)\s*"[a-z0-9]+"/.test(code) && !/\b(PLDEF|ANIDEF)=/.test(code))
           fails.push(`portability: ${f}:${i + 1} compares or sets world to a literal id — read it from PL (the PLACES seam)`);
+        if (f === 'engine/engine3d.js' && /catch\(e\)\{\}/.test(code))
+          fails.push(`${f}:${i + 1} swallows an error — route it through t3Note (#24)`);
         if (/WORLDS\.[a-z][a-z0-9]\b/.test(code) && !/\b(PLDEF|ANIDEF)=/.test(code))
           fails.push(`portability: ${f}:${i + 1} reaches WORLDS.<id> by name — read the id from PL`);
       });

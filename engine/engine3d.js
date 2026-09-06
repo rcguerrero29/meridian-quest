@@ -9,6 +9,17 @@ const DAY_AMB=0.66,DAY_SUN=0.42;   /* see the note at the lights: these two numb
 const T3={renderer:null,scene:null,cam:null,group:null,amb:null,sun:null,lastW:0,
   builtKey:"",dirty:0,fail:false,yaw:0,pool:[],tintables:[],tint:null,glows:[],K:1}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
 function t3Invalidate(){T3.dirty++;} /* growth, theme edits — anything that reshapes tiles */
+/* ---------- the error log (#24) ----------
+   Four places swallowed a 3D failure and left no trace: a decor artist, an actor artist, init,
+   render. Every one now lands here — once per distinct message in the console, the last one
+   under the pack's prefix (err3d) so a session can read what the owner's browser saw — and a
+   fall-back to the flat camera says so on screen instead of quietly switching. */
+T3.errors=[];
+function t3Note(where,e){const msg=String((e&&e.message)||e||"?").slice(0,160),key=where+"|"+msg;
+  if(!T3.errors.some(x=>x.key===key)){T3.errors.push({key,where,msg,at:Date.now()});if(T3.errors.length>20)T3.errors.shift();console.warn("3D "+where+": "+msg);}
+  try{localStorage.setItem(SK("err3d"),JSON.stringify({where,msg,at:Date.now(),v:typeof GAMEV==="string"?GAMEV:""}));}catch(err){}}
+function t3Fell(){if(T3.said)return;T3.said=true;const last=T3.errors[T3.errors.length-1];
+  try{toast((typeof lang!=="undefined"&&lang==="es"?"El 3D no pudo dibujar — cámara plana. ":"3D could not draw — flat camera instead. ")+(last?last.where+": "+last.msg:""),5200);}catch(err){}}
 /* ---------- which way is screen-right? ----------
    Billboards always show their painted face to the camera, but the painters mirror an
    animal by its WORLD facing (`face` = ±x). Turn the camera to the north stop and a dog
@@ -310,7 +321,7 @@ function t3Build(key){
     const f=(typeof DECODRAW!=="undefined")&&DECODRAW[d.deco];if(!f)return;
     const c=document.createElement("canvas");c.width=32*K;c.height=32*K;
     const o2=ctx;ctx=c.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
-    try{f(0,0,d);}catch(e){}finally{ctx=o2;}
+    try{f(0,0,d);}catch(e){t3Note("decor "+d.deco,e);}finally{ctx=o2;}
     const tex=t3Tex(c),cx=d.x+0.5,cz=d.y+0.5;
     const onWall=d.x>=0&&d.y>=0&&d.y<w.H&&d.x<w.W&&SOLID.has(w.grid[d.y][d.x]);
     if(onWall){
@@ -385,8 +396,8 @@ function t3Actors(){
     p.g.setTransform(T3.K,0,0,T3.K,0,0);p.g.clearRect(0,0,36,40);
     ctx=p.g; /* the 2D artists paint straight onto the billboard */
     if(a.fc){const f0=a.fc.face;a.fc.face=t3ScreenFace(a.fc); /* painted for the camera, not the map */
-      try{a.f(p.g);}catch(e){}a.fc.face=f0;}
-    else{try{a.f(p.g);}catch(e){}}
+      try{a.f(p.g);}catch(e){t3Note("actor",e);}a.fc.face=f0;}
+    else{try{a.f(p.g);}catch(e){t3Note("actor",e);}}
     ctx=old;
     p.tex.needsUpdate=true;
     /* pull each billboard a step toward the camera so heads stop sinking into the
@@ -415,7 +426,7 @@ function t3Light(){
 }
 function draw3d(){ /* returns true when it rendered; false → caller falls back */
   if(T3.fail)return false;
-  if(!T3.renderer){try{t3Init();}catch(e){T3.fail=true;return false;}}
+  if(!T3.renderer){try{t3Init();}catch(e){T3.fail=true;t3Note("init",e);t3Fell();return false;}}
   try{
     const c3=T3.renderer.domElement;
     if(Math.abs((c3.clientWidth||0)-T3.lastW)>2){T3.lastW=c3.clientWidth||0;t3Resize();}
@@ -431,7 +442,7 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
     t3Leash();
     T3.renderer.render(T3.scene,T3.cam);
     return true;
-  }catch(e){T3.fail=true;return false;}
+  }catch(e){T3.fail=true;t3Note("render",e);t3Fell();return false;}
 }
 function t3Glow(){ /* the light under every door breathes — same clock as the 2D art */
   const a=0.25+0.2*Math.sin(Date.now()/380);
