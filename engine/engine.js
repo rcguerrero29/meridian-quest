@@ -477,11 +477,12 @@ function drawIso(){
   /* depth pass: blocks + actors, painter's order */
   const R=[];
   for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
-    const gch=w.grid[y][x];
-    if(!SOLID.has(gch))continue;
+    const gch=w.grid[y][x],wg=winAt(w,x,y);
+    if(!SOLID.has(gch)&&!wg)continue;
     const[cx,cy]=P(x,y);
     if(cx<-ISW||cx>VW+ISW||cy<-ISH-40||cy>VH+ISH+40)continue;
-    if(gch==="J")R.push({d:x+y,f:()=>{isoBlock(cx,cy,"#6E4A2C",12);
+    if(wg)R.push({d:x+y,f:()=>isoBlock(cx,cy,ISOCOL[wg]||C.wall,Math.round(izh(wg)*0.45))}); /* the counter she stands behind */
+    else if(gch==="J")R.push({d:x+y,f:()=>{isoBlock(cx,cy,"#6E4A2C",12);
       const t2=Math.sin(Date.now()/900+x)*1.2;
       ctx.fillStyle=tc("#4E8A58");
       [[-9,-1,9],[9,-1,9],[0,-7,10]].forEach(q=>{ctx.beginPath();ctx.arc(cx+q[0]+t2,cy-16+q[1],q[2],0,7);ctx.fill();});
@@ -876,6 +877,14 @@ if(typeof TILEMETA!=="undefined")Object.entries(TILEMETA).forEach(([g,m])=>TILES
    exactly as it was rather than standing its floor plan on edge. */
 const stands=g=>{const m=TILES[g];return !!(m&&m.stand);};
 const standsUp=g=>stands(g)&&!!TILESIDE[g];
+/* A person who works INSIDE a wall: a clerk at a window, a teller behind a counter. The pack
+   marks the station with `win:"B"` — the glyph of the wall she stands in — and every camera
+   draws that wall's counter in front of her and its roof over her, so the building keeps its
+   line instead of opening a hole where the map letter became a person. Meridian marks no
+   station this way, so this answers null for every one of its tiles. */
+const winAt=(w,x,y)=>{if(!w||!w.grid[y]||w.grid[y][x]!=="N")return null;
+  const n=w.npcs.find(m=>m.x===x&&m.y===y&&m.win),m=n&&TILES[n.win];
+  return m&&(m.kind==="wall"||m.kind==="facade")?n.win:null;};
 const roofCol=g=>({"#":C.wallTop,U:C.wallTop,B:"#6E5A60",Q:"#7A3527",Z:"#385C36",D:C.deskTop,K:C.counter,
   W:"#8E969E",V:"#23272C"})[g]||shadeHex(BASECOL[g]||(typeof MAPCOL!=="undefined"&&MAPCOL[g])||C.wall,-0.18);
 /* ---------- DECOR: instance metadata (IDEAS §10 step ①b) ----------
@@ -946,8 +955,12 @@ function drawFront(){
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
     R.push({d:d.y+0.05,f:()=>f(sx,sy,d)});}); /* after its row's facade, before actors */
   for(let y=Math.max(0,y0-1);y<=yEnd;y++)for(let x=x0;x<=xEnd;x++){
-    const gch=w.grid[y][x];if(!SOLID.has(gch)&&!standsUp(gch))continue;
-    const ch=w.rows[y][x],sx=x*TS-camX,sy=y*TS-camY;
+    const gch0=w.grid[y][x],wg=winAt(w,x,y);if(!SOLID.has(gch0)&&!standsUp(gch0)&&!wg)continue;
+    const gch=wg||gch0,ch=wg||w.rows[y][x],sx=x*TS-camX,sy=y*TS-camY;
+    if(wg)R.push({d:y+0.7,f:()=>{ /* the counter: after the person at y+0.55, so her legs are behind it */
+      ctx.fillStyle=tc(shadeHex(roofCol(wg),-0.25));ctx.fillRect(sx,sy+TS-9,TS,9);
+      ctx.fillStyle="rgba(255,255,255,.18)";ctx.fillRect(sx,sy+TS-9,TS,1.5);
+      ctx.fillStyle="rgba(15,12,20,.25)";ctx.fillRect(sx,sy+TS-1.5,TS,1.5);}});
     R.push({d:y,f:()=>{
       const m=TILES[gch]||TILES[ch]||{lift:7,kind:"prop"},L=m.lift|0,kd=m.kind;
       if(kd==="wall"||kd==="facade"||kd==="fence"){

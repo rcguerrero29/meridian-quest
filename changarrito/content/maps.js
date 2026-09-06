@@ -53,8 +53,11 @@ const PORTALS={hq:{"E":{to:"st",x:14,y:1,dir:"down"}},
                st:{"E":{to:"hq",x:10,y:12,dir:"up"},"2":{to:"pk",x:1,y:6,dir:"right"}},
                pk:{"2":{to:"st",x:28,y:1,dir:"down"}}};
 /* who stands where by map letter: Don Güero at his stall; la ventanilla at her window on the
-   street (her document is the city's record — content/record.js hands it to her at boot) */
-const WNPC={hq:{g:{npc:"guero",q:[0]}},st:{v:{npc:"ventanilla",q:[],chat:1}},pk:{}};
+   street (her document is the city's record — content/record.js hands it to her at boot).
+   `win:"B"` says she works INSIDE city hall's wall: the engine draws B's counter in front of
+   her and B's roof over her (ch-v3 had her standing in a hole in the facade — owner,
+   2026-09-06: "how did this pass a test for a teller?"). */
+const WNPC={hq:{g:{npc:"guero",q:[0]}},st:{v:{npc:"ventanilla",q:[],chat:1,win:"B"}},pk:{}};
 /* the pack's own solid glyphs (the engine draws them; the pack says they are walls) */
 const SOLIDX="~9ZI";
 const DOORS="+E2";

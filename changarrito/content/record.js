@@ -127,6 +127,10 @@ const RECORDSRC={
   /* Ask for more context: one comment; the next session answers in plain words */
   async askMore(n){const d=await this.write("POST","/issues/"+n+"/comments",{body:"más contexto, por favor"});
     if(d)this.say("Asked. The next session will answer in plain words.","Pedido. La siguiente sesión contesta en palabras llanas.");return d;},
+  /* Comment: your own words on the issue, as you — the free-text sibling of Ask for more context */
+  async comment(n,text){const b=this.clean(text,1500);if(!b)return null;
+    const d=await this.write("POST","/issues/"+n+"/comments",{body:b});
+    if(d)this.say("Commented on #"+n+".","Comentado en #"+n+".");return d;},
   async addLabel(n,label){const l=this.clean(label,40);if(!l)return null;return this.write("POST","/issues/"+n+"/labels",{labels:[l]});},
   async removeLabel(n,label){const l=this.clean(label,40);if(!l)return null;return this.write("DELETE","/issues/"+n+"/labels/"+encodeURIComponent(l));},
   /* File a request: the body template every issue reads by (§10.4). A session fills the two
@@ -182,8 +186,12 @@ const RECORDSRC={
       self.paras(i.body).slice(0,14).forEach(p=>s.push({p:p.replace(/[`*_#>]/g,"")}));
       s.push({kv:[["#",String(i.n)],["labels",(i.labels||[]).join(", ")||"—"],["opened",i.at||"—"],["url",i.url||"—"]]});
       const es=lang==="es";
+      s.push({h:es?"Qué puedes hacer":"What you can do"});
+      s.push({p:self.token()?(es?"Estás identificado: cada botón escribe en GitHub como tú.":"You are signed in: each button writes to GitHub as you.")
+        :(es?"Sin identificar: los botones pedirán que te identifiques primero en la ventanilla (arriba, en la pared del ayuntamiento). Leer, filtrar y buscar no necesitan token.":"Not signed in: the buttons will ask you to sign in first at la ventanilla (up top, in city hall's wall). Reading, filtering and searching need no token.")});
       s.push({btn:es?"✅ Hecho — cerrar #"+i.n:"✅ Done — close #"+i.n,run:()=>self.done(i.n)});
       s.push({btn:es?"❓ Pídeme más contexto":"❓ Ask for more context",run:()=>self.askMore(i.n)});
+      s.push({btn:es?"💬 Comentar con mis palabras":"💬 Comment in my own words",run:()=>{const t=self.ask(es?"Tu comentario en #"+i.n+":":"Your comment on #"+i.n+":");if(t)self.comment(i.n,t);}});
       s.push({btn:es?"🏷️ + etiqueta":"🏷️ + label",run:()=>{const l=self.ask(es?"Etiqueta a añadir:":"Label to add:");if(l)self.addLabel(i.n,l);}});
       s.push({btn:es?"🏷️ − etiqueta":"🏷️ − label",run:()=>{const l=self.ask(es?"Etiqueta a quitar:":"Label to remove:");if(l)self.removeLabel(i.n,l);}});
       return s;}};},
