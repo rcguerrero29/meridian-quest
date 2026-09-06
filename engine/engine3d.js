@@ -255,6 +255,17 @@ function t3Build(key){
       if(h>1.02)piece(h-1,0.16,0.42,(1+h)/2,"winTop"); /* the roof line, a thin strip over the opening */
       continue;
     }
+    { /* #62: a climbing flight's treads are LOW BOXES that rise east, the head the top step, so the
+         stair stands and you rise with it (t3Actors lifts anyone on a tread). The loft's well
+         stays flat: painted on the floor, darker, railed. */
+      const sr=stairRun(w,x,y);
+      if(sr&&sr.up){const hh=STAIRH*(sr.i+1),g=w.rows[y][x];
+        const tk=g+"|"+x+"|"+y,lid=wallMat[tk]||(wallMat[tk]=new THREE.MeshLambertMaterial({map:t3Tex(t3BakeGlyph(g,true,baseOf(g),false,false,null,x,y))}));
+        const rs=wallMat["≡side"]||(wallMat["≡side"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#9F9783")}));
+        const bx=new THREE.Mesh(new THREE.BoxGeometry(1,hh,1),[rs,rs,lid,rs,rs,rs]);
+        bx.position.set(cx,hh/2,cz);bx.userData={tread:true,g,x,y,h:hh};grp.add(bx);
+        continue;} /* the head ▲ is the top step; its portal mark still floats above it */
+    }
     if(!SOLID.has(gch))continue;
     const m=TILES[gch]||{lift:7,kind:"prop"},kd=m.kind;
     if(kd==="water")continue; /* painted into the ground */
@@ -354,10 +365,10 @@ function t3Build(key){
 function t3Sprite(i){
   let p=T3.pool[i];
   if(!p){
-    const c=document.createElement("canvas");c.width=36*T3.K;c.height=40*T3.K;
+    const c=document.createElement("canvas");c.width=36*T3.K;c.height=48*T3.K; /* 8px of headroom for the bubble (#57) */
     const tex=t3Tex(c);
     const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
-    spr.center.set(0.5,0.1);
+    spr.center.set(0.5,4/48); /* feet 4px above the card's bottom, as before */
     p=T3.pool[i]={c,g:c.getContext("2d"),tex,spr,live:false};
     T3.scene.add(spr);
   }
@@ -397,7 +408,7 @@ function t3Actors(){
   const old=ctx;
   list.forEach((a,i)=>{
     const p=t3Sprite(i);
-    p.g.setTransform(T3.K,0,0,T3.K,0,0);p.g.clearRect(0,0,36,40);
+    p.g.setTransform(T3.K,0,0,T3.K,0,8*T3.K);p.g.clearRect(0,-8,36,48); /* every artist paints 8px lower; the bubble above the head is no longer cut off (#57) */
     ctx=p.g; /* the 2D artists paint straight onto the billboard */
     if(a.fc){const f0=a.fc.face;a.fc.face=t3ScreenFace(a.fc); /* painted for the camera, not the map */
       try{a.f(p.g);}catch(e){t3Note("actor",e);}a.fc.face=f0;}
@@ -408,8 +419,9 @@ function t3Actors(){
        wall behind them (owner: "head disappearance near walls") */
     const ax=a.x+0.5,az=a.y+0.5;
     const ddx=T3.cam.position.x-ax,ddz=T3.cam.position.z-az,dl=Math.hypot(ddx,ddz)||1;
-    p.spr.position.set(ax+ddx/dl*0.34,a.h||0,az+ddz/dl*0.34);
-    p.spr.scale.set(36/32*1.12,40/32*1.12,1);
+    const lift=stairLift(CW(),Math.round(a.x),Math.round(a.y)); /* on a climbing tread you stand that much higher (#62) */
+    p.spr.position.set(ax+ddx/dl*0.34,(a.h||0)+lift,az+ddz/dl*0.34);
+    p.spr.scale.set(36/32*1.12,48/32*1.12,1);
     p.spr.material.color.copy(T3.tint);
     p.spr.material.depthTest=!a.hero;p.spr.renderOrder=a.hero?999:0; /* the hero reads through walls; everyone else sits in the scene */
     p.spr.visible=true;p.live=true;
@@ -442,12 +454,23 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
     T3.cam.lookAt(hx,0.4,hz);
     t3Light();
     t3Glow();
+    t3Cutaway();
     t3Actors();
     t3Leash();
     T3.renderer.render(T3.scene,T3.cam);
     return true;
   }catch(e){T3.fail=true;t3Note("render",e);t3Fell();return false;}
 }
+/* #61: a wall between the camera and the hero vanishes for that frame — the cutaway every third-
+   person camera does. Standing in the lobby with the south wall behind you, the wall used to fill
+   the screen and the hero (drawn through walls) read as standing ON it, while Sonny, drawn in the
+   scene, was hidden behind it. Now that wall is simply not there while it is in the way. Walls,
+   facades, lintels, doors and the window pieces cut; treads, rails, props and decor do not. */
+function t3Cutaway(){const c=T3.cam.position,hx=fx+0.5,hz=fy+0.5;
+  const vx=hx-c.x,vz=hz-c.z,L=Math.hypot(vx,vz)||1,ux=vx/L,uz=vz/L;
+  T3.group.children.forEach(o=>{const u=o.userData;if(!u||!(u.wall!==undefined||u.lintel||u.door||u.counter||u.winTop||u.winBack))return;
+    const dx=o.position.x-c.x,dz=o.position.z-c.z,along=dx*ux+dz*uz,side=Math.abs(dz*ux-dx*uz);
+    o.visible=!(along>0&&along<L-0.6&&side<2.6);});}
 function t3Glow(){ /* the light under every door breathes — same clock as the 2D art */
   const a=0.25+0.2*Math.sin(Date.now()/380);
   T3.glows.forEach(m=>{m.opacity=a;});

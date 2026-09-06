@@ -999,6 +999,15 @@ const CANDIDATES = [
     const through = T3.pool.filter(p => p.live && p.spr.material.depthTest === false);
     if (through.length !== 1) problems.push(`${through.length} billboards draw through walls — the hero, and only the hero, must`);
     if (through.length === 1 && through[0].spr.renderOrder < 1) problems.push('the hero billboard is not drawn last');
+    // #57 (mq-v78): the actor card has headroom — a thought bubble above the head is not cut off
+    if (T3.pool[0].c.height !== 48 * T3.K) problems.push('the actor card is not 48 tall');
+    { const c = document.createElement('canvas'); c.width = 36; c.height = 48; const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 8);
+      const now0 = Date.now; Date.now = () => 1000; const o = ctx; ctx = g;
+      try { drawPerson(g, 2, 6, look, { dir: 'down' }); drawEmote({ npc: 'nobody', x: 0, y: 0 }, 2, 6); } finally { ctx = o; Date.now = now0; }
+      const d = g.getImageData(0, 0, 36, 48).data, on = y => { for (let x = 0; x < 36; x++) if (d[(y * 36 + x) * 4 + 3] > 30) return true; return false; };
+      if (on(0) || on(1)) problems.push('the bubble touches the top edge of the actor card');
+      let any = false; for (let y = 2; y < 14; y++) if (on(y)) { any = true; break; } if (!any) problems.push('no bubble was drawn above the head'); }
+    if (stairLift(CW(), 17, 5) !== 0) problems.push("Meridian's stairs lift nobody — the flight that runs east is not laid in Meridian");
     // #24 (mq-v74): a 3D failure leaves a trace — once in the console, the last one under the prefix
     { const n0 = T3.errors.length; t3Note('test', new Error('boom')); t3Note('test', new Error('boom'));
       if (T3.errors.length !== n0 + 1) problems.push('t3Note does not log once per distinct message (' + (T3.errors.length - n0) + ')');
