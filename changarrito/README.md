@@ -66,6 +66,15 @@ and the version the title screen should say. **Copy** at the bottom of his sheet
   (a comment you type), **+ label / − label**.
   Nothing here can touch code: the token can only read and write issues.
 
+## What la ventanilla tells you first (ch-v13)
+
+Since your last visit: who answered, who is new, who went home, and which decisions are waiting
+on you — each with a button that walks you to the person. She says the counts once at the door.
+The town no longer re-reads GitHub on a clock: it reads when it opens, after every write, and
+when you press **↻ Refresh** on her card (two switches in `content/config.js` bring the clock and
+the permits back). If `main` is ahead of what you are running she says so and which line of el
+pregonero's sheet to run.
+
 ## What needs the token, and what does not
 
 Nothing you *read* needs it: walking, talking, the paperwork, la ventanilla's permits, the
