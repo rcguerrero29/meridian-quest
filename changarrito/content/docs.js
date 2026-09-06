@@ -42,5 +42,26 @@ const DOCS = {
     title: { en: "The board — notes", es: "El tablero — notas" },
     sub:   { en: "The small things, pinned. Nobody stands for these.", es: "Las cosas chicas, prendidas. Nadie las carga." },
     build: () => RECORDSRC.boardDoc()
+  },
+  /* el pregonero's sheet: the commands, in order, with Copy at the bottom of the reader */
+  how: {
+    title: { en: "How to open the town", es: "Cómo abrir el pueblo" },
+    sub:   { en: "Three lines in the terminal. Copy takes them all.", es: "Tres líneas en la terminal. Copiar se las lleva todas." },
+    build: () => {
+      const es = lang === "es", v = typeof GAMEV === "string" ? GAMEV : "";
+      return [
+        { h: es ? "Cada día, para abrir" : "Every day, to open" },
+        { p: es ? "En la Terminal, una línea a la vez:" : "In Terminal, one line at a time:" },
+        { kv: [["1", "cd ~/code/meridian-quest"], ["2", "git pull"], ["3", "python3 -m http.server 8765 --bind 127.0.0.1"]] },
+        { p: es ? "Luego en el navegador: http://127.0.0.1:8765/changarrito/" : "Then in the browser: http://127.0.0.1:8765/changarrito/" },
+        { h: es ? "Para actualizar" : "To update" },
+        { p: es ? "Es la línea 2. `git pull` trae lo que se fusionó. Si el servidor ya corre, no lo pares; solo recarga la página." : "It is line 2. `git pull` fetches whatever was merged. If the server is already running, leave it; just reload the page." },
+        { h: es ? "Si se ve raro" : "If it looks wrong" },
+        { p: es ? "Recarga fuerte: ⌘⇧R. Si sigue igual, ventana privada. La pantalla de título debe decir: " + v : "Hard refresh: ⌘⇧R. If it still looks the same, a private window. The title screen should read: " + v },
+        { p: es ? "Para parar el servidor: Ctrl-C en la Terminal." : "To stop the server: Ctrl-C in Terminal." },
+        { h: es ? "Dónde vive" : "Where it lives" },
+        { p: es ? "~/code/meridian-quest en tu laptop — una copia de main. Nada de esto sale de tu máquina." : "~/code/meridian-quest on your laptop — a copy of main. None of this leaves your machine." }
+      ];
+    }
   }
 };

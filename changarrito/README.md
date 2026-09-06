@@ -39,6 +39,12 @@ then open **http://127.0.0.1:8765/changarrito/**
 `--bind 127.0.0.1` keeps the server on your machine; a bare `http.server` listens to the whole
 network. Never put a tunnel in front of it. Nothing links here from the public game.
 
+## If you forget the three lines
+
+**El pregonero**, the town crier in the red shirt with the 📣, walks the street with them. Talk
+to him: the sheet has the three lines in order, the update line, what to do if it looks wrong,
+and the version the title screen should say. **Copy** at the bottom of his sheet takes it all.
+
 ## What you get, by part
 
 - **2a (this):** the street, read-only. Your open issues as people — `tier: high` a named
