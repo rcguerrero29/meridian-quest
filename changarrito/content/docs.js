@@ -47,6 +47,7 @@ const DOCS = {
   request: { title: { en: "File a request", es: "Presentar una petición" }, sub: { en: "The five headings every request reads by.", es: "Los cinco encabezados de toda petición." }, build: () => RECORDSRC.requestDoc() },
   signin:  { title: { en: "Sign in", es: "Identificarme" }, sub: { en: "A key for issues on this repo, kept in this browser only.", es: "Una llave para issues de este repo, solo en este navegador." }, build: () => RECORDSRC.signInDoc() },
   filter:  { title: { en: "Narrow the street", es: "Acotar la calle" }, sub: { en: "Labels and a word. Empty means everyone.", es: "Etiquetas y una palabra. Vacío es todos." }, build: () => RECORDSRC.filterDoc() },
+  guero:   { title: { en: "Don Güero · the planner", es: "Don Güero · el planificador" }, sub: { en: "Ask him to build things. His answers come back as feedback on your requests.", es: "Pídele que construya. Sus respuestas vuelven como comentarios en tus peticiones." }, build: () => RECORDSRC.gueroDoc() },
   index:   { title: { en: "The index", es: "El índice" }, sub: { en: "Everything the town knows, by tag. Pick a category or type a word; walk there, or file about it.", es: "Todo lo que el pueblo sabe, por etiqueta. Elige una categoría o escribe una palabra; camina allá, o presenta algo sobre eso." }, build: () => RECORDSRC.indexDoc() },
   /* el pregonero's sheet: the commands, in order, with Copy at the bottom of the reader */
   how: {

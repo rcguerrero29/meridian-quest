@@ -478,6 +478,23 @@ const { chromium } = require('playwright-core');
         if (!docSections('window').some(x => x.btn && /index/i.test(x.btn))) problems.push("la ventanilla's card has no index button");
         if (typeof READERLOOK !== 'string' || READERLOOK !== 'night' || !document.getElementById('paperSheet').classList.contains('night')) problems.push('the town does not wear the night look on its paper');
         RECORDSRC.indexCat = ''; RECORDSRC.formTags = []; RECORDSRC.place([]); document.getElementById('reader').hidden = true; }
+      // ---- ch-v17: the signs count, the boards name the faces, Don Güero talks ----
+      { const g = WORLDS.hq.npcs.find(n => n.npc === 'guero');
+        if (!g || g.doc !== 'guero' || (g.q && g.q.length)) problems.push('Don Güero does not carry his document (or still holds the old quest)');
+        if (g && (!hasSay(g) || wanders(g))) problems.push('Don Güero has no mark or wanders off his counter');
+        const fx7 = [{ n: 95, title: 'Ask Don Güero for a bakery', body: '', labels: ['tier: normal', 'ask', 'guero'], at: '2026-09-06' }, { n: 96, title: 'plain bug', body: '', labels: ['tier: low', 'bug'], at: '2026-09-06' }, { n: 97, title: 'a decision', body: '', labels: ['tier: high', 'decision'], at: '2026-09-06' }];
+        RECORDSRC.comments[95] = { updated: 'x', last: { body: 'A bakery goes on the corner.', at: '2026-09-06', ts: '2026-09-06T10:00:00Z', answer: true } };
+        RECORDSRC.filter = []; RECORDSRC.search = ''; RECORDSRC.place(fx7);
+        const sign = k => (DECOR.find(d => d.deco === 'sign' && d.kind === k) || {}).text;
+        if (sign('ask') !== '1' || sign('bug') !== '1' || sign('decision') !== '1' || sign('hall') !== '3') problems.push('the signs do not count the open issues: ' + ['ask', 'decision', 'bug', 'hall'].map(sign).join(','));
+        if (!DECOR.some(d => d.deco === 'board' && d.text === 'BUGS') || typeof DECOART === 'undefined' || typeof DECOART.board !== 'function') problems.push('the faces have no boards');
+        { const c = document.createElement('canvas'); c.width = 32; c.height = 32; const o = ctx; ctx = c.getContext('2d'); try { DECOART.board(0, 0, { text: 'ASKS', c: '#2E5FA8' }); DECODRAW.sign(0, 0, { text: '12', c: '#C0392B' }); } catch (e) { problems.push('a board or a sign throws: ' + e.message); } finally { ctx = o; } }
+        RECORDSRC.cycle.g = 0; const g0 = docSections('guero'), g1 = docSections('guero'), g2 = docSections('guero'), g3 = docSections('guero');
+        if (!g0.some(x => x.h && /Who I am/.test(x.h)) || !g1.some(x => x.h && /requests with my name · 1/.test(x.h)) || !g2.some(x => x.h && /feedback/i.test(x.h)) || !g3.some(x => x.h && /Who I am/.test(x.h))) problems.push("Don Güero's three lines do not cycle");
+        if (!g1.some(x => x.btn && /walk to #95/.test(x.btn))) problems.push('the request with his name has no walk button');
+        if (!g2.some(x => x.p && /bakery goes on the corner/.test(x.p))) problems.push('his third line does not quote the last feedback');
+        const ask = g0.find(x => x.btn && /Ask me to build/.test(x.btn)); if (!ask) problems.push('no Ask me to build button'); else { ask.run(); if (docCur !== 'request' || RECORDSRC.formTags.join() !== 'guero,changarrito') problems.push('asking Don Güero did not pre-tag guero'); }
+        RECORDSRC.formTags = []; RECORDSRC.place([]); document.getElementById('reader').hidden = true; }
       // Meridian's animals have somewhere to stand in the town's rooms
       if (SOLID.has(WORLDS.hq.grid[5][12])) problems.push('hq (12,5) is solid — Frederick has nowhere to stand');
       if (SOLID.has(WORLDS.st.grid[1][4])) problems.push('st (4,1) is solid — the pigeon has nowhere to stand');

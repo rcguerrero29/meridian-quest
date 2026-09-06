@@ -103,6 +103,35 @@ const RECORDSRC={
     if(AW("pig"))add("pigeon","The pigeon","La paloma",["pigeon","animals"],near(AW("pig"),Math.round(PIG.fx),Math.round(PIG.fy)),"Pecks on the street. Ignores you.","Picotea en la calle. Te ignora.");
     if(AW("loro"))add("lorenzo","Lorenzo","Lorenzo",["lorenzo","animals","loro"],near(AW("loro"),LORO.x,LORO.y),"The parrot, in the tree.","El loro, en el árbol.");
     return T;},
+  /* ---------- ch-v17: the signs count, Don Güero talks ----------
+     The signs over the faces show the number of open issues of their kind (all tiers), city
+     hall's the total; the 3D scene bakes decor at build, so it is rebuilt once. */
+  signs(){const D=(typeof DECOR!=="undefined"&&DECOR)||[];const by={ask:0,decision:0,bug:0,other:0};
+    this.all.forEach(i=>{by[this.kind(i)]=(by[this.kind(i)]|0)+1;});
+    let changed=false;D.forEach(d=>{if(d.deco!=="sign"||!d.kind)return;const n=d.kind==="hall"?this.all.length:(by[d.kind]|0);
+      const t=String(n).slice(0,4);if(d.text!==t){d.text=t;changed=true;}});
+    if(changed){try{if(typeof t3Invalidate==="function")t3Invalidate();}catch(e){}}return by;},
+  /* Don Güero (#50; owner: "hes someone i like to chat with and may ask him to build things...
+     just dont want him standing without lines"): three lines that cycle like everyone's — who he
+     is, the requests that carry his name, and the last feedback that came back on one of them
+     ("check out the request feedback!") — and a form to ask him for a build, pre-tagged guero. */
+  mineFor(i){const L=(i.labels||[]).map(l=>l.toLowerCase());return L.some(l=>/g[uü]ero/.test(l))||/g[uü]ero/i.test((i.title||"")+" "+(i.body||""));},
+  gueroDoc(){const es=lang==="es",self=this,mine=this.all.filter(i=>this.mineFor(i));
+    const answered=mine.filter(i=>{const c=this.comments[i.n];return c&&c.last&&c.last.answer;}).sort((a,b)=>String(this.comments[b.n].last.ts).localeCompare(String(this.comments[a.n].last.ts)));
+    const last=answered[0]&&this.comments[answered[0].n].last;
+    const Q=(es&&typeof QES!=="undefined"?QES:(typeof QEN!=="undefined"?QEN:[]))[0],welcome=(Q&&Q.nodes&&Q.nodes.a&&Q.nodes.a.say)||"";
+    const L=[
+      {k:es?"Quién soy":"Who I am",t:welcome||(es?"Yo planeo la ciudad. Pídeme algo y vuelvo con un plan.":"I plan the city. Ask me for something and I come back with a plan.")},
+      {k:(es?"Las peticiones con mi nombre · ":"The requests with my name · ")+mine.length,t:mine.length?mine.slice(0,6).map(i=>this.personPlain(i)).join("\n"):(es?"Ninguna todavía. Pídeme algo abajo y aparece en la calle con mi nombre.":"None yet. Ask me for something below and it appears on the street with my name.")},
+      {k:es?"¡Mira los comentarios de la petición!":"Check out the request feedback!",t:last?((es?"En #":"On #")+answered[0].n+", "+last.at+": "+last.body.replace(/[`*_#>]/g,"")):(es?"Nada de vuelta todavía. Cuando una sesión conteste, lo digo aquí.":"Nothing back yet. When a session answers, I say it here.")}];
+    const k=(this.cycle.g|0)%L.length;this.cycle.g=k+1;try{localStorage.setItem(SK("cycle"),JSON.stringify(this.cycle));}catch(e){}
+    const s=[{h:"💬 "+L[k].k},{p:L[k].t}];
+    if(k===1)mine.slice(0,6).forEach(i=>s.push({btn:(es?"→ caminar a #":"→ walk to #")+i.n,run:()=>self.walkTo(i.n)}));
+    if(k===2&&answered[0])s.push({btn:(es?"→ caminar a #":"→ walk to #")+answered[0].n,run:()=>self.walkTo(answered[0].n)});
+    s.push({h:es?"Qué puedes pedirme":"What you can ask me"});
+    s.push({btn:es?"📝 Pídeme que construya algo":"📝 Ask me to build something",run:()=>{self.formTags=["guero","changarrito"];docOpen("request");}});
+    s.push({btn:es?"📇 Todas mis peticiones":"📇 All my requests",run:()=>{self.indexCat="label:guero";self.indexQ="";docOpen("index");}});
+    return s;},
   /* a person's state, in one word */
   state(i){const c=this.comments[i.n],l=c&&c.last;if((i.labels||[]).includes("decision"))return "waiting";if(l&&l.answer)return "answered";return "unanswered";},
   personPlain(i){const es=lang==="es",st=this.state(i),S={waiting:es?"espera tu palabra":"waiting on you",answered:es?"contestado":"answered",unanswered:es?"sin contestar":"unanswered"};
@@ -483,6 +512,7 @@ const RECORDSRC={
       const key=addChill({name:{en:this.name(i),es:this.name(i)},world:this.world,x,y,look:this.look(i)});
       if(key){const n=w.npcs.find(m=>m.key===key);n.doc=this.doc(i);n.tier=this.tier(i);n.issue=i.n;this.placed[i.n]=key;used.add(x+","+y);}});
     auditReach().forEach(p=>console.warn("REACH "+p)); /* a placed person may never wall the hero */
+    this.signs();
     console.log("RECORD: "+people.length+" on the street, "+this.notesList.length+" note(s) on the board");
   }
 };
