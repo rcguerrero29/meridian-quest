@@ -25,24 +25,65 @@ const RECORDSRC={
   filter:[],      /* labels the street is narrowed to (empty = everyone); the rest go to the board */
   search:"",      /* a word the street is narrowed to (empty = everyone) */
   busy:false,
-  every:5*60*1000,
+  every:(typeof REFRESH_MS==="number")?REFRESH_MS:5*60*1000,      /* 0 = no clock: open, writes, ↻ */
+  showPermits:(typeof SHOW_PERMITS==="boolean")?SHOW_PERMITS:true,
+  mainVersion:null, /* GAMEV as main has it, read from the repo — "run line 2" when it differs */
+  prev:{seen:"",known:[]}, /* the last visit: when, and which people were on file — for the news */
   boot(){
+    try{this.prev={seen:localStorage.getItem(SK("seen"))||"",known:JSON.parse(localStorage.getItem(SK("known"))||"[]")||[]};}catch(e){}
+    try{this.titles=JSON.parse(localStorage.getItem(SK("titles"))||"{}")||{};}catch(e){this.titles={};}
     try{this.cycle=JSON.parse(localStorage.getItem(SK("cycle"))||"{}")||{};}catch(e){this.cycle={};}
     try{const f=JSON.parse(localStorage.getItem(SK("filter"))||"null");if(f){this.filter=f.labels||[];this.search=f.search||"";if(["weight","newest","oldest","number"].includes(f.sort))this.sort=f.sort;}}catch(e){}
     const v=WORLDS[this.world]&&WORLDS[this.world].npcs.find(n=>n.npc==="ventanilla");
     if(v)v.doc="window"; /* the clerk hands you the city's record */
-    this.refresh();
+    this.refresh().then(()=>{this.markSeen();const n=this.news();
+      if(n.answered.length||n.fresh.length||n.gone.length)this.say("Since your last visit: "+n.answered.length+" answered · "+n.fresh.length+" new · "+n.gone.length+" went home — la ventanilla has the list.","Desde tu última visita: "+n.answered.length+" contestados · "+n.fresh.length+" nuevos · "+n.gone.length+" se fueron — la ventanilla tiene la lista.");
+      if(this.behind())this.say("You are on "+GAMEV+"; main is on "+this.mainVersion+". Run line 2 of el pregonero's sheet (git pull), then reload.","Estás en "+GAMEV+"; main va en "+this.mainVersion+". Corre la línea 2 de la hoja del pregonero (git pull) y recarga.");});
     const kw=this.keyWarning();if(kw)setTimeout(()=>this.say(kw,kw),1200); /* short or dead: said once, at the door */
-    setInterval(()=>this.refresh(),this.every);
-    document.addEventListener("visibilitychange",()=>{if(!document.hidden)this.refresh();});
+    if(this.every>0){setInterval(()=>this.refresh(),this.every);
+      document.addEventListener("visibilitychange",()=>{if(!document.hidden)this.refresh();});}
   },
   async refresh(){
     const list=await this.load();
     this.place(list);
     if(this.refused&&!this.saidRefused){this.saidRefused=true;this.say("GitHub refused the read (rate limit) until "+this.refused+" — la ventanilla has the details.","GitHub rechazó la lectura (límite) hasta las "+this.refused+" — la ventanilla tiene los detalles.");}
-    this.permits=await this.loadPulls();
+    if(this.showPermits)this.permits=await this.loadPulls();
     await this.loadComments(this.people);
+    await this.checkVersion();
   },
+  /* ---------- ch-v13: the news since your last visit ----------
+     The last visit is remembered under the prefix — when, and which people were on file. On the
+     next open the difference is the news: who answered (a session's comment since then), who is
+     new, who went home (closed), and which decisions are waiting on you. Said once at the door,
+     listed on la ventanilla's card with a "walk there" for each. */
+  markSeen(){if(this.refused&&!this.all.length)return; /* a refused read is not a visit */
+    try{localStorage.setItem(SK("seen"),new Date(Date.now()).toISOString());localStorage.setItem(SK("known"),JSON.stringify(this.all.map(i=>i.n)));}catch(e){}},
+  news(){const seen=this.prev.seen||"",known=new Set(this.prev.known||[]),all=this.all||[];
+    const answered=all.filter(i=>{const c=this.comments[i.n],l=c&&c.last;return l&&l.answer&&String(l.ts||"")>seen;});
+    const fresh=all.filter(i=>!known.has(i.n));
+    const gone=[...known].filter(n=>!all.some(i=>i.n===n)).map(n=>({n,title:(this.titles&&this.titles[n])||("#"+n)}));
+    const waiting=all.filter(i=>(i.labels||[]).includes("decision"));
+    return {seen,answered,fresh,gone,waiting};},
+  /* walk to a person: the reader closes and you stand beside them, facing them; someone on the
+     board opens the board instead */
+  walkTo(n){const w=WORLDS[this.world],key=this.placed[n],p=key&&w.npcs.find(m=>m.key===key);
+    if(!p){docOpen("board");return false;}
+    const spot=[[0,1],[1,0],[-1,0],[0,-1]].map(([dx,dy])=>[p.x+dx,p.y+dy]).find(([x,y])=>!isSolidAt(this.world,x,y));
+    if(!spot)return false;
+    world=this.world;px=fx=spot[0];py=fy=spot[1];held=null;dir=spot[1]>p.y?"up":spot[1]<p.y?"down":spot[0]>p.x?"left":"right";
+    try{$("reader").hidden=true;}catch(e){}try{setWorldTag();}catch(e){}try{if(typeof t3Invalidate==="function")t3Invalidate();}catch(e){}
+    return true;},
+  /* ---------- ch-v13: "run line 2" — the version main has, read from the repo ----------
+     One conditional GET of the town's own config on main (an ETag makes the repeat free), decoded,
+     GAMEV read out. Differs from the one running → la ventanilla says which line to run. Anything
+     odd (no network, a refusal, a shape we do not know) → she says nothing. */
+  async checkVersion(){try{
+      const d=await this.get("verfile","/contents/changarrito/content/config.js?ref=main",null);
+      const b64=d&&typeof d.content==="string"?d.content.replace(/\s/g,""):"";if(!b64){this.mainVersion=null;return null;}
+      const txt=new TextDecoder().decode(Uint8Array.from(atob(b64),c=>c.charCodeAt(0)));
+      const m=/GAMEV\s*=\s*"([^"]{1,60})"/.exec(txt);this.mainVersion=m?m[1]:null;return this.mainVersion;
+    }catch(e){this.mainVersion=null;return null;}},
+  behind(){return !!(this.mainVersion&&typeof GAMEV==="string"&&this.mainVersion!==GAMEV);},
   api(path){return "https://api.github.com/repos/"+this.owner+"/"+this.repo+path;},
   /* one conditional GET with a last-good copy under the town's own prefix.
      ch-v6: signed when you are signed in — an unsigned read gets 60 an hour and a refresh spends
@@ -79,6 +120,8 @@ const RECORDSRC={
   /* control characters, bidi and zero-width marks out; a hard cap on length */
   clean(s,max){return String(s||"").replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069]/g,"").replace(/[\u0000-\u0008\u000B-\u001f]/g,"").trim().slice(0,max);},
   mine(x){return x&&x.user&&x.user.login===this.owner;},
+  isAnswer(x){return !!(x&&/Generated by \[Claude Code\]/.test(String(x.body||"")));},
+  stripFooter(b){return String(b||"").replace(/\n*-{3,}\s*_?Generated by \[Claude Code\][^\n]*_?\s*$/,"").trim();},
   /* keep only what a person on the street needs; drop PRs and anything not the owner's */
   trim(raw){return (Array.isArray(raw)?raw:[]).filter(i=>i&&!i.pull_request&&this.mine(i))
     .map(i=>({n:i.number|0,title:this.clean(i.title,200),body:this.clean(i.body,4000),
@@ -110,8 +153,11 @@ const RECORDSRC={
       const c=this.comments[i.n];if(c&&c.updated===i.updated)continue;
       const raw=await this.get("cm"+i.n,"/issues/"+i.n+"/comments?per_page=30",[]);done++;
       const mine=(Array.isArray(raw)?raw:[]).filter(x=>this.mine(x));
-      const last=mine.length?mine[mine.length-1]:null;
-      this.comments[i.n]={updated:i.updated,last:last?{body:this.clean(last.body,1500),at:String(last.created_at||"").slice(0,10)}:null};
+      /* a session's answer carries the Claude Code footer; the owner's own words do not. The third
+         line prefers the last ANSWER; the footer itself is never said on the street */
+      const answers=mine.filter(x=>this.isAnswer(x));
+      const last=answers.length?answers[answers.length-1]:(mine.length?mine[mine.length-1]:null);
+      this.comments[i.n]={updated:i.updated,last:last?{body:this.clean(this.stripFooter(last.body),1500),at:String(last.created_at||"").slice(0,10),ts:String(last.created_at||""),answer:this.isAnswer(last)}:null};
     }
   },
   /* ---------- Part 3: the town writes. A token typed once, kept under the town's prefix, never
@@ -248,17 +294,29 @@ const RECORDSRC={
       s.push({btn:es?"🏷️ − etiqueta":"🏷️ − label",run:()=>{const l=self.ask(es?"Etiqueta a quitar:":"Label to remove:");if(l)self.removeLabel(i.n,l);}});
       return s;}};},
   /* la ventanilla's document: the permits, then the count of people and notes. Past tense only */
-  windowDoc(){const es=lang==="es",s=[];
+  windowDoc(){const es=lang==="es",s=[];const self=this;
     s.push({p:(es?"Archivado al ":"Filed as of ")+(this.filedAt||(es?"— sin fecha —":"— no date —"))+"."});
+    if(this.behind())s.push({p:(es?"⬆️ Estás en "+GAMEV+"; main va en "+this.mainVersion+". Corre la línea 2 de la hoja del pregonero (git pull) y recarga la página.":"⬆️ You are on "+GAMEV+"; main is on "+this.mainVersion+". Run line 2 of el pregonero's sheet (git pull), then reload the page.")});
+    /* the news since your last visit */
+    const nw=this.news(),seenDay=nw.seen?nw.seen.slice(0,10):"";
+    s.push({h:(es?"Desde tu última visita":"Since your last visit")+(seenDay?" · "+seenDay:"")});
+    if(!nw.answered.length&&!nw.fresh.length&&!nw.gone.length)s.push({p:es?"Nada nuevo. Las decisiones que esperan tu palabra siguen abajo.":"Nothing new. The decisions waiting on you are listed below."});
+    const walk=(i,pre)=>s.push({btn:pre+" #"+i.n+" · "+String(i.title||"").replace(/^❗/,"").slice(0,48),run:()=>self.walkTo(i.n)});
+    nw.answered.slice(0,6).forEach(i=>walk(i,es?"💬 contestado →":"💬 answered →"));
+    nw.fresh.slice(0,6).forEach(i=>walk(i,es?"🆕 nuevo →":"🆕 new →"));
+    nw.gone.slice(0,6).forEach(g=>s.push({p:(es?"🏠 se fue a casa: #":"🏠 went home: #")+g.n+" · "+String(g.title).replace(/^❗/,"").slice(0,60)}));
+    if(nw.waiting.length){s.push({p:(es?"⚖️ ":"⚖️ ")+nw.waiting.length+(es?" decisión(es) esperan tu palabra:":" decision(s) waiting on you:")});nw.waiting.slice(0,6).forEach(i=>walk(i,es?"⚖️ decidir →":"⚖️ decide →"));}
+    if(this.showPermits){
     s.push({h:es?"Permisos":"Permits"});
     if(!this.permits.length)s.push({p:es?"La ciudad no tiene ningún permiso pendiente en el expediente.":"The city has no permit pending on file."});
     this.permits.forEach(p=>{const st=p.draft?(es?"borrador":"draft"):p.green===true?(es?"en verde":"green"):p.green===false?(es?"en rojo":"red"):(es?"sin revisar":"unchecked");
       const mg=p.mergeable===true?(es?"sin conflictos":"no conflicts"):p.mergeable===false?(es?"con conflictos":"conflicts"):"";
       s.push({kv:[["#"+p.n,p.title],[es?"estado":"state",st+(mg?" · "+mg:"")],[es?"presentado":"filed",p.at],["url",p.url]]});});
+    }
     s.push({h:es?"La calle":"The street"});
     s.push({p:(es?"Hay ":"There are ")+this.people.length+(es?" persona(s) en la calle y ":" person(s) on the street and ")+this.notesList.length+(es?" nota(s) en el tablero.":" note(s) on the board.")
       +(this.filter.length||this.search?(es?" Filtro: ":" Filter: ")+[...this.filter,this.search?"“"+this.search+"”":""].filter(Boolean).join(", ")+".":"")});
-    const self=this;
+    s.push({btn:es?"↻ Actualizar":"↻ Refresh",run:()=>{self.refresh().then(()=>docOpen("window"));}});
     if(this.refused)s.push({p:es?"⚠️ GitHub rechazó la última lectura (límite de peticiones). Vuelve a abrir a las "+this.refused+". Hasta entonces la calle muestra la última copia buena; identificarte sube el límite de 60 a 5000 por hora."
       :"⚠️ GitHub refused the last read (rate limit). It opens again at "+this.refused+". Until then the street shows the last good copy; signing in raises the limit from 60 to 5,000 an hour."});
     if(this.filter.length||this.search)s.push({btn:es?"✖ Quitar filtro y búsqueda":"✖ Clear filter and search",run:()=>{self.setFilter([],"");docOpen("window");}});
@@ -285,12 +343,17 @@ const RECORDSRC={
   /* the board: the small things, pinned */
   boardDoc(){const es=lang==="es",s=[];
     if(!this.notesList.length)s.push({p:es?"El tablero está vacío.":"The board is empty."});
-    this.notesList.forEach(i=>s.push({kv:[["#"+i.n,i.title],[es?"archivado":"filed",this.days(i.at)],[es?"en palabras llanas":"in plain words",this.plain(i)]]}));
+    /* grouped by kind, the dropdown's order (owner, 2026-09-06: "grouping works") */
+    const names={ask:es?"Peticiones":"Asks",decision:es?"Decisiones":"Decisions",bug:es?"Bugs":"Bugs",other:es?"Otras":"Other"};
+    ["ask","decision","bug","other"].forEach(k=>{const grp=this.notesList.filter(i=>this.kind(i)===k);if(!grp.length)return;
+      s.push({h:names[k]+" · "+grp.length});
+      grp.forEach(i=>s.push({kv:[["#"+i.n,i.title],[es?"archivado":"filed",this.days(i.at)],[es?"en palabras llanas":"in plain words",this.plain(i)]]}));});
     return s;},
   place(list){
     const w=WORLDS[this.world];if(!w)return;
     const by={high:[],normal:[],low:[]},aside=[];
     this.all=(list||[]).slice();
+    this.titles=this.titles||{};this.all.forEach(i=>{this.titles[i.n]=i.title;});try{localStorage.setItem(SK("titles"),JSON.stringify(this.titles));}catch(e){}
     (list||[]).forEach(i=>{if(this.matches(i))by[this.tier(i)].push(i);else aside.push(i);});
     const people=this.sortPeople(by.high.concat(by.normal)).slice(0,this.cap);
     this.people=people;
