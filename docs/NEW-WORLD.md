@@ -78,11 +78,16 @@ the day two worlds need to live in one deploy.
 
 ## 3 · The engine debt a second world will hit — say it now, not in month two
 
-- **Sixty-two hardcoded world ids in `engine/engine.js`** (`"pk"` ×20, `"hq"` ×16, `"st"` ×13,
-  `"lc"` ×7, `"lo"` ×4, `"f2"`, `"me"`, `"no"`). They mean roles — home base, the park, the
-  street, the first shop. A new world either **reuses those ids as roles** (cheapest, and
-  fine for a second cozy town) or the engine gets a `ROLES` map first (a sitting; the honest
-  fix). Decide before drawing the first map.
+- ~~**Sixty-two hardcoded world ids in `engine/engine.js`.**~~ **Paid 2026-09-06 (`mq-v71`, #25).**
+  The engine reads its rooms as ROLES from the pack's `PLACES` table: `home` and `spawn`
+  (where a new game and a broken save land), `street` (the map dot follows you there), `park`
+  with `parkIn` / `parkDog` / `parkDogHome` / `parkAdopt` (the leash, the dogs), `friends` (the
+  worlds whose people a dog may befriend — only worlds you have), `upstairs` (the map's ⇧).
+  Pavement colours per world come from `FLOORS`. A pack that declares neither gets Meridian's
+  table byte for byte; a pack with its own names declares its own (`changarrito/content/config.js`
+  is the worked example). The smoke fails the build if a world id is ever spelled in `engine/`
+  again, and `test/engine.smoke.js` checks that every role a pack declares points at a real,
+  walkable place.
 - **The name blocklist** in `test/smoke.js` (the portability guard) is Meridian's proper nouns.
   A new world adds its own list, or the guard becomes generic (scan the pack for capitalised
   names and forbid them in `engine/`).

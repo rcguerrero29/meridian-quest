@@ -40,6 +40,12 @@ const { chromium } = require('playwright-core');
     const tag = (document.getElementById('verTag') || {}).textContent || '';
     if (!/El Changarrito/.test(tag) || !/engine mq-v/.test(tag)) problems.push('verTag does not name the town and the engine: ' + tag);
     if (!RECORD.enabled) problems.push('RECORD is not enabled');
+    // #25 (ch-v8): the town names its own roles; every world it names exists (friends included —
+    // Meridian's default list named rooms the town does not have, and pickFriend() crashed on them)
+    if (typeof PLACES === 'undefined') problems.push('the town does not declare PLACES');
+    else { ['home', 'street', 'park'].forEach(k => { if (!WORLDS[PL[k]]) problems.push('PLACES.' + k + ' names a missing world ' + PL[k]); });
+      PL.friends.forEach(w => { if (!WORLDS[w]) problems.push('PLACES.friends names a missing world ' + w); });
+      if (typeof pickFriend === 'function') { try { for (let i = 0; i < 20; i++) pickFriend(); } catch (e) { problems.push('pickFriend() throws in the town: ' + e.message); } } }
     const before = WORLDS.st.npcs.length;
     const fx = [1, 2, 3, 4].map(n => ({ n, title: '❗Fixture ' + n + ' <b>x</b>', body: 'Line one.\n\nLine two.', at: '2026-09-05',
       labels: n === 3 ? ['tier: normal', 'bug'] : n === 4 ? ['tier: low'] : ['tier: high', 'ask'], url: 'https://example.invalid/' + n }));

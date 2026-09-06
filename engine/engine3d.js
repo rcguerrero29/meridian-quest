@@ -126,9 +126,7 @@ function t3Build(key){
   try{
     for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
       const ch=w.rows[y][x],sx=x*32,sy=y*32;
-      if(world==="st")ctx.fillStyle=tc((x+y)%2?"#C6C4BB":"#BFBDB4");
-      else if(world==="lo")ctx.fillStyle=tc((x+y)%2?"#D9DCE0":"#D1D5DA");
-      else ctx.fillStyle=tc((x+y)%2?C.floor:C.floorAlt);
+      {const fp=FLOORC[world];ctx.fillStyle=tc(fp?((x+y)%2?fp[0]:fp[1]):((x+y)%2?C.floor:C.floorAlt));}
       ctx.fillRect(sx,sy,32,32);
       const hsh=(x*374761393+y*668265263+world.charCodeAt(0)*69069)>>>0;
       if((hsh&7)<2){ctx.globalAlpha=0.05;ctx.fillStyle="#000";ctx.fillRect(sx,sy,32,32);ctx.globalAlpha=1;}

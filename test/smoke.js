@@ -1689,6 +1689,13 @@ const CANDIDATES = [
           if (new RegExp(n, 'i').test(code))
             fails.push(`portability: ${f}:${i + 1} names "${n}" in code — content belongs in the pack`);
         });
+        // #25 (mq-v71): the engine reads ROLES from the pack's PLACES table; a world id spelled
+        // in engine code is Meridian's room leaking into every other world. The two default
+        // tables (PLDEF, ANIDEF) are the one place the ids may live.
+        if (/\bworld\s*(?:===|!==|=|:)\s*"[a-z0-9]+"/.test(code) && !/\b(PLDEF|ANIDEF)=/.test(code))
+          fails.push(`portability: ${f}:${i + 1} compares or sets world to a literal id — read it from PL (the PLACES seam)`);
+        if (/WORLDS\.[a-z][a-z0-9]\b/.test(code) && !/\b(PLDEF|ANIDEF)=/.test(code))
+          fails.push(`portability: ${f}:${i + 1} reaches WORLDS.<id> by name — read the id from PL`);
       });
     }
   }
@@ -2874,6 +2881,12 @@ const CANDIDATES = [
     const r1 = await page.evaluate(() => {
       const problems = [];
       if (typeof ANIMALS !== 'undefined') problems.push('Meridian declares ANIMALS — its animals are the engine defaults by design');
+      // #25: Meridian declares no PLACES or FLOORS either — its rooms ARE the engine's default table, byte for byte
+      if (typeof PLACES !== 'undefined') problems.push('Meridian declares PLACES — its rooms are the engine defaults by design');
+      if (typeof FLOORS !== 'undefined') problems.push('Meridian declares FLOORS — its pavements are the engine defaults by design');
+      if (JSON.stringify(PL) !== JSON.stringify(PLDEF)) problems.push('PL drifted from PLDEF with no PLACES declared');
+      if (PL.home !== 'hq' || PL.spawn.join() !== '10,11' || PL.street !== 'st' || PL.park !== 'pk' || PL.upstairs !== 'f2') problems.push('the default roles are not Meridian\'s rooms: ' + JSON.stringify(PL));
+      if (world !== PL.home && !WORLDS[world]) problems.push('the current world is not a world');
       // mq-v70: `roams` lets a document-carrier walk (the town's crier). No Meridian station says
       // it, so every person with a document stays where the map put them, as before.
       Object.entries(WORLDS).forEach(([id, w]) => w.npcs.forEach(n => { if (n.roams) problems.push(`Meridian station ${n.npc} in ${id} roams — the seam is the town's, not Meridian's`);
