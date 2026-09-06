@@ -39,9 +39,9 @@ const WORLD_DEFS={
      "#..................#",
      "#..................#",
      "#..................#",
-     "#..........◺◺◺.....#",
-     "#.........▼≡≡≡.....#",
-     "#..........◺◺◺.....#",
+     "#.........◺◺◺◺.....#",
+     "#........◺▼≡≡≡.....#",
+     "#.........◺◺◺◺.....#",
      "####################"],
  st:["BBQQQQQBBvBBBBEBBBZZZZBBIIIIB2",
      "..............................",
@@ -75,7 +75,9 @@ const WORLD_DEFS={
 /* la caja de escalera (#4, Don Güero's candidate B, 2026-09-06): the stall grew three rows south —
    a lobby at the front door, a stair hall behind the door at (10,13), the flight east with its
    head ▲ at (14,14) the way up; the loft's ▼ at (10,14) the way down. Coming in from the street
-   you land on the landing (10,14), floor behind you, not one step inside the door. */
+   you land on the landing (10,14), floor behind you, not one step inside the door. The loft's
+   well (#62) is a hole in the floor with the steps sunk in it, railed on three sides — north,
+   south and at its head — so the only way in is off the arrival tile (14,14) at the top. */
 const PORTALS={hq:{"E":{to:"st",x:14,y:1,dir:"down"},"▲":{to:"f2",x:14,y:14,dir:"left",mark:"up"}},
                f2:{"▼":{to:"hq",x:10,y:14,dir:"right"}},
                st:{"E":{to:"hq",x:10,y:14,dir:"up"},"2":{to:"pk",x:1,y:6,dir:"right"}},

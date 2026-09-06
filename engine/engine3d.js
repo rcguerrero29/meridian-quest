@@ -163,11 +163,12 @@ function t3Build(key){
           ctx.fillRect(dx>0?sx+32-D:sx, dy>0?sy+32-D:sy, dx?D:32, dy?D:32);};
         dark(0,-1);dark(0,1);dark(-1,0);dark(1,0);   /* a wall on any side reaches onto this tile */
       }
+      if(wellDepth(w,x,y)>0)ctx.clearRect(sx,sy,32,32); /* the well is a HOLE in the floor: the sunken steps stand in it (#62) */
     }
   }finally{ctx=old;}
   const ground=new THREE.Mesh(new THREE.PlaneGeometry(w.W,w.H),
-    new THREE.MeshLambertMaterial({map:t3Tex(gc,true)}));
-  ground.rotation.x=-Math.PI/2;ground.position.set(w.W/2,0,w.H/2);
+    new THREE.MeshLambertMaterial({map:t3Tex(gc,true),alphaTest:0.5})); /* alphaTest: the cleared tiles are see-through, the rest untouched */
+  ground.rotation.x=-Math.PI/2;ground.position.set(w.W/2,0,w.H/2);ground.userData={ground:true};
   grp.add(ground);
   /* the standing world: boxes wear the facade art, everything else is a cutout */
   const faceTex={},flatTex={},wallMat={},boxMat={};
@@ -256,14 +257,17 @@ function t3Build(key){
       continue;
     }
     { /* #62: a climbing flight's treads are LOW BOXES that rise east, the head the top step, so the
-         stair stands and you rise with it (t3Actors lifts anyone on a tread). The loft's well
-         stays flat: painted on the floor, darker, railed. */
-      const sr=stairRun(w,x,y);
-      if(sr&&sr.up){const hh=STAIRH*(sr.i+1),g=w.rows[y][x];
+         stair stands and you rise with it (t3Actors lifts anyone on a tread). The loft's well is
+         the same flight seen from the top: a hole in the floor (the ground is cleared there) with
+         the steps SUNK in it, each a step deeper toward the ▼, so you look down into it and sink
+         as you go (owner: "downstairs, not so much. still blocky, squares"). */
+      const sr=stairRun(w,x,y),dep=wellDepth(w,x,y),g=w.rows[y][x];
+      if((sr&&sr.up)||dep>0){const hh=dep>0?1.2:STAIRH*(sr.i+1); /* a sunken step is a tall box whose lid is below the floor; its sides are the risers you see */
         const tk=g+"|"+x+"|"+y,lid=wallMat[tk]||(wallMat[tk]=new THREE.MeshLambertMaterial({map:t3Tex(t3BakeGlyph(g,true,baseOf(g),false,false,null,x,y))}));
-        const rs=wallMat["≡side"]||(wallMat["≡side"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#9F9783")}));
+        const rk=dep>0?"≡well":"≡side",rs=wallMat[rk]||(wallMat[rk]=new THREE.MeshLambertMaterial({color:new THREE.Color(dep>0?"#5E5852":"#9F9783")}));
         const bx=new THREE.Mesh(new THREE.BoxGeometry(1,hh,1),[rs,rs,lid,rs,rs,rs]);
-        bx.position.set(cx,hh/2,cz);bx.userData={tread:true,g,x,y,h:hh};grp.add(bx);
+        const top=dep>0?-dep:hh;
+        bx.position.set(cx,top-hh/2,cz);bx.userData={tread:true,well:dep>0,g,x,y,h:top};grp.add(bx);
         continue;} /* the head ▲ is the top step; its portal mark still floats above it */
     }
     if(!SOLID.has(gch))continue;
@@ -290,10 +294,16 @@ function t3Build(key){
       const fk=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&(TILES[w.rows[ay][ax]]||{}).kind==="fence";
       const nsRun=fk(x,y-1)||fk(x,y+1),ewRun=fk(x-1,y)||fk(x+1,y);
       const fm=new THREE.MeshLambertMaterial({map:flatTex[gch],side:THREE.DoubleSide,transparent:true,alphaTest:0.3});
-      const panel=rot=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(1,0.8),fm);
-        p.position.set(cx,0.4,cz);p.rotation.y=rot;p.userData={fence:true,x,y};grp.add(p);};
-      if(nsRun&&!ewRun)panel(Math.PI/2);else panel(0);
-      if(nsRun&&ewRun)panel(Math.PI/2);
+      /* a RAIL beside a well (#62) is not a fence mid-tile: it stands on the LIP of the hole,
+         knee-high, turned to face it — a north or south well turns it along X, an east or
+         west well across X. Everything else keeps the fence's panel. */
+      const wl=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&wellDepth(w,ax,ay)>0;
+      const lip=wl(x,y+1)?[0,0.44,0]:wl(x,y-1)?[0,-0.44,0]:wl(x+1,y)?[0.44,0,Math.PI/2]:wl(x-1,y)?[-0.44,0,Math.PI/2]:null;
+      const panel=(rot,ph,ox,oz)=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(1,ph),fm);
+        p.position.set(cx+ox,ph/2,cz+oz);p.rotation.y=rot;p.userData={fence:true,x,y};grp.add(p);};
+      if(lip){panel(lip[2],0.55,lip[0],lip[1]);}
+      else{if(nsRun&&!ewRun)panel(Math.PI/2,0.8,0,0);else panel(0,0.8,0,0);
+        if(nsRun&&ewRun)panel(Math.PI/2,0.8,0,0);}
     }else if(kd==="tree"){
       const trunk=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.7,0.16),
         new THREE.MeshLambertMaterial({color:0x6E4A2C}));

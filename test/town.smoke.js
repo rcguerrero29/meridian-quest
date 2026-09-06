@@ -137,11 +137,16 @@ const { chromium } = require('playwright-core');
       // #62: the flight climbs — each tread a step higher, the head the top; the loft's well is flat and railed on both sides
       if (!(stairLift(hq, 11, 14) > 0 && stairLift(hq, 12, 14) > stairLift(hq, 11, 14) && stairLift(hq, 14, 14) > stairLift(hq, 13, 14))) problems.push('the treads do not rise east to the head');
       if (stairLift(hq, 10, 14) !== 0 || stairLift(hq, 10, 15) !== 0) problems.push('the landing or the lobby has a lift');
-      if (!f2 || !(stairRun(f2, 12, 14) && stairRun(f2, 12, 14).well) || stairLift(f2, 12, 14) !== 0) problems.push('the loft treads are not a flat well');
-      if (f2 && f2.rows[15] !== '#..........◺◺◺.....#') problems.push('the well is not railed on the south side — you could walk off the floor');
+      // #62, the way down (owner: "downstairs, not so much. still blocky, squares with a faulty railing"):
+      // the loft's well is a HOLE — each tread a step below the last toward the way down, the ▼ the deepest,
+      // the arrival tile the floor — and the rail closes it on three sides, so the only way in is the top of the flight
+      if (!f2 || !(stairRun(f2, 12, 14) && stairRun(f2, 12, 14).well)) problems.push('the loft treads are not a well');
+      if (f2 && !(stairLift(f2, 13, 14) < 0 && stairLift(f2, 12, 14) < stairLift(f2, 13, 14) && stairLift(f2, 11, 14) < stairLift(f2, 12, 14) && stairLift(f2, 10, 14) < stairLift(f2, 11, 14))) problems.push('the well does not drop step by step toward the way down');
+      if (f2 && stairLift(f2, 14, 14) !== 0) problems.push('the arrival tile of the loft is not at floor level');
+      if (f2 && Math.abs(stairLift(f2, 10, 14) + stairLift(hq, 14, 14)) > 1e-9) problems.push('the way down is not as deep as the head is high — one flight, two ends');
       if (!f2) problems.push('the stall has no loft (f2)');
       else { if (!(f2.W === 20 && f2.H === 17)) problems.push('the loft is not 20×17');
-        if (f2.rows[13] !== '#..........◺◺◺.....#' || f2.rows[14] !== '#.........▼≡≡≡.....#') problems.push('the loft has no railed well over the flight'); }
+        if (f2.rows[13] !== '#.........◺◺◺◺.....#' || f2.rows[14] !== '#........◺▼≡≡≡.....#' || f2.rows[15] !== '#.........◺◺◺◺.....#') problems.push('the well is not railed on three sides — you could walk into the hole from the floor'); }
       if (PL.upstairs !== 'f2') problems.push('PLACES.upstairs is not the loft');
       const up = PORTALS.hq['▲'], dn = PORTALS.f2 && PORTALS.f2['▼'], inE = PORTALS.st.E;
       if (!up || up.to !== 'f2' || up.x !== 14 || up.y !== 14 || up.mark !== 'up') problems.push('▲ does not climb to the loft at (14,14) with the up mark');
@@ -152,6 +157,24 @@ const { chromium } = require('playwright-core');
       ['⊓', '≡', '▲', '▼', '◺'].forEach(g => { if (!TILES[g] || !TILEDRAW[g]) problems.push(g + ' has no tile or no drawing'); });
       if (!TILESIDE['◺']) problems.push('the rail has no elevation drawing');
       if (SOLID.has(hq.grid[5][12])) problems.push('Frederick lost his tile');
+      { const b0 = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
+        camSet('3d'); world = 'f2'; px = 14; py = 14; moving = false; held = null;
+        if (!draw3d() || T3.fail) problems.push('the loft did not render in 3D');
+        else { const wells = T3.group.children.filter(o => o.userData && o.userData.well);
+          if (wells.length !== 4) problems.push('the well is not four sunken steps in 3D (' + wells.length + ')');
+          if (wells.some(o => o.userData.h >= 0)) problems.push('a well step stands above the floor in 3D');
+          const tops = wells.map(o => o.userData.h).sort((a, b) => a - b);
+          if (new Set(tops).size !== 4) problems.push('the well steps are all the same depth in 3D');
+          const ground = T3.group.children.find(o => o.userData && o.userData.ground);
+          if (!ground) problems.push('the ground does not name itself in 3D');
+          else if (!(ground.material.alphaTest > 0)) problems.push('the ground has no hole for the well — the steps are buried under the floor');
+          const rails = T3.group.children.filter(o => o.userData && o.userData.fence && WORLDS.f2.rows[o.userData.y][o.userData.x] === '◺');
+          if (rails.length < 9) problems.push('the rail is not nine panels round the well (' + rails.length + ')');
+          if (!rails.every(o => Math.abs(o.position.x - (o.userData.x + 0.5)) > 0.3 || Math.abs(o.position.z - (o.userData.y + 0.5)) > 0.3)) problems.push('a rail panel stands mid-tile instead of on the lip of the well');
+          const west = rails.find(o => o.userData.x === 9 && o.userData.y === 14);
+          if (!west || Math.abs(Math.abs(west.rotation.y) - Math.PI / 2) > 1e-6) problems.push('the rail at the head of the well does not turn to face it');
+          if (rails.some(o => o.geometry.parameters.height >= 0.8)) problems.push('the rail is as tall as a fence — it is knee-high, not a cage'); }
+        world = b0.world; px = b0.px; py = b0.py; T3.yaw = b0.yaw; camSet(b0.cam); }
       // in 3D: four mass boxes wearing four DIFFERENT faces (one flight, not four little staircases), the rail as a panel, the office door with its lintel
       const b3 = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
       camSet('3d'); world = 'hq'; px = 10; py = 15; moving = false; held = null;
