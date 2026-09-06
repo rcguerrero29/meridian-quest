@@ -342,10 +342,10 @@ function t3Actors(){
     drawEmote(n,2,6); /* the trade is drawn BESIDE the mark here too, never instead of it */
   }}));
   PEERS.forEach(p=>{if(p.w===world)list.push({x:p.x,y:p.y,f:g=>drawPerson(g,2,6,p.look||look,{dir:t3ScreenDir(p.dir||"down")})});});
-  if(world==="hq")list.push({x:DOG.fx,y:DOG.fy,fc:DOG,f:g=>drawDog(g,2,6)});
-  if(world==="lc")list.push({x:CAT.fx,y:CAT.fy,fc:CAT,f:g=>drawCat(g,2,6)});
-  if(world==="st"){list.push({x:PIG.fx,y:PIG.fy,fc:PIG,f:g=>drawPigeon(g,2,6)});
-    list.push({x:LORO.x,y:LORO.y,f:g=>drawLoro(g,2,6)});}
+  if(world===AW("dog"))list.push({x:DOG.fx,y:DOG.fy,fc:DOG,f:g=>drawDog(g,2,6)});
+  if(world===AW("cat"))list.push({x:CAT.fx,y:CAT.fy,fc:CAT,f:g=>drawCat(g,2,6)});
+  if(world===AW("pig"))list.push({x:PIG.fx,y:PIG.fy,fc:PIG,f:g=>drawPigeon(g,2,6)});
+  if(world===AW("loro"))list.push({x:LORO.x,y:LORO.y,f:g=>drawLoro(g,2,6)});
   CRIT.forEach(cr=>{if(cr.world!==world)return;
     list.push({x:cr.fx,y:cr.fy,fc:cr,f:g=>{
       if(cr.kind==="butterfly")drawButterfly(g,cr,2,6);

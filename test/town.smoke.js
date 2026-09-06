@@ -71,6 +71,11 @@ const { chromium } = require('playwright-core');
            if (!hasSay(v)) problems.push('la ventanilla wears no mark'); if (wanders(v)) problems.push('la ventanilla wanders'); }
     if (!READS.some(r => r.world === 'st' && r.doc === 'board')) problems.push('no board on the street');
     if (!CRIT.some(c => c.kind === 'beagle' && c.name === 'Sonny' && c.world === 'st')) problems.push('Sonny is not on the street');
+    // the town's animals are the town's (#38): no cat, and Lorenzo perches on the tree, not on thin air
+    if (AW('cat') !== null) problems.push('the town has a bodega cat and no bodega');
+    if (AW('loro') !== 'st' || LORO.x !== 12 || LORO.y !== 5) problems.push('Lorenzo is not in the tree at (12,5)');
+    if (!SOLID.has(WORLDS.st.grid[LORO.y][LORO.x])) problems.push('Lorenzo has nothing under him');
+    if (AW('dog') !== 'hq' || AW('pig') !== 'st') problems.push('Frederick or the pigeon lost their world');
     // plain words: the paragraph under "In plain words:" comes first; markdown marks stripped
     const pw = { n: 9, title: 'x', body: 'Filed context.\n\n**In plain words:** The *street* is the backlog.\n\nMore.', labels: ['tier: high', 'decision'], at: '2026-09-01' };
     if (RECORDSRC.plain(pw) !== 'The street is the backlog.') problems.push('plain words not extracted: ' + RECORDSRC.plain(pw));
