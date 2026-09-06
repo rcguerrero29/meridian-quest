@@ -68,11 +68,82 @@ const RECORDSRC={
      board opens the board instead */
   walkTo(n){const w=WORLDS[this.world],key=this.placed[n],p=key&&w.npcs.find(m=>m.key===key);
     if(!p){docOpen("board");return false;}
-    const spot=[[0,1],[1,0],[-1,0],[0,-1]].map(([dx,dy])=>[p.x+dx,p.y+dy]).find(([x,y])=>!isSolidAt(this.world,x,y));
+    return this.goBeside(this.world,p.x,p.y);},
+  /* stand beside a tile in any world, facing it, the reader closed — people, animals, doors, faces */
+  goBeside(wid,tx,ty){if(!WORLDS[wid])return false;
+    const spot=[[0,1],[1,0],[-1,0],[0,-1],[0,0]].map(([dx,dy])=>[tx+dx,ty+dy]).find(([x,y])=>!isSolidAt(wid,x,y));
     if(!spot)return false;
-    world=this.world;px=fx=spot[0];py=fy=spot[1];held=null;dir=spot[1]>p.y?"up":spot[1]<p.y?"down":spot[0]>p.x?"left":"right";
+    world=wid;px=fx=spot[0];py=fy=spot[1];held=null;dir=spot[1]>ty?"up":spot[1]<ty?"down":spot[0]>tx?"left":"right";
     try{$("reader").hidden=true;}catch(e){}try{setWorldTag();}catch(e){}try{if(typeof t3Invalidate==="function")t3Invalidate();}catch(e){}
     return true;},
+  /* ---------- ch-v15: the index — everything the town knows, by tag (owner: "cant we use those tags
+     to help me pull up specific things i want fixed or resolved? even events etc? then your job
+     would be to say it to me in plain language and have it categorized in her menu too") ----------
+     Two kinds of thing: the PEOPLE the record places (labels, kind, weight, state, events) and the
+     THINGS of the town itself (rooms, faces, residents, animals), each with tags. One search over
+     both; one category menu; every hit says itself in plain words, walks you there, and can file
+     a request already tagged with what it is about. */
+  things(){const es=lang==="es",st=this.world,W=WORLDS;
+    const near=(wid,x,y)=>W[wid]?{world:wid,x,y}:null;
+    const T=[];const add=(id,en,esn,tags,at,plainEn,plainEs)=>{if(at)T.push({id,name:es?esn:en,tags,at,plain:es?plainEs:plainEn,thing:true});};
+    add("stall","The stall","El changarrito",["changarrito","stall","home"],near(PL.home,PL.spawn[0],PL.spawn[1]),"Where you wake up. Don Güero's counter, the door to the street, the stairs to the loft.","Donde despiertas. El mostrador de Don Güero, la puerta a la calle, la escalera al tapanco.");
+    if(W[PL.upstairs])add("loft","The loft","El tapanco",["changarrito","loft","stairs"],near(PL.upstairs,14,14),"Upstairs, bare on purpose; the way down is the light square.","Arriba, vacío a propósito; la bajada es el cuadro claro.");
+    add("street","The street","La calle",["changarrito","street"],near(st,14,2),"Where the record's people stand, by kind: asks left, decisions middle, bugs right.","Donde está la gente del expediente, por tipo: peticiones a la izquierda, decisiones al centro, bugs a la derecha.");
+    add("hall","City hall · la ventanilla","El ayuntamiento · la ventanilla",["ventanilla","hall","record"],near(st,9,1),"Her window: the news, the index, the forms, your key.","Su ventana: las noticias, el índice, los formularios, tu llave.");
+    add("board","The board","El tablero",["board","notes","tier: low"],near(st,8,1),"The small things, pinned, grouped by kind.","Las cosas chicas, prendidas, por tipo.");
+    add("asks","The asks' storefront","La fachada de las peticiones",["ask"],near(st,4,1),"People labelled ask stand in front of it.","La gente con etiqueta ask se para enfrente.");
+    add("decisions","The decisions' storefront","La fachada de las decisiones",["decision"],near(st,19,1),"People labelled decision stand in front of it — the ones waiting on your word.","La gente con etiqueta decision se para enfrente — los que esperan tu palabra.");
+    add("bugs","The bugs' storefront","La fachada de los bugs",["bug"],near(st,25,1),"People labelled bug stand in front of it.","La gente con etiqueta bug se para enfrente.");
+    if(W[PL.park])add("park","The park","El parque",["park","sonny","animals"],near(PL.park,PL.parkIn[0],PL.parkIn[1]),"Through the east gate. Sonny's mini game lives here.","Por la reja del este. Aquí vive el mini juego de Sonny.");
+    /* residents and animals, where they are right now */
+    Object.entries(W).forEach(([wid,w])=>w.npcs.forEach(n=>{if(n.issue||!n.npc)return;
+      add("npc:"+n.npc,npcName(n.npc),npcName(n.npc),[n.npc,"people"],near(wid,n.fx===undefined?n.x:Math.round(n.fx),n.fy===undefined?n.y:Math.round(n.fy)),n.doc?"Carries a document — talk to read it.":"A resident. Talk to them.",n.doc?"Lleva un documento — háblale para leerlo.":"Vive aquí. Háblale.");}));
+    (typeof CRIT!=="undefined"?CRIT:[]).forEach(c=>{if(!c.name)return;add("crit:"+c.name,c.name,c.name,[String(c.name).toLowerCase(),"animals","dog"],near(c.world,Math.round(c.fx),Math.round(c.fy)),"The owner's dog. Follows you, sits, stays; the ball and the cone are his.","El perro del dueño. Te sigue, se sienta, se queda; la pelota y el cono son suyos.");});
+    if(AW("dog"))add("frederick","Frederick","Frederick",["frederick","animals","dog"],near(AW("dog"),Math.round(DOG.fx),Math.round(DOG.fy)),"The engine's dog, at the stall.","El perro del motor, en el changarrito.");
+    if(AW("pig"))add("pigeon","The pigeon","La paloma",["pigeon","animals"],near(AW("pig"),Math.round(PIG.fx),Math.round(PIG.fy)),"Pecks on the street. Ignores you.","Picotea en la calle. Te ignora.");
+    if(AW("loro"))add("lorenzo","Lorenzo","Lorenzo",["lorenzo","animals","loro"],near(AW("loro"),LORO.x,LORO.y),"The parrot, in the tree.","El loro, en el árbol.");
+    return T;},
+  /* a person's state, in one word */
+  state(i){const c=this.comments[i.n],l=c&&c.last;if((i.labels||[]).includes("decision"))return "waiting";if(l&&l.answer)return "answered";return "unanswered";},
+  personPlain(i){const es=lang==="es",st=this.state(i),S={waiting:es?"espera tu palabra":"waiting on you",answered:es?"contestado":"answered",unanswered:es?"sin contestar":"unanswered"};
+    return "#"+i.n+" · "+String(i.title||"").replace(/^❗/,"")+" · "+this.kind(i)+", "+this.tier(i)+" · "+S[st]+(this.placed[i.n]?"":(es?" · en el tablero":" · on the board"));},
+  /* the categories la ventanilla offers, grouped; and the search over everything */
+  indexCats(){const es=lang==="es",g1=es?"estado":"state",g2=es?"eventos":"events",g3=es?"etiquetas":"labels",g4=es?"lugares y quiénes":"places and who";
+    const cats=[{v:"",t:es?"— todo —":"— everything —"},
+      {v:"state:waiting",t:es?"esperan tu palabra":"waiting on you",g:g1},{v:"state:answered",t:es?"contestados":"answered",g:g1},{v:"state:unanswered",t:es?"sin contestar":"unanswered",g:g1},
+      {v:"ev:answered",t:es?"contestados desde tu última visita":"answered since your last visit",g:g2},{v:"ev:fresh",t:es?"nuevos desde tu última visita":"new since your last visit",g:g2},{v:"ev:gone",t:es?"se fueron a casa":"went home",g:g2},
+      {v:"where:street",t:es?"en la calle":"on the street",g:g4},{v:"where:board",t:es?"en el tablero":"on the board",g:g4},{v:"things",t:es?"lugares, residentes, animales":"places, residents, animals",g:g4}];
+    this.labelsSeen().forEach(o=>cats.push({v:"label:"+o.v,t:o.v,g:g3}));return cats;},
+  index(cat,q){const es=lang==="es",nw=this.news(),qq=this.clean(q,60).toLowerCase();
+    let people=this.all.slice(),things=this.things();
+    if(cat==="things")people=[];
+    else if(cat&&cat.startsWith("state:")){const st=cat.slice(6);people=people.filter(i=>this.state(i)===st);things=[];}
+    else if(cat==="ev:answered"){people=nw.answered;things=[];}
+    else if(cat==="ev:fresh"){people=nw.fresh;things=[];}
+    else if(cat==="ev:gone"){people=[];things=nw.gone.map(g=>({id:"gone:"+g.n,name:"#"+g.n+" · "+String(g.title).replace(/^❗/,""),tags:["gone"],at:null,plain:es?"Se fue a casa desde tu última visita (cerrado).":"Went home since your last visit (closed).",thing:true}));}
+    else if(cat==="where:street"){people=people.filter(i=>this.placed[i.n]);things=[];}
+    else if(cat==="where:board"){people=people.filter(i=>!this.placed[i.n]);things=[];}
+    else if(cat&&cat.startsWith("label:")){const l=cat.slice(6);people=people.filter(i=>(i.labels||[]).includes(l));things=things.filter(t=>t.tags.includes(l));}
+    if(qq){people=people.filter(i=>((i.title||"")+" "+(i.body||"")+" "+(i.labels||[]).join(" ")).toLowerCase().includes(qq));
+      things=things.filter(t=>(t.name+" "+t.tags.join(" ")+" "+t.plain).toLowerCase().includes(qq));}
+    return {people,things};},
+  indexCat:"",indexQ:"",
+  indexDoc(){const es=lang==="es",self=this,s=[];
+    s.push({sel:es?"📇 Mostrar":"📇 Show",opts:this.indexCats(),value:this.indexCat,run:v=>{self.indexCat=v;docOpen("index");}});
+    s.push({form:{fields:[{k:"q",label:es?"Una palabra (gente, lugares, etiquetas, animales)":"A word (people, places, labels, animals)",type:"text",value:this.indexQ}],submit:es?"🔎 Buscar":"🔎 Search",cancel:es?"Limpiar":"Clear",noFocus:true,
+      onCancel:()=>{self.indexQ="";self.indexCat="";docOpen("index");},run:v=>{self.indexQ=self.clean(v.q,60);docOpen("index");}}});
+    const r=this.index(this.indexCat,this.indexQ);
+    s.push({h:(es?"Gente · ":"People · ")+r.people.length});
+    if(!r.people.length)s.push({p:es?"Nadie aquí con eso.":"Nobody here with that."});
+    r.people.slice(0,20).forEach(i=>{s.push({p:this.personPlain(i)});s.push({btn:(es?"→ caminar a #":"→ walk to #")+i.n,run:()=>self.walkTo(i.n)});
+      s.push({btn:es?"📝 presentar algo sobre #"+i.n:"📝 file about #"+i.n,run:()=>{self.formTags=(i.labels||[]).filter(l=>!/^tier: /.test(l));docOpen("request");}});});
+    if(r.people.length>20)s.push({p:(es?"… y ":"… and ")+(r.people.length-20)+(es?" más. Acota con una palabra.":" more. Narrow with a word.")});
+    s.push({h:(es?"Lugares, residentes, animales · ":"Places, residents, animals · ")+r.things.length});
+    if(!r.things.length)s.push({p:es?"Nada aquí con eso.":"Nothing here with that."});
+    r.things.slice(0,20).forEach(t=>{s.push({p:t.name+" · "+t.plain+" · "+(es?"etiquetas: ":"tags: ")+t.tags.join(", ")});
+      if(t.at)s.push({btn:(es?"→ caminar a ":"→ walk to ")+t.name,run:()=>self.goBeside(t.at.world,t.at.x,t.at.y)});
+      s.push({btn:(es?"📝 presentar algo sobre ":"📝 file about ")+t.name,run:()=>{self.formTags=t.tags.filter(l=>!/^tier: /.test(l)).slice(0,4);docOpen("request");}});});
+    return s;},
   /* ---------- ch-v13: "run line 2" — the version main has, read from the repo ----------
      One conditional GET of the town's own config on main (an ETag makes the repeat free), decoded,
      GAMEV read out. Differs from the one running → la ventanilla says which line to run. Anything
@@ -235,7 +306,8 @@ const RECORDSRC={
      renders the fields (engine mq-v76); the record acts on the values. */
   formTags:[],   /* tags pre-picked for the next request — where you filed it from (the index, PR 3) */
   tagOpts(){const seen=this.labelsSeen().filter(o=>!/^tier: /.test(o.v)&&!["ask","decision","bug"].includes(o.v)).map(o=>o.v);
-    return [...new Set(["changarrito","ventanilla",...seen])].map(v=>({v,t:v}));},
+    const own=[];this.things().forEach(t=>t.tags.forEach(l=>{if(!/^tier: /.test(l)&&!["ask","decision","bug","people"].includes(l))own.push(l);}));
+    return [...new Set(["changarrito","ventanilla",...seen,...this.formTags,...own])].map(v=>({v,t:v}));},
   requestDoc(){const es=lang==="es",self=this;return [{form:{fields:[
       {k:"title",label:es?"Título (corto)":"Title (short)",type:"text"},
       {k:"plain",label:es?"En palabras llanas — qué es, por qué importa":"In plain words — what this is, why it matters",type:"area"},
@@ -379,7 +451,8 @@ const RECORDSRC={
       run:v=>{self.setFilter(v?[v]:[],self.search);docOpen("window");}});
     s.push({sel:es?"↕ Orden":"↕ Sort",opts:[{v:"weight",t:es?"por peso (alto primero)":"by weight (high first)"},{v:"newest",t:es?"más nuevos primero":"newest first"},{v:"oldest",t:es?"más viejos primero":"oldest first"},{v:"number",t:es?"por número":"by number"}],value:this.sort,
       run:v=>{self.setSort(v);docOpen("window");}});
-    s.push({btn:es?"🔍 Varias etiquetas y una palabra":"🔍 Several labels, or a word",run:()=>docOpen("filter")});
+    s.push({btn:es?"📇 El índice — todo por etiqueta, buscar":"📇 The index — everything by tag, search",run:()=>docOpen("index")});
+    s.push({btn:es?"🔍 Acotar la calle: varias etiquetas, una palabra":"🔍 Narrow the street: several labels, a word",run:()=>docOpen("filter")});
     return s;},
   /* the board: the small things, pinned */
   boardDoc(){const es=lang==="es",s=[];

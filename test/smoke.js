@@ -2896,6 +2896,9 @@ const CANDIDATES = [
       // #25: Meridian declares no PLACES or FLOORS either — its rooms ARE the engine's default table, byte for byte
       if (typeof PLACES !== 'undefined') problems.push('Meridian declares PLACES — its rooms are the engine defaults by design');
       if (typeof FLOORS !== 'undefined') problems.push('Meridian declares FLOORS — its pavements are the engine defaults by design');
+      // mq-v77: the reader's look is the pack's choice; Meridian declares none and keeps the cream paper
+      if (typeof READERLOOK !== 'undefined') problems.push('Meridian declares READERLOOK — its paper is cream by design');
+      if (document.getElementById('paperSheet').className !== 'paper') problems.push("Meridian's paper wears a look it did not ask for: " + document.getElementById('paperSheet').className);
       if (JSON.stringify(PL) !== JSON.stringify(PLDEF)) problems.push('PL drifted from PLDEF with no PLACES declared');
       if (PL.home !== 'hq' || PL.spawn.join() !== '10,11' || PL.street !== 'st' || PL.park !== 'pk' || PL.upstairs !== 'f2') problems.push('the default roles are not Meridian\'s rooms: ' + JSON.stringify(PL));
       if (world !== PL.home && !WORLDS[world]) problems.push('the current world is not a world');

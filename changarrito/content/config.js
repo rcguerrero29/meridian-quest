@@ -2,7 +2,7 @@
    street. docs/story/el-changarrito.md. This pack trains no role, carries no curriculum and
    awards no grade that means anything about the player (§7½). */
 const GAMENAME="El Changarrito";
-const GAMEV="ch-v14 · engine mq-v76";   /* the town's own version, and the engine it was built on */
+const GAMEV="ch-v15 · engine mq-v77";   /* the town's own version, and the engine it was built on */
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;
@@ -18,3 +18,6 @@ const PLACES={home:"hq",spawn:[10,11],street:"st",park:"pk",parkIn:[2,6,"right"]
    the timer back; SHOW_PERMITS=true brings the open PRs back to her card. Nothing was deleted. */
 const REFRESH_MS=0;
 const SHOW_PERMITS=false;
+/* the reader's look (ch-v15, engine mq-v77): "night" is the purple dark paper the owner liked in
+   the mockup; leave it out for the cream one Meridian keeps. AJ picks either for a world. */
+const READERLOOK="night";
