@@ -11,6 +11,17 @@
    Default "mq": Meridian's keys are unchanged, byte for byte. Guarded by the smoke suite:
    no literal key may remain in engine/. */
 const SK=k=>((typeof STOREPFX==="string"&&STOREPFX)||"mq")+k;
+/* ---------- the places seam (#25) ----------
+   The engine used to spell Meridian's room ids in ~60 places: home base "hq" with (10,11)
+   walkable, the street "st", the park "pk" with the leash landing at (2,6). A second world
+   inherited them or crashed. Now the pack says which of its worlds play which ROLE, and the
+   engine reads the role. A pack that says nothing gets Meridian's table, byte for byte. */
+const PLDEF={home:"hq",spawn:[10,11],street:"st",park:"pk",parkIn:[2,6,"right"],parkDog:[3,6],parkDogHome:[8,6],
+  parkAdopt:[[17,4],[19,4],[17,2],[19,2],[16,3],[20,3]],friends:["st","me","lc","lo"],upstairs:"f2"};
+const PL=Object.assign({},PLDEF,(typeof PLACES==="object"&&PLACES)||{});
+/* the pavement each world is painted with; a world not listed gets the pack's floor colours */
+const FLOORDEF={st:["#C6C4BB","#BFBDB4"],lo:["#D9DCE0","#D1D5DA"]};
+const FLOORC=(typeof FLOORS==="object"&&FLOORS)||FLOORDEF;
 const FQ=()=>lang==="es"?FQES:FQEN;
 const TS=32;
 /* "C" (the traffic cone) left this set on 2026-09-04. Owner: "I think a cone shouldnt make me
@@ -20,7 +31,7 @@ const SOLID=new Set(["#","D","K","P","B","F","G","X","T","W","V","A","U","Q","J"
 /* the content seam: a pack adds its own solid glyphs and declares which are doors */
 (typeof SOLIDX!=="undefined"?SOLIDX:"").split("").forEach(c=>SOLID.add(c));
 const DOORSET=new Set((typeof DOORS!=="undefined"?DOORS:"+ELO").split(""));
-let world="hq";
+let world=PL.home;
 const WORLDS={};
 Object.keys(WORLD_DEFS).forEach(id=>{
   const rows=WORLD_DEFS[id].slice(),grid=[],wnpcs=[],defs=WNPC[id]||{};
@@ -168,7 +179,7 @@ const chillLines=k=>{
 function auditReach(){
   const probs=[],seen={};Object.keys(WORLDS).forEach(k=>seen[k]=new Set());
   const walk=(id,x,y)=>{const w=WORLDS[id];return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N");};
-  const q=[["hq",10,11]];seen.hq.add("10,11");
+  const q=[[PL.home,PL.spawn[0],PL.spawn[1]]];if(seen[PL.home])seen[PL.home].add(PL.spawn[0]+","+PL.spawn[1]);
   while(q.length){const[idw,x,y]=q.shift();
     const ch=WORLDS[idw].rows[y][x];
     if(PORTALS[idw]&&PORTALS[idw][ch]){const p=PORTALS[idw][ch],key=p.x+","+p.y;
@@ -357,7 +368,7 @@ function sanitizeSave(s){
     o&&(bl[String(k).slice(0,40)]=o);});
   return{n,c:str2(s.c,24,""),lk,xp:num(s.xp,0,999,0),he:num(s.he,0,3,3),d,
     px:num(s.px,0,63,10),py:num(s.py,0,63,11),tr:num(s.tr,0,9999,0),fq:num(s.fq,0,3,0),
-    w:str2(s.w,4,"hq"),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,hd,bl,
+    w:str2(s.w,12,PL.home),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,hd,bl,
     v:s.v===undefined?undefined:num(s.v,0,99,0)};
 }
 function loadSave(){try{return sanitizeSave(JSON.parse(localStorage.getItem(SK("1"))||""));}catch(e){return null;}}
@@ -458,7 +469,7 @@ function drawIso(){
     const[cx,cy]=P(x,y);
     if(cx<-ISW||cx>VW+ISW||cy<-ISH-24||cy>VH+ISH+24)continue;
     const ch=w.rows[y][x];
-    let fc=world==="st"?((x+y)%2?"#C6C4BB":"#BFBDB4"):world==="lo"?((x+y)%2?"#D9DCE0":"#D1D5DA"):((x+y)%2?C.floor:C.floorAlt);
+    const fp=FLOORC[world];let fc=fp?((x+y)%2?fp[0]:fp[1]):((x+y)%2?C.floor:C.floorAlt);
     const hsh=(x*374761393+y*668265263)>>>0;
     if((hsh&7)<2)fc=shadeHex(fc,-0.045);
     isoDiamond(cx,cy,tc(fc));
@@ -938,9 +949,7 @@ function drawFront(){
   /* ground pass: floors, walkable art, and the shadow every facade casts */
   for(let y=y0;y<=yEnd;y++)for(let x=x0;x<=xEnd;x++){
     const ch=w.rows[y][x],sx=x*TS-camX,sy=y*TS-camY;
-    if(world==="st")ctx.fillStyle=tc((x+y)%2?"#C6C4BB":"#BFBDB4");
-    else if(world==="lo")ctx.fillStyle=tc((x+y)%2?"#D9DCE0":"#D1D5DA");
-    else ctx.fillStyle=tc((x+y)%2?C.floor:C.floorAlt);
+    {const fp=FLOORC[world];ctx.fillStyle=tc(fp?((x+y)%2?fp[0]:fp[1]):((x+y)%2?C.floor:C.floorAlt));}
     ctx.fillRect(sx,sy,TS,TS);
     const hsh=(x*374761393+y*668265263+world.charCodeAt(0)*69069)>>>0;
     if((hsh&7)<2){ctx.globalAlpha=0.05;ctx.fillStyle="#000";ctx.fillRect(sx,sy,TS,TS);ctx.globalAlpha=1;}
@@ -1052,9 +1061,7 @@ function draw(){
   const queueCanopy=(cx2,cy2)=>trees.push([cx2,cy2]);
   for(let y=y0;y<=Math.min(w.H-1,y0+9);y++)for(let x=x0;x<=Math.min(w.W-1,x0+11);x++){
     const ch=w.rows[y][x],sx=x*TS-camX,sy=y*TS-camY;
-    if(world==="st")ctx.fillStyle=tc((x+y)%2?"#C6C4BB":"#BFBDB4");
-    else if(world==="lo")ctx.fillStyle=tc((x+y)%2?"#D9DCE0":"#D1D5DA");
-    else ctx.fillStyle=tc((x+y)%2?C.floor:C.floorAlt);
+    {const fp=FLOORC[world];ctx.fillStyle=tc(fp?((x+y)%2?fp[0]:fp[1]):((x+y)%2?C.floor:C.floorAlt));}
     ctx.fillRect(sx,sy,TS,TS);
     /* wave-1 ground detail: per-tile hash variation (stable speckle) */
     const hsh=(x*374761393+y*668265263+world.charCodeAt(0)*69069)>>>0;
@@ -1336,7 +1343,7 @@ function drawPigeon(g,sx,sy){
 }
 const LORO=aniXY("loro",{x:17,y:5,next:0});
 function loroTick(now){
-  if(world!=="st")return;
+  if(world!==AW("loro"))return;
   if(now<LORO.next)return;LORO.next=now+2000;
   if(Math.abs(LORO.x-px)+Math.abs(LORO.y-py)<=2&&Math.random()<0.45&&Date.now()-lastBump>2600){
     lastBump=Date.now();const L=T().loro;toast("🦜 "+L[Math.floor(Math.random()*L.length)],2000);}
@@ -1537,7 +1544,7 @@ function dogStep(cr,now){ /* the task router: every job a dog can hold */
     if(tk.phase==="go"&&d===0){BALL.phase="carried";BALL.dog=cr;tk.phase="return";return;}
     if(tk.phase==="return"&&d<=1){
       BALL=null;cr.task=null;cr.sit=true;cr.next=now+2400;cr.happyT=now+1800;
-      if(cr.world==="pk")PARK.f++;
+      if(cr.world===PL.park)PARK.f++;
       const L=T().fetchYes||[];if(L.length)toast("🎾 "+L[Math.floor(Math.random()*L.length)],2600);
       return;}
     if(!dogWalk(cr,tgt[0],tgt[1])){cr.task=null;
@@ -1581,7 +1588,7 @@ const AGILITY=[[9,8],[11,8],[13,8]]; /* the course order: hurdle, tunnel, weave 
 function dogWhim(cr,now){ /* his own clock: mostly naps and songs. Digging was a
   puppy phase (owner canon) — it stays in the repertoire, barely. In the park:
   zoomies through the agility course, and the ancient greeting between dogs. */
-  const r=Math.random(),park=cr.world==="pk";
+  const r=Math.random(),park=cr.world===PL.park;
   /* the cone. Owner, 2026-09-04: "sonny should be even able to rip it." Checked before the rest of
      the repertoire so a cone right under his nose beats a nap — but it is one roll in twenty-five,
      so it stays a thing that happened once and not a thing he does. It comes back when you leave
@@ -1599,7 +1606,7 @@ function dogWhim(cr,now){ /* his own clock: mostly naps and songs. Digging was a
     const f=(WORLDS[cr.world].npcs||[]).find(n=>n.key===cr.friend.key);
     if(f&&Math.abs(f.x-cr.x)+Math.abs(f.y-cr.y)<=2&&Math.random()<0.4){
       cr.happyT=now+2200;cr.face=Math.sign(f.x-cr.x)||cr.face;cr.sit=true;cr.next=now+2800;return;}}
-  const other=park?CRIT.find(o=>o!==cr&&isDog(o)&&o.world==="pk"&&!o.task
+  const other=park?CRIT.find(o=>o!==cr&&isDog(o)&&o.world===PL.park&&!o.task
     &&Math.abs(o.x-cr.x)+Math.abs(o.y-cr.y)<=7):null;
   if(r<0.42){cr.layT=now+3800+Math.random()*3200;cr.sit=false;cr.next=cr.layT;}
   else if(r<0.74){cr.howlT=now+2100;cr.next=now+2800;
@@ -2013,7 +2020,7 @@ function tryPortal(ts){
   const p=PORTALS[world][pch],fromW=world,fromX=px,fromY=py;
   world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
   worldArrived(fromW,fromX,fromY);roomInvite();
-  if(fromW==="pk"&&world!=="pk")parkExit(); /* crossing back over the rainbow: the recap */
+  if(fromW===PL.park&&world!==PL.park)parkExit(); /* crossing back over the rainbow: the recap */
   return true;
 }
 let last=0;
@@ -2312,10 +2319,10 @@ function fredCheck(){ /* now the generic animal-interaction check: every creatur
   $("ball").hidden=!ballOK;
   if(ballOK)$("ball").textContent=T().ballLb;
   /* park row: the leash (outside), the bandana (inside), the doghouse (inside) */
-  const leashOK=dogT&&world!=="pk"&&!BALL&&petCrit&&!petCrit.task;
+  const leashOK=dogT&&world!==PL.park&&!BALL&&petCrit&&!petCrit.task;
   $("leash").hidden=!leashOK;
   if(leashOK)$("leash").textContent=T().leashLb||"🦮";
-  const bandOK=dogT&&world==="pk";
+  const bandOK=dogT&&world===PL.park;
   $("band").hidden=!bandOK;
   if(bandOK)$("band").textContent=T().bandLb||"🎀";
   const loveOK=dogT; /* you can always tell him */
@@ -2326,7 +2333,7 @@ function fredCheck(){ /* now the generic animal-interaction check: every creatur
   $("cmd").hidden=false;
   $("cmd").textContent="🐾";
   let adoptOK=false;
-  if(world==="pk"&&!moving&&!bandOK){const w9=CW();
+  if(world===PL.park&&!moving&&!bandOK){const w9=CW();
     adoptOK=[[1,0],[-1,0],[0,1],[0,-1]].some(dd=>{const nx=px+dd[0],ny=py+dd[1];
       return nx>=0&&ny>=0&&nx<w9.W&&ny<w9.H&&w9.grid[ny][nx]==="9";});}
   $("adopt").hidden=!adoptOK;
@@ -2351,7 +2358,7 @@ $("treat").addEventListener("click",()=>{
     const g2=petCrit;
     if(g2){g2.sit=true;g2.next=performance.now()+3200;g2.happyT=performance.now()+2200;g2.layT=0;
       g2.fedT=performance.now();g2.fseq=null; /* food-driven: the next cycle rolls at 6/7 */
-      if(world==="pk")PARK.t++;}
+      if(world===PL.park)PARK.t++;}
     const L=(g2&&g2.egg&&EGGSAFE[g2.egg]&&Math.random()<0.35)?EGGSAFE[g2.egg].lines[lang]
            :(T().beagleTreat||T().gato);
     toast("🦴 "+L[Math.floor(Math.random()*L.length)],2400);}
@@ -2595,7 +2602,7 @@ document.querySelectorAll(".classes button").forEach(b=>b.addEventListener("clic
 }));
 $("begin").addEventListener("click",()=>{
   heroName=($("heroname").value.trim()||"Rookie").slice(0,14);
-  xp=0;hearts=startHearts();done=new Set();qa={};marks={};world="hq";px=fx=10;py=fy=11;dir="down";
+  xp=0;hearts=startHearts();done=new Set();qa={};marks={};world=PL.home;px=fx=PL.spawn[0];py=fy=PL.spawn[1];dir="down";
   save();enterWorld(true);
   const eg=eggFor(heroName); /* a legendary name gets a nod once the tutorial clears */
   if(eg)setTimeout(()=>toast(EGGSAFE[eg].lines[lang][0],3600),7400);
@@ -2637,7 +2644,7 @@ $("endGo").addEventListener("click",()=>{
      you simply stay where you were. */
   const rd=ribbons().find(r=>r.district===chSeen&&r.doorstep);
   if(!last&&rd){const d=rd.doorstep;if(d.world&&WORLDS[d.world])world=d.world;px=fx=d.x|0;py=fy=d.y|0;dir=d.dir||"down";}
-  if(isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
+  if(isSolid(px,py)){world=PL.home;px=fx=PL.spawn[0];py=fy=PL.spawn[1];}
   wasFs=false;
   growthPend=false;seenOpen.add(K.open);
   save();$("end").hidden=true;showWorld();applyCtl();setWorldTag();hud();checkTalk();
@@ -2651,7 +2658,7 @@ $("replay").addEventListener("click",()=>{
     replayTimer=setTimeout(()=>{replayTimer=null;$("replay").textContent=T().replay;},4000);
     return;}
   clearTimeout(replayTimer);replayTimer=null;$("replay").textContent=T().replay;
-  xp=0;hearts=startHearts();done=new Set();qa={};marks={};chSeen=0;world="hq";px=fx=10;py=fy=11;dir="down";
+  xp=0;hearts=startHearts();done=new Set();qa={};marks={};chSeen=0;world=PL.home;px=fx=PL.spawn[0];py=fy=PL.spawn[1];dir="down";
   applyGrowth();save();
   seenOpen=new Set();handedDocs=new Set();
   $("settings").hidden=true;$("end").hidden=true;$("card").hidden=true;showWorld();
@@ -3326,7 +3333,7 @@ function worldFlags(){
   return f;
 }
 function drawTown(){
-  const mc=$("mapcv"),g2=mc.getContext("2d"),w=WORLDS.st,s=10;
+  const mc=$("mapcv"),g2=mc.getContext("2d"),w=WORLDS[PL.street],s=10;
   mc.width=w.W*s;mc.height=w.H*s+14;
   g2.fillStyle="#EFE9DA";g2.fillRect(0,0,mc.width,mc.height);
   const col={...BASECOL,...(typeof MAPCOL!=="undefined"?MAPCOL:{})};
@@ -3342,14 +3349,14 @@ function drawTown(){
   g2.fillStyle="#8A8474";g2.font="600 8px sans-serif";
   g2.fillText(es?"puertas y escaleras en dorado · ◉ estás aquí":"doors & stairs in gold · ◉ you are here",mc.width/2,w.H*s+10);
   const M=typeof MAPDOT!=="undefined"?MAPDOT:{};
-  const dot=world==="st"?[fx,fy]:M[world]||null;
+  const dot=world===PL.street?[fx,fy]:M[world]||null;
   if(dot){g2.fillStyle="#7A3FE0";g2.beginPath();g2.arc(dot[0]*s+s/2,dot[1]*s+s/2,5,0,7);g2.fill();
     g2.strokeStyle="#F2F1EA";g2.lineWidth=2;g2.stroke();}
 }
 function openMap(){
   drawTown();
   const t=T();
-  $("mapNote").textContent="📍 "+t.locs[world]+(world==="f2"?"  ·  ⇧":"");
+  $("mapNote").textContent="📍 "+t.locs[world]+(world===PL.upstairs?"  ·  ⇧":"");
   $("mapov").hidden=false;held=null;
 }
 $("mapbtn").addEventListener("click",openMap);
@@ -3519,7 +3526,7 @@ function setTile(x,y,ch){
 $("undoBtn").addEventListener("click",()=>{
   let ed=[];try{ed=JSON.parse(localStorage.getItem(SK("edits"))||"[]");}catch(e){}
   if(!ed.length){toast(T().undoEmpty,1500);return;}
-  const e2=ed.pop(),w=WORLDS[e2.m||"hq"];
+  const e2=ed.pop(),w=WORLDS[e2.m||PL.home];
   const back=(e2.prev!==undefined&&e2.prev!==null)?e2.prev:w.rows0[e2.y][e2.x];
   w.rows[e2.y]=w.rows[e2.y].slice(0,e2.x)+back+w.rows[e2.y].slice(e2.x+1);
   if(w.grid[e2.y][e2.x]!=="N")w.grid[e2.y][e2.x]=back;
@@ -3566,7 +3573,7 @@ function swEnd(e){
   el.addEventListener("pointerup",swEnd);el.addEventListener("pointercancel",swEnd);
 });
 try{(JSON.parse(localStorage.getItem(SK("edits"))||"[]")).forEach(e2=>{
-  const w=WORLDS[e2&&(e2.m||"hq")];if(!w)return;
+  const w=WORLDS[e2&&(e2.m||PL.home)];if(!w)return;
   if(e2&&w.grid[e2.y]&&w.grid[e2.y][e2.x]!=="N"&&!(e2.x<=0||e2.y<=0||e2.x>=w.W-1||e2.y>=w.H-1)){
     w.rows[e2.y]=w.rows[e2.y].slice(0,e2.x)+e2.ch+w.rows[e2.y].slice(e2.x+1);w.grid[e2.y][e2.x]=e2.ch;}});}catch(e){}
 /* ---------- owner-created characters (admin ➕ brush) — per-device, like map edits.
@@ -3615,9 +3622,10 @@ try{const p0=JSON.parse(localStorage.getItem(SK("park"))||"{}");
 function parkPersist(){try{localStorage.setItem(SK("park"),JSON.stringify(parkPrefs));}catch(e){}}
 /* every adopted dog befriends one particular townsperson (owner ask) — and some
    dogs roam the city to hang out at their friend's side */
-const FRIENDW=["st","me","lc","lo"];
+const FRIENDW=PL.friends.filter(w=>WORLDS[w]); /* a role the pack has no world for is simply skipped */
 function pickFriend(){ /* only townsfolk with room beside them for a dog */
   for(let i=0;i<12;i++){
+    if(!FRIENDW.length)return null;
     const w=FRIENDW[Math.floor(Math.random()*FRIENDW.length)];
     const ns=WORLDS[w].npcs;if(!ns.length)continue;
     const fr={w,key:ns[Math.floor(Math.random()*ns.length)].key};
@@ -3635,7 +3643,7 @@ function dogPlace(cr,rec){ /* the park, or the friend's side */
   if((rec.rehomed||rec.out)&&rec.friend){
     const s=friendSpot(rec.friend);
     if(s){cr.world=rec.friend.w;cr.x=s[0];cr.y=s[1];cr.fx=s[0];cr.fy=s[1];cr.home=[s[0],s[1]];return;}}
-  cr.world="pk";cr.x=rec.x|0;cr.y=rec.y|0;cr.fx=cr.x;cr.fy=cr.y;cr.home=[cr.x,cr.y];}
+  cr.world=PL.park;cr.x=rec.x|0;cr.y=rec.y|0;cr.fx=cr.x;cr.fy=cr.y;cr.home=[cr.x,cr.y];}
 function dogsRoam(newW){ /* rolled at every door: unseen dogs drift between the park
   and their friend's side; rehomed dogs live with their friend for good */
   let dirty=false;
@@ -3647,7 +3655,7 @@ function dogsRoam(newW){ /* rolled at every door: unseen dogs drift between the 
 parkPrefs.dogs.forEach(d0=>{const n=sanName(d0.n);if(!n)return;
   const k=DOGK.has(d0.k)?d0.k:"beagle";
   if(!d0.friend)d0.friend=pickFriend(); /* older pups get a friend assigned */
-  const cr={kind:k,world:"pk",x:d0.x|0,y:d0.y|0,fx:d0.x|0,fy:d0.y|0,
+  const cr={kind:k,world:PL.park,x:d0.x|0,y:d0.y|0,fx:d0.x|0,fy:d0.y|0,
     c:hexOK(d0.c)?d0.c:"#E8C46A",friend:d0.friend,
     name:n,egg:eggFor(n),moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false,home:[d0.x|0,d0.y|0]};
   dogPlace(cr,d0);
@@ -3655,14 +3663,14 @@ parkPrefs.dogs.forEach(d0=>{const n=sanName(d0.n);if(!n)return;
 parkPersist();
 CRIT.forEach(cr=>{if(cr.kind==="beagle"&&cr.name&&parkPrefs.band[cr.name])cr.band=parkPrefs.band[cr.name];});
 $("leash").addEventListener("click",()=>{
-  if(!DOGK.has(petTarget)||!petCrit||world==="pk")return;
+  if(!DOGK.has(petTarget)||!petCrit||world===PL.park)return;
   const c=petCrit;
   LEASH={cr:c,w:c.world,x:c.home[0],y:c.home[1]};
   PARK={f:0,t:0,h:0,d:0};
   toast(T().leashToast(c.name||"🐶"),2400);
   setTimeout(()=>{
-    world="pk";px=fx=2;py=fy=6;dir="right";held=null;
-    c.world="pk";c.x=3;c.y=6;c.fx=3;c.fy=6;c.home=[8,6];c.follow=true;c.task=null;c.sit=false;
+    world=PL.park;px=fx=PL.parkIn[0];py=fy=PL.parkIn[1];dir=PL.parkIn[2];held=null;
+    c.world=PL.park;c.x=PL.parkDog[0];c.y=PL.parkDog[1];c.fx=c.x;c.fy=c.y;c.home=PL.parkDogHome.slice();c.follow=true;c.task=null;c.sit=false;
     c.leashT=performance.now()+6500; /* the leash shows for the bridge crossing, then he's loose */
     if(BALL)BALL=null;
     warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
@@ -3674,7 +3682,7 @@ function parkExit(){
   if(LEASH){const c=LEASH.cr; /* the leashed dog trots home; adopted dogs LIVE here */
     c.follow=false;c.task=null;c.world=LEASH.w;c.x=LEASH.x;c.y=LEASH.y;c.fx=c.x;c.fy=c.y;
     c.home=[c.x,c.y];LEASH=null;}
-  if(BALL&&BALL.world==="pk")BALL=null;
+  if(BALL&&BALL.world===PL.park)BALL=null;
   const t=T();
   $("pkTitle").textContent=t.parkTitle;
   $("pkSum").textContent=t.parkSum(PARK.f,PARK.t,PARK.h,PARK.d);
@@ -3731,12 +3739,12 @@ $("adoptGo").addEventListener("click",()=>{
   if(!n)return;
   if(CRIT.some(c=>isDog(c)&&(c.name||"").toLowerCase()===n.toLowerCase())){
     toast(T().dupDog(n),2600);return;}
-  const w9=WORLDS.pk;
-  const spot=[[17,4],[19,4],[17,2],[19,2],[16,3],[20,3]].find(([x,y])=>
-    !SOLID.has(w9.grid[y][x])&&!(x===px&&y===py)&&!CRIT.some(c=>c.world==="pk"&&c.x===x&&c.y===y))||[17,4];
+  const w9=WORLDS[PL.park];
+  const spot=PL.parkAdopt.find(([x,y])=>
+    !SOLID.has(w9.grid[y][x])&&!(x===px&&y===py)&&!CRIT.some(c=>c.world===PL.park&&c.x===x&&c.y===y))||PL.parkAdopt[0];
   const[ax,ay]=spot;
   const fr=pickFriend(); /* every pup gets one particular person in this city */
-  CRIT.push({kind:adoptB,world:"pk",x:ax,y:ay,fx:ax,fy:ay,c:adoptC,friend:fr,
+  CRIT.push({kind:adoptB,world:PL.park,x:ax,y:ay,fx:ax,fy:ay,c:adoptC,friend:fr,
     name:n,egg:eggFor(n),moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false,home:[ax,ay]});
   parkPrefs.dogs.push({n,x:ax,y:ay,k:adoptB,c:adoptC,friend:fr});parkPersist();
   toast(T().adoptDone(n),3200);
@@ -3830,9 +3838,9 @@ $("cmdReh").addEventListener("click",()=>{
 });
 /* a save that closed the app mid-park: make sure a dog is there when it reopens */
 function parkRescue(){
-  if(world==="pk"&&!CRIT.some(c=>isDog(c)&&c.world==="pk")){
+  if(world===PL.park&&!CRIT.some(c=>isDog(c)&&c.world===PL.park)){
     const s0=CRIT.find(c=>isDog(c));
-    if(s0){s0.world="pk";s0.x=3;s0.y=6;s0.fx=3;s0.fy=6;s0.home=[8,6];}
+    if(s0){s0.world=PL.park;s0.x=PL.parkDog[0];s0.y=PL.parkDog[1];s0.fx=s0.x;s0.fy=s0.y;s0.home=PL.parkDogHome.slice();}
   }
 }
 npcPersist();
@@ -4101,10 +4109,10 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
         :{bandana:fredQ>=2?"#C0392B":null,collar:null,cape:null}; /* pre-wardrobe saves: keep the earned red bandana */
     qa=(SV.qa&&typeof SV.qa==="object")?SV.qa:{}; /* pre-retry saves: done quests stay done, credited as-is */
     wearCat=(SV.wc&&typeof SV.wc==="object")?{bandana:null,collar:null,...SV.wc}:{bandana:null,collar:null};
-    world=WORLDS[SV.w]?SV.w:"hq";
+    world=WORLDS[SV.w]?SV.w:PL.home;
     px=fx=SV.px??10;py=fy=SV.py??11;
     applyGrowth();parkRescue();
-    if(px>=CW().W||py>=CW().H||isSolid(px,py)){world="hq";px=fx=10;py=fy=11;}
+    if(px>=CW().W||py>=CW().H||isSolid(px,py)){world=PL.home;px=fx=PL.spawn[0];py=fy=PL.spawn[1];}
     if(chDue()){finish(livesOn()&&hearts<=0);$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;applyCtl();hud();}
     else{enterWorld(false);lateOpenToast();ribbonSay();}   /* anything that arrived while the phone was away */
   });

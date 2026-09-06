@@ -47,6 +47,16 @@ const { chromium } = require('playwright-core');
         if (!walk(WORLDS[p.to], p.x, p.y)) P.push(id + ':' + ch + ' lands on a blocked tile in ' + p.to + ' (' + p.x + ',' + p.y + ')');
       });
     });
+    // ---- the roles the pack declares point at real places (#25) ----
+    if (!WORLDS[PL.home]) P.push('PLACES.home names a missing world ' + PL.home);
+    else if (!walk(WORLDS[PL.home], PL.spawn[0], PL.spawn[1])) P.push('the spawn (' + PL.spawn + ') in ' + PL.home + ' is not walkable');
+    if (!WORLDS[PL.street]) P.push('PLACES.street names a missing world ' + PL.street);
+    if (WORLDS[PL.park]) { const pk = WORLDS[PL.park];
+      if (!walk(pk, PL.parkIn[0], PL.parkIn[1])) P.push('the leash lands on a blocked tile (' + PL.parkIn.slice(0, 2) + ') in ' + PL.park);
+      if (!walk(pk, PL.parkDog[0], PL.parkDog[1])) P.push('the dog\'s park spot (' + PL.parkDog + ') is blocked');
+      if (!walk(pk, PL.parkDogHome[0], PL.parkDogHome[1])) P.push('the dog\'s park home (' + PL.parkDogHome + ') is blocked');
+      if (!PL.parkAdopt.some(([x, y]) => walk(pk, x, y))) P.push('no adoption spot in the park is walkable'); }
+    if (!PL.friends.some(w => WORLDS[w])) P.push('no PLACES.friends world exists — an adopted dog would have nobody to befriend');
     auditReach().forEach(p => P.push('reach: ' + p));
     auditWander().forEach(p => P.push('a wanderer has nowhere to step: ' + p));
     // ---- every person is a person ----

@@ -137,7 +137,7 @@ every literal replaced, and a smoke assertion that `engine/` contains no `"mq1"`
 service worker has the same bug: `sw.js:14-16` deletes every cache whose name is not its
 own, and `caches.match` searches the whole origin.
 
-**B4 · The hardcoded world ids — which bite.** Crash or silent reset without a world
+**B4 · The hardcoded world ids — which bite.** *(Paid 2026-09-06, `mq-v71`: the `PLACES` seam, #25; the town declares its roles in `config.js`. What follows is the finding as it stood.)* Crash or silent reset without a world
 literally named `hq` with (10,11) walkable: `engine.js:17, 157, 174, 2529, 2571, 2585,
 3453, 3500, 4035, 4038`. `drawTown` (`3259-3276`) throws without `st`. `sanitizeSave`
 clamps world ids to **4 characters** (`333`). The rest are cosmetic but leaky (animals,
