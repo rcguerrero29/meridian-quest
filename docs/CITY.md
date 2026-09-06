@@ -205,30 +205,17 @@ would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
-- ⏳ **❗La caja de escalera — RE-OPENED BY THE OWNER, 2026-09-05.** His words: *"i think that
-  we can make the building bigger, fit in a proper staircase. move it out of a tiny room if
-  needed."* That supersedes both earlier readings (the shaft at `hq(18,5)` inside the existing
-  3×3 hall, and the retired stacking idea). The owner wants a REAL staircase and is willing to
-  enlarge HQ (20×14 today) to get one. **Not built** — *"dont build"*. The expert panel of
-  2026-09-05 (`docs/meetings/2026-09-05-el-experto.md`) was asked for the smallest enlargement
-  that earns a proper flight; Don Güero sites it. What "proper" can mean without elevation
-  (IDEAS §15.10): a hall wide enough for a landing, a flight, a return, and a well upstairs —
-  masonry you walk beside, with the portal as the last step.
-- ⏳ **❗La caja de escalera — now BLOCKING, and the reason changed** *(2026-09-04, second pass)*.
-  The owner asked for stairs that are "part of the building... not just portal images". The shape
-  is settled: a SOLID stair shaft beside the walkable head, `lift:13`, the only body in this engine
-  as tall as the `#` next to it, and every glyph it needs (`◢ ◤ ◥ ◣ ▲ ▼ ◺ ◸ ⌂ ⊓`) is unused. What
-  stops it is **siting, and it is worse than it looked**: the one tile at HQ that could take a
-  shaft, (17,4), is already `#` — but it is the **south wall of the small room at x17-18/y1-3, and
-  the CEO stands in it at (17,2) carrying quest 9.** A wall-kind box wears its art on all four
-  faces, so a flight there hangs a staircase on the inside wall of a room the player must walk into
-  for a quest. Reachability is untouched, which is exactly why a reachability check passes it. Not
-  built; the owner picks the site.
-- ⏳ **❗La caja de escalera** *(Don Güero, 2026-09-04)* — HQ's stair is at (17,5); Floor 2's is
-  at (18,11), same 20×14 building, six rows apart. You climb in the north-east alcove and arrive
-  in the south-east corner. Stacking them makes the building a building — but it re-opens a
-  sentence already signed (f2's clear sight line from the stairs to the window, and the clear
-  arrival tile at (17,11)). His recommendation: stack, and re-sign the sight line in one line.
+- ⏳ **❗La caja de escalera — SITED 2026-09-06 and BUILT IN THE TOWN FIRST (`mq-v75`, `ch-v12`).**
+  Don Güero's candidate B, the owner's *"sounds good don Guerito, go for it"* on #4: HQ and Floor 2
+  grow three rows SOUTH — a lobby at the front door, a stair hall behind a door at (10,13), a
+  four-tile mass at (11–14,13) carrying the flight in profile, three treads and a head ▲ at (14,14)
+  that is the portal up; upstairs the same footprint as a railed well with the way DOWN ▼ at
+  (10,14). Rows 0–12 untouched. Coming in from the street lands on the landing. Five engine glyphs
+  (`⊓ ≡ ▲ ▼ ◺`), so every pack gets a real flight. The town's stall carries it now with a bare
+  loft; **Meridian's maps change when the owner has walked it there** — that is the one thing
+  still open on this entry. `docs/meetings/2026-09-06-la-caja-de-escalera.md` has the three
+  candidates and why. The two earlier readings (the shaft at (18,5) in the 3×3 hall; stacking the
+  old stairs) are superseded and folded here.
 - ⏳ **❗El zaguán** *(Don Güero, 2026-09-04)* — Nolasco is a walkup, and today its street door
   and its staircase are the same connection wearing two different clothes: you go **up** through
   a door and come back **down** through stairs. `maps.js` records the rule it breaks, thirty
