@@ -2084,6 +2084,11 @@ function docOpen(id,from){
       pk.textContent=q.pick+(q.tries>1?"  ("+q.tries+")":"");w.appendChild(pk);
       if(q.why){const wy=document.createElement("p");wy.className="dwhy";
         wy.textContent=(q.concept?q.concept+" — ":"")+q.why;w.appendChild(wy);}}
+    else if(s2.btn){ /* a button a pack's document may carry (the town's Done, its requests) —
+       the reader never knows what it does; content does, and content is never Markdown-exported */
+      const b=document.createElement("button");b.className="dbtn";b.type="button";b.textContent=s2.btn;
+      b.addEventListener("click",()=>{try{if(typeof s2.run==="function")s2.run();}catch(err){console.warn("DOC: button failed",err);}});
+      body.appendChild(b);}
     else if(s2.docs){const row=el("div","ddocs");
       s2.docs.forEach(k=>{if(!DC()[k])return;const b=document.createElement("button");
         b.className="opt";b.textContent=docTitle(k);

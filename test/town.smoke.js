@@ -102,13 +102,57 @@ const { chromium } = require('playwright-core');
     if (!wd.some(s => s.kv && s.kv.some(r => r[0] === '#37'))) problems.push('the window does not list the permit');
     const bd = docSections('board'); if (!bd.length) problems.push('the board does not build');
     RECORDSRC.place([]);
-    // Meridian's animals have somewhere to stand in the town's rooms
-    if (SOLID.has(WORLDS.hq.grid[5][12])) problems.push('hq (12,5) is solid — Frederick has nowhere to stand');
-    if (SOLID.has(WORLDS.st.grid[1][4])) problems.push('st (4,1) is solid — the pigeon has nowhere to stand');
-    return problems;
+    // ---- 3: la ventanilla behind her window; the reader's button; the writes ----
+    if (!(v && v.y === 0 && v.x === 9)) problems.push('la ventanilla is not in the facade row at (9,0)');
+    if (v && SOLID.has(WORLDS.st.grid[1][9])) problems.push('the tile in front of her window is not walkable');
+    let ran = 0; docOpen({ title: { en: 't' }, build: () => [{ btn: 'press', run: () => { ran++; } }] });
+    const btn = document.querySelector('#docBody button.dbtn');
+    if (!btn) problems.push('the reader did not render a button section'); else { btn.click(); if (ran !== 1) problems.push('the button did not run its content'); }
+    const calls = []; const realFetch = window.fetch;
+    window.fetch = (url, opt) => { calls.push({ url: String(url), opt: opt || {} }); return Promise.resolve(new Response('{"number":99}', { status: 200, headers: { 'Content-Type': 'application/json' } })); };
+    RECORDSRC.signOut();
+    return Promise.resolve(RECORDSRC.done(5)).then(async r1 => {
+      if (r1 !== null || calls.length) problems.push('a write went out without a token');
+      RECORDSRC.signIn('ghp_test_only');
+      await RECORDSRC.done(5);
+      const w1 = calls.find(c => c.opt.method === 'PATCH');
+      if (!w1 || !/\/issues\/5$/.test(w1.url)) problems.push('Done did not PATCH /issues/5');
+      else { if (!/Bearer ghp_test_only/.test(w1.opt.headers.Authorization)) problems.push('Done did not carry the token');
+             const b = JSON.parse(w1.opt.body); if (b.state !== 'closed') problems.push('Done did not close'); }
+      if (!calls.some(c => !c.opt.method || c.opt.method === 'GET')) problems.push('the street did not refresh after a write');
+      calls.length = 0; await RECORDSRC.askMore(7);
+      const w2 = calls.find(c => c.opt.method === 'POST');
+      if (!w2 || !/\/issues\/7\/comments$/.test(w2.url) || !/contexto/.test(w2.opt.body)) problems.push('ask-for-more-context did not comment');
+      calls.length = 0; await RECORDSRC.file({ title: 'A <b>thing</b>', plain: 'Why it matters.', notes: 'n', done: 'when', kind: 'bug', tier: 'high' });
+      const w3 = calls.find(c => c.opt.method === 'POST');
+      if (!w3 || !/\/issues$/.test(w3.url)) problems.push('file-a-request did not POST /issues');
+      else { const b = JSON.parse(w3.opt.body);
+        ['In plain words:', 'Notes:', 'Questions to consider:', 'Areas affected:', 'Done when:'].forEach(h => { if (!b.body.includes(h)) problems.push('request body lacks ' + h); });
+        if (!(b.labels.includes('tier: high') && b.labels.includes('bug'))) problems.push('request labels wrong: ' + b.labels.join(','));
+        if (b.body.indexOf('In plain words') > b.body.indexOf('Done when')) problems.push('headings out of order'); }
+      calls.length = 0; await RECORDSRC.addLabel(8, 'ventanilla'); await RECORDSRC.removeLabel(8, 'bug');
+      if (!calls.some(c => c.opt.method === 'POST' && /\/issues\/8\/labels$/.test(c.url))) problems.push('+label did not POST');
+      if (!calls.some(c => c.opt.method === 'DELETE' && /\/issues\/8\/labels\/bug$/.test(c.url))) problems.push('−label did not DELETE');
+      if ((localStorage.getItem(SK('1')) || '').includes('ghp_test_only')) problems.push('the token leaked into the save');
+      RECORDSRC.signOut(); window.fetch = realFetch;
+      const fx3 = [{ n: 21, title: 'alpha', body: '', labels: ['tier: high', 'bug'], at: '2026-09-05' }, { n: 22, title: 'beta', body: '', labels: ['tier: high', 'ask'], at: '2026-09-05' }];
+      RECORDSRC.filter = ['bug']; RECORDSRC.search = ''; RECORDSRC.place(fx3);
+      if (RECORDSRC.people.length !== 1 || RECORDSRC.people[0].n !== 21) problems.push('filter by label did not narrow the street');
+      if (!RECORDSRC.notesList.some(i => i.n === 22)) problems.push('the filtered-out person is not on the board');
+      RECORDSRC.filter = []; RECORDSRC.search = 'beta'; RECORDSRC.place(fx3);
+      if (RECORDSRC.people.length !== 1 || RECORDSRC.people[0].n !== 22) problems.push('search did not narrow the street');
+      RECORDSRC.filter = []; RECORDSRC.search = ''; RECORDSRC.place([]);
+      const wd2 = docSections('window');
+      if (!wd2.some(s => s.btn && /Sign in/.test(s.btn))) problems.push('the window has no sign-in button');
+      if (!wd2.some(s => s.btn && /File a request/.test(s.btn))) problems.push('the window has no file-a-request button');
+      // Meridian's animals have somewhere to stand in the town's rooms
+      if (SOLID.has(WORLDS.hq.grid[5][12])) problems.push('hq (12,5) is solid — Frederick has nowhere to stand');
+      if (SOLID.has(WORLDS.st.grid[1][4])) problems.push('st (4,1) is solid — the pigeon has nowhere to stand');
+      return problems;
+    });
   });
   fails.push(...r);
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
-  console.log('OK — the town boots on its own prefix, has a street, a window, a board and a park, places people by tier where they belong, cycles three lines, and lets them leave.');
+  console.log('OK — the town boots on its own prefix, has a street, a window, a board and a park, places people by tier where they belong, cycles three lines, lets them leave, and writes only with a token.');
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

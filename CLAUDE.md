@@ -17,6 +17,11 @@ instructions live. It is not the instructions.*
    what this is, why it matters, what done looks like, no file names — because the owner's
    town (`changarrito/`) shows that paragraph first. Answer an owner's "más contexto" comment
    with a comment in the same plain words; the town says the last one as the person's third line.
+   **The body of every issue has five headings, in this order:** `In plain words:` · `Notes:` ·
+   `Questions to consider:` · `Areas affected:` · `Done when:`. The owner writes the first, second
+   and last (from the town's form or by hand); **a session fills *Questions to consider* and *Areas
+   affected* when it first reads the issue** — an edit under those headings only, never above the
+   owner's words, announced in one comment.
 4. **`docs/OWNER.md`** — the settled rules. `docs/BACKLOG.md` — the ranked index.
    `docs/story/el-changarrito.md` §7½ — what a second world may never do to Meridian.
 

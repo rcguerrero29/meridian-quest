@@ -51,7 +51,20 @@ network. Never put a tunnel in front of it. Nothing links here from the public g
   (the notes); the **park** through the east gate, so Sonny has somewhere to run; **Sonny**
   himself. Each person has three lines that cycle — plain words, the paperwork, what's next —
   and the street refetches every five minutes, so a closed issue's person walks home.
-- **3:** file a request and press Done from her window. The day a token is typed in, once.
+- **3 (built):** the town writes. At la ventanilla's window: **Sign in** (a GitHub token for
+  this repo with `issues: write` only, 30-day expiry, pasted once — it stays in this browser
+  under the town's own key and nowhere else), **File a request** (title, plain words, notes,
+  done-when, kind, weight — the five headings every issue reads by), **Filter by labels**,
+  **Search a word**. On any person: **Done** (closes the issue; they go home), **Ask for more
+  context** (a comment the next session answers in plain words), **+ label / − label**.
+  Nothing here can touch code: the token can only read and write issues.
+
+## The token, once
+
+GitHub → Settings → Developer settings → Fine-grained tokens → *Generate new token*: name it
+"changarrito", **repository access: only `meridian-quest`**, **permissions: Issues → Read and
+write**, nothing else, expiry 30 days. Copy it, walk to la ventanilla, press **Sign in**,
+paste. To revoke: delete the token on GitHub; the town notices on its next write.
 
 ## What it is not
 

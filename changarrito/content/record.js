@@ -22,9 +22,13 @@ const RECORDSRC={
   comments:{},    /* issue number → {updated, last:{by,body,at}} — the owner's last comment */
   cycle:{},       /* issue number → which of the three lines you hear next */
   filedAt:"",     /* when the record was last fetched, for "filed as of" */
+  filter:[],      /* labels the street is narrowed to (empty = everyone); the rest go to the board */
+  search:"",      /* a word the street is narrowed to (empty = everyone) */
+  busy:false,
   every:5*60*1000,
   boot(){
     try{this.cycle=JSON.parse(localStorage.getItem(SK("cycle"))||"{}")||{};}catch(e){this.cycle={};}
+    try{const f=JSON.parse(localStorage.getItem(SK("filter"))||"null");if(f){this.filter=f.labels||[];this.search=f.search||"";}}catch(e){}
     const v=WORLDS[this.world]&&WORLDS[this.world].npcs.find(n=>n.npc==="ventanilla");
     if(v)v.doc="window"; /* the clerk hands you the city's record */
     this.refresh();
@@ -96,6 +100,61 @@ const RECORDSRC={
       this.comments[i.n]={updated:i.updated,last:last?{body:this.clean(last.body,1500),at:String(last.created_at||"").slice(0,10)}:null};
     }
   },
+  /* ---------- Part 3: the town writes. A token typed once, kept under the town's prefix, never
+     in a save, never in a sheet. Every write goes through one door and refreshes the street. ---------- */
+  token(){try{return localStorage.getItem(SK("token"))||"";}catch(e){return "";}},
+  signIn(t){const v=String(t||"").trim();if(!v)return false;try{localStorage.setItem(SK("token"),v);}catch(e){return false;}return true;},
+  signOut(){try{localStorage.removeItem(SK("token"));}catch(e){}},
+  say(en,es){toast("💬 "+(lang==="es"?es:en),3200);},
+  async write(method,path,body){
+    const t=this.token();
+    if(!t){this.say("Sign in at la ventanilla's window first — the town cannot write without your token.","Primero identifícate en la ventanilla — el pueblo no puede escribir sin tu token.");return null;}
+    if(this.busy)return null;this.busy=true;
+    try{
+      const r=await fetch(this.api(path),{method,headers:{Accept:"application/vnd.github+json","Content-Type":"application/json",Authorization:"Bearer "+t},body:body===undefined?undefined:JSON.stringify(body)});
+      if(r.status===401||r.status===403){this.say("The token was refused ("+r.status+"). Sign in again with a token for this repo.","El token fue rechazado ("+r.status+"). Identifícate otra vez con un token para este repo.");return null;}
+      if(!r.ok){this.say("The city refused it ("+r.status+").","La ciudad lo rechazó ("+r.status+").");return null;}
+      const data=r.status===204?{}:await r.json().catch(()=>({}));
+      try{["issues","pulls"].forEach(k=>localStorage.removeItem(SK(k)));}catch(e){} /* the next read is fresh */
+      await this.refresh();
+      return data;
+    }catch(e){this.say("No network — nothing was written.","Sin red — no se escribió nada.");return null;}
+    finally{this.busy=false;}
+  },
+  /* Done: the issue closes; the person goes home on the refresh */
+  async done(n){const d=await this.write("PATCH","/issues/"+n,{state:"closed",state_reason:"completed"});
+    if(d)this.say("Filed as done. #"+n+" goes home.","Archivado como hecho. #"+n+" se va a su casa.");return d;},
+  /* Ask for more context: one comment; the next session answers in plain words */
+  async askMore(n){const d=await this.write("POST","/issues/"+n+"/comments",{body:"más contexto, por favor"});
+    if(d)this.say("Asked. The next session will answer in plain words.","Pedido. La siguiente sesión contesta en palabras llanas.");return d;},
+  async addLabel(n,label){const l=this.clean(label,40);if(!l)return null;return this.write("POST","/issues/"+n+"/labels",{labels:[l]});},
+  async removeLabel(n,label){const l=this.clean(label,40);if(!l)return null;return this.write("DELETE","/issues/"+n+"/labels/"+encodeURIComponent(l));},
+  /* File a request: the body template every issue reads by (§10.4). A session fills the two
+     headings marked for it when it first reads the issue */
+  requestBody(f){return "**In plain words:** "+this.clean(f.plain,1500)+"\n\n**Notes:** "+(this.clean(f.notes,1500)||"—")
+    +"\n\n**Questions to consider:** _(a session fills this when it first reads the issue)_"
+    +"\n\n**Areas affected:** _(a session fills this when it first reads the issue)_"
+    +"\n\n**Done when:** "+(this.clean(f.done,600)||"—")+"\n\nFiled from El Changarrito.";},
+  async file(f){const title=this.clean(f.title,120);if(!title){this.say("A request needs a title.","Una petición necesita título.");return null;}
+    const labels=["tier: "+(["high","normal","low"].includes(f.tier)?f.tier:"normal"),["ask","decision","bug"].includes(f.kind)?f.kind:"ask"];
+    const d=await this.write("POST","/issues",{title,body:this.requestBody(f),labels});
+    if(d&&d.number)this.say("Filed as #"+d.number+". They will be on the street shortly.","Archivado como #"+d.number+". Pronto estarán en la calle.");return d;},
+  /* the form, as prompts — one question at a time, the interview's shape without its machinery */
+  ask(q){const v=window.prompt(q);return v===null?null:String(v);},
+  fileByPrompt(){const es=lang==="es";
+    const title=this.ask(es?"Título de la petición (corto):":"Title of the request (short):");if(title===null)return;
+    const plain=this.ask(es?"En palabras llanas — qué es, por qué importa:":"In plain words — what this is, why it matters:");if(plain===null)return;
+    const notes=this.ask(es?"Notas (opcional):":"Notes (optional):");if(notes===null)return;
+    const done=this.ask(es?"Está hecho cuando…:":"Done when…:");if(done===null)return;
+    const kind=this.ask(es?"Tipo: ask / decision / bug":"Kind: ask / decision / bug")||"ask";
+    const tier=this.ask(es?"Peso: high / normal / low":"Weight: high / normal / low")||"normal";
+    this.file({title,plain,notes,done,kind:kind.trim().toLowerCase(),tier:tier.trim().toLowerCase()});},
+  /* filter and search: read-only; whoever does not match waits on the board */
+  setFilter(labels,search){this.filter=(labels||[]).map(l=>this.clean(l,40)).filter(Boolean);this.search=this.clean(search,60).toLowerCase();
+    try{localStorage.setItem(SK("filter"),JSON.stringify({labels:this.filter,search:this.search}));}catch(e){}
+    this.load().then(l=>this.place(l));},
+  matches(i){if(this.filter.length&&!this.filter.every(l=>(i.labels||[]).includes(l)))return false;
+    if(this.search&&!((i.title||"")+" "+(i.body||"")).toLowerCase().includes(this.search))return false;return true;},
   tier(i){const L=i.labels||[];return L.includes("tier: high")?"high":L.includes("tier: normal")?"normal":"low";},
   kind(i){const L=i.labels||[];return L.includes("bug")?"bug":L.includes("decision")?"decision":L.includes("ask")?"ask":"other";},
   name(i){return sanName(String(i.title||"").replace(/^[^\p{L}\p{N}]+/u,""))||("#"+i.n);},
@@ -121,7 +180,13 @@ const RECORDSRC={
       self.cycle[i.n]=k+1;try{localStorage.setItem(SK("cycle"),JSON.stringify(self.cycle));}catch(e){}
       const s=[{h:"💬 "+L[k].k},{p:L[k].t},{h:lang==="es"?"El expediente":"The paperwork"}];
       self.paras(i.body).slice(0,14).forEach(p=>s.push({p:p.replace(/[`*_#>]/g,"")}));
-      s.push({kv:[["#",String(i.n)],["labels",(i.labels||[]).join(", ")||"—"],["opened",i.at||"—"],["url",i.url||"—"]]});return s;}};},
+      s.push({kv:[["#",String(i.n)],["labels",(i.labels||[]).join(", ")||"—"],["opened",i.at||"—"],["url",i.url||"—"]]});
+      const es=lang==="es";
+      s.push({btn:es?"✅ Hecho — cerrar #"+i.n:"✅ Done — close #"+i.n,run:()=>self.done(i.n)});
+      s.push({btn:es?"❓ Pídeme más contexto":"❓ Ask for more context",run:()=>self.askMore(i.n)});
+      s.push({btn:es?"🏷️ + etiqueta":"🏷️ + label",run:()=>{const l=self.ask(es?"Etiqueta a añadir:":"Label to add:");if(l)self.addLabel(i.n,l);}});
+      s.push({btn:es?"🏷️ − etiqueta":"🏷️ − label",run:()=>{const l=self.ask(es?"Etiqueta a quitar:":"Label to remove:");if(l)self.removeLabel(i.n,l);}});
+      return s;}};},
   /* la ventanilla's document: the permits, then the count of people and notes. Past tense only */
   windowDoc(){const es=lang==="es",s=[];
     s.push({p:(es?"Archivado al ":"Filed as of ")+(this.filedAt||(es?"— sin fecha —":"— no date —"))+"."});
@@ -131,7 +196,15 @@ const RECORDSRC={
       const mg=p.mergeable===true?(es?"sin conflictos":"no conflicts"):p.mergeable===false?(es?"con conflictos":"conflicts"):"";
       s.push({kv:[["#"+p.n,p.title],[es?"estado":"state",st+(mg?" · "+mg:"")],[es?"presentado":"filed",p.at],["url",p.url]]});});
     s.push({h:es?"La calle":"The street"});
-    s.push({p:(es?"Hay ":"There are ")+this.people.length+(es?" persona(s) en la calle y ":" person(s) on the street and ")+this.notesList.length+(es?" nota(s) en el tablero.":" note(s) on the board.")});
+    s.push({p:(es?"Hay ":"There are ")+this.people.length+(es?" persona(s) en la calle y ":" person(s) on the street and ")+this.notesList.length+(es?" nota(s) en el tablero.":" note(s) on the board.")
+      +(this.filter.length||this.search?(es?" Filtro: ":" Filter: ")+[...this.filter,this.search?"“"+this.search+"”":""].filter(Boolean).join(", ")+".":"")});
+    const self=this;
+    s.push({h:es?"Trámites":"At the window"});
+    s.push({p:this.token()?(es?"Identificado. El pueblo puede escribir.":"Signed in. The town can write."):(es?"Sin identificar. El pueblo solo lee. Un token de GitHub para este repo (issues: write), escrito una vez, se queda en este navegador y en ningún otro lado.":"Not signed in. The town only reads. A GitHub token for this repo (issues: write), typed once, stays in this browser and nowhere else.")});
+    s.push({btn:this.token()?(es?"🔑 Salir":"🔑 Sign out"):(es?"🔑 Identificarme":"🔑 Sign in"),run:()=>{if(self.token()){self.signOut();self.say("Signed out.","Sesión cerrada.");}else{const t=self.ask(es?"Pega tu token de GitHub (solo issues: write, 30 días):":"Paste your GitHub token (issues: write only, 30 days):");if(t&&self.signIn(t))self.say("Signed in. Nothing else was stored.","Identificado. No se guardó nada más.");}docOpen("window");}});
+    s.push({btn:es?"📝 Presentar una petición":"📝 File a request",run:()=>self.fileByPrompt()});
+    s.push({btn:es?"🔍 Filtrar por etiquetas":"🔍 Filter by labels",run:()=>{const v=self.ask(es?"Etiquetas, separadas por coma (vacío = todos):":"Labels, comma-separated (empty = everyone):");if(v!==null){self.setFilter(v.split(",").map(x=>x.trim()).filter(Boolean),self.search);docOpen("window");}}});
+    s.push({btn:es?"🔎 Buscar una palabra":"🔎 Search a word",run:()=>{const v=self.ask(es?"Palabra (vacío = todos):":"Word (empty = everyone):");if(v!==null){self.setFilter(self.filter,v);docOpen("window");}}});
     return s;},
   /* the board: the small things, pinned */
   boardDoc(){const es=lang==="es",s=[];
@@ -140,10 +213,11 @@ const RECORDSRC={
     return s;},
   place(list){
     const w=WORLDS[this.world];if(!w)return;
-    const by={high:[],normal:[],low:[]};(list||[]).forEach(i=>by[this.tier(i)].push(i));
+    const by={high:[],normal:[],low:[]},aside=[];
+    (list||[]).forEach(i=>{if(this.matches(i))by[this.tier(i)].push(i);else aside.push(i);});
     const people=by.high.concat(by.normal).slice(0,this.cap);
     this.people=people;
-    this.notesList=by.low.concat(by.high.concat(by.normal).slice(this.cap));
+    this.notesList=by.low.concat(by.high.concat(by.normal).slice(this.cap)).concat(aside); /* whoever is not on the street is on the board */
     this.notes=this.notesList.length;
     /* who left: a closed issue's person goes home and the tile comes back */
     Object.keys(this.placed).forEach(n=>{if(!people.some(i=>String(i.n)===n)){removeChill(this.placed[n]);delete this.placed[n];}});
