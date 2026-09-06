@@ -109,6 +109,17 @@ const { chromium } = require('playwright-core');
     if (!wd.some(s => s.kv && s.kv.some(r => r[0] === '#37'))) problems.push('the window does not list the permit');
     const bd = docSections('board'); if (!bd.length) problems.push('the board does not build');
     RECORDSRC.place([]);
+    // ---- ch-v7: el pregonero walks the street with the three lines (owner: "its hard to
+    // remember the command for a git pull — can you have another character walk around with it?") ----
+    { const c = WORLDS.st.npcs.find(n => n.npc === 'pregonero');
+      if (!c) problems.push('el pregonero is not on the street');
+      else { if (!wanders(c)) problems.push('el pregonero does not walk (roams)');
+        if (!hasSay(c)) problems.push('el pregonero wears no mark');
+        if (c.doc !== 'how') problems.push("el pregonero carries the wrong sheet ('" + c.doc + "')");
+        if (WORLDS.st.grid[c.y][c.x] !== 'N') problems.push('his tile is not a person tile');
+        const how = docSections('how') || [], text = JSON.stringify(how);
+        ['cd ~/code/meridian-quest', 'git pull', 'python3 -m http.server 8765 --bind 127.0.0.1', '127.0.0.1:8765/changarrito', GAMEV].forEach(k => { if (!text.includes(k)) problems.push('the how-to sheet lacks: ' + k); });
+        const md = docMarkdown('how'); if (!/git pull/.test(md)) problems.push('Copy would not carry git pull'); } }
     // ---- 3: la ventanilla behind her window; the reader's button; the writes ----
     if (!(v && v.y === 0 && v.x === 9)) problems.push('la ventanilla is not in the facade row at (9,0)');
     if (v && SOLID.has(WORLDS.st.grid[1][9])) problems.push('the tile in front of her window is not walkable');

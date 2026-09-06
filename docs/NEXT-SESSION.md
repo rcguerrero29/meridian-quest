@@ -5,7 +5,7 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-05)
 
-**Deployed:** whatever `CACHE` in `sw.js` says — `mq-v69` at the time of writing (the `win` seam: la ventanilla behind a real counter in every camera, `ch-v4`; the reader's Comment button and sign-in line; `ch-v5` town-only: the key's date, the days-left line, the make-a-new-token button; `ch-v6` town-only: signed reads, a write keeps the last good copy, the rate-limit line, Clear filter and search) — before that `mq-v68` (the `ANIMALS` seam, #38; regression R1/R5/R8) and `mq-v67` (Parts 2a, 2b and 3 of El
+**Deployed:** whatever `CACHE` in `sw.js` says — `mq-v70` at the time of writing (`roams`: a document-carrier may walk; `ch-v7` el pregonero, the crier with the three lines) — before that `mq-v69` (the `win` seam: la ventanilla behind a real counter in every camera, `ch-v4`; the reader's Comment button and sign-in line; `ch-v5` town-only: the key's date, the days-left line, the make-a-new-token button; `ch-v6` town-only: signed reads, a write keeps the last good copy, the rate-limit line, Clear filter and search) — before that `mq-v68` (the `ANIMALS` seam, #38; regression R1/R5/R8) and `mq-v67` (Parts 2a, 2b and 3 of El
 Changarrito: the town at `changarrito/`, run from localhost — street with faces, la ventanilla behind
 her window with the permits, the board, the park, Sonny, three lines per person; and the town writes:
 token in the browser only, Done, ask for more context, file a request with the five headings, labels,

@@ -2874,6 +2874,10 @@ const CANDIDATES = [
     const r1 = await page.evaluate(() => {
       const problems = [];
       if (typeof ANIMALS !== 'undefined') problems.push('Meridian declares ANIMALS — its animals are the engine defaults by design');
+      // mq-v70: `roams` lets a document-carrier walk (the town's crier). No Meridian station says
+      // it, so every person with a document stays where the map put them, as before.
+      Object.entries(WORLDS).forEach(([id, w]) => w.npcs.forEach(n => { if (n.roams) problems.push(`Meridian station ${n.npc} in ${id} roams — the seam is the town's, not Meridian's`);
+        if (n.doc && wanders(n)) problems.push(`Meridian's ${n.npc} carries a document and wanders — a person you look for must be where you left them`); }));
       const want = { dog: ['hq', 12, 5], cat: ['lc', 16, 9], pig: ['st', 4, 1], loro: ['st', 17, 5] };
       Object.entries(want).forEach(([k, [wid, x, y]]) => {
         const a = ANI(k); if (!a || a.world !== wid || a.x !== x || a.y !== y) problems.push(`animal ${k} default moved: ${JSON.stringify(a)}`);

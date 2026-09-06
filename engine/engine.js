@@ -42,7 +42,9 @@ const isSolidAt=(id,x,y)=>{const w=WORLDS[id];return !w||x<0||y<0||x>=w.W||y>=w.
    onto the tile you are standing on, and holds still while you are beside them so a
    conversation is never a chase. */
 const WANDER_R=3, WANDER_MS=420;
-function wanders(n){return !!n&&!n.doc&&(!n.q||!n.q.length)&&
+/* `roams:true` on a station lets a person who carries a document walk anyway — a crier with
+   the news, not a clerk you have to find at her window. No Meridian station says it. */
+function wanders(n){return !!n&&(!n.doc||n.roams)&&(!n.q||!n.q.length)&&
   !(typeof roomHosts!=="undefined"&&roomHosts&&roomHosts[n.npc]);}
 function wanderInit(){Object.values(WORLDS).forEach(w=>w.npcs.forEach(n=>{
   n.fx=n.x;n.fy=n.y;n.hx=n.x;n.hy=n.y;n.wnext=0;n.mv=null;n.mt=0;n.face=1;}));}

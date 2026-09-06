@@ -22,7 +22,7 @@ const WORLD_DEFS={
      "##########E#########"],
  st:["BBQQQQQBBvBBBBEBBBZZZZBBIIIIB2",
      "..............................",
-     "..............................",
+     "...........c..................",
      ".g.........g..........g.......",
      "..............................",
      "..b.........P........b........",
@@ -57,7 +57,7 @@ const PORTALS={hq:{"E":{to:"st",x:14,y:1,dir:"down"}},
    `win:"B"` says she works INSIDE city hall's wall: the engine draws B's counter in front of
    her and B's roof over her (ch-v3 had her standing in a hole in the facade — owner,
    2026-09-06: "how did this pass a test for a teller?"). */
-const WNPC={hq:{g:{npc:"guero",q:[0]}},st:{v:{npc:"ventanilla",q:[],chat:1,win:"B"}},pk:{}};
+const WNPC={hq:{g:{npc:"guero",q:[0]}},st:{v:{npc:"ventanilla",q:[],chat:1,win:"B"},c:{npc:"pregonero",q:[],chat:1,doc:"how",roams:true}},pk:{}};
 /* the pack's own solid glyphs (the engine draws them; the pack says they are walls) */
 const SOLIDX="~9ZI";
 const DOORS="+E2";
