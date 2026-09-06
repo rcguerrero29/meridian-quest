@@ -476,11 +476,26 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
    the screen and the hero (drawn through walls) read as standing ON it, while Sonny, drawn in the
    scene, was hidden behind it. Now that wall is simply not there while it is in the way. Walls,
    facades, lintels, doors and the window pieces cut; treads, rails, props and decor do not. */
+/* #65 (owner: "make the doors just like minimized, looks weird otherwise but better than before"):
+   a wall or door between the camera and you is not cut away — it is MINIMIZED: the piece
+   itself is hidden and a knee-high STUB in its top colour stands in its footprint, the way
+   The Sims drops its walls, so the room keeps its shape and you keep your view. What hangs
+   over an opening (a lintel, the strip over a window) has nothing to stand on once its wall
+   is a stub, so that alone is hidden. Everything stands back up the moment it is out of the
+   way. The stub is a companion mesh (userData.stub), so the wall a test inspects is the wall
+   as built. */
+const T3STUB=0.28;
 function t3Cutaway(){const c=T3.cam.position,hx=fx+0.5,hz=fy+0.5;
   const vx=hx-c.x,vz=hz-c.z,L=Math.hypot(vx,vz)||1,ux=vx/L,uz=vz/L;
-  T3.group.children.forEach(o=>{const u=o.userData;if(!u||!(u.wall!==undefined||u.lintel||u.door||u.counter||u.winTop||u.winBack))return;
+  T3.group.children.slice().forEach(o=>{const u=o.userData;if(!u||u.stub||!(u.wall!==undefined||u.lintel||u.door||u.counter||u.winTop||u.winBack))return;
     const dx=o.position.x-c.x,dz=o.position.z-c.z,along=dx*ux+dz*uz,side=Math.abs(dz*ux-dx*uz);
-    o.visible=!(along>0&&along<L-0.6&&side<2.6);});}
+    const cut=along>0&&along<L-0.6&&side<2.6;
+    if(u.lintel||u.winTop){o.visible=!cut;return;}
+    if(!u.stub3){const g=o.geometry.parameters||{},m=o.material,top=Array.isArray(m)?m[2]:m;
+      const st=new THREE.Mesh(new THREE.BoxGeometry(g.width||1,T3STUB,g.depth||1),top);
+      st.position.set(o.position.x,o.position.y-(g.height||1)/2+T3STUB/2,o.position.z);st.rotation.y=o.rotation.y;
+      st.userData={stub:true,x:u.x,y:u.y};st.visible=false;T3.group.add(st);u.stub3=st;}
+    o.visible=!cut;u.stub3.visible=cut;});}
 function t3Glow(){ /* the light under every door breathes — same clock as the 2D art */
   const a=0.25+0.2*Math.sin(Date.now()/380);
   T3.glows.forEach(m=>{m.opacity=a;});
