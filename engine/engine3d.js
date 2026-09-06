@@ -228,6 +228,24 @@ function t3Build(key){
       T3.tintables.push(s.material);grp.add(s);
       continue;
     }
+    const wg=winAt(w,x,y);
+    if(wg){ /* a person at work inside this wall: back slab, counter toward the street, roof strip
+               over the opening — so she is seen behind her counter, not standing in a hole */
+      const h=wallH(wg),{side,top,face}=wallMats(wg);
+      const open=[[0,1],[0,-1],[1,0],[-1,0]].find(([dx,dz])=>!sol(x+dx,y+dz))||[0,1]; /* the street side */
+      const [dx,dz]=open,ew=dx!==0; /* ew: the opening faces east or west, so the pieces turn */
+      /* the pieces are thin and hug the street edge: a deep counter or a roof slab over her
+         hid her from the raised camera (checked in shots, 2026-09-06) — the camera looks down,
+         so anything above or in front of her must be shallow */
+      const piece=(ht,dep,off,yc,tag,front)=>{
+        const m=[side,side,top,side,side,side];if(front)m[ew?(dx>0?0:1):(dz>0?4:5)]=front;
+        const b=new THREE.Mesh(new THREE.BoxGeometry(ew?dep:1,ht,ew?1:dep),m);
+        b.position.set(cx+dx*off,yc,cz+dz*off);b.userData={[tag]:true,g:wg,x,y};grp.add(b);};
+      piece(h,0.3,-0.35,h/2,"winBack",face);        /* the back wall: full height, wearing the storefront */
+      piece(0.46,0.16,0.42,0.23,"counter");          /* the counter: waist high, at the street edge */
+      if(h>1.02)piece(h-1,0.16,0.42,(1+h)/2,"winTop"); /* the roof line, a thin strip over the opening */
+      continue;
+    }
     if(!SOLID.has(gch))continue;
     const m=TILES[gch]||{lift:7,kind:"prop"},kd=m.kind;
     if(kd==="water")continue; /* painted into the ground */

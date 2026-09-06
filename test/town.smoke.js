@@ -53,7 +53,9 @@ const { chromium } = require('playwright-core');
     if (p.some(n => wanders(n))) problems.push('a placed person wanders');
     if (p.some(n => /</.test(npcName(n.npc)))) problems.push('a name kept markup: ' + p.map(n => npcName(n.npc)).join(','));
     const secs = docSections(p[0].doc);
-    if (!secs || secs.filter(s => s.p).length !== 3) problems.push('document did not split the body into paragraphs (the line, then two)');
+    if (!secs || secs.filter(s => s.p).length !== 4) problems.push('document did not split the body into paragraphs (the line, then two, then the sign-in note)');
+    if (!secs || !secs.some(s => s.p && /sign in|ventanilla/i.test(s.p))) problems.push('the reader does not say where to sign in');
+    if (!secs || !secs.some(s => s.btn && /Comment/.test(s.btn))) problems.push('the reader has no Comment button');
     if (!secs.some(s => s.kv)) problems.push('document has no facts row');
     // a closed issue: its person leaves and the tile comes back
     RECORDSRC.place(fx.slice(0, 2));
@@ -110,6 +112,21 @@ const { chromium } = require('playwright-core');
     // ---- 3: la ventanilla behind her window; the reader's button; the writes ----
     if (!(v && v.y === 0 && v.x === 9)) problems.push('la ventanilla is not in the facade row at (9,0)');
     if (v && SOLID.has(WORLDS.st.grid[1][9])) problems.push('the tile in front of her window is not walkable');
+    // ch-v4: she works INSIDE city hall's wall. ch-v3 passed with her standing in a hole in the
+    // facade (owner: "how did this pass a test for a teller?") because only her coordinates were checked.
+    if (v && v.win !== 'B') problems.push("la ventanilla's station does not say which wall she works in (win)");
+    if (v && winAt(WORLDS.st, 9, 0) !== 'B') problems.push('the engine does not see her window at (9,0)');
+    if (winAt(WORLDS.st, 9, 1)) problems.push('the street tile in front of her counts as a window');
+    { const b3 = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
+      camSet('3d'); world = 'st'; px = 9; py = 2; moving = false; held = null; /* fx is a fixture here; draw3d reads px/py */
+      if (!draw3d() || T3.fail) problems.push('3D did not render headless — her window could not be checked');
+      else { const at = t => T3.group.children.filter(o => o.userData && o.userData[t] && o.userData.x === 9 && o.userData.y === 0);
+        if (at('counter').length !== 1) problems.push('no counter in front of la ventanilla in 3D');
+        if (at('winBack').length !== 1) problems.push('no wall behind la ventanilla in 3D — she stands in a hole');
+        if (at('winTop').length !== 1) problems.push('no roof over la ventanilla in 3D');
+        const c = at('counter')[0]; if (c && !(c.position.z > 0.5 && c.geometry.parameters.height <= 0.55)) problems.push('the counter is not waist-high on the street side');
+        if (T3.group.children.some(o => o.userData && o.userData.wall === false && o.userData.g === 'B' && o.userData.x === 9 && o.userData.y === 0)) problems.push('a full facade box still stands on her tile'); }
+      T3.yaw = b3.yaw; camSet(b3.cam); world = b3.world; px = b3.px; py = b3.py; }
     let ran = 0; docOpen({ title: { en: 't' }, build: () => [{ btn: 'press', run: () => { ran++; } }] });
     const btn = document.querySelector('#docBody button.dbtn');
     if (!btn) problems.push('the reader did not render a button section'); else { btn.click(); if (ran !== 1) problems.push('the button did not run its content'); }
@@ -128,6 +145,11 @@ const { chromium } = require('playwright-core');
       calls.length = 0; await RECORDSRC.askMore(7);
       const w2 = calls.find(c => c.opt.method === 'POST');
       if (!w2 || !/\/issues\/7\/comments$/.test(w2.url) || !/contexto/.test(w2.opt.body)) problems.push('ask-for-more-context did not comment');
+      calls.length = 0; await RECORDSRC.comment(7, '  hola, Bearto  ');
+      const w2b = calls.find(c => c.opt.method === 'POST');
+      if (!w2b || !/\/issues\/7\/comments$/.test(w2b.url)) problems.push('comment did not POST to /issues/7/comments');
+      else { const b = JSON.parse(w2b.opt.body); if (b.body !== 'hola, Bearto') problems.push('comment body was not trimmed: ' + JSON.stringify(b.body)); }
+      calls.length = 0; if ((await RECORDSRC.comment(7, '   ')) !== null || calls.length) problems.push('an empty comment went out');
       calls.length = 0; await RECORDSRC.file({ title: 'A <b>thing</b>', plain: 'Why it matters.', notes: 'n', done: 'when', kind: 'bug', tier: 'high' });
       const w3 = calls.find(c => c.opt.method === 'POST');
       if (!w3 || !/\/issues$/.test(w3.url)) problems.push('file-a-request did not POST /issues');

@@ -56,8 +56,17 @@ network. Never put a tunnel in front of it. Nothing links here from the public g
   under the town's own key and nowhere else), **File a request** (title, plain words, notes,
   done-when, kind, weight — the five headings every issue reads by), **Filter by labels**,
   **Search a word**. On any person: **Done** (closes the issue; they go home), **Ask for more
-  context** (a comment the next session answers in plain words), **+ label / − label**.
+  context** (a comment the next session answers in plain words), **Comment in my own words**
+  (a comment you type), **+ label / − label**.
   Nothing here can touch code: the token can only read and write issues.
+
+## What needs the token, and what does not
+
+Nothing you *read* needs it: walking, talking, the paperwork, la ventanilla's permits, the
+board, **Filter by labels** and **Search a word** all use the public API, signed out. Only the
+buttons that *change* GitHub need it — Done, Ask for more context, **Comment in my own words**,
++ label / − label, File a request. Press one signed out and the town says so and does nothing.
+Every person's card says which state you are in.
 
 ## The token, once
 
@@ -65,6 +74,15 @@ GitHub → Settings → Developer settings → Fine-grained tokens → *Generate
 "changarrito", **repository access: only `meridian-quest`**, **permissions: Issues → Read and
 write**, nothing else, expiry 30 days. Copy it, walk to la ventanilla, press **Sign in**,
 paste. To revoke: delete the token on GitHub; the town notices on its next write.
+
+**The risks, plainly.** The token is a key to *issues on this one repo* and nothing else: whoever
+holds it can open, comment on, label and close issues as you — not read private code, not push,
+not touch other repos, not change settings. It lives in this browser's storage under the town's
+own key; it is never written to a save, a sheet, the repo, or a request. It expires in 30 days
+on its own. The two ways to lose it are someone at your unlocked laptop and a browser extension
+that reads page storage; the cure for either is deleting the token on GitHub, which takes ten
+seconds and costs nothing. Never paste it anywhere but la ventanilla's prompt, and never make one
+with more permissions than *Issues: read and write*.
 
 ## What it is not
 
