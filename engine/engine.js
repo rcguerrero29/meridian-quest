@@ -27,7 +27,7 @@ const TS=32;
 /* "C" (the traffic cone) left this set on 2026-09-04. Owner: "I think a cone shouldnt make me
    have to go around it. i should be able to kick it." A cone is not a wall — it is a thing one
    person moves with a foot. It is a `stand` tile now: walkable, still drawn standing. */
-const SOLID=new Set(["#","D","K","P","B","F","G","X","T","W","V","A","U","Q","J"]);
+const SOLID=new Set(["#","D","K","P","B","F","G","X","T","W","V","A","U","Q","J","⊓","◺"]); /* ⊓ the stair mass, ◺ the rail — the engine's own flight (#4) */
 /* the content seam: a pack adds its own solid glyphs and declares which are doors */
 (typeof SOLIDX!=="undefined"?SOLIDX:"").split("").forEach(c=>SOLID.add(c));
 const DOORSET=new Set((typeof DOORS!=="undefined"?DOORS:"+ELO").split(""));
@@ -603,8 +603,10 @@ TILEDRAW["1"]=rc=>{const{sx,sy}=rc; /* STAIRS, from above. Four flat grey bars b
       which are the same shape: three glyphs, one shape language, three meanings. A flight reads
       in PLAN from three things and none of them is stripes: stringers that CONVERGE (two lines
       going away from you), a hard NOSING shadow under every tread, and a dark HEAD at the far
-      end — the opening you climb into. The flight rises NORTH, up-screen: one convention for the
-      whole city, the way every facade faces south. */
+      end — the opening you climb into. This flight rises NORTH, up-screen. Since 2026-09-06 the
+      engine also has a flight that runs EAST along a wall — ⊓ ≡ ▲ ▼ ◺ below (#4): a mass you
+      walk beside, treads you walk on, a head that is the portal. Two conventions, each
+      declared by its glyph; a pack picks one per flight. */
   ctx.fillStyle="rgba(15,12,20,.22)";ctx.fillRect(sx+4,sy+29.5,24,2);        /* the bottom step casts onto the floor */
   ctx.fillStyle="#241F2E";ctx.fillRect(sx+8,sy+3,16,7);                      /* HEAD — the dark opening at the top */
   const TR=["#C6BEAA","#B9B19D","#ACA490","#9F9783","#928A76"];              /* light at your feet, dark under the floor above */
@@ -811,6 +813,38 @@ TILESIDE["K"]=rc=>{const{sx,sy,x,y}=rc; /* a counter from the front. A coffee ma
         ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+14,sy+10,5,4);ctx.fillRect(sx+19,sy+11,1.5,2);}
       else{ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+7,sy+10,5,4);ctx.fillRect(sx+12,sy+11,1.5,2);   /* a cup */
         ctx.fillStyle="#C9B7A0";ctx.fillRect(sx+19,sy+9,6,5);ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+20,sy+7,4,3);}};
+/* ---------- the flight that runs EAST (#4) ----------
+   ⊓ is drawn for the SOUTH face of the mass: the flight in profile, rising left to right. A run
+   of ⊓ tiles is one flight — each tile finds where it sits in its run (the tiles west of it on
+   the same row) and draws its two steps at the right height, so four tiles read as one flight of
+   eight steps, not four little staircases. */
+TILEDRAW["⊓"]=rc=>{const{sx,sy,x,y}=rc;const w=CW(),row=(w&&w.rows&&w.rows[y])||"";
+  let i=0;while(x-i-1>=0&&row[x-i-1]==="⊓")i++;let L=i+1;while(x-i+L<row.length&&row[x-i+L]==="⊓")L++;
+  const n=L*2,k0=i*2,rise=22/n,top=k=>sy+28-(k+1)*rise;                  /* two steps per tile; total rise 22px over the run */
+  ctx.fillStyle="#6B6470";ctx.fillRect(sx,sy,TS,TS);                       /* the wall of the stair hall */
+  ctx.fillStyle="#4E4854";ctx.beginPath();ctx.moveTo(sx,sy+TS);ctx.lineTo(sx,top(k0)+rise);ctx.lineTo(sx+TS,top(k0+1));ctx.lineTo(sx+TS,sy+TS);ctx.closePath();ctx.fill(); /* the stringer under the flight */
+  for(let st=0;st<2;st++){const k=k0+st,x0=sx+st*16,ty=top(k);
+    ctx.fillStyle="#9F9783";ctx.fillRect(x0,ty,2.5,rise);                  /* the riser up to this tread */
+    ctx.fillStyle="#C6BEAA";ctx.fillRect(x0,ty,16,2.4);                    /* the tread's edge */
+    ctx.fillStyle="rgba(15,12,20,.28)";ctx.fillRect(x0+2.5,ty+2.4,13.5,1.3);} /* the nosing shadow */
+  ctx.strokeStyle="#3A3140";ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(sx,top(k0)-7);ctx.lineTo(sx+TS,top(k0+2)-7);ctx.stroke(); /* the handrail */
+  ctx.fillStyle="#3A3140";ctx.fillRect(sx+7,top(k0)-7,1.5,7);ctx.fillRect(sx+23,top(k0+1)-7,1.5,7);};   /* two balusters */
+TILEDRAW["≡"]=rc=>{const{sx,sy}=rc; /* a tread from above, on a flight that runs east: two risers a tile, the nosing shadow on the east edge */
+  ctx.fillStyle="#C6BEAA";ctx.fillRect(sx+1,sy+3,14,26);ctx.fillRect(sx+17,sy+3,14,26);
+  ctx.fillStyle="rgba(255,255,255,.25)";ctx.fillRect(sx+1,sy+3,1.5,26);ctx.fillRect(sx+17,sy+3,1.5,26);
+  ctx.fillStyle="rgba(15,12,20,.28)";ctx.fillRect(sx+13,sy+3,2,26);ctx.fillRect(sx+29,sy+3,2,26);};
+TILEDRAW["▲"]=rc=>{const{sx,sy}=rc; /* the head of the flight: the dark opening you climb into, and the way it goes */
+  ctx.fillStyle="#241F2E";ctx.fillRect(sx+2,sy+2,28,28);
+  ctx.fillStyle="#C6BEAA";ctx.beginPath();ctx.moveTo(sx+16,sy+9);ctx.lineTo(sx+24,sy+20);ctx.lineTo(sx+8,sy+20);ctx.closePath();ctx.fill();};
+TILEDRAW["▼"]=rc=>{const{sx,sy}=rc; /* the way DOWN: a light landing and a dark chevron — the one glyph that says a flight descends */
+  ctx.fillStyle="#C6BEAA";ctx.fillRect(sx+2,sy+2,28,28);ctx.fillStyle="rgba(15,12,20,.22)";ctx.fillRect(sx+2,sy+28,28,2);
+  ctx.fillStyle="#241F2E";ctx.beginPath();ctx.moveTo(sx+8,sy+11);ctx.lineTo(sx+24,sy+11);ctx.lineTo(sx+16,sy+22);ctx.closePath();ctx.fill();};
+TILEDRAW["◺"]=rc=>{const{sx,sy}=rc; /* the rail from above: a handrail along the well, four balusters */
+  ctx.fillStyle="#6E5334";[3,11,19,27].forEach(px=>ctx.fillRect(sx+px,sy+11,3,8));
+  ctx.fillStyle="#8A6A3E";ctx.fillRect(sx,sy+13,TS,3);ctx.fillStyle="rgba(255,255,255,.2)";ctx.fillRect(sx,sy+13,TS,1);};
+TILESIDE["◺"]=rc=>{const{sx,sy}=rc; /* the rail in elevation: posts and a handrail, knee-high, see-through */
+  ctx.fillStyle="#6E5334";[3,11,19,27].forEach(px=>ctx.fillRect(sx+px,sy+10,2.5,22));
+  ctx.fillStyle="#8A6A3E";ctx.fillRect(sx,sy+9,TS,3);ctx.fillStyle="rgba(255,255,255,.2)";ctx.fillRect(sx,sy+9,TS,1);};
 TILESIDE["1"]=rc=>{const{sx,sy}=rc; /* STAIRS in profile — the stepped diagonal, a silhouette
       nothing else in this city has. It rises to the RIGHT and always will, at every camera stop:
       facing is a screen-space fact (t3ScreenFace), and a flight turned to match the map would
@@ -883,6 +917,11 @@ Object.assign(TILES,{
      that lived in engine3d.js — engine code naming a pack's glyphs is the portability law
      wearing a different hat. */
   "1":{lift:9,kind:"stair",stand:true},
+  /* the flight that runs EAST (#4, 2026-09-06): ⊓ the stair mass — a wall-height body that wears
+     the flight in profile, one drawing per tile of its run (`vary`); ≡ a tread you walk on; ▲ the
+     head, a portal up; ▼ the way down, a portal; ◺ the rail round the well upstairs, knee-high */
+  "⊓":{lift:13,kind:"wall",vary:true},"≡":{lift:0,kind:"stair"},"▲":{lift:0,kind:"stair"},"▼":{lift:0,kind:"stair"},
+  "◺":{lift:5,kind:"fence"},
   "3":{lift:8,kind:"gear",stand:true},"4":{lift:8,kind:"gear",stand:true},"5":{lift:8,kind:"gear",stand:true}});
 if(typeof TILEMETA!=="undefined")Object.entries(TILEMETA).forEach(([g,m])=>TILES[g]={...(TILES[g]||{}),...m});
 /* walkable, but drawn standing. `standsUp` also asks whether there IS a side drawing: a tile
@@ -3325,7 +3364,7 @@ $("exCopy").addEventListener("click",()=>{const v=$("exArea").value;
    Tile colours, district labels and the you-are-here dot all come from the content
    pack (MAPCOL / TOWNLBL / MAPDOT). A new business shows up on the plan without a
    line of engine change. */
-const BASECOL={"≈":"#4A4B52","-":"#9A9B9E",".":"#D5D2C6","B":"#5C4A50","Q":"#B0563A","F":"#B0895B","G":"#C98A2D","C":"#E0662B","X":"#E7C25A","P":"#3E7C4F","E":"#E0B45C","L":"#E0B45C","O":"#E0B45C","1":"#8A8474","2":"#E0B45C","Y":"#C0392B","J":"#639C6C","b":"#D77FA8","g":"#9DBB77"};
+const BASECOL={"≈":"#4A4B52","-":"#9A9B9E",".":"#D5D2C6","B":"#5C4A50","Q":"#B0563A","F":"#B0895B","G":"#C98A2D","C":"#E0662B","X":"#E7C25A","P":"#3E7C4F","E":"#E0B45C","L":"#E0B45C","O":"#E0B45C","1":"#8A8474","⊓":"#6B6470","◺":"#8A6A3E","≡":"#B9B19D","▲":"#241F2E","▼":"#C6BEAA","2":"#E0B45C","Y":"#C0392B","J":"#639C6C","b":"#D77FA8","g":"#9DBB77"};
 /* ---------- worldFlags — everything the world is allowed to know about your play ----------
    One place, handed to content: the town plan's labels read it, and so does any decor that
    changes with what you have done. `grade[id]` is 1-3 once you have answered ANYTHING in a

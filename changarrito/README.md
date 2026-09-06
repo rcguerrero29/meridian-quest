@@ -80,6 +80,14 @@ buttons that *change* GitHub need it — Done, Ask for more context, **Comment i
 + label / − label, File a request. Press one signed out and the town says so and does nothing.
 Every person's card says which state you are in.
 
+## The stall has an upstairs (ch-v12)
+
+Walk south from where you wake up: through the door at the bottom of the hall is a stair hall,
+the flight climbs east along the wall, and the dark square at its head takes you up to the loft.
+The loft is bare on purpose; the way down is the light square with the chevron. Coming in from
+the street you land at the foot of the stairs. This is Don Güero's staircase (#4), built here
+first so you can walk it before Meridian's office takes the same four rows.
+
 ## The token, once
 
 GitHub → Settings → Developer settings → Fine-grained tokens → *Generate new token*: name it

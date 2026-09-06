@@ -259,7 +259,11 @@ function t3Build(key){
     const m=TILES[gch]||{lift:7,kind:"prop"},kd=m.kind;
     if(kd==="water")continue; /* painted into the ground */
     if(kd==="wall"||kd==="facade"){
-      const h=wallH(gch),{side,top,face}=wallMats(gch);
+      const h=wallH(gch),wm=wallMats(gch),side=wm.side,top=wm.top;
+      /* `vary`: the glyph draws itself differently per tile (the stair mass finds its place in
+         its run), so its face is baked per tile instead of once per glyph */
+      const vk=gch+"|"+x+"|"+y;
+      const face=m.vary?(wallMat[vk]||(wallMat[vk]=new THREE.MeshLambertMaterial({map:t3Tex(t3BakeGlyph(gch,true,baseOf(gch),false,false,null,x,y))}))):wm.face;
       /* a wall wears its art on all four sides: it runs either way and is seen from any
          of the four camera stops — with art on ±Z only, every north-south wall in HQ was
          a bare slab. A facade keeps plain ends: those are a building's corners, not its

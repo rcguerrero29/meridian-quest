@@ -2,7 +2,7 @@
    street. docs/story/el-changarrito.md. This pack trains no role, carries no curriculum and
    awards no grade that means anything about the player (§7½). */
 const GAMENAME="El Changarrito";
-const GAMEV="ch-v11 · engine mq-v74";   /* the town's own version, and the engine it was built on */
+const GAMEV="ch-v12 · engine mq-v75";   /* the town's own version, and the engine it was built on */
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;
@@ -12,4 +12,4 @@ const STAKES={mode:"none",hearts:3};
    street is the street, the park is the park; dogs befriend people on the street only, since
    the town has no other rooms. The engine reads these instead of assuming Meridian's ids. */
 const PLACES={home:"hq",spawn:[10,11],street:"st",park:"pk",parkIn:[2,6,"right"],parkDog:[3,6],parkDogHome:[8,6],
-  parkAdopt:[[17,4],[19,4],[17,2],[19,2],[16,3],[20,3]],friends:["st"],upstairs:""};
+  parkAdopt:[[17,4],[19,4],[17,2],[19,2],[16,3],[20,3]],friends:["st"],upstairs:"f2"};

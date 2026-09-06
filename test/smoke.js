@@ -2899,6 +2899,13 @@ const CANDIDATES = [
       if (JSON.stringify(PL) !== JSON.stringify(PLDEF)) problems.push('PL drifted from PLDEF with no PLACES declared');
       if (PL.home !== 'hq' || PL.spawn.join() !== '10,11' || PL.street !== 'st' || PL.park !== 'pk' || PL.upstairs !== 'f2') problems.push('the default roles are not Meridian\'s rooms: ' + JSON.stringify(PL));
       if (world !== PL.home && !WORLDS[world]) problems.push('the current world is not a world');
+      // mq-v75 (#4): the engine owns the flight that runs east — five glyphs, drawable — and Meridian
+      // does not lay them yet (the town walks the stair first; Meridian's maps change when the owner signs)
+      ['⊓', '≡', '▲', '▼', '◺'].forEach(g => { if (!TILES[g] || !TILEDRAW[g]) problems.push('the engine lacks the stair glyph ' + g);
+        const c = document.createElement('canvas'); c.width = 32; c.height = 32; const o = ctx; ctx = c.getContext('2d');
+        try { TILEDRAW[g]({ sx: 0, sy: 0, x: 12, y: 13, canopy: () => {} }); if (TILESIDE[g]) TILESIDE[g]({ sx: 0, sy: 0, x: 12, y: 13, canopy: () => {} }); } catch (e) { problems.push('stair glyph ' + g + ' throws: ' + e.message); } finally { ctx = o; }
+        Object.entries(WORLDS).forEach(([id, w]) => { if (w.rows.join('').includes(g)) problems.push("Meridian's " + id + ' already lays ' + g + ' — the town walks the stair first'); }); });
+      if (!SOLID.has('⊓') || !SOLID.has('◺') || SOLID.has('≡') || SOLID.has('▲') || SOLID.has('▼')) problems.push('the stair glyphs have the wrong solidity');
       // mq-v70: `roams` lets a document-carrier walk (the town's crier). No Meridian station says
       // it, so every person with a document stays where the map put them, as before.
       Object.entries(WORLDS).forEach(([id, w]) => w.npcs.forEach(n => { if (n.roams) problems.push(`Meridian station ${n.npc} in ${id} roams — the seam is the town's, not Meridian's`);

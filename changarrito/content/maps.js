@@ -1,6 +1,6 @@
 /* El Changarrito — the stall you wake up in, the one street, and the park.
-   The engine hardcodes the office as "hq" with (10,11) walkable and the street as "st"
-   (NEW-WORLD.md §3); the leash warps to "pk", so the park exists (§9.4). Frederick stands at
+   The roles are declared in config.js (PLACES, #25): the stall is home with (10,11) walkable,
+   the street is "st", the leash warps to "pk", the loft "f2" is upstairs. Frederick stands at
    (12,5) in any hq and the pigeon at (4,1) in any st — both tiles kept walkable.
    The street (§9.1): three storefront faces the engine already draws — Q for asks, Z for
    decisions, I for bugs — city hall (B) with la ventanilla standing IN the facade row at her window — behind the counter, visible, talkable from the street (owner, 2026-09-06: "behind the window but visible"), the stall's door E at
@@ -19,7 +19,30 @@ const WORLD_DEFS={
      "####+###...P...#...#",
      "#......#.......+...#",
      "#......+.......#####",
+     "##########+⊓⊓⊓⊓#####",
+     "#..........≡≡≡▲#####",
+     "#..................#",
      "##########E#########"],
+ /* the loft (#4, ch-v12): bare, the way Meridian's Floor 2 opened — the railed well over the
+    flight, the way down at (10,14), the arrival at (14,14). Built here first so the owner walks
+    the stair before it ships to Meridian. */
+ f2:["####################",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..................#",
+     "#..........◺◺◺.....#",
+     "#.........▼≡≡≡.....#",
+     "#..................#",
+     "####################"],
  st:["BBQQQQQBBvBBBBEBBBZZZZBBIIIIB2",
      "..............................",
      "...........c..................",
@@ -49,8 +72,13 @@ const WORLD_DEFS={
      "F..~~......g.....b.....F",
      "FFF~~FFFFFFFFFFFFFFFFFFF"]
 };
-const PORTALS={hq:{"E":{to:"st",x:14,y:1,dir:"down"}},
-               st:{"E":{to:"hq",x:10,y:12,dir:"up"},"2":{to:"pk",x:1,y:6,dir:"right"}},
+/* la caja de escalera (#4, Don Güero's candidate B, 2026-09-06): the stall grew three rows south —
+   a lobby at the front door, a stair hall behind the door at (10,13), the flight east with its
+   head ▲ at (14,14) the way up; the loft's ▼ at (10,14) the way down. Coming in from the street
+   you land on the landing (10,14), floor behind you, not one step inside the door. */
+const PORTALS={hq:{"E":{to:"st",x:14,y:1,dir:"down"},"▲":{to:"f2",x:14,y:14,dir:"left",mark:"up"}},
+               f2:{"▼":{to:"hq",x:10,y:14,dir:"right"}},
+               st:{"E":{to:"hq",x:10,y:14,dir:"up"},"2":{to:"pk",x:1,y:6,dir:"right"}},
                pk:{"2":{to:"st",x:28,y:1,dir:"down"}}};
 /* who stands where by map letter: Don Güero at his stall; la ventanilla at her window on the
    street (her document is the city's record — content/record.js hands it to her at boot).

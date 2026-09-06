@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v74";
+const GAMEV="mq-v75";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -78,7 +78,7 @@ const GROWTH={
    {id:"gift-li",world:"f2",district:5,tiles:[[5,15,"."],[10,18,"."]],
   say:{en:"Vero's crew went up to the office and took the empty boxes away. That was the gift.",es:"La cuadrilla de Vero subió a la oficina y se llevó las cajas vacías. Ese era el regalo."}},
    {id:"gift-no",world:"f2",district:6,tiles:[[10,17,"▯"]],
-  say:{en:"A file cabinet is standing in your office where the last box was. Nolasco sent it up.",es:"Hay un archivero en tu oficina donde estaba la última caja. Lo mandó Nolasco."}}  /* the file cabinet IS the box by the stairs (BACKLOG §6); it used to land on bare floor and clear the box instead */
+  say:{en:"A file cabinet is standing in your office where the last box was. Nolasco sent it up.",es:"Hay un archivero en tu oficina donde estaba la última caja. Lo mandó Nolasco."}}  /* the file cabinet lands ON the last box Nolasco's crew left at (17,10) — a box becomes a cabinet, nothing clears; it used to land on bare floor and clear the box instead (#4: the stairs are moving, so this no longer says "by the stairs") */
   ],
   /* any attempt at this quest opens the wardrobe — the extra, not the quest */
   wardrobeQuest:15,

@@ -115,6 +115,36 @@ const { chromium } = require('playwright-core');
     if (!wd.some(s => s.kv && s.kv.some(r => r[0] === '#37'))) problems.push('the window does not list the permit');
     const bd = docSections('board'); if (!bd.length) problems.push('the board does not build');
     RECORDSRC.place([]);
+    // ---- ch-v12 (#4): la caja de escalera — the stall grew three rows south; the flight runs east ----
+    { const hq = WORLDS.hq, f2 = WORLDS.f2;
+      if (!(hq.W === 20 && hq.H === 17)) problems.push('the stall is not 20×17: ' + hq.W + '×' + hq.H);
+      if (hq.rows[12] !== '#......+.......#####') problems.push('row 12 of the stall changed — rows 0–12 must be untouched');
+      if (hq.rows[13] !== '##########+⊓⊓⊓⊓#####' || hq.rows[14] !== '#..........≡≡≡▲#####' || hq.rows[15] !== '#..................#' || hq.rows[16] !== '##########E#########') problems.push('the stair hall and lobby rows are not candidate B');
+      if (!f2) problems.push('the stall has no loft (f2)');
+      else { if (!(f2.W === 20 && f2.H === 17)) problems.push('the loft is not 20×17');
+        if (f2.rows[13] !== '#..........◺◺◺.....#' || f2.rows[14] !== '#.........▼≡≡≡.....#') problems.push('the loft has no railed well over the flight'); }
+      if (PL.upstairs !== 'f2') problems.push('PLACES.upstairs is not the loft');
+      const up = PORTALS.hq['▲'], dn = PORTALS.f2 && PORTALS.f2['▼'], inE = PORTALS.st.E;
+      if (!up || up.to !== 'f2' || up.x !== 14 || up.y !== 14 || up.mark !== 'up') problems.push('▲ does not climb to the loft at (14,14) with the up mark');
+      if (!dn || dn.to !== 'hq' || dn.x !== 10 || dn.y !== 14) problems.push('▼ does not come down to the landing (10,14)');
+      if (!inE || inE.to !== 'hq' || inE.x !== 10 || inE.y !== 14) problems.push('coming in from the street does not land on the landing (10,14)');
+      ['⊓', '◺'].forEach(g => { if (!SOLID.has(g)) problems.push(g + ' is not solid'); });
+      ['≡', '▲', '▼'].forEach(g => { if (SOLID.has(g)) problems.push(g + ' is solid — you cannot walk the flight'); });
+      ['⊓', '≡', '▲', '▼', '◺'].forEach(g => { if (!TILES[g] || !TILEDRAW[g]) problems.push(g + ' has no tile or no drawing'); });
+      if (!TILESIDE['◺']) problems.push('the rail has no elevation drawing');
+      if (SOLID.has(hq.grid[5][12])) problems.push('Frederick lost his tile');
+      // in 3D: four mass boxes wearing four DIFFERENT faces (one flight, not four little staircases), the rail as a panel, the office door with its lintel
+      const b3 = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
+      camSet('3d'); world = 'hq'; px = 10; py = 15; moving = false; held = null;
+      if (!draw3d() || T3.fail) problems.push('the stall did not render in 3D');
+      else { const mass = T3.group.children.filter(o => o.userData && o.userData.wall && o.userData.g === '⊓');
+        if (mass.length !== 4) problems.push('the stair mass is not four boxes in 3D (' + mass.length + ')');
+        const faces = new Set(mass.map(o => (Array.isArray(o.material) ? o.material[4] : o.material))); if (faces.size !== 4) problems.push('the four mass tiles share a face — four little staircases, not one flight');
+        if (!T3.group.children.some(o => o.userData && o.userData.lintel && o.userData.x === 10 && o.userData.y === 13)) problems.push('the office door at (10,13) has no lintel'); }
+      world = 'f2'; px = 14; py = 14;
+      if (!draw3d() || T3.fail) problems.push('the loft did not render in 3D');
+      else if (T3.group.children.filter(o => o.userData && o.userData.fence && o.userData.y === 13).length < 3) problems.push('the rail does not stand as panels in 3D');
+      T3.yaw = b3.yaw; camSet(b3.cam); world = b3.world; px = b3.px; py = b3.py; }
     // ---- ch-v7: el pregonero walks the street with the three lines (owner: "its hard to
     // remember the command for a git pull — can you have another character walk around with it?") ----
     { const c = WORLDS.st.npcs.find(n => n.npc === 'pregonero');
