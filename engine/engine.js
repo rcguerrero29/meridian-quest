@@ -2124,6 +2124,16 @@ function docOpen(id,from){
       const b=document.createElement("button");b.className="dbtn";b.type="button";b.textContent=s2.btn;
       b.addEventListener("click",()=>{try{if(typeof s2.run==="function")s2.run();}catch(err){console.warn("DOC: button failed",err);}});
       body.appendChild(b);}
+    else if(s2.sel){ /* a dropdown a pack's document may carry (the town's filter and sort):
+       a label, options (optionally grouped), the current value; content runs the change */
+      const lab=el("label","dsel");lab.appendChild(document.createTextNode(s2.sel+" "));
+      const se=document.createElement("select");const groups={};
+      (s2.opts||[]).forEach(o=>{const op=document.createElement("option");op.value=String(o.v);op.textContent=String(o.t===undefined?o.v:o.t);
+        if(String(o.v)===String(s2.value===undefined?"":s2.value))op.selected=true;
+        if(o.g){if(!groups[o.g]){groups[o.g]=document.createElement("optgroup");groups[o.g].label=o.g;se.appendChild(groups[o.g]);}groups[o.g].appendChild(op);}
+        else se.appendChild(op);});
+      se.addEventListener("change",()=>{try{if(typeof s2.run==="function")s2.run(se.value);}catch(err){console.warn("DOC: select failed",err);}});
+      lab.appendChild(se);body.appendChild(lab);}
     else if(s2.docs){const row=el("div","ddocs");
       s2.docs.forEach(k=>{if(!DC()[k])return;const b=document.createElement("button");
         b.className="opt";b.textContent=docTitle(k);
