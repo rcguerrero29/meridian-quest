@@ -75,6 +75,14 @@ when you press **↻ Refresh** on her card (two switches in `content/config.js` 
 the permits back). If `main` is ahead of what you are running she says so and which line of el
 pregonero's sheet to run.
 
+## Don Güero, the signs, the boards (ch-v17)
+
+Don Güero at the stall talks every visit: who he is, the requests that carry his name, and the
+last feedback that came back on one of them. **Ask me to build something** files a request
+tagged `guero`, which a session's planner picks up. On the street the signs over the three
+faces count the open issues of that kind and city hall's counts them all; the boards say which
+face is which.
+
 ## The index (ch-v15)
 
 **📇 The index** on la ventanilla's card is the search. Pick from her menu — waiting on you,

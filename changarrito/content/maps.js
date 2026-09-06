@@ -85,15 +85,26 @@ const PORTALS={hq:{"E":{to:"st",x:14,y:1,dir:"down"},"▲":{to:"f2",x:14,y:14,di
    `win:"B"` says she works INSIDE city hall's wall: the engine draws B's counter in front of
    her and B's roof over her (ch-v3 had her standing in a hole in the facade — owner,
    2026-09-06: "how did this pass a test for a teller?"). */
-const WNPC={hq:{g:{npc:"guero",q:[0]}},st:{v:{npc:"ventanilla",q:[],chat:1,win:"B"},c:{npc:"pregonero",q:[],chat:1,doc:"how",roams:true}},pk:{}};
+const WNPC={hq:{g:{npc:"guero",q:[],chat:1,doc:"guero"}},st:{v:{npc:"ventanilla",q:[],chat:1,win:"B"},c:{npc:"pregonero",q:[],chat:1,doc:"how",roams:true}},pk:{}};
 /* the pack's own solid glyphs (the engine draws them; the pack says they are walls) */
 const SOLIDX="~9ZI";
 const DOORS="+E2";
 const DOORLOOK={E:{wood:"#8A5A2B",wood2:"#A06A35",frame:"#4A2E14",glass:true},   /* the stall: warm wood */
                 "2":{wood:"#4E7A4A",wood2:"#5F8F5A",frame:"#2C4A2A"}};          /* the park gate: green */
-/* signs over the faces — the engine's own sign glyph, no art of the pack's */
-const DECOR=[{world:"st",x:4,y:0,deco:"sign"},{world:"st",x:10,y:0,deco:"sign"},
-             {world:"st",x:19,y:0,deco:"sign"},{world:"st",x:25,y:0,deco:"sign"}];
+/* the signs over the faces are COUNTERS (ch-v17; owner: "the clocks... can we use them for
+   something important like amount of issues?"): the record writes the number of open issues of
+   that kind on each one — asks, decisions, bugs — and the total on city hall's. The boards beside
+   them name the face, so a storefront says what it is for. `kind` is the record's hook. */
+const DECOR=[{world:"st",x:4,y:0,deco:"sign",kind:"ask",c:"#2E5FA8"},{world:"st",x:10,y:0,deco:"sign",kind:"hall",c:"#7A3FE0"},
+             {world:"st",x:19,y:0,deco:"sign",kind:"decision",c:"#B8860B"},{world:"st",x:25,y:0,deco:"sign",kind:"bug",c:"#C0392B"},
+             {world:"st",x:3,y:0,deco:"board",text:"ASKS",c:"#2E5FA8"},{world:"st",x:20,y:0,deco:"board",text:"DECIDE",c:"#B8860B"},
+             {world:"st",x:26,y:0,deco:"board",text:"BUGS",c:"#C0392B"}];
+/* the pack's own decor art (engine seam DECOART): a board that names a face — a dark plank with
+   the word painted on it, the colour of its kind */
+const DECOART={board:(sx,sy,d)=>{ctx.fillStyle="#2A2420";ctx.fillRect(sx+1,sy+3,30,13);
+  ctx.fillStyle=d.c||"#7A3FE0";ctx.fillRect(sx+1,sy+3,30,2);ctx.fillRect(sx+1,sy+14,30,2);
+  ctx.strokeStyle="rgba(15,12,20,.5)";ctx.lineWidth=1;ctx.strokeRect(sx+1,sy+3,30,13);
+  ctx.fillStyle="#F2E8D8";ctx.font="700 7px monospace";ctx.textAlign="center";ctx.fillText(String(d.text||"").slice(0,8),sx+16,sy+12);ctx.textAlign="start";}};
 /* the engine's own animals, where THIS town puts them (#38): Frederick at the stall, the pigeon
    on the street, Lorenzo in the tree at (12,5) — a perch, not thin air — and no bodega cat,
    because there is no bodega. */
