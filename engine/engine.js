@@ -2173,6 +2173,28 @@ function docOpen(id,from){
         else se.appendChild(op);});
       se.addEventListener("change",()=>{try{if(typeof s2.run==="function")s2.run(se.value);}catch(err){console.warn("DOC: select failed",err);}});
       lab.appendChild(se);body.appendChild(lab);}
+    else if(s2.form){ /* a form a pack's document may carry (mq-v76): fields — text, password, area,
+       select, checks — a submit and a cancel. The reader collects the values; content acts. Every
+       field is on one screen beside the paperwork, so nothing is a chain of browser prompts. */
+      const f=s2.form,box=el("div","dform"),inputs={};
+      (f.fields||[]).forEach(fd=>{
+        const lab=document.createElement("label");lab.className="dfl";lab.appendChild(document.createTextNode(fd.label||fd.k));
+        let inp;
+        if(fd.type==="area"){inp=document.createElement("textarea");inp.value=fd.value||"";}
+        else if(fd.type==="select"){inp=document.createElement("select");(fd.opts||[]).forEach(o=>{const op=document.createElement("option");op.value=String(o.v);op.textContent=String(o.t===undefined?o.v:o.t);if(String(o.v)===String(fd.value===undefined?"":fd.value))op.selected=true;inp.appendChild(op);});}
+        else if(fd.type==="checks"){inp=document.createElement("div");inp.className="dchecks";const on=new Set((fd.value||[]).map(String));
+          (fd.opts||[]).forEach(o=>{const l2=document.createElement("label");const cb=document.createElement("input");cb.type="checkbox";cb.value=String(o.v);cb.checked=on.has(String(o.v));l2.appendChild(cb);l2.appendChild(document.createTextNode(" "+String(o.t===undefined?o.v:o.t)));inp.appendChild(l2);});}
+        else{inp=document.createElement("input");inp.type=fd.type==="password"?"password":"text";inp.value=fd.value||"";if(fd.placeholder)inp.placeholder=fd.placeholder;}
+        inputs[fd.k]={fd,inp};lab.appendChild(inp);box.appendChild(lab);});
+      const read=()=>{const v={};Object.entries(inputs).forEach(([k,o])=>{v[k]=o.fd.type==="checks"?[...o.inp.querySelectorAll("input:checked")].map(c=>c.value):o.inp.value;});return v;};
+      const row=document.createElement("div");row.className="dfrow";
+      const ok=document.createElement("button");ok.type="button";ok.className="dbtn";ok.textContent=f.submit||"OK";
+      ok.addEventListener("click",()=>{try{if(typeof f.run==="function")f.run(read());}catch(err){console.warn("DOC: form failed",err);}});
+      row.appendChild(ok);
+      if(f.cancel){const c=document.createElement("button");c.type="button";c.className="dbtn";c.textContent=typeof f.cancel==="string"?f.cancel:"✕";
+        c.addEventListener("click",()=>{try{if(typeof f.onCancel==="function")f.onCancel();else $("docClose").click();}catch(err){console.warn("DOC: cancel failed",err);}});row.appendChild(c);}
+      box.appendChild(row);
+      if(!f.noFocus){const first=box.querySelector("input,textarea,select");if(first)setTimeout(()=>{try{first.focus();}catch(e){}},0);}}
     else if(s2.docs){const row=el("div","ddocs");
       s2.docs.forEach(k=>{if(!DC()[k])return;const b=document.createElement("button");
         b.className="opt";b.textContent=docTitle(k);

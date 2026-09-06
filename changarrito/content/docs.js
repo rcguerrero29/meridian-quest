@@ -43,6 +43,10 @@ const DOCS = {
     sub:   { en: "The small things, pinned. Nobody stands for these.", es: "Las cosas chicas, prendidas. Nadie las carga." },
     build: () => RECORDSRC.boardDoc()
   },
+  /* ch-v14: the forms are documents too — one screen each, every field visible, cancel costs nothing */
+  request: { title: { en: "File a request", es: "Presentar una petición" }, sub: { en: "The five headings every request reads by.", es: "Los cinco encabezados de toda petición." }, build: () => RECORDSRC.requestDoc() },
+  signin:  { title: { en: "Sign in", es: "Identificarme" }, sub: { en: "A key for issues on this repo, kept in this browser only.", es: "Una llave para issues de este repo, solo en este navegador." }, build: () => RECORDSRC.signInDoc() },
+  filter:  { title: { en: "Narrow the street", es: "Acotar la calle" }, sub: { en: "Labels and a word. Empty means everyone.", es: "Etiquetas y una palabra. Vacío es todos." }, build: () => RECORDSRC.filterDoc() },
   /* el pregonero's sheet: the commands, in order, with Copy at the bottom of the reader */
   how: {
     title: { en: "How to open the town", es: "Cómo abrir el pueblo" },

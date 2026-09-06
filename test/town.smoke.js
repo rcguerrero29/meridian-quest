@@ -21,6 +21,9 @@ const { chromium } = require('playwright-core');
     if (/content\/meridian\//.test(town)) fails.push("the town loads Meridian's content");
     if (!/\.\.\/engine\/engine\.js/.test(town)) fails.push('the town does not load the shared engine by path');
     if (pub.split('\n').length - town.split('\n').length > 20) fails.push('the town index drifted far from the public one');
+    // ch-v14: every popup became a form in the reader — no browser prompt survives in the town's content
+    const rec = fs.readFileSync(path.join(root, 'changarrito', 'content', 'record.js'), 'utf8');
+    if (/window\.prompt|\bprompt\(/.test(rec)) fails.push('record.js still uses a browser prompt');
   }
   const browser = await chromium.launch({ executablePath: exe });
   const page = await browser.newPage({ viewport: { width: 480, height: 900 } });
@@ -380,6 +383,56 @@ const { chromium } = require('playwright-core');
         const bd = docSections('board').filter(x => x.h).map(x => x.h);
         if (!(bd.length === 3 && /^Asks/.test(bd[0]) && /^Bugs/.test(bd[1]) && /^Other/.test(bd[2]))) problems.push('the board is not grouped by kind in order: ' + bd.join(' | '));
         RECORDSRC.place([]); window.fetch = fetch0; }
+      // ---- ch-v14 (engine mq-v76): the reader's form section; every write is a form, no popup ----
+      { const fetch0 = window.fetch, prompt0 = window.prompt, calls = [];
+        window.prompt = () => { throw new Error('a browser prompt was used'); };
+        window.fetch = (url, opt) => { calls.push({ url: String(url), opt: opt || {} }); return Promise.resolve(new Response((opt && opt.method && opt.method !== 'GET') ? '{"number":77}' : '[]', { status: 200, headers: { 'Content-Type': 'application/json' } })); };
+        // the section itself: every field type renders, submit collects, cancel runs onCancel
+        let got = null, cancelled = 0;
+        docOpen({ title: { en: 'f' }, build: () => [{ form: { fields: [{ k: 't', label: 'T', type: 'text', value: 'x' }, { k: 'a', label: 'A', type: 'area' }, { k: 's', label: 'S', type: 'select', opts: [{ v: 'a' }, { v: 'b' }], value: 'b' }, { k: 'c', label: 'C', type: 'checks', opts: [{ v: '1' }, { v: '2' }], value: ['2'] }, { k: 'p', label: 'P', type: 'password' }], submit: 'Go', cancel: 'Nope', onCancel: () => { cancelled++; }, run: v => { got = v; } } }] });
+        const body = document.getElementById('docBody');
+        if (!body.querySelector('.dform input[type=text]') || !body.querySelector('.dform textarea') || !body.querySelector('.dform select') || body.querySelectorAll('.dform input[type=checkbox]').length !== 2 || !body.querySelector('.dform input[type=password]')) problems.push('the form did not render every field type');
+        body.querySelector('.dform textarea').value = 'why'; body.querySelectorAll('.dform input[type=checkbox]')[0].checked = true;
+        const btns = [...body.querySelectorAll('.dfrow button')]; btns.find(b => b.textContent === 'Go').click();
+        if (!got || got.t !== 'x' || got.a !== 'why' || got.s !== 'b' || got.c.join() !== '1,2') problems.push('the form did not collect its values: ' + JSON.stringify(got));
+        btns.find(b => b.textContent === 'Nope').click(); if (cancelled !== 1) problems.push('cancel did not run onCancel');
+        // file a request: a document with a form; tags ride along as labels
+        RECORDSRC.signIn('ghp_test_only');
+        const wdb = docSections('window').find(x => x.btn && /File a request/.test(x.btn)); if (!wdb) problems.push('no File a request button'); else wdb.run();
+        if (docCur !== 'request') problems.push('File a request did not open the request document');
+        const rf = (docSections('request') || []).find(x => x.form); if (!rf) problems.push('the request document has no form');
+        else { calls.length = 0; rf.form.run({ title: 'T', plain: 'P', notes: '', done: 'D', kind: 'bug', tier: 'high', tags: ['changarrito', 'sonny'] }); await new Promise(r => setTimeout(r, 40));
+          const w = calls.find(c => c.opt.method === 'POST' && /\/issues$/.test(c.url)); if (!w) problems.push('the request form did not file');
+          else { const b = JSON.parse(w.opt.body); ['tier: high', 'bug', 'changarrito', 'sonny'].forEach(l => { if (!b.labels.includes(l)) problems.push('the filed request lacks the label ' + l); }); } }
+        // sign in: a password field, no popup
+        RECORDSRC.signOut(); docSections('window').find(x => x.btn && /Sign in/.test(x.btn)).run();
+        if (docCur !== 'signin') problems.push('Sign in did not open the sign-in document');
+        const sf = docSections('signin').find(x => x.form); if (!sf || sf.form.fields[0].type !== 'password') problems.push('the sign-in form has no password field');
+        else { sf.form.run({ token: 'ghp_form_key' }); if (RECORDSRC.token() !== 'ghp_form_key') problems.push('the sign-in form did not store the key'); }
+        // labels: checkboxes, the diff becomes adds and removes
+        const person = { n: 81, title: 'p', body: '1. three rows\n2. two rows\n', labels: ['tier: high', 'decision', 'ventanilla'], at: '2026-09-06' };
+        RECORDSRC.place([person, { n: 82, title: 'q', body: '', labels: ['tier: normal', 'bug'], at: '2026-09-06' }]);
+        const ld = RECORDSRC.labelsDoc(person), lf = ld.build().find(x => x.form);
+        calls.length = 0; await RECORDSRC.setLabels(person, ['tier: high', 'decision', 'bug'], 'nuevo');
+        const adds = calls.filter(c => c.opt.method === 'POST' && /\/labels$/.test(c.url)).map(c => JSON.parse(c.opt.body).labels[0]).sort().join();
+        const dels = calls.filter(c => c.opt.method === 'DELETE').map(c => decodeURIComponent(c.url.split('/labels/')[1])).join();
+        if (adds !== 'bug,nuevo' || dels !== 'ventanilla') problems.push('the labels form did not diff (adds ' + adds + ', dels ' + dels + ')');
+        if (!lf || !lf.form.fields.some(f => f.type === 'checks')) problems.push('the labels form has no checkboxes');
+        // a pick opens a comment: the options come off the paperwork
+        const pk = RECORDSRC.picks(person); if (pk.join('|') !== 'three rows|two rows') problems.push('picks were not read off the paperwork: ' + pk.join('|'));
+        const dd = RECORDSRC.decideDoc(person).build().find(x => x.form); calls.length = 0; dd.form.run({ pick: 'three rows', other: '', note: 'lobby please' }); await new Promise(r => setTimeout(r, 40));
+        const pc = calls.find(c => c.opt.method === 'POST' && /\/issues\/81\/comments$/.test(c.url));
+        if (!pc || JSON.parse(pc.opt.body).body !== 'Pick: three rows — lobby please') problems.push('the pick did not post as a comment: ' + (pc && pc.opt.body));
+        const pd = RECORDSRC.doc(person).build(); if (!pd.some(x => x.btn && /Decide/.test(x.btn))) problems.push('a decision has no Decide button');
+        if (RECORDSRC.doc({ n: 82, title: 'q', body: '', labels: ['bug'], at: '2026-09-06' }).build().some(x => x.btn && /Decide/.test(x.btn))) problems.push('a bug has a Decide button');
+        // a comment: a form, back to the person after
+        const cd = RECORDSRC.commentDoc(person).build().find(x => x.form); calls.length = 0; cd.form.run({ text: 'hola' }); await new Promise(r => setTimeout(r, 40));
+        if (!calls.some(c => c.opt.method === 'POST' && /\/issues\/81\/comments$/.test(c.url) && JSON.parse(c.opt.body).body === 'hola')) problems.push('the comment form did not post');
+        // the filter: checks and a word
+        const ff = docSections('filter').find(x => x.form); ff.form.run({ labels: ['bug'], search: '' }); await new Promise(r => setTimeout(r, 40));
+        if (RECORDSRC.filter.join() !== 'bug') problems.push('the filter form did not narrow');
+        RECORDSRC.setFilter([], ''); await new Promise(r => setTimeout(r, 40));
+        RECORDSRC.signOut(); RECORDSRC.place([]); window.fetch = fetch0; window.prompt = prompt0; document.getElementById('reader').hidden = true; }
       // Meridian's animals have somewhere to stand in the town's rooms
       if (SOLID.has(WORLDS.hq.grid[5][12])) problems.push('hq (12,5) is solid — Frederick has nowhere to stand');
       if (SOLID.has(WORLDS.st.grid[1][4])) problems.push('st (4,1) is solid — the pigeon has nowhere to stand');
