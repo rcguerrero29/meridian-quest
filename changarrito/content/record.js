@@ -226,20 +226,62 @@ const RECORDSRC={
     +"\n\n**Areas affected:** _(a session fills this when it first reads the issue)_"
     +"\n\n**Done when:** "+(this.clean(f.done,600)||"—")+"\n\nFiled from El Changarrito.";},
   async file(f){const title=this.clean(f.title,120);if(!title){this.say("A request needs a title.","Una petición necesita título.");return null;}
-    const labels=["tier: "+(["high","normal","low"].includes(f.tier)?f.tier:"normal"),["ask","decision","bug"].includes(f.kind)?f.kind:"ask"];
+    const labels=["tier: "+(["high","normal","low"].includes(f.tier)?f.tier:"normal"),["ask","decision","bug"].includes(f.kind)?f.kind:"ask"]
+      .concat((f.tags||[]).map(l=>this.clean(l,40)).filter(l=>l&&!/^tier: /.test(l)&&!["ask","decision","bug"].includes(l)).slice(0,5));
     const d=await this.write("POST","/issues",{title,body:this.requestBody(f),labels});
     if(d&&d.number)this.say("Filed as #"+d.number+". They will be on the street shortly.","Archivado como #"+d.number+". Pronto estarán en la calle.");return d;},
-  /* the form, as prompts — one question at a time, the interview's shape without its machinery */
-  ask(q){const v=window.prompt(q);return v===null?null:String(v);},
-  fileByPrompt(){const es=lang==="es";
-    const title=this.ask(es?"Título de la petición (corto):":"Title of the request (short):");if(title===null)return;
-    const plain=this.ask(es?"En palabras llanas — qué es, por qué importa:":"In plain words — what this is, why it matters:");if(plain===null)return;
-    const notes=this.ask(es?"Notas (opcional):":"Notes (optional):");if(notes===null)return;
-    const done=this.ask(es?"Está hecho cuando…:":"Done when…:");if(done===null)return;
-    const kind=this.ask(es?"Tipo: ask / decision / bug":"Kind: ask / decision / bug")||"ask";
-    const tier=this.ask(es?"Peso: high / normal / low":"Weight: high / normal / low")||"normal";
-    this.file({title,plain,notes,done,kind:kind.trim().toLowerCase(),tier:tier.trim().toLowerCase()});},
-  /* filter and search: read-only; whoever does not match waits on the board */
+  /* ---------- ch-v14: every popup is a form in the reader (owner: "show me what you mean for #2") ----------
+     One screen each, every field visible beside the paperwork, cancel costs nothing. The reader
+     renders the fields (engine mq-v76); the record acts on the values. */
+  formTags:[],   /* tags pre-picked for the next request — where you filed it from (the index, PR 3) */
+  tagOpts(){const seen=this.labelsSeen().filter(o=>!/^tier: /.test(o.v)&&!["ask","decision","bug"].includes(o.v)).map(o=>o.v);
+    return [...new Set(["changarrito","ventanilla",...seen])].map(v=>({v,t:v}));},
+  requestDoc(){const es=lang==="es",self=this;return [{form:{fields:[
+      {k:"title",label:es?"Título (corto)":"Title (short)",type:"text"},
+      {k:"plain",label:es?"En palabras llanas — qué es, por qué importa":"In plain words — what this is, why it matters",type:"area"},
+      {k:"notes",label:es?"Notas (opcional)":"Notes (optional)",type:"area"},
+      {k:"done",label:es?"Está hecho cuando…":"Done when…",type:"text"},
+      {k:"kind",label:es?"Tipo":"Kind",type:"select",opts:[{v:"ask",t:es?"petición (ask)":"ask"},{v:"decision",t:es?"decisión":"decision"},{v:"bug",t:"bug"}],value:"ask"},
+      {k:"tier",label:es?"Peso":"Weight",type:"select",opts:[{v:"normal",t:"normal"},{v:"high",t:"high"},{v:"low",t:"low"}],value:"normal"},
+      {k:"tags",label:es?"Etiquetas":"Tags",type:"checks",opts:this.tagOpts(),value:this.formTags}],
+    submit:es?"📨 Presentar":"📨 File it",cancel:es?"Cancelar":"Cancel",onCancel:()=>docOpen("window"),
+    run:v=>{self.file(v).then(d=>{if(d)docOpen("window");});}}}];},
+  signInDoc(){const es=lang==="es",self=this;return [
+    {p:es?"Una llave de GitHub solo para issues de este repo (lectura y escritura), 30 días. Se queda en este navegador y en ningún otro lado.":"A GitHub key for issues on this repo only (read and write), 30 days. It stays in this browser and nowhere else."},
+    {form:{fields:[{k:"token",label:es?"Pega la llave":"Paste the key",type:"password"}],submit:es?"🔑 Identificarme":"🔑 Sign in",cancel:es?"Cancelar":"Cancel",onCancel:()=>docOpen("window"),
+      run:v=>{if(self.signIn(v.token)){self.say("Signed in. Nothing else was stored.","Identificado. No se guardó nada más.");docOpen("window");}}}}];},
+  filterDoc(){const es=lang==="es",self=this;return [{form:{fields:[
+      {k:"labels",label:es?"Etiquetas (todas deben coincidir)":"Labels (all must match)",type:"checks",opts:this.labelsSeen(),value:this.filter},
+      {k:"search",label:es?"Una palabra":"A word",type:"text",value:this.search}],
+    submit:es?"🔍 Acotar":"🔍 Narrow",cancel:es?"Cancelar":"Cancel",onCancel:()=>docOpen("window"),
+    run:v=>{self.setFilter(v.labels||[],v.search||"");docOpen("window");}}}];},
+  commentDoc(i){const es=lang==="es",self=this,back=()=>docOpen(self.doc(i));
+    return {title:{en:"Comment on #"+i.n,es:"Comentar en #"+i.n},build:()=>[{p:i.title},{form:{fields:[{k:"text",label:es?"Tu comentario, con tus palabras":"Your comment, in your own words",type:"area"}],
+      submit:es?"💬 Publicar":"💬 Post",cancel:es?"Volver":"Back",onCancel:back,run:v=>{self.comment(i.n,v.text).then(back);}}}]};},
+  labelsDoc(i){const es=lang==="es",self=this,back=()=>docOpen(self.doc(i));
+    return {title:{en:"Labels on #"+i.n,es:"Etiquetas de #"+i.n},build:()=>[{p:i.title},{form:{fields:[
+        {k:"on",label:es?"Etiquetas":"Labels",type:"checks",opts:this.labelsSeen(),value:i.labels||[]},
+        {k:"add",label:es?"Una etiqueta nueva":"A new label",type:"text"}],
+      submit:es?"🏷️ Guardar":"🏷️ Save",cancel:es?"Volver":"Back",onCancel:back,
+      run:v=>{self.setLabels(i,v.on||[],v.add||"").then(back);}}}]};},
+  async setLabels(i,on,add){const cur=new Set(i.labels||[]),want=new Set((on||[]).map(l=>this.clean(l,40)).filter(Boolean));
+    const a=this.clean(add,40);if(a)want.add(a);
+    for(const l of want)if(!cur.has(l))await this.addLabel(i.n,l);
+    for(const l of cur)if(!want.has(l))await this.removeLabel(i.n,l);
+    i.labels=[...want];},
+  /* a pick opens a comment (owner: "your pic should open up a comment right?"): the options are
+     read off the paperwork and the last answer — numbered or bulleted lines — plus "other" */
+  picks(i){const c=this.comments[i.n],src=((c&&c.last&&c.last.body)||"")+"\n"+(i.body||"");const out=[];
+    src.split("\n").forEach(l=>{const m=/^\s*(?:\d+[.)]|[-•*])\s+(.{3,120}?)\s*$/.exec(l);if(m&&out.length<8)out.push(m[1].replace(/[`*_#>]/g,"").trim());});
+    return out;},
+  decideDoc(i){const es=lang==="es",self=this,back=()=>docOpen(self.doc(i)),opts=this.picks(i).map(v=>({v,t:v}));
+    return {title:{en:"Decide #"+i.n,es:"Decidir #"+i.n},build:()=>[{p:i.title},{form:{fields:[
+        {k:"pick",label:es?"Tu elección":"Your pick",type:"select",opts:opts.concat([{v:"__other",t:es?"otra — abajo":"other — below"}]),value:opts.length?opts[0].v:"__other"},
+        {k:"other",label:es?"Otra elección":"Other pick",type:"text"},
+        {k:"note",label:es?"Nota (opcional)":"Note (optional)",type:"area"}],
+      submit:es?"⚖️ Publicar mi elección":"⚖️ Post my pick",cancel:es?"Volver":"Back",onCancel:back,
+      run:v=>{const pick=v.pick==="__other"?self.clean(v.other,200):v.pick;if(!pick)return;
+        self.comment(i.n,"Pick: "+pick+(self.clean(v.note,1000)?" — "+self.clean(v.note,1000):"")).then(back);}}}]};},
   /* ch-v9 (#42): every label the record has seen, grouped for a dropdown — weight, kind, the rest */
   all:[],         /* the last list the record placed, filter or no filter */
   sort:"weight",  /* who gets the street first: weight (tier), newest, oldest, number */
@@ -289,9 +331,9 @@ const RECORDSRC={
         :(es?"Sin identificar: los botones pedirán que te identifiques primero en la ventanilla (arriba, en la pared del ayuntamiento). Leer, filtrar y buscar no necesitan token.":"Not signed in: the buttons will ask you to sign in first at la ventanilla (up top, in city hall's wall). Reading, filtering and searching need no token.")});
       s.push({btn:es?"✅ Hecho — cerrar #"+i.n:"✅ Done — close #"+i.n,run:()=>self.done(i.n)});
       s.push({btn:es?"❓ Pídeme más contexto":"❓ Ask for more context",run:()=>self.askMore(i.n)});
-      s.push({btn:es?"💬 Comentar con mis palabras":"💬 Comment in my own words",run:()=>{const t=self.ask(es?"Tu comentario en #"+i.n+":":"Your comment on #"+i.n+":");if(t)self.comment(i.n,t);}});
-      s.push({btn:es?"🏷️ + etiqueta":"🏷️ + label",run:()=>{const l=self.ask(es?"Etiqueta a añadir:":"Label to add:");if(l)self.addLabel(i.n,l);}});
-      s.push({btn:es?"🏷️ − etiqueta":"🏷️ − label",run:()=>{const l=self.ask(es?"Etiqueta a quitar:":"Label to remove:");if(l)self.removeLabel(i.n,l);}});
+      s.push({btn:es?"💬 Comentar con mis palabras":"💬 Comment in my own words",run:()=>docOpen(self.commentDoc(i))});
+      if((i.labels||[]).includes("decision"))s.push({btn:es?"⚖️ Decidir":"⚖️ Decide",run:()=>docOpen(self.decideDoc(i))});
+      s.push({btn:es?"🏷️ Etiquetas":"🏷️ Labels",run:()=>docOpen(self.labelsDoc(i))});
       return s;}};},
   /* la ventanilla's document: the permits, then the count of people and notes. Past tense only */
   windowDoc(){const es=lang==="es",s=[];const self=this;
@@ -327,9 +369,9 @@ const RECORDSRC={
         :(es?"Identificado. El pueblo puede escribir. La llave caduca en "+dl+(dl===1?" día":" días")+when+".":"Signed in. The town can write. The key runs out in "+dl+(dl===1?" day":" days")+when+"."))
       :(es?"Sin identificar. El pueblo solo lee. Un token de GitHub para este repo (issues: write), escrito una vez, se queda en este navegador y en ningún otro lado.":"Not signed in. The town only reads. A GitHub token for this repo (issues: write), typed once, stays in this browser and nowhere else.")});
     const kw=this.keyWarning();if(kw)s.push({p:"🔑 "+kw});
-    s.push({btn:this.token()?(es?"🔑 Salir":"🔑 Sign out"):(es?"🔑 Identificarme":"🔑 Sign in"),run:()=>{if(self.token()){self.signOut();self.say("Signed out.","Sesión cerrada.");}else{const t=self.ask(es?"Pega tu token de GitHub (solo issues: write, 30 días):":"Paste your GitHub token (issues: write only, 30 days):");if(t&&self.signIn(t))self.say("Signed in. Nothing else was stored.","Identificado. No se guardó nada más.");}docOpen("window");}});
+    s.push({btn:this.token()?(es?"🔑 Salir":"🔑 Sign out"):(es?"🔑 Identificarme":"🔑 Sign in"),run:()=>{if(self.token()){self.signOut();self.say("Signed out.","Sesión cerrada.");docOpen("window");}else docOpen("signin");}});
     s.push({btn:es?"🔑 Hacer un token nuevo (abre GitHub)":"🔑 Make a new token (opens GitHub)",run:()=>self.openNewToken()});
-    s.push({btn:es?"📝 Presentar una petición":"📝 File a request",run:()=>self.fileByPrompt()});
+    s.push({btn:es?"📝 Presentar una petición":"📝 File a request",run:()=>{self.formTags=[];docOpen("request");}});
     /* the dropdowns (#42): one label at a time from the labels the record has seen, grouped by
        weight / kind / other; and who gets the street first. The typed prompt below still takes
        several labels at once (owner: "include/tag the tags") */
@@ -337,8 +379,7 @@ const RECORDSRC={
       run:v=>{self.setFilter(v?[v]:[],self.search);docOpen("window");}});
     s.push({sel:es?"↕ Orden":"↕ Sort",opts:[{v:"weight",t:es?"por peso (alto primero)":"by weight (high first)"},{v:"newest",t:es?"más nuevos primero":"newest first"},{v:"oldest",t:es?"más viejos primero":"oldest first"},{v:"number",t:es?"por número":"by number"}],value:this.sort,
       run:v=>{self.setSort(v);docOpen("window");}});
-    s.push({btn:es?"🔍 Varias etiquetas a la vez":"🔍 Several labels at once",run:()=>{const v=self.ask(es?"Etiquetas, separadas por coma (vacío = todos):":"Labels, comma-separated (empty = everyone):");if(v!==null){self.setFilter(v.split(",").map(x=>x.trim()).filter(Boolean),self.search);docOpen("window");}}});
-    s.push({btn:es?"🔎 Buscar una palabra":"🔎 Search a word",run:()=>{const v=self.ask(es?"Palabra (vacío = todos):":"Word (empty = everyone):");if(v!==null){self.setFilter(self.filter,v);docOpen("window");}}});
+    s.push({btn:es?"🔍 Varias etiquetas y una palabra":"🔍 Several labels, or a word",run:()=>docOpen("filter")});
     return s;},
   /* the board: the small things, pinned */
   boardDoc(){const es=lang==="es",s=[];

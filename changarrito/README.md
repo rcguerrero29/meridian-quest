@@ -75,6 +75,13 @@ when you press **↻ Refresh** on her card (two switches in `content/config.js` 
 the permits back). If `main` is ahead of what you are running she says so and which line of el
 pregonero's sheet to run.
 
+## Nothing pops up any more (ch-v14)
+
+Filing a request, signing in, narrowing the street, commenting, changing labels, and deciding
+are all one screen inside the reader — every field visible, the paperwork above it, Cancel costs
+nothing. On a person marked *decision*, **⚖️ Decide** lists the options read off their paperwork
+and the last answer; your pick posts as a comment in your name and the next session acts on it.
+
 ## What needs the token, and what does not
 
 Nothing you *read* needs it: walking, talking, the paperwork, la ventanilla's permits, the
