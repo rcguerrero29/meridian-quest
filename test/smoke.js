@@ -995,6 +995,10 @@ const CANDIDATES = [
       }
     });
     if (doors !== want) problems.push(`hq has ${want} doors on the map and ${doors} standing in 3D`);
+    // #22 (mq-v73): exactly one billboard — the hero — is drawn through walls; everyone else sits in the scene
+    const through = T3.pool.filter(p => p.live && p.spr.material.depthTest === false);
+    if (through.length !== 1) problems.push(`${through.length} billboards draw through walls — the hero, and only the hero, must`);
+    if (through.length === 1 && through[0].spr.renderOrder < 1) problems.push('the hero billboard is not drawn last');
     if (lintels < doors) problems.push(`${doors - lintels} of hq's ${doors} doors have a see-through slot above them (no lintel)`);
     if (glows < doors) problems.push(`${doors - glows} of hq's ${doors} doors do not say "this one opens" in 3D`);
     T3.yaw = before.yaw; camSet(before.cam);

@@ -371,7 +371,10 @@ function t3Actors(){
       else if(cr.kind==="lab")drawLab(g,cr,2,6);
       else if(cr.kind==="chi")drawChi(g,cr,2,6);}});});
   if(BALL&&BALL.world===world)list.push({x:BALL.fx,y:BALL.fy,f:g=>drawBall(g,2,6,BALL.phase,BALL.t)});
-  list.push({x:fx,y:fy,f:g=>drawPerson(g,2,6,look,{dir:t3ScreenDir(dir),bob:moving?Math.sin(bob)*2:0,moving})});
+  /* hero:true — drawn through whatever stands between them and the camera (#22: "a wall between
+     you and the camera hides you in 3D"). The four camera stops put a wall in front of the hero
+     often; the person you are steering must never vanish behind one. */
+  list.push({x:fx,y:fy,hero:true,f:g=>drawPerson(g,2,6,look,{dir:t3ScreenDir(dir),bob:moving?Math.sin(bob)*2:0,moving})});
   /* the door marker rides the same pool, lifted above the wall line so the door slab
      does not hide it */
   doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,f:g=>drawDoorMark(g,2,30,0,d.mark)}));
@@ -393,6 +396,7 @@ function t3Actors(){
     p.spr.position.set(ax+ddx/dl*0.34,a.h||0,az+ddz/dl*0.34);
     p.spr.scale.set(36/32*1.12,40/32*1.12,1);
     p.spr.material.color.copy(T3.tint);
+    p.spr.material.depthTest=!a.hero;p.spr.renderOrder=a.hero?999:0; /* the hero reads through walls; everyone else sits in the scene */
     p.spr.visible=true;p.live=true;
   });
   for(let i=list.length;i<T3.pool.length;i++){T3.pool[i].spr.visible=false;T3.pool[i].live=false;}
