@@ -154,6 +154,16 @@
   .paper .dfl textarea{min-height:64px; resize:vertical;}
   .paper .dchecks{display:flex; flex-wrap:wrap; gap:6px 12px; text-transform:none; letter-spacing:0; font-size:.85rem;}
   .paper .dfrow{display:flex; gap:8px; margin-top:4px;}
+  /* the night look (READERLOOK="night"): the same paper in purple dark — a pack's choice, cream by default */
+  .paper.night{background:#1C1A22; color:#E8E4DC;}
+  .paper.night::before{display:none;}
+  .paper.night h2,.paper.night .dh{color:#FFFFFF;}
+  .paper.night .dsub,.paper.night .dtmpl,.paper.night .dkv b,.paper.night .dfl{color:#B48CFF;}
+  .paper.night .dnote{background:#26232E; border-left-color:#7A3FE0; color:#CFC9BF;}
+  .paper.night .dfl input,.paper.night .dfl textarea,.paper.night .dfl select{background:#26232E; border-color:#3B3546; color:#E8E4DC;}
+  .paper.night button{background:#3B3546; color:#FFFFFF; border-color:#4A4358;}
+  .paper.night .dbtn{background:#7A3FE0; border-color:#7A3FE0;}
+  .paper.night .dsel select{background:#26232E; color:#E8E4DC; border-color:#3B3546;}
   .paper .dtable{width:100%; border-collapse:collapse; margin:10px 0; font-size:.72rem;}
   .paper .dtable th{text-align:left; border-bottom:1.5px solid #C6BCA2; padding:5px 6px; color:#5A5245;}
   .paper .dtable td{border-bottom:1px solid #E2D9C2; padding:5px 6px; vertical-align:top;}

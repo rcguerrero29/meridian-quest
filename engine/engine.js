@@ -3148,6 +3148,9 @@ function applyLang(){
   $("begin").textContent=t.begin;
   setWorldTag();
   $("openExp").textContent=t.expBtn;$("exTitle").textContent=t.expTitle;$("exHint").textContent=t.expHint;
+  /* the reader's look is the pack's choice (mq-v77): READERLOOK="night" for the purple dark paper;
+     nothing declared keeps the cream. One class on the sheet; both shells carry both looks. */
+  try{const pr=$("paperSheet");if(pr&&typeof READERLOOK==="string"&&/^[a-z]{1,16}$/.test(READERLOOK))pr.classList.add(READERLOOK);}catch(e){}
   {const u=DCU();$("docClose").textContent=u.close||"✕";$("docCopy").textContent=u.copy||"📋";
    $("docDl").textContent=u.dl||"⬇️";if(!$("read").hidden&&!$("world").hidden)checkRead();}
   $("exCopy").textContent=t.expCopy;$("exClose").textContent=t.tlClose;

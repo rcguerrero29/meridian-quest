@@ -100,6 +100,12 @@ the day two worlds need to live in one deploy.
 - `room.js` (the office intake) and `docs.js` (deliverables, templates) are Meridian's
   career layer. Fully removable; drop them and nothing else breaks (`docs/for-aj/AFFECTED.md`).
 
+### 3½ · Two looks for the reader
+
+`READERLOOK="night"` in a pack's config turns the reader's cream paper purple-dark (the town's
+choice, 2026-09-06); leave it out and the paper stays cream (Meridian's). Both shells carry both
+looks in CSS; the engine adds one class to the sheet. A new world picks either in one line.
+
 ## 4 · The rules that travel to any story *(from `docs/OWNER.md`)*
 
 - **Nothing is ever taken away from the player.** No progress, no city, no save, no access.

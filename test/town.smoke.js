@@ -255,7 +255,7 @@ const { chromium } = require('playwright-core');
       const wd2 = docSections('window');
       if (!wd2.some(s => s.btn && /Sign in/.test(s.btn))) problems.push('the window has no sign-in button');
       if (!wd2.some(s => s.btn && /File a request/.test(s.btn))) problems.push('the window has no file-a-request button');
-      if (!wd2.some(s => s.btn && /Several labels/.test(s.btn))) problems.push('the typed several-labels prompt is gone');
+      if (!wd2.some(s => s.btn && /several labels/i.test(s.btn))) problems.push('the several-labels form is gone');
       // ---- ch-v5: the key has a date. La ventanilla counts the days, says so, and points at
       // the page where a new one is made. Nothing new leaves the browser. ----
       { const DAY = 864e5, realNow = Date.now, fetch0 = window.fetch, calls = [];
@@ -433,6 +433,34 @@ const { chromium } = require('playwright-core');
         if (RECORDSRC.filter.join() !== 'bug') problems.push('the filter form did not narrow');
         RECORDSRC.setFilter([], ''); await new Promise(r => setTimeout(r, 40));
         RECORDSRC.signOut(); RECORDSRC.place([]); window.fetch = fetch0; window.prompt = prompt0; document.getElementById('reader').hidden = true; }
+      // ---- ch-v15: the index — everything by tag, one search, walk there, file about it ----
+      { const fx6 = [{ n: 91, title: '❗Sonny should bark', body: 'the pigeon flutters', labels: ['tier: high', 'ask', 'sonny'], at: '2026-09-06' }, { n: 92, title: 'The stair rail', body: '', labels: ['tier: normal', 'decision'], at: '2026-09-06' }, { n: 93, title: 'a small one', body: '', labels: ['tier: low', 'bug'], at: '2026-09-06' }];
+        RECORDSRC.filter = []; RECORDSRC.search = ''; RECORDSRC.place(fx6); RECORDSRC.comments[91] = { updated: 'x', last: { body: 'answered', at: '2026-09-06', ts: '2026-09-06T09:00:00Z', answer: true } }; delete RECORDSRC.comments[92]; delete RECORDSRC.comments[93];
+        const th = RECORDSRC.things(); const names = th.map(t => t.id);
+        ['stall', 'loft', 'street', 'hall', 'board', 'asks', 'decisions', 'bugs', 'park', 'crit:Sonny', 'frederick', 'pigeon', 'lorenzo', 'npc:ventanilla', 'npc:pregonero', 'npc:guero'].forEach(id => { if (!names.includes(id)) problems.push('the index does not know ' + id); });
+        if (th.some(t => t.at && (!WORLDS[t.at.world]))) problems.push('a thing points at a missing world');
+        let r = RECORDSRC.index('', 'sonny');
+        if (!(r.people.map(i => i.n).join() === '91' && r.things.some(t => t.id === 'crit:Sonny') && r.things.some(t => t.id === 'park'))) problems.push('searching "sonny" did not find the request, the dog and the park');
+        r = RECORDSRC.index('state:waiting', ''); if (r.people.map(i => i.n).join() !== '92' || r.things.length) problems.push('state:waiting is wrong');
+        r = RECORDSRC.index('state:answered', ''); if (r.people.map(i => i.n).join() !== '91') problems.push('state:answered is wrong');
+        r = RECORDSRC.index('state:unanswered', ''); if (r.people.map(i => i.n).join() !== '93') problems.push('state:unanswered is wrong');
+        r = RECORDSRC.index('where:board', ''); if (r.people.map(i => i.n).join() !== '93') problems.push('where:board is wrong');
+        r = RECORDSRC.index('label:bug', ''); if (r.people.map(i => i.n).join() !== '93' || !r.things.some(t => t.id === 'bugs')) problems.push('label:bug did not find the person and the storefront');
+        r = RECORDSRC.index('things', 'loro'); if (r.people.length || r.things.map(t => t.id).join() !== 'lorenzo') problems.push('things + a word is wrong');
+        if (!/waiting on you/.test(RECORDSRC.personPlain(fx6[1])) || !/on the board/.test(RECORDSRC.personPlain(fx6[2]))) problems.push('personPlain does not say the state and the place');
+        RECORDSRC.indexCat = 'label:sonny'; RECORDSRC.indexQ = '';
+        const idx = docSections('index');
+        if (!idx.some(x => x.sel && x.opts.some(o => o.v === 'label:sonny')) || !idx.some(x => x.form)) problems.push('the index document lacks the menu or the search');
+        const fb = idx.find(x => x.btn && /file about #91/.test(x.btn)); if (!fb) problems.push('no file-about button for the person');
+        else { fb.run(); if (docCur !== 'request' || RECORDSRC.formTags.join() !== 'ask,sonny') problems.push('file about #91 did not pre-tag the request: ' + RECORDSRC.formTags.join()); }
+        const rq = docSections('request').find(x => x.form); const tagsF = rq && rq.form.fields.find(f => f.k === 'tags');
+        if (!tagsF || !tagsF.value.includes('sonny') || !tagsF.opts.some(o => o.v === 'sonny')) problems.push('the request form does not carry the pre-picked tag');
+        const wb = idx.find(x => x.btn && /walk to .*Sonny/.test(x.btn)); const b0 = { world, px, py };
+        if (!wb) problems.push('no walk-to button for Sonny'); else { wb.run(); const c = CRIT.find(k => k.name === 'Sonny'); if (!(world === c.world && Math.abs(px - Math.round(c.fx)) + Math.abs(py - Math.round(c.fy)) <= 1)) problems.push('walk to Sonny did not land beside him'); }
+        world = b0.world; px = b0.px; py = b0.py;
+        if (!docSections('window').some(x => x.btn && /index/i.test(x.btn))) problems.push("la ventanilla's card has no index button");
+        if (typeof READERLOOK !== 'string' || READERLOOK !== 'night' || !document.getElementById('paperSheet').classList.contains('night')) problems.push('the town does not wear the night look on its paper');
+        RECORDSRC.indexCat = ''; RECORDSRC.formTags = []; RECORDSRC.place([]); document.getElementById('reader').hidden = true; }
       // Meridian's animals have somewhere to stand in the town's rooms
       if (SOLID.has(WORLDS.hq.grid[5][12])) problems.push('hq (12,5) is solid — Frederick has nowhere to stand');
       if (SOLID.has(WORLDS.st.grid[1][4])) problems.push('st (4,1) is solid — the pigeon has nowhere to stand');

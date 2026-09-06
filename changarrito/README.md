@@ -75,6 +75,15 @@ when you press **↻ Refresh** on her card (two switches in `content/config.js` 
 the permits back). If `main` is ahead of what you are running she says so and which line of el
 pregonero's sheet to run.
 
+## The index (ch-v15)
+
+**📇 The index** on la ventanilla's card is the search. Pick from her menu — waiting on you,
+answered, unanswered; answered / new / went home since your last visit; on the street or on the
+board; any label; places, residents and animals — or type a word, and every hit says itself in one
+line with **→ walk there** and **📝 file about this**, which opens the request form already tagged
+with what it is about (file about Sonny and the request carries `sonny`). The paper is purple in
+the town (`READERLOOK="night"` in `content/config.js`); leave the line out for the cream one.
+
 ## Nothing pops up any more (ch-v14)
 
 Filing a request, signing in, narrowing the street, commenting, changing labels, and deciding
