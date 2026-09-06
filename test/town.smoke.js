@@ -205,6 +205,50 @@ const { chromium } = require('playwright-core');
         ['tokenAt', 'tokenExp'].forEach(k => { if (localStorage.getItem(SK(k))) problems.push('sign-out left ' + k + ' behind'); });
         if (!/^https:\/\/github\.com\/settings\/personal-access-tokens/.test(RECORDSRC.newTokenUrl)) problems.push('the new-token link does not go to GitHub settings: ' + RECORDSRC.newTokenUrl);
         Date.now = realNow; window.fetch = fetch0; }
+      // ---- ch-v6: the street went empty in play (owner, 2026-09-06: "0 people on the board").
+      // Reads were unsigned (60 an hour, a dozen per refresh) and a write threw the last good copy
+      // away — a refused read after a write left nobody. Signed reads, kept copies, a plain line
+      // about the refusal, and one button to clear a filter. ----
+      { const fetch0 = window.fetch, calls = [];
+        const answer = (status, headers, body) => Promise.resolve(new Response(body || '[]', { status, headers: Object.assign({ 'Content-Type': 'application/json' }, headers || {}) }));
+        // signed in: the read carries the token; an Issues-only key that cannot read pulls falls back to the public API
+        RECORDSRC.signIn('ghp_test_only');
+        window.fetch = (url, opt) => { calls.push({ url: String(url), opt: opt || {} }); return /\/pulls/.test(String(url)) && (opt.headers || {}).Authorization ? answer(403) : answer(200, {}, '[]'); };
+        localStorage.removeItem(SK('issues')); await RECORDSRC.load();
+        const rd = calls.find(c => /\/issues\?/.test(c.url));
+        if (!rd || !/Bearer ghp_test_only/.test((rd.opt.headers || {}).Authorization || '')) problems.push('a signed-in read did not carry the token');
+        calls.length = 0; localStorage.removeItem(SK('pulls')); await RECORDSRC.loadPulls();
+        const pr = calls.filter(c => /\/pulls/.test(c.url));
+        if (pr.length !== 2 || (pr[1].opt.headers || {}).Authorization) problems.push('a refused signed read did not retry unsigned (' + pr.length + ' calls)');
+        // signed out: no token on the wire
+        RECORDSRC.signOut(); calls.length = 0; localStorage.removeItem(SK('issues')); await RECORDSRC.load();
+        if (calls.some(c => (c.opt.headers || {}).Authorization)) problems.push('a signed-out read carried a token');
+        // a write keeps the last good copy and only forgets the ETag
+        localStorage.setItem(SK('issues'), JSON.stringify({ etag: 'W/"abc"', at: Date.now(), data: [{ number: 77, title: 'kept', body: '', labels: [{ name: 'tier: high' }, { name: 'ask' }], user: { login: RECORDSRC.owner }, state: 'open', created_at: '2026-09-06T00:00:00Z' }] }));
+        // the write lands, then every read is rate-limited — exactly the afternoon the owner had
+        const limited = () => answer(403, { 'x-ratelimit-remaining': '0', 'x-ratelimit-reset': String(Math.floor(Date.now() / 1000) + 1800) }, '{"message":"API rate limit exceeded"}');
+        RECORDSRC.signIn('ghp_test_only'); window.fetch = (url, opt) => { calls.push({ url: String(url), opt: opt || {} }); return (opt && opt.method && opt.method !== 'GET') ? answer(200, {}, '{}') : limited(); };
+        await RECORDSRC.addLabel(77, 'x');
+        const kept = JSON.parse(localStorage.getItem(SK('issues')) || 'null');
+        if (!kept || !Array.isArray(kept.data) || !kept.data.some(i => i.number === 77)) problems.push('a write followed by a refused read threw the last good copy away');
+        else if (kept.etag) problems.push('a write did not forget the ETag, so the next read is not fresh');
+        if (!RECORDSRC.people.some(i => i.n === 77)) problems.push('after the write, the kept person is not on the street');
+        // a rate-limited read: the copy stands, and la ventanilla says why and until when
+        window.fetch = () => limited();
+        RECORDSRC.signOut(); const got = await RECORDSRC.load();
+        if (!got.some(i => i.n === 77)) problems.push('a refused read did not fall back to the kept copy');
+        if (!RECORDSRC.refused) problems.push('a rate-limited read left no note of the refusal');
+        let wd4 = docSections('window'); const said4 = wd4.filter(x => x.p).map(x => x.p).join(' ');
+        if (!/refused|rate/i.test(said4) || !/\d\d:\d\d/.test(said4)) problems.push('la ventanilla does not say the read was refused and until when: ' + said4.slice(0, 200));
+        window.fetch = (url, opt) => answer(200, {}, '[]'); await RECORDSRC.load();
+        if (RECORDSRC.refused) problems.push('a good read did not clear the refusal note');
+        // one button clears a filter and a search together
+        RECORDSRC.filter = ['sonny']; RECORDSRC.search = 'sonny'; wd4 = docSections('window');
+        const clr = wd4.find(x => x.btn && /clear/i.test(x.btn));
+        if (!clr) problems.push('with a filter set, the window has no Clear button');
+        else { clr.run(); if (RECORDSRC.filter.length || RECORDSRC.search) problems.push('Clear did not clear'); }
+        if (docSections('window').some(x => x.btn && /clear/i.test(x.btn))) problems.push('the Clear button shows with nothing to clear');
+        RECORDSRC.signOut(); window.fetch = fetch0; RECORDSRC.filter = []; RECORDSRC.search = ''; }
       // Meridian's animals have somewhere to stand in the town's rooms
       if (SOLID.has(WORLDS.hq.grid[5][12])) problems.push('hq (12,5) is solid — Frederick has nowhere to stand');
       if (SOLID.has(WORLDS.st.grid[1][4])) problems.push('st (4,1) is solid — the pigeon has nowhere to stand');

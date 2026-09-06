@@ -39,17 +39,26 @@ const RECORDSRC={
   async refresh(){
     const list=await this.load();
     this.place(list);
+    if(this.refused&&!this.saidRefused){this.saidRefused=true;this.say("GitHub refused the read (rate limit) until "+this.refused+" — la ventanilla has the details.","GitHub rechazó la lectura (límite) hasta las "+this.refused+" — la ventanilla tiene los detalles.");}
     this.permits=await this.loadPulls();
     await this.loadComments(this.people);
   },
   api(path){return "https://api.github.com/repos/"+this.owner+"/"+this.repo+path;},
-  /* one conditional GET with a last-good copy under the town's own prefix */
+  /* one conditional GET with a last-good copy under the town's own prefix.
+     ch-v6: signed when you are signed in — an unsigned read gets 60 an hour and a refresh spends
+     a dozen, so an afternoon of reloads left the street empty (owner, 2026-09-06). A key that
+     cannot read a path (Issues-only, asked for pulls) is refused once and the public API answers
+     instead. A rate-limit refusal is noted, with the minute it lifts, for la ventanilla to say. */
+  refused:"",     /* "" or the time GitHub reopens, when the last read was rate-limited */
   async get(key,path,fallback){
     let cached=null;try{cached=JSON.parse(localStorage.getItem(SK(key))||"null");}catch(e){}
     const h={Accept:"application/vnd.github+json"};
     if(cached&&cached.etag)h["If-None-Match"]=cached.etag;
+    const t=this.token();if(t)h.Authorization="Bearer "+t;
     try{
-      const r=await fetch(this.api(path),{headers:h});
+      let r=await fetch(this.api(path),{headers:h});
+      if(t&&(r.status===401||r.status===403)&&!this.limited(r)){delete h.Authorization;r=await fetch(this.api(path),{headers:h});}
+      this.noteLimit(r);
       if(r.status===304&&cached)return cached.data;
       if(!r.ok)throw new Error("HTTP "+r.status);
       const data=await r.json();
@@ -59,6 +68,10 @@ const RECORDSRC={
     }catch(e){console.warn("RECORD: "+path+" offline or refused ("+(e&&e.message)+") — the last good copy stands");
       if(cached){this.filedAt=new Date(cached.at||0).toISOString().slice(0,10);return cached.data;}return fallback;}
   },
+  limited(r){try{return r.status===403&&r.headers.get("x-ratelimit-remaining")==="0";}catch(e){return false;}},
+  noteLimit(r){if(this.limited(r)){const at=parseInt(r.headers.get("x-ratelimit-reset")||"0",10)*1000;
+      const d=at?new Date(at):new Date(Date.now()+3600e3);this.refused=d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0");}
+    else if(r.ok||r.status===304)this.refused="";},
   async load(){
     const raw=await this.get("issues","/issues?state=open&per_page=100&creator="+this.owner,[]);
     return this.trim(raw);
@@ -140,7 +153,9 @@ const RECORDSRC={
         else this.say("The token was refused ("+r.status+"). Sign in again with a token for this repo.","El token fue rechazado ("+r.status+"). Identifícate otra vez con un token para este repo.");return null;}
       if(!r.ok){this.say("The city refused it ("+r.status+").","La ciudad lo rechazó ("+r.status+").");return null;}
       const data=r.status===204?{}:await r.json().catch(()=>({}));
-      try{["issues","pulls"].forEach(k=>localStorage.removeItem(SK(k)));}catch(e){} /* the next read is fresh */
+      /* the next read is fresh — the ETag goes, the copy stays: a refused read after a write
+         used to leave the street empty (ch-v6) */
+      try{["issues","pulls"].forEach(k=>{const c=JSON.parse(localStorage.getItem(SK(k))||"null");if(c){c.etag="";localStorage.setItem(SK(k),JSON.stringify(c));}});}catch(e){}
       await this.refresh();
       return data;
     }catch(e){this.say("No network — nothing was written.","Sin red — no se escribió nada.");return null;}
@@ -232,6 +247,9 @@ const RECORDSRC={
     s.push({p:(es?"Hay ":"There are ")+this.people.length+(es?" persona(s) en la calle y ":" person(s) on the street and ")+this.notesList.length+(es?" nota(s) en el tablero.":" note(s) on the board.")
       +(this.filter.length||this.search?(es?" Filtro: ":" Filter: ")+[...this.filter,this.search?"“"+this.search+"”":""].filter(Boolean).join(", ")+".":"")});
     const self=this;
+    if(this.refused)s.push({p:es?"⚠️ GitHub rechazó la última lectura (límite de peticiones). Vuelve a abrir a las "+this.refused+". Hasta entonces la calle muestra la última copia buena; identificarte sube el límite de 60 a 5000 por hora."
+      :"⚠️ GitHub refused the last read (rate limit). It opens again at "+this.refused+". Until then the street shows the last good copy; signing in raises the limit from 60 to 5,000 an hour."});
+    if(this.filter.length||this.search)s.push({btn:es?"✖ Quitar filtro y búsqueda":"✖ Clear filter and search",run:()=>{self.setFilter([],"");docOpen("window");}});
     s.push({h:es?"Trámites":"At the window"});
     const dl=this.daysLeft(),ex=this.expiry(),when=ex?" ("+ex.toISOString().slice(0,10)+")":"";
     s.push({p:this.token()?(dl===null?(es?"Identificado. El pueblo puede escribir.":"Signed in. The town can write.")
