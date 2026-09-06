@@ -3,7 +3,7 @@
    (NEW-WORLD.md §3); the leash warps to "pk", so the park exists (§9.4). Frederick stands at
    (12,5) in any hq and the pigeon at (4,1) in any st — both tiles kept walkable.
    The street (§9.1): three storefront faces the engine already draws — Q for asks, Z for
-   decisions, I for bugs — city hall (B) with la ventanilla's window, the stall's door E at
+   decisions, I for bugs — city hall (B) with la ventanilla standing IN the facade row at her window — behind the counter, visible, talkable from the street (owner, 2026-09-06: "behind the window but visible"), the stall's door E at
    the top, the park's door 2 at the east end. Every door opens; the rest are faces. */
 const WORLD_DEFS={
  hq:["####################",
@@ -20,8 +20,8 @@ const WORLD_DEFS={
      "#......#.......+...#",
      "#......+.......#####",
      "##########E#########"],
- st:["BBQQQQQBBBBBBBEBBBZZZZBBIIIIB2",
-     ".........v....................",
+ st:["BBQQQQQBBvBBBBEBBBZZZZBBIIIIB2",
+     "..............................",
      "..............................",
      ".g.........g..........g.......",
      "..............................",
