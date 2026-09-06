@@ -119,10 +119,11 @@ const { chromium } = require('playwright-core');
     if ((document.querySelector('header h1') || {}).textContent.includes('MERIDIAN')) problems.push("the town's header still says Meridian");
     RECORDSRC.showPermits = true; wd = docSections('window');
     if (!wd.some(s => s.p && /no permit/i.test(s.p))) problems.push('with permits shown, the window does not say there are none');
-    RECORDSRC.showPermits = false;
     RECORDSRC.permits = [{ n: 37, title: 'CLAUDE.md', at: '2026-09-05', mergeable: true, green: true, draft: false, url: 'u' }];
-    wd = docSections('window');
+    wd = docSections('window'); /* the switch is still on from the line above: the permit lists */
     if (!wd.some(s => s.kv && s.kv.some(r => r[0] === '#37'))) problems.push('the window does not list the permit');
+    RECORDSRC.showPermits = false; wd = docSections('window');
+    if (wd.some(s => s.kv && s.kv.some(r => r[0] === '#37'))) problems.push('the permit still lists with the switch off');
     const bd = docSections('board'); if (!bd.length) problems.push('the board does not build');
     RECORDSRC.place([]);
     // ---- ch-v12 (#4): la caja de escalera — the stall grew three rows south; the flight runs east ----
