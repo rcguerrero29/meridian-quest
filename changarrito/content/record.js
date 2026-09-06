@@ -28,7 +28,7 @@ const RECORDSRC={
   every:5*60*1000,
   boot(){
     try{this.cycle=JSON.parse(localStorage.getItem(SK("cycle"))||"{}")||{};}catch(e){this.cycle={};}
-    try{const f=JSON.parse(localStorage.getItem(SK("filter"))||"null");if(f){this.filter=f.labels||[];this.search=f.search||"";}}catch(e){}
+    try{const f=JSON.parse(localStorage.getItem(SK("filter"))||"null");if(f){this.filter=f.labels||[];this.search=f.search||"";if(["weight","newest","oldest","number"].includes(f.sort))this.sort=f.sort;}}catch(e){}
     const v=WORLDS[this.world]&&WORLDS[this.world].npcs.find(n=>n.npc==="ventanilla");
     if(v)v.doc="window"; /* the clerk hands you the city's record */
     this.refresh();
@@ -194,8 +194,20 @@ const RECORDSRC={
     const tier=this.ask(es?"Peso: high / normal / low":"Weight: high / normal / low")||"normal";
     this.file({title,plain,notes,done,kind:kind.trim().toLowerCase(),tier:tier.trim().toLowerCase()});},
   /* filter and search: read-only; whoever does not match waits on the board */
+  /* ch-v9 (#42): every label the record has seen, grouped for a dropdown — weight, kind, the rest */
+  all:[],         /* the last list the record placed, filter or no filter */
+  sort:"weight",  /* who gets the street first: weight (tier), newest, oldest, number */
+  labelsSeen(){const seen=new Set();this.all.forEach(i=>(i.labels||[]).forEach(l=>seen.add(l)));
+    const es=lang==="es",g=l=>l.startsWith("tier: ")?(es?"peso":"weight"):["ask","decision","bug"].includes(l)?(es?"tipo":"kind"):(es?"otras":"other");
+    const order={weight:0,peso:0,kind:1,tipo:1,other:2,otras:2};
+    return [...seen].sort((a,b)=>(order[g(a)]-order[g(b)])||a.localeCompare(b)).map(l=>({v:l,t:l,g:g(l)}));},
+  sortPeople(list){const by=this.sort,t={high:0,normal:1,low:2};
+    const cmp={newest:(a,b)=>String(b.at).localeCompare(String(a.at))||b.n-a.n,oldest:(a,b)=>String(a.at).localeCompare(String(b.at))||a.n-b.n,
+      number:(a,b)=>a.n-b.n,weight:(a,b)=>(t[this.tier(a)]-t[this.tier(b)])||b.n-a.n}[by]||((a,b)=>0);
+    return list.slice().sort(cmp);},
+  setSort(v){this.sort=["weight","newest","oldest","number"].includes(v)?v:"weight";this.setFilter(this.filter,this.search);},
   setFilter(labels,search){this.filter=(labels||[]).map(l=>this.clean(l,40)).filter(Boolean);this.search=this.clean(search,60).toLowerCase();
-    try{localStorage.setItem(SK("filter"),JSON.stringify({labels:this.filter,search:this.search}));}catch(e){}
+    try{localStorage.setItem(SK("filter"),JSON.stringify({labels:this.filter,search:this.search,sort:this.sort}));}catch(e){}
     this.load().then(l=>this.place(l));},
   matches(i){if(this.filter.length&&!this.filter.every(l=>(i.labels||[]).includes(l)))return false;
     if(this.search&&!((i.title||"")+" "+(i.body||"")).toLowerCase().includes(this.search))return false;return true;},
@@ -260,7 +272,14 @@ const RECORDSRC={
     s.push({btn:this.token()?(es?"🔑 Salir":"🔑 Sign out"):(es?"🔑 Identificarme":"🔑 Sign in"),run:()=>{if(self.token()){self.signOut();self.say("Signed out.","Sesión cerrada.");}else{const t=self.ask(es?"Pega tu token de GitHub (solo issues: write, 30 días):":"Paste your GitHub token (issues: write only, 30 days):");if(t&&self.signIn(t))self.say("Signed in. Nothing else was stored.","Identificado. No se guardó nada más.");}docOpen("window");}});
     s.push({btn:es?"🔑 Hacer un token nuevo (abre GitHub)":"🔑 Make a new token (opens GitHub)",run:()=>self.openNewToken()});
     s.push({btn:es?"📝 Presentar una petición":"📝 File a request",run:()=>self.fileByPrompt()});
-    s.push({btn:es?"🔍 Filtrar por etiquetas":"🔍 Filter by labels",run:()=>{const v=self.ask(es?"Etiquetas, separadas por coma (vacío = todos):":"Labels, comma-separated (empty = everyone):");if(v!==null){self.setFilter(v.split(",").map(x=>x.trim()).filter(Boolean),self.search);docOpen("window");}}});
+    /* the dropdowns (#42): one label at a time from the labels the record has seen, grouped by
+       weight / kind / other; and who gets the street first. The typed prompt below still takes
+       several labels at once (owner: "include/tag the tags") */
+    s.push({sel:es?"🔍 Etiqueta":"🔍 Label",opts:[{v:"",t:es?"— todos —":"— everyone —"}].concat(this.labelsSeen()),value:this.filter.length===1?this.filter[0]:(this.filter.length?"…":""),
+      run:v=>{self.setFilter(v?[v]:[],self.search);docOpen("window");}});
+    s.push({sel:es?"↕ Orden":"↕ Sort",opts:[{v:"weight",t:es?"por peso (alto primero)":"by weight (high first)"},{v:"newest",t:es?"más nuevos primero":"newest first"},{v:"oldest",t:es?"más viejos primero":"oldest first"},{v:"number",t:es?"por número":"by number"}],value:this.sort,
+      run:v=>{self.setSort(v);docOpen("window");}});
+    s.push({btn:es?"🔍 Varias etiquetas a la vez":"🔍 Several labels at once",run:()=>{const v=self.ask(es?"Etiquetas, separadas por coma (vacío = todos):":"Labels, comma-separated (empty = everyone):");if(v!==null){self.setFilter(v.split(",").map(x=>x.trim()).filter(Boolean),self.search);docOpen("window");}}});
     s.push({btn:es?"🔎 Buscar una palabra":"🔎 Search a word",run:()=>{const v=self.ask(es?"Palabra (vacío = todos):":"Word (empty = everyone):");if(v!==null){self.setFilter(self.filter,v);docOpen("window");}}});
     return s;},
   /* the board: the small things, pinned */
@@ -271,8 +290,9 @@ const RECORDSRC={
   place(list){
     const w=WORLDS[this.world];if(!w)return;
     const by={high:[],normal:[],low:[]},aside=[];
+    this.all=(list||[]).slice();
     (list||[]).forEach(i=>{if(this.matches(i))by[this.tier(i)].push(i);else aside.push(i);});
-    const people=by.high.concat(by.normal).slice(0,this.cap);
+    const people=this.sortPeople(by.high.concat(by.normal)).slice(0,this.cap);
     this.people=people;
     this.notesList=by.low.concat(by.high.concat(by.normal).slice(this.cap)).concat(aside); /* whoever is not on the street is on the board */
     this.notes=this.notesList.length;

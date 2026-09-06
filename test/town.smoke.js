@@ -185,10 +185,33 @@ const { chromium } = require('playwright-core');
       if (!RECORDSRC.notesList.some(i => i.n === 22)) problems.push('the filtered-out person is not on the board');
       RECORDSRC.filter = []; RECORDSRC.search = 'beta'; RECORDSRC.place(fx3);
       if (RECORDSRC.people.length !== 1 || RECORDSRC.people[0].n !== 22) problems.push('search did not narrow the street');
-      RECORDSRC.filter = []; RECORDSRC.search = ''; RECORDSRC.place([]);
+      // ---- ch-v9 (#42): a dropdown of the labels seen, grouped; a sort; the reader renders a select ----
+      RECORDSRC.filter = []; RECORDSRC.search = ''; RECORDSRC.sort = 'weight'; RECORDSRC.place(fx3);
+      const load0 = RECORDSRC.load; RECORDSRC.load = async () => fx3; /* setFilter re-reads; hand it the fixture, no wire */
+      const seen = RECORDSRC.labelsSeen();
+      if (!seen.some(o => o.v === 'tier: high' && /weight/.test(o.g)) || !seen.some(o => o.v === 'bug' && /kind/.test(o.g))) problems.push('labelsSeen() does not group the labels: ' + JSON.stringify(seen));
+      let wdS = docSections('window');
+      const selL = wdS.find(x => x.sel && /Label/.test(x.sel)), selS = wdS.find(x => x.sel && /Sort/.test(x.sel));
+      if (!selL) problems.push('the window has no label dropdown'); else { if (!selL.opts.some(o => o.v === 'bug')) problems.push('the label dropdown lacks a seen label'); selL.run('bug'); await new Promise(r => setTimeout(r, 30));
+        if (RECORDSRC.filter.join() !== 'bug' || RECORDSRC.people.length !== 1 || RECORDSRC.people[0].n !== 21) problems.push('choosing a label in the dropdown did not narrow the street'); selL.run(''); await new Promise(r => setTimeout(r, 30)); if (RECORDSRC.filter.length) problems.push('choosing everyone did not clear the label'); }
+      if (!selS) problems.push('the window has no sort dropdown'); else { selS.run('oldest'); }
+      const fx4 = [{ n: 31, title: 'c', body: '', labels: ['tier: normal', 'ask'], at: '2026-09-03' }, { n: 32, title: 'd', body: '', labels: ['tier: high', 'ask'], at: '2026-09-05' }, { n: 33, title: 'e', body: '', labels: ['tier: normal', 'ask'], at: '2026-09-01' }];
+      RECORDSRC.place(fx4);
+      if (RECORDSRC.people.map(i => i.n).join() !== '33,31,32') problems.push('sort oldest did not order the street: ' + RECORDSRC.people.map(i => i.n).join());
+      RECORDSRC.setSort('weight'); RECORDSRC.place(fx4);
+      if (RECORDSRC.people[0].n !== 32) problems.push('sort by weight does not put tier: high first');
+      RECORDSRC.setSort('number'); RECORDSRC.place(fx4);
+      if (RECORDSRC.people.map(i => i.n).join() !== '31,32,33') problems.push('sort by number is wrong: ' + RECORDSRC.people.map(i => i.n).join());
+      if (!(JSON.parse(localStorage.getItem(SK('filter')) || '{}').sort === 'number')) problems.push('the sort is not remembered under the prefix');
+      let chosen = null; docOpen({ title: { en: 't' }, build: () => [{ sel: 'Pick', opts: [{ v: 'a', t: 'A', g: 'g1' }, { v: 'b', t: 'B' }], value: 'b', run: v => { chosen = v; } }] });
+      const se = document.querySelector('#docBody select');
+      if (!se) problems.push('the reader did not render a select'); else { if (se.value !== 'b') problems.push('the select does not show the current value'); if (!se.querySelector('optgroup')) problems.push('the select does not group options');
+        se.value = 'a'; se.dispatchEvent(new Event('change')); if (chosen !== 'a') problems.push('changing the select did not run its content'); }
+      RECORDSRC.setSort('weight'); await new Promise(r => setTimeout(r, 30)); RECORDSRC.load = load0; RECORDSRC.filter = []; RECORDSRC.search = ''; RECORDSRC.place([]);
       const wd2 = docSections('window');
       if (!wd2.some(s => s.btn && /Sign in/.test(s.btn))) problems.push('the window has no sign-in button');
       if (!wd2.some(s => s.btn && /File a request/.test(s.btn))) problems.push('the window has no file-a-request button');
+      if (!wd2.some(s => s.btn && /Several labels/.test(s.btn))) problems.push('the typed several-labels prompt is gone');
       // ---- ch-v5: the key has a date. La ventanilla counts the days, says so, and points at
       // the page where a new one is made. Nothing new leaves the browser. ----
       { const DAY = 864e5, realNow = Date.now, fetch0 = window.fetch, calls = [];
