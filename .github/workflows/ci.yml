@@ -1,6 +1,8 @@
 name: CI
 permissions:
-  contents: read   # the smoke test reads; nothing in CI may push
+  contents: read        # the smoke test reads; nothing in CI may push
+  issues: read          # R3: the Closes check reads the issues a PR says it closes
+  pull-requests: read
 on:
   push:
   pull_request:
@@ -23,3 +25,16 @@ jobs:
         run: node test/smoke.js
       - name: El Changarrito smoke
         run: node test/town.smoke.js
+      - name: Engine smoke, against both games (R4)
+        run: |
+          node test/engine.smoke.js --index index.html
+          node test/engine.smoke.js --index changarrito/index.html
+      - name: The issues this PR closes are the ones it talks about (R3)
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          git diff "origin/${{ github.base_ref }}"...HEAD > /tmp/pr.diff || git diff "origin/${{ github.base_ref }}" HEAD > /tmp/pr.diff
+          node test/closes.js --diff-file /tmp/pr.diff
