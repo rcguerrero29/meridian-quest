@@ -829,10 +829,22 @@ TILEDRAW["⊓"]=rc=>{const{sx,sy,x,y}=rc;const w=CW(),row=(w&&w.rows&&w.rows[y])
     ctx.fillStyle="rgba(15,12,20,.28)";ctx.fillRect(x0+2.5,ty+2.4,13.5,1.3);} /* the nosing shadow */
   ctx.strokeStyle="#3A3140";ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(sx,top(k0)-7);ctx.lineTo(sx+TS,top(k0+2)-7);ctx.stroke(); /* the handrail */
   ctx.fillStyle="#3A3140";ctx.fillRect(sx+7,top(k0)-7,1.5,7);ctx.fillRect(sx+23,top(k0+1)-7,1.5,7);};   /* two balusters */
-TILEDRAW["≡"]=rc=>{const{sx,sy}=rc; /* a tread from above, on a flight that runs east: two risers a tile, the nosing shadow on the east edge */
-  ctx.fillStyle="#C6BEAA";ctx.fillRect(sx+1,sy+3,14,26);ctx.fillRect(sx+17,sy+3,14,26);
+/* the run a tread belongs to: its index from the west, the run's length, and whether it CLIMBS
+   (a ▲ head at the east end — the hall side) or is the WELL (a ▼ at the west end — the loft
+   side, where you look down into it). Every camera and the 3D lift read this one function. */
+const STAIRH=0.16; /* one step's rise, in tile units — three treads and a head climb 0.64 */
+function stairRun(w,x,y){const row=(w&&w.rows&&w.rows[y])||"";if(row[x]!=="≡"&&row[x]!=="▲")return null;
+  let a=x;while(a-1>=0&&row[a-1]==="≡")a--;let b=x;while(b+1<row.length&&(row[b+1]==="≡"||row[b+1]==="▲"))b++;
+  const up=row[b]==="▲",well=row[a-1]==="▼";const i=x-a,L=b-a+1;return {i,L,up:up&&!well,well};}
+function stairLift(w,x,y){const r=stairRun(w,x,y);if(!r||!r.up)return 0;return STAIRH*(r.i+1);}
+TILEDRAW["≡"]=rc=>{const{sx,sy,x,y}=rc; /* a tread from above on a flight that runs east: two risers a tile,
+  the nosing shadow on the east edge; a climbing flight lightens step by step, a well darkens */
+  const r=stairRun(CW(),x,y)||{i:0,L:1,up:true,well:false};const t=r.L>1?r.i/(r.L-1):0;
+  const base=r.well?["#8A8476","#7A7468"]:["#B9B19D","#CEC6B2"];
+  const mix=(a,b,t)=>{const h=c=>parseInt(c,16);const A=[1,3,5].map(i=>h(a.slice(i,i+2))),B=[1,3,5].map(i=>h(b.slice(i,i+2)));return "rgb("+A.map((v,k)=>Math.round(v+(B[k]-v)*t)).join(",")+")";};
+  ctx.fillStyle=mix(base[0],base[1],t);ctx.fillRect(sx+1,sy+3,14,26);ctx.fillRect(sx+17,sy+3,14,26);
   ctx.fillStyle="rgba(255,255,255,.25)";ctx.fillRect(sx+1,sy+3,1.5,26);ctx.fillRect(sx+17,sy+3,1.5,26);
-  ctx.fillStyle="rgba(15,12,20,.28)";ctx.fillRect(sx+13,sy+3,2,26);ctx.fillRect(sx+29,sy+3,2,26);};
+  ctx.fillStyle=r.well?"rgba(15,12,20,.45)":"rgba(15,12,20,.28)";ctx.fillRect(sx+13,sy+3,2,26);ctx.fillRect(sx+29,sy+3,2,26);};
 TILEDRAW["▲"]=rc=>{const{sx,sy}=rc; /* the head of the flight: the dark opening you climb into, and the way it goes */
   ctx.fillStyle="#241F2E";ctx.fillRect(sx+2,sy+2,28,28);
   ctx.fillStyle="#C6BEAA";ctx.beginPath();ctx.moveTo(sx+16,sy+9);ctx.lineTo(sx+24,sy+20);ctx.lineTo(sx+8,sy+20);ctx.closePath();ctx.fill();};

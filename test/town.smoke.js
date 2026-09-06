@@ -134,6 +134,11 @@ const { chromium } = require('playwright-core');
       if (!(hq.W === 20 && hq.H === 17)) problems.push('the stall is not 20×17: ' + hq.W + '×' + hq.H);
       if (hq.rows[12] !== '#......+.......#####') problems.push('row 12 of the stall changed — rows 0–12 must be untouched');
       if (hq.rows[13] !== '##########+⊓⊓⊓⊓#####' || hq.rows[14] !== '#..........≡≡≡▲#####' || hq.rows[15] !== '#..................#' || hq.rows[16] !== '##########E#########') problems.push('the stair hall and lobby rows are not candidate B');
+      // #62: the flight climbs — each tread a step higher, the head the top; the loft's well is flat and railed on both sides
+      if (!(stairLift(hq, 11, 14) > 0 && stairLift(hq, 12, 14) > stairLift(hq, 11, 14) && stairLift(hq, 14, 14) > stairLift(hq, 13, 14))) problems.push('the treads do not rise east to the head');
+      if (stairLift(hq, 10, 14) !== 0 || stairLift(hq, 10, 15) !== 0) problems.push('the landing or the lobby has a lift');
+      if (!f2 || !(stairRun(f2, 12, 14) && stairRun(f2, 12, 14).well) || stairLift(f2, 12, 14) !== 0) problems.push('the loft treads are not a flat well');
+      if (f2 && f2.rows[15] !== '#..........◺◺◺.....#') problems.push('the well is not railed on the south side — you could walk off the floor');
       if (!f2) problems.push('the stall has no loft (f2)');
       else { if (!(f2.W === 20 && f2.H === 17)) problems.push('the loft is not 20×17');
         if (f2.rows[13] !== '#..........◺◺◺.....#' || f2.rows[14] !== '#.........▼≡≡≡.....#') problems.push('the loft has no railed well over the flight'); }
@@ -154,7 +159,19 @@ const { chromium } = require('playwright-core');
       else { const mass = T3.group.children.filter(o => o.userData && o.userData.wall && o.userData.g === '⊓');
         if (mass.length !== 4) problems.push('the stair mass is not four boxes in 3D (' + mass.length + ')');
         const faces = new Set(mass.map(o => (Array.isArray(o.material) ? o.material[4] : o.material))); if (faces.size !== 4) problems.push('the four mass tiles share a face — four little staircases, not one flight');
-        if (!T3.group.children.some(o => o.userData && o.userData.lintel && o.userData.x === 10 && o.userData.y === 13)) problems.push('the office door at (10,13) has no lintel'); }
+        if (!T3.group.children.some(o => o.userData && o.userData.lintel && o.userData.x === 10 && o.userData.y === 13)) problems.push('the office door at (10,13) has no lintel');
+        const treads = T3.group.children.filter(o => o.userData && o.userData.tread && o.userData.y === 14).sort((a, b) => a.userData.x - b.userData.x);
+        if (treads.length !== 4 || !treads.every((t, i) => i === 0 || t.userData.h > treads[i - 1].userData.h)) problems.push('the flight is not four rising boxes in 3D (' + treads.map(t => t.userData.h.toFixed(2)).join(',') + ')');
+        // #61: from the lobby the south wall stands between the camera and you — it is cut away; the north wall is not
+        RECORDSRC.goBeside('hq', 10, 16); T3.yaw = 0; draw3d(); /* beside the front door = the lobby (10,15); goBeside moves fx/fy too */
+        const south = T3.group.children.filter(o => o.userData && o.userData.wall !== undefined && o.userData.y === 16 && Math.abs(o.userData.x - 10) <= 2);
+        const north = T3.group.children.filter(o => o.userData && o.userData.wall !== undefined && o.userData.y === 0);
+        if (!south.length || south.some(o => o.visible)) problems.push('the south wall is not cut away while it stands between the camera and you');
+        if (!north.length || north.some(o => !o.visible)) problems.push('the north wall was cut away for nothing');
+        // you stand higher on a tread
+        RECORDSRC.goBeside('hq', 12, 13); draw3d(); const hero = T3.pool.filter(p => p.live && p.spr.material.depthTest === false)[0]; /* beside the mass = the second tread (12,14) */
+        if (!(px === 12 && py === 14)) problems.push('goBeside the mass did not land on the tread: ' + px + ',' + py);
+        if (!hero || hero.spr.position.y < 0.3) problems.push('standing on the second tread does not lift you: ' + (hero && hero.spr.position.y)); }
       world = 'f2'; px = 14; py = 14;
       if (!draw3d() || T3.fail) problems.push('the loft did not render in 3D');
       else if (T3.group.children.filter(o => o.userData && o.userData.fence && o.userData.y === 13).length < 3) problems.push('the rail does not stand as panels in 3D');
