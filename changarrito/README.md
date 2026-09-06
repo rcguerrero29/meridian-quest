@@ -63,7 +63,13 @@ network. Never put a tunnel in front of it. Nothing links here from the public g
 ## What needs the token, and what does not
 
 Nothing you *read* needs it: walking, talking, the paperwork, la ventanilla's permits, the
-board, **Filter by labels** and **Search a word** all use the public API, signed out. Only the
+board, **Filter by labels** and **Search a word** all use the public API, signed out. Signed
+in, the town reads with your key too (ch-v6): the public API allows 60 reads an hour and a
+refresh spends about a dozen, so an afternoon of reloads can run it dry — with the key it is
+5,000. When GitHub refuses a read, la ventanilla says so and the minute it reopens, and the
+street shows the last good copy. If the street looks empty, talk to her first: her *The street*
+line names any filter or search that is hiding people, and **Clear filter and search** is one
+press. Only the
 buttons that *change* GitHub need it — Done, Ask for more context, **Comment in my own words**,
 + label / − label, File a request. Press one signed out and the town says so and does nothing.
 Every person's card says which state you are in.
