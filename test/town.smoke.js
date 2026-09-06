@@ -172,6 +172,39 @@ const { chromium } = require('playwright-core');
       const wd2 = docSections('window');
       if (!wd2.some(s => s.btn && /Sign in/.test(s.btn))) problems.push('the window has no sign-in button');
       if (!wd2.some(s => s.btn && /File a request/.test(s.btn))) problems.push('the window has no file-a-request button');
+      // ---- ch-v5: the key has a date. La ventanilla counts the days, says so, and points at
+      // the page where a new one is made. Nothing new leaves the browser. ----
+      { const DAY = 864e5, realNow = Date.now, fetch0 = window.fetch, calls = [];
+        const at = iso => { Date.now = () => Date.parse(iso); };
+        at('2026-09-06T12:00:00Z'); RECORDSRC.signIn('ghp_test_only');
+        if (!(RECORDSRC.expiry() instanceof Date)) problems.push('signing in did not start the clock');
+        else if (Math.round((RECORDSRC.expiry() - Date.now()) / DAY) !== 30) problems.push('a fresh key does not count 30 days: ' + RECORDSRC.expiry());
+        if (RECORDSRC.daysLeft() !== 30) problems.push('daysLeft is not 30 on the day of sign-in: ' + RECORDSRC.daysLeft());
+        let wd3 = docSections('window'); const said = wd3.filter(s => s.p).map(s => s.p).join(' ');
+        if (!/30 days/.test(said)) problems.push("the window does not say how many days the key has left");
+        if (!wd3.some(s => s.btn && /new token/i.test(s.btn))) problems.push('the window has no make-a-new-token button');
+        if (wd3.some(s => s.p && /ghp_test_only/.test(s.p))) problems.push('the token itself is printed on the window');
+        // GitHub tells the real date on every answer; the town believes GitHub over its own count
+        window.fetch = (url, opt) => { calls.push({ url: String(url), opt: opt || {} }); return Promise.resolve(new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json', 'github-authentication-token-expiration': '2026-09-16 15:26:57 UTC' } })); };
+        await RECORDSRC.addLabel(8, 'x');
+        if (RECORDSRC.daysLeft() !== 10) problems.push('the expiry header was not read (daysLeft ' + RECORDSRC.daysLeft() + ', want 10)');
+        at('2026-09-13T12:00:00Z'); wd3 = docSections('window');
+        if (RECORDSRC.daysLeft() !== 3) problems.push('daysLeft did not move with the calendar: ' + RECORDSRC.daysLeft());
+        if (!wd3.some(s => s.p && /3 days/.test(s.p) && /new/i.test(s.p))) problems.push('with 3 days left the window does not warn');
+        if (!RECORDSRC.keyWarning()) problems.push('with 3 days left there is no warning to say out loud');
+        at('2026-09-20T12:00:00Z'); wd3 = docSections('window');
+        if (RECORDSRC.daysLeft() >= 0) problems.push('a dead key still counts days: ' + RECORDSRC.daysLeft());
+        if (!wd3.some(s => s.p && /run out|expired/i.test(s.p))) problems.push('a dead key is not called dead on the window');
+        // a 401 on a dead key says "make a new one", not a bare status code
+        window.fetch = () => Promise.resolve(new Response('{}', { status: 401 }));
+        const toasts = []; const toast0 = window.toast; window.toast = (m) => toasts.push(String(m));
+        await RECORDSRC.addLabel(8, 'x'); window.toast = toast0;
+        if (!toasts.some(m => /new/i.test(m) && /key|token/i.test(m))) problems.push('a refused dead key did not say to make a new one: ' + toasts.join(' | '));
+        RECORDSRC.signOut();
+        if (RECORDSRC.expiry() !== null) problems.push('signing out did not clear the clock');
+        ['tokenAt', 'tokenExp'].forEach(k => { if (localStorage.getItem(SK(k))) problems.push('sign-out left ' + k + ' behind'); });
+        if (!/^https:\/\/github\.com\/settings\/personal-access-tokens/.test(RECORDSRC.newTokenUrl)) problems.push('the new-token link does not go to GitHub settings: ' + RECORDSRC.newTokenUrl);
+        Date.now = realNow; window.fetch = fetch0; }
       // Meridian's animals have somewhere to stand in the town's rooms
       if (SOLID.has(WORLDS.hq.grid[5][12])) problems.push('hq (12,5) is solid — Frederick has nowhere to stand');
       if (SOLID.has(WORLDS.st.grid[1][4])) problems.push('st (4,1) is solid — the pigeon has nowhere to stand');

@@ -75,6 +75,15 @@ GitHub → Settings → Developer settings → Fine-grained tokens → *Generate
 write**, nothing else, expiry 30 days. Copy it, walk to la ventanilla, press **Sign in**,
 paste. To revoke: delete the token on GitHub; the town notices on its next write.
 
+**When it runs out (ch-v5).** La ventanilla keeps the date. Her card says *"the key runs out in
+N days"* — GitHub tells her the exact day on every answer the key signs, and she believes that
+over her own count from the day you signed in. Under five days she says it out loud when the
+town opens, and when the key is dead she says so instead of a bare 401. Beside Sign in there is
+**Make a new token (opens GitHub)**: the token page in a new tab — same settings as above — copy,
+walk back, Sign in, paste. Nothing you *read* ever stops; only the write buttons wait for the new
+key. The one thing that stays yours is the copy-and-paste: GitHub will not let a page mint a key,
+and that is the gate we want kept.
+
 **The risks, plainly.** The token is a key to *issues on this one repo* and nothing else: whoever
 holds it can open, comment on, label and close issues as you — not read private code, not push,
 not touch other repos, not change settings. It lives in this browser's storage under the town's

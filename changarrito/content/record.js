@@ -32,6 +32,7 @@ const RECORDSRC={
     const v=WORLDS[this.world]&&WORLDS[this.world].npcs.find(n=>n.npc==="ventanilla");
     if(v)v.doc="window"; /* the clerk hands you the city's record */
     this.refresh();
+    const kw=this.keyWarning();if(kw)setTimeout(()=>this.say(kw,kw),1200); /* short or dead: said once, at the door */
     setInterval(()=>this.refresh(),this.every);
     document.addEventListener("visibilitychange",()=>{if(!document.hidden)this.refresh();});
   },
@@ -103,8 +104,29 @@ const RECORDSRC={
   /* ---------- Part 3: the town writes. A token typed once, kept under the town's prefix, never
      in a save, never in a sheet. Every write goes through one door and refreshes the street. ---------- */
   token(){try{return localStorage.getItem(SK("token"))||"";}catch(e){return "";}},
-  signIn(t){const v=String(t||"").trim();if(!v)return false;try{localStorage.setItem(SK("token"),v);}catch(e){return false;}return true;},
-  signOut(){try{localStorage.removeItem(SK("token"));}catch(e){}},
+  signIn(t){const v=String(t||"").trim();if(!v)return false;
+    try{localStorage.setItem(SK("token"),v);localStorage.setItem(SK("tokenAt"),new Date(Date.now()).toISOString());localStorage.removeItem(SK("tokenExp"));}catch(e){return false;}return true;},
+  signOut(){try{["token","tokenAt","tokenExp"].forEach(k=>localStorage.removeItem(SK(k)));}catch(e){}},
+  /* ---------- ch-v5: the key has a date. A fine-grained token dies on its own (30 days is the
+     README's rule); GitHub says the exact day in a header on every answer the token signs, and
+     the town believes that over its own count from the day of sign-in. Nothing here leaves the
+     browser: two dates under the town's prefix, beside the token, gone with it at sign-out. ---------- */
+  newTokenUrl:"https://github.com/settings/personal-access-tokens/new",
+  keyDays:30,
+  expiry(){if(!this.token())return null;
+    try{const e=localStorage.getItem(SK("tokenExp"));if(e){const d=new Date(e);if(!isNaN(d))return d;}
+      const a=localStorage.getItem(SK("tokenAt"));if(a){const d=new Date(a);if(!isNaN(d))return new Date(d.getTime()+this.keyDays*864e5);}}catch(e){}
+    return null;},
+  daysLeft(){const e=this.expiry();return e?Math.floor((e.getTime()-Date.now())/864e5):null;},
+  noteExpiry(r){try{const h=r&&r.headers&&r.headers.get("github-authentication-token-expiration");if(!h)return;
+      const d=new Date(h.trim().replace(" UTC","Z").replace(" ","T"));if(!isNaN(d))localStorage.setItem(SK("tokenExp"),d.toISOString());}catch(e){}},
+  /* what la ventanilla says about the key: null while it has time, a sentence when it is short or gone */
+  keyWarning(){const d=this.daysLeft();if(d===null||d>5)return null;const es=lang==="es";
+    if(d<0)return es?"Tu llave ya caducó. Haz una nueva en GitHub y vuelve a identificarte — leer sigue funcionando.":"Your key has run out. Make a new one on GitHub and sign in again — reading still works.";
+    const dd=d+(es?(d===1?" día":" días"):(d===1?" day":" days"));
+    return es?"Tu llave caduca en "+dd+". Haz una nueva en GitHub cuando puedas.":"Your key runs out in "+dd+". Make a new one on GitHub when you can.";},
+  openNewToken(){try{window.open(this.newTokenUrl,"_blank","noopener");}catch(e){}
+    this.say("GitHub opened in a new tab: only this repo, Issues read and write, 30 days. Copy it and Sign in here.","GitHub se abrió en otra pestaña: solo este repo, Issues lectura y escritura, 30 días. Cópialo e identifícate aquí.");},
   say(en,es){toast("💬 "+(lang==="es"?es:en),3200);},
   async write(method,path,body){
     const t=this.token();
@@ -112,7 +134,10 @@ const RECORDSRC={
     if(this.busy)return null;this.busy=true;
     try{
       const r=await fetch(this.api(path),{method,headers:{Accept:"application/vnd.github+json","Content-Type":"application/json",Authorization:"Bearer "+t},body:body===undefined?undefined:JSON.stringify(body)});
-      if(r.status===401||r.status===403){this.say("The token was refused ("+r.status+"). Sign in again with a token for this repo.","El token fue rechazado ("+r.status+"). Identifícate otra vez con un token para este repo.");return null;}
+      this.noteExpiry(r);
+      if(r.status===401||r.status===403){const d=this.daysLeft();
+        if(d!==null&&d<0)this.say("Your key has run out ("+r.status+"). Make a new token on GitHub and sign in again.","Tu llave ya caducó ("+r.status+"). Haz un token nuevo en GitHub e identifícate otra vez.");
+        else this.say("The token was refused ("+r.status+"). Sign in again with a token for this repo.","El token fue rechazado ("+r.status+"). Identifícate otra vez con un token para este repo.");return null;}
       if(!r.ok){this.say("The city refused it ("+r.status+").","La ciudad lo rechazó ("+r.status+").");return null;}
       const data=r.status===204?{}:await r.json().catch(()=>({}));
       try{["issues","pulls"].forEach(k=>localStorage.removeItem(SK(k)));}catch(e){} /* the next read is fresh */
@@ -208,8 +233,14 @@ const RECORDSRC={
       +(this.filter.length||this.search?(es?" Filtro: ":" Filter: ")+[...this.filter,this.search?"“"+this.search+"”":""].filter(Boolean).join(", ")+".":"")});
     const self=this;
     s.push({h:es?"Trámites":"At the window"});
-    s.push({p:this.token()?(es?"Identificado. El pueblo puede escribir.":"Signed in. The town can write."):(es?"Sin identificar. El pueblo solo lee. Un token de GitHub para este repo (issues: write), escrito una vez, se queda en este navegador y en ningún otro lado.":"Not signed in. The town only reads. A GitHub token for this repo (issues: write), typed once, stays in this browser and nowhere else.")});
+    const dl=this.daysLeft(),ex=this.expiry(),when=ex?" ("+ex.toISOString().slice(0,10)+")":"";
+    s.push({p:this.token()?(dl===null?(es?"Identificado. El pueblo puede escribir.":"Signed in. The town can write.")
+        :dl<0?(es?"Identificado, pero la llave ya caducó"+when+". El pueblo solo lee hasta que hagas una nueva.":"Signed in, but the key has run out"+when+". The town only reads until you make a new one.")
+        :(es?"Identificado. El pueblo puede escribir. La llave caduca en "+dl+(dl===1?" día":" días")+when+".":"Signed in. The town can write. The key runs out in "+dl+(dl===1?" day":" days")+when+"."))
+      :(es?"Sin identificar. El pueblo solo lee. Un token de GitHub para este repo (issues: write), escrito una vez, se queda en este navegador y en ningún otro lado.":"Not signed in. The town only reads. A GitHub token for this repo (issues: write), typed once, stays in this browser and nowhere else.")});
+    const kw=this.keyWarning();if(kw)s.push({p:"🔑 "+kw});
     s.push({btn:this.token()?(es?"🔑 Salir":"🔑 Sign out"):(es?"🔑 Identificarme":"🔑 Sign in"),run:()=>{if(self.token()){self.signOut();self.say("Signed out.","Sesión cerrada.");}else{const t=self.ask(es?"Pega tu token de GitHub (solo issues: write, 30 días):":"Paste your GitHub token (issues: write only, 30 days):");if(t&&self.signIn(t))self.say("Signed in. Nothing else was stored.","Identificado. No se guardó nada más.");}docOpen("window");}});
+    s.push({btn:es?"🔑 Hacer un token nuevo (abre GitHub)":"🔑 Make a new token (opens GitHub)",run:()=>self.openNewToken()});
     s.push({btn:es?"📝 Presentar una petición":"📝 File a request",run:()=>self.fileByPrompt()});
     s.push({btn:es?"🔍 Filtrar por etiquetas":"🔍 Filter by labels",run:()=>{const v=self.ask(es?"Etiquetas, separadas por coma (vacío = todos):":"Labels, comma-separated (empty = everyone):");if(v!==null){self.setFilter(v.split(",").map(x=>x.trim()).filter(Boolean),self.search);docOpen("window");}}});
     s.push({btn:es?"🔎 Buscar una palabra":"🔎 Search a word",run:()=>{const v=self.ask(es?"Palabra (vacío = todos):":"Word (empty = everyone):");if(v!==null){self.setFilter(self.filter,v);docOpen("window");}}});
