@@ -63,6 +63,10 @@ const DOORLOOK={E:{wood:"#8A5A2B",wood2:"#A06A35",frame:"#4A2E14",glass:true},  
 /* signs over the faces — the engine's own sign glyph, no art of the pack's */
 const DECOR=[{world:"st",x:4,y:0,deco:"sign"},{world:"st",x:10,y:0,deco:"sign"},
              {world:"st",x:19,y:0,deco:"sign"},{world:"st",x:25,y:0,deco:"sign"}];
+/* the engine's own animals, where THIS town puts them (#38): Frederick at the stall, the pigeon
+   on the street, Lorenzo in the tree at (12,5) — a perch, not thin air — and no bodega cat,
+   because there is no bodega. */
+const ANIMALS={dog:{world:"hq",x:12,y:5},cat:null,pig:{world:"st",x:4,y:1},loro:{world:"st",x:12,y:5}};
 /* Sonny, as he is (§9.4): follows you, sit / lie / stay, the ball, the cone. Carries nothing. */
 const CRITTERS=[
  {kind:"beagle",world:"st",x:22,y:11,c:"#E8C46A",name:"Sonny",egg:"sonny"}

@@ -507,9 +507,10 @@ function drawIso(){
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     drawEmote(n,bx,by);}));
-  if(world==="hq")bill(DOG.fx,DOG.fy,(bx,by)=>drawDog(ctx,bx,by));
-  if(world==="lc")bill(CAT.fx,CAT.fy,(bx,by)=>drawCat(ctx,bx,by));
-  if(world==="st"){bill(PIG.fx,PIG.fy,(bx,by)=>drawPigeon(ctx,bx,by));bill(LORO.x,LORO.y,(bx,by)=>drawLoro(ctx,bx,by));}
+  if(world===AW("dog"))bill(DOG.fx,DOG.fy,(bx,by)=>drawDog(ctx,bx,by));
+  if(world===AW("cat"))bill(CAT.fx,CAT.fy,(bx,by)=>drawCat(ctx,bx,by));
+  if(world===AW("pig"))bill(PIG.fx,PIG.fy,(bx,by)=>drawPigeon(ctx,bx,by));
+  if(world===AW("loro"))bill(LORO.x,LORO.y,(bx,by)=>drawLoro(ctx,bx,by));
   CRIT.forEach(cr=>{if(cr.world!==world)return;
     bill(cr.fx,cr.fy,(bx,by)=>{
       if(cr.kind==="butterfly")drawButterfly(ctx,cr,bx,by);
@@ -986,9 +987,10 @@ function drawFront(){
       ctx.fillStyle="rgba(15,12,20,.75)";ctx.fillText(String(p.name||"").slice(0,12),sx+16.7,sy-1.3);
       ctx.fillStyle="#EDE9F5";ctx.fillText(String(p.name||"").slice(0,12),sx+16,sy-2);
       ctx.textAlign="start";});});
-  if(world==="hq")act(DOG.fx,DOG.fy,(sx,sy)=>drawDog(ctx,sx,sy));
-  if(world==="lc")act(CAT.fx,CAT.fy,(sx,sy)=>drawCat(ctx,sx,sy));
-  if(world==="st"){act(PIG.fx,PIG.fy,(sx,sy)=>drawPigeon(ctx,sx,sy));act(LORO.x,LORO.y,(sx,sy)=>drawLoro(ctx,sx,sy));}
+  if(world===AW("dog"))act(DOG.fx,DOG.fy,(sx,sy)=>drawDog(ctx,sx,sy));
+  if(world===AW("cat"))act(CAT.fx,CAT.fy,(sx,sy)=>drawCat(ctx,sx,sy));
+  if(world===AW("pig"))act(PIG.fx,PIG.fy,(sx,sy)=>drawPigeon(ctx,sx,sy));
+  if(world===AW("loro"))act(LORO.x,LORO.y,(sx,sy)=>drawLoro(ctx,sx,sy));
   CRIT.forEach(cr=>{if(cr.world!==world)return;
     act(cr.fx,cr.fy,(sx,sy)=>{
       if(cr.kind==="butterfly")drawButterfly(ctx,cr,sx,sy);
@@ -1080,9 +1082,10 @@ function draw(){
     ctx.fillStyle="#EDE9F5";ctx.fillText(String(p.name||"").slice(0,12),sx+16,sy-2);
     ctx.textAlign="start";
   });
-  if(world==="hq")drawDog(ctx,DOG.fx*TS-camX,DOG.fy*TS-camY);
-  if(world==="lc")drawCat(ctx,CAT.fx*TS-camX,CAT.fy*TS-camY);
-  if(world==="st"){drawPigeon(ctx,PIG.fx*TS-camX,PIG.fy*TS-camY);drawLoro(ctx,LORO.x*TS-camX,LORO.y*TS-camY);}
+  if(world===AW("dog"))drawDog(ctx,DOG.fx*TS-camX,DOG.fy*TS-camY);
+  if(world===AW("cat"))drawCat(ctx,CAT.fx*TS-camX,CAT.fy*TS-camY);
+  if(world===AW("pig"))drawPigeon(ctx,PIG.fx*TS-camX,PIG.fy*TS-camY);
+  if(world===AW("loro"))drawLoro(ctx,LORO.x*TS-camX,LORO.y*TS-camY);
   CRIT.forEach(cr=>{
     if(cr.world!==world)return;
     const sx=cr.fx*TS-camX,sy=cr.fy*TS-camY;
@@ -1175,10 +1178,20 @@ function drawAmbient(w,camX,camY){
   ctx.globalAlpha=1;
 }
 /* ---------- the office Aussie ---------- */
-const DOG={x:12,y:5,fx:12,fy:5,moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false};
-function dogFree(x,y){const w=WORLDS.hq;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world==="hq"&&x===px&&y===py);}
+/* ANIMALS seam — the engine's own four animals (the office dog, the bodega cat, the pigeon, the
+   parrot) stand where a pack puts them. Meridian's places are the defaults, byte for byte; a pack
+   declares ANIMALS={dog:{world,x,y}|null, cat, pig, loro} to move one or leave it out. A null
+   animal is nowhere: never drawn, never greeted. (#38: Lorenzo floated in the town because he
+   was pinned to a fence only Meridian has at (17,5).) Held by the smoke suites: something
+   stands under every animal, and an animal appears only in the world its pack put it in. */
+const ANIDEF={dog:{world:"hq",x:12,y:5},cat:{world:"lc",x:16,y:9},pig:{world:"st",x:4,y:1},loro:{world:"st",x:17,y:5}};
+const ANI=k=>(typeof ANIMALS!=="undefined"&&ANIMALS&&Object.prototype.hasOwnProperty.call(ANIMALS,k))?ANIMALS[k]:ANIDEF[k];
+const AW=k=>{const a=ANI(k);return a&&a.world&&WORLDS[a.world]?a.world:null;};
+const aniXY=(k,o)=>{const a=ANI(k);if(a){o.x=a.x|0;o.y=a.y|0;if("fx" in o){o.fx=o.x;o.fy=o.y;}}return o;};
+const DOG=aniXY("dog",{x:12,y:5,fx:12,fy:5,moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false});
+function dogFree(x,y){const w=WORLDS[AW("dog")];if(!w)return false;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world===AW("dog")&&x===px&&y===py);}
 function dogUpdate(dt,now){
-  if(world!=="hq"&&!DOG.moving){DOG.next=now+800;return;}
+  if(world!==AW("dog")&&!DOG.moving){DOG.next=now+800;return;}
   if(DOG.moving){
     DOG.mt+=dt/430;
     if(DOG.mt>=1){DOG.moving=false;DOG.fx=DOG.x;DOG.fy=DOG.y;}
@@ -1230,13 +1243,13 @@ function drawDog(g,sx,sy){
   g.restore();
 }
 /* ---------- Canela, La Cocina's cat ---------- */
-const CAT={x:16,y:9,fx:16,fy:9,moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:true};
-function catFree(x,y){const w=WORLDS.lc;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world==="lc"&&x===px&&y===py);}
+const CAT=aniXY("cat",{x:16,y:9,fx:16,fy:9,moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:true});
+function catFree(x,y){const w=WORLDS[AW("cat")];if(!w)return false;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world===AW("cat")&&x===px&&y===py);}
 function catUpdate(dt,now){
   if(CAT.moving){CAT.mt+=dt/520;
     if(CAT.mt>=1){CAT.moving=false;CAT.fx=CAT.x;CAT.fy=CAT.y;}
     else{CAT.fx=CAT.x-CAT.dx*(1-CAT.mt);CAT.fy=CAT.y-CAT.dy*(1-CAT.mt);}return;}
-  if(world!=="lc"){CAT.next=now+1000;return;}
+  if(world!==AW("cat")){CAT.next=now+1000;return;}
   if(now<CAT.next)return;
   const r=Math.random();
   if(r<0.55){CAT.sit=r<0.4;CAT.next=now+1500+Math.random()*3500;return;}
@@ -1274,13 +1287,13 @@ function drawCat(g,sx,sy){
   g.restore();
 }
 /* ---------- Paloma the pigeon (street) & Lorenzo the parrot (perched on the fence) ---------- */
-const PIG={x:4,y:1,fx:4,fy:1,moving:false,mt:0,dx:0,dy:0,face:1,next:0,peck:false};
-function pigFree(x,y){const w=WORLDS.st;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world==="st"&&x===px&&y===py);}
+const PIG=aniXY("pig",{x:4,y:1,fx:4,fy:1,moving:false,mt:0,dx:0,dy:0,face:1,next:0,peck:false});
+function pigFree(x,y){const w=WORLDS[AW("pig")];if(!w)return false;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world===AW("pig")&&x===px&&y===py);}
 function pigUpdate(dt,now){
   if(PIG.moving){PIG.mt+=dt/180;
     if(PIG.mt>=1){PIG.moving=false;PIG.fx=PIG.x;PIG.fy=PIG.y;}
     else{PIG.fx=PIG.x-PIG.dx*(1-PIG.mt);PIG.fy=PIG.y-PIG.dy*(1-PIG.mt);}return;}
-  if(world!=="st"){PIG.next=now+1000;return;}
+  if(world!==AW("pig")){PIG.next=now+1000;return;}
   if(now<PIG.next)return;
   const r=Math.random();
   if(r<0.5){PIG.peck=r<0.3;PIG.next=now+500+Math.random()*1400;return;}
@@ -1306,7 +1319,7 @@ function drawPigeon(g,sx,sy){
   g.fillStyle="#26202B";g.fillRect(cx+3.9,sy+17.8+pk,0.9,0.9);
   g.restore();
 }
-const LORO={x:17,y:5,next:0};
+const LORO=aniXY("loro",{x:17,y:5,next:0});
 function loroTick(now){
   if(world!=="st")return;
   if(now<LORO.next)return;LORO.next=now+2000;
@@ -2264,10 +2277,10 @@ function fredCheck(){ /* now the generic animal-interaction check: every creatur
      2026-09-02: "logs of the crosswalk while im trying to talk"). Step away to pet her. */
   const personFirst=!$("talk").hidden&&$("talk").dataset.qi!==undefined;
   if(!$("world").hidden&&!moving&&!personFirst){
-    if(world==="hq"&&!DOG.moving&&Math.abs(DOG.x-px)+Math.abs(DOG.y-py)===1){tgt="fred";label=T().treatLb;}
-    else if(world==="lc"&&!CAT.moving&&Math.abs(CAT.x-px)+Math.abs(CAT.y-py)===1){tgt="cat";label=T().petCat;}
-    else if(world==="st"&&!PIG.moving&&Math.abs(PIG.x-px)+Math.abs(PIG.y-py)===1){tgt="pig";label=T().petPig;}
-    else if(world==="st"&&Math.abs(LORO.x-px)+Math.abs(LORO.y-py)<=2){tgt="loro";label=T().petLoro;}
+    if(world===AW("dog")&&!DOG.moving&&Math.abs(DOG.x-px)+Math.abs(DOG.y-py)===1){tgt="fred";label=T().treatLb;}
+    else if(world===AW("cat")&&!CAT.moving&&Math.abs(CAT.x-px)+Math.abs(CAT.y-py)===1){tgt="cat";label=T().petCat;}
+    else if(world===AW("pig")&&!PIG.moving&&Math.abs(PIG.x-px)+Math.abs(PIG.y-py)===1){tgt="pig";label=T().petPig;}
+    else if(world===AW("loro")&&Math.abs(LORO.x-px)+Math.abs(LORO.y-py)<=2){tgt="loro";label=T().petLoro;}
     else{ /* every critter is interactive — cats and dogs get petted, fliers get admired */
       const g2=CRIT.find(cr=>cr.world===world&&
         ((cr.kind==="gato"||isDog(cr))?(!cr.moving&&Math.abs(cr.x-px)+Math.abs(cr.y-py)===1)
@@ -3912,7 +3925,7 @@ function applyStaged(){
   const sf=g.safe;
   if(sf&&world===g.world&&(isSolid(px,py)||!growthReach(px,py))){
     px=fx=sf.x;py=fy=sf.y;dir="down";held=null;moving=false;}
-  if(SOLID.has(w.grid[PIG.y][PIG.x])){PIG.x=PIG.fx=4;PIG.y=PIG.fy=1;PIG.moving=false;} /* Paloma will not be bricked in */
+  if(SOLID.has(w.grid[PIG.y][PIG.x])){const pa=ANI("pig")||ANIDEF.pig;PIG.x=PIG.fx=pa.x|0;PIG.y=PIG.fy=pa.y|0;PIG.moving=false;} /* Paloma will not be bricked in — she goes back where her pack put her */
 }
 /* A storefront, a gift or a page on your wall may say ONE line the first time it lands.
    Nothing in the city announced its own deliveries: the owner finished districts, pages were

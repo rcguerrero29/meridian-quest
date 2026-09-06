@@ -5,7 +5,7 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-05)
 
-**Deployed:** whatever `CACHE` in `sw.js` says — `mq-v67` at the time of writing (Parts 2a, 2b and 3 of El
+**Deployed:** whatever `CACHE` in `sw.js` says — `mq-v68` at the time of writing (the `ANIMALS` seam, #38; regression R1/R5/R8) — before that `mq-v67` (Parts 2a, 2b and 3 of El
 Changarrito: the town at `changarrito/`, run from localhost — street with faces, la ventanilla behind
 her window with the permits, the board, the park, Sonny, three lines per person; and the town writes:
 token in the browser only, Done, ask for more context, file a request with the five headings, labels,

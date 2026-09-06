@@ -2867,6 +2867,48 @@ const CANDIDATES = [
     fails.push(...prop);
   }
 
+  // ---- R1: something stands under every animal, and an animal is only where its pack put it ----
+  // Lorenzo floated in the town (#38): the parrot was pinned to a fence only Meridian has.
+  // Ground animals need a walkable tile; the parrot needs a perch — a solid or lifted tile.
+  {
+    const r1 = await page.evaluate(() => {
+      const problems = [];
+      if (typeof ANIMALS !== 'undefined') problems.push('Meridian declares ANIMALS — its animals are the engine defaults by design');
+      const want = { dog: ['hq', 12, 5], cat: ['lc', 16, 9], pig: ['st', 4, 1], loro: ['st', 17, 5] };
+      Object.entries(want).forEach(([k, [wid, x, y]]) => {
+        const a = ANI(k); if (!a || a.world !== wid || a.x !== x || a.y !== y) problems.push(`animal ${k} default moved: ${JSON.stringify(a)}`);
+        if (AW(k) !== wid) problems.push(`animal ${k} is not in ${wid}`);
+        const w = WORLDS[wid], g = w.grid[y] && w.grid[y][x];
+        if (g === undefined) problems.push(`animal ${k} is off the map`);
+        else if (k === 'loro') { if (!SOLID.has(g) && !((TILES[g] || {}).lift > 0)) problems.push(`the parrot has nothing under him at ${wid} (${x},${y}): "${g}"`); }
+        else if (SOLID.has(g)) problems.push(`animal ${k} stands in a wall at ${wid} (${x},${y}): "${g}"`);
+      });
+      return problems;
+    });
+    fails.push(...r1);
+  }
+  // ---- R5: every document a quest hands over exists, builds, and names a real template ----
+  {
+    const r5 = await page.evaluate(() => {
+      const problems = [], ids = new Set();
+      [QEN, QES].forEach(Q => Q.forEach(q => Object.values(q.nodes || {}).forEach(n => { if (n.doc) ids.add(n.doc); })));
+      const en = new Set(), es = new Set();
+      QEN.forEach(q => Object.values(q.nodes || {}).forEach(n => { if (n.doc) en.add(n.doc); }));
+      QES.forEach(q => Object.values(q.nodes || {}).forEach(n => { if (n.doc) es.add(n.doc); }));
+      if ([...en].sort().join() !== [...es].sort().join()) problems.push('EN and ES hand over different documents');
+      const tmpls = [];
+      ids.forEach(id => { const d = DOCS[id]; if (!d) { problems.push(`quest hands over "${id}" and DOCS has no such document`); return; }
+        const secs = docSections(id); if (!Array.isArray(secs) || !secs.length) problems.push(`document "${id}" does not build`);
+        if (d.tmpl) tmpls.push([id, d.tmpl]); });
+      return { problems, tmpls };
+    });
+    fails.push(...r5.problems);
+    // the neutral set is the source; the branded set is generated from it (build-branded.js --check holds that)
+    const tdir = path.join(__dirname, '..', 'docs', 'templates', 'neutral');
+    const files = fs.existsSync(tdir) ? fs.readdirSync(tdir) : [];
+    r5.tmpls.forEach(([id, t]) => { if (!files.some(f => f.startsWith(String(t)))) fails.push(`document "${id}" names template ${t} and docs/templates/neutral/ has no ${t}-* file`); });
+  }
+
   // ---- the public build's guarantee (docs/story/el-changarrito.md §5 R7) ----
   // Meridian's public build must not know about any personal build: no API host, no
   // token, no URL-driven behaviour, a pinned CSP, every storage key through SK(), pack
@@ -2878,8 +2920,15 @@ const CANDIDATES = [
     let tracked = [];
     try { tracked = execSync('git ls-files', { cwd: root }).toString().split('\n').filter(Boolean); }
     catch (e) { fails.push('guarantee: git ls-files unavailable — the guard needs the tracked list, not the working tree'); }
+    // R8: the shell is whatever the PUBLIC index loads — derived from its script tags, so a
+    // second pack added to index.html is scanned the day it is added, not the day it leaks
+    const pubIndex = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+    const loaded = [...pubIndex.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]);
+    const loadedDirs = [...new Set(loaded.map(p => p.includes('/') ? p.slice(0, p.lastIndexOf('/') + 1) : ''))].filter(Boolean);
     const shell = tracked.filter(f => ['index.html', 'sw.js', 'qr.js', 'manifest.webmanifest'].includes(f)
+                                   || loaded.includes(f) || loadedDirs.some(d => f.startsWith(d))
                                    || f.startsWith('engine/') || f.startsWith('content/'));
+    if (!loaded.some(p => p.startsWith('engine/'))) fails.push('guarantee: the public index does not load engine/ — the script scan found nothing');
     for (const f of shell) {
       const src = fs.readFileSync(path.join(root, f), 'utf8');
       ['api.github.com', 'net.local', 'github_pat', 'Authorization'].forEach(w => {

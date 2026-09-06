@@ -417,6 +417,9 @@ this town — by the owner's choice each time. A new world for someone else gets
 none. **Until that is a setting, a session asks the owner "keep Sonny?" before drawing a new
 world's animals.** Written into `NEW-WORLD.md` §0.
 
+**Built 2026-09-06 (mq-v68):** the `ANIMALS` seam. Lorenzo perches in the tree at (12,5); the
+town has no cat. #38.
+
 ### 9.5 · What changes in the parts
 
 | Part | Was | Now |
