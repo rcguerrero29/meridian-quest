@@ -1204,7 +1204,7 @@ const CANDIDATES = [
         const pb = (S.art.papelBridge || []).map(h => h.toLowerCase());
         if (S.art.papel && !pb.length) problems.push('the bridge has no marigold palette for its papel picado (papelBridge)');
         const bf = T3.group.children.filter(o => o.userData && o.userData.papel && o.userData.flag);
-        if (pb.length && bf.length && !bf.every(f => pb.includes('#' + f.material.color.getHexString()))) problems.push('the papel picado over the bridge is not cut from the marigold palette');
+        if (pb.length && bf.length && !bf.every(f => (f.userData.pal || []).map(h => h.toLowerCase()).join() === pb.join())) problems.push('the papel picado over the bridge is not cut from the marigold palette');
         Object.entries(per).forEach(([c, n]) => { if (!n) problems.push('the ' + c + ' camera never spills petals onto the ground around the bridge'); });
         if (!trails) problems.push('the top and front cameras never draw the trail');
         // the trail: a step ON THE DECK drops three petals, drawn on the ground, three flat planes in 3D;
@@ -1239,7 +1239,29 @@ const CANDIDATES = [
         fiestaSwags(PL.street).forEach(sw => { const y = sw.from[1]; for (let x = Math.min(sw.from[0], sw.to[0]); x <= Math.max(sw.from[0], sw.to[0]); x++) { if (portalAt(PL.street, x, y)) problems.push(`a swag on the street hangs over the door at (${x},${y})`); } });
         camSet('3d'); world = PL.street; px = fx = 5; py = fy = 10; moving = false; held = null; t3Invalidate(); draw3d();
         const flags = T3.group.children.filter(o => o.userData && o.userData.swag && o.userData.flag);
-        if (flags.length < 30) problems.push(`the street carries ${flags.length} swag flags in 3D — it is not dressed`);
+        const nfl = flags.reduce((a, f) => a + (f.userData.flags || 1), 0);
+        if (nfl < 200) problems.push(`the street carries ${nfl} swag flags in 3D — it is not dressed`);
+        // owner, 2026-09-07 (evening): "papel picado all over the place" — Pili: cut paper with punched holes, two rows, by place
+        if (flags.some(f => !f.material.map)) problems.push('the papel picado in 3D is plain bunting — no cut, no holes');
+        if (!flags.some(f => f.userData.row === 1)) problems.push('the papel picado hangs in one row');
+        if (typeof drawCalaverita !== 'function' || typeof canopyDress !== 'function' || typeof fiestaProps !== 'function' || typeof drawPapelRow !== 'function') problems.push('the engine has no calaveritas, no dressed trees, no cut paper');
+        else {
+          const pal2 = (art('papel', []) || []);
+          ['pk', 'hq', 'me', 'lc'].forEach(wid => { if (!fiestaSwags(wid).length) problems.push('no papel picado in ' + wid); });
+          const pr = art('props', []) || []; if (!pr.some(p => p.kind === 'calaverita')) problems.push('no calaveritas de azúcar anywhere');
+          const pw = pr.find(p => p.kind === 'calaverita'); if (pw) { camSet('3d'); world = pw.world; px = fx = pw.x; py = fy = pw.y + 2; moving = false; held = null; t3Invalidate(); draw3d();
+            const cs = T3.group.children.filter(o => o.userData && o.userData.calaverita), want = pr.filter(p => p.world === pw.world && p.kind === 'calaverita');
+            if (cs.length !== want.length) problems.push(`${cs.length} calaveritas stand in ${pw.world} in 3D, ${want.length} were set down`);
+            want.forEach(p => { const s = cs.find(o => o.userData.x === p.x && o.userData.y === p.y); if (s && p.h !== undefined && s.position.y < p.h) problems.push('a calaverita sank below where it was set'); }); }
+          const bakeC = (fn, w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); fn(g); return g.getImageData(0, 0, w, h).data; };
+          const inPal = (d, list) => { const L = list.map(h => h.toLowerCase()); let n = 0; for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 250) continue; if (L.includes('#' + [d[i], d[i + 1], d[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''))) n++; } return n; };
+          if (inPal(bakeC(g => drawCalaverita(g, 0, 0), 8, 8), ['#F6F2E8']) < 12) problems.push('a calaverita is not a white sugar skull');
+          if (inPal(bakeC(g => canopyDress(g, 20, 12), 40, 40), pal2) < 10) problems.push('a dressed tree carries no paper');
+          const cd0 = canopyDress; let dressed = 0; canopyDress = function () { dressed++; return cd0.apply(this, arguments); };
+          world = PL.park; px = fx = PL.parkIn[0]; py = fy = PL.parkIn[1]; camSet('top'); draw(); camSet('front'); draw(); canopyDress = cd0;
+          if (dressed < 2) problems.push('the top and front cameras do not dress the trees (' + dressed + ')');
+          seasonSet('off'); if (inPal(bakeC(g => canopyDress(g, 20, 12), 40, 40), pal2) > 0) problems.push('out of season a tree is still dressed'); seasonSet(id);
+        }
         if (flags.some(f => f.position.y < 1.5)) problems.push('a swag hangs at head height');
         const ex = (art('hangs', []) || []).find(h => h.kind === 'pinata'); if (!ex) problems.push('no piñata is hung');
         else { world = ex.world; px = fx = ex.x; py = fy = ex.y + 3; t3Invalidate(); draw3d();
