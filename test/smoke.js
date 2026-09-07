@@ -998,7 +998,24 @@ const CANDIDATES = [
     // #22 (mq-v73): exactly one billboard — the hero — is drawn through walls; everyone else sits in the scene
     const through = T3.pool.filter(p => p.live && p.spr.material.depthTest === false);
     if (through.length !== 1) problems.push(`${through.length} billboards draw through walls — the hero, and only the hero, must`);
-    if (through.length === 1 && through[0].spr.renderOrder < 1) problems.push('the hero billboard is not drawn last');
+    // owner, 2026-09-07: "when we walk behind people it seems like im walking on them" — the hero was
+    // drawn LAST, over everyone. Billboards draw in order of distance from the camera: whoever is
+    // nearer the camera than you draws over you, whoever is farther draws under; the hero still
+    // ignores depth so a wall never hides them.
+    const order = () => {
+      const hero = T3.pool.find(p => p.live && p.spr.material.depthTest === false); if (!hero) return ['no hero billboard'];
+      const dist = p => Math.hypot(T3.cam.position.x - p.spr.position.x, T3.cam.position.z - p.spr.position.z);
+      const dh = dist(hero), out = [];
+      T3.pool.filter(p => p.live && p !== hero).forEach(p => { const d = dist(p);
+        if (d < dh - 0.3 && p.spr.renderOrder <= hero.spr.renderOrder) out.push(`a billboard ${(dh - d).toFixed(1)} nearer the camera than the hero draws under them (${p.spr.renderOrder} vs ${hero.spr.renderOrder})`);
+        if (d > dh + 0.3 && p.spr.renderOrder >= hero.spr.renderOrder) out.push(`a billboard ${(d - dh).toFixed(1)} farther from the camera than the hero draws over them`); });
+      return out; };
+    { // stand right behind a person, camera to the south: they are nearer the camera than you
+      const n = WORLDS.hq.npcs.find(n => !isSolidAt('hq', n.x, n.y - 1));
+      if (!n) problems.push('no one in hq has a free tile behind them to test the draw order');
+      else { world = 'hq'; px = fx = n.x; py = fy = n.y - 1; T3.yaw = 0; draw3d(); problems.push(...order().slice(0, 2));
+        py = fy = n.y + 1; if (!isSolidAt('hq', n.x, n.y + 1)) { draw3d(); problems.push(...order().slice(0, 2)); } }
+    }
     // #45: a poster on a wall hangs on the wall's open face, mid-height. The six office posters
     // on f2's north wall used to float 1.15 up — above the wall they are pinned to.
     world = 'f2'; px = fx = 2; py = fy = 1; draw3d();
