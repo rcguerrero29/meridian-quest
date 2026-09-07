@@ -4153,8 +4153,10 @@ function ribbonSay(){
       all). That is the hook for "the roof depends on the door", "this block is richer once
       the taller opens", and anything else a pack invents later, with no engine change.
    4. NOTHING IS STAMPED THAT BREAKS THE CITY. Every build is validated before a single tile
-      lands: inside the map, never over a person, never over a portal, and no portal in that
-      world may lose its last standable neighbour. A refused build is announced, not silent.
+      lands: inside the map, never over a person, never over a portal, never a door that opens
+      onto nothing (#9), and no portal in that world may lose its last standable neighbour.
+      A refused build is logged to the console and fails the smoke (§27); saying it in play is
+      El Portero's job (#8, designed, not built).
 
    A template: {id, size:{w,h}, parts:[Part]}
    A Part:     {id, when?(ctx), tiles?:[[dy,dx,glyph]], reads?:[{x,y,doc}], pick?:[Option]}
@@ -4198,6 +4200,12 @@ function buildSafe(spec){
     if(w.grid[y][x]==="N")return "somebody is standing at "+x+","+y;
     if(DOORSET.has(w.rows[y][x])&&(PORTALS[spec.world]||{})[w.rows[y][x]])
       return "it would build over the door at "+x+","+y;
+    /* #9 (Don Güero, 2026-09-07): a build may not lay a tile the pack declares to be a DOOR
+       (TILEMETA kind:"door") unless that door opens — walkable, or a portal on that glyph in this
+       world. A painted door on a wall is the shortcut "nothing goes into the world the player
+       cannot use" forbids; the engine refuses it instead of a session remembering to. */
+    if((TILES[ch]||{}).kind==="door"&&SOLID.has(ch)&&!(PORTALS[spec.world]||{})[ch])
+      return "the door at "+x+","+y+" would open onto nothing";
   }
   /* simulate, then check every portal in this world still has somewhere to stand */
   const g=w.grid.map(r=>r.slice()),rows=w.rows.slice();

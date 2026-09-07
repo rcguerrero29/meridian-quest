@@ -215,13 +215,14 @@ would have none left unless looks key by npc instead.
   of the smallest office in the city. Move the waiting corner west (a sixteenth) or grow `no` to
   the city's standard 20×10 (a third of a sitting). His recommendation: grow it — the owner's own
   words on 2026-09-05 were "make the building bigger, fit in a proper staircase."
-- ⏳ **❗La reja** *(Don Güero, 2026-09-07, on #9)* — the casita's `▦` draws a door and is filed as
-  a facade; the data is right, the paint lies. Redraw it as a closed reja (content, half an hour)
-  and give `buildSafe()` the rule "no build lays a door-kind tile that does not open" via
-  `TILEMETA kind:"door"` (a sixteenth, red first in §27, inert in the town). With it, ❗La cuadra:
-  whether the two casitas go back on Calle Dos as honest homes (his recommendation: yes), and
-  ❗El portero: a refused build is heard through a failing test (his recommendation), a line of
-  his, or a toast.
+- ✅ **❗La reja — BUILT (`mq-v91`, 2026-09-07).** Owner on #9: *"work on this please."* The
+  casita's `▦` no longer draws a door on a wall: it is a closed reja — the recess, iron bars, a
+  chain and a padlock, the step kept so it is the same house; the template part is still `door`,
+  the name of the tile that carries the front. `buildSafe()` refuses any build that lays a tile
+  the pack declares `kind:"door"` unless it opens (walkable, or a portal on it in that world),
+  and the smoke fails on any declared lot the engine refuses. Proven red first; inert in the
+  town (no `BUILDTPL`). Open with it: ❗La cuadra (do the two casitas go back on Calle Dos as
+  homes) and ❗El portero (the owner's design on #8: a room, counts, red for critical).
 - ⏳ **❗La llave** *(Don Güero, 2026-09-07, on #10)* — portals are keyed by glyph per world (eight
   read sites in `engine/engine.js`), so every enterable house costs its own glyph and Meridian's
   uppercase alphabet is spent. Pay a coordinate-keyed portal seam (a third to a half of a sitting,

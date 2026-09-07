@@ -2406,6 +2406,21 @@ const CANDIDATES = [
       const npc = w.npcs[0];
       if (npc && !buildSafe({ id: 'e2', world: 'ex', tiles: [[npc.y, npc.x, '▩']], reads: [] })) problems.push('a build was allowed to stand on somebody');
       if (!buildSafe({ id: 'e3', world: 'ex', tiles: [[999, 999, '▩']], reads: [] })) problems.push('a build was allowed off the map');
+      // #9 (Don Güero): a build may not lay a door-kind tile that opens onto nothing. A probe glyph
+      // declared as a solid door with no portal must be refused; the same glyph with a portal passes.
+      { const G = '⌂', had = TILES[G], wasSolid = SOLID.has(G), P0 = PORTALS.ex;
+        TILES[G] = { lift: 13, kind: 'door' }; SOLID.add(G);
+        const spot = (() => { for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (w.rows[y][x] === '.' && w.grid[y][x] === '.') return [y, x]; return null; })();
+        if (!spot) problems.push('no open tile on Calle Dos to probe a door on');
+        else {
+          if (!buildSafe({ id: 'e4', world: 'ex', tiles: [[spot[0], spot[1], G]], reads: [] })) problems.push('a build was allowed to lay a door that opens onto nothing (#9)');
+          PORTALS.ex = Object.assign({}, P0, { [G]: { to: 'st', x: 1, y: 1, dir: 'down' } });
+          if (buildSafe({ id: 'e5', world: 'ex', tiles: [[spot[0], spot[1], G]], reads: [] })) problems.push('a build was refused for a door that does open');
+        }
+        PORTALS.ex = P0; if (had) TILES[G] = had; else delete TILES[G]; if (!wasSolid) SOLID.delete(G); }
+      // and every lot the pack has declared is one the engine accepts — a refused lot must never
+      // ship silently (Don Güero on #8: the suite fails the build)
+      BUILDS.forEach(bd => { const spec = resolveBuild(bd); const bad = spec && buildSafe(spec); if (!spec || bad) problems.push('the lot ' + bd.id + ' is refused: ' + (bad || 'no template')); });
       return problems;
     });
     fails.push(...b);
@@ -2444,6 +2459,8 @@ const CANDIDATES = [
         if (g === '.') return;
         if (!TILEDRAW[g] && !TILEART[g]) problems.push('a template lays a glyph nothing can draw: ' + g);
         if (SOLID.has(g) && !TILES[g]) problems.push('a solid template glyph has no metadata: ' + g);
+        // #9: no glyph a template can lay is solid AND a door AND portalless everywhere — a door drawn on a wall
+        if (SOLID.has(g) && (TILES[g] || {}).kind === 'door' && !Object.values(PORTALS).some(P => P[g])) problems.push('a template lays a solid door no world opens: ' + g);
       });
       return problems;
     });
