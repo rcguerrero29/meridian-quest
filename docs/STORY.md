@@ -211,6 +211,11 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   the way the mercado did: somebody says what they think of you, phones the next
   neighbour, and a cat moves in.
 
+**La silla (2026-09-07).** Xochi's line grew a second hand. Naye Robles cuts hair between her
+tía's crates on Calle Dos — the head for every outfit Xochi ever made — and the barrio's most
+irreversible tool is a pair of scissors. Her shop is a service until ❗El espejo (CITY.md) says
+otherwise. The same day the casa's neighbour got her own name back: Doña Tencha, not a second Chelo.
+
 ## Open threads (promises already on the wall)
 
 - **La ventanilla** — the city's own record, kept by a government NPC, separate from the
@@ -280,7 +285,8 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   aprons, crew uniforms, one good jacket. Proof this is a barrio, not four shops.
   **Paid across four packs (2026-09-02):** shop shirts with Tuerca on the pocket (q31),
   aprons with a pocket for Sol's strip, crew shirts nine of nine, and \"Do you own a
-  jacket?\" — the jacket is for la inauguración.
+  jacket?\" — the jacket is for la inauguración. **And one apprentice (2026-09-07):** Naye,
+  El Espejo — the fifth thing she outfitted was a person.
 - ~~**The reserved lot**~~ — Taller Herrera, Phase 2.
 - ~~**Week Two, chapter two+**~~ — retired with weeks.
 
