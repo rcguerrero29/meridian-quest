@@ -354,6 +354,44 @@ const BUILDTPL={
   },
 };
 
+/* ---------- `casa` — a home you can ENTER (#10, the owner: "lets take this on don guero!") ----------
+   The same three-tile front as the casita, but the middle tile is a real front door ⌂ that the
+   template LINKS to a room it carries: a small living room with a table, a rug, a shelf, a plant,
+   a north window, and a neighbour with three lines. The engine stamps the room as a world of its
+   own per lot (named after the lot), keyed by where the door stands, so this template can go up
+   on as many lots as Calle Dos has and every door still opens. Homes get neighbours, never
+   quests: a business is a parcel and comes through Don Güero and Nacho (his guardrail, #10). */
+const CASA_ROOM={
+  rows:["####|#####",
+        "#S......P#",
+        "#..T⊔....#",
+        "#..⊔.....#",
+        "#.c......#",
+        "#R.......#",
+        "#........#",
+        "#####⌂####"],
+  people:{c:{npc:"chelo",q:[],chat:1}},
+  locs:{en:"Doña Chelo's, Calle Dos",es:"Casa de Doña Chelo, Calle Dos"},
+  arrive:{en:"Doña Chelo's front room. The radio is on low.",es:"La sala de Doña Chelo. El radio, bajito."}
+};
+BUILDTPL.casa={
+  id:"casa", size:{w:3,h:2},
+  parts:[
+    {id:"shell", tiles:[[0,0,"▩"],[0,1,"▩"],[0,2,"▩"],
+                        [1,0,"."],[1,1,"."],[1,2,"."]]},
+    {id:"door", tiles:[[0,1,"⌂"]], link:{door:[0,1],landing:[5,6],exit:[5,7],interior:CASA_ROOM}},
+    {id:"end", pick:[
+      {id:"window", w:2, tiles:[]},
+      {id:"lamp",   w:1, tiles:[[0,2,"▨"]]},
+    ]},
+    {id:"yard", pick:[
+      {id:"none",  w:2, tiles:[]},
+      {id:"plant", w:2, tiles:[[1,0,"P"]]},
+      {id:"chair", w:1, tiles:[[1,0,"⊔"]]},
+    ]},
+  ],
+};
+
 /* the lots Don Güero has been given. Same template, different seeds, different houses. */
 /* NO LOTS ARE BUILT. The ability is the thing that was asked for — "it is just an ability"
    (owner, 2026-09-03) — and two casitas went up on Calle Dos that nobody asked for and that
@@ -363,4 +401,9 @@ const BUILDTPL={
    FIRST, and then it goes in this list. Restoring the two casitas is two lines:
      {id:"casita-w", tpl:"casita", world:"ex", x:0,  y:0, seed:"calle-dos-poniente"},
      {id:"casita-e", tpl:"casita", world:"ex", x:21, y:0, seed:"calle-dos-oriente"},  */
-const BUILDS=[];
+/* 2026-09-07 (#10): the rule above is kept — a lot goes in WITH a room and a door that opens —
+   and the first lot that meets it is Doña Chelo's casa at the water's edge on Calle Dos: the
+   `casa` template links its front door to the room it carries, and Doña Chelo lives there. */
+const BUILDS=[
+  {id:"casa-w", tpl:"casa", world:"ex", x:4, y:2, seed:"calle-dos-4"},
+];

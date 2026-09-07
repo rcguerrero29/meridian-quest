@@ -222,14 +222,17 @@ would have none left unless looks key by npc instead.
   and the smoke fails on any declared lot the engine refuses. Proven red first; inert in the
   town (no `BUILDTPL`). Open with it: ❗La cuadra (do the two casitas go back on Calle Dos as
   homes) and ❗El portero (the owner's design on #8: a room, counts, red for critical).
-- ⏳ **❗La llave** *(Don Güero, 2026-09-07, on #10)* — portals are keyed by glyph per world (eight
-  read sites in `engine/engine.js`), so every enterable house costs its own glyph and Meridian's
-  uppercase alphabet is spent. Pay a coordinate-keyed portal seam (a third to a half of a sitting,
-  both shells; it unlocks storefront templates too) or keep doors for businesses only. His
-  recommendation: the latter, and buy the seam the day a parcel is genuinely developed. With it,
-  ❗Quién vive ahí: a neighbour with three lines behind any casita door (recommended), never a
-  business without a parcel.
-
+- ✅ **❗La llave — PAID (`mq-v93`, 2026-09-07).** Owner on #10: *"lets take this on don guero!"*,
+  *"lets start this fix too. templates will help us and the game grow without having to build
+  with you."* Portals are keyed by WHERE a door stands as well as by its letter: `PORTALSAT`,
+  `portalAt(id,x,y)`, `portalsOf(id)` — every read site in the engine asks those, never the
+  tables. A template part may `link` its door to an interior the template carries (rows, people,
+  a name and an arrival line in both languages); the build stamps that room as a world of its own
+  named after the lot, the door and the room's exit become portals to each other, and the lots
+  are applied at load so the room exists before anyone walks toward it. **❗Quién vive ahí** is
+  answered his way: a neighbour with three lines. The first lot is Doña Chelo's casa at the
+  water's edge on Calle Dos (`casa` template, `BUILDS`), a home, never a business. Still his:
+  Don Güero saying a line about what he built (Meridian has no Don Güero station yet).
 - ✅ **❗La caja de escalera — BUILT, town first (`mq-v75`/`ch-v12`), then Meridian (`mq-v81`, 2026-09-07).**
   Don Güero's candidate B, the owner's *"sounds good don Guerito, go for it"* on #4, then *"the
   stairs going up looks good"* after walking the town, then *"send the stairs to templates and MQ"*.

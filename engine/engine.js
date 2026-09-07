@@ -40,6 +40,18 @@ Object.keys(WORLD_DEFS).forEach(id=>{
   WORLDS[id]={rows,rows0:WORLD_DEFS[id].slice(),grid,npcs:wnpcs,W:rows[0].length,H:rows.length};
 });
 const CW=()=>WORLDS[world];
+/* ---------- PORTALS by coordinate (#10, La llave) ----------
+   PORTALS is keyed by glyph per world: one letter, one destination. That is why every house you
+   can enter cost its own glyph and the alphabet ran out. PORTALSAT is keyed by WHERE the door
+   stands — "x,y" per world — and is what a build writes when a template links a lot to an
+   interior. portalAt() answers both, coordinate first; portalsOf() lists every portal a world
+   has, either way. Every read site asks these two, never the tables. */
+const PORTALSAT={};
+function portalAt(id,x,y){const A=PORTALSAT[id];if(A&&A[x+","+y])return A[x+","+y];
+  const w=WORLDS[id],P=PORTALS[id];if(!w||!P)return null;const ch=w.rows[y]&&w.rows[y][x];return (ch&&P[ch])||null;}
+function portalsOf(id){const w=WORLDS[id],out=[];if(!w)return out;const P=PORTALS[id]||{},A=PORTALSAT[id]||{};
+  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){const ch=w.rows[y][x];const p=A[x+","+y]||P[ch];if(p)out.push({x,y,ch,p});}
+  return out;}
 const isSolid=(x,y)=>{const w=CW();return x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N";};
 /* the same question about a world you are not standing in — used by the discoverability audit */
 const isSolidAt=(id,x,y)=>{const w=WORLDS[id];return !w||x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N";};
@@ -166,12 +178,12 @@ const chillLines=k=>{
     const L=rows[0].length;
     rows.forEach((r,i)=>{if(r.length!==L)console.warn("WORLD "+id+" row "+i+" width "+r.length+" != "+L);});
   });
-  Object.entries(PORTALS).forEach(([from,m])=>Object.entries(m).forEach(([ch,p])=>{
+  Object.keys(WORLDS).forEach(from=>portalsOf(from).forEach(({ch,p})=>{
     const w=WORLDS[p.to];
     if(!w){console.warn("PORTAL "+from+":"+ch+" → missing world "+p.to);return;}
     const t=w.rows[p.y]&&w.rows[p.y][p.x];
     if(t===undefined||SOLID.has(t)||w.grid[p.y][p.x]==="N")console.warn("PORTAL "+from+":"+ch+" spawn blocked at "+p.to+" ("+p.x+","+p.y+")");
-    if(PORTALS[p.to]&&PORTALS[p.to][t])console.warn("PORTAL "+from+":"+ch+" spawns ON a portal tile — ping-pong risk");
+    if(portalAt(p.to,p.x,p.y))console.warn("PORTAL "+from+":"+ch+" spawns ON a portal tile — ping-pong risk");
   }));
 })();
 /* full-universe reachability audit: BFS from the hero's spawn across every world THROUGH portals.
@@ -181,8 +193,8 @@ function auditReach(){
   const walk=(id,x,y)=>{const w=WORLDS[id];return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N");};
   const q=[[PL.home,PL.spawn[0],PL.spawn[1]]];if(seen[PL.home])seen[PL.home].add(PL.spawn[0]+","+PL.spawn[1]);
   while(q.length){const[idw,x,y]=q.shift();
-    const ch=WORLDS[idw].rows[y][x];
-    if(PORTALS[idw]&&PORTALS[idw][ch]){const p=PORTALS[idw][ch],key=p.x+","+p.y;
+    const pp=portalAt(idw,x,y);
+    if(pp){const p=pp,key=p.x+","+p.y;
       if(!seen[p.to].has(key)&&walk(p.to,p.x,p.y)){seen[p.to].add(key);q.push([p.to,p.x,p.y]);}}
     [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{const nx=x+dx,ny=y+dy,key=nx+","+ny;
       if(!seen[idw].has(key)&&walk(idw,nx,ny)){seen[idw].add(key);q.push([idw,nx,ny]);}});}
@@ -1600,7 +1612,7 @@ function propFree(x,y){const w=CW();
   if(x<0||y<0||x>=w.W||y>=w.H)return false;
   const g=w.grid[y][x];
   if(SOLID.has(g)||g==="N"||isLight(g))return false;
-  if(PORTALS[world]&&PORTALS[world][w.rows[y][x]])return false;
+  if(portalAt(world,x,y))return false;
   if(x===px&&y===py)return false;
   return !CRIT.some(c=>c.world===world&&c.x===x&&c.y===y);}
 function kickProp(x,y,dx,dy){
@@ -2148,9 +2160,9 @@ function worldArrived(fromW,fromX,fromY){
 function tryPortal(ts){
   const key=world+":"+px+","+py;
   if(portalHold&&portalHold!==key)portalHold="";
-  const pch=CW().rows[py][px];
-  if(portalHold||ts<=portalT||!(PORTALS[world]&&PORTALS[world][pch]))return false;
-  const p=PORTALS[world][pch],fromW=world,fromX=px,fromY=py;
+  const pp=portalAt(world,px,py);
+  if(portalHold||ts<=portalT||!pp)return false;
+  const p=pp,fromW=world,fromX=px,fromY=py;
   world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
   worldArrived(fromW,fromX,fromY);roomInvite();
   if(fromW===PL.park&&world!==PL.park)parkExit(); /* crossing back over the rainbow: the recap */
@@ -2331,9 +2343,9 @@ function drawReadMark(g,bx,by,up){ /* a cream card that BREATHES — never the b
   g.fillStyle="#B9AE95";g.fillRect(x+2,y+2.5,w-6,1);g.fillRect(x+2,y+5,w-4,1);g.fillRect(x+2,y+7.5,w-7,1);
   g.fillStyle="#C9BFA6";g.beginPath();g.moveTo(x+w-4,y);g.lineTo(x+w,y);g.lineTo(x+w,y+4);g.closePath();g.fill();
   g.restore();}
-function doorMarks(){const w=CW(),out=[],P=PORTALS[world];if(!P)return out;
+function doorMarks(){const w=CW(),out=[];
   for(let y=Math.max(0,py-3);y<=Math.min(w.H-1,py+3);y++)for(let x=Math.max(0,px-3);x<=Math.min(w.W-1,px+3);x++){
-    const ch=w.rows[y][x];if(Math.abs(x-px)+Math.abs(y-py)<=3&&P[ch])out.push({x,y,ch,mark:P[ch].mark||""});}
+    const ch=w.rows[y][x],p=Math.abs(x-px)+Math.abs(y-py)<=3&&portalAt(world,x,y);if(p)out.push({x,y,ch,mark:p.mark||""});}
   /* It used to ask DOORSET.has(ch) as well, which is how the STAIRS — the only way to the
      office — ended up as the one portal in the city wearing no marker (owner, 2026-09-03:
      "it is hard knowing where to go"). P[ch] already means "this tile leads somewhere",
@@ -2359,11 +2371,10 @@ let nudgeW="",nudged=new Set();
 function portalNudge(){
   if($("world").hidden)return;
   if(nudgeW!==world){nudgeW=world;nudged=new Set();}
-  const P=PORTALS[world];if(!P)return;
   const w=CW();
   for(let y=Math.max(0,py-1);y<=Math.min(w.H-1,py+1);y++)for(let x=Math.max(0,px-1);x<=Math.min(w.W-1,px+1);x++){
     if(Math.abs(x-px)+Math.abs(y-py)>1)continue;
-    const ch=w.rows[y][x],d=P[ch]&&P[ch].to;
+    const pp=portalAt(world,x,y),d=pp&&pp.to;
     if(!d||!WORLDS[d]||nudged.has(d)||!worldPending(d))continue;
     nudged.add(d);
     /* if the waiting person is a room host, the pack's own invite names them */
@@ -3683,7 +3694,7 @@ function setTile(x,y,ch){
   const w=CW();
   if(x<=0||y<=0||x>=w.W-1||y>=w.H-1)return;
   if(w.grid[y][x]==="N")return;
-  if(PORTALS[world]&&PORTALS[world][w.rows[y][x]])return; /* never paint over stairs/exits */
+  if(portalAt(world,x,y))return; /* never paint over stairs/exits */
   if(w.rows[y][x]==="Y")return; /* nor the trolley stop — transit infrastructure is sacred */
   const prev=w.rows[y][x];
   w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);
@@ -4167,6 +4178,10 @@ const BLDS=()=>(typeof BUILDS!=="undefined"&&Array.isArray(BUILDS))?BUILDS:[];
 let bldPicks={};            /* buildId -> {partId: optionId}, saved so a house keeps its face */
 let bldReads=[];            /* readable things a build put into the world */
 let bldWarned=false;
+/* the lots stand from the first frame, new game or old: builds are applied here at load (a save
+   re-applies them with the faces it kept, through applyGrowth), so a room a template carries is a
+   world before anyone can walk toward it (#10) */
+applyBuilds();
 function bldHash(s){let h=2166136261>>>0;
   for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
   return h>>>0;}
@@ -4176,7 +4191,7 @@ function bldRng(seed){let a=bldHash(String(seed))||1;
 function resolveBuild(b){
   const T=BLD()[b.tpl];if(!T)return null;
   const rnd=bldRng(b.seed!==undefined?b.seed:(b.id+"|"+b.world+"|"+b.x+","+b.y));
-  const saved=bldPicks[b.id]||null,pick={},tiles=[],reads=[];
+  const saved=bldPicks[b.id]||null,pick={},tiles=[],reads=[],links=[];
   (T.parts||[]).forEach(part=>{
     const ctx={pick,build:b,tpl:T,flags:worldFlags()};
     if(typeof part.when==="function"){let ok=false;try{ok=!!part.when(ctx);}catch(e){ok=false;}if(!ok)return;}
@@ -4189,8 +4204,14 @@ function resolveBuild(b){
     }
     (src.tiles||[]).forEach(t=>tiles.push([b.y+t[0],b.x+t[1],t[2]]));
     (src.reads||[]).forEach(r=>reads.push({world:b.world,x:b.x+(r.x|0),y:b.y+(r.y|0),doc:r.doc}));
+    /* `link` (#10): this part's door at [dy,dx] opens into an interior the template carries — rows,
+       people, a name in both languages — and its exit tile leads back to the doorstep. One lot, one
+       room of its own, keyed by where the door stands (PORTALSAT), so a template stamps as many
+       homes as there are lots and every door still goes somewhere. */
+    if(src.link&&src.link.interior)links.push({x:b.x+src.link.door[1],y:b.y+src.link.door[0],interior:src.link.interior,
+      landing:src.link.landing,exit:src.link.exit,id:b.id});
   });
-  return {id:b.id,world:b.world,tpl:b.tpl,pick,tiles,reads};
+  return {id:b.id,world:b.world,tpl:b.tpl,pick,tiles,reads,links};
 }
 /* refuse anything that would wall the city in. Cheap, and it runs before a tile is written. */
 function buildSafe(spec){
@@ -4198,21 +4219,22 @@ function buildSafe(spec){
   for(const [y,x,ch] of spec.tiles){
     if(y<0||x<0||y>=w.H||x>=w.W)return "off the map at "+x+","+y;
     if(w.grid[y][x]==="N")return "somebody is standing at "+x+","+y;
-    if(DOORSET.has(w.rows[y][x])&&(PORTALS[spec.world]||{})[w.rows[y][x]])
+    const over=DOORSET.has(w.rows[y][x])&&portalAt(spec.world,x,y);
+    if(over&&over.by!==spec.id) /* a lot may be stamped again over its own door (applyGrowth re-applies every build) */
       return "it would build over the door at "+x+","+y;
     /* #9 (Don Güero, 2026-09-07): a build may not lay a tile the pack declares to be a DOOR
        (TILEMETA kind:"door") unless that door opens — walkable, or a portal on that glyph in this
        world. A painted door on a wall is the shortcut "nothing goes into the world the player
        cannot use" forbids; the engine refuses it instead of a session remembering to. */
-    if((TILES[ch]||{}).kind==="door"&&SOLID.has(ch)&&!(PORTALS[spec.world]||{})[ch])
+    if((TILES[ch]||{}).kind==="door"&&SOLID.has(ch)&&!(PORTALS[spec.world]||{})[ch]&&!(spec.links||[]).some(l=>l.x===x&&l.y===y))
       return "the door at "+x+","+y+" would open onto nothing";
   }
   /* simulate, then check every portal in this world still has somewhere to stand */
   const g=w.grid.map(r=>r.slice()),rows=w.rows.slice();
   spec.tiles.forEach(([y,x,ch])=>{g[y][x]=ch;rows[y]=rows[y].slice(0,x)+ch+rows[y].slice(x+1);});
-  const P=PORTALS[spec.world]||{};
+  const P=PORTALS[spec.world]||{},A=PORTALSAT[spec.world]||{};
   for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
-    if(!P[rows[y][x]])continue;
+    if(!P[rows[y][x]]&&!A[x+","+y])continue;
     const ok=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>{const nx=x+dx,ny=y+dy;
       return nx>=0&&ny>=0&&nx<w.W&&ny<w.H&&!SOLID.has(g[ny][nx])&&g[ny][nx]!=="N";});
     if(!ok)return "it would seal the door at "+x+","+y;
@@ -4231,7 +4253,23 @@ function applyBuilds(){
       w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);w.grid[y][x]=ch;});
     bldPicks[b.id]=spec.pick;
     spec.reads.forEach(r=>bldReads.push(r));
+    (spec.links||[]).forEach(l=>buildInterior(spec.world,l));
   });
+}
+/* an interior a build carries becomes a WORLD of its own, named after the lot (an id is at most
+   twelve characters — the save keeps that many), with its people, its name and its arrival line
+   in both languages; the lot's door and the room's exit become coordinate portals to each other */
+function buildInterior(from,l){
+  const I=l.interior,id=String(l.id).slice(0,12);
+  const rows=I.rows.slice(),grid=[],wnpcs=[],defs=I.people||{};
+  rows.forEach((row,y)=>{grid.push(row.split(""));row.split("").forEach((ch,x)=>{
+    if(defs[ch]){wnpcs.push({key:ch,x,y,...defs[ch]});grid[y][x]="N";}});});
+  WORLDS[id]={rows,rows0:I.rows.slice(),grid,npcs:wnpcs,W:rows[0].length,H:rows.length,built:true};
+  Object.keys(UI).forEach(lg=>{const t=UI[lg];if(!t)return;t.locs=t.locs||{};t.arrive=t.arrive||{};
+    if(I.locs)t.locs[id]=I.locs[lg]||I.locs.en||id;if(I.arrive)t.arrive[id]=I.arrive[lg]||I.arrive.en||"";});
+  const ld=l.landing||[Math.floor(rows[0].length/2),rows.length-2],ex=l.exit||[Math.floor(rows[0].length/2),rows.length-1];
+  (PORTALSAT[from]=PORTALSAT[from]||{})[l.x+","+l.y]={to:id,x:ld[0],y:ld[1],dir:"up",by:l.id};
+  (PORTALSAT[id]=PORTALSAT[id]||{})[ex[0]+","+ex[1]]={to:from,x:l.x,y:l.y+1,dir:"down",by:l.id};
 }
 /* a district's storefront ribbon: dropped once that district has opened */
 function applyRibbon(){

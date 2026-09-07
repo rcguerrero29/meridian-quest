@@ -58,7 +58,10 @@ content/<name>/
 **Optional — guarded by `typeof`, the engine simply does less without them:**
 `GAMEV CAMDEF STAKES GROWTH SEASONS CHAPTERS INTERVIEW CRITTERS EGGS CHATTER CHILL NPCACT TRV
 DECOR DECOART READS DOCS DOCUI BUILDTPL BUILDS TILEART TILEART_SIDE TILEMETA MAPCOL MAPDOT
-TOWNLBL DOORS DOORLOOK SOLIDX PLACES FLOORS ANIMALS READERLOOK` — and, since `mq-v65`, **`STOREPFX`** (config.js): the prefix on
+TOWNLBL DOORS DOORLOOK SOLIDX PLACES FLOORS ANIMALS READERLOOK` — and a template part's `link`
+(`{door:[dy,dx], landing:[x,y], exit:[x,y], interior:{rows, people, locs, arrive}}`, #10): the
+build stamps the interior as a world named after the lot and keys both doors by place
+(`PORTALSAT`), so one template can be stamped on many lots and every door opens — and, since `mq-v65`, **`STOREPFX`** (config.js): the prefix on
 every storage key. Optional in the engine, **required in practice for any second world served
 from the same origin**, or it loads the first world's save and overwrites it (§8). A world with none of these is a walkable town with people and
 quests. Everything else is a layer you add when its answer arrives.
