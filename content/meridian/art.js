@@ -392,6 +392,31 @@ BUILDTPL.casa={
   ],
 };
 
+/* ---------- `caseta` — the site hut, where El Portero keeps the gate (#8) ----------
+   Owner: "he can be in a room so that way he does have activity where he brings up oh 4 stopped
+   attempts - lets talk to review root cause... i need him to highlight the amount of issues and
+   if any critical ones - that can be highlighted in red." A hut at the water's edge on Calle Dos,
+   two lamp walls and a door; inside, a desk with the gate sheet on it and the tin man himself. */
+const CASETA_ROOM={
+  rows:["###|####",
+        "#D.....#",
+        "#..r...#",
+        "#......#",
+        "#......#",
+        "###⌂####"],
+  people:{r:{npc:"portero",q:[],chat:1}},
+  reads:[{x:1,y:1,doc:"portero"}],
+  locs:{en:"The site hut, Calle Dos",es:"La caseta de obra, Calle Dos"},
+  arrive:{en:"The site hut. A tin man with a clipboard. He does not look up.",es:"La caseta de obra. Un hombre de lata con su tablilla. No levanta la vista."}
+};
+BUILDTPL.caseta={
+  id:"caseta", size:{w:3,h:2},
+  parts:[
+    {id:"shell", tiles:[[0,0,"▨"],[0,1,"▨"],[0,2,"▨"],[1,0,"."],[1,1,"."],[1,2,"."]]},
+    {id:"door", tiles:[[0,1,"⌂"]], link:{door:[0,1],landing:[3,4],exit:[3,5],interior:CASETA_ROOM}},
+  ],
+};
+
 /* the lots Don Güero has been given. Same template, different seeds, different houses. */
 /* NO LOTS ARE BUILT. The ability is the thing that was asked for — "it is just an ability"
    (owner, 2026-09-03) — and two casitas went up on Calle Dos that nobody asked for and that
@@ -406,4 +431,5 @@ BUILDTPL.casa={
    `casa` template links its front door to the room it carries, and Doña Chelo lives there. */
 const BUILDS=[
   {id:"casa-w", tpl:"casa", world:"ex", x:4, y:2, seed:"calle-dos-4"},
+  {id:"caseta", tpl:"caseta", world:"ex", x:16, y:2, seed:"la-caseta"}, /* El Portero's hut, by the site (#8) */
 ];

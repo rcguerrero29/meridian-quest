@@ -37,6 +37,25 @@ const READS = [
   { world: "f2", x: 17, y: 0, doc: "nolasco" },
 ];
 
+/* the gate sheet (#8): what El Portero stopped, what is critical, what merely went wrong —
+   built live from the engine's log; the critical rows print in red */
+const PORTERO_DOC={
+  title:{en:"The gate sheet",es:"La hoja de la reja"},
+  sub:{en:"Stopped attempts and critical errors, in red. Read it, then clear it.",es:"Intentos detenidos y errores críticos, en rojo. Léela y luego límpiala."},
+  build:()=>{const es=lang==="es",out=[],when=e=>new Date(e.at).toISOString().slice(0,16).replace("T"," ");
+    const b=logKind("build"),c=logCrit().filter(e=>e.kind!=="build"),w=mqLog.filter(e=>!e.crit&&e.kind!=="build");
+    out.push({h:es?"Intentos detenidos":"Stopped attempts"});
+    if(!b.length)out.push({p:es?"Ninguno. Todo lo que se construyó, se construyó.":"None. Everything that was built, was built."});
+    b.forEach(e=>out.push({red:"× "+e.n+" · "+e.msg+" · "+when(e)}));
+    out.push({h:es?"Crítico — para hablarlo pronto":"Critical — to discuss sooner than later"});
+    if(!c.length)out.push({p:es?"Nada crítico.":"Nothing critical."});
+    c.forEach(e=>out.push({red:"× "+e.n+" · "+e.kind+": "+e.msg+" · "+when(e)}));
+    out.push({h:es?"Avisos":"Warnings"});
+    if(!w.length)out.push({p:es?"Ninguno.":"None."});
+    w.forEach(e=>out.push({p:"× "+e.n+" · "+e.kind+": "+e.msg+" · "+when(e)}));
+    if(mqLog.length)out.push({btn:es?"✓ Revisado — limpiar la hoja":"✓ Reviewed — clear the sheet",run:()=>{logClear();docOpen("portero");}});
+    return out;}
+};
 /* ---- helpers every document shares ---- */
 const dDistrict = (R, id) => R.districts.find(d => d.id === id) || { quests: [], closed: false, grade: 0 };
 const dCalls = (R, id) => { const q = dDistrict(R, id).quests;
@@ -586,3 +605,4 @@ const DOCS = {
       ]);
     } },
 };
+DOCS.portero=PORTERO_DOC; /* the gate sheet, registered once DOCS exists (#8) */

@@ -11,6 +11,24 @@
    Default "mq": Meridian's keys are unchanged, byte for byte. Guarded by the smoke suite:
    no literal key may remain in engine/. */
 const SK=k=>((typeof STOREPFX==="string"&&STOREPFX)||"mq")+k;
+/* ---------- THE LOG (#8, IDEAS §15.5 — owner: "efficient and low storage") ----------
+   What went wrong, kept small: thirty entries under the pack's prefix, one per kind|message
+   with a count and a last-seen instead of N copies, a 16 KB ceiling (halved once if crossed),
+   private mode tolerated. `crit` marks what must be discussed sooner than later — a refused
+   build, a portal to nowhere, an uncaught error — and El Portero and the teller print those in
+   red. Never a player's free text: only the engine's own messages reach here. */
+const LOGN=30,LOGKB=16*1024;let mqLog=[];
+try{mqLog=JSON.parse(localStorage.getItem(SK("log"))||"[]");if(!Array.isArray(mqLog))mqLog=[];}catch(e){mqLog=[];}
+function mqwarn(kind,msg,crit){const m=String(msg||"?").slice(0,160),key=kind+"|"+m,now=Date.now();
+  let e=mqLog.find(x=>x.key===key);
+  if(e){e.n++;e.at=now;if(crit)e.crit=true;}
+  else{e={key,kind,msg:m,n:1,at:now,crit:!!crit,v:typeof GAMEV==="string"?GAMEV:""};mqLog.push(e);if(mqLog.length>LOGN)mqLog.shift();}
+  try{let j=JSON.stringify(mqLog);if(j.length>LOGKB){mqLog=mqLog.slice(-Math.floor(LOGN/2));j=JSON.stringify(mqLog);}localStorage.setItem(SK("log"),j);}catch(err){}
+  console.warn((crit?"CRIT ":"")+kind+": "+m);}
+const logCrit=()=>mqLog.filter(e=>e.crit),logKind=k=>mqLog.filter(e=>e.kind===k);
+function logClear(){mqLog=[];try{localStorage.removeItem(SK("log"));}catch(e){}}
+window.addEventListener("error",e=>{try{mqwarn("error",(e&&e.message)||"error",true);}catch(x){}});
+window.addEventListener("unhandledrejection",e=>{try{const r=e&&e.reason;mqwarn("promise",(r&&(r.message||String(r)))||"rejection",true);}catch(x){}});
 /* ---------- the places seam (#25) ----------
    The engine used to spell Meridian's room ids in ~60 places: home base "hq" with (10,11)
    walkable, the street "st", the park "pk" with the leash landing at (2,6). A second world
@@ -176,14 +194,14 @@ const chillLines=k=>{
 (function validateWorlds(){
   Object.entries(WORLD_DEFS).forEach(([id,rows])=>{
     const L=rows[0].length;
-    rows.forEach((r,i)=>{if(r.length!==L)console.warn("WORLD "+id+" row "+i+" width "+r.length+" != "+L);});
+    rows.forEach((r,i)=>{if(r.length!==L)mqwarn("world",id+" row "+i+" width "+r.length+" != "+L,true);});
   });
   Object.keys(WORLDS).forEach(from=>portalsOf(from).forEach(({ch,p})=>{
     const w=WORLDS[p.to];
-    if(!w){console.warn("PORTAL "+from+":"+ch+" → missing world "+p.to);return;}
+    if(!w){mqwarn("portal",from+":"+ch+" → missing world "+p.to,true);return;}
     const t=w.rows[p.y]&&w.rows[p.y][p.x];
-    if(t===undefined||SOLID.has(t)||w.grid[p.y][p.x]==="N")console.warn("PORTAL "+from+":"+ch+" spawn blocked at "+p.to+" ("+p.x+","+p.y+")");
-    if(portalAt(p.to,p.x,p.y))console.warn("PORTAL "+from+":"+ch+" spawns ON a portal tile — ping-pong risk");
+    if(t===undefined||SOLID.has(t)||w.grid[p.y][p.x]==="N")mqwarn("portal",from+":"+ch+" spawn blocked at "+p.to+" ("+p.x+","+p.y+")",true);
+    if(portalAt(p.to,p.x,p.y))mqwarn("portal",from+":"+ch+" spawns ON a portal tile — ping-pong risk",true);
   }));
 })();
 /* full-universe reachability audit: BFS from the hero's spawn across every world THROUGH portals.
@@ -208,7 +226,7 @@ function auditReach(){
   });
   return probs;
 }
-auditReach().forEach(p=>console.warn("REACH "+p));
+auditReach().forEach(p=>mqwarn("reach",p,true));
 /* ---------- chapters ----------
    A chapter is a district's quest pack plus how many of them close it. Both live in
    content (config.js): `need` is deliberately lower than the pack size, so the city
@@ -391,7 +409,7 @@ function clearSave(){try{localStorage.removeItem(SK("1"));}catch(e){}}
 /* toasts */
 let toastT=null,toastQ=[];
 const tickerLines=[];
-function toast(msg,ms){const el=$("toast");
+function toast(msg,ms,crit){const el=$("toast");el.classList.toggle("crit",!!crit); /* red for what must be discussed sooner (#8) */
   /* The activity record mirrors recent messages so a short interaction can be re-read
      after the toast fades (owner ask). Owner, 2026-09-01: keep the last TWO. Owner,
      2026-09-03: "should only delete after two activities, the timer is too fast" — so
@@ -1957,7 +1975,28 @@ function drawGato(g,cr,sx,sy){ /* the street cat: Canela's silhouette, alley pal
   g.fillStyle="#C4586B";g.fillRect(cx+9.2,sy+18,1.1,0.9);
   g.restore();
 }
+/* El Portero (#8, Pili's first robot): a tin man with a clipboard, a shade too still. Square head,
+   two amber lamps for eyes, an antenna with a red tip, a riveted barrel body, tread feet. He does
+   not bob; he does not blink. Drawn wherever drawPerson would draw him, so every camera sees him. */
+function drawRobot(g,sx,sy,lk,o){
+  o=o||{};const d=o.dir||"down",tin=lk.shirt||"#9AA3AD",dark="#5B6470",lamp="#F2B705";
+  g.fillStyle="rgba(0,0,0,.2)";g.beginPath();g.ellipse(sx+16,sy+28,8,3.5,0,0,7);g.fill();
+  g.fillStyle=dark;g.fillRect(sx+9,sy+24,6,4);g.fillRect(sx+17,sy+24,6,4); /* tread feet */
+  g.fillStyle=tin;g.beginPath();g.roundRect(sx+8,sy+11,16,13,3);g.fill(); /* the barrel */
+  g.strokeStyle="rgba(15,12,20,.4)";g.lineWidth=.8;g.stroke();
+  g.fillStyle=dark;[[11,14],[20,14],[11,21],[20,21]].forEach(r=>g.fillRect(sx+r[0],sy+r[1],1.4,1.4)); /* rivets */
+  g.fillStyle="#DDE4EA";g.fillRect(sx+13,sy+15,6,7);g.fillStyle="#26202B";[16.5,18,19.5].forEach(yy=>g.fillRect(sx+14,sy+yy,4,0.7)); /* the clipboard, three lines on it */
+  g.fillStyle=tin;g.fillRect(sx+5,sy+12,3,8);g.fillRect(sx+24,sy+12,3,8); /* arms, straight down */
+  g.fillStyle=lk.skin||"#B8C0C8";g.beginPath();g.roundRect(sx+9.5,sy-1,13,12,2);g.fill(); /* the square head */
+  g.strokeStyle="rgba(15,12,20,.4)";g.stroke();
+  g.fillStyle=dark;g.fillRect(sx+15.4,sy-5,1.2,4.5);g.fillStyle="#D9342B";g.beginPath();g.arc(sx+16,sy-5.4,1.4,0,7);g.fill(); /* antenna, red tip */
+  const ex=d==="left"?-1.5:d==="right"?1.5:0;
+  if(d!=="up"){g.fillStyle="#2B2536";g.fillRect(sx+11.5+ex,sy+2.5,4,3.6);g.fillRect(sx+16.5+ex,sy+2.5,4,3.6);
+    g.fillStyle=lamp;g.fillRect(sx+12.3+ex,sy+3.3,2.4,2);g.fillRect(sx+17.3+ex,sy+3.3,2.4,2); /* amber lamps */
+    g.fillStyle="#2B2536";g.fillRect(sx+13,sy+8,6,1);} /* a slot for a mouth; it does not move */
+}
 function drawPerson(g,sx,sy,lk,o){
+  if(lk&&lk.robot)return drawRobot(g,sx,sy,lk,o);
   o=o||{};const b=o.bob||o.idle||0,d=o.dir||"down",bh=b*0.5;
   g.fillStyle="rgba(0,0,0,.2)";g.beginPath();g.ellipse(sx+16,sy+28,8,3.5,0,0,7);g.fill();
   g.fillStyle=lk.outfit==="formal"?"#23262E":"#2E3547";
@@ -2249,6 +2288,7 @@ function docOpen(id,from){
     if(s2.h)el("h3","dh",s2.h);
     else if(s2.p)el("p","dp",s2.p);
     else if(s2.note)el("p","dnote",s2.note);
+    else if(s2.red)el("p","dred",s2.red); /* critical, in red — El Portero's sheet, the teller's category (#8) */
     else if(s2.blank){const r=el("p","dblank");
       r.innerHTML='<b></b> <span class="dline"></span>';r.querySelector("b").textContent=s2.blank+":";}
     else if(s2.kv){const t=el("div","dkv");
@@ -2465,7 +2505,8 @@ $("talk").addEventListener("click",()=>{
        alike on a phone screen (owner, 2026-09-03: "its hard to tell people apart, should
        they have their name when they speak?"). Tile flavour stays unsigned on purpose —
        the crosswalk is not a person. */
-    if(L.length)toast(sayAs(tb.dataset.chatn,L[Math.floor(Math.random()*L.length)]),2800);return;}
+    if(L.length){let ln=L[Math.floor(Math.random()*L.length)];if(typeof ln==="function")ln=ln(); /* a line may be counted at the moment it is said (El Portero, #8) */
+      const crit=!!(ln&&ln.crit);ln=(ln&&ln.t!==undefined)?ln.t:ln;toast(sayAs(tb.dataset.chatn,ln),2800,crit);}return;}
   questStart(+tb.dataset.qi);});
 let petTarget=null,petCrit=null;
 function fredCheck(){ /* now the generic animal-interaction check: every creature is reachable and greetable */
@@ -4245,9 +4286,9 @@ function applyBuilds(){
   bldReads=[];
   BLDS().forEach(b=>{
     const spec=resolveBuild(b);
-    if(!spec){if(!bldWarned){bldWarned=true;console.warn("WORLD: no template named "+b.tpl);}return;}
+    if(!spec){if(!bldWarned){bldWarned=true;mqwarn("build","no template named "+b.tpl,true);}return;}
     const bad=buildSafe(spec);
-    if(bad){console.warn("WORLD: refused to build "+b.id+" — "+bad);return;}
+    if(bad){mqwarn("build","refused to build "+b.id+" — "+bad,true);return;}
     const w=WORLDS[spec.world];
     spec.tiles.forEach(([y,x,ch])=>{
       w.rows[y]=w.rows[y].slice(0,x)+ch+w.rows[y].slice(x+1);w.grid[y][x]=ch;});
@@ -4265,6 +4306,7 @@ function buildInterior(from,l){
   rows.forEach((row,y)=>{grid.push(row.split(""));row.split("").forEach((ch,x)=>{
     if(defs[ch]){wnpcs.push({key:ch,x,y,...defs[ch]});grid[y][x]="N";}});});
   WORLDS[id]={rows,rows0:I.rows.slice(),grid,npcs:wnpcs,W:rows[0].length,H:rows.length,built:true};
+  (I.reads||[]).forEach(r=>bldReads.push({world:id,x:r.x|0,y:r.y|0,doc:r.doc})); /* a sheet on a desk inside */
   Object.keys(UI).forEach(lg=>{const t=UI[lg];if(!t)return;t.locs=t.locs||{};t.arrive=t.arrive||{};
     if(I.locs)t.locs[id]=I.locs[lg]||I.locs.en||id;if(I.arrive)t.arrive[id]=I.arrive[lg]||I.arrive.en||"";});
   const ld=l.landing||[Math.floor(rows[0].length/2),rows.length-2],ex=l.exit||[Math.floor(rows[0].length/2),rows.length-1];
@@ -4302,7 +4344,7 @@ function lateOpenToast(){
 }
 /* ---------- boot ---------- */
 wanderInit();
-{const bad=auditWander();if(bad.length)console.warn("WORLD: nowhere to walk for "+bad.join(" | "));}
+{const bad=auditWander();if(bad.length)mqwarn("world","nowhere to walk for "+bad.join(" | "),false);}
 const SV=loadSave();
 if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").textContent=T().contBtn(SV.n,SV.xp,SV.d.length);

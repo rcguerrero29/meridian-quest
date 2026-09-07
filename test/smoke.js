@@ -2446,6 +2446,32 @@ const CANDIDATES = [
             const reach = auditReach().filter(m => m.includes(id)); if (reach.length) problems.push('the casa is not reachable: ' + reach.join('; '));
             if (room.rows.some(r => r.includes('▦'))) problems.push('the room has a reja inside it');
           }
+          // #8 El Portero: the log, the tin man in his hut, the count he says, the red on his sheet
+          if (typeof mqwarn !== 'function' || typeof logCrit !== 'function') problems.push('the engine keeps no log (mqwarn / logCrit)');
+          else {
+            const hut = Object.entries(WORLDS).find(([k, w]) => w.built && w.npcs.some(n => n.npc === 'portero'));
+            if (!hut) problems.push('El Portero has no hut');
+            else {
+              const [hid, hw] = hut, rob = hw.npcs.find(n => n.npc === 'portero');
+              if (!NPCLOOK.portero || !NPCLOOK.portero.robot) problems.push('El Portero is not drawn as a robot');
+              if (!RD().some(r => r.world === hid && r.doc === 'portero')) problems.push('the gate sheet is not on a desk in the hut');
+              const say = () => { let l = UI[lang].chat.portero[0]; return typeof l === 'function' ? l() : l; };
+              const keep = mqLog.slice(); logClear();
+              const quiet = say(); if (quiet && quiet.crit) problems.push('with nothing logged El Portero speaks in red');
+              mqwarn('build', 'refused to build probe — the door at 1,1 would open onto nothing', true);
+              mqwarn('build', 'refused to build probe — the door at 1,1 would open onto nothing', true);
+              const loud = say();
+              if (!loud || !loud.crit || !/^2 /.test(loud.t)) problems.push('El Portero does not count two stopped attempts in red (' + JSON.stringify(loud) + ')');
+              const secs = docSections('portero') || [];
+              if (!secs.some(x => x.red && /× 2/.test(x.red))) problems.push('the gate sheet does not print the stopped attempt in red');
+              window.dispatchEvent(new ErrorEvent('error', { message: 'probe error' }));
+              if (!logCrit().some(e => e.kind === 'error' && e.msg === 'probe error')) problems.push('an uncaught error does not reach the log');
+              let stored = null; try { stored = JSON.parse(localStorage.getItem(SK('log'))); } catch (e) {}
+              if (!stored || !stored.some(e => e.kind === 'build')) problems.push('the log is not kept under the prefix');
+              logClear(); mqLog.push(...keep);
+              mqwarn('build', 'refused to build probe2 — off the map', true); docOpen('portero'); if (!document.querySelector('#docBody .dred')) problems.push('the reader has no red line'); $('reader').hidden = true; logClear(); mqLog.push(...keep);
+            }
+          }
           // a second lot from the same template gets a room of its own — the point of keying doors by place
           const two = resolveBuild({ id: 'casa-probe', tpl: 'casa', world: lot.world, x: lot.x + 8, y: lot.y, seed: 'probe' });
           if (!two || !two.links || two.links.length !== 1 || two.links[0].id !== 'casa-probe') problems.push('a second lot from the casa template does not carry its own link');
