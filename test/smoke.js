@@ -1291,8 +1291,20 @@ const CANDIDATES = [
         if (typeof drawCalaverita !== 'function' || typeof canopyDress !== 'function' || typeof fiestaProps !== 'function' || typeof drawPapelRow !== 'function') problems.push('the engine has no calaveritas, no dressed trees, no cut paper');
         else {
           const pal2 = (art('papel', []) || []);
-          ['pk', 'hq', 'me', 'lc'].forEach(wid => { if (!fiestaSwags(wid).length) problems.push('no papel picado in ' + wid); });
+          // owner, 2026-09-07 (night): "the papel picado can be everywhere and more colorful" — every base world strung, ten colours in the cut
+          Object.keys(WORLDS).filter(k => !WORLDS[k].built).forEach(wid => { if (!fiestaSwags(wid).length) problems.push('no papel picado in ' + wid); });
+          if (pal2.length < 9) problems.push('the cut has only ' + pal2.length + ' colours');
           const pr = art('props', []) || []; if (!pr.some(p => p.kind === 'calaverita')) problems.push('no calaveritas de azúcar anywhere');
+          // "the candied skulls are probably better in a window sill (as in human reality)": every calaverita sits on a facade's window
+          pr.filter(p => p.kind === 'calaverita').forEach(p => { if (!p.sill) problems.push('a calaverita is not on a sill at ' + p.world + ' ' + p.x + ',' + p.y); else if (typeof propSill !== 'function' || !propSill(p.world, p)) problems.push('a sill calaverita has no window under it at ' + p.world + ' ' + p.x + ',' + p.y); });
+          // ❗La ofrenda: one at the foot of the bridge, one on Doña Tencha's table; it draws; it stands in 3D
+          const ofr = pr.filter(p => p.kind === 'ofrenda'); if (typeof drawOfrenda !== 'function') problems.push('the engine has no ofrenda');
+          else { if (!ofr.some(p => p.world === PL.park) || !ofr.some(p => WORLDS[p.world] && WORLDS[p.world].built)) problems.push('the ofrenda is not at the foot of the bridge and on a neighbour\'s table');
+            const oc = document.createElement('canvas'); oc.width = 32; oc.height = 32; const og = oc.getContext('2d'); drawOfrenda(og, 0, 0); const od = og.getImageData(0, 0, 32, 32).data; let on = 0; for (let i = 3; i < od.length; i += 4) if (od[i] > 200) on++; if (on < 300) problems.push('the ofrenda draws almost nothing (' + on + ' px)');
+            camSet('3d'); world = PL.park; px = fx = PL.parkIn[0]; py = fy = PL.parkIn[1]; moving = false; held = null; t3Invalidate(); draw3d();
+            if (!T3.group.children.some(o => o.userData && o.userData.ofrenda)) problems.push('the ofrenda does not stand in the park in 3D');
+            world = 'st'; px = fx = 5; py = fy = 2; t3Invalidate(); draw3d(); const sills = T3.group.children.filter(o => o.userData && o.userData.calaverita && o.userData.sill);
+            if (!sills.length) problems.push('no calaverita stands on a sill on the street in 3D'); else if (sills.some(s => s.position.y < 0.2)) problems.push('a sill calaverita sits on the ground, not in the window'); }
           const pw = pr.find(p => p.kind === 'calaverita'); if (pw) { camSet('3d'); world = pw.world; px = fx = pw.x; py = fy = pw.y + 2; moving = false; held = null; t3Invalidate(); draw3d();
             const cs = T3.group.children.filter(o => o.userData && o.userData.calaverita), want = pr.filter(p => p.world === pw.world && p.kind === 'calaverita');
             if (cs.length !== want.length) problems.push(`${cs.length} calaveritas stand in ${pw.world} in 3D, ${want.length} were set down`);
