@@ -290,12 +290,22 @@ function casaBase(sx,sy,wall){
   ctx.fillStyle="rgba(0,0,0,.18)";ctx.fillRect(sx,sy+5,32,2);
   ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx,sy+29,32,3);              /* the wet line at the bottom */
 }
-TILEART["▦"]=rc=>{const{sx,sy}=rc;                                   /* the door */
+TILEART["▦"]=rc=>{const{sx,sy}=rc;                                   /* the REJA — a closed gate (#9, 2026-09-07) */
+  /* It drew a door with a handle and a step, and the tile is a wall: "i cant enter the houses".
+     The paperwork was right (kind: facade), the paint lied. Now it is honestly closed: the dark
+     recess stays, iron bars over it, a chain and a padlock, the step kept so it is the same house.
+     The template part is still called `door`; that names which tile carries the front. */
   casaBase(sx,sy);
-  ctx.fillStyle="#5B3A22";ctx.fillRect(sx+11,sy+14,10,15);
-  ctx.fillStyle="#3E2716";ctx.fillRect(sx+11,sy+14,10,2);
-  ctx.fillStyle="#E0B45C";ctx.fillRect(sx+18,sy+21,2,2);             /* the handle */
-  ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+9,sy+29,14,3);};           /* the step */
+  ctx.fillStyle="#3E2716";ctx.fillRect(sx+10,sy+13,12,16);            /* the recess */
+  ctx.fillStyle="#2A2A30";ctx.fillRect(sx+9,sy+12,14,2);              /* the lintel bar */
+  ctx.fillStyle="#3A3A44";[11,14,17,20].forEach(x=>ctx.fillRect(sx+x,sy+13,1.6,16)); /* the bars */
+  ctx.fillStyle="rgba(255,255,255,.22)";[11,14,17,20].forEach(x=>ctx.fillRect(sx+x,sy+13,0.6,16));
+  ctx.fillStyle="#2A2A30";ctx.fillRect(sx+9,sy+27,14,1.4);            /* the bottom rail */
+  ctx.strokeStyle="#8A8A94";ctx.lineWidth=1.1;ctx.beginPath();        /* the chain, looped through two bars */
+  ctx.moveTo(sx+14.5,sy+19);ctx.quadraticCurveTo(sx+16,sy+22.5,sx+17.8,sy+19);ctx.stroke();
+  ctx.fillStyle="#E0B45C";ctx.fillRect(sx+14.8,sy+21,2.6,2.8);        /* the padlock, brass */
+  ctx.fillStyle="#2A2A30";ctx.fillRect(sx+15.7,sy+22.2,0.8,0.8);
+  ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+9,sy+29,14,3);};           /* the step, kept: same house */
 TILEART["▩"]=rc=>{const{sx,sy}=rc;                                   /* the window */
   casaBase(sx,sy);
   ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+7,sy+11,18,14);
