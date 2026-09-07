@@ -509,7 +509,12 @@ function t3Actors(){
        used to draw LAST, over everyone, so behind a person you stood on their head (owner,
        2026-09-07: "when we walk behind people it seems like im walking on them"). The hero still
        ignores depth, so a wall never hides them (#22) — a person can. */
-    p.spr.material.depthTest=!a.hero;p.spr.renderOrder=1000-Math.round(dl*10);
+    /* #92 (owner: "when im going downstairs, im walking on the wall again"): drawn through everything,
+       a hero sunk in a well read as standing ON the rail and the floor's lip in front of them. Below the
+       floor the hero respects depth — the lip and the knee-high rail hide their legs, which is what going
+       down into a hole looks like — and the tall wall on the camera side is the one the near-wall rule
+       already minimizes. On the floor and on a climbing flight they still draw through walls (#22). */
+    p.spr.material.depthTest=!a.hero||lift<0;p.spr.renderOrder=1000-Math.round(dl*10);
     p.spr.visible=true;p.live=true;
   });
   for(let i=list.length;i<T3.pool.length;i++){T3.pool[i].spr.visible=false;T3.pool[i].live=false;}
