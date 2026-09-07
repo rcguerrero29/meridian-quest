@@ -235,6 +235,7 @@ function t3Build(key){
       flatTex[g]=flatTex[g]||t3Tex(t3BakeGlyph(g,false,null,false,true));
       const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[g]}));
       s.center.set(0.5,0.06);s.scale.set(1.05,1.05,1);s.position.set(cx,0,cz);
+      s.userData={flat:true,g,x,y}; /* a picture standing in the scene — the 3D-realism audit counts these (#39) */
       T3.tintables.push(s.material);grp.add(s);
       continue;
     }
@@ -365,6 +366,7 @@ function t3Build(key){
       }
       const cs=new THREE.Sprite(new THREE.SpriteMaterial({map:T3.canopyTex}));
       cs.scale.set(1.7,1.7,1);cs.position.set(cx,1.05,cz);
+      cs.userData={flat:true,g:gch,x,y,canopy:true}; /* the canopy is a picture on a real trunk (#39) */
       T3.tintables.push(cs.material);grp.add(cs);
     }else if(t3Boxy(gch,m)){
       const b=t3BoxMats(gch,x,y);
@@ -378,6 +380,7 @@ function t3Build(key){
       const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[vk]}));
       s.center.set(0.5,0.06);s.scale.set(1.05,1.05,1);
       s.position.set(cx,0,cz);
+      s.userData={flat:true,g:gch,x,y}; /* a cutout, not a solid — the 3D-realism audit counts these (#39) */
       T3.tintables.push(s.material);grp.add(s);
     }
   }

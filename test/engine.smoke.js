@@ -29,7 +29,7 @@ const { chromium } = require('playwright-core');
   if (pageErrors.length) fails.push('page errors: ' + pageErrors.join(' | '));
   warns.filter(w => /^(REACH|PORTAL) /.test(w)).forEach(w => fails.push('boot warning: ' + w));
 
-  const r = await page.evaluate(() => {
+  const r0 = await page.evaluate(() => {
     const P = [];
     const walk = (w, x, y) => x >= 0 && y >= 0 && x < w.W && y < w.H && !SOLID.has(w.grid[y][x]) && w.grid[y][x] !== 'N';
     const firstWalkable = w => { for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (walk(w, x, y)) return [x, y]; return null; };
@@ -80,6 +80,7 @@ const { chromium } = require('playwright-core');
     // ---- every camera draws every world; every door stands in 3D ----
     const before = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
     moving = false; held = null;
+    const flat = {}, flatIn = {};
     Object.entries(WORLDS).forEach(([id, w]) => {
       const spot = firstWalkable(w); if (!spot) { P.push(id + ' has no walkable tile'); return; }
       world = id; px = fx = spot[0]; py = fy = spot[1];
@@ -96,16 +97,32 @@ const { chromium } = require('playwright-core');
       if (doors !== want) P.push(id + ' has ' + want + ' doors on the map and ' + doors + ' standing in 3D');
       if (lintels < wantLintel) P.push(id + ': ' + (wantLintel - lintels) + ' door(s) in a tall wall have a see-through slot above them');
       if (glows < doors) P.push(id + ': ' + (doors - glows) + ' door(s) do not say "this one opens" in 3D');
+      T3.group.children.forEach(o => { const u = o.userData || {}; if (u.flat) { flat[u.g] = (flat[u.g] || 0) + 1; (flatIn[u.g] = flatIn[u.g] || new Set()).add(id); } });
     });
     world = before.world; px = fx = before.px; py = fy = before.py; T3.yaw = before.yaw; camSet(before.cam);
+    // ---- #39: the 3D-realism audit — a picture standing in the scene is not a thing with sides ----
+    // Owner, 2026-09-07: "the test should catch things like 2d image looking thing/objects." The 3D
+    // builder tags every billboard it stands in a world as `flat`. FLAT_KNOWN is what is still flat
+    // TODAY, and it only ever shrinks: a glyph flat and not on it fails the build (nothing new may
+    // ship as a picture), and a glyph on it that is laid in this pack yet no longer flat fails too,
+    // so the list is kept honest as things get sides (TILESIDE) or become boxes.
+    // 2026-09-07: 17 kinds were flat; the desk (D) and the shelving (S) got sides the same day.
+    const FLAT_KNOWN = ['1', '3', '4', '5', '7', '9', 'A', 'C', 'H', 'I', 'J', 'P', 'W', 'X', 'Y'];
+    const laid = new Set(); Object.values(WORLDS).forEach(w => w.rows.forEach(r => r.split('').forEach(ch => laid.add(ch))));
+    Object.keys(flat).forEach(g => { if (!FLAT_KNOWN.includes(g)) P.push('"' + g + '" (' + ((TILES[g] || {}).kind || '?') + ') stands in 3D as a flat picture in ' + [...flatIn[g]].join(',') + ' — give it a side view (TILESIDE) so it becomes a box; nothing new may ship flat (#39)'); });
+    // a pack may give a letter another meaning (the town's I is a facade): only a glyph laid here
+    // as a kind the builder could make flat counts as "no longer flat"
+    const couldBeFlat = g => ['furniture', 'appliance', 'prop', 'nature', 'gear', 'marker', 'site', 'transit', 'stair', 'tree'].includes((TILES[g] || {}).kind);
+    FLAT_KNOWN.forEach(g => { if (laid.has(g) && couldBeFlat(g) && !flat[g]) P.push('"' + g + '" is no longer flat in 3D — take it off FLAT_KNOWN in test/engine.smoke.js so the list keeps shrinking (#39)'); });
     // ---- nothing is stored outside the pack's prefix ----
     const pfx = SK(''); const stray = [];
     for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!k.startsWith(pfx)) stray.push(k); }
     if (stray.length) P.push('storage keys outside the prefix "' + pfx + '": ' + stray.join(', '));
-    return P;
+    return { P, stillFlat: Object.keys(flat).sort().map(g => g + '×' + flat[g]) };
   });
+  const r = r0.P; r.stillFlat = r0.stillFlat;
   fails.push(...r);
   await browser.close();
   if (fails.length) { console.log('FAIL (' + idx + ')\n- ' + fails.join('\n- ')); process.exit(1); }
-  console.log('OK — ' + idx + ': the worlds hang together, every person is reachable and named, every document builds, every camera draws every world, every door stands in 3D, every animal has ground, and storage stays under its prefix.');
+  console.log('OK — ' + idx + ': the worlds hang together, every person is reachable and named, every document builds, every camera draws every world, every door stands in 3D, every animal has ground, and storage stays under its prefix. Still flat in 3D (#39): ' + (r.stillFlat && r.stillFlat.length ? r.stillFlat.join(' ') : 'nothing') + '.');
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

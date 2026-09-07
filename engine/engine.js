@@ -815,6 +815,30 @@ TILESIDE["T"]=rc=>{const{sx,sy}=rc; /* a restaurant table from the front: chair 
       ctx.fillStyle="#C0392B";for(let i=1;i<7;i+=2)ctx.fillRect(sx+3+i*4,sy+17,4,3);
       ctx.fillStyle="#FFFFFF";[10,22].forEach(px=>{ctx.beginPath();ctx.ellipse(sx+px,sy+12.5,4,1.6,0,0,7);ctx.fill();});
       ctx.fillStyle="#7A4E2C";ctx.fillRect(sx+5,sy+23,3,7);ctx.fillRect(sx+24,sy+23,3,7);};
+TILESIDE["D"]=rc=>{const{sx,sy}=rc; /* a desk from the front (#39, the 3D-realism audit: "2d image looking
+      objects"): a slab on two legs with a drawer unit on the right, the monitor standing on it, a
+      sheet of paper. With a side view the desk is a BOX in 3D, walked around, not a cutout. */
+      ctx.fillStyle="#2B2F38";ctx.fillRect(sx+9,sy+4,13,9);ctx.fillRect(sx+15,sy+13,2,2);ctx.fillRect(sx+12,sy+14.5,8,1.2); /* monitor, stand */
+      ctx.fillStyle="#7FB3D5";ctx.fillRect(sx+10,sy+5,11,7); /* screen */
+      ctx.fillStyle=tc(C.deskTop);ctx.fillRect(sx+2,sy+15.5,TS-4,3); /* the top slab */
+      ctx.fillStyle="rgba(255,255,255,.18)";ctx.fillRect(sx+2,sy+15.5,TS-4,1); /* light on the edge */
+      ctx.fillStyle=tc(C.desk);ctx.fillRect(sx+3,sy+18.5,3,11.5); /* left leg */
+      ctx.fillRect(sx+18,sy+18.5,11,11.5); /* the drawer unit */
+      ctx.fillStyle="rgba(15,12,20,.28)";[21,25].forEach(yy=>ctx.fillRect(sx+19,sy+yy,9,0.9)); /* drawer seams */
+      ctx.fillStyle="#D9C9A3";[20.5,24.5,28].forEach(yy=>ctx.fillRect(sx+22,sy+yy,3,0.9)); /* handles */
+      ctx.fillStyle="#DDE4EA";ctx.fillRect(sx+4,sy+14,6,1.6); /* the paper, on the slab */
+      ctx.fillStyle="rgba(15,12,20,.18)";ctx.fillRect(sx+2,sy+29.5,TS-4,1);}; /* shadow at the floor */
+TILESIDE["S"]=rc=>{const{sx,sy,x,y}=rc; /* shelving from the front: a bookcase — two uprights, three shelves,
+      books and boxes on each, varying by tile so a wall of them is not one picture repeated (#39) */
+      ctx.fillStyle="#8A6F4D";ctx.fillRect(sx+2,sy+2,TS-4,28); /* the case */
+      ctx.fillStyle="#6E5638";ctx.fillRect(sx+2,sy+2,2.2,28);ctx.fillRect(sx+TS-4.2,sy+2,2.2,28); /* uprights */
+      ctx.fillStyle="#5A4530";ctx.fillRect(sx+4,sy+4,TS-8,14);ctx.fillRect(sx+4,sy+19,TS-8,10); /* the dark inside */
+      ctx.fillStyle="#6E5638";[10,18,26].forEach(yy=>ctx.fillRect(sx+2,sy+yy,TS-4,2)); /* shelves */
+      const sd=((x|0)*7+(y|0)*13)%5,cols=["#D9C9A3","#C0392B","#2E5FA8","#E0B45C","#639C6C","#F2E8D8"];
+      [[5,4,6],[12,4,6],[19,4,6],[5,12,6],[13,12,6],[21,12,6],[5,20,6],[12,20,6],[20,20,6]].forEach((b,i)=>{ /* books and boxes */
+        const w=b[2]-(i%3===sd%3?2:0);ctx.fillStyle=cols[(i+sd)%cols.length];ctx.fillRect(sx+b[0],sy+b[1],w,b[1]<20?5:5.5);});
+      ctx.fillStyle="rgba(255,255,255,.14)";ctx.fillRect(sx+2,sy+2,TS-4,1);
+      ctx.fillStyle="rgba(15,12,20,.18)";ctx.fillRect(sx+2,sy+29.5,TS-4,1);};
 TILESIDE["K"]=rc=>{const{sx,sy,x,y}=rc; /* a counter from the front. A coffee machine on every third
       tile (a run of fourteen machines is not a counter); the rest carry a cup and a napkin stand. */
       ctx.fillStyle=tc(C.counter);ctx.fillRect(sx+1,sy+16,30,14);
