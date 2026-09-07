@@ -19,6 +19,7 @@ activities"* is a rule; "improve the ticker" is a mood. Quote the rule.
 
 | Asked | Verbatim | State |
 |---|---|---|
+| 2026-09-07 | *"can you double check when i click done on a task with a person, that only one is being closed?"* | **Checked, and pinned by a test**: Done on a person sends one PATCH to that one issue, from the street body or the house body alike; nothing loops over people |
 | 2026-09-07 | *"that looks really cool ok well i need to look through them. i am a bit surprised how unrealistically slim the buildings are but otherwise good so far. any questions for me right now?"* | Filed as an issue (the buildings are one tile deep: a facade is a wall with a face, the room is a separate world — the engine's convention, Meridian's street is the same). Questions asked back in the session: depth or height for the buildings, block two now or later, #40's first template, #11's "file them", Done on #65 |
 | 2026-09-07 | *"wait is there another merging happening?"* · *"i walked - lets merge when greeen please"* | Told: one open, #75 (dos cuerpos, `ch-v24`), everything else merged. **Merged on green** at the owner's word |
 | 2026-09-07 | *"i meant for buildings in don gueros plans too please"* | **In block one** (`ch-v23`): every house wears its work label in plain words — on the board beside its door (two lines: RECORDS / & FORMS …), in its clerk's first line, and in the index, beside its name |

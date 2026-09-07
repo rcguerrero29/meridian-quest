@@ -505,6 +505,16 @@ const { chromium } = require('playwright-core');
         const ff = docSections('filter').find(x => x.form); ff.form.run({ labels: ['bug'], search: '' }); await new Promise(r => setTimeout(r, 40));
         if (RECORDSRC.filter.join() !== 'bug') problems.push('the filter form did not narrow');
         RECORDSRC.setFilter([], ''); await new Promise(r => setTimeout(r, 40));
+        // owner, 2026-09-07: "double check when i click done on a task with a person, that only one is being closed" —
+        // Done from either body of a person is ONE PATCH to THAT issue, and nobody else's issue is touched
+        RECORDSRC.place([{ n: 61, title: 'one', body: '', labels: ['tier: high', 'ask', 'work: the engine'], at: '2026-09-06' }, { n: 62, title: 'two', body: '', labels: ['tier: high', 'ask', 'work: the engine'], at: '2026-09-06' }, { n: 63, title: 'three', body: '', labels: ['tier: high', 'bug'], at: '2026-09-06' }]);
+        const bodies61 = Object.values(WORLDS).flatMap(w => w.npcs.filter(n => n.issue === 61));
+        if (bodies61.length !== 2) problems.push('#61 should stand twice, on the doorstep and inside (' + bodies61.length + ')');
+        for (const b of bodies61) { calls.length = 0; const dn = docSections(b.doc).find(x => x.btn && /Done/.test(x.btn)); if (!dn) { problems.push('a body of #61 has no Done button'); continue; }
+          dn.run(); await new Promise(r => setTimeout(r, 40));
+          const patches = calls.filter(c => c.opt.method === 'PATCH');
+          if (patches.length !== 1 || !/\/issues\/61$/.test(patches[0].url) || JSON.parse(patches[0].opt.body).state !== 'closed') problems.push('Done on #61 did not send exactly one close for #61: ' + JSON.stringify(patches.map(c => c.url)));
+          if (calls.some(c => (c.opt.method || 'GET') !== 'GET' && !/\/issues\/61$/.test(c.url))) problems.push('Done on #61 wrote to something else: ' + JSON.stringify(calls.filter(c => (c.opt.method || 'GET') !== 'GET').map(c => c.url))); }
         RECORDSRC.signOut(); RECORDSRC.place([]); window.fetch = fetch0; window.prompt = prompt0; document.getElementById('reader').hidden = true; }
       // ---- ch-v15: the index — everything by tag, one search, walk there, file about it ----
       { const fx6 = [{ n: 91, title: '❗Sonny should bark', body: 'the pigeon flutters', labels: ['tier: high', 'ask', 'sonny'], at: '2026-09-06' }, { n: 92, title: 'The stair rail', body: '', labels: ['tier: normal', 'decision'], at: '2026-09-06' }, { n: 93, title: 'a small one', body: '', labels: ['tier: low', 'bug'], at: '2026-09-06' }];
