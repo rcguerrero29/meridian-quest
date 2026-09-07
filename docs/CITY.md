@@ -210,7 +210,7 @@ would have none left unless looks key by npc instead.
 
 - ⏳ **❗La ofrenda** *(Nacho, 2026-09-07, with the fiesta)* — where the barrio sets its table for
   Día de Muertos and whose photo is on it. His recommendation: one at the foot of the marigold
-  bridge in the park and one on Doña Chelo's table at home, with a petal path from her door; an
+  bridge in the park and one on Doña Tencha's table at home (the casa's neighbour — Doña Tencha since 2026-09-07; she was a second "chelo"), with a petal path from her door; an
   EMPTY frame, nobody named ("That one's for whoever needs it") — never the old AI lead, who
   vanished and did not die. Not built: the fiesta shipped the swags, the piñata and Doña Meche;
   the ofrendas wait on this word.
@@ -232,16 +232,41 @@ would have none left unless looks key by npc instead.
     the photo, the last cut and the time; Naye confirms at the mirror before anything is cut.
   - ⏳ **❗La fachada** — the shop wears the casa's facade today. A barbershop glyph of its own (a pole,
     the mirror wall from the sidewalk) needs one cold read; or keep the facade and hang a sign.
-  Not absorbed: Nacho found `chelo` declared twice in `npcs.js` (neighbour and mercado owner under one
-  key; the later wins) — the owner says which is true; and "Wardrobe / Vestidor" already names the
-  animals' fitting room, so the chair never uses that word.
+- ⏳ **❗El espejo — does the chair get a story, and when** *(Nacho, 2026-09-07; owner: "barber - cool
+  can we reuse for MQ then for the story, nacho?")* — **In plain words:** Naye cuts hair on Calle Dos
+  and nobody in Meridian has said a word about her yet. She is the only person in the city holding a
+  tool that cannot be undone. The beat she carries is the one the taller only half-taught: the brief is
+  not the request, and somebody confirms before the irreversible step. A customer brings a photo of a
+  stranger's head; Naye asks twice at the mirror — Xochi taught her that — and only then cuts. Human in
+  the loop, with scissors.
+  - **A — Service only, one thread.** Three lines tying her to Xochi and tía Chelo, one existing NPC
+    quotes the mirror rule. Free; teaches nothing new.
+  - **B — Three quests, a small `espejo` district, `need:2`, opens after Nolasco** ← **Nacho recommends.**
+    *La foto* (brief vs request), *Nomás tantito* (the confirm before the cut), *La tía* (Chelo Robles
+    phones Naye — the referral chain finally runs inside a family). Industry: personal services; role:
+    the prompt engineer's second room, which proves the skill transfers. Half a sitting of writing.
+  - **C — A full eight-quest district** with a mural panel — the five signed roles are spent, and a
+    sixth trade before la inauguración moves the finale further away.
+  Nacho's bible lines are on STORY.md already (the arc and Xochi's line); the quests wait on the pick.
+  ~~Not absorbed: Nacho found `chelo` declared twice in `npcs.js`~~ **Fixed 2026-09-07 (owner: "nacho/you
+  fix it and choose a new name that fits with the story"):** the mercado keeps Chelo Robles (older canon,
+  Naye's tía); the casa's neighbour is **Doña Tencha** — Hortensia, forty years on Calle Dos, the first
+  house Don Güero built with the door in the middle because she asked, no relation to the Robles; her
+  lines are unchanged (she was already the woman who says "take a plant when you go"). The smoke now
+  fails a cast key declared twice. "Wardrobe / Vestidor" still names the animals' fitting room; the
+  chair never uses that word.
+  **❗La silla, the second half — DECIDED 2026-09-07 (owner: "la silla - you choose but all these may need
+  architecture to grow right?"):** a *service* today, and yes, the architecture to grow it is already
+  there and named: a template room's `people` carry `q:[...]` like any station, so Naye takes quests the
+  day a `CHAPTERS` entry names an `espejo` district — nothing in the engine changes for that. Nacho's
+  plan for what those quests are is ❗El espejo below.
 - ✅ **❗La piñata / ❗El tamal — BUILT the owner's way (`mq-v98`, 2026-09-07).** Owner: *"put a
   pinata in there as well as tamales, etc."* Nacho's picks taken: the piñata hangs over the
   paletera's corner on Calle Dos and only sways — never hit, gives nothing; Doña Meche, a new
   neighbour with a pot at the trolley stop, three lines in both languages and a fourth that
-  asks the season, permanent and never a parcel. Kike says he hung the piñata; Doña Chelo sets
+  asks the season, permanent and never a parcel. Kike says he hung the piñata; Doña Tencha sets
   her table. Three things Nacho found and did not absorb: Yola the paletera has a name and no
-  voice (chill folk share one line pool); Doña Chelo's "water's edge" is the trolley bed — the
+  voice (chill folk share one line pool); Doña Tencha's "water's edge" is the trolley bed — the
   canal is a doc that never became a tile; a season cannot add a person, which is why Doña
   Meche is year-round.
 
@@ -270,7 +295,7 @@ would have none left unless looks key by npc instead.
   a name and an arrival line in both languages); the build stamps that room as a world of its own
   named after the lot, the door and the room's exit become portals to each other, and the lots
   are applied at load so the room exists before anyone walks toward it. **❗Quién vive ahí** is
-  answered his way: a neighbour with three lines. The first lot is Doña Chelo's casa at the
+  answered his way: a neighbour with three lines. The first lot is Doña Tencha's casa at the
   water's edge on Calle Dos (`casa` template, `BUILDS`), a home, never a business. Still his:
   Don Güero saying a line about what he built (Meridian has no Don Güero station yet).
 - ✅ **❗La caja de escalera — BUILT, town first (`mq-v75`/`ch-v12`), then Meridian (`mq-v81`, 2026-09-07).**

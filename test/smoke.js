@@ -29,6 +29,15 @@ const CANDIDATES = [
   if (!exe) exe = CANDIDATES.find(p => { try { return fs.existsSync(p) && fs.statSync(p).isFile(); } catch (e) { return false; } });
   if (!exe) { console.error('No Chromium found. Set CHROMIUM_PATH.'); process.exit(1); }
   const fails = [];
+  // the cast: no key declared twice in NPCE / NPCN — the later wins silently and a neighbour is labelled the mercado's owner (Nacho, 2026-09-07)
+  {
+    const src = fs.readFileSync(path.resolve(__dirname, '..', 'content', 'meridian', 'npcs.js'), 'utf8');
+    src.split('\n').filter(l => /^(const NPCE=|\s*en:\{|\s*es:\{)/.test(l)).forEach(l => {
+      const keys = [...l.matchAll(/(?:^|[{,])\s*([a-z][a-z0-9_]*)\s*:/g)].map(m => m[1]).filter(k => !['en', 'es'].includes(k));
+      const dup = keys.filter((k, i) => keys.indexOf(k) !== i);
+      if (dup.length) fails.push('a cast key is declared twice: ' + [...new Set(dup)].join(', '));
+    });
+  }
   // version lockstep: sw.js CACHE and config.js GAMEV must move together
   {
     const sw = fs.readFileSync(path.resolve(__dirname, '..', 'sw.js'), 'utf8');

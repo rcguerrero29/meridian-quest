@@ -388,9 +388,9 @@ const CASA_ROOM={
         "#R.......#",
         "#........#",
         "#####⌂####"],
-  people:{c:{npc:"chelo",q:[],chat:1}},
-  locs:{en:"Doña Chelo's, Calle Dos",es:"Casa de Doña Chelo, Calle Dos"},
-  arrive:{en:"Doña Chelo's front room. The radio is on low.",es:"La sala de Doña Chelo. El radio, bajito."}
+  people:{c:{npc:"tencha",q:[],chat:1}}, /* Doña Tencha — Hortensia — forty years on Calle Dos, the first house Don Güero built with the door in the middle because she asked (Nacho, 2026-09-07; she was "chelo" for a day and collided with the mercado's Chelo Robles) */
+  locs:{en:"Doña Tencha's, Calle Dos",es:"Casa de Doña Tencha, Calle Dos"},
+  arrive:{en:"Doña Tencha's front room. The radio is on low.",es:"La sala de Doña Tencha. El radio, bajito."}
 };
 BUILDTPL.casa={
   id:"casa", size:{w:3,h:2},
