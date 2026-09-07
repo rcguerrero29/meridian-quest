@@ -1157,6 +1157,19 @@ const CANDIDATES = [
       // stripes paint every row one colour edge to edge; petals leave no row uniform
       let mixed = 0; for (let yy = 5; yy < 27; yy++) { const seen = new Set(); for (let xx = 2; xx < 30; xx++) { const i = (yy * 32 + xx) * 4; seen.add([px[i], px[i + 1], px[i + 2]].join()); } if (seen.size > 1) mixed++; }
       if (mixed < 15) problems.push(`the deck in season reads as stripes, not petals (${mixed} of 22 rows vary)`);
+      // owner, 2026-09-07 (evening): "the bridge turns into one mostly made out of the petals, they dont even look like the
+      // correct petals" — a bridge MADE of petals: no plank shows, the heap has a value range, a petal is a fan with a rib
+      if (typeof petalShape !== 'function') problems.push('the engine has no petal shape — the deck is gravel');
+      else {
+        const seen = new Set(); let plank = 0; for (let i = 0; i < px.length; i += 4) { const h = '#' + [px[i], px[i + 1], px[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''); if (pal.includes(h)) seen.add(h); if (['#6e4e30', '#c9b99a', '#8a6f4d'].includes(h)) plank++; }
+        if (plank) problems.push(`in season the deck still shows ${plank} plank pixels — the bridge is not made of petals`);
+        if (seen.size < 4) problems.push(`the heap uses ${seen.size} of the palette's ${pal.length} colours — it has no depth`);
+        const pc = document.createElement('canvas'); pc.width = 48; pc.height = 48; const pg = pc.getContext('2d'); petalShape(pg, 24, 40, 0, 6, '#f2870f');
+        const d = pg.getImageData(0, 0, 48, 48).data; let x0 = 48, x1 = 0, y0 = 48, y1 = 0, rib = 0;
+        for (let yy = 0; yy < 48; yy++) for (let xx = 0; xx < 48; xx++) { const i = (yy * 48 + xx) * 4; if (d[i + 3] < 250) continue; x0 = Math.min(x0, xx); x1 = Math.max(x1, xx); y0 = Math.min(y0, yy); y1 = Math.max(y1, yy); if (!(d[i] === 0xf2 && d[i + 1] === 0x87 && d[i + 2] === 0x0f)) rib++; }
+        if ((y1 - y0) < (x1 - x0) * 1.2) problems.push('a petal is not longer than it is wide — a lentil, not a cempasúchil petal');
+        if (rib < 6) problems.push('a petal has no rib');
+      }
     } else if (on.toLowerCase() !== S.art.bridge[0].toLowerCase()) problems.push(`the bridge's first band is ${on}, not the season's ${S.art.bridge[0]}`);
     if (on === off) problems.push('the season changed nothing on the bridge');
     if (S.art.bridgeStyle === 'petals') { // owner, 2026-09-07: "full of the petals, they spill into water and the floor and a trail forms behind characters"
@@ -1184,6 +1197,14 @@ const CANDIDATES = [
         const per = {}; ['top', 'front', 'iso'].forEach(c => { spills = 0; camSet(c); draw(); per[c] = spills; });
         spills = 0; camSet('3d'); t3Invalidate(); draw3d(); per['3d'] = spills;
         petalSpill = spill0; petalTrail = trail0;
+        // in 3D the deck's SIDES are petals too, and the papel picado over the crossing is cut from the marigold palette (Pili)
+        camSet('3d'); t3Invalidate(); draw3d();
+        const dk = T3.group.children.filter(o => o.userData && o.userData.bridge);
+        if (!dk.length) problems.push('no deck in the park in 3D'); else if (!dk.every(m => Array.isArray(m.material) && m.material[0].map)) problems.push('the deck\'s sides in 3D are bare planks under a bridge of petals');
+        const pb = (S.art.papelBridge || []).map(h => h.toLowerCase());
+        if (S.art.papel && !pb.length) problems.push('the bridge has no marigold palette for its papel picado (papelBridge)');
+        const bf = T3.group.children.filter(o => o.userData && o.userData.papel && o.userData.flag);
+        if (pb.length && bf.length && !bf.every(f => pb.includes('#' + f.material.color.getHexString()))) problems.push('the papel picado over the bridge is not cut from the marigold palette');
         Object.entries(per).forEach(([c, n]) => { if (!n) problems.push('the ' + c + ' camera never spills petals onto the ground around the bridge'); });
         if (!trails) problems.push('the top and front cameras never draw the trail');
         // the trail: a step ON THE DECK drops three petals, drawn on the ground, three flat planes in 3D;

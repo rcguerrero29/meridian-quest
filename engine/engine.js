@@ -809,6 +809,14 @@ function fiestaDraw2D(wid,toScreen,front){ /* toScreen(x,y) → the tile's top-l
     ctx.strokeStyle="#3A2E26";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx0+2,ly);ctx.lineTo(sx1-2,ly);ctx.stroke();
     let k=0;for(let px=sx0+5;px<sx1-4;px+=6.4,k++){ctx.fillStyle=pal[(k+x0+y)%pal.length];ctx.beginPath();ctx.moveTo(px-2.4,ly);ctx.lineTo(px+2.4,ly);ctx.lineTo(px,ly+5);ctx.closePath();ctx.fill();}});
   fiestaHangs(wid).forEach(h=>{const[sx,sy]=toScreen(h.x,h.y);if(h.kind==="pinata")drawPinata(ctx,sx,sy,Math.sin(Date.now()/700+h.x)*0.06);});}
+const BRIDGE_PETALS=["#7A2E12","#B8410E","#E2620F","#F2870F","#FBB024","#FFD972"]; /* embers to pale gold, dark first: a heap needs a value range (Pili, 2026-09-07) */
+function petalPal(){const b=art("bridge",null);return b&&b.length>=6?b:BRIDGE_PETALS;}
+function petalShape(g,px,py,a,s,col,rib){ /* one cempasúchil petal (Pili, 2026-09-07): "not a lentil" — a fan, narrow at the
+  root, widening to a squared, notched tip, and a rib down the middle; the rib is what says petal */
+  g.save();g.translate(px,py);g.rotate(a);g.scale(s,s);
+  g.fillStyle=col;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(-1.9,-1.6,-1.5,-3.4);g.lineTo(-0.5,-4.2);g.lineTo(0,-3.6);g.lineTo(0.5,-4.2);g.lineTo(1.5,-3.4);g.quadraticCurveTo(1.9,-1.6,0,0);g.fill();
+  if(rib!==false){g.strokeStyle=rib||"rgba(60,20,5,.35)";g.lineWidth=0.6;g.beginPath();g.moveTo(0,-0.5);g.lineTo(0,-2.8);g.stroke();}
+  g.restore();}
 const PETALS=[],PETAL_N=90,PETAL_MS=90000;
 function petalsOn(){return art("bridgeStyle","bands")==="petals";}
 function bridgeDist(w,x,y){ /* Chebyshev distance to the nearest deck tile, up to 3; cached per world */
@@ -819,10 +827,10 @@ function bridgeDist(w,x,y){ /* Chebyshev distance to the nearest deck tile, up t
   const v=w._pd[x+","+y];return v===undefined?9:v;}
 function petalSpill(w,x,y,sx,sy,scale){
   if(!petalsOn())return;const d=bridgeDist(w,x,y);if(d<1||d>3)return;
-  const bands=art("bridge",BRIDGE_BANDS),n=d===1?26:d===2?11:4,sc=scale||1;
+  const P=petalPal(),n=d===1?26:d===2?11:2,sc=scale||1; /* two, not four, three tiles out: four read as litter (Pili) */
   let sd=((x|0)*911+(y|0)*271+3)|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
-  for(let i=0;i<n;i++){const px=sx+rnd()*TS*sc,py=sy+rnd()*TS*sc,a=rnd()*Math.PI;
-    ctx.fillStyle=bands[(i+d)%bands.length];ctx.beginPath();ctx.ellipse(px,py,2*sc,1.2*sc,a,0,7);ctx.fill();}}
+  for(let i=0;i<n;i++){const px=sx+rnd()*TS*sc,py=sy+rnd()*TS*sc,a=rnd()*Math.PI*2;
+    petalShape(ctx,px,py,a,1.0*sc,P[1+((i+d)%(P.length-1))]);}}
 const HEROFEET={}; /* what the hero's shoes carry off the deck */
 function petalDrop(wid,x,y,feet){ /* owner, 2026-09-07: the trail "for the bridge only" — a step on the deck scatters
   petals; the two steps after it still shed what the shoes carried; nowhere else does a step drop anything */
@@ -830,11 +838,11 @@ function petalDrop(wid,x,y,feet){ /* owner, 2026-09-07: the trail "for the bridg
   if(bridgeDist(w,x,y)===0)f.pc=2;else if(f.pc>0)f.pc--;else return;
   PETALS.push({w:wid,x,y,t:Date.now(),s:((x*37+y*101+PETALS.length*13)|0)});if(PETALS.length>PETAL_N)PETALS.shift();}
 function petalTrail(wid,toScreen){ /* toScreen(x,y) → [sx,sy] of the tile's top-left in this camera */
-  if(!PETALS.length)return;const now=Date.now(),bands=art("bridge",BRIDGE_BANDS);
+  if(!PETALS.length)return;const now=Date.now(),P=petalPal();
   PETALS.forEach(pt=>{if(pt.w!==wid)return;const age=(now-pt.t)/PETAL_MS;if(age>=1)return;
     const[sx,sy]=toScreen(pt.x,pt.y);let sd=pt.s;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
     ctx.globalAlpha=1-age*age;
-    for(let i=0;i<3;i++){ctx.fillStyle=bands[(i+pt.s)%bands.length];ctx.beginPath();ctx.ellipse(sx+6+rnd()*20,sy+6+rnd()*20,2,1.2,rnd()*Math.PI,0,7);ctx.fill();}
+    for(let i=0;i<3;i++)petalShape(ctx,sx+6+rnd()*20,sy+6+rnd()*20,rnd()*Math.PI*2,1.1,P[1+((i+pt.s)%(P.length-1))]);
     ctx.globalAlpha=1;});}
 TILEDRAW["^"]=rc=>{const{sx,sy,x,y}=rc; /* the rainbow bridge: walk the whole spectrum.
       The six bands are what a season recolours; planks and rails are design. One season may
@@ -842,19 +850,25 @@ TILEDRAW["^"]=rc=>{const{sx,sy,x,y}=rc; /* the rainbow bridge: walk the whole sp
       over dark planks, the way petals are laid as a path for the souls to follow home — the
       owner's word, 2026-09-07: "marigold, and petals too". Deterministic per tile, so the
       3D bake and the four cameras agree on where each petal fell. */
-      ctx.fillStyle="#C9B99A";ctx.fillRect(sx,sy,TS,TS); /* plank base */
       const bands=art("bridge",BRIDGE_BANDS);
-      if(art("bridgeStyle","bands")==="petals"){
-        ctx.fillStyle="#6E4E30";ctx.fillRect(sx,sy+2.5,TS,TS-5); /* dark planks under the petals */
-        let sd=((x|0)*73+(y|0)*131+7)|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
-        for(let i=0;i<70;i++){const px=sx+rnd()*TS,py=sy+3+rnd()*(TS-6),a=rnd()*Math.PI; /* FULL of petals (owner, 2026-09-07) */
-          ctx.fillStyle=bands[i%bands.length];ctx.beginPath();ctx.ellipse(px,py,2.2,1.35,a,0,7);ctx.fill();}
-        ctx.globalAlpha=0.18;ctx.fillStyle="#FFF";
-        for(let i=0;i<10;i++){ctx.beginPath();ctx.arc(sx+2+rnd()*(TS-4),sy+5+rnd()*(TS-10),0.7,0,7);ctx.fill();}
-        ctx.globalAlpha=1;
-      }else{
-        bands.forEach((cc,i)=>{ctx.fillStyle=cc;ctx.fillRect(sx,sy+3+i*4.4,TS,4.4);});
-        ctx.globalAlpha=0.22;ctx.fillStyle="#FFF";ctx.fillRect(sx,sy+3,TS,2);ctx.globalAlpha=1;}
+      if(art("bridgeStyle","bands")==="petals"){ /* a bridge MADE of petals (owner, 2026-09-07, evening: "the bridge turns
+           into one mostly made out of the petals") — no plank shows. Pili's recipe: the heap's own shadow under
+           everything, three passes of fan petals back to front (big and dark, then middle, then small and pale),
+           a few dark blots between passes so the heap is deep, every angle on the wheel, drawn past the tile's
+           edge and clipped so no seam bands the deck; the rails are the heap's colour with petals over the lip. */
+        const P=petalPal();let sd=((x|0)*73+(y|0)*131+7)|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+        ctx.save();ctx.beginPath();ctx.rect(sx,sy,TS,TS);ctx.clip();
+        ctx.fillStyle=P[0];ctx.fillRect(sx,sy,TS,TS);
+        const pass=(n,s,a,b)=>{for(let i=0;i<n;i++)petalShape(ctx,sx-3+rnd()*(TS+6),sy-3+rnd()*(TS+6),rnd()*Math.PI*2,s,P[a+((i*7+3)%(b-a+1))]);};
+        const shade=()=>{ctx.globalAlpha=0.18;ctx.fillStyle="#5A1E0B";for(let i=0;i<6;i++){ctx.beginPath();ctx.arc(sx+rnd()*TS,sy+rnd()*TS,5,0,7);ctx.fill();}ctx.globalAlpha=1;};
+        pass(40,1.5,0,2);shade();pass(34,1.25,2,4);shade();pass(22,1.0,4,5);
+        ctx.restore();
+        ctx.fillStyle=P[0];ctx.fillRect(sx,sy,TS,2.5);ctx.fillRect(sx,sy+TS-2.5,TS,2.5); /* the rails, in the heap's colour */
+        for(let i=0;i<8;i++)petalShape(ctx,sx+rnd()*TS,(i%2?sy+1.5:sy+TS-1.5)+rnd()*1.5,rnd()*Math.PI*2,0.8,P[3+(i%3)]);
+        return;}
+      ctx.fillStyle="#C9B99A";ctx.fillRect(sx,sy,TS,TS); /* plank base */
+      bands.forEach((cc,i)=>{ctx.fillStyle=cc;ctx.fillRect(sx,sy+3+i*4.4,TS,4.4);});
+      ctx.globalAlpha=0.22;ctx.fillStyle="#FFF";ctx.fillRect(sx,sy+3,TS,2);ctx.globalAlpha=1;
       ctx.fillStyle="#8A6F4D";ctx.fillRect(sx,sy,TS,2.5);ctx.fillRect(sx,sy+TS-2.5,TS,2.5); /* rails */};
 TILEDRAW["3"]=rc=>{const{sx,sy}=rc; /* agility hurdle: two posts, a bar to sail over */
       ctx.fillStyle="#C0392B";ctx.fillRect(sx+5,sy+8,3,20);ctx.fillRect(sx+24,sy+8,3,20);

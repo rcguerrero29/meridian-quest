@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v99";
+const GAMEV="mq-v100";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -114,14 +114,16 @@ const GROWTH={
    before October ("a manual way too because i will want to test").
    Keys the engine reads: `bridge` (the six bands), `bridgeStyle` ("petals" strews the deck
    with cempasúchil instead of bands), `papel` (a palette hangs papel picado over the
-   crossing in 3D), `sky` (the north window's dusk). Palette SIGNED 2026-09-07 ("marigold"):
+   crossing in 3D), `sky` (the north window's dusk). `papelBridge` (the cut hung over the
+   crossing, marigold so the bridge reads as one warm object). Palette SIGNED 2026-09-07 ("marigold"), re-cut the
+   same evening on Pili's read — a real value range, embers to pale gold, dark first, so the heap has depth:
    a cempasúchil gradient, gold to deep orange, after the marigold bridge of Día de Muertos —
    the petals laid as a path so the souls find their way home. */
 const SEASONS={
   muertos:{label:{en:"Día de Muertos",es:"Día de Muertos"},from:[10,18],to:[11,3],
-    art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],
+    art:{bridge:["#7A2E12","#B8410E","#E2620F","#F2870F","#FBB024","#FFD972"],
          bridgeStyle:"petals",
-         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"], /* cut paper: pink, teal, gold, purple, orange, white */
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"], /* cut paper: pink, teal, gold, purple, orange, white */
          /* LA FIESTA (Nacho, 2026-09-07): dress by what a place is for — Calle Principal is dressed, Calle Dos is
             the party, the park is the remembering, workplaces get nothing. Swags, not wallpaper: five to nine
             tiles, a gap of sky between, each tied to a tree or a facade you can see. Never a map row. */
@@ -141,8 +143,8 @@ const SEASONS={
      alebrije is a real animal in impossible colours; the wingless get tiny wings) and `facepaint`
      (five calavera looks for everyone; the hero picks, a person's comes from who they are). */
   alebrije:{label:{en:"Noche de alebrijes",es:"Noche de alebrijes"},
-    art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],bridgeStyle:"petals",
-         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],sky:"#E8A24A",
+    art:{bridge:["#7A2E12","#B8410E","#E2620F","#F2870F","#FBB024","#FFD972"],bridgeStyle:"petals",
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"],sky:"#E8A24A",
          /* LA FIESTA (Nacho, 2026-09-07): dress by what a place is for — Calle Principal is dressed, Calle Dos is
             the party, the park is the remembering, workplaces get nothing. Swags, not wallpaper: five to nine
             tiles, a gap of sky between, each tied to a tree or a facade you can see. Never a map row. */

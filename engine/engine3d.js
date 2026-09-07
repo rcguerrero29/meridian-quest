@@ -280,8 +280,14 @@ function t3Build(key){T3.pinatas=[];
          the river: water north or south means the bridge runs east-west and the rails stand north and south. */
       const g=gch,tk=g+"|"+x+"|"+y;
       const lid=wallMat[tk]||(wallMat[tk]=new THREE.MeshLambertMaterial({map:t3Tex(t3BakeGlyph(g,true,baseOf(g),false,false,null,x,y))}));
-      const plank=wallMat["^plank"]||(wallMat["^plank"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#8A6F4D")}));
-      const rail=wallMat["^rail"]||(wallMat["^rail"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#6E5538")}));
+      const pet=typeof petalsOn==="function"&&petalsOn();
+      /* in season the deck's SIDES are a petal mass too (Pili: "skip it and you have a marigold rug on a
+         lumber-yard box"): one baked strip — the heap's field, petals crowded in the top, sparse and dark
+         below, six cut by the top edge so they read as spilling over — one material for every side */
+      const plank=pet?(wallMat["^petalside"]||(wallMat["^petalside"]=new THREE.MeshLambertMaterial({map:t3Tex(t3PetalSide())})))
+        :(wallMat["^plank"]||(wallMat["^plank"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#8A6F4D")})));
+      const rail=pet?(wallMat["^railp"]||(wallMat["^railp"]=new THREE.MeshLambertMaterial({color:new THREE.Color(petalPal()[1])})))
+        :(wallMat["^rail"]||(wallMat["^rail"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#6E5538")})));
       const deck=new THREE.Mesh(new THREE.BoxGeometry(1,BRIDGEH,1),[plank,plank,lid,plank,plank,plank]);
       deck.position.set(cx,BRIDGEH/2,cz);deck.userData={bridge:true,g,x,y,h:BRIDGEH};grp.add(deck);
       const wat=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&(TILES[w.rows[ay][ax]]||{}).kind==="water";
@@ -297,7 +303,7 @@ function t3Build(key){T3.pinatas=[];
          through art("papel"), a string is hung ACROSS the crossing on each deck tile, high over
          the head, between two thin poles at the rails — five little cut-paper flags a string,
          both faces coloured, so it reads from every camera stop. Nothing without a season. */
-      const pap=art("papel",null);
+      const pap=art("papelBridge",null)||art("papel",null); /* over the crossing the marigold cut, so it reads as one warm object (Pili) */
       if(pap&&pap.length){
         const PH=1.9,pole=wallMat["^pole"]||(wallMat["^pole"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#5A4330")}));
         const strg=wallMat["^string"]||(wallMat["^string"]=new THREE.MeshBasicMaterial({color:new THREE.Color("#3A2E26")}));
@@ -442,17 +448,28 @@ function t3Fiesta(){ /* the piñata sways; it is never hit and gives nothing (Na
   (T3.pinatas||[]).forEach(sp=>{if(!sp.parent)return;sp.material.rotation=Math.sin(Date.now()/700+sp.userData.x)*0.08;});}
 /* the petal trail in 3D: a pool of little flat planes, three per drop, lying on the ground where
    somebody walked in season, fading over a minute and a half (owner: "a trail forms behind characters") */
+function t3PetalSide(){ /* the deck's side, baked once a season: 64×14, the field and the heap's edge */
+  const P=petalPal(),c=document.createElement("canvas");c.width=64;c.height=14;const g=c.getContext("2d");
+  let sd=977;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+  g.fillStyle=P[0];g.fillRect(0,0,64,14);
+  for(let i=0;i<5;i++)petalShape(g,rnd()*64,7+rnd()*7,rnd()*6.28,0.7,P[1]);           /* sparse and dark below */
+  for(let i=0;i<20;i++)petalShape(g,rnd()*64,rnd()*5.6,rnd()*6.28,0.9,P[2+(i%4)]);      /* crowded in the top 40% */
+  for(let i=0;i<6;i++)petalShape(g,4+i*10.5+rnd()*3,-1+rnd()*2,Math.PI+(rnd()-0.5)*0.8,1,P[3+(i%3)]); /* cut by the edge: spilling over */
+  return c;}
+function t3PetalTex(){ /* one white petal with alpha, tinted per drop by the material colour */
+  if(T3.petalTex)return T3.petalTex;const c=document.createElement("canvas");c.width=16;c.height=20;const g=c.getContext("2d");
+  petalShape(g,8,19,0,4,"#FFFFFF","rgba(0,0,0,.35)");const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;return T3.petalTex=t;}
 function t3Petals(){
-  T3.petals=T3.petals||[];const L=(typeof PETALS!=="undefined")?PETALS:[],now=Date.now(),bands=(typeof art==="function")?art("bridge",BRIDGE_BANDS):BRIDGE_BANDS;
+  T3.petals=T3.petals||[];const L=(typeof PETALS!=="undefined")?PETALS:[],now=Date.now(),bands=(typeof petalPal==="function")?petalPal():BRIDGE_BANDS;
   let i=0;
   L.forEach(pt=>{if(pt.w!==world)return;const age=(now-pt.t)/PETAL_MS;if(age>=1)return;
     let sd=pt.s;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
     const lift=stairLift(CW(),pt.x,pt.y);
     for(let k=0;k<3;k++){
       let p=T3.petals[i];
-      if(!p){p=new THREE.Mesh(new THREE.PlaneGeometry(0.14,0.085),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,side:THREE.DoubleSide,depthWrite:false}));
+      if(!p){p=new THREE.Mesh(new THREE.PlaneGeometry(0.13,0.16),new THREE.MeshBasicMaterial({color:0xffffff,map:t3PetalTex(),transparent:true,alphaTest:0.3,side:THREE.DoubleSide,depthWrite:false}));
         p.rotation.x=-Math.PI/2;p.userData={petal:true};T3.petals[i]=p;T3.scene.add(p);}
-      p.material.color.set(bands[(k+pt.s)%bands.length]);p.material.opacity=1-age*age;
+      p.material.color.set(bands[1+((k+pt.s)%(bands.length-1))]);p.material.opacity=1-age*age;
       p.position.set(pt.x+0.18+rnd()*0.64,0.012+lift,pt.y+0.18+rnd()*0.64);p.rotation.z=rnd()*Math.PI;
       p.visible=true;i++;}});
   for(;i<T3.petals.length;i++)T3.petals[i].visible=false;
