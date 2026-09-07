@@ -16,9 +16,10 @@ function t3Invalidate(){T3.dirty++;} /* growth, theme edits — anything that re
    fall-back to the flat camera says so on screen instead of quietly switching. */
 T3.errors=[];
 function t3Note(where,e){const msg=String((e&&e.message)||e||"?").slice(0,160),key=where+"|"+msg;
-  if(!T3.errors.some(x=>x.key===key)){T3.errors.push({key,where,msg,at:Date.now()});if(T3.errors.length>20)T3.errors.shift();console.warn("3D "+where+": "+msg);}
+  if(!T3.errors.some(x=>x.key===key)){T3.errors.push({key,where,msg,at:Date.now()});if(T3.errors.length>20)T3.errors.shift();if(typeof mqwarn==="function")mqwarn("3d",where+": "+msg,false);else console.warn("3D "+where+": "+msg);}
   try{localStorage.setItem(SK("err3d"),JSON.stringify({where,msg,at:Date.now(),v:typeof GAMEV==="string"?GAMEV:""}));}catch(err){}}
 function t3Fell(){if(T3.said)return;T3.said=true;const last=T3.errors[T3.errors.length-1];
+  if(typeof mqwarn==="function")mqwarn("3d","fell to the flat camera"+(last?" — "+last.where+": "+last.msg:""),true); /* critical: the camera the game boots into could not draw (#8) */
   try{toast((typeof lang!=="undefined"&&lang==="es"?"El 3D no pudo dibujar — cámara plana. ":"3D could not draw — flat camera instead. ")+(last?last.where+": "+last.msg:""),5200);}catch(err){}}
 /* ---------- which way is screen-right? ----------
    Billboards always show their painted face to the camera, but the painters mirror an

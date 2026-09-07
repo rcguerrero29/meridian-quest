@@ -805,7 +805,7 @@ colors".
 
 ---
 
-### 15.5 ERROR LOG — designed, NOT built (owner: "efficient and low storage")
+### 15.5 ERROR LOG — BUILT 2026-09-07 (`mq-v94`, with El Portero, #8) — as designed below, surfaced on the gate sheet in his hut rather than an Exporter tab
 
 **Blind spot it must close first:** 3D failure is swallowed in four places and leaves
 zero trace (`engine3d.js:228, :242, :200` and `engine.js:263`), and the boot audits

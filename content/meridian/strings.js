@@ -45,7 +45,12 @@ const UI={
   carePackToast:"📦 New in ⚙️ → Export: Frederick's care pack — his sheet + reminders, ready for your own pet.",
   fredDoneToast:"🎀 Mod unlocked: Frederick's red bandana.",
   locs:{ta:"Taller Herrera",pa:"Panadería La Espiga",li:"Limpieza Velázquez",no:"Nolasco Tax & Notario",hq:"Meridian HQ",f2:"Floor 2 · Your office",st:"Meridian Street",lc:"La Cocina",lo:"La Obra · Studio",ex:"Calle Dos · Expansion block",me:"El Mercado Robles",pk:"El Parque 🌈"},
-  chat:{chelo:["Come in, come in. Don Güero built this one with the door in the middle — I asked him to.","Forty years on Calle Dos. The canal was clean once; it will be again.","Take a plant when you go. I have too many and they keep coming back."],
+  chat:{portero:[()=>{const b=logKind("build"),n=b.reduce((t,e)=>t+e.n,0),c=logCrit().filter(e=>e.kind!=="build");
+          if(n)return {t:n+" stopped attempt"+(n===1?"":"s")+". Let's review the root cause. The sheet is on the desk.",crit:true};
+          if(c.length)return {t:c.length+" critical thing"+(c.length===1?"":"s")+" on the sheet. Read it before you go.",crit:true};
+          return "Nothing stopped. Nothing critical. Carry on.";},
+        "The gate is closed at night. I do not sleep."],
+        chelo:["Come in, come in. Don Güero built this one with the door in the middle — I asked him to.","Forty years on Calle Dos. The canal was clean once; it will be again.","Take a plant when you go. I have too many and they keep coming back."],
         beto:["We pour, we cure, we move down the block. Don Güero says hi.","Ask me again in two weeks, primo. Whatever's behind that fence will be a building."],
         kike:["Straight walls, straight prompts — same discipline.","The AI did the material takeoff. I checked every line. We're friends now."],
         mari:["From the crane you can see Güero's whole plan.","The lift schedule is AI-sorted — weight, wind, order. Smooth all day."],
@@ -254,7 +259,12 @@ One source of truth for one very good pet.
   carePackToast:"📦 Nuevo en ⚙️ → Exportar: el kit de cuidados de Frederick — su ficha + recordatorios, listos para tu propia mascota.",
   fredDoneToast:"🎀 Mod desbloqueado: el pañuelo rojo de Frederick.",
   locs:{ta:"Taller Herrera",pa:"Panadería La Espiga",li:"Limpieza Velázquez",no:"Nolasco Tax & Notario",hq:"Meridian HQ",f2:"Piso 2 · Tu oficina",st:"Calle Meridian",lc:"La Cocina",lo:"La Obra · Estudio",ex:"Calle Dos · Cuadra de expansión",me:"El Mercado Robles",pk:"El Parque 🌈"},
-  chat:{chelo:["Pásale, pásale. Esta la hizo Don Güero con la puerta en medio; yo se lo pedí.","Cuarenta años en la Calle Dos. El canal estuvo limpio una vez; lo volverá a estar.","Llévate una planta cuando salgas. Tengo demasiadas y siempre vuelven."],
+  chat:{portero:[()=>{const b=logKind("build"),n=b.reduce((t,e)=>t+e.n,0),c=logCrit().filter(e=>e.kind!=="build");
+          if(n)return {t:n+" intento"+(n===1?"":"s")+" detenido"+(n===1?"":"s")+". Revisemos la causa raíz. La hoja está en el escritorio.",crit:true};
+          if(c.length)return {t:c.length+" cosa"+(c.length===1?"":"s")+" crítica"+(c.length===1?"":"s")+" en la hoja. Léela antes de irte.",crit:true};
+          return "Nada detenido. Nada crítico. Sigue.";},
+        "La reja se cierra de noche. Yo no duermo."],
+        chelo:["Pásale, pásale. Esta la hizo Don Güero con la puerta en medio; yo se lo pedí.","Cuarenta años en la Calle Dos. El canal estuvo limpio una vez; lo volverá a estar.","Llévate una planta cuando salgas. Tengo demasiadas y siempre vuelven."],
         beto:["Colamos, fraguamos, y nos movemos a la siguiente. Don Güero manda saludos.","Pregúntame en dos semanas, primo. Lo que esté detrás de esa cerca va a ser un edificio."],
         kike:["Muros derechos, prompts derechos — la misma disciplina.","La IA hizo el despiece de materiales. Revisé cada línea. Ya somos amigos."],
         mari:["Desde la grúa se ve el plan completo de Güero.","La IA ordena los izajes — peso, viento, orden. Suavecito todo el día."],
