@@ -534,7 +534,7 @@ function drawIso(){
       else if(cr.kind==="lab")drawLab(ctx,cr,bx,by);
       else if(cr.kind==="chi")drawChi(ctx,cr,bx,by);});});
   if(BALL&&BALL.world===world)bill(BALL.fx,BALL.fy,(bx,by)=>drawBall(ctx,bx,by,BALL.phase,BALL.t));
-  bill(fx,fy,(bx,by)=>drawPerson(ctx,bx,by,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
+  bill(fx,fy,(bx,by)=>drawPerson(ctx,bx,by,look,{dir,bob:moving?Math.sin(bob)*2:0,moving,hero:true}));
   /* decor stands up here too. It used to be drawn ONLY top-down and front, so every landmark
      the pack declares — the mural among them — was invisible in the two cameras people play in
      (found at la junta, 2026-09-03). */
@@ -1099,7 +1099,7 @@ function drawFront(){
     else if(cr.kind==="lab")drawLab(ctx,cr,sx,sy);
     else if(cr.kind==="chi")drawChi(ctx,cr,sx,sy);});});
   if(BALL&&BALL.world===world)act(BALL.fx,BALL.fy,(sx,sy)=>drawBall(ctx,sx,sy,BALL.phase,BALL.t));
-  act(fx,fy,(sx,sy)=>drawPerson(ctx,sx,sy,look,{dir,bob:moving?Math.sin(bob)*2:0,moving}));
+  act(fx,fy,(sx,sy)=>drawPerson(ctx,sx,sy,look,{dir,bob:moving?Math.sin(bob)*2:0,moving,hero:true}));
   doorMarks().forEach(d=>act(d.x,d.y,(sx,sy)=>drawDoorMark(ctx,sx,sy,14,d.mark)));
   readMarks().forEach(d=>act(d.x,d.y,(sx,sy)=>drawReadMark(ctx,sx,sy,14)));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
@@ -1195,7 +1195,7 @@ function draw(){
     else if(cr.kind==="chi")drawChi(ctx,cr,sx,sy);
   });
   if(BALL&&BALL.world===world)drawBall(ctx,BALL.fx*TS-camX,BALL.fy*TS-camY,BALL.phase,BALL.t);
-  drawPerson(ctx,fx*TS-camX,fy*TS-camY,look,{dir,bob:moving?Math.sin(bob)*2:0,moving});
+  drawPerson(ctx,fx*TS-camX,fy*TS-camY,look,{dir,bob:moving?Math.sin(bob)*2:0,moving,hero:true});
   doorMarks().forEach(d=>drawDoorMark(ctx,d.x*TS-camX,d.y*TS-camY,0,d.mark)); /* the top camera draws its own people — the marker too */
   readMarks().forEach(d=>drawReadMark(ctx,d.x*TS-camX,d.y*TS-camY,0));
   CRIT.forEach(cr=>{if(cr.leashT>performance.now()&&cr.world===world)drawLeash(cr,camX,camY);});
@@ -1944,6 +1944,18 @@ function drawPerson(g,sx,sy,lk,o){
   g.fillStyle=lk.skin;g.beginPath();g.arc(sx+16,sy+5+bh,6.5,0,7);g.fill();
   g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.8;g.stroke();
   const st=lk.style||"cap",hx=sx+16,hy=sy+5+bh;
+  /* calavera paint on the HERO only, when the season hands art("facepaint") — owner, 2026-09-07:
+     "i get a dia de los muertos face paint color". Base over the face, petal rings round the
+     eye sockets in the accent, the nose, the stitched grin; hair and eyes go on over it. */
+  const fp=o.hero&&art("facepaint",null);
+  const paint=()=>{g.save();g.beginPath();g.arc(hx,hy,6.5,0,7);g.clip();
+    g.fillStyle=fp.base||"#F4F1EA";g.fillRect(hx-7,hy-7,14,14);
+    g.fillStyle=fp.accent||"#F28C28";[-2.8,2.8].forEach(dx=>{g.beginPath();g.arc(hx+dx,hy+0.6,2.2,0,7);g.fill();});
+    g.fillStyle=fp.dark||"#2B2536";[-2.8,2.8].forEach(dx=>{g.beginPath();g.arc(hx+dx,hy+0.6,1.6,0,7);g.fill();});
+    g.beginPath();g.moveTo(hx-0.9,hy+3.9);g.lineTo(hx+0.9,hy+3.9);g.lineTo(hx,hy+2.6);g.closePath();g.fill();
+    g.fillRect(hx-3.2,hy+5.2,6.4,0.8);[-2.2,-0.8,0.6,2].forEach(dx=>g.fillRect(hx+dx,hy+4.6,0.6,1.9));
+    g.restore();g.fillStyle=lk.hair;};
+  if(fp)paint();
   /* hair v3: clipped to the actual skull, so every style fits clean */
   const inHead=fn=>{g.save();g.beginPath();g.arc(hx,hy,6.5,0,7);g.clip();g.fillStyle=lk.hair;fn();g.restore();g.fillStyle=lk.hair;};
   g.fillStyle=lk.hair;
@@ -1954,7 +1966,7 @@ function drawPerson(g,sx,sy,lk,o){
   else if(st==="long"){ /* v5: full mane behind the head, face windowed out */
     g.beginPath();g.roundRect(hx-8.6,hy-7.6,17.2,17.6,7);g.fill();
     g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.8;g.stroke();
-    g.fillStyle=lk.skin;g.beginPath();g.arc(hx,hy+0.4,5.7,0,7);g.fill();
+    g.fillStyle=lk.skin;g.beginPath();g.arc(hx,hy+0.4,5.7,0,7);g.fill();if(fp)paint();
     g.fillStyle=lk.hair;capFill(5.2);}
   else if(st==="curly"){ /* v5: dense curly wreath, ear to ear, with inner volume */
     for(let a=0;a<7;a++){const ang=Math.PI*(1.0+a/6);
@@ -1996,7 +2008,7 @@ function drawPerson(g,sx,sy,lk,o){
     g.lineTo(hx+4.6,hy+10.5);g.lineTo(hx+6.4,hy+7);g.lineTo(hx+8.2,hy+9.5);
     g.lineTo(hx+8.2,hy+2);g.closePath();g.fill();
     g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.8;g.stroke();
-    g.fillStyle=lk.skin;g.beginPath();g.arc(hx,hy+0.4,5.7,0,7);g.fill();
+    g.fillStyle=lk.skin;g.beginPath();g.arc(hx,hy+0.4,5.7,0,7);g.fill();if(fp)paint();
     g.fillStyle=lk.hair;capFill(4.8);}
   else if(st==="broccoli"){ /* fluffy high crown, clean sides */
     [[-3.4,-6.6],[0,-8],[3.4,-6.6],[-1.8,-5.2],[1.8,-5.2],[0,-5.8]].forEach(p=>{
@@ -2032,6 +2044,28 @@ function drawPerson(g,sx,sy,lk,o){
   if(d!=="up"&&Math.floor(Date.now()/130+sx*0.7+sy)%37!==0){
     g.fillStyle="#26202B";g.fillRect(sx+13.5+ex,sy+4.5+ey+bh,1.6,1.6);g.fillRect(sx+17+ex,sy+4.5+ey+bh,1.6,1.6);}
 }
+/* ---------- alebrije colours (owner, 2026-09-07: "another mode where they turn into little
+   alebrije colors") ---------- When the season hands a palette through art("alebrije"), every
+   animal is painted as usual on a scratch canvas, then STRIPED in the palette only where its own
+   pixels are (source-atop), and stamped back — an alebrije is a real animal in impossible colours,
+   so the silhouette, the shading between the stripes and the animation stay the animal's. The
+   scratch canvas is one per size, reused. Without a palette the drawers are untouched. */
+const wildTmp={c:null};
+function wildDraw(g,pal,fn,sx,sy){
+  const cv=g.canvas,W=cv.width,H=cv.height;
+  let t=wildTmp.c;if(!t||t.width!==W||t.height!==H){t=wildTmp.c=document.createElement("canvas");t.width=W;t.height=H;}
+  const tg=t.getContext("2d");tg.setTransform(1,0,0,1,0,0);tg.clearRect(0,0,W,H);tg.setTransform(g.getTransform());
+  fn(tg);
+  tg.save();tg.globalCompositeOperation="source-atop";
+  for(let i=0;i<16;i++){tg.fillStyle=pal[i%pal.length];tg.beginPath();
+    const x0=sx-8+i*3.4;tg.moveTo(x0,sy-10);tg.lineTo(x0+1.7,sy-10);tg.lineTo(x0+1.7+14,sy+36);tg.lineTo(x0+14,sy+36);tg.closePath();tg.fill();}
+  tg.restore();
+  g.save();g.setTransform(1,0,0,1,0,0);g.drawImage(t,0,0);g.restore();
+}
+const wild=(fn,ai)=>function(g,...a){const pal=art("alebrije",null);if(!pal||!pal.length)return fn(g,...a);return wildDraw(g,pal,tg=>fn(tg,...a),a[ai],a[ai+1]);};
+drawDog=wild(drawDog,0);drawCat=wild(drawCat,0);drawPigeon=wild(drawPigeon,0);drawLoro=wild(drawLoro,0);
+drawBeagle=wild(drawBeagle,1);drawLab=wild(drawLab,1);drawChi=wild(drawChi,1);drawGato=wild(drawGato,1);
+drawButterfly=wild(drawButterfly,1);drawColibri=wild(drawColibri,1);
 /* ---------- movement ---------- */
 const DIRS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 /* One quarter-turn of the camera, as a rename of the four directions. */
@@ -2687,7 +2721,7 @@ function buildOpts(rowId,list,key){
     row.appendChild(b);});
 }
 function pvDraw(){const g=$("pv").getContext("2d");g.setTransform(1.6,0,0,1.6,5,22);
-  g.clearRect(-6,-16,70,80);drawPerson(g,0,0,look,{dir:"down"});}
+  g.clearRect(-6,-16,70,80);drawPerson(g,0,0,look,{dir:"down",hero:true});}
 $("pvtog").addEventListener("click",()=>{const bx=$("pvbox");bx.classList.toggle("dark");
   $("pvtog").textContent=bx.classList.contains("dark")?"☀️":"🌙";});
 /* Every return to the street goes through here. A save that booted straight into an

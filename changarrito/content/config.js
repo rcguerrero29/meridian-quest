@@ -2,7 +2,7 @@
    street. docs/story/el-changarrito.md. This pack trains no role, carries no curriculum and
    awards no grade that means anything about the player (§7½). */
 const GAMENAME="El Changarrito";
-const GAMEV="ch-v29 · engine mq-v88";   /* the town's own version, and the engine it was built on */
+const GAMEV="ch-v30 · engine mq-v89";   /* the town's own version, and the engine it was built on */
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;
@@ -34,7 +34,17 @@ const PLACES={
 const SEASONS={
   muertos:{label:{en:"Día de Muertos",es:"Día de Muertos"},from:[10,18],to:[11,3],
     art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],bridgeStyle:"petals",
-         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],sky:"#E8A24A"}}
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],sky:"#E8A24A"}},
+  /* NOCHE DE ALEBRIJES — the owner's second mode (2026-09-07: "another mode where they turn into
+     little alebrije colors and i get a dia de los muertos face paint color"). No dates: picked by
+     name in Settings → Season, never by the calendar. Carries the Muertos dressing, and adds
+     `alebrije` (a palette every animal is striped in — an alebrije is a real animal in impossible
+     colours) and `facepaint` (calavera paint on the hero: base, accent round the eyes, dark). */
+  alebrije:{label:{en:"Noche de alebrijes",es:"Noche de alebrijes"},
+    art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],bridgeStyle:"petals",
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],sky:"#E8A24A",
+         alebrije:["#FF3D7F","#00C2D1","#FFD400","#8A2BE2","#39FF14","#FF6A00"],
+         facepaint:{base:"#F4F1EA",accent:"#F28C28",dark:"#2B2536"}}}
 };
 const REFRESH_MS=0;
 const SHOW_PERMITS=false;
