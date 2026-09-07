@@ -1492,7 +1492,7 @@ was never a chatbot.
    engine change.
 4. **Nothing is stamped that breaks the city.** `buildSafe()` runs first: inside the map, never
    over a person, never over a portal, and no door in that world may lose its last standable
-   neighbour. A refusal is announced, never silent. **It earned its keep on the first run** —
+   neighbour. A refusal is announced, never silent *(as written this is not true: `applyBuilds` writes a `console.warn` and nothing a player sees — Don Güero's finding, 2026-09-07; ❗El portero in `docs/CITY.md` decides who hears it)*. **It earned its keep on the first run** —
    it refused to build the west casita because Yola the paletera has stood on that corner
    since August. The lot moved; she stayed.
 
