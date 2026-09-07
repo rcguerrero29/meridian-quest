@@ -2738,13 +2738,23 @@ const CANDIDATES = [
               const bn = broom.npcs.find(n => n.npc === who); const keep = { world, px, py, xp, style: look.style, cam: camMode, hero: alePick.hero };
               world = bid; px = fx = bn.x; py = fy = bn.y + 1; moving = false; held = null; checkTalk();
               if ($('talk').hidden || $('talk').dataset.chatn !== who) problems.push('standing before the barber, Talk does not offer the chair');
+              // the bubble hints what the chair changes (owner, 2026-09-07, night: "make it easy to tell... their thought bubble at least has a hint")
+              if (!/✂️/.test($('talk').textContent) || !$('talk').textContent.includes(UI[lang].chairHint)) problems.push('the barber\'s bubble does not say what the chair changes: ' + $('talk').textContent);
+              // AJ's fashion options: patterns on the shirt, four to pick, drawn inside the shirt, saved with the look
+              if (!UI.en.patterns || UI.en.patterns.length < 4 || (UI.es.patterns || []).length !== UI.en.patterns.length) problems.push('the shirt offers fewer than four patterns in both languages');
               else { $('talk').click();
                 if ($('creator').hidden) problems.push('Talk at the barber does not open the chair');
                 else { if (!$('heroname').hidden) problems.push('the chair lets you rename yourself');
                   const sb = [...$('rowStyle').querySelectorAll('button')].find(b => b.getAttribute('aria-pressed') !== 'true'); if (sb) sb.click();
+                  const pbs = [...$('rowPattern').querySelectorAll('button')]; if (pbs.length < 4 || $('rowPattern').hidden) problems.push('the chair offers no patterns');
+                  else { const bakeP = () => { const c = document.createElement('canvas'); c.width = 44; c.height = 44; const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 6, 12); drawPerson(g, 0, 0, look, { dir: 'down', hero: true }); return g.getImageData(0, 0, 44, 44).data; };
+                    const plain0 = bakeP(); pbs[1].click(); const striped = bakeP(); let dp = 0; for (let i = 0; i < plain0.length; i += 4) if (plain0[i] !== striped[i] || plain0[i + 1] !== striped[i + 1]) dp++;
+                    if (look.pattern !== UI.en.patterns[1][0]) problems.push('picking a pattern does not set it on the look'); if (dp < 12) problems.push('the pattern draws nothing on the shirt (' + dp + ' px)');
+                    pbs[0].click(); }
                   $('begin').click();
                   if (!$('creator').hidden) problems.push('the chair does not close'); if (xp !== keep.xp) problems.push('sitting in the chair reset your progress');
                   if (sb && look.style === keep.style) problems.push('a new hairstyle from the chair did not take');
+                  { const svp = loadSave(); if (!svp || !svp.lk || svp.lk.pattern !== look.pattern) problems.push('the shirt\'s pattern is not saved with the look'); }
                   const sv = loadSave(); if (sb && (!sv || !sv.lk || sv.lk.style !== look.style)) problems.push('the new look was not saved');
                   if ($('heroname').hidden) problems.push('after the chair the name field stays hidden for the next hero');
                   seasonSet('muertos'); checkTalk(); $('talk').click(); const pb = $('rowPaint') ? [...$('rowPaint').querySelectorAll('button')] : [];

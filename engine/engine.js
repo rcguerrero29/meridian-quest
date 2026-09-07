@@ -374,7 +374,7 @@ function sanitizeSave(s){
   const n=str2(s.n,14,"");if(!n)return null;
   const lkIn=(s.lk&&typeof s.lk==="object")?s.lk:{};
   const lk={shirt:col(lkIn.shirt)||"#8B5CF6",skin:col(lkIn.skin)||"#E5AC82",hair:col(lkIn.hair)||"#26202B",
-            style:str2(lkIn.style,12,"cap"),outfit:str2(lkIn.outfit,8,"casual")};
+            style:str2(lkIn.style,12,"cap"),outfit:str2(lkIn.outfit,8,"casual"),pattern:str2(lkIn.pattern,10,"plain")};
   const wearIn=k2=>{const o=(s[k2]&&typeof s[k2]==="object")?s[k2]:{};
     return{bandana:col(o.bandana),collar:col(o.collar),cape:col(o.cape)};};
   const d=Array.isArray(s.d)?[...new Set(s.d.map(v=>num(v,0,98,-1)).filter(v=>v>=0))]:[];
@@ -2188,6 +2188,16 @@ function faceLooks(){const a=art("facepaint",null);if(!a)return null;
 function faceLookFor(who,hero){const L=faceLooks();if(!L)return null;
   const i=hero?alePick.hero:(aleHash(who||"?")+alePick.off),lk=L[((i%L.length)+L.length)%L.length];
   const cu=hero&&alePick.custom&&alePick.custom.you;return cu?{...lk,...cu,id:lk.id}:lk;}
+/* the shirt's pattern (owner, 2026-09-07, night: "aj is busy so she cant review fashion right now but keep making a couple
+   more options"; #82: "flourish, patterns, stripes, etc to differentiate"): drawn INSIDE the shirt's rounded rectangle, in a
+   darker or paler take on the shirt's own colour so any shirt wears any pattern. `plain` is the default and draws nothing.
+   A pack may add patterns: SHIRT_PATTERNS[id]=(g,x,y,w,h,lk)=>{...} and a row in T().patterns. */
+const SHIRT_PATTERNS={
+  stripes:(g,x,y,w,h,lk)=>{g.fillStyle=hexDark(lk.shirt,0.72);for(let i=1;i<=3;i++)g.fillRect(x,y+2+i*2.8,w,1.1);},
+  dots:(g,x,y,w,h,lk)=>{g.fillStyle="rgba(255,255,255,.55)";for(let r=0;r<3;r++)for(let c=0;c<3;c++){g.beginPath();g.arc(x+3+c*4+(r%2)*2,y+3.5+r*3.6,0.9,0,7);g.fill();}},
+  flourish:(g,x,y,w,h,lk)=>{g.fillStyle="rgba(255,255,255,.5)";[[7,4],[5,7],[9,7],[7,10],[7,7]].forEach(([dx,dy],i)=>{g.beginPath();g.ellipse(x+dx,y+dy,i<4?1.4:1,i<4?2:1,i<4?(i*Math.PI/2):0,0,7);g.fill();});
+    g.fillStyle=hexDark(lk.shirt,0.7);g.beginPath();g.arc(x+7,y+7,0.8,0,7);g.fill();}};
+function shirtPattern(g,lk,x,y,w,h){const f=SHIRT_PATTERNS[lk.pattern];if(!f)return;g.save();g.beginPath();g.roundRect(x,y,w,h,4);g.clip();f(g,x,y,w,h,lk);g.restore();}
 function drawPerson(g,sx,sy,lk,o){
   if(lk&&lk.robot)return drawRobot(g,sx,sy,lk,o);
   o=o||{};const b=o.bob||o.idle||0,d=o.dir||"down",bh=b*0.5;
@@ -2196,6 +2206,7 @@ function drawPerson(g,sx,sy,lk,o){
   g.fillRect(sx+11,sy+20+b,4,7);g.fillRect(sx+17,sy+20-(o.moving?b:0),4,7);
   g.fillStyle=lk.shirt;
   g.beginPath();g.roundRect(sx+9,sy+9+bh,14,13,4);g.fill();
+  shirtPattern(g,lk,sx+9,sy+9+bh,14,13); /* stripes, dots, a flourish — AJ's fashion options (#82), plain by default */
   g.strokeStyle="rgba(15,12,20,.35)";g.lineWidth=.8;g.stroke();
   if(o.moving){ /* wave-1 walk cycle: arms swing opposite the legs */
     g.fillStyle=lk.shirt;
@@ -2729,6 +2740,10 @@ function checkTalk(){
     else if(rh){ /* a host says what the talk is about, like a quest does */
       tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${rh.talk[lang]||rh.talk.en}”`;
       tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
+    else if(n.npc===GRW().barberNpc&&T().chairHint){ /* the bubble says what the chair changes (owner: "make it easy to tell... their thought bubble at least has a hint") */
+      tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${T().chairHint}”`;tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
+    else if(n.npc===GRW().wardrobeNpc&&T().wdHint){ /* and what the fitting room changes: the animals' wear, never yours */
+      tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${T().wdHint}”`;tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
     else{tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]}`;
       tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
     tb.hidden=false;}
@@ -3108,7 +3123,7 @@ function enterWorld(fresh){
 document.querySelectorAll(".classes button").forEach(b=>b.addEventListener("click",()=>{
   cls=b.querySelector("b").textContent;look.shirt=SHIRTS[b.dataset.c]||look.shirt;
   $("intro").hidden=true;$("creator").hidden=false;
-  buildSwatches();buildOpts("rowStyle",T().styles,"style");buildOpts("rowOutfit",T().outfits,"outfit");buildPaintRow();pvDraw();
+  buildSwatches();buildOpts("rowStyle",T().styles,"style");buildOpts("rowOutfit",T().outfits,"outfit");if(T().patterns)buildOpts("rowPattern",T().patterns,"pattern");buildPaintRow();pvDraw();
 }));
 /* ---------- the chair (owner, 2026-09-07, night: "we should really open the ability to change our character
    outfit and haircut after start... a small barber") — the creator reopens over the world with the name locked;
@@ -3121,7 +3136,7 @@ function buildPaintRow(){const row=$("rowPaint"),lb=$("lbPaint");if(!row)return;
 function openChair(who){const t=T();chairOpen=true;
   $("crTitle").textContent=t.chairTitle||t.crTitle;$("lbName").hidden=true;$("heroname").hidden=true;
   const note=$("crNote");if(note){const L=(t.chat||{})[who]||[];let ln=L.length?L[Math.floor(Math.random()*L.length)]:"";if(typeof ln==="function")ln=ln();ln=(ln&&ln.t!==undefined)?ln.t:ln;note.textContent=ln?sayAs(who,ln):"";note.hidden=!ln;}
-  buildSwatches();buildOpts("rowStyle",t.styles,"style");buildOpts("rowOutfit",t.outfits,"outfit");buildPaintRow();pvDraw();
+  buildSwatches();buildOpts("rowStyle",t.styles,"style");buildOpts("rowOutfit",t.outfits,"outfit");if(t.patterns)buildOpts("rowPattern",t.patterns,"pattern");buildPaintRow();pvDraw();
   $("begin").textContent=t.chairDone||t.begin;$("world").hidden=true;$("creator").hidden=false;held=null;}
 function closeChair(){const t=T();chairOpen=false;$("creator").hidden=true;$("lbName").hidden=false;$("heroname").hidden=false;$("begin").textContent=t.begin;
   const note=$("crNote");if(note)note.hidden=true;
@@ -3648,7 +3663,8 @@ function applyLang(){
   $("langQuick").textContent=t.langQuick;
   applyText();
   if(!$("world").hidden){applyCtl();checkTalk();}
-  if(!$("creator").hidden){buildOpts("rowStyle",t.styles,"style");buildOpts("rowOutfit",t.outfits,"outfit");}
+  if(!$("creator").hidden){buildOpts("rowStyle",t.styles,"style");buildOpts("rowOutfit",t.outfits,"outfit");if(t.patterns)buildOpts("rowPattern",t.patterns,"pattern");}
+  if($("lbPattern")){$("lbPattern").textContent=t.lbPattern||"Pattern";$("lbPattern").hidden=!t.patterns;$("rowPattern").hidden=!t.patterns;}
   if(!$("hud").hidden)hud();
   try{localStorage.setItem(SK("lang"),lang);}catch(e){}
 }
