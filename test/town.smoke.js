@@ -259,7 +259,15 @@ const { chromium } = require('playwright-core');
         if (at('winBack').length !== 1) problems.push('no wall behind la ventanilla in 3D — she stands in a hole');
         if (at('winTop').length !== 1) problems.push('no roof over la ventanilla in 3D');
         const c = at('counter')[0]; if (c && !(c.position.z > 0.5 && c.geometry.parameters.height <= 0.55)) problems.push('the counter is not waist-high on the street side');
-        if (T3.group.children.some(o => o.userData && o.userData.wall === false && o.userData.g === 'B' && o.userData.x === 9 && o.userData.y === 0)) problems.push('a full facade box still stands on her tile'); }
+        if (T3.group.children.some(o => o.userData && o.userData.wall === false && o.userData.g === 'B' && o.userData.x === 9 && o.userData.y === 0)) problems.push('a full facade box still stands on her tile');
+        // #45 (owner: "poster next to teller is off, a bit too high"): the board at (8,0) is a poster on
+        // city hall's wall. It hangs on the wall's street face, mid-height — not floating above the roof.
+        const wallTop = 0.55 + (TILES.B.lift | 0) * 0.042;
+        const post = T3.pool.filter(p => p.live && p.spr.userData.mark === 'read' && Math.abs(p.spr.position.x - 8.5) < 0.2);
+        if (post.length !== 1) problems.push('no read mark stands beside la ventanilla in 3D (' + post.length + ')');
+        else { const s = post[0].spr.position;
+          if (s.y + 0.2 > wallTop || s.y < 0.3) problems.push('the board beside la ventanilla is not mid-face on city hall\'s wall (' + s.y.toFixed(2) + ' up on a ' + wallTop.toFixed(2) + ' wall)');
+          if (s.z < 1.0) problems.push('the board beside la ventanilla hangs inside the wall, not on its street face (z ' + s.z.toFixed(2) + ')'); } }
       T3.yaw = b3.yaw; camSet(b3.cam); world = b3.world; px = b3.px; py = b3.py; }
     let ran = 0; docOpen({ title: { en: 't' }, build: () => [{ btn: 'press', run: () => { ran++; } }] });
     const btn = document.querySelector('#docBody button.dbtn');
