@@ -47,16 +47,17 @@ and the version the title screen should say. **Copy** at the bottom of his sheet
 
 ## What you get, by part
 
-- **2a (this):** the street, read-only. Your open issues as people — `tier: high` a named
-  person with a document, `tier: normal` townsfolk. Walk up, read. No token: the town reads the
-  public API unauthenticated (60 requests an hour is plenty) and keeps the last good copy so it
-  works offline. Low-tier issues are counted for the board and not yet shown.
+- **2a (built):** the street, read-only. Your open issues as people — `tier: high` a named
+  person with a document, `tier: normal` townsfolk. Walk up, read. The town reads with your key
+  when you are signed in (since ch-v6; without one it reads the public API, 60 an hour) and keeps
+  the last good copy so it works offline. Low-tier issues are the board's notes.
 - **2b (built):** three storefront faces — asks, decisions, bugs — and people stand in front
   of the one that matches; city hall with **la ventanilla** at her window (talk to her: the
   permits, i.e. open PRs, green or not, and the count); the **board** on the wall beside her
   (the notes); the **park** through the east gate, so Sonny has somewhere to run; **Sonny**
   himself. Each person has three lines that cycle — plain words, the paperwork, what's next —
-  and the street refetches every five minutes, so a closed issue's person walks home.
+  and a closed issue's person walks home on the next read (the town reads when it opens, after
+  every write, and on ↻ — there is no clock).
 - **3 (built):** the town writes. At la ventanilla's window: **Sign in** (a GitHub token for
   this repo with `issues: write` only, 30-day expiry, pasted once — it stays in this browser
   under the town's own key and nowhere else), **File a request** (title, plain words, notes,
@@ -112,6 +113,20 @@ press. Only the
 buttons that *change* GitHub need it — Done, Ask for more context, **Comment in my own words**,
 + label / − label, File a request. Press one signed out and the town says so and does nothing.
 Every person's card says which state you are in.
+
+## Block one — six houses, one per kind of work (ch-v23)
+
+The street is a boulevard now. Every building has a door that opens and a board beside it that
+says in plain words what kind of work lives there: **Records & forms** (El Anexo), **Rooms &
+stairs** (La Obra), **The engine** (El Motor) along the north rank; **Docs & templates** (La
+Papelería), **How it looks** (El Estudio de Pili), **Meridian's story** (La Cocina de Meridian)
+in the middle block. Inside, a clerk with three lines: what the house is for, how many of your
+things have that address, what is on the desk. The sign over each door counts its house.
+
+An issue's address is its `work:` label, one of the six, in plain words. The request form has
+a *What kind of work* dropdown; the Labels button on any person changes it. The people
+themselves still stand on the street by kind for now; standing inside comes with the next part.
+The town's ledger is `docs/changarrito/CITY.md`.
 
 ## The stall has an upstairs (ch-v12)
 

@@ -13,7 +13,61 @@ const RECORDSRC={
   /* where people stand: in front of the face that matches their first label (§9.1), then the
      open street. Past `cap` the rest are notes — a street with forty people is a queue */
   stands:{ask:[[3,3],[5,3],[7,3],[4,6],[6,6]],decision:[[18,3],[20,3],[19,6],[21,6]],
-          bug:[[24,3],[26,3],[25,6],[27,6]],other:[[10,8],[14,8],[18,8],[6,10],[22,10],[12,12]]},
+          bug:[[24,3],[26,3],[25,6],[27,6]],other:[[10,10],[14,10],[18,10],[6,10],[22,10],[12,12]]},
+  /* ---------- #69, block one: the six houses — one per kind of work ----------
+     The address is a LABEL in plain words (owner: "put a human friendly label as to what type of
+     issue or work is being done"): the first `work:` label an issue carries names its house. Each
+     house has a world copied from Meridian's shells, a door on the street, a clerk who knows only
+     its business, a sign over the door that counts it, and a board beside the door that says the
+     work in two short lines. Don Güero's plan is on #69. */
+  AREAS:[
+    {id:"an",world:"an",glyph:"$",door:{x:4,y:0},label:"work: records & forms",name:{en:"El Anexo de la Ventanilla",es:"El Anexo de la Ventanilla"},clerk:"remedios",
+     plain:{en:"Records & forms — the window, the index, the forms, the reports.",es:"Registros y formularios — la ventanilla, el índice, los formularios, los reportes."}},
+    {id:"pp",world:"pp",glyph:"@",door:{x:6,y:8},label:"work: docs & templates",name:{en:"La Papelería",es:"La Papelería"},clerk:"chuy",
+     plain:{en:"Docs & templates — anything that ends up as a document, a template or a test.",es:"Documentos y plantillas — lo que termina en un documento, una plantilla o una prueba."}},
+    {id:"es",world:"es",glyph:"M",door:{x:14,y:8},label:"work: how it looks",name:{en:"El Estudio de Pili",es:"El Estudio de Pili"},clerk:"pili",
+     plain:{en:"How it looks — the camera, the walls, the art, the tiles, the screen.",es:"Cómo se ve — la cámara, las paredes, el arte, los mosaicos, la pantalla."}},
+    {id:"mo",world:"mo",glyph:"%",door:{x:25,y:0},label:"work: the engine",name:{en:"El Motor",es:"El Motor"},clerk:"beto",
+     plain:{en:"The engine — seams, saves, speed, and what has to be true in both cities.",es:"El motor — costuras, partidas guardadas, velocidad, y lo que debe ser cierto en las dos ciudades."}},
+    {id:"ob",world:"ob",glyph:"O",door:{x:19,y:0},label:"work: rooms & stairs",name:{en:"La Obra",es:"La Obra"},clerk:"cuca",
+     plain:{en:"Rooms & stairs — where things stand, doors, maps, and how you get in.",es:"Cuartos y escaleras — dónde está cada cosa, puertas, mapas, y cómo se entra."}},
+    {id:"co",world:"co",glyph:"L",door:{x:22,y:8},label:"work: Meridian's story",name:{en:"La Cocina de Meridian",es:"La Cocina de Meridian"},clerk:"nacho",
+     plain:{en:"Meridian's story — the other city: its quests, its districts, its practice.",es:"La historia de Meridian — la otra ciudad: sus misiones, sus barrios, su práctica."}}],
+  areas(){return this.AREAS.filter(a=>WORLDS[a.world]);},
+  area(id){return this.AREAS.find(a=>a.id===id)||null;},
+  /* the house an issue lives in: its first work label; none → no address (the plaza, block two) */
+  house(i){const L=(i.labels||[]).map(l=>l.toLowerCase());const a=this.AREAS.find(a=>L.includes(a.label.toLowerCase()));return a?a.id:null;},
+  workLabels(){return this.AREAS.map(a=>a.label);},
+  ofHouse(id){return this.all.filter(i=>this.house(i)===id);},
+  /* the clerk's three lines: what this house is for (the work, in plain words), the count, what is on the desk */
+  clerkDoc(id){const es=lang==="es",self=this,a=this.area(id);if(!a)return [{p:"—"}];
+    const mine=this.sortPeople(this.ofHouse(id)),standing=mine.filter(i=>this.placed[i.n]),pinned=mine.filter(i=>!this.placed[i.n]);
+    const oldest=mine.slice().sort((x,y)=>String(x.at).localeCompare(String(y.at))||x.n-y.n)[0];
+    const waiting=mine.filter(i=>this.state(i)==="waiting"),unanswered=mine.filter(i=>this.state(i)==="unanswered");
+    const work=a.label.replace(/^work: /,"");
+    const L=[
+      {k:es?"Para qué es esta casa":"What this house is for",t:(es?a.plain.es:a.plain.en)+(es?" Todo lo que lleva la etiqueta «":" Everything that carries the label \u201c")+a.label+(es?"» vive aquí.":"\u201d lives here.")},
+      {k:es?"La cuenta":"The count",t:mine.length?(mine.length+(es?" cosa(s) tuya(s) tienen esta dirección. ":" of your things have this address. ")+standing.length+(es?" de pie, ":" standing, ")+pinned.length+(es?" prendida(s) en el tablero.":" pinned on the board.")+(oldest?(es?" La más vieja llegó el ":" The oldest came in on ")+oldest.at+".":""))
+        :(es?"Nada archivado con esta dirección ahora mismo.":"Nothing filed with this address right now.")},
+      {k:es?"Lo que hay en el escritorio":"What's on the desk",t:mine.length?((oldest?(es?"La más vieja: #":"Oldest here: #")+oldest.n+", "+this.days(oldest.at)+(unanswered.some(i=>i.n===oldest.n)?(es?", nadie la ha contestado.":", nobody has answered it."):"."):"")
+        +(waiting.length?" "+waiting.length+(es?" espera(n) tu palabra.":" waiting on your word."):""))
+        :(es?"El escritorio está limpio ("+work+").":"The desk is clear ("+work+").")}];
+    const k=(this.cycle["h_"+id]|0)%L.length;this.cycle["h_"+id]=k+1;try{localStorage.setItem(SK("cycle"),JSON.stringify(this.cycle));}catch(e){}
+    const s=[{h:"💬 "+L[k].k},{p:L[k].t}];
+    if(k===2){if(oldest)s.push({btn:(es?"→ caminar a #":"→ walk to #")+oldest.n,run:()=>self.walkTo(oldest.n)});
+      waiting.slice(0,4).forEach(i=>{if(!oldest||i.n!==oldest.n)s.push({btn:(es?"⚖️ decidir → #":"⚖️ decide → #")+i.n,run:()=>self.walkTo(i.n)});});}
+    s.push({h:es?"Qué puedes hacer":"What you can do"});
+    s.push({btn:es?"📌 El tablero de esta casa":"📌 This house's board",run:()=>docOpen("b_"+id)});
+    s.push({btn:es?"📝 Presentar algo sobre esta casa":"📝 File something about this house",run:()=>{self.formTags=[a.label];docOpen("request");}});
+    s.push({btn:es?"📇 Todos con esta dirección":"📇 Everyone with this address",run:()=>{self.indexCat="label:"+a.label;self.indexQ="";docOpen("index");}});
+    return s;},
+  /* the house's board: everything with this address, the small things included */
+  houseBoardDoc(id){const es=lang==="es",a=this.area(id),s=[];if(!a)return [{p:"—"}];
+    const mine=this.sortPeople(this.ofHouse(id));
+    s.push({p:(es?a.plain.es:a.plain.en)});
+    if(!mine.length)s.push({p:es?"Nada archivado con esta dirección ahora mismo.":"Nothing filed with this address right now."});
+    mine.forEach(i=>s.push({kv:[["#"+i.n,i.title],[es?"archivado":"filed",this.days(i.at)],[es?"estado":"state",this.state(i)],[es?"en palabras llanas":"in plain words",this.plain(i)]]}));
+    return s;},
   cap:12,
   placed:{},      /* issue number → the npc key addChill() gave it */
   people:[],      /* the issues standing on the street, in order */
@@ -88,12 +142,13 @@ const RECORDSRC={
     const T=[];const add=(id,en,esn,tags,at,plainEn,plainEs)=>{if(at)T.push({id,name:es?esn:en,tags,at,plain:es?plainEs:plainEn,thing:true});};
     add("stall","The stall","El changarrito",["changarrito","stall","home"],near(PL.home,PL.spawn[0],PL.spawn[1]),"Where you wake up. Don Güero's counter, the door to the street, the stairs to the loft.","Donde despiertas. El mostrador de Don Güero, la puerta a la calle, la escalera al tapanco.");
     if(W[PL.upstairs])add("loft","The loft","El tapanco",["changarrito","loft","stairs"],near(PL.upstairs,14,14),"Upstairs, bare on purpose; the way down is the light square.","Arriba, vacío a propósito; la bajada es el cuadro claro.");
-    add("street","The street","La calle",["changarrito","street"],near(st,14,2),"Where the record's people stand, by kind: asks left, decisions middle, bugs right.","Donde está la gente del expediente, por tipo: peticiones a la izquierda, decisiones al centro, bugs a la derecha.");
+    add("street","The street","La calle",["changarrito","street"],near(st,14,2),"A boulevard with two ranks of houses, one per kind of work; the record's people stand on it.","Un bulevar con dos hileras de casas, una por tipo de trabajo; la gente del expediente se para aquí.");
     add("hall","City hall · la ventanilla","El ayuntamiento · la ventanilla",["ventanilla","hall","record"],near(st,9,1),"Her window: the news, the index, the forms, your key.","Su ventana: las noticias, el índice, los formularios, tu llave.");
     add("board","The board","El tablero",["board","notes","tier: low"],near(st,8,1),"The small things, pinned, grouped by kind.","Las cosas chicas, prendidas, por tipo.");
-    add("asks","The asks' storefront","La fachada de las peticiones",["ask"],near(st,4,1),"People labelled ask stand in front of it.","La gente con etiqueta ask se para enfrente.");
-    add("decisions","The decisions' storefront","La fachada de las decisiones",["decision"],near(st,19,1),"People labelled decision stand in front of it — the ones waiting on your word.","La gente con etiqueta decision se para enfrente — los que esperan tu palabra.");
-    add("bugs","The bugs' storefront","La fachada de los bugs",["bug"],near(st,25,1),"People labelled bug stand in front of it.","La gente con etiqueta bug se para enfrente.");
+    /* the six houses (#69): the work label first, then the house's name — the human-friendly label on the building */
+    this.areas().forEach(a=>{const work=a.label.replace(/^work: /,"");const dy=a.door.y===0?1:-1;
+      add("h:"+a.id,work.charAt(0).toUpperCase()+work.slice(1)+" · "+a.name.en,a.plain.es.split(" — ")[0]+" · "+a.name.es,[a.label,a.id,"house","changarrito"],near(st,a.door.x,a.door.y+dy),
+        a.plain.en+" Walk in: "+npcName(a.clerk)+" is at the counter.",a.plain.es+" Entra: "+npcName(a.clerk)+" atiende.");});
     if(W[PL.park])add("park","The park","El parque",["park","sonny","animals"],near(PL.park,PL.parkIn[0],PL.parkIn[1]),"Through the east gate. Sonny's mini game lives here.","Por la reja del este. Aquí vive el mini juego de Sonny.");
     /* residents and animals, where they are right now */
     Object.entries(W).forEach(([wid,w])=>w.npcs.forEach(n=>{if(n.issue||!n.npc)return;
@@ -107,7 +162,7 @@ const RECORDSRC={
      The signs over the faces show the number of open issues of their kind (all tiers), city
      hall's the total; the 3D scene bakes decor at build, so it is rebuilt once. */
   signs(){const D=(typeof DECOR!=="undefined"&&DECOR)||[];const by={ask:0,decision:0,bug:0,other:0};
-    this.all.forEach(i=>{by[this.kind(i)]=(by[this.kind(i)]|0)+1;});
+    this.all.forEach(i=>{by[this.kind(i)]=(by[this.kind(i)]|0)+1;const h=this.house(i);if(h)by[h]=(by[h]|0)+1;}); /* #69: a sign over a door counts its house */
     let changed=false;D.forEach(d=>{if(d.deco!=="sign"||!d.kind)return;const n=d.kind==="hall"?this.all.length:(by[d.kind]|0);
       const t=String(n).slice(0,4);if(d.text!==t){d.text=t;changed=true;}});
     if(changed){try{if(typeof t3Invalidate==="function")t3Invalidate();}catch(e){}}return by;},
@@ -326,8 +381,9 @@ const RECORDSRC={
     +"\n\n**Areas affected:** _(a session fills this when it first reads the issue)_"
     +"\n\n**Done when:** "+(this.clean(f.done,600)||"—")+"\n\nFiled from El Changarrito.";},
   async file(f){const title=this.clean(f.title,120);if(!title){this.say("A request needs a title.","Una petición necesita título.");return null;}
+    const work=this.workLabels().includes(f.work)?[f.work]:[]; /* #69: the address, one work label in plain words */
     const labels=["tier: "+(["high","normal","low"].includes(f.tier)?f.tier:"normal"),["ask","decision","bug"].includes(f.kind)?f.kind:"ask"]
-      .concat((f.tags||[]).map(l=>this.clean(l,40)).filter(l=>l&&!/^tier: /.test(l)&&!["ask","decision","bug"].includes(l)).slice(0,5));
+      .concat(work).concat((f.tags||[]).map(l=>this.clean(l,40)).filter(l=>l&&!/^tier: /.test(l)&&!["ask","decision","bug"].includes(l)&&!work.includes(l)).slice(0,5));
     const d=await this.write("POST","/issues",{title,body:this.requestBody(f),labels});
     if(d&&d.number)this.say("Filed as #"+d.number+". They will be on the street shortly.","Archivado como #"+d.number+". Pronto estarán en la calle.");return d;},
   /* ---------- ch-v14: every popup is a form in the reader (owner: "show me what you mean for #2") ----------
@@ -344,6 +400,7 @@ const RECORDSRC={
       {k:"done",label:es?"Está hecho cuando…":"Done when…",type:"text"},
       {k:"kind",label:es?"Tipo":"Kind",type:"select",opts:[{v:"ask",t:es?"petición (ask)":"ask"},{v:"decision",t:es?"decisión":"decision"},{v:"bug",t:"bug"}],value:"ask"},
       {k:"tier",label:es?"Peso":"Weight",type:"select",opts:[{v:"normal",t:"normal"},{v:"high",t:"high"},{v:"low",t:"low"}],value:"normal"},
+      {k:"work",label:es?"Qué tipo de trabajo (su casa)":"What kind of work (its house)",type:"select",opts:[{v:"",t:es?"— sin dirección —":"— no address yet —"}].concat(this.areas().map(a=>({v:a.label,t:a.label.replace(/^work: /,"")+" · "+(es?a.name.es:a.name.en)}))),value:this.formTags.find(t=>/^work: /.test(t))||""},
       {k:"tags",label:es?"Etiquetas":"Tags",type:"checks",opts:this.tagOpts(),value:this.formTags}],
     submit:es?"📨 Presentar":"📨 File it",cancel:es?"Cancelar":"Cancel",onCancel:()=>docOpen("window"),
     run:v=>{self.file(v).then(d=>{if(d)docOpen("window");});}}}];},
