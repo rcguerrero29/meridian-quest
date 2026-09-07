@@ -177,7 +177,9 @@ preference that outlives one phase; cite the date and their words.
   is what carries meaning (see the cold-read pass). **Amended 2026-09-07** (owner: *"marigold,
   and petals too and papel picado - do it alll!!!"*): Día de Muertos is the one season that
   may also DRESS the world — petals on the bridge deck, papel picado over the crossing,
-  alebrije colours on the animals, calavera paint on the hero — a dressing laid over the
+  alebrije colours on the animals (five looks a kind that keep the animal's silhouette, and tiny
+  wings on the wingless — the owner's word, 2026-09-07: "so sonny will still look sonny like but
+  in different colors and perhaps tiny wings"), calavera paint on everyone — a dressing laid over the
   design, never a rebuild of it; every other season stays colour-only until the owner says
   otherwise. Note this is a SECOND palette layer
   from `THEMES`, which is UI chrome only — choosing a UI theme must never repaint the
