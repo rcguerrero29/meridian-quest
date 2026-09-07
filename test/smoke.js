@@ -1246,6 +1246,7 @@ const CANDIDATES = [
         if (!(UI.en.chat.meche || []).length || (UI.en.chat.meche || []).length !== (UI.es.chat.meche || []).length) problems.push('Doña Meche has no lines, or not the same number in both languages');
         const mn = mw[1].npcs.find(n => n.npc === 'meche'), pot = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => (mw[1].rows[mn.y + dy] || '')[mn.x + dx] === 'ʘ');
         if (!pot) problems.push('Doña Meche\'s pot is not beside her');
+        if (wanders(mn)) problems.push('Doña Meche wanders off from her pot — she would step onto the trolley\'s landing');
         if (!SOLID.has('ʘ') || !TILESIDE['ʘ'] || (TILES['ʘ'] || {}).kind !== 'appliance') problems.push('the pot is not a solid box with a side view — it would ship flat (#39)'); }
     }
     if (S.art.papel) { // "and papel picado": in 3D the season hangs cut-paper flags over the crossing; none out of season
