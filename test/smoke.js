@@ -2675,6 +2675,38 @@ const CANDIDATES = [
             const reach = auditReach().filter(m => m.includes(id)); if (reach.length) problems.push('the casa is not reachable: ' + reach.join('; '));
             if (room.rows.some(r => r.includes('▦'))) problems.push('the room has a reja inside it');
           }
+          // the chair (owner, 2026-09-07, night: "open the ability to change our character outfit and haircut after start...
+          // a small barber"): a barbería lot from a template, Naye behind the chair, Talk reopens the creator with the
+          // name locked, what you pick is saved, progress untouched; in season the calavera looks sit in the same panel
+          const bl = BUILDS.find(bd => bd.tpl === 'barberia');
+          if (!bl) problems.push('no barbería is declared — outfit and hair are decided once, at the start');
+          else if (!GRW().barberNpc) problems.push('nobody is nominated to run the chair (GROWTH.barberNpc)');
+          else {
+            const bid = bl.id, broom = WORLDS[bid], who = GRW().barberNpc;
+            if (!broom) problems.push('the barbería has no room');
+            else {
+              if (!broom.npcs.some(n => n.npc === who)) problems.push('the barber is not in the barbería');
+              if (!NPCN.en[who] || !NPCN.es[who] || !(UI.en.chat[who] || []).length || (UI.en.chat[who] || []).length !== (UI.es.chat[who] || []).length) problems.push('the barber has no name or lines in both languages');
+              if (!UI.en.locs[bid] || !UI.es.locs[bid] || !UI.en.arrive[bid] || !UI.es.arrive[bid]) problems.push('the barbería has no name or arrival line in both languages');
+              const reach = auditReach().filter(m => m.includes(bid)); if (reach.length) problems.push('the barbería is not reachable: ' + reach.join('; '));
+              const bn = broom.npcs.find(n => n.npc === who); const keep = { world, px, py, xp, style: look.style, cam: camMode, hero: alePick.hero };
+              world = bid; px = fx = bn.x; py = fy = bn.y + 1; moving = false; held = null; checkTalk();
+              if ($('talk').hidden || $('talk').dataset.chatn !== who) problems.push('standing before the barber, Talk does not offer the chair');
+              else { $('talk').click();
+                if ($('creator').hidden) problems.push('Talk at the barber does not open the chair');
+                else { if (!$('heroname').hidden) problems.push('the chair lets you rename yourself');
+                  const sb = [...$('rowStyle').querySelectorAll('button')].find(b => b.getAttribute('aria-pressed') !== 'true'); if (sb) sb.click();
+                  $('begin').click();
+                  if (!$('creator').hidden) problems.push('the chair does not close'); if (xp !== keep.xp) problems.push('sitting in the chair reset your progress');
+                  if (sb && look.style === keep.style) problems.push('a new hairstyle from the chair did not take');
+                  const sv = loadSave(); if (sb && (!sv || !sv.lk || sv.lk.style !== look.style)) problems.push('the new look was not saved');
+                  if ($('heroname').hidden) problems.push('after the chair the name field stays hidden for the next hero');
+                  seasonSet('muertos'); checkTalk(); $('talk').click(); const pb = $('rowPaint') ? [...$('rowPaint').querySelectorAll('button')] : [];
+                  if ($('creator').hidden) problems.push('in season the chair does not open'); else if (pb.length !== 5) problems.push('in season the chair offers ' + pb.length + ' calavera looks, not five');
+                  else { pb[4].click(); if (alePick.hero !== 4) problems.push('picking the calavera in the chair did not paint it'); }
+                  $('begin').click(); seasonSet('auto'); } }
+              alePick.hero = keep.hero; alePersist(); look.style = keep.style; world = keep.world; px = fx = keep.px; py = fy = keep.py; save(); camSet(keep.cam); }
+          }
           // #8 El Portero: the log, the tin man in his hut, the count he says, the red on his sheet
           if (typeof mqwarn !== 'function' || typeof logCrit !== 'function') problems.push('the engine keeps no log (mqwarn / logCrit)');
           else {

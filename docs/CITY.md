@@ -49,7 +49,10 @@ on top of a business that already exists.)*
 - ~~**st southwest lot**~~ — **built 2026-08-31**: El Mercado Robles.
 - ~~**st southeast lot**~~ — **built 2026-09-02**: Taller Herrera (ribbon on row 13, x18–28).
 - ~~**Calle Dos frontage, `ex` row 0**~~ — **built 2026-09-02**: La Espiga (x4–8) and Limpieza
-  Velázquez (x10–14). A short gap remains at x15–23.
+  Velázquez (x10–14). ~~A short gap remains at x15–23.~~ Corrected 2026-09-07 (Nacho's read): x15 and
+  x20 are jacarandas, Yola the paletera stands at (17,0) and the season hangs the piñata at (18,0) — that
+  corner is hers, not a lot. **x21–23 built 2026-09-07 (`mq-v105`): Barbería El Espejo**, Naye's chair
+  (3 wide, the door at (22,0) onto the trolley bed). Nothing open remains on the north frontage.
 - **`ex` row 10 — the canal-side south frontage**, entered from the lane at row 9. The largest
   genuinely open parcel left. (The old entry said "rows 0/9"; row 9 is the *street*, not a lot.)
   ⏳ ❗El solar.
@@ -211,6 +214,27 @@ would have none left unless looks key by npc instead.
   EMPTY frame, nobody named ("That one's for whoever needs it") — never the old AI lead, who
   vanished and did not die. Not built: the fiesta shipped the swags, the piñata and Doña Meche;
   the ofrendas wait on this word.
+- ✅ **❗La silla — BUILT as a service (`mq-v105`, 2026-09-07).** Owner: *"we should really open the
+  ability to change our character outfit and haircut after start. maybe have a small barber we can
+  share with meridian quest as some could be hispanic businesses and they have the ability to help
+  with the fit. see if any of our characters would like to do that or if they train another agent."*
+  Nacho: nobody in the cast has a fit-and-style streak except Xochi, and Xochi's thread is clothing
+  the barrio one business at a time — so **Xochi trains a new one**: **Naye Robles, 29**, Doña Chelo's
+  niece, eleven years cutting hair between the crates of her tía's abarrotes. **Barbería y Estética El
+  Espejo**, `ex` (21–23, 0), built from a `barberia` template like the casa: two mirrors, a chair under
+  each, the waiting chair, the counter. Talk to Naye and the creator reopens over the world with the name
+  locked (`GROWTH.barberNpc`, `openChair`); outfit, shirt, skin, hair and — in season — the calavera;
+  saved on the way out, progress untouched. Don Güero's siting (x16–19) was moved east: it sat on Yola
+  and the piñata. **Two picks still the owner's:**
+  - ⏳ **❗La silla, the second half** — stays a *service* (no quests, like the casa and the caseta —
+    recommended by Don Güero and Nacho both) or becomes a *district* with a practice pack. Nacho's
+    sketch for the pack if it ever does: *"La foto"* — the brief is not the request; intake asks for
+    the photo, the last cut and the time; Naye confirms at the mirror before anything is cut.
+  - ⏳ **❗La fachada** — the shop wears the casa's facade today. A barbershop glyph of its own (a pole,
+    the mirror wall from the sidewalk) needs one cold read; or keep the facade and hang a sign.
+  Not absorbed: Nacho found `chelo` declared twice in `npcs.js` (neighbour and mercado owner under one
+  key; the later wins) — the owner says which is true; and "Wardrobe / Vestidor" already names the
+  animals' fitting room, so the chair never uses that word.
 - ✅ **❗La piñata / ❗El tamal — BUILT the owner's way (`mq-v98`, 2026-09-07).** Owner: *"put a
   pinata in there as well as tamales, etc."* Nacho's picks taken: the piñata hangs over the
   paletera's corner on Calle Dos and only sways — never hit, gives nothing; Doña Meche, a new

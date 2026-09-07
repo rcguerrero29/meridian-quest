@@ -2735,6 +2735,7 @@ $("talk").addEventListener("click",()=>{
     if(roomHosts[tb.dataset.chatn]){roomStart(roomHosts[tb.dataset.chatn],tb.dataset.chatn);return;}
     /* content nominates who runs the fitting room; the engine just opens it */
     if(tb.dataset.chatn===GRW().wardrobeNpc){openWardrobe();return;}
+    if(tb.dataset.chatn===GRW().barberNpc){openChair(tb.dataset.chatn);return;} /* the chair: content nominates the barber; the engine reopens the creator */
     const L=chillLines(tb.dataset.chatn)||(T().chat||{})[tb.dataset.chatn]||[];
     /* A line with nobody's name on it is a line you cannot place: half the barrio sounds
        alike on a phone screen (owner, 2026-09-03: "its hard to tell people apart, should
@@ -3051,9 +3052,26 @@ function enterWorld(fresh){
 document.querySelectorAll(".classes button").forEach(b=>b.addEventListener("click",()=>{
   cls=b.querySelector("b").textContent;look.shirt=SHIRTS[b.dataset.c]||look.shirt;
   $("intro").hidden=true;$("creator").hidden=false;
-  buildSwatches();buildOpts("rowStyle",T().styles,"style");buildOpts("rowOutfit",T().outfits,"outfit");pvDraw();
+  buildSwatches();buildOpts("rowStyle",T().styles,"style");buildOpts("rowOutfit",T().outfits,"outfit");buildPaintRow();pvDraw();
 }));
+/* ---------- the chair (owner, 2026-09-07, night: "we should really open the ability to change our character
+   outfit and haircut after start... a small barber") — the creator reopens over the world with the name locked;
+   what you pick is saved on the way out. In season the calavera looks sit in the same panel. ---------- */
+let chairOpen=false;
+function buildPaintRow(){const row=$("rowPaint"),lb=$("lbPaint");if(!row)return;const F=faceLooks(),on=!!F;row.innerHTML="";row.hidden=!on;if(lb){lb.hidden=!on;lb.textContent=T().lbPaint||"Calavera";}
+  if(!on)return;const cur=((alePick.hero%F.length)+F.length)%F.length;
+  F.forEach((lk,i)=>{const b=document.createElement("button");b.className="opt";b.textContent=lk.name?(lk.name[lang]||lk.name.en):lk.id;b.setAttribute("aria-pressed",cur===i?"true":"false");
+    b.addEventListener("click",()=>{alePick.hero=i;alePersist();[...row.children].forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed","true");pvDraw();if(typeof aleRowBuild==="function")aleRowBuild();});row.appendChild(b);});}
+function openChair(who){const t=T();chairOpen=true;
+  $("crTitle").textContent=t.chairTitle||t.crTitle;$("lbName").hidden=true;$("heroname").hidden=true;
+  const note=$("crNote");if(note){const L=(t.chat||{})[who]||[];let ln=L.length?L[Math.floor(Math.random()*L.length)]:"";if(typeof ln==="function")ln=ln();ln=(ln&&ln.t!==undefined)?ln.t:ln;note.textContent=ln?sayAs(who,ln):"";note.hidden=!ln;}
+  buildSwatches();buildOpts("rowStyle",t.styles,"style");buildOpts("rowOutfit",t.outfits,"outfit");buildPaintRow();pvDraw();
+  $("begin").textContent=t.chairDone||t.begin;$("world").hidden=true;$("creator").hidden=false;held=null;}
+function closeChair(){const t=T();chairOpen=false;$("creator").hidden=true;$("lbName").hidden=false;$("heroname").hidden=false;$("begin").textContent=t.begin;
+  const note=$("crNote");if(note)note.hidden=true;
+  save();showWorld();applyCtl();hud();checkTalk();if(t.chairAfter)toast(sayAs(GRW().barberNpc,t.chairAfter),2800);}
 $("begin").addEventListener("click",()=>{
+  if(chairOpen){closeChair();return;}
   heroName=($("heroname").value.trim()||"Rookie").slice(0,14);
   xp=0;hearts=startHearts();done=new Set();qa={};marks={};world=PL.home;px=fx=PL.spawn[0];py=fy=PL.spawn[1];dir="down";
   save();enterWorld(true);
