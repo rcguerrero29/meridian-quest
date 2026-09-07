@@ -189,31 +189,36 @@ const { chromium } = require('playwright-core');
         RECORDSRC.goBeside('hq', 10, 16); T3.yaw = 0; draw3d(); /* beside the front door = the lobby (10,15); goBeside moves fx/fy too */
         const south = T3.group.children.filter(o => o.userData && o.userData.wall !== undefined && o.userData.y === 16 && Math.abs(o.userData.x - 10) <= 2);
         const north = T3.group.children.filter(o => o.userData && o.userData.wall !== undefined && o.userData.y === 0);
-        // #65, the owner's second word (AJ present): "lets try the camera angles, and only if they are surrounded by
-        // 4 walls in a small room do you do this and only one wall near the character". A wall hides you only when
-        // it is close and tall (the camera looks down from 6.2 high, 7.4 back: a wall d tiles in front of you must be
-        // taller than 0.7·d+0.3 to cover your body). Then the camera turns to a stop where nothing hides you; walls
-        // never vanish. Only when all four stops are blocked — a nook — is the one nearest wall minimized.
-        if (typeof t3Hides !== 'function' || typeof t3Sight !== 'function') problems.push('the engine has no line-of-sight rule (t3Hides / t3Sight)');
+        // #65, the owner's third word: "aj prefers the minimized wall but limit it to one near the person... the view
+        // change was too confusing - lets keep that manual". The camera never turns by itself; ↻ is the only turn.
+        // A wall HIDES you only when it is close and tall (the camera looks down from 6.2 high, 7.4 back: a wall d
+        // tiles in front of you must be taller than 0.65·d+0.3 to cover your body). The one nearest such wall — the
+        // piece in front of you and its two neighbours — is minimized to a knee-high stub; everything else stays whole.
+        if (typeof t3Hides !== 'function' || typeof t3Near !== 'function') problems.push('the engine has no line-of-sight rule (t3Hides / t3Near)');
         else {
           if (!t3Hides(1.3, 1) || t3Hides(1.3, 2) || t3Hides(1.0, 1.2) || !t3Hides(2.4, 2.5)) problems.push('t3Hides is not the camera\'s geometry: a 1.3 wall hides at 1 tile, not at 2; a 2.4 facade hides at 2.5');
-          // in the lobby the south wall is one tile behind you: the camera swings to a side, and the wall stays whole
-          const sg = t3Sight(10, 15, 0);
-          if (!sg || sg.enclosed) problems.push('the lobby reads as a nook');
-          if (!sg || Math.abs(Math.abs(sg.goal) - Math.PI / 2) > 1e-9) problems.push('from the lobby the camera does not turn to a side stop: ' + (sg && sg.goal));
-          if (!south.length || south.some(o => !o.visible)) problems.push('the lobby\'s south wall is hidden or stubbed — walls never vanish now');
-          if (T3.group.children.some(o => o.userData && o.userData.stub && o.visible)) problems.push('a stub stands where no nook is');
-          if (Math.abs(Math.abs(T3.yawGoal) - Math.PI / 2) > 1e-9) problems.push('draw3d did not adopt the swing: yawGoal ' + T3.yawGoal);
-          // on the flight the south wall is two tiles off: nothing hides you, the camera stays put
-          const st = t3Sight(12, 14, 0); if (!st || st.goal !== 0 || st.enclosed) problems.push('in the stair hall the camera swings for nothing: ' + JSON.stringify(st && { goal: st.goal, enclosed: st.enclosed }));
-          // a nook: walls within reach on all four sides — only the nearest one is minimized
-          const nk = t3Sight(10, 15, 0, [[10, 16, 1.3], [10, 14, 1.3], [9, 15, 1.3], [11, 15, 1.3]]);
-          if (!nk || !nk.enclosed) problems.push('four near walls do not read as a nook');
-          if (nk && nk.near.length !== 1) problems.push('a nook minimizes ' + (nk && nk.near.length) + ' walls, not the one nearest');
-          // the player's own turn is instant and kept
-          const y0 = T3.yaw, g0 = T3.yawGoal; document.getElementById('rot3d').click();
-          if (Math.abs(T3.yaw - (y0 + Math.PI / 2)) > 1e-9 || Math.abs(T3.yawGoal - T3.yaw) > 1e-9) problems.push('↻ is no longer an instant quarter turn with the goal following');
-          T3.yaw = y0; T3.yawGoal = g0;
+          // in the lobby the south wall is one tile behind you: the camera stays, the three pieces nearest you drop to stubs
+          for (let i = 0; i < 12; i++) draw3d();
+          if (T3.yaw !== 0) problems.push('the camera turned by itself: yaw ' + T3.yaw + ' — the view change was too confusing, it is manual');
+          if (typeof t3AutoYaw === 'function' || T3.yawGoal !== undefined) problems.push('the automatic turn is still in the engine');
+          const stubs = (y, x0, dx) => T3.group.children.filter(o => o.userData && o.userData.stub && o.userData.y === y && Math.abs(o.userData.x - x0) <= dx);
+          const nearW = T3.group.children.filter(o => o.userData && (o.userData.wall !== undefined || o.userData.door) && o.userData.y === 16 && Math.abs(o.userData.x - 10) <= 1), farW = south.filter(o => Math.abs(o.userData.x - 10) === 2); /* the front door is the piece in front of you */
+          if (nearW.length !== 3 || nearW.some(o => o.visible)) problems.push('the three pieces of the south wall nearest you are not minimized (' + nearW.filter(o => !o.visible).length + ' of ' + nearW.length + ')');
+          if (!farW.length || farW.some(o => !o.visible)) problems.push('the south wall beyond one tile of you was minimized too — one wall near the person, not the whole row');
+          { const st = stubs(16, 10, 1); if (st.length !== 3 || st.some(o => !o.visible)) problems.push('no stub stands where the near wall was minimized (' + st.filter(o => o.visible).length + ')');
+            if (st.some(o => o.geometry.parameters.height >= 0.5 || o.material.map)) problems.push('the stub is not knee-high in the wall\'s top colour');
+            if (stubs(16, 10, 2).filter(o => o.visible).length !== 3) problems.push('a stub stands beyond the near wall'); }
+          if (!north.length || north.some(o => !o.visible)) problems.push('the north wall was minimized for nothing');
+          // on the flight the south wall is two tiles off: nothing hides you, nothing is minimized
+          RECORDSRC.goBeside('hq', 12, 13); T3.yaw = 0; for (let i = 0; i < 3; i++) draw3d();
+          if (T3.group.children.some(o => o.userData && o.userData.stub && o.visible)) problems.push('a stub stands in the stair hall, where no wall hides you');
+          // the rule on paper: of two walls in the way only the nearer is minimized
+          const nr = t3Near(10, 15, 0, [[10, 16, 1.3], [10, 14, 1.3], [12, 16, 1.3], [8, 16, 1.3]]);
+          if (!nr || nr.length !== 1 || nr[0].x !== 10.5 || nr[0].z !== 16.5) problems.push('t3Near does not pick the one wall in front of you: ' + JSON.stringify(nr && nr.map(p => [p.x, p.z])));
+          // ↻ stays an instant quarter turn, the only turn there is
+          const y0 = T3.yaw; document.getElementById('rot3d').click();
+          if (Math.abs(T3.yaw - (y0 + Math.PI / 2)) > 1e-9) problems.push('↻ is no longer an instant quarter turn');
+          T3.yaw = y0;
         }
         // you stand higher on a tread
         RECORDSRC.goBeside('hq', 12, 13); draw3d(); const hero = T3.pool.filter(p => p.live && p.spr.material.depthTest === false)[0]; /* beside the mass = the second tread (12,14) */
