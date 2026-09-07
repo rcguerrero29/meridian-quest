@@ -2132,9 +2132,11 @@ const FACE_DEF={looks:[ /* the engine's own five, the same recipe as the packs':
   {id:"turquesa",name:{en:"Turquesa",es:"Turquesa"},base:"#EAF7F5",ring:"#00B8C4",dark:"#12324A",brow:"dots",mark:"#00B8C4",chin:"#00B8C4"},
   {id:"corazon",name:{en:"Corazón",es:"Corazón"},base:"#FBEFEA",ring:"#D9342B",dark:"#2B2536",nose:"heart",mark:"#D9342B",brow:"web"}]};
 function faceLooks(){const a=art("facepaint",null);if(!a)return null;
+  if(a===true)return FACE_DEF.looks; /* a season may just say "yes" and take the engine's five (Día de Muertos does) */
   if(a.looks&&a.looks.length)return a.looks;if(a.base)return [{id:"pack",name:{en:"Calavera",es:"Calavera"},base:a.base,ring:a.accent||"#F28C28",dark:a.dark||"#2B2536"}];return FACE_DEF.looks;}
 function faceLookFor(who,hero){const L=faceLooks();if(!L)return null;
-  const i=hero?alePick.hero:(aleHash(who||"?")+alePick.off);return L[((i%L.length)+L.length)%L.length];}
+  const i=hero?alePick.hero:(aleHash(who||"?")+alePick.off),lk=L[((i%L.length)+L.length)%L.length];
+  const cu=hero&&alePick.custom&&alePick.custom.you;return cu?{...lk,...cu,id:lk.id}:lk;}
 function drawPerson(g,sx,sy,lk,o){
   if(lk&&lk.robot)return drawRobot(g,sx,sy,lk,o);
   o=o||{};const b=o.bob||o.idle||0,d=o.dir||"down",bh=b*0.5;
@@ -2295,12 +2297,16 @@ function alebLooks(){const a=art("alebrije",null);if(!a)return null;
   if(Array.isArray(a))return ALEB_DEF.looks.map((l,i)=>({...l,tint:a[i%a.length]||l.tint}));
   return (a.looks&&a.looks.length)?a.looks:ALEB_DEF.looks;}
 /* the player's picks: one per named animal, one for the hero, an offset that shifts the crowd */
-let alePick={hero:0,off:0,animals:{}};
-try{const a0=JSON.parse(localStorage.getItem(SK("ale"))||"{}");if(a0&&typeof a0==="object")alePick={hero:a0.hero|0,off:a0.off|0,animals:(a0.animals&&typeof a0.animals==="object")?a0.animals:{}};}catch(e){}
+let alePick={hero:0,off:0,animals:{},custom:{}};
+/* `custom` is the seam for a later editor (owner, 2026-09-07: "leave it in the architecture to have the ability to
+   upgrade to customize the look of the alebrije"): custom[key] = {tint,pat,accent,wings} for an animal by name, or
+   custom.you = {base,ring,dark,...} for the face — laid over the picked look's fields. Nothing writes it yet. */
+try{const a0=JSON.parse(localStorage.getItem(SK("ale"))||"{}");if(a0&&typeof a0==="object")alePick={hero:a0.hero|0,off:a0.off|0,animals:(a0.animals&&typeof a0.animals==="object")?a0.animals:{},custom:(a0.custom&&typeof a0.custom==="object")?a0.custom:{}};}catch(e){}
 function alePersist(){try{localStorage.setItem(SK("ale"),JSON.stringify(alePick));}catch(e){}}
 const aleHash=str=>{let h=2166136261>>>0;for(let i=0;i<String(str).length;i++){h^=String(str).charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h>>>0;};
 function alebLookFor(kind,name){const L=alebLooks();if(!L)return null;
-  const k=name||kind,i=alePick.animals[k]!==undefined?alePick.animals[k]:(aleHash(k)+alePick.off);return L[((i%L.length)+L.length)%L.length];}
+  const k=name||kind,i=alePick.animals[k]!==undefined?alePick.animals[k]:(aleHash(k)+alePick.off),lk=L[((i%L.length)+L.length)%L.length];
+  const cu=alePick.custom&&alePick.custom[k];return cu?{...lk,...cu,id:lk.id}:lk;}
 const wildTmp={a:null,b:null};
 function wildScratch(which,W,H){let c=wildTmp[which];if(!c||c.width!==W||c.height!==H){c=wildTmp[which]=document.createElement("canvas");c.width=W;c.height=H;}return c;}
 /* the marks each kind has room for, and where its wings root; cx is the sprite's centre column */
@@ -2771,7 +2777,7 @@ function fredCheck(){ /* now the generic animal-interaction check: every creatur
   const bandOK=dogT&&world===PL.park;
   $("band").hidden=!bandOK;
   if(bandOK)$("band").textContent=T().bandLb||"🎀";
-  const aleOn=!!alebLooks();if($("aleRnd")){$("aleRnd").hidden=!aleOn;$("aleNext").hidden=!aleOn;} /* the alebrije looks: random, next — the animal you are beside, else you */
+  const aleOn=!!alebLooks()||!!faceLooks();if($("aleRnd")){$("aleRnd").hidden=!aleOn;$("aleNext").hidden=!aleOn;} /* the looks: random, next — the animal you are beside, else your face; in Muertos the face alone */
   const loveOK=dogT; /* you can always tell him */
   $("love").hidden=!loveOK;
   if(loveOK)$("love").textContent=T().loveLb||"💗";
@@ -3288,7 +3294,7 @@ function seasonSet(pick){
   try{localStorage.setItem(SK("season"),pick);}catch(e){}
   if(typeof t3Invalidate==="function")t3Invalidate();
   if(typeof T3!=="undefined"&&T3&&T3.canopyTex){T3.canopyTex.dispose();T3.canopyTex=null;} /* the canopy is baked once; the season dresses it */
-  seasonRowBuild();
+  seasonRowBuild();if(typeof aleRowBuild==="function")aleRowBuild();
 }
 function seasonRowBuild(){ /* the row is built from content: auto, year-round, then each declared season by its own name */
   const row=$("seasonRow"),lb=$("lbSeason");if(!row)return;
@@ -3543,6 +3549,7 @@ function applyLang(){
   $("lbTheme").textContent=t.lbTheme;
   $("lbCam").textContent=t.lbCam;
   if($("lbSeason")){$("lbSeason").textContent=t.lbSeason;seasonRowBuild();}
+  if($("lbAle")){$("lbAle").textContent=t.lbAle||"Alebrijes";aleRowBuild();}
   document.querySelectorAll("#camRow button").forEach(b=>{
     b.textContent=b.dataset.cam==="top"?t.camTop:b.dataset.cam==="front"?(t.camFront||"⬆ 2.5D")
                  :b.dataset.cam==="3d"?(t.cam3d||"⛰ 3D"):t.camIso;
@@ -4156,15 +4163,36 @@ $("band").addEventListener("click",()=>{
    else on your own face paint. Random never repeats the current look; the toast says the look's name,
    which is how five names get learned without a menu (Pili). */
 function alePress(random){
-  const L=alebLooks();if(!L)return;
-  const c=(DOGK.has(petTarget)&&petCrit)?petCrit:null;
+  const L=alebLooks();
+  const c=(L&&DOGK.has(petTarget)&&petCrit)?petCrit:null;
   if(c){const key=c.name||c.kind,cur=L.indexOf(alebLookFor(c.kind,c.name));let i=(cur+1)%L.length;
     if(random){do{i=Math.floor(Math.random()*L.length);}while(i===cur&&L.length>1);}
-    alePick.animals[key]=i;alePersist();const lk=L[i];toast((c.name||npcName(c.kind)||c.kind)+" — "+(lk.name?(lk.name[lang]||lk.name.en):lk.id),1800);}
+    aleSetPick(key,i);}
   else{const F=faceLooks();if(!F)return;const cur=alePick.hero%F.length;let i=(cur+1)%F.length;
     if(random){do{i=Math.floor(Math.random()*F.length);}while(i===cur&&F.length>1);}
-    alePick.hero=i;alePersist();const lk=F[i];toast((T().youLb||"You")+" — "+(lk.name?(lk.name[lang]||lk.name.en):lk.id),1800);}
+    aleSetPick("you",i);}
 }
+/* one door for every pick — the buttons beside the bandana, the Settings menu, a barber's chair later */
+function aleSetPick(key,i){
+  if(key==="you"){const F=faceLooks();if(!F)return;alePick.hero=i;const lk=F[i];toast((T().youLb||"You")+" — "+(lk.name?(lk.name[lang]||lk.name.en):lk.id),1800);}
+  else{const L=alebLooks();if(!L)return;alePick.animals[key]=i;const lk=L[i],c=CRIT.find(k=>(k.name||k.kind)===key);toast((c&&c.name||npcName(key)||key)+" — "+(lk.name?(lk.name[lang]||lk.name.en):lk.id),1800);}
+  alePersist();aleRowBuild();}
+/* Settings → Alebrijes (owner, 2026-09-07, night: "a menu to choose the different alebrije styles"): pick who — your
+   face, or any animal with a name — then the look by its name. Built from content like the season row; hidden when
+   the season hands out no looks. */
+function aleSubjects(){const out=[];if(faceLooks())out.push(["you",T().aleYou||"You"]);
+  if(alebLooks()){const seen=new Set();CRIT.forEach(c=>{const k=c.name||c.kind;if(seen.has(k))return;seen.add(k);out.push([k,c.name||npcName(c.kind)||c.kind]);});}
+  return out;}
+let aleWho="you";
+function aleRowBuild(){const row=$("aleRow"),lb=$("lbAle");if(!row)return;
+  const subs=aleSubjects();const on=subs.length>0;row.hidden=!on;if(lb)lb.hidden=!on;row.innerHTML="";if(!on)return;
+  if(!subs.some(s=>s[0]===aleWho))aleWho=subs[0][0];
+  const sel=document.createElement("select");sel.id="aleWho";subs.forEach(([k,label])=>{const o=document.createElement("option");o.value=k;o.textContent=label;if(k===aleWho)o.selected=true;sel.appendChild(o);});
+  sel.addEventListener("change",()=>{aleWho=sel.value;aleRowBuild();});row.appendChild(sel);
+  const L=aleWho==="you"?faceLooks():alebLooks();if(!L)return;
+  const cur=aleWho==="you"?((alePick.hero%L.length)+L.length)%L.length:L.indexOf(alebLookFor(null,aleWho));
+  L.forEach((lk,i)=>{const b=document.createElement("button");b.dataset.look=lk.id;b.textContent=lk.name?(lk.name[lang]||lk.name.en):lk.id;
+    b.setAttribute("aria-pressed",i===cur?"true":"false");b.addEventListener("click",()=>aleSetPick(aleWho,i));row.appendChild(b);});}
 if($("aleRnd")){$("aleRnd").addEventListener("click",()=>alePress(true));$("aleNext").addEventListener("click",()=>alePress(false));}
 $("love").addEventListener("click",()=>{ /* "let us say i love you to him" — owner ask */
   if(!DOGK.has(petTarget)||!petCrit)return;

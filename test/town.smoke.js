@@ -37,6 +37,8 @@ const { chromium } = require('playwright-core');
   warns.filter(w => /^REACH /.test(w)).forEach(w => fails.push('reach: ' + w));
   const r = await page.evaluate(() => {
     const problems = [];
+  // the Settings menu for the looks exists in the town's shell too (mq-v104)
+    if (!document.getElementById('aleRow')) problems.push('the town has no Alebrijes menu in Settings');
     if (typeof STOREPFX === 'undefined' || STOREPFX !== 'ch') problems.push('STOREPFX is not "ch"');
     if (SK('1') !== 'ch1') problems.push('SK() does not use the prefix: ' + SK('1'));
     if (!WORLDS.hq || !WORLDS.st) problems.push('hq/st missing');

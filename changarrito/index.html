@@ -10,7 +10,8 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.github.com; base-uri 'self'; form-action 'none'; object-src 'none'">
 <meta name="theme-color" content="#14121B">
 <link rel="apple-touch-icon" href="../icon-192.png">
-<style>:root{color-scheme:light dark}body{margin:0;padding:0}img{max-width:100%}</style>
+<style>:root{color-scheme:light dark}body{margin:0;padding:0}img{max-width:100%}#aleRow select{font:inherit;padding:.55rem .7rem;border-radius:12px;border:1px solid var(--line,#c9c4b8);background:var(--surface,#fff);color:inherit;max-width:12em}
+</style>
 <title>El Changarrito</title>
 </head>
 <body>
@@ -389,6 +390,8 @@
             </div>
             <label id="lbSeason"></label>
             <div class="optrow" id="seasonRow"></div>
+            <label id="lbAle" hidden></label>
+            <div class="optrow" id="aleRow" hidden></div>
           </details>
 
           <details class="drawer" id="drwSound">
