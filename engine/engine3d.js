@@ -315,11 +315,8 @@ function t3Build(key){T3.pinatas=[];
           pl.position.set(cx+(ew?sd*0.48:0),PH/2,cz+(ew?0:sd*0.48));pl.userData={papel:true,pole:true,x,y};grp.add(pl);});
         const st=new THREE.Mesh(new THREE.BoxGeometry(ew?1:0.02,0.02,ew?0.02:1),strg);
         st.position.set(cx,PH,cz);st.userData={papel:true,string:true,x,y};grp.add(st);
-        for(let i=0;i<5;i++){const t=-0.4+i*0.2,col=pap[(i+x+y)%pap.length];
-          const fm=wallMat["^papel"+col]||(wallMat["^papel"+col]=new THREE.MeshBasicMaterial({color:new THREE.Color(col),side:THREE.DoubleSide}));
-          const fl=new THREE.Mesh(new THREE.PlaneGeometry(0.16,0.17),fm);
-          fl.position.set(cx+(ew?t:0),PH-0.1,cz+(ew?0:t));if(!ew)fl.rotation.y=Math.PI/2;
-          fl.userData={papel:true,flag:true,x,y};grp.add(fl);}
+        const fl=t3PapelStrip(pap,1,x+y,0);fl.position.set(cx,PH-0.11,cz);if(!ew)fl.rotation.y=Math.PI/2;
+        fl.userData.papel=true;fl.userData.x=x;fl.userData.y=y;grp.add(fl);
       }
       continue;
     }
@@ -368,8 +365,9 @@ function t3Build(key){T3.pinatas=[];
         [[11,24,10],[29,24,10],[20,16,12]].forEach(q=>{g2.beginPath();g2.arc(q[0],q[1],q[2],0,7);g2.fill();});
         g2.fillStyle="#639C6C";
         [[16,20,8],[26,22,7]].forEach(q=>{g2.beginPath();g2.arc(q[0],q[1],q[2],0,7);g2.fill();});
-        g2.fillStyle="#B08FE0";
+        g2.fillStyle=art("bloom","#B08FE0");
         [[10,16],[22,8],[30,15],[16,28],[28,29],[20,20]].forEach(q=>{g2.beginPath();g2.arc(q[0],q[1],2,0,7);g2.fill();});
+        if(typeof canopyDress==="function")canopyDress(g2,20,16); /* dressed in season; seasonSet drops the bake */
         T3.canopyTex=t3Tex(cc);
       }
       const cs=new THREE.Sprite(new THREE.SpriteMaterial({map:T3.canopyTex}));
@@ -434,9 +432,14 @@ function t3Build(key){T3.pinatas=[];
         const st=new THREE.Mesh(new THREE.BoxGeometry(L-0.1,0.02,0.02),strg);st.position.set(x0+L/2,PH,y+0.5);st.userData={swag:true,string:true,y};grp.add(st);
         [x0,x1].forEach(ex=>{const g=w.grid[y]&&w.grid[y][ex];if(g!==undefined&&SOLID.has(g))return; /* tied to what stands there */
           const pl=new THREE.Mesh(new THREE.BoxGeometry(0.05,PH,0.05),pole);pl.position.set(ex+0.5,PH/2,y+0.5);pl.userData={swag:true,pole:true};grp.add(pl);});
-        for(let i=0;i<L*5;i++){const col=pal[(i+x0+y)%pal.length];
-          const fm=wallMat["^papel"+col]||(wallMat["^papel"+col]=new THREE.MeshBasicMaterial({color:new THREE.Color(col),side:THREE.DoubleSide}));
-          const fl=new THREE.Mesh(new THREE.PlaneGeometry(0.16,0.17),fm);fl.position.set(x0+0.1+i*0.2,PH-0.1,y+0.5);fl.userData={swag:true,flag:true};grp.add(fl);}});
+        [0,1].forEach(row=>{const fl=t3PapelStrip(pal,L,x0+y,row);fl.position.set(x0+L/2+(row?0.07:0),PH-0.11-row*0.22,y+0.5);fl.userData.swag=true;fl.userData.y=y;grp.add(fl);});
+        const st2=new THREE.Mesh(new THREE.BoxGeometry(L-0.1,0.02,0.02),strg);st2.position.set(x0+L/2,PH-0.22,y+0.5);st2.userData={swag:true,string:true,y};grp.add(st2);});
+      (typeof fiestaProps==="function"?fiestaProps(world):[]).forEach(p=>{if(p.kind!=="calaverita")return; /* a sugar skull set down on a rail, a counter, the ground */
+        const c=document.createElement("canvas");c.width=8*K;c.height=8*K;const g2=c.getContext("2d");g2.scale(K,K);drawCalaverita(g2,0,0,p.foil);
+        const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true}));sp.center.set(0.5,0.02);sp.scale.set(0.22,0.22,1);
+        const g=w.grid[p.y]&&w.grid[p.y][p.x],up=g!==undefined&&(SOLID.has(g)||((TILES[g]||{}).lift|0)>=5);
+        const h=p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y));
+        sp.position.set(p.x+(p.ox===undefined?0.5:p.ox),h+0.01,p.y+(p.oy===undefined?0.5:p.oy));sp.userData={prop:true,calaverita:true,x:p.x,y:p.y};grp.add(sp);});
       fiestaHangs(world).forEach(h=>{if(h.kind!=="pinata")return;
         const c=document.createElement("canvas");c.width=32*K;c.height=32*K;const o2=ctx;ctx=c.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
         try{drawPinata(ctx,0,0,0);}finally{ctx=o2;}
@@ -448,6 +451,17 @@ function t3Fiesta(){ /* the piñata sways; it is never hit and gives nothing (Na
   (T3.pinatas||[]).forEach(sp=>{if(!sp.parent)return;sp.material.rotation=Math.sin(Date.now()/700+sp.userData.x)*0.08;});}
 /* the petal trail in 3D: a pool of little flat planes, three per drop, lying on the ground where
    somebody walked in season, fading over a minute and a half (owner: "a trail forms behind characters") */
+function t3PapelTex(pal,n,seed){ /* a string of n cut-paper flags baked once (Pili): flat colour, a scalloped hem, five punched
+  holes you see the sky through — the difference between bunting and papel picado */
+  const c=document.createElement("canvas");c.width=n*8;c.height=14;const g=c.getContext("2d");
+  g.fillStyle="#3A2E26";g.fillRect(0,0,c.width,1);
+  for(let i=0;i<n;i++){const col=pal[(i+seed)%pal.length],x=i*8+1;g.fillStyle=col;g.fillRect(x,1,6,10);
+    g.beginPath();g.moveTo(x,11);g.lineTo(x+1.5,13);g.lineTo(x+3,11);g.lineTo(x+4.5,13);g.lineTo(x+6,11);g.closePath();g.fill();
+    [[2.5,3],[4,3],[1,6],[4,6],[2.5,9]].forEach(h=>g.clearRect(x+h[0],h[1],1,1));}
+  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;return t;}
+function t3PapelStrip(pal,L,seed,row){ /* one plane a string, seven flags a tile, the texture carries the cut; two draw calls a swag, not two hundred */
+  const n=Math.max(1,Math.round(L*7)),m=new THREE.Mesh(new THREE.PlaneGeometry(L-0.1,0.22),new THREE.MeshBasicMaterial({map:t3PapelTex(pal,n,seed+(row?3:0)),transparent:true,alphaTest:0.3,side:THREE.DoubleSide}));
+  m.userData={flag:true,flags:n,pal:pal.slice(),row:row|0};return m;}
 function t3PetalSide(){ /* the deck's side, baked once a season: 64×14, the field and the heap's edge */
   const P=petalPal(),c=document.createElement("canvas");c.width=64;c.height=14;const g=c.getContext("2d");
   let sd=977;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};

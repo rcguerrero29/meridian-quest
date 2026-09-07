@@ -532,8 +532,8 @@ function drawIso(){
       const t2=Math.sin(Date.now()/900+x)*1.2;
       ctx.fillStyle=tc("#4E8A58");
       [[-9,-1,9],[9,-1,9],[0,-7,10]].forEach(q=>{ctx.beginPath();ctx.arc(cx+q[0]+t2,cy-16+q[1],q[2],0,7);ctx.fill();});
-      ctx.fillStyle="#B08FE0";[[-8,-4],[4,-9],[8,0],[-2,-2]].forEach(q=>{
-        ctx.beginPath();ctx.arc(cx+q[0]+t2,cy-16+q[1],1.6,0,7);ctx.fill();});}});
+      ctx.fillStyle=art("bloom","#B08FE0");[[-8,-4],[4,-9],[8,0],[-2,-2]].forEach(q=>{
+        ctx.beginPath();ctx.arc(cx+q[0]+t2,cy-16+q[1],1.6,0,7);ctx.fill();});canopyDress(ctx,cx+t2,cy-16);}});
     else R.push({d:x+y,f:()=>isoBlock(cx,cy,ISOCOL[gch]||ISOCOL[w.rows[y][x]]||C.wall,IZH[gch]||izh(w.rows[y][x]))});
   }
   /* STANDING TILES. A `stand` tile is walkable, so the block pass above skips it — and
@@ -806,9 +806,38 @@ function fiestaDraw2D(wid,toScreen,front){ /* toScreen(x,y) → the tile's top-l
   const pal=art("papel",null);if(!pal)return;
   fiestaSwags(wid).forEach(sw=>{const y=sw.from[1],x0=Math.min(sw.from[0],sw.to[0]),x1=Math.max(sw.from[0],sw.to[0]);
     const[sx0,sy0]=toScreen(x0,y),[sx1]=toScreen(x1+1,y),ly=sy0+(front?3:5);
-    ctx.strokeStyle="#3A2E26";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx0+2,ly);ctx.lineTo(sx1-2,ly);ctx.stroke();
-    let k=0;for(let px=sx0+5;px<sx1-4;px+=6.4,k++){ctx.fillStyle=pal[(k+x0+y)%pal.length];ctx.beginPath();ctx.moveTo(px-2.4,ly);ctx.lineTo(px+2.4,ly);ctx.lineTo(px,ly+5);ctx.closePath();ctx.fill();}});
-  fiestaHangs(wid).forEach(h=>{const[sx,sy]=toScreen(h.x,h.y);if(h.kind==="pinata")drawPinata(ctx,sx,sy,Math.sin(Date.now()/700+h.x)*0.06);});}
+    drawPapelRow(ctx,sx0,sx1,ly,pal,x0+y);});
+  fiestaHangs(wid).forEach(h=>{const[sx,sy]=toScreen(h.x,h.y);if(h.kind==="pinata")drawPinata(ctx,sx,sy,Math.sin(Date.now()/700+h.x)*0.06);});
+  fiestaProps(wid).forEach(p=>{if(p.kind!=="calaverita")return;const[sx,sy]=toScreen(p.x,p.y);const ox=(p.ox===undefined?0.5:p.ox)*TS,oy=(p.oy===undefined?0.5:p.oy)*TS;
+    drawCalaverita(ctx,sx+ox-4,front?(isSolidAt(wid,p.x,p.y)||p.h?sy+2:sy+TS-9):sy+oy-4,p.foil);});}
+function fiestaProps(wid){return (art("props",[])||[]).filter(p=>p.world===wid);} /* small things set down by place: {world,x,y,kind,ox,oy,h,foil} */
+function drawPapelRow(g,x0,x1,ly,pal,seed){ /* a string of cut paper (Pili, 2026-09-07): little squares with a scalloped hem and a punched
+  hole — paper, not bunting — in TWO rows, the second half a flag over; two rows is what makes a street look dressed */
+  g.strokeStyle="#3A2E26";g.lineWidth=1;g.beginPath();g.moveTo(x0+2,ly);g.lineTo(x1-2,ly);g.moveTo(x0+4,ly+5.5);g.lineTo(x1-4,ly+5.5);g.stroke();
+  [0,1].forEach(row=>{let k=row*3;for(let px=x0+3+row*2.3;px<x1-3;px+=4.6,k++){const col=pal[(k+seed)%pal.length],fy=ly+row*5.5;
+    g.fillStyle=col;g.fillRect(px-1.8,fy,3.6,3.6);
+    g.beginPath();g.moveTo(px-1.8,fy+3.6);g.lineTo(px-0.9,fy+4.8);g.lineTo(px,fy+3.6);g.lineTo(px+0.9,fy+4.8);g.lineTo(px+1.8,fy+3.6);g.closePath();g.fill();
+    g.fillStyle="rgba(40,30,20,.55)";g.fillRect(px-0.4,fy+1.2,0.8,0.8);}});}
+function drawCalaverita(g,x,y,foil){ /* a calaverita de azúcar, 8×8 (Pili): white sugar, FOIL sockets — black would read Halloween, foil reads
+  candy — an icing brow, dots across the crown, a line under the jaw so it sits instead of floats */
+  g.fillStyle="#D9CFC0";g.fillRect(x+1,y+7.4,6,0.8);
+  g.fillStyle="#F6F2E8";g.beginPath();g.roundRect(x,y,8,6,2.5);g.fill();g.fillRect(x+2,y+5.5,4,2);
+  g.fillStyle=foil||"#E8478F";g.fillRect(x+1.5,y+2,2,2);g.fillRect(x+4.5,y+2,2,2);
+  g.fillStyle="#FFFFFF";g.fillRect(x+1.5,y+2,0.8,0.8);g.fillRect(x+4.5,y+2,0.8,0.8);
+  g.strokeStyle="#F2B705";g.lineWidth=0.8;g.beginPath();g.arc(x+4,y+2.6,2.8,Math.PI*1.15,Math.PI*1.85);g.stroke();
+  g.fillStyle="#7B4BA8";[1.5,4,6.5].forEach(dx=>g.fillRect(x+dx-0.45,y+0.2,0.9,0.9));
+  g.fillStyle="#2FA5A0";g.fillRect(x+3.5,y+3.7,1,1);
+  g.fillStyle="#3A2E26";g.fillRect(x+3,y+5.7,0.5,1);g.fillRect(x+4.5,y+5.7,0.5,1);}
+function canopyDress(g,cxT,cyT){ /* the trees dressed for the night (owner, 2026-09-07: "trees can be decorated"; Pili's recipe): a garland of
+  petals slung across the canopy, three papel streamers hanging BELOW it into the trunk — hanging is what reads as decorated rather than
+  repainted — and one sugar-skull lantern on a thread. One; three is a Christmas tree. Nothing without a season. */
+  const pal=art("papel",null);if(!pal)return;const P=petalPal();
+  g.strokeStyle=P[2];g.lineWidth=1.5;g.beginPath();g.moveTo(cxT-11,cyT+1);g.quadraticCurveTo(cxT,cyT+6,cxT+11,cyT+1);g.stroke();
+  for(let i=0;i<9;i++){const t=(i+0.5)/9,x=cxT-11+22*t,y=cyT+1+2*t*(1-t)*5;petalShape(g,x,y,Math.PI+(i%3-1)*0.5,0.6,P[3+(i%3)]);}
+  [-8,0,8].forEach((dx,i)=>{const col=pal[(i+2)%pal.length];g.fillStyle="#3A2E26";g.fillRect(cxT+dx-0.4,cyT+7,0.8,4);
+    g.fillStyle=col;g.fillRect(cxT+dx-2,cyT+11,4,3.6);g.beginPath();g.moveTo(cxT+dx-2,cyT+14.6);g.lineTo(cxT+dx-1,cyT+15.8);g.lineTo(cxT+dx,cyT+14.6);g.lineTo(cxT+dx+1,cyT+15.8);g.lineTo(cxT+dx+2,cyT+14.6);g.closePath();g.fill();
+    g.fillStyle="rgba(40,30,20,.55)";g.fillRect(cxT+dx-0.4,cyT+12.2,0.8,0.8);});
+  g.fillStyle="#3A2E26";g.fillRect(cxT+4.6,cyT+9,0.8,4);drawCalaverita(g,cxT+1,cyT+13);}
 const BRIDGE_PETALS=["#7A2E12","#B8410E","#E2620F","#F2870F","#FBB024","#FFD972"]; /* embers to pale gold, dark first: a heap needs a value range (Pili, 2026-09-07) */
 function petalPal(){const b=art("bridge",null);return b&&b.length>=6?b:BRIDGE_PETALS;}
 function petalShape(g,px,py,a,s,col,rib){ /* one cempasúchil petal (Pili, 2026-09-07): "not a lentil" — a fan, narrow at the
@@ -1248,9 +1277,10 @@ function drawFront(){
     ctx.fillStyle=tc("#639C6C");
     ctx.beginPath();ctx.arc(cxT-4,cyT-1,6.5,0,7);ctx.fill();
     ctx.beginPath();ctx.arc(cxT+6,cyT+1,5.5,0,7);ctx.fill();
-    ctx.fillStyle="#B08FE0";
+    ctx.fillStyle=art("bloom","#B08FE0");
     [[-8,-4],[3,-8],[9,-1],[-2,2],[-12,4],[12,5]].forEach(p=>{
       ctx.beginPath();ctx.arc(cxT+p[0],cyT+p[1],1.7,0,7);ctx.fill();});
+    canopyDress(ctx,cxT,cyT);
   });
   drawAmbient(w,camX,camY);
   drawDaylight(w,camX,camY);
@@ -1294,9 +1324,10 @@ function draw(){
     ctx.fillStyle=tc("#639C6C");
     ctx.beginPath();ctx.arc(cxT-4,cyT-1,6.5,0,7);ctx.fill();
     ctx.beginPath();ctx.arc(cxT+6,cyT+1,5.5,0,7);ctx.fill();
-    ctx.fillStyle="#B08FE0"; /* jacaranda blooms */
+    ctx.fillStyle=art("bloom","#B08FE0"); /* jacaranda blooms */
     [[-8,-4],[3,-8],[9,-1],[-2,2],[-12,4],[12,5]].forEach(p=>{
       ctx.beginPath();ctx.arc(cxT+p[0],cyT+p[1],1.7,0,7);ctx.fill();});
+    canopyDress(ctx,cxT,cyT);
   });
   w.npcs.forEach(n=>{
     const sx=(n.fx===undefined?n.x:n.fx)*TS-camX,sy=(n.fy===undefined?n.y:n.fy)*TS-camY;
@@ -3224,6 +3255,7 @@ function seasonSet(pick){
   seasonPick=pick;seasonMemo.day="";
   try{localStorage.setItem(SK("season"),pick);}catch(e){}
   if(typeof t3Invalidate==="function")t3Invalidate();
+  if(typeof T3!=="undefined"&&T3&&T3.canopyTex){T3.canopyTex.dispose();T3.canopyTex=null;} /* the canopy is baked once; the season dresses it */
   seasonRowBuild();
 }
 function seasonRowBuild(){ /* the row is built from content: auto, year-round, then each declared season by its own name */
