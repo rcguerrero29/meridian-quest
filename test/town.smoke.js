@@ -189,8 +189,21 @@ const { chromium } = require('playwright-core');
         RECORDSRC.goBeside('hq', 10, 16); T3.yaw = 0; draw3d(); /* beside the front door = the lobby (10,15); goBeside moves fx/fy too */
         const south = T3.group.children.filter(o => o.userData && o.userData.wall !== undefined && o.userData.y === 16 && Math.abs(o.userData.x - 10) <= 2);
         const north = T3.group.children.filter(o => o.userData && o.userData.wall !== undefined && o.userData.y === 0);
-        if (!south.length || south.some(o => o.visible)) problems.push('the south wall is not cut away while it stands between the camera and you');
-        if (!north.length || north.some(o => !o.visible)) problems.push('the north wall was cut away for nothing');
+        // #65 (owner: "make the doors just like minimized, looks weird otherwise"): a wall between the camera
+        // and you is not gone — it is hidden and a knee-high STUB stands in its footprint, so the room keeps its shape
+        const stubs = (y, x0, dx) => T3.group.children.filter(o => o.userData && o.userData.stub && o.userData.y === y && Math.abs(o.userData.x - x0) <= dx);
+        if (!south.length || south.some(o => o.visible)) problems.push('the south wall still stands full height between the camera and you');
+        { const st = stubs(16, 10, 2);
+          if (st.length < south.length || st.some(o => !o.visible)) problems.push('no knee-high stub stands where the south wall was minimized (' + st.filter(o => o.visible).length + ' of ' + south.length + ')');
+          if (st.some(o => o.geometry.parameters.height >= 0.5 || o.position.y > 0.3)) problems.push('the stub is not knee-high');
+          if (st.some(o => o.material.map)) problems.push('a stub wears the wall\'s full face squashed instead of its top colour'); }
+        if (!north.length || north.some(o => !o.visible) || stubs(0, 10, 9).some(o => o.visible)) problems.push('the north wall was minimized for nothing');
+        { const frontDoor = T3.group.children.find(o => o.userData && o.userData.door && o.userData.x === 10 && o.userData.y === 16);
+          if (!frontDoor || frontDoor.visible || !stubs(16, 10, 0).some(o => o.visible)) problems.push('the front door between the camera and you is not minimized with its wall'); }
+        // and it stands back up the moment it is no longer in the way
+        RECORDSRC.goBeside('hq', 10, 2); T3.yaw = 0; draw3d(); /* the camera stands ~7 tiles behind you: from the top of the office the south wall is behind it */
+        { const south2 = T3.group.children.filter(o => o.userData && o.userData.wall !== undefined && o.userData.y === 16 && Math.abs(o.userData.x - 10) <= 2); /* goBeside rebuilds the scene: query again */
+          if (!south2.length || south2.some(o => !o.visible) || stubs(16, 10, 2).some(o => o.visible)) problems.push('the south wall did not stand back up once it was out of the way'); }
         // you stand higher on a tread
         RECORDSRC.goBeside('hq', 12, 13); draw3d(); const hero = T3.pool.filter(p => p.live && p.spr.material.depthTest === false)[0]; /* beside the mass = the second tread (12,14) */
         if (!(px === 12 && py === 14)) problems.push('goBeside the mass did not land on the tread: ' + px + ',' + py);
