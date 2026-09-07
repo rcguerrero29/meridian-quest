@@ -2289,29 +2289,39 @@ const wildTmp={a:null,b:null};
 function wildScratch(which,W,H){let c=wildTmp[which];if(!c||c.width!==W||c.height!==H){c=wildTmp[which]=document.createElement("canvas");c.width=W;c.height=H;}return c;}
 /* the marks each kind has room for, and where its wings root; cx is the sprite's centre column */
 const ALEB_KIND={
-  beagle:{wings:[[-2.5,12],[-4,15.5]],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;for(let i=0;i<4;i++){g.beginPath();g.arc(cx-4+i*2,sy+16.4,0.55,0,7);g.fill();}
+  beagle:{wings:[[-1.5,15],[-3.5,18]],eye:[7.6,15.2,3.0],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;for(let i=0;i<4;i++){g.beginPath();g.arc(cx-4+i*2,sy+16.4,0.55,0,7);g.fill();}
     g.fillStyle=l.accent;g.fillRect(cx+3.4,sy+19.4,1.6,1.4);}}, /* spine on the saddle, the ear tip */
-  lab:{wings:[[-2.5,10.5],[-4,14]],marks:(g,l,cx,sy)=>{g.strokeStyle=l.pat;g.lineWidth=0.8;[18,21].forEach((yy,r)=>{for(let i=0;i<3;i++){g.beginPath();g.arc(cx-5+i*3+(r?1.5:0),sy+yy,1.2,Math.PI,0);g.stroke();}});
+  lab:{wings:[[-1.5,13.5],[-3.5,16.5]],eye:[9,13.5,2.8],marks:(g,l,cx,sy)=>{g.strokeStyle=l.pat;g.lineWidth=0.8;[18,21].forEach((yy,r)=>{for(let i=0;i<3;i++){g.beginPath();g.arc(cx-5+i*3+(r?1.5:0),sy+yy,1.2,Math.PI,0);g.stroke();}});
     g.fillStyle=l.accent;g.fillRect(cx+3,sy+15.8,2,1.6);}}, /* scales on the flank, the ear tip */
-  chi:{wings:[[-1.5,15],[-3,18.5]],small:true,marks:(g,l,cx,sy)=>{g.fillStyle=l.accent;g.fillRect(cx+2.4,sy+10.6,1.4,1.6);g.fillRect(cx+7,sy+10.2,1.4,1.6);
+  chi:{wings:[[-1,17],[-2.5,19.5]],small:true,eye:[5.9,15,2.8],marks:(g,l,cx,sy)=>{g.fillStyle=l.accent;g.fillRect(cx+2.4,sy+10.6,1.4,1.6);g.fillRect(cx+7,sy+10.2,1.4,1.6);
     g.fillStyle=l.pat;g.beginPath();g.arc(cx+3.1,sy+9.9,0.45,0,7);g.arc(cx+7.7,sy+9.5,0.45,0,7);g.fill();}}, /* the ears only */
-  dog:{wings:[[-2.5,10],[-4,13.5]],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.beginPath();g.arc(cx-3,sy+18,2.4,0,7);g.fill();g.beginPath();g.arc(cx+3.4,sy+20.6,1.9,0,7);g.fill();
+  dog:{wings:[[-1,13.5],[-3,16.5]],eye:[12.1,13.8,2.6],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.beginPath();g.arc(cx-3,sy+18,2.4,0,7);g.fill();g.beginPath();g.arc(cx+3.4,sy+20.6,1.9,0,7);g.fill();
     g.fillStyle=l.accent;g.beginPath();g.arc(cx-9.6,sy+16.5,1.2,0,7);g.fill();}}, /* the merle patches, the tail tip */
-  cat:{wings:[[-2.5,13],[-4,16.5]],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.fillRect(cx-4.5,sy+18.5,1.8,6);g.fillRect(cx-1,sy+18.5,1.8,6);
+  cat:{wings:[[-1.5,17],[-3.5,20]],eye:[6.9,17.1,3.2],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.fillRect(cx-4.5,sy+18.5,1.8,6);g.fillRect(cx-1,sy+18.5,1.8,6);
     g.fillStyle=l.accent;g.beginPath();g.arc(cx+4.2,sy+12.4,0.8,0,7);g.arc(cx+8.6,sy+12.6,0.8,0,7);g.fill();}}, /* the two bars, the ear tips */
-  gato:{wings:[[-2.5,13],[-4,16.5]],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.fillRect(cx-4.5,sy+18.5,1.8,6);g.fillRect(cx-1,sy+18.5,1.8,6);
+  gato:{wings:[[-1.5,17],[-3.5,20]],eye:[6.9,17.1,3.2],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.fillRect(cx-4.5,sy+18.5,1.8,6);g.fillRect(cx-1,sy+18.5,1.8,6);
     g.fillStyle=l.accent;g.beginPath();g.arc(cx+4.2,sy+12.4,0.8,0,7);g.arc(cx+8.6,sy+12.6,0.8,0,7);g.fill();}},
-  pigeon:{marks:(g,l,cx,sy)=>{g.strokeStyle=l.pat;g.lineWidth=0.9;g.beginPath();g.moveTo(cx-3.5,sy+21.5);g.lineTo(cx-1.5,sy+20);g.lineTo(cx+0.5,sy+21.5);g.stroke();}}, /* one chevron */
-  loro:{tint:0.75,marks:(g,l,cx,sy)=>{g.strokeStyle=l.pat;g.lineWidth=0.9;[16,19].forEach(yy=>{g.beginPath();g.moveTo(cx-1.3,sy+yy+1);g.lineTo(cx,sy+yy);g.lineTo(cx+1.3,sy+yy+1);g.stroke();});}},
+  pigeon:{eye:[4.35,18.25,2.2],marks:(g,l,cx,sy)=>{g.strokeStyle=l.pat;g.lineWidth=0.9;g.beginPath();g.moveTo(cx-3.5,sy+21.5);g.lineTo(cx-1.5,sy+20);g.lineTo(cx+0.5,sy+21.5);g.stroke();}}, /* one chevron */
+  loro:{tint:0.75,eye:[0.6,4.9,2.2],marks:(g,l,cx,sy)=>{g.strokeStyle=l.pat;g.lineWidth=0.9;[16,19].forEach(yy=>{g.beginPath();g.moveTo(cx-1.3,sy+yy+1);g.lineTo(cx,sy+yy);g.lineTo(cx+1.3,sy+yy+1);g.stroke();});}},
   butterfly:{tint:0.95,marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.beginPath();g.arc(cx-2.6,sy+11.5,1,0,7);g.arc(cx+2.6,sy+11.5,1,0,7);g.fill();}}, /* an eye on each upper wing */
-  colibri:{marks:(g,l,cx,sy)=>{g.fillStyle=l.accent;g.beginPath();g.arc(cx+3,sy+10.6,1.5,0,7);g.fill();}} /* the gorget */
+  colibri:{eye:[3.6,10.2,2.2],marks:(g,l,cx,sy)=>{g.fillStyle=l.accent;g.beginPath();g.arc(cx+3,sy+10.6,1.5,0,7);g.fill();}} /* the gorget */
 };
-function wildWings(g,l,K,cx,sy,small){ /* two crisp frames, swept back toward the tail, never over the face */
-  const fl=(Math.floor(Date.now()/110)&1),sc=small?0.7:1;
-  const W=[[K[0][0],K[0][1],4.6,fl?1.7:3.0,fl?-0.28:-0.62],[K[1][0],K[1][1],3.2,fl?1.2:2.1,fl?-0.05:-0.25]];
-  W.forEach(([dx,dy,rx,ry,rot])=>{g.save();g.globalAlpha=0.85;g.fillStyle=l.accent;g.beginPath();g.ellipse(cx+dx*sc,sy+dy,rx*sc,ry*sc,rot,0,7);g.fill();
-    g.globalAlpha=1;g.strokeStyle=l.pat;g.lineWidth=0.8;g.stroke();
-    g.fillStyle=l.tint;g.beginPath();g.arc(cx+dx*sc-rx*sc*0.7,sy+dy-ry*sc*0.3,0.9,0,7);g.fill();g.restore();});}
+const hexDark=(h,f)=>{const n=parseInt(String(h).slice(1),16);if(isNaN(n))return h;return "rgb("+(((n>>16)&255)*f|0)+","+(((n>>8)&255)*f|0)+","+((n&255)*f|0)+")";};
+function wildWings(g,l,K,cx,sy,small){ /* cut-paper wings, not feathers (Pili, 2026-09-07, after the owner's "wings look off"): a hindwing
+  behind and a forewing over it, rooted at the shoulder just behind the head, swept back, big enough to break the silhouette —
+  a wing that does not is a smudge. The accent filled flat, a darker edge all the way round, ribs in the pattern colour, three
+  bites out of the trailing edge. Two frames: the flap folds the wing, it does not shrink it. */
+  const fl=(Math.floor(Date.now()/110)&1),sc=(small?0.7:1)*1.3,edge=hexDark(l.accent,0.5);
+  const wing=(dx,dy,fore)=>{g.save();g.translate(cx+dx*sc,sy+dy);g.rotate((fore?0.44:0.96)+(fl?0.15:0.55)); /* positive lifts the tip: back and UP, never into the legs */g.scale(sc,sc*(fl?0.45:1));
+    g.beginPath();
+    if(fore){g.moveTo(0,0);g.quadraticCurveTo(-3,-5,-8,-4.5);g.quadraticCurveTo(-5.5,-1.2,0,0);}            /* pointed tip */
+    else{g.moveTo(0,0);g.quadraticCurveTo(-2.5,-3.6,-5.5,-3);g.quadraticCurveTo(-6.4,-1.4,-5,-0.3);g.quadraticCurveTo(-2.5,0.6,0,0);} /* rounded tip */
+    g.closePath();g.fillStyle=l.accent;g.fill();g.lineWidth=1.2;g.strokeStyle=edge;g.stroke();
+    g.strokeStyle=l.pat;g.lineWidth=0.7;g.globalAlpha=0.6;g.beginPath();
+    (fore?[[-7.5,-4.2],[-6.5,-2.4],[-4.5,-1.2]]:[[-5,-2.6],[-4.5,-1.3]]).forEach(p=>{g.moveTo(-0.5,-0.3);g.lineTo(p[0],p[1]);});g.stroke();g.globalAlpha=1;
+    g.fillStyle=edge;(fore?[[-6.5,-3],[-4.75,-1.75],[-2.5,-0.75]]:[[-2.5,0.2]]).forEach(p=>{g.beginPath();g.arc(p[0],p[1],0.9,0,7);g.fill();});
+    g.restore();};
+  wing(K[1][0],K[1][1],false);wing(K[0][0],K[0][1],true);}
 function wildDraw(g,look,kind,fn,sx,sy,face){
   const T=g.getTransform(),x0=sx-6,y0=sy-12,BW=44,BH=44,W=Math.ceil(BW*T.a),H=Math.ceil(BH*T.d);
   const t=wildScratch("a",W,H),u=wildScratch("b",W,H),tg=t.getContext("2d"),ug=u.getContext("2d");
@@ -2329,6 +2339,12 @@ function wildDraw(g,look,kind,fn,sx,sy,face){
     for(let i=0;i<d.length;i+=4){if(!d[i+3])continue;d[i]=d[i]*(0.55+0.45*o[i]/255);d[i+1]=d[i+1]*(0.55+0.45*o[i+1]/255);d[i+2]=d[i+2]*(0.55+0.45*o[i+2]/255);}
     tg.save();tg.setTransform(1,0,0,1,0,0);tg.putImageData(im,0,0);tg.restore();}
   if(KD.marks){tg.save();tg.globalCompositeOperation="source-atop";tg.translate(cx,0);tg.scale(face||1,1);tg.translate(-cx,0);KD.marks(tg,look,cx,sy);tg.restore();} /* C: five marks at most */
+  if(KD.eye){ /* C½: colour round the eyes (owner: "the color can be added like around the eyes or something") — two rings, the accent and
+       a thinner one in the pattern colour outside it (Pili: two rings is the alebrije look, one is a bruise), centred ON the eye
+       and wider than it, so the pupil stays a pupil; inside the silhouette like everything else */
+    const[ex,ey,er]=KD.eye;tg.save();tg.globalCompositeOperation="source-atop";tg.translate(cx,0);tg.scale(face||1,1);tg.translate(-cx,0);
+    tg.lineWidth=1.6;tg.globalAlpha=0.9;tg.strokeStyle=look.accent;tg.beginPath();tg.arc(cx+ex,sy+ey,er,0,7);tg.stroke();
+    tg.lineWidth=0.7;tg.globalAlpha=0.6;tg.strokeStyle=look.pat;tg.beginPath();tg.arc(cx+ex,sy+ey,er+1.1,0,7);tg.stroke();tg.restore();}
   if(look.wings&&KD.wings){tg.save();tg.globalCompositeOperation="destination-over";tg.translate(cx,0);tg.scale(face||1,1);tg.translate(-cx,0);wildWings(tg,look,KD.wings,cx,sy,KD.small);tg.restore();} /* D: wings behind */
   g.save();g.setTransform(1,0,0,1,0,0);g.drawImage(t,T.e+T.a*x0+T.c*y0,T.f+T.b*x0+T.d*y0);g.restore();
 }
