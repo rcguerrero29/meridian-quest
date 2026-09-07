@@ -36,6 +36,10 @@ const CANDIDATES = [
     const swv = (sw.match(/CACHE = "(mq-v\d+)"/) || [])[1];
     const gv = (cfg.match(/GAMEV="(mq-v\d+)"/) || [])[1];
     if (!swv || !gv || swv !== gv) fails.push(`version lockstep broken: sw=${swv} config=${gv}`);
+    // the city record (#14): status.json is served network-first, before the cache-first path, or a clerk is stale forever
+    const rec = sw.indexOf('status.json'), cf = sw.indexOf('caches.match(e.request, { cacheName: CACHE }).then(hit => hit || fetch');
+    if (rec < 0 || cf < 0 || rec > cf) fails.push('sw.js does not serve status.json network-first');
+    if (!fs.existsSync(path.resolve(__dirname, '..', '.github', 'workflows', 'pages.yml')) || !fs.existsSync(path.resolve(__dirname, '..', '.github', 'scripts', 'city-record.js'))) fails.push('no deploy writes the city record (#14)');
   }
   const browser = await chromium.launch({ executablePath: exe });
   const page = await browser.newPage({ viewport: { width: 480, height: 900 } });

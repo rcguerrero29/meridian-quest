@@ -1,4 +1,6 @@
 node_modules/
+status.json
+_site/
 package.json
 package-lock.json
 shots/
