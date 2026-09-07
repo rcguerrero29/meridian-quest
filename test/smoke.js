@@ -1016,6 +1016,19 @@ const CANDIDATES = [
       else { world = 'hq'; px = fx = n.x; py = fy = n.y - 1; T3.yaw = 0; draw3d(); problems.push(...order().slice(0, 2));
         py = fy = n.y + 1; if (!isSolidAt('hq', n.x, n.y + 1)) { draw3d(); problems.push(...order().slice(0, 2)); } }
     }
+    // owner, 2026-09-07: "i want to upgrade rainbow bridge for sonny asap" (IDEAS §15.4, planned since
+    // 2026-09-01): in 3D the bridge is a DECK over the river with a rail each side, not flat paint,
+    // and whoever crosses it stands on the deck.
+    world = 'pk'; px = fx = 2; py = fy = 6; T3.yaw = 0; draw3d();
+    const decks = T3.group.children.filter(o => o.userData && o.userData.bridge);
+    if (decks.length !== 2) problems.push(`the rainbow bridge is ${decks.length} deck(s) in 3D, not two`);
+    decks.forEach(d => { if (!(d.position.y > 0.05)) problems.push(`the bridge deck at (${d.userData.x},${d.userData.y}) lies flat on the water`); });
+    const rails = T3.group.children.filter(o => o.userData && o.userData.bridgeRail);
+    if (rails.length < 4) problems.push(`the rainbow bridge has ${rails.length} rail pieces in 3D — it needs a rail each side`);
+    if (rails.some(r => r.position.y <= 0.2)) problems.push('a bridge rail stands on the water, not on the deck');
+    px = fx = 3; draw3d();
+    { const hero = T3.pool.find(p => p.live && p.spr.material.depthTest === false);
+      if (!hero || hero.spr.position.y < 0.15) problems.push('standing on the rainbow bridge, the hero is not lifted onto its deck (' + (hero ? hero.spr.position.y.toFixed(2) : 'no hero') + ')'); }
     // #45: a poster on a wall hangs on the wall's open face, mid-height. The six office posters
     // on f2's north wall used to float 1.15 up — above the wall they are pinned to.
     world = 'f2'; px = fx = 2; py = fy = 1; draw3d();

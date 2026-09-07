@@ -270,6 +270,28 @@ function t3Build(key){
         bx.position.set(cx,top-hh/2,cz);bx.userData={tread:true,well:dep>0,g,x,y,h:top};grp.add(bx);
         continue;} /* the head ▲ is the top step; its portal mark still floats above it */
     }
+    if((TILES[gch]||{}).kind==="bridge"){ /* the rainbow bridge (IDEAS §15.4, owner 2026-09-07: "upgrade rainbow
+         bridge for sonny asap"): it was two tiles of flat art that read as a smear on the floor. Now a
+         plank DECK stands BRIDGEH over the water wearing the six bands on top, with a post-and-bar rail
+         on each side of the crossing; whoever crosses stands on the deck (stairLift). The run follows
+         the river: water north or south means the bridge runs east-west and the rails stand north and south. */
+      const g=gch,tk=g+"|"+x+"|"+y;
+      const lid=wallMat[tk]||(wallMat[tk]=new THREE.MeshLambertMaterial({map:t3Tex(t3BakeGlyph(g,true,baseOf(g),false,false,null,x,y))}));
+      const plank=wallMat["^plank"]||(wallMat["^plank"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#8A6F4D")}));
+      const rail=wallMat["^rail"]||(wallMat["^rail"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#6E5538")}));
+      const deck=new THREE.Mesh(new THREE.BoxGeometry(1,BRIDGEH,1),[plank,plank,lid,plank,plank,plank]);
+      deck.position.set(cx,BRIDGEH/2,cz);deck.userData={bridge:true,g,x,y,h:BRIDGEH};grp.add(deck);
+      const wat=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&(TILES[w.rows[ay][ax]]||{}).kind==="water";
+      const ew=wat(x,y-1)||wat(x,y+1)||!(wat(x-1,y)||wat(x+1,y)); /* east-west unless the water runs beside it */
+      const RH=0.5,PW=0.07;
+      [-1,1].forEach(sd=>{ /* one rail per side of the crossing: two posts and a bar */
+        const off=0.5-PW/2;
+        [-0.46,0.46].forEach(al=>{const post=new THREE.Mesh(new THREE.BoxGeometry(PW,RH,PW),rail);
+          post.position.set(cx+(ew?al:sd*off),BRIDGEH+RH/2,cz+(ew?sd*off:al));post.userData={bridgeRail:true,x,y};grp.add(post);});
+        const bar=new THREE.Mesh(new THREE.BoxGeometry(ew?1:PW,0.05,ew?PW:1),rail);
+        bar.position.set(cx+(ew?0:sd*off),BRIDGEH+RH,cz+(ew?sd*off:0));bar.userData={bridgeRail:true,bar:true,x,y};grp.add(bar);});
+      continue;
+    }
     if(!SOLID.has(gch))continue;
     const m=TILES[gch]||{lift:7,kind:"prop"},kd=m.kind;
     if(kd==="water")continue; /* painted into the ground */
