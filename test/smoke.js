@@ -1016,6 +1016,15 @@ const CANDIDATES = [
       else { world = 'hq'; px = fx = n.x; py = fy = n.y - 1; T3.yaw = 0; draw3d(); problems.push(...order().slice(0, 2));
         py = fy = n.y + 1; if (!isSolidAt('hq', n.x, n.y + 1)) { draw3d(); problems.push(...order().slice(0, 2)); } }
     }
+    // #92 (owner: "when im going downstairs, im walking on the wall again"): sunk in the well the hero is
+    // depth-tested, so the lip and the rail in front hide their legs; on the floor they draw through walls
+    world = 'f2'; px = fx = 11; py = fy = 14; T3.yaw = 0; draw3d();
+    { const hero = T3.pool.find(p => p.live && p.spr.userData.mark === '' && Math.abs(p.spr.position.x - 11.5) < 0.6 && p.spr.position.y < -0.1);
+      if (!hero) problems.push('no hero billboard sunk in the loft\'s well at (11,14)');
+      else if (hero.spr.material.depthTest !== true) problems.push('sunk in the well, the hero is still drawn through the rail and the floor\'s lip — they read as standing on the wall (#92)'); }
+    px = fx = 11; py = fy = 11; draw3d();
+    { const hero = T3.pool.find(p => p.live && p.spr.material.depthTest === false);
+      if (!hero) problems.push('on the floor the hero no longer draws through walls (#22)'); }
     // owner, 2026-09-07: "i want to upgrade rainbow bridge for sonny asap" (IDEAS §15.4, planned since
     // 2026-09-01): in 3D the bridge is a DECK over the river with a rail each side, not flat paint,
     // and whoever crosses it stands on the deck.
