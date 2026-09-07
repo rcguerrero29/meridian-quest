@@ -460,7 +460,6 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
     const key=world+"|"+themeName+"|"+T3.dirty;
     if(T3.builtKey!==key)t3Build(key);
     const hx=fx+0.5,hz=fy+0.5;
-    t3AutoYaw();
     T3.cam.position.set(hx+Math.sin(T3.yaw)*T3CAMD,T3CAMH,hz+Math.cos(T3.yaw)*T3CAMD);
     T3.cam.lookAt(hx,0.4,hz);
     t3Light();
@@ -477,46 +476,37 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
    the screen and the hero (drawn through walls) read as standing ON it, while Sonny, drawn in the
    scene, was hidden behind it. Now that wall is simply not there while it is in the way. Walls,
    facades, lintels, doors and the window pieces cut; treads, rails, props and decor do not. */
-/* #65, the owner's word with AJ present: "lets try the camera angles, and only if they are
-   surrounded by 4 walls in a small room do you do this and only one wall near the character."
-   Walls never vanish. A wall HIDES you only when it is close and tall: the camera looks down
-   from T3CAMH high and T3CAMD back, so a wall d tiles in front of you covers your feet up to
-   ~0.84·d — t3Hides counts it once it reaches above your shins (0.65·d+0.3). When the stop you
-   are at has such a wall on the line of sight, the camera turns to the nearest stop that has
-   none (t3Sight), by itself, the way ↻ turns it. Only when all four stops are blocked — a nook —
-   is the one nearest wall minimized to a knee-high stub, and just that one (t3Reveal). Your own
-   ↻ is instant and kept until you step somewhere it is blocked. */
+/* #65, the owner's word after AJ walked it: "aj prefers the minimized wall but limit it to one
+   near the person... the view change was too confusing - lets keep that manual." The camera
+   never turns by itself; ↻ is the only turn. A wall HIDES you only when it is close and tall:
+   the camera looks down from T3CAMH high and T3CAMD back, so a wall d tiles in front of you
+   covers your feet up to ~0.84·d — t3Hides counts it once it reaches above your shins
+   (0.65·d+0.3). Of the walls that hide you, only the NEAREST is minimized — the piece in front
+   of you and its two neighbours drop to a knee-high stub in the wall's top colour (t3Reveal);
+   everything else, the far wall included, stays whole. */
 const T3CAMD=7.4,T3CAMH=6.2,T3STUB=0.28;
 function t3Hides(h,d){return h>0.65*d+0.3;}
-function t3Sight(x,y,yaw,fake){ /* the stop that shows you whole from (x,y), nearest to `yaw`; `fake`=[[x,y,h]] walls for a test */
-  const hx=x+0.5,hz=y+0.5;
+function t3Near(x,y,yaw,fake){ /* the pieces of the one wall nearest (x,y) that hides you at this camera stop; `fake`=[[x,y,h]] for a test */
+  const hx=x+0.5,hz=y+0.5,ux=Math.sin(yaw),uz=Math.cos(yaw);
   const pieces=fake?fake.map(([ax,ay,h])=>({x:ax+0.5,z:ay+0.5,h,o:null}))
-    :T3.group.children.filter(o=>{const u=o.userData;return u&&!u.stub&&(u.wall!==undefined||u.door||u.winBack);})
+    :T3.group.children.filter(o=>{const u=o.userData;return u&&!u.stub&&(u.wall!==undefined||u.door||u.winBack||u.counter);})
       .map(o=>({x:o.position.x,z:o.position.z,h:(o.geometry.parameters&&o.geometry.parameters.height)||1,o}));
-  const at=yw=>{const ux=Math.sin(yw),uz=Math.cos(yw),out=[];
-    pieces.forEach(p=>{const dx=p.x-hx,dz=p.z-hz,d=dx*ux+dz*uz,side=Math.abs(dz*ux-dx*uz);
-      if(d>0.4&&d<T3CAMD&&side<0.9&&t3Hides(p.h,d))out.push({p,d});});return out;};
-  const q=Math.round(yaw/(Math.PI/2))*(Math.PI/2);
-  for(const st of [q,q+Math.PI/2,q-Math.PI/2,q+Math.PI]){if(!at(st).length)return {goal:st,enclosed:false,near:[]};}
-  const b=at(q).sort((a,c)=>a.d-c.d),dmin=b[0].d;
-  return {goal:q,enclosed:true,near:b.filter(e=>e.d<=dmin+0.55).map(e=>e.p)};}
-function t3Reveal(){ /* every wall whole, but the nook's nearest one: hidden, a stub in its footprint */
-  const nook=new Set((T3.nook||[]).map(p=>p.o).filter(Boolean));
+  const hits=[];pieces.forEach(p=>{const dx=p.x-hx,dz=p.z-hz,d=dx*ux+dz*uz,side=Math.abs(dz*ux-dx*uz);
+    if(d>0.4&&d<T3CAMD&&side<0.9&&t3Hides(p.h,d))hits.push({p,d});});
+  if(!hits.length)return [];
+  const dmin=Math.min(...hits.map(e=>e.d)); /* the nearest wall; its neighbours one tile either side, in the same row */
+  return pieces.filter(p=>{const dx=p.x-hx,dz=p.z-hz,d=dx*ux+dz*uz,side=Math.abs(dz*ux-dx*uz);return Math.abs(d-dmin)<0.55&&side<1.6;});}
+function t3Reveal(){ /* every wall whole, but the one nearest that hides you: hidden, a stub in its footprint */
+  const key=world+"|"+px+"|"+py+"|"+t3Q()+"|"+T3.builtKey;
+  if(T3.nearKey!==key){T3.nearKey=key;T3.near=t3Near(px,py,Math.round(T3.yaw/(Math.PI/2))*(Math.PI/2));}
+  const cut3=new Set((T3.near||[]).map(p=>p.o).filter(Boolean));
   T3.group.children.slice().forEach(o=>{const u=o.userData;if(!u||u.stub||!(u.wall!==undefined||u.door||u.winBack||u.counter))return;
-    const cut=nook.has(o);
+    const cut=cut3.has(o);
     if(cut&&!u.stub3){const g=o.geometry.parameters||{},m=o.material,top=Array.isArray(m)?m[2]:m;
       const st=new THREE.Mesh(new THREE.BoxGeometry(g.width||1,T3STUB,g.depth||1),top);
       st.position.set(o.position.x,o.position.y-(g.height||1)/2+T3STUB/2,o.position.z);st.rotation.y=o.rotation.y;
       st.userData={stub:true,x:u.x,y:u.y};T3.group.add(st);u.stub3=st;}
     o.visible=!cut;if(u.stub3)u.stub3.visible=cut;});}
-function t3AutoYaw(){ /* once per tile: keep the stop, or turn to one that shows you; then ease T3.yaw toward it */
-  if(T3.yawGoal===undefined)T3.yawGoal=T3.yaw;
-  if(T3.yawSeen!==undefined&&T3.yaw!==T3.yawSeen){T3.yawGoal=T3.yaw;T3.autoKey=null;} /* somebody turned the camera by hand: that is the goal now */
-  const ak=world+"|"+px+"|"+py+"|"+T3.builtKey;
-  if(T3.autoKey!==ak){T3.autoKey=ak;const sg=t3Sight(px,py,T3.yawGoal);T3.yawGoal=sg.goal;T3.nook=sg.enclosed?sg.near:[];}
-  const d=T3.yawGoal-T3.yaw;
-  if(Math.abs(d)>1e-9){T3.yaw+=Math.sign(d)*Math.min(Math.abs(d),0.09);if(Math.abs(T3.yawGoal-T3.yaw)<1e-6)T3.yaw=T3.yawGoal;}
-  T3.yawSeen=T3.yaw;}
 function t3Glow(){ /* the light under every door breathes — same clock as the 2D art */
   const a=0.25+0.2*Math.sin(Date.now()/380);
   T3.glows.forEach(m=>{m.opacity=a;});
@@ -541,5 +531,5 @@ function t3Leash(){ /* the blue leash exists in 3D too, while it's on */
    exactly why the owner reported "some directions are broken when i rotate". */
 (function(){
   const b=document.getElementById("rot3d");
-  if(b)b.addEventListener("click",()=>{T3.yaw+=Math.PI/2;T3.yawGoal=T3.yaw;T3.yawSeen=T3.yaw;}); /* instant, and the goal follows (#65) */
+  if(b)b.addEventListener("click",()=>{T3.yaw+=Math.PI/2;}); /* the only turn there is (#65: "lets keep that manual") */
 })();
