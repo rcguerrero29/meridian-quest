@@ -3,7 +3,7 @@
    game's own shell and nothing else — never a cross-origin request (an API answer must not
    be frozen in a cache), never a non-ok response (a 403 must not become the permanent
    answer), and it deletes only caches it owns (another pack on this origin keeps its own). */
-const CACHE = "mq-v105";
+const CACHE = "mq-v106";
 const PFX = "mq-"; /* the cache names this worker owns */
 const ASSETS = ["./", "./index.html", "./qr.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   "./engine/engine.js", "./engine/engine3d.js", "./vendor/three.min.js",
@@ -27,6 +27,13 @@ self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   let url; try { url = new URL(e.request.url); } catch (err) { return; }
   if (url.origin !== self.location.origin) return; /* the shell only — never an API, never a CDN */
+  if (url.pathname.endsWith("/status.json")) { /* the city record (#14): network first, the cached copy only when offline — or a clerk is stale forever */
+    e.respondWith(fetch(e.request).then(res => {
+      if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
+      return res;
+    }).catch(() => caches.match(e.request, { cacheName: CACHE }).then(hit => hit || Response.error())));
+    return;
+  }
   e.respondWith(
     caches.match(e.request, { cacheName: CACHE }).then(hit => hit || fetch(e.request).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }

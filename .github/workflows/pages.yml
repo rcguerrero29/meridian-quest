@@ -1,0 +1,48 @@
+name: Pages
+# The city record (#14 ❗El expediente — owner, 2026-09-07: "ok go for your recommendations"):
+# the site is deployed from this job's artifact with status.json written beside the game from the
+# GitHub API — version and permits, nothing more. CI still never pushes a commit (contents: read).
+# Until the owner switches Settings → Pages → Source to "GitHub Actions", the deploy step cannot
+# take and is allowed to fail; the branch deploy stands and the record is only checked, not served.
+permissions:
+  contents: read
+  pull-requests: read
+  checks: read
+  pages: write
+  id-token: write
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: the site, without the repository's own bones
+        run: rsync -a --exclude .git --exclude .github --exclude node_modules ./ _site/
+      - name: write the city record
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          OUT_DIR: _site
+        run: node .github/scripts/city-record.js
+      - name: the record is what a clerk can read
+        run: node test/record.js _site/status.json
+      - uses: actions/configure-pages@v5
+        id: pages
+        continue-on-error: true
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.pages.outcome == 'success'
+        with:
+          path: _site
+      - uses: actions/deploy-pages@v4
+        if: steps.pages.outcome == 'success'
+        continue-on-error: true
