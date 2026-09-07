@@ -10,10 +10,13 @@ const RECORDSRC={
   enabled:true,
   owner:"rcguerrero29",repo:"meridian-quest",
   world:"st",
-  /* where people stand: in front of the face that matches their first label (§9.1), then the
-     open street. Past `cap` the rest are notes — a street with forty people is a queue */
-  stands:{ask:[[3,3],[5,3],[7,3],[4,6],[6,6]],decision:[[18,3],[20,3],[19,6],[21,6]],
-          bug:[[24,3],[26,3],[25,6],[27,6]],other:[[10,10],[14,10],[18,10],[6,10],[22,10],[12,12]]},
+  /* ch-v24 (#69, dos cuerpos): a person stands on their house's DOORSTEP and again INSIDE at the
+     counter — two bodies, one issue, one document. The two heaviest of each house stand outside
+     and inside; the next two inside only; the rest are pinned on the house's board. Whoever has no
+     address (no work label yet) waits in the PLAZA before the hoarding, six at most, the rest on
+     city hall's board as sin domicilio. The tile in front of every door stays free. */
+  plaza:[[10,11],[14,11],[18,11],[10,13],[14,13],[18,13]],
+  capStep:2,capIn:4,capPlaza:6,
   /* ---------- #69, block one: the six houses — one per kind of work ----------
      The address is a LABEL in plain words (owner: "put a human friendly label as to what type of
      issue or work is being done"): the first `work:` label an issue carries names its house. Each
@@ -21,17 +24,17 @@ const RECORDSRC={
      its business, a sign over the door that counts it, and a board beside the door that says the
      work in two short lines. Don Güero's plan is on #69. */
   AREAS:[
-    {id:"an",world:"an",glyph:"$",door:{x:4,y:0},label:"work: records & forms",name:{en:"El Anexo de la Ventanilla",es:"El Anexo de la Ventanilla"},clerk:"remedios",
+    {id:"an",world:"an",glyph:"$",door:{x:4,y:0},doorstep:[[3,1],[5,1]],inside:[[4,4],[7,4],[12,4],[4,2]],label:"work: records & forms",name:{en:"El Anexo de la Ventanilla",es:"El Anexo de la Ventanilla"},clerk:"remedios",
      plain:{en:"Records & forms — the window, the index, the forms, the reports.",es:"Registros y formularios — la ventanilla, el índice, los formularios, los reportes."}},
-    {id:"pp",world:"pp",glyph:"@",door:{x:6,y:8},label:"work: docs & templates",name:{en:"La Papelería",es:"La Papelería"},clerk:"chuy",
+    {id:"pp",world:"pp",glyph:"@",door:{x:6,y:8},doorstep:[[5,7],[7,7]],inside:[[4,7],[8,7],[12,7],[16,7]],label:"work: docs & templates",name:{en:"La Papelería",es:"La Papelería"},clerk:"chuy",
      plain:{en:"Docs & templates — anything that ends up as a document, a template or a test.",es:"Documentos y plantillas — lo que termina en un documento, una plantilla o una prueba."}},
-    {id:"es",world:"es",glyph:"M",door:{x:14,y:8},label:"work: how it looks",name:{en:"El Estudio de Pili",es:"El Estudio de Pili"},clerk:"pili",
+    {id:"es",world:"es",glyph:"M",door:{x:14,y:8},doorstep:[[13,7],[15,7]],inside:[[4,7],[8,7],[12,7],[16,7]],label:"work: how it looks",name:{en:"El Estudio de Pili",es:"El Estudio de Pili"},clerk:"pili",
      plain:{en:"How it looks — the camera, the walls, the art, the tiles, the screen.",es:"Cómo se ve — la cámara, las paredes, el arte, los mosaicos, la pantalla."}},
-    {id:"mo",world:"mo",glyph:"%",door:{x:25,y:0},label:"work: the engine",name:{en:"El Motor",es:"El Motor"},clerk:"beto",
+    {id:"mo",world:"mo",glyph:"%",door:{x:25,y:0},doorstep:[[24,1],[26,1]],inside:[[4,6],[8,6],[12,6],[16,6]],label:"work: the engine",name:{en:"El Motor",es:"El Motor"},clerk:"beto",
      plain:{en:"The engine — seams, saves, speed, and what has to be true in both cities.",es:"El motor — costuras, partidas guardadas, velocidad, y lo que debe ser cierto en las dos ciudades."}},
-    {id:"ob",world:"ob",glyph:"O",door:{x:19,y:0},label:"work: rooms & stairs",name:{en:"La Obra",es:"La Obra"},clerk:"cuca",
+    {id:"ob",world:"ob",glyph:"O",door:{x:19,y:0},doorstep:[[18,1],[20,1]],inside:[[4,2],[8,2],[12,2],[16,2]],label:"work: rooms & stairs",name:{en:"La Obra",es:"La Obra"},clerk:"cuca",
      plain:{en:"Rooms & stairs — where things stand, doors, maps, and how you get in.",es:"Cuartos y escaleras — dónde está cada cosa, puertas, mapas, y cómo se entra."}},
-    {id:"co",world:"co",glyph:"L",door:{x:22,y:8},label:"work: Meridian's story",name:{en:"La Cocina de Meridian",es:"La Cocina de Meridian"},clerk:"nacho",
+    {id:"co",world:"co",glyph:"L",door:{x:22,y:8},doorstep:[[21,7],[23,7]],inside:[[4,6],[8,6],[12,6],[16,6]],label:"work: Meridian's story",name:{en:"La Cocina de Meridian",es:"La Cocina de Meridian"},clerk:"nacho",
      plain:{en:"Meridian's story — the other city: its quests, its districts, its practice.",es:"La historia de Meridian — la otra ciudad: sus misiones, sus barrios, su práctica."}}],
   areas(){return this.AREAS.filter(a=>WORLDS[a.world]);},
   area(id){return this.AREAS.find(a=>a.id===id)||null;},
@@ -63,13 +66,18 @@ const RECORDSRC={
     return s;},
   /* the house's board: everything with this address, the small things included */
   houseBoardDoc(id){const es=lang==="es",a=this.area(id),s=[];if(!a)return [{p:"—"}];
-    const mine=this.sortPeople(this.ofHouse(id));
+    const mine=this.sortPeople(this.ofHouse(id)),pinned=mine.filter(i=>!(this.placed[i.n]&&this.placed[i.n].in));
     s.push({p:(es?a.plain.es:a.plain.en)});
-    if(!mine.length)s.push({p:es?"Nada archivado con esta dirección ahora mismo.":"Nothing filed with this address right now."});
-    mine.forEach(i=>s.push({kv:[["#"+i.n,i.title],[es?"archivado":"filed",this.days(i.at)],[es?"estado":"state",this.state(i)],[es?"en palabras llanas":"in plain words",this.plain(i)]]}));
+    s.push({h:(es?"Prendidos · ":"Pinned · ")+pinned.length});
+    if(!pinned.length)s.push({p:mine.length?(es?"Todos los de esta casa están de pie adentro.":"Everyone with this address is standing inside."):(es?"Nada archivado con esta dirección ahora mismo.":"Nothing filed with this address right now.")});
+    pinned.forEach(i=>s.push({kv:[["#"+i.n,i.title],[es?"archivado":"filed",this.days(i.at)],[es?"estado":"state",this.state(i)],[es?"en palabras llanas":"in plain words",this.plain(i)]]}));
+    /* la casa vacía (Don Güero): an empty room is the proof you finished something — past tense, filed things only */
+    const home=(this.gone||[]).filter(g=>this.house(g)===id).slice(0,6);
+    s.push({h:(es?"Se fueron a casa · ":"Went home · ")+home.length});
+    if(!home.length)s.push({p:es?"Nadie de esta casa se ha ido últimamente.":"Nobody from this house went home lately."});
+    home.forEach(g=>s.push({kv:[["#"+g.n,g.title],[es?"cerrado":"closed",g.closed||"—"]]}));
     return s;},
-  cap:12,
-  placed:{},      /* issue number → the npc key addChill() gave it */
+  placed:{},      /* issue number → {st: the street body's key or null, in: the house body's key or null, house} */
   people:[],      /* the issues standing on the street, in order */
   notesList:[],   /* tier: low, and the overflow past cap */
   permits:[],     /* open PRs the owner authored */
@@ -103,8 +111,15 @@ const RECORDSRC={
     if(this.refused&&!this.saidRefused){this.saidRefused=true;this.say("GitHub refused the read (rate limit) until "+this.refused+" — la ventanilla has the details.","GitHub rechazó la lectura (límite) hasta las "+this.refused+" — la ventanilla tiene los detalles.");}
     if(this.showPermits)this.permits=await this.loadPulls();
     await this.loadComments(this.people);
+    await this.loadGone();this.signs();
     await this.checkVersion();
   },
+  /* who went home lately (ch-v24, la casa vacía): the owner's recently closed issues, so an empty
+     house's board can show what got finished there. One read, cached like the rest. */
+  gone:[],
+  async loadGone(){const raw=await this.get("gone","/issues?state=closed&per_page=30&sort=updated&creator="+this.owner,[]);
+    this.gone=(Array.isArray(raw)?raw:[]).filter(i=>i&&!i.pull_request&&this.mine(i)).map(i=>({n:i.number|0,title:this.clean(i.title,200),
+      labels:(i.labels||[]).map(l=>this.clean(typeof l==="string"?l:(l&&l.name),40)).filter(Boolean),closed:String(i.closed_at||"").slice(0,10)}));return this.gone;},
   /* ---------- ch-v13: the news since your last visit ----------
      The last visit is remembered under the prefix — when, and which people were on file. On the
      next open the difference is the news: who answered (a session's comment since then), who is
@@ -120,9 +135,12 @@ const RECORDSRC={
     return {seen,answered,fresh,gone,waiting};},
   /* walk to a person: the reader closes and you stand beside them, facing them; someone on the
      board opens the board instead */
-  walkTo(n){const w=WORLDS[this.world],key=this.placed[n],p=key&&w.npcs.find(m=>m.key===key);
-    if(!p){docOpen("board");return false;}
-    return this.goBeside(this.world,p.x,p.y);},
+  walkTo(n){const b=this.placed[n];if(!b){docOpen("board");return false;}
+    const find=(wid,key)=>{const w=WORLDS[wid];const p=key&&w&&w.npcs.find(m=>m.key===key);return p?{wid,p}:null;};
+    const hw=b.house?this.area(b.house).world:null;
+    const hit=(world===this.world&&find(this.world,b.st))||(hw&&world===hw&&find(hw,b.in))||find(this.world,b.st)||(hw&&find(hw,b.in));
+    if(!hit){docOpen("board");return false;}
+    return this.goBeside(hit.wid,hit.p.x,hit.p.y);},
   /* stand beside a tile in any world, facing it, the reader closed — people, animals, doors, faces */
   goBeside(wid,tx,ty){if(!WORLDS[wid])return false;
     const spot=[[0,1],[1,0],[-1,0],[0,-1],[0,0]].map(([dx,dy])=>[tx+dx,ty+dy]).find(([x,y])=>!isSolidAt(wid,x,y));
@@ -162,7 +180,7 @@ const RECORDSRC={
      The signs over the faces show the number of open issues of their kind (all tiers), city
      hall's the total; the 3D scene bakes decor at build, so it is rebuilt once. */
   signs(){const D=(typeof DECOR!=="undefined"&&DECOR)||[];const by={ask:0,decision:0,bug:0,other:0};
-    this.all.forEach(i=>{by[this.kind(i)]=(by[this.kind(i)]|0)+1;const h=this.house(i);if(h)by[h]=(by[h]|0)+1;}); /* #69: a sign over a door counts its house */
+    this.all.forEach(i=>{by[this.kind(i)]=(by[this.kind(i)]|0)+1;const h=this.house(i);if(h)by[h]=(by[h]|0)+1;else by.next=(by.next|0)+1;}); /* #69: a sign over a door counts its house; the hoarding the homeless */
     let changed=false;D.forEach(d=>{if(d.deco!=="sign"||!d.kind)return;const n=d.kind==="hall"?this.all.length:(by[d.kind]|0);
       const t=String(n).slice(0,4);if(d.text!==t){d.text=t;changed=true;}});
     if(changed){try{if(typeof t3Invalidate==="function")t3Invalidate();}catch(e){}}return by;},
@@ -424,9 +442,14 @@ const RECORDSRC={
       run:v=>{self.setLabels(i,v.on||[],v.add||"").then(back);}}}]};},
   async setLabels(i,on,add){const cur=new Set(i.labels||[]),want=new Set((on||[]).map(l=>this.clean(l,40)).filter(Boolean));
     const a=this.clean(add,40);if(a)want.add(a);
+    const h0=this.house(i);
     for(const l of want)if(!cur.has(l))await this.addLabel(i.n,l);
     for(const l of cur)if(!want.has(l))await this.removeLabel(i.n,l);
-    i.labels=[...want];},
+    i.labels=[...want];
+    /* ch-v24: a change to a room you are not standing in announces itself (OWNER.md, 2026-09-03) */
+    const h1=this.house(i);if(h1!==h0){const ar=h1&&this.area(h1);
+      if(ar)this.say("#"+i.n+" moved to "+ar.name.en+" ("+ar.label.replace(/^work: /,"")+").","#"+i.n+" se mudó a "+ar.name.es+" ("+ar.label.replace(/^work: /,"")+").");
+      else this.say("#"+i.n+" has no address now — the plaza, until a work label lands.","#"+i.n+" ya no tiene domicilio — la plaza, hasta que tenga etiqueta de trabajo.");}},
   /* a pick opens a comment (owner: "your pic should open up a comment right?"): the options are
      read off the paperwork and the last answer — numbered or bulleted lines — plus "other" */
   picks(i){const c=this.comments[i.n],src=((c&&c.last&&c.last.body)||"")+"\n"+(i.body||"");const out=[];
@@ -540,9 +563,19 @@ const RECORDSRC={
     s.push({btn:es?"📇 El índice — todo por etiqueta, buscar":"📇 The index — everything by tag, search",run:()=>docOpen("index")});
     s.push({btn:es?"🔍 Acotar la calle: varias etiquetas, una palabra":"🔍 Narrow the street: several labels, a word",run:()=>docOpen("filter")});
     return s;},
+  /* the hoarding (ch-v24): block two's gate, reserved — what waits for it */
+  nextDoc(){const es=lang==="es",self=this,wait=this.sortPeople(this.all.filter(i=>!this.house(i)));
+    const s=[{p:es?"Aquí va la segunda cuadra: el barrio de las decisiones, luego el de los bugs. Don Güero la sitúa cuando el dueño la pida.":"Block two goes here: the decisions district, then the bugs'. Don Güero sites it when the owner asks."}];
+    s.push({p:wait.length+(es?" esperan sin domicilio. Una etiqueta de trabajo los mete en una casa hoy mismo.":" wait here with no address. A work label moves them into a house today.")});
+    wait.slice(0,8).forEach(i=>{s.push({p:this.personPlain(i)});if(this.placed[i.n])s.push({btn:(es?"→ caminar a #":"→ walk to #")+i.n,run:()=>self.walkTo(i.n)});});
+    return s;},
   /* the board: the small things, pinned */
   boardDoc(){const es=lang==="es",s=[];
     if(!this.notesList.length)s.push({p:es?"El tablero está vacío.":"The board is empty."});
+    /* ch-v24: the ones with no address first — sin domicilio — the nudge to press Labels on their card */
+    const homeless=this.notesList.filter(i=>!this.house(i));
+    if(homeless.length){s.push({h:(es?"Sin domicilio · ":"No address · sin domicilio · ")+homeless.length});
+      s.push({p:es?"Sin etiqueta de trabajo no tienen casa. Ponles una con el botón Etiquetas y se mudan.":"With no work label they have no house. Give them one with the Labels button and they move in."});}
     /* grouped by kind, the dropdown's order (owner, 2026-09-06: "grouping works") */
     const names={ask:es?"Peticiones":"Asks",decision:es?"Decisiones":"Decisions",bug:es?"Bugs":"Bugs",other:es?"Otras":"Other"};
     ["ask","decision","bug","other"].forEach(k=>{const grp=this.notesList.filter(i=>this.kind(i)===k);if(!grp.length)return;
@@ -550,26 +583,33 @@ const RECORDSRC={
       grp.forEach(i=>s.push({kv:[["#"+i.n,i.title],[es?"archivado":"filed",this.days(i.at)],[es?"en palabras llanas":"in plain words",this.plain(i)]]}));});
     return s;},
   place(list){
-    const w=WORLDS[this.world];if(!w)return;
-    const by={high:[],normal:[],low:[]},aside=[];
+    const st=WORLDS[this.world];if(!st)return;
     this.all=(list||[]).slice();
     this.titles=this.titles||{};this.all.forEach(i=>{this.titles[i.n]=i.title;});try{localStorage.setItem(SK("titles"),JSON.stringify(this.titles));}catch(e){}
-    (list||[]).forEach(i=>{if(this.matches(i))by[this.tier(i)].push(i);else aside.push(i);});
-    const people=this.sortPeople(by.high.concat(by.normal)).slice(0,this.cap);
-    this.people=people;
-    this.notesList=by.low.concat(by.high.concat(by.normal).slice(this.cap)).concat(aside); /* whoever is not on the street is on the board */
+    const bodies=[],aside=[];   /* who gets a body: {i, house, step:[x,y]|null, in:{wid,x,y}|null} */
+    (list||[]).forEach(i=>{if(!this.matches(i))aside.push(i);});
+    const eligible=i=>this.matches(i)&&this.tier(i)!=="low";
+    const pinned=[];
+    this.areas().forEach(a=>{const mine=this.sortPeople(this.all.filter(i=>this.house(i)===a.id&&eligible(i)));
+      mine.forEach((i,k)=>{if(k<this.capIn)bodies.push({i,house:a.id,step:k<this.capStep?a.doorstep[k]:null,in:{wid:a.world,x:a.inside[k][0],y:a.inside[k][1]}});else pinned.push(i);});});
+    const homeless=this.sortPeople(this.all.filter(i=>!this.house(i)&&eligible(i)));
+    homeless.forEach((i,k)=>{if(k<this.capPlaza)bodies.push({i,house:null,step:this.plaza[k],in:null});else pinned.push(i);});
+    this.people=bodies.map(b=>b.i);
+    this.notesList=this.all.filter(i=>this.tier(i)==="low"&&this.matches(i)).concat(pinned).concat(aside); /* whoever has no body is on a board */
     this.notes=this.notesList.length;
-    /* who left: a closed issue's person goes home and the tile comes back */
-    Object.keys(this.placed).forEach(n=>{if(!people.some(i=>String(i.n)===n)){removeChill(this.placed[n]);delete this.placed[n];}});
-    const used=new Set(Object.values(this.placed).map(k=>{const n=w.npcs.find(m=>m.key===k);return n?n.x+","+n.y:"";}));
-    const free=(arr)=>arr.find(([x,y])=>!used.has(x+","+y)&&!SOLID.has(w.grid[y][x])&&w.grid[y][x]!=="N");
-    people.forEach(i=>{if(this.placed[i.n])return;
-      const spot=free(this.stands[this.kind(i)]||[])||free(this.stands.other)||free([].concat(...Object.values(this.stands)));
-      if(!spot)return;const [x,y]=spot;
-      const key=addChill({name:{en:this.name(i),es:this.name(i)},world:this.world,x,y,look:this.look(i)});
-      if(key){const n=w.npcs.find(m=>m.key===key);n.doc=this.doc(i);n.tier=this.tier(i);n.issue=i.n;this.placed[i.n]=key;used.add(x+","+y);}});
+    /* who left, or moved: a body whose issue is gone, or whose house changed, goes home and the tile comes back */
+    Object.keys(this.placed).forEach(n=>{const b=this.placed[n],want=bodies.find(x=>String(x.i.n)===n);
+      if(!want||want.house!==b.house){if(b.st)removeChill(b.st);if(b.in)removeChill(b.in);delete this.placed[n];}});
+    const put=(i,wid,x,y)=>{const w=WORLDS[wid];if(!w||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")return null;
+      const key=addChill({name:{en:this.name(i),es:this.name(i)},world:wid,x,y,look:this.look(i)});
+      if(key){const n=w.npcs.find(m=>m.key===key);n.doc=this.doc(i);n.tier=this.tier(i);n.issue=i.n;}return key;};
+    bodies.forEach(b=>{if(this.placed[b.i.n])return;
+      const rec={st:null,in:null,house:b.house};
+      if(b.step)rec.st=put(b.i,this.world,b.step[0],b.step[1]);
+      if(b.in)rec.in=put(b.i,b.in.wid,b.in.x,b.in.y);
+      if(rec.st||rec.in)this.placed[b.i.n]=rec;});
     auditReach().forEach(p=>console.warn("REACH "+p)); /* a placed person may never wall the hero */
     this.signs();
-    console.log("RECORD: "+people.length+" on the street, "+this.notesList.length+" note(s) on the board");
+    console.log("RECORD: "+bodies.length+" standing ("+bodies.filter(b=>b.step).length+" on the street), "+this.notesList.length+" note(s) on the boards");
   }
 };

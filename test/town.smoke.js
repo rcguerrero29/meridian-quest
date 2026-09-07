@@ -54,7 +54,7 @@ const { chromium } = require('playwright-core');
       labels: n === 3 ? ['tier: normal', 'bug'] : n === 4 ? ['tier: low'] : ['tier: high', 'ask'], url: 'https://example.invalid/' + n }));
     RECORDSRC.place(fx);
     const placed = WORLDS.st.npcs.length - before;
-    if (placed !== 3) problems.push('placed ' + placed + ' people, expected 3 (a tier: low issue is a note, not a person)');
+    if (placed !== 3) problems.push('placed ' + placed + ' people on the street, expected 3 (a tier: low issue is a note, not a person)');
     if (RECORDSRC.notes !== 1) problems.push('notes for the board: ' + RECORDSRC.notes + ', expected 1');
     const p = WORLDS.st.npcs.filter(n => n.doc && n.issue); /* record-placed people; la ventanilla carries hers */
     if (p.length !== 3) problems.push('people lack documents');
@@ -69,8 +69,9 @@ const { chromium } = require('playwright-core');
     // a closed issue: its person leaves and the tile comes back
     RECORDSRC.place(fx.slice(0, 2));
     if (WORLDS.st.npcs.length - before !== 2) problems.push("a closed issue's person did not leave");
+    if (Object.values(WORLDS).some(w => w.npcs.some(n => n.issue === 3))) problems.push('a closed issue still has a body in some world');
     if (WORLDS.st.npcs.filter(n => n.doc && n.issue === 3).length) problems.push('the closed issue is still standing');
-    if (Object.values(RECORDSRC.stands).flat().some(([x, y]) => WORLDS.st.grid[y][x] === 'N' && !WORLDS.st.npcs.some(n => n.x === x && n.y === y))) problems.push('a tile stayed marked after someone left');
+    Object.entries(WORLDS).forEach(([wid, w]) => { for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (w.grid[y][x] === 'N' && !w.npcs.some(n => n.x === x && n.y === y)) problems.push(wid + ' (' + x + ',' + y + ') stayed marked after someone left'); });
     // ---- 2b: the park, the clerk, the board, the permits, three lines, plain words, Sonny ----
     if (!WORLDS.pk) problems.push('no park (pk) — the leash warp has nowhere to go');
     if (!PORTALS.st['2'] || PORTALS.st['2'].to !== 'pk') problems.push('the street has no door to the park');
@@ -100,16 +101,19 @@ const { chromium } = require('playwright-core');
     if (!/ask me/i.test(RECORDSRC.lines(pw)[2].t)) problems.push("what's next without a comment should invite the ask");
     RECORDSRC.comments[9] = { updated: '', last: { body: 'Answered here.', at: '2026-09-05' } };
     if (!/Answered here/.test(RECORDSRC.lines(pw)[2].t)) problems.push("what's next ignores the owner's comment");
-    // per-label stands: a decision stands in front of the Z face, a bug in front of I, an ask in front of Q
+    // ch-v24 (#69, dos cuerpos): a person with a work label stands on their house's DOORSTEP and again INSIDE at
+    // the counter; a person with no address stands in the plaza before the hoarding
     RECORDSRC.place([]);
-    RECORDSRC.place([{ n: 11, title: 'd', body: '', labels: ['tier: high', 'decision'], at: '2026-09-05' },
+    RECORDSRC.place([{ n: 11, title: 'd', body: '', labels: ['tier: high', 'decision', 'work: the engine'], at: '2026-09-05' },
                      { n: 12, title: 'b', body: '', labels: ['tier: high', 'bug'], at: '2026-09-05' },
-                     { n: 13, title: 'a', body: '', labels: ['tier: normal', 'ask'], at: '2026-09-05' }]);
-    const at = n => { const k = RECORDSRC.placed[n]; const p2 = WORLDS.st.npcs.find(m => m.key === k); return p2 ? [p2.x, p2.y] : null; };
-    const inZone = (pos, zone) => pos && RECORDSRC.stands[zone].some(([x, y]) => x === pos[0] && y === pos[1]);
-    if (!inZone(at(11), 'decision')) problems.push('a decision did not stand by the Z face');
-    if (!inZone(at(12), 'bug')) problems.push('a bug did not stand by the I face');
-    if (!inZone(at(13), 'ask')) problems.push('an ask did not stand by the Q face');
+                     { n: 13, title: 'a', body: '', labels: ['tier: normal', 'ask', 'work: how it looks'], at: '2026-09-05' }]);
+    const bodyAt = (n, wid) => { const k = RECORDSRC.placed[n]; if (!k) return null; const key = wid === 'st' ? k.st : k.in; const p2 = key && WORLDS[wid].npcs.find(m => m.key === key); return p2 ? [p2.x, p2.y] : null; };
+    const onList = (pos, list) => pos && list.some(([x, y]) => x === pos[0] && y === pos[1]);
+    if (!onList(bodyAt(11, 'st'), RECORDSRC.area('mo').doorstep)) problems.push('an engine issue does not stand on El Motor\'s doorstep: ' + JSON.stringify(bodyAt(11, 'st')));
+    if (!onList(bodyAt(11, 'mo'), RECORDSRC.area('mo').inside)) problems.push('an engine issue does not also stand inside El Motor');
+    if (!onList(bodyAt(13, 'st'), RECORDSRC.area('es').doorstep) || !onList(bodyAt(13, 'es'), RECORDSRC.area('es').inside)) problems.push('a how-it-looks issue is not on the Estudio\'s doorstep and inside');
+    if (!onList(bodyAt(12, 'st'), RECORDSRC.plaza)) problems.push('a bug with no address does not stand in the plaza: ' + JSON.stringify(bodyAt(12, 'st')));
+    if (RECORDSRC.placed[12] && RECORDSRC.placed[12].in) problems.push('a person with no address has a body inside a house');
     // the window and the board build from the record, with and without permits
     // ch-v13: the clock is off and the permits are hidden by two switches — nothing deleted
     if (typeof REFRESH_MS !== 'number' || REFRESH_MS !== 0) problems.push('REFRESH_MS is not 0');
@@ -428,7 +432,7 @@ const { chromium } = require('playwright-core');
         const wb = wdn.find(x => x.btn && /answered/.test(x.btn) && /#22/.test(x.btn));
         if (!wb) problems.push('the news has no walk-there button for the answered person');
         else { const b0 = { world, px, py }; docOpen('window'); wb.run();
-          const k = RECORDSRC.placed[22], p22 = WORLDS.st.npcs.find(m => m.key === k);
+          const k = (RECORDSRC.placed[22] || {}).st, p22 = WORLDS.st.npcs.find(m => m.key === k); /* ch-v24: the street body */
           if (!(world === 'st' && p22 && Math.abs(px - p22.x) + Math.abs(py - p22.y) === 1)) problems.push('walk-there did not put you beside the person');
           if (!document.getElementById('reader').hidden) problems.push('walk-there left the reader open');
           world = b0.world; px = b0.px; py = b0.py; }
@@ -449,7 +453,7 @@ const { chromium } = require('playwright-core');
         if (RECORDSRC.mainVersion !== null || RECORDSRC.behind()) problems.push('a refused version read left a version behind');
         // the board, grouped by kind
         RECORDSRC.place([{ n: 71, title: 'n1', body: '', labels: ['tier: low', 'bug'], at: '2026-09-05' }, { n: 72, title: 'n2', body: '', labels: ['tier: low', 'ask'], at: '2026-09-05' }, { n: 73, title: 'n3', body: '', labels: ['tier: low'], at: '2026-09-05' }]);
-        const bd = docSections('board').filter(x => x.h).map(x => x.h);
+        const bd = docSections('board').filter(x => x.h && !/No address/.test(x.h)).map(x => x.h); /* ch-v24: the sin-domicilio section comes first, by design */
         if (!(bd.length === 3 && /^Asks/.test(bd[0]) && /^Bugs/.test(bd[1]) && /^Other/.test(bd[2]))) problems.push('the board is not grouped by kind in order: ' + bd.join(' | '));
         RECORDSRC.place([]); window.fetch = fetch0; }
       // ---- ch-v14 (engine mq-v76): the reader's form section; every write is a form, no popup ----
@@ -597,11 +601,53 @@ const { chromium } = require('playwright-core');
           if (!c2.some(x => x.btn && /walk to #201/.test(x.btn))) problems.push('the clerk\'s third line has no walk button for the oldest');
           if (!c0.some(x => x.btn && /file something about/i.test(x.btn))) problems.push('the clerk offers no file-about button');
           const fb = c0.find(x => x.btn && /file something about/i.test(x.btn)); if (fb) { fb.run(); if (docCur !== 'request' || !RECORDSRC.formTags.includes('work: rooms & stairs')) problems.push('filing from a house does not pre-tag its work label: ' + RECORDSRC.formTags.join()); }
-          const hb = docSections('b_ob'); if (!hb.some(x => x.kv && x.kv.some(r => r[0] === '#202'))) problems.push('the house board does not list its residents');
+          const hb = docSections('b_ob'); if (!hb.some(x => x.h && /Pinned · 0/.test(x.h))) problems.push('the house board does not say both residents stand inside: ' + JSON.stringify(hb.filter(x => x.h).map(x => x.h)));
           const rq = docSections('request').find(x => x.form); const wk = rq && rq.form.fields.find(f => f.k === 'work');
           if (!wk || wk.type !== 'select' || !wk.opts.some(o => o.v === 'work: the engine')) problems.push('the request form has no work dropdown');
           RECORDSRC.formTags = []; RECORDSRC.place([]); document.getElementById('reader').hidden = true;
           if (auditReach().length) problems.push('reach with the block: ' + auditReach().join(' | '));
+          // ---- ch-v24: dos cuerpos — two on the doorstep, four inside, the rest on the house board; the plaza holds six ----
+          { const many = []; for (let k = 0; k < 8; k++) many.push({ n: 300 + k, title: 'engine ' + k, body: '', labels: ['tier: ' + (k < 3 ? 'high' : 'normal'), 'bug', 'work: the engine'], at: '2026-09-0' + (1 + (k % 7)) });
+            for (let k = 0; k < 8; k++) many.push({ n: 400 + k, title: 'homeless ' + k, body: '', labels: ['tier: high', 'decision'], at: '2026-09-05' });
+            many.push({ n: 500, title: 'small', body: '', labels: ['tier: low', 'bug', 'work: the engine'], at: '2026-09-05' });
+            RECORDSRC.place(many);
+            const mo = RECORDSRC.area('mo');
+            const onStep = WORLDS.st.npcs.filter(n => n.issue && mo.doorstep.some(([x, y]) => x === n.x && y === n.y));
+            const inside = WORLDS.mo.npcs.filter(n => n.issue);
+            const plaza = WORLDS.st.npcs.filter(n => n.issue && RECORDSRC.plaza.some(([x, y]) => x === n.x && y === n.y));
+            if (onStep.length !== 2) problems.push('El Motor\'s doorstep holds ' + onStep.length + ' people, not the two heaviest');
+            if (inside.length !== 4) problems.push('El Motor holds ' + inside.length + ' people inside, not four');
+            if (!onStep.every(n => inside.some(m => m.issue === n.issue))) problems.push('the doorstep two are not also at the counter');
+            if (plaza.length !== 6) problems.push('the plaza holds ' + plaza.length + ' people, not six');
+            const standing = new Set(Object.keys(RECORDSRC.placed).map(Number)), pinned = RECORDSRC.notesList.map(i => i.n);
+            if (standing.size + pinned.length !== many.length || pinned.some(n => standing.has(n))) problems.push('standing + pinned != fetched (' + standing.size + ' + ' + pinned.length + ' vs ' + many.length + ')');
+            const hb = docSections('b_mo'), inN = new Set(inside.map(n => n.issue));
+            [300, 301, 302, 303, 304, 305, 306, 307].filter(n => !inN.has(n)).concat([500]).forEach(n => { if (!hb.some(x => x.kv && x.kv.some(r => r[0] === '#' + n))) problems.push('the house board does not pin #' + n); });
+            if ([...inN].some(n => hb.some(x => x.kv && x.kv.some(r => r[0] === '#' + n)))) problems.push('the house board pins someone who is standing inside');
+            const plazaN = new Set(plaza.map(n => n.issue)), homelessPinned = [400, 401, 402, 403, 404, 405, 406, 407].filter(n => !plazaN.has(n));
+            if (homelessPinned.length !== 2) problems.push('two homeless people should be pinned, got ' + homelessPinned.length);
+            const cb = docSections('board'); if (!cb.some(x => x.h && /no address|sin domicilio/i.test(x.h))) problems.push('city hall\'s board has no sin-domicilio section'); homelessPinned.forEach(n => { if (!cb.some(x => x.kv && x.kv.some(r => r[0] === '#' + n))) problems.push('the pinned homeless #' + n + ' is not on city hall\'s board'); });
+            // walk there: from the street you meet the doorstep body, from inside the house the counter body
+            const stepOne = onStep[0] && onStep[0].issue, inOnly = (inside.find(n => !onStep.some(m => m.issue === n.issue)) || {}).issue;
+            world = 'st'; RECORDSRC.walkTo(stepOne); if (world !== 'st') problems.push('walkTo from the street left the street');
+            world = 'mo'; px = 2; py = 3; RECORDSRC.walkTo(stepOne); if (world !== 'mo') problems.push('walkTo from inside the house left the house');
+            world = 'st'; RECORDSRC.walkTo(inOnly); if (world !== 'mo') problems.push('walkTo a person who only stands inside did not go inside');
+            // the hoarding: a sign that counts the people with no address, a board that names block two, a sheet to read
+            if (sign('next') !== '8') problems.push('the hoarding does not count the people waiting for block two: ' + sign('next'));
+            if (!DECOR.some(d => d.deco === 'board' && d.x <= 1 && d.y === 0 && /2|two|dos/i.test(d.text))) problems.push('no board names block two on the hoarding');
+            if (!READS.some(r => r.world === 'st' && r.x === 1 && r.y === 0 && r.doc === 'next')) problems.push('the hoarding has nothing to read');
+            const nx = docSections('next'); if (!nx.some(x => x.p && /8/.test(x.p))) problems.push('the hoarding sheet does not say how many wait');
+            // who went home: the house board shows the recently closed of its kind, past tense
+            RECORDSRC.gone = [{ n: 290, title: 'fixed the save', labels: ['bug', 'work: the engine'], closed: '2026-09-06' }, { n: 291, title: 'other house', labels: ['work: how it looks'], closed: '2026-09-06' }];
+            const hb2 = docSections('b_mo'); if (!hb2.some(x => x.h && /went home|se fueron/i.test(x.h)) || !hb2.some(x => x.kv && x.kv.some(r => r[0] === '#290')) || hb2.some(x => x.kv && x.kv.some(r => r[0] === '#291'))) problems.push('the house board does not show who went home from this house');
+            // a label lands: the town says where the person moved
+            const said = []; const say0 = RECORDSRC.say; RECORDSRC.say = (en, es) => said.push(en);
+            const w0 = RECORDSRC.write; RECORDSRC.write = async () => ({});
+            const mover = many.find(i => i.n === 400); await RECORDSRC.setLabels(mover, ['tier: high', 'decision', 'work: rooms & stairs'], '');
+            if (!said.some(t => /#400/.test(t) && /Obra|rooms & stairs/i.test(t))) problems.push('the town did not announce the move: ' + JSON.stringify(said));
+            RECORDSRC.say = say0; RECORDSRC.write = w0; RECORDSRC.gone = [];
+            RECORDSRC.place([]);
+            Object.entries(WORLDS).forEach(([wid, w]) => { if (w.npcs.some(n => n.issue)) problems.push(wid + ' still holds a record person after place([])'); }); }
         }
       }
       // Meridian's animals have somewhere to stand in the town's rooms

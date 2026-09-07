@@ -190,6 +190,8 @@ const DOORLOOK={E:{wood:"#8A5A2B",wood2:"#A06A35",frame:"#4A2E14",glass:true},  
    that kind on each one — asks, decisions, bugs — and the total on city hall's. The boards beside
    them name the face, so a storefront says what it is for. `kind` is the record's hook. */
 const DECOR=[{world:"st",x:10,y:0,deco:"sign",kind:"hall",c:"#7A3FE0"},
+             /* ch-v24: the hoarding at x0–1 is block two's gate — its sign counts who waits with no address, its board says so */
+             {world:"st",x:1,y:0,deco:"sign",kind:"next",c:"#B8860B"},{world:"st",x:0,y:0,deco:"board",house:"next",text:"BLOCK 2\nSOON",c:"#B8860B"},
              /* #69: every sign hangs over its door and counts its house; every board hangs beside the door and
                 says the work in plain words, two lines (the owner's human-friendly label, on the building too) */
              {world:"st",x:4,y:0,deco:"sign",kind:"an",c:"#6E2F4A"},{world:"st",x:3,y:0,deco:"board",house:"an",text:"RECORDS\n& FORMS",c:"#6E2F4A"},

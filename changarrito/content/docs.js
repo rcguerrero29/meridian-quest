@@ -30,6 +30,7 @@ const DOCUI = {
 /* what is readable on the street: the board on city hall's wall, beside la ventanilla */
 const READS = [
   { world: "st", x: 8, y: 0, doc: "board" },
+  { world: "st", x: 1, y: 0, doc: "next" },   /* the hoarding: block two's gate, and who waits for it */
   /* #69: each house's board, on the wall just west of its door, read from the tile in front of it */
   { world: "an", x: 7, y: 7, doc: "b_an" }, { world: "pp", x: 9, y: 9, doc: "b_pp" }, { world: "es", x: 9, y: 11, doc: "b_es" },
   { world: "mo", x: 9, y: 11, doc: "b_mo" }, { world: "ob", x: 9, y: 9, doc: "b_ob" }, { world: "co", x: 9, y: 11, doc: "b_co" }
@@ -52,6 +53,7 @@ const DOCS = {
   filter:  { title: { en: "Narrow the street", es: "Acotar la calle" }, sub: { en: "Labels and a word. Empty means everyone.", es: "Etiquetas y una palabra. Vacío es todos." }, build: () => RECORDSRC.filterDoc() },
   guero:   { title: { en: "Don Güero · the planner", es: "Don Güero · el planificador" }, sub: { en: "Ask him to build things. His answers come back as feedback on your requests.", es: "Pídele que construya. Sus respuestas vuelven como comentarios en tus peticiones." }, build: () => RECORDSRC.gueroDoc() },
   index:   { title: { en: "The index", es: "El índice" }, sub: { en: "Everything the town knows, by tag. Pick a category or type a word; walk there, or file about it.", es: "Todo lo que el pueblo sabe, por etiqueta. Elige una categoría o escribe una palabra; camina allá, o presenta algo sobre eso." }, build: () => RECORDSRC.indexDoc() },
+  next: { title: { en: "Block two — coming", es: "La segunda cuadra — viene" }, sub: { en: "Who waits here with no address.", es: "Quiénes esperan aquí sin domicilio." }, build: () => RECORDSRC.nextDoc() },
   /* #69, block one: the six clerks and the six house boards, built live from the record */
   h_an: { title: { en: "Doña Remedios · the annex", es: "Doña Remedios · el anexo" }, sub: { en: "Records & forms. Filed things only.", es: "Registros y formularios. Solo lo archivado." }, build: () => RECORDSRC.clerkDoc("an") },
   h_pp: { title: { en: "Chuy · the paper shop", es: "Chuy · la papelería" }, sub: { en: "Docs & templates. Filed things only.", es: "Documentos y plantillas. Solo lo archivado." }, build: () => RECORDSRC.clerkDoc("pp") },
