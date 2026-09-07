@@ -846,7 +846,7 @@ function petalShape(g,px,py,a,s,col,rib){ /* one cempasúchil petal (Pili, 2026-
   g.fillStyle=col;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(-1.9,-1.6,-1.5,-3.4);g.lineTo(-0.5,-4.2);g.lineTo(0,-3.6);g.lineTo(0.5,-4.2);g.lineTo(1.5,-3.4);g.quadraticCurveTo(1.9,-1.6,0,0);g.fill();
   if(rib!==false){g.strokeStyle=rib||"rgba(60,20,5,.35)";g.lineWidth=0.6;g.beginPath();g.moveTo(0,-0.5);g.lineTo(0,-2.8);g.stroke();}
   g.restore();}
-const DECK_PETALS=[400,340,220]; /* the three passes of a deck tile: ten times the first cut (owner, 2026-09-07: "multiply the amount of leaves times 10") */
+const DECK_PETALS=[2000,1700,1100]; /* the three passes of a deck tile: FIFTY times the first cut (owner, 2026-09-07: "multiply the amount of leaves times 10", then "do 50x the petals, it does look better") — baked once a tile, so the count costs nothing per frame */
 const PETALCACHE=new Map();
 function petalBake(key,W,H,paint,seed){ /* petals are many and never move: bake a tile once (per season), blit after */
   const k=seasonNow()+"|"+key;let c=PETALCACHE.get(k);if(c)return c;
@@ -905,7 +905,7 @@ TILEDRAW["^"]=rc=>{const{sx,sy,x,y}=rc; /* the rainbow bridge: walk the whole sp
           g.fillStyle=P[0];g.fillRect(0,0,TS,TS);
           const pass=(n,s,a,b)=>{for(let i=0;i<n;i++)petalShape(g,-3+rnd()*(TS+6),-3+rnd()*(TS+6),rnd()*Math.PI*2,s,P[a+((i*7+3)%(b-a+1))]);};
           const shade=()=>{g.globalAlpha=0.18;g.fillStyle="#5A1E0B";for(let i=0;i<6;i++){g.beginPath();g.arc(rnd()*TS,rnd()*TS,5,0,7);g.fill();}g.globalAlpha=1;};
-          pass(DECK_PETALS[0],1.5,0,2);shade();pass(DECK_PETALS[1],1.25,2,4);shade();pass(DECK_PETALS[2],1.0,4,5);
+          pass(DECK_PETALS[0],1.5,0,2);shade();pass(DECK_PETALS[1],1.25,2,4);shade();pass(DECK_PETALS[2],1.0,0,5); /* the top pass wears the whole range: with thousands of petals only the surface shows, and a surface of one colour is a rug */
           g.restore();
           g.fillStyle=P[0];if(rn==="1")g.fillRect(0,0,TS,2.5);if(rs==="1")g.fillRect(0,TS-2.5,TS,2.5); /* the rails, in the heap's colour */
           for(let i=0;i<8;i++){const north=i%2===1;if(north?rn!=="1":rs!=="1")continue;petalShape(g,rnd()*TS,(north?1.5:TS-1.5)+rnd()*1.5,rnd()*Math.PI*2,0.8,P[3+(i%3)]);}},

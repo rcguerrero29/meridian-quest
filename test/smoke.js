@@ -1043,7 +1043,7 @@ const CANDIDATES = [
       if ((nx !== r.userData.x || ny !== r.userData.y) && (TILES[(pkw.rows[ny] || '')[nx]] || {}).kind === 'bridge') problems.push(`a rail stands between two deck tiles at (${r.userData.x},${r.userData.y})`); });
     if (typeof bridgeEdges !== 'function') problems.push('the engine does not know which edges of a deck are open');
     else { const kw = world; world = 'pk'; const e5 = bridgeEdges(3, 5), e6 = bridgeEdges(3, 6); world = kw; if (e5 !== '10' || e6 !== '01') problems.push(`the deck's open edges read ${e5}/${e6}, not north-only/south-only`); }
-    if (typeof DECK_PETALS === 'undefined' || DECK_PETALS.reduce((a, b) => a + b, 0) < 900) problems.push('the deck carries fewer than nine hundred petals a tile — the owner asked for ten times');
+    if (typeof DECK_PETALS === 'undefined' || DECK_PETALS.reduce((a, b) => a + b, 0) < 4500) problems.push('the deck carries fewer than four and a half thousand petals a tile — the owner asked for fifty times');
     if (typeof petalBake !== 'function') problems.push('nine hundred petals a tile are drawn every frame — bake them');
     decks.forEach(d => { if (!(d.position.y > 0.05)) problems.push(`the bridge deck at (${d.userData.x},${d.userData.y}) lies flat on the water`); });
     const rails = T3.group.children.filter(o => o.userData && o.userData.bridgeRail);
