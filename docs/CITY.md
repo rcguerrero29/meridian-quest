@@ -205,6 +205,31 @@ would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
+- ⏳ **❗El zaguán** *(Don Güero, 2026-09-07, on #7 — "is this still an issue?")* — Nolasco's
+  is the last old `1` in the city: a door in on the avenue, a corner stair out. Keep it, make the
+  exit a door in the south wall (half an hour, a second floor stepping onto a pavement), or build
+  the engine's well (rows 4–6, x9–14 fit; it displaces the rug and two chairs). His recommendation:
+  the well. Four smoke pins go red first (the arrow test, §31's camera subject, the `MAPCOL['1']`
+  gold, §28's arrival).
+- ⏳ **❗El despacho chico** *(Don Güero, 2026-09-07, with ❗El zaguán)* — the well eats a quarter
+  of the smallest office in the city. Move the waiting corner west (a sixteenth) or grow `no` to
+  the city's standard 20×10 (a third of a sitting). His recommendation: grow it — the owner's own
+  words on 2026-09-05 were "make the building bigger, fit in a proper staircase."
+- ⏳ **❗La reja** *(Don Güero, 2026-09-07, on #9)* — the casita's `▦` draws a door and is filed as
+  a facade; the data is right, the paint lies. Redraw it as a closed reja (content, half an hour)
+  and give `buildSafe()` the rule "no build lays a door-kind tile that does not open" via
+  `TILEMETA kind:"door"` (a sixteenth, red first in §27, inert in the town). With it, ❗La cuadra:
+  whether the two casitas go back on Calle Dos as honest homes (his recommendation: yes), and
+  ❗El portero: a refused build is heard through a failing test (his recommendation), a line of
+  his, or a toast.
+- ⏳ **❗La llave** *(Don Güero, 2026-09-07, on #10)* — portals are keyed by glyph per world (eight
+  read sites in `engine/engine.js`), so every enterable house costs its own glyph and Meridian's
+  uppercase alphabet is spent. Pay a coordinate-keyed portal seam (a third to a half of a sitting,
+  both shells; it unlocks storefront templates too) or keep doors for businesses only. His
+  recommendation: the latter, and buy the seam the day a parcel is genuinely developed. With it,
+  ❗Quién vive ahí: a neighbour with three lines behind any casita door (recommended), never a
+  business without a parcel.
+
 - ✅ **❗La caja de escalera — BUILT, town first (`mq-v75`/`ch-v12`), then Meridian (`mq-v81`, 2026-09-07).**
   Don Güero's candidate B, the owner's *"sounds good don Guerito, go for it"* on #4, then *"the
   stairs going up looks good"* after walking the town, then *"send the stairs to templates and MQ"*.
@@ -411,7 +436,8 @@ stays live until the Phase 2 refactor lands.
   as ❗La oficina.** Original note kept: Owner: *"i think an office should become mine
   somewhere so i can access these."* Supersedes the mural-wall-only option. For whoever
   specs it: **`f2` already exists** — "Floor 2 · Expansion", portal wired from HQ at
-  `PORTALS.hq["1"]`, arrive text *"Quiet up here… for now."* An empty floor with a door,
+  `PORTALS.hq["1"]` *(since `mq-v81` it is `PORTALS.hq["▲"]`, the head of the flight — the smoke
+  forbids `hq["1"]` from existing; Don Güero's correction, 2026-09-07)*, arrive text *"Quiet up here… for now."* An empty floor with a door,
   waiting for a purpose. Fits Settled "HQ is the onboarding", and gives the terminology
   work (glossary, filled deliverable drafts) a room rather than a menu. Nacho's mural
   keeps the CITY's record; the office is the player's own. **Needs a parcel spec from
