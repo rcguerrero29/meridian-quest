@@ -384,6 +384,20 @@ function t3Sprite(i){
   }
   return p;
 }
+/* where a wall poster hangs (#45): the wall's first open side — south, north, east, west, the
+   street side first — at six tenths of the wall's height, the card drawn centred on its anchor.
+   A billboard leans back with the camera (it looks down at ~40°), so a card flush with the face
+   would sink its top half into the wall: it stands 0.16 out, and the lean tucks its top edge
+   back to the face. Nothing for a tile that is not a wall or facade, or a wall with no open side. */
+function t3ReadFace(w,x,y){
+  const g=w.grid[y][x],m=TILES[g]||{};
+  if(m.kind!=="wall"&&m.kind!=="facade")return null;
+  const wh=0.55+(m.lift|0)*0.042;
+  for(const [dx,dy] of [[0,1],[0,-1],[1,0],[-1,0]]){
+    const nx=x+dx,ny=y+dy;
+    if(ny<0||ny>=w.H||nx<0||nx>=w.W||SOLID.has(w.grid[ny][nx]))continue;
+    return {ox:dx*0.66,oz:dy*0.66,h:Math.max(0.3,wh*0.6)};}
+  return null;}
 function t3Actors(){
   const list=[];
   const w=CW();
@@ -414,7 +428,14 @@ function t3Actors(){
   /* the door marker rides the same pool, lifted above the wall line so the door slab
      does not hide it */
   doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,f:g=>drawDoorMark(g,2,30,0,d.mark)}));
-  if(typeof readMarks==="function")readMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.15,f:g=>drawReadMark(g,2,30,0)}));
+  /* a poster on a WALL hangs on the wall's open face, mid-height, and is not pulled toward the
+     camera (that would push it inside the wall). It used to float 1.15 up wherever it stood, which
+     put the board beside la ventanilla above city hall's roof (#45: "poster next to teller is off,
+     a bit too high"). A readable thing that is not a wall (the desk) keeps the float. */
+  if(typeof readMarks==="function")readMarks().forEach(d=>{
+    const face=t3ReadFace(w,d.x,d.y);
+    if(face)list.push({x:d.x,y:d.y,h:face.h,ox:face.ox,oz:face.oz,fixed:true,mark:"read",f:g=>drawReadMark(g,2,30,-7)}); /* up:-7 centres the card on its anchor */
+    else list.push({x:d.x,y:d.y,h:1.15,mark:"read",f:g=>drawReadMark(g,2,30,0)});});
   const old=ctx;
   list.forEach((a,i)=>{
     const p=t3Sprite(i);
@@ -430,7 +451,9 @@ function t3Actors(){
     const ax=a.x+0.5,az=a.y+0.5;
     const ddx=T3.cam.position.x-ax,ddz=T3.cam.position.z-az,dl=Math.hypot(ddx,ddz)||1;
     const lift=stairLift(CW(),Math.round(a.x),Math.round(a.y)); /* on a climbing tread you stand that much higher (#62) */
-    p.spr.position.set(ax+ddx/dl*0.34,(a.h||0)+lift,az+ddz/dl*0.34);
+    if(a.fixed)p.spr.position.set(ax+(a.ox||0),(a.h||0)+lift,az+(a.oz||0)); /* pinned to a wall: stays put (#45) */
+    else p.spr.position.set(ax+ddx/dl*0.34,(a.h||0)+lift,az+ddz/dl*0.34);
+    p.spr.userData.mark=a.mark||"";
     p.spr.scale.set(36/32*1.12,48/32*1.12,1);
     p.spr.material.color.copy(T3.tint);
     p.spr.material.depthTest=!a.hero;p.spr.renderOrder=a.hero?999:0; /* the hero reads through walls; everyone else sits in the scene */

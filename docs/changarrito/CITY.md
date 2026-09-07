@@ -49,6 +49,13 @@ counts the total.
   issue takes both bodies home; a label that lands announces the move ("#40 moved to El
   Anexo"); an empty house's board shows who went home lately, from a read of the closed issues.
 
+- **2026-09-07 · EL CARTEL (`ch-v25`, engine `mq-v84`).** Owner from the street, #45: *"poster
+  next to teller is off, a bit too high."* The cream card that marks a readable thing floated
+  1.15 up wherever it stood, which on a street put it above city hall's roof. A poster on a wall
+  or facade now hangs on the wall's open side (the street side first), mid-face, and is not
+  pulled toward the camera; a readable desk keeps its float. Meridian's six office posters and
+  the six house boards take the same rule; both smokes pin it.
+
 ## Pending — what block one still owes
 
 - Block two's gate at (1,0); the decisions district sited by Don Güero when the owner asks.

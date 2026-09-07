@@ -999,6 +999,17 @@ const CANDIDATES = [
     const through = T3.pool.filter(p => p.live && p.spr.material.depthTest === false);
     if (through.length !== 1) problems.push(`${through.length} billboards draw through walls — the hero, and only the hero, must`);
     if (through.length === 1 && through[0].spr.renderOrder < 1) problems.push('the hero billboard is not drawn last');
+    // #45: a poster on a wall hangs on the wall's open face, mid-height. The six office posters
+    // on f2's north wall used to float 1.15 up — above the wall they are pinned to.
+    world = 'f2'; px = fx = 2; py = fy = 1; draw3d();
+    const wallTop = 0.55 + ((TILES['▭'] || {}).lift | 0) * 0.042;
+    const posters = T3.pool.filter(p => p.live && p.spr.userData.mark === 'read' && p.spr.position.z < 1.5);
+    if (posters.length !== 6) problems.push(`${posters.length} of 6 office posters stand on f2's north wall in 3D`);
+    posters.forEach(p => { const s = p.spr.position;
+      if (s.y + 0.2 > wallTop || s.y < 0.3) problems.push(`the poster at x ${s.x.toFixed(1)} is not mid-face on its wall (${s.y.toFixed(2)} up on a ${wallTop.toFixed(2)} wall)`);
+      if (s.z < 1.0) problems.push(`the poster at x ${s.x.toFixed(1)} hangs inside the wall, not on its open face (z ${s.z.toFixed(2)})`); });
+    const desk = T3.pool.filter(p => p.live && p.spr.userData.mark === 'read' && Math.abs(p.spr.position.x - 10.5) < 0.6);
+    if (desk.length !== 1 || desk[0].spr.position.y < 1.0) problems.push('the read mark on the old lead\'s desk no longer floats where it can be seen');
     // #57 (mq-v78): the actor card has headroom — a thought bubble above the head is not cut off
     if (T3.pool[0].c.height !== 48 * T3.K) problems.push('the actor card is not 48 tall');
     { const c = document.createElement('canvas'); c.width = 36; c.height = 48; const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 8);
