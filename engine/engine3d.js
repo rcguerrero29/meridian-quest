@@ -147,6 +147,7 @@ function t3Build(key){
       if(!SOLID.has(gch)||water){
         if(!DOORSET.has(ch)&&!stands(ch)){const tf=TILEDRAW[ch]||(water?TILEDRAW[gch]:null);
           if(tf)tf({sx,sy,x,y,canopy:()=>{}});} /* a `stand` tile is drawn standing, not baked into the floor */
+        if(typeof petalSpill==="function")petalSpill(w,x,y,sx,sy); /* petals off the bridge, onto water and floor */
         /* CONTACT SHADOW. Both 2D cameras darken the floor in front of a solid; the 3D ground
            never looked at its neighbours, so every building in the city met the pavement on a
            hard bright line and read as pasted on. Ambient light does not reach into the corner
@@ -419,6 +420,23 @@ function t3Build(key){
 
   T3.scene.add(grp);
 }
+/* the petal trail in 3D: a pool of little flat planes, three per drop, lying on the ground where
+   somebody walked in season, fading over a minute and a half (owner: "a trail forms behind characters") */
+function t3Petals(){
+  T3.petals=T3.petals||[];const L=(typeof PETALS!=="undefined")?PETALS:[],now=Date.now(),bands=(typeof art==="function")?art("bridge",BRIDGE_BANDS):BRIDGE_BANDS;
+  let i=0;
+  L.forEach(pt=>{if(pt.w!==world)return;const age=(now-pt.t)/PETAL_MS;if(age>=1)return;
+    let sd=pt.s;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+    const lift=stairLift(CW(),pt.x,pt.y);
+    for(let k=0;k<3;k++){
+      let p=T3.petals[i];
+      if(!p){p=new THREE.Mesh(new THREE.PlaneGeometry(0.14,0.085),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,side:THREE.DoubleSide,depthWrite:false}));
+        p.rotation.x=-Math.PI/2;p.userData={petal:true};T3.petals[i]=p;T3.scene.add(p);}
+      p.material.color.set(bands[(k+pt.s)%bands.length]);p.material.opacity=1-age*age;
+      p.position.set(pt.x+0.18+rnd()*0.64,0.012+lift,pt.y+0.18+rnd()*0.64);p.rotation.z=rnd()*Math.PI;
+      p.visible=true;i++;}});
+  for(;i<T3.petals.length;i++)T3.petals[i].visible=false;
+}
 /* actors: a pool of live-canvas sprites, repainted by the 2D artists every frame */
 function t3Sprite(i){
   let p=T3.pool[i];
@@ -547,6 +565,7 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
     t3Glow();
     t3Reveal();
     t3Actors();
+    t3Petals();
     t3Leash();
     T3.renderer.render(T3.scene,T3.cam);
     return true;

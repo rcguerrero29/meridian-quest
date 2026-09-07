@@ -1159,6 +1159,46 @@ const CANDIDATES = [
       if (mixed < 15) problems.push(`the deck in season reads as stripes, not petals (${mixed} of 22 rows vary)`);
     } else if (on.toLowerCase() !== S.art.bridge[0].toLowerCase()) problems.push(`the bridge's first band is ${on}, not the season's ${S.art.bridge[0]}`);
     if (on === off) problems.push('the season changed nothing on the bridge');
+    if (S.art.bridgeStyle === 'petals') { // owner, 2026-09-07: "full of the petals, they spill into water and the floor and a trail forms behind characters"
+      const keep = { cam: camMode, world, px, py };
+      const pal = S.art.bridge.map(h => h.toLowerCase());
+      const offCount = fn => { const c = document.createElement('canvas'); c.width = 32; c.height = 32; const o = ctx; ctx = c.getContext('2d'); try { fn(); } finally { ctx = o; }
+        const d = c.getContext('2d').getImageData(0, 0, 32, 32).data; let n = 0; for (let i = 0; i < d.length; i += 4) { const h = '#' + [d[i], d[i + 1], d[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''); if (pal.includes(h)) n++; } return n; };
+      if (typeof petalSpill !== 'function' || typeof petalDrop !== 'function' || typeof petalTrail !== 'function' || typeof bridgeDist !== 'function') problems.push('the engine has no petal spill or trail');
+      else {
+        seasonSet(id); const pk = WORLDS[PL.park];
+        const wt = (() => { for (let y = 0; y < pk.H; y++) for (let x = 0; x < pk.W; x++) if ((TILES[pk.rows[y][x]] || {}).kind === 'water' && bridgeDist(pk, x, y) === 1) return [x, y]; return null; })();
+        const ft = (() => { for (let y = 0; y < pk.H; y++) for (let x = 0; x < pk.W; x++) if (pk.rows[y][x] === '.' && bridgeDist(pk, x, y) === 2) return [x, y]; return null; })();
+        if (!wt || !ft) problems.push('no water beside the bridge or floor near it to spill onto');
+        else {
+          const nw = offCount(() => petalSpill(pk, wt[0], wt[1], 0, 0)), nf = offCount(() => petalSpill(pk, ft[0], ft[1], 0, 0));
+          if (nw < 12) problems.push(`the petals do not spill into the water beside the bridge (${nw} petal pixels)`);
+          if (nf < 5) problems.push(`the petals do not spill onto the floor near the bridge (${nf} petal pixels)`);
+          if (nf >= nw) problems.push('the spill is not thickest beside the deck');
+          if (offCount(() => petalSpill(pk, 20, 2, 0, 0)) > 0) problems.push('petals spill far from any bridge');
+        }
+        // every painter calls the spill for the ground: top, front, iso and the 3D bake
+        const spill0 = petalSpill, trail0 = petalTrail; let spills = 0, trails = 0;
+        petalSpill = function () { spills++; return spill0.apply(this, arguments); }; petalTrail = function () { trails++; return trail0.apply(this, arguments); };
+        world = PL.park; px = fx = PL.parkIn[0]; py = fy = PL.parkIn[1]; moving = false; held = null;
+        const per = {}; ['top', 'front', 'iso'].forEach(c => { spills = 0; camSet(c); draw(); per[c] = spills; });
+        spills = 0; camSet('3d'); t3Invalidate(); draw3d(); per['3d'] = spills;
+        petalSpill = spill0; petalTrail = trail0;
+        Object.entries(per).forEach(([c, n]) => { if (!n) problems.push('the ' + c + ' camera never spills petals onto the ground around the bridge'); });
+        if (!trails) problems.push('the top and front cameras never draw the trail');
+        // the trail: a finished step drops three petals, drawn on the ground, three flat planes in 3D
+        PETALS.length = 0; petalDrop(PL.park, PL.parkIn[0], PL.parkIn[1]);
+        if (offCount(() => petalTrail(PL.park, () => [0, 0])) < 4) problems.push('a dropped petal draws nothing on the ground');
+        PETALS.length = 0; moving = true; mt = 1; dir = 'right'; loop(performance.now() + 20); moving = false;
+        if (!PETALS.length) problems.push('finishing a step in season drops no petals (the trail never forms)');
+        camSet('3d'); draw3d(); const planes = T3.scene.children.filter(o => o.userData && o.userData.petal && o.visible);
+        if (planes.length < 3) problems.push(`the trail has ${planes.length} petals on the ground in 3D — three a drop`);
+        seasonSet('off'); PETALS.length = 0;
+        if (wt && offCount(() => petalSpill(pk, wt[0], wt[1], 0, 0)) > 0) problems.push('out of season the water beside the bridge still carries petals');
+        petalDrop(PL.park, 2, 6); if (PETALS.length) problems.push('out of season a step still drops petals');
+      }
+      camSet(keep.cam); world = keep.world; px = fx = keep.px; py = fy = keep.py;
+    }
     if (S.art.papel) { // "and papel picado": in 3D the season hangs cut-paper flags over the crossing; none out of season
       const keep = { cam: camMode, world, px, py };
       camSet('3d'); world = PL.park; px = fx = PL.parkIn[0]; py = fy = PL.parkIn[1]; moving = false; held = null;

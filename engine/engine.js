@@ -98,7 +98,7 @@ function wanderUpdate(dt){
       n.fx=n.x+(n.mv[0]-n.x)*n.mt;n.fy=n.y+(n.mv[1]-n.y)*n.mt;
       if(n.mt>=1){
         if(w.grid[n.y])w.grid[n.y][n.x]=".";
-        n.x=n.mv[0];n.y=n.mv[1];n.fx=n.x;n.fy=n.y;
+        n.x=n.mv[0];n.y=n.mv[1];n.fx=n.x;n.fy=n.y;petalDrop(world,n.x,n.y);
         if(w.grid[n.y])w.grid[n.y][n.x]="N";
         n.mv=null;n.wnext=now+1600+Math.random()*3200;}
       return;}
@@ -504,6 +504,7 @@ function drawIso(){
     if((hsh&7)<2)fc=shadeHex(fc,-0.045);
     isoDiamond(cx,cy,tc(fc));
     if(ch==="≈"){isoDiamond(cx,cy,tc("#54555B"));}
+    if(petalsOn()&&(!SOLID.has(w.grid[y][x])||(TILES[w.grid[y][x]]||{}).kind==="water")&&bridgeDist(w,x,y)<=3){ctx.save();ctx.translate(cx-ISW/4,cy-ISH/4);ctx.scale(0.5,0.5);petalSpill(w,x,y,0,0,1);ctx.restore();}
     else if(ch==="-"){isoDiamond(cx,cy,tc("#8F9096"));}
     else if(ch==="R"){ctx.save();ctx.translate(cx,cy);ctx.scale(0.75,0.75);ctx.translate(-cx,-cy);isoDiamond(cx,cy,tc(C.rug));ctx.restore();}
     else if(ch==="b"){[[ -7,0,"#D77FA8"],[3,-3,"#E7C25A"],[6,3,"#C9699E"]].forEach(f=>{
@@ -771,6 +772,36 @@ TILEDRAW["~"]=rc=>{const{sx,sy,x,y}=rc; /* river water: cool blue, drifting glin
       ctx.fillRect(sx+4,sy+8+ph*2,11,2);ctx.fillRect(sx+17,sy+21-ph*2,10,2);
       ctx.fillStyle="rgba(255,255,255,.25)";ctx.fillRect(sx+7,sy+9+ph*2,4,1);};
 const BRIDGE_BANDS=["#D95B5B","#E0A430","#E7C25A","#7A9A4E","#5E93BC","#8B6FC8"]; /* year-round */
+/* ---------- petals off the bridge (owner, 2026-09-07: "it should be full of the petals, they spill
+   into water and the floor and a trail forms behind characters") ----------
+   petalSpill: every ground painter (top, front, iso, the 3D bake) calls it after a tile's own art;
+   within three tiles of a bridge deck it strews petals, thickest beside the deck, thinning out —
+   onto water and floor alike, deterministic per tile. petalDrop: whoever finishes a step in season
+   leaves three petals on that tile; the trail fades over a minute and a half. Nothing without
+   art("bridgeStyle")==="petals". */
+const PETALS=[],PETAL_N=90,PETAL_MS=90000;
+function petalsOn(){return art("bridgeStyle","bands")==="petals";}
+function bridgeDist(w,x,y){ /* Chebyshev distance to the nearest deck tile, up to 3; cached per world */
+  if(!w._pd||w._pdW!==w.rows.join("\n")){w._pdW=w.rows.join("\n");const d={};
+    const decks=[];for(let yy=0;yy<w.H;yy++)for(let xx=0;xx<w.W;xx++)if((TILES[w.rows[yy][xx]]||{}).kind==="bridge")decks.push([xx,yy]);
+    decks.forEach(([bx,by])=>{for(let yy=by-3;yy<=by+3;yy++)for(let xx=bx-3;xx<=bx+3;xx++){const k=xx+","+yy,dd=Math.max(Math.abs(xx-bx),Math.abs(yy-by));if(d[k]===undefined||dd<d[k])d[k]=dd;}});
+    w._pd=d;}
+  const v=w._pd[x+","+y];return v===undefined?9:v;}
+function petalSpill(w,x,y,sx,sy,scale){
+  if(!petalsOn())return;const d=bridgeDist(w,x,y);if(d<1||d>3)return;
+  const bands=art("bridge",BRIDGE_BANDS),n=d===1?26:d===2?11:4,sc=scale||1;
+  let sd=((x|0)*911+(y|0)*271+3)|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+  for(let i=0;i<n;i++){const px=sx+rnd()*TS*sc,py=sy+rnd()*TS*sc,a=rnd()*Math.PI;
+    ctx.fillStyle=bands[(i+d)%bands.length];ctx.beginPath();ctx.ellipse(px,py,2*sc,1.2*sc,a,0,7);ctx.fill();}}
+function petalDrop(wid,x,y){if(!petalsOn())return;
+  PETALS.push({w:wid,x,y,t:Date.now(),s:((x*37+y*101+PETALS.length*13)|0)});if(PETALS.length>PETAL_N)PETALS.shift();}
+function petalTrail(wid,toScreen){ /* toScreen(x,y) → [sx,sy] of the tile's top-left in this camera */
+  if(!PETALS.length)return;const now=Date.now(),bands=art("bridge",BRIDGE_BANDS);
+  PETALS.forEach(pt=>{if(pt.w!==wid)return;const age=(now-pt.t)/PETAL_MS;if(age>=1)return;
+    const[sx,sy]=toScreen(pt.x,pt.y);let sd=pt.s;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+    ctx.globalAlpha=1-age*age;
+    for(let i=0;i<3;i++){ctx.fillStyle=bands[(i+pt.s)%bands.length];ctx.beginPath();ctx.ellipse(sx+6+rnd()*20,sy+6+rnd()*20,2,1.2,rnd()*Math.PI,0,7);ctx.fill();}
+    ctx.globalAlpha=1;});}
 TILEDRAW["^"]=rc=>{const{sx,sy,x,y}=rc; /* the rainbow bridge: walk the whole spectrum.
       The six bands are what a season recolours; planks and rails are design. One season may
       also STREW the deck (art("bridgeStyle")==="petals"): Día de Muertos lays cempasúchil petals
@@ -782,8 +813,8 @@ TILEDRAW["^"]=rc=>{const{sx,sy,x,y}=rc; /* the rainbow bridge: walk the whole sp
       if(art("bridgeStyle","bands")==="petals"){
         ctx.fillStyle="#6E4E30";ctx.fillRect(sx,sy+2.5,TS,TS-5); /* dark planks under the petals */
         let sd=((x|0)*73+(y|0)*131+7)|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
-        for(let i=0;i<38;i++){const px=sx+1+rnd()*(TS-2),py=sy+4+rnd()*(TS-8),a=rnd()*Math.PI;
-          ctx.fillStyle=bands[i%bands.length];ctx.beginPath();ctx.ellipse(px,py,2.1,1.3,a,0,7);ctx.fill();}
+        for(let i=0;i<70;i++){const px=sx+rnd()*TS,py=sy+3+rnd()*(TS-6),a=rnd()*Math.PI; /* FULL of petals (owner, 2026-09-07) */
+          ctx.fillStyle=bands[i%bands.length];ctx.beginPath();ctx.ellipse(px,py,2.2,1.35,a,0,7);ctx.fill();}
         ctx.globalAlpha=0.18;ctx.fillStyle="#FFF";
         for(let i=0;i<10;i++){ctx.beginPath();ctx.arc(sx+2+rnd()*(TS-4),sy+5+rnd()*(TS-10),0.7,0,7);ctx.fill();}
         ctx.globalAlpha=1;
@@ -1084,9 +1115,11 @@ function drawFront(){
     if((hsh&7)<2){ctx.globalAlpha=0.05;ctx.fillStyle="#000";ctx.fillRect(sx,sy,TS,TS);ctx.globalAlpha=1;}
     if(hsh%11===3){ctx.globalAlpha=0.08;ctx.fillStyle="#FFF";ctx.fillRect(sx+(hsh>>3)%26+2,sy+(hsh>>5)%26+2,2,2);ctx.globalAlpha=1;}
     if(!SOLID.has(w.grid[y][x])&&!standsUp(ch)){const tf=TILEDRAW[ch];if(tf)tf({sx,sy,x,y,canopy:queueCanopy});}
+    if(!SOLID.has(w.grid[y][x])||(TILES[w.grid[y][x]]||{}).kind==="water")petalSpill(w,x,y,sx,sy);
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
       ctx.fillStyle="rgba(15,12,20,.16)";ctx.fillRect(sx,sy,TS,8);}
   }
+  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);
   drawDecals(camX,camY);
   /* depth pass: facades, decor and actors interleaved by row, back to front */
   const R=[];
@@ -1197,10 +1230,12 @@ function draw(){
     if((hsh&7)<2){ctx.globalAlpha=0.05;ctx.fillStyle="#000";ctx.fillRect(sx,sy,TS,TS);ctx.globalAlpha=1;}
     if(hsh%11===3){ctx.globalAlpha=0.08;ctx.fillStyle="#FFF";ctx.fillRect(sx+(hsh>>3)%26+2,sy+(hsh>>5)%26+2,2,2);ctx.globalAlpha=1;}
     const tf=TILEDRAW[ch];if(tf)tf({sx,sy,x,y,canopy:queueCanopy});
+    if(!SOLID.has(w.grid[y][x])||(TILES[w.grid[y][x]]||{}).kind==="water")petalSpill(w,x,y,sx,sy);
     /* walls cast down: a soft shadow on the walkable tile below any solid one */
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
       ctx.fillStyle="rgba(15,12,20,.13)";ctx.fillRect(sx,sy,TS,6);}
   }
+  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);
   drawDecals(camX,camY);drawDecor(camX,camY);
   trees.forEach(([sx,sy])=>{ /* canopy pass: overhangs neighboring tiles, sways gently */
     const sw=Math.sin(Date.now()/900+sx)*1.2,cxT=sx+16+sw,cyT=sy+6;
@@ -2212,7 +2247,7 @@ function loop(ts){
   const dt=Math.min(50,ts-last);last=ts;
   if(moving){
     mt+=dt/240;bob+=dt/70;
-    if(mt>=1){moving=false;fx=px;fy=py;
+    if(mt>=1){moving=false;fx=px;fy=py;petalDrop(world,px,py);
       const pch=CW().rows[py][px];
       if(tryPortal(ts)){}
       else if(pch==="Y"&&ts>portalT){portalT=performance.now()+900;held=null;openTravel();}
