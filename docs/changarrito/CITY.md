@@ -41,15 +41,18 @@ counts the total.
   form gained a *What kind of work* dropdown; the six work labels went on every open issue by
   hand the same day. Approved by the owner on #69 (*"have fun with the organization"*).
 
+- **2026-09-07 · DOS CUERPOS (`ch-v24`, engine untouched).** The people moved in: the two
+  heaviest of each house stand on its doorstep *and* at its counter, the next two inside only,
+  the rest pinned on the house's board. Whoever has no work label waits in the plaza before
+  the hoarding at x0–1 (six at most; the rest on city hall's board as *sin domicilio*). The
+  hoarding's sign counts them, its board says BLOCK 2 SOON, its sheet lists them. A closed
+  issue takes both bodies home; a label that lands announces the move ("#40 moved to El
+  Anexo"); an empty house's board shows who went home lately, from a read of the closed issues.
+
 ## Pending — what block one still owes
 
-- **Dos cuerpos** (Don Güero's recommendation, accepted): the two heaviest of each house on its
-  doorstep *and* at its counter (four inside); decisions and bugs in the plaza before the
-  hoarding; a closed issue removes both bodies; the caps hold. **Next PR.**
-- **La casa vacía**: an empty house's board shows who went home recently. With the above.
-- **El domicilio**: a person with no work label stands in the plaza and city hall's board lists
-  them as *sin domicilio*; labelling them announces the move. With the above.
 - Block two's gate at (1,0); the decisions district sited by Don Güero when the owner asks.
+- Pili's faces for the six houses (block one reuses Meridian's shells with new names).
 
 ## Decided
 

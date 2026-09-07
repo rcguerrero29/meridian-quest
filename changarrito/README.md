@@ -124,9 +124,12 @@ in the middle block. Inside, a clerk with three lines: what the house is for, ho
 things have that address, what is on the desk. The sign over each door counts its house.
 
 An issue's address is its `work:` label, one of the six, in plain words. The request form has
-a *What kind of work* dropdown; the Labels button on any person changes it. The people
-themselves still stand on the street by kind for now; standing inside comes with the next part.
-The town's ledger is `docs/changarrito/CITY.md`.
+a *What kind of work* dropdown; the Labels button on any person changes it, and the town says
+where they moved. **Dos cuerpos (ch-v24):** the two heaviest people of each house stand on its
+doorstep *and* at its counter inside; the next two inside only; the rest are pinned on the
+house's board, which also shows who went home lately. Whoever has no work label waits in the
+plaza in front of the hoarding at the west end, block two's gate; city hall's board lists the
+overflow as *sin domicilio*. The town's ledger is `docs/changarrito/CITY.md`.
 
 ## The stall has an upstairs (ch-v12)
 
