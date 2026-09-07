@@ -840,20 +840,40 @@ function canopyDress(g,cxT,cyT){ /* the trees dressed for the night (owner, 2026
   g.fillStyle="#3A2E26";g.fillRect(cxT+4.6,cyT+9,0.8,4);drawCalaverita(g,cxT+1,cyT+13);}
 const BRIDGE_PETALS=["#7A2E12","#B8410E","#E2620F","#F2870F","#FBB024","#FFD972"]; /* embers to pale gold, dark first: a heap needs a value range (Pili, 2026-09-07) */
 function petalPal(){const b=art("bridge",null);return b&&b.length>=6?b:BRIDGE_PETALS;}
+const PETAL_PATH=(()=>{try{const p=new Path2D();p.moveTo(0,0);p.quadraticCurveTo(-1.9,-1.6,-1.5,-3.4);p.lineTo(-0.5,-4.2);p.lineTo(0,-3.6);p.lineTo(0.5,-4.2);p.lineTo(1.5,-3.4);p.quadraticCurveTo(1.9,-1.6,0,0);p.closePath();
+  const r=new Path2D();r.moveTo(0,-0.5);r.lineTo(0,-2.8);return {p,r};}catch(e){return null;}})();
 function petalShape(g,px,py,a,s,col,rib){ /* one cempasúchil petal (Pili, 2026-09-07): "not a lentil" — a fan, narrow at the
-  root, widening to a squared, notched tip, and a rib down the middle; the rib is what says petal */
-  g.save();g.translate(px,py);g.rotate(a);g.scale(s,s);
-  g.fillStyle=col;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(-1.9,-1.6,-1.5,-3.4);g.lineTo(-0.5,-4.2);g.lineTo(0,-3.6);g.lineTo(0.5,-4.2);g.lineTo(1.5,-3.4);g.quadraticCurveTo(1.9,-1.6,0,0);g.fill();
-  if(rib!==false){g.strokeStyle=rib||"rgba(60,20,5,.35)";g.lineWidth=0.6;g.beginPath();g.moveTo(0,-0.5);g.lineTo(0,-2.8);g.stroke();}
-  g.restore();}
-const DECK_PETALS=[2000,1700,1100]; /* the three passes of a deck tile: FIFTY times the first cut (owner, 2026-09-07: "multiply the amount of leaves times 10", then "do 50x the petals, it does look better") — baked once a tile, so the count costs nothing per frame */
+  root, widening to a squared, notched tip, and a rib down the middle; the rib is what says petal.
+  Tens of thousands of these bake a deck, so the path is built once (Path2D) and placed with one
+  transform — no save/restore, no path rebuilt per petal. */
+  const m=g.getTransform(),c=Math.cos(a)*s,sn=Math.sin(a)*s;
+  g.transform(c,sn,-sn,c,px,py);
+  if(PETAL_PATH){g.fillStyle=col;g.fill(PETAL_PATH.p);if(rib!==false){g.strokeStyle=rib||"rgba(60,20,5,.35)";g.lineWidth=0.6;g.stroke(PETAL_PATH.r);}}
+  else{g.fillStyle=col;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(-1.9,-1.6,-1.5,-3.4);g.lineTo(-0.5,-4.2);g.lineTo(0,-3.6);g.lineTo(0.5,-4.2);g.lineTo(1.5,-3.4);g.quadraticCurveTo(1.9,-1.6,0,0);g.fill();
+    if(rib!==false){g.strokeStyle=rib||"rgba(60,20,5,.35)";g.lineWidth=0.6;g.beginPath();g.moveTo(0,-0.5);g.lineTo(0,-2.8);g.stroke();}}
+  g.setTransform(m);}
+const DECK_PETALS=[2000,1700,1100],DECK_DEEP=43200; /* a deck tile: fifty times the first cut at once (owner, 2026-09-07: "multiply the amount of
+   leaves times 10", "do 50x the petals, it does look better"), then TEN times that ("definitely do like 10x the amount of petals for the
+   bridge") filled in behind the frame — 48,000 a tile would stall a phone for seconds if baked in one go, so the rest is drawn in
+   idle slices of twelve hundred (PETALDEEP) and the 3D lid re-bakes once when the last slice lands. Only the surface ever shows. */
+const PETALDEEP=[];let petalDeepTimer=0;
+function petalDeepQueue(c,seed,n,rn,rs){PETALDEEP.push({c,seed,left:n,done:0,y0:rn?2.5:0,y1:c.height-(rs?2.5:0)});petalDeepArm();}
+function petalDeepArm(){if(petalDeepTimer||!PETALDEEP.length)return;
+  const run=()=>{petalDeepTimer=0;petalDeepStep();if(PETALDEEP.length)petalDeepArm();else if(typeof t3Invalidate==="function")t3Invalidate();};
+  petalDeepTimer=(typeof requestIdleCallback==="function")?requestIdleCallback(run,{timeout:300}):setTimeout(run,16);}
+function petalDeepPending(){return PETALDEEP.reduce((a,j)=>a+j.left,0);}
+function petalDeepStep(chunk){chunk=chunk||1200;const j=PETALDEEP[0];if(!j)return 0;
+  const g=j.c.getContext("2d"),P=petalPal(),W=j.c.width;let sd=j.seed;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+  const n=Math.min(chunk,j.left);g.save();g.beginPath();g.rect(0,j.y0,W,j.y1-j.y0);g.clip();
+  for(let i=0;i<n;i++)petalShape(g,-3+rnd()*(W+6),-3+rnd()*(W+6),rnd()*Math.PI*2,1.0+rnd()*0.3,P[(j.done+i)%P.length]);
+  g.restore();j.left-=n;j.done+=n;j.seed=sd;if(!j.left)PETALDEEP.shift();return n;}
 const PETALCACHE=new Map();
 function petalBake(key,W,H,paint,seed){ /* petals are many and never move: bake a tile once (per season), blit after */
   const k=seasonNow()+"|"+key;let c=PETALCACHE.get(k);if(c)return c;
   if(PETALCACHE.size>400)PETALCACHE.clear();
   c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
   let sd=seed|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
-  paint(g,rnd);PETALCACHE.set(k,c);return c;}
+  paint(g,rnd);c.fresh=true;PETALCACHE.set(k,c);return c;}
 function bridgeEdges(x,y){ /* "10"/"01"/"11"/"00": does a rail stand on the north edge, on the south edge — none where the next tile is deck too */
   const w=CW();const isB=(ax,ay)=>!!(w&&w.rows[ay]&&(TILES[w.rows[ay][ax]]||{}).kind==="bridge");
   if(!w)return "11";const ew=(TILES[(w.rows[y-1]||"")[x]]||{}).kind==="water"||(TILES[(w.rows[y+1]||"")[x]]||{}).kind==="water"||!((TILES[(w.rows[y]||"")[x-1]]||{}).kind==="water"||(TILES[(w.rows[y]||"")[x+1]]||{}).kind==="water");
@@ -873,6 +893,15 @@ function petalSpill(w,x,y,sx,sy,scale){
     for(let i=0;i<n;i++){const px=rnd()*TS*sc,py=rnd()*TS*sc,a=rnd()*Math.PI*2;petalShape(g,px,py,a,1.0*sc,P[1+((i+d)%(P.length-1))]);}},((x|0)*911+(y|0)*271+3)|0);
   ctx.drawImage(c,sx,sy);}
 const HEROFEET={}; /* what the hero's shoes carry off the deck */
+/* the moment on the deck (owner, 2026-09-07, night: "if one hangs on the petals, the character picks one up and looks at it
+   saying something like 'we will meet once again, love...'"): stand still on the bridge in season for a breath and you
+   bend for a petal, hold it up, and say one of the pack's lines — once per crossing. The bridge is the park's; this is
+   what it is for. */
+let deckIdle=0,petalMoment=false,petalSaid=false;
+function petalMomentTick(dt){const w=CW();
+  if(!moving&&w&&petalsOn()&&bridgeDist(w,px,py)===0){deckIdle+=dt;
+    if(deckIdle>=2200&&!petalSaid){petalSaid=true;petalMoment=true;const L=(T().petalLines||[]);if(L.length)toast(L[Math.floor(Math.random()*L.length)],4200);}}
+  else{deckIdle=0;petalMoment=false;if(!w||bridgeDist(w,px,py)!==0)petalSaid=false;}}
 function petalDrop(wid,x,y,feet){ /* owner, 2026-09-07: the trail "for the bridge only" — a step on the deck scatters
   petals; the two steps after it still shed what the shoes carried; nowhere else does a step drop anything */
   if(!petalsOn())return;const w=WORLDS[wid];if(!w)return;const f=feet||HEROFEET;
@@ -910,6 +939,7 @@ TILEDRAW["^"]=rc=>{const{sx,sy,x,y}=rc; /* the rainbow bridge: walk the whole sp
           g.fillStyle=P[0];if(rn==="1")g.fillRect(0,0,TS,2.5);if(rs==="1")g.fillRect(0,TS-2.5,TS,2.5); /* the rails, in the heap's colour */
           for(let i=0;i<8;i++){const north=i%2===1;if(north?rn!=="1":rs!=="1")continue;petalShape(g,rnd()*TS,(north?1.5:TS-1.5)+rnd()*1.5,rnd()*Math.PI*2,0.8,P[3+(i%3)]);}},
           ((x|0)*73+(y|0)*131+7)|0);
+        if(c.fresh){c.fresh=false;const[rn,rs]=bridgeEdges(x,y).split("");petalDeepQueue(c,((x|0)*131+(y|0)*73+11)|0,DECK_DEEP,rn==="1",rs==="1");}
         ctx.drawImage(c,sx,sy);return;}
       ctx.fillStyle="#C9B99A";ctx.fillRect(sx,sy,TS,TS); /* plank base */
       bands.forEach((cc,i)=>{ctx.fillStyle=cc;ctx.fillRect(sx,sy+3+i*4.4,TS,4.4);});
@@ -2158,6 +2188,10 @@ function drawPerson(g,sx,sy,lk,o){
     g.fillStyle="#F2F1EA";g.beginPath();g.moveTo(sx+13,sy+9+bh);g.lineTo(sx+19,sy+9+bh);g.lineTo(sx+16,sy+16+bh);g.closePath();g.fill();
     g.fillStyle="#8E2F3C";g.fillRect(sx+15.2,sy+10.5+bh,1.6,5.5);
   }
+  if(o.hero&&petalMoment){ /* the arm comes up with a petal; you look at it */
+    g.fillStyle=lk.shirt;g.beginPath();g.roundRect(sx+21.5,sy+3+bh,2.6,9,1.3);g.fill();g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.7;g.stroke();
+    g.fillStyle=lk.skin;g.beginPath();g.arc(sx+22.8,sy+3+bh,1.5,0,7);g.fill();
+    petalShape(g,sx+23.6,sy+2.4+bh,Math.PI*0.85,1.6,petalPal()[3]);}
   g.fillStyle=lk.skin;g.beginPath();g.arc(sx+16,sy+5+bh,6.5,0,7);g.fill();
   g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.8;g.stroke();
   const st=lk.style||"cap",hx=sx+16,hy=sy+5+bh;
@@ -2455,6 +2489,7 @@ function loop(ts){
     }
     else{const[dx,dy]=DIRS[dir];fx=px-dx*(1-mt);fy=py-dy*(1-mt);}
   }else if(!tryPortal(ts))tryStep(); /* standing on a door whose cooldown just ran out: go through */
+  petalMomentTick(dt);
   dogUpdate(dt,ts);catUpdate(dt,ts);pigUpdate(dt,ts);loroTick(ts);critUpdate(dt,ts);ballUpdate(dt,ts);wanderUpdate(dt);fredCheck();
   if(!$("world").hidden)draw();
   requestAnimationFrame(loop);
