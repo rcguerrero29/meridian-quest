@@ -6,7 +6,7 @@ const WORLD_DEFS={
      "#.p..D.#.D....D.#c.#",
      "#......+........+..#",
      "#.j..D.#........####",
-     "#......#..RR...#.1.#",
+     "#......#..RR...#...#",
      "####+###..RR...#.l.#",
      "#......#.......+...#",
      "#.t.K..+...m...#####",
@@ -14,6 +14,9 @@ const WORLD_DEFS={
      "####+###...P...#.h.#",
      "#......#.......+...#",
      "#.a....+.......#####",
+     "##########+⊓⊓⊓⊓#####",
+     "#..........≡≡≡▲#####",
+     "#..................#",
      "##########E#########"],
  /* Floor 2 opens BARE, as signed (STORY.md ❗La oficina, 2026-09-02): the old lead's
     desk alone under the north wall, the stairs, and nothing else — the barrio furnishes
@@ -23,7 +26,7 @@ const WORLD_DEFS={
     and the line being laid — Nacho + Don Güero, 2026-09-02. */
  /* MID-MOVE since 2026-09-02 (owner: "for the move it should be mid"): four taped boxes
     (□, art.js), one of Don Güero's cones and a plant still in its pot. The arrival tile
-    (17,11) and the sight line from the stairs to the window stay clear — Nacho's
+    (14,14) and the sight line from the top of the flight to the window stay clear — Nacho's
     "nothing in the way" is an answer a player can pick, so it has to be true. */
  f2:["##▭#▭#▭##|||#▭#▭#▭##",
      "#.........D........#",
@@ -36,8 +39,11 @@ const WORLD_DEFS={
      "#..................#",
      "#...............C..#",
      "#................□□#",
-     "#.............□...1#",
+     "#.............□....#",
      "#..................#",
+     "#.........◺◺◺◺.....#",
+     "#........◺▼≡≡≡.....#",
+     "#.........◺◺◺◺.....#",
      "####################"],
  st:["BBBBBBBBBBBBBBEBBBBBBBBBBBBBBB",
      "Y............................2",
@@ -170,9 +176,13 @@ const WORLD_DEFS={
      "F..~~......g.....b.....F",
      "FFF~~FFFFFFFFFFFFFFFFFFF"]
 };
-const PORTALS={hq:{"1":{to:"f2",x:17,y:11,dir:"left",mark:"up"},"E":{to:"st",x:14,y:1,dir:"down"}},   /* the only flight in the city that CLIMBS — its arrow says so */
-               f2:{"1":{to:"hq",x:16,y:5,dir:"left"}},
-               st:{"E":{to:"hq",x:10,y:12,dir:"up"},"L":{to:"lc",x:10,y:10,dir:"up"},"O":{to:"lo",x:10,y:8,dir:"up"},"M":{to:"me",x:10,y:10,dir:"up"},"2":{to:"ex",x:1,y:3,dir:"right"}},
+/* la caja de escalera (#4, Don Güero's candidate B, walked in the town first, 2026-09-06): HQ grew
+   three rows south — a lobby at the front door, a stair hall behind the door at (10,13), the
+   flight east with its head ▲ at (14,14) the way up; the loft's ▼ at (10,14) the way down, the
+   deepest tile of a railed well. Coming in from the street you land on the landing (10,14). */
+const PORTALS={hq:{"▲":{to:"f2",x:14,y:14,dir:"left",mark:"up"},"E":{to:"st",x:14,y:1,dir:"down"}},   /* the only flight in the city that CLIMBS — its arrow says so */
+               f2:{"▼":{to:"hq",x:10,y:14,dir:"right"}},
+               st:{"E":{to:"hq",x:10,y:14,dir:"up"},"L":{to:"lc",x:10,y:10,dir:"up"},"O":{to:"lo",x:10,y:8,dir:"up"},"M":{to:"me",x:10,y:10,dir:"up"},"2":{to:"ex",x:1,y:3,dir:"right"}},
                ex:{"2":{to:"st",x:28,y:1,dir:"left"}},
                lc:{"L":{to:"st",x:6,y:4,dir:"up"}},
                lo:{"O":{to:"st",x:21,y:4,dir:"up"}},

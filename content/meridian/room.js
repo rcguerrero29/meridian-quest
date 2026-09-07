@@ -51,7 +51,7 @@ const INTERVIEW={
   hosts:[
     /* Nacho came up from Calle Principal to sketch the wall; he asks how the room
        should FEEL. His street body is gone on purpose — one Nacho, not two. Both hosts
-       stand where the stairs let you out can SEE them in 3D (arrival is (17,11)). */
+       stand where the stairs let you out can SEE them in 3D (arrival is (14,14), the top of the flight). */
     {id:"nacho",emoji:"🖌️",name:{en:"Nacho · Mural Painter",es:"Nacho · Muralista"},
      world:"f2",x:15,y:8,look:{shirt:"#4B7FB3",skin:"#C08356",hair:"#26202B",style:"afro"},
      talk:{en:"Before you unpack",es:"Antes de desempacar"}, /* was "An empty room" — it is not, since the boxes (Don Güero's proposal; Nacho may rename) */

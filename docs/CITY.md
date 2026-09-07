@@ -205,17 +205,18 @@ would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
-- ⏳ **❗La caja de escalera — SITED 2026-09-06 and BUILT IN THE TOWN FIRST (`mq-v75`, `ch-v12`).**
-  Don Güero's candidate B, the owner's *"sounds good don Guerito, go for it"* on #4: HQ and Floor 2
-  grow three rows SOUTH — a lobby at the front door, a stair hall behind a door at (10,13), a
-  four-tile mass at (11–14,13) carrying the flight in profile, three treads and a head ▲ at (14,14)
-  that is the portal up; upstairs the same footprint as a railed well with the way DOWN ▼ at
-  (10,14). Rows 0–12 untouched. Coming in from the street lands on the landing. Five engine glyphs
-  (`⊓ ≡ ▲ ▼ ◺`), so every pack gets a real flight. The town's stall carries it now with a bare
-  loft; **Meridian's maps change when the owner has walked it there** — that is the one thing
-  still open on this entry. `docs/meetings/2026-09-06-la-caja-de-escalera.md` has the three
-  candidates and why. The two earlier readings (the shaft at (18,5) in the 3×3 hall; stacking the
-  old stairs) are superseded and folded here.
+- ✅ **❗La caja de escalera — BUILT, town first (`mq-v75`/`ch-v12`), then Meridian (`mq-v81`, 2026-09-07).**
+  Don Güero's candidate B, the owner's *"sounds good don Guerito, go for it"* on #4, then *"the
+  stairs going up looks good"* after walking the town, then *"send the stairs to templates and MQ"*.
+  HQ and Floor 2 grew three rows SOUTH: a lobby at the front door (10,16), a stair hall behind the
+  door at (10,13), a four-tile mass at (11–14,13) carrying the flight in profile, three rising
+  treads and the head ▲ at (14,14) that is the portal up; upstairs a railed well — a hole in the
+  floor with the steps sunk toward the way DOWN ▼ at (10,14), railed on three sides (#62). Rows
+  0–12 untouched; the old `1` left Dana's closet (❗El escalón de Dana closes with a yes: she
+  stays). Coming in from the street lands on the landing (10,14). Five engine glyphs (`⊓ ≡ ▲ ▼ ◺`),
+  so every pack gets a real flight; the template is NEW-WORLD.md §3¾. Nolasco's `1` stays the
+  standing staircase down to the street — ❗El zaguán below is still his. The meeting notes:
+  `docs/meetings/2026-09-06-la-caja-de-escalera.md`.
 - ⏳ **❗El zaguán** *(Don Güero, 2026-09-04)* — Nolasco is a walkup, and today its street door
   and its staircase are the same connection wearing two different clothes: you go **up** through
   a door and come back **down** through stairs. `maps.js` records the rule it breaks, thirty
