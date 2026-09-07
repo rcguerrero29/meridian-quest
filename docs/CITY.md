@@ -205,16 +205,15 @@ would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
-- ⏳ **❗El zaguán** *(Don Güero, 2026-09-07, on #7 — "is this still an issue?")* — Nolasco's
-  is the last old `1` in the city: a door in on the avenue, a corner stair out. Keep it, make the
-  exit a door in the south wall (half an hour, a second floor stepping onto a pavement), or build
-  the engine's well (rows 4–6, x9–14 fit; it displaces the rug and two chairs). His recommendation:
-  the well. Four smoke pins go red first (the arrow test, §31's camera subject, the `MAPCOL['1']`
-  gold, §28's arrival).
-- ⏳ **❗El despacho chico** *(Don Güero, 2026-09-07, with ❗El zaguán)* — the well eats a quarter
-  of the smallest office in the city. Move the waiting corner west (a sixteenth) or grow `no` to
-  the city's standard 20×10 (a third of a sitting). His recommendation: grow it — the owner's own
-  words on 2026-09-05 were "make the building bigger, fit in a proper staircase."
+- ✅ **❗El zaguán — BUILT the owner's way (`mq-v92`, 2026-09-07).** Owner on #7: *"i think you
+  expand the building for meridian in the right side and add the staircase through a door from
+  that room."* Not the well in the corner: Nolasco's office grew EAST by a stair room (16×8 →
+  24×8), a doorway `+` at (15,2) between the rooms, the engine's railed well at (16–20,4) with
+  `▼` at (17,4) the way down to the avenue; the office's desks, cabinets, rug and chairs did not
+  move. The avenue door `$` is the foot of the stairs — you come up unseen and appear at the top
+  (21,4), facing the well. The last old `1` left the city; the stand-tile smoke (§31) now proves
+  its category on the street's cone. ❗El despacho chico is moot: nothing in the office was
+  displaced.
 - ✅ **❗La reja — BUILT (`mq-v91`, 2026-09-07).** Owner on #9: *"work on this please."* The
   casita's `▦` no longer draws a door on a wall: it is a closed reja — the recess, iron bars, a
   chain and a padlock, the step kept so it is the same house; the template part is still `door`,
@@ -243,7 +242,7 @@ would have none left unless looks key by npc instead.
   so every pack gets a real flight; the template is NEW-WORLD.md §3¾. Nolasco's `1` stays the
   standing staircase down to the street — ❗El zaguán below is still his. The meeting notes:
   `docs/meetings/2026-09-06-la-caja-de-escalera.md`.
-- ⏳ **❗El zaguán** *(Don Güero, 2026-09-04)* — Nolasco is a walkup, and today its street door
+- ✅ *(closed 2026-09-07 with ❗El zaguán above — the stair room)* **❗El zaguán** *(Don Güero, 2026-09-04)* — Nolasco is a walkup, and today its street door
   and its staircase are the same connection wearing two different clothes: you go **up** through
   a door and come back **down** through stairs. `maps.js` records the rule it breaks, thirty
   lines below the code that breaks it. His recommendation: draw the climb at both ends (half an

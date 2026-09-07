@@ -107,7 +107,7 @@ const { chromium } = require('playwright-core');
     // ship as a picture), and a glyph on it that is laid in this pack yet no longer flat fails too,
     // so the list is kept honest as things get sides (TILESIDE) or become boxes.
     // 2026-09-07: 17 kinds were flat; the desk (D) and the shelving (S) got sides the same day.
-    const FLAT_KNOWN = ['1', '3', '4', '5', '7', '9', 'A', 'C', 'H', 'I', 'J', 'P', 'W', 'X', 'Y'];
+    const FLAT_KNOWN = ['3', '4', '5', '7', '9', 'A', 'C', 'H', 'I', 'J', 'P', 'W', 'X', 'Y']; /* the old stair '1' left the city with #7 */
     const laid = new Set(); Object.values(WORLDS).forEach(w => w.rows.forEach(r => r.split('').forEach(ch => laid.add(ch))));
     Object.keys(flat).forEach(g => { if (!FLAT_KNOWN.includes(g)) P.push('"' + g + '" (' + ((TILES[g] || {}).kind || '?') + ') stands in 3D as a flat picture in ' + [...flatIn[g]].join(',') + ' — give it a side view (TILESIDE) so it becomes a box; nothing new may ship flat (#39)'); });
     // a pack may give a letter another meaning (the town's I is a facade): only a glyph laid here

@@ -153,16 +153,18 @@ const WORLD_DEFS={
      "#.P..............P.#",
      "##########*#########"],
  /* Nolasco Tax & Notario: a walkup. Cabinets and the licenciado's desk NW, a north
-    window onto the same back lot as f2, Bere's intake counter SW, a waiting rug with two
-    chairs, and the stairs in the SE corner — the way down. */
- no:["#######|########",
-     "#▯▯.D....S.S...#",
-     "#...n..........#",
-     "#............P.#",
-     "#..............#",
-     "#KK......RR....#",
-     "#Pe......⊔⊔..1.#",
-     "################"],
+    window, the waiting corner SW. The avenue door `$` is the FOOT of the stairs; you come up
+    unseen and appear at the top, in the stair room east of the office (#7, the owner's plan,
+    2026-09-07): a door at (15,2) between the rooms, the engine's railed well at (16–20,4) with
+    ▼ at (17,4) the way down. The office itself did not move. */
+ no:["#######|################",
+     "#▯▯.D....S.S...#.......#",
+     "#...n..........+.......#",
+     "#............P.#.◺◺◺◺..#",
+     "#..............#◺▼≡≡≡..#",
+     "#KK......RR....#.◺◺◺◺..#",
+     "#Pe......⊔⊔....#.......#",
+     "########################"],
  pk:["FFF~~FFFFFFFFFFFFFFFFFFF",
      "F..~~...g....J.....b...F",
      "F..~~..................F",
@@ -192,9 +194,12 @@ const PORTALS={hq:{"▲":{to:"f2",x:14,y:14,dir:"left",mark:"up"},"E":{to:"st",x
                ta:{"%":{to:"st",x:23,y:12,dir:"up"}},
                pa:{"@":{to:"ex",x:6,y:1,dir:"down"}},
                li:{"*":{to:"ex",x:12,y:1,dir:"down"}},
-               no:{"1":{to:"st",x:25,y:1,dir:"down"}}};
+               /* #7 (owner, 2026-09-07: "expand the building for meridian in the right side and add the
+                  staircase through a door from that room"): the office grew EAST; a door at (15,2) opens into
+                  a stair room whose railed well goes down to the avenue — the last old `1` left the city */
+               no:{"▼":{to:"st",x:25,y:1,dir:"down"}}};
 PORTALS.st["%"]={to:"ta",x:10,y:10,dir:"up"};
-PORTALS.st["$"]={to:"no",x:12,y:6,dir:"left"};
+PORTALS.st["$"]={to:"no",x:21,y:4,dir:"left"}; /* the avenue door is the foot of Nolasco's stairs: you appear at the top, in the stair room, facing the well */
 PORTALS.ex["@"]={to:"pa",x:10,y:8,dir:"up"};
 PORTALS.ex["*"]={to:"li",x:10,y:8,dir:"up"};
 /* the four storefront ribbons — each rises when its district opens (GROWTH.ribbons) */

@@ -2736,14 +2736,16 @@ const CANDIDATES = [
       const keepW = world, keepX = px, keepY = py, keepC = camMode, keepFx = fx, keepFy = fy;
       // the camera follows fx/fy, not px/py — move both or the stairs are off-screen and every
       // count below is zero for the wrong reason
-      world = 'no'; px = fx = 12; py = fy = 6;       // beside Nolasco's stairs, the one '1' left in the city (#4 gave HQ the engine's flight)
+      // #7 (2026-09-07): the last old '1' left the city (Nolasco's well is the engine's flight now), so the
+      // stand-tile category is proven on the CONE at (4,4) on the street — walkable, drawn standing, kickable
+      world = 'st'; px = fx = 5; py = fy = 4;
 
-      const f = spy('1'); camSet('front'); drawFront();
+      const f = spy('C'); camSet('front'); drawFront();
       if (f.plan) problems.push('the front camera still paints the stairs flat on the floor (' + f.plan + ' calls)');
       if (!f.side) problems.push('the front camera never draws the stairs standing');
       f.restore();
 
-      const t = spy('1'); camSet('top'); draw();
+      const t = spy('C'); camSet('top'); draw();
       if (!t.plan) problems.push('the top camera lost the stairs entirely — it is the one camera a plan view is right for');
       t.restore();
 
@@ -2759,7 +2761,8 @@ const CANDIDATES = [
         const d = doorMarks().find(m => m.ch === ch); return d ? (d.mark || 'down') : null; };
       if (markAt('hq', 13, 14, '▲') !== 'up') problems.push('HQ\'s flight climbs to the office and its marker still points down');
       if (markAt('f2', 11, 14, '▼') !== 'down') problems.push('the office\'s way down does not say so');
-      if (markAt('no', 12, 6, '1') !== 'down') problems.push('Nolasco\'s stairs go down to the street and their marker does not say so');
+      if (markAt('no', 18, 4, '▼') !== 'down') problems.push('Nolasco\'s well goes down to the avenue and its marker does not say so (#7)');
+      if (Object.values(WORLDS).some(w => w.rows.some(r => r.includes('1')))) problems.push('the old stair glyph is still laid somewhere — Nolasco\'s was the last (#7)');
       world = keepW; px = keepX; py = keepY;
       return problems;
     });
@@ -3057,7 +3060,7 @@ const CANDIDATES = [
         const c = document.createElement('canvas'); c.width = 32; c.height = 32; const o = ctx; ctx = c.getContext('2d');
         try { TILEDRAW[g]({ sx: 0, sy: 0, x: 12, y: 13, canopy: () => {} }); if (TILESIDE[g]) TILESIDE[g]({ sx: 0, sy: 0, x: 12, y: 13, canopy: () => {} }); } catch (e) { problems.push('stair glyph ' + g + ' throws: ' + e.message); } finally { ctx = o; }
         const laid = Object.keys(WORLDS).filter(id => WORLDS[id].rows.join('').includes(g)).sort().join(',');
-        const wantIn = { '⊓': 'hq', '≡': 'f2,hq', '▲': 'hq', '▼': 'f2', '◺': 'f2' }[g];
+        const wantIn = { '⊓': 'hq', '≡': 'f2,hq,no', '▲': 'hq', '▼': 'f2,no', '◺': 'f2,no' }[g]; /* #7: Nolasco's stair room */
         if (laid !== wantIn) problems.push('the stair glyph ' + g + ' is laid in [' + laid + '], expected [' + wantIn + ']'); });
       if (!SOLID.has('⊓') || !SOLID.has('◺') || SOLID.has('≡') || SOLID.has('▲') || SOLID.has('▼')) problems.push('the stair glyphs have the wrong solidity');
       // mq-v70: `roams` lets a document-carrier walk (the town's crier). No Meridian station says
