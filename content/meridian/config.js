@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v84";
+const GAMEV="mq-v85";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -9,6 +9,24 @@ const LEVELS=[0,45,90,120];
    renderer falls back to front-profile by itself if 3D cannot run on the device. */
 const CAMDEF="3d";
 const MAXXP=830;
+/* Which of this world's rooms play which ROLE for the engine (#25, the PLACES seam). The engine
+   never assumes a room name; it asks this table. Meridian's answer is the engine's default table,
+   key for key (the smoke fails the build if they drift), written out here so the metadata lives
+   with the content — owner, 2026-09-07: "update here and meridian and template so we have a
+   good amount of metadata that includes these". A role you leave out falls back to the default.
+   The town's copy is changarrito/content/config.js; the template is docs/NEW-WORLD.md §3. */
+const PLACES={
+  home:"hq",                 /* the room a new game and a broken save land in */
+  spawn:[10,11],             /* the tile in `home` you land on — must be walkable */
+  street:"st",               /* the map's world: the 📍 dot follows you here */
+  park:"pk",                 /* the room the leash leads to; nothing else happens there */
+  parkIn:[2,6,"right"],      /* where you arrive in the park, and which way you face */
+  parkDog:[3,6],             /* where the dog you brought stands when you arrive */
+  parkDogHome:[8,6],         /* where that dog drifts back to while you play */
+  parkAdopt:[[17,4],[19,4],[17,2],[19,2],[16,3],[20,3]], /* free spots an adopted dog may take, tried in order */
+  friends:["st","me","lc","lo"], /* the worlds whose people a dog may befriend — only worlds you have */
+  upstairs:"f2"              /* the floor the map marks ⇧ */
+};
 /* Districts: a district's quest pack, and how many answers play its ending.
    `need` is deliberately LOWER than the pack size — the city is a template, so the
    bar is data, not a constant in the engine. Retune it here.
