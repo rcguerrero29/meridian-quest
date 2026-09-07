@@ -805,6 +805,21 @@ colors".
 
 ---
 
+### 15.4½ THE BRIDGE IS A GRIEF MINI GAME — SAID 2026-09-07, VERSIONS NOT YET PLANNED
+
+Owner, the night of the petals: *"essentially — this is a custom mini game to help deal with the loss
+of a dog. i didnt want it that way but it is cool and helpful so we will have a couple different
+versions of it as it is the months close to it already."* So the bridge in the park is not dressing;
+it is the thing. Built on the night: the deck of cempasúchil (the bridge is the park's only), the
+trail that is the bridge's, the spill into the water, and **the moment** — stand still on the deck in
+season for a breath and you bend for a petal, hold it up, and say one of `T().petalLines` ("We will
+meet once again, love…"), once per crossing (`petalMomentTick`, `petalMoment`; the hero's arm in
+`drawPerson`). **❗Las versiones del puente** — a couple of versions for the months around the date:
+Nacho's call, planning only. Candidates to argue: (a) the crossing at dusk, candles along the rails,
+Sonny waiting on the far bank and walking you back; (b) the ofrenda at the foot of the bridge with the
+empty frame, the petal path from Doña Tencha's door; (c) a night where everyone on Calle Dos crosses
+with you. Nothing built until the owner picks.
+
 ### 15.5 ERROR LOG — BUILT 2026-09-07 (`mq-v94`, with El Portero, #8) — as designed below, surfaced on the gate sheet in his hut rather than an Exporter tab
 
 **Blind spot it must close first:** 3D failure is swallowed in four places and leaves
