@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v87";
+const GAMEV="mq-v88";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -104,19 +104,25 @@ const GROWTH={
   wardrobeNpc:"xochi"
 };
 /* SEASONS — a season changes COLOUR, never design (owner, 2026-09-01: "if someone
-   changes the palette, it can change but keep the general design"). The engine knows
-   only that there is a current season and that it may override world-art keys through
-   art(key, fallback); the names, dates and colours live here. Arrives on its own by
-   the calendar (`from`/`to` are [month, day], inclusive, and may wrap the new year);
-   Settings offers "by the calendar", "year-round", or any season by name.
-   One season, named for Día de Muertos (signed 2026-09-01, IDEAS §15.9) — the bridge
-   is a memorial crossing, so the palette is remembrance: cempasúchil orange, papel
-   picado pink and purple, candle yellow, teal. DRAFT palette — the owner signs it off.
-   `bridge` is the proving run; jacaranda, awnings and the light wash widen it later. */
+   changes the palette, it can change but keep the general design"), with one signed
+   exception: Día de Muertos may DRESS the bridge (owner, 2026-09-07: "marigold, and petals
+   too and papel picado - do it alll!!!"). The engine knows only that there is a current
+   season and that it may override world-art keys through art(key, fallback); the names,
+   dates and colours live here. Arrives on its own by the calendar (`from`/`to` are
+   [month, day], inclusive, and may wrap the new year); Settings offers "by the calendar",
+   "year-round", or any season by name — the by-name switch is the owner's way to test it
+   before October ("a manual way too because i will want to test").
+   Keys the engine reads: `bridge` (the six bands), `bridgeStyle` ("petals" strews the deck
+   with cempasúchil instead of bands), `papel` (a palette hangs papel picado over the
+   crossing in 3D), `sky` (the north window's dusk). Palette SIGNED 2026-09-07 ("marigold"):
+   a cempasúchil gradient, gold to deep orange, after the marigold bridge of Día de Muertos —
+   the petals laid as a path so the souls find their way home. */
 const SEASONS={
   muertos:{label:{en:"Día de Muertos",es:"Día de Muertos"},from:[10,18],to:[11,3],
-    art:{bridge:["#E0483C","#F07C24","#F2B705","#E8478F","#7B4BA8","#2FA5A0"],
-         sky:"#E8A24A"}} /* the north window's sky at dusk — Don Güero, 2026-09-02; draft like the rest */
+    art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],
+         bridgeStyle:"petals",
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"], /* cut paper: pink, teal, gold, purple, orange, white */
+         sky:"#E8A24A"}} /* the north window's sky at dusk — Don Güero, 2026-09-02 */
 };
 const CHAPTERS=[
  /* need:12 of 16 — ANY twelve, from anywhere in the district. week1 is not "the

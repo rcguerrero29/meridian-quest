@@ -1137,8 +1137,31 @@ const CANDIDATES = [
     if (seasonNow() !== id) problems.push(`forcing season "${id}" did not make it current`);
     if (art('bridge', 'X') !== S.art.bridge) problems.push('with the season forced, art("bridge") is not the pack palette');
     const on = bake();
-    if (on.toLowerCase() !== S.art.bridge[0].toLowerCase()) problems.push(`the bridge's first band is ${on}, not the season's ${S.art.bridge[0]}`);
+    if (S.art.bridgeStyle === 'petals') {
+      // owner, 2026-09-07: "marigold, and petals too" — the deck is strewn with the season's petals:
+      // many pixels of the palette scattered over the tile, not six stripes
+      const c = document.createElement('canvas'); c.width = 32; c.height = 32;
+      const o = ctx; ctx = c.getContext('2d'); try { TILEDRAW['^']({ sx: 0, sy: 0, x: 3, y: 6, canopy: () => {} }); } finally { ctx = o; }
+      const px = c.getContext('2d').getImageData(0, 0, 32, 32).data, pal = S.art.bridge.map(h => h.toLowerCase());
+      let hits = 0; for (let i = 0; i < px.length; i += 4) { const h = '#' + [px[i], px[i + 1], px[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''); if (pal.includes(h)) hits++; }
+      if (hits < 60) problems.push(`in season the deck shows ${hits} petal pixels of the palette — it is not strewn with petals`);
+      // stripes paint every row one colour edge to edge; petals leave no row uniform
+      let mixed = 0; for (let yy = 5; yy < 27; yy++) { const seen = new Set(); for (let xx = 2; xx < 30; xx++) { const i = (yy * 32 + xx) * 4; seen.add([px[i], px[i + 1], px[i + 2]].join()); } if (seen.size > 1) mixed++; }
+      if (mixed < 15) problems.push(`the deck in season reads as stripes, not petals (${mixed} of 22 rows vary)`);
+    } else if (on.toLowerCase() !== S.art.bridge[0].toLowerCase()) problems.push(`the bridge's first band is ${on}, not the season's ${S.art.bridge[0]}`);
     if (on === off) problems.push('the season changed nothing on the bridge');
+    if (S.art.papel) { // "and papel picado": in 3D the season hangs cut-paper flags over the crossing; none out of season
+      const keep = { cam: camMode, world, px, py };
+      camSet('3d'); world = PL.park; px = fx = PL.parkIn[0]; py = fy = PL.parkIn[1]; moving = false; held = null;
+      seasonSet(id); draw3d();
+      const flags = T3.group.children.filter(o => o.userData && o.userData.flag), poles = T3.group.children.filter(o => o.userData && o.userData.pole);
+      if (flags.length < 5) problems.push(`in season the bridge carries ${flags.length} papel picado flags in 3D — it needs a string of five per deck tile`);
+      if (poles.length < 2) problems.push('the papel picado has no poles to hang from');
+      if (flags.some(f => f.position.y < 1.5)) problems.push('a papel picado flag hangs at head height — it must be strung high over the crossing');
+      seasonSet('off'); draw3d();
+      if (T3.group.children.some(o => o.userData && o.userData.papel)) problems.push('out of season the papel picado is still up');
+      camSet(keep.cam); world = keep.world; px = fx = keep.px; py = fy = keep.py;
+    }
     // auto by date: inside the window it arrives on its own; outside, it is gone
     seasonSet('auto');
     const [fm, fd] = S.from, [tm, td] = S.to;

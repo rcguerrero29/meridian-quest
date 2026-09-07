@@ -2,7 +2,7 @@
    street. docs/story/el-changarrito.md. This pack trains no role, carries no curriculum and
    awards no grade that means anything about the player (§7½). */
 const GAMENAME="El Changarrito";
-const GAMEV="ch-v28 · engine mq-v87";   /* the town's own version, and the engine it was built on */
+const GAMEV="ch-v29 · engine mq-v88";   /* the town's own version, and the engine it was built on */
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;
@@ -29,6 +29,13 @@ const PLACES={
 /* ch-v13 — the owner turned the clock off (2026-09-06: "ok turn it off"): the town reads when it
    opens, after every write, and when you press ↻ at la ventanilla's window. REFRESH_MS>0 brings
    the timer back; SHOW_PERMITS=true brings the open PRs back to her card. Nothing was deleted. */
+/* The town keeps Meridian's Día de Muertos season for Sonny's park, so the owner can walk the
+   marigold bridge here first (Settings → Season, by name). Same keys as Meridian's config. */
+const SEASONS={
+  muertos:{label:{en:"Día de Muertos",es:"Día de Muertos"},from:[10,18],to:[11,3],
+    art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],bridgeStyle:"petals",
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],sky:"#E8A24A"}}
+};
 const REFRESH_MS=0;
 const SHOW_PERMITS=false;
 /* the reader's look (ch-v15, engine mq-v77): "night" is the purple dark paper the owner liked in

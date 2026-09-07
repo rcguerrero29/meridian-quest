@@ -290,6 +290,28 @@ function t3Build(key){
           post.position.set(cx+(ew?al:sd*off),BRIDGEH+RH/2,cz+(ew?sd*off:al));post.userData={bridgeRail:true,x,y};grp.add(post);});
         const bar=new THREE.Mesh(new THREE.BoxGeometry(ew?1:PW,0.05,ew?PW:1),rail);
         bar.position.set(cx+(ew?0:sd*off),BRIDGEH+RH,cz+(ew?sd*off:0));bar.userData={bridgeRail:true,bar:true,x,y};grp.add(bar);});
+      /* papel picado (owner, 2026-09-07: "and papel picado"): when the season hands a palette
+         through art("papel"), a string is hung ACROSS the crossing on each deck tile, high over
+         the head, between two thin poles at the rails — five little cut-paper flags a string,
+         both faces coloured, so it reads from every camera stop. Nothing without a season. */
+      const pap=art("papel",null);
+      if(pap&&pap.length){
+        const PH=1.9,pole=wallMat["^pole"]||(wallMat["^pole"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#5A4330")}));
+        const strg=wallMat["^string"]||(wallMat["^string"]=new THREE.MeshBasicMaterial({color:new THREE.Color("#3A2E26")}));
+        /* the string runs ALONG the crossing, so the flags face the way you walk and read from the
+           default camera stop; a pole stands only where the run ends (the neighbour is not a deck) */
+        const isB=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&(TILES[w.rows[ay][ax]]||{}).kind==="bridge";
+        [-1,1].forEach(sd=>{if(isB(x+(ew?sd:0),y+(ew?0:sd)))return;
+          const pl=new THREE.Mesh(new THREE.BoxGeometry(0.05,PH,0.05),pole);
+          pl.position.set(cx+(ew?sd*0.48:0),PH/2,cz+(ew?0:sd*0.48));pl.userData={papel:true,pole:true,x,y};grp.add(pl);});
+        const st=new THREE.Mesh(new THREE.BoxGeometry(ew?1:0.02,0.02,ew?0.02:1),strg);
+        st.position.set(cx,PH,cz);st.userData={papel:true,string:true,x,y};grp.add(st);
+        for(let i=0;i<5;i++){const t=-0.4+i*0.2,col=pap[(i+x+y)%pap.length];
+          const fm=wallMat["^papel"+col]||(wallMat["^papel"+col]=new THREE.MeshBasicMaterial({color:new THREE.Color(col),side:THREE.DoubleSide}));
+          const fl=new THREE.Mesh(new THREE.PlaneGeometry(0.16,0.17),fm);
+          fl.position.set(cx+(ew?t:0),PH-0.1,cz+(ew?0:t));if(!ew)fl.rotation.y=Math.PI/2;
+          fl.userData={papel:true,flag:true,x,y};grp.add(fl);}
+      }
       continue;
     }
     if(!SOLID.has(gch))continue;
