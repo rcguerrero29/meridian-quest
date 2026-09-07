@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v88";
+const GAMEV="mq-v89";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -122,7 +122,17 @@ const SEASONS={
     art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],
          bridgeStyle:"petals",
          papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"], /* cut paper: pink, teal, gold, purple, orange, white */
-         sky:"#E8A24A"}} /* the north window's sky at dusk — Don Güero, 2026-09-02 */
+         sky:"#E8A24A"}}, /* the north window's sky at dusk — Don Güero, 2026-09-02 */
+  /* NOCHE DE ALEBRIJES — the owner's second mode (2026-09-07: "another mode where they turn into
+     little alebrije colors and i get a dia de los muertos face paint color"). No dates: picked by
+     name in Settings → Season, never by the calendar. Carries the Muertos dressing, and adds
+     `alebrije` (a palette every animal is striped in — an alebrije is a real animal in impossible
+     colours) and `facepaint` (calavera paint on the hero: base, accent round the eyes, dark). */
+  alebrije:{label:{en:"Noche de alebrijes",es:"Noche de alebrijes"},
+    art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],bridgeStyle:"petals",
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],sky:"#E8A24A",
+         alebrije:["#FF3D7F","#00C2D1","#FFD400","#8A2BE2","#39FF14","#FF6A00"],
+         facepaint:{base:"#F4F1EA",accent:"#F28C28",dark:"#2B2536"}}}
 };
 const CHAPTERS=[
  /* need:12 of 16 — ANY twelve, from anywhere in the district. week1 is not "the

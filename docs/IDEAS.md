@@ -785,7 +785,9 @@ cempasúchil gradient, strews the deck with petals (`art("bridgeStyle")==="petal
 `TILEDRAW["^"]`, so every camera and the 3D bake agree), and hangs papel picado over the
 crossing in 3D (`art("papel")`, poles and five flags a tile). By the calendar Oct 18 – Nov 3,
 or by name in Settings → Season, which is how the owner tests it before October. The town
-carries the same season for Sonny's park. Not built: the arch.
+carries the same season for Sonny's park. Not built: the arch. **And a second mode the same day,
+Noche de alebrijes (`mq-v89`)**: no dates, picked by name — every animal striped in alebrije
+colours where its own pixels are (`art("alebrije")`), calavera paint on the hero (`art("facepaint")`).
 Coco is the reference, not the source: the tradition (petal paths, cut paper) is everybody's;
 Disney's characters and designs are not used.
 

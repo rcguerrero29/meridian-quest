@@ -1179,6 +1179,35 @@ const CANDIDATES = [
     const row = document.getElementById('seasonRow');
     if (!row) problems.push('no #seasonRow in Settings');
     else if (![...row.querySelectorAll('button')].some(b => b.dataset.sn === id)) problems.push(`Settings has no button for season "${id}"`);
+    // NOCHE DE ALEBRIJES (owner, 2026-09-07): a second mode, by name only — every animal striped in
+    // the palette, calavera paint on the hero's face. Off, nothing of it remains.
+    const ale = Object.entries(SEASONS).find(([k, v]) => v.art && v.art.alebrije);
+    if (!ale) problems.push('no season hands an alebrije palette');
+    else { const [aid, A] = ale;
+      if (A.from || A.to) problems.push('the alebrije mode is on the calendar — it is a mode you pick, not a season that arrives');
+      if (!A.art.facepaint) problems.push('the alebrije mode paints no face');
+      const sonny = CRIT.find(c => c.kind === 'beagle' && c.name === 'Sonny');
+      if (!sonny) problems.push('no Sonny to paint');
+      else { const keep = { cam: camMode, world, px, py };
+        const pal = A.art.alebrije.map(h => h.toLowerCase());
+        const count = (c, want) => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0;
+          for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 250) continue; const h = '#' + [d[i], d[i + 1], d[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''); if (want.includes(h)) n++; } return n; };
+        const draw = () => { camSet('3d'); world = sonny.world; px = fx = sonny.x - 1; py = fy = sonny.y; moving = false; held = null; T3.yaw = 0; draw3d(); draw3d(); };
+        const dogOf = () => T3.pool.find(p => p.live && p.spr.material.depthTest !== false && Math.abs(p.spr.position.x - (sonny.fx + 0.5)) < 0.7 && Math.abs(p.spr.position.z - (sonny.fy + 0.5)) < 0.9);
+        const heroOf = () => T3.pool.find(p => p.live && p.spr.material.depthTest === false);
+        seasonSet(aid); draw();
+        const dog = dogOf(), hero = heroOf();
+        if (!dog) problems.push('Sonny\'s billboard was not found beside the hero');
+        else if (count(dog.c, pal) < 15) problems.push(`in the alebrije mode Sonny wears ${count(dog.c, pal)} pixels of the palette — he is not an alebrije`);
+        // the calavera base is a colour no skin or shirt wears: count its pixels on the hero's card
+        const base = [A.art.facepaint.base.toLowerCase()];
+        if (!hero) problems.push('no hero billboard in the alebrije mode');
+        else if (count(hero.c, base) < 8) problems.push(`the hero's card in the alebrije mode shows ${count(hero.c, base)} pixels of the calavera base ${A.art.facepaint.base} — no face paint`);
+        seasonSet('off'); draw();
+        const dog0 = dogOf(), hero0 = heroOf();
+        if (dog0 && count(dog0.c, pal) > 0) problems.push('with the mode off, Sonny still wears alebrije colours');
+        if (hero0 && count(hero0.c, base) > 0) problems.push('with the mode off, the hero still wears the calavera paint');
+        camSet(keep.cam); world = keep.world; px = fx = keep.px; py = fy = keep.py; } }
     seasonSet(pick0);
     return problems;
   });

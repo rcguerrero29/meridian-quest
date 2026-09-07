@@ -468,7 +468,7 @@ function t3Actors(){
   /* hero:true — drawn through whatever stands between them and the camera (#22: "a wall between
      you and the camera hides you in 3D"). The four camera stops put a wall in front of the hero
      often; the person you are steering must never vanish behind one. */
-  list.push({x:fx,y:fy,hero:true,f:g=>drawPerson(g,2,6,look,{dir:t3ScreenDir(dir),bob:moving?Math.sin(bob)*2:0,moving})});
+  list.push({x:fx,y:fy,hero:true,f:g=>drawPerson(g,2,6,look,{dir:t3ScreenDir(dir),bob:moving?Math.sin(bob)*2:0,moving,hero:true})});
   /* the door marker rides the same pool, lifted above the wall line so the door slab
      does not hide it */
   doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,f:g=>drawDoorMark(g,2,30,0,d.mark)}));
