@@ -229,7 +229,7 @@ const MERCADO=[[13,1,"Z"],[13,2,"Z"],[13,3,"Z"],[13,4,"Z"],[13,5,"Z"],[13,6,"M"]
    The engine hardcodes nothing about Meridian's buildings. A new business is a
    content edit: give it a door glyph, a mini-map colour, a label, and a dot.
    (The full per-glyph tile registry is queued with the graphics-prep refactor.) */
-const DOORS="+ELOM%@*$";                       /* glyphs painted as a door */
+const DOORS="+ELOM%@*$⌂";                      /* glyphs painted as a door — ⌂ is a HOME's front door (#10): keyed by where it stands, not by its letter, so every casa may wear it */
 /* DOORLOOK — what tells one door from another, by glyph. The engine draws one door
    body; this colours it for where it leads, so a shop entrance is not the same brown
    as an office door (the cold read, IDEAS §15.8, found all five pixel-identical).
@@ -242,9 +242,10 @@ const DOORLOOK={E:{wood:"#4F5474",wood2:"#5F6588",frame:"#2E3147",glass:true}, /
                 "%":{wood:"#7C8590",wood2:"#8E98A3",frame:"#3A3F46"},           /* Taller: steel — TILEART draws the roll-up over it */
                 "@":{wood:"#D9A441",wood2:"#E8B85A",frame:"#7A4E17",glass:true}, /* La Espiga: wheat */
                 "*":{wood:"#3FA3A0",wood2:"#52B8B4",frame:"#1F5A58",glass:true}, /* Velázquez: teal */
-                "$":{wood:"#6E2F4A",wood2:"#84405E",frame:"#3A1728",glass:true}}; /* Nolasco: burgundy, frosted */
+                "$":{wood:"#6E2F4A",wood2:"#84405E",frame:"#3A1728",glass:true}, /* Nolasco: burgundy, frosted */
+               "⌂":{wood:"#8A5A2B",wood2:"#A26A35",frame:"#4A2E17",glass:false}}; /* a home on Calle Dos: plain pine, no glass */
 const SOLIDX="ZSHI~9|□=6780&!▣▯⊔○▭▤▦▩▨";        /* solid glyphs this pack adds (~ water, 9 doghouse, | window, □ box, and the four parcels' tiles) */
-const MAPCOL={"1":"#E0B45C","▭":"#6E6A80","▤":"#E8DFC4","▦":"#9E5442","▩":"#C9A77C","▨":"#BE9A72",  /* the legend says "doors & stairs in gold" and the plan painted them grey */
+const MAPCOL={"1":"#E0B45C","⌂":"#8A5A2B","▭":"#6E6A80","▤":"#E8DFC4","▦":"#9E5442","▩":"#C9A77C","▨":"#BE9A72",  /* the legend says "doors & stairs in gold" and the plan painted them grey */
   Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D",
               "|":"#6E638A",  /* window: shades to the wall-top colour, so 3D gives it no darker cap */
               "□":"#C8A277",  /* moving box: cardboard, paler than the produce crate so the map never confuses them */

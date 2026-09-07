@@ -1481,7 +1481,7 @@ realistic. not perfect but so if needed it can be upgraded."* Removed the same d
 is now in `docs/OWNER.md` as settled. The test is data-driven rather than a promise: **every
 trolley destination must be a world that actually contains a trolley tile.** Rails or no stop.
 
-### 15.22 EL MAESTRO CONSTRUCTOR — BUILDING FROM A TEMPLATE — BUILT 2026-09-03
+### 15.22 EL MAESTRO CONSTRUCTOR — BUILDING FROM A TEMPLATE — BUILT 2026-09-03 · doors by place and a room per lot, 2026-09-07 (#10, `mq-v93`)
 
 Owner: *"one day we want to assign him a house template that he can build and just add some
 random customizations"* and *"design it but make sure the architecture is able to handle more

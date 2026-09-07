@@ -42,7 +42,7 @@ const { chromium } = require('playwright-core');
     if (!WORLDS || !Object.keys(WORLDS).length) P.push('no worlds');
     Object.entries(WORLDS).forEach(([id, w]) => {
       if (!w.rows.every(r => r.length === w.W)) P.push(id + ': rows are not all the same width');
-      Object.entries(PORTALS[id] || {}).forEach(([ch, p]) => {
+      (typeof portalsOf === 'function' ? portalsOf(id) : Object.entries(PORTALS[id] || {}).map(([ch, p]) => ({ ch, p }))).forEach(({ ch, p }) => { /* #10: by glyph and by place */
         if (!WORLDS[p.to]) { P.push(id + ':' + ch + ' portals to a missing world ' + p.to); return; }
         if (!walk(WORLDS[p.to], p.x, p.y)) P.push(id + ':' + ch + ' lands on a blocked tile in ' + p.to + ' (' + p.x + ',' + p.y + ')');
       });

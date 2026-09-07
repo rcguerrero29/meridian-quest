@@ -2387,7 +2387,8 @@ const CANDIDATES = [
           if (r.pick.yard !== undefined) problems.push('a pot was put where the door swings'); } }
       if (!sawSkip) problems.push('never rolled the door that skips the yard — the when() rule is untested');
       // PINNED: a saved pick survives a template that gains a new option
-      const one = BUILDS[0] || { id: 'pin-probe', tpl: t, world: 'ex', x: 0, y: 0, seed: 'pin' };
+      // a lot whose template offers a choice of door; the casa's door is fixed (it is the link), so probe the casita
+      const one = BUILDS.find(bd => (BUILDTPL[bd.tpl].parts || []).some(pt => pt.id === 'door' && pt.pick)) || { id: 'pin-probe', tpl: 'casita', world: 'ex', x: 0, y: 0, seed: 'pin' };
       const before = resolveBuild(one).pick;
       bldPicks[one.id] = { ...before, door: before.door === 'left' ? 'right' : 'left' };
       const after = resolveBuild(one).pick;
@@ -2421,6 +2422,35 @@ const CANDIDATES = [
       // and every lot the pack has declared is one the engine accepts — a refused lot must never
       // ship silently (Don Güero on #8: the suite fails the build)
       BUILDS.forEach(bd => { const spec = resolveBuild(bd); const bad = spec && buildSafe(spec); if (!spec || bad) problems.push('the lot ' + bd.id + ' is refused: ' + (bad || 'no template')); });
+      // #10 La llave: a template may LINK a lot's door to a room it carries. Doña Chelo's casa on Calle Dos
+      // is the first: her door is a portal keyed by where it stands, the room is a world of its own named
+      // after the lot, her exit leads back to the doorstep, she has a name and three lines, and the whole
+      // thing is reachable from the street.
+      if (typeof portalAt !== 'function' || typeof portalsOf !== 'function') problems.push('the engine has no coordinate-portal seam (portalAt / portalsOf)');
+      else {
+        const lot = BUILDS.find(bd => bd.tpl === 'casa');
+        if (!lot) problems.push('no casa lot is declared — nothing on Calle Dos can be entered');
+        else {
+          const id = lot.id, door = portalAt(lot.world, lot.x + 1, lot.y);
+          if (!door || door.to !== id) problems.push('the casa\'s front door does not open into its own room (' + JSON.stringify(door) + ')');
+          const room = WORLDS[id];
+          if (!room) problems.push('the casa has no room of its own in WORLDS');
+          else {
+            if (!isSolidAt(id, door.x, door.y) === false) problems.push('the casa\'s landing is not walkable');
+            const back = portalsOf(id).find(o => o.p.to === lot.world);
+            if (!back) problems.push('the room has no way back out');
+            else if (back.p.x !== lot.x + 1 || back.p.y !== lot.y + 1) problems.push('the way out does not land on the doorstep (' + back.p.x + ',' + back.p.y + ')');
+            if (!room.npcs.length || !room.npcs[0].chat) problems.push('nobody lives in the casa');
+            else if (!NPCN.en[room.npcs[0].npc] || !NPCN.es[room.npcs[0].npc] || !UI.en.chat[room.npcs[0].npc] || !UI.es.chat[room.npcs[0].npc]) problems.push('the neighbour has no name or no lines in both languages');
+            if (!UI.en.locs[id] || !UI.es.locs[id] || !UI.en.arrive[id] || !UI.es.arrive[id]) problems.push('the casa has no name or arrival line in both languages');
+            const reach = auditReach().filter(m => m.includes(id)); if (reach.length) problems.push('the casa is not reachable: ' + reach.join('; '));
+            if (room.rows.some(r => r.includes('▦'))) problems.push('the room has a reja inside it');
+          }
+          // a second lot from the same template gets a room of its own — the point of keying doors by place
+          const two = resolveBuild({ id: 'casa-probe', tpl: 'casa', world: lot.world, x: lot.x + 8, y: lot.y, seed: 'probe' });
+          if (!two || !two.links || two.links.length !== 1 || two.links[0].id !== 'casa-probe') problems.push('a second lot from the casa template does not carry its own link');
+        }
+      }
       return problems;
     });
     fails.push(...b);
@@ -2457,7 +2487,7 @@ const CANDIDATES = [
       }));
       seen.forEach(g => {
         if (g === '.') return;
-        if (!TILEDRAW[g] && !TILEART[g]) problems.push('a template lays a glyph nothing can draw: ' + g);
+        if (!TILEDRAW[g] && !TILEART[g] && !DOORSET.has(g)) problems.push('a template lays a glyph nothing can draw: ' + g);
         if (SOLID.has(g) && !TILES[g]) problems.push('a solid template glyph has no metadata: ' + g);
         // #9: no glyph a template can lay is solid AND a door AND portalless everywhere — a door drawn on a wall
         if (SOLID.has(g) && (TILES[g] || {}).kind === 'door' && !Object.values(PORTALS).some(P => P[g])) problems.push('a template lays a solid door no world opens: ' + g);
@@ -2479,7 +2509,7 @@ const CANDIDATES = [
       // trolley, and the place a new hero starts
       const arrivals = {};
       const add = (w, x, y) => { if (!WORLDS[w]) return; (arrivals[w] = arrivals[w] || []).push([x, y]); };
-      Object.values(PORTALS).forEach(P => Object.values(P).forEach(p => { if (p.to) add(p.to, p.x, p.y); }));
+      Object.keys(WORLDS).forEach(id => portalsOf(id).forEach(({ p }) => { if (p.to) add(p.to, p.x, p.y); })); /* #10: portals by glyph and by place */
       (typeof TRV !== 'undefined' ? TRV : []).forEach(d => add(d.w, d.x, d.y));
       add('hq', 10, 11);                    // where a new hero starts
       add('pk', 2, 6);                      // the park is entered on a leash, not through a door
