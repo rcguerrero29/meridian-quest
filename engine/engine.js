@@ -100,7 +100,7 @@ function wanderUpdate(dt){
       n.fx=n.x+(n.mv[0]-n.x)*n.mt;n.fy=n.y+(n.mv[1]-n.y)*n.mt;
       if(n.mt>=1){
         if(w.grid[n.y])w.grid[n.y][n.x]=".";
-        n.x=n.mv[0];n.y=n.mv[1];n.fx=n.x;n.fy=n.y;petalDrop(world,n.x,n.y);
+        n.x=n.mv[0];n.y=n.mv[1];n.fx=n.x;n.fy=n.y;petalDrop(world,n.x,n.y,n);
         if(w.grid[n.y])w.grid[n.y][n.x]="N";
         n.mv=null;n.wnext=now+1600+Math.random()*3200;}
       return;}
@@ -823,7 +823,11 @@ function petalSpill(w,x,y,sx,sy,scale){
   let sd=((x|0)*911+(y|0)*271+3)|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
   for(let i=0;i<n;i++){const px=sx+rnd()*TS*sc,py=sy+rnd()*TS*sc,a=rnd()*Math.PI;
     ctx.fillStyle=bands[(i+d)%bands.length];ctx.beginPath();ctx.ellipse(px,py,2*sc,1.2*sc,a,0,7);ctx.fill();}}
-function petalDrop(wid,x,y){if(!petalsOn())return;
+const HEROFEET={}; /* what the hero's shoes carry off the deck */
+function petalDrop(wid,x,y,feet){ /* owner, 2026-09-07: the trail "for the bridge only" — a step on the deck scatters
+  petals; the two steps after it still shed what the shoes carried; nowhere else does a step drop anything */
+  if(!petalsOn())return;const w=WORLDS[wid];if(!w)return;const f=feet||HEROFEET;
+  if(bridgeDist(w,x,y)===0)f.pc=2;else if(f.pc>0)f.pc--;else return;
   PETALS.push({w:wid,x,y,t:Date.now(),s:((x*37+y*101+PETALS.length*13)|0)});if(PETALS.length>PETAL_N)PETALS.shift();}
 function petalTrail(wid,toScreen){ /* toScreen(x,y) → [sx,sy] of the tile's top-left in this camera */
   if(!PETALS.length)return;const now=Date.now(),bands=art("bridge",BRIDGE_BANDS);
@@ -2060,12 +2064,12 @@ function drawRobot(g,sx,sy,lk,o){
     g.fillStyle=lamp;g.fillRect(sx+12.3+ex,sy+3.3,2.4,2);g.fillRect(sx+17.3+ex,sy+3.3,2.4,2); /* amber lamps */
     g.fillStyle="#2B2536";g.fillRect(sx+13,sy+8,6,1);} /* a slot for a mouth; it does not move */
 }
-const FACE_DEF={looks:[
-  {id:"clasica",name:{en:"Calaca clásica",es:"Calaca clásica"},base:"#F4F1EA",ring:"#F28C28",dark:"#2B2536"},
+const FACE_DEF={looks:[ /* the engine's own five, the same recipe as the packs': light base, black sockets, nose, stitches — always */
+  {id:"clasica",name:{en:"Calaca clásica",es:"Calaca clásica"},base:"#F4F1EA",ring:"#2B2536",dark:"#2B2536",brow:"dots",mark:"#2B2536"},
   {id:"cempasuchil",name:{en:"Cempasúchil",es:"Cempasúchil"},base:"#FFF3D6",ring:"#FF6A00",dark:"#3A1F12",petals:true,brow:"dots",mark:"#FFC300"},
-  {id:"catrina",name:{en:"Catrina",es:"Catrina"},base:"#F6F2E8",ring:"#8A3FE8",dark:"#1B1230",brow:"tear"},
-  {id:"colibri",name:{en:"Colibrí",es:"Colibrí"},base:"#EAF7F5",ring:"#00D9E8",dark:"#12324A",grinRing:true},
-  {id:"fuego",name:{en:"Fuego",es:"Fuego"},base:"#2B2536",ring:"#FFC300",dark:"#F6F2E8",brow:"flame",mark:"#FF2E88"}]};
+  {id:"catrina",name:{en:"Catrina",es:"Catrina"},base:"#F6F2E8",ring:"#1B1230",dark:"#1B1230",tall:true,brow:"tear",mark:"#8A3FE8",lip:"#C8102E"},
+  {id:"turquesa",name:{en:"Turquesa",es:"Turquesa"},base:"#EAF7F5",ring:"#00B8C4",dark:"#12324A",brow:"dots",mark:"#00B8C4",chin:"#00B8C4"},
+  {id:"corazon",name:{en:"Corazón",es:"Corazón"},base:"#FBEFEA",ring:"#D9342B",dark:"#2B2536",nose:"heart",mark:"#D9342B",brow:"web"}]};
 function faceLooks(){const a=art("facepaint",null);if(!a)return null;
   if(a.looks&&a.looks.length)return a.looks;if(a.base)return [{id:"pack",name:{en:"Calavera",es:"Calavera"},base:a.base,ring:a.accent||"#F28C28",dark:a.dark||"#2B2536"}];return FACE_DEF.looks;}
 function faceLookFor(who,hero){const L=faceLooks();if(!L)return null;
@@ -2095,23 +2099,29 @@ function drawPerson(g,sx,sy,lk,o){
   g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.8;g.stroke();
   const st=lk.style||"cap",hx=sx+16,hy=sy+5+bh;
   /* calavera paint for EVERYONE when the season hands art("facepaint") — owner, 2026-09-07: "everyone
-     should also have that, not just me... have only a number of changes - 5 perhaps". Five looks
-     (Pili's: four light bases in different hues and one value-inverted, so a crowd reads from ten
-     tiles): base over the face, ring round the eye sockets (petals in one look), the sockets, the
-     nose, the stitched grin, a brow mark only where the hair leaves a forehead. The hero picks;
-     a person's look comes from who they are, never from where they stand. Hair and eyes go on over it. */
+     should also have that, not just me... have only a number of changes - 5 perhaps". Five looks, and
+     every one keeps the four marks that make a skull at this size (a Día de Muertos makeup review,
+     2026-09-07): a LIGHT base over the whole face, two big dark sockets (ringed in colour or petals,
+     tall ovals for the Catrina), the nose (a heart in one look), the stitched grin (a red lip line in
+     one). The extras go where there is room: dots or a web on a brow the hair leaves bare, a tear under
+     the eye, a dot on the chin. Never a dark base — owner: "having one with all dark is a bit of a no
+     no - not really even looking like a skeleton". The hero picks; a person's look comes from who they
+     are, never from where they stand. Hair and eyes go on over it. */
   const fp=faceLookFor(o.who,!!o.hero);
   const paint=()=>{const brow=["buzz","fade","bald","flat"].includes(st);
     g.save();g.beginPath();g.arc(hx,hy,6.5,0,7);g.clip();
     g.fillStyle=fp.base;g.fillRect(hx-7,hy-7,14,14);
     g.fillStyle=fp.ring;[-2.8,2.8].forEach(dx=>{if(fp.petals){for(let k=0;k<6;k++){g.beginPath();g.arc(hx+dx+Math.cos(k*Math.PI/3)*1.9,hy+0.6+Math.sin(k*Math.PI/3)*1.9,0.9,0,7);g.fill();}}
       else{g.beginPath();g.arc(hx+dx,hy+0.6,2.2,0,7);g.fill();}});
-    g.fillStyle=fp.dark;[-2.8,2.8].forEach(dx=>{g.beginPath();g.arc(hx+dx,hy+0.6,1.6,0,7);g.fill();});
-    g.beginPath();g.moveTo(hx-0.9,hy+3.9);g.lineTo(hx+0.9,hy+3.9);g.lineTo(hx,hy+2.6);g.closePath();g.fill();
-    g.fillStyle=fp.grinRing?fp.ring:fp.dark;g.fillRect(hx-3.2,hy+5.2,6.4,0.8);[-2.2,-0.8,0.6,2].forEach(dx=>g.fillRect(hx+dx,hy+4.6,0.6,1.9));
-    if(fp.brow==="tear"){g.fillStyle=fp.ring;g.beginPath();g.moveTo(hx-2.8,hy+2.4);g.lineTo(hx-2.1,hy+3.6);g.lineTo(hx-3.5,hy+3.6);g.closePath();g.fill();}
+    g.fillStyle=fp.dark;[-2.8,2.8].forEach(dx=>{g.beginPath();if(fp.tall)g.ellipse(hx+dx,hy+0.7,1.5,2.1,0,0,7);else g.arc(hx+dx,hy+0.6,1.6,0,7);g.fill();}); /* the sockets */
+    if(fp.nose==="heart"){g.fillStyle=fp.mark||fp.ring;g.beginPath();g.arc(hx-0.6,hy+3,0.65,0,7);g.arc(hx+0.6,hy+3,0.65,0,7);g.fill();g.beginPath();g.moveTo(hx-1.2,hy+3.2);g.lineTo(hx+1.2,hy+3.2);g.lineTo(hx,hy+4.4);g.closePath();g.fill();}
+    else{g.fillStyle=fp.dark;g.beginPath();g.moveTo(hx-0.9,hy+3.9);g.lineTo(hx+0.9,hy+3.9);g.lineTo(hx,hy+2.6);g.closePath();g.fill();}
+    if(fp.lip){g.fillStyle=fp.lip;g.fillRect(hx-2.6,hy+4.5,5.2,1.1);} /* the Catrina's red mouth under the stitches */
+    g.fillStyle=fp.dark;g.fillRect(hx-3.2,hy+5.2,6.4,0.8);[-2.2,-0.8,0.6,2].forEach(dx=>g.fillRect(hx+dx,hy+4.6,0.6,1.9)); /* the stitched grin, always dark */
+    if(fp.chin){g.fillStyle=fp.chin;g.beginPath();g.arc(hx,hy+7,0.7,0,7);g.fill();}
+    if(fp.brow==="tear"){g.fillStyle=fp.mark||fp.ring;g.beginPath();g.moveTo(hx-2.8,hy+2.9);g.lineTo(hx-2.1,hy+4.2);g.lineTo(hx-3.5,hy+4.2);g.closePath();g.fill();}
     else if(brow&&fp.brow==="dots"){g.fillStyle=fp.mark||fp.ring;[-1.8,0,1.8].forEach((dx,i)=>{g.beginPath();g.arc(hx+dx,hy-3.3-(i===1?0.6:0),0.55,0,7);g.fill();});}
-    else if(brow&&fp.brow==="flame"){g.fillStyle=fp.mark||fp.ring;g.beginPath();g.moveTo(hx-1,hy-2.6);g.lineTo(hx,hy-4.6);g.lineTo(hx+1,hy-2.6);g.closePath();g.fill();}
+    else if(brow&&fp.brow==="web"){g.strokeStyle=fp.mark||fp.ring;g.lineWidth=0.5;g.beginPath();g.moveTo(hx-2.2,hy-4.6);g.lineTo(hx+2.2,hy-2.4);g.moveTo(hx+2.2,hy-4.6);g.lineTo(hx-2.2,hy-2.4);g.moveTo(hx-2.4,hy-3.5);g.lineTo(hx+2.4,hy-3.5);g.stroke();}
     g.restore();g.fillStyle=lk.hair;};
   if(fp)paint();
   /* hair v3: clipped to the actual skull, so every style fits clean */
@@ -2354,7 +2364,7 @@ function loop(ts){
   const dt=Math.min(50,ts-last);last=ts;
   if(moving){
     mt+=dt/240;bob+=dt/70;
-    if(mt>=1){moving=false;fx=px;fy=py;petalDrop(world,px,py);
+    if(mt>=1){moving=false;fx=px;fy=py;petalDrop(world,px,py,HEROFEET);
       const pch=CW().rows[py][px];
       if(tryPortal(ts)){}
       else if(pch==="Y"&&ts>portalT){portalT=performance.now()+900;held=null;openTravel();}

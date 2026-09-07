@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v98";
+const GAMEV="mq-v99";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -160,12 +160,17 @@ const SEASONS={
            {id:"selva",name:{en:"Jungle",es:"Selva"},tint:"#7CFF3D",pat:"#12B39B",accent:"#FFC300",wings:false},
            {id:"cempasuchil",name:{en:"Marigold",es:"Cempasúchil"},tint:"#FFC300",pat:"#FF6A00",accent:"#FF2E88",wings:false},
            {id:"medianoche",name:{en:"Midnight",es:"Medianoche"},tint:"#8A3FE8",pat:"#FF2E88",accent:"#00D9E8",wings:true}]},
-         facepaint:{looks:[ /* five calavera looks for everyone: four light bases in different hues, one inverted (fuego) */
-           {id:"clasica",name:{en:"Calaca clásica",es:"Calaca clásica"},base:"#F4F1EA",ring:"#F28C28",dark:"#2B2536"},
+         facepaint:{looks:[ /* five calavera looks for everyone. Every one keeps what makes a face read as a
+           skull at twelve pixels: a light base, black sockets, the nose, the stitched grin (a review of Día de
+           Muertos makeup, 2026-09-07: white bone + black voids IS the symbol; a dark base reads as a mask —
+           owner: "having one with all dark is a bit of a no no"). The looks differ in the first thing the eye
+           catches: black outlines only · marigold petal rings · a purple tear and red lips · teal rings and
+           dots · a red heart nose and a web on the brow. */
+           {id:"clasica",name:{en:"Calaca clásica",es:"Calaca clásica"},base:"#F4F1EA",ring:"#2B2536",dark:"#2B2536",brow:"dots",mark:"#2B2536"},
            {id:"cempasuchil",name:{en:"Cempasúchil",es:"Cempasúchil"},base:"#FFF3D6",ring:"#FF6A00",dark:"#3A1F12",petals:true,brow:"dots",mark:"#FFC300"},
-           {id:"catrina",name:{en:"Catrina",es:"Catrina"},base:"#F6F2E8",ring:"#8A3FE8",dark:"#1B1230",brow:"tear"},
-           {id:"colibri",name:{en:"Colibrí",es:"Colibrí"},base:"#EAF7F5",ring:"#00D9E8",dark:"#12324A",grinRing:true},
-           {id:"fuego",name:{en:"Fuego",es:"Fuego"},base:"#2B2536",ring:"#FFC300",dark:"#F6F2E8",brow:"flame",mark:"#FF2E88"}]}}}
+           {id:"catrina",name:{en:"Catrina",es:"Catrina"},base:"#F6F2E8",ring:"#1B1230",dark:"#1B1230",tall:true,brow:"tear",mark:"#8A3FE8",lip:"#C8102E"},
+           {id:"turquesa",name:{en:"Turquesa",es:"Turquesa"},base:"#EAF7F5",ring:"#00B8C4",dark:"#12324A",brow:"dots",mark:"#00B8C4",chin:"#00B8C4"},
+           {id:"corazon",name:{en:"Corazón",es:"Corazón"},base:"#FBEFEA",ring:"#D9342B",dark:"#2B2536",nose:"heart",mark:"#D9342B",brow:"web"}]}}}
 };
 const CHAPTERS=[
  /* need:12 of 16 — ANY twelve, from anywhere in the district. week1 is not "the
