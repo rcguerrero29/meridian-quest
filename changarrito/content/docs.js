@@ -29,7 +29,10 @@ const DOCUI = {
 /* where a readable thing stands. A wall poster is read from the tile in front of it. */
 /* what is readable on the street: the board on city hall's wall, beside la ventanilla */
 const READS = [
-  { world: "st", x: 8, y: 0, doc: "board" }
+  { world: "st", x: 8, y: 0, doc: "board" },
+  /* #69: each house's board, on the wall just west of its door, read from the tile in front of it */
+  { world: "an", x: 7, y: 7, doc: "b_an" }, { world: "pp", x: 9, y: 9, doc: "b_pp" }, { world: "es", x: 9, y: 11, doc: "b_es" },
+  { world: "mo", x: 9, y: 11, doc: "b_mo" }, { world: "ob", x: 9, y: 9, doc: "b_ob" }, { world: "co", x: 9, y: 11, doc: "b_co" }
 ];
 /* the documents are built live from the record (content/record.js) — every open is fresh */
 const DOCS = {
@@ -49,6 +52,19 @@ const DOCS = {
   filter:  { title: { en: "Narrow the street", es: "Acotar la calle" }, sub: { en: "Labels and a word. Empty means everyone.", es: "Etiquetas y una palabra. Vacío es todos." }, build: () => RECORDSRC.filterDoc() },
   guero:   { title: { en: "Don Güero · the planner", es: "Don Güero · el planificador" }, sub: { en: "Ask him to build things. His answers come back as feedback on your requests.", es: "Pídele que construya. Sus respuestas vuelven como comentarios en tus peticiones." }, build: () => RECORDSRC.gueroDoc() },
   index:   { title: { en: "The index", es: "El índice" }, sub: { en: "Everything the town knows, by tag. Pick a category or type a word; walk there, or file about it.", es: "Todo lo que el pueblo sabe, por etiqueta. Elige una categoría o escribe una palabra; camina allá, o presenta algo sobre eso." }, build: () => RECORDSRC.indexDoc() },
+  /* #69, block one: the six clerks and the six house boards, built live from the record */
+  h_an: { title: { en: "Doña Remedios · the annex", es: "Doña Remedios · el anexo" }, sub: { en: "Records & forms. Filed things only.", es: "Registros y formularios. Solo lo archivado." }, build: () => RECORDSRC.clerkDoc("an") },
+  h_pp: { title: { en: "Chuy · the paper shop", es: "Chuy · la papelería" }, sub: { en: "Docs & templates. Filed things only.", es: "Documentos y plantillas. Solo lo archivado." }, build: () => RECORDSRC.clerkDoc("pp") },
+  h_es: { title: { en: "Pili · the paint shop", es: "Pili · el estudio" }, sub: { en: "How it looks. Filed things only.", es: "Cómo se ve. Solo lo archivado." }, build: () => RECORDSRC.clerkDoc("es") },
+  h_mo: { title: { en: "Beto Bujía · the engine room", es: "Beto Bujía · el cuarto del motor" }, sub: { en: "The engine. Filed things only.", es: "El motor. Solo lo archivado." }, build: () => RECORDSRC.clerkDoc("mo") },
+  h_ob: { title: { en: "Doña Cuca · the works", es: "Doña Cuca · la obra" }, sub: { en: "Rooms & stairs. Filed things only.", es: "Cuartos y escaleras. Solo lo archivado." }, build: () => RECORDSRC.clerkDoc("ob") },
+  h_co: { title: { en: "Nacho · Meridian's kitchen", es: "Nacho · la cocina de Meridian" }, sub: { en: "Meridian's story. Filed things only.", es: "La historia de Meridian. Solo lo archivado." }, build: () => RECORDSRC.clerkDoc("co") },
+  b_an: { title: { en: "The annex's board", es: "El tablero del anexo" }, sub: { en: "Everything with this address.", es: "Todo con esta dirección." }, build: () => RECORDSRC.houseBoardDoc("an") },
+  b_pp: { title: { en: "The paper shop's board", es: "El tablero de la papelería" }, sub: { en: "Everything with this address.", es: "Todo con esta dirección." }, build: () => RECORDSRC.houseBoardDoc("pp") },
+  b_es: { title: { en: "The paint shop's board", es: "El tablero del estudio" }, sub: { en: "Everything with this address.", es: "Todo con esta dirección." }, build: () => RECORDSRC.houseBoardDoc("es") },
+  b_mo: { title: { en: "The engine room's board", es: "El tablero del motor" }, sub: { en: "Everything with this address.", es: "Todo con esta dirección." }, build: () => RECORDSRC.houseBoardDoc("mo") },
+  b_ob: { title: { en: "The works' board", es: "El tablero de la obra" }, sub: { en: "Everything with this address.", es: "Todo con esta dirección." }, build: () => RECORDSRC.houseBoardDoc("ob") },
+  b_co: { title: { en: "The kitchen's board", es: "El tablero de la cocina" }, sub: { en: "Everything with this address.", es: "Todo con esta dirección." }, build: () => RECORDSRC.houseBoardDoc("co") },
   /* el pregonero's sheet: the commands, in order, with Copy at the bottom of the reader */
   how: {
     title: { en: "How to open the town", es: "Cómo abrir el pueblo" },
