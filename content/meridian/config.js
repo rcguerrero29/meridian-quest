@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v97";
+const GAMEV="mq-v98";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -122,6 +122,17 @@ const SEASONS={
     art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],
          bridgeStyle:"petals",
          papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"], /* cut paper: pink, teal, gold, purple, orange, white */
+         /* LA FIESTA (Nacho, 2026-09-07): dress by what a place is for — Calle Principal is dressed, Calle Dos is
+            the party, the park is the remembering, workplaces get nothing. Swags, not wallpaper: five to nine
+            tiles, a gap of sky between, each tied to a tree or a facade you can see. Never a map row. */
+         swags:[{world:"st",from:[1,1],to:[8,1]},{world:"st",from:[10,1],to:[18,1]},          /* HQ's facade row; nothing east of x18 — that wall is the mural's */
+                {world:"st",from:[0,4],to:[6,4]},{world:"st",from:[7,4],to:[12,4]},{world:"st",from:[15,4],to:[21,4]}, /* the awning line, the Studio front */
+                {world:"st",from:[2,14],to:[12,14]},{world:"st",from:[18,14],to:[26,14]},    /* jacaranda to jacaranda; the middle left open */
+                {world:"ex",from:[3,0],to:[9,0]},{world:"ex",from:[9,0],to:[15,0]},{world:"ex",from:[15,0],to:[20,0]}, /* the four jacarandas */
+                {world:"ex",from:[5,3],to:[17,3]},                                            /* Doña Chelo's roofline to El Portero's caseta — the neighbours tied it */
+                {world:"ex",from:[4,6],to:[18,6]}],                                           /* inside the crew pen: it's their yard */
+         hangs:[{world:"ex",x:18,y:0,kind:"pinata"}],                                         /* over the paletera's corner, where the kids are; Kike hung it */
+         bloom:"#F59E1B",                                                                     /* every planter blooms cempasúchil */
          sky:"#E8A24A"}}, /* the north window's sky at dusk — Don Güero, 2026-09-02 */
   /* NOCHE DE ALEBRIJES — the owner's second mode (2026-09-07: "another mode where they turn into
      little alebrije colors and i get a dia de los muertos face paint color"). No dates: picked by
@@ -132,6 +143,17 @@ const SEASONS={
   alebrije:{label:{en:"Noche de alebrijes",es:"Noche de alebrijes"},
     art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],bridgeStyle:"petals",
          papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],sky:"#E8A24A",
+         /* LA FIESTA (Nacho, 2026-09-07): dress by what a place is for — Calle Principal is dressed, Calle Dos is
+            the party, the park is the remembering, workplaces get nothing. Swags, not wallpaper: five to nine
+            tiles, a gap of sky between, each tied to a tree or a facade you can see. Never a map row. */
+         swags:[{world:"st",from:[1,1],to:[8,1]},{world:"st",from:[10,1],to:[18,1]},          /* HQ's facade row; nothing east of x18 — that wall is the mural's */
+                {world:"st",from:[0,4],to:[6,4]},{world:"st",from:[7,4],to:[12,4]},{world:"st",from:[15,4],to:[21,4]}, /* the awning line, the Studio front */
+                {world:"st",from:[2,14],to:[12,14]},{world:"st",from:[18,14],to:[26,14]},    /* jacaranda to jacaranda; the middle left open */
+                {world:"ex",from:[3,0],to:[9,0]},{world:"ex",from:[9,0],to:[15,0]},{world:"ex",from:[15,0],to:[20,0]}, /* the four jacarandas */
+                {world:"ex",from:[5,3],to:[17,3]},                                            /* Doña Chelo's roofline to El Portero's caseta — the neighbours tied it */
+                {world:"ex",from:[4,6],to:[18,6]}],                                           /* inside the crew pen: it's their yard */
+         hangs:[{world:"ex",x:18,y:0,kind:"pinata"}],                                         /* over the paletera's corner, where the kids are; Kike hung it */
+         bloom:"#F59E1B",                                                                     /* every planter blooms cempasúchil */
          alebrije:{looks:[ /* Pili's five, the same five on every animal so the night reads as one; wings on the wingless */
            {id:"fuego",name:{en:"Ember",es:"Fuego"},tint:"#FF6A00",pat:"#FFC300",accent:"#FF2E88",wings:true},
            {id:"cielo",name:{en:"Sky",es:"Cielo"},tint:"#00D9E8",pat:"#FFE9F2",accent:"#8A3FE8",wings:true},

@@ -1199,6 +1199,55 @@ const CANDIDATES = [
       }
       camSet(keep.cam); world = keep.world; px = fx = keep.px; py = fy = keep.py;
     }
+    if (S.art.swags) { // LA FIESTA (owner: "lets hang papel picado all over. put a pinata in there as well as tamales"; Nacho's plan)
+      if (typeof fiestaSwags !== 'function' || typeof fiestaHangs !== 'function' || typeof drawPinata !== 'function') problems.push('the engine has no fiesta (fiestaSwags / fiestaHangs / drawPinata)');
+      else {
+        const keep = { cam: camMode, world, px, py }, rows0 = JSON.stringify(Object.fromEntries(Object.entries(WORLDS).map(([k, w]) => [k, w.rows])));
+        seasonSet(id);
+        if (JSON.stringify(Object.fromEntries(Object.entries(WORLDS).map(([k, w]) => [k, w.rows]))) !== rows0) problems.push('the season changed a map row — the dressing must never rebuild the design');
+        if (fiestaSwags(PL.street).length < 5) problems.push('the street is not dressed: fewer than five swags');
+        // every swag is tied to something you can see it tied to, or gets a pole; none crosses a door or a portal
+        fiestaSwags(PL.street).forEach(sw => { const y = sw.from[1]; for (let x = Math.min(sw.from[0], sw.to[0]); x <= Math.max(sw.from[0], sw.to[0]); x++) { if (portalAt(PL.street, x, y)) problems.push(`a swag on the street hangs over the door at (${x},${y})`); } });
+        camSet('3d'); world = PL.street; px = fx = 5; py = fy = 10; moving = false; held = null; t3Invalidate(); draw3d();
+        const flags = T3.group.children.filter(o => o.userData && o.userData.swag && o.userData.flag);
+        if (flags.length < 30) problems.push(`the street carries ${flags.length} swag flags in 3D — it is not dressed`);
+        if (flags.some(f => f.position.y < 1.5)) problems.push('a swag hangs at head height');
+        const ex = (art('hangs', []) || []).find(h => h.kind === 'pinata'); if (!ex) problems.push('no piñata is hung');
+        else { world = ex.world; px = fx = ex.x; py = fy = ex.y + 3; t3Invalidate(); draw3d();
+          if (!T3.group.children.some(o => o.userData && o.userData.pinata)) problems.push('the piñata is not hanging in 3D');
+          if (isSolidAt(ex.world, ex.x, ex.y)) problems.push('the piñata hangs over a solid tile — it must hang over open ground'); }
+        // the two flat cameras draw it: spy the painter, and the flags leave paper-coloured pixels
+        const f0 = fiestaDraw2D; let calls = 0; fiestaDraw2D = function () { calls++; return f0.apply(this, arguments); };
+        world = PL.street; px = fx = 5; py = fy = 2; camSet('top'); draw(); camSet('front'); draw(); fiestaDraw2D = f0;
+        if (calls < 2) problems.push('the top and front cameras do not draw the fiesta');
+        const pal = (art('papel', []) || []).map(h => h.toLowerCase());
+        const cnt = (() => { const c = document.createElement('canvas'); c.width = 320; c.height = 64; const o = ctx; ctx = c.getContext('2d'); try { fiestaDraw2D(PL.street, (x, y) => [x * 32, (y - 1) * 32], false); } finally { ctx = o; }
+          const d = c.getContext('2d').getImageData(0, 0, 320, 64).data; let n = 0; for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 250) continue; if (pal.includes('#' + [d[i], d[i + 1], d[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''))) n++; } return n; })();
+        if (cnt < 40) problems.push('the flat cameras draw no paper flags (' + cnt + ' pixels)');
+        // the season speaks: arrival lines may be functions and say something different tonight; planters bloom
+        const arr = UI.en.arrive[ex ? ex.world : PL.street]; const said = typeof arr === 'function' ? arr() : arr;
+        seasonSet('off'); const plain = typeof arr === 'function' ? arr() : arr;
+        if (said === plain) problems.push('Calle Dos says the same line in season as out of it');
+        if (!S.art.bloom) problems.push('the season gives the planters no bloom');
+        else { const bakeP = () => { const c = document.createElement('canvas'); c.width = 32; c.height = 32; const o = ctx; ctx = c.getContext('2d'); try { TILEDRAW['P']({ sx: 0, sy: 0, x: 0, y: 0, canopy: () => {} }); } finally { ctx = o; }
+            const d = c.getContext('2d').getImageData(0, 0, 32, 32).data; let n = 0; const b = S.art.bloom.toLowerCase(); for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 250) continue; if ('#' + [d[i], d[i + 1], d[i + 2]].map(v => v.toString(16).padStart(2, '0')).join('') === b) n++; } return n; };
+          seasonSet(id); const on = bakeP(); seasonSet('off'); const off = bakeP();
+          if (on < 12) problems.push('in season the planters do not bloom'); if (off) problems.push('out of season a planter still blooms'); }
+        // and out of season nothing is left behind
+        world = PL.street; camSet('3d'); t3Invalidate(); draw3d();
+        if (T3.group.children.some(o => o.userData && (o.userData.swag || o.userData.pinata))) problems.push('out of season the swags or the piñata are still up');
+        camSet(keep.cam); world = keep.world; px = fx = keep.px; py = fy = keep.py;
+      }
+      // Doña Meche, the tamalera at the trolley stop: a neighbour with three lines, her pot a box you walk around
+      if (!NPCN.en.meche || !NPCN.es.meche || !NPCE.meche) problems.push('Doña Meche has no name in both languages');
+      const mw = Object.entries(WORLDS).find(([k, w]) => w.npcs.some(n => n.npc === 'meche'));
+      if (!mw) problems.push('Doña Meche stands nowhere');
+      else { const reach = auditReach().filter(m => m.includes('meche')); if (reach.length) problems.push('Doña Meche is not reachable: ' + reach.join('; '));
+        if (!(UI.en.chat.meche || []).length || (UI.en.chat.meche || []).length !== (UI.es.chat.meche || []).length) problems.push('Doña Meche has no lines, or not the same number in both languages');
+        const mn = mw[1].npcs.find(n => n.npc === 'meche'), pot = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => (mw[1].rows[mn.y + dy] || '')[mn.x + dx] === 'ʘ');
+        if (!pot) problems.push('Doña Meche\'s pot is not beside her');
+        if (!SOLID.has('ʘ') || !TILESIDE['ʘ'] || (TILES['ʘ'] || {}).kind !== 'appliance') problems.push('the pot is not a solid box with a side view — it would ship flat (#39)'); }
+    }
     if (S.art.papel) { // "and papel picado": in 3D the season hangs cut-paper flags over the crossing; none out of season
       const keep = { cam: camMode, world, px, py };
       camSet('3d'); world = PL.park; px = fx = PL.parkIn[0]; py = fy = PL.parkIn[1]; moving = false; held = null;

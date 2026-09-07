@@ -125,7 +125,7 @@ function t3Dispose(obj){
     ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose();});
   });
 }
-function t3Build(key){
+function t3Build(key){T3.pinatas=[];
   T3.builtKey=key;
   if(T3.group){T3.scene.remove(T3.group);t3Dispose(T3.group);}
   T3.tintables=[];T3.glows=[];
@@ -418,8 +418,28 @@ function t3Build(key){
     }
   });
 
+  /* LA FIESTA in 3D: the season's swags strung over the ground at head height and above, five flags a
+     tile, poles only where an end stands on open ground (a tree or a facade at the end is what the
+     string is tied to); the piñata on its rope, swaying in t3Fiesta. Nothing solid, nothing in a row. */
+  if(typeof fiestaSwags==="function"){const pal=art("papel",null);
+    if(pal&&pal.length){const PH=1.9,pole=wallMat["^pole"]||(wallMat["^pole"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#5A4330")}));
+      const strg=wallMat["^string"]||(wallMat["^string"]=new THREE.MeshBasicMaterial({color:new THREE.Color("#3A2E26")}));
+      fiestaSwags(world).forEach(sw=>{const y=sw.from[1],x0=Math.min(sw.from[0],sw.to[0]),x1=Math.max(sw.from[0],sw.to[0]),L=x1-x0+1;
+        const st=new THREE.Mesh(new THREE.BoxGeometry(L-0.1,0.02,0.02),strg);st.position.set(x0+L/2,PH,y+0.5);st.userData={swag:true,string:true,y};grp.add(st);
+        [x0,x1].forEach(ex=>{const g=w.grid[y]&&w.grid[y][ex];if(g!==undefined&&SOLID.has(g))return; /* tied to what stands there */
+          const pl=new THREE.Mesh(new THREE.BoxGeometry(0.05,PH,0.05),pole);pl.position.set(ex+0.5,PH/2,y+0.5);pl.userData={swag:true,pole:true};grp.add(pl);});
+        for(let i=0;i<L*5;i++){const col=pal[(i+x0+y)%pal.length];
+          const fm=wallMat["^papel"+col]||(wallMat["^papel"+col]=new THREE.MeshBasicMaterial({color:new THREE.Color(col),side:THREE.DoubleSide}));
+          const fl=new THREE.Mesh(new THREE.PlaneGeometry(0.16,0.17),fm);fl.position.set(x0+0.1+i*0.2,PH-0.1,y+0.5);fl.userData={swag:true,flag:true};grp.add(fl);}});
+      fiestaHangs(world).forEach(h=>{if(h.kind!=="pinata")return;
+        const c=document.createElement("canvas");c.width=32*K;c.height=32*K;const o2=ctx;ctx=c.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
+        try{drawPinata(ctx,0,0,0);}finally{ctx=o2;}
+        const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true}));sp.center.set(0.5,0.94);sp.scale.set(1,1,1);
+        sp.position.set(h.x+0.5,PH+0.02,h.y+0.5);sp.userData={pinata:true,x:h.x,y:h.y};grp.add(sp);T3.pinatas=(T3.pinatas||[]);T3.pinatas.push(sp);});}}
   T3.scene.add(grp);
 }
+function t3Fiesta(){ /* the piñata sways; it is never hit and gives nothing (Nacho's guardrail) */
+  (T3.pinatas||[]).forEach(sp=>{if(!sp.parent)return;sp.material.rotation=Math.sin(Date.now()/700+sp.userData.x)*0.08;});}
 /* the petal trail in 3D: a pool of little flat planes, three per drop, lying on the ground where
    somebody walked in season, fading over a minute and a half (owner: "a trail forms behind characters") */
 function t3Petals(){
@@ -566,6 +586,7 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
     t3Reveal();
     t3Actors();
     t3Petals();
+    t3Fiesta();
     t3Leash();
     T3.renderer.render(T3.scene,T3.cam);
     return true;
