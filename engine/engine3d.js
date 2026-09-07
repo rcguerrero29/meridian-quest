@@ -456,7 +456,12 @@ function t3Actors(){
     p.spr.userData.mark=a.mark||"";
     p.spr.scale.set(36/32*1.12,48/32*1.12,1);
     p.spr.material.color.copy(T3.tint);
-    p.spr.material.depthTest=!a.hero;p.spr.renderOrder=a.hero?999:0; /* the hero reads through walls; everyone else sits in the scene */
+    /* billboards draw in order of distance from the camera, farthest first, all of them after the
+       scene's transparent pieces: whoever stands nearer the camera than you draws over you. The hero
+       used to draw LAST, over everyone, so behind a person you stood on their head (owner,
+       2026-09-07: "when we walk behind people it seems like im walking on them"). The hero still
+       ignores depth, so a wall never hides them (#22) — a person can. */
+    p.spr.material.depthTest=!a.hero;p.spr.renderOrder=1000-Math.round(dl*10);
     p.spr.visible=true;p.live=true;
   });
   for(let i=list.length;i<T3.pool.length;i++){T3.pool[i].spr.visible=false;T3.pool[i].live=false;}
