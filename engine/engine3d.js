@@ -435,10 +435,18 @@ function t3Build(key){T3.pinatas=[];
           const pl=new THREE.Mesh(new THREE.BoxGeometry(0.05,PH,0.05),pole);pl.position.set(ex+0.5,PH/2,y+0.5);pl.userData={swag:true,pole:true};grp.add(pl);});
         [0,1].forEach(row=>{const fl=t3PapelStrip(pal,L,x0+y,row);fl.position.set(x0+L/2+(row?0.07:0),PH-0.11-row*0.22,y+0.5);fl.userData.swag=true;fl.userData.y=y;grp.add(fl);});
         const st2=new THREE.Mesh(new THREE.BoxGeometry(L-0.1,0.02,0.02),strg);st2.position.set(x0+L/2,PH-0.22,y+0.5);st2.userData={swag:true,string:true,y};grp.add(st2);});
-      (typeof fiestaProps==="function"?fiestaProps(world):[]).forEach(p=>{if(p.kind!=="calaverita")return; /* a sugar skull set down on a rail, a counter, the ground */
+      (typeof fiestaProps==="function"?fiestaProps(world):[]).forEach(p=>{
+        const g=w.grid[p.y]&&w.grid[p.y][p.x],up=g!==undefined&&(SOLID.has(g)||((TILES[g]||{}).lift|0)>=5);
+        if(p.kind==="ofrenda"){ /* the ofrenda: a tile-wide picture standing where it was set, on a table's top if the tile is one */
+          const c=document.createElement("canvas");c.width=32*K;c.height=32*K;const g2=c.getContext("2d");g2.scale(K,K);drawOfrenda(g2,0,0);
+          const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true}));sp.center.set(0.5,0.02);const sc=up?0.8:1;sp.scale.set(sc,sc,1);
+          sp.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);sp.userData={prop:true,ofrenda:true,x:p.x,y:p.y};grp.add(sp);return;}
+        if(p.kind!=="calaverita")return;
         const c=document.createElement("canvas");c.width=8*K;c.height=8*K;const g2=c.getContext("2d");g2.scale(K,K);drawCalaverita(g2,0,0,p.foil);
         const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true}));sp.center.set(0.5,0.02);sp.scale.set(0.22,0.22,1);
-        const g=w.grid[p.y]&&w.grid[p.y][p.x],up=g!==undefined&&(SOLID.has(g)||((TILES[g]||{}).lift|0)>=5);
+        const win=typeof propSill==="function"?propSill(world,p):null;
+        if(win){ /* on the sill: the facade's window says how high and where along the face; it stands just proud of the south face */
+          const H=wallH(g);sp.position.set(p.x+win.cx/32,H*(1-win.sill/32)+0.005,p.y+1.03);sp.userData={prop:true,calaverita:true,sill:true,x:p.x,y:p.y};grp.add(sp);return;}
         const h=p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y));
         sp.position.set(p.x+(p.ox===undefined?0.5:p.ox),h+0.01,p.y+(p.oy===undefined?0.5:p.oy));sp.userData={prop:true,calaverita:true,x:p.x,y:p.y};grp.add(sp);});
       fiestaHangs(world).forEach(h=>{if(h.kind!=="pinata")return;

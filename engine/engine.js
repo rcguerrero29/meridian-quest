@@ -808,8 +808,29 @@ function fiestaDraw2D(wid,toScreen,front){ /* toScreen(x,y) → the tile's top-l
     const[sx0,sy0]=toScreen(x0,y),[sx1]=toScreen(x1+1,y),ly=sy0+(front?3:5);
     drawPapelRow(ctx,sx0,sx1,ly,pal,x0+y);});
   fiestaHangs(wid).forEach(h=>{const[sx,sy]=toScreen(h.x,h.y);if(h.kind==="pinata")drawPinata(ctx,sx,sy,Math.sin(Date.now()/700+h.x)*0.06);});
-  fiestaProps(wid).forEach(p=>{if(p.kind!=="calaverita")return;const[sx,sy]=toScreen(p.x,p.y);const ox=(p.ox===undefined?0.5:p.ox)*TS,oy=(p.oy===undefined?0.5:p.oy)*TS;
+  fiestaProps(wid).forEach(p=>{const[sx,sy]=toScreen(p.x,p.y);const ox=(p.ox===undefined?0.5:p.ox)*TS,oy=(p.oy===undefined?0.5:p.oy)*TS;
+    if(p.kind==="ofrenda"){drawOfrenda(ctx,sx,sy-(front&&isSolidAt(wid,p.x,p.y)?10:0));return;}
+    if(p.kind!=="calaverita")return;
+    const win=propSill(wid,p); /* on a window sill (owner: "as in human reality"): the facade's own window says where */
+    if(win){if(front)drawCalaverita(ctx,sx+win.cx-4,sy+win.sill-8,p.foil);else drawCalaverita(ctx,sx+win.cx-4,sy+TS-9,p.foil);return;}
     drawCalaverita(ctx,sx+ox-4,front?(isSolidAt(wid,p.x,p.y)||p.h?sy+2:sy+TS-9):sy+oy-4,p.foil);});}
+function propSill(wid,p){ /* a prop with sill:true sits on the first window of the facade it names: {cx, sill} in tile pixels, or null */
+  if(!p.sill)return null;const w=WORLDS[wid],g=w&&w.rows[p.y]&&w.rows[p.y][p.x],m=(TILES[g]||{}),win=m.win&&(m.win[p.w|0]||m.win[0]); /* p.w picks the second window of a two-window facade */
+  if(!win)return null;return {cx:win[0]+win[2]/2,sill:win[1]+win[3],g};}
+function drawOfrenda(g,x,y){ /* la ofrenda (Nacho, 2026-09-07; the owner: "sounds like a good idea"): a tiered table under a marigold arch —
+  the cloth, three candles, pan de muerto, a calaverita, and at the top an EMPTY frame, nobody named: "that one's for whoever needs it".
+  The owner's own document with the basics refines this when it arrives. */
+  const P=petalPal();
+  g.fillStyle="#5A2E7A";g.fillRect(x+2,y+20,28,10);g.fillStyle="#7B4BA8";g.fillRect(x+2,y+20,28,2);      /* the lower cloth */
+  g.fillStyle="#E2620F";g.fillRect(x+6,y+13,20,7);g.fillStyle="#F2870F";g.fillRect(x+6,y+13,20,1.5);        /* the upper tier */
+  g.strokeStyle="#7A2E12";g.lineWidth=2.4;g.beginPath();g.arc(x+16,y+14,13,Math.PI*1.05,Math.PI*1.95);g.stroke(); /* the arch */
+  for(let i=0;i<11;i++){const t=Math.PI*(1.08+0.84*i/10);petalShape(g,x+16+Math.cos(t)*13,y+14+Math.sin(t)*13,t+Math.PI/2,0.9,P[2+(i%4)]);}
+  [[8,21],[16,14],[24,21]].forEach(([cx,cy],i)=>{g.fillStyle="#F6F2E8";g.fillRect(x+cx-1.2,y+cy-6,2.4,6);g.fillStyle="#FFC300";g.beginPath();g.ellipse(x+cx,y+cy-7,1,1.8,0,0,7);g.fill();}); /* candles */
+  g.fillStyle="#3A2E26";g.fillRect(x+12,y+3,8,7);g.fillStyle="#F6F2E8";g.fillRect(x+13,y+4,6,5);         /* the empty frame */
+  g.fillStyle="#B8722E";g.beginPath();g.arc(x+11,y+18,3,0,7);g.fill();g.fillStyle="#E8B86A";g.fillRect(x+10.5,y+15.5,1,5);g.fillRect(x+8.5,y+17.5,5,1); /* pan de muerto */
+  drawCalaverita(g,x+18,y+12.5,"#E8478F");
+  g.fillStyle="#F6F2E8";g.beginPath();g.arc(x+4,y+24,1.4,0,7);g.arc(x+28,y+24,1.4,0,7);g.fill();          /* two cups of water */
+  drawPapelRow(g,x+2,x+30,y+25,art("papel",["#E8478F","#2FA5A0","#F2B705"]),3);}
 function fiestaProps(wid){return (art("props",[])||[]).filter(p=>p.world===wid);} /* small things set down by place: {world,x,y,kind,ox,oy,h,foil} */
 function drawPapelRow(g,x0,x1,ly,pal,seed){ /* a string of cut paper (Pili, 2026-09-07): little squares with a scalloped hem and a punched
   hole — paper, not bunting — in TWO rows, the second half a flag over; two rows is what makes a street look dressed */

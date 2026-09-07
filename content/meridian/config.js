@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v109";
+const GAMEV="mq-v110";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -124,7 +124,7 @@ const SEASONS={
   muertos:{label:{en:"Día de Muertos",es:"Día de Muertos"},from:[10,18],to:[11,3],
     art:{bridge:["#7A2E12","#B8410E","#E2620F","#F2870F","#FBB024","#FFD972"],
          bridgeStyle:"petals",
-         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"], /* cut paper: pink, teal, gold, purple, orange, white */
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8","#7BD3F7","#C5E86C","#FF4D4D","#3D5AFE"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"], /* cut paper: pink, teal, gold, purple, orange, white */
          /* LA FIESTA (Nacho, 2026-09-07): dress by what a place is for — Calle Principal is dressed, Calle Dos is
             the party, the park is the remembering, workplaces get nothing. Swags, not wallpaper: five to nine
             tiles, a gap of sky between, each tied to a tree or a facade you can see. Never a map row. */
@@ -137,10 +137,18 @@ const SEASONS={
                 {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[5,6],to:[12,6]}, /* the park: tree to tree, and one across the path from the bridge so you walk under it (Pili) */
                 {world:"hq",from:[0,15],to:[9,15]},                                           /* one short swag over the lobby, tied to the west wall; the offices stay offices */
                 {world:"me",from:[0,1],to:[8,1]},{world:"me",from:[11,1],to:[19,1]},           /* El Mercado: along the awning line */
-                {world:"lc",from:[0,1],to:[7,1]},{world:"lc",from:[12,1],to:[19,1]}],          /* La Cocina: the same */
-         props:[{world:"pk",x:3,y:6,ox:0.2,oy:0.04,h:0.75,kind:"calaverita"},{world:"pk",x:4,y:6,ox:0.6,oy:0.04,h:0.75,kind:"calaverita",foil:"#2FA5A0"},{world:"pk",x:3,y:6,ox:0.7,oy:0.96,h:0.75,kind:"calaverita",foil:"#7B4BA8"}, /* calaveritas de azúcar on the bridge rails */
-                {world:"me",x:2,y:8,kind:"calaverita"},{world:"me",x:5,y:8,kind:"calaverita",foil:"#2FA5A0"},                              /* two on the mercado counter */
-                {world:"ex",x:20,y:3,ox:0.3,kind:"calaverita"},{world:"ex",x:20,y:3,ox:0.75,oy:0.35,kind:"calaverita",foil:"#F2B705"},{world:"ex",x:22,y:4,kind:"calaverita",foil:"#7B4BA8"},{world:"ex",x:22,y:4,ox:0.25,oy:0.7,kind:"calaverita"}], /* by Doña Meche's pot, where the ofrenda will stand (❗La ofrenda, CITY.md) */
+                {world:"lc",from:[0,1],to:[7,1]},{world:"lc",from:[12,1],to:[19,1]},           /* La Cocina: the same */
+                /* everywhere (owner, 2026-09-07, night: "the papel picado can be everywhere and more colorful") — the offices too, under the north wall */
+                {world:"hq",from:[0,1],to:[7,1]},{world:"hq",from:[8,1],to:[16,1]},{world:"f2",from:[0,1],to:[9,1]},{world:"f2",from:[10,1],to:[19,1]},
+                {world:"lo",from:[0,2],to:[9,2]},{world:"lo",from:[10,2],to:[19,2]},{world:"li",from:[0,2],to:[9,2]},{world:"li",from:[10,2],to:[19,2]},
+                {world:"ta",from:[0,1],to:[9,1]},{world:"ta",from:[10,1],to:[19,1]},{world:"pa",from:[0,1],to:[9,1]},{world:"pa",from:[10,1],to:[19,1]},
+                {world:"no",from:[0,1],to:[11,1]},{world:"no",from:[12,1],to:[23,1]},{world:"ex",from:[0,9],to:[11,9]},{world:"ex",from:[12,9],to:[23,9]},
+                {world:"st",from:[0,12],to:[8,12]},{world:"st",from:[20,12],to:[29,12]}],
+         props:[ /* calaveritas de azúcar on window sills (owner, 2026-09-07, night: "probably better in a window sill, as in human reality") — sill:true, the facade's own window says where */
+                {world:"st",x:2,y:0,kind:"calaverita",sill:true},{world:"st",x:6,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:10,y:0,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:12,y:0,kind:"calaverita",sill:true,foil:"#F2B705"},
+                {world:"st",x:17,y:0,kind:"calaverita",sill:true},{world:"st",x:22,y:0,w:1,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:2,y:5,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:9,y:5,kind:"calaverita",sill:true}, /* HQ's second window, La Cocina's awning windows */
+                /* ❗La ofrenda (Nacho; owner: "sounds like a good idea"): one at the foot of the marigold bridge, one on Doña Tencha's table — an empty frame, nobody named */
+                {world:"pk",x:5,y:6,kind:"ofrenda"},{world:"casa-w",x:3,y:2,kind:"ofrenda"}],
          hangs:[{world:"ex",x:18,y:0,kind:"pinata"}],                                         /* over the paletera's corner, where the kids are; Kike hung it */
          bloom:"#F59E1B",                                                                     /* every planter blooms cempasúchil */
          facepaint:true, /* the calavera in Día de Muertos too (owner, 2026-09-07, night) — the engine's five looks */
@@ -153,7 +161,7 @@ const SEASONS={
      (five calavera looks for everyone; the hero picks, a person's comes from who they are). */
   alebrije:{label:{en:"Noche de alebrijes",es:"Noche de alebrijes"},
     art:{bridge:["#7A2E12","#B8410E","#E2620F","#F2870F","#FBB024","#FFD972"],bridgeStyle:"petals",
-         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"],sky:"#E8A24A",
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8","#7BD3F7","#C5E86C","#FF4D4D","#3D5AFE"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"],sky:"#E8A24A",
          /* LA FIESTA (Nacho, 2026-09-07): dress by what a place is for — Calle Principal is dressed, Calle Dos is
             the party, the park is the remembering, workplaces get nothing. Swags, not wallpaper: five to nine
             tiles, a gap of sky between, each tied to a tree or a facade you can see. Never a map row. */
@@ -166,10 +174,18 @@ const SEASONS={
                 {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[5,6],to:[12,6]}, /* the park: tree to tree, and one across the path from the bridge so you walk under it (Pili) */
                 {world:"hq",from:[0,15],to:[9,15]},                                           /* one short swag over the lobby, tied to the west wall; the offices stay offices */
                 {world:"me",from:[0,1],to:[8,1]},{world:"me",from:[11,1],to:[19,1]},           /* El Mercado: along the awning line */
-                {world:"lc",from:[0,1],to:[7,1]},{world:"lc",from:[12,1],to:[19,1]}],          /* La Cocina: the same */
-         props:[{world:"pk",x:3,y:6,ox:0.2,oy:0.04,h:0.75,kind:"calaverita"},{world:"pk",x:4,y:6,ox:0.6,oy:0.04,h:0.75,kind:"calaverita",foil:"#2FA5A0"},{world:"pk",x:3,y:6,ox:0.7,oy:0.96,h:0.75,kind:"calaverita",foil:"#7B4BA8"}, /* calaveritas de azúcar on the bridge rails */
-                {world:"me",x:2,y:8,kind:"calaverita"},{world:"me",x:5,y:8,kind:"calaverita",foil:"#2FA5A0"},                              /* two on the mercado counter */
-                {world:"ex",x:20,y:3,ox:0.3,kind:"calaverita"},{world:"ex",x:20,y:3,ox:0.75,oy:0.35,kind:"calaverita",foil:"#F2B705"},{world:"ex",x:22,y:4,kind:"calaverita",foil:"#7B4BA8"},{world:"ex",x:22,y:4,ox:0.25,oy:0.7,kind:"calaverita"}], /* by Doña Meche's pot, where the ofrenda will stand (❗La ofrenda, CITY.md) */
+                {world:"lc",from:[0,1],to:[7,1]},{world:"lc",from:[12,1],to:[19,1]},           /* La Cocina: the same */
+                /* everywhere (owner, 2026-09-07, night: "the papel picado can be everywhere and more colorful") — the offices too, under the north wall */
+                {world:"hq",from:[0,1],to:[7,1]},{world:"hq",from:[8,1],to:[16,1]},{world:"f2",from:[0,1],to:[9,1]},{world:"f2",from:[10,1],to:[19,1]},
+                {world:"lo",from:[0,2],to:[9,2]},{world:"lo",from:[10,2],to:[19,2]},{world:"li",from:[0,2],to:[9,2]},{world:"li",from:[10,2],to:[19,2]},
+                {world:"ta",from:[0,1],to:[9,1]},{world:"ta",from:[10,1],to:[19,1]},{world:"pa",from:[0,1],to:[9,1]},{world:"pa",from:[10,1],to:[19,1]},
+                {world:"no",from:[0,1],to:[11,1]},{world:"no",from:[12,1],to:[23,1]},{world:"ex",from:[0,9],to:[11,9]},{world:"ex",from:[12,9],to:[23,9]},
+                {world:"st",from:[0,12],to:[8,12]},{world:"st",from:[20,12],to:[29,12]}],
+         props:[ /* calaveritas de azúcar on window sills (owner, 2026-09-07, night: "probably better in a window sill, as in human reality") — sill:true, the facade's own window says where */
+                {world:"st",x:2,y:0,kind:"calaverita",sill:true},{world:"st",x:6,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:10,y:0,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:12,y:0,kind:"calaverita",sill:true,foil:"#F2B705"},
+                {world:"st",x:17,y:0,kind:"calaverita",sill:true},{world:"st",x:22,y:0,w:1,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:2,y:5,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:9,y:5,kind:"calaverita",sill:true}, /* HQ's second window, La Cocina's awning windows */
+                /* ❗La ofrenda (Nacho; owner: "sounds like a good idea"): one at the foot of the marigold bridge, one on Doña Tencha's table — an empty frame, nobody named */
+                {world:"pk",x:5,y:6,kind:"ofrenda"},{world:"casa-w",x:3,y:2,kind:"ofrenda"}],
          hangs:[{world:"ex",x:18,y:0,kind:"pinata"}],                                         /* over the paletera's corner, where the kids are; Kike hung it */
          bloom:"#F59E1B",                                                                     /* every planter blooms cempasúchil */
          alebrije:{looks:[ /* Pili's five, the same five on every animal so the night reads as one; wings on the wingless */
