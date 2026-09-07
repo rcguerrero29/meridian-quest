@@ -833,6 +833,7 @@ TILEDRAW["⊓"]=rc=>{const{sx,sy,x,y}=rc;const w=CW(),row=(w&&w.rows&&w.rows[y])
    (a ▲ head at the east end — the hall side) or is the WELL (a ▼ at the west end — the loft
    side, where you look down into it). Every camera and the 3D lift read this one function. */
 const STAIRH=0.16; /* one step's rise, in tile units — three treads and a head climb 0.64 */
+const BRIDGEH=0.22; /* the rainbow bridge's deck, in tile units: a plank deck over the river, not paint (IDEAS §15.4) */
 function stairRun(w,x,y){const row=(w&&w.rows&&w.rows[y])||"";if(row[x]!=="≡"&&row[x]!=="▲")return null;
   let a=x;while(a-1>=0&&row[a-1]==="≡")a--;let b=x;while(b+1<row.length&&(row[b+1]==="≡"||row[b+1]==="▲"))b++;
   const up=row[b]==="▲",well=row[a-1]==="▼";const i=x-a,L=b-a+1;return {i,L,up:up&&!well,well};}
@@ -843,7 +844,9 @@ function wellDepth(w,x,y){const row=(w&&w.rows&&w.rows[y])||"";
   if(row[x]==="▼"){let L=0;while(row[x+1+L]==="≡")L++;return L?STAIRH*(L+1):0;}
   const r=stairRun(w,x,y);if(!r||!r.well)return 0;return STAIRH*(r.L-r.i);}
 /* the height anyone standing on (x,y) stands at: up a climbing tread, DOWN a well tread */
-function stairLift(w,x,y){const r=stairRun(w,x,y);if(r&&r.up)return STAIRH*(r.i+1);return -wellDepth(w,x,y);}
+function stairLift(w,x,y){const r=stairRun(w,x,y);if(r&&r.up)return STAIRH*(r.i+1);
+  const g=w.rows[y]&&w.rows[y][x];if(g&&(TILES[g]||{}).kind==="bridge")return BRIDGEH; /* on the bridge you stand on its deck */
+  return -wellDepth(w,x,y);}
 TILEDRAW["≡"]=rc=>{const{sx,sy,x,y}=rc; /* a tread from above on a flight that runs east: two risers a tile,
   the nosing shadow on the east edge; a climbing flight lightens step by step, a well darkens */
   const r=stairRun(CW(),x,y)||{i:0,L:1,up:true,well:false};const t=r.L>1?r.i/(r.L-1):0;
@@ -928,6 +931,7 @@ Object.assign(TILES,{
   C:{lift:6,kind:"marker",stand:true,light:true},X:{lift:6,kind:"site"},   /* light: you kick it, you do not walk around it */
   P:{lift:6,kind:"nature"},J:{lift:0,kind:"tree"},
   "~":{lift:0,kind:"water"},"9":{lift:7,kind:"prop"},
+  "^":{lift:0,kind:"bridge"}, /* walkable, flat art in 2D; in 3D a raised plank deck with rails (owner, 2026-09-07: "upgrade rainbow bridge for sonny") */
   /* `stand`: walkable, but an OBJECT — not paint on the floor. The engine had exactly two
      categories, flat ground art or solid geometry, and a staircase is neither: you walk onto
      it and it has to stand up. Without this the front camera and the 3D ground bake paint a

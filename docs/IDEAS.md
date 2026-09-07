@@ -772,10 +772,18 @@ structurally sound. The wrongness is entirely in `engine3d.js:98-124`.
 
 ---
 
-### 15.4 THE RAINBOW BRIDGE — planned, NOT built
+### 15.4 THE RAINBOW BRIDGE — the deck BUILT 2026-09-07 (`mq-v87`); the palette still waits
 
-**Fact base:** the rainbow bridge is **2 tiles of flat floor art**. There is no bridge
-object, in any camera. The owner wants "an arch and even some day of the dead theme
+**Built at the owner's word** (*"i want to upgrade rainbow bridge for sonny asap please"*): in
+3D the two `^` tiles are a plank deck `BRIDGEH` (0.22) over the river, the six bands baked on
+top, a post-and-bar rail on each side of the crossing, and whoever crosses — you, the dog on
+the leash — stands on the deck (`stairLift` returns the deck height on a bridge tile). The 2D
+cameras keep the flat art; a season may still recolour the bands through `art("bridge")`.
+Not built: the arch (a flat deck reads as a bridge already; an arch is a second deck height
+per tile) and the Día de Muertos palette, which the owner signs (a season, per OWNER.md).
+
+**Fact base as it stood:** the rainbow bridge was **2 tiles of flat floor art**. There was no
+bridge object, in any camera. The owner wanted "an arch and even some day of the dead theme
 colors".
 
 - **The tile grid is not the constraint** — the flat ground plane and the `y=0` actor
