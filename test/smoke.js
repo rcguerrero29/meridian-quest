@@ -1055,12 +1055,12 @@ const CANDIDATES = [
     if (typeof DECK_PETALS === 'undefined' || DECK_PETALS.reduce((a, b) => a + b, 0) < 4500) problems.push('the deck carries fewer than four and a half thousand petals a tile — the owner asked for fifty times');
       // then ten times that, behind the frame (owner: "definitely do like 10x the amount of petals for the bridge"): a fresh tile queues a deep bake that fills in slices
       if (typeof DECK_DEEP === 'undefined' || typeof petalDeepStep !== 'function' || DECK_PETALS.reduce((a, b) => a + b, 0) + DECK_DEEP < 45000) problems.push('the deck does not fill in to forty-five thousand petals behind the frame');
-      else { PETALCACHE.clear(); PETALDEEP.length = 0; const c2 = document.createElement('canvas'); c2.width = 32; c2.height = 32; const o2 = ctx; ctx = c2.getContext('2d'); try { TILEDRAW['^']({ sx: 0, sy: 0, x: 3, y: 6, canopy: () => {} }); } finally { ctx = o2; }
-        if (petalDeepPending() < DECK_DEEP) problems.push('a fresh deck tile queues no deep bake');
+      else { const sid0 = seasonPick; seasonSet(Object.keys(SEAS()).find(k => SEAS()[k].art && SEAS()[k].art.bridgeStyle === 'petals') || 'off'); PETALCACHE.clear(); PETALDEEP.length = 0; const c2 = document.createElement('canvas'); c2.width = 32; c2.height = 32; const o2 = ctx; ctx = c2.getContext('2d'); try { TILEDRAW['^']({ sx: 0, sy: 0, x: 3, y: 6, canopy: () => {} }); } finally { ctx = o2; }
+        if (petalDeepPending() < DECK_DEEP) problems.push('a fresh deck tile queues no deep bake (' + petalDeepPending() + ' pending, style ' + art('bridgeStyle', 'bands') + ', season ' + seasonNow() + ')');
         let guard = 200; while (petalDeepPending() && guard--) petalDeepStep(); if (petalDeepPending()) problems.push('the deep bake never finishes');
-        const cc = PETALCACHE.get(seasonNow() + '|deck|3|6|' + bridgeEdges(3, 6)); const dd = cc ? cc.getContext('2d').getImageData(0, 0, 32, 32).data : null; const seen2 = new Set();
-        if (dd) for (let i = 0; i < dd.length; i += 4) { const h = '#' + [dd[i], dd[i + 1], dd[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''); if (pal.includes(h)) seen2.add(h); }
-        if (!cc || seen2.size < 4) problems.push('after the deep bake the heap is a rug again (' + seen2.size + ' colours)'); }
+        const ck = [...PETALCACHE.keys()].find(k => k.endsWith('|deck|3|6|' + bridgeEdges(3, 6))); const cc = ck ? PETALCACHE.get(ck) : null; const dd = cc ? cc.getContext('2d').getImageData(0, 0, 32, 32).data : null; const seen2 = new Set();
+        const palD = petalPal().map(h => h.toLowerCase()); if (dd) for (let i = 0; i < dd.length; i += 4) { const h = '#' + [dd[i], dd[i + 1], dd[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''); if (palD.includes(h)) seen2.add(h); }
+        if (!cc || seen2.size < 4) problems.push('after the deep bake the heap is a rug again (' + seen2.size + ' colours)'); seasonSet(sid0); }
     if (typeof petalBake !== 'function') problems.push('nine hundred petals a tile are drawn every frame — bake them');
     decks.forEach(d => { if (!(d.position.y > 0.05)) problems.push(`the bridge deck at (${d.userData.x},${d.userData.y}) lies flat on the water`); });
     const rails = T3.group.children.filter(o => o.userData && o.userData.bridgeRail);
@@ -1253,10 +1253,11 @@ const CANDIDATES = [
         const wn = pk.npcs[0]; if (wn && (() => { PETALS.length = 0; petalDrop(PL.park, PL.parkIn[0], PL.parkIn[1], wn); return PETALS.length; })()) problems.push('a wanderer far from the bridge drops petals');
         // the moment on the deck (owner, 2026-09-07, night): stand still on the bridge for a breath, pick a petal up, say the line — once per crossing, never off the deck
         if (typeof petalMomentTick !== 'function' || !(UI.en.petalLines || []).length || (UI.en.petalLines || []).length !== (UI.es.petalLines || []).length) problems.push('the deck has no moment or no lines in both languages');
-        else if (deck) { const tt = $('toast'); const heldBefore = petalMoment; moving = false; px = fx = deck[0]; py = fy = deck[1]; deckIdle = 0; petalSaid = false; petalMoment = false;
+        else if (deck) { const heldBefore = petalMoment; moving = false; px = fx = deck[0]; py = fy = deck[1]; deckIdle = 0; petalSaid = false; petalMoment = false;
+          const toast0 = toast; let said = null; toast = function (m) { said = m; return toast0.apply(this, arguments); };
           for (let i = 0; i < 10; i++) petalMomentTick(100); if (petalMoment) problems.push('the petal comes up before a breath has passed');
           for (let i = 0; i < 20; i++) petalMomentTick(100); if (!petalMoment) problems.push('standing on the deck, no petal is picked up');
-          if (!UI[lang].petalLines.includes(tt.textContent)) problems.push('the moment says nothing of the pack\'s lines (' + JSON.stringify(tt.textContent) + ')');
+          toast = toast0; if (!UI[lang].petalLines.includes(said)) problems.push('the moment says nothing of the pack\'s lines (' + JSON.stringify(said) + ')');
           const bakeH = fn => { const c = document.createElement('canvas'); c.width = 44; c.height = 44; const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 6, 12); fn(g); return g.getImageData(0, 0, 44, 44).data; };
           const withP = bakeH(g => drawPerson(g, 0, 0, look, { dir: 'down', hero: true })); petalMoment = false; const without = bakeH(g => drawPerson(g, 0, 0, look, { dir: 'down', hero: true })); petalMoment = true;
           let diff = 0; for (let i = 0; i < withP.length; i += 4) if (withP[i + 3] !== without[i + 3]) diff++; if (diff < 10) problems.push('the petal in hand draws nothing');
