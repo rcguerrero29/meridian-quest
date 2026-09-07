@@ -536,6 +536,19 @@ const RECORDSRC={
       const mg=p.mergeable===true?(es?"sin conflictos":"no conflicts"):p.mergeable===false?(es?"con conflictos":"conflicts"):"";
       s.push({kv:[["#"+p.n,p.title],[es?"estado":"state",st+(mg?" · "+mg:"")],[es?"presentado":"filed",p.at],["url",p.url]]});});
     }
+    /* #8 (owner: "the teller should have a category for that that highlights in red. if any other
+       critical errors come up, there can be another section in that critical red for other than
+       robot gated things"): what El Portero stopped, then everything else critical, both in red,
+       from the town's own log; nothing printed when there is nothing */
+    if(typeof mqLog!=="undefined"){
+      const stopped=mqLog.filter(e=>e.kind==="build"),other=mqLog.filter(e=>e.crit&&e.kind!=="build");
+      if(stopped.length||other.length){
+        s.push({h:es?"🔴 Crítico":"🔴 Critical"});
+        if(stopped.length){s.push({red:(es?"Intentos detenidos por El Portero: ":"Stopped by El Portero: ")+stopped.reduce((t,e)=>t+e.n,0)});
+          stopped.forEach(e=>s.push({red:"× "+e.n+" · "+e.msg}));}
+        if(other.length){s.push({red:(es?"Otros errores críticos: ":"Other critical errors: ")+other.length});
+          other.forEach(e=>s.push({red:"× "+e.n+" · "+e.kind+": "+e.msg}));}
+        s.push({btn:es?"✓ Revisado — limpiar":"✓ Reviewed — clear",run:()=>{logClear();docOpen("window");}});}}
     s.push({h:es?"La calle":"The street"});
     s.push({p:(es?"Hay ":"There are ")+this.people.length+(es?" persona(s) en la calle y ":" person(s) on the street and ")+this.notesList.length+(es?" nota(s) en el tablero.":" note(s) on the board.")
       +(this.filter.length||this.search?(es?" Filtro: ":" Filter: ")+[...this.filter,this.search?"“"+this.search+"”":""].filter(Boolean).join(", ")+".":"")});

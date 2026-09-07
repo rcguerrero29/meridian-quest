@@ -269,6 +269,20 @@ const { chromium } = require('playwright-core');
           if (s.y + 0.2 > wallTop || s.y < 0.3) problems.push('the board beside la ventanilla is not mid-face on city hall\'s wall (' + s.y.toFixed(2) + ' up on a ' + wallTop.toFixed(2) + ' wall)');
           if (s.z < 1.0) problems.push('the board beside la ventanilla hangs inside the wall, not on its street face (z ' + s.z.toFixed(2) + ')'); } }
       T3.yaw = b3.yaw; camSet(b3.cam); world = b3.world; px = b3.px; py = b3.py; }
+    // #8: the teller's card carries a red category — what El Portero stopped, then other critical errors —
+    // only when there is something to say, and it clears once reviewed
+    { const keep = mqLog.slice(); logClear();
+      const quiet = RECORDSRC.windowDoc();
+      if (quiet.some(x => x.red)) problems.push('the teller prints red with nothing critical logged');
+      mqwarn('build', 'refused to build probe — the door at 1,1 would open onto nothing', true);
+      mqwarn('portal', 'probe:E → missing world zz', true);
+      mqwarn('world', 'nowhere to walk for probe', false);
+      const loud = RECORDSRC.windowDoc(), reds = loud.filter(x => x.red).map(x => x.red);
+      if (!reds.some(r => /Stopped by El Portero: 1/.test(r))) problems.push('the teller does not count what El Portero stopped in red (' + reds.join(' | ') + ')');
+      if (!reds.some(r => /Other critical errors: 1/.test(r))) problems.push('the teller has no second red section for other critical errors');
+      if (reds.some(r => /nowhere to walk/.test(r))) problems.push('a plain warning is printed in red');
+      const clear = loud.find(x => x.btn && /Reviewed/.test(x.btn)); if (!clear) problems.push('the red category has no Reviewed button'); else { clear.run(); if (mqLog.length) problems.push('Reviewed did not clear the log'); }
+      $('reader').hidden = true; logClear(); mqLog.push(...keep); }
     let ran = 0; docOpen({ title: { en: 't' }, build: () => [{ btn: 'press', run: () => { ran++; } }] });
     const btn = document.querySelector('#docBody button.dbtn');
     if (!btn) problems.push('the reader did not render a button section'); else { btn.click(); if (ran !== 1) problems.push('the button did not run its content'); }
