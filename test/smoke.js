@@ -1186,7 +1186,7 @@ const CANDIDATES = [
       const keep = { cam: camMode, world, px, py };
       const pal = S.art.bridge.map(h => h.toLowerCase());
       const offCount = fn => { const c = document.createElement('canvas'); c.width = 32; c.height = 32; const o = ctx; ctx = c.getContext('2d'); try { fn(); } finally { ctx = o; }
-        const d = c.getContext('2d').getImageData(0, 0, 32, 32).data; let n = 0; for (let i = 0; i < d.length; i += 4) { const h = '#' + [d[i], d[i + 1], d[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''); if (pal.includes(h)) n++; } return n; };
+        const d = c.getContext('2d').getImageData(0, 0, 32, 32).data; let n = 0; for (let i = 0; i < d.length; i += 4) { const h = '#' + [d[i], d[i + 1], d[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''); if (pal.some(p => Math.abs(parseInt(p.slice(1, 3), 16) - d[i]) < 48 && Math.abs(parseInt(p.slice(3, 5), 16) - d[i + 1]) < 48 && Math.abs(parseInt(p.slice(5, 7), 16) - d[i + 2]) < 48)) n++; } return n; };
       if (typeof petalSpill !== 'function' || typeof petalDrop !== 'function' || typeof petalTrail !== 'function' || typeof bridgeDist !== 'function') problems.push('the engine has no petal spill or trail');
       else {
         seasonSet(id); const pk = WORLDS[PL.park];
