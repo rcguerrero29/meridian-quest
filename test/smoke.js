@@ -1228,34 +1228,60 @@ const CANDIDATES = [
     const row = document.getElementById('seasonRow');
     if (!row) problems.push('no #seasonRow in Settings');
     else if (![...row.querySelectorAll('button')].some(b => b.dataset.sn === id)) problems.push(`Settings has no button for season "${id}"`);
-    // NOCHE DE ALEBRIJES (owner, 2026-09-07): a second mode, by name only — every animal striped in
-    // the palette, calavera paint on the hero's face. Off, nothing of it remains.
+    // NOCHE DE ALEBRIJES (owner, 2026-09-07; Pili's direction the same day): a second mode, by name only.
+    // Every animal keeps its silhouette and gets tinted, marked and (the wingless) winged; five looks a
+    // kind, the same five names; everyone gets calavera paint, five looks, the crowd varies by person.
     const ale = Object.entries(SEASONS).find(([k, v]) => v.art && v.art.alebrije);
-    if (!ale) problems.push('no season hands an alebrije palette');
+    if (!ale) problems.push('no season hands alebrije looks');
+    else if (typeof alebLooks !== 'function' || typeof faceLookFor !== 'function' || typeof wildDraw !== 'function') problems.push('the engine has no alebrije looks (alebLooks / faceLookFor / wildDraw)');
     else { const [aid, A] = ale;
       if (A.from || A.to) problems.push('the alebrije mode is on the calendar — it is a mode you pick, not a season that arrives');
-      if (!A.art.facepaint) problems.push('the alebrije mode paints no face');
       const sonny = CRIT.find(c => c.kind === 'beagle' && c.name === 'Sonny');
       if (!sonny) problems.push('no Sonny to paint');
-      else { const keep = { cam: camMode, world, px, py };
-        const pal = A.art.alebrije.map(h => h.toLowerCase());
-        const count = (c, want) => { const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0;
-          for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 250) continue; const h = '#' + [d[i], d[i + 1], d[i + 2]].map(v => v.toString(16).padStart(2, '0')).join(''); if (want.includes(h)) n++; } return n; };
-        const draw = () => { camSet('3d'); world = sonny.world; px = fx = sonny.x - 1; py = fy = sonny.y; moving = false; held = null; T3.yaw = 0; draw3d(); draw3d(); };
-        const dogOf = () => T3.pool.find(p => p.live && p.spr.material.depthTest !== false && Math.abs(p.spr.position.x - (sonny.fx + 0.5)) < 0.7 && Math.abs(p.spr.position.z - (sonny.fy + 0.5)) < 0.9);
-        const heroOf = () => T3.pool.find(p => p.live && p.spr.material.depthTest === false);
-        seasonSet(aid); draw();
-        const dog = dogOf(), hero = heroOf();
-        if (!dog) problems.push('Sonny\'s billboard was not found beside the hero');
-        else if (count(dog.c, pal) < 15) problems.push(`in the alebrije mode Sonny wears ${count(dog.c, pal)} pixels of the palette — he is not an alebrije`);
-        // the calavera base is a colour no skin or shirt wears: count its pixels on the hero's card
-        const base = [A.art.facepaint.base.toLowerCase()];
-        if (!hero) problems.push('no hero billboard in the alebrije mode');
-        else if (count(hero.c, base) < 8) problems.push(`the hero's card in the alebrije mode shows ${count(hero.c, base)} pixels of the calavera base ${A.art.facepaint.base} — no face paint`);
-        seasonSet('off'); draw();
-        const dog0 = dogOf(), hero0 = heroOf();
-        if (dog0 && count(dog0.c, pal) > 0) problems.push('with the mode off, Sonny still wears alebrije colours');
-        if (hero0 && count(hero0.c, base) > 0) problems.push('with the mode off, the hero still wears the calavera paint');
+      else { const keep = { cam: camMode, world, px, py, ale: JSON.stringify(alePick) };
+        const now0 = Date.now; Date.now = () => 1700000000000; /* the tail wags with the clock: freeze it so two bakes differ only by the treatment */
+        const bake = (fn, sc) => { sc = sc || 1; const c = document.createElement('canvas'); c.width = 44 * sc; c.height = 44 * sc; const g = c.getContext('2d'); g.setTransform(sc, 0, 0, sc, 6 * sc, 12 * sc); fn(g); return g.getImageData(0, 0, 44 * sc, 44 * sc).data; };
+        const dog = () => bake(g => drawBeagle(g, sonny, 0, 0));
+        const alpha = d => { const a = []; for (let i = 3; i < d.length; i += 4) a.push(d[i] > 40 ? 1 : 0); return a; };
+        const hues = d => { const B = new Set(); for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 200) continue; const r = d[i] / 255, gg = d[i + 1] / 255, b = d[i + 2] / 255, mx = Math.max(r, gg, b), mn = Math.min(r, gg, b), l = (mx + mn) / 2, sat = mx === mn ? 0 : (mx - mn) / (1 - Math.abs(2 * l - 1)); if (sat < 0.35 || l < 0.12 || l > 0.9) continue; let h = 0; if (mx === r) h = ((gg - b) / (mx - mn)) % 6; else if (mx === gg) h = (b - r) / (mx - mn) + 2; else h = (r - gg) / (mx - mn) + 4; B.add(Math.floor(((h * 60 + 360) % 360) / 30)); } return B.size; };
+        seasonSet('off'); const off = dog();
+        seasonSet(aid); const L = alebLooks();
+        if (!L || L.length !== 5) problems.push('the alebrije mode does not offer five looks (' + (L ? L.length : 0) + ')');
+        else {
+          const noWing = L.findIndex(l => !l.wings), wing = L.findIndex(l => l.wings);
+          if (noWing < 0 || wing < 0) problems.push('the five looks must include wings on and wings off');
+          alePick.animals.Sonny = noWing; const on = dog();
+          if (alpha(on).join('') !== alpha(off).join('')) problems.push('the alebrije treatment moved Sonny\'s silhouette — it must paint only inside his own pixels');
+          const nh = hues(on); if (nh < 2 || nh > 4) problems.push(`Sonny wears ${nh} hue families as an alebrije — two to four read; one is a wash, more is crossed out`);
+          const ids = new Set(); for (let i = 0; i < 5; i++) { alePick.animals.Sonny = i; ids.add(alebLookFor('beagle', 'Sonny').id); } if (ids.size !== 5) problems.push('the five looks are not five distinct looks for Sonny');
+          alePick.animals.Sonny = wing; const w1 = dog(), a0 = alpha(off), a1 = alpha(w1);
+          let added = 0, out = 0; for (let i = 0; i < a0.length; i++) { if (a0[i] && !a1[i]) out++; if (!a0[i] && a1[i]) { added++; const x = i % 44, y = Math.floor(i / 44); if (x < 6 + 16 - 13 || x > 6 + 16 + 13 || y > 12 + 22) out++; } }
+          if (added < 12) problems.push('the winged look adds no wings to Sonny');
+          if (out) problems.push('the wings cross Sonny\'s own pixels, his face, or the card\'s edge (' + out + ' pixels)');
+          // the buttons: next cycles all five and comes back; random never repeats the current look
+          petCrit = sonny; petTarget = 'beagle'; alePick.animals.Sonny = 0; const seen = [];
+          for (let i = 0; i < 5; i++) { alePress(false); seen.push(alebLookFor('beagle', 'Sonny').id); }
+          if (new Set(seen).size !== 5 || alebLookFor('beagle', 'Sonny').id !== L[0].id) problems.push('Next does not walk the five looks and come back (' + seen.join(',') + ')');
+          for (let i = 0; i < 12; i++) { const cur = alebLookFor('beagle', 'Sonny').id; alePress(true); if (alebLookFor('beagle', 'Sonny').id === cur) { problems.push('Random repeated the current look'); break; } }
+          petCrit = null; petTarget = null;
+        }
+        // everyone painted: the hero and a person of the world, in different looks when they are different people
+        const F = faceLooks(); if (!F || F.length !== 5) problems.push('the calavera paint does not offer five looks');
+        else {
+          const face = (who, hero) => bake(g => drawPerson(g, 0, 0, hero ? look : (NPCLOOK.tacho || look), { dir: 'down', hero, who }), 3); /* at 3x the base has room to be counted */
+          const count = (d, hex) => { const h = hex.toLowerCase(); let n = 0; for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 250) continue; if ('#' + [d[i], d[i + 1], d[i + 2]].map(v => v.toString(16).padStart(2, '0')).join('') === h) n++; } return n; };
+          for (let i = 0; i < 5; i++) { alePick.hero = i; const d = face('hero', true); if (count(d, F[i].base) < 30) problems.push('the hero\'s calavera look ' + F[i].id + ' leaves no base on the face (' + count(d, F[i].base) + ')'); }
+          alePick.hero = 0;
+          const lk = faceLookFor('tacho', false); if (!lk) problems.push('a person of the world gets no calavera look');
+          else if (count(face('tacho', false), lk.base) < 30) problems.push('a person of the world is not painted (' + lk.id + ')');
+          const pair = (WORLDS.hq.npcs || []).slice(0, 2).map(n => faceLookFor(n.npc || n.key, false).id);
+          const ids = new Set((WORLDS.hq.npcs || []).map(n => faceLookFor(n.npc || n.key, false).id));
+          if ((WORLDS.hq.npcs || []).length >= 5 && ids.size < 3) problems.push('the crowd in HQ wears fewer than three calavera looks');
+          seasonSet('off'); if (faceLookFor('tacho', false) || alebLooks()) problems.push('with the mode off, the paint and the looks remain');
+          const offAgain = dog(); if (alpha(offAgain).join('') !== alpha(off).join('')) problems.push('with the mode off, Sonny\'s wings did not go');
+        }
+        Date.now = now0;
+        alePick = JSON.parse(keep.ale); alePersist();
         camSet(keep.cam); world = keep.world; px = fx = keep.px; py = fy = keep.py; } }
     seasonSet(pick0);
     return problems;

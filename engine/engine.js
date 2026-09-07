@@ -548,7 +548,7 @@ function drawIso(){
   const bill=(gx,gy,fn)=>{const[cx,cy]=P(gx,gy);
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
   w.npcs.forEach(n=>bill(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(bx,by)=>{
-    drawPerson(ctx,bx,by,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
+    drawPerson(ctx,bx,by,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     drawEmote(n,bx,by);}));
@@ -1163,12 +1163,12 @@ function drawFront(){
   const act=(gx,gy,fn)=>{const sx=gx*TS-camX,sy=gy*TS-camY;
     if(sx<-TS||sy<-TS-16||sx>VW||sy>VH)return;R.push({d:gy+0.55,f:()=>fn(sx,sy)});};
   w.npcs.forEach(n=>act(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(sx,sy)=>{
-    drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
+    drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     drawEmote(n,sx,sy);}));
   PEERS.forEach(p=>{if(p.w!==world)return;
-    act(p.x,p.y,(sx,sy)=>{drawPerson(ctx,sx,sy,p.look||look,{dir:p.dir||"down"});
+    act(p.x,p.y,(sx,sy)=>{drawPerson(ctx,sx,sy,p.look||look,{dir:p.dir||"down",who:p.id||p.name||"peer"});
       ctx.font="600 8px monospace";ctx.textAlign="center";
       ctx.fillStyle="rgba(15,12,20,.75)";ctx.fillText(String(p.name||"").slice(0,12),sx+16.7,sy-1.3);
       ctx.fillStyle="#EDE9F5";ctx.fillText(String(p.name||"").slice(0,12),sx+16,sy-2);
@@ -1253,7 +1253,7 @@ function draw(){
   w.npcs.forEach(n=>{
     const sx=(n.fx===undefined?n.x:n.fx)*TS-camX,sy=(n.fy===undefined?n.y:n.fy)*TS-camY;
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
-    drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8});
+    drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
     if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
       ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
     drawEmote(n,sx,sy);
@@ -1262,7 +1262,7 @@ function draw(){
     if(p.w!==world)return;
     const sx=p.x*TS-camX,sy=p.y*TS-camY;
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
-    drawPerson(ctx,sx,sy,p.look||look,{dir:p.dir||"down"});
+    drawPerson(ctx,sx,sy,p.look||look,{dir:p.dir||"down",who:p.id||p.name||"peer"});
     ctx.font="600 8px monospace";ctx.textAlign="center";
     ctx.fillStyle="rgba(15,12,20,.75)";ctx.fillText(String(p.name||"").slice(0,12),sx+16.7,sy-1.3);
     ctx.fillStyle="#EDE9F5";ctx.fillText(String(p.name||"").slice(0,12),sx+16,sy-2);
@@ -2030,6 +2030,16 @@ function drawRobot(g,sx,sy,lk,o){
     g.fillStyle=lamp;g.fillRect(sx+12.3+ex,sy+3.3,2.4,2);g.fillRect(sx+17.3+ex,sy+3.3,2.4,2); /* amber lamps */
     g.fillStyle="#2B2536";g.fillRect(sx+13,sy+8,6,1);} /* a slot for a mouth; it does not move */
 }
+const FACE_DEF={looks:[
+  {id:"clasica",name:{en:"Calaca clásica",es:"Calaca clásica"},base:"#F4F1EA",ring:"#F28C28",dark:"#2B2536"},
+  {id:"cempasuchil",name:{en:"Cempasúchil",es:"Cempasúchil"},base:"#FFF3D6",ring:"#FF6A00",dark:"#3A1F12",petals:true,brow:"dots",mark:"#FFC300"},
+  {id:"catrina",name:{en:"Catrina",es:"Catrina"},base:"#F6F2E8",ring:"#8A3FE8",dark:"#1B1230",brow:"tear"},
+  {id:"colibri",name:{en:"Colibrí",es:"Colibrí"},base:"#EAF7F5",ring:"#00D9E8",dark:"#12324A",grinRing:true},
+  {id:"fuego",name:{en:"Fuego",es:"Fuego"},base:"#2B2536",ring:"#FFC300",dark:"#F6F2E8",brow:"flame",mark:"#FF2E88"}]};
+function faceLooks(){const a=art("facepaint",null);if(!a)return null;
+  if(a.looks&&a.looks.length)return a.looks;if(a.base)return [{id:"pack",name:{en:"Calavera",es:"Calavera"},base:a.base,ring:a.accent||"#F28C28",dark:a.dark||"#2B2536"}];return FACE_DEF.looks;}
+function faceLookFor(who,hero){const L=faceLooks();if(!L)return null;
+  const i=hero?alePick.hero:(aleHash(who||"?")+alePick.off);return L[((i%L.length)+L.length)%L.length];}
 function drawPerson(g,sx,sy,lk,o){
   if(lk&&lk.robot)return drawRobot(g,sx,sy,lk,o);
   o=o||{};const b=o.bob||o.idle||0,d=o.dir||"down",bh=b*0.5;
@@ -2054,16 +2064,24 @@ function drawPerson(g,sx,sy,lk,o){
   g.fillStyle=lk.skin;g.beginPath();g.arc(sx+16,sy+5+bh,6.5,0,7);g.fill();
   g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.8;g.stroke();
   const st=lk.style||"cap",hx=sx+16,hy=sy+5+bh;
-  /* calavera paint on the HERO only, when the season hands art("facepaint") — owner, 2026-09-07:
-     "i get a dia de los muertos face paint color". Base over the face, petal rings round the
-     eye sockets in the accent, the nose, the stitched grin; hair and eyes go on over it. */
-  const fp=o.hero&&art("facepaint",null);
-  const paint=()=>{g.save();g.beginPath();g.arc(hx,hy,6.5,0,7);g.clip();
-    g.fillStyle=fp.base||"#F4F1EA";g.fillRect(hx-7,hy-7,14,14);
-    g.fillStyle=fp.accent||"#F28C28";[-2.8,2.8].forEach(dx=>{g.beginPath();g.arc(hx+dx,hy+0.6,2.2,0,7);g.fill();});
-    g.fillStyle=fp.dark||"#2B2536";[-2.8,2.8].forEach(dx=>{g.beginPath();g.arc(hx+dx,hy+0.6,1.6,0,7);g.fill();});
+  /* calavera paint for EVERYONE when the season hands art("facepaint") — owner, 2026-09-07: "everyone
+     should also have that, not just me... have only a number of changes - 5 perhaps". Five looks
+     (Pili's: four light bases in different hues and one value-inverted, so a crowd reads from ten
+     tiles): base over the face, ring round the eye sockets (petals in one look), the sockets, the
+     nose, the stitched grin, a brow mark only where the hair leaves a forehead. The hero picks;
+     a person's look comes from who they are, never from where they stand. Hair and eyes go on over it. */
+  const fp=faceLookFor(o.who,!!o.hero);
+  const paint=()=>{const brow=["buzz","fade","bald","flat"].includes(st);
+    g.save();g.beginPath();g.arc(hx,hy,6.5,0,7);g.clip();
+    g.fillStyle=fp.base;g.fillRect(hx-7,hy-7,14,14);
+    g.fillStyle=fp.ring;[-2.8,2.8].forEach(dx=>{if(fp.petals){for(let k=0;k<6;k++){g.beginPath();g.arc(hx+dx+Math.cos(k*Math.PI/3)*1.9,hy+0.6+Math.sin(k*Math.PI/3)*1.9,0.9,0,7);g.fill();}}
+      else{g.beginPath();g.arc(hx+dx,hy+0.6,2.2,0,7);g.fill();}});
+    g.fillStyle=fp.dark;[-2.8,2.8].forEach(dx=>{g.beginPath();g.arc(hx+dx,hy+0.6,1.6,0,7);g.fill();});
     g.beginPath();g.moveTo(hx-0.9,hy+3.9);g.lineTo(hx+0.9,hy+3.9);g.lineTo(hx,hy+2.6);g.closePath();g.fill();
-    g.fillRect(hx-3.2,hy+5.2,6.4,0.8);[-2.2,-0.8,0.6,2].forEach(dx=>g.fillRect(hx+dx,hy+4.6,0.6,1.9));
+    g.fillStyle=fp.grinRing?fp.ring:fp.dark;g.fillRect(hx-3.2,hy+5.2,6.4,0.8);[-2.2,-0.8,0.6,2].forEach(dx=>g.fillRect(hx+dx,hy+4.6,0.6,1.9));
+    if(fp.brow==="tear"){g.fillStyle=fp.ring;g.beginPath();g.moveTo(hx-2.8,hy+2.4);g.lineTo(hx-2.1,hy+3.6);g.lineTo(hx-3.5,hy+3.6);g.closePath();g.fill();}
+    else if(brow&&fp.brow==="dots"){g.fillStyle=fp.mark||fp.ring;[-1.8,0,1.8].forEach((dx,i)=>{g.beginPath();g.arc(hx+dx,hy-3.3-(i===1?0.6:0),0.55,0,7);g.fill();});}
+    else if(brow&&fp.brow==="flame"){g.fillStyle=fp.mark||fp.ring;g.beginPath();g.moveTo(hx-1,hy-2.6);g.lineTo(hx,hy-4.6);g.lineTo(hx+1,hy-2.6);g.closePath();g.fill();}
     g.restore();g.fillStyle=lk.hair;};
   if(fp)paint();
   /* hair v3: clipped to the actual skull, so every style fits clean */
@@ -2154,28 +2172,87 @@ function drawPerson(g,sx,sy,lk,o){
   if(d!=="up"&&Math.floor(Date.now()/130+sx*0.7+sy)%37!==0){
     g.fillStyle="#26202B";g.fillRect(sx+13.5+ex,sy+4.5+ey+bh,1.6,1.6);g.fillRect(sx+17+ex,sy+4.5+ey+bh,1.6,1.6);}
 }
-/* ---------- alebrije colours (owner, 2026-09-07: "another mode where they turn into little
-   alebrije colors") ---------- When the season hands a palette through art("alebrije"), every
-   animal is painted as usual on a scratch canvas, then STRIPED in the palette only where its own
-   pixels are (source-atop), and stamped back — an alebrije is a real animal in impossible colours,
-   so the silhouette, the shading between the stripes and the animation stay the animal's. The
-   scratch canvas is one per size, reused. Without a palette the drawers are untouched. */
-const wildTmp={c:null};
-function wildDraw(g,pal,fn,sx,sy){
-  const cv=g.canvas,W=cv.width,H=cv.height;
-  let t=wildTmp.c;if(!t||t.width!==W||t.height!==H){t=wildTmp.c=document.createElement("canvas");t.width=W;t.height=H;}
-  const tg=t.getContext("2d");tg.setTransform(1,0,0,1,0,0);tg.clearRect(0,0,W,H);tg.setTransform(g.getTransform());
-  fn(tg);
-  tg.save();tg.globalCompositeOperation="source-atop";
-  for(let i=0;i<16;i++){tg.fillStyle=pal[i%pal.length];tg.beginPath();
-    const x0=sx-8+i*3.4;tg.moveTo(x0,sy-10);tg.lineTo(x0+1.7,sy-10);tg.lineTo(x0+1.7+14,sy+36);tg.lineTo(x0+14,sy+36);tg.closePath();tg.fill();}
-  tg.restore();
-  g.save();g.setTransform(1,0,0,1,0,0);g.drawImage(t,0,0);g.restore();
+/* ---------- ALEBRIJES (owner, 2026-09-07: "so sonny will still look sonny like but in different
+   colors and perhaps tiny wings"; Pili's direction the same day) ----------
+   An alebrije is a real animal in impossible colours. The first cut striped the animal and the
+   owner called it "crossed out". Now, inside the animal's own alpha mask (the silhouette is
+   byte-identical, and the test says so): the coat is TINTED (source-atop, 62%, the contact shadow
+   clipped out), the animal's own darks are pulled back (multiply with the untreated draw, so the
+   eye stays an eye), at most five small marks go where the kind has room (a spine of dots on a
+   saddle, scales on a flank, the inner ears, a chevron on a wing), the tips take the accent —
+   and the wingless get tiny wings behind the shoulder, two crisp frames, drawn destination-over
+   so they never cross the face. Five looks, the same five on every kind, so a park full of
+   critters reads as one night. Colours are content's (art("alebrije") may hand {looks:[…]});
+   the engine keeps a default. */
+const ALEB_DEF={looks:[
+  {id:"fuego",name:{en:"Ember",es:"Fuego"},tint:"#FF6A00",pat:"#FFC300",accent:"#FF2E88",wings:true},
+  {id:"cielo",name:{en:"Sky",es:"Cielo"},tint:"#00D9E8",pat:"#FFE9F2",accent:"#8A3FE8",wings:true},
+  {id:"selva",name:{en:"Jungle",es:"Selva"},tint:"#7CFF3D",pat:"#12B39B",accent:"#FFC300",wings:false},
+  {id:"cempasuchil",name:{en:"Marigold",es:"Cempasúchil"},tint:"#FFC300",pat:"#FF6A00",accent:"#FF2E88",wings:false},
+  {id:"medianoche",name:{en:"Midnight",es:"Medianoche"},tint:"#8A3FE8",pat:"#FF2E88",accent:"#00D9E8",wings:true}]};
+function alebLooks(){const a=art("alebrije",null);if(!a)return null;
+  if(Array.isArray(a))return ALEB_DEF.looks.map((l,i)=>({...l,tint:a[i%a.length]||l.tint}));
+  return (a.looks&&a.looks.length)?a.looks:ALEB_DEF.looks;}
+/* the player's picks: one per named animal, one for the hero, an offset that shifts the crowd */
+let alePick={hero:0,off:0,animals:{}};
+try{const a0=JSON.parse(localStorage.getItem(SK("ale"))||"{}");if(a0&&typeof a0==="object")alePick={hero:a0.hero|0,off:a0.off|0,animals:(a0.animals&&typeof a0.animals==="object")?a0.animals:{}};}catch(e){}
+function alePersist(){try{localStorage.setItem(SK("ale"),JSON.stringify(alePick));}catch(e){}}
+const aleHash=str=>{let h=2166136261>>>0;for(let i=0;i<String(str).length;i++){h^=String(str).charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h>>>0;};
+function alebLookFor(kind,name){const L=alebLooks();if(!L)return null;
+  const k=name||kind,i=alePick.animals[k]!==undefined?alePick.animals[k]:(aleHash(k)+alePick.off);return L[((i%L.length)+L.length)%L.length];}
+const wildTmp={a:null,b:null};
+function wildScratch(which,W,H){let c=wildTmp[which];if(!c||c.width!==W||c.height!==H){c=wildTmp[which]=document.createElement("canvas");c.width=W;c.height=H;}return c;}
+/* the marks each kind has room for, and where its wings root; cx is the sprite's centre column */
+const ALEB_KIND={
+  beagle:{wings:[[-2.5,12],[-4,15.5]],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;for(let i=0;i<4;i++){g.beginPath();g.arc(cx-4+i*2,sy+16.4,0.55,0,7);g.fill();}
+    g.fillStyle=l.accent;g.fillRect(cx+3.4,sy+19.4,1.6,1.4);}}, /* spine on the saddle, the ear tip */
+  lab:{wings:[[-2.5,10.5],[-4,14]],marks:(g,l,cx,sy)=>{g.strokeStyle=l.pat;g.lineWidth=0.8;[18,21].forEach((yy,r)=>{for(let i=0;i<3;i++){g.beginPath();g.arc(cx-5+i*3+(r?1.5:0),sy+yy,1.2,Math.PI,0);g.stroke();}});
+    g.fillStyle=l.accent;g.fillRect(cx+3,sy+15.8,2,1.6);}}, /* scales on the flank, the ear tip */
+  chi:{wings:[[-1.5,15],[-3,18.5]],small:true,marks:(g,l,cx,sy)=>{g.fillStyle=l.accent;g.fillRect(cx+2.4,sy+10.6,1.4,1.6);g.fillRect(cx+7,sy+10.2,1.4,1.6);
+    g.fillStyle=l.pat;g.beginPath();g.arc(cx+3.1,sy+9.9,0.45,0,7);g.arc(cx+7.7,sy+9.5,0.45,0,7);g.fill();}}, /* the ears only */
+  dog:{wings:[[-2.5,10],[-4,13.5]],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.beginPath();g.arc(cx-3,sy+18,2.4,0,7);g.fill();g.beginPath();g.arc(cx+3.4,sy+20.6,1.9,0,7);g.fill();
+    g.fillStyle=l.accent;g.beginPath();g.arc(cx-9.6,sy+16.5,1.2,0,7);g.fill();}}, /* the merle patches, the tail tip */
+  cat:{wings:[[-2.5,13],[-4,16.5]],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.fillRect(cx-4.5,sy+18.5,1.8,6);g.fillRect(cx-1,sy+18.5,1.8,6);
+    g.fillStyle=l.accent;g.beginPath();g.arc(cx+4.2,sy+12.4,0.8,0,7);g.arc(cx+8.6,sy+12.6,0.8,0,7);g.fill();}}, /* the two bars, the ear tips */
+  gato:{wings:[[-2.5,13],[-4,16.5]],marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.fillRect(cx-4.5,sy+18.5,1.8,6);g.fillRect(cx-1,sy+18.5,1.8,6);
+    g.fillStyle=l.accent;g.beginPath();g.arc(cx+4.2,sy+12.4,0.8,0,7);g.arc(cx+8.6,sy+12.6,0.8,0,7);g.fill();}},
+  pigeon:{marks:(g,l,cx,sy)=>{g.strokeStyle=l.pat;g.lineWidth=0.9;g.beginPath();g.moveTo(cx-3.5,sy+21.5);g.lineTo(cx-1.5,sy+20);g.lineTo(cx+0.5,sy+21.5);g.stroke();}}, /* one chevron */
+  loro:{tint:0.75,marks:(g,l,cx,sy)=>{g.strokeStyle=l.pat;g.lineWidth=0.9;[16,19].forEach(yy=>{g.beginPath();g.moveTo(cx-1.3,sy+yy+1);g.lineTo(cx,sy+yy);g.lineTo(cx+1.3,sy+yy+1);g.stroke();});}},
+  butterfly:{tint:0.95,marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.beginPath();g.arc(cx-2.6,sy+11.5,1,0,7);g.arc(cx+2.6,sy+11.5,1,0,7);g.fill();}}, /* an eye on each upper wing */
+  colibri:{marks:(g,l,cx,sy)=>{g.fillStyle=l.accent;g.beginPath();g.arc(cx+3,sy+10.6,1.5,0,7);g.fill();}} /* the gorget */
+};
+function wildWings(g,l,K,cx,sy,small){ /* two crisp frames, swept back toward the tail, never over the face */
+  const fl=(Math.floor(Date.now()/110)&1),sc=small?0.7:1;
+  const W=[[K[0][0],K[0][1],4.6,fl?1.7:3.0,fl?-0.28:-0.62],[K[1][0],K[1][1],3.2,fl?1.2:2.1,fl?-0.05:-0.25]];
+  W.forEach(([dx,dy,rx,ry,rot])=>{g.save();g.globalAlpha=0.85;g.fillStyle=l.accent;g.beginPath();g.ellipse(cx+dx*sc,sy+dy,rx*sc,ry*sc,rot,0,7);g.fill();
+    g.globalAlpha=1;g.strokeStyle=l.pat;g.lineWidth=0.8;g.stroke();
+    g.fillStyle=l.tint;g.beginPath();g.arc(cx+dx*sc-rx*sc*0.7,sy+dy-ry*sc*0.3,0.9,0,7);g.fill();g.restore();});}
+function wildDraw(g,look,kind,fn,sx,sy,face){
+  const T=g.getTransform(),x0=sx-6,y0=sy-12,BW=44,BH=44,W=Math.ceil(BW*T.a),H=Math.ceil(BH*T.d);
+  const t=wildScratch("a",W,H),u=wildScratch("b",W,H),tg=t.getContext("2d"),ug=u.getContext("2d");
+  const M=()=>[T.a,T.b,T.c,T.d,-(T.a*x0+T.c*y0),-(T.b*x0+T.d*y0)];
+  tg.setTransform(1,0,0,1,0,0);tg.clearRect(0,0,W,H);tg.setTransform(...M());
+  fn(tg); /* the animal, untreated */
+  ug.setTransform(1,0,0,1,0,0);ug.clearRect(0,0,W,H);ug.drawImage(t,0,0); /* a copy of its own darks */
+  const KD=ALEB_KIND[kind]||{},cx=sx+16;
+  tg.save();tg.globalCompositeOperation="source-atop"; /* A: tint the coat, the shadow clipped out */
+  tg.beginPath();tg.rect(x0,y0,BW,25+sy-y0);tg.clip();tg.globalAlpha=KD.tint||0.62;tg.fillStyle=look.tint;tg.fillRect(x0,y0,BW,BH);tg.restore();
+  { /* B: the eye stays an eye — the animal's own darks pulled back by a multiply on the colour
+       channels only. Done per pixel rather than with the "multiply" composite, which also thickens
+       every anti-aliased edge and so moves the silhouette; the alpha channel is not touched. */
+    const im=tg.getImageData(0,0,W,H),d=im.data,o=ug.getImageData(0,0,W,H).data;
+    for(let i=0;i<d.length;i+=4){if(!d[i+3])continue;d[i]=d[i]*(0.55+0.45*o[i]/255);d[i+1]=d[i+1]*(0.55+0.45*o[i+1]/255);d[i+2]=d[i+2]*(0.55+0.45*o[i+2]/255);}
+    tg.save();tg.setTransform(1,0,0,1,0,0);tg.putImageData(im,0,0);tg.restore();}
+  if(KD.marks){tg.save();tg.globalCompositeOperation="source-atop";tg.translate(cx,0);tg.scale(face||1,1);tg.translate(-cx,0);KD.marks(tg,look,cx,sy);tg.restore();} /* C: five marks at most */
+  if(look.wings&&KD.wings){tg.save();tg.globalCompositeOperation="destination-over";tg.translate(cx,0);tg.scale(face||1,1);tg.translate(-cx,0);wildWings(tg,look,KD.wings,cx,sy,KD.small);tg.restore();} /* D: wings behind */
+  g.save();g.setTransform(1,0,0,1,0,0);g.drawImage(t,T.e+T.a*x0+T.c*y0,T.f+T.b*x0+T.d*y0);g.restore();
 }
-const wild=(fn,ai)=>function(g,...a){const pal=art("alebrije",null);if(!pal||!pal.length)return fn(g,...a);return wildDraw(g,pal,tg=>fn(tg,...a),a[ai],a[ai+1]);};
-drawDog=wild(drawDog,0);drawCat=wild(drawCat,0);drawPigeon=wild(drawPigeon,0);drawLoro=wild(drawLoro,0);
-drawBeagle=wild(drawBeagle,1);drawLab=wild(drawLab,1);drawChi=wild(drawChi,1);drawGato=wild(drawGato,1);
-drawButterfly=wild(drawButterfly,1);drawColibri=wild(drawColibri,1);
+const wild=(fn,ai,kind,faceOf)=>function(g,...a){const L=alebLooks();if(!L)return fn(g,...a);
+  const cr=ai?a[0]:null,look=alebLookFor(cr&&cr.kind||kind,cr&&cr.name);if(!look)return fn(g,...a);
+  return wildDraw(g,look,cr&&cr.kind||kind,tg=>fn(tg,...a),a[ai],a[ai+1],faceOf?faceOf(cr):1);};
+drawDog=wild(drawDog,0,"dog",()=>DOG.face);drawCat=wild(drawCat,0,"cat",()=>CAT.face);drawPigeon=wild(drawPigeon,0,"pigeon",()=>PIG.face);drawLoro=wild(drawLoro,0,"loro",()=>1);
+drawBeagle=wild(drawBeagle,1,"beagle",c=>c.face);drawLab=wild(drawLab,1,"lab",c=>c.face);drawChi=wild(drawChi,1,"chi",c=>c.face);drawGato=wild(drawGato,1,"gato",c=>c.face);
+drawButterfly=wild(drawButterfly,1,"butterfly",c=>c.face);drawColibri=wild(drawColibri,1,"colibri",c=>c.face);
 /* ---------- movement ---------- */
 const DIRS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 /* One quarter-turn of the camera, as a rename of the four directions. */
@@ -2577,6 +2654,7 @@ function fredCheck(){ /* now the generic animal-interaction check: every creatur
   const bandOK=dogT&&world===PL.park;
   $("band").hidden=!bandOK;
   if(bandOK)$("band").textContent=T().bandLb||"🎀";
+  const aleOn=!!alebLooks();if($("aleRnd")){$("aleRnd").hidden=!aleOn;$("aleNext").hidden=!aleOn;} /* the alebrije looks: random, next — the animal you are beside, else you */
   const loveOK=dogT; /* you can always tell him */
   $("love").hidden=!loveOK;
   if(loveOK)$("love").textContent=T().loveLb||"💗";
@@ -3955,6 +4033,21 @@ $("band").addEventListener("click",()=>{
   if(c.name){if(c.band)parkPrefs.band[c.name]=c.band;else delete parkPrefs.band[c.name];parkPersist();}
   toast(c.band?T().bandToast:T().bandOff,1600);
 });
+/* the two alebrije buttons (owner: "a button for random, another to vary through the ones created for
+   that animal"): they act on the animal you are beside (the same target as the treat and the bandana),
+   else on your own face paint. Random never repeats the current look; the toast says the look's name,
+   which is how five names get learned without a menu (Pili). */
+function alePress(random){
+  const L=alebLooks();if(!L)return;
+  const c=(DOGK.has(petTarget)&&petCrit)?petCrit:null;
+  if(c){const key=c.name||c.kind,cur=L.indexOf(alebLookFor(c.kind,c.name));let i=(cur+1)%L.length;
+    if(random){do{i=Math.floor(Math.random()*L.length);}while(i===cur&&L.length>1);}
+    alePick.animals[key]=i;alePersist();const lk=L[i];toast((c.name||npcName(c.kind)||c.kind)+" — "+(lk.name?(lk.name[lang]||lk.name.en):lk.id),1800);}
+  else{const F=faceLooks();if(!F)return;const cur=alePick.hero%F.length;let i=(cur+1)%F.length;
+    if(random){do{i=Math.floor(Math.random()*F.length);}while(i===cur&&F.length>1);}
+    alePick.hero=i;alePersist();const lk=F[i];toast((T().youLb||"You")+" — "+(lk.name?(lk.name[lang]||lk.name.en):lk.id),1800);}
+}
+if($("aleRnd")){$("aleRnd").addEventListener("click",()=>alePress(true));$("aleNext").addEventListener("click",()=>alePress(false));}
 $("love").addEventListener("click",()=>{ /* "let us say i love you to him" — owner ask */
   if(!DOGK.has(petTarget)||!petCrit)return;
   const c=petCrit;
