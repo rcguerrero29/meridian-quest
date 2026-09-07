@@ -2,7 +2,7 @@
    street. docs/story/el-changarrito.md. This pack trains no role, carries no curriculum and
    awards no grade that means anything about the player (§7½). */
 const GAMENAME="El Changarrito";
-const GAMEV="ch-v40 · engine mq-v99";   /* the town's own version, and the engine it was built on */
+const GAMEV="ch-v41 · engine mq-v100";   /* the town's own version, and the engine it was built on */
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;
@@ -33,8 +33,8 @@ const PLACES={
    marigold bridge here first (Settings → Season, by name). Same keys as Meridian's config. */
 const SEASONS={
   muertos:{label:{en:"Día de Muertos",es:"Día de Muertos"},from:[10,18],to:[11,3],
-    art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],bridgeStyle:"petals",
-         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],sky:"#E8A24A"}},
+    art:{bridge:["#7A2E12","#B8410E","#E2620F","#F2870F","#FBB024","#FFD972"],bridgeStyle:"petals",
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"],sky:"#E8A24A"}},
   /* NOCHE DE ALEBRIJES — the owner's second mode (2026-09-07: "another mode where they turn into
      little alebrije colors and i get a dia de los muertos face paint color"). No dates: picked by
      name in Settings → Season, never by the calendar. Carries the Muertos dressing, and adds
@@ -42,8 +42,8 @@ const SEASONS={
      alebrije is a real animal in impossible colours; the wingless get tiny wings) and `facepaint`
      (five calavera looks for everyone; the hero picks, a person's comes from who they are). */
   alebrije:{label:{en:"Noche de alebrijes",es:"Noche de alebrijes"},
-    art:{bridge:["#FFD166","#F7B733","#F59E1B","#F28C28","#E8731F","#D9601A"],bridgeStyle:"petals",
-         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],sky:"#E8A24A",
+    art:{bridge:["#7A2E12","#B8410E","#E2620F","#F2870F","#FBB024","#FFD972"],bridgeStyle:"petals",
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"],sky:"#E8A24A",
          alebrije:{looks:[ /* Pili's five, the same five on every animal so the night reads as one; wings on the wingless */
            {id:"fuego",name:{en:"Ember",es:"Fuego"},tint:"#FF6A00",pat:"#FFC300",accent:"#FF2E88",wings:true},
            {id:"cielo",name:{en:"Sky",es:"Cielo"},tint:"#00D9E8",pat:"#FFE9F2",accent:"#8A3FE8",wings:true},
