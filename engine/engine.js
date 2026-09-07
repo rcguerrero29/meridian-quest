@@ -741,12 +741,25 @@ TILEDRAW["~"]=rc=>{const{sx,sy,x,y}=rc; /* river water: cool blue, drifting glin
       ctx.fillRect(sx+4,sy+8+ph*2,11,2);ctx.fillRect(sx+17,sy+21-ph*2,10,2);
       ctx.fillStyle="rgba(255,255,255,.25)";ctx.fillRect(sx+7,sy+9+ph*2,4,1);};
 const BRIDGE_BANDS=["#D95B5B","#E0A430","#E7C25A","#7A9A4E","#5E93BC","#8B6FC8"]; /* year-round */
-TILEDRAW["^"]=rc=>{const{sx,sy}=rc; /* the rainbow bridge: walk the whole spectrum.
-      The six bands are the one thing a season may recolour; planks and rails are design */
+TILEDRAW["^"]=rc=>{const{sx,sy,x,y}=rc; /* the rainbow bridge: walk the whole spectrum.
+      The six bands are what a season recolours; planks and rails are design. One season may
+      also STREW the deck (art("bridgeStyle")==="petals"): Día de Muertos lays cempasúchil petals
+      over dark planks, the way petals are laid as a path for the souls to follow home — the
+      owner's word, 2026-09-07: "marigold, and petals too". Deterministic per tile, so the
+      3D bake and the four cameras agree on where each petal fell. */
       ctx.fillStyle="#C9B99A";ctx.fillRect(sx,sy,TS,TS); /* plank base */
-      art("bridge",BRIDGE_BANDS).forEach((cc,i)=>{
-        ctx.fillStyle=cc;ctx.fillRect(sx,sy+3+i*4.4,TS,4.4);});
-      ctx.globalAlpha=0.22;ctx.fillStyle="#FFF";ctx.fillRect(sx,sy+3,TS,2);ctx.globalAlpha=1;
+      const bands=art("bridge",BRIDGE_BANDS);
+      if(art("bridgeStyle","bands")==="petals"){
+        ctx.fillStyle="#6E4E30";ctx.fillRect(sx,sy+2.5,TS,TS-5); /* dark planks under the petals */
+        let sd=((x|0)*73+(y|0)*131+7)|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+        for(let i=0;i<38;i++){const px=sx+1+rnd()*(TS-2),py=sy+4+rnd()*(TS-8),a=rnd()*Math.PI;
+          ctx.fillStyle=bands[i%bands.length];ctx.beginPath();ctx.ellipse(px,py,2.1,1.3,a,0,7);ctx.fill();}
+        ctx.globalAlpha=0.18;ctx.fillStyle="#FFF";
+        for(let i=0;i<10;i++){ctx.beginPath();ctx.arc(sx+2+rnd()*(TS-4),sy+5+rnd()*(TS-10),0.7,0,7);ctx.fill();}
+        ctx.globalAlpha=1;
+      }else{
+        bands.forEach((cc,i)=>{ctx.fillStyle=cc;ctx.fillRect(sx,sy+3+i*4.4,TS,4.4);});
+        ctx.globalAlpha=0.22;ctx.fillStyle="#FFF";ctx.fillRect(sx,sy+3,TS,2);ctx.globalAlpha=1;}
       ctx.fillStyle="#8A6F4D";ctx.fillRect(sx,sy,TS,2.5);ctx.fillRect(sx,sy+TS-2.5,TS,2.5); /* rails */};
 TILEDRAW["3"]=rc=>{const{sx,sy}=rc; /* agility hurdle: two posts, a bar to sail over */
       ctx.fillStyle="#C0392B";ctx.fillRect(sx+5,sy+8,3,20);ctx.fillRect(sx+24,sy+8,3,20);

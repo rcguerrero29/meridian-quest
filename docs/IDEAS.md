@@ -779,8 +779,15 @@ structurally sound. The wrongness is entirely in `engine3d.js:98-124`.
 top, a post-and-bar rail on each side of the crossing, and whoever crosses — you, the dog on
 the leash — stands on the deck (`stairLift` returns the deck height on a bridge tile). The 2D
 cameras keep the flat art; a season may still recolour the bands through `art("bridge")`.
-Not built: the arch (a flat deck reads as a bridge already; an arch is a second deck height
-per tile) and the Día de Muertos palette, which the owner signs (a season, per OWNER.md).
+**The palette SIGNED the same day** (owner, after the Coco research: *"marigold, and petals too
+and papel picado - do it alll!!!"*, `mq-v88`): the Día de Muertos season paints the bands a
+cempasúchil gradient, strews the deck with petals (`art("bridgeStyle")==="petals"`, drawn by
+`TILEDRAW["^"]`, so every camera and the 3D bake agree), and hangs papel picado over the
+crossing in 3D (`art("papel")`, poles and five flags a tile). By the calendar Oct 18 – Nov 3,
+or by name in Settings → Season, which is how the owner tests it before October. The town
+carries the same season for Sonny's park. Not built: the arch.
+Coco is the reference, not the source: the tradition (petal paths, cut paper) is everybody's;
+Disney's characters and designs are not used.
 
 **Fact base as it stood:** the rainbow bridge was **2 tiles of flat floor art**. There was no
 bridge object, in any camera. The owner wanted "an arch and even some day of the dead theme
