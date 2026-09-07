@@ -317,7 +317,25 @@ TILEART["▨"]=rc=>{const{sx,sy}=rc;                                   /* the bl
   ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+15,sy+9,2,4);
   ctx.fillStyle="#E8D6B0";ctx.fillRect(sx+12,sy+12,8,5);
   ctx.fillStyle="rgba(232,214,176,.28)";ctx.fillRect(sx+10,sy+17,12,7);};
+/* ʘ — Doña Meche's bote: a steel tamale pot on a cart at the trolley stop on Calle Dos (Nacho,
+   2026-09-07: "tamales are sold at the transit stop in every barrio on earth"). A box in 3D with a
+   side view, never a cutout; steam always, a marigold on the lid in season (art("bloom")). */
+TILEART["ʘ"]=rc=>{const{sx,sy}=rc; /* from above: the round lid, the cart's edge, steam */
+  ctx.fillStyle="#6E5638";ctx.fillRect(sx+4,sy+6,24,22);ctx.fillStyle="#8A6F4D";ctx.fillRect(sx+5,sy+7,22,20);
+  ctx.fillStyle="#8A8F98";ctx.beginPath();ctx.arc(sx+16,sy+17,9,0,7);ctx.fill();ctx.fillStyle="#B0B4BC";ctx.beginPath();ctx.arc(sx+16,sy+17,7,0,7);ctx.fill();
+  ctx.fillStyle="#6E7278";ctx.fillRect(sx+14,sy+16,4,2);
+  const bl=art("bloom",null);if(bl){ctx.fillStyle=bl;ctx.beginPath();ctx.arc(sx+20,sy+13,2,0,7);ctx.fill();}
+  ctx.fillStyle="rgba(255,255,255,.28)";const ph=Math.sin(Date.now()/500);[[-4,-9],[0,-11],[4,-8]].forEach((q,i)=>{ctx.beginPath();ctx.arc(sx+16+q[0]+ph*(i-1),sy+17+q[1]-ph,1.6,0,7);ctx.fill();});};
+TILEART_SIDE["ʘ"]=rc=>{const{sx,sy}=rc; /* from the front: the cart, two wheels, the pot on top, steam, a ladle */
+  ctx.fillStyle="rgba(15,12,20,.18)";ctx.beginPath();ctx.ellipse(sx+16,sy+30,12,2,0,0,7);ctx.fill();
+  ctx.fillStyle="#6E5638";ctx.fillRect(sx+5,sy+16,22,9);ctx.fillStyle="#8A6F4D";ctx.fillRect(sx+6,sy+17,20,7);
+  ctx.fillStyle="#3A3A44";[9,23].forEach(x=>{ctx.beginPath();ctx.arc(sx+x,sy+27,3,0,7);ctx.fill();});ctx.fillStyle="#8A8F98";[9,23].forEach(x=>{ctx.beginPath();ctx.arc(sx+x,sy+27,1.1,0,7);ctx.fill();});
+  ctx.fillStyle="#8A8F98";ctx.fillRect(sx+9,sy+7,14,10);ctx.fillStyle="#B0B4BC";ctx.fillRect(sx+10,sy+8,12,8);ctx.fillStyle="#6E7278";ctx.fillRect(sx+8,sy+6,16,2);
+  ctx.fillStyle="#3A3A44";ctx.fillRect(sx+22,sy+3,1.2,6);ctx.fillRect(sx+21,sy+2.5,3,1.4); /* the ladle */
+  const bl=art("bloom",null);if(bl){ctx.fillStyle=bl;ctx.beginPath();ctx.arc(sx+12,sy+5.5,2,0,7);ctx.fill();}
+  ctx.fillStyle="rgba(255,255,255,.3)";const ph=Math.sin(Date.now()/500);[[-3,2],[0,-1],[3,1]].forEach((q,i)=>{ctx.beginPath();ctx.arc(sx+16+q[0]+ph*(i-1),sy+q[1]-ph,1.5,0,7);ctx.fill();});};
 Object.assign(TILEMETA,{
+  "ʘ":{lift:8,kind:"appliance"},
   "▦":{lift:13,kind:"facade"},
   "▩":{lift:13,kind:"facade"},
   "▨":{lift:13,kind:"facade"},

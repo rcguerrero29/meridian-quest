@@ -84,8 +84,10 @@ const isSolidAt=(id,x,y)=>{const w=WORLDS[id];return !w||x<0||y<0||x>=w.W||y>=w.
    conversation is never a chase. */
 const WANDER_R=3, WANDER_MS=420;
 /* `roams:true` on a station lets a person who carries a document walk anyway — a crier with
-   the news, not a clerk you have to find at her window. No Meridian station says it. */
-function wanders(n){return !!n&&(!n.doc||n.roams)&&(!n.q||!n.q.length)&&
+   the news, not a clerk you have to find at her window. No Meridian station says it.
+   `still:true` keeps a person where the map put them even with nothing to hand out — a
+   vendor at her pot (Doña Meche); a wanderer stepping onto a trolley's landing would block it. */
+function wanders(n){return !!n&&!n.still&&(!n.doc||n.roams)&&(!n.q||!n.q.length)&&
   !(typeof roomHosts!=="undefined"&&roomHosts&&roomHosts[n.npc]);}
 function wanderInit(){Object.values(WORLDS).forEach(w=>w.npcs.forEach(n=>{
   n.fx=n.x;n.fy=n.y;n.hx=n.x;n.hy=n.y;n.wnext=0;n.mv=null;n.mt=0;n.face=1;}));}
@@ -682,7 +684,10 @@ TILEDRAW["D"]=rc=>{const{sx,sy,x,y}=rc; /* a desk: top, two legs, a monitor on i
       ctx.fillStyle="#DDE4EA";ctx.fillRect(sx+23,sy+14,5,3);}; /* paper */
 TILEDRAW["K"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc(C.counter);ctx.fillRect(sx+2,sy+6,TS-4,TS-10);ctx.font="12px serif";ctx.fillText("☕",sx+9,sy+22);};
 TILEDRAW["P"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=C.pot;ctx.fillRect(sx+10,sy+18,12,10);ctx.fillStyle=C.plant;
-      ctx.beginPath();ctx.arc(sx+16,sy+13,8,0,7);ctx.fill();};
+      ctx.beginPath();ctx.arc(sx+16,sy+13,8,0,7);ctx.fill();
+      const bl=art("bloom",null);if(bl){ctx.fillStyle=bl; /* every planter blooms cempasúchil in season (Nacho: the cheapest way the season reaches every world) */
+        [[-4,-3],[3,-4],[0,1],[-2,4],[4,3]].forEach(q=>{ctx.beginPath();ctx.arc(sx+16+q[0],sy+13+q[1],2.5,0,7);ctx.fill();});
+        ctx.fillStyle="rgba(255,255,255,.35)";[[-4,-3],[3,-4],[0,1],[-2,4],[4,3]].forEach(q=>{ctx.beginPath();ctx.arc(sx+16+q[0]-0.5,sy+13+q[1]-0.5,0.6,0,7);ctx.fill();});}};
 TILEDRAW["T"]=rc=>{const{sx,sy,x,y}=rc; /* a restaurant table: gingham cloth, two plates, a chair
       either side. The cold read saw a dartboard (cream disc, red dot); without the chairs
       the gingham disc could pass for a pizza. */
@@ -779,6 +784,31 @@ const BRIDGE_BANDS=["#D95B5B","#E0A430","#E7C25A","#7A9A4E","#5E93BC","#8B6FC8"]
    onto water and floor alike, deterministic per tile. petalDrop: whoever finishes a step in season
    leaves three petals on that tile; the trail fades over a minute and a half. Nothing without
    art("bridgeStyle")==="petals". */
+/* ---------- LA FIESTA (owner, 2026-09-07: "lets hang papel picado all over. put a pinata in there
+   as well as tamales"; Nacho's plan the same day: swags, not wallpaper — five flags a tile, a swag
+   of five to nine tiles tied to something you can see it tied to; dress by what a place is FOR) ----------
+   The season hands art("swags") — [{world,from:[x,y],to:[x,y]}] horizontal spans — and art("hangs")
+   — [{world,x,y,kind:"pinata"}]. Never a map row: a string hangs above the ground and changes no
+   tile. In 3D the builder strings them (poles where the end is open ground); the two flat cameras
+   draw them here. Season off → art() falls back to nothing and nothing is left behind. */
+function fiestaSwags(wid){return (art("swags",[])||[]).filter(sw=>sw.world===wid&&sw.from&&sw.to&&sw.from[1]===sw.to[1]);}
+function fiestaHangs(wid){return (art("hangs",[])||[]).filter(h=>h.world===wid);}
+function drawPinata(g,sx,sy,sway){ /* a seven-point star on a rope: a gold body, seven cones in the paper palette, tissue tabs at the tips */
+  const pal=art("papel",null)||["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8"],cx=sx+16,cy=sy+18;
+  g.save();g.translate(cx,sy+2);g.rotate(sway||0);g.translate(-cx,-(sy+2));
+  g.strokeStyle="#5A4330";g.lineWidth=1;g.beginPath();g.moveTo(cx,sy+1);g.lineTo(cx,cy-6);g.stroke(); /* the rope is the whole read */
+  for(let k=0;k<7;k++){const a=-Math.PI/2+k*Math.PI*2/7,ex=cx+Math.cos(a)*11,ey=cy+Math.sin(a)*11;
+    g.fillStyle=pal[k%pal.length];g.beginPath();g.moveTo(cx+Math.cos(a-0.5)*5.5,cy+Math.sin(a-0.5)*5.5);g.lineTo(ex,ey);g.lineTo(cx+Math.cos(a+0.5)*5.5,cy+Math.sin(a+0.5)*5.5);g.closePath();g.fill();
+    g.fillStyle="#F6F2E8";[-0.25,0,0.25].forEach(t=>{g.fillRect(ex+Math.cos(a+t)*1.2-0.5,ey+Math.sin(a+t)*1.2-0.5,1,1.6);});}
+  g.fillStyle="#F2B705";g.beginPath();for(let k=0;k<6;k++){const a=k*Math.PI/3;g.lineTo(cx+Math.cos(a)*6,cy+Math.sin(a)*6);}g.closePath();g.fill();
+  g.fillStyle="rgba(255,255,255,.3)";g.fillRect(cx-3,cy-4,3,1.4);g.restore();}
+function fiestaDraw2D(wid,toScreen,front){ /* toScreen(x,y) → the tile's top-left; front: the flags hang from the top of the row */
+  const pal=art("papel",null);if(!pal)return;
+  fiestaSwags(wid).forEach(sw=>{const y=sw.from[1],x0=Math.min(sw.from[0],sw.to[0]),x1=Math.max(sw.from[0],sw.to[0]);
+    const[sx0,sy0]=toScreen(x0,y),[sx1]=toScreen(x1+1,y),ly=sy0+(front?3:5);
+    ctx.strokeStyle="#3A2E26";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx0+2,ly);ctx.lineTo(sx1-2,ly);ctx.stroke();
+    let k=0;for(let px=sx0+5;px<sx1-4;px+=6.4,k++){ctx.fillStyle=pal[(k+x0+y)%pal.length];ctx.beginPath();ctx.moveTo(px-2.4,ly);ctx.lineTo(px+2.4,ly);ctx.lineTo(px,ly+5);ctx.closePath();ctx.fill();}});
+  fiestaHangs(wid).forEach(h=>{const[sx,sy]=toScreen(h.x,h.y);if(h.kind==="pinata")drawPinata(ctx,sx,sy,Math.sin(Date.now()/700+h.x)*0.06);});}
 const PETALS=[],PETAL_N=90,PETAL_MS=90000;
 function petalsOn(){return art("bridgeStyle","bands")==="petals";}
 function bridgeDist(w,x,y){ /* Chebyshev distance to the nearest deck tile, up to 3; cached per world */
@@ -1119,7 +1149,7 @@ function drawFront(){
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
       ctx.fillStyle="rgba(15,12,20,.16)";ctx.fillRect(sx,sy,TS,8);}
   }
-  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);
+  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);fiestaDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],true);
   drawDecals(camX,camY);
   /* depth pass: facades, decor and actors interleaved by row, back to front */
   const R=[];
@@ -1235,7 +1265,7 @@ function draw(){
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
       ctx.fillStyle="rgba(15,12,20,.13)";ctx.fillRect(sx,sy,TS,6);}
   }
-  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);
+  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);fiestaDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],false);
   drawDecals(camX,camY);drawDecor(camX,camY);
   trees.forEach(([sx,sy])=>{ /* canopy pass: overhangs neighboring tiles, sways gently */
     const sw=Math.sin(Date.now()/900+sx)*1.2,cxT=sx+16+sw,cyT=sy+6;
@@ -2303,7 +2333,7 @@ function tryStep(){
    you had been walking with was still standing at the stop, still set to follow. */
 function worldArrived(fromW,fromX,fromY){
   warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
-  save();setWorldTag();toast(T().arrive[world],2200);
+  save();setWorldTag();{const ar=T().arrive[world];toast(typeof ar==="function"?ar():ar,2200);} /* a line may ask the season (Nacho, 2026-09-07) */
   propsReset();                    /* "they'll just reappear when i leave the screen" — the owner's scope */
   dogsFollow(fromW,fromX,fromY);   /* a dog at your heels comes with you */
   dogsRoam(world);                 /* unseen pups drift toward their favorite townsperson */

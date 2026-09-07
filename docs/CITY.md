@@ -205,6 +205,22 @@ would have none left unless looks key by npc instead.
 
 ## Pending proposals (⏳ = needs an owner decision via side quest)
 
+- ⏳ **❗La ofrenda** *(Nacho, 2026-09-07, with the fiesta)* — where the barrio sets its table for
+  Día de Muertos and whose photo is on it. His recommendation: one at the foot of the marigold
+  bridge in the park and one on Doña Chelo's table at home, with a petal path from her door; an
+  EMPTY frame, nobody named ("That one's for whoever needs it") — never the old AI lead, who
+  vanished and did not die. Not built: the fiesta shipped the swags, the piñata and Doña Meche;
+  the ofrendas wait on this word.
+- ✅ **❗La piñata / ❗El tamal — BUILT the owner's way (`mq-v98`, 2026-09-07).** Owner: *"put a
+  pinata in there as well as tamales, etc."* Nacho's picks taken: the piñata hangs over the
+  paletera's corner on Calle Dos and only sways — never hit, gives nothing; Doña Meche, a new
+  neighbour with a pot at the trolley stop, three lines in both languages and a fourth that
+  asks the season, permanent and never a parcel. Kike says he hung the piñata; Doña Chelo sets
+  her table. Three things Nacho found and did not absorb: Yola the paletera has a name and no
+  voice (chill folk share one line pool); Doña Chelo's "water's edge" is the trolley bed — the
+  canal is a doc that never became a tile; a season cannot add a person, which is why Doña
+  Meche is year-round.
+
 - ✅ **❗El zaguán — BUILT the owner's way (`mq-v92`, 2026-09-07).** Owner on #7: *"i think you
   expand the building for meridian in the right side and add the staircase through a door from
   that room."* Not the well in the corner: Nolasco's office grew EAST by a stair room (16×8 →
