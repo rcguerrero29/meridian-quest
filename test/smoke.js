@@ -1359,6 +1359,18 @@ const CANDIDATES = [
           let added = 0, out = 0; for (let i = 0; i < a0.length; i++) { if (a0[i] && !a1[i]) out++; if (!a0[i] && a1[i]) { added++; const x = i % 44, y = Math.floor(i / 44); if (x < 6 + 16 - 13 || x > 6 + 16 + 13 || y > 12 + 22) out++; } }
           if (added < 12) problems.push('the winged look adds no wings to Sonny');
           if (out) problems.push('the wings cross Sonny\'s own pixels, his face, or the card\'s edge (' + out + ' pixels)');
+          // owner, 2026-09-07 (evening): "wings look off" — Pili: big enough to break the silhouette, an edge and ribs, not one flat blob
+          if (added < 40) problems.push(`the wings are a smudge — ${added} pixels; a wing that does not break the silhouette is not a wing`);
+          const wcols = new Set(); for (let i = 0; i < a0.length; i++) if (!a0[i] && a1[i]) wcols.add(w1[i * 4] + ',' + w1[i * 4 + 1] + ',' + w1[i * 4 + 2]);
+          if (wcols.size < 3) problems.push('the wings are one flat colour — no edge, no ribs');
+          const acc = parseInt(L[wing].accent.slice(1), 16), tgt = [(acc >> 16) & 255, (acc >> 8) & 255, acc & 255].map(v => v * 0.5 | 0);
+          if (![...wcols].some(c => { const v = c.split(',').map(Number); return Math.abs(v[0] - tgt[0]) < 10 && Math.abs(v[1] - tgt[1]) < 10 && Math.abs(v[2] - tgt[2]) < 10; })) problems.push('the wings have no darker edge in their own colour — cut paper has an edge all the way round');
+          // "the color can be added like around the eyes": a ring round the eye, wider than it, the pupil untouched
+          const KB = ALEB_KIND.beagle; if (!KB || !KB.eye) problems.push('Sonny has no colour round the eyes');
+          else { alePick.animals.Sonny = noWing; const ringed = dog(); const eye = KB.eye; delete KB.eye; const bare = dog(); KB.eye = eye;
+            let ring = 0, pupil = 0; for (let i = 0; i < a0.length; i++) { const x = i % 44 - 6 - 16 - eye[0] * (sonny.face || 1), y = Math.floor(i / 44) - 12 - eye[1], r = Math.hypot(x, y);
+              const diff = ringed[i * 4] !== bare[i * 4] || ringed[i * 4 + 1] !== bare[i * 4 + 1] || ringed[i * 4 + 2] !== bare[i * 4 + 2]; if (!diff) continue; if (r < 1.3) pupil++; else if (r < eye[2] + 2.5) ring++; }
+            if (ring < 8) problems.push('the ring round Sonny\'s eye paints nothing (' + ring + ')'); if (pupil) problems.push('the ring closes on Sonny\'s pupil — he goes blind at ten tiles'); }
           // the buttons: next cycles all five and comes back; random never repeats the current look
           petCrit = sonny; petTarget = 'beagle'; alePick.animals.Sonny = 0; const seen = [];
           for (let i = 0; i < 5; i++) { alePress(false); seen.push(alebLookFor('beagle', 'Sonny').id); }
