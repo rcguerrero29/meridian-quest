@@ -846,6 +846,18 @@ function petalShape(g,px,py,a,s,col,rib){ /* one cempasúchil petal (Pili, 2026-
   g.fillStyle=col;g.beginPath();g.moveTo(0,0);g.quadraticCurveTo(-1.9,-1.6,-1.5,-3.4);g.lineTo(-0.5,-4.2);g.lineTo(0,-3.6);g.lineTo(0.5,-4.2);g.lineTo(1.5,-3.4);g.quadraticCurveTo(1.9,-1.6,0,0);g.fill();
   if(rib!==false){g.strokeStyle=rib||"rgba(60,20,5,.35)";g.lineWidth=0.6;g.beginPath();g.moveTo(0,-0.5);g.lineTo(0,-2.8);g.stroke();}
   g.restore();}
+const DECK_PETALS=[400,340,220]; /* the three passes of a deck tile: ten times the first cut (owner, 2026-09-07: "multiply the amount of leaves times 10") */
+const PETALCACHE=new Map();
+function petalBake(key,W,H,paint,seed){ /* petals are many and never move: bake a tile once (per season), blit after */
+  const k=seasonNow()+"|"+key;let c=PETALCACHE.get(k);if(c)return c;
+  if(PETALCACHE.size>400)PETALCACHE.clear();
+  c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+  let sd=seed|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+  paint(g,rnd);PETALCACHE.set(k,c);return c;}
+function bridgeEdges(x,y){ /* "10"/"01"/"11"/"00": does a rail stand on the north edge, on the south edge — none where the next tile is deck too */
+  const w=CW();const isB=(ax,ay)=>!!(w&&w.rows[ay]&&(TILES[w.rows[ay][ax]]||{}).kind==="bridge");
+  if(!w)return "11";const ew=(TILES[(w.rows[y-1]||"")[x]]||{}).kind==="water"||(TILES[(w.rows[y+1]||"")[x]]||{}).kind==="water"||!((TILES[(w.rows[y]||"")[x-1]]||{}).kind==="water"||(TILES[(w.rows[y]||"")[x+1]]||{}).kind==="water");
+  return ew?((isB(x,y-1)?"0":"1")+(isB(x,y+1)?"0":"1")):((isB(x-1,y)?"0":"1")+(isB(x+1,y)?"0":"1"));}
 const PETALS=[],PETAL_N=90,PETAL_MS=90000;
 function petalsOn(){return art("bridgeStyle","bands")==="petals";}
 function bridgeDist(w,x,y){ /* Chebyshev distance to the nearest deck tile, up to 3; cached per world */
@@ -856,10 +868,10 @@ function bridgeDist(w,x,y){ /* Chebyshev distance to the nearest deck tile, up t
   const v=w._pd[x+","+y];return v===undefined?9:v;}
 function petalSpill(w,x,y,sx,sy,scale){
   if(!petalsOn())return;const d=bridgeDist(w,x,y);if(d<1||d>3)return;
-  const P=petalPal(),n=d===1?26:d===2?11:2,sc=scale||1; /* two, not four, three tiles out: four read as litter (Pili) */
-  let sd=((x|0)*911+(y|0)*271+3)|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
-  for(let i=0;i<n;i++){const px=sx+rnd()*TS*sc,py=sy+rnd()*TS*sc,a=rnd()*Math.PI*2;
-    petalShape(ctx,px,py,a,1.0*sc,P[1+((i+d)%(P.length-1))]);}}
+  const n=d===1?78:d===2?33:6,sc=scale||1; /* three times the first cut, thickest beside the deck, a few three tiles out */
+  const c=petalBake("spill|"+x+"|"+y+"|"+sc,Math.ceil(TS*sc),Math.ceil(TS*sc),(g,rnd)=>{const P=petalPal();
+    for(let i=0;i<n;i++){const px=rnd()*TS*sc,py=rnd()*TS*sc,a=rnd()*Math.PI*2;petalShape(g,px,py,a,1.0*sc,P[1+((i+d)%(P.length-1))]);}},((x|0)*911+(y|0)*271+3)|0);
+  ctx.drawImage(c,sx,sy);}
 const HEROFEET={}; /* what the hero's shoes carry off the deck */
 function petalDrop(wid,x,y,feet){ /* owner, 2026-09-07: the trail "for the bridge only" — a step on the deck scatters
   petals; the two steps after it still shed what the shoes carried; nowhere else does a step drop anything */
@@ -884,21 +896,25 @@ TILEDRAW["^"]=rc=>{const{sx,sy,x,y}=rc; /* the rainbow bridge: walk the whole sp
            into one mostly made out of the petals") — no plank shows. Pili's recipe: the heap's own shadow under
            everything, three passes of fan petals back to front (big and dark, then middle, then small and pale),
            a few dark blots between passes so the heap is deep, every angle on the wheel, drawn past the tile's
-           edge and clipped so no seam bands the deck; the rails are the heap's colour with petals over the lip. */
-        const P=petalPal();let sd=((x|0)*73+(y|0)*131+7)|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
-        ctx.save();ctx.beginPath();ctx.rect(sx,sy,TS,TS);ctx.clip();
-        ctx.fillStyle=P[0];ctx.fillRect(sx,sy,TS,TS);
-        const pass=(n,s,a,b)=>{for(let i=0;i<n;i++)petalShape(ctx,sx-3+rnd()*(TS+6),sy-3+rnd()*(TS+6),rnd()*Math.PI*2,s,P[a+((i*7+3)%(b-a+1))]);};
-        const shade=()=>{ctx.globalAlpha=0.18;ctx.fillStyle="#5A1E0B";for(let i=0;i<6;i++){ctx.beginPath();ctx.arc(sx+rnd()*TS,sy+rnd()*TS,5,0,7);ctx.fill();}ctx.globalAlpha=1;};
-        pass(40,1.5,0,2);shade();pass(34,1.25,2,4);shade();pass(22,1.0,4,5);
-        ctx.restore();
-        ctx.fillStyle=P[0];ctx.fillRect(sx,sy,TS,2.5);ctx.fillRect(sx,sy+TS-2.5,TS,2.5); /* the rails, in the heap's colour */
-        for(let i=0;i<8;i++)petalShape(ctx,sx+rnd()*TS,(i%2?sy+1.5:sy+TS-1.5)+rnd()*1.5,rnd()*Math.PI*2,0.8,P[3+(i%3)]);
-        return;}
+           edge and clipped so no seam bands the deck; the rails are the heap's colour with petals over the lip.
+           Then the owner: "multiply the amount of leaves times 10" — DECK_PETALS, nine hundred and sixty a tile,
+           baked ONCE a tile into petalBake() and blitted every frame after, so the frame stays cheap.
+           A rail stands only on an edge with no deck beyond it: the bridge may be two tiles wide. */
+        const c=petalBake("deck|"+x+"|"+y+"|"+bridgeEdges(x,y),TS,TS,(g,rnd)=>{const P=petalPal(),[rn,rs]=bridgeEdges(x,y).split("");
+          g.save();g.beginPath();g.rect(0,0,TS,TS);g.clip();
+          g.fillStyle=P[0];g.fillRect(0,0,TS,TS);
+          const pass=(n,s,a,b)=>{for(let i=0;i<n;i++)petalShape(g,-3+rnd()*(TS+6),-3+rnd()*(TS+6),rnd()*Math.PI*2,s,P[a+((i*7+3)%(b-a+1))]);};
+          const shade=()=>{g.globalAlpha=0.18;g.fillStyle="#5A1E0B";for(let i=0;i<6;i++){g.beginPath();g.arc(rnd()*TS,rnd()*TS,5,0,7);g.fill();}g.globalAlpha=1;};
+          pass(DECK_PETALS[0],1.5,0,2);shade();pass(DECK_PETALS[1],1.25,2,4);shade();pass(DECK_PETALS[2],1.0,4,5);
+          g.restore();
+          g.fillStyle=P[0];if(rn==="1")g.fillRect(0,0,TS,2.5);if(rs==="1")g.fillRect(0,TS-2.5,TS,2.5); /* the rails, in the heap's colour */
+          for(let i=0;i<8;i++){const north=i%2===1;if(north?rn!=="1":rs!=="1")continue;petalShape(g,rnd()*TS,(north?1.5:TS-1.5)+rnd()*1.5,rnd()*Math.PI*2,0.8,P[3+(i%3)]);}},
+          ((x|0)*73+(y|0)*131+7)|0);
+        ctx.drawImage(c,sx,sy);return;}
       ctx.fillStyle="#C9B99A";ctx.fillRect(sx,sy,TS,TS); /* plank base */
       bands.forEach((cc,i)=>{ctx.fillStyle=cc;ctx.fillRect(sx,sy+3+i*4.4,TS,4.4);});
       ctx.globalAlpha=0.22;ctx.fillStyle="#FFF";ctx.fillRect(sx,sy+3,TS,2);ctx.globalAlpha=1;
-      ctx.fillStyle="#8A6F4D";ctx.fillRect(sx,sy,TS,2.5);ctx.fillRect(sx,sy+TS-2.5,TS,2.5); /* rails */};
+      const[rn,rs]=bridgeEdges(x,y).split("");ctx.fillStyle="#8A6F4D";if(rn==="1")ctx.fillRect(sx,sy,TS,2.5);if(rs==="1")ctx.fillRect(sx,sy+TS-2.5,TS,2.5); /* rails on the open edges */};
 TILEDRAW["3"]=rc=>{const{sx,sy}=rc; /* agility hurdle: two posts, a bar to sail over */
       ctx.fillStyle="#C0392B";ctx.fillRect(sx+5,sy+8,3,20);ctx.fillRect(sx+24,sy+8,3,20);
       ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+5,sy+12,22,3);
