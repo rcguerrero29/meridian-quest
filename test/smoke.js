@@ -2934,13 +2934,22 @@ const CANDIDATES = [
     const r1 = await page.evaluate(() => {
       const problems = [];
       if (typeof ANIMALS !== 'undefined') problems.push('Meridian declares ANIMALS — its animals are the engine defaults by design');
-      // #25: Meridian declares no PLACES or FLOORS either — its rooms ARE the engine's default table, byte for byte
-      if (typeof PLACES !== 'undefined') problems.push('Meridian declares PLACES — its rooms are the engine defaults by design');
+      // #25 (owner, 2026-09-07: "update here and meridian and template so we have a good amount of
+      // metadata that includes these"): Meridian DECLARES its rooms, one line per role with a note,
+      // and the declaration must match the engine's default table key for key — it is documentation
+      // of the seam, never a divergence from it. A role the engine knows and Meridian does not name
+      // is metadata missing; a role Meridian names and the engine does not read is a lie.
+      if (typeof PLACES === 'undefined') problems.push('Meridian declares no PLACES — its rooms must be written down, one role per line (#25)');
+      else {
+        Object.keys(PLDEF).forEach(k => { if (!(k in PLACES)) problems.push('Meridian\'s PLACES leaves out the role ' + k); });
+        Object.keys(PLACES).forEach(k => { if (!(k in PLDEF)) problems.push('Meridian\'s PLACES names a role the engine never reads: ' + k); });
+        if (JSON.stringify(PLACES) !== JSON.stringify(PLDEF)) problems.push('Meridian\'s PLACES drifted from the engine\'s defaults: ' + JSON.stringify(PLACES) + ' vs ' + JSON.stringify(PLDEF));
+      }
       if (typeof FLOORS !== 'undefined') problems.push('Meridian declares FLOORS — its pavements are the engine defaults by design');
       // mq-v77: the reader's look is the pack's choice; Meridian declares none and keeps the cream paper
       if (typeof READERLOOK !== 'undefined') problems.push('Meridian declares READERLOOK — its paper is cream by design');
       if (document.getElementById('paperSheet').className !== 'paper') problems.push("Meridian's paper wears a look it did not ask for: " + document.getElementById('paperSheet').className);
-      if (JSON.stringify(PL) !== JSON.stringify(PLDEF)) problems.push('PL drifted from PLDEF with no PLACES declared');
+      if (JSON.stringify(PL) !== JSON.stringify(PLDEF)) problems.push('PL drifted from PLDEF — Meridian\'s declared rooms are the defaults by design');
       if (PL.home !== 'hq' || PL.spawn.join() !== '10,11' || PL.street !== 'st' || PL.park !== 'pk' || PL.upstairs !== 'f2') problems.push('the default roles are not Meridian\'s rooms: ' + JSON.stringify(PL));
       if (world !== PL.home && !WORLDS[world]) problems.push('the current world is not a world');
       // mq-v75 (#4): the engine owns the flight that runs east — five glyphs, drawable. mq-v81: Meridian lays

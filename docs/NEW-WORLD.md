@@ -58,7 +58,7 @@ content/<name>/
 **Optional — guarded by `typeof`, the engine simply does less without them:**
 `GAMEV CAMDEF STAKES GROWTH SEASONS CHAPTERS INTERVIEW CRITTERS EGGS CHATTER CHILL NPCACT TRV
 DECOR DECOART READS DOCS DOCUI BUILDTPL BUILDS TILEART TILEART_SIDE TILEMETA MAPCOL MAPDOT
-TOWNLBL DOORS DOORLOOK SOLIDX` — and, since `mq-v65`, **`STOREPFX`** (config.js): the prefix on
+TOWNLBL DOORS DOORLOOK SOLIDX PLACES FLOORS ANIMALS READERLOOK` — and, since `mq-v65`, **`STOREPFX`** (config.js): the prefix on
 every storage key. Optional in the engine, **required in practice for any second world served
 from the same origin**, or it loads the first world's save and overwrites it (§8). A world with none of these is a walkable town with people and
 quests. Everything else is a layer you add when its answer arrives.
@@ -87,7 +87,26 @@ the day two worlds need to live in one deploy.
   table byte for byte; a pack with its own names declares its own (`changarrito/content/config.js`
   is the worked example). The smoke fails the build if a world id is ever spelled in `engine/`
   again, and `test/engine.smoke.js` checks that every role a pack declares points at a real,
-  walkable place.
+  walkable place. **The full table, every role the engine reads** (owner, 2026-09-07: *"update
+  here and meridian and template so we have a good amount of metadata that includes these"*;
+  both packs carry it with a note per line, and Meridian's must equal the defaults key for key):
+
+  | role | type | the engine uses it for | default (Meridian) |
+  |---|---|---|---|
+  | `home` | world id | where a new game and a broken save land | `hq` |
+  | `spawn` | `[x,y]` | the tile in `home` you land on — must be walkable | `[10,11]` |
+  | `street` | world id | the map's world; the 📍 dot follows you only here | `st` |
+  | `park` | world id | the room the leash leads to; the park recap plays when you leave it | `pk` |
+  | `parkIn` | `[x,y,dir]` | where you arrive in the park and which way you face | `[2,6,"right"]` |
+  | `parkDog` | `[x,y]` | where the dog you brought stands on arrival | `[3,6]` |
+  | `parkDogHome` | `[x,y]` | where that dog drifts back to while you play | `[8,6]` |
+  | `parkAdopt` | `[[x,y],…]` | free spots an adopted dog may take, tried in order | six spots |
+  | `friends` | world ids | the worlds whose people a dog may befriend; a world you do not have is skipped | `st me lc lo` |
+  | `upstairs` | world id | the floor the map marks ⇧ | `f2` |
+
+  A role you leave out falls back to the default. Declare all ten anyway: the table is the
+  world's metadata, and a reader should not have to open the engine to learn what the engine
+  will assume. Everything a pack may declare is listed in §2 (`PLACES FLOORS ANIMALS …`).
 - **The name blocklist** in `test/smoke.js` (the portability guard) is Meridian's proper nouns.
   A new world adds its own list, or the guard becomes generic (scan the pack for capitalised
   names and forbid them in `engine/`).
