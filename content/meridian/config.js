@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v104";
+const GAMEV="mq-v105";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -101,7 +101,8 @@ const GROWTH={
   /* any attempt at this quest opens the wardrobe — the extra, not the quest */
   wardrobeQuest:15,
   /* and who runs the fitting room once it is open */
-  wardrobeNpc:"xochi"
+  wardrobeNpc:"xochi",
+  barberNpc:"naye" /* who runs the chair: outfit, hair and the calavera after the start (owner, 2026-09-07, night) */
 };
 /* SEASONS — a season changes COLOUR, never design (owner, 2026-09-01: "if someone
    changes the palette, it can change but keep the general design"), with one signed

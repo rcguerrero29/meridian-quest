@@ -410,6 +410,32 @@ BUILDTPL.casa={
   ],
 };
 
+/* ---------- `barberia` — Barbería y Estética El Espejo, Naye's chair (owner, 2026-09-07, night) ----------
+   "open the ability to change our character outfit and haircut after start. maybe have a small barber."
+   Nacho: Naye Robles, 29, Doña Chelo's niece, Xochi's apprentice — the other half of Xochi's line, a head
+   for every outfit. Two mirrors on the north wall, a chair under each, the waiting chair, the counter.
+   The chair is a service, not a district: no quests (❗La silla in CITY.md says whether that changes). */
+const BARBER_ROOM={
+  rows:["####|#|###",
+        "#S.⊔.⊔..P#",
+        "#..b.....#",
+        "#⊔......D#",
+        "#........#",
+        "#........#",
+        "#........#",
+        "#####⌂####"],
+  people:{b:{npc:"naye",q:[],chat:1}},
+  locs:{en:"Barbería El Espejo, Calle Dos",es:"Barbería El Espejo, Calle Dos"},
+  arrive:{en:"El Espejo. Two chairs, two mirrors, a photo strip of half the barrio's haircuts.",es:"El Espejo. Dos sillas, dos espejos, una tira de fotos con medio barrio recién cortado."}
+};
+BUILDTPL.barberia={
+  id:"barberia", size:{w:3,h:2},
+  parts:[
+    {id:"shell", tiles:[[0,0,"▩"],[0,1,"▩"],[0,2,"▩"],[1,0,"."],[1,1,"."],[1,2,"."]]},
+    {id:"door", tiles:[[0,1,"⌂"]], link:{door:[0,1],landing:[5,6],exit:[5,7],interior:BARBER_ROOM}},
+  ],
+};
+
 /* ---------- `caseta` — the site hut, where El Portero keeps the gate (#8) ----------
    Owner: "he can be in a room so that way he does have activity where he brings up oh 4 stopped
    attempts - lets talk to review root cause... i need him to highlight the amount of issues and
@@ -450,4 +476,5 @@ BUILDTPL.caseta={
 const BUILDS=[
   {id:"casa-w", tpl:"casa", world:"ex", x:4, y:2, seed:"calle-dos-4"},
   {id:"caseta", tpl:"caseta", world:"ex", x:16, y:2, seed:"la-caseta"}, /* El Portero's hut, by the site (#8) */
+  {id:"barberia", tpl:"barberia", world:"ex", x:21, y:0, seed:"el-espejo"}, /* Naye's chair, the east end of the north frontage — clear of Yola (17,0) and the piñata (18,0) */
 ];
