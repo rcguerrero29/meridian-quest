@@ -1030,7 +1030,17 @@ const CANDIDATES = [
     // and whoever crosses it stands on the deck.
     world = 'pk'; px = fx = 2; py = fy = 6; T3.yaw = 0; draw3d();
     const decks = T3.group.children.filter(o => o.userData && o.userData.bridge);
-    if (decks.length !== 2) problems.push(`the rainbow bridge is ${decks.length} deck(s) in 3D, not two`);
+    // owner, 2026-09-07 (night): "make it a bit wider - the bridge, twice as wide" — two rows of deck, rails only on the open edges
+    if (decks.length !== 4) problems.push(`the rainbow bridge is ${decks.length} deck(s) in 3D, not four (two wide, two long)`);
+    const pkw = WORLDS.pk, deckRows = new Set(); for (let yy = 0; yy < pkw.H; yy++) for (let xx = 0; xx < pkw.W; xx++) if ((TILES[pkw.rows[yy][xx]] || {}).kind === 'bridge') deckRows.add(yy);
+    if (deckRows.size < 2) problems.push('the bridge is one tile wide');
+    const railsAll = T3.group.children.filter(o => o.userData && o.userData.bridgeRail);
+    railsAll.forEach(r => { const dz = r.position.z - (r.userData.y + 0.5), dx = r.position.x - (r.userData.x + 0.5); const ny = r.userData.y + (Math.abs(dz) > 0.3 ? Math.sign(dz) : 0), nx = r.userData.x + (Math.abs(dx) > 0.3 && Math.abs(dz) <= 0.3 ? Math.sign(dx) : 0);
+      if ((nx !== r.userData.x || ny !== r.userData.y) && (TILES[(pkw.rows[ny] || '')[nx]] || {}).kind === 'bridge') problems.push(`a rail stands between two deck tiles at (${r.userData.x},${r.userData.y})`); });
+    if (typeof bridgeEdges !== 'function') problems.push('the engine does not know which edges of a deck are open');
+    else { const kw = world; world = 'pk'; const e5 = bridgeEdges(3, 5), e6 = bridgeEdges(3, 6); world = kw; if (e5 !== '10' || e6 !== '01') problems.push(`the deck's open edges read ${e5}/${e6}, not north-only/south-only`); }
+    if (typeof DECK_PETALS === 'undefined' || DECK_PETALS.reduce((a, b) => a + b, 0) < 900) problems.push('the deck carries fewer than nine hundred petals a tile — the owner asked for ten times');
+    if (typeof petalBake !== 'function') problems.push('nine hundred petals a tile are drawn every frame — bake them');
     decks.forEach(d => { if (!(d.position.y > 0.05)) problems.push(`the bridge deck at (${d.userData.x},${d.userData.y}) lies flat on the water`); });
     const rails = T3.group.children.filter(o => o.userData && o.userData.bridgeRail);
     if (rails.length < 4) problems.push(`the rainbow bridge has ${rails.length} rail pieces in 3D — it needs a rail each side`);

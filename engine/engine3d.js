@@ -293,7 +293,9 @@ function t3Build(key){T3.pinatas=[];
       const wat=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&(TILES[w.rows[ay][ax]]||{}).kind==="water";
       const ew=wat(x,y-1)||wat(x,y+1)||!(wat(x-1,y)||wat(x+1,y)); /* east-west unless the water runs beside it */
       const RH=0.5,PW=0.07;
-      [-1,1].forEach(sd=>{ /* one rail per side of the crossing: two posts and a bar */
+      const isB=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&(TILES[w.rows[ay][ax]]||{}).kind==="bridge";
+      [-1,1].forEach(sd=>{ /* one rail per OPEN side of the crossing: two posts and a bar; none between two deck tiles (the bridge may be two wide) */
+        if(isB(x+(ew?0:sd),y+(ew?sd:0)))return;
         const off=0.5-PW/2;
         [-0.46,0.46].forEach(al=>{const post=new THREE.Mesh(new THREE.BoxGeometry(PW,RH,PW),rail);
           post.position.set(cx+(ew?al:sd*off),BRIDGEH+RH/2,cz+(ew?sd*off:al));post.userData={bridgeRail:true,x,y};grp.add(post);});
@@ -309,7 +311,6 @@ function t3Build(key){T3.pinatas=[];
         const strg=wallMat["^string"]||(wallMat["^string"]=new THREE.MeshBasicMaterial({color:new THREE.Color("#3A2E26")}));
         /* the string runs ALONG the crossing, so the flags face the way you walk and read from the
            default camera stop; a pole stands only where the run ends (the neighbour is not a deck) */
-        const isB=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&(TILES[w.rows[ay][ax]]||{}).kind==="bridge";
         [-1,1].forEach(sd=>{if(isB(x+(ew?sd:0),y+(ew?0:sd)))return;
           const pl=new THREE.Mesh(new THREE.BoxGeometry(0.05,PH,0.05),pole);
           pl.position.set(cx+(ew?sd*0.48:0),PH/2,cz+(ew?0:sd*0.48));pl.userData={papel:true,pole:true,x,y};grp.add(pl);});
