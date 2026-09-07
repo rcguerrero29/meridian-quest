@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v103";
+const GAMEV="mq-v104";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -142,6 +142,7 @@ const SEASONS={
                 {world:"ex",x:20,y:3,ox:0.3,kind:"calaverita"},{world:"ex",x:20,y:3,ox:0.75,oy:0.35,kind:"calaverita",foil:"#F2B705"},{world:"ex",x:22,y:4,kind:"calaverita",foil:"#7B4BA8"},{world:"ex",x:22,y:4,ox:0.25,oy:0.7,kind:"calaverita"}], /* by Doña Meche's pot, where the ofrenda will stand (❗La ofrenda, CITY.md) */
          hangs:[{world:"ex",x:18,y:0,kind:"pinata"}],                                         /* over the paletera's corner, where the kids are; Kike hung it */
          bloom:"#F59E1B",                                                                     /* every planter blooms cempasúchil */
+         facepaint:true, /* the calavera in Día de Muertos too (owner, 2026-09-07, night) — the engine's five looks */
          sky:"#E8A24A"}}, /* the north window's sky at dusk — Don Güero, 2026-09-02 */
   /* NOCHE DE ALEBRIJES — the owner's second mode (2026-09-07: "another mode where they turn into
      little alebrije colors and i get a dia de los muertos face paint color"). No dates: picked by

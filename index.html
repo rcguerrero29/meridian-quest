@@ -11,7 +11,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#14121B">
 <link rel="apple-touch-icon" href="icon-192.png">
-<style>:root{color-scheme:light dark}body{margin:0;padding:0}img{max-width:100%}</style>
+<style>:root{color-scheme:light dark}body{margin:0;padding:0}img{max-width:100%}#aleRow select{font:inherit;padding:.55rem .7rem;border-radius:12px;border:1px solid var(--line,#c9c4b8);background:var(--surface,#fff);color:inherit;max-width:12em}
+</style>
 <title>Meridian Quest</title>
 </head>
 <body>
@@ -390,6 +391,8 @@
             </div>
             <label id="lbSeason"></label>
             <div class="optrow" id="seasonRow"></div>
+            <label id="lbAle" hidden></label>
+            <div class="optrow" id="aleRow" hidden></div>
           </details>
 
           <details class="drawer" id="drwSound">

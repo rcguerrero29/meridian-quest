@@ -1407,7 +1407,31 @@ const CANDIDATES = [
           const pair = (WORLDS.hq.npcs || []).slice(0, 2).map(n => faceLookFor(n.npc || n.key, false).id);
           const ids = new Set((WORLDS.hq.npcs || []).map(n => faceLookFor(n.npc || n.key, false).id));
           if ((WORLDS.hq.npcs || []).length >= 5 && ids.size < 3) problems.push('the crowd in HQ wears fewer than three calavera looks');
+          // owner, 2026-09-07 (night): "a menu to choose the different alebrije styles" — Settings → Alebrijes: who, then the look by name
+          const row = $('aleRow'), sel = $('aleWho');
+          if (!row || row.hidden || !sel) problems.push('Settings has no Alebrijes menu in season');
+          else { const opts = [...sel.options].map(o => o.value); if (!opts.includes('you') || !opts.includes('Sonny')) problems.push('the menu offers neither your face nor Sonny (' + opts.join(',') + ')');
+            sel.value = 'Sonny'; sel.dispatchEvent(new Event('change')); const btns = [...$('aleRow').querySelectorAll('button')];
+            if (btns.length !== 5) problems.push('the menu lists ' + btns.length + ' looks for Sonny, not five');
+            else { btns[3].click(); if (alePick.animals.Sonny !== 3 || alebLookFor('beagle', 'Sonny').id !== F.length && alebLookFor('beagle', 'Sonny').id !== alebLooks()[3].id) problems.push('picking a look from the menu did not dress Sonny in it');
+              if ($('aleRow').querySelectorAll('button[aria-pressed="true"]').length !== 1) problems.push('the menu does not mark the look Sonny wears'); }
+            $('aleWho').value = 'you'; $('aleWho').dispatchEvent(new Event('change')); const fb = [...$('aleRow').querySelectorAll('button')];
+            if (fb.length !== 5) problems.push('the menu lists ' + fb.length + ' calavera looks for your face, not five'); else { fb[2].click(); if (alePick.hero !== 2) problems.push('picking a face from the menu did not paint it'); }
+            delete alePick.animals.Sonny; alePick.hero = 0; }
+          // "leave it in the architecture to have the ability to upgrade to customize the look": a custom seam over the pick
+          alePick.custom = { Sonny: { tint: '#123456' }, you: { ring: '#654321' } };
+          if (alebLookFor('beagle', 'Sonny').tint !== '#123456') problems.push('a custom look for Sonny is not laid over his pick');
+          if (faceLookFor('hero', true).ring !== '#654321') problems.push('a custom face is not laid over your pick');
+          if (alebLookFor('beagle', 'Sonny').id !== alebLooks()[((aleHash('Sonny') + alePick.off) % 5 + 5) % 5].id) problems.push('a custom look lost the pick\'s name');
+          alePick.custom = {};
           seasonSet('off'); if (faceLookFor('tacho', false) || alebLooks()) problems.push('with the mode off, the paint and the looks remain');
+          if ($('aleRow') && !$('aleRow').hidden) problems.push('with the mode off, the Alebrijes menu stays');
+          // "we also should be able to wear the make up during dia de los muertos": the calavera in Muertos, the buttons act on your face
+          if (S.art.facepaint === undefined) problems.push('Día de Muertos hands out no face paint');
+          else { seasonSet(id); if (!faceLookFor('tacho', false) || !faceLookFor('hero', true)) problems.push('in Día de Muertos nobody is painted');
+            applyCtl(); if ($('aleRnd') && $('aleRnd').hidden) problems.push('in Día de Muertos the look buttons hide'); const h0 = alePick.hero; alePress(false); if (alePick.hero === h0) problems.push('in Día de Muertos the next-look button does not change your face'); alePick.hero = h0; alePersist();
+            if (!$('aleRow') || $('aleRow').hidden || ![...$('aleWho').options].some(o => o.value === 'you')) problems.push('in Día de Muertos the menu does not offer your face');
+            seasonSet('off'); }
           const offAgain = dog(); if (alpha(offAgain).join('') !== alpha(off).join('')) problems.push('with the mode off, Sonny\'s wings did not go');
         }
         Date.now = now0;

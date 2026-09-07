@@ -1481,6 +1481,25 @@ realistic. not perfect but so if needed it can be upgraded."* Removed the same d
 is now in `docs/OWNER.md` as settled. The test is data-driven rather than a promise: **every
 trolley destination must be a world that actually contains a trolley tile.** Rails or no stop.
 
+### 15.21½ THE LOOK MENU, THE CUSTOM SEAM, AND AJ'S BRIEF — BUILT 2026-09-07 (`mq-v104`)
+
+Settings → **Alebrijes** (`aleRowBuild`, both shells): pick who — your face, or any animal with a name — then
+the look by name; the same `aleSetPick(key,i)` the 🎲/🔁 buttons use. Hidden when the season hands out no
+looks. Día de Muertos says `facepaint:true` and takes the engine's five calavera looks, so the paint is worn
+on the night itself, not only in Noche de alebrijes.
+
+**The custom seam** (owner: *"leave it in the architecture to have the ability to upgrade to customize the look
+of the alebrije"*): `alePick.custom[key]` — `{tint,pat,accent,wings}` for an animal by name, `custom.you` —
+`{base,ring,dark,...}` for the face — is laid over the picked look's fields by `alebLookFor` / `faceLookFor`,
+keeping the look's id. Persisted with the picks under `SK("ale")`. Nothing writes it yet; an editor (a colour
+row per field, like the creator's swatches) is the upgrade.
+
+**AJ's brief for the shirts (#82, owner 2026-09-07):** AJ's interests are **Avengers, Vampire Diaries, Harry
+Potter** — "you'll have to ask her" for the rest. Patterns, stripes and flourishes on the shirts start from
+those; coordinated outfits between neighbours are a **soft rule** — something the art attempts, never a test
+failure. The barber's chair (❗La silla) is where those patterns plug in once the look editor reopens after
+the start.
+
 ### 15.22 EL MAESTRO CONSTRUCTOR — BUILDING FROM A TEMPLATE — BUILT 2026-09-03 · doors by place and a room per lot, 2026-09-07 (#10, `mq-v93`)
 
 Owner: *"one day we want to assign him a house template that he can build and just add some
