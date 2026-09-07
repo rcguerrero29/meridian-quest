@@ -1186,11 +1186,19 @@ const CANDIDATES = [
         petalSpill = spill0; petalTrail = trail0;
         Object.entries(per).forEach(([c, n]) => { if (!n) problems.push('the ' + c + ' camera never spills petals onto the ground around the bridge'); });
         if (!trails) problems.push('the top and front cameras never draw the trail');
-        // the trail: a finished step drops three petals, drawn on the ground, three flat planes in 3D
-        PETALS.length = 0; petalDrop(PL.park, PL.parkIn[0], PL.parkIn[1]);
+        // the trail: a step ON THE DECK drops three petals, drawn on the ground, three flat planes in 3D;
+        // the two steps after it still shed what the shoes carried; a step anywhere else drops nothing
+        // (owner, 2026-09-07: "i meant for the bridge only lol. there are that many petals on the bridge")
+        const deck = (() => { for (let y = 0; y < pk.H; y++) for (let x = 0; x < pk.W; x++) if ((TILES[pk.rows[y][x]] || {}).kind === 'bridge') return [x, y]; return null; })();
+        const feet = {}; PETALS.length = 0; petalDrop(PL.park, PL.parkIn[0], PL.parkIn[1], feet);
+        if (PETALS.length) problems.push('a step far from the bridge drops petals — the trail is the bridge\'s only');
+        if (deck) { petalDrop(PL.park, deck[0], deck[1], feet); if (PETALS.length !== 1) problems.push('a step on the deck drops no petals');
+          petalDrop(PL.park, 2, 6, feet); petalDrop(PL.park, 2, 7, feet); if (PETALS.length !== 3) problems.push('the two steps off the deck do not shed what the shoes carried');
+          petalDrop(PL.park, 2, 8, feet); if (PETALS.length !== 3) problems.push('the third step off the deck still drops petals'); }
         if (offCount(() => petalTrail(PL.park, () => [0, 0])) < 4) problems.push('a dropped petal draws nothing on the ground');
-        PETALS.length = 0; moving = true; mt = 1; dir = 'right'; loop(performance.now() + 20); moving = false;
-        if (!PETALS.length) problems.push('finishing a step in season drops no petals (the trail never forms)');
+        PETALS.length = 0; if (deck) { px = fx = deck[0]; py = fy = deck[1]; } moving = true; mt = 1; dir = 'right'; loop(performance.now() + 20); moving = false;
+        if (!PETALS.length) problems.push('finishing a step on the deck in season drops no petals (the trail never forms)');
+        const wn = pk.npcs[0]; if (wn && (() => { PETALS.length = 0; petalDrop(PL.park, PL.parkIn[0], PL.parkIn[1], wn); return PETALS.length; })()) problems.push('a wanderer far from the bridge drops petals');
         camSet('3d'); draw3d(); const planes = T3.scene.children.filter(o => o.userData && o.userData.petal && o.visible);
         if (planes.length < 3) problems.push(`the trail has ${planes.length} petals on the ground in 3D — three a drop`);
         seasonSet('off'); PETALS.length = 0;
@@ -1320,7 +1328,14 @@ const CANDIDATES = [
         else {
           const face = (who, hero) => bake(g => drawPerson(g, 0, 0, hero ? look : (NPCLOOK.tacho || look), { dir: 'down', hero, who }), 3); /* at 3x the base has room to be counted */
           const count = (d, hex) => { const h = hex.toLowerCase(); let n = 0; for (let i = 0; i < d.length; i += 4) { if (d[i + 3] < 250) continue; if ('#' + [d[i], d[i + 1], d[i + 2]].map(v => v.toString(16).padStart(2, '0')).join('') === h) n++; } return n; };
-          for (let i = 0; i < 5; i++) { alePick.hero = i; const d = face('hero', true); if (count(d, F[i].base) < 30) problems.push('the hero\'s calavera look ' + F[i].id + ' leaves no base on the face (' + count(d, F[i].base) + ')'); }
+          const lum = hex => { const n = parseInt(hex.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+          for (let i = 0; i < 5; i++) { alePick.hero = i; const d = face('hero', true); if (count(d, F[i].base) < 30) problems.push('the hero\'s calavera look ' + F[i].id + ' leaves no base on the face (' + count(d, F[i].base) + ')');
+            // a Día de Muertos makeup review (2026-09-07): white bone + black voids IS the symbol — a dark base reads as a mask.
+            // Owner: "having one with all dark is a bit of a no no - not really even looking like a skeleton"
+            if (lum(F[i].base) < 0.8) problems.push('calavera look ' + F[i].id + ' has a dark base — it would not read as a skull');
+            if (lum(F[i].dark) > 0.3) problems.push('calavera look ' + F[i].id + ' has no dark sockets');
+            if (count(d, F[i].dark) < 20) problems.push('calavera look ' + F[i].id + ' paints no sockets or grin on the hero (' + count(d, F[i].dark) + ')'); }
+          if (new Set(F.map(f => f.id)).size !== 5) problems.push('the five calavera looks are not five names');
           alePick.hero = 0;
           const lk = faceLookFor('tacho', false); if (!lk) problems.push('a person of the world gets no calavera look');
           else if (count(face('tacho', false), lk.base) < 30) problems.push('a person of the world is not painted (' + lk.id + ')');
