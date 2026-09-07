@@ -100,6 +100,31 @@ the day two worlds need to live in one deploy.
 - `room.js` (the office intake) and `docs.js` (deliverables, templates) are Meridian's
   career layer. Fully removable; drop them and nothing else breaks (`docs/for-aj/AFFECTED.md`).
 
+### 3¾ · A staircase — the template (#4, 2026-09-07)
+
+The engine owns five glyphs for a flight that runs EAST: `⊓` the stair mass (solid, wall-height,
+wears the flight in profile — bake per tile), `≡` a tread (walkable), `▲` the head, the way up
+(a portal, `mark:"up"`), `▼` the way down (a portal, the deepest tile of a well), `◺` a rail
+(solid, knee-high; beside a well it stands on the lip and faces it). A climbing flight's treads
+rise toward `▲` and lift whoever stands on them; a well's treads sink toward `▼`, the floor is
+cut away over them, and you sink as you go down (`stairRun`, `wellDepth`, `stairLift`). Lay them
+as these four rows at the bottom of a 20-wide floor and its upstairs; nothing above them moves:
+
+```
+ground  ##########+⊓⊓⊓⊓#####     the door into the room at x10 · the mass x11–14 behind the flight
+        #..........≡≡≡▲#####     the landing x10 · treads 11–13 · the head ▲ at x14 → upstairs (14, same row)
+        #..................#     a lobby
+        ##########E#########     the front door; the street lands you on the landing
+upstairs #.........◺◺◺◺.....#    the rail, north side
+        #........◺▼≡≡≡.....#     the rail at the head of the well · ▼ → ground (10, same row) · treads · (14,row) is the floor you step off onto
+        #.........◺◺◺◺.....#     the rail, south side
+        ####################
+```
+
+`PORTALS`: ground `"▲":{to:up,x:14,y:R,dir:"left",mark:"up"}`, upstairs `"▼":{to:ground,x:10,y:R,dir:"right"}`,
+and the street's door lands on `(10,R)`. Meridian's HQ/f2 and the town's stall/loft carry exactly
+this; `test/engine.smoke.js` checks the portals land on walkable tiles in any pack.
+
 ### 3½ · Two looks for the reader
 
 `READERLOOK="night"` in a pack's config turns the reader's cream paper purple-dark (the town's

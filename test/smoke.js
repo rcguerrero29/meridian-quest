@@ -927,7 +927,7 @@ const CANDIDATES = [
     const before = { cam: camMode, world, px, py };
     camSet('top');
     // 1. the ordinary case: a step that ENDS on HQ's front door goes through it
-    world = 'hq'; px = fx = 10; py = fy = 13; moving = true; mt = 1; held = null; portalT = 0; portalHold = '';
+    world = 'hq'; px = fx = 10; py = fy = 16; moving = true; mt = 1; held = null; portalT = 0; portalHold = ''; /* the front door is at (10,16) since the lobby (#4) */
     await wait(250);
     if (world !== 'st' || px !== 14 || py !== 1) problems.push(`a step ending on HQ’s door left you in ${world} (${px},${py}) — expected the doorstep st (14,1)`);
     // 2. the bug: standing on the street door, arrived DURING the cooldown
@@ -940,8 +940,8 @@ const CANDIDATES = [
     if (world !== 'hq') problems.push('standing on a door after its cooldown ended, nothing re-checked the ground under your feet');
     // 3. the guard that makes the standing check safe: the tile a warp SET YOU DOWN on
     //    never fires until you step off it — even if a pack lands you on a portal
-    world = 'hq'; px = fx = 10; py = fy = 13; moving = false; held = null; portalT = 0;
-    portalHold = 'hq:10,13';
+    world = 'hq'; px = fx = 10; py = fy = 16; moving = false; held = null; portalT = 0;
+    portalHold = 'hq:10,16';
     await wait(250);
     if (world !== 'hq') problems.push('the tile a warp set you down on fired by itself — that is the ping-pong the cooldown existed to stop');
     portalHold = '';                    // …and once the hold is gone, the same tile is a door again
@@ -1007,7 +1007,9 @@ const CANDIDATES = [
       const d = g.getImageData(0, 0, 36, 48).data, on = y => { for (let x = 0; x < 36; x++) if (d[(y * 36 + x) * 4 + 3] > 30) return true; return false; };
       if (on(0) || on(1)) problems.push('the bubble touches the top edge of the actor card');
       let any = false; for (let y = 2; y < 14; y++) if (on(y)) { any = true; break; } if (!any) problems.push('no bubble was drawn above the head'); }
-    if (stairLift(CW(), 17, 5) !== 0) problems.push("Meridian's stairs lift nobody — the flight that runs east is not laid in Meridian");
+    // #4 (mq-v81): Meridian's office has the flight — it rises in HQ's stair hall and sinks into the loft's well
+    if (!(stairLift(WORLDS.hq, 11, 14) > 0 && stairLift(WORLDS.hq, 14, 14) > stairLift(WORLDS.hq, 11, 14))) problems.push("Meridian's flight does not rise east in HQ's stair hall (#4)");
+    if (!(stairLift(WORLDS.f2, 13, 14) < 0 && stairLift(WORLDS.f2, 10, 14) < stairLift(WORLDS.f2, 13, 14))) problems.push("Meridian's loft has no well sinking to the way down (#4)");
     // #24 (mq-v74): a 3D failure leaves a trace — once in the console, the last one under the prefix
     { const n0 = T3.errors.length; t3Note('test', new Error('boom')); t3Note('test', new Error('boom'));
       if (T3.errors.length !== n0 + 1) problems.push('t3Note does not log once per distinct message (' + (T3.errors.length - n0) + ')');
@@ -1232,9 +1234,9 @@ const CANDIDATES = [
     const problems = [];
     if (typeof doorMarks !== 'function' || typeof drawDoorMark !== 'function') return ['no doorMarks()/drawDoorMark() in the engine'];
     const before = { world, px, py };
-    world = 'hq'; px = fx = 10; py = fy = 11;                   // two steps from the front door at (10,13)
+    world = 'hq'; px = fx = 10; py = fy = 14;                   // two steps from the front door at (10,16), on the landing
     let m = doorMarks();
-    if (!m.some(d => d.x === 10 && d.y === 13)) problems.push('two steps from HQ\'s front door, no marker');
+    if (!m.some(d => d.x === 10 && d.y === 16)) problems.push('two steps from HQ\'s front door, no marker');
     if (m.some(d => !PORTALS.hq[d.ch])) problems.push('a marker over a door that leads nowhere');
     px = fx = 8; py = fy = 12;                                   // beside an interior door "+" at (7,12)
     m = doorMarks();
@@ -1336,8 +1338,8 @@ const CANDIDATES = [
     const f2 = WORLDS.f2;
     ribbons().filter(r => r.world === 'f2').forEach(r => r.tiles.forEach(([y, x, ch]) => {
       if (f2.rows[y][x] !== ch) problems.push(`${r.id}: gift '${ch}' did not land at (${x},${y})`);
-      if (x === 17 && y === 11) problems.push(`${r.id}: a gift on the arrival tile`);
-      if ([[16,10],[15,9],[14,8],[13,7],[12,6],[11,5],[11,4],[10,3],[10,2]].some(([sx, sy]) => sx === x && sy === y) && (TILES[ch] || {}).lift > 6) problems.push(`${r.id}: a tall gift on the sight line`);
+      if (x === 14 && y === 14) problems.push(`${r.id}: a gift on the arrival tile`);
+      if ([[14,13],[13,12],[13,11],[13,10],[12,9],[12,8],[12,7],[12,6],[11,5],[11,4],[11,3],[10,2]].some(([sx, sy]) => sx === x && sy === y) && (TILES[ch] || {}).lift > 6) problems.push(`${r.id}: a tall gift on the sight line`);
     }));
     if (!f2.npcs.some(n => roomHosts[n.npc])) problems.push('the room hosts vanished when the office was rebuilt');
     if (typeof drawTown === 'function') { try { drawTown(); } catch (e) { problems.push('the town plan throws with every lot raised: ' + e.message); } }
@@ -1440,19 +1442,37 @@ const CANDIDATES = [
     // its pot. Don Güero's grid; the arrival tile and the sight line from the stairs to
     // the window stay clear because Nacho's "nothing in the way" is an answer a player
     // can pick, so it has to be true.
+    // HQ (#4): rows 0–12 untouched but for the old stair leaving Dana's closet; then the office door and the
+    // stair mass, the landing and the flight to the head, the lobby, the front door — Don Güero's candidate B
+    { const hq = WORLDS.hq.rows;
+      if (hq.length !== 17 || hq.some(r => r.length !== 20)) problems.push('hq is not 20 wide x 17 tall');
+      if (hq[13] !== '##########+⊓⊓⊓⊓#####' || hq[14] !== '#..........≡≡≡▲#####' || hq[15] !== '#..................#' || hq[16] !== '##########E#########') problems.push('HQ\'s last four rows are not the stair hall and the lobby');
+      if (hq[5] !== '#......#..RR...#...#') problems.push('the old stair did not leave Dana\'s closet: ' + hq[5]);
+      if (hq[12] !== '#.a....+.......#####') problems.push('row 12 of HQ changed — rows 0–12 keep every coordinate');
+      if (hq.some(r => r.includes('1'))) problems.push('the old stair glyph is still laid in HQ');
+      const up = PORTALS.hq['▲'], dn = PORTALS.f2['▼'], inE = PORTALS.st.E;
+      if (!up || up.to !== 'f2' || up.x !== 14 || up.y !== 14 || up.mark !== 'up') problems.push('▲ does not climb to the loft at (14,14) with the up mark');
+      if (!dn || dn.to !== 'hq' || dn.x !== 10 || dn.y !== 14) problems.push('▼ does not come down to the landing (10,14)');
+      if (!inE || inE.to !== 'hq' || inE.x !== 10 || inE.y !== 14) problems.push('coming in from the street does not land on the landing (10,14)');
+      if (PORTALS.hq['1'] || PORTALS.f2['1']) problems.push('the old stair portals are still declared'); }
     const f2 = WORLDS.f2.rows;
-    if (f2.length !== 14 || f2.some(r => r.length !== 20)) problems.push('f2 is not 20 wide x 14 tall');
+    // #4 (mq-v81, Don Güero's candidate B): three rows south — the railed well over the flight, the loft's floor, the wall
+    if (f2.length !== 17 || f2.some(r => r.length !== 20)) problems.push('f2 is not 20 wide x 17 tall');
+    if (f2[13] !== '#.........◺◺◺◺.....#' || f2[14] !== '#........◺▼≡≡≡.....#' || f2[15] !== '#.........◺◺◺◺.....#' || f2[16] !== '####################') problems.push('the loft\'s last four rows are not the railed well over the flight');
+    if (f2[12] !== '#..................#') problems.push('row 12 of the loft changed — rows 0–12 keep every coordinate');
     const glyphs = {}; f2.forEach(r => [...r].forEach(c => { glyphs[c] = (glyphs[c] || 0) + 1; }));
     // the wall now carries six sheets of blank paper — the office's own record, pinned
     // from day one and unlabelled (owner's call, 2026-09-03), each swapped for a stapled
     // document by its district's ribbon.
-    const want = { D: 1, '□': 4, C: 1, P: 1, '1': 1, '▭': 6 };
+    const want = { D: 1, '□': 4, C: 1, P: 1, '▼': 1, '≡': 3, '◺': 9, '▭': 6 };
     Object.entries(want).forEach(([c, n]) => { if (glyphs[c] !== n) problems.push(`the office should hold ${n} '${c}', found ${glyphs[c] || 0}`); });
-    if (f2[11][18] !== '1') problems.push('the stairs moved — the portal from HQ lands at (17,11) beside them');
-    Object.keys(glyphs).forEach(c => { if (!'#.D1|□CP▭▤'.includes(c)) problems.push(`the office holds something unplanned: '${c}'`); });
-    if (f2[11][17] !== '.') problems.push('the arrival tile (17,11) is blocked');
-    [[16,10],[15,9],[14,8],[13,7],[12,6],[11,5],[11,4],[10,3],[10,2]].forEach(([x, y]) => {
-      if (f2[y][x] !== '.') problems.push(`the sight line from the stairs to the window is blocked at (${x},${y}) by '${f2[y][x]}'`); });
+    if ((f2[14] || '')[10] !== '▼') problems.push('the way down moved — it is the ▼ at (10,14), the deepest tile of the well');
+    if (f2.some(r => r.includes('1'))) problems.push('the old stair glyph is still laid in the office — the flight replaced it');
+    Object.keys(glyphs).forEach(c => { if (!'#.D|□CP▭▤▼≡◺'.includes(c)) problems.push(`the office holds something unplanned: '${c}'`); });
+    if ((f2[14] || '')[14] !== '.') problems.push('the arrival tile (14,14) is blocked');
+    if ((f2[13] || '')[14] !== '.') problems.push('(14,13) must be floor — you step off the top of the flight into the room');
+    [[14,13],[13,12],[13,11],[13,10],[12,9],[12,8],[12,7],[12,6],[11,5],[11,4],[11,3],[10,2]].forEach(([x, y]) => {
+      if ((f2[y] || '')[x] !== '.') problems.push(`the sight line from the stairs to the window is blocked at (${x},${y}) by '${(f2[y] || '')[x]}'`); });
     // ---- la ventana del norte (Don Güero + Nacho, 2026-09-02): three panes IN the north wall,
     // over the old desk, declared by the pack (art.js) and never by the engine ----
     if (f2[0].slice(9, 12) !== '|||') problems.push(`the three panes must stay over the desk, got "${f2[0]}"`);
@@ -1849,9 +1869,9 @@ const CANDIDATES = [
   {
     // the marker asks "does this lead somewhere", not "is it in the DOORS list"
     const marks = await page.evaluate(() => {
-      world = 'hq'; px = fx = 16; py = fy = 5; moving = false; held = null;
+      world = 'hq'; px = fx = 13; py = fy = 14; moving = false; held = null; /* on the flight, below the head */
       const m = doorMarks();
-      return { has: m.some(d => d.x === 17 && d.y === 5 && d.ch === '1'), all: m.map(d => d.ch).join('') };
+      return { has: m.some(d => d.x === 14 && d.y === 14 && d.ch === '▲'), all: m.map(d => d.ch).join('') };
     });
     if (!marks.has) fails.push('the HQ stairs still wear no marker: ' + JSON.stringify(marks));
     const bogus = await page.evaluate(() => doorMarks().filter(d => !PORTALS[world][d.ch]).length);
@@ -1862,7 +1882,7 @@ const CANDIDATES = [
       const out = {};
       roomAns = {}; nudgeW = ''; nudged = new Set(); tickerLines.length = 0;
       document.getElementById('world').hidden = false;
-      world = 'hq'; px = fx = 16; py = fy = 5;
+      world = 'hq'; px = fx = 13; py = fy = 14; /* on the flight, a step from the head */
       out.pendingUpstairs = worldPending('f2');
       portalNudge();
       out.first = tickerLines[tickerLines.length - 1] || '';
@@ -2606,7 +2626,7 @@ const CANDIDATES = [
       const keepW = world, keepX = px, keepY = py, keepC = camMode, keepFx = fx, keepFy = fy;
       // the camera follows fx/fy, not px/py — move both or the stairs are off-screen and every
       // count below is zero for the wrong reason
-      world = 'hq'; px = fx = 17; py = fy = 6;       // standing at the foot of HQ's flight
+      world = 'no'; px = fx = 12; py = fy = 6;       // beside Nolasco's stairs, the one '1' left in the city (#4 gave HQ the engine's flight)
 
       const f = spy('1'); camSet('front'); drawFront();
       if (f.plan) problems.push('the front camera still paints the stairs flat on the floor (' + f.plan + ' calls)');
@@ -2625,10 +2645,11 @@ const CANDIDATES = [
     // the arrow over a portal points the way that portal goes
     const arrow = await page.evaluate(() => {
       const problems = [], keepW = world, keepX = px, keepY = py;
-      const markAt = (w2, x, y) => { world = w2; px = x; py = y;
-        const d = doorMarks().find(m => m.ch === '1'); return d ? (d.mark || 'down') : null; };
-      if (markAt('hq', 17, 6) !== 'up') problems.push('HQ\'s stairs climb to the office and their marker still points down');
-      if (markAt('f2', 17, 11) !== 'down') problems.push('the office stairs go down and their marker does not say so');
+      const markAt = (w2, x, y, ch) => { world = w2; px = x; py = y;
+        const d = doorMarks().find(m => m.ch === ch); return d ? (d.mark || 'down') : null; };
+      if (markAt('hq', 13, 14, '▲') !== 'up') problems.push('HQ\'s flight climbs to the office and its marker still points down');
+      if (markAt('f2', 11, 14, '▼') !== 'down') problems.push('the office\'s way down does not say so');
+      if (markAt('no', 12, 6, '1') !== 'down') problems.push('Nolasco\'s stairs go down to the street and their marker does not say so');
       world = keepW; px = keepX; py = keepY;
       return problems;
     });
@@ -2752,8 +2773,8 @@ const CANDIDATES = [
       // the real path: stand on the portal tile and let tryPortal() run.
       {
         const hq = WORLDS['hq']; let sx = -1, sy = -1;
-        for (let y = 0; y < hq.H; y++) for (let x = 0; x < hq.W; x++) if (hq.rows[y][x] === '1') { sx = x; sy = y; }
-        if (sx < 0) problems.push('no stair tile in hq to test the door with');
+        for (let y = 0; y < hq.H; y++) for (let x = 0; x < hq.W; x++) if (hq.rows[y][x] === '▲') { sx = x; sy = y; }
+        if (sx < 0) problems.push('no stair head in hq to test the door with');
         else {
           world = 'hq'; px = fx = sx; py = fy = sy;
           put('hq', sx, sy + 1); sonny.follow = true; sonny.holdT = 0; sonny.stayT = 0; sonny.moving = false;
@@ -2911,12 +2932,14 @@ const CANDIDATES = [
       if (JSON.stringify(PL) !== JSON.stringify(PLDEF)) problems.push('PL drifted from PLDEF with no PLACES declared');
       if (PL.home !== 'hq' || PL.spawn.join() !== '10,11' || PL.street !== 'st' || PL.park !== 'pk' || PL.upstairs !== 'f2') problems.push('the default roles are not Meridian\'s rooms: ' + JSON.stringify(PL));
       if (world !== PL.home && !WORLDS[world]) problems.push('the current world is not a world');
-      // mq-v75 (#4): the engine owns the flight that runs east — five glyphs, drawable — and Meridian
-      // does not lay them yet (the town walks the stair first; Meridian's maps change when the owner signs)
+      // mq-v75 (#4): the engine owns the flight that runs east — five glyphs, drawable. mq-v81: Meridian lays
+      // them, in HQ's stair hall and the loft's well and nowhere else (the owner walked them in the town first)
       ['⊓', '≡', '▲', '▼', '◺'].forEach(g => { if (!TILES[g] || !TILEDRAW[g]) problems.push('the engine lacks the stair glyph ' + g);
         const c = document.createElement('canvas'); c.width = 32; c.height = 32; const o = ctx; ctx = c.getContext('2d');
         try { TILEDRAW[g]({ sx: 0, sy: 0, x: 12, y: 13, canopy: () => {} }); if (TILESIDE[g]) TILESIDE[g]({ sx: 0, sy: 0, x: 12, y: 13, canopy: () => {} }); } catch (e) { problems.push('stair glyph ' + g + ' throws: ' + e.message); } finally { ctx = o; }
-        Object.entries(WORLDS).forEach(([id, w]) => { if (w.rows.join('').includes(g)) problems.push("Meridian's " + id + ' already lays ' + g + ' — the town walks the stair first'); }); });
+        const laid = Object.keys(WORLDS).filter(id => WORLDS[id].rows.join('').includes(g)).sort().join(',');
+        const wantIn = { '⊓': 'hq', '≡': 'f2,hq', '▲': 'hq', '▼': 'f2', '◺': 'f2' }[g];
+        if (laid !== wantIn) problems.push('the stair glyph ' + g + ' is laid in [' + laid + '], expected [' + wantIn + ']'); });
       if (!SOLID.has('⊓') || !SOLID.has('◺') || SOLID.has('≡') || SOLID.has('▲') || SOLID.has('▼')) problems.push('the stair glyphs have the wrong solidity');
       // mq-v70: `roams` lets a document-carrier walk (the town's crier). No Meridian station says
       // it, so every person with a document stays where the map put them, as before.
