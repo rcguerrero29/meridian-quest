@@ -272,7 +272,15 @@ function gradeAll(){
   const clean=ans.filter(i=>marks[i]===1).length/ans.length;
   return clean>=0.9?3:clean>=0.6?2:1;
 }
-const chDue=()=>{const L=CHS();return chSeen<L.length&&((livesOn()&&hearts<=0)||chClosed(L[chSeen]));};
+/* ENDLESS: a place you inhabit has no Saturday (Nacho; the owner: "i dont think it ends").
+   A pack may declare `ENDLESS=true` and the ending panel never fires — no epilogue, no title, no
+   "claim your reward". This mattered more than it sounds: a pack that declares no CHAPTERS gets
+   the synthesised one above, so El Changarrito — the owner's own backlog as a street, with a
+   single quest in it — ran Meridian's LAST-DAY EPILOGUE the moment he answered Don Güero. Doña
+   Chelo counting the drawer at El Mercado Robles, in a town that has no mercado and no Chelo.
+   Meridian declares nothing and ends exactly as it always has. */
+const chDue=()=>{if(typeof ENDLESS!=="undefined"&&ENDLESS)return false;
+  const L=CHS();return chSeen<L.length&&((livesOn()&&hearts<=0)||chClosed(L[chSeen]));};
 /* which district a quest belongs to; -1 for quests that belong to none */
 const qChapter=qi=>{const L=CHS();for(let i=0;i<L.length;i++)if(L[i].quests.indexOf(qi)>=0)return i;return -1;};
 /* Districts open and stay open. A quest is on offer once its district has opened
@@ -431,6 +439,16 @@ function clearSave(){try{localStorage.removeItem(SK("1"));}catch(e){}}
 /* toasts */
 let toastT=null,toastQ=[];
 const tickerLines=[];
+/* IS THE WORLD COVERED? The paperwork and every panel open over the page now, so when one is up
+   the world behind it is scenery at best. Two things follow: it is not drawn (the loop), and
+   nothing that happens out there is announced over the top of what you are reading (below). */
+function worldCovered(){
+  if(!$("reader").hidden)return true;
+  const ps=document.querySelectorAll(".settings");
+  for(let i=0;i<ps.length;i++)if(!ps[i].hidden)return true;
+  return false;
+}
+let toastHeld=[],wasCovered=false;   /* what the street said while you were not looking */
 function toast(msg,ms,crit){const el=$("toast");el.classList.toggle("crit",!!crit); /* red for what must be discussed sooner (#8) */
   /* The activity record mirrors recent messages so a short interaction can be re-read
      after the toast fades (owner ask). Owner, 2026-09-01: keep the last TWO. Owner,
@@ -445,6 +463,11 @@ function toast(msg,ms,crit){const el=$("toast");el.classList.toggle("crit",!!cri
     if(i<tickerLines.length-1)d.className="prev";   /* the older one, dimmed */
     tk.appendChild(d);});
   tk.hidden=false;
+  /* Owner: "capture events if happening in background." The trolley still comes and the dog still
+     does what it does while you are reading a sheet — but a toast played out behind an opaque panel
+     is a message delivered to nobody, and it takes its turn in the queue with it. Held instead, and
+     said when you put the paper down. The record above has it either way. */
+  if(worldCovered()){toastHeld.push([msg,ms,!!crit]);return;}
   if(el.classList.contains("on")){toastQ.push([msg,ms]);return;}
   el.textContent=msg;el.classList.add("on");
   clearTimeout(toastT);toastT=setTimeout(()=>{el.classList.remove("on");
@@ -646,6 +669,7 @@ function camSet(m){camMode=m;
   sizeCanvas();  /* the world's height depends on which camera is running now */
   if($("rot3d"))$("rot3d").hidden=!is3;}
 document.querySelectorAll("#camRow button").forEach(b=>b.addEventListener("click",()=>camSet(b.dataset.cam)));
+document.querySelectorAll("#easeRow button").forEach(b=>b.addEventListener("click",()=>{if(typeof camEaseSet==="function")camEaseSet(b.dataset.ease);}));
 /* ---------- tile renderer registry (graphics-prep, IDEAS §7 step 1) ----------
    Every glyph draws via TILEDRAW[ch](rc), rc={sx,sy,x,y,canopy}. Content packs
    may override or add art via TILEART (typeof-guarded, like CRITTERS/EGGS) —
@@ -2705,7 +2729,18 @@ function loop(ts){
   }else if(!tryPortal(ts))tryStep(); /* standing on a door whose cooldown just ran out: go through */
   petalMomentTick(dt);troUpdate(dt);
   dogUpdate(dt,ts);catUpdate(dt,ts);pigUpdate(dt,ts);loroTick(ts);critUpdate(dt,ts);ballUpdate(dt,ts);wanderUpdate(dt);fredCheck();
-  if(!$("world").hidden)draw();
+  /* The world keeps thinking behind a panel — the dog walks, the trolley comes, petals fall — so
+     nothing jumps when you put the paper down. It is not DRAWN, though: measured at 215 frames in
+     six seconds with a document covering the screen, every one of them at full device resolution
+     and none of them visible. On a phone that is battery and heat for pixels nobody sees.
+     The moment the cover lifts, whatever the street said while you were reading is said now. */
+  const covered=worldCovered();
+  if(covered!==wasCovered){
+    wasCovered=covered;
+    if(!covered&&toastHeld.length){const held=toastHeld;toastHeld=[];
+      setTimeout(()=>held.forEach(([m,d,c],i)=>setTimeout(()=>toast(m,d,c),i*120)),260);}
+  }
+  if(!$("world").hidden&&!covered)draw();
   requestAnimationFrame(loop);
 }
 /* the door marker — the third door affordance (owner, 2026-09-02: "i think we should have a
@@ -3840,6 +3875,13 @@ function applyLang(){
   $("lbTheme").textContent=t.lbTheme;
   $("lbCam").textContent=t.lbCam;
   if($("lbSeason")){$("lbSeason").textContent=t.lbSeason;seasonRowBuild();}
+  /* the camera-turn row only exists where there is a camera to turn */
+  if($("lbEase")){const on=typeof T3EASE!=="undefined";
+    $("lbEase").hidden=$("easeRow").hidden=!on;
+    if(on){$("lbEase").textContent=t.lbEase||"Camera turn";
+      const names=t.easeNames||["Instant","Quick","Easy","Slow"];
+      document.querySelectorAll("#easeRow button").forEach((b,i)=>{b.textContent=names[i]||b.dataset.ease;
+        b.setAttribute("aria-pressed",b.dataset.ease===camEase?"true":"false");});}}
   if($("lbAle")){$("lbAle").textContent=t.lbAle||"Alebrijes";aleRowBuild();}
   document.querySelectorAll("#camRow button").forEach(b=>{
     b.textContent=b.dataset.cam==="top"?t.camTop:b.dataset.cam==="front"?(t.camFront||"⬆ 2.5D")

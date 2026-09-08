@@ -221,10 +221,18 @@ const { chromium } = require('playwright-core');
           // the rule on paper: of two walls in the way only the nearer is minimized
           const nr = t3Near(10, 15, 0, [[10, 16, 1.3], [10, 14, 1.3], [12, 16, 1.3], [8, 16, 1.3]]);
           if (!nr || nr.length !== 1 || nr[0].x !== 10.5 || nr[0].z !== 16.5) problems.push('t3Near does not pick the one wall in front of you: ' + JSON.stringify(nr && nr.map(p => [p.x, p.z])));
-          // ↻ stays an instant quarter turn, the only turn there is
-          const y0 = T3.yaw; document.getElementById('rot3d').click();
-          if (Math.abs(T3.yaw - (y0 + Math.PI / 2)) > 1e-9) problems.push('↻ is no longer an instant quarter turn');
-          T3.yaw = y0;
+          // ↻ is still the only turn there is, and still exactly a quarter — it is EASED now
+          // (300ms by default, a Settings choice), so what is pinned is where it ends, not that it
+          // arrives in one frame. "Instant" in that setting is the old behaviour exactly.
+          const y0 = T3.yaw, keepE = camEase;
+          camEaseSet('instant'); document.getElementById('rot3d').click();
+          if (Math.abs(T3.yaw - (y0 + Math.PI / 2)) > 1e-9) problems.push('↻ set to instant is no longer an instant quarter turn');
+          T3.yaw = y0; T3.turn = null;
+          camEaseSet('easy'); document.getElementById('rot3d').click();
+          if (!T3.turn) problems.push('↻ does not start an eased turn when the setting asks for one');
+          else if (Math.abs(T3.turn.to - (y0 + Math.PI / 2)) > 1e-9) problems.push('an eased ↻ does not land on the same quarter turn');
+          if (Math.abs(T3.yaw - (y0 + Math.PI / 2)) < 1e-9) problems.push('an eased ↻ arrived in one frame — nothing to follow');
+          T3.turn = null; T3.yaw = y0; camEaseSet(keepE);
         }
         // you stand higher on a tread
         RECORDSRC.goBeside('hq', 12, 13); draw3d(); const hero = T3.pool.filter(p => p.live && p.spr.material.depthTest === false)[0]; /* beside the mass = the second tread (12,14) */

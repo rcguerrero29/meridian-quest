@@ -954,12 +954,17 @@ const CANDIDATES = [
       if (worldDir(worldDir(worldDir(worldDir('up')))) !== 'up')
         problems.push(`four quarter-turns from yaw ${yaw} did not return to "up"`);
     });
-    // the ↻ button must step in QUARTER turns — a 4-way grid cannot be driven from 45°
-    T3.yaw = 0;
+    // The ↻ button must step in QUARTER turns — a 4-way movement grid cannot be driven from 45°.
+    // The turn is EASED now (a Settings choice, 300ms by default), so the quarter is checked at
+    // its destination rather than one frame after the press; "instant" is the old behaviour.
+    T3.yaw = 0; T3.turn = null;
     const btn = document.getElementById('rot3d');
     if (!btn) problems.push('the 3D rotate button is missing');
-    else { btn.click(); if (Math.abs(T3.yaw - Math.PI/2) > 1e-9)
-      problems.push(`↻ stepped ${(T3.yaw*180/Math.PI).toFixed(1)}° — must be 90°, or half the stops are unmappable`); }
+    else { btn.click();
+      const landed = T3.turn ? T3.turn.to : T3.yaw;
+      if (Math.abs(landed - Math.PI/2) > 1e-9)
+        problems.push(`↻ stepped ${(landed*180/Math.PI).toFixed(1)}° — must be 90°, or half the stops are unmappable`);
+      T3.turn = null; T3.yaw = 0; }
     // the 2D cameras must be completely unaffected
     camSet('front'); T3.yaw = Math.PI / 2;
     if (worldDir('up') !== 'up') problems.push('camera rotation leaked into a 2D camera');

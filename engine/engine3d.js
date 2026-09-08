@@ -7,7 +7,7 @@
 "use strict";
 const DAY_AMB=0.66,DAY_SUN=0.42;   /* see the note at the lights: these two numbers are what gives a building faces */
 const T3={renderer:null,scene:null,cam:null,group:null,amb:null,sun:null,lastW:0,
-  builtKey:"",dirty:0,fail:false,lastH:0,yaw:0,pool:[],tintables:[],tint:null,glows:[],K:1}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
+  builtKey:"",dirty:0,fail:false,lastH:0,turn:null,yaw:0,pool:[],tintables:[],tint:null,glows:[],K:1}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
 function t3Invalidate(){T3.dirty++;} /* growth, theme edits — anything that reshapes tiles */
 /* ---------- the error log (#24) ----------
    Four places swallowed a 3D failure and left no trace: a decor artist, an actor artist, init,
@@ -712,6 +712,7 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
     t3CheckK();
     const key=world+"|"+themeName+"|"+T3.dirty;
     if(T3.builtKey!==key)t3Build(key);
+    t3TurnTick();
     const hx=fx+0.5,hz=fy+0.5;
     T3.cam.position.set(hx+Math.sin(T3.yaw)*T3CAMD,T3CAMH,hz+Math.cos(T3.yaw)*T3CAMD);
     T3.cam.lookAt(hx,0.4,hz);
@@ -784,7 +785,37 @@ function t3Leash(){ /* the blue leash exists in 3D too, while it's on */
    movement grid cannot be driven from a 45°-rotated camera — at those four odd stops
    NO swipe the player can make corresponds to a straight move on screen, which is
    exactly why the owner reported "some directions are broken when i rotate". */
+/* THE TURN, EASED (Rosa's 3D note; the owner picked "your choice, ready to change, maybe in
+   settings"). The camera used to jump a quarter turn in one frame. AJ called the old AUTOMATIC
+   turn "too confusing" (#65) and the cure then was to make it manual — but the confusion was never
+   that it turned, it was that the turn had no motion to follow, so the eye had to re-find the
+   whole street from scratch. A move you can watch is a move you can follow.
+   300ms with an ease-in-out is the middle of the range interface work lands on for a change of
+   view: fast enough not to feel like waiting, slow enough to be followed. It is a setting, not a
+   constant, because it is taste — Settings → Picture → Camera turn offers instant, quick, easy and
+   slow, and instant is exactly the old behaviour for anyone who wants it back. */
+const T3EASE={instant:0,quick:150,easy:300,slow:520};
+let camEase="easy";
+try{const v=localStorage.getItem(SK("camease"));if(v&&T3EASE[v]!==undefined)camEase=v;}
+catch(e){t3Note("camease",e);}   /* storage can be refused; the default stands, but it is never silent (#24) */
+function camEaseSet(k){if(T3EASE[k]===undefined)return;camEase=k;
+  try{localStorage.setItem(SK("camease"),k);}catch(e){t3Note("camease",e);}
+  document.querySelectorAll("#easeRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.ease===k?"true":"false"));}
+function t3TurnTick(){                    /* called once a frame, before the camera is placed */
+  const T=T3.turn;if(!T)return;
+  const ms=T3EASE[camEase]||0;
+  if(ms<=0){T3.yaw=T.to;T3.turn=null;return;}
+  const u=Math.min(1,(performance.now()-T.t0)/ms);
+  const e=u<0.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;   /* ease in, ease out — a move with a shape */
+  T3.yaw=T.from+(T.to-T.from)*e;
+  if(u>=1)T3.turn=null;
+}
+function t3Turn(by){                      /* one quarter, from wherever the last one got to */
+  const from=T3.turn?T3.turn.to:T3.yaw;
+  T3.turn={from:T3.yaw,to:from+by,t0:performance.now()};
+  if(!(T3EASE[camEase]>0)){T3.yaw=T3.turn.to;T3.turn=null;}
+}
 (function(){
   const b=document.getElementById("rot3d");
-  if(b)b.addEventListener("click",()=>{T3.yaw+=Math.PI/2;}); /* the only turn there is (#65: "lets keep that manual") */
+  if(b)b.addEventListener("click",()=>t3Turn(Math.PI/2)); /* the only turn there is (#65: "lets keep that manual") */
 })();
