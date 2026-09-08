@@ -100,6 +100,72 @@ const { chromium } = require('playwright-core');
       T3.group.children.forEach(o => { const u = o.userData || {}; if (u.flat) { flat[u.g] = (flat[u.g] || 0) + 1; (flatIn[u.g] = flatIn[u.g] || new Set()).add(id); } });
     });
     world = before.world; px = fx = before.px; py = fy = before.py; T3.yaw = before.yaw; camSet(before.cam);
+    // ---- #132 / #133: a hair style has to look like its name ----
+    // Owner: "long hair looks like a beard, lets call it that, then create one that looks a bit
+    // more like long hair only not bearded" and "fro is also offf". Both are claims about pixels,
+    // so both are measured in pixels: the person is drawn at the size they are seen on the street.
+    {
+      const HAIR = '#E01B24'; /* a colour nothing else in the drawing uses, so hair is countable */
+      const shot = (style) => {
+        const c = document.createElement('canvas'); c.width = 40; c.height = 40;
+        const g = c.getContext('2d'); const o = ctx; ctx = g;
+        try { g.translate(11, 6); drawPerson(g, 0, 0, { shirt: '#8B5CF6', skin: '#E5AC82', hair: HAIR, style, outfit: 'casual', pattern: 'plain' }, { dir: 'down' }); }
+        finally { ctx = o; }
+        const d = g.getImageData(0, 0, 40, 40).data;
+        return { at: (x, y) => { const i = ((y | 0) * 40 + (x | 0)) * 4; return [d[i], d[i + 1], d[i + 2], d[i + 3]]; },
+                 isHair: (x, y) => { const i = (((y | 0) * 40 + (x | 0)) * 4);
+                   return d[i + 3] > 40 && d[i] > 60 && d[i] > d[i + 1] * 1.5 && d[i] > d[i + 2] * 1.5; },
+                 isSkin: (x, y) => { const i = (((y | 0) * 40 + (x | 0)) * 4);
+                   return d[i + 3] > 40 && d[i] > 180 && d[i + 1] > 140 && d[i + 2] > 110 && d[i] < d[i + 1] * 1.5; },
+                 data: d };
+      };
+      const named = (T().styles || []).map(x => x[0]);
+      ['long', 'beard', 'afro'].forEach(k => { if (named.indexOf(k) < 0) P.push('#132/#133: "' + k + '" is not offered in the style list (' + lang + ')'); });
+      // The face finds itself, so nothing here depends on where the drawing happens to land.
+      const faceBox = (sh) => { let x0 = 99, y0 = 99, x1 = -1, y1 = -1;
+        for (let y = 0; y < 40; y++) for (let x = 0; x < 40; x++) if (sh.isSkin(x, y)) {
+          if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+        return x1 < 0 ? null : { x0, y0, x1, y1, cx: Math.round((x0 + x1) / 2) }; };
+      const massIn = (sh, x0, x1, y0, y1) => { let n = 0;
+        for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (sh.isHair(x, y)) n++; return n; };
+      const beard = shot('beard'), long = shot('long');
+      const fb = faceBox(beard), fl = faceBox(long);
+      if (!fb || !fl) P.push('#132: no face found in the drawing, so the hair cannot be judged against it');
+      else {
+        // under the chin: closed is a beard, open is long hair. That is the whole distinction.
+        const chin = (sh, f) => massIn(sh, f.cx - 2, f.cx + 2, f.y1 + 1, f.y1 + 3);
+        if (chin(beard, fb) < 8) P.push('#132: "beard" does not close under the chin (' + chin(beard, fb) + 'px) — that closed shape is what makes it a beard');
+        if (chin(long, fl) > 2) P.push('#132: "long" closes under the chin (' + chin(long, fl) + 'px), which is the silhouette of a beard, not of long hair');
+        // and it has to be long: mass down both sides, from mid-face past the jaw
+        const midY = Math.round((fl.y0 + fl.y1) / 2);
+        [['left', fl.x0 - 5, fl.x0 - 1], ['right', fl.x1 + 1, fl.x1 + 5]].forEach(([side, a, b]) => {
+          const n = massIn(long, a, b, midY, fl.y1 + 3);
+          if (n < 8) P.push('#132: "long" has almost no hair down its ' + side + ' side past the jaw (' + n + 'px) — that fall is what makes it long');
+        });
+      }
+      // #133: the afro must have a value range, not one flat brightness
+      // Only the INSIDE of the mass counts. An edge is antialiased against the background and
+      // would hand back a spread of values for free; what was missing is a ladder across the
+      // body of the hair, so that is what is measured.
+      const afro = shot('afro');
+      const inside = (x, y) => afro.isHair(x, y) && afro.isHair(x - 1, y) && afro.isHair(x + 1, y) && afro.isHair(x, y - 1) && afro.isHair(x, y + 1);
+      let lo = 999, hi = -1, n = 0;
+      for (let y = 2; y < 22; y++) for (let x = 2; x < 38; x++) if (inside(x, y)) {
+        const i = (y * 40 + x) * 4;
+        const L = 0.299 * afro.data[i] + 0.587 * afro.data[i + 1] + 0.114 * afro.data[i + 2];
+        if (L < lo) lo = L; if (L > hi) hi = L; n++; }
+      if (n < 40) P.push('#133: the afro has almost no mass to it (' + n + ' pixels inside its own edge)');
+      else if (hi - lo < 18) P.push('#133: the body of the afro spans ' + Math.round(hi - lo) + ' levels of brightness — at one value it reads as a helmet, not as hair with a near side and a far side');
+    }
+    // a save that chose the old "long" was wearing the beard, and keeps it
+    {
+      const s0 = { n: 'Test', c: 'architect', lk: { style: 'long' }, v: 2 };
+      const out = sanitizeSave(s0);
+      if (!out || out.lk.style !== 'beard') P.push('#132: a save made before this change loses the beard it was wearing (got "' + (out && out.lk.style) + '")');
+      const s1 = { n: 'Test', c: 'architect', lk: { style: 'long' }, v: 2, hairV: 2 };
+      const out1 = sanitizeSave(s1);
+      if (!out1 || out1.lk.style !== 'long') P.push('#132: a save made after this change cannot keep long hair (got "' + (out1 && out1.lk.style) + '")');
+    }
     // ---- #130: naming and styling are two parts, and look like two parts ----
     // Owner: "for the menu to update sonny and my appearance, can we move it slightly up and
     // sepparate from my name? just looks like it overlaps". The panel is one block above (title,
