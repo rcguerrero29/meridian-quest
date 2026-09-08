@@ -3197,7 +3197,12 @@ function openChair(who){const t=T();chairOpen=true;
   $("crTitle").textContent=t.chairTitle||t.crTitle;$("lbName").hidden=true;$("heroname").hidden=true;
   const note=$("crNote");if(note){const L=(t.chat||{})[who]||[];let ln=L.length?L[Math.floor(Math.random()*L.length)]:"";if(typeof ln==="function")ln=ln();ln=(ln&&ln.t!==undefined)?ln.t:ln;note.textContent=ln?sayAs(who,ln):"";note.hidden=!ln;}
   buildSwatches();buildOpts("rowStyle",t.styles,"style");buildOpts("rowOutfit",t.outfits,"outfit");if(t.patterns)buildOpts("rowPattern",t.patterns,"pattern");buildPaintRow();pvDraw();
-  $("begin").textContent=t.chairDone||t.begin;$("world").hidden=true;$("creator").hidden=false;held=null;}
+  $("begin").textContent=t.chairDone||t.begin;$("world").hidden=true;$("creator").hidden=false;held=null;
+  /* #126: the chair opens over the world, and the page was left scrolled wherever the world had it — so the panel
+     could open entirely below the fold with its way out unreachable. Put it in view and start it at its own top. */
+  const cp=$("creator");cp.scrollTop=0;
+  try{window.scrollTo({top:0,behavior:"auto"});}catch(e){window.scrollTo(0,0);}
+  try{cp.scrollIntoView({block:"start"});}catch(e){}}
 function closeChair(){const t=T();chairOpen=false;$("creator").hidden=true;$("lbName").hidden=false;$("heroname").hidden=false;$("begin").textContent=t.begin;
   const note=$("crNote");if(note)note.hidden=true;
   save();showWorld();applyCtl();hud();checkTalk();if(t.chairAfter)toast(sayAs(GRW().barberNpc,t.chairAfter),2800);}

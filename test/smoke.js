@@ -69,6 +69,37 @@ const CANDIDATES = [
   if (valWarns.length) fails.push('validator warnings: ' + valWarns.join(' | '));
 
   // ---- 2. static invariants inside the page ----
+  // #126 — the chair used to trap you. The creator panel grew and had no height of its own, so on a short screen
+  // the finish button fell below the fold with nothing able to scroll: at the start the page scrolls, but the chair
+  // opens this panel over the world, where it cannot. Checked at a phone's height, with every row showing.
+  {
+    await page.setViewportSize({ width: 390, height: 560 });
+    const t2 = await page.evaluate(() => {
+      const problems = [];
+      const bl = (typeof BUILDS !== 'undefined' ? BUILDS : []).find(b => b.tpl === 'barberia'), who = GRW().barberNpc;
+      if (!bl || !who) return problems;
+      const keep = { world, px, py, season: seasonPick };
+      seasonSet('muertos');
+      const rm = WORLDS[bl.id], n = rm && rm.npcs.find(x => x.npc === who);
+      if (n) {
+        world = bl.id; px = fx = n.x; py = fy = n.y + 1; moving = false; held = null; checkTalk(); $('talk').click();
+        const pnl = $('creator'), out = $('begin');
+        if (pnl.hidden) problems.push('the chair did not open');
+        else { const cs = getComputedStyle(pnl), bs = getComputedStyle(out);
+          const pr = pnl.getBoundingClientRect(), br = out.getBoundingClientRect();
+          if (pr.bottom > window.innerHeight + 1) problems.push(`the chair's panel runs ${Math.round(pr.bottom - window.innerHeight)}px past the bottom of the screen`);
+          if (br.bottom > window.innerHeight + 1) problems.push(`the way out of the chair sits ${Math.round(br.bottom - window.innerHeight)}px below the screen`);
+          if (cs.overflowY !== 'auto' && cs.overflowY !== 'scroll') problems.push('the chair\'s panel does not scroll inside itself');
+          if (bs.position !== 'sticky') problems.push('the way out of the chair does not ride the bottom of the panel');
+          if (br.width < 40 || br.height < 20) problems.push('the way out of the chair has no size');
+          out.click(); if (!$('creator').hidden) problems.push('pressing the way out does not leave the chair'); }
+      }
+      seasonSet(keep.season || 'auto'); world = keep.world; px = fx = keep.px; py = fy = keep.py;
+      return problems;
+    });
+    t2.forEach(m => fails.push(m));
+    await page.setViewportSize({ width: 480, height: 900 });
+  }
   // el trolley (owner, 2026-09-08): it runs a line nothing stands on, it comes on its own, it waits for anyone
   // crossing, and it comes when you stand at a stop. TROLLEYAT is content; the engine knows only the line.
   {
