@@ -366,6 +366,166 @@ const { chromium } = require('playwright-core');
   });
   const r = r0.P; r.stillFlat = r0.stillFlat;
   fails.push(...r);
+
+  /* ---- a button you can see does what it says (Rosa, finding 1) ----
+     This one needs a SHORT screen: the fault only exists where the sheet is taller than the
+     window, which is why a laptop never saw it. So it runs at a phone's size, outside the main
+     evaluate, and puts the window back afterwards. */
+  await page.setViewportSize({ width: 390, height: 560 });
+  const rosa1 = await page.evaluate(() => {
+    const P = [];
+  // "position:sticky; bottom:0" on a bar at the foot of a scrolling sheet does not merely sit at
+  // the end of the paper — it hovers over WHATEVER content is in that band, so which control is
+  // unreachable depends only on where you have scrolled. On a phone that put Copy/Download/Close
+  // on top of Sign in, Make a new token and File a request. This asks the browser what is on top
+  // of every visible button rather than trusting that it is drawn, for every document this pack
+  // declares, at three scroll positions, at a phone's size. It is written against the SHEET, not
+  // against one game's content, so it holds for Meridian, the town and anything built from the
+  // template.
+  {
+    const keep = { w: innerWidth, h: innerHeight };
+    /* "a button you can see" means visible, not merely laid out: a button scrolled out of its own
+       scroll box still reports a rectangle, and the browser answers with whatever is painted there.
+       So the centre has to survive every clipping ancestor before it is worth asking about. */
+    const seeable = (b) => {
+      const r = b.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return null;
+      let top = 0, left = 0, bottom = innerHeight, right = innerWidth;
+      for (let p = b.parentElement; p; p = p.parentElement) {
+        const cs = getComputedStyle(p);
+        if (cs.overflowY === 'visible' && cs.overflowX === 'visible') continue;
+        const pr = p.getBoundingClientRect();
+        top = Math.max(top, pr.top); left = Math.max(left, pr.left);
+        bottom = Math.min(bottom, pr.bottom); right = Math.min(right, pr.right);
+      }
+      const x = Math.round(r.left + r.width / 2), y = Math.round(r.top + r.height / 2);
+      return (x > left && x < right && y > top && y < bottom) ? [x, y] : null;
+    };
+    const covered = (root) => { const bad = [];
+      root.querySelectorAll('button').forEach(b => {
+        if (b.hidden || b.offsetParent === null) return;
+        const c = seeable(b); if (!c) return;   /* not on screen at all is a different fault */
+        const x = c[0], y = c[1];
+        const hit = document.elementFromPoint(x, y);
+        if (!hit) { bad.push((b.id || b.textContent.trim().slice(0, 14)) + ' → nothing'); return; }
+        if (hit !== b && !b.contains(hit) && !hit.contains(b))
+          bad.push('"' + (b.textContent.trim().slice(0, 16) || b.id) + '" is under "' + (hit.textContent || '').trim().slice(0, 16) + (hit.id ? ' #' + hit.id : '') + '"');
+      });
+      return bad; };
+    const ids = Object.keys(DC());
+    const sc = document.getElementById('paperScroll');
+    if (!sc) P.push("Rosa 1: the sheet has no scroll box of its own, so its bar floats over the document");
+    const seen = {};
+    ids.forEach(id => {
+      try { docOpen(id); } catch (e) { P.push("Rosa 1: document '" + id + "' will not open: " + e.message); return; }
+      const box = document.getElementById('paperScroll') || document.getElementById('reader');
+      [0, Math.round(box.scrollHeight / 2), box.scrollHeight].forEach(top => {
+        box.scrollTop = top;
+        covered(document.getElementById('reader')).forEach(m => { seen[m] = (seen[m] || 0) + 1; });
+      });
+      try { document.getElementById('docClose').click(); } catch (e) {}
+    });
+    Object.keys(seen).slice(0, 4).forEach(m =>
+      P.push('Rosa 1: in an open document at a phone\'s size, ' + m + ' — pressing where you see it does the other thing'));
+    const n = Object.keys(seen).length;
+    if (n > 4) P.push('Rosa 1: ' + (n - 4) + ' more button(s) in the same state, not listed');
+    void keep;
+  }
+
+    // ---- every button the world offers stands inside the world (Rosa, findings 3 and 7) ----
+    // They used to be placed by a ladder of fixed distances from the bottom — 16, 72, 128, 184,
+    // 240 — which fits a 427px laptop frame and not a 266px phone one: the fifth rung landed
+    // outside the world, clipped and half-unpressable, on top of the corner icons. Three buttons
+    // shared one rung and two shared another; 🎲 and 🔁 shared one exactly, so the random-look
+    // button was never pressable. Measured, not looked at, with every button showing at once.
+    {
+      const vp = document.getElementById('vp'), acts = document.getElementById('acts');
+      const wd = document.getElementById('world'), wasHid = wd.hidden;
+      wd.hidden = false; /* this suite never enters the world; the buttons need a real box */
+      sizeCanvas();      /* and the frame has to be measured while it is visible, or it is 0 tall */
+      /* found by class, not by container, so the geometry is judged whatever the markup does */
+      const btns = [...(wd.querySelectorAll('button.talk'))];
+      if (!btns.length) P.push('Rosa 3: no world buttons found to measure');
+      else {
+        const was = btns.map(b => b.hidden);
+        btns.forEach(b => { b.hidden = false; if (!b.textContent.trim()) b.textContent = b.id; });
+        const R = e => e.getBoundingClientRect(), vr = R(vp);
+        if (vr.height < 40) P.push('Rosa 3: the world measured ' + Math.round(vr.height) + 'px tall, so its buttons could not be judged against it');
+        const shown = btns.filter(b => R(b).width > 1);
+        if (shown.length < 4) P.push('Rosa 3: only ' + shown.length + ' world button(s) could be shown, so the stack was never really tested');
+        shown.forEach(b => { const r = R(b);
+          if (r.top < vr.top - 0.5 || r.bottom > vr.bottom + 0.5 || r.left < vr.left - 0.5 || r.right > vr.right + 0.5)
+            P.push('Rosa 3: the "' + b.id + '" button is outside the world (' + Math.round(r.top - vr.top) + 'px from its top edge, world is ' + Math.round(vr.height) + 'px tall)');
+        });
+        const over = (a, b) => !(a.right <= b.left + 0.5 || b.right <= a.left + 0.5 || a.bottom <= b.top + 0.5 || b.bottom <= a.top + 0.5);
+        for (let i = 0; i < shown.length; i++) for (let j = i + 1; j < shown.length; j++)
+          if (over(R(shown[i]), R(shown[j])))
+            P.push('Rosa 7: "' + shown[i].id + '" and "' + shown[j].id + '" occupy the same place, so one of them can never be pressed');
+        ['gear', 'fsbtn', 'mapbtn'].forEach(id => { const ic = document.getElementById(id); if (!ic) return;
+          shown.forEach(b => { if (over(R(b), R(ic)))
+            P.push('Rosa 3: the "' + b.id + '" button lands on the ' + id + ' icon'); }); });
+        btns.forEach((b, i) => { b.hidden = was[i]; });
+      }
+      wd.hidden = wasHid;
+    }
+    // ---- a panel over the world can be seen out of, and nothing runs off the side ----
+    // Rosa 4: Settings and the map opened INSIDE the world's frame, so on a phone the way out was
+    // 360px below the fold and the map's "Close" was cut through the middle of the word.
+    // Rosa 6: the rows of choices never wrapped, so Spanish ran off the panel on a DESKTOP.
+    // Rosa 5: one long dropdown option made every field in the request form wider than the phone.
+    {
+      const wd2 = document.getElementById('world'), wh2 = wd2.hidden; wd2.hidden = false; sizeCanvas();
+      const panels = [...document.querySelectorAll('.settings')].filter(p => p.id && p.id !== 'reader');
+      panels.forEach(p => {
+        const cs = getComputedStyle(p);
+        if (cs.position !== 'fixed')
+          P.push('Rosa 4: the ' + p.id + ' panel opens inside the world\'s frame (' + cs.position + '), where it has a third of the screen to live in');
+      });
+      const wasHid = {};
+      ['settings', 'mapov'].forEach(id => {
+        const p = document.getElementById(id); if (!p) return;
+        wasHid[id] = p.hidden; p.hidden = false;
+        const box = p.querySelector('.box'), out = p.querySelector('.box>.close');
+        if (!out) { P.push('Rosa 4: the ' + id + ' panel has no way out to check'); return; }
+        const br = box.getBoundingClientRect(), orr = out.getBoundingClientRect();
+        if (orr.bottom > br.bottom + 1 || orr.top < br.top - 1)
+          P.push('Rosa 4: the way out of ' + id + ' is cut off by its own box (' + Math.round(orr.bottom - br.bottom) + 'px past the edge)');
+        if (orr.bottom > innerHeight + 1)
+          P.push('Rosa 4: the way out of ' + id + ' is ' + Math.round(orr.bottom - innerHeight) + 'px below the screen when it opens');
+        if (getComputedStyle(out).position !== 'sticky')
+          P.push('Rosa 4: the way out of ' + id + ' does not ride the bottom of its box, so it can scroll out of sight');
+        // Rosa 6: nothing in a row of choices is cut off sideways, in whatever language this is
+        p.querySelectorAll('.optrow').forEach(row => {
+          const rr = row.getBoundingClientRect();
+          [...row.children].forEach(c => { const r = c.getBoundingClientRect();
+            if (r.width < 1) return;
+            if (r.right > rr.right + 1 || r.left < rr.left - 1)
+              P.push('Rosa 6: "' + (c.textContent || c.id).trim().slice(0, 14) + '" runs off the side of its row in ' + lang);
+            if (c.scrollWidth > c.clientWidth + 2)
+              P.push('Rosa 6: "' + (c.textContent || c.id).trim().slice(0, 14) + '" is clipped to ' + Math.round(c.clientWidth) + 'px of ' + c.scrollWidth + ' in ' + lang);
+          });
+        });
+        p.hidden = wasHid[id];
+      });
+      // Rosa 5: a form on a sheet fits the sheet, whatever is inside its controls
+      const withForm = Object.keys(DC()).find(id => { try { return (docSections(id) || []).some(x => x && x.form); } catch (e) { return false; } });
+      if (withForm) { try { docOpen(withForm);
+        const sheet = document.getElementById('paperSheet'), sr = sheet.getBoundingClientRect();
+        sheet.querySelectorAll('.dform select,.dform input,.dform textarea,.dform label').forEach(f => {
+          const r = f.getBoundingClientRect(); if (r.width < 1) return;
+          if (r.right > sr.right + 1 || r.left < sr.left - 1)
+            P.push('Rosa 5: a form field runs ' + Math.round(Math.max(r.right - sr.right, sr.left - r.left)) + 'px past the edge of the sheet');
+        });
+        if (document.scrollingElement && document.scrollingElement.scrollWidth > innerWidth + 2)
+          P.push('Rosa 5: the page scrolls sideways by ' + Math.round(document.scrollingElement.scrollWidth - innerWidth) + 'px with the form open');
+        document.getElementById('docClose').click();
+      } catch (e) { P.push('Rosa 5: the form document will not open: ' + e.message); } }
+      wd2.hidden = wh2;
+    }
+    return P;
+  });
+  fails.push(...rosa1);
+  await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();
   if (fails.length) { console.log('FAIL (' + idx + ')\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log('OK — ' + idx + ': the worlds hang together, every person is reachable and named, every document builds, every camera draws every world, every door stands in 3D, every animal has ground, and storage stays under its prefix. Still flat in 3D (#39): ' + (r.stillFlat && r.stillFlat.length ? r.stillFlat.join(' ') : 'nothing') + '.');

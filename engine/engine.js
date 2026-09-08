@@ -2781,7 +2781,7 @@ function docOpen(id,from){
         b.className="opt";b.textContent=docTitle(k);
         b.addEventListener("click",()=>docOpen(k,docBack));row.appendChild(b);});}
   });
-  body.scrollTop=0;
+  body.scrollTop=0;{const sc=$("paperScroll");if(sc)sc.scrollTop=0;}  /* the paper scrolls in its own box now, so that is what returns to the top */
   /* a document handed over inside a quest must NOT re-run exitFsForCard: questStart already
      ran it, and a second call records wasFs=false, so the player never gets fullscreen back. */
   if(docBack!=="card")exitFsForCard();
@@ -2911,7 +2911,21 @@ window.addEventListener("keydown",e=>{
   if(!$("world").hidden&&keyDir(e)){held=keyDir(e);e.preventDefault();}
   if(e.key==="Enter"&&!$("talk").hidden&&!$("world").hidden)$("talk").click();
   /* Escape puts the paper down, wherever you have scrolled to */
-  if(e.key==="Escape"&&!$("reader").hidden){e.preventDefault();$("docClose").click();}});
+  if(e.key==="Escape"&&!$("reader").hidden){e.preventDefault();$("docClose").click();return;}
+  /* Rosa 4: and it leaves a panel, the way it does in every other program. Only a panel that
+     ALREADY has a way out — a chooser you are meant to answer (the language at first boot) has
+     none on purpose, and keeps you in it. */
+  if(e.key==="Escape"){const w=panelWayOut(topPanel());if(w){e.preventDefault();w.click();}}});
+/* the topmost panel open over the world. The reader keeps its own Escape, above. */
+function topPanel(){const ps=[...document.querySelectorAll(".settings")].filter(p=>!p.hidden&&p.id!=="reader");
+  return ps.length?ps[ps.length-1]:null;}
+function panelWayOut(p){if(!p)return null;
+  return [...p.querySelectorAll("button")].find(b=>!b.hidden&&b.offsetParent!==null&&
+    (b.classList.contains("close")||/^(close|done|back)/i.test(b.id||"")));}
+/* a tap on the dark outside is the same as pressing the way out — and only ever on the backdrop
+   itself, never on a click that happened inside the box and bubbled up */
+document.addEventListener("click",e=>{const p=topPanel();
+  if(!p||e.target!==p)return;const w=panelWayOut(p);if(w)w.click();});
 window.addEventListener("keyup",e=>{if(keyDir(e)&&held===keyDir(e))held=null;});
 $("read").addEventListener("click",()=>{const id=$("read").dataset.doc;if(id)docOpen(id);});
 $("npcDoc").addEventListener("click",()=>{if(npcHeld)docOpen(npcHeld,"card");});
