@@ -626,3 +626,23 @@ const RECORDSRC={
     console.log("RECORD: "+bodies.length+" standing ("+bodies.filter(b=>b.step).length+" on the street), "+this.notesList.length+" note(s) on the boards");
   }
 };
+
+/* WHAT THE STRIP AT THE DOOR SAYS (Rosa, finding 8; the owner: "ok go for the facts then").
+   The town used to wear Meridian's front door: a rank, a ladder from Rookie to AI Legend, and
+   `0 XP` that nothing in the town could ever award. Rosa's call was that a place you inhabit
+   should not carry a score at all — whatever XP counts, it teaches, and in a backlog neither
+   filing more nor closing more is reliably good, while a permanent zero is a verdict delivered at
+   the door every session. So the strip carries a FACT instead: what is waiting, and what has
+   moved since you were last here. It goes down as well as up and neither direction is praised.
+   Before the ledger has been read it says nothing rather than guessing. */
+function HUDFACT(){
+  const R=typeof RECORD!=="undefined"&&RECORD;
+  if(!R||!R.all||!R.all.length)return "";
+  const es=lang==="es";
+  const open=R.all.length;
+  let n=null;try{n=R.news();}catch(e){}
+  const moved=n?(n.answered.length+n.gone.length):0;
+  const a=open+(es?(open===1?" esperando":" esperando"):(open===1?" waiting":" waiting"));
+  if(!moved)return a;
+  return a+" · "+moved+(es?" con novedad":" moved");
+}

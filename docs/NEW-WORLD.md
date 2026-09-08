@@ -174,6 +174,24 @@ that front's windows in turn) and cuts the candy to two thirds of the pane, so i
 (#131). A facade with narrow windows therefore gets a smaller sweet for free — nothing to hand-size. The smoke proves: every base world strung, every calaverita on a window, an ofrenda at
 the bridge and on a table, the planters bloom, the bridge two tiles wide, and the ofrenda standing in 3D.
 
+### 3⅚ · The world's height, and what `fov` costs you (2026-09-08)
+
+The world used to be **width × 0.8** in every camera — the 2D tile grid's 5:4. Nobody chose that;
+it fell out of ten-by-eight tiles, and on a phone it left the world 266px tall, **31% of the
+screen**, with every panel and button hand-placed against it. A 3D camera has no picture to
+protect, so when it is running the world takes a **share of the screen** instead (`svh`, so it does
+not jump when the address bar slides away) — about 45%. The flat cameras keep their 5:4: they draw
+a fixed bitmap, and stretching or letterboxing it would be worse than the crowding.
+
+**The trap:** three.js's `fov` is the **vertical** angle. Make the box taller and narrower and you
+get the same up-and-down and **less left-and-right** — measured here, 10.9 tiles of street across
+became 7.7, which reads as the camera zooming in. Below the game's own aspect the vertical angle
+must widen to hold the width. Above it, leave it alone: a wide screen already gains width.
+
+**The apron.** Past the edge of the map the ground stopped and the background showed through. A
+taller frame shows far more of that, so a dim plane in the world's floor colour sits a hair below
+the ground and well outside it: the city carries on into the dark rather than ending at a cliff.
+
 ### 3¾½ · A bar that floats over a sheet (Rosa, 2026-09-08)
 
 `position:sticky; bottom:0` on a bar at the foot of a scrolling panel does **not** merely sit at the

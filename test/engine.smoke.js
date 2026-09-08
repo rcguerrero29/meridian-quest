@@ -374,6 +374,24 @@ const { chromium } = require('playwright-core');
   await page.setViewportSize({ width: 390, height: 560 });
   const rosa1 = await page.evaluate(() => {
     const P = [];
+  // ---- the strip at the door says something true (Rosa, finding 8) ----
+  {
+    const bar = document.getElementById('xpbarwrap'), tag = document.getElementById('ptag');
+    hud();
+    if (typeof HUDFACT === 'function') {
+      if (!bar.hidden) P.push('Rosa 8: this pack carries a fact at the door but still shows a progress bar under it');
+      if (/·/.test(tag.textContent)) P.push('Rosa 8: the door still wears a rank ladder ("' + tag.textContent + '") beside a fact');
+      let v = null; try { v = HUDFACT(); } catch (e) { P.push('Rosa 8: the fact at the door throws: ' + e.message); }
+      if (v !== null && typeof v !== 'string') P.push('Rosa 8: the fact at the door is not a string');
+      if (typeof v === 'string' && v && !/\d/.test(v)) P.push('Rosa 8: the fact at the door carries no number, so it cannot go down as well as up');
+      const st = document.getElementById('status');
+      if (!v && !st.hidden) P.push('Rosa 8: with nothing true to say the strip shows an empty chip rather than nothing');
+    } else {
+      /* the suite never starts a game, so the bar is legitimately hidden here; what must still be
+         true is that the score is what the strip carries */
+      if (!/XP/.test(document.getElementById('xp').textContent)) P.push('a pack with no fact at the door lost its score');
+    }
+  }
   // "position:sticky; bottom:0" on a bar at the foot of a scrolling sheet does not merely sit at
   // the end of the paper — it hovers over WHATEVER content is in that band, so which control is
   // unreachable depends only on where you have scrolled. On a phone that put Copy/Download/Close
@@ -525,6 +543,46 @@ const { chromium } = require('playwright-core');
     return P;
   });
   fails.push(...rosa1);
+
+  /* ---- the world takes a share of the screen ----
+     This needs a phone's HEIGHT, not just its width: at 560 the old 5:4 rule already filled half
+     the window, and the fault only appears on a tall screen. 390x844 is an actual phone. */
+  await page.setViewportSize({ width: 390, height: 844 });
+  const tallw = await page.evaluate(() => {
+    const P = [];
+// ---- the world takes a share of the screen, and the camera holds its width ----
+// The world's height used to be width x 0.8 in every camera — the 2D tile grid's 5:4. Nobody
+// chose 266px on a phone. With the 3D camera running it takes a share of the SCREEN instead,
+// and because `fov` is the VERTICAL angle, a taller and narrower box would have shown the same
+// up-and-down and LESS left-and-right: measured, 10.9 tiles of street across became 7.7. So the
+// angle widens below the game's own 10:8 to hold the width. Both halves are checked, because
+// either one alone is a regression.
+{
+  const wd3 = document.getElementById('world'), wh3 = wd3.hidden; wd3.hidden = false;
+  const before = camMode;
+  camSet('3d'); sizeCanvas(); draw3d();
+  const vpr = document.getElementById('vp').getBoundingClientRect();
+  const share = vpr.height / innerHeight;
+  if (share < 0.40) P.push('the world is ' + Math.round(share * 100) + '% of the screen with the 3D camera on — it is still taking the 2D tile grid\'s 5:4 instead of a share of the screen');
+  const cam = T3.cam, d = cam.position.distanceTo(new THREE.Vector3(fx + 0.5, 0.4, fy + 0.5));
+  const tallU = 2 * d * Math.tan(cam.fov * Math.PI / 360), wideU = tallU * cam.aspect;
+  if (wideU < 10) P.push('the 3D camera shows only ' + wideU.toFixed(1) + ' tiles across — a taller frame must not cost width, or it reads as the camera zooming in');
+  if (tallU < wideU * 0.9) P.push('the 3D camera shows ' + tallU.toFixed(1) + ' tiles up-and-down against ' + wideU.toFixed(1) + ' across — the extra height bought nothing');
+  // the flat cameras keep their own 5:4: they draw a fixed bitmap and must never be stretched
+  camSet('top'); sizeCanvas();
+  const cvr = document.getElementById('cv').getBoundingClientRect();
+  const want = cvr.width * VH / VW;
+  if (Math.abs(cvr.height - want) > 2)
+    P.push('the flat camera is ' + Math.round(cvr.height) + 'px tall in a ' + Math.round(cvr.width) + 'px box — its bitmap is being stretched or letterboxed');
+  // and past the edge of the map the ground carries on, rather than stopping at a cliff
+  camSet('3d'); draw3d();
+  let apron = 0; T3.group.traverse(o => { if (o.userData && o.userData.apron) apron++; });
+  if (!apron) P.push('there is nothing beyond the edge of the map, so a taller frame shows the world ending at a cliff');
+  camSet(before); sizeCanvas(); wd3.hidden = wh3;
+}
+    return P;
+  });
+  fails.push(...tallw);
   await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();
   if (fails.length) { console.log('FAIL (' + idx + ')\n- ' + fails.join('\n- ')); process.exit(1); }

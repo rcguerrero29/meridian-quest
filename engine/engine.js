@@ -348,10 +348,25 @@ const shortName=k=>String(npcName(k)||"").split(" ·")[0];   /* the name without
 const sayAs=(k,line)=>{const n=shortName(k);return "💬 "+(n?n+": ":"")+line;}; /* every spoken line is signed */
 const lvlIdx=()=>{let i=0;LEVELS.forEach((t2,j)=>{if(xp>=t2)i=j;});return i;};
 const lvlName=()=>T().levels[lvlIdx()];
+/* THE STRIP AT THE DOOR. A quest game earns a score; a place you inhabit does not. Rosa, on the
+   town's front door describing Meridian: whatever XP counts, it teaches — and in a backlog neither
+   filing more nor closing more is reliably good, while a permanent `0 XP` is a verdict delivered
+   at the door every session. So a pack may declare `HUDFACT`, a function returning what is true
+   right now instead of what you have earned. A fact must be able to go DOWN as well as up, and
+   neither direction is praised. Return "" and the strip stays empty rather than lying.
+   A pack with no HUDFACT keeps the score, the rank and the bar exactly as before — Meridian is a
+   quest game and this changes nothing for it. */
 function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat(Math.max(0,startHearts()-Math.max(0,hearts)))):"";
+  const fact=(typeof HUDFACT==="function")?(()=>{try{return String(HUDFACT()||"");}catch(e){return "";}})():null;
+  if(fact!==null){
+    $("ptag").textContent=heroName;$("hearts").textContent=hs;$("xp").textContent=fact;
+    $("xpbarwrap").hidden=true;                      /* no bar: there is nothing to fill */
+    /* and no empty chip in the corner of the world: before the ledger has been read there is
+       nothing true to say, so nothing is said */
+    $("status").textContent=fact;$("status").hidden=!fact;return;}
   $("ptag").textContent=`${heroName} · ${lvlName()}`;$("hearts").textContent=hs;$("xp").textContent=`${xp} XP`;
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
-  $("status").textContent=`${hs}  ${xp}XP`.trim();}
+  $("status").textContent=`${hs}  ${xp}XP`.trim();$("status").hidden=false;}
 /* save */
 function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],hd:[...handedDocs],bl:bldPicks,v:2,hairV:2};  /* hairV 2: "long" means long hair, not the beard it used to draw (#132) */
   try{localStorage.setItem(SK("1"),JSON.stringify(st));}catch(e){}
@@ -448,7 +463,21 @@ function sizeCanvas(){
   cv.style.height=(w*VH/VW)+"px";
   cv.width=VW*scale; cv.height=VH*scale;
   ctx.setTransform(scale,0,0,scale,0,0);
-  const c3=$("cv3");if(c3)c3.style.height=cv.style.height;
+  /* The world's height used to be width x 0.8 in every camera — the 2D tile grid's 5:4. Nobody
+     chose 266px on a phone; it fell out of ten-by-eight tiles, and then every panel and button was
+     hand-placed against it. A 3D camera has no picture to protect (see t3Resize), so when it is
+     the one running, the world takes a share of the SCREEN instead: about 45% of it rather than
+     31%, and the camera takes the shape it is given. `svh` is the small viewport height, so the
+     world does not jump when the browser's address bar slides away. The flat cameras are untouched
+     — they draw a fixed bitmap and keep their 5:4, so nothing letterboxes and no pixel art is
+     stretched. Never shorter than it is today. */
+  const c3=$("cv3");
+  if(c3){
+    if(camMode==="3d"){
+      const svh=(window.visualViewport&&window.visualViewport.height)||window.innerHeight||600;
+      c3.style.height=Math.round(Math.max(w*VH/VW,Math.min(svh*0.46,560)))+"px";
+    }else c3.style.height=cv.style.height;
+  }
   if(typeof t3Resize==="function")try{t3Resize();}catch(e){}
 }
 window.addEventListener("resize",sizeCanvas);
@@ -595,6 +624,7 @@ function camSet(m){camMode=m;
   const is3=camMode==="3d",c3=$("cv3");
   if(c3)c3.hidden=!is3;
   cv.hidden=is3;
+  sizeCanvas();  /* the world's height depends on which camera is running now */
   if($("rot3d"))$("rot3d").hidden=!is3;}
 document.querySelectorAll("#camRow button").forEach(b=>b.addEventListener("click",()=>camSet(b.dataset.cam)));
 /* ---------- tile renderer registry (graphics-prep, IDEAS §7 step 1) ----------
@@ -3262,7 +3292,7 @@ $("pvtog").addEventListener("click",()=>{const bx=$("pvbox");bx.classList.toggle
 function showWorld(){$("world").hidden=false;sizeCanvas();}
 function enterWorld(fresh){
   $("intro").hidden=true;$("creator").hidden=true;
-  $("hud").hidden=false;$("xpbarwrap").hidden=false;showWorld();
+  $("hud").hidden=false;$("xpbarwrap").hidden=(typeof HUDFACT==="function");showWorld();
   applyCtl();hud();setWorldTag();checkTalk();
   if(fresh){toast(T().tut1,3000);
     setTimeout(()=>toast(T().tut2,3800),3300);}
@@ -4890,7 +4920,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
     px=fx=SV.px??10;py=fy=SV.py??11;
     applyGrowth();parkRescue();
     if(px>=CW().W||py>=CW().H||isSolid(px,py)){world=PL.home;px=fx=PL.spawn[0];py=fy=PL.spawn[1];}
-    if(chDue()){finish(livesOn()&&hearts<=0);$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=false;applyCtl();hud();}
+    if(chDue()){finish(livesOn()&&hearts<=0);$("intro").hidden=true;$("hud").hidden=false;$("xpbarwrap").hidden=(typeof HUDFACT==="function");applyCtl();hud();}
     else{enterWorld(false);lateOpenToast();ribbonSay();}   /* anything that arrived while the phone was away */
   });
 }

@@ -114,6 +114,7 @@ function t3Tex(c,ground,live){const t=new THREE.CanvasTexture(c);
     t.anisotropy=cap.getMaxAnisotropy();
   }
   return t;}
+const T3FOV=50;  /* the camera's vertical angle at the game's own 10:8; it only ever widens from here */
 function t3Resize(){ /* The 2D canvases render tiny on purpose (pixel art, CSS-stretched with
    image-rendering:pixelated). 3D must NOT — it renders at the element's real on-screen size,
    full device resolution.
@@ -134,7 +135,18 @@ function t3Resize(){ /* The 2D canvases render tiny on purpose (pixel art, CSS-s
   const hCss=Math.round(box.height)||c3.clientHeight||Math.round(wCss*VH/VW);
   T3.renderer.setPixelRatio(Math.min(3,window.devicePixelRatio||1));
   T3.renderer.setSize(wCss,hCss,false);
-  if(T3.cam){T3.cam.aspect=wCss/hCss;T3.cam.updateProjectionMatrix();}
+  if(T3.cam){T3.cam.aspect=wCss/hCss;
+    /* HOLD THE HORIZONTAL FIELD. `fov` is the VERTICAL angle, so a taller, narrower box shows the
+       same up-and-down and LESS left-and-right: measured on a phone, giving the world 380px
+       instead of 266 cut the visible street from 10.9 tiles across to 7.7. The camera would look
+       like it had zoomed in, which is not what anyone asked for. So below the game's own 10:8 the
+       vertical angle widens to keep the same width on screen, and the extra height buys extra
+       world instead of taking some away. Above 10:8 nothing changes — a wide screen already gains
+       width, which is what fullscreen does. Capped: past 78° the edges of the frame start to
+       stretch. */
+    const ref=VW/VH,asp=wCss/hCss;
+    T3.cam.fov=asp<ref?Math.min(78,2*Math.atan(Math.tan(T3FOV*Math.PI/360)*ref/asp)*180/Math.PI):T3FOV;
+    T3.cam.updateProjectionMatrix();}
 }
 function t3Init(){
   const c3=document.getElementById("cv3");
@@ -142,7 +154,7 @@ function t3Init(){
   t3Resize();
   T3.scene=new THREE.Scene();
   T3.scene.background=new THREE.Color(0x241F2E);
-  T3.cam=new THREE.PerspectiveCamera(50,VW/VH,0.1,120);
+  T3.cam=new THREE.PerspectiveCamera(T3FOV,VW/VH,0.1,120);
   /* DAY_AMB/DAY_SUN: with the old 0.95/0.5 the Lambert sum came out top 1.35, east 1.21,
      south 1.10 — all clipped to white — and west and north both exactly 0.95. Every face of
      every building in the city rendered the same value, which is why they read as painted
@@ -208,6 +220,16 @@ function t3Build(key){T3.pinatas=[];
     new THREE.MeshLambertMaterial({map:t3Tex(gc,true),alphaTest:0.5})); /* alphaTest: the cleared tiles are see-through, the rest untouched */
   ground.rotation.x=-Math.PI/2;ground.position.set(w.W/2,0,w.H/2);ground.userData={ground:true};
   grp.add(ground);
+  /* THE APRON. Past the edge of the map the ground simply stopped and the background showed
+     through, which reads as the world ending at a cliff. It was always true; giving the world a
+     taller frame shows far more of it, so it is worth answering here rather than leaving a new
+     hole for the player to find. A dim plane in this world's own floor colour, a hair below the
+     ground and well outside it: the city carries on into the dark instead of stopping. Nothing
+     stands on it, nothing walks on it — it is scenery for the corner of your eye. */
+  const apron=new THREE.Mesh(new THREE.PlaneGeometry(w.W*3+60,w.H*3+60),
+    new THREE.MeshBasicMaterial({color:new THREE.Color(tc(C.floor)).multiplyScalar(0.20)}));
+  apron.rotation.x=-Math.PI/2;apron.position.set(w.W/2,-0.05,w.H/2);apron.userData={apron:true};
+  grp.add(apron);
   /* the standing world: boxes wear the facade art, everything else is a cutout */
   const faceTex={},flatTex={},wallMat={},boxMat={};
   /* Furniture, appliances and anything content marks `box:true` stand as a BOX when the
