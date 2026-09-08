@@ -100,6 +100,29 @@ const { chromium } = require('playwright-core');
       T3.group.children.forEach(o => { const u = o.userData || {}; if (u.flat) { flat[u.g] = (flat[u.g] || 0) + 1; (flatIn[u.g] = flatIn[u.g] || new Set()).add(id); } });
     });
     world = before.world; px = fx = before.px; py = fy = before.py; T3.yaw = before.yaw; camSet(before.cam);
+    // ---- #130: naming and styling are two parts, and look like two parts ----
+    // Owner: "for the menu to update sonny and my appearance, can we move it slightly up and
+    // sepparate from my name? just looks like it overlaps". The panel is one block above (title,
+    // note, preview, name) and one below (the choices), with a rule between them — and the chair,
+    // which comes in with the name hidden, gets the same shape so both ways in read the same.
+    {
+      const cr = document.getElementById('creator'), hid = cr.hidden;
+      cr.hidden = false;
+      const head = cr.querySelector('.crhead'), body = cr.querySelector('.crbody');
+      if (!head || !body) P.push('#130: the create-your-character panel is not split into a header and its choices');
+      else {
+        const nm = document.getElementById('heroname'), row = document.getElementById('rowOutfit');
+        if (!head.contains(nm)) P.push('#130: the name field is not in the panel\'s header');
+        if (!body.contains(row)) P.push('#130: the first row of choices is not in the panel\'s body');
+        const cs = getComputedStyle(body);
+        if (parseFloat(cs.borderTopWidth) < 1) P.push('#130: nothing marks where naming ends and styling begins');
+        const gap = body.getBoundingClientRect().top - nm.getBoundingClientRect().bottom;
+        if (gap < 12) P.push('#130: the choices start ' + Math.round(gap) + 'px under the name field — that is the same rhythm as every row, so they read as one list');
+        const lb = document.getElementById('crLooksLb');
+        if (!lb || !lb.textContent.trim()) P.push('#130: the styling half of the panel has no heading in ' + lang);
+      }
+      cr.hidden = hid;
+    }
     // ---- #127: every drawer is one subject, and its controls live inside it ----
     // Owner: "there is a bug in the main settings menu due to the options for sonny/my character.
     // lets just move that to its own section and re organize so it doesnt break the architecture

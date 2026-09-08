@@ -3727,6 +3727,7 @@ function applyLang(){
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
   $("lbStakes").textContent=t.lbStakes;$("stkNone").textContent=t.stkNone;$("stkHearts").textContent=t.stkHearts;
+  if($("crLooksLb"))$("crLooksLb").textContent=t.crLooksLb||"How you look"; /* #130: the styling half says so */
   $("lbTheme").textContent=t.lbTheme;
   $("lbCam").textContent=t.lbCam;
   if($("lbSeason")){$("lbSeason").textContent=t.lbSeason;seasonRowBuild();}
