@@ -812,11 +812,32 @@ function fiestaDraw2D(wid,toScreen,front){ /* toScreen(x,y) → the tile's top-l
     if(p.kind==="ofrenda"){drawOfrenda(ctx,sx,sy-(front&&isSolidAt(wid,p.x,p.y)?10:0));return;}
     if(p.kind!=="calaverita")return;
     const win=propSill(wid,p); /* on a window sill (owner: "as in human reality"): the facade's own window says where */
-    if(win){if(front)drawCalaverita(ctx,sx+win.cx-4,sy+win.sill-8,p.foil);else drawCalaverita(ctx,sx+win.cx-4,sy+TS-9,p.foil);return;}
+    if(win){const z=win.size; /* centred on its own window, standing on the sill, small enough to leave glass around it */
+      if(front)drawCalaverita(ctx,sx+win.cx-z/2,sy+win.sill-z,p.foil,z);
+      else drawCalaverita(ctx,sx+win.cx-z/2,sy+TS-1-z,p.foil,z);
+      return;}
     drawCalaverita(ctx,sx+ox-4,front?(isSolidAt(wid,p.x,p.y)||p.h?sy+2:sy+TS-9):sy+oy-4,p.foil);});}
-function propSill(wid,p){ /* a prop with sill:true sits on the first window of the facade it names: {cx, sill} in tile pixels, or null */
-  if(!p.sill)return null;const w=WORLDS[wid],g=w&&w.rows[p.y]&&w.rows[p.y][p.x],m=(TILES[g]||{}),win=m.win&&(m.win[p.w|0]||m.win[0]); /* p.w picks the second window of a two-window facade */
-  if(!win)return null;return {cx:win[0]+win[2]/2,sill:win[1]+win[3],g};}
+/* Which window a sill prop stands in, and how big it may be there (#131, owner: "sugar skull on
+   sills are overlapping"). Two faults lived in the one line this replaces.
+   The candy is drawn 8px wide. Meridian's shopfront window is SEVEN, and the engine's is eight —
+   so the sweet was as wide as the pane it stood in, or wider, and taller than the opening on a
+   6px window. It read as a skull pasted over the glass, which is exactly what the owner saw. A
+   candy on a sill has to be visibly smaller than the window behind it: two thirds of the opening,
+   never wider than the art it is drawn from, never so small it stops reading as a skull.
+   And a front with two windows only ever offered the first, so two candies set on one tile landed
+   on the same pane. `w` in the content still names a window when it wants one; when it does not,
+   the candies on a tile take its windows in turn, so nothing has to be hand-numbered to be spread.
+   Returns {cx, sill, size, i, w, h, g} in tile pixels, or null. */
+function sillWindow(wid,p,n){
+  if(p.w!==undefined)return ((p.w|0)%n+n)%n;
+  const mine=fiestaProps(wid).filter(q=>q.sill&&q.x===p.x&&q.y===p.y);
+  const k=mine.indexOf(p);return (k<0?0:k)%n;}
+function propSill(wid,p){
+  if(!p.sill)return null;const w=WORLDS[wid],g=w&&w.rows[p.y]&&w.rows[p.y][p.x],m=(TILES[g]||{}),wins=m.win;
+  if(!wins||!wins.length)return null;
+  const i=sillWindow(wid,p,wins.length),win=wins[i]||wins[0];
+  const size=Math.max(4,Math.min(8,Math.round(win[2]*0.66),Math.round(win[3]*0.9)));
+  return {cx:win[0]+win[2]/2,sill:win[1]+win[3],size,i,w:win[2],h:win[3],g};}
 function drawOfrenda(g,x,y){ /* la ofrenda (Nacho, 2026-09-07; the owner: "sounds like a good idea"): a tiered table under a marigold arch —
   the cloth, three candles, pan de muerto, a calaverita, and at the top an EMPTY frame, nobody named: "that one's for whoever needs it".
   The owner's own document with the basics refines this when it arrives. */
@@ -839,8 +860,13 @@ function drawPapelRow(g,x0,x1,ly,pal,seed){ /* a string of cut paper (Pili, 2026
     g.fillStyle=col;g.fillRect(px-1.8,fy,3.6,3.6);
     g.beginPath();g.moveTo(px-1.8,fy+3.6);g.lineTo(px-0.9,fy+4.8);g.lineTo(px,fy+3.6);g.lineTo(px+0.9,fy+4.8);g.lineTo(px+1.8,fy+3.6);g.closePath();g.fill();
     g.fillStyle="rgba(40,30,20,.55)";g.fillRect(px-0.4,fy+1.2,0.8,0.8);}});}
-function drawCalaverita(g,x,y,foil){ /* a calaverita de azúcar, 8×8 (Pili): white sugar, FOIL sockets — black would read Halloween, foil reads
-  candy — an icing brow, dots across the crown, a line under the jaw so it sits instead of floats */
+function drawCalaverita(g,x,y,foil,size){ /* a calaverita de azúcar, 8×8 (Pili): white sugar, FOIL sockets — black would read Halloween, foil reads
+  candy — an icing brow, dots across the crown, a line under the jaw so it sits instead of floats.
+  size: draw it smaller than 8 when it has to fit a window (#131). The whole sweet scales; nothing
+  in it is re-drawn, so a small one is the same candy seen from further away. */
+  const sc=(size||8)/8;
+  if(sc!==1){g.save();g.translate(x,y);g.scale(sc,sc);x=0;y=0;}
+  try{
   g.fillStyle="#D9CFC0";g.fillRect(x+1,y+7.4,6,0.8);
   g.fillStyle="#F6F2E8";g.beginPath();g.roundRect(x,y,8,6,2.5);g.fill();g.fillRect(x+2,y+5.5,4,2);
   g.fillStyle=foil||"#E8478F";g.fillRect(x+1.5,y+2,2,2);g.fillRect(x+4.5,y+2,2,2);
@@ -848,7 +874,8 @@ function drawCalaverita(g,x,y,foil){ /* a calaverita de azúcar, 8×8 (Pili): wh
   g.strokeStyle="#F2B705";g.lineWidth=0.8;g.beginPath();g.arc(x+4,y+2.6,2.8,Math.PI*1.15,Math.PI*1.85);g.stroke();
   g.fillStyle="#7B4BA8";[1.5,4,6.5].forEach(dx=>g.fillRect(x+dx-0.45,y+0.2,0.9,0.9));
   g.fillStyle="#2FA5A0";g.fillRect(x+3.5,y+3.7,1,1);
-  g.fillStyle="#3A2E26";g.fillRect(x+3,y+5.7,0.5,1);g.fillRect(x+4.5,y+5.7,0.5,1);}
+  g.fillStyle="#3A2E26";g.fillRect(x+3,y+5.7,0.5,1);g.fillRect(x+4.5,y+5.7,0.5,1);
+  }finally{if(sc!==1)g.restore();}}
 function canopyDress(g,cxT,cyT){ /* the trees dressed for the night (owner, 2026-09-07: "trees can be decorated"; Pili's recipe): a garland of
   petals slung across the canopy, three papel streamers hanging BELOW it into the trunk — hanging is what reads as decorated rather than
   repainted — and one sugar-skull lantern on a thread. One; three is a Christmas tree. Nothing without a season. */

@@ -168,7 +168,10 @@ world's own maps, no engine change. The keys, all optional:
 | `alebrije:{looks:[5]}` | every animal tinted, marked and (the wingless) winged, keeping its silhouette |
 
 Copy the town's `muertos` block from `changarrito/content/config.js`, keep the palettes, and re-place every
-`world/x/y` on your maps. The smoke proves: every base world strung, every calaverita on a window, an ofrenda at
+`world/x/y` on your maps. A `props` entry with `sill:true` lands on a window of the facade it names: the
+engine picks which window (`w` in the entry names one; without it, several candies on one front take
+that front's windows in turn) and cuts the candy to two thirds of the pane, so it never covers the glass
+(#131). A facade with narrow windows therefore gets a smaller sweet for free — nothing to hand-size. The smoke proves: every base world strung, every calaverita on a window, an ofrenda at
 the bridge and on a table, the planters bloom, the bridge two tiles wide, and the ofrenda standing in 3D.
 
 ### 3⅝ · How 3D samples a pixel grid — free, and easy to lose (#134, 2026-09-08)

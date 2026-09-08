@@ -1,5 +1,10 @@
 # Meridian Quest — state of the world & next steps
 
+> **Superseded (2026-09-08).** The living state of play is `docs/NEXT-SESSION.md`, rewritten at the
+> end of every session; the settled rules are `docs/OWNER.md` and the ranked index is `docs/BACKLOG.md`.
+> Everything below is a snapshot of 2026-08-30 and its counts are long out of date — keep it as the
+> record of where the project stood then, do not read it as current.
+
 **Updated:** 2026-08-30 · everything below is live on `main` (deployed via GitHub Pages + PWA).
 This is the pick-up-where-we-left-off doc for future sessions. Companion docs:
 `APPROACH.md` (why this is a repo; the gifted-games thesis — historical record, numbers

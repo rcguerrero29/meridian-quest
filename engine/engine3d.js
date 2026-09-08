@@ -485,11 +485,14 @@ function t3Build(key){T3.pinatas=[];
           const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true}));sp.center.set(0.5,0.02);const sc=up?0.8:1;sp.scale.set(sc,sc,1);
           sp.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);sp.userData={prop:true,ofrenda:true,x:p.x,y:p.y};grp.add(sp);return;}
         if(p.kind!=="calaverita")return;
-        const c=document.createElement("canvas");c.width=8*K;c.height=8*K;const g2=c.getContext("2d");g2.scale(K,K);drawCalaverita(g2,0,0,p.foil);
-        const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true}));sp.center.set(0.5,0.02);sp.scale.set(0.22,0.22,1);
         const win=typeof propSill==="function"?propSill(world,p):null;
-        if(win){ /* on the sill: the facade's window says how high and where along the face; it stands just proud of the south face */
-          const H=wallH(g);sp.position.set(p.x+win.cx/32,H*(1-win.sill/32)+0.005,p.y+1.03);sp.userData={prop:true,calaverita:true,sill:true,x:p.x,y:p.y};grp.add(sp);return;}
+        /* on a sill the candy is cut to the window it stands in (#131) — 7 tile-pixels of sweet in a
+           7-pixel pane was the overlap. Off a sill it keeps its full 8. */
+        const z=win?win.size:8;
+        const c=document.createElement("canvas");c.width=z*K;c.height=z*K;const g2=c.getContext("2d");g2.scale(K,K);drawCalaverita(g2,0,0,p.foil,z);
+        const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true}));sp.center.set(0.5,0.02);sp.scale.set(z/32,z/32,1);
+        if(win){ /* the facade's window says how high and where along the face; it stands just proud of the south face */
+          const H=wallH(g);sp.position.set(p.x+win.cx/32,H*(1-win.sill/32)+0.005,p.y+1.03);sp.userData={prop:true,calaverita:true,sill:true,x:p.x,y:p.y,win:win.i};grp.add(sp);return;}
         const h=p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y));
         sp.position.set(p.x+(p.ox===undefined?0.5:p.ox),h+0.01,p.y+(p.oy===undefined?0.5:p.oy));sp.userData={prop:true,calaverita:true,x:p.x,y:p.y};grp.add(sp);});
       fiestaHangs(world).forEach(h=>{if(h.kind!=="pinata")return;
