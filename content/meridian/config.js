@@ -148,7 +148,7 @@ const SEASONS={
                 {world:"st",x:2,y:0,kind:"calaverita",sill:true},{world:"st",x:6,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:10,y:0,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:12,y:0,kind:"calaverita",sill:true,foil:"#F2B705"},
                 {world:"st",x:17,y:0,kind:"calaverita",sill:true},{world:"st",x:22,y:0,w:1,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:2,y:5,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:9,y:5,kind:"calaverita",sill:true}, /* HQ's second window, La Cocina's awning windows */
                 /* ❗La ofrenda (Nacho; owner: "sounds like a good idea"): one at the foot of the marigold bridge, one on Doña Tencha's table — an empty frame, nobody named */
-                {world:"pk",x:5,y:6,kind:"ofrenda"},{world:"casa-w",x:3,y:2,kind:"ofrenda"}],
+                {world:"pk",x:6,y:2,kind:"ofrenda"} /* open ground at the top of the bridge's section — under no string (owner, 2026-09-08: "overlapping the papel picado and looks weird") */,{world:"casa-w",x:3,y:2,kind:"ofrenda"}],
          hangs:[{world:"ex",x:18,y:0,kind:"pinata"}],                                         /* over the paletera's corner, where the kids are; Kike hung it */
          bloom:"#F59E1B",                                                                     /* every planter blooms cempasúchil */
          facepaint:true, /* the calavera in Día de Muertos too (owner, 2026-09-07, night) — the engine's five looks */
@@ -185,7 +185,7 @@ const SEASONS={
                 {world:"st",x:2,y:0,kind:"calaverita",sill:true},{world:"st",x:6,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:10,y:0,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:12,y:0,kind:"calaverita",sill:true,foil:"#F2B705"},
                 {world:"st",x:17,y:0,kind:"calaverita",sill:true},{world:"st",x:22,y:0,w:1,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:2,y:5,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:9,y:5,kind:"calaverita",sill:true}, /* HQ's second window, La Cocina's awning windows */
                 /* ❗La ofrenda (Nacho; owner: "sounds like a good idea"): one at the foot of the marigold bridge, one on Doña Tencha's table — an empty frame, nobody named */
-                {world:"pk",x:5,y:6,kind:"ofrenda"},{world:"casa-w",x:3,y:2,kind:"ofrenda"}],
+                {world:"pk",x:6,y:2,kind:"ofrenda"} /* open ground at the top of the bridge's section — under no string (owner, 2026-09-08: "overlapping the papel picado and looks weird") */,{world:"casa-w",x:3,y:2,kind:"ofrenda"}],
          hangs:[{world:"ex",x:18,y:0,kind:"pinata"}],                                         /* over the paletera's corner, where the kids are; Kike hung it */
          bloom:"#F59E1B",                                                                     /* every planter blooms cempasúchil */
          alebrije:{looks:[ /* Pili's five, the same five on every animal so the night reads as one; wings on the wingless */
