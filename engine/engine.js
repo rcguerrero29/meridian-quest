@@ -3313,7 +3313,7 @@ function curtain(apply,after){const v=$("veil");
    (owner, 2026-09-03: "each setting can also just expand or close like a drawer ... use best
    gaming practices"). Controls opens by default because it is the one a new player needs;
    the action buttons underneath are not settings and never hide. */
-const DRAWERS=["drwCtl","drwLook","drwSound","drwGame"];
+const DRAWERS=["drwCtl","drwLook","drwSelf","drwSound","drwGame"];  /* drwSelf: appearance, its own subject (#127) */
 function drawersInit(){
   let open={};try{open=JSON.parse(localStorage.getItem(SK("drawers"))||"null")||{drwCtl:true};}catch(e){open={drwCtl:true};}
   DRAWERS.forEach(id=>{const d=$(id);if(!d)return;
@@ -3722,7 +3722,7 @@ function applyLang(){
   $("exTabRep").textContent=t.exTabRep;$("exDl").textContent=t.exDl;
   if(!replayTimer)$("replay").textContent=t.replay;
   $("mapTitle").textContent=t.mapTitle;$("mapClose").textContent=t.tlClose;
-  ["Ctl","Look","Sound","Game"].forEach(k=>{const el=$("drw"+k+"Lb");if(el)el.textContent=t["drw"+k]||k;});
+  ["Ctl","Look","Self","Sound","Game"].forEach(k=>{const el=$("drw"+k+"Lb");if(el)el.textContent=t["drw"+k]||k;});
   $("setTitle").textContent=t.setTitle;$("lbCtl").textContent=t.lbCtl;
   $("optSwipe").textContent=t.swipeB;$("optJoy").textContent=t.joyB;$("optPad").textContent=t.padB;
   $("lbLang").textContent=t.lbLang;$("lbAdm").textContent=t.lbAdm;$("admOff").textContent=t.admOff;$("admOn").textContent=t.admOn;
@@ -4367,7 +4367,11 @@ function aleSubjects(){const out=[];if(faceLooks())out.push(["you",T().aleYou||"
   return out;}
 let aleWho="you";
 function aleRowBuild(){const row=$("aleRow"),lb=$("lbAle");if(!row)return;
-  const subs=aleSubjects();const on=subs.length>0;row.hidden=!on;if(lb)lb.hidden=!on;row.innerHTML="";if(!on)return;
+  const subs=aleSubjects();const on=subs.length>0;row.hidden=!on;if(lb)lb.hidden=!on;
+  /* #127: the drawer goes with its contents. An empty drawer with a name and an arrow is a
+     promise the menu cannot keep. */
+  {const d=$("drwSelf");if(d)d.hidden=!on;}
+  row.innerHTML="";if(!on)return;
   if(!subs.some(s=>s[0]===aleWho))aleWho=subs[0][0];
   const sel=document.createElement("select");sel.id="aleWho";subs.forEach(([k,label])=>{const o=document.createElement("option");o.value=k;o.textContent=label;if(k===aleWho)o.selected=true;sel.appendChild(o);});
   sel.addEventListener("change",()=>{aleWho=sel.value;aleRowBuild();});row.appendChild(sel);

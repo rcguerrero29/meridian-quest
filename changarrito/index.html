@@ -10,7 +10,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.github.com; base-uri 'self'; form-action 'none'; object-src 'none'">
 <meta name="theme-color" content="#14121B">
 <link rel="apple-touch-icon" href="../icon-192.png">
-<style>:root{color-scheme:light dark}body{margin:0;padding:0}img{max-width:100%}#aleRow select{font:inherit;padding:.55rem .7rem;border-radius:12px;border:1px solid var(--line,#c9c4b8);background:var(--surface,#fff);color:inherit;max-width:12em}
+<style>:root{color-scheme:light dark}body{margin:0;padding:0}img{max-width:100%}
 </style>
 <title>El Changarrito</title>
 </head>
@@ -253,6 +253,11 @@
   .opt{font-family:'IBM Plex Sans',sans-serif; font-size:.82rem; padding:8px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer;}
   .opt[aria-pressed="true"]{border-color:var(--accent); background:var(--accent); color:var(--accent-ink);}
   .drawer{border:1px solid var(--line); border-radius:10px; margin:8px 0; background:rgba(255,255,255,.02);}
+  /* #127: a drawer's dropdown is styled here with the rest of the sheet, not in the head's
+     reset where it was hiding, and by role rather than by one row's id — so the next drawer
+     that needs a select already looks right. */
+  .drawer select{font:inherit; padding:.55rem .7rem; border-radius:12px; border:1px solid var(--line);
+    background:var(--surface); color:inherit; max-width:12em;}
   .drawer>summary{list-style:none; cursor:pointer; padding:10px 12px; font-family:'Unbounded',sans-serif;
     font-size:.74rem; color:var(--text); display:flex; align-items:center; gap:8px; user-select:none;}
   .drawer>summary::-webkit-details-marker{display:none;}
@@ -400,6 +405,15 @@
             </div>
             <label id="lbSeason"></label>
             <div class="optrow" id="seasonRow"></div>
+          </details>
+
+          <!-- #127: appearance is its own subject, so it gets its own drawer. These two rows used
+               to hang off the bottom of the Picture drawer, under the season buttons — a drawer
+               built for the theme, the camera and the season — and the dropdown they brought with
+               them was the one control on the page that looked like nothing else. Each drawer is
+               one subject; nothing is appended to a drawer it does not belong in. -->
+          <details class="drawer" id="drwSelf">
+            <summary><span id="drwSelfLb"></span></summary>
             <label id="lbAle" hidden></label>
             <div class="optrow" id="aleRow" hidden></div>
           </details>

@@ -100,6 +100,45 @@ const { chromium } = require('playwright-core');
       T3.group.children.forEach(o => { const u = o.userData || {}; if (u.flat) { flat[u.g] = (flat[u.g] || 0) + 1; (flatIn[u.g] = flatIn[u.g] || new Set()).add(id); } });
     });
     world = before.world; px = fx = before.px; py = fy = before.py; T3.yaw = before.yaw; camSet(before.cam);
+    // ---- #127: every drawer is one subject, and its controls live inside it ----
+    // Owner: "there is a bug in the main settings menu due to the options for sonny/my character.
+    // lets just move that to its own section and re organize so it doesnt break the architecture
+    // of the drawers and menus." So this checks the architecture, not one drawer: each drawer is
+    // named, opens and closes on its own, and every control belongs to exactly one of them.
+    {
+      const WANT = { drwCtl: ['lbCtl', 'optSwipe'], drwLook: ['lbTheme', 'themeRow', 'lbCam', 'camRow', 'lbSeason', 'seasonRow'],
+                     drwSelf: ['lbAle', 'aleRow'], drwSound: ['lbMusic', 'tuneRow'], drwGame: ['lbLang'] };
+      const ORDER = Object.keys(WANT); /* named here, not read from DRAWERS — DRAWERS is what is under test */
+      const seen = {};
+      if (ORDER.some(id => DRAWERS.indexOf(id) < 0))
+        P.push('#127: the engine does not know every drawer (' + ORDER.filter(id => DRAWERS.indexOf(id) < 0).join(', ') + '), so it will not remember whether it was open');
+      ORDER.forEach(id => {
+        const d = document.getElementById(id);
+        if (!d) { P.push('#127: the ' + id + ' drawer is not in this shell'); return; }
+        if (d.tagName !== 'DETAILS') { P.push('#127: ' + id + ' is a ' + d.tagName + ', not a drawer'); return; }
+        const lb = d.querySelector('summary span');
+        if (!lb || !lb.textContent.trim()) P.push('#127: the ' + id + ' drawer has no name in ' + lang);
+        // it opens and closes on its own, and remembers which
+        const was = d.open; d.open = true; if (!d.open) P.push('#127: ' + id + ' will not open');
+        d.open = false; if (d.open) P.push('#127: ' + id + ' will not close'); d.open = was;
+        (WANT[id] || []).forEach(cid => {
+          const el = document.getElementById(cid);
+          if (!el) { P.push('#127: ' + cid + ' is missing from this shell'); return; }
+          if (!d.contains(el)) {
+            const home = ORDER.map(k => document.getElementById(k)).find(o => o && o.contains(el));
+            P.push('#127: ' + cid + ' belongs in ' + id + ' but sits in ' + (home ? home.id : 'no drawer at all'));
+          }
+        });
+        // nothing may be claimed by two drawers
+        [...d.querySelectorAll('[id]')].forEach(el => {
+          if (seen[el.id] && seen[el.id] !== id) P.push('#127: ' + el.id + ' is inside both ' + seen[el.id] + ' and ' + id);
+          seen[el.id] = id; });
+      });
+      // the dropdown the looks row brings is styled with the sheet, not left to the browser
+      const sel = document.querySelector('#aleRow select');
+      if (sel) { const cs = getComputedStyle(sel);
+        if (parseFloat(cs.borderRadius) < 4) P.push('#127: the looks dropdown is unstyled — it is the one control on the page that looks like nothing else'); }
+    }
     // ---- fullscreen: the 3D buffer is the shape of the box it is shown in ----
     // Owner, 2026-09-08: "its still blurry in full screen". `.viewport.fs` gives the canvas
     // `height:100% !important` and `object-fit:contain`. A drawing buffer whose aspect does not
