@@ -2781,7 +2781,7 @@ function docOpen(id,from){
         b.className="opt";b.textContent=docTitle(k);
         b.addEventListener("click",()=>docOpen(k,docBack));row.appendChild(b);});}
   });
-  body.scrollTop=0;
+  body.scrollTop=0;{const sc=$("paperScroll");if(sc)sc.scrollTop=0;}  /* the paper scrolls in its own box now, so that is what returns to the top */
   /* a document handed over inside a quest must NOT re-run exitFsForCard: questStart already
      ran it, and a second call records wasFs=false, so the player never gets fullscreen back. */
   if(docBack!=="card")exitFsForCard();

@@ -366,6 +366,76 @@ const { chromium } = require('playwright-core');
   });
   const r = r0.P; r.stillFlat = r0.stillFlat;
   fails.push(...r);
+
+  /* ---- a button you can see does what it says (Rosa, finding 1) ----
+     This one needs a SHORT screen: the fault only exists where the sheet is taller than the
+     window, which is why a laptop never saw it. So it runs at a phone's size, outside the main
+     evaluate, and puts the window back afterwards. */
+  await page.setViewportSize({ width: 390, height: 560 });
+  const rosa1 = await page.evaluate(() => {
+    const P = [];
+  // "position:sticky; bottom:0" on a bar at the foot of a scrolling sheet does not merely sit at
+  // the end of the paper — it hovers over WHATEVER content is in that band, so which control is
+  // unreachable depends only on where you have scrolled. On a phone that put Copy/Download/Close
+  // on top of Sign in, Make a new token and File a request. This asks the browser what is on top
+  // of every visible button rather than trusting that it is drawn, for every document this pack
+  // declares, at three scroll positions, at a phone's size. It is written against the SHEET, not
+  // against one game's content, so it holds for Meridian, the town and anything built from the
+  // template.
+  {
+    const keep = { w: innerWidth, h: innerHeight };
+    /* "a button you can see" means visible, not merely laid out: a button scrolled out of its own
+       scroll box still reports a rectangle, and the browser answers with whatever is painted there.
+       So the centre has to survive every clipping ancestor before it is worth asking about. */
+    const seeable = (b) => {
+      const r = b.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return null;
+      let top = 0, left = 0, bottom = innerHeight, right = innerWidth;
+      for (let p = b.parentElement; p; p = p.parentElement) {
+        const cs = getComputedStyle(p);
+        if (cs.overflowY === 'visible' && cs.overflowX === 'visible') continue;
+        const pr = p.getBoundingClientRect();
+        top = Math.max(top, pr.top); left = Math.max(left, pr.left);
+        bottom = Math.min(bottom, pr.bottom); right = Math.min(right, pr.right);
+      }
+      const x = Math.round(r.left + r.width / 2), y = Math.round(r.top + r.height / 2);
+      return (x > left && x < right && y > top && y < bottom) ? [x, y] : null;
+    };
+    const covered = (root) => { const bad = [];
+      root.querySelectorAll('button').forEach(b => {
+        if (b.hidden || b.offsetParent === null) return;
+        const c = seeable(b); if (!c) return;   /* not on screen at all is a different fault */
+        const x = c[0], y = c[1];
+        const hit = document.elementFromPoint(x, y);
+        if (!hit) { bad.push((b.id || b.textContent.trim().slice(0, 14)) + ' → nothing'); return; }
+        if (hit !== b && !b.contains(hit) && !hit.contains(b))
+          bad.push('"' + (b.textContent.trim().slice(0, 16) || b.id) + '" is under "' + (hit.textContent || '').trim().slice(0, 16) + (hit.id ? ' #' + hit.id : '') + '"');
+      });
+      return bad; };
+    const ids = Object.keys(DC());
+    const sc = document.getElementById('paperScroll');
+    if (!sc) P.push("Rosa 1: the sheet has no scroll box of its own, so its bar floats over the document");
+    const seen = {};
+    ids.forEach(id => {
+      try { docOpen(id); } catch (e) { P.push("Rosa 1: document '" + id + "' will not open: " + e.message); return; }
+      const box = document.getElementById('paperScroll') || document.getElementById('reader');
+      [0, Math.round(box.scrollHeight / 2), box.scrollHeight].forEach(top => {
+        box.scrollTop = top;
+        covered(document.getElementById('reader')).forEach(m => { seen[m] = (seen[m] || 0) + 1; });
+      });
+      try { document.getElementById('docClose').click(); } catch (e) {}
+    });
+    Object.keys(seen).slice(0, 4).forEach(m =>
+      P.push('Rosa 1: in an open document at a phone\'s size, ' + m + ' — pressing where you see it does the other thing'));
+    const n = Object.keys(seen).length;
+    if (n > 4) P.push('Rosa 1: ' + (n - 4) + ' more button(s) in the same state, not listed');
+    void keep;
+  }
+
+    return P;
+  });
+  fails.push(...rosa1);
+  await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();
   if (fails.length) { console.log('FAIL (' + idx + ')\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log('OK — ' + idx + ': the worlds hang together, every person is reachable and named, every document builds, every camera draws every world, every door stands in 3D, every animal has ground, and storage stays under its prefix. Still flat in 3D (#39): ' + (r.stillFlat && r.stillFlat.length ? r.stillFlat.join(' ') : 'nothing') + '.');

@@ -174,6 +174,24 @@ that front's windows in turn) and cuts the candy to two thirds of the pane, so i
 (#131). A facade with narrow windows therefore gets a smaller sweet for free — nothing to hand-size. The smoke proves: every base world strung, every calaverita on a window, an ofrenda at
 the bridge and on a table, the planters bloom, the bridge two tiles wide, and the ofrenda standing in 3D.
 
+### 3¾½ · A bar that floats over a sheet (Rosa, 2026-09-08)
+
+`position:sticky; bottom:0` on a bar at the foot of a scrolling panel does **not** merely sit at the
+end of the paper. It hovers over whatever content happens to be in that band, so *which* control is
+unreachable depends only on where the reader has scrolled. On a laptop the sheet fits and nothing
+happens; on a phone it parked Copy/Download/Close on top of the town's three write buttons, and a
+tap went to Copy with no sign anything was wrong.
+
+Reserving space at the foot does not fix it — the overlap moves with the scroll. The panel has to be
+a **column**: the content scrolls in its own box (`flex:1; min-height:0; overflow-y:auto` — without
+`min-height:0` a flex child refuses to shrink and the column just grows past the screen), and the bar
+sits under it in normal flow, where it cannot be on top of anything.
+
+The same shape is the cure for a panel taller than the window generally — it is what §3⅝'s sibling
+fix did for the barber's chair (#126). `test/engine.smoke.js` opens every document a pack declares at
+390×560 and asks the browser what is on top of each visible button, so a new world gets the guard for
+free.
+
 ### 3⅝ · How 3D samples a pixel grid — free, and easy to lose (#134, 2026-09-08)
 
 A new world inherits this from `engine/engine3d.js` and never sets it; it is written down because it

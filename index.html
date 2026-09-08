@@ -121,11 +121,16 @@
   /* the reframe line on a quest answered long after its district's Saturday: the
      neighbour is still interested, never still waiting on you */
   .bubble p.late{font-style:italic; color:var(--muted); font-size:.87rem; margin-bottom:6px;}
-  .settings.reader{position:fixed; inset:0; z-index:60; display:block; overflow-y:auto;
+  .settings.reader{position:fixed; inset:0; z-index:60; display:flex; justify-content:center;
+    align-items:flex-start; overflow:hidden;
     padding:14px 10px 28px; background:rgba(16,13,24,.88);}
-  .paper{position:relative; max-width:640px; margin:0 auto; background:#F7F2E4; color:#2A2620;
+  .paper{position:relative; width:100%; max-width:640px; margin:0 auto; background:#F7F2E4; color:#2A2620;
     border-radius:3px; padding:30px 24px 20px; box-shadow:0 10px 34px rgba(0,0,0,.5);
-    font-family:'IBM Plex Mono',monospace; font-size:.78rem; line-height:1.55;}
+    font-family:'IBM Plex Mono',monospace; font-size:.78rem; line-height:1.55;
+    box-sizing:border-box; display:flex; flex-direction:column; max-height:100%;}
+  /* the document's own scroll box. min-height:0 is what lets a flex child shrink far enough to
+     scroll at all — without it the column just grows past the screen and takes the bar with it. */
+  .paperscroll{flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain;}
   .paper::before{content:""; position:absolute; inset:0; border-radius:3px; pointer-events:none;
     box-shadow:inset 0 0 0 1px rgba(0,0,0,.10), inset 0 30px 40px -34px rgba(0,0,0,.18);}
   .staple{position:absolute; top:13px; left:20px; width:15px; height:4px; background:#9AA1A8;
@@ -180,13 +185,11 @@
   .paper .dpick{margin:0; font-weight:600;}
   .paper .dwhy{margin:5px 0 0; color:#6B6355; font-size:.72rem;}
   .paper .ddocs{display:flex; flex-wrap:wrap; gap:7px; margin:10px 0;}
-  /* the way out rides along. The reader scrolls the whole sheet, so on a long document —
-     Chelo's eleven-item list, Bere's fifty-two — Close, Copy and Download sat below the
-     fold and you had to scroll a table to put the paper down. Sticky keeps all three in
-     reach at any scroll position, and the cream matches the sheet so it still reads as paper. */
-  .paper .docbar{margin-top:22px; padding:14px 0 12px; border-top:1px dashed #C6BCA2;
-    position:sticky; bottom:0; background:#F7F2E4;
-    box-shadow:0 -14px 16px -10px #F7F2E4, 0 14px 0 0 #F7F2E4;}
+  /* The way out still rides along — on a long document (Chelo's eleven-item list, Bere's
+     fifty-two) Close, Copy and Download must never be below the fold. It gets there by sitting
+     outside the scroll box now instead of floating over it: same result, and nothing underneath. */
+  .paper .docbar{flex:0 0 auto; margin-top:16px; padding:14px 0 2px; border-top:1px dashed #C6BCA2;
+    background:#F7F2E4;}
   .codex{background:var(--gold-bg); border:1px solid var(--gold); border-radius:10px; padding:11px 14px; margin:12px 0;}
   .codex b{display:block; font-family:'IBM Plex Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:4px;}
   .codex p{margin:0; font-size:.88rem;}
@@ -634,10 +637,20 @@
   <div class="settings reader" id="reader" hidden>
     <div class="paper" id="paperSheet">
       <div class="staple" aria-hidden="true"></div>
-      <p class="dtmpl" id="docTmpl" hidden></p>
-      <h2 id="docTitle"></h2>
-      <p class="dsub" id="docSub"></p>
-      <div id="docBody"></div>
+      <!-- Rosa's first finding, 2026-09-08. The bar used to be `position:sticky; bottom:0` at the
+           foot of this paper, and a sticky bar hovers over WHATEVER content happens to be in that
+           band — not only over the end of the document. On a phone, where the sheet is taller than
+           the screen, it opened parked on top of Sign in, Make a new token and File a request: the
+           town's whole write surface, pressed straight through to Copy. Reserving space at the foot
+           would not have helped, because the overlap moves with the scroll. So the paper is a column
+           now: the document scrolls in its own box, and the bar sits under it in normal flow, where
+           it cannot be on top of anything. -->
+      <div class="paperscroll" id="paperScroll">
+        <p class="dtmpl" id="docTmpl" hidden></p>
+        <h2 id="docTitle"></h2>
+        <p class="dsub" id="docSub"></p>
+        <div id="docBody"></div>
+      </div>
       <div class="optrow docbar">
         <button id="docCopy"></button><button id="docDl"></button><button id="docClose"></button>
       </div>
