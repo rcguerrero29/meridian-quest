@@ -56,7 +56,12 @@ function t3CheckK(){ /* a DPR change (fullscreen, a window dragged between monit
   if(K===T3.K)return;
   T3.K=K;T3.dirty++;
   if(T3.canopyTex){T3.canopyTex.dispose();T3.canopyTex=null;}
-  T3.pool.forEach(p=>{p.c.width=36*K;p.c.height=40*K;p.tex.needsUpdate=true;});
+  /* 48, not 40: t3Sprite bakes these 36×48 (8px of headroom for the bubble, #57) and every
+     artist paints through a transform that assumes it. A DPR change — fullscreen, a window
+     dragged to a second monitor — re-cut them 40 tall, which threw away the bottom rows and
+     then stretched what was left over the sprite's full height. Every person in the world went
+     soft and short until the next reload. Part of #134. */
+  T3.pool.forEach(p=>{p.c.width=36*K;p.c.height=48*K;p.tex.needsUpdate=true;});
 }
 /* bake a glyph's art through TILEDRAW by borrowing the global ctx.
    raw: fill the base UNtinted — door art paints its own C.doorFrame untinted, and a
@@ -80,13 +85,34 @@ function t3BakeGlyph(g,opaque,base,raw,side,frame,x,y){
   return c;
 }
 const DOORLIGHT="#E8D6B0"; /* the door frame colour in 3D: warm sand against the dark wall */
-function t3Tex(c,ground){const t=new THREE.CanvasTexture(c);
+/* #134 "things are looking a bit blurry". Measured, not guessed: a 3D shot of the street
+   scored by the mean absolute Laplacian of its pixels — edge energy, which is what sharpness
+   IS. Baseline 2.26. The mip pyramid was never the blur; the LINEAR blend was. Every texture
+   in the scene sampled with a linear filter somewhere: the ground blended between mip levels
+   (LinearMipmapLinear), and all 559 standing tiles blended between texels (LinearFilter, no
+   pyramid at all). Both smear a pixel grid whose whole point is that it does not smear.
+     mips everywhere, linear   1.94–2.13   softer still
+     baseline                  2.26
+     nearest, no mips anywhere 2.77   sharpest — and it shimmers, nothing damps the distance
+     NEAREST MIPMAP NEAREST    2.74   the same crispness WITH the pyramid
+   So: nearest between texels AND between mip levels. The pyramid stays and keeps the far half
+   from crawling; the blend that softened it is gone. Anisotropy still earns its keep at the
+   glancing angles this camera looks down. Raising the bake factor K on top of this bought
+   nothing measurable (2.75 at K=3 against 2.77 at K=2), so K is left where it is and the
+   memory with it.
+   live: a sprite repainted every frame cannot afford a pyramid rebuilt every frame — it gets
+   nearest with no mips, which is the crisp end of the trade anyway.
+   The pyramid is asked for only under WebGL2. On a WebGL1 fallback a non-power-of-two texture
+   with mipmaps renders BLACK, and every texture here is sized to the world, never to a power
+   of two — the old ground had that hole open. */
+function t3Tex(c,ground,live){const t=new THREE.CanvasTexture(c);
   t.magFilter=THREE.NearestFilter; /* crisp pixels up close */
-  if(ground&&T3.renderer){ /* the floor at glancing angles was the blur (owner) —
-       mipmaps + anisotropy sharpen it into the distance */
-    t.generateMipmaps=true;t.minFilter=THREE.LinearMipmapLinearFilter;
-    t.anisotropy=T3.renderer.capabilities.getMaxAnisotropy();
-  }else{t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;}
+  t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;
+  const cap=T3.renderer&&T3.renderer.capabilities;
+  if(!live&&cap&&cap.isWebGL2){
+    t.generateMipmaps=true;t.minFilter=THREE.NearestMipmapNearestFilter;
+    t.anisotropy=cap.getMaxAnisotropy();
+  }
   return t;}
 function t3Resize(){ /* THE blur fix: the 2D canvases render tiny on purpose (pixel art,
    CSS-stretched with image-rendering:pixelated). 3D must NOT — it renders at the
@@ -533,7 +559,7 @@ function t3Sprite(i){
   let p=T3.pool[i];
   if(!p){
     const c=document.createElement("canvas");c.width=36*T3.K;c.height=48*T3.K; /* 8px of headroom for the bubble (#57) */
-    const tex=t3Tex(c);
+    const tex=t3Tex(c,false,true); /* live: repainted every frame, so no pyramid */
     const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
     spr.center.set(0.5,4/48); /* feet 4px above the card's bottom, as before */
     p=T3.pool[i]={c,g:c.getContext("2d"),tex,spr,live:false};

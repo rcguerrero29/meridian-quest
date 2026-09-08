@@ -100,6 +100,45 @@ const { chromium } = require('playwright-core');
       T3.group.children.forEach(o => { const u = o.userData || {}; if (u.flat) { flat[u.g] = (flat[u.g] || 0) + 1; (flatIn[u.g] = flatIn[u.g] || new Set()).add(id); } });
     });
     world = before.world; px = fx = before.px; py = fy = before.py; T3.yaw = before.yaw; camSet(before.cam);
+    // ---- #134 "things are looking a bit blurry": nothing is sampled through a LINEAR filter ----
+    // This art is a pixel grid. A linear filter blends between texels (and, with a pyramid,
+    // between mip levels), which is exactly the smear the owner reported. Nearest keeps the grid.
+    // The pyramid itself was never the blur and stays: without it the far half of the street
+    // crawls as you walk. So: nearest between texels AND between levels, everywhere.
+    // The pyramid is asked for only under WebGL2 — on a WebGL1 fallback a non-power-of-two
+    // texture with mipmaps renders BLACK, and every texture here is sized to its world.
+    {
+      const N = THREE.NearestFilter, OKMIN = [N, THREE.NearestMipmapNearestFilter, THREE.NearestMipmapLinearFilter];
+      const cap = T3.renderer && T3.renderer.capabilities, gl2 = !!(cap && cap.isWebGL2);
+      const seen = [], bad = [], noMip = [], wrongMip = [];
+      T3.group.traverse(o => {
+        const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
+        ms.forEach(m => { if (!m.map) return; const t = m.map, tag = JSON.stringify(o.userData || {}).slice(0, 40);
+          seen.push(t);
+          if (t.magFilter !== N) bad.push('magFilter on ' + tag);
+          if (OKMIN.indexOf(t.minFilter) < 0) bad.push('minFilter on ' + tag);
+          if (gl2 && !t.generateMipmaps) noMip.push(tag);
+          if (!gl2 && t.generateMipmaps) wrongMip.push(tag); });
+      });
+      if (!seen.length) P.push('#134: no textures found in the 3D scene to check');
+      if (bad.length) P.push('#134: ' + bad.length + ' texture(s) in the 3D scene are sampled through a linear filter — that is the blur (' + bad.slice(0, 3).join(', ') + ')');
+      if (noMip.length) P.push('#134: ' + noMip.length + ' texture(s) have no mip pyramid, so the distance crawls (' + noMip.slice(0, 3).join(', ') + ')');
+      if (wrongMip.length) P.push('#134: mipmaps asked for without WebGL2 — a non-power-of-two texture renders black there (' + wrongMip.slice(0, 3).join(', ') + ')');
+      // the live sprites are repainted every frame, so they carry no pyramid — but they must still
+      // be nearest, and they must keep their shape when the device pixel ratio changes.
+      const shape = (why) => T3.pool.forEach((sp, i) => {
+        if (sp.c.width !== 36 * T3.K || sp.c.height !== 48 * T3.K)
+          P.push('#134: sprite ' + i + ' is ' + sp.c.width + '\u00d7' + sp.c.height + ', not ' + (36 * T3.K) + '\u00d7' + (48 * T3.K) + ' ' + why + ' — the artists paint 36\u00d748 and the rest is stretched');
+        if (sp.tex.magFilter !== N || sp.tex.minFilter !== N) P.push('#134: sprite ' + i + ' is sampled through a linear filter');
+        if (sp.tex.generateMipmaps) P.push('#134: sprite ' + i + ' rebuilds a mip pyramid every frame');
+      });
+      if (!T3.pool.length) P.push('#134: no live sprites were built to check');
+      shape('as built');
+      const gp = T3.renderer.getPixelRatio.bind(T3.renderer), K0 = T3.K;
+      T3.renderer.getPixelRatio = () => (K0 > 1 ? 1 : 2); /* the owner goes fullscreen, or drags the window to another monitor */
+      t3CheckK(); shape('after the device pixel ratio changed');
+      T3.renderer.getPixelRatio = gp; t3CheckK();
+    }
     // ---- #39: the 3D-realism audit — a picture standing in the scene is not a thing with sides ----
     // Owner, 2026-09-07: "the test should catch things like 2d image looking thing/objects." The 3D
     // builder tags every billboard it stands in a world as `flat`. FLAT_KNOWN is what is still flat

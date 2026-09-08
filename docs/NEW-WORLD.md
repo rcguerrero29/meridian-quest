@@ -171,6 +171,29 @@ Copy the town's `muertos` block from `changarrito/content/config.js`, keep the p
 `world/x/y` on your maps. The smoke proves: every base world strung, every calaverita on a window, an ofrenda at
 the bridge and on a table, the planters bloom, the bridge two tiles wide, and the ofrenda standing in 3D.
 
+### 3⅝ · How 3D samples a pixel grid — free, and easy to lose (#134, 2026-09-08)
+
+A new world inherits this from `engine/engine3d.js` and never sets it; it is written down because it
+is the kind of thing a later change quietly undoes.
+
+The art is a pixel grid. **Nothing may be sampled through a linear filter** — not between texels
+(`magFilter`, `minFilter`), not between mip levels. Linear blending is what "blurry" means here; the
+owner reported it and a measurement confirmed it (mean absolute Laplacian of a rendered street:
+2.26 blurred, 2.72 fixed).
+
+The **mip pyramid stays**. It was never the blur; drop it and the far half of the street crawls as you
+walk. `NearestMipmapNearestFilter` plus max anisotropy gets both: the texel grid intact up close, a
+smaller level chosen honestly at distance.
+
+Ask for the pyramid **only under WebGL2** (`renderer.capabilities.isWebGL2`). Every texture here is
+sized to its world, never to a power of two, and a non-power-of-two texture with mipmaps renders
+**black** on a WebGL1 fallback.
+
+A texture repainted every frame (the actor sprites) carries **no** pyramid — rebuilding one per frame
+costs more than it buys — but it is still nearest at both ends.
+
+`test/engine.smoke.js` holds all of this for any pack, so a new world gets the guard for free.
+
 ### 3½ · Two looks for the reader
 
 `READERLOOK="night"` in a pack's config turns the reader's cream paper purple-dark (the town's

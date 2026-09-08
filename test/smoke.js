@@ -1231,8 +1231,12 @@ const CANDIDATES = [
     // actors: the live billboards must be baked at K too, or people go soft while walls stay sharp
     const live = T3.pool.filter(p => p.live);
     if (!live.length) problems.push('no live actor billboards after a draw');
-    live.forEach(p => { if (p.c.width !== 36 * K || p.c.height !== 40 * K)
-      problems.push(`an actor billboard is ${p.c.width}x${p.c.height} — not ${36 * K}x${40 * K}`); });
+    // 48, not 40 (#134). This line used to read 40 and passed — because it runs AFTER a forced DPR
+    // change, and the resize path was cutting the billboards 40 tall while t3Sprite bakes them 48
+    // (8px of headroom for the bubble, #57). The test was pinning the bug: every person went short
+    // and stretched after the owner went fullscreen. The engine now re-cuts them 48 and this asks for it.
+    live.forEach(p => { if (p.c.width !== 36 * K || p.c.height !== 48 * K)
+      problems.push(`an actor billboard is ${p.c.width}x${p.c.height} — not ${36 * K}x${48 * K}`); });
     // and back: a DPR change (fullscreen, a window dragged between monitors) re-bakes both ways
     T3.renderer.setPixelRatio(pr0); draw3d();
     if (T3.K !== Math.min(3, Math.max(1, Math.round(pr0)))) problems.push(`back at ${pr0}x the bake factor stayed ${T3.K}`);
