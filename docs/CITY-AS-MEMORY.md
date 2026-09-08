@@ -223,6 +223,29 @@ has its own worktree, and expect the merge queue, not the agents, to become the 
 
 ---
 
+## 5½ · The crew, as it now stands
+
+Seven files in `.claude/agents/`, each recallable by name. Four were added 2026-09-08 when the
+owner asked whether the roles could exist:
+
+| Who | Role | Edits code? |
+|---|---|---|
+| **Don Güero** | city planner — what gets built, where, and what it costs | no |
+| **Nacho** | story — meaning, arcs, the EN+ES words | no |
+| **Pili** | art and readability — whether anyone can tell what they are looking at | no |
+| **Rosa** | interface — whether a control can be reached, understood and pressed | no |
+| **Chuy** | staff engineer — correctness, which seam a change belongs in, what a test must prove | only when asked |
+| **Tavo** | game design — what a mechanic asks, what it gives back, what it teaches by accident | no |
+| **Yaz** | build and release — CI, the suites, the service worker, cache invalidation | workflow and tests only |
+
+Three of them (Chuy, Rosa, Yaz) can run the game headless and measure; the rest read and judge.
+**Only one may hold the pen at a time** until worktree isolation is in place — see §5.
+
+The division that makes them worth having: Nacho decides what a thing MEANS, Don Güero decides
+what gets BUILT, Pili decides whether anyone can TELL, Rosa decides whether they can USE it, Tavo
+decides whether it is WORTH their attention, Chuy decides whether it is SOUND, and Yaz decides
+whether it SHIPS. When two disagree, that is the meeting the loft is for.
+
 ## 6 · The order I would build it
 
 1. **The decision store.** Pure documentation, no code, highest value, unblocks everything else.
