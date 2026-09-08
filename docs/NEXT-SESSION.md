@@ -12,7 +12,10 @@ current: each session rewrites the queue before signing off.)*
     string that crosses the path — is fixed here (`mq-v112`/`ch-v54`: both packs stand it at pk (6,2), open ground
     at the top of the bridge's section, no swag over it). **The rest is the next session's first job, a playtest:**
     walk the park in both seasons in all four cameras, shoot the bridge's foot, the trees, and the crossing string,
-    and name what overlaps what. Known suspects: the 3D swag planes crossing the deck's own papel over the bridge;
+    and name what overlaps what. **First cause found and fixed 2026-09-08 (`mq-v113`/`ch-v55`):** the park's
+    crossing swag ran along row 6 — the deck's own row — so the multicolour cut and the bridge's marigold cut
+    tangled at the deck's north end; it moves to row 4 (still across the path, north of the crossing) and both
+    suites now fail any swag sharing a bridge's row or column. Remaining suspects: the 3D swag planes crossing the deck's own papel over the bridge;
     the trail's petal planes and a prop sprite sharing a height; a tree's streamers hanging into a swag. One PR per
     cause, red first.
  2. **❗El camino — "the road in meridian doesnt make sense at the moment - don guero has to review."**
