@@ -353,7 +353,7 @@ function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat
   $("xpfill").style.width=Math.min(100,xp/MAXXP*100)+"%";
   $("status").textContent=`${hs}  ${xp}XP`.trim();}
 /* save */
-function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],hd:[...handedDocs],bl:bldPicks,v:2};
+function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],hd:[...handedDocs],bl:bldPicks,v:2,hairV:2};  /* hairV 2: "long" means long hair, not the beard it used to draw (#132) */
   try{localStorage.setItem(SK("1"),JSON.stringify(st));}catch(e){}
   if(NET.enabled)NET.sync(st);}
 /* The ❗ on the world tag means what it means everywhere else: somebody in here has
@@ -375,6 +375,11 @@ function sanitizeSave(s){
   const lkIn=(s.lk&&typeof s.lk==="object")?s.lk:{};
   const lk={shirt:col(lkIn.shirt)||"#8B5CF6",skin:col(lkIn.skin)||"#E5AC82",hair:col(lkIn.hair)||"#26202B",
             style:str2(lkIn.style,12,"cap"),outfit:str2(lkIn.outfit,8,"casual"),pattern:str2(lkIn.pattern,10,"plain")};
+  /* #132: "long" used to draw what everyone could see was a beard, and now names real long hair.
+     A save that chose it chose the beard, so it keeps the beard — the face in the mirror does not
+     change under anyone. Only saves written before this line carry the old meaning; from here on
+     "long" is long. */
+  if(lk.style==="long"&&!(s.hairV>=2))lk.style="beard";
   const wearIn=k2=>{const o=(s[k2]&&typeof s[k2]==="object")?s[k2]:{};
     return{bandana:col(o.bandana),collar:col(o.collar),cape:col(o.cape)};};
   const d=Array.isArray(s.d)?[...new Set(s.d.map(v=>num(v,0,98,-1)).filter(v=>v>=0))]:[];
@@ -2347,11 +2352,31 @@ function drawPerson(g,sx,sy,lk,o){
     g.beginPath();g.ellipse(hx,hy-8+h,7,1.3,0,0,Math.PI);g.fill();});}; /* soft hairline, no hard bar */
   if(st==="cap"){capFill(6.2);inHead(()=>{g.fillRect(hx-7,hy-3.2,2,4.4);g.fillRect(hx+5,hy-3.2,2,4.4);});}
   else if(st==="buzz"){g.globalAlpha=.9;capFill(4.6);g.globalAlpha=1;}
-  else if(st==="long"){ /* v5: full mane behind the head, face windowed out */
+  else if(st==="beard"){ /* #132. This drawing used to be called "long", and the owner was right:
+    a rounded mass that CLOSES under the chin, with the face punched out of it, is the silhouette
+    of a beard, not of long hair. It keeps the drawing and takes the honest name — the game had no
+    beard and now does. The paint is re-stamped inside the face window so the calavera still lands
+    on the jaw, with the beard framing it. */
     g.beginPath();g.roundRect(hx-8.6,hy-7.6,17.2,17.6,7);g.fill();
     g.strokeStyle="rgba(15,12,20,.3)";g.lineWidth=.8;g.stroke();
     g.fillStyle=lk.skin;g.beginPath();g.arc(hx,hy+0.4,5.7,0,7);g.fill();if(fp)paint();
     g.fillStyle=lk.hair;capFill(5.2);}
+  else if(st==="long"){ /* #132, the real one: the mass stays BESIDE and BEHIND the head and falls
+    past the shoulders, and the jaw is left open — that open jaw is the whole difference between
+    long hair and a beard. Two lengths down the sides, wider at the bottom than at the temple so it
+    hangs rather than clamps, a soft crown over the top, and a darker inner edge so the near side
+    reads in front of the far one. */
+    const fall=(sx)=>{g.beginPath();
+      g.moveTo(hx+sx*5.4,hy-5.2);            /* temple */
+      g.quadraticCurveTo(hx+sx*8.6,hy-1.2,hx+sx*8.0,hy+5.0);   /* out over the ear, then down */
+      g.quadraticCurveTo(hx+sx*7.6,hy+9.4,hx+sx*5.2,hy+10.6);  /* the tip, past the jaw */
+      g.quadraticCurveTo(hx+sx*4.2,hy+6.0,hx+sx*4.4,hy+0.6);   /* back up the inside, clear of the chin */
+      g.quadraticCurveTo(hx+sx*4.6,hy-3.0,hx+sx*5.4,hy-5.2);g.closePath();g.fill();};
+    fall(-1);fall(1);
+    g.strokeStyle="rgba(15,12,20,.28)";g.lineWidth=.7;
+    [-1,1].forEach(sx=>{g.beginPath();g.moveTo(hx+sx*4.5,hy+0.2);
+      g.quadraticCurveTo(hx+sx*4.3,hy+6.2,hx+sx*5.2,hy+10.2);g.stroke();});
+    g.fillStyle=lk.hair;capFill(6.0);}
   else if(st==="curly"){ /* v5: dense curly wreath, ear to ear, with inner volume */
     for(let a=0;a<7;a++){const ang=Math.PI*(1.0+a/6);
       g.beginPath();g.arc(hx+6.3*Math.cos(ang),hy+6.0*Math.sin(ang),3.1,0,7);g.fill();}
@@ -2365,11 +2390,27 @@ function drawPerson(g,sx,sy,lk,o){
   else if(st==="pony"){capFill(6.2);
     g.beginPath();g.arc(hx+5.6,hy-4.4,1.9,0,7);g.fill();
     g.beginPath();g.roundRect(hx+6.2,hy-4.2,2.6,9,1.3);g.fill();}
-  else if(st==="afro"){
-    g.beginPath();g.arc(hx-4,hy-4.6,4.4,0,7);g.fill();
-    g.beginPath();g.arc(hx,hy-6.2,4.6,0,7);g.fill();
-    g.beginPath();g.arc(hx+4,hy-4.6,4.4,0,7);g.fill();
-    capFill(4.6);}
+  else if(st==="afro"){ /* #133 "fro is also offf". Three flat circles at one brightness read as a
+    helmet, not as hair: nothing said which part was nearer the light. Rebuilt on the lessons the
+    petals taught — silhouette first, then a value range. A wider crown that clears the skull on
+    both sides so the outline is unmistakable; a bumpy edge so it is hair and not a dome; a lit
+    cap up and left and a shadow tucked under and right, both in the hair's own colour, so it has
+    a near side and a far side. */
+    /* Every circle goes into ONE path so the whole crown is a single silhouette, then that one
+       shape is filled with a single gradient. Shading it with overlaid blobs left a hard lens
+       across the mass that read as another object sitting on the hair; a gradient has no seam
+       anywhere, because there is only one fill. */
+    const crown=new Path2D();
+    crown.arc(hx,hy-7.0,7.1,0,7);                                  /* the mass, proud of the head — its
+                                                                      lower edge clears the eyes */
+    [[-6.0,-5.4,2.9],[6.0,-5.4,2.9],[-4.6,-9.8,2.8],[4.6,-9.8,2.8],[0,-11.6,2.9]]
+      .forEach(p=>{crown.moveTo(hx+p[0]+p[2],hy+p[1]);crown.arc(hx+p[0],hy+p[1],p[2],0,7);});
+    const gr=g.createLinearGradient(hx-6,hy-13,hx+7,hy+0);
+    gr.addColorStop(0,hexLite(lk.hair,0.26));                      /* the lit side, up and to the left */
+    gr.addColorStop(0.55,lk.hair);
+    gr.addColorStop(1,hexDark(lk.hair,0.62));                      /* the heavy side, under and to the right */
+    g.fillStyle=gr;g.fill(crown);g.fillStyle=lk.hair;
+    capFill(4.2);}
   else if(st==="mohawk"){ /* shaved sides, one jagged proud crest */
     g.globalAlpha=.3;capFill(3.2);g.globalAlpha=1;
     g.beginPath();g.moveTo(hx-2.3,hy-4.4);
@@ -2481,6 +2522,11 @@ const ALEB_KIND={
   butterfly:{tint:0.95,marks:(g,l,cx,sy)=>{g.fillStyle=l.pat;g.beginPath();g.arc(cx-2.6,sy+11.5,1,0,7);g.arc(cx+2.6,sy+11.5,1,0,7);g.fill();}}, /* an eye on each upper wing */
   colibri:{eye:[3.6,10.2,2.2],marks:(g,l,cx,sy)=>{g.fillStyle=l.accent;g.beginPath();g.arc(cx+3,sy+10.6,1.5,0,7);g.fill();}} /* the gorget */
 };
+/* hexDark multiplies toward black, which is right for a shadow and useless for a highlight:
+   a near-black hair times 1.3 is still near-black. hexLite mixes toward white instead, so the
+   lit side of dark hair actually lifts (#133). */
+const hexLite=(h,f)=>{const n=parseInt(String(h).slice(1),16);if(isNaN(n))return h;
+  const m=c=>Math.round(c+(255-c)*f);return "rgb("+m((n>>16)&255)+","+m((n>>8)&255)+","+m(n&255)+")";};
 const hexDark=(h,f)=>{const n=parseInt(String(h).slice(1),16);if(isNaN(n))return h;return "rgb("+(((n>>16)&255)*f|0)+","+(((n>>8)&255)*f|0)+","+((n&255)*f|0)+")";};
 function wildWings(g,l,K,cx,sy,small){ /* cut-paper wings, not feathers (Pili, 2026-09-07, after the owner's "wings look off"): a hindwing
   behind and a forewing over it, rooted at the shoulder just behind the head, swept back, big enough to break the silhouette —
