@@ -1294,6 +1294,13 @@ const CANDIDATES = [
           // owner, 2026-09-07 (night): "the papel picado can be everywhere and more colorful" — every base world strung, ten colours in the cut
           Object.keys(WORLDS).filter(k => !WORLDS[k].built).forEach(wid => { if (!fiestaSwags(wid).length) problems.push('no papel picado in ' + wid); });
           if (pal2.length < 9) problems.push('the cut has only ' + pal2.length + ' colours');
+        // owner, 2026-09-08: "the alebrijes mode has some overlay issues still in the park" — a swag must never share a
+        // line with the deck: the bridge hangs its own marigold cut, and two strings in one line tangle at the deck's end
+        Object.keys(WORLDS).filter(k => !WORLDS[k].built).forEach(wid => { const w = WORLDS[wid];
+          fiestaSwags(wid).forEach(sw => { const hor = sw.from[1] === sw.to[1], ln = hor ? sw.from[1] : sw.from[0];
+            for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++)
+              if ((TILES[w.rows[y][x]] || {}).kind === 'bridge' && (hor ? y : x) === ln)
+                problems.push(`a swag in ${wid} shares the bridge's ${hor ? 'row' : 'column'} ${ln} — the deck hangs its own cut there`); }); });
           const pr = art('props', []) || []; if (!pr.some(p => p.kind === 'calaverita')) problems.push('no calaveritas de azúcar anywhere');
           // "the candied skulls are probably better in a window sill (as in human reality)": every calaverita sits on a facade's window
           pr.filter(p => p.kind === 'calaverita').forEach(p => { if (!p.sill) problems.push('a calaverita is not on a sill at ' + p.world + ' ' + p.x + ',' + p.y); else if (typeof propSill !== 'function' || !propSill(p.world, p)) problems.push('a sill calaverita has no window under it at ' + p.world + ' ' + p.x + ',' + p.y); });

@@ -2,7 +2,7 @@
    street. docs/story/el-changarrito.md. This pack trains no role, carries no curriculum and
    awards no grade that means anything about the player (§7½). */
 const GAMENAME="El Changarrito";
-const GAMEV="ch-v54 · engine mq-v112";   /* the town's own version, and the engine it was built on */
+const GAMEV="ch-v55 · engine mq-v113";   /* the town's own version, and the engine it was built on */
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;
@@ -41,7 +41,7 @@ const SEASONS={
             table, every planter blooming. The bridge is the park's. */
          swags:[{world:"st",from:[0,1],to:[8,1]},{world:"st",from:[9,1],to:[19,1]},{world:"st",from:[20,1],to:[29,1]},   /* under the north rank of faces */
                 {world:"st",from:[3,9],to:[13,9]},{world:"st",from:[15,9],to:[26,9]},{world:"st",from:[2,13],to:[9,13]},{world:"st",from:[20,13],to:[27,13]},
-                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[5,6],to:[12,6]},   /* tree to tree, and across the path from the bridge */
+                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[6,4],to:[13,4]},   /* tree to tree, and across the path from the bridge */
                 {world:"hq",from:[0,1],to:[7,1]},{world:"hq",from:[8,1],to:[16,1]},{world:"f2",from:[0,1],to:[9,1]},{world:"f2",from:[10,1],to:[19,1]},
                 {world:"an",from:[0,1],to:[7,1]},{world:"an",from:[8,1],to:[15,1]},{world:"pp",from:[0,1],to:[9,1]},{world:"pp",from:[10,1],to:[19,1]},
                 {world:"es",from:[0,1],to:[9,1]},{world:"es",from:[10,1],to:[19,1]},{world:"mo",from:[0,1],to:[9,1]},{world:"mo",from:[10,1],to:[19,1]},
@@ -68,7 +68,7 @@ const SEASONS={
             table, every planter blooming. The bridge is the park's. */
          swags:[{world:"st",from:[0,1],to:[8,1]},{world:"st",from:[9,1],to:[19,1]},{world:"st",from:[20,1],to:[29,1]},   /* under the north rank of faces */
                 {world:"st",from:[3,9],to:[13,9]},{world:"st",from:[15,9],to:[26,9]},{world:"st",from:[2,13],to:[9,13]},{world:"st",from:[20,13],to:[27,13]},
-                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[5,6],to:[12,6]},   /* tree to tree, and across the path from the bridge */
+                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[6,4],to:[13,4]},   /* tree to tree, and across the path from the bridge */
                 {world:"hq",from:[0,1],to:[7,1]},{world:"hq",from:[8,1],to:[16,1]},{world:"f2",from:[0,1],to:[9,1]},{world:"f2",from:[10,1],to:[19,1]},
                 {world:"an",from:[0,1],to:[7,1]},{world:"an",from:[8,1],to:[15,1]},{world:"pp",from:[0,1],to:[9,1]},{world:"pp",from:[10,1],to:[19,1]},
                 {world:"es",from:[0,1],to:[9,1]},{world:"es",from:[10,1],to:[19,1]},{world:"mo",from:[0,1],to:[9,1]},{world:"mo",from:[10,1],to:[19,1]},

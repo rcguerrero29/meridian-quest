@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v112";
+const GAMEV="mq-v113";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -134,7 +134,7 @@ const SEASONS={
                 {world:"ex",from:[3,0],to:[9,0]},{world:"ex",from:[9,0],to:[15,0]},{world:"ex",from:[15,0],to:[20,0]}, /* the four jacarandas */
                 {world:"ex",from:[5,3],to:[17,3]},                                            /* Doña Tencha's roofline to El Portero's caseta — the neighbours tied it */
                 {world:"ex",from:[4,6],to:[18,6]},                                            /* inside the crew pen: it's their yard */
-                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[5,6],to:[12,6]}, /* the park: tree to tree, and one across the path from the bridge so you walk under it (Pili) */
+                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[6,4],to:[13,4]}, /* the park: tree to tree, and one across the path NORTH of the bridge so you walk under it — never in a row the deck is in, or the two cuts tangle (owner, 2026-09-08: "overlay issues still in the park") */
                 {world:"hq",from:[0,15],to:[9,15]},                                           /* one short swag over the lobby, tied to the west wall; the offices stay offices */
                 {world:"me",from:[0,1],to:[8,1]},{world:"me",from:[11,1],to:[19,1]},           /* El Mercado: along the awning line */
                 {world:"lc",from:[0,1],to:[7,1]},{world:"lc",from:[12,1],to:[19,1]},           /* La Cocina: the same */
@@ -171,7 +171,7 @@ const SEASONS={
                 {world:"ex",from:[3,0],to:[9,0]},{world:"ex",from:[9,0],to:[15,0]},{world:"ex",from:[15,0],to:[20,0]}, /* the four jacarandas */
                 {world:"ex",from:[5,3],to:[17,3]},                                            /* Doña Tencha's roofline to El Portero's caseta — the neighbours tied it */
                 {world:"ex",from:[4,6],to:[18,6]},                                            /* inside the crew pen: it's their yard */
-                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[5,6],to:[12,6]}, /* the park: tree to tree, and one across the path from the bridge so you walk under it (Pili) */
+                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[6,4],to:[13,4]}, /* the park: tree to tree, and one across the path NORTH of the bridge so you walk under it — never in a row the deck is in, or the two cuts tangle (owner, 2026-09-08: "overlay issues still in the park") */
                 {world:"hq",from:[0,15],to:[9,15]},                                           /* one short swag over the lobby, tied to the west wall; the offices stay offices */
                 {world:"me",from:[0,1],to:[8,1]},{world:"me",from:[11,1],to:[19,1]},           /* El Mercado: along the awning line */
                 {world:"lc",from:[0,1],to:[7,1]},{world:"lc",from:[12,1],to:[19,1]},           /* La Cocina: the same */

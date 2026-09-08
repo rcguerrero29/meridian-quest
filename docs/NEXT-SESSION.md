@@ -12,7 +12,10 @@ current: each session rewrites the queue before signing off.)*
     string that crosses the path — is fixed here (`mq-v112`/`ch-v54`: both packs stand it at pk (6,2), open ground
     at the top of the bridge's section, no swag over it). **The rest is the next session's first job, a playtest:**
     walk the park in both seasons in all four cameras, shoot the bridge's foot, the trees, and the crossing string,
-    and name what overlaps what. Known suspects: the 3D swag planes crossing the deck's own papel over the bridge;
+    and name what overlaps what. **First cause found and fixed 2026-09-08 (`mq-v113`/`ch-v55`):** the park's
+    crossing swag ran along row 6 — the deck's own row — so the multicolour cut and the bridge's marigold cut
+    tangled at the deck's north end; it moves to row 4 (still across the path, north of the crossing) and both
+    suites now fail any swag sharing a bridge's row or column. Remaining suspects: the 3D swag planes crossing the deck's own papel over the bridge;
     the trail's petal planes and a prop sprite sharing a height; a tree's streamers hanging into a swag. One PR per
     cause, red first.
  2. **❗El camino — "the road in meridian doesnt make sense at the moment - don guero has to review."**
@@ -21,7 +24,9 @@ current: each session rewrites the queue before signing off.)*
     (`2` at st (29,1) ↔ ex (0,3)) and to the park (pk (0,6)); where the trolley stops (`Y` at st (0,1), ex (23,3));
     and whether a person can walk HQ's door → Calle Dos → the park without stepping on the tracks. He returns one
     side quest with picks A/B/C, the owner picks, then one PR per road change with the reach audit red first.
-    Invoke `/don-guero` with those five.
+    **Done 2026-09-08: he sat and answered** — ❗El camino is in CITY.md with picks A/B/C (A recommended: call it
+    a street, crosswalks on Calle Dos, a kerb glyph, Doña Meche one tile east so the lane opens). Waiting on the
+    owner's pick; then one PR per road change with the reach audit red first.
 
 **A. The world.** (1) ❗El espejo — the owner picks A/B/C; B is three quests and a small `espejo` district after
 Nolasco, half a sitting; the seam is `people.q` on Naye plus a `CHAPTERS` entry. (2) ❗La fachada — one cold read

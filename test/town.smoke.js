@@ -691,6 +691,13 @@ const { chromium } = require('playwright-core');
       if (typeof SEASONS === 'undefined' || !SEASONS.muertos) problems.push('the town has no Día de Muertos');
       else { const keepS = seasonPick, keepW = { world, px, py, cam: camMode }; seasonSet('muertos');
         Object.keys(WORLDS).filter(k => !WORLDS[k].built).forEach(wid => { if (!fiestaSwags(wid).length) problems.push('no papel picado in the town\'s ' + wid); });
+        // owner, 2026-09-08: "the alebrijes mode has some overlay issues still in the park" — a swag must never share a
+        // line with the deck: the bridge hangs its own marigold cut, and two strings in one line tangle at the deck's end
+        Object.keys(WORLDS).filter(k => !WORLDS[k].built).forEach(wid => { const w = WORLDS[wid];
+          fiestaSwags(wid).forEach(sw => { const hor = sw.from[1] === sw.to[1], ln = hor ? sw.from[1] : sw.from[0];
+            for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++)
+              if ((TILES[w.rows[y][x]] || {}).kind === 'bridge' && (hor ? y : x) === ln)
+                problems.push(`a swag in ${wid} shares the bridge's ${hor ? 'row' : 'column'} ${ln} — the deck hangs its own cut there`); }); });
         if (!(art('hangs', []) || []).some(h => h.kind === 'pinata')) problems.push('no piñata in the town');
         const pr = art('props', []) || []; if (!pr.some(p => p.kind === 'ofrenda' && p.world === 'pk') || pr.filter(p => p.kind === 'ofrenda').length < 2) problems.push('the town has no ofrenda at the foot of the bridge and on a table');
         pr.filter(p => p.kind === 'calaverita').forEach(p => { if (!p.sill || !propSill(p.world, p)) problems.push('a town calaverita is not on a window: ' + p.world + ' ' + p.x + ',' + p.y); });
