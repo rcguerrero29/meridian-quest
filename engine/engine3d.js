@@ -7,7 +7,7 @@
 "use strict";
 const DAY_AMB=0.66,DAY_SUN=0.42;   /* see the note at the lights: these two numbers are what gives a building faces */
 const T3={renderer:null,scene:null,cam:null,group:null,amb:null,sun:null,lastW:0,
-  builtKey:"",dirty:0,fail:false,yaw:0,pool:[],tintables:[],tint:null,glows:[],K:1}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
+  builtKey:"",dirty:0,fail:false,lastH:0,yaw:0,pool:[],tintables:[],tint:null,glows:[],K:1}; /* yaw 0 = camera south of the hero, north up — the 2D map's mental model */
 function t3Invalidate(){T3.dirty++;} /* growth, theme edits — anything that reshapes tiles */
 /* ---------- the error log (#24) ----------
    Four places swallowed a 3D failure and left no trace: a decor artist, an actor artist, init,
@@ -114,14 +114,24 @@ function t3Tex(c,ground,live){const t=new THREE.CanvasTexture(c);
     t.anisotropy=cap.getMaxAnisotropy();
   }
   return t;}
-function t3Resize(){ /* THE blur fix: the 2D canvases render tiny on purpose (pixel art,
-   CSS-stretched with image-rendering:pixelated). 3D must NOT — it renders at the
-   element's real on-screen size, full device resolution, smooth scaling. */
+function t3Resize(){ /* The 2D canvases render tiny on purpose (pixel art, CSS-stretched with
+   image-rendering:pixelated). 3D must NOT — it renders at the element's real on-screen size,
+   full device resolution.
+   FULLSCREEN (owner, 2026-09-08: "its still blurry in full screen"). This used to take the
+   element's WIDTH and derive its height as the game's 10:8, which is right in a window — the
+   shell sizes the 3D canvas to match the 2D one — and wrong the moment `.viewport.fs` says
+   `height:100% !important`. The buffer then had the game's aspect while the element had the
+   screen's, and `object-fit:contain` quietly rescaled the whole render to fit: at 1440x900 a
+   2880x2304 buffer was resampled down to 1125x900 before anyone saw it. That is a 0.39x
+   resample of every pixel, and it cost more GPU than rendering it right would have.
+   A 3D camera has no fixed frame to protect. Measure the box it is actually given and render
+   THAT: the aspect follows the screen, contain becomes a no-op, and nothing is resampled. */
   if(!T3.renderer)return;
   const c3=T3.renderer.domElement;
   c3.style.imageRendering="auto";
-  const wCss=c3.clientWidth||document.getElementById("vp").clientWidth||360;
-  const hCss=Math.round(wCss*VH/VW);
+  const box=c3.getBoundingClientRect();
+  const wCss=Math.round(box.width)||c3.clientWidth||document.getElementById("vp").clientWidth||360;
+  const hCss=Math.round(box.height)||c3.clientHeight||Math.round(wCss*VH/VW);
   T3.renderer.setPixelRatio(Math.min(3,window.devicePixelRatio||1));
   T3.renderer.setSize(wCss,hCss,false);
   if(T3.cam){T3.cam.aspect=wCss/hCss;T3.cam.updateProjectionMatrix();}
@@ -674,7 +684,9 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
   if(!T3.renderer){try{t3Init();}catch(e){T3.fail=true;t3Note("init",e);t3Fell();return false;}}
   try{
     const c3=T3.renderer.domElement;
-    if(Math.abs((c3.clientWidth||0)-T3.lastW)>2){T3.lastW=c3.clientWidth||0;t3Resize();}
+    /* height too, not just width: going fullscreen can keep the width and change the shape */
+    if(Math.abs((c3.clientWidth||0)-T3.lastW)>2||Math.abs((c3.clientHeight||0)-T3.lastH)>2){
+      T3.lastW=c3.clientWidth||0;T3.lastH=c3.clientHeight||0;t3Resize();}
     t3CheckK();
     const key=world+"|"+themeName+"|"+T3.dirty;
     if(T3.builtKey!==key)t3Build(key);

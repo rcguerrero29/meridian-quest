@@ -1,0 +1,22 @@
+const {chromium}=require('playwright-core');
+const W=+process.argv[2],H=+process.argv[3],TAG=process.argv[4];
+(async()=>{
+ const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH,args:['--use-gl=swiftshader','--enable-unsafe-swiftshader']});
+ const p=await b.newPage({viewport:{width:W,height:H},deviceScaleFactor:2});
+ await p.goto('file:///home/user/meridian-quest/changarrito/index.html');
+ await p.waitForTimeout(900);
+ await p.click('.classes button[data-c="architect"]'); await p.waitForTimeout(200);
+ await p.click('#begin'); await p.waitForTimeout(600);
+ await p.evaluate(()=>{world='hq';px=fx=11;py=fy=5;dir='right';showWorld();checkTalk();});
+ await p.waitForTimeout(600);
+ await p.evaluate(()=>toast("Desks, plants and walls just block you — coworkers with a ❗ have quests. Walk up and Talk.",12000));
+ await p.waitForTimeout(600);
+ const o=await p.evaluate(()=>{const R=e=>{const r=e.getBoundingClientRect();return {x:Math.round(r.x),y:Math.round(r.y),r2:Math.round(r.right),b:Math.round(r.bottom)};};
+  const vis=e=>e&&e.offsetParent!==null;const g=id=>{const e=document.getElementById(id);return vis(e)?{...R(e),t:(e.textContent||'').trim().slice(0,24)}:null;};
+  const ov=(a,c)=>a&&c?{ox:Math.min(a.r2,c.r2)-Math.max(a.x,c.x),oy:Math.min(a.b,c.b)-Math.max(a.y,c.y)}:null;
+  const t=g('toast'),tk=g('talk'),ti=g('ticker');
+  return {toast:t,talk:tk,ticker:ti,overlapToastTalk:ov(t,tk),overlapToastTicker:ov(t,ti),vp:R(document.querySelector('.viewport'))};});
+ console.log(TAG,JSON.stringify(o));
+ await p.screenshot({path:`/tmp/rosa/${TAG}-43-toast-over-talk.png`});
+ await b.close();
+})();
