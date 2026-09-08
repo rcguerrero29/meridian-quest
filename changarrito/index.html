@@ -102,14 +102,24 @@
   .brushes button{width:44px; height:48px; border-radius:8px; border:1.5px solid transparent; background:rgba(237,233,245,.12); font-size:.95rem; cursor:pointer; padding:2px 0 0; display:flex; flex-direction:column; align-items:center; gap:1px; color:#EDE9F5;}
   .brushes button .bl{font-size:.5rem; letter-spacing:.03em; opacity:.85;}
   .brushes button[aria-pressed="true"]{border-color:#E0B45C; background:rgba(224,180,92,.25);}
-  .talk{position:absolute; right:10px; bottom:16px; font-family:'Unbounded',sans-serif; font-size:.8rem; padding:12px 16px; border-radius:12px; border:none; background:var(--accent); color:var(--accent-ink); cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.35);}
-  .treat{bottom:72px !important; background:#B5773A !important; color:#FFF !important;}
-  #ball{bottom:128px !important; background:#7A9A4E !important;}
-  #leash{bottom:184px !important; background:#2E5FA8 !important;}
-  .read{bottom:240px !important; background:#F6EFDC !important; color:#2B2536 !important; box-shadow:0 2px 10px rgba(0,0,0,.35), inset 0 0 0 2px #C9BFA6 !important;}
-  #band{bottom:184px !important; background:#D77FA8 !important;}
-  #adopt{bottom:184px !important; background:#4E7A4A !important;}
-  #love{bottom:240px !important; background:#C4586B !important;}
+  /* the world's action buttons: a column that fills upward from the bottom corner (Rosa 3, 7).
+     column-reverse puts the first in the markup nearest the thumb; wrap-reverse sends an
+     overflowing column left, into the world, rather than up and out of it; the cap keeps the
+     top of the stack clear of the 38px corner icons at top:10px. The container ignores taps so
+     the world can still be walked through the gaps between buttons. */
+  .acts{position:absolute; right:10px; bottom:10px; z-index:5;
+    display:flex; flex-direction:column-reverse; flex-wrap:wrap-reverse;
+    align-items:flex-end; align-content:flex-end; gap:8px;
+    max-height:calc(100% - 58px); pointer-events:none;}
+  .acts>button{pointer-events:auto;}
+  .talk{position:static; font-family:'Unbounded',sans-serif; font-size:.8rem; padding:12px 16px; border-radius:12px; border:none; background:var(--accent); color:var(--accent-ink); cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.35);}
+  .treat{background:#B5773A !important; color:#FFF !important;}
+  #ball{background:#7A9A4E !important;}
+  #leash{background:#2E5FA8 !important;}
+  .read{background:#F6EFDC !important; color:#2B2536 !important; box-shadow:0 2px 10px rgba(0,0,0,.35), inset 0 0 0 2px #C9BFA6 !important;}
+  #band{background:#D77FA8 !important;}
+  #adopt{background:#4E7A4A !important;}
+  #love{background:#C4586B !important;}
   #cmd{bottom:auto !important; top:104px; right:10px !important; left:auto !important; width:42px; height:42px; padding:0 !important; border-radius:50% !important; background:rgba(20,16,30,.55) !important; font-size:1.25rem; z-index:4; backdrop-filter:blur(2px);}
   .hint{font-size:.8rem; color:var(--muted); margin:10px 2px 0;}
   .npc{display:flex; gap:10px; margin-bottom:12px;}
@@ -130,6 +140,21 @@
   /* the document's own scroll box. min-height:0 is what lets a flex child shrink far enough to
      scroll at all — without it the column just grows past the screen and takes the bar with it. */
   .paperscroll{flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain;}
+  /* Rosa, finding 5. One long option in a dropdown made EVERY field in the request form 70px wider
+     than the phone, and the sheet slid to x=-24 when a field took focus. A control may not be sized
+     by its longest contents: the field wins, the text inside it gets an ellipsis. And the writing
+     boxes were taking their height from the settings panel's rule rather than the form's — 220px
+     each, which put the button that files the request two screens down. */
+  /* min-width:0 on the items, not only minmax(0,1fr) on the track: a grid item's automatic minimum
+     size is its CONTENT, so a label wrapping a 392px dropdown overflowed a track that was already
+     told it could be narrow. Capping the track alone does nothing without this. */
+  .paper .dform>*{min-width:0;}
+  .paper .dfl{display:block; min-width:0;}
+  .paper .dform select, .paper .dform input, .paper .dform textarea{width:100%;}
+  .paper select, .paper input, .paper textarea{max-width:100%; box-sizing:border-box;}
+  .paper select{text-overflow:ellipsis;}
+  .paper textarea{min-height:64px; resize:vertical;}
+  .paper .dform{max-width:100%;}
   .paper::before{content:""; position:absolute; inset:0; border-radius:3px; pointer-events:none;
     box-shadow:inset 0 0 0 1px rgba(0,0,0,.10), inset 0 30px 40px -34px rgba(0,0,0,.18);}
   .staple{position:absolute; top:13px; left:20px; width:15px; height:4px; background:#9AA1A8;
@@ -154,7 +179,7 @@
   .paper .dblank .dline{flex:1; border-bottom:1px dashed #B7AD95; min-height:1em;}
   .paper .dkv{display:grid; grid-template-columns:auto 1fr; gap:3px 12px; margin:8px 0;}
   .paper .dkv b{color:#6B6355; font-weight:600;}
-  .paper .dform{margin:10px 0; display:grid; gap:8px;}
+  .paper .dform{margin:10px 0; display:grid; grid-template-columns:minmax(0,1fr); gap:8px;}  /* minmax(0,1fr): a grid column defaults to `auto`, which is as wide as its widest child — that is how one long dropdown option made every field overflow the phone (Rosa 5) */
   .paper .dfl{display:grid; gap:3px; font-size:.7rem; letter-spacing:.06em; text-transform:uppercase; color:#6B6355;}
   .paper .dfl input,.paper .dfl textarea,.paper .dfl select{font:inherit; font-size:.85rem; text-transform:none; letter-spacing:0; padding:7px 9px; border:1px solid #B7AD95; border-radius:6px; background:#FFFDF7; color:#2A2620;}
   .paper .dfl textarea{min-height:64px; resize:vertical;}
@@ -278,11 +303,25 @@
   .drawer>label:first-of-type{margin-top:10px;}
   .drawer>label,.drawer>.optrow{padding-left:12px; padding-right:12px;}
   .drawer>.optrow:last-child{padding-bottom:12px;}
-  .settings{position:absolute; inset:0; background:rgba(15,12,22,.78); display:flex; align-items:center; justify-content:center; z-index:5;}
-  .settings .box{background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:12px; padding:18px; width:82%; max-width:320px; max-height:88%; overflow-y:auto;}
+  /* Rosa, finding 4. These opened INSIDE the world's frame — `position:absolute` in a box that is
+     427px tall on a laptop and 266px on a phone — so Settings arrived as a 270px slot showing one
+     and a half sections and the map arrived with the word "Close" cut through the middle. Her rule:
+     a panel whose height is not fixed by the designer does not open inside the world's frame. They
+     go over the page now, like the paperwork always has, and their way out rides the bottom of the
+     box the way the barber's chair learned to (#126) — plus Escape and a tap on the dark outside,
+     which every other program gives you. z-index sits under the reader's 60, so paper still opens
+     over a panel. */
+  .settings{position:fixed; inset:0; background:rgba(15,12,22,.78); display:flex; align-items:center; justify-content:center; z-index:55;}
+  .settings .box{background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:12px; padding:18px; width:82%; max-width:320px; max-height:88svh; overflow-y:auto; box-sizing:border-box;}
+  .settings .box>.close{position:sticky; bottom:-18px; z-index:2; margin-bottom:0;
+    box-shadow:0 -14px 16px -8px var(--surface);}
   .settings h3{font-family:'Unbounded',sans-serif; font-size:.9rem; margin:0 0 12px;}
-  .settings .optrow{display:flex; gap:8px; margin-bottom:14px;}
-  .settings .optrow button{flex:1; font-family:'IBM Plex Sans',sans-serif; font-size:.85rem; padding:10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer;}
+  /* Rosa, finding 6. These were one line whose items shared the space equally, were never allowed
+     to be narrower than their own text, and were never allowed to wrap — so in Spanish on a 1440px
+     DESKTOP the music row read "Auto | fi | Campanas | Marimba | Ata". They wrap now, and an item
+     may shrink to a floor rather than to nothing: a name is either whole or on the next line. */
+  .settings .optrow{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .settings .optrow button{flex:1 1 auto; min-width:max-content; min-height:44px; font-family:'IBM Plex Sans',sans-serif; font-size:.85rem; padding:10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer;}
   .settings .optrow button[aria-pressed="true"]{border-color:var(--accent); background:var(--accent); color:var(--accent-ink);}
   .settings .close{width:100%; font-family:'Unbounded',sans-serif; font-size:.8rem; padding:10px; border-radius:10px; border:none; background:var(--accent); color:var(--accent-ink); cursor:pointer;}
   .settings label{display:block; font-family:'IBM Plex Mono',monospace; font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:6px;}
@@ -378,17 +417,30 @@
         <button data-b="npc"><span>🧍</span><span class="bl"></span></button>
         <button id="undoBtn"><span>↩️</span><span class="bl"></span></button>
       </div>
-      <button class="talk" id="talk" hidden></button>
-      <button class="talk treat" id="treat" hidden></button>
-      <button class="talk treat" id="ball" hidden></button>
-      <button class="talk treat" id="leash" hidden></button>
-      <button class="talk read" id="read" hidden></button>
-      <button class="talk treat" id="band" hidden></button>
-      <button class="talk treat" id="aleRnd" hidden title="a random alebrije look">🎲</button>
-      <button class="talk treat" id="aleNext" hidden title="the next alebrije look">🔁</button>
-      <button class="talk treat" id="adopt" hidden></button>
-      <button class="talk treat" id="love" hidden></button>
-      <button class="talk treat" id="cmd" hidden></button>
+      <!-- Rosa, findings 3 and 7. These eleven used to be placed by a ladder of fixed distances
+           from the bottom of the world — 16, 72, 128, 184, 240 — laid out for a tall frame. The
+           world is 427px tall on a laptop and 266px on a phone, so on a phone the fifth rung
+           landed OUTSIDE the frame, clipped, on top of the corner icons and not fully pressable.
+           Three buttons shared the 184 rung and two shared the 240; 🎲 and 🔁 shared one exactly,
+           so the random-look button had never been pressable at all.
+           Nothing is placed by hand now. They are a column that fills upward from the bottom
+           corner, so however many happen to be showing they stack without touching, and the
+           column is capped clear of the icons — past that it wraps into a second column rather
+           than climbing out of the world. A `hidden` button takes no part in a flex layout, so
+           the stack closes up on its own. -->
+      <div class="acts" id="acts">
+        <button class="talk" id="talk" hidden></button>
+        <button class="talk treat" id="treat" hidden></button>
+        <button class="talk treat" id="ball" hidden></button>
+        <button class="talk treat" id="leash" hidden></button>
+        <button class="talk read" id="read" hidden></button>
+        <button class="talk treat" id="band" hidden></button>
+        <button class="talk treat" id="aleRnd" hidden title="a random alebrije look">🎲</button>
+        <button class="talk treat" id="aleNext" hidden title="the next alebrije look">🔁</button>
+        <button class="talk treat" id="adopt" hidden></button>
+        <button class="talk treat" id="love" hidden></button>
+        <button class="talk treat" id="cmd" hidden></button>
+      </div>
       <div class="toast" id="toast"></div>
       <div class="ticker" id="ticker" hidden></div>
       <div class="settings" id="settings" hidden>
