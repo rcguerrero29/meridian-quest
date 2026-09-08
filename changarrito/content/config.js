@@ -2,7 +2,7 @@
    street. docs/story/el-changarrito.md. This pack trains no role, carries no curriculum and
    awards no grade that means anything about the player (§7½). */
 const GAMENAME="El Changarrito";
-const GAMEV="ch-v52 · engine mq-v111";   /* the town's own version, and the engine it was built on */
+const GAMEV="ch-v53 · engine mq-v111";   /* the town's own version, and the engine it was built on */
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;
@@ -34,7 +34,24 @@ const PLACES={
 const SEASONS={
   muertos:{label:{en:"Día de Muertos",es:"Día de Muertos"},from:[10,18],to:[11,3],
     art:{bridge:["#7A2E12","#B8410E","#E2620F","#F2870F","#FBB024","#FFD972"],bridgeStyle:"petals",
-         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8","#7BD3F7","#C5E86C","#FF4D4D","#3D5AFE"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"],facepaint:true, /* the calavera in Día de Muertos too (owner, 2026-09-07, night) — the engine's five looks */
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8","#7BD3F7","#C5E86C","#FF4D4D","#3D5AFE"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"],
+         /* the dressing, placed on the TOWN's own maps (owner, 2026-09-08: "we should have in both and template") — the same
+            keys Meridian reads: swags by place (five to nine tiles, a gap between), the piñata over open ground, calaveritas
+            on window sills (sill:true — the facade's own window says where), the ofrenda at the foot of the bridge and on a
+            table, every planter blooming. The bridge is the park's. */
+         swags:[{world:"st",from:[0,1],to:[8,1]},{world:"st",from:[9,1],to:[19,1]},{world:"st",from:[20,1],to:[29,1]},   /* under the north rank of faces */
+                {world:"st",from:[3,9],to:[13,9]},{world:"st",from:[15,9],to:[26,9]},{world:"st",from:[2,13],to:[9,13]},{world:"st",from:[20,13],to:[27,13]},
+                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[5,6],to:[12,6]},   /* tree to tree, and across the path from the bridge */
+                {world:"hq",from:[0,1],to:[7,1]},{world:"hq",from:[8,1],to:[16,1]},{world:"f2",from:[0,1],to:[9,1]},{world:"f2",from:[10,1],to:[19,1]},
+                {world:"an",from:[0,1],to:[7,1]},{world:"an",from:[8,1],to:[15,1]},{world:"pp",from:[0,1],to:[9,1]},{world:"pp",from:[10,1],to:[19,1]},
+                {world:"es",from:[0,1],to:[9,1]},{world:"es",from:[10,1],to:[19,1]},{world:"mo",from:[0,1],to:[9,1]},{world:"mo",from:[10,1],to:[19,1]},
+                {world:"ob",from:[0,1],to:[9,1]},{world:"ob",from:[10,1],to:[19,1]},{world:"co",from:[0,1],to:[9,1]},{world:"co",from:[10,1],to:[19,1]}],
+         hangs:[{world:"st",x:12,y:2,kind:"pinata"}],
+         props:[{world:"st",x:0,y:0,kind:"calaverita",sill:true},{world:"st",x:7,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:11,y:0,kind:"calaverita",sill:true,foil:"#7B4BA8"},
+                {world:"st",x:16,y:0,kind:"calaverita",sill:true,foil:"#F2B705"},{world:"st",x:22,y:0,kind:"calaverita",sill:true},{world:"st",x:27,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},
+                {world:"st",x:4,y:8,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:12,y:8,kind:"calaverita",sill:true},{world:"st",x:20,y:8,kind:"calaverita",sill:true,foil:"#F2B705"},
+                {world:"pk",x:5,y:6,kind:"ofrenda"},{world:"co",x:3,y:3,kind:"ofrenda"}],
+         bloom:"#F59E1B",facepaint:true, /* the calavera in Día de Muertos too (owner, 2026-09-07, night) — the engine's five looks */
          sky:"#E8A24A"}},
   /* NOCHE DE ALEBRIJES — the owner's second mode (2026-09-07: "another mode where they turn into
      little alebrije colors and i get a dia de los muertos face paint color"). No dates: picked by
@@ -44,7 +61,24 @@ const SEASONS={
      (five calavera looks for everyone; the hero picks, a person's comes from who they are). */
   alebrije:{label:{en:"Noche de alebrijes",es:"Noche de alebrijes"},
     art:{bridge:["#7A2E12","#B8410E","#E2620F","#F2870F","#FBB024","#FFD972"],bridgeStyle:"petals",
-         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8","#7BD3F7","#C5E86C","#FF4D4D","#3D5AFE"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"],sky:"#E8A24A",
+         papel:["#E8478F","#2FA5A0","#F2B705","#7B4BA8","#F07C24","#F6F2E8","#7BD3F7","#C5E86C","#FF4D4D","#3D5AFE"],papelBridge:["#FBB024","#F2870F","#E2620F","#F6F2E8"],
+         /* the dressing, placed on the TOWN's own maps (owner, 2026-09-08: "we should have in both and template") — the same
+            keys Meridian reads: swags by place (five to nine tiles, a gap between), the piñata over open ground, calaveritas
+            on window sills (sill:true — the facade's own window says where), the ofrenda at the foot of the bridge and on a
+            table, every planter blooming. The bridge is the park's. */
+         swags:[{world:"st",from:[0,1],to:[8,1]},{world:"st",from:[9,1],to:[19,1]},{world:"st",from:[20,1],to:[29,1]},   /* under the north rank of faces */
+                {world:"st",from:[3,9],to:[13,9]},{world:"st",from:[15,9],to:[26,9]},{world:"st",from:[2,13],to:[9,13]},{world:"st",from:[20,13],to:[27,13]},
+                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[5,6],to:[12,6]},   /* tree to tree, and across the path from the bridge */
+                {world:"hq",from:[0,1],to:[7,1]},{world:"hq",from:[8,1],to:[16,1]},{world:"f2",from:[0,1],to:[9,1]},{world:"f2",from:[10,1],to:[19,1]},
+                {world:"an",from:[0,1],to:[7,1]},{world:"an",from:[8,1],to:[15,1]},{world:"pp",from:[0,1],to:[9,1]},{world:"pp",from:[10,1],to:[19,1]},
+                {world:"es",from:[0,1],to:[9,1]},{world:"es",from:[10,1],to:[19,1]},{world:"mo",from:[0,1],to:[9,1]},{world:"mo",from:[10,1],to:[19,1]},
+                {world:"ob",from:[0,1],to:[9,1]},{world:"ob",from:[10,1],to:[19,1]},{world:"co",from:[0,1],to:[9,1]},{world:"co",from:[10,1],to:[19,1]}],
+         hangs:[{world:"st",x:12,y:2,kind:"pinata"}],
+         props:[{world:"st",x:0,y:0,kind:"calaverita",sill:true},{world:"st",x:7,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:11,y:0,kind:"calaverita",sill:true,foil:"#7B4BA8"},
+                {world:"st",x:16,y:0,kind:"calaverita",sill:true,foil:"#F2B705"},{world:"st",x:22,y:0,kind:"calaverita",sill:true},{world:"st",x:27,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},
+                {world:"st",x:4,y:8,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:12,y:8,kind:"calaverita",sill:true},{world:"st",x:20,y:8,kind:"calaverita",sill:true,foil:"#F2B705"},
+                {world:"pk",x:5,y:6,kind:"ofrenda"},{world:"co",x:3,y:3,kind:"ofrenda"}],
+         bloom:"#F59E1B",sky:"#E8A24A",
          alebrije:{looks:[ /* Pili's five, the same five on every animal so the night reads as one; wings on the wingless */
            {id:"fuego",name:{en:"Ember",es:"Fuego"},tint:"#FF6A00",pat:"#FFC300",accent:"#FF2E88",wings:true},
            {id:"cielo",name:{en:"Sky",es:"Cielo"},tint:"#00D9E8",pat:"#FFE9F2",accent:"#8A3FE8",wings:true},

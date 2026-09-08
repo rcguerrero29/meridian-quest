@@ -147,6 +147,30 @@ upstairs #.........◺◺◺◺.....#    the rail, north side
 and the street's door lands on `(10,R)`. Meridian's HQ/f2 and the town's stall/loft carry exactly
 this; `test/engine.smoke.js` checks the portals land on walkable tiles in any pack.
 
+### 3⅞ · Seasons — the template (2026-09-08, owner: "we should have in both and template")
+
+A season is ONE block in `SEASONS` in the pack's config. The engine reads its keys and does less without any of
+them; nothing else in the engine knows a holiday's name. Two packs carry the same two seasons today (Día de
+Muertos with dates, Noche de alebrijes by name only); a third holiday is a third block, placed on the new
+world's own maps, no engine change. The keys, all optional:
+
+| Key | What the engine does with it |
+|---|---|
+| `label:{en,es}`, `from:[m,d]`, `to:[m,d]` | the Settings → Season button; the dates make it automatic ("By the calendar"); no dates = by name only |
+| `bridge:[6 hexes, dark first]`, `bridgeStyle:"petals"` | the park's crossing: six bands year-round, a heap of cempasúchil in season (`^` tiles; the trail and the spill are the bridge's) |
+| `papel:[hexes]`, `papelBridge:[hexes]` | the cut paper's palette; the marigold cut over the crossing |
+| `swags:[{world,from:[x,y],to:[x,y]}]` | a string of cut paper by place — five to nine tiles, a gap between, tied to walls or trees, a pole where it ends on open ground; never over a door |
+| `hangs:[{world,x,y,kind:"pinata"}]` | a piñata over open ground |
+| `props:[{world,x,y,kind:"calaverita",sill:true,w,foil}]`, `[{world,x,y,kind:"ofrenda"}]` | sugar skulls on a facade's own window (`TILEMETA[g].win`; `w` picks the second window); the ofrenda at the foot of the bridge and on a table (it stands on a solid's top) |
+| `bloom:"#hex"` | every planter and the jacarandas bloom |
+| `sky:"#hex"` | the north window's dusk |
+| `facepaint:true` or `{looks:[5]}` | calavera paint on everyone (the engine's five, or the pack's) |
+| `alebrije:{looks:[5]}` | every animal tinted, marked and (the wingless) winged, keeping its silhouette |
+
+Copy the town's `muertos` block from `changarrito/content/config.js`, keep the palettes, and re-place every
+`world/x/y` on your maps. The smoke proves: every base world strung, every calaverita on a window, an ofrenda at
+the bridge and on a table, the planters bloom, the bridge two tiles wide, and the ofrenda standing in 3D.
+
 ### 3½ · Two looks for the reader
 
 `READERLOOK="night"` in a pack's config turns the reader's cream paper purple-dark (the town's

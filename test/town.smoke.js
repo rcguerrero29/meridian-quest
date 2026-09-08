@@ -687,6 +687,19 @@ const { chromium } = require('playwright-core');
       // Meridian's animals have somewhere to stand in the town's rooms
       if (SOLID.has(WORLDS.hq.grid[5][12])) problems.push('hq (12,5) is solid — Frederick has nowhere to stand');
       if (SOLID.has(WORLDS.st.grid[1][4])) problems.push('st (4,1) is solid — the pigeon has nowhere to stand');
+      // the season dressing in the town (owner, 2026-09-08: "these updates arent there... we should have in both and template")
+      if (typeof SEASONS === 'undefined' || !SEASONS.muertos) problems.push('the town has no Día de Muertos');
+      else { const keepS = seasonPick, keepW = { world, px, py, cam: camMode }; seasonSet('muertos');
+        Object.keys(WORLDS).filter(k => !WORLDS[k].built).forEach(wid => { if (!fiestaSwags(wid).length) problems.push('no papel picado in the town\'s ' + wid); });
+        if (!(art('hangs', []) || []).some(h => h.kind === 'pinata')) problems.push('no piñata in the town');
+        const pr = art('props', []) || []; if (!pr.some(p => p.kind === 'ofrenda' && p.world === 'pk') || pr.filter(p => p.kind === 'ofrenda').length < 2) problems.push('the town has no ofrenda at the foot of the bridge and on a table');
+        pr.filter(p => p.kind === 'calaverita').forEach(p => { if (!p.sill || !propSill(p.world, p)) problems.push('a town calaverita is not on a window: ' + p.world + ' ' + p.x + ',' + p.y); });
+        if (!art('bloom', null)) problems.push('the town\'s planters do not bloom');
+        const pkw = WORLDS.pk, rowsD = new Set(); for (let y = 0; y < pkw.H; y++) for (let x = 0; x < pkw.W; x++) if ((TILES[pkw.rows[y][x]] || {}).kind === 'bridge') rowsD.add(y);
+        if (rowsD.size < 2) problems.push('the town\'s bridge is one tile wide');
+        camSet('3d'); world = 'pk'; px = 6; py = 7; moving = false; held = null; t3Invalidate(); draw3d();
+        if (!T3.group.children.some(o => o.userData && o.userData.ofrenda)) problems.push('the ofrenda does not stand in the town\'s park in 3D');
+        seasonSet(keepS || 'auto'); world = keepW.world; px = keepW.px; py = keepW.py; camSet(keepW.cam); }
       return problems;
     });
   });
