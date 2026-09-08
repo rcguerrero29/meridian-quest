@@ -4,3 +4,6 @@ _site/
 package.json
 package-lock.json
 shots/
+# scratch probes a session writes at the repo root because playwright-core resolves from here
+*.tmp.js
+*.tmp.png
