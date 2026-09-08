@@ -62,14 +62,17 @@
   .tlsearch input{flex:1; box-sizing:border-box; font-family:'IBM Plex Mono',monospace; font-size:.8rem; padding:8px 10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink);}
   .tlsearch button{font-size:.8rem; padding:8px 12px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer;}
   canvas{display:block; width:100%; image-rendering:pixelated;}
-  .dpad{position:absolute; left:10px; bottom:10px; display:grid; grid-template-columns:repeat(3,44px); grid-template-rows:repeat(3,44px); gap:2px; opacity:.92; touch-action:none; user-select:none;}
+  .dpad{position:absolute; left:calc(10px + env(safe-area-inset-left)); bottom:calc(10px + env(safe-area-inset-bottom)); display:grid; grid-template-columns:repeat(3,44px); grid-template-rows:repeat(3,44px); gap:2px; opacity:.92; touch-action:none; user-select:none;}
   .dpad button{border:none; border-radius:9px; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.05rem; cursor:pointer; backdrop-filter:blur(2px); touch-action:none;}
   .dpad button:active{background:rgba(122,63,224,.75);}
   .dpad .blank{visibility:hidden;}
-  .joy{position:absolute; left:12px; bottom:12px; width:116px; height:116px; touch-action:none; user-select:none;}
+  .joy{position:absolute; left:calc(12px + env(safe-area-inset-left)); bottom:calc(12px + env(safe-area-inset-bottom)); width:116px; height:116px; touch-action:none; user-select:none;}
   .joybase{position:absolute; inset:0; border-radius:50%; background:rgba(20,16,30,.4); border:2px solid rgba(237,233,245,.25); backdrop-filter:blur(2px);}
   .knob{position:absolute; left:50%; top:50%; width:48px; height:48px; border-radius:50%; background:rgba(122,63,224,.85); border:2px solid rgba(237,233,245,.5); transform:translate(-50%,-50%); transition:transform .08s;}
-  .gear{position:absolute; right:10px; top:10px; width:38px; height:38px; border-radius:10px; border:none; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.05rem; cursor:pointer; z-index:4;}
+  /* SAFE AREA. A phone's rounded corners, notch and home indicator eat the edges of the screen,
+     and everything anchored to an edge has to step inside them. env() is 0 on a device without
+     insets, so this costs nothing anywhere else. */
+  .gear{position:absolute; right:calc(10px + env(safe-area-inset-right)); top:calc(10px + env(safe-area-inset-top)); width:38px; height:38px; border-radius:10px; border:none; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.05rem; cursor:pointer; z-index:4;}
   .gear svg{display:block; width:20px; height:20px; margin:auto; pointer-events:none;}
   #careForm input{box-sizing:border-box; min-width:0; font-family:'IBM Plex Sans',sans-serif; font-size:.85rem; padding:8px 10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink);}
   .palrow{display:flex; gap:6px; margin-bottom:6px;}
@@ -84,8 +87,11 @@
   .wdrow .sw{width:30px; height:30px; border-radius:50%; border:2px solid var(--line); cursor:pointer; padding:0; background:var(--chip); color:var(--muted); font-size:.75rem; line-height:1;}
   .wdrow .sw[aria-pressed="true"]{border-color:var(--accent); outline:2px solid var(--accent); outline-offset:1px;}
   #wdpv{display:block; margin:0 auto 12px; width:132px; image-rendering:pixelated; background:#241F2E; border-radius:10px;}
-  .fsbtn{right:54px !important;}
-  .mapbtn{right:98px !important;}
+  /* the chip in the corner of the world sits over live scenery — pale stone, dark water, a
+     marigold blaze — so it carries its own ground instead of trusting whatever is behind it */
+  #status{background:rgba(16,13,24,.72); color:#EDE9F5; text-shadow:0 1px 2px rgba(0,0,0,.55);}
+  .fsbtn{right:calc(54px + env(safe-area-inset-right)) !important;}
+  .mapbtn{right:calc(98px + env(safe-area-inset-right)) !important;}
   .vmap{display:flex; flex-direction:column; align-items:center; gap:2px; margin-bottom:14px; font-size:.78rem;}
   .vmap .vrow{display:flex; gap:6px; justify-content:center; width:100%;}
   .vmap .vm{border:1.5px solid var(--line); border-radius:8px; padding:6px 8px; background:var(--bg); text-align:center; flex:1;}
@@ -95,7 +101,7 @@
   .viewport.fs{position:fixed; inset:0; z-index:50; border-radius:0; display:flex; align-items:center; justify-content:center;}
   .viewport.fs canvas{width:100%; height:100% !important; object-fit:contain;}
   body.noscroll{overflow:hidden;}
-  .status{position:absolute; left:10px; top:10px; background:rgba(20,16,30,.55); color:#EDE9F5; font-family:'IBM Plex Mono',monospace; font-size:.74rem; padding:5px 10px; border-radius:999px; pointer-events:none; z-index:4; letter-spacing:1px;}
+  .status{position:absolute; left:calc(10px + env(safe-area-inset-left)); top:calc(10px + env(safe-area-inset-top)); background:rgba(20,16,30,.55); color:#EDE9F5; font-family:'IBM Plex Mono',monospace; font-size:.74rem; padding:5px 10px; border-radius:999px; pointer-events:none; z-index:4; letter-spacing:1px;}
   .ticker div+div{margin-top:2px;}
   .ticker .prev{opacity:.55;}
   .ticker{position:absolute; left:10px; top:44px; max-width:58%; background:rgba(20,16,30,.55); color:#EDE9F5; font-family:'IBM Plex Mono',monospace; font-size:.68rem; line-height:1.35; padding:5px 9px; border-radius:10px; z-index:4; cursor:pointer;}
@@ -108,7 +114,7 @@
      overflowing column left, into the world, rather than up and out of it; the cap keeps the
      top of the stack clear of the 38px corner icons at top:10px. The container ignores taps so
      the world can still be walked through the gaps between buttons. */
-  .acts{position:absolute; right:10px; bottom:10px; z-index:5;
+  .acts{position:absolute; right:calc(10px + env(safe-area-inset-right)); bottom:calc(10px + env(safe-area-inset-bottom)); z-index:5;
     display:flex; flex-direction:column-reverse; flex-wrap:wrap-reverse;
     align-items:flex-end; align-content:flex-end; gap:8px;
     max-height:calc(100% - 58px); pointer-events:none;}
