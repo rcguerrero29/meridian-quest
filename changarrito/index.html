@@ -185,7 +185,7 @@
   .paper .dblank .dline{flex:1; border-bottom:1px dashed #B7AD95; min-height:1em;}
   .paper .dkv{display:grid; grid-template-columns:auto 1fr; gap:3px 12px; margin:8px 0;}
   .paper .dkv b{color:#6B6355; font-weight:600;}
-  .paper .dform{margin:10px 0; display:grid; grid-template-columns:minmax(0,1fr); gap:8px;}  /* minmax(0,1fr): a grid column defaults to `auto`, which is as wide as its widest child — that is how one long dropdown option made every field overflow the phone (Rosa 5) */
+  .paper .dform{margin:10px 0; display:grid; grid-template-columns:minmax(0,1fr); gap:12px;}  /* minmax(0,1fr): a grid column defaults to `auto`, which is as wide as its widest child — that is how one long dropdown option made every field overflow the phone (Rosa 5) */
   .paper .dfl{display:grid; gap:3px; font-size:.7rem; letter-spacing:.06em; text-transform:uppercase; color:#6B6355;}
   .paper .dfl input,.paper .dfl textarea,.paper .dfl select{font:inherit; font-size:.85rem; text-transform:none; letter-spacing:0; padding:7px 9px; border:1px solid #B7AD95; border-radius:6px; background:#FFFDF7; color:#2A2620;}
   .paper .dfl textarea{min-height:64px; resize:vertical;}
@@ -218,6 +218,32 @@
   /* The way out still rides along — on a long document (Chelo's eleven-item list, Bere's
      fifty-two) Close, Copy and Download must never be below the fold. It gets there by sitting
      outside the scroll box now instead of floating over it: same result, and nothing underneath. */
+  /* ROSA, FINDING 2 — the page shouted about the least important thing on it.
+     `.dbtn` (sign in, make a new token, file a request, submit) carried a colour and NOTHING else:
+     no height, no padding, no spacing. So each fell back to the browser's default button — 21px
+     tall, roughly half the smallest target a thumb hits reliably — and they flowed inline flush
+     against each other, so a run of three read as one purple bar with hairlines in it. Directly
+     under them, Copy and Download were 68px with 8px of air. Her scale, three roles:
+       primary 48px, the full width of the text column, 12px below it — the things that change
+         something are the biggest, best-spaced things on the sheet, and no two ever touch
+       secondary 44px — the ones that move you or open something
+       quiet 40px, no fill — Copy and Download only copy the page
+     Hit area is 44 even where the paint is smaller. She is leaning on WCAG 2.5.5 and Apple's 44pt
+     rather than 2.5.8's 24px AA floor on purpose: the spacing exception there would let a merely
+     spread-out 21px strip formally conform and still be wrong, and the failure here was never
+     "cannot hit it", it was "hit the wrong one, silently". The 12px gap is wider than Material's 8
+     for the same reason. */
+  .paper .dbtn{display:block; width:100%; box-sizing:border-box; min-height:48px;
+    margin:12px 0 0; padding:13px 16px; font-family:'IBM Plex Sans',sans-serif; font-size:.92rem;
+    border-radius:12px; border:1.5px solid var(--accent); background:var(--accent);
+    color:var(--accent-ink); cursor:pointer; text-align:center;}
+  .paper .opt{min-height:44px; padding:11px 14px;}
+  .paper .ddocs{gap:12px;}
+  .paper .dchecks label{min-height:44px; display:inline-flex; align-items:center; gap:6px;}
+  .paper .docbar{display:flex; gap:12px;}
+  .paper .docbar button{flex:1; min-height:40px; padding:10px 12px; font-family:'IBM Plex Sans',sans-serif;
+    font-size:.82rem; font-weight:500; border-radius:10px; border:1.5px solid #C6BCA2;
+    background:transparent; color:#5A5142; cursor:pointer;}
   .paper .docbar{flex:0 0 auto; margin-top:16px; padding:14px 0 2px; border-top:1px dashed #C6BCA2;
     background:#F7F2E4;}
   .codex{background:var(--gold-bg); border:1px solid var(--gold); border-radius:10px; padding:11px 14px; margin:12px 0;}
@@ -484,6 +510,13 @@
             </div>
             <label id="lbSeason"></label>
             <div class="optrow" id="seasonRow"></div>
+            <!-- how the camera turns: taste, so it is a setting rather than a constant. "Instant"
+                 is exactly the behaviour before this row existed. -->
+            <label id="lbEase" hidden></label>
+            <div class="optrow" id="easeRow" hidden>
+              <button data-ease="instant"></button><button data-ease="quick"></button>
+              <button data-ease="easy"></button><button data-ease="slow"></button>
+            </div>
           </details>
 
           <!-- #127: appearance is its own subject, so it gets its own drawer. These two rows used

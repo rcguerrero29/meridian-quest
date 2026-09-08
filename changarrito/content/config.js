@@ -2,7 +2,13 @@
    street. docs/story/el-changarrito.md. This pack trains no role, carries no curriculum and
    awards no grade that means anything about the player (§7½). */
 const GAMENAME="El Changarrito";
-const GAMEV="ch-v68 · engine mq-v126";   /* the town's own version, and the engine it was built on */
+/* The town never ends. Nacho: "a place you inhabit has no Saturday" — and the owner agreed. Before
+   this, the town declared no CHAPTERS, so the engine synthesised one district holding its single
+   quest, and answering Don Güero ran Meridian's last-day epilogue: Doña Chelo counting the drawer
+   at El Mercado Robles, in a town with no mercado and no Chelo. There is no ending panel here now,
+   no title to claim and no reward — the street is as long tomorrow as it was this morning. */
+const ENDLESS=true;
+const GAMEV="ch-v69 · engine mq-v127";   /* the town's own version, and the engine it was built on */
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;

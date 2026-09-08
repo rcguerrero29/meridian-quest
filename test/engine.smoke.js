@@ -216,6 +216,35 @@ const { chromium } = require('playwright-core');
       }
       cr.hidden = hid;
     }
+    // ---- every button on a sheet is a thumb's target, and none of them touch (Rosa 2) ----
+    // `.dbtn` carried a colour and nothing else, so it fell back to the browser's default — 21px
+    // tall, half a reliable thumb target — and flowed flush against its neighbours, while Copy and
+    // Download beside it were 68. Her floor is 44 for anything that acts, and the buttons that only
+    // copy the page may never be the most prominent thing on it.
+    {
+      const withBtns = Object.keys(DC()).filter(id => { try { return (docSections(id) || []).some(x => x && (x.btn || x.form || x.docs)); } catch (e) { return false; } });
+      const said = {};
+      withBtns.slice(0, 6).forEach(id => {
+        try { docOpen(id); } catch (e) { return; }
+        const sheet = document.getElementById('paperSheet');
+        const acts = [...sheet.querySelectorAll('.dbtn, .opt')].filter(b => b.getBoundingClientRect().height > 0);
+        acts.forEach(b => { const r = b.getBoundingClientRect();
+          if (r.height < 44) said['a "' + b.textContent.trim().slice(0, 18) + '" button on a sheet is ' + Math.round(r.height) + 'px tall — under the 44 a thumb needs'] = 1; });
+        // no two may touch: a miss then lands on the neighbour rather than on nothing
+        for (let i = 0; i < acts.length; i++) for (let j = i + 1; j < acts.length; j++) {
+          const a = acts[i].getBoundingClientRect(), c = acts[j].getBoundingClientRect();
+          const apart = Math.max(a.left - c.right, c.left - a.right, a.top - c.bottom, c.top - a.bottom);
+          if (apart < 8) said['"' + acts[i].textContent.trim().slice(0, 14) + '" and "' + acts[j].textContent.trim().slice(0, 14) + '" are ' + Math.round(Math.max(0, apart)) + 'px apart — a miss lands on the neighbour'] = 1;
+        }
+        // and the quiet end stays quiet
+        const quiet = [...sheet.querySelectorAll('.docbar button')].map(b => b.getBoundingClientRect().height).filter(h => h > 0);
+        const loud = acts.map(b => b.getBoundingClientRect().height);
+        if (quiet.length && loud.length && Math.max(...quiet) > Math.min(...loud))
+          said['the buttons that only copy the sheet (' + Math.round(Math.max(...quiet)) + 'px) are bigger than the ones that change something (' + Math.round(Math.min(...loud)) + 'px)'] = 1;
+        try { document.getElementById('docClose').click(); } catch (e) {}
+      });
+      Object.keys(said).slice(0, 4).forEach(m => P.push('Rosa 2: ' + m));
+    }
     // ---- #127: every drawer is one subject, and its controls live inside it ----
     // Owner: "there is a bug in the main settings menu due to the options for sonny/my character.
     // lets just move that to its own section and re organize so it doesnt break the architecture
@@ -610,6 +639,49 @@ const { chromium } = require('playwright-core');
     return P;
   });
   fails.push(...tallw);
+  /* ---- the loop stops DRAWING behind a panel, and never stops thinking ----
+     Measured before the change: 215 frames in six seconds with a document covering the world, all
+     at full device resolution, none of them visible. The world must still tick — otherwise the dog
+     teleports when you put the paper down — and anything it says while you are reading is held
+     rather than played out behind an opaque panel. */
+  const loopq = await page.evaluate(async () => {
+    const P = [];
+    if (typeof worldCovered !== 'function') { P.push('the loop cannot tell when the world is covered, so it draws behind every panel'); return P; }
+    document.getElementById('world').hidden = false; camSet('3d'); sizeCanvas();
+    /* Count what the LOOP decides to do, rather than how fast WebGL happens to run in a headless
+       page: the rule under test is "does the loop call draw", and that is observable directly. */
+    const realDraw = draw; let calls = 0;
+    draw = function () { calls++; return realDraw.apply(this, arguments); };
+    /* A headless page throttles requestAnimationFrame hard — two frames in half a second, not
+       thirty — so this counts SOME against NONE, which is the whole rule, rather than a rate. */
+    const over = async (ms) => { calls = 0; await new Promise(r => setTimeout(r, ms)); return calls; };
+    const open = await over(800);
+    if (open < 1) P.push('the loop is not drawing the world at all with nothing over it');
+    const doc = Object.keys(DC())[0];
+    docOpen(doc); await new Promise(r => setTimeout(r, 200));
+    if (!worldCovered()) P.push('an open document does not count as covering the world');
+    const covered = await over(800);
+    if (covered > 0) P.push('the world is still drawn ' + covered + ' time(s) behind an open document — nobody can see any of it');
+    // it must still be THINKING, or everything jumps when the paper goes down
+    const t0 = (typeof last !== 'undefined') ? last : null;
+    await new Promise(r => setTimeout(r, 300));
+    const t1 = (typeof last !== 'undefined') ? last : null;
+    if (t0 === null) P.push('cannot tell whether the loop is alive behind a panel');
+    else if (t0 === t1) P.push('the loop stopped entirely behind the panel, so the world will jump when the panel closes');
+    // and what the street said while you were reading is kept, then said
+    toast('a thing happened out there', 900);
+    if (!toastHeld.length) P.push('something the world said behind a panel was spent on nobody');
+    document.getElementById('docClose').click();
+    await new Promise(r => setTimeout(r, 700));
+    if (toastHeld.length) P.push('what the street said while you were reading was never delivered');
+    const back = await over(800);
+    if (back < 1) P.push('the loop did not start drawing again when the panel closed');
+    draw = realDraw;
+    document.getElementById('world').hidden = true;
+    return P;
+  });
+  fails.push(...loopq);
+
   await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();
   if (fails.length) { console.log('FAIL (' + idx + ')\n- ' + fails.join('\n- ')); process.exit(1); }
