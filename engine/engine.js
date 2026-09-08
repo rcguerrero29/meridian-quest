@@ -913,6 +913,49 @@ function petalSpill(w,x,y,sx,sy,scale){
   const c=petalBake("spill|"+x+"|"+y+"|"+sc,Math.ceil(TS*sc),Math.ceil(TS*sc),(g,rnd)=>{const P=petalPal();
     for(let i=0;i<n;i++){const px=rnd()*TS*sc,py=rnd()*TS*sc,a=rnd()*Math.PI*2;petalShape(g,px,py,a,1.0*sc,P[1+((i+d)%(P.length-1))]);}},((x|0)*911+(y|0)*271+3)|0);
   ctx.drawImage(c,sx,sy);}
+/* ---------- el trolley (owner, 2026-09-08) — it comes on its own, it stops for anyone on the line, and it comes
+   when you stand at a stop. Content declares the line in TROLLEYAT; the engine knows nothing about where. ---------- */
+const TRO_EVERY=19000,TRO_SPEED=3.4,TRO_LEN=2,TRO_HOLD=1400;
+const TRO={x:0,dir:1,state:"away",t:0,called:false,said:0};
+function troLine(wid){const L=(typeof TROLLEYAT!=="undefined"&&TROLLEYAT)?TROLLEYAT:[];return L.find(r=>r.world===(wid||world))||null;}
+function troTiles(L){const a=Math.min(L.from,L.to),b=Math.max(L.from,L.to),out=[];for(let x=a;x<=b;x++)out.push([x,L.row]);return out;}
+/* what stands on the line — a wall, a lot, a person, a door. The owner's rule: nothing may. */
+function troBlocked(wid){const L=troLine(wid);if(!L)return [];const w=WORLDS[L.world];if(!w)return [];
+  return troTiles(L).filter(([x,y])=>{const g=w.rows[y]&&w.rows[y][x],lg=w.grid[y]&&w.grid[y][x];
+    return g===undefined||SOLID.has(g)||SOLID.has(lg)||lg==="N"||(typeof portalAt==="function"&&portalAt(L.world,x,y));})
+    .map(([x,y])=>x+","+y);}
+/* is anyone standing on the rails just ahead of the nose? then it waits */
+function troAhead(L){const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),near=v=>{const d=(v-nose)*TRO.dir;return d>=-0.6&&d<=2.6;};
+  if(world===L.world&&Math.round(py)===L.row&&near(px))return true;
+  const w=WORLDS[L.world];if(w&&w.npcs.some(n=>n.y===L.row&&near(n.x)))return true;
+  return (typeof CRIT!=="undefined"?CRIT:[]).some(c=>c.world===L.world&&Math.round(c.y)===L.row&&near(c.x));}
+function troAtStop(L){const w=WORLDS[L.world];if(!w||world!==L.world)return false;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const r=w.rows[py+dy];if(r&&r[px+dx]==="Y")return true;}
+  return false;}
+function troCall(){TRO.called=true;}
+function troUpdate(dt){const L=troLine();
+  if(!L){TRO.state="away";return;}
+  if(TRO.state==="away"){
+    if(troAtStop(L)&&!TRO.called){TRO.called=true;if(T().troCome)toast(T().troCome,2200);}
+    TRO.t+=dt;
+    if(TRO.called||TRO.t>=TRO_EVERY){TRO.called=false;TRO.t=0;TRO.dir=L.to>=L.from?1:-1;TRO.x=L.from-TRO.dir*TRO_LEN;TRO.state="run";}
+    return;}
+  if(troAhead(L)){TRO.state="hold";TRO.t=0;return;}          /* somebody is crossing: wait */
+  if(TRO.state==="hold"){TRO.t+=dt;if(TRO.t<TRO_HOLD)return;TRO.t=0;}
+  TRO.state="run";TRO.x+=TRO.dir*TRO_SPEED*dt/1000;
+  const end=L.to+TRO.dir*TRO_LEN;
+  if((TRO.dir>0&&TRO.x>end)||(TRO.dir<0&&TRO.x<end)){TRO.state="away";TRO.t=0;}}
+function drawTram(g,sx,sy,front){const W=TS*TRO_LEN,H=TS;
+  g.fillStyle="rgba(0,0,0,.18)";g.fillRect(sx+3,sy+H-5,W-6,4);
+  g.fillStyle="#B0563A";g.beginPath();g.roundRect(sx+2,sy+(front?2:5),W-4,H-(front?8:12),5);g.fill();
+  g.fillStyle="#8E4230";g.fillRect(sx+2,sy+(front?2:5),W-4,3);
+  g.fillStyle="#D8E6F0";for(let i=0;i<3;i++)g.fillRect(sx+8+i*(W-20)/3,sy+(front?7:9),(W-24)/3,front?9:7);
+  g.fillStyle="#E0A430";g.fillRect(sx+W/2-4,sy+(front?2:5)-2,8,2);
+  g.fillStyle="#2B2536";[0.22,0.78].forEach(t2=>{g.beginPath();g.arc(sx+W*t2,sy+H-6,2.6,0,7);g.fill();});
+  if(TRO.state==="hold"){g.fillStyle="#D9342B";g.beginPath();g.arc(sx+(TRO.dir>0?W-5:5),sy+(front?5:8),2,0,7);g.fill();}}
+function troDraw2D(wid,toScreen,front){const L=troLine(wid);
+  if(!L||L.world!==wid||TRO.state==="away")return;
+  const[sx,sy]=toScreen(TRO.x,L.row);drawTram(ctx,sx,sy,front);}
 const HEROFEET={}; /* what the hero's shoes carry off the deck */
 /* the moment on the deck (owner, 2026-09-07, night: "if one hangs on the petals, the character picks one up and looks at it
    saying something like 'we will meet once again, love...'"): stand still on the bridge in season for a breath and you
@@ -1263,7 +1306,7 @@ function drawFront(){
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
       ctx.fillStyle="rgba(15,12,20,.16)";ctx.fillRect(sx,sy,TS,8);}
   }
-  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);fiestaDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],true);
+  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);troDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],true);fiestaDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],true);
   drawDecals(camX,camY);
   /* depth pass: facades, decor and actors interleaved by row, back to front */
   const R=[];
@@ -1380,7 +1423,7 @@ function draw(){
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
       ctx.fillStyle="rgba(15,12,20,.13)";ctx.fillRect(sx,sy,TS,6);}
   }
-  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);fiestaDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],false);
+  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);troDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],false);fiestaDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],false);
   drawDecals(camX,camY);drawDecor(camX,camY);
   trees.forEach(([sx,sy])=>{ /* canopy pass: overhangs neighboring tiles, sways gently */
     const sw=Math.sin(Date.now()/900+sx)*1.2,cxT=sx+16+sw,cyT=sy+6;
@@ -2521,7 +2564,7 @@ function loop(ts){
     }
     else{const[dx,dy]=DIRS[dir];fx=px-dx*(1-mt);fy=py-dy*(1-mt);}
   }else if(!tryPortal(ts))tryStep(); /* standing on a door whose cooldown just ran out: go through */
-  petalMomentTick(dt);
+  petalMomentTick(dt);troUpdate(dt);
   dogUpdate(dt,ts);catUpdate(dt,ts);pigUpdate(dt,ts);loroTick(ts);critUpdate(dt,ts);ballUpdate(dt,ts);wanderUpdate(dt);fredCheck();
   if(!$("world").hidden)draw();
   requestAnimationFrame(loop);

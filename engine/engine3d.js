@@ -456,6 +456,20 @@ function t3Build(key){T3.pinatas=[];
         sp.position.set(h.x+0.5,PH+0.02,h.y+0.5);sp.userData={pinata:true,x:h.x,y:h.y};grp.add(sp);T3.pinatas=(T3.pinatas||[]);T3.pinatas.push(sp);});}}
   T3.scene.add(grp);
 }
+function t3Trolley(){ /* the tram, one box on the line; it is never a wall — you may stand where it will pass, and it waits */
+  const L=(typeof troLine==="function")?troLine():null;
+  if(!T3.tram){const g=new THREE.Group();
+    const body=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.1,0.42,0.72),new THREE.MeshLambertMaterial({color:new THREE.Color("#B0563A")}));
+    body.position.y=0.28;g.add(body);
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.05,0.05,0.78),new THREE.MeshLambertMaterial({color:new THREE.Color("#8E4230")}));
+    roof.position.y=0.51;g.add(roof);
+    const win=new THREE.MeshLambertMaterial({color:new THREE.Color("#D8E6F0")});
+    [-0.55,0,0.55].forEach(dx=>{[-1,1].forEach(sd=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.16,0.02),win);
+      m.position.set(dx,0.34,sd*0.37);g.add(m);});});
+    g.userData={tram:true};T3.tram=g;T3.scene.add(g);}
+  const on=!!(L&&L.world===world&&typeof TRO!=="undefined"&&TRO.state!=="away");
+  T3.tram.visible=on;
+  if(on)T3.tram.position.set(TRO.x+TRO_LEN/2,0.02,L.row+0.5);}
 function t3Fiesta(){ /* the piñata sways; it is never hit and gives nothing (Nacho's guardrail) */
   (T3.pinatas||[]).forEach(sp=>{if(!sp.parent)return;sp.material.rotation=Math.sin(Date.now()/700+sp.userData.x)*0.08;});}
 /* the petal trail in 3D: a pool of little flat planes, three per drop, lying on the ground where
@@ -626,7 +640,7 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
     t3Reveal();
     t3Actors();
     t3Petals();
-    t3Fiesta();
+    t3Fiesta();t3Trolley();
     t3Leash();
     T3.renderer.render(T3.scene,T3.cam);
     return true;

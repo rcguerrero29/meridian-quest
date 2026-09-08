@@ -232,6 +232,21 @@ would have none left unless looks key by npc instead.
     the photo, the last cut and the time; Naye confirms at the mirror before anything is cut.
   - ⏳ **❗La fachada** — the shop wears the casa's facade today. A barbershop glyph of its own (a pole,
     the mirror wall from the sidewalk) needs one cold read; or keep the facade and hang a sign.
+- ✅ **❗El camino — ANSWERED A, WITH A REAL TROLLEY (`mq-v114`/`ch-v56`, 2026-09-08).** Owner: *"do the street
+  with a troley at the end or build the trolley that comes in periodically and ther is no building, person or
+  house in the way, or it stops for people crossing or if i call it."* Calle Dos becomes one lane (`ex` row 1)
+  with the sidewalk its two houses stand on below it (row 2, was bed — Doña Tencha's casa and El Portero's
+  caseta were literally stamped in the road), and a crossing at each of their doors. Calle Principal keeps both
+  lanes and its crossing. **El trolley** (`TROLLEYAT` in the pack, `TRO`/`troUpdate` in the engine): it comes on
+  its own every nineteen seconds, runs the line, **waits for anyone standing on it** — you, a neighbour or an
+  animal — and **comes when you stand at a stop**. It is never a wall: you may stand where it will pass and it
+  stops for you. Drawn in both flat cameras (`troDraw2D`) and as a car in 3D (`t3Trolley`). The smoke fails if a
+  wall, a lot, a person or a door stands anywhere on a line — proven red against the old map, which named all
+  six tiles of the two houses. Still open below: what the strip is *called* in the ledger.
+- ⏳ **❗El camino, the leftovers** — Don Güero's four ledger lines are still wrong (CITY.md calls `ex` row 10
+  "canal-side"; CITY.md says Naye's door opens onto the bed; OWNER.md says the papel picado hangs "over the
+  crossing"; the leash still moves you town-to-park with no gate and the park's door is one-way out). And the
+  original review, for the record:
 - ⏳ **❗El camino — what is that grey strip, and where do people cross it?** *(Don Güero, 2026-09-08; owner:
   "the road in meridian doesnt make sense at the moment - don guero has to review")* — **In plain words:** one
   strip runs along the top of both maps and nobody agrees what it is. The ledger calls it a trolley bed, Doña
