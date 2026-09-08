@@ -288,19 +288,36 @@ function t3Build(key){T3.pinatas=[];
         :(wallMat["^plank"]||(wallMat["^plank"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#8A6F4D")})));
       const rail=pet?(wallMat["^railp"]||(wallMat["^railp"]=new THREE.MeshLambertMaterial({color:new THREE.Color(petalPal()[1])})))
         :(wallMat["^rail"]||(wallMat["^rail"]=new THREE.MeshLambertMaterial({color:new THREE.Color("#6E5538")})));
-      const deck=new THREE.Mesh(new THREE.BoxGeometry(1,BRIDGEH,1),[plank,plank,lid,plank,plank,plank]);
-      deck.position.set(cx,BRIDGEH/2,cz);deck.userData={bridge:true,g,x,y,h:BRIDGEH};grp.add(deck);
+      /* the arch: this tile's deck sits at its own camber and is laid at its own slope, so the crossing rises
+         from bank to crown and falls again instead of lying flat over the river (owner, 2026-09-08) */
+      const cam=(typeof bridgeCamber==="function")?bridgeCamber(w,x,y):0,slp=(typeof bridgeSlope==="function")?bridgeSlope(w,x,y):0;
       const wat=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&(TILES[w.rows[ay][ax]]||{}).kind==="water";
       const ew=wat(x,y-1)||wat(x,y+1)||!(wat(x-1,y)||wat(x+1,y)); /* east-west unless the water runs beside it */
+      const deck=new THREE.Mesh(new THREE.BoxGeometry(Math.hypot(1,slp),BRIDGEH,1),[plank,plank,lid,plank,plank,plank]);
+      deck.position.set(cx,BRIDGEH/2+cam,cz);
+      if(ew)deck.rotation.z=Math.atan2(slp,1);else{deck.rotation.y=Math.PI/2;deck.rotation.z=Math.atan2(slp,1);}
+      deck.userData={bridge:true,g,x,y,h:BRIDGEH+cam,arch:cam};grp.add(deck);
+      /* one rib under each row of the crossing, following the same curve down to the water */
+      const rr=(typeof bridgeRun==="function")?bridgeRun(w,x,y):null;
+      if(rr&&rr.i===0){const R=rr.n/2,crown=BRIDGEH+BRIDGE_ARCH;
+        const am=wallMat["^arch"]||(wallMat["^arch"]=new THREE.MeshLambertMaterial({color:new THREE.Color(pet?petalPal()[0]:"#6E5538")}));
+        const rib=new THREE.Mesh(new THREE.TorusGeometry(R,0.055,6,26,Math.PI),am);
+        rib.scale.y=Math.max(0.05,(crown-0.04)/R);
+        rib.position.set(ew?cx-0.5+R:cx,0,ew?cz:cz-0.5+R);
+        if(!ew)rib.rotation.y=Math.PI/2;
+        rib.userData={arch:true,x,y}; /* a rib, not a deck: it carries no lid and nobody stands on it */grp.add(rib);}
       const RH=0.5,PW=0.07;
       const isB=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&(TILES[w.rows[ay][ax]]||{}).kind==="bridge";
       [-1,1].forEach(sd=>{ /* one rail per OPEN side of the crossing: two posts and a bar; none between two deck tiles (the bridge may be two wide) */
         if(isB(x+(ew?0:sd),y+(ew?sd:0)))return;
         const off=0.5-PW/2;
         [-0.46,0.46].forEach(al=>{const post=new THREE.Mesh(new THREE.BoxGeometry(PW,RH,PW),rail);
-          post.position.set(cx+(ew?al:sd*off),BRIDGEH+RH/2,cz+(ew?sd*off:al));post.userData={bridgeRail:true,x,y};grp.add(post);});
+          post.position.set(cx+(ew?al:sd*off),BRIDGEH+cam+RH/2+(ew?al:0)*slp,cz+(ew?sd*off:al)); /* the posts ride the arch */
+          post.userData={bridgeRail:true,x,y};grp.add(post);});
         const bar=new THREE.Mesh(new THREE.BoxGeometry(ew?1:PW,0.05,ew?PW:1),rail);
-        bar.position.set(cx+(ew?0:sd*off),BRIDGEH+RH,cz+(ew?sd*off:0));bar.userData={bridgeRail:true,bar:true,x,y};grp.add(bar);});
+        bar.position.set(cx+(ew?0:sd*off),BRIDGEH+cam+RH,cz+(ew?sd*off:0));
+        if(ew)bar.rotation.z=Math.atan2(slp,1);
+        bar.userData={bridgeRail:true,bar:true,x,y};grp.add(bar);});
       /* papel picado (owner, 2026-09-07: "and papel picado"): when the season hands a palette
          through art("papel"), a string is hung ACROSS the crossing on each deck tile, high over
          the head, between two thin poles at the rails — five little cut-paper flags a string,

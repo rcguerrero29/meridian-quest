@@ -805,6 +805,18 @@ colors".
 
 ---
 
+### 15.4¾ THE CROSSING ARCHES — BUILT 2026-09-08 (`mq-v115`)
+
+Owner: *"for water, make the bridge a bit better, some arching and or dimesionality."* The deck no longer lies
+flat over the river. A half sine gives the height at any point along the run (`bridgeH`); a tile takes the
+average of its two edges as its camber (`bridgeCamber`) and the difference between them as the slope it is laid
+at (`bridgeSlope`), so a two-tile crossing rises from the bank to a crown and falls again. Everything reads the
+same two numbers: the deck box is tilted and lifted, the rail posts and bars ride the curve, and `stairLift`
+puts whoever crosses on the arch rather than on a flat slab. Under each row of the crossing a rib curves down
+to the water (a half torus scaled so its crown sits just under the deck; it takes the heap's colour in season).
+The smoke fails a flat slab: every deck tile must ride above its banks, the run must both rise and fall, the
+bank must not arch, and at least one deck tile in 3D must be laid at a slope with a rib beneath it.
+
 ### 15.4½ THE BRIDGE IS A GRIEF MINI GAME — SAID 2026-09-07, VERSIONS NOT YET PLANNED
 
 Owner, the night of the petals: *"essentially — this is a custom mini game to help deal with the loss
