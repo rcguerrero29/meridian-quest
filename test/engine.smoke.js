@@ -100,6 +100,37 @@ const { chromium } = require('playwright-core');
       T3.group.children.forEach(o => { const u = o.userData || {}; if (u.flat) { flat[u.g] = (flat[u.g] || 0) + 1; (flatIn[u.g] = flatIn[u.g] || new Set()).add(id); } });
     });
     world = before.world; px = fx = before.px; py = fy = before.py; T3.yaw = before.yaw; camSet(before.cam);
+    // ---- fullscreen: the 3D buffer is the shape of the box it is shown in ----
+    // Owner, 2026-09-08: "its still blurry in full screen". `.viewport.fs` gives the canvas
+    // `height:100% !important` and `object-fit:contain`. A drawing buffer whose aspect does not
+    // match the element's box is then RESCALED by the browser before anyone sees it — at
+    // 1440x900 a 2880x2304 buffer was resampled down to 1125x900, letterboxed with bars either
+    // side, and every edge in the world went soft. A 3D camera has no fixed frame to protect, so
+    // it renders the box it is actually given.
+    {
+      const c3 = T3.renderer.domElement, vp = document.getElementById('vp');
+      const before = { cam: camMode, w: world, x: px, y: py, hid: document.getElementById('world').hidden };
+      document.getElementById('world').hidden = false; /* this suite never enters the world; the box needs to be real */
+      camSet('3d'); world = before.w;
+      const check = (why) => {
+        sizeCanvas(); draw3d(); t3Resize();
+        const box = c3.getBoundingClientRect();
+        if (box.width < 2 || box.height < 2) { P.push('fullscreen: the 3D canvas has no box ' + why); return; }
+        const boxAsp = box.width / box.height, bufAsp = c3.width / c3.height;
+        if (Math.abs(boxAsp - bufAsp) / boxAsp > 0.02)
+          P.push('fullscreen: ' + why + ' the 3D buffer is ' + c3.width + '\u00d7' + c3.height + ' (' + bufAsp.toFixed(2) + ') in a ' +
+                 Math.round(box.width) + '\u00d7' + Math.round(box.height) + ' box (' + boxAsp.toFixed(2) + ') — the browser rescales that before it is seen, and every edge goes soft');
+        if (T3.cam && Math.abs(T3.cam.aspect - boxAsp) / boxAsp > 0.02)
+          P.push('fullscreen: ' + why + ' the camera is framed ' + T3.cam.aspect.toFixed(2) + ' for a ' + boxAsp.toFixed(2) + ' box');
+      };
+      check('in a window,');
+      vp.classList.add('fs'); document.body.classList.add('noscroll');
+      check('in fullscreen,');
+      vp.classList.remove('fs'); document.body.classList.remove('noscroll');
+      sizeCanvas();
+      world = before.w; px = fx = before.x; py = fy = before.y; camSet(before.cam);
+      document.getElementById('world').hidden = before.hid;
+    }
     // ---- #131: one candy per window, and a candy smaller than the window it stands in ----
     // Owner: "sugar skull on sills are overlapping". Two ways for that to be true, both checked
     // here for whatever pack this is run against.
