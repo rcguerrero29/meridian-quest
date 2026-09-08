@@ -69,6 +69,54 @@ const CANDIDATES = [
   if (valWarns.length) fails.push('validator warnings: ' + valWarns.join(' | '));
 
   // ---- 2. static invariants inside the page ----
+  // el trolley (owner, 2026-09-08): it runs a line nothing stands on, it comes on its own, it waits for anyone
+  // crossing, and it comes when you stand at a stop. TROLLEYAT is content; the engine knows only the line.
+  {
+    const t = await page.evaluate(() => {
+      const problems = [];
+      if (typeof TROLLEYAT === 'undefined' || !TROLLEYAT.length) { problems.push('the city declares no trolley line'); return problems; }
+      TROLLEYAT.forEach(L => {
+        const w = WORLDS[L.world];
+        if (!w) { problems.push('the trolley runs in a world that does not exist: ' + L.world); return; }
+        const keep = { world, px, py, st: TRO.state, x: TRO.x, t: TRO.t };
+        world = L.world; px = fx = L.from; py = fy = L.row + 2; moving = false;
+        // nothing stands on the line — no wall, no lot, no person, no door
+        const bad = troBlocked(L.world);
+        if (bad.length) problems.push(`something stands on the trolley's line in ${L.world}: ${bad.join(' ')}`);
+        // it comes on its own
+        TRO.state = 'away'; TRO.t = 0; TRO.called = false; px = fx = L.from; py = fy = L.row + 2;
+        troUpdate(100); if (TRO.state !== 'away') problems.push('the trolley leaves before its time');
+        troUpdate(TRO_EVERY); if (TRO.state === 'away') problems.push('the trolley never comes on its own');
+        const x0 = TRO.x; troUpdate(500); if (TRO.x === x0) problems.push('the trolley does not move');
+        // it waits for anyone on the line ahead of it
+        py = fy = L.row; px = fx = Math.round(TRO.x + TRO.dir * 2);
+        troUpdate(200); if (TRO.state !== 'hold') problems.push('the trolley does not stop for someone crossing');
+        const xh = TRO.x; troUpdate(200); if (TRO.x !== xh) problems.push('the trolley rolls through someone crossing');
+        py = fy = L.row + 2; troUpdate(TRO_HOLD + 200); if (TRO.state === 'hold') problems.push('the trolley never starts again once the way is clear');
+        // it comes when you stand at a stop
+        TRO.state = 'away'; TRO.t = 0; TRO.called = false;
+        let stop = null; for (let y = 0; y < w.H && !stop; y++) for (let x = 0; x < w.W; x++) if (w.rows[y][x] === 'Y') { stop = [x, y]; break; }
+        if (!stop) problems.push('the trolley\'s world has no stop to call it from');
+        else { px = fx = stop[0]; py = fy = stop[1]; troUpdate(50);
+          if (!TRO.called && TRO.state === 'away') problems.push('standing at the stop does not call the trolley'); }
+        world = keep.world; px = fx = keep.px; py = fy = keep.py; TRO.state = keep.st; TRO.x = keep.x; TRO.t = keep.t;
+      });
+      // it draws in the flat cameras and stands in 3D
+      const L0 = TROLLEYAT[0]; const keep2 = { world, px, py, cam: camMode };
+      world = L0.world; px = fx = L0.from + 3; py = fy = L0.row + 2; moving = false; TRO.state = 'run'; TRO.x = L0.from + 2; TRO.dir = 1;
+      const d0 = troDraw2D; let drew = 0; troDraw2D = function () { drew++; return d0.apply(this, arguments); };
+      camSet('top'); draw(); camSet('front'); draw(); troDraw2D = d0;
+      if (drew < 2) problems.push('the top and front cameras do not draw the trolley');
+      camSet('3d'); draw3d();
+      const tram = T3.tram;
+      if (!tram || !tram.visible) problems.push('the trolley does not stand in 3D');
+      else if (Math.abs(tram.position.z - (L0.row + 0.5)) > 0.6) problems.push('the trolley in 3D is not on its line');
+      TRO.state = 'away'; camSet('3d'); draw3d(); if (T3.tram && T3.tram.visible) problems.push('the trolley is still there when it has gone');
+      world = keep2.world; px = fx = keep2.px; py = fy = keep2.py; camSet(keep2.cam);
+      return problems;
+    });
+    t.forEach(m => fails.push(m));
+  }
   const stat = await page.evaluate(() => {
     const problems = [];
     const keys = o => Object.keys(o).sort().join(',');

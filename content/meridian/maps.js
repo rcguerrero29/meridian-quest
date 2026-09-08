@@ -62,8 +62,8 @@ const WORLD_DEFS={
      "..J.........J.....J.......J...",
      "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"],
  ex:["...J.....J.....J....J...",
-     "≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
-     "≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
+     "≈≈≈≈≈-≈≈≈≈≈≈≈≈≈≈≈-≈≈≈≈≈≈",
+     "........................",
      "2....................m.Y",
      "..FFFFFFFFF.FFFFFFFFFʘ..",
      "..F..G...G....G...G..F..",
@@ -272,6 +272,13 @@ const MAPDOT={ta:[23,13],pa:[29,1],li:[29,1],no:[25,0],hq:[14,0],f2:[14,0],lc:[6
    second floor of a building — the office came off this list on 2026-09-03 ("i dont like that
    i go from a train to a floor. dont do that. i asked to make the world realistic"). You reach
    the office the way you would reach an office: through the front door and up the stairs. */
+/* ❗El camino, the owner's pick (2026-09-08): "do the street with a troley at the end or build the trolley that
+   comes in periodically and ther is no building, person or house in the way, or it stops for people crossing or
+   if i call it." The line the tram runs, per world: the row, and the ends it enters and leaves by. Calle
+   Principal keeps both lanes and its crossing at x13–14; Calle Dos is one lane (row 1) with the sidewalk its
+   two houses stand on below it (row 2) and a crossing at each door. The smoke fails if anything stands on a
+   line: a wall, a person, a lot or a door. */
+const TROLLEYAT=[{world:"st",row:2,from:0,to:29},{world:"ex",row:1,from:20,to:0}];
 const TRV=[{w:"st",x:1,y:1,dir:"right"},{w:"ex",x:22,y:3,dir:"left"}];
 /* ambient critters: kinds live in the engine (butterfly, colibri, gato); spawns are
    content. Each wanders a small radius around home; the gato is pettable. */
