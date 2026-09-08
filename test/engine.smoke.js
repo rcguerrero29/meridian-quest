@@ -26,6 +26,33 @@ const { chromium } = require('playwright-core');
   await page.goto('file://' + file);
   await page.waitForTimeout(1500);
   const fails = [];
+
+  /* ---- in-scene text has a floor (Rosa's 3D note) ----
+     Text painted into the world is authored in tile units and the camera decides how big it lands:
+     measured on a phone, one unit is about a CSS pixel, so a glyph authored at 5.5 arrives around
+     five pixels tall and stops being letters. Raising it at draw time would only overflow the
+     tile, so the floor is enforced where the art is authored — here, by reading it. Scanned rather
+     than run because these sizes are literals in the drawing code, and a literal is exactly the
+     thing that drifts. */
+  {
+    const fs = require('fs');
+    const SCENE_MIN = 7;
+    const dirs = [path.join(root, 'engine'), path.dirname(path.resolve(root, idx))];
+    const seen = [];
+    const scan = (dir, depth) => { let ents = []; try { ents = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return; }
+      ents.forEach(en => { const f = path.join(dir, en.name);
+        if (en.isDirectory()) { if (depth < 3 && en.name !== 'node_modules') scan(f, depth + 1); return; }
+        if (!/\.js$/.test(en.name)) return;
+        const src = fs.readFileSync(f, 'utf8');
+        const re = /font\s*=\s*"(?:[^"]*?\s)?(\d+(?:\.\d+)?)px\s/g; let m;
+        while ((m = re.exec(src))) { const px = parseFloat(m[1]);
+          if (px < SCENE_MIN) seen.push(path.relative(root, f) + ' draws text at ' + px + ' units'); }
+      }); };
+    dirs.forEach(d => scan(d, 0));
+    [...new Set(seen)].forEach(msg =>
+      fails.push('in-scene text below the floor: ' + msg + ' — under ' + SCENE_MIN + ' units it lands around five CSS pixels on a phone and stops resolving in every camera'));
+  }
+
   if (pageErrors.length) fails.push('page errors: ' + pageErrors.join(' | '));
   warns.filter(w => /^(REACH|PORTAL) /.test(w)).forEach(w => fails.push('boot warning: ' + w));
 

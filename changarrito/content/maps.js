@@ -205,9 +205,14 @@ const DECOR=[{world:"st",x:10,y:0,deco:"sign",kind:"hall",c:"#7A3FE0"},
 const DECOART={board:(sx,sy,d)=>{ctx.fillStyle="#2A2420";ctx.fillRect(sx+1,sy+2,30,15);
   ctx.fillStyle=d.c||"#7A3FE0";ctx.fillRect(sx+1,sy+2,30,1.5);ctx.fillRect(sx+1,sy+15.5,30,1.5);
   ctx.strokeStyle="rgba(15,12,20,.5)";ctx.lineWidth=1;ctx.strokeRect(sx+1,sy+2,30,15);
+  /* Two lines used to be painted at 5.5 units, which lands around five CSS pixels on a phone in
+     every camera — below the size at which letters stop being letters. A board that cannot be read
+     is not a board, it is texture pretending to be one. Both lines are 7 now, the floor for any
+     in-scene text meant to be read (SCENE_MIN in the engine), and the plank is a little taller so
+     they still fit. Eight characters was already the cut; that has not changed. */
   const L=String(d.text||"").split("\n").slice(0,2);ctx.fillStyle="#F2E8D8";ctx.textAlign="center";
   if(L.length===1){ctx.font="700 7px monospace";ctx.fillText(L[0].slice(0,8),sx+16,sy+12);}
-  else{ctx.font="700 5.5px monospace";ctx.fillText(L[0].slice(0,8),sx+16,sy+8.5);ctx.fillText(L[1].slice(0,8),sx+16,sy+14.5);}
+  else{ctx.font="700 7px monospace";ctx.fillText(L[0].slice(0,8),sx+16,sy+8);ctx.fillText(L[1].slice(0,8),sx+16,sy+15.5);}
   ctx.textAlign="start";}};
 /* the engine's own animals, where THIS town puts them (#38): Frederick at the stall, the pigeon
    on the street, Lorenzo in the tree at (12,5) — a perch, not thin air — and no bodega cat,

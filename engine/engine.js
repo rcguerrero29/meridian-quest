@@ -458,6 +458,25 @@ const hasSay=n=>pendingAt(n)!==undefined||roomPending(n)||!!(n&&n.doc); /* a doc
 /* ---------- canvas ---------- */
 const cv=$("cv");let ctx=cv.getContext("2d"); /* let: the 3D baker borrows ctx to render tile art into textures */
 const VW=10*TS,VH=8*TS;
+/* THE FLOOR FOR IN-SCENE TEXT (Rosa's 3D note; the owner: "i say best practices").
+   Text painted into the world is drawn in tile units — 32 to a tile — and then the camera decides
+   how big that lands. Measured on a phone: one tile is about 90 device pixels in 3D and about 66
+   in the flat cameras, so a unit is roughly 2.1–2.8 device pixels, or about one CSS pixel. A glyph
+   authored at 5.5 units therefore arrives around FIVE CSS pixels tall, which is not small type, it
+   is texture that used to be words.
+   The rule this project follows, which is what the standards actually say once you separate the
+   two cases:
+     · Text that carries information may never exist ONLY in the scene. A sign is allowed to be
+       unreadable at a distance the way a real sign is, but whatever it says must also be reachable
+       by walking up to it, or on a board, or in the index. WCAG exempts incidental text and text
+       that is part of a picture for exactly this reason — the obligation is on the information,
+       not on the pixels.
+     · Text that is MEANT to be read in the scene is authored at SCENE_MIN units or more. Below
+       that the letters stop resolving in every camera and at every screen size we ship, so a
+       smaller number is never a legitimate choice — it is a bug that looks like a style.
+   Raising this floor at draw time would only overflow the tile, so it is enforced where the art is
+   authored, and the smoke reads the source and fails the build on anything under it. */
+const SCENE_MIN=7;
 function sizeCanvas(){
   const w=$("vp").clientWidth,scale=window.devicePixelRatio||1;
   cv.style.height=(w*VH/VW)+"px";

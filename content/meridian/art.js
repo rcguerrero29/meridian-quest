@@ -268,8 +268,12 @@ const DECOART={
     ctx.fillStyle="#C0392B";ctx.fillRect(sx+4,sy+20,24,3);
     ctx.fillStyle="#2E5FA8";ctx.fillRect(sx+4,sy+24,24,3);
     ctx.fillStyle="#4E8A58";ctx.fillRect(sx+4,sy+28,24,2);
-    ctx.fillStyle="#3A2F17";ctx.font="700 6px sans-serif";ctx.textAlign="center";
-    ctx.fillText("MERIDIAN",sx+16,sy+7);ctx.textAlign="start";},
+    /* 7 units, the floor for in-scene text (SCENE_MIN): at 6 the word arrived around five CSS
+       pixels tall on a phone and read as a smudge on the mural rather than the town's name.
+       "MERIDIAN" is nine characters across 24 units, so it is condensed rather than shrunk. */
+    ctx.fillStyle="#3A2F17";ctx.font="700 7px sans-serif";ctx.textAlign="center";
+    ctx.save();ctx.translate(sx+16,sy+7.5);ctx.scale(0.88,1);
+    ctx.fillText("MERIDIAN",0,0);ctx.restore();ctx.textAlign="start";},
   /* one panel per business: plaster until you begin, then colour that brightens with the grade */
   panel:(sx,sy,d)=>{
     muralGround(sx,sy);
