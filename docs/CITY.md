@@ -232,6 +232,32 @@ would have none left unless looks key by npc instead.
     the photo, the last cut and the time; Naye confirms at the mirror before anything is cut.
   - ⏳ **❗La fachada** — the shop wears the casa's facade today. A barbershop glyph of its own (a pole,
     the mirror wall from the sidewalk) needs one cold read; or keep the facade and hang a sign.
+- ⏳ **❗El camino — what is that grey strip, and where do people cross it?** *(Don Güero, 2026-09-08; owner:
+  "the road in meridian doesnt make sense at the moment - don guero has to review")* — **In plain words:** one
+  strip runs along the top of both maps and nobody agrees what it is. The ledger calls it a trolley bed, Doña
+  Tencha calls it the water's edge, and the paint says road — `TILEDRAW["≈"]` is grey asphalt with a lane line,
+  walkable end to end, and the only marking on it is a crosswalk at st (13–14, 2–3). It does not read as a
+  street: nothing ever drives on it (the Pass is a menu), there is no kerb, and sidewalk, lot and shop floor are
+  all the same tile. **What he found walking it:** Calle Principal's crossing at x13–14 is the one good bone —
+  it lines up with HQ's door, the arrival tile and the gap in row 5. **Calle Dos has no crossing at all**, yet
+  the bakery, Velázquez, Naye's chair, Yola's cart and the piñata all sit on the far side of the bed from where
+  the corner sets you down. Doña Meche at ex (21,3) with her pot at (21,4) and the pen fence at (20,4) plugs the
+  lane, so the short way to her trolley stop is over the bed (the reach audit still passes on a long detour).
+  The walk from HQ's door east to the corner never touches the bed and is clean.
+  - **A — It's a street. Say so.** *(Don Güero recommends; one PR, content only)* Crosswalk tiles at each ribbon
+    on Calle Dos (x6–7, x12–13, x22) plus one at the corner facing (1,3); one kerb glyph along both bed edges
+    (one cold read); Doña Meche steps to (22,4) keeping her pot and her stop, and the lane opens end to end.
+  - **B — Make it the canal.** The bed becomes water, bridges at st x13–14 and on Calle Dos, poured landings for
+    every north door. Honest with Tencha and worth four quests — but it is a map rewrite, and **her house already
+    stands in it** (ex row 2, x4–6).
+  - **C — Crossings only.** Stripes and the corner, no kerb, no name. Half a PR; the street still reads as a
+    plaza with a stripe painted on it.
+  **Four ledger lines he found wrong, not absorbed:** CITY.md calls ex row 10 "canal-side" (it is the south map
+  fence, the farthest tile from the strip); CITY.md says Naye's door opens "onto the trolley bed" (the template
+  pours pavement at row 1, x21–23 — the code is better than the ledger); OWNER.md says Muertos hangs papel
+  picado "over the crossing" (the swags hang over st row 1, the facade); and the leash moves you town-to-park
+  with no gate while the park's only door is one-way out — the 2026-09-03 train-to-a-floor rule wearing a collar.
+
 - ⏳ **❗El espejo — does the chair get a story, and when** *(Nacho, 2026-09-07; owner: "barber - cool
   can we reuse for MQ then for the story, nacho?")* — **In plain words:** Naye cuts hair on Calle Dos
   and nobody in Meridian has said a word about her yet. She is the only person in the city holding a

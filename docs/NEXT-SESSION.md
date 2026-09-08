@@ -24,7 +24,9 @@ current: each session rewrites the queue before signing off.)*
     (`2` at st (29,1) ↔ ex (0,3)) and to the park (pk (0,6)); where the trolley stops (`Y` at st (0,1), ex (23,3));
     and whether a person can walk HQ's door → Calle Dos → the park without stepping on the tracks. He returns one
     side quest with picks A/B/C, the owner picks, then one PR per road change with the reach audit red first.
-    Invoke `/don-guero` with those five.
+    **Done 2026-09-08: he sat and answered** — ❗El camino is in CITY.md with picks A/B/C (A recommended: call it
+    a street, crosswalks on Calle Dos, a kerb glyph, Doña Meche one tile east so the lane opens). Waiting on the
+    owner's pick; then one PR per road change with the reach audit red first.
 
 **A. The world.** (1) ❗El espejo — the owner picks A/B/C; B is three quests and a small `espejo` district after
 Nolasco, half a sitting; the seam is `people.q` on Naye plus a `CHAPTERS` entry. (2) ❗La fachada — one cold read
