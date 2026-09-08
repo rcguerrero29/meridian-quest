@@ -1129,8 +1129,25 @@ function wellDepth(w,x,y){const row=(w&&w.rows&&w.rows[y])||"";
   if(row[x]==="▼"){let L=0;while(row[x+1+L]==="≡")L++;return L?STAIRH*(L+1):0;}
   const r=stairRun(w,x,y);if(!r||!r.well)return 0;return STAIRH*(r.L-r.i);}
 /* the height anyone standing on (x,y) stands at: up a climbing tread, DOWN a well tread */
+/* the crossing ARCHES (owner, 2026-09-08: "for water, make the bridge a bit better, some arching and or
+   dimesionality"): the deck rises from each bank to a crown over the middle of the water. The height at a
+   point along the run is a half sine; a tile takes the average of its two edges, and the difference between
+   them is the slope it is laid at. Everything else — the rails, the hero, the petals — reads the same two. */
+const BRIDGE_ARCH=0.30;
+function bridgeRun(w,x,y){const isB=(ax,ay)=>{const g=w.rows[ay]&&w.rows[ay][ax];return !!(g&&(TILES[g]||{}).kind==="bridge");};
+  if(!isB(x,y))return null;
+  const wat=(ax,ay)=>{const g=w.rows[ay]&&w.rows[ay][ax];return !!(g&&(TILES[g]||{}).kind==="water");};
+  const ew=wat(x,y-1)||wat(x,y+1)||!(wat(x-1,y)||wat(x+1,y));
+  const at=k=>ew?isB(k,y):isB(x,k);
+  let a=ew?x:y,b=a;while(at(a-1))a--;while(at(b+1))b++;
+  return {i:(ew?x:y)-a,n:b-a+1,ew};}
+const bridgeH=(u)=>BRIDGE_ARCH*Math.sin(Math.PI*Math.max(0,Math.min(1,u)));
+function bridgeCamber(w,x,y){const r=bridgeRun(w,x,y);if(!r)return 0;
+  return (bridgeH(r.i/r.n)+bridgeH((r.i+1)/r.n))/2;}
+function bridgeSlope(w,x,y){const r=bridgeRun(w,x,y);if(!r)return 0;
+  return bridgeH((r.i+1)/r.n)-bridgeH(r.i/r.n);}
 function stairLift(w,x,y){const r=stairRun(w,x,y);if(r&&r.up)return STAIRH*(r.i+1);
-  const g=w.rows[y]&&w.rows[y][x];if(g&&(TILES[g]||{}).kind==="bridge")return BRIDGEH; /* on the bridge you stand on its deck */
+  const g=w.rows[y]&&w.rows[y][x];if(g&&(TILES[g]||{}).kind==="bridge")return BRIDGEH+bridgeCamber(w,x,y); /* on the bridge you stand on its deck, and the deck arches */
   return -wellDepth(w,x,y);}
 TILEDRAW["≡"]=rc=>{const{sx,sy,x,y}=rc; /* a tread from above on a flight that runs east: two risers a tile,
   the nosing shadow on the east edge; a climbing flight lightens step by step, a well darkens */

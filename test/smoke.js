@@ -1114,6 +1114,18 @@ const CANDIDATES = [
     const rails = T3.group.children.filter(o => o.userData && o.userData.bridgeRail);
     if (rails.length < 4) problems.push(`the rainbow bridge has ${rails.length} rail pieces in 3D — it needs a rail each side`);
     if (rails.some(r => r.position.y <= 0.2)) problems.push('a bridge rail stands on the water, not on the deck');
+    // the crossing arches (owner, 2026-09-08: "make the bridge a bit better, some arching and or dimesionality")
+    if (typeof bridgeCamber !== 'function' || typeof bridgeSlope !== 'function') problems.push('the bridge does not arch');
+    else { const pk2 = WORLDS[PL.park], deckT = [];
+      for (let y2 = 0; y2 < pk2.H; y2++) for (let x2 = 0; x2 < pk2.W; x2++) if ((TILES[pk2.rows[y2][x2]] || {}).kind === 'bridge') deckT.push([x2, y2]);
+      if (!deckT.every(([x2, y2]) => bridgeCamber(pk2, x2, y2) > 0.02)) problems.push('a deck tile rides no higher than its banks');
+      const slopes = deckT.map(([x2, y2]) => bridgeSlope(pk2, x2, y2));
+      if (!slopes.some(v => v > 0.05) || !slopes.some(v => v < -0.05)) problems.push('the crossing does not rise and fall — it is a flat slab, not an arch');
+      if (bridgeCamber(pk2, 0, 0) !== 0) problems.push('the bank arches too');
+      const bank = stairLift(pk2, deckT[0][0], deckT[0][1]);
+      if (!(bank > BRIDGEH)) problems.push('standing on the deck does not put you on the arch');
+      if (!decks.some(d => d.rotation.z !== 0)) problems.push('no deck tile in 3D is laid at a slope');
+      if (!T3.group.children.some(o => o.userData && o.userData.arch === true)) problems.push('the crossing has no rib under it'); }
     px = fx = 3; draw3d();
     { const hero = T3.pool.find(p => p.live && p.spr.material.depthTest === false);
       if (!hero || hero.spr.position.y < 0.15) problems.push('standing on the rainbow bridge, the hero is not lifted onto its deck (' + (hero ? hero.spr.position.y.toFixed(2) : 'no hero') + ')'); }
