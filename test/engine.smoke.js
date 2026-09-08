@@ -100,6 +100,52 @@ const { chromium } = require('playwright-core');
       T3.group.children.forEach(o => { const u = o.userData || {}; if (u.flat) { flat[u.g] = (flat[u.g] || 0) + 1; (flatIn[u.g] = flatIn[u.g] || new Set()).add(id); } });
     });
     world = before.world; px = fx = before.px; py = fy = before.py; T3.yaw = before.yaw; camSet(before.cam);
+    // ---- #131: one candy per window, and a candy smaller than the window it stands in ----
+    // Owner: "sugar skull on sills are overlapping". Two ways for that to be true, both checked
+    // here for whatever pack this is run against.
+    if (typeof propSill === 'function' && typeof fiestaProps === 'function') {
+      const seasons = (typeof SEASONS === 'object' && SEASONS) ? Object.keys(SEASONS) : [];
+      const was = (typeof seasonNow === 'function') ? seasonNow() : null;
+      seasons.forEach(sn => {
+        seasonSet(sn);
+        Object.keys(WORLDS).forEach(wid => {
+          const taken = {};
+          fiestaProps(wid).forEach(pr => {
+            if (!pr.sill) return;
+            const win = propSill(wid, pr);
+            if (!win) { P.push('#131: a sill candy at ' + wid + ' (' + pr.x + ',' + pr.y + ') in ' + sn + ' names a tile with no window'); return; }
+            // a candy must leave glass around it, or it reads as pasted over the pane. The pane is
+            // read straight off the map, so this holds whatever propSill decides to report.
+            const box = ((TILES[WORLDS[wid].rows[pr.y][pr.x]] || {}).win || [])[win.i] || [];
+            const pw = box[2], ph = box[3];
+            if (typeof win.size !== 'number')
+              P.push('#131: the candy at ' + wid + ' (' + pr.x + ',' + pr.y + ') is drawn at its full 8px whatever the window is — nothing stops it covering the glass');
+            else if (win.size > pw - 1 || win.size > ph)
+              P.push('#131: the candy at ' + wid + ' (' + pr.x + ',' + pr.y + ') in ' + sn + ' is ' + win.size + 'px in a ' + pw + '\u00d7' + ph + ' window — it covers the glass instead of sitting on the sill');
+            else if (win.size < 4) P.push('#131: the candy at ' + wid + ' (' + pr.x + ',' + pr.y + ') is ' + win.size + 'px — too small to read as a skull');
+            // and no two may share one
+            const key = wid + '|' + pr.x + '|' + pr.y + '|' + win.i;
+            if (taken[key]) P.push('#131: two candies share one window at ' + wid + ' (' + pr.x + ',' + pr.y + ') in ' + sn + ' — each sill takes one');
+            taken[key] = true;
+          });
+        });
+      });
+      // two candies set on one two-window front must land on different panes without being numbered
+      const tile = (() => { for (const wid of Object.keys(WORLDS)) { const w = WORLDS[wid];
+        for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) { const m = TILES[w.rows[y][x]] || {};
+          if (m.win && m.win.length > 1) return { wid, x, y }; } } return null; })();
+      if (!tile) P.push('#131: no facade in this pack has two windows, so the spreading rule cannot be checked');
+      else { const a = { world: tile.wid, x: tile.x, y: tile.y, kind: 'calaverita', sill: true },
+                   b = { world: tile.wid, x: tile.x, y: tile.y, kind: 'calaverita', sill: true };
+        const sn0 = Object.keys(SEASONS)[0], bag = SEASONS[sn0].art;
+        seasonSet(sn0);
+        const keep = bag.props; bag.props = (keep || []).concat([a, b]);
+        const ia = propSill(tile.wid, a), ib = propSill(tile.wid, b);
+        if (!ia || !ib || ia.i === ib.i) P.push('#131: two candies on one front both took window ' + (ia ? ia.i : '?') + ' — a front with two windows must spread them');
+        bag.props = keep;
+      }
+      if (was !== null) seasonSet(was);
+    }
     // ---- #134 "things are looking a bit blurry": nothing is sampled through a LINEAR filter ----
     // This art is a pixel grid. A linear filter blends between texels (and, with a pyramid,
     // between mip levels), which is exactly the smear the owner reported. Nearest keeps the grid.

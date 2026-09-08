@@ -2,7 +2,7 @@
    street. docs/story/el-changarrito.md. This pack trains no role, carries no curriculum and
    awards no grade that means anything about the player (§7½). */
 const GAMENAME="El Changarrito";
-const GAMEV="ch-v59 · engine mq-v117";   /* the town's own version, and the engine it was built on */
+const GAMEV="ch-v60 · engine mq-v118";   /* the town's own version, and the engine it was built on */
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;
