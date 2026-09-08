@@ -2,7 +2,7 @@
    street. docs/story/el-changarrito.md. This pack trains no role, carries no curriculum and
    awards no grade that means anything about the player (§7½). */
 const GAMENAME="El Changarrito";
-const GAMEV="ch-v53 · engine mq-v111";   /* the town's own version, and the engine it was built on */
+const GAMEV="ch-v54 · engine mq-v112";   /* the town's own version, and the engine it was built on */
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;
@@ -50,7 +50,7 @@ const SEASONS={
          props:[{world:"st",x:0,y:0,kind:"calaverita",sill:true},{world:"st",x:7,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:11,y:0,kind:"calaverita",sill:true,foil:"#7B4BA8"},
                 {world:"st",x:16,y:0,kind:"calaverita",sill:true,foil:"#F2B705"},{world:"st",x:22,y:0,kind:"calaverita",sill:true},{world:"st",x:27,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},
                 {world:"st",x:4,y:8,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:12,y:8,kind:"calaverita",sill:true},{world:"st",x:20,y:8,kind:"calaverita",sill:true,foil:"#F2B705"},
-                {world:"pk",x:5,y:6,kind:"ofrenda"},{world:"co",x:3,y:3,kind:"ofrenda"}],
+                {world:"pk",x:6,y:2,kind:"ofrenda"} /* open ground at the top of the bridge's section — under no string (owner, 2026-09-08: "overlapping the papel picado and looks weird") */,{world:"co",x:3,y:3,kind:"ofrenda"}],
          bloom:"#F59E1B",facepaint:true, /* the calavera in Día de Muertos too (owner, 2026-09-07, night) — the engine's five looks */
          sky:"#E8A24A"}},
   /* NOCHE DE ALEBRIJES — the owner's second mode (2026-09-07: "another mode where they turn into
@@ -77,7 +77,7 @@ const SEASONS={
          props:[{world:"st",x:0,y:0,kind:"calaverita",sill:true},{world:"st",x:7,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:11,y:0,kind:"calaverita",sill:true,foil:"#7B4BA8"},
                 {world:"st",x:16,y:0,kind:"calaverita",sill:true,foil:"#F2B705"},{world:"st",x:22,y:0,kind:"calaverita",sill:true},{world:"st",x:27,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},
                 {world:"st",x:4,y:8,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:12,y:8,kind:"calaverita",sill:true},{world:"st",x:20,y:8,kind:"calaverita",sill:true,foil:"#F2B705"},
-                {world:"pk",x:5,y:6,kind:"ofrenda"},{world:"co",x:3,y:3,kind:"ofrenda"}],
+                {world:"pk",x:6,y:2,kind:"ofrenda"} /* open ground at the top of the bridge's section — under no string (owner, 2026-09-08: "overlapping the papel picado and looks weird") */,{world:"co",x:3,y:3,kind:"ofrenda"}],
          bloom:"#F59E1B",sky:"#E8A24A",
          alebrije:{looks:[ /* Pili's five, the same five on every animal so the night reads as one; wings on the wingless */
            {id:"fuego",name:{en:"Ember",es:"Fuego"},tint:"#FF6A00",pat:"#FFC300",accent:"#FF2E88",wings:true},
