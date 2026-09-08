@@ -225,26 +225,70 @@ has its own worktree, and expect the merge queue, not the agents, to become the 
 
 ## 5½ · The crew, as it now stands
 
-Seven files in `.claude/agents/`, each recallable by name. Four were added 2026-09-08 when the
-owner asked whether the roles could exist:
+**Thirteen agents, all recallable by name — see `docs/CREW.md` for who to call and how they hand
+off.** The naming follows a discovery: El Changarrito's six house clerks *already are* the
+work-kinds (records and forms, docs and templates, how it looks, the engine, rooms and stairs, the
+words), which the owner built long before anyone thought about a crew. So the crew is named for the
+street it works on, and the `CREW` seam below is nearly free: a crew member's home is the house
+whose work it owns.
 
-| Who | Role | Edits code? |
-|---|---|---|
-| **Don Güero** | city planner — what gets built, where, and what it costs | no |
-| **Nacho** | story — meaning, arcs, the EN+ES words | no |
-| **Pili** | art and readability — whether anyone can tell what they are looking at | no |
-| **Rosa** | interface — whether a control can be reached, understood and pressed | no |
-| **Chuy** | staff engineer — correctness, which seam a change belongs in, what a test must prove | only when asked |
-| **Tavo** | game design — what a mechanic asks, what it gives back, what it teaches by accident | no |
-| **Yaz** | build and release — CI, the suites, the service worker, cache invalidation | workflow and tests only |
+Seven have a house — Remedios, Chuy, Pili, Beto, Cuca, Nacho, Don Güero. Six do not yet — Rosa,
+Tavo, Yaz, Chava, Paty, Mari.
 
-Three of them (Chuy, Rosa, Yaz) can run the game headless and measure; the rest read and judge.
 **Only one may hold the pen at a time** until worktree isolation is in place — see §5.
 
-The division that makes them worth having: Nacho decides what a thing MEANS, Don Güero decides
-what gets BUILT, Pili decides whether anyone can TELL, Rosa decides whether they can USE it, Tavo
-decides whether it is WORTH their attention, Chuy decides whether it is SOUND, and Yaz decides
-whether it SHIPS. When two disagree, that is the meeting the loft is for.
+## 5¾ · The git setup — what changes from today
+
+Today's process is not wrong; it is **single-threaded on purpose**, and it has held all session.
+The change is smaller than it sounds.
+
+### What stays exactly as it is
+
+- One branch per part, one PR per part, CI green, the owner merges.
+- Red before green; the failing test is written first and quoted in the PR.
+- `GAMEV` and `CACHE` bump together on every engine change.
+- The owner is the only one who merges. **No agent ever merges its own work.**
+- Nothing is force-pushed; nothing rewrites somebody else's history.
+
+### What is different
+
+| | Today | With a crew |
+|---|---|---|
+| **Who works** | one session, one branch, one working tree | several agents, each on its own branch |
+| **The tree** | shared — this is the hazard | one **git worktree per builder**, so nobody edits anybody's files |
+| **Branch name** | one long-lived branch, `claude/...` | one per issue, carrying its number: `claude/131-sill-skulls` |
+| **Claiming** | nothing — I just work | a `taken: <name>` label on the issue **before** the branch exists |
+| **Scope** | whatever the owner asked for that turn | exactly one issue; a second finding becomes a second issue |
+| **Merging** | I merge when CI is green | still the owner or the driving session; the queue is ordered |
+| **Cleanup** | branch reused | branch and worktree deleted on merge; the label clears |
+| **`git add`** | `git add -A` — **which bit twice this session** | explicit paths only, always |
+
+### The three rules that make it safe
+
+1. **One agent, one issue, one branch, one PR.** If a builder finds a second problem, it files it
+   and keeps going on the first. This is what stops a PR from growing until nobody can review it.
+2. **The label is the lock.** An agent claims by labelling before it starts, and the label clears
+   on merge. A claim older than a session is stale and may be taken. The town renders it, so the
+   owner can *see* who has what by walking the street.
+3. **One tree per pen.** Worktree isolation is not a nicety — it is the difference between two
+   agents working and two agents corrupting each other. Without it the safe number of code-editing
+   agents is exactly one, which is what we run today.
+
+### What would have gone wrong today without them
+
+Both hazards are real and already happened, which is why they are written as rules rather than
+advice:
+
+- `git add -A` swept **fifteen of Rosa's scratch files** into a commit that reached `main`.
+  Explicit paths, plus a `.gitignore` rule for the shape, is the fix — and both are in place now.
+- Nacho could not write his own deliverable **at all**, because the only way to keep him from
+  colliding with an in-flight edit was to forbid him the tree. With a worktree he simply writes.
+
+### What does *not* need to change
+
+There is no new tooling, no bot, no automation, no webhook. GitHub already has labels, branches
+and PRs; the town already reads labels. **The crew setup is a convention plus worktrees, not a
+system** — which is the main reason it is worth doing.
 
 ## 6 · The order I would build it
 
