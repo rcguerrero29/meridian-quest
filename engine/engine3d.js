@@ -293,7 +293,7 @@ function t3Build(key){T3.pinatas=[];
     if(stands(w.rows[y][x])&&!SOLID.has(gch)){ /* walkable cutouts: agility gear, and the stairs */
       const g=w.rows[y][x];
       flatTex[g]=flatTex[g]||t3Tex(t3BakeGlyph(g,false,null,false,true));
-      const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[g]}));
+      const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[g],alphaTest:T3ALPHA}));
       s.center.set(0.5,0.06);s.scale.set(1.05,1.05,1);s.position.set(cx,0,cz);
       s.userData={flat:true,g,x,y}; /* a picture standing in the scene — the 3D-realism audit counts these (#39) */
       T3.tintables.push(s.material);grp.add(s);
@@ -446,7 +446,7 @@ function t3Build(key){T3.pinatas=[];
         if(typeof canopyDress==="function")canopyDress(g2,20,16); /* dressed in season; seasonSet drops the bake */
         T3.canopyTex=t3Tex(cc);
       }
-      const cs=new THREE.Sprite(new THREE.SpriteMaterial({map:T3.canopyTex}));
+      const cs=new THREE.Sprite(new THREE.SpriteMaterial({map:T3.canopyTex,alphaTest:T3ALPHA}));
       cs.scale.set(1.7,1.7,1);cs.position.set(cx,1.05,cz);
       cs.userData={flat:true,g:gch,x,y,canopy:true}; /* the canopy is a picture on a real trunk (#39) */
       T3.tintables.push(cs.material);grp.add(cs);
@@ -459,7 +459,7 @@ function t3Build(key){T3.pinatas=[];
               at most six pictures per glyph — so a drawing that varies by tile still varies. */
       const vk=gch+"|"+(((x+y)%6)+6)%6;
       flatTex[vk]=flatTex[vk]||t3Tex(t3BakeGlyph(gch,false,null,false,true,null,x,y));
-      const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[vk]}));
+      const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[vk],alphaTest:T3ALPHA}));
       s.center.set(0.5,0.06);s.scale.set(1.05,1.05,1);
       s.position.set(cx,0,cz);
       s.userData={flat:true,g:gch,x,y}; /* a cutout, not a solid — the 3D-realism audit counts these (#39) */
@@ -491,7 +491,7 @@ function t3Build(key){T3.pinatas=[];
       pl.userData={deco:d.deco,x:d.x,y:d.y};
       T3.tintables.push(m);grp.add(pl);
     }else{
-      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex}));
+      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,alphaTest:T3ALPHA}));
       sp.center.set(0.5,0.06);sp.scale.set(1.05,1.05,1);sp.position.set(cx,0,cz);
       sp.userData={deco:d.deco,x:d.x,y:d.y};
       T3.tintables.push(sp.material);grp.add(sp);
@@ -514,7 +514,7 @@ function t3Build(key){T3.pinatas=[];
         const g=w.grid[p.y]&&w.grid[p.y][p.x],up=g!==undefined&&(SOLID.has(g)||((TILES[g]||{}).lift|0)>=5);
         if(p.kind==="ofrenda"){ /* the ofrenda: a tile-wide picture standing where it was set, on a table's top if the tile is one */
           const c=document.createElement("canvas");c.width=32*K;c.height=32*K;const g2=c.getContext("2d");g2.scale(K,K);drawOfrenda(g2,0,0);
-          const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true}));sp.center.set(0.5,0.02);const sc=up?0.8:1;sp.scale.set(sc,sc,1);
+          const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.02);const sc=up?0.8:1;sp.scale.set(sc,sc,1);
           sp.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);sp.userData={prop:true,ofrenda:true,x:p.x,y:p.y};grp.add(sp);return;}
         if(p.kind!=="calaverita")return;
         const win=typeof propSill==="function"?propSill(world,p):null;
@@ -522,7 +522,7 @@ function t3Build(key){T3.pinatas=[];
            7-pixel pane was the overlap. Off a sill it keeps its full 8. */
         const z=win?win.size:8;
         const c=document.createElement("canvas");c.width=z*K;c.height=z*K;const g2=c.getContext("2d");g2.scale(K,K);drawCalaverita(g2,0,0,p.foil,z);
-        const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true}));sp.center.set(0.5,0.02);sp.scale.set(z/32,z/32,1);
+        const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.02);sp.scale.set(z/32,z/32,1);
         if(win){ /* the facade's window says how high and where along the face; it stands just proud of the south face */
           const H=wallH(g);sp.position.set(p.x+win.cx/32,H*(1-win.sill/32)+0.005,p.y+1.03);sp.userData={prop:true,calaverita:true,sill:true,x:p.x,y:p.y,win:win.i};grp.add(sp);return;}
         const h=p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y));
@@ -530,7 +530,7 @@ function t3Build(key){T3.pinatas=[];
       fiestaHangs(world).forEach(h=>{if(h.kind!=="pinata")return;
         const c=document.createElement("canvas");c.width=32*K;c.height=32*K;const o2=ctx;ctx=c.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
         try{drawPinata(ctx,0,0,0);}finally{ctx=o2;}
-        const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true}));sp.center.set(0.5,0.94);sp.scale.set(1,1,1);
+        const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.94);sp.scale.set(1,1,1);
         sp.position.set(h.x+0.5,PH+0.02,h.y+0.5);sp.userData={pinata:true,x:h.x,y:h.y};grp.add(sp);T3.pinatas=(T3.pinatas||[]);T3.pinatas.push(sp);});}}
   T3.scene.add(grp);
 }
@@ -740,29 +740,71 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
    (0.65·d+0.3). Of the walls that hide you, only the NEAREST is minimized — the piece in front
    of you and its two neighbours drop to a knee-high stub in the wall's top colour (t3Reveal);
    everything else, the far wall included, stays whole. */
-const T3CAMD=7.4,T3CAMH=6.2,T3STUB=0.28;
+const T3CAMD=7.4,T3CAMH=6.2,T3STUB=0.28,T3GHOST=0.55;
+/* #149: every prop, tree crown and cutout in 3D is a PICTURE on a card, and most of that card is
+   see-through. A see-through pixel that still writes depth punches a hole in whatever is drawn after
+   it — which is people: a quest mark beside a desk simply went missing, and nobody could see why,
+   because the thing eating it was invisible. alphaTest throws those pixels away before they reach
+   the depth buffer. 0.25 is low enough to keep a soft edge and high enough to drop the margin. */
+const T3ALPHA=0.25;
 function t3Hides(h,d){return h>0.65*d+0.3;}
-function t3Near(x,y,yaw,fake){ /* the pieces of the one wall nearest (x,y) that hides you at this camera stop; `fake`=[[x,y,h]] for a test */
+/* #140: how high the top of a piece stands, whatever KIND of piece it is. The near-wall rule used to
+   read `geometry.parameters.height`, which a sprite does not have — so a tree crown, a lamp or a
+   piñata could never be considered tall no matter how much of you it covered. A box stands on its
+   own half-height; a billboard hangs from its centre point. */
+function t3Top(o){
+  if(o.isSprite)return o.position.y+o.scale.y*(1-((o.center&&o.center.y)||0));
+  const g=o.geometry&&o.geometry.parameters;
+  return g&&g.height!==undefined?o.position.y+g.height/2:1;
+}
+function t3Wallish(u){return u&&(u.wall!==undefined||u.door||u.winBack||u.counter);}
+function t3Near(x,y,yaw,fake){ /* the pieces nearest (x,y) that hide you at this camera stop; `fake`=[[x,y,h]] for a test */
   const hx=x+0.5,hz=y+0.5,ux=Math.sin(yaw),uz=Math.cos(yaw);
+  /* #140: it used to be a list of KINDS — walls, facades, lintels, doors, window pieces — so a tree,
+     a lamp or a piñata was never considered no matter how much of you it covered (owner: "there are
+     still overlaps with other objects where i seem to walk on them"). A kind list cannot answer the
+     question being asked. The question is only ever "is this thing tall enough, and is it standing
+     between me and the camera", so that is what is asked now, of everything that has a footprint. */
   const pieces=fake?fake.map(([ax,ay,h])=>({x:ax+0.5,z:ay+0.5,h,o:null}))
-    :T3.group.children.filter(o=>{const u=o.userData;return u&&!u.stub&&(u.wall!==undefined||u.door||u.winBack||u.counter);})
-      .map(o=>({x:o.position.x,z:o.position.z,h:(o.geometry.parameters&&o.geometry.parameters.height)||1,o}));
+    :T3.group.children.filter(o=>{const u=o.userData;
+      return u&&!u.stub&&!u.apron&&!u.papel&&!u.swag&&!u.string&&(t3Wallish(u)||u.x!==undefined);})
+      .map(o=>({x:o.position.x,z:o.position.z,h:t3Top(o),o}));
   const hits=[];pieces.forEach(p=>{const dx=p.x-hx,dz=p.z-hz,d=dx*ux+dz*uz,side=Math.abs(dz*ux-dx*uz);
     if(d>0.4&&d<T3CAMD&&side<0.9&&t3Hides(p.h,d))hits.push({p,d});});
   if(!hits.length)return [];
-  const dmin=Math.min(...hits.map(e=>e.d)); /* the nearest wall; its neighbours one tile either side, in the same row */
-  return pieces.filter(p=>{const dx=p.x-hx,dz=p.z-hz,d=dx*ux+dz*uz,side=Math.abs(dz*ux-dx*uz);return Math.abs(d-dmin)<0.55&&side<1.6;});}
-function t3Reveal(){ /* every wall whole, but the one nearest that hides you: hidden, a stub in its footprint */
+  const dmin=Math.min(...hits.map(e=>e.d)); /* the nearest thing; its neighbours one tile either side, in the same row */
+  return pieces.filter(p=>{const dx=p.x-hx,dz=p.z-hz,d=dx*ux+dz*uz,side=Math.abs(dz*ux-dx*uz);
+    return Math.abs(d-dmin)<0.55&&side<1.6&&t3Hides(p.h,Math.max(d,0.4));});}
+/* #140: TWO ways out of the way, because a wall and a tree are not the same thing.
+   A wall is a plane you are meant to see over: dropping it to a knee-high stub in its own top colour
+   reads as a cutaway, which is what every third-person camera does, and it is what the owner already
+   signed off on in #65. A tree, a lamp, a piñata is an OBJECT: half a tree is not a cutaway, it is a
+   missing tree, and the room stops making sense. So a tall object turns to GLASS instead — still
+   there, still in its place, drawn at T3GHOST so you can be seen through it.
+   The glass is drawn AFTER the people and writes no depth, which is why the hero can keep drawing
+   through walls (#22, #92) and still read as being BEHIND the tree: the crown is painted over him at
+   55%, so the pixel holds both of them and the position is honest either way.
+   Materials can be shared between pieces of one glyph, so the glass copy is made once per PIECE and
+   kept beside the solid one — never edited in place, or one tree would fog the whole row. */
+function t3Reveal(){
   const key=world+"|"+px+"|"+py+"|"+t3Q()+"|"+T3.builtKey;
   if(T3.nearKey!==key){T3.nearKey=key;T3.near=t3Near(px,py,Math.round(T3.yaw/(Math.PI/2))*(Math.PI/2));}
   const cut3=new Set((T3.near||[]).map(p=>p.o).filter(Boolean));
-  T3.group.children.slice().forEach(o=>{const u=o.userData;if(!u||u.stub||!(u.wall!==undefined||u.door||u.winBack||u.counter))return;
+  T3.group.children.slice().forEach(o=>{const u=o.userData;if(!u||u.stub)return;
     const cut=cut3.has(o);
-    if(cut&&!u.stub3){const g=o.geometry.parameters||{},m=o.material,top=Array.isArray(m)?m[2]:m;
-      const st=new THREE.Mesh(new THREE.BoxGeometry(g.width||1,T3STUB,g.depth||1),top);
-      st.position.set(o.position.x,o.position.y-(g.height||1)/2+T3STUB/2,o.position.z);st.rotation.y=o.rotation.y;
-      st.userData={stub:true,x:u.x,y:u.y};T3.group.add(st);u.stub3=st;}
-    o.visible=!cut;if(u.stub3)u.stub3.visible=cut;});}
+    if(t3Wallish(u)){
+      if(cut&&!u.stub3){const g=o.geometry.parameters||{},m=o.material,top=Array.isArray(m)?m[2]:m;
+        const st=new THREE.Mesh(new THREE.BoxGeometry(g.width||1,T3STUB,g.depth||1),top);
+        st.position.set(o.position.x,o.position.y-(g.height||1)/2+T3STUB/2,o.position.z);st.rotation.y=o.rotation.y;
+        st.userData={stub:true,x:u.x,y:u.y};T3.group.add(st);u.stub3=st;}
+      o.visible=!cut;if(u.stub3)u.stub3.visible=cut;return;}
+    if(!cut&&!u.solid3)return;               /* never been glass and is not now: leave it alone */
+    if(!u.solid3){u.solid3=o.material;
+      const mk=q=>{const c=q.clone();c.transparent=true;c.opacity=T3GHOST;c.depthWrite=false;return c;};
+      u.glass3=Array.isArray(o.material)?o.material.map(mk):mk(o.material);}
+    o.material=cut?u.glass3:u.solid3;
+    o.renderOrder=cut?1500:0;                /* after the people, so it tints them instead of hiding them */
+  });}
 function t3Glow(){ /* the light under every door breathes — same clock as the 2D art */
   const a=0.25+0.2*Math.sin(Date.now()/380);
   T3.glows.forEach(m=>{m.opacity=a;});

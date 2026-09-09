@@ -639,6 +639,74 @@ const { chromium } = require('playwright-core');
     return P;
   });
   fails.push(...tallw);
+
+  /* ---- #140 / #149: a thing you stand behind must not swallow you, and its empty corners are not solid ----
+     The owner walked into it twice: "there are still overlaps with other objects where i seem to walk on
+     them", and separately, people losing their quest marks near a desk. Two different faults with one
+     camera between them.
+     #149 first, because it is the plain one. Every prop, tree crown and cutout in this world is a PICTURE
+     on a card, and most of that card is see-through. A see-through pixel that still writes depth punches a
+     hole in whatever is drawn after it — which is people. alphaTest throws those pixels away before they
+     reach the depth buffer, and the hole closes.
+     #140 is the tall one. Only WALLS were ever cut away when they came between you and the camera; a tree,
+     a lamp, a piñata never were. Cutting them to a knee-high stub the way a wall is cut would be worse — a
+     tree is not a wall and half a tree is nonsense — so a tall thing that hides you turns to glass instead:
+     it is still there, still in its place, and you can be seen through it. Written as what a person sees:
+     stand behind the tree and BOTH the crown and you are in that pixel. Today only you are. */
+  const ghost = await page.evaluate(() => {
+    const P = [];
+    const wd = document.getElementById('world'), wh = wd.hidden; wd.hidden = false;
+    const before = camMode, bw = world, bx = px, by = py;
+    camSet('3d'); sizeCanvas();
+    // #149 — every baked picture in the scene throws its see-through pixels away
+    const solidMargins = [];
+    for (const wn of Object.keys(WORLD_DEFS)) {
+      world = wn; px = fx = 1; py = fy = 1; t3Invalidate(); draw3d();
+      T3.group.children.forEach(o => {
+        if (!o.isSprite || !o.material || !o.material.map) return;
+        const u = o.userData || {};
+        if (!(u.flat || u.prop || u.canopy || u.pinata || u.deco)) return;
+        if (!(o.material.alphaTest > 0)) solidMargins.push(wn + ':' + (u.g || u.deco || (u.canopy && 'canopy') || 'prop'));
+      });
+    }
+    if (solidMargins.length)
+      P.push('#149: ' + solidMargins.length + ' picture(s) in 3D still count their empty corners as solid, so they cut holes in anyone standing near them (' + [...new Set(solidMargins)].slice(0, 4).join(', ') + ')');
+
+    // #140 — find a tall thing that is not a wall, stand one tile behind it, and look
+    let found = null;
+    for (const wn of Object.keys(WORLD_DEFS)) {
+      world = wn; px = fx = 1; py = fy = 1; t3Invalidate(); draw3d();
+      const tall = T3.group.children.filter(o => {
+        const u = o.userData || {}; if (!u || u.stub || u.apron) return false;
+        if (u.wall !== undefined || u.door || u.winBack || u.counter) return false;
+        return u.x !== undefined && u.y !== undefined && t3Top(o) > 1.2;
+      });
+      for (const o of tall) {
+        const sx = o.userData.x, sy = o.userData.y - 1;   // one tile toward the camera at yaw 0
+        if (sy < 0 || SOLID.has(CW().grid[sy][sx])) continue;
+        found = { wn, sx, sy }; break;
+      }
+      if (found) break;
+    }
+    if (!found) { P.push('#140: no tall non-wall piece with room to stand behind it was found in any world — the check never ran'); }
+    else {
+      world = found.wn; px = fx = found.sx; py = fy = found.sy; moving = false; held = null;
+      T3.yaw = 0; t3Invalidate(); draw3d();
+      const cut = (T3.near || []).filter(p => p.o && !(p.o.userData.wall !== undefined || p.o.userData.door || p.o.userData.winBack || p.o.userData.counter));
+      if (!cut.length)
+        P.push('#140: standing right behind a ' + (CW().grid[found.sy + 1][found.sx]) + ' in ' + found.wn + ', the only things the camera will move out of your way are walls — the thing in front of you is left solid, which is the "I seem to walk on them" report');
+      else {
+        const bad = cut.filter(p => !(p.o.material && (Array.isArray(p.o.material) ? p.o.material[0] : p.o.material).opacity < 1));
+        if (bad.length) P.push('#140: the piece between you and the camera was picked out but never turned to glass — you still cannot be seen through it');
+        const anyStub = cut.some(p => p.o.userData.stub3);
+        if (anyStub) P.push('#140: a tree or a prop was cut down to a knee-high stub the way a wall is — half a tree is not a cutaway, it is a missing tree');
+      }
+    }
+    world = bw; px = fx = bx; py = fy = by; t3Invalidate();
+    camSet(before); sizeCanvas(); wd.hidden = wh;
+    return P;
+  });
+  fails.push(...ghost);
   /* ---- the loop stops DRAWING behind a panel, and never stops thinking ----
      Measured before the change: 215 frames in six seconds with a document covering the world, all
      at full device resolution, none of them visible. The world must still tick — otherwise the dog
