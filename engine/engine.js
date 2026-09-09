@@ -935,7 +935,13 @@ function propSill(wid,p){
   if(!p.sill)return null;const w=WORLDS[wid],g=w&&w.rows[p.y]&&w.rows[p.y][p.x],m=(TILES[g]||{}),wins=m.win;
   if(!wins||!wins.length)return null;
   const i=sillWindow(wid,p,wins.length),win=wins[i]||wins[0];
-  const size=Math.max(4,Math.min(8,Math.round(win[2]*0.66),Math.round(win[3]*0.9)));
+  /* #131 cut the candy from a flat 8 to two thirds of the pane, because at 8 in an 8-pixel window it
+     filled the glass edge to edge and its crown poked over the frame. Two thirds was my number and it
+     was too small: 8x8 to 5x5 is SIXTY-ONE PERCENT of the sweet gone, and on a wall 1.1 units high seen
+     from twelve tiles back that is three screen pixels. The owner, 2026-09-09: "the skulls are still
+     hidden on the sills." They were never hidden. They were shrunk, by me, fixing the opposite fault.
+     0.85 leaves a pixel of glass each side — a sweet ON a sill, not a sweet AVOIDING one. */
+  const size=Math.max(4,Math.min(8,Math.round(win[2]*0.85),Math.round(win[3]*0.9)));
   return {cx:win[0]+win[2]/2,sill:win[1]+win[3],size,i,w:win[2],h:win[3],g};}
 function drawOfrenda(g,x,y){ /* la ofrenda (Nacho, 2026-09-07; the owner: "sounds like a good idea"): a tiered table under a marigold arch —
   the cloth, three candles, pan de muerto, a calaverita, and at the top an EMPTY frame, nobody named: "that one's for whoever needs it".
