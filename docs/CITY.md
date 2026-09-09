@@ -273,6 +273,12 @@ would have none left unless looks key by npc instead.
   picado "over the crossing" (the swags hang over st row 1, the facade); and the leash moves you town-to-park
   with no gate while the park's only door is one-way out — the 2026-09-03 train-to-a-floor rule wearing a collar.
 
+- ✅ **❗El espejo — ANSWERED B (owner, 2026-09-09: "if nacho recommends ill say yes"). NOT YET BUILT.**
+  Three quests and a small `espejo` district, `need:2`, opening after Nolasco — *La foto* (the brief is not the
+  request), *Nomás tantito* (the confirm before the irreversible step), *La tía* (Chelo Robles). Naye is the only
+  person in the city holding a tool that cannot be undone, and the beat she carries is human-in-the-loop with
+  scissors. Next: Nacho writes the three quests EN+ES, Don Güero places the district, and the chapter block goes
+  in `content/meridian/config.js` after `nolasco`. The original options are kept below for the record.
 - ⏳ **❗El espejo — does the chair get a story, and when** *(Nacho, 2026-09-07; owner: "barber - cool
   can we reuse for MQ then for the story, nacho?")* — **In plain words:** Naye cuts hair on Calle Dos
   and nobody in Meridian has said a word about her yet. She is the only person in the city holding a
