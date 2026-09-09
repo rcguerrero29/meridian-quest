@@ -208,10 +208,24 @@ const chillLines=k=>{
 })();
 /* full-universe reachability audit: BFS from the hero's spawn across every world THROUGH portals.
    Guarantees: every walkable tile is reachable, and every character always has a reachable adjacent tile. */
-function auditReach(){
+/* `grown`: audit a city with every lot raised, where NOTHING may be unreachable. Left off, a world
+   nothing reaches is skipped, because at a fresh boot seven of Meridian's fifteen worlds are behind
+   doors the city has not built yet and that is correct. Left off FOREVER, which is what it was, the
+   audit could not see a district fall off the map: delete one portal line and Taller Herrera leaves
+   the city — 161 walkable tiles, three people, eight quests — and this function returned []. Worse,
+   severing the door TILE instead reported "st: 5 walkable tiles unreachable", the leftover pocket of
+   pavement, pointing away from the fault. (#155; the owner: "do fix the part where a missing world
+   wouldn't register.") */
+function auditReach(grown){
   const probs=[],seen={};Object.keys(WORLDS).forEach(k=>seen[k]=new Set());
   const walk=(id,x,y)=>{const w=WORLDS[id];return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N");};
-  const q=[[PL.home,PL.spawn[0],PL.spawn[1]]];if(seen[PL.home])seen[PL.home].add(PL.spawn[0]+","+PL.spawn[1]);
+  /* seed EVERY declared arrival, not just the spawn. The park has no portal — the leash carries you
+     there — so it had zero reached tiles at every boot and was therefore never audited at all. An
+     arrival a pack declares is a way in, whether or not it is a door. */
+  const q=[];
+  const seed=(id,x,y)=>{if(WORLDS[id]&&walk(id,x,y)&&!seen[id].has(x+","+y)){seen[id].add(x+","+y);q.push([id,x,y]);}};
+  seed(PL.home,PL.spawn[0],PL.spawn[1]);
+  if(PL.park&&PL.parkIn)seed(PL.park,PL.parkIn[0],PL.parkIn[1]);
   while(q.length){const[idw,x,y]=q.shift();
     const pp=portalAt(idw,x,y);
     if(pp){const p=pp,key=p.x+","+p.y;
@@ -219,7 +233,14 @@ function auditReach(){
     [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{const nx=x+dx,ny=y+dy,key=nx+","+ny;
       if(!seen[idw].has(key)&&walk(idw,nx,ny)){seen[idw].add(key);q.push([idw,nx,ny]);}});}
   Object.entries(WORLDS).forEach(([id,w])=>{
-    if(seen[id].size===0)return; /* world locked behind a not-yet-built portal (e.g. the Studio pre-completion) — audited once it opens */
+    if(seen[id].size===0){
+      /* nothing reaches it. Before the city is grown that is ordinary — the lot is not built yet.
+         With every lot raised it means the place has fallen off the map, and it is said in the
+         words a person would use, naming who is stranded, because "0 tiles reachable" reads like
+         a rounding error and three people waiting does not. */
+      if(grown){const who=w.npcs.map(n=>n.npc);
+        probs.push(id+" is on the map and no way leads into it"+(who.length?" — "+who.join(", ")+" "+(who.length===1?"is":"are")+" in a room nobody can walk into":""));}
+      return;}
     w.npcs.forEach(n=>{const ok=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen[id].has((n.x+dx)+","+(n.y+dy)));
       if(!ok)probs.push("NPC unreachable: "+n.npc+" in "+id);});
     let un=0;

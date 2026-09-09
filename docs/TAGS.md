@@ -148,6 +148,36 @@ side.**
 preferences, not answers. The only ungraded conversation today is `INTERVIEW`, which is not a quest
 and pays nothing.
 
+### L12 · `ENDLESS` is the district-advance switch, not a story flag
+`engine/engine.js:303`, `:3439`, `changarrito/content/config.js:10`. It reads as "skip the epilogue."
+It is not. `chDue()` returns false when `ENDLESS` is set, so the ending panel never opens — and
+`$("endGo")`'s click handler is the **only** writer of `chSeen` in the engine. `chSeen` gates which
+quests are on offer (`:291`), which storefronts are up (`ribbonUp`, `:305`) and `GROWTH` staging.
+**An endless pack with two or more districts never opens the second, silently.** El Changarrito is
+immune only because it declares no `CHAPTERS` and receives one synthesised district.
+It is two settings wearing one coat — *"does an ending panel play"* and *"how does this world open
+its next district"* — and the second has no tag at all. The recommendation on the register is to
+**split, not rename**: `ENDING:false` for the panel, and give the advance its own trigger, which is
+also what `docs/OWNER.md`'s *"a day may end, it may never close anything"* has been asking for.
+
+### L13 · `flat` does not exist, and `water` is doing its job under a noun
+`engine/engine3d.js:401` is the only path that renders a **solid tile with no standing geometry**,
+and it is reached by `kind==="water"`. A pack wanting a flower bed, a plot, a puddle or a rug either
+walks through it or gets a cardboard cutout (`:461`). The honest kind is `flat` — *drawn into the
+ground plane, zero height, no standing geometry* — which is `water` with the noun taken out;
+solidity keeps coming from `SOLIDX`, because **`kind` has never set walkability.**
+Register the coupling too: `kind:"water"` triggers Meridian's marigold petal spill (`engine.js:585`,
+`:1427`) and the bridge's orientation test (`:1005`), so `~` keeps `water` as an alias until those
+move to a flag. That is the migration.
+
+### L14 · `kind` does not decide walkability, and half the vocabulary assumes it does
+`SOLID`/`SOLIDX` decides. `engine3d.js:399` skips every non-solid glyph **before `kind` is ever
+read**. The renderer knows exactly five shapes — box (`wall`/`facade`), billboard panel (`fence`),
+trunk-plus-canopy (`tree`), freestanding box (`box:true`, and only with a `TILEART_SIDE` drawing),
+and floor paint (`water`) — and everything else falls through to a cardboard cutout. Anyone planning
+by `kind` alone is planning against nothing. This is the mechanism behind L7 and the reason the seven
+inert kinds went unnoticed for so long.
+
 ---
 
 ## Collisions — one word, several jobs
@@ -158,7 +188,7 @@ and pays nothing.
 | `mark` | **four** — portal direction, calavera accent colour, per-quest attempt tally, `kind:"marker"` | `maps.js:185`, `engine.js:2345`, `:261`, `:1338` |
 | one district | **four names** — chapter id `mercado`, world id `me`, ribbon id `me`, DOCS key `mercado`, plus a 1-based `district:` number inferred from array position | `config.js:213/66/78`, `docs.js:119` |
 | walkability | **three overlapping tags** — `SOLID`, `stand`, `standsUp`, plus `kind:"door"` duplicating `DOORSET` | `engine.js:1359–1360`, `:4882` |
-| `box` | duplicates `kind` | `engine3d.js:241` |
+| `box` | **three spellings of one geometry** — `m.box \|\| m.kind==="furniture" \|\| m.kind==="appliance"`, and the only one named for the geometry is the flag. `furniture` and `appliance` are Meridian's nouns for the same box and no renderer can tell them apart | `engine3d.js:241` |
 
 ---
 

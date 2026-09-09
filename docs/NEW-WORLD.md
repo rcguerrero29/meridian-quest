@@ -28,6 +28,36 @@ Then open a bible and a ledger on day one, empty:
 the owner's recurring dog, not the engine's; he appears in the owner's worlds by choice, and a
 world for someone else gets its own dog, or none. Ask before declaring a new world's `CRITTERS`.
 
+## 0½ · Does your world END? — ask this before anything else (2026-09-09)
+
+**The owner's decision, signed:** whether a world ends is the pack's choice, and **the template's
+default is that it ends.** A pack that says nothing gets a last day, an epilogue and a grade.
+
+    const ENDLESS = true;    // in the pack's config.js — this world never ends
+
+Ask it first, because every later answer depends on it, and because getting it wrong is not a
+setting you notice — it is Meridian's goodbye speech printing itself into somebody else's game.
+That already happened to El Changarrito before this flag existed.
+
+| | **A world that ENDS** (the default) | **A world that does not** |
+|---|---|---|
+| Declares | `CHAPTERS`, and nothing else | `ENDLESS = true`, and **no** `CHAPTERS` |
+| Has | a last day, an epilogue panel, a grade | none of those |
+| Story shape | an arc with a Saturday | people you keep returning to |
+| Good for | a course, an engagement, a season | a place you inhabit; a backlog; a comfort world |
+
+**Do not keep the chapter skeleton with the lesson removed.** Nacho's warning, and it is the whole
+trap: *a Saturday with nothing to graduate from is a countdown to nothing.* Pick one shape.
+
+**❗ Known fault, not yet fixed, and it bites exactly here.** `ENDLESS = true` today does more than
+suppress the ending — it **freezes district progression.** `chDue()` (`engine/engine.js:303`) returns
+false, so the ending panel never opens, and `$("endGo")` (`:3439`) is the *only* place in the engine
+that advances `chSeen`. `chSeen` gates which quests are on offer, which storefronts are up, and city
+growth. **An endless pack with two or more districts is locked in district one forever, with no
+error.** The town is immune only because it declares no chapters and gets one synthesised district.
+Until that is fixed, an endless world must have exactly one district. Registered as L12 in
+`docs/TAGS.md`.
+
 ## 1 · The folder — nine files, and which ones the engine actually needs
 
 ```

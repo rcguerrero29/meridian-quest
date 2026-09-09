@@ -707,6 +707,68 @@ const { chromium } = require('playwright-core');
     return P;
   });
   fails.push(...ghost);
+
+  /* ---- #155: a place can fall off the map, and the pack says what it is ----
+     The owner: "do fix the part where a missing 'world' wouldn't register. please make it so we
+     have some basic tests. open world with 10? ok we check for the setting and 10 cities or world
+     or whatever."
+     Two checks, and the first one is the reason the second is trustworthy. The audit used to skip
+     any world nothing reached, because at a fresh boot seven of Meridian's fifteen worlds are behind
+     doors the city has not built yet. So it also skipped the case where a district simply lost its
+     only door. Measured before this: deleting one portal took Taller Herrera out of the city — 161
+     walkable tiles, three people, eight quests — and the audit returned an empty list.
+     The test raises every lot, proves the grown city is clean, then SEVERS a door and proves the
+     audit says so by name. A check that has never been red is not a check. */
+  const orphan = await page.evaluate(() => {
+    const P = [];
+    // ---- the declaration: what this pack says it is, and whether that is what it has ----
+    const ids = Object.keys(WORLD_DEFS), n = ids.length;
+    if (Object.keys(WORLDS).length < n)
+      P.push('#155: the pack declares ' + n + ' worlds and only ' + Object.keys(WORLDS).length + ' were built');
+    const endless = (typeof ENDLESS !== 'undefined') && !!ENDLESS;
+    const chapters = (typeof CHAPTERS !== 'undefined' && CHAPTERS) ? CHAPTERS.length : 0;
+    // a world that ENDS must say how; a world that does not end must not carry an ending it never plays
+    if (!endless && !chapters)
+      P.push('#155: this pack does not declare ENDLESS, so its world ends — but it declares no chapters, so nothing can ever end it');
+    if (endless && chapters)
+      P.push('#155: this pack declares ENDLESS and ' + chapters + ' chapters — a world that does not end cannot also have a last day');
+    if (!PL.home || !PL.spawn) P.push('#155: the pack names no home world or no spawn — nothing can be reached from nowhere');
+
+    // ---- the grown city: with every lot raised, nothing may be unreachable ----
+    // applyGrowth() rewinds each world to the map it shipped with and builds back what has been
+    // EARNED, so the whole city is "every quest answered, every district seen". Ribbons alone are
+    // not enough: La Obra's own door is a staged lot, and the Studio's interior is a BUILD.
+    const beforeSeen = chSeen, beforeDone = new Set(done);
+    for (let i = 0; i < 999; i++) done.add(i);   // every quest answered, whatever a pack has
+    chSeen = 999; applyGrowth();
+    const clean = auditReach(true);
+    if (clean.length)
+      P.push('#155: with every lot in the city built, somewhere still cannot be reached — ' + clean.join(' | '));
+
+    // ---- and it must NOTICE. Sever every way into an inhabited world and expect to be told ----
+    const victim = ids.find(id => id !== PL.home && WORLDS[id] && WORLDS[id].npcs.length
+      && Object.keys(PORTALS).some(w => Object.entries(PORTALS[w] || {}).some(([, p]) => p.to === id)));
+    if (!victim) {
+      P.push('#155: no inhabited world with a door into it was found, so the check that a missing place registers never ran');
+    } else {
+      const cut = [];
+      Object.keys(PORTALS).forEach(w => Object.entries(PORTALS[w] || {}).forEach(([ch, p]) => {
+        if (p.to === victim) { cut.push([w, ch, p]); delete PORTALS[w][ch]; }
+      }));
+      const said = auditReach(true);
+      cut.forEach(([w, ch, p]) => { PORTALS[w][ch] = p; });
+      const named = said.some(s => s.indexOf(victim) === 0);
+      if (!named)
+        P.push('#155: ' + victim + ' was cut out of the city with ' + WORLDS[victim].npcs.length +
+               ' people still standing in it, and the audit did not say so — this is the fault the ticket is about');
+      const people = WORLDS[victim].npcs.map(x => x.npc);
+      if (named && people.length && !said.some(s => s.indexOf(people[0]) >= 0))
+        P.push('#155: the audit noticed ' + victim + ' but did not say who is stranded in it — "0 tiles reachable" reads like a rounding error');
+    }
+    chSeen = beforeSeen; done.clear(); beforeDone.forEach(i => done.add(i)); applyGrowth();
+    return P;
+  });
+  fails.push(...orphan);
   /* ---- the loop stops DRAWING behind a panel, and never stops thinking ----
      Measured before the change: 215 frames in six seconds with a document covering the world, all
      at full device resolution, none of them visible. The world must still tick — otherwise the dog
