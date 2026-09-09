@@ -5,6 +5,18 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-05)
 
+**2026-09-09, later — PR #152 is open** (`mq-v129`/`ch-v71`): `T3GHOST` 0.55 → 0.68 at the owner's
+word after he walked it, the crew-mode day-after chart, and **the first real crew-mode run**. He
+asked whether he could turn crew mode on right now: yes for anything finishing inside one session
+(parallel agents and worktrees need no setup), no for the full thing — the `taken:` labels do not
+exist on the repo, the town cannot render a claim, and there is no decision store, all of which
+matter only across sessions. The run produced **Toño el ferretero** (`.claude/agents/tono.md`, the
+fifteenth of the crew) and **`docs/TAGS.md`** — the vocabulary ledger, with an eleven-entry leak
+register. **Read TAGS.md before proposing any tag.** Its two biggest items are open work, not
+opinions: quests are identified by array index and nothing else (L9), and the town ships Meridian's
+career ladder in a pack whose config disclaims it (L10).
+
+
 **2026-09-09 — PR #151 is MERGED (`e100864`).** The owner merged it after reading only the two code commits; the four docs commits were taken on trust, which is the reading rule now (`docs/OWNER.md`, Taste). #140 and #149 are closed; **#125 stays open for its art half only.** `mq-v128`/`ch-v70`, three commits, each
 rewindable alone: **#140** (a tall thing that is not a wall turns to glass at 0.55 instead of being
 cut to a stub — the near-wall rule asks about HEIGHT now, through a new `t3Top()`, instead of about
