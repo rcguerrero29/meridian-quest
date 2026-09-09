@@ -5,6 +5,43 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-05)
 
+### ⇢ 2026-09-09, end of session — START HERE
+
+**Read `docs/OPEN.md` first.** It is the index to everything below: what is waiting on the owner,
+what is decided-but-unbuilt, the four registers, the traps, and what the game is for a session that
+has never seen it. This block is the summary; that file is the map.
+
+**Merged today:** PR #151 (`mq-v128`) — #140 the glass, #149 the empty margins, #125 the trolley
+stop. **Open:** PR #152, now large — `T3GHOST` 0.68, crew mode, Chema, Toño, Lupe, `auditReach`'s
+blind spot, the skull fix, and the four registers. `mq-v131`/`ch-v73`, all four suites green.
+
+**Four new registers, all opened today, all read-before-you-propose:**
+`docs/TAGS.md` (14 tag leaks) · `docs/3D-LOG.md` (every 3D attempt AND every rejected approach) ·
+`docs/QA-PASS.md` (the checklist + the escape register) · `docs/BEAUTIFY.md` (what every object
+renders as, what it should be, and which are **correctly** flat).
+
+**Three new crew (fifteen total):** Chema el fotógrafo (3D realism, measures), Toño el ferretero (the
+tag vocabulary, refuses two names for one part), Lupe la verificadora (QA, *every check runs at both
+sizes*).
+
+**Crew mode exists** — `docs/CREW-MODE.md`, first line `MODE: off`, read at start via `CLAUDE.md`
+step 3½. Three runs happened today and it works; what is missing (`taken:` labels, the town
+rendering claims, the decision store) only matters *across* sessions.
+
+**The owner's own dial is now a settled rule** in `docs/OWNER.md`: the unit of work is one ticket, a
+ticket is never left half-done, so budget in tickets and not tokens. And an option list is a table
+ranked by what it costs **him**, with the literal words he can type and one recommendation.
+
+**What he signed today, still to build:** split `ENDLESS` (and the landmine — an endless pack with
+2+ districts is locked in district one, silently); El Zócalo with *la placa*; **upgrade, do not cut**
+the five objects; townsfolk with no story part you can talk to; interactive/liftable objects with
+real dimensions; find-quest mode on the map; a comfort-and-crowding pass at fullscreen.
+
+**The one thing to do first:** the top four rows of `docs/BEAUTIFY.md` — the rug, the crates, the
+counter, the quest marker. **All art, no engine, no version bump**, and the rug is six rooms and the
+first thing a new player's eye lands on in the very first room of the game.
+
+
 **2026-09-09, later — PR #152 is open** (`mq-v129`/`ch-v71`): `T3GHOST` 0.55 → 0.68 at the owner's
 word after he walked it, the crew-mode day-after chart, and **the first real crew-mode run**. He
 asked whether he could turn crew mode on right now: yes for anything finishing inside one session
