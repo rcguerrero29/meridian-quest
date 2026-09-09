@@ -16,7 +16,25 @@ Read it before proposing anything about the 3D view. Append to it before moving 
 
 > **A pixel world that obeys real light and real depth — without ever stopping being a pixel world.**
 
-Three sentences that follow from it, all of them already settled by shipped decisions:
+**And the second half of the goal, in the owner's words (2026-09-09):** *"the standing goal is also
+supposed to keep in mind the customizeable and ability to use as template for other games with
+technology."* Realism here is never Meridian's realism. Every rendering improvement must arrive as
+one of two things and nothing else:
+
+- **a RULE** — it belongs in `engine/`, it is behaviour-identical for Meridian, El Changarrito and
+  any world built from the template, and it is proven the same day by all four suites; or
+- **a SEAM** — the engine asks, the content pack answers, and a pack that says nothing gets a sane
+  default. `PLACES · GROWTH · SEASONS · CHAPTERS · ENDLESS · HUDFACT · TILEART · DECOART · CRITTERS ·
+  BUILDTPL · BUILDS · READS · DOCS · INTERVIEW · TOWNLBL` is the existing list; a new one joins it.
+
+A realism change that only makes sense for Meridian's art, Meridian's palette or Meridian's maps is
+**not a realism change** — it is Meridian content wearing an engine's clothes, and it is refused.
+Test for it: *could a game about something else entirely turn this on, turn it off, or set it to a
+different value without touching the engine?* If not, find the seam before you find the fix. Every
+rule in this log passes that test — nearest filtering, `alphaTest`, `t3Top`, the stub, the glass —
+which is why they are engine rules and not Meridian's.
+
+Three more sentences that follow from it, all of them already settled by shipped decisions:
 
 1. **The grid is never softened.** Everything is sampled nearest. Realism here means correct
    *behaviour* — occlusion, depth, light, camera — never smoother pixels. Any proposal whose result
