@@ -287,6 +287,39 @@ should log in to see what is different in town, not to find out whether they won
   Five templates written 2026-08-31 in `docs/templates/` — usable by hand at work
   today; the game only generates the decision log so far.
 
+## How much gets done in a session — the owner's dial (2026-09-09)
+
+*The owner: "how will i be able to control how much gets done — how many tokens i use without
+leaving things incomplete?"*
+
+**The unit of work is one ticket, and a ticket is never left half-done.** A ticket is finished when
+it is red, then green, then committed, then pushed, then written down. Stopping between tickets is
+always safe and costs nothing; stopping *inside* one is the only way this repo leaves a mess. So the
+owner budgets in **tickets**, never in time and never in tokens — and any session that is running
+out of room finishes the ticket it is on and stops, rather than starting a second one it cannot
+finish.
+
+**The dial, in the order it saves the most:**
+
+| What the owner types | What it does |
+|---|---|
+| *"just plan"* / *"just measure"* / *"don't build yet"* | The cheapest setting by a wide margin. Reading, diagnosing and drawing cost a fraction of building, because building means writing the failing test, writing the fix, and running four suites until they are green |
+| *"do one thing"* / *"do these two"* | Names the number of tickets. Without a number a session takes everything in the message, which is why a six-part message becomes a long session |
+| *"show me first"* | A mock or a measurement before the build. Cheaper to reject a picture than a PR, and it is the setting that has saved the most rework here |
+| *"one agent"* vs *"three agents"* | Fan-out. Three specialists cost roughly three times one, and the ceiling is not the machines — it is how many PRs the owner wants to read that evening |
+| `/model` | The heavy work wants Opus. Triage, ledger tidying, copy checks and playtest reports do not |
+| *"what would this take?"* | An estimate before committing to anything. Always allowed, always cheap |
+
+**What is expensive here, honestly:** rendering and looking at screenshots (each picture is a real
+cost, and this project looks at a lot of them, for good reason); re-reading large files; and long
+sessions, because everything already said is carried forward. **What is cheap:** running the four
+suites, git, and reading a targeted grep.
+
+**The safety net already exists and needs nothing new.** Every ask is logged in `docs/ASKS.md`
+before it is done; `docs/NEXT-SESSION.md` is rewritten at the end of every session; one branch, one
+PR, one part. A session can be cut at any ticket boundary and the next one picks up from the file
+rather than from the owner's memory. **That is what makes a budget safe to set.**
+
 ## What a session feels like under this shape
 
 *(Owed to the owner as a walkthrough and never delivered live — written down instead,
@@ -327,6 +360,21 @@ You close the app. Nothing was lost, nothing expired, and there is a barrio out 
 that is a little more built than it was, because you helped.
 
 ## Taste — how to write and plan for this owner
+
+**When offering options, offer them the way the dial is written (owner, 2026-09-09: "lets keep those
+your type of suggestions when you provide options").** That means, every time:
+
+- **A table, not a paragraph.** One row per option, ranked by what it actually saves or costs him —
+  not alphabetically, not in the order they occurred to the session.
+- **The literal words he can type**, in the left column. Not a description of a capability: the
+  thing he can copy.
+- **What it costs and what it buys**, in his terms — his time, his attention, his money, how many
+  PRs land on him — never in the session's terms.
+- **The honest note beside it.** What is genuinely expensive, what is genuinely cheap, and which
+  option the session would pick. One recommendation, with the reason, never a survey.
+- **What happens if he does nothing.** Every option list has a "leave it alone" row, and it is a
+  real row with a real consequence, not a courtesy.
+
 
 - **Plain language, player-side.** Describe what the player sees and feels, not the
   architecture. The owner has twice been confused by implementation framing

@@ -210,6 +210,36 @@ fix did for the barber's chair (#126). `test/engine.smoke.js` opens every docume
 390×560 and asks the browser what is on top of each visible button, so a new world gets the guard for
 free.
 
+### 3⅔ · What gets out of your way, and how (#140/#149, 2026-09-09)
+
+A third-person camera has to answer one question over and over: *the player is behind that thing —
+now what?* This template answers it twice, because a wall and a tree are not the same kind of thing.
+
+**A wall is a plane you are meant to see over.** The nearest wall that hides you drops to a knee-high
+stub in its own top colour. That reads as a cutaway. It has been the rule since #65, and the owner
+signed it: only the nearest one, never automatically turning the camera.
+
+**A tree, a lamp, a piñata is an object.** Half a tree is not a cutaway, it is a missing tree, and the
+room stops making sense. A tall object that hides you turns to glass instead: still there, still in
+its place, drawn at `T3GHOST` (0.55) with `depthWrite` off and a render order above the people, so
+the crown is painted *over* you at 55% and one pixel holds both of you.
+
+Two things this depends on, both easy to lose:
+
+- **Ask about height, never about kind.** The old rule listed kinds — walls, facades, lintels, doors,
+  window pieces — so a tree crown could never be considered no matter how much of you it covered.
+  Worse, it read `geometry.parameters.height`, which a billboard does not have. `t3Top(o)` answers
+  for a box and for a sprite; use it, and the list of kinds only ever decides *which cure*, not
+  *whether*.
+- **A see-through pixel must not write depth.** Every prop in 3D is a picture on a card and most of
+  that card is empty. Empty pixels that still write depth punch holes in whatever is drawn after
+  them — which is people. Every baked billboard carries `alphaTest: T3ALPHA` for that reason. A new
+  world that bakes its own billboard and forgets it will lose quest marks near furniture and never
+  work out why; `test/engine.smoke.js` fails the build instead.
+
+Materials can be shared between pieces of one glyph, so the glass copy is made once **per piece** and
+kept beside the solid one. Edit a material in place and one tree will fog its whole row.
+
 ### 3⅝ · How 3D samples a pixel grid — free, and easy to lose (#134, 2026-09-08)
 
 A new world inherits this from `engine/engine3d.js` and never sets it; it is written down because it

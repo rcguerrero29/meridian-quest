@@ -1,0 +1,388 @@
+<title>How the Crew Ships</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#F2EFE4; --surface:#FBF9F3; --ink:#241F2E; --muted:#6B6478;
+    --line:#D8D2C2; --rule:#C6BCA2;
+    --accent:#6C34C8;        /* the game's own purple */
+    --claim:#1E7F73;         /* a claim held */
+    --warn:#A8690C;          /* the hazard that already happened */
+    --stop:#9E3226;
+    --lane-own:#EFE7FA; --lane-crew:#E7F1EF; --lane-git:#F5EEDF;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#15121C; --surface:#1E1A28; --ink:#EDE9F5; --muted:#A099B2;
+      --line:#332C45; --rule:#463C5E;
+      --accent:#B48CFF; --claim:#54C4B2; --warn:#E0A94F; --stop:#E5786B;
+      --lane-own:#241C36; --lane-crew:#16292B; --lane-git:#2A2418;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#15121C; --surface:#1E1A28; --ink:#EDE9F5; --muted:#A099B2;
+    --line:#332C45; --rule:#463C5E;
+    --accent:#B48CFF; --claim:#54C4B2; --warn:#E0A94F; --stop:#E5786B;
+    --lane-own:#241C36; --lane-crew:#16292B; --lane-git:#2A2418;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans',system-ui,sans-serif; line-height:1.6;}
+  .wrap{max-width:1080px; margin:0 auto; padding:40px 20px 80px;}
+  header{display:flex; flex-direction:column; gap:10px; margin-bottom:36px;
+    padding-bottom:22px; border-bottom:2px solid var(--rule);}
+  .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:.7rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--accent); margin:0;}
+  h1{font-family:'Unbounded',sans-serif; font-weight:700; font-size:clamp(1.6rem,4vw,2.4rem);
+    margin:0; text-wrap:balance; letter-spacing:-.01em;}
+  .sub{margin:0; color:var(--muted); max-width:62ch; font-size:1.02rem;}
+  h2{font-family:'Unbounded',sans-serif; font-weight:500; font-size:1.12rem;
+    margin:52px 0 6px; text-wrap:balance;}
+  h3{font-family:'IBM Plex Mono',monospace; font-size:.74rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--muted); margin:28px 0 10px; font-weight:600;}
+  p{max-width:68ch;}
+  figure{margin:22px 0 8px; padding:0;}
+  .scroll{overflow-x:auto; padding-bottom:6px;}
+  svg{display:block; max-width:100%; height:auto; min-width:640px;}
+  figcaption{font-size:.9rem; color:var(--muted); margin-top:12px; max-width:66ch;}
+  code,.mono{font-family:'IBM Plex Mono',monospace; font-size:.86em;}
+  code{background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:1px 5px;}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.94rem;}
+  th,td{text-align:left; padding:11px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{font-family:'IBM Plex Mono',monospace; font-size:.7rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--muted); font-weight:600;}
+  tbody tr:last-child td{border-bottom:none;}
+  .rules{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); margin:18px 0 0;}
+  .rule-card{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px 18px;}
+  .rule-card b{display:block; font-family:'Unbounded',sans-serif; font-weight:500;
+    font-size:.95rem; margin-bottom:6px;}
+  .rule-card p{margin:0; font-size:.92rem; color:var(--muted); max-width:none;}
+  .n{display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:.7rem;
+    color:var(--accent); border:1px solid var(--accent); border-radius:999px;
+    width:20px; height:20px; line-height:18px; text-align:center; margin-right:8px;}
+  .note{border-left:3px solid var(--warn); background:var(--surface);
+    padding:14px 18px; margin:22px 0; border-radius:0 8px 8px 0;}
+  .note p{margin:0; font-size:.94rem;}
+  .note b{color:var(--warn);}
+  .cmds{background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:16px 18px; margin:16px 0; overflow-x:auto;}
+  .cmds div{font-family:'IBM Plex Mono',monospace; font-size:.85rem; white-space:pre;
+    line-height:2;}
+  .cmds .c{color:var(--muted);}
+  .foot{margin-top:56px; padding-top:20px; border-top:1px solid var(--line);
+    color:var(--muted); font-size:.86rem;}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Meridian Quest · El Changarrito</p>
+  <h1>How the Crew Ships</h1>
+  <p class="sub">Two pictures. The first is what a git worktree actually is and why one per builder
+  is the difference between several agents working and several agents corrupting each other. The
+  second is the whole path a piece of work takes, from something noticed in play to a merge.</p>
+</header>
+
+<h2>1 · What a worktree is</h2>
+
+<p>A git repository is two things that people usually see as one: a <b>store</b> of every commit,
+branch and object — the <code>.git</code> folder — and a <b>working tree</b>, the ordinary files on
+disk that you actually edit. Normally there is one of each, so "the repo" and "the files" feel like
+the same thing.</p>
+
+<p><code>git worktree</code> separates them. One store, several working trees, each checked out on
+its own branch, each with <b>its own staging area</b>. That last part is the whole point: staging is
+where <code>git add</code> collects files, and a separate staging area is why one agent's
+<code>git add</code> physically cannot reach another agent's files.</p>
+
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 400" role="img" aria-label="Left: one working tree shared by three agents, whose edits and git add commands collide. Right: one shared git object store with three separate working trees, each on its own branch with its own staging area, so no agent can touch another's files.">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+    </marker>
+    <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,0 10,5 0,10" fill="#A8690C"/>
+    </marker>
+    <marker id="arc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,0 10,5 0,10" fill="#1E7F73"/>
+    </marker>
+  </defs>
+
+  <text x="10" y="20" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#A8690C">TODAY — ONE TREE</text>
+  <text x="480" y="20" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#1E7F73">WITH WORKTREES — ONE TREE EACH</text>
+  <line x1="450" y1="0" x2="450" y2="400" stroke="currentColor" stroke-width="1" stroke-dasharray="3 5" opacity=".3"/>
+
+  <!-- LEFT: today -->
+  <rect x="16" y="40" width="112" height="34" rx="6" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="72" y="62" font-family="IBM Plex Sans, sans-serif" font-size="12" text-anchor="middle" fill="currentColor">Rosa</text>
+  <rect x="16" y="88" width="112" height="34" rx="6" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="72" y="110" font-family="IBM Plex Sans, sans-serif" font-size="12" text-anchor="middle" fill="currentColor">Nacho</text>
+  <rect x="16" y="136" width="112" height="34" rx="6" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="72" y="158" font-family="IBM Plex Sans, sans-serif" font-size="12" text-anchor="middle" fill="currentColor">Beto</text>
+
+  <line x1="132" y1="57" x2="228" y2="130" stroke="#A8690C" stroke-width="1.6" marker-end="url(#arw)"/>
+  <line x1="132" y1="105" x2="228" y2="140" stroke="#A8690C" stroke-width="1.6" marker-end="url(#arw)"/>
+  <line x1="132" y1="153" x2="228" y2="150" stroke="#A8690C" stroke-width="1.6" marker-end="url(#arw)"/>
+  <text x="152" y="88" font-family="IBM Plex Mono, monospace" font-size="10" fill="#A8690C">all edit</text>
+
+  <rect x="234" y="108" width="186" height="74" rx="8" fill="none" stroke="#A8690C" stroke-width="2"/>
+  <text x="327" y="134" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" text-anchor="middle" fill="currentColor">one working tree</text>
+  <text x="327" y="154" font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="var(--muted)">meridian-quest/</text>
+  <text x="327" y="171" font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="#A8690C">ONE staging area</text>
+
+  <rect x="234" y="204" width="186" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".65"/>
+  <text x="327" y="229" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="currentColor">.git — the store</text>
+  <line x1="327" y1="182" x2="327" y2="200" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)" opacity=".65"/>
+
+  <rect x="234" y="278" width="186" height="94" rx="8" fill="none" stroke="#A8690C" stroke-width="1.4" stroke-dasharray="4 4"/>
+  <text x="327" y="300" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="600" text-anchor="middle" fill="#A8690C">WHAT HAPPENED</text>
+  <text x="327" y="320" font-family="IBM Plex Sans, sans-serif" font-size="11" text-anchor="middle" fill="currentColor">git add -A swept 15 of</text>
+  <text x="327" y="336" font-family="IBM Plex Sans, sans-serif" font-size="11" text-anchor="middle" fill="currentColor">Rosa's files into main</text>
+  <text x="327" y="356" font-family="IBM Plex Sans, sans-serif" font-size="11" text-anchor="middle" fill="currentColor">Nacho could not write at all</text>
+
+  <!-- RIGHT: worktrees -->
+  <rect x="486" y="40" width="120" height="34" rx="6" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="546" y="62" font-family="IBM Plex Sans, sans-serif" font-size="12" text-anchor="middle" fill="currentColor">Rosa</text>
+  <rect x="486" y="88" width="120" height="34" rx="6" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="546" y="110" font-family="IBM Plex Sans, sans-serif" font-size="12" text-anchor="middle" fill="currentColor">Nacho</text>
+  <rect x="486" y="136" width="120" height="34" rx="6" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="546" y="158" font-family="IBM Plex Sans, sans-serif" font-size="12" text-anchor="middle" fill="currentColor">Beto</text>
+
+  <line x1="610" y1="57" x2="662" y2="57" stroke="#1E7F73" stroke-width="1.6" marker-end="url(#arc)"/>
+  <line x1="610" y1="105" x2="662" y2="105" stroke="#1E7F73" stroke-width="1.6" marker-end="url(#arc)"/>
+  <line x1="610" y1="153" x2="662" y2="153" stroke="#1E7F73" stroke-width="1.6" marker-end="url(#arc)"/>
+
+  <rect x="666" y="36" width="222" height="42" rx="7" fill="none" stroke="#1E7F73" stroke-width="1.6"/>
+  <text x="777" y="53" font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="currentColor">wt-134/ · own staging</text>
+  <text x="777" y="69" font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" fill="#1E7F73">claude/134-blur</text>
+
+  <rect x="666" y="84" width="222" height="42" rx="7" fill="none" stroke="#1E7F73" stroke-width="1.6"/>
+  <text x="777" y="101" font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="currentColor">wt-131/ · own staging</text>
+  <text x="777" y="117" font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" fill="#1E7F73">claude/131-skulls</text>
+
+  <rect x="666" y="132" width="222" height="42" rx="7" fill="none" stroke="#1E7F73" stroke-width="1.6"/>
+  <text x="777" y="149" font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="currentColor">wt-140/ · own staging</text>
+  <text x="777" y="165" font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" fill="#1E7F73">claude/140-depth</text>
+
+  <line x1="777" y1="180" x2="777" y2="222" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)" opacity=".7"/>
+  <text x="789" y="204" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)">all commit into</text>
+  <rect x="666" y="226" width="222" height="40" rx="8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="777" y="251" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle" fill="currentColor">ONE .git — the store</text>
+
+  <rect x="666" y="292" width="222" height="80" rx="8" fill="none" stroke="#1E7F73" stroke-width="1.4" stroke-dasharray="4 4"/>
+  <text x="777" y="314" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="600" text-anchor="middle" fill="#1E7F73">WHY IT IS SAFE</text>
+  <text x="777" y="334" font-family="IBM Plex Sans, sans-serif" font-size="11" text-anchor="middle" fill="currentColor">separate staging areas —</text>
+  <text x="777" y="350" font-family="IBM Plex Sans, sans-serif" font-size="11" text-anchor="middle" fill="currentColor">git add cannot reach across</text>
+  <text x="777" y="366" font-family="IBM Plex Sans, sans-serif" font-size="11" text-anchor="middle" fill="currentColor">git refuses one branch twice</text>
+</svg>
+</div>
+<figcaption>One store either way. What changes is the number of working trees — and with them, the
+number of staging areas, which is the mechanism that makes parallel agents safe rather than just
+tidier.</figcaption>
+</figure>
+
+<div class="cmds">
+  <div><span class="c"># make one — a new directory, a new branch, off main</span></div>
+  <div>git worktree add ../wt-131 -b claude/131-sill-skulls origin/main</div>
+  <div> </div>
+  <div><span class="c"># the agent works entirely inside ../wt-131 and never leaves it</span></div>
+  <div> </div>
+  <div><span class="c"># after the PR merges, take it away</span></div>
+  <div>git worktree remove ../wt-131 && git branch -d claude/131-sill-skulls</div>
+</div>
+
+<p>Two properties do the work. <b>Git refuses to check out the same branch in two worktrees</b>, so
+two agents cannot silently be on the same one. And <b>each tree has its own index</b>, so
+<code>git add</code>, <code>git stash</code> and <code>git checkout</code> in one are invisible to
+the others. Everything they commit still lands in the same store, so branches and history stay
+whole.</p>
+
+<h2>2 · The path a piece of work takes</h2>
+
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 960 560" role="img" aria-label="A three-lane flow. The owner notices something and ranks findings. The crew plays, triages, judges the cause, plans, builds red before green, and files the decision. Git and GitHub hold the issue, the claim label, the branch, the worktree, CI and the merge. Only the owner merges.">
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,0 10,5 0,10" fill="currentColor"/>
+    </marker>
+    <marker id="a2p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,0 10,5 0,10" fill="#6C34C8"/>
+    </marker>
+    <marker id="a2s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <polygon points="0,0 10,5 0,10" fill="#9E3226"/>
+    </marker>
+  </defs>
+
+  <!-- lanes -->
+  <rect x="0" y="34" width="960" height="150" fill="var(--lane-own)"/>
+  <rect x="0" y="184" width="960" height="212" fill="var(--lane-crew)"/>
+  <rect x="0" y="396" width="960" height="150" fill="var(--lane-git)"/>
+  <text x="10" y="52" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="var(--muted)">OWNER</text>
+  <text x="10" y="202" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="var(--muted)">CREW</text>
+  <text x="10" y="414" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="var(--muted)">GIT · GITHUB</text>
+
+  <text x="14" y="22" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="#6C34C8">FINDING → MERGE</text>
+
+  <!-- owner lane -->
+  <rect x="86" y="64" width="128" height="46" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <text x="150" y="83" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">notices it</text>
+  <text x="150" y="99" font-family="IBM Plex Sans, sans-serif" font-size="10.5" text-anchor="middle" fill="var(--muted)">in play</text>
+
+  <rect x="352" y="64" width="128" height="46" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <text x="416" y="83" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">ranks it</text>
+  <text x="416" y="99" font-family="IBM Plex Sans, sans-serif" font-size="10.5" text-anchor="middle" fill="var(--muted)">tier · yes / no / later</text>
+
+  <rect x="792" y="64" width="150" height="46" rx="7" fill="var(--surface)" stroke="#6C34C8" stroke-width="2"/>
+  <text x="867" y="83" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">merges</text>
+  <text x="867" y="99" font-family="IBM Plex Sans, sans-serif" font-size="10.5" text-anchor="middle" fill="#6C34C8">only the owner</text>
+
+  <!-- crew lane -->
+  <rect x="86" y="214" width="128" height="52" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <text x="150" y="234" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">/chava plays</text>
+  <text x="150" y="250" font-family="IBM Plex Sans, sans-serif" font-size="10.5" text-anchor="middle" fill="var(--muted)">says what happened</text>
+  <text x="150" y="262" font-family="IBM Plex Mono, monospace" font-size="9.5" text-anchor="middle" fill="#9E3226">the step people skip</text>
+
+  <rect x="238" y="214" width="128" height="52" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <text x="302" y="234" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">/remedios</text>
+  <text x="302" y="250" font-family="IBM Plex Sans, sans-serif" font-size="10.5" text-anchor="middle" fill="var(--muted)">triages · dedupes</text>
+  <text x="302" y="262" font-family="IBM Plex Sans, sans-serif" font-size="10.5" text-anchor="middle" fill="var(--muted)">one symptom each</text>
+
+  <rect x="238" y="292" width="128" height="60" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <text x="302" y="311" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">a specialist</text>
+  <text x="302" y="326" font-family="IBM Plex Mono, monospace" font-size="9.5" text-anchor="middle" fill="var(--muted)">/rosa /pili /tavo</text>
+  <text x="302" y="339" font-family="IBM Plex Mono, monospace" font-size="9.5" text-anchor="middle" fill="var(--muted)">/cuca /paty /yaz</text>
+
+  <rect x="418" y="252" width="128" height="60" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <text x="482" y="272" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">/beto plans</text>
+  <text x="482" y="288" font-family="IBM Plex Sans, sans-serif" font-size="10.5" text-anchor="middle" fill="var(--muted)">which seam?</text>
+  <text x="482" y="302" font-family="IBM Plex Sans, sans-serif" font-size="10.5" text-anchor="middle" fill="var(--muted)">what must the test prove?</text>
+
+  <rect x="598" y="252" width="140" height="60" rx="7" fill="var(--surface)" stroke="#6C34C8" stroke-width="2"/>
+  <text x="668" y="272" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">one builder</text>
+  <text x="668" y="288" font-family="IBM Plex Sans, sans-serif" font-size="10.5" text-anchor="middle" fill="#6C34C8">red, then green</text>
+  <text x="668" y="302" font-family="IBM Plex Sans, sans-serif" font-size="10.5" text-anchor="middle" fill="var(--muted)">bump GAMEV + CACHE</text>
+
+  <rect x="792" y="252" width="150" height="52" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <text x="867" y="272" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">/chuy files</text>
+  <text x="867" y="288" font-family="IBM Plex Sans, sans-serif" font-size="10.5" text-anchor="middle" fill="var(--muted)">the decision + why</text>
+
+  <!-- git lane -->
+  <rect x="238" y="424" width="128" height="46" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <text x="302" y="443" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">issue filed</text>
+  <text x="302" y="459" font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" fill="var(--muted)">labels · tier</text>
+
+  <rect x="418" y="424" width="128" height="46" rx="7" fill="var(--surface)" stroke="#1E7F73" stroke-width="2"/>
+  <text x="482" y="443" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">claim</text>
+  <text x="482" y="459" font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" fill="#1E7F73">taken: beto</text>
+
+  <rect x="598" y="424" width="140" height="46" rx="7" fill="var(--surface)" stroke="#1E7F73" stroke-width="2"/>
+  <text x="668" y="443" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">worktree + branch</text>
+  <text x="668" y="459" font-family="IBM Plex Mono, monospace" font-size="9.5" text-anchor="middle" fill="#1E7F73">claude/140-depth</text>
+
+  <rect x="792" y="424" width="150" height="46" rx="7" fill="var(--surface)" stroke="currentColor" stroke-width="1.4"/>
+  <text x="867" y="443" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="currentColor">one PR · CI</text>
+  <text x="867" y="459" font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" fill="var(--muted)">4 suites, both games</text>
+
+  <rect x="598" y="494" width="344" height="40" rx="7" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4"/>
+  <text x="770" y="518" font-family="IBM Plex Sans, sans-serif" font-size="11" text-anchor="middle" fill="var(--muted)">on merge: label clears · branch and worktree removed</text>
+
+  <!-- arrows -->
+  <line x1="150" y1="110" x2="150" y2="210" stroke="currentColor" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="158" y="160" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="var(--muted)">or asks for a playtest</text>
+
+  <line x1="214" y1="240" x2="234" y2="240" stroke="currentColor" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="302" y1="266" x2="302" y2="288" stroke="currentColor" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="302" y1="352" x2="302" y2="420" stroke="currentColor" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="310" y="392" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="var(--muted)">writes it up</text>
+
+  <line x1="302" y1="424" x2="380" y2="112" stroke="#6C34C8" stroke-width="1.5" marker-end="url(#a2p)"/>
+  <text x="318" y="200" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#6C34C8">for ranking</text>
+
+  <line x1="416" y1="110" x2="440" y2="248" stroke="#6C34C8" stroke-width="1.5" marker-end="url(#a2p)"/>
+  <text x="430" y="180" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#6C34C8">go</text>
+
+  <line x1="482" y1="312" x2="482" y2="420" stroke="#1E7F73" stroke-width="1.5" marker-end="url(#a2c)"/>
+  <line x1="482" y1="312" x2="482" y2="420" stroke="#1E7F73" stroke-width="1.5" marker-end="url(#arc)"/>
+  <text x="490" y="372" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#1E7F73">claims BEFORE the branch</text>
+
+  <line x1="546" y1="447" x2="594" y2="447" stroke="#1E7F73" stroke-width="1.5" marker-end="url(#arc)"/>
+  <line x1="668" y1="420" x2="668" y2="316" stroke="currentColor" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="738" y1="282" x2="788" y2="282" stroke="currentColor" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="738" y1="447" x2="788" y2="447" stroke="currentColor" stroke-width="1.5" marker-end="url(#a2)"/>
+  <text x="742" y="438" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="var(--muted)">opens</text>
+
+  <line x1="867" y1="420" x2="867" y2="114" stroke="#6C34C8" stroke-width="1.5" marker-end="url(#a2p)"/>
+  <text x="875" y="200" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#6C34C8">green + mergeable</text>
+
+  <path d="M 792 468 L 760 486 L 560 486 L 482 474" fill="none" stroke="#9E3226" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#a2s)"/>
+  <text x="592" y="482" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#9E3226">CI red → back to the builder, never to the queue</text>
+</svg>
+</div>
+<figcaption>Three lanes, and every crossing between them is a handoff. Note the two purple arrows
+into the owner's lane: findings go up for ranking, and a green PR goes up for merge. Nothing merges
+itself.</figcaption>
+</figure>
+
+<h2>3 · The rules that make it safe</h2>
+
+<div class="rules">
+  <div class="rule-card">
+    <b><span class="n">1</span>One issue, one branch, one PR</b>
+    <p>A builder that finds a second problem files it and keeps going on the first. This is what
+    stops a change from growing until nobody can review it.</p>
+  </div>
+  <div class="rule-card">
+    <b><span class="n">2</span>The label is the lock</b>
+    <p>Claimed before the branch exists, cleared on merge, stale after a session. The town renders
+    it, so you can see who holds what by walking the street.</p>
+  </div>
+  <div class="rule-card">
+    <b><span class="n">3</span>One tree per pen</b>
+    <p>Without worktree isolation the safe number of code-editing agents is exactly one — which is
+    what runs today.</p>
+  </div>
+  <div class="rule-card">
+    <b><span class="n">4</span>A reviewer never files</b>
+    <p>Findings go to the owner, who ranks them. An agent that both finds and files is an agent
+    marking its own homework.</p>
+  </div>
+  <div class="rule-card">
+    <b><span class="n">5</span>Explicit paths, never <span class="mono">-A</span></b>
+    <p><code>git add</code> names the files it means. This one is written from experience, twice.</p>
+  </div>
+  <div class="rule-card">
+    <b><span class="n">6</span>No agent merges its own work</b>
+    <p>Red before green, four suites, both games — and then a person decides.</p>
+  </div>
+</div>
+
+<div class="note">
+  <p><b>Both hazards already happened here.</b> <code>git add -A</code> swept fifteen of Rosa's
+  scratch files into a commit that reached <code>main</code>. And Nacho could not write his own
+  deliverable at all, because forbidding him the tree was the only way to stop him colliding with an
+  in-flight edit. With a worktree, he simply writes. That is why these are rules and not advice.</p>
+</div>
+
+<h2>4 · What actually changes from today</h2>
+
+<table>
+  <thead><tr><th>&nbsp;</th><th>Today</th><th>With a crew</th></tr></thead>
+  <tbody>
+    <tr><td><b>Who works</b></td><td>one session, one branch</td><td>several agents, each on its own branch</td></tr>
+    <tr><td><b>The tree</b></td><td>shared — the hazard</td><td>one worktree per builder</td></tr>
+    <tr><td><b>Branch name</b></td><td>one long-lived <code>claude/…</code></td><td>one per issue, carrying its number</td></tr>
+    <tr><td><b>Claiming</b></td><td>nothing</td><td>a <code>taken:</code> label before the branch exists</td></tr>
+    <tr><td><b>Scope</b></td><td>whatever was asked that turn</td><td>exactly one issue</td></tr>
+    <tr><td><b><span class="mono">git add</span></b></td><td><code>-A</code></td><td>explicit paths, always</td></tr>
+    <tr><td><b>Cleanup</b></td><td>branch reused</td><td>branch, worktree and label removed on merge</td></tr>
+    <tr><td><b>Merging</b></td><td colspan="2">unchanged — the owner, on green CI, never an agent</td></tr>
+    <tr><td><b>Red before green</b></td><td colspan="2">unchanged</td></tr>
+    <tr><td><b>Tooling needed</b></td><td colspan="2">none — no bot, no webhook. GitHub already has labels, branches and PRs; the town already reads labels.</td></tr>
+  </tbody>
+</table>
+
+<p class="foot">Meridian Quest · El Changarrito — one engine, two games. This is a plan; nothing in it
+is built yet. The written version lives in <span class="mono">docs/CITY-AS-MEMORY.md</span> §5¾ and
+the crew in <span class="mono">docs/CREW.md</span>.</p>
+</div>

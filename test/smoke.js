@@ -110,12 +110,27 @@ const CANDIDATES = [
         const w = WORLDS[L.world];
         if (!w) { problems.push('the trolley runs in a world that does not exist: ' + L.world); return; }
         const keep = { world, px, py, st: TRO.state, x: TRO.x, t: TRO.t };
-        world = L.world; px = fx = L.from; py = fy = L.row + 2; moving = false;
+        /* park somewhere the trolley is NOT called from. Standing at a stop calls it, on purpose,
+           so "it comes on its own" can only be tested away from one — this used to park at the
+           line's own end, which stopped being neutral the moment a stop was put where the trolley
+           actually terminates (#125). The middle of the run is neutral in both worlds. */
+        const park = Math.round((L.from + L.to) / 2);
+        world = L.world; px = fx = park; py = fy = L.row + 2; moving = false;
         // nothing stands on the line — no wall, no lot, no person, no door
         const bad = troBlocked(L.world);
         if (bad.length) problems.push(`something stands on the trolley's line in ${L.world}: ${bad.join(' ')}`);
+        /* #125, the owner: "a trolley icon stands at the end of the construction — why?" It was a real
+           stop, standing two rows off its own rails at the far corner of the site, past the end of the
+           run. Nothing on screen could tell you it was a stop, because it was nowhere near a trolley.
+           A stop belongs beside the line it serves, within reach of where the trolley actually goes. */
+        const onLine = troTiles(L);
+        for (let yy = 0; yy < w.H; yy++) for (let xx = 0; xx < w.W; xx++) {
+          if (w.rows[yy][xx] !== 'Y') continue;
+          const near = onLine.some(([lx, ly]) => Math.abs(lx - xx) <= 1 && Math.abs(ly - yy) <= 1);
+          if (!near) problems.push(`the trolley stop at ${xx},${yy} in ${L.world} stands away from the trolley's own line — nobody can tell what it is`);
+        }
         // it comes on its own
-        TRO.state = 'away'; TRO.t = 0; TRO.called = false; px = fx = L.from; py = fy = L.row + 2;
+        TRO.state = 'away'; TRO.t = 0; TRO.called = false; px = fx = park; py = fy = L.row + 2;
         troUpdate(100); if (TRO.state !== 'away') problems.push('the trolley leaves before its time');
         troUpdate(TRO_EVERY); if (TRO.state === 'away') problems.push('the trolley never comes on its own');
         const x0 = TRO.x; troUpdate(500); if (TRO.x === x0) problems.push('the trolley does not move');
