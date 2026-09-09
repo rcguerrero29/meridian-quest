@@ -74,9 +74,14 @@ bodyguard for it.
 wrote `./undefined/living.png` at the repo root, and was caught by a hook rather than by anyone
 looking.
 **Which row would have caught it:** none — it is not a viewport problem.
+**And a fourth, hours later:** an agent told in writing to keep scratch out of the repo wrote its
+shot list to `spots1.tmp.json` at the repo root. `.gitignore` covered `*.tmp.js` and not
+`*.tmp.json` — the rule was written for the shape that had escaped before, which is the shape of
+every rule written from one example. It is `*.tmp.*` now.
 **What the list is now:** scratch goes in the session scratchpad; every commit stages **explicit
-paths**; `.gitignore` carries the shapes. Both times it was somebody sure they had been careful,
-which is why the guard is mechanical and not a resolution.
+paths**; `.gitignore` carries the shapes, plural. **Four escapes in one day, every one by somebody
+who had been told and was being careful** — which is the whole argument for the guard being
+mechanical. Instructions did not work. The hook did.
 
 ---
 

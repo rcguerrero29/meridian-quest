@@ -8,6 +8,7 @@ shots/
 # *.png at the root only — the game's real icons live in subdirectories and at named paths,
 # and screenshots taken to answer a question must never be committed as if they were art.
 *.tmp.js
+*.tmp.*
 /*.png
 !/icon-*.png
 # A screenshot script whose output directory came from an unset variable writes to
