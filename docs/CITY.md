@@ -676,3 +676,50 @@ angled. Full plans: IDEAS §10 (TILES+DECOR metadata architecture, front-profile
 renderer, camera rotate/wall fade), §11 (Sonny's program — fetch 4/7, feed, howl,
 lay, dig, 💩→ future janitor pack), §12 (emote regression). Only plans were made,
 per owner instruction — nothing built this round.
+
+
+## ⏳ Phase 6 proposal — El Zócalo de Meridian (Don Güero, 2026-09-09) — NOT BUILT
+
+*The owner: "it seems crowded. it wouldnt pass in california. we really cant do better for these
+cities? ... please make/grow the world ... beautiful gardens or fountains or something."*
+
+**Measured, not asserted.** `st`'s southern half is **178 contiguous walkable tiles — 37% of the
+street map — holding ten objects** (two pots, two grass tufts, four jacarandas, a Caprice, a tire
+pile). One in eighteen. It carries **one NPC** (Lupe) and **nothing to read**: all seven of the
+pack's `READS` are upstairs in `f2`, behind a stair, in a room you enter on purpose. And the whole
+of it — La Cocina's door, El Mercado's door, Taller Herrera's door — hangs off **one tile**: (13,5)
+is the only walkable continuation south, because (14,5) dead-ends on the fence at (14,6).
+
+**Don Güero's correction to the brief:** `st` is not crowded, it is a barbell — its edges are 100%
+built and its middle is a parking lot. **`ex` is the crowded one**, ~1 object per 9 tiles.
+
+**The plan — content only. No engine, no `GROWTH`, no resize.** A fountain at `st` (12–14, 11) and
+(12–14, 12) as one basin across six tiles (new pack glyph, solid, knee-high, reading its neighbours
+the way `⊓` already does); benches at (10,11)(10,12) and (16,11)(16,12); jacarandas at (11,10) and
+(15,10); beds and grass between. The spine already lands on it: HQ's door (14,0) → the crossing →
+the notch at (13,5) → straight down x13, and at row 10 the room opens with the basin dead-centre.
+
+**La placa** — a plaque on the basin's north rim at (13,11), `DECOR` + `READS`, and **Meridian's
+first readable thing outdoors.** It builds from the play record: every business you opened, in the
+order you opened them, in dry municipal prose, gaining a line each time a district closes. It never
+lists what you have not done. Zero engine work — `READS`/`DOCS` shipped 2026-09-03 and Meridian
+never used it on the street.
+
+**What comes out, all of it his own:** the two traffic cones at (4,4) and (25,4) — La Obra finished
+a week ago and the cones are still barricading an open street — the tire stack at (25,14), and the
+two lone pots. **Net −5, +22. Object density 1-in-18 → 1-in-6.6.**
+
+**The rule he proposes for any city on this engine — *la regla del doce y el octavo*:** no walkable
+tile is more than **twelve steps** from something you can stop at, and **between 1 in 8 and 1 in 5**
+walkable tiles is furniture, planting or water. *Under 1 in 8 it is a parking lot; over 1 in 5 it is
+furniture storage.* Twelve is a Manhattan count, because this engine walks one press one step.
+
+**The honest limits he named:** worlds are fixed-size string grids and widening `st` would rewrite
+every coordinate pointing into it (HQ grew three rows once and it cost a full ticket) — **nothing
+here needs that**. Nobody can sit; there is no sit verb, so a bench is a thing you stand beside and
+the copy must not promise otherwise. The stand-still petal moment is welded to the bridge and Día de
+Muertos, so it cannot be pointed at a fountain without a new seam. And there is no multi-tile object
+— six tiles bake as six fountains unless the art reads its neighbours.
+
+**Four decisions are open** — the plaque's content, who inhabits the plaza, permission to cut his own
+five objects, and whether the rule of twelve is promoted to `docs/OWNER.md` for every world.

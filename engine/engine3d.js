@@ -740,7 +740,7 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
    (0.65·d+0.3). Of the walls that hide you, only the NEAREST is minimized — the piece in front
    of you and its two neighbours drop to a knee-high stub in the wall's top colour (t3Reveal);
    everything else, the far wall included, stays whole. */
-const T3CAMD=7.4,T3CAMH=6.2,T3STUB=0.28,T3GHOST=0.55;
+const T3CAMD=7.4,T3CAMH=6.2,T3STUB=0.28,T3GHOST=0.68;
 /* #149: every prop, tree crown and cutout in 3D is a PICTURE on a card, and most of that card is
    see-through. A see-through pixel that still writes depth punches a hole in whatever is drawn after
    it — which is people: a quest mark beside a desk simply went missing, and nobody could see why,

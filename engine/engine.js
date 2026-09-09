@@ -208,10 +208,24 @@ const chillLines=k=>{
 })();
 /* full-universe reachability audit: BFS from the hero's spawn across every world THROUGH portals.
    Guarantees: every walkable tile is reachable, and every character always has a reachable adjacent tile. */
-function auditReach(){
+/* `grown`: audit a city with every lot raised, where NOTHING may be unreachable. Left off, a world
+   nothing reaches is skipped, because at a fresh boot seven of Meridian's fifteen worlds are behind
+   doors the city has not built yet and that is correct. Left off FOREVER, which is what it was, the
+   audit could not see a district fall off the map: delete one portal line and Taller Herrera leaves
+   the city — 161 walkable tiles, three people, eight quests — and this function returned []. Worse,
+   severing the door TILE instead reported "st: 5 walkable tiles unreachable", the leftover pocket of
+   pavement, pointing away from the fault. (#155; the owner: "do fix the part where a missing world
+   wouldn't register.") */
+function auditReach(grown){
   const probs=[],seen={};Object.keys(WORLDS).forEach(k=>seen[k]=new Set());
   const walk=(id,x,y)=>{const w=WORLDS[id];return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N");};
-  const q=[[PL.home,PL.spawn[0],PL.spawn[1]]];if(seen[PL.home])seen[PL.home].add(PL.spawn[0]+","+PL.spawn[1]);
+  /* seed EVERY declared arrival, not just the spawn. The park has no portal — the leash carries you
+     there — so it had zero reached tiles at every boot and was therefore never audited at all. An
+     arrival a pack declares is a way in, whether or not it is a door. */
+  const q=[];
+  const seed=(id,x,y)=>{if(WORLDS[id]&&walk(id,x,y)&&!seen[id].has(x+","+y)){seen[id].add(x+","+y);q.push([id,x,y]);}};
+  seed(PL.home,PL.spawn[0],PL.spawn[1]);
+  if(PL.park&&PL.parkIn)seed(PL.park,PL.parkIn[0],PL.parkIn[1]);
   while(q.length){const[idw,x,y]=q.shift();
     const pp=portalAt(idw,x,y);
     if(pp){const p=pp,key=p.x+","+p.y;
@@ -219,7 +233,14 @@ function auditReach(){
     [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{const nx=x+dx,ny=y+dy,key=nx+","+ny;
       if(!seen[idw].has(key)&&walk(idw,nx,ny)){seen[idw].add(key);q.push([idw,nx,ny]);}});}
   Object.entries(WORLDS).forEach(([id,w])=>{
-    if(seen[id].size===0)return; /* world locked behind a not-yet-built portal (e.g. the Studio pre-completion) — audited once it opens */
+    if(seen[id].size===0){
+      /* nothing reaches it. Before the city is grown that is ordinary — the lot is not built yet.
+         With every lot raised it means the place has fallen off the map, and it is said in the
+         words a person would use, naming who is stranded, because "0 tiles reachable" reads like
+         a rounding error and three people waiting does not. */
+      if(grown){const who=w.npcs.map(n=>n.npc);
+        probs.push(id+" is on the map and no way leads into it"+(who.length?" — "+who.join(", ")+" "+(who.length===1?"is":"are")+" in a room nobody can walk into":""));}
+      return;}
     w.npcs.forEach(n=>{const ok=[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>seen[id].has((n.x+dx)+","+(n.y+dy)));
       if(!ok)probs.push("NPC unreachable: "+n.npc+" in "+id);});
     let un=0;
@@ -914,7 +935,13 @@ function propSill(wid,p){
   if(!p.sill)return null;const w=WORLDS[wid],g=w&&w.rows[p.y]&&w.rows[p.y][p.x],m=(TILES[g]||{}),wins=m.win;
   if(!wins||!wins.length)return null;
   const i=sillWindow(wid,p,wins.length),win=wins[i]||wins[0];
-  const size=Math.max(4,Math.min(8,Math.round(win[2]*0.66),Math.round(win[3]*0.9)));
+  /* #131 cut the candy from a flat 8 to two thirds of the pane, because at 8 in an 8-pixel window it
+     filled the glass edge to edge and its crown poked over the frame. Two thirds was my number and it
+     was too small: 8x8 to 5x5 is SIXTY-ONE PERCENT of the sweet gone, and on a wall 1.1 units high seen
+     from twelve tiles back that is three screen pixels. The owner, 2026-09-09: "the skulls are still
+     hidden on the sills." They were never hidden. They were shrunk, by me, fixing the opposite fault.
+     0.85 leaves a pixel of glass each side — a sweet ON a sill, not a sweet AVOIDING one. */
+  const size=Math.max(4,Math.min(8,Math.round(win[2]*0.85),Math.round(win[3]*0.9)));
   return {cx:win[0]+win[2]/2,sill:win[1]+win[3],size,i,w:win[2],h:win[3],g};}
 function drawOfrenda(g,x,y){ /* la ofrenda (Nacho, 2026-09-07; the owner: "sounds like a good idea"): a tiered table under a marigold arch —
   the cloth, three candles, pan de muerto, a calaverita, and at the top an EMPTY frame, nobody named: "that one's for whoever needs it".

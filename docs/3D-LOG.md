@@ -153,9 +153,12 @@ against it is measured against the wrong thing. — *Chema, 2026-09-09*
    judgment about how it reads, and it wants Pili beside me.
 2. **Rosa's remaining 3D notes**, chiefly her call that the world's height should stop being derived
    from the 2D tile grid — partly addressed by the screen-share change, not finished.
-3. **Light.** Nothing in this log is about light yet, and it is the largest untouched lever on the
-   standing goal. Day/dusk/night tints exist; contact shadows, a real ground-occlusion darkening
-   where things meet the floor, and whether the sun should rake do not.
+3. **Light.** Day/dusk/night tints exist. **Correction, 2026-09-09 (Pili, and she is right): contact
+   shadows DO exist** — `engine3d.js:203–214` darkens a walkable tile that touches a solid neighbour,
+   and this log said otherwise, which is the log being behind the code. What that mechanism reveals
+   is sharper than the gap it filled: **a tile with no solid neighbour gets no gradient at all**, so
+   an open plaza is one flat value edge to edge, and the eye reads a single flat value as absence.
+   Still untouched: whether the sun should rake, and any lighting a pack can ask for.
 4. **A named baseline.** Every number above was taken ad hoc. A `test/` script that renders the same
    six frames and prints the same six numbers would make "continuously improve" mean something
    arithmetic rather than something remembered.

@@ -1,6 +1,6 @@
 # The crew — who does what
 
-*Fourteen agents in `.claude/agents/`, each recallable by name with `/name`. This file says which
+*Fifteen agents in `.claude/agents/`, each recallable by name with `/name`. This file says which
 one to call, what each may touch, and how they hand off to each other. Written 2026-09-08 when the
 owner asked for personas "so that if we ever proceed we have agents know what their role is to do."*
 
@@ -41,7 +41,7 @@ docs and memory role he always was.)*
 | `/nacho` | Nacho the muralist | what a thing means; the EN+ES words | nothing |
 | `/don-guero` | Don Güero | what gets built in the city, where, and at what cost | nothing |
 
-### The seven without one yet
+### The eight without one yet
 
 | `/name` | Who | Decides | May touch |
 |---|---|---|---|
@@ -52,6 +52,18 @@ docs and memory role he always was.)*
 | `/paty` | Paty | whether both languages say the same thing and sound like the same person | strings when asked |
 | `/mari` | Mari | what order a new game gets built in | plans only |
 | `/chema` | Chema el fotógrafo | whether the 3D reads as a real place — and he measures it | code only when asked |
+| `/tono` | Toño el ferretero | whether a NAME travels — the tag vocabulary and the open-world template | code only when asked |
+
+**Toño is downstream of nobody.** Beto asks *"engine rule or pack seam?"*; Toño asks the question
+underneath it — *"is this word about the mechanism, or about Meridian?"* A tag chosen badly is cheap
+today and unpayable in a year, which is why he judges before anything is built and not after. His
+ledger is `docs/TAGS.md`: the inventory, the **leak register** of tags that look universal and are
+not, the collisions, and the gaps. He registers a leak whether or not anyone will fix it — the
+register is the deliverable, the fix is a ticket.
+
+**The two rules he judges by came from Pili and Nacho independently, about opposite halves, and are
+the same rule:** *name the geometry, not the noun*, and *write it for a world with no lesson and no
+career.* Describe the mechanism, never the meaning.
 
 **Chema and Pili are not the same job, and they will disagree.** Pili decides whether anyone can
 *tell what they are looking at*; Chema decides whether it reads as *real* — light, depth, occlusion,

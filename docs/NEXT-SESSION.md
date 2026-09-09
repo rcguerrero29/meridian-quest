@@ -5,7 +5,56 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-05)
 
-**2026-09-09 — PR #151 is open and waiting on the owner.** `mq-v128`/`ch-v70`, three commits, each
+### ⇢ 2026-09-09, end of session — START HERE
+
+**Read `docs/OPEN.md` first.** It is the index to everything below: what is waiting on the owner,
+what is decided-but-unbuilt, the four registers, the traps, and what the game is for a session that
+has never seen it. This block is the summary; that file is the map.
+
+**Merged today:** PR #151 (`mq-v128`) — #140 the glass, #149 the empty margins, #125 the trolley
+stop. **Open:** PR #152, now large — `T3GHOST` 0.68, crew mode, Chema, Toño, Lupe, `auditReach`'s
+blind spot, the skull fix, and the four registers. `mq-v131`/`ch-v73`, all four suites green.
+
+**Four new registers, all opened today, all read-before-you-propose:**
+`docs/TAGS.md` (14 tag leaks) · `docs/3D-LOG.md` (every 3D attempt AND every rejected approach) ·
+`docs/QA-PASS.md` (the checklist + the escape register) · `docs/BEAUTIFY.md` (what every object
+renders as, what it should be, and which are **correctly** flat).
+
+**Three new crew (fifteen total):** Chema el fotógrafo (3D realism, measures), Toño el ferretero (the
+tag vocabulary, refuses two names for one part), Lupe la verificadora (QA, *every check runs at both
+sizes*).
+
+**Crew mode exists** — `docs/CREW-MODE.md`, first line `MODE: off`, read at start via `CLAUDE.md`
+step 3½. Three runs happened today and it works; what is missing (`taken:` labels, the town
+rendering claims, the decision store) only matters *across* sessions.
+
+**The owner's own dial is now a settled rule** in `docs/OWNER.md`: the unit of work is one ticket, a
+ticket is never left half-done, so budget in tickets and not tokens. And an option list is a table
+ranked by what it costs **him**, with the literal words he can type and one recommendation.
+
+**What he signed today, still to build:** split `ENDLESS` (and the landmine — an endless pack with
+2+ districts is locked in district one, silently); El Zócalo with *la placa*; **upgrade, do not cut**
+the five objects; townsfolk with no story part you can talk to; interactive/liftable objects with
+real dimensions; find-quest mode on the map; a comfort-and-crowding pass at fullscreen.
+
+**The one thing to do first:** the top four rows of `docs/BEAUTIFY.md` — the rug, the crates, the
+counter, the quest marker. **All art, no engine, no version bump**, and the rug is six rooms and the
+first thing a new player's eye lands on in the very first room of the game.
+
+
+**2026-09-09, later — PR #152 is open** (`mq-v129`/`ch-v71`): `T3GHOST` 0.55 → 0.68 at the owner's
+word after he walked it, the crew-mode day-after chart, and **the first real crew-mode run**. He
+asked whether he could turn crew mode on right now: yes for anything finishing inside one session
+(parallel agents and worktrees need no setup), no for the full thing — the `taken:` labels do not
+exist on the repo, the town cannot render a claim, and there is no decision store, all of which
+matter only across sessions. The run produced **Toño el ferretero** (`.claude/agents/tono.md`, the
+fifteenth of the crew) and **`docs/TAGS.md`** — the vocabulary ledger, with an eleven-entry leak
+register. **Read TAGS.md before proposing any tag.** Its two biggest items are open work, not
+opinions: quests are identified by array index and nothing else (L9), and the town ships Meridian's
+career ladder in a pack whose config disclaims it (L10).
+
+
+**2026-09-09 — PR #151 is MERGED (`e100864`).** The owner merged it after reading only the two code commits; the four docs commits were taken on trust, which is the reading rule now (`docs/OWNER.md`, Taste). #140 and #149 are closed; **#125 stays open for its art half only.** `mq-v128`/`ch-v70`, three commits, each
 rewindable alone: **#140** (a tall thing that is not a wall turns to glass at 0.55 instead of being
 cut to a stub — the near-wall rule asks about HEIGHT now, through a new `t3Top()`, instead of about
 kind; it had been reading a property a billboard does not have, which is why a tree crown was never
@@ -13,9 +62,18 @@ once considered), **#149** (every baked billboard carries `alphaTest`; 76 pictur
 their empty corners as solid and cutting holes in whoever stood near them), and **#125** (the stray
 trolley icon was a real stop standing two rows off its own rails at the far corner of the site — it
 moves beside the line, travel untouched; the new rule is that a stop stands beside the line it serves).
-The rule is in `docs/NEW-WORLD.md` §3⅔. **Not done and asked for:** the *art* half of #125 — the owner
-said "make the trolley more realistic, even the old one seemed cute and realistic though 2d". That is
-Pili's, and it is the next thing on this branch. Also still open from the same message: **la fachada is
+The rule is in `docs/NEW-WORLD.md` §3⅔. Also merged in the same PR: **Chema el fotógrafo** (the
+fourteenth of the crew, the 3D realism lead), **`docs/3D-LOG.md`** (his contact sheet — the standing
+goal, how things are measured here, and every 3D attempt backfilled with its numbers *and the ones
+that were rejected, with the reason*), **`docs/CREW-MODE.md`** (`MODE: off` on its first line, read by
+every session at start via `CLAUDE.md` step 3½), the four crew charts as HTML source in `docs/crew/`,
+and two settled rules in `docs/OWNER.md` — **the owner's dial** (budget in tickets, never tokens; a
+ticket is never left half-done) and **the shape of an option list** (a table ranked by what it costs
+HIM, the literal words he can type, one recommendation, and a real "leave it alone" row).
+**Not done and asked for:** the *art* half of #125 — the owner said "make the trolley more realistic,
+even the old one seemed cute and realistic though 2d". That is Pili's, with Chema, and it is the next
+thing. **❗Open, needs the owner's word:** the standing goal at the top of `docs/3D-LOG.md` was
+inferred from what he has already signed rather than stated by him. Also still open from the same message: **la fachada is
 option (a)**, a real barbershop glyph, needing Pili's cold read.
 
 
