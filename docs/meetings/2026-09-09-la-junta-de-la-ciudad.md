@@ -23,9 +23,15 @@ re-verified by hand against the code before it was written down.**
 carries seven doors, `ex` six, and **nowhere in fifteen worlds is more than two doors from the
 street**. Nobody gets lost in that. What is out of hand is `docs/CITY.md`, which calls `ex` row 10
 "canal-side" when it is the south fence, says Naye's door opens onto the trolley bed when the code
-pours pavement, and puts Yola at (17,0) when the map has her at (20,2). **Don Güero catalogued four
+pours pavement. **Don Güero catalogued four
 wrong lines himself on 2026-09-08 and they are still wrong today.** A planner reading that file
 builds on top of a business that already exists — which the file also records happening twice.
+
+> **CORRECTION, same day.** This review also claimed CITY.md "puts Yola at (17,0) when the map has
+> her at (20,2)." **CITY.md was right and the reviewer was wrong** — `content/meridian/npcs.js:54`
+> puts Yola at `ex (17,0)`, exactly as the ledger says. (20,2) is the glyph `Y`, the trolley stop:
+> a tile was read as a person, and I repeated it to the owner before checking. Caught by Don Güero,
+> verified, corrected here rather than quietly dropped. Her other three findings hold.
 
 **Beto: neither.** Not merely undocumented, and not unable to take another district. There is real
 structural debt (below), and the district *is* data, and `buildInterior` proves a room can be
@@ -56,8 +62,15 @@ The early return is legitimate — the Studio really is locked before completion
 the failure case with it. This is the same shape as the test that pinned a sprite bug at 40px and
 passed the whole time: a check written for the true case that is silent on the false one.
 
-**This is the first thing to fix, and it is an engine rule, not a layout change.** Nothing else on
-this page is worth doing while a whole district can vanish without a word.
+**This is the first thing to fix, and it is an engine rule, not a layout change.**
+
+> **BUILT the same day — `mq-v130`.** `auditReach(grown)` reports it in the words a person would use
+> and names who is stranded; `test/engine.smoke.js` severs a door and proves the audit says so; and
+> writing the test found a second fault — the walk seeded only from the spawn, so the park, which has
+> no portal because the leash carries you there, was never audited at all. **This paragraph is left
+> standing rather than deleted, because Don Güero read it four hours later and reported it as stale
+> — which is precisely the disease this junta convened to diagnose, committed by the note that
+> diagnosed it.**
 
 ---
 
