@@ -5,7 +5,7 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-05)
 
-**2026-09-09 — PR #151 is open and waiting on the owner.** `mq-v128`/`ch-v70`, three commits, each
+**2026-09-09 — PR #151 is MERGED (`e100864`).** The owner merged it after reading only the two code commits; the four docs commits were taken on trust, which is the reading rule now (`docs/OWNER.md`, Taste). #140 and #149 are closed; **#125 stays open for its art half only.** `mq-v128`/`ch-v70`, three commits, each
 rewindable alone: **#140** (a tall thing that is not a wall turns to glass at 0.55 instead of being
 cut to a stub — the near-wall rule asks about HEIGHT now, through a new `t3Top()`, instead of about
 kind; it had been reading a property a billboard does not have, which is why a tree crown was never
@@ -13,9 +13,18 @@ once considered), **#149** (every baked billboard carries `alphaTest`; 76 pictur
 their empty corners as solid and cutting holes in whoever stood near them), and **#125** (the stray
 trolley icon was a real stop standing two rows off its own rails at the far corner of the site — it
 moves beside the line, travel untouched; the new rule is that a stop stands beside the line it serves).
-The rule is in `docs/NEW-WORLD.md` §3⅔. **Not done and asked for:** the *art* half of #125 — the owner
-said "make the trolley more realistic, even the old one seemed cute and realistic though 2d". That is
-Pili's, and it is the next thing on this branch. Also still open from the same message: **la fachada is
+The rule is in `docs/NEW-WORLD.md` §3⅔. Also merged in the same PR: **Chema el fotógrafo** (the
+fourteenth of the crew, the 3D realism lead), **`docs/3D-LOG.md`** (his contact sheet — the standing
+goal, how things are measured here, and every 3D attempt backfilled with its numbers *and the ones
+that were rejected, with the reason*), **`docs/CREW-MODE.md`** (`MODE: off` on its first line, read by
+every session at start via `CLAUDE.md` step 3½), the four crew charts as HTML source in `docs/crew/`,
+and two settled rules in `docs/OWNER.md` — **the owner's dial** (budget in tickets, never tokens; a
+ticket is never left half-done) and **the shape of an option list** (a table ranked by what it costs
+HIM, the literal words he can type, one recommendation, and a real "leave it alone" row).
+**Not done and asked for:** the *art* half of #125 — the owner said "make the trolley more realistic,
+even the old one seemed cute and realistic though 2d". That is Pili's, with Chema, and it is the next
+thing. **❗Open, needs the owner's word:** the standing goal at the top of `docs/3D-LOG.md` was
+inferred from what he has already signed rather than stated by him. Also still open from the same message: **la fachada is
 option (a)**, a real barbershop glyph, needing Pili's cold read.
 
 
