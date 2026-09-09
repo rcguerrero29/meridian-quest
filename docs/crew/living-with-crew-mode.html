@@ -1,0 +1,120 @@
+<meta charset="utf-8"><title>Crew mode — your day, once it is on</title><style>
+:root{--ink:#221E2B;--dim:#5F5970;--line:#C9C3BA;--paper:#F2F0EA;--card:#FFF}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 ui-monospace,Menlo,monospace;padding:26px 30px}
+h1{font:700 25px/1.2 system-ui;margin:0 0 3px}
+h2{font:700 17px/1.2 system-ui;margin:28px 0 4px;padding-top:15px;border-top:1px solid var(--line)}
+h2 span{font-weight:400;color:var(--dim);font-size:13px}
+h3{font:700 13px system-ui;margin:16px 0 6px;color:#4A4458;letter-spacing:.03em;text-transform:uppercase}
+p.sub{margin:0 0 8px;color:var(--dim);font:13px/1.55 system-ui;max-width:102ch}
+.switch{background:#2A2536;color:#F2E8D8;border-radius:12px;padding:13px 18px;margin:14px 0 6px;font:13px/1.6 system-ui;max-width:102ch}
+.switch code{background:rgba(255,255,255,.14);padding:2px 7px;border-radius:5px;font-size:12.5px}
+.switch b{color:#F0C878}
+.step{display:flex;margin:0 0 10px;background:var(--card);border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.step.you{border-color:#B98B3E;background:#FDF6E9}
+.step.them{border-color:#4A72B8;background:#F3F7FD}
+.step.mach{border-color:#4B7A52;background:#F2F8F3}
+.num{flex:0 0 46px;display:flex;align-items:center;justify-content:center;font:700 17px system-ui;background:rgba(0,0,0,.05)}
+.who{flex:0 0 100px;padding:11px 10px;font:600 11px system-ui;color:var(--dim);border-right:1px solid rgba(0,0,0,.08);display:flex;align-items:center}
+.bd{flex:1;padding:11px 14px}
+.bd b{display:block;font:600 14px system-ui;margin-bottom:3px}
+.bd p{margin:0 0 5px;font:12.5px/1.55 system-ui;color:#3B3547}
+.bd .say{display:inline-block;background:#2A2536;color:#F2E8D8;border-radius:7px;padding:3px 10px;font:600 12px system-ui;margin:3px 0}
+.meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
+.pill{font:600 10.5px system-ui;padding:2px 8px;border-radius:99px;background:#E9E5DD;color:#4A4458}
+.pill.w{background:#F6E7CF;color:#6E4E14}.pill.g{background:#D8EFDC;color:#1D5B2B}.pill.r{background:#F6D9D9;color:#7A2020}
+table{border-collapse:collapse;font:12.5px system-ui;width:100%;margin-top:10px}
+td,th{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#E9E5DD;font-weight:600}
+code{background:#E9E5DD;padding:1px 5px;border-radius:4px;font-size:11.5px}
+.note{margin:10px 0 0;font:12.5px/1.6 system-ui;color:var(--dim);border-left:3px solid var(--line);padding-left:11px;max-width:100ch}
+.stop{background:#FBEFEF;border:1.5px solid #B85555;border-radius:11px;padding:12px 16px;margin:12px 0 0;font:12.5px/1.6 system-ui;max-width:102ch}
+.stop b{color:#7A2020;font:700 13px system-ui}
+</style>
+
+<h1>Crew mode — your day, once it is on</h1>
+<p class="sub">The other chart was how to <i>switch it on</i>. This one is what your evenings look like <b>after</b>.
+Same merge button, same rules, more hands. Nothing here is new to learn — it is the loop you already run, with the
+number of things in flight raised from one to a few.</p>
+
+<div class="switch"><b>It is called crew mode.</b> The switch is the first line of <code>docs/CREW-MODE.md</code>:
+<code>MODE: off</code> → <code>MODE: on</code>. Every session reads it at start (<code>CLAUDE.md</code>, step 3½).
+You can also just say <b>"crew mode on for this one"</b> and it applies to that session only, without touching the file.
+A session that is unsure is <b>off</b>.</div>
+
+<h2>The unit is a RUN <span>— one sitting, a few tickets, a few PRs</span></h2>
+<p class="sub">In normal mode the unit is a ticket. In crew mode the unit is a <b>run</b>: you name a handful of issues,
+they get worked at the same time, and they come back to you together. A run is over when you have merged or rejected
+everything in it. <b>You never have two runs open at once</b> — that is the thing that keeps this legible.</p>
+
+<h3>Step 1 · you open the run</h3>
+<div class="step you"><div class="num">1</div><div class="who">you · 2 min</div><div class="bd"><b>Name the issues and the size.</b>
+<p>Look at the open list, pick the ones you want, say so. The number is the budget — say it out loud or you will get everything.</p>
+<span class="say">crew mode on — run #128, #129 and #150</span>
+<p>Or if you would rather not pick: <span class="say">crew mode on — take the top three by tier</span></p>
+<div class="meta"><span class="pill w">2 minutes</span><span class="pill g">reversible — say stop at any point</span></div></div></div>
+
+<h3>Step 2 · they claim, in the open</h3>
+<div class="step them"><div class="num">2</div><div class="who">the crew</div><div class="bd"><b>Each agent labels its issue <code>taken:</code> before it starts.</b>
+<p>This is the lock. Two agents cannot take the same issue, and you can see who has what <b>by walking the town</b> — the
+label shows on the stall. Nothing else about the issue changes.</p>
+<div class="meta"><span class="pill">nothing lands on you</span></div></div></div>
+
+<h3>Step 3 · they work, each in its own folder</h3>
+<div class="step them"><div class="num">3</div><div class="who">the crew</div><div class="bd"><b>One branch and one worktree per agent.</b>
+<p>Branch names carry the issue number — <code>claude/129-...</code>. Nobody edits anybody's files, because nobody
+shares a folder. Each writes its failing test first, then the fix, then runs all four suites until green.</p>
+<div class="meta"><span class="pill">nothing lands on you</span></div></div></div>
+
+<h3>Step 4 · you answer, if asked</h3>
+<div class="step you"><div class="num">4</div><div class="who">you · 0–5 min</div><div class="bd"><b>Only taste, story, or how much.</b>
+<p>Never something a machine could have worked out. Usually zero or one question per issue, and <b>the rest of the run
+keeps moving while you think</b> — that is the whole point of running them in parallel.</p>
+<div class="meta"><span class="pill w">0–5 minutes</span><span class="pill r">everything on that one ticket waits on you</span></div></div></div>
+
+<h3>Step 5 · CI, then the PRs arrive together</h3>
+<div class="step mach"><div class="num">5</div><div class="who">machine</div><div class="bd"><b>Each PR is green before you ever see it.</b>
+<p>One PR per issue. Red never reaches your merge button. If one goes red it goes back to its own agent and does not
+hold up the others.</p></div></div>
+
+<h3>Step 6 · you read and merge — the only step that matters</h3>
+<div class="step you"><div class="num">6</div><div class="who">you · ~10 min each</div><div class="bd"><b>Merge the ones you like. Say no to the ones you don't.</b>
+<p>Rejecting costs nothing: the branch and the folder are deleted, the <code>taken:</code> label clears, and the issue
+goes back on the pile as if it had never been picked up. <b>Use the reading rule</b> — spend your attention on the
+commits that touch <code>engine/</code> or content, and take docs commits on trust.</p>
+<div class="meta"><span class="pill w">~10 min per PR</span><span class="pill r">the merge is the one irreversible step, and it is still only yours</span></div></div></div>
+
+<h3>Step 7 · the run closes itself</h3>
+<div class="step them"><div class="num">7</div><div class="who">the crew</div><div class="bd"><b>Labels clear, branches and folders are deleted, issues are closed in plain words, NEXT-SESSION is rewritten.</b>
+<p>You do nothing. The next run starts from a clean street.</p></div></div>
+
+<h2>What actually changes for you — the honest list</h2>
+<table>
+<tr><th>What you will notice</th><th>Why it happens</th><th>What to do about it</th></tr>
+<tr><td><b>Three PRs instead of one</b></td><td>That is the whole feature</td><td>Read them in whatever order you like. They do not depend on each other</td></tr>
+<tr><td><b>Issues wearing a <code>taken:</code> label</b></td><td>The claim is public so two agents cannot collide</td><td>Nothing. It clears itself on merge. A label older than a session is stale and gets taken</td></tr>
+<tr><td><b>Branch names with numbers in them</b></td><td>One branch per issue instead of one long-lived branch</td><td>Nothing. They delete themselves</td></tr>
+<tr><td><b>Two PRs touching the same file</b></td><td>Two agents landed near each other</td><td>Merge the one you prefer. The second rebases and re-runs the suites — the tests decide, not you</td></tr>
+<tr><td><b>Your evening is fuller</b></td><td>Three PRs is roughly thirty minutes, not ten</td><td><b>This is the real cost.</b> If it is too much, run two next time instead of three</td></tr>
+</table>
+
+<h2>When you want it to stop</h2>
+<div class="step you"><div class="num">✋</div><div class="who">you · 5 sec</div><div class="bd"><b>Say stop. That is the whole procedure.</b>
+<p><span class="say">stop the run</span> — work in flight is abandoned, labels clear, nothing is merged.
+<span class="say">crew mode off</span> — back to one thing at a time, permanently, until you say otherwise.</p>
+<p>Neither loses anything you had already merged, and neither needs a cleanup step from you.</p></div></div>
+
+<div class="stop"><b>The four things that never change, on or off.</b>
+You merge, and nothing else merges. CI is green before you see anything. Every commit stages explicit paths, never
+<code>git add -A</code>. The public game only ever changes for the public game's sake, and the town never leaks into it.
+<b>Crew mode dials how many hands are working. It does not touch anything that decides what is safe.</b></div>
+
+<h2>How to tell whether it was worth it</h2>
+<p class="sub">After one run, one question — and it is not "did more get done," because more will always get done:</p>
+<table>
+<tr><th>Ask yourself</th><th>If yes</th><th>If no</th></tr>
+<tr><td><b>Did I read all three PRs as carefully as I read one?</b></td><td>Keep it on. Try four next time</td><td>Go to two, or go back to one. <b>An unread merge is worse than a slow week</b></td></tr>
+<tr><td>Did I have to answer more questions than usual?</td><td>The tickets were underspecified, not the mode — Remedios sharpens them before the next run</td><td>Nothing to fix</td></tr>
+<tr><td>Did two of them collide on the same file?</td><td>Run tickets from different areas together, not three that touch the same one</td><td>Nothing to fix</td></tr>
+</table>
+<p class="note">The ceiling on this was never the machines. It is how many pull requests you want to read in one evening,
+and only you can find that number. Three is where I would start, and it is a number you can change by saying a different one.</p>

@@ -77,6 +77,24 @@ his attention, and he can stop after any of them without breaking what came befo
 
 Steps 1–4 are worth doing even if step 5 never happens. Nothing about them requires crew mode.
 
+## Once it is on — the unit is a RUN, not a ticket
+
+In `off` the unit of work is one ticket. In `on` it is a **run**: the owner names a handful of issues, they are worked
+at the same time, and they come back together. A run is over when everything in it is merged or rejected, and **two runs
+are never open at once** — that is what keeps it legible.
+
+    crew mode on — run #128, #129 and #150
+    crew mode on — take the top three by tier
+    stop the run          (work in flight abandoned, labels clear, nothing merged)
+    crew mode off         (back to one at a time, until he says otherwise)
+
+The seven steps of a run, what he will notice that is new, what to do when two PRs collide, and the one question to ask
+himself afterwards are all in [`crew/living-with-crew-mode.html`](crew/living-with-crew-mode.html). The short version:
+**four of the seven steps land on nobody, two are his, and the only one that is irreversible is still the merge.**
+
+The one question after the first run is *not* "did more get done" — more will always get done. It is: **did I read all
+three PRs as carefully as I read one?** If no, the number goes down. An unread merge is worse than a slow week.
+
 ---
 
 ## The charts, kept as source
@@ -90,6 +108,7 @@ them in a browser, or re-render with a headless screenshot:
 | [`crew/what-happens.html`](crew/what-happens.html) | the nineteen steps one piece of work goes through, with the five that repeat marked |
 | [`crew/worktrees.html`](crew/worktrees.html) | one shared folder vs one folder per builder — what it buys and what it costs |
 | [`crew/enable-crew.html`](crew/enable-crew.html) | **the owner's own eleven steps** — what is his, how long, what is reversible |
+| [`crew/living-with-crew-mode.html`](crew/living-with-crew-mode.html) | **what a day looks like once it is ON** — the seven steps of a run, what changes for him, and how to stop |
 
 ## Where the rest of it is written
 
