@@ -1,0 +1,90 @@
+<meta charset="utf-8"><style>
+:root{--ink:#221E2B;--dim:#5F5970;--line:#C9C3BA;--paper:#F2F0EA;--card:#FFF}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 ui-monospace,Menlo,monospace;padding:26px 30px}
+h1{font:700 25px/1.2 system-ui;margin:0 0 3px}h2{font:700 16px/1.2 system-ui;margin:26px 0 4px;padding-top:14px;border-top:1px solid var(--line)}
+h2 span{font-weight:400;color:var(--dim);font-size:13px}
+p.sub{margin:0 0 8px;color:var(--dim);font:13px/1.5 system-ui;max-width:100ch}
+.step{display:flex;gap:0;align-items:stretch;margin:0 0 10px;background:var(--card);border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.step.you{border-color:#B98B3E;background:#FDF6E9}
+.step.me{border-color:#4A72B8;background:#F3F7FD}
+.step.mach{border-color:#4B7A52;background:#F2F8F3}
+.num{flex:0 0 46px;display:flex;align-items:center;justify-content:center;font:700 17px system-ui;background:rgba(0,0,0,.05)}
+.body{flex:1;padding:11px 14px}
+.body b{display:block;font:600 14px system-ui;margin-bottom:3px}
+.body p{margin:0 0 5px;font:12.5px/1.5 system-ui;color:#3B3547}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.pill{font:600 10.5px system-ui;padding:2px 8px;border-radius:99px;background:#E9E5DD;color:#4A4458}
+.pill.w{background:#F6E7CF;color:#6E4E14}.pill.g{background:#D8EFDC;color:#1D5B2B}.pill.r{background:#F6D9D9;color:#7A2020}.pill.b{background:#DDE7F6;color:#22406E}
+.who{flex:0 0 92px;padding:11px 10px;font:600 11px system-ui;color:var(--dim);border-right:1px solid rgba(0,0,0,.08);display:flex;align-items:center}
+.loop{border:1.5px dashed #A34F86;background:#FBF2F7;border-radius:12px;padding:12px 16px;margin:12px 0 0}
+.loop b{color:#A34F86;font:700 14px system-ui}
+.loop ol{margin:6px 0 0 18px;padding:0;font:12.5px/1.7 system-ui}
+.side{background:#EFEDE6;border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0 0;font:12.5px/1.6 system-ui}
+.side b{font:600 13px system-ui}
+table{border-collapse:collapse;font:12px system-ui;width:100%;margin-top:10px}
+td,th{border:1px solid var(--line);padding:6px 9px;text-align:left}th{background:#E9E5DD;font-weight:600}
+code{background:#E9E5DD;padding:1px 5px;border-radius:4px;font-size:11.5px}
+</style>
+<h1>Exactly what <i>you</i> do — the whole list</h1>
+<p class="sub">Not what the crew does. What lands on <b>you</b>, in order, with how long it takes and whether you can undo it.
+There are eleven things. Six of them you do once, ever. Two are clicks in a browser. Nothing on this list is code.</p>
+
+<h2>Part one · switching it on <span>— once, ever. About 40 minutes of your time, spread over as many evenings as you like.</span></h2>
+
+<div class="step you"><div class="num">1</div><div class="who">you · 1 min</div><div class="body"><b>Say "build the decision store."</b>
+<p>That is the whole step. It is a folder of short documents — one per settled decision, what was decided and why. No code, nothing to configure, nothing that can break the game.</p>
+<div class="meta"><span class="pill w">1 minute</span><span class="pill g">fully reversible — it is text</span><span class="pill b">unlocks: everything else</span></div></div></div>
+
+<div class="step you"><div class="num">2</div><div class="who">you · 10 min</div><div class="body"><b>Read that PR and merge it.</b>
+<p>Your normal merge. If you hate the shape of it, say so and it changes before anything is built on top.</p>
+<div class="meta"><span class="pill w">10 minutes</span><span class="pill r">the merge is the irreversible bit — as always</span></div></div></div>
+
+<div class="step you"><div class="num">3</div><div class="who">you · 1 min</div><div class="body"><b>Say "add claiming by label."</b>
+<p>Three labels get created on the repo and a few lines are added so the town renders them. After this, two agents cannot take the same issue by accident — the label is the lock.</p>
+<div class="meta"><span class="pill w">1 minute</span><span class="pill g">reversible — delete three labels</span><span class="pill b">unlocks: more than one builder at a time</span></div></div></div>
+
+<div class="step you"><div class="num">4</div><div class="who">you · 10 min</div><div class="body"><b>Read that PR and merge it.</b>
+<p>Small. Mostly a convention written down plus a label being drawn on a stall in the street.</p>
+<div class="meta"><span class="pill w">10 minutes</span></div></div></div>
+
+<div class="step you"><div class="num">5</div><div class="who">you · 2 min</div><div class="body"><b>Pick three open issues and say "run these three together."</b>
+<p><b>This is the actual switch-on.</b> Everything before it is groundwork you could stop at. Here three agents take three issues, each in its own folder, and you get three PRs instead of one.</p>
+<div class="meta"><span class="pill w">2 minutes</span><span class="pill g">reversible — say "just one at a time" and it goes back</span><span class="pill b">this is the thing you are deciding whether you want</span></div></div></div>
+
+<div class="step you"><div class="num">6</div><div class="who">you · 30 min</div><div class="body"><b>Read the three PRs. Merge the ones you like.</b>
+<p>Reject one and nothing breaks — its branch and its folder are deleted, the label clears, the issue goes back on the pile. <b>After this evening you will know whether three-at-once is comfortable or too much.</b> That answer is the real output of part one.</p>
+<div class="meta"><span class="pill w">~30 minutes</span><span class="pill r">the merges</span></div></div></div>
+
+<h2>Part two · optional, and unrelated <span>— do it any time, or never. Nothing above depends on it.</span></h2>
+
+<div class="step you"><div class="num">7</div><div class="who">you · 2 min</div><div class="body"><b>GitHub → Settings → Pages → Branch: <code>main</code> / root → Save.</b>
+<p>One dropdown, one button, in the browser. About sixty seconds later the game is on a public URL you can open on your phone and add to your home screen. It plays offline after the first load.</p>
+<p><b>What it changes for you:</b> today you test by opening a file on your laptop. After this you test on the thing you actually play on, which is where every one of your reports has come from — the blur, the hair, the buttons, the tree.</p>
+<div class="meta"><span class="pill w">2 minutes</span><span class="pill g">fully reversible — set it back to "None"</span><span class="pill r">it makes the game public</span></div></div></div>
+
+<div class="side"><b>What Pages is not.</b> It is not for the agents. They never touch it. It has nothing to do with worktrees,
+labels, or the crew — it is the same one setting it would have been a month ago, and the only reason it keeps coming up is
+that it is the difference between "it works on my laptop" and "it works." <b>El Changarrito is never published by it</b> —
+the town runs from your laptop only, and the smoke fails the build if anything of the town leaks into the public shell.</div>
+
+<h2>Part three · every time, forever <span>— this is the part that never stops, and it is short</span></h2>
+<div class="loop"><b>Your standing loop — four things</b>
+<ol>
+<li><b>Notice something and say it.</b> Plain words. "It's still blurry in full screen." That is a complete bug report here.</li>
+<li><b>Answer a question, when there is one.</b> Only ever taste, story, or how much — never anything a machine could have worked out. Usually zero or one per ticket.</li>
+<li><b>Look at what was built.</b> A picture, a mock, a demo. Say "not that" freely; nothing is expensive to redo before merge.</li>
+<li><b>Merge.</b> The only irreversible step in the whole system, and it is yours alone.</li>
+</ol></div>
+
+<h2>The honest ledger</h2>
+<table>
+<tr><th>Step</th><th>Your time</th><th>Once or always</th><th>If you skip it</th></tr>
+<tr><td>1–2 &nbsp;decision store</td><td>~11 min</td><td>once</td><td>Everything still works; decisions get re-argued in three months.</td></tr>
+<tr><td>3–4 &nbsp;claiming by label</td><td>~11 min</td><td>once</td><td>You are capped at one builder at a time — which is exactly today.</td></tr>
+<tr><td>5–6 &nbsp;the first parallel run</td><td>~32 min</td><td>once, to decide</td><td>Nothing changes. This is the only step that is a real decision.</td></tr>
+<tr><td>7 &nbsp;Pages</td><td>~2 min</td><td>once</td><td>You keep testing on a laptop file instead of the phone you play on.</td></tr>
+<tr><td>the loop</td><td>minutes per ticket</td><td>always</td><td>—</td></tr>
+</table>
+<p class="sub" style="margin-top:10px"><b>Total, to have the whole thing running: under an hour of your attention, and you can stop after any step
+without breaking what came before.</b> There is no new tool to install, no account to make, no bot, no webhook. GitHub already
+has labels, branches and pull requests; the town already reads labels. That is the whole machine.</p>

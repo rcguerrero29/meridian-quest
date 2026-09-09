@@ -361,6 +361,21 @@ that is a little more built than it was, because you helped.
 
 ## Taste — how to write and plan for this owner
 
+**When offering options, offer them the way the dial is written (owner, 2026-09-09: "lets keep those
+your type of suggestions when you provide options").** That means, every time:
+
+- **A table, not a paragraph.** One row per option, ranked by what it actually saves or costs him —
+  not alphabetically, not in the order they occurred to the session.
+- **The literal words he can type**, in the left column. Not a description of a capability: the
+  thing he can copy.
+- **What it costs and what it buys**, in his terms — his time, his attention, his money, how many
+  PRs land on him — never in the session's terms.
+- **The honest note beside it.** What is genuinely expensive, what is genuinely cheap, and which
+  option the session would pick. One recommendation, with the reason, never a survey.
+- **What happens if he does nothing.** Every option list has a "leave it alone" row, and it is a
+  real row with a real consequence, not a courtesy.
+
+
 - **Plain language, player-side.** Describe what the player sees and feels, not the
   architecture. The owner has twice been confused by implementation framing
   ("no engine work", "the replay rewind is asymmetric"). Say *"the Studio you built

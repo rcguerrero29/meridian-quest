@@ -22,6 +22,9 @@ instructions live. It is not the instructions.*
    and last (from the town's form or by hand); **a session fills *Questions to consider* and *Areas
    affected* when it first reads the issue** — an edit under those headings only, never above the
    owner's words, announced in one comment.
+3½. **`docs/CREW-MODE.md`** — one line at the top says whether crew mode is `on` or `off`. `off` is
+   today's behaviour and the default; `on` means one issue per branch, a `taken:` label as the lock,
+   and one worktree per builder. A per-session instruction beats the file; a session unsure is `off`.
 4. **`docs/OWNER.md`** — the settled rules. `docs/BACKLOG.md` — the ranked index.
    `docs/story/el-changarrito.md` §7½ — what a second world may never do to Meridian.
 

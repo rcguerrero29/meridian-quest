@@ -1,0 +1,100 @@
+<meta charset="utf-8"><style>
+:root{--ink:#221E2B;--dim:#605A70;--line:#C9C3BA;--paper:#F2F0EA;--card:#FFF;
+ --owner:#F3E2C8;--ownerb:#B98B3E;--agent:#DDE7F6;--agentb:#4A72B8;--robot:#E2E9DE;--robotb:#4B7A52;--loop:#F0DCE8;--loopb:#A34F86}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;padding:26px 30px}
+h1{font:700 24px/1.2 system-ui;margin:0 0 2px}h2{font:700 16px/1.2 system-ui;margin:26px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+p.sub{margin:0 0 6px;color:var(--dim);font:13px/1.5 system-ui;max-width:96ch}
+.key{display:flex;gap:16px;flex-wrap:wrap;margin:14px 0 4px;font:12px system-ui}
+.key span{display:flex;align-items:center;gap:6px}.sw{width:14px;height:14px;border-radius:4px;border:1px solid}
+.lane{display:flex;align-items:stretch;gap:0;margin:0 0 2px}
+.who{flex:0 0 108px;font:600 11px system-ui;color:var(--dim);padding:14px 8px 0 0;text-align:right;letter-spacing:.02em}
+.track{flex:1;display:flex;align-items:center;gap:0;flex-wrap:wrap;padding:6px 0}
+.step{position:relative;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;min-width:132px;max-width:210px;box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.step b{display:block;font:600 12.5px system-ui;margin-bottom:3px}
+.step small{display:block;color:var(--dim);font:11.5px/1.4 system-ui}
+.n{position:absolute;top:-9px;left:-9px;width:20px;height:20px;border-radius:99px;background:var(--ink);color:#fff;font:700 11px/20px system-ui;text-align:center}
+.o{background:var(--owner);border-color:var(--ownerb)}.a{background:var(--agent);border-color:var(--agentb)}
+.r{background:var(--robot);border-color:var(--robotb)}.l{background:var(--loop);border-color:var(--loopb)}
+.arw{flex:0 0 26px;text-align:center;color:var(--dim);font-size:16px}
+.rep{position:absolute;top:-8px;right:-8px;background:#A34F86;color:#fff;font:700 10px/16px system-ui;padding:0 6px;border-radius:99px}
+.note{margin:8px 0 0 108px;font:12px/1.5 system-ui;color:var(--dim);max-width:92ch;border-left:3px solid var(--line);padding-left:10px}
+.loopbar{margin:10px 0 0 108px;background:#F7E8F1;border:1.5px dashed var(--loopb);border-radius:10px;padding:9px 12px;font:12.5px/1.5 system-ui;max-width:92ch}
+.loopbar b{color:#A34F86}
+table{border-collapse:collapse;margin:10px 0 0 108px;font:12px system-ui}
+td,th{border:1px solid var(--line);padding:5px 9px;text-align:left}th{background:#E9E5DD;font-weight:600}
+</style>
+<h1>What actually happens, step by step</h1>
+<p class="sub">The other chart showed <i>who</i> the crew are. This one shows <i>what happens to one piece of work</i>, from the moment
+you notice something to the moment it is on your phone. The pink badge marks the steps that repeat.</p>
+<div class="key">
+ <span><i class="sw o"></i>you</span><span><i class="sw a"></i>an agent (a person on the crew)</span>
+ <span><i class="sw r"></i>a machine, no one watching</span><span><i class="sw l"></i>repeats</span>
+</div>
+
+<h2>A. Getting the work in — happens once per thing you notice</h2>
+<div class="lane"><div class="who">you</div><div class="track">
+ <div class="step o"><span class="n">1</span><b>You say it</b><small>In the town, in chat, or straight into an issue. Plain words, no file names.</small></div>
+ <div class="arw">→</div>
+ <div class="step a"><span class="n">2</span><b>Remedios writes it down</b><small>Turns it into the five-heading ticket. Checks it isn't already open.</small></div>
+ <div class="arw">→</div>
+ <div class="step a"><span class="n">3</span><b>She ranks it</b><small>tier: high / normal / low, against everything else open.</small></div>
+</div></div>
+<p class="note">Steps 1–3 are the only place your words enter the system. Everything after this reads the ticket, never the chat.</p>
+
+<h2>B. Doing one ticket — the whole of this repeats per ticket</h2>
+<div class="lane"><div class="who">planning</div><div class="track">
+ <div class="step a"><span class="n">4</span><b>Beto reads it</b><small>Decides: is this a RULE (engine) or a CHOICE (a seam the pack answers)? Fills in "Questions to consider" and "Areas affected".</small></div>
+ <div class="arw">→</div>
+ <div class="step o"><span class="n">5</span><b>You answer the open questions</b><small>Only the ones a machine can't decide — taste, story, how much.</small><span class="rep">repeats</span></div>
+ <div class="arw">→</div>
+ <div class="step a"><span class="n">6</span><b>The right specialist takes it</b><small>Rosa for a control, Pili for how it reads, Nacho for words, Cuca for a room, Tavo for a mechanic.</small></div>
+</div></div>
+<div class="lane"><div class="who">building</div><div class="track">
+ <div class="step a l"><span class="n">7</span><b>Write the test first</b><small>In plain words: "what a person would have seen." Run it. It must FAIL.</small><span class="rep">repeats</span></div>
+ <div class="arw">→</div>
+ <div class="step a l"><span class="n">8</span><b>Write the fix</b><small>The smallest change that turns the test green.</small><span class="rep">repeats</span></div>
+ <div class="arw">→</div>
+ <div class="step r l"><span class="n">9</span><b>Run all four suites</b><small>Meridian · the town · the engine against each shell. Green or go back to 8.</small><span class="rep">repeats</span></div>
+</div></div>
+<div class="lane"><div class="who">checking</div><div class="track">
+ <div class="step a"><span class="n">10</span><b>Chava plays it</b><small>Like a player, including the wrong way round. Reports what happened, not what was meant.</small></div>
+ <div class="arw">→</div>
+ <div class="step a"><span class="n">11</span><b>Paty checks both languages</b><small>Only if words changed. Same meaning, same voice, same width.</small></div>
+ <div class="arw">→</div>
+ <div class="step a"><span class="n">12</span><b>Bump GAMEV + CACHE together</b><small>Only if engine/ changed. The suite fails the build if they drift.</small></div>
+</div></div>
+<div class="loopbar"><b>7 → 8 → 9 is the loop that runs the most.</b> One ticket goes round it once if it's simple and four or five times if
+it isn't. Every trip is cheap because it's a machine. Nothing reaches you until it is green.</div>
+
+<h2>C. Shipping it — once per ticket, and this is where you are the gate</h2>
+<div class="lane"><div class="who">shipping</div><div class="track">
+ <div class="step a"><span class="n">13</span><b>One branch, one PR</b><small>The branch is named for the ticket. Nothing else rides along.</small></div>
+ <div class="arw">→</div>
+ <div class="step r"><span class="n">14</span><b>CI re-runs the four suites</b><small>On a clean machine, not the one that wrote the code.</small><span class="rep">repeats</span></div>
+ <div class="arw">→</div>
+ <div class="step o"><span class="n">15</span><b>You merge</b><small>The one irreversible step. Nothing merges without you.</small></div>
+ <div class="arw">→</div>
+ <div class="step r"><span class="n">16</span><b>Pages rebuilds, phone updates</b><small>~60s. See the second chart.</small></div>
+</div></div>
+<p class="note">If CI is red at 14, it goes back to 8 and comes round again. That is the second-most-repeated path.</p>
+
+<h2>D. Closing the loop — once</h2>
+<div class="lane"><div class="who">after</div><div class="track">
+ <div class="step a"><span class="n">17</span><b>Close the issue, say what shipped</b><small>In the same plain words, so the town shows it.</small></div>
+ <div class="arw">→</div>
+ <div class="step a"><span class="n">18</span><b>Chuy writes down WHY</b><small>The decision, not the diff. So nobody re-argues it in March.</small></div>
+ <div class="arw">→</div>
+ <div class="step a"><span class="n">19</span><b>Rewrite NEXT-SESSION.md</b><small>State of play. The next session starts here.</small></div>
+</div></div>
+
+<h2>What repeats, and how often</h2>
+<table>
+<tr><th>Step</th><th>How often</th><th>Who is waiting on it</th></tr>
+<tr><td>7 → 8 → 9 &nbsp;<i>red, fix, green</i></td><td>1–5× per ticket</td><td>nobody — machine speed</td></tr>
+<tr><td>14 &nbsp;<i>CI</i></td><td>1× per push, so 1–3× per ticket</td><td>nobody — ~2 min</td></tr>
+<tr><td>5 &nbsp;<i>you answer a question</i></td><td>0–2× per ticket</td><td><b>everything</b></td></tr>
+<tr><td>15 &nbsp;<i>you merge</i></td><td>exactly 1× per ticket</td><td><b>everything</b></td></tr>
+<tr><td>B and C as a whole</td><td>1× per ticket, and tickets run in parallel</td><td>—</td></tr>
+</table>
+<p class="note">Two steps out of nineteen need you. That is the whole design: the crew can run 7–9 all night, but 5 and 15 are yours,
+and nothing irreversible happens on the other side of them.</p>

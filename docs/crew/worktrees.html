@@ -1,0 +1,77 @@
+<meta charset="utf-8"><style>
+:root{--ink:#221E2B;--dim:#605A70;--line:#C9C3BA;--paper:#F2F0EA;--card:#FFF}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 ui-monospace,Menlo,monospace;padding:26px 30px}
+h1{font:700 24px/1.2 system-ui;margin:0 0 2px}h2{font:700 16px/1.2 system-ui;margin:24px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+p.sub{margin:0 0 6px;color:var(--dim);font:13px/1.5 system-ui;max-width:98ch}
+.two{display:flex;gap:22px;align-items:flex-start}
+.pane{flex:1;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px}
+.pane h3{font:700 14px system-ui;margin:0 0 2px}.pane .cap{font:12px/1.4 system-ui;color:var(--dim);margin:0 0 12px}
+.now h3{color:#7A2020}.next h3{color:#1D5B2B}
+.step{display:flex;gap:9px;margin:0 0 9px;align-items:flex-start}
+.dot{flex:0 0 20px;height:20px;border-radius:99px;background:#E9E5DD;color:#3B3547;font:700 11px/20px system-ui;text-align:center;margin-top:1px}
+.now .dot{background:#F6D9D9;color:#7A2020}.next .dot{background:#D8EFDC;color:#1D5B2B}
+.txt{font:12.5px/1.5 system-ui}.txt b{font-weight:600}.txt small{display:block;color:var(--dim);font-size:11.5px}
+.stop{background:#FBEFEF;border:1.5px dashed #B85555;border-radius:9px;padding:8px 11px;font:12px/1.5 system-ui;margin:6px 0 10px}
+.go{background:#EEF7F0;border:1.5px dashed #4B7A52;border-radius:9px;padding:8px 11px;font:12px/1.5 system-ui;margin:6px 0 10px}
+.bar{display:flex;align-items:center;gap:0;margin:12px 0 4px}
+.slot{flex:1;height:26px;border-radius:6px;border:1.5px solid var(--line);background:#EFECE6;font:600 11px/24px system-ui;text-align:center;color:var(--dim);margin-right:5px}
+.busy{background:#DDE7F6;border-color:#4A72B8;color:#22406E}
+.wait{background:#F6E7CF;border-color:#B98B3E;color:#6E4E14}
+table{border-collapse:collapse;margin:12px 0 0;font:12px system-ui;width:100%}
+td,th{border:1px solid var(--line);padding:6px 9px;text-align:left}th{background:#E9E5DD;font-weight:600}
+.note{margin:10px 0 0;font:12px/1.5 system-ui;color:var(--dim);border-left:3px solid var(--line);padding-left:10px;max-width:100ch}
+</style>
+<h1>What the git change buys you</h1>
+<p class="sub">Same crew, same tests, same merge button. The only thing that changes is <b>how many of them can be working at once</b>
+without stepping on each other. Nothing here changes how you play or how you merge.</p>
+
+<h2>One repo, one folder — today</h2>
+<div class="two">
+<div class="pane now">
+<h3>Today: one checkout, one branch at a time</h3>
+<p class="cap">A folder on disk can only be on one branch. Everyone shares that folder.</p>
+<div class="step"><span class="dot">1</span><span class="txt"><b>Rosa starts a UI fix.</b><small>The folder switches to her branch.</small></span></div>
+<div class="step"><span class="dot">2</span><span class="txt"><b>Beto wants to start the engine fix.</b><small>Same folder. He must wait, or switch and wreck Rosa's half-done files.</small></span></div>
+<div class="stop"><b>The jam.</b> Two people, one desk. The second one waits — not for a decision, just for the desk.</div>
+<div class="step"><span class="dot">3</span><span class="txt"><b>Rosa finishes, pushes, you merge.</b></span></div>
+<div class="step"><span class="dot">4</span><span class="txt"><b>Now Beto starts.</b><small>His wait was pure dead time.</small></span></div>
+<div class="bar"><div class="slot busy">Rosa</div><div class="slot wait">Beto waiting</div><div class="slot wait">Nacho waiting</div></div>
+<div class="bar"><div class="slot">·</div><div class="slot busy">Beto</div><div class="slot wait">Nacho waiting</div></div>
+<div class="bar"><div class="slot">·</div><div class="slot">·</div><div class="slot busy">Nacho</div></div>
+<p class="note">Three tickets take three rounds. Your merges are spread across all three.</p>
+</div>
+
+<div class="pane next">
+<h3>With worktrees: one repo, several desks</h3>
+<p class="cap">A worktree is an extra folder on disk pointing at the SAME repo, checked out to its own branch. Same history, same remote, same rules.</p>
+<div class="step"><span class="dot">1</span><span class="txt"><b>Each agent gets its own folder.</b><small><code>../wt-rosa-131</code>, <code>../wt-beto-140</code>, <code>../wt-nacho-doors</code>.</small></span></div>
+<div class="step"><span class="dot">2</span><span class="txt"><b>All three start at the same time.</b><small>Nobody switches anybody's branch, because nobody shares a folder.</small></span></div>
+<div class="go"><b>No jam.</b> The desk stops being the bottleneck. The only bottleneck left is you, on purpose.</div>
+<div class="step"><span class="dot">3</span><span class="txt"><b>Three PRs land together.</b><small>CI runs all three in parallel. Each is still one branch, one ticket.</small></span></div>
+<div class="step"><span class="dot">4</span><span class="txt"><b>You merge them in whatever order you like.</b><small>If two touched the same file, the second one rebases and re-runs. The tests catch it, not you.</small></span></div>
+<div class="bar"><div class="slot busy">Rosa</div><div class="slot busy">Beto</div><div class="slot busy">Nacho</div></div>
+<div class="bar"><div class="slot wait">your 3 merges</div><div class="slot">·</div><div class="slot">·</div></div>
+<p class="note">Three tickets take one round. Your merges arrive in one sitting instead of three.</p>
+</div>
+</div>
+
+<h2>What it does not change</h2>
+<table>
+<tr><th>Stays exactly the same</th><th>Why that matters</th></tr>
+<tr><td>One branch per part, one PR per part</td><td>You can still read a PR in one sitting.</td></tr>
+<tr><td>CI green before you see it</td><td>Nothing red ever reaches your merge button.</td></tr>
+<tr><td>You merge. Nothing else merges.</td><td>The irreversible step is still yours, alone.</td></tr>
+<tr><td>The public game only changes for the public game's sake</td><td>The town never leaks into Meridian.</td></tr>
+<tr><td>Your laptop copy of <code>main</code></td><td>The town you play from is untouched by any of this.</td></tr>
+</table>
+
+<h2>The cost, honestly</h2>
+<table>
+<tr><th>What it costs</th><th>How bad</th></tr>
+<tr><td>Disk: one working folder per active agent</td><td>Small — the history is shared, only the files are copied.</td></tr>
+<tr><td>Two agents editing the same file</td><td>Real. Second one rebases; the four suites decide. Beto's rule: one ticket per <i>area</i>, not just per ticket.</td></tr>
+<tr><td>More PRs open at once</td><td>Real, and it is the actual limit — not the machines. Three or four open is comfortable to read; ten is not.</td></tr>
+</table>
+<p class="note">That last row is the honest answer to "what is our limit in agents": it is not the tooling, it is how many PRs
+you want to read in one evening. Three concurrent is the number I would start with, and it is a number you can raise later
+by changing nothing but your mind.</p>
