@@ -10,3 +10,7 @@ shots/
 *.tmp.js
 /*.png
 !/icon-*.png
+# A screenshot script whose output directory came from an unset variable writes to
+# ./undefined/ at the repo root. It happened 2026-09-09; the cure for the mistake is not
+# committing it, but this stops the next one reaching a commit at all.
+/undefined/
