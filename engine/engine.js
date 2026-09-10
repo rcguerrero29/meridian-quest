@@ -497,7 +497,14 @@ function sanitizeSave(s){
   return{n,c:str2(s.c,24,""),lk,xp:num(s.xp,0,999,0),he:num(s.he,0,3,3),d,
     px:num(s.px,0,63,10),py:num(s.py,0,63,11),tr:num(s.tr,0,9999,0),fq:num(s.fq,0,3,0),
     w:str2(s.w,12,PL.home),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,hd,bl,
-    v:s.v===undefined?undefined:num(s.v,0,99,0)};
+    v:s.v===undefined?undefined:num(s.v,0,99,0),
+    /* hairV must survive the wash. It is the field that records what "long" MEANS (#132), and
+       :473 reads it to decide whether a long-haired hero keeps their hair or is turned back into
+       the beard the style used to draw. Dropping it here meant a sanitized save no longer carried
+       its own meaning, so a hero who crossed on a Trolley Pass grew a beard on arrival. Found by
+       the security crew reading sanitizeSave for injection and noticing a field that goes in and
+       does not come out. */
+    hairV:s.hairV===undefined?undefined:num(s.hairV,0,9,0)};
 }
 function loadSave(){try{return sanitizeSave(JSON.parse(localStorage.getItem(SK("1"))||""));}catch(e){return null;}}
 /* belt & suspenders: flush progress when the tab is backgrounded or closed (only once a run exists) */

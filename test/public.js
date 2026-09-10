@@ -68,9 +68,23 @@ if (has('index.html')) { const html = read('index.html');
   if (!csp) fails.push('the public index declares no Content-Security-Policy — nothing limits where the page may talk to');
   else { if (/api\.github\.com/.test(csp)) fails.push('the public index\'s CSP allows api.github.com — that belongs to the private town, not the game');
          if (!/connect-src/.test(csp)) notes.push('the CSP names no connect-src, so fetch/XHR falls back to default-src — check that is deliberate'); }
-  [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]).forEach(s => {
-    if (/^https?:/.test(s)) fails.push('the public index loads a script from off-origin: ' + s);
-    else if (!has(s.replace(/^\.\//, ''))) fails.push('the public index loads "' + s + '" and it is not in the upload — every visitor gets a 404'); });
+  /* EVERY way the page reaches out, not just <script>. The first version of this section read
+     <script src> alone — and index.html:19 pulls a stylesheet from fonts.googleapis.com, so every
+     visitor's IP and User-Agent went to Google on every load and this check said nothing. That is
+     the R8 mistake inside the guard written to fix the R8 mistake: "nothing the page may reach"
+     means link, img, iframe and font too. An off-origin host is not forbidden — it is a DECISION,
+     and the rule is that it has to be a declared one. Add a host here and say why. */
+  const DECLARED_OFF_ORIGIN = {
+    'fonts.googleapis.com': 'the two display faces, declared in the CSP style-src (index.html:10)',
+    'fonts.gstatic.com': 'the font files those faces pull, declared in the CSP font-src',
+  };
+  [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map(m => m[1]).forEach(u => {
+    const m = u.match(/^https?:\/\/([^/]+)/);
+    if (m) { if (!DECLARED_OFF_ORIGIN[m[1]])
+      fails.push('the public index reaches ' + m[1] + ' and nothing in this repo says that was decided — if it is deliberate, declare it in test/public.js with the reason'); return; }
+    if (/^(data|mailto|#|javascript):/.test(u)) return;
+    const f = u.replace(/^\.\//, '').split(/[?#]/)[0];
+    if (f && !has(f)) fails.push('the public index loads "' + u + '" and it is not in the upload — every visitor gets a 404'); });
 }
 
 /* ---- 4 · the offline app must actually install --------------------------------------------- */

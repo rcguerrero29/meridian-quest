@@ -42,8 +42,7 @@ jobs:
           cp index.html sw.js qr.js manifest.webmanifest icon-192.png icon-512.png _site/
           cp -r engine vendor _site/
           mkdir -p _site/content && cp -r content/meridian _site/content/
-      - name: nothing private is in the upload
-        run: node test/public.js _site
+
       - name: write the city record
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,6 +52,12 @@ jobs:
         run: node .github/scripts/city-record.js
       - name: the record is what a clerk can read
         run: node test/record.js _site/status.json
+      # R10 runs LAST, after city-record.js has written status.json INTO the artifact. It used to
+      # run before that step, so the one file generated at deploy time — carrying titles straight
+      # from the API — was the only file in the box the box-check never saw. Check the box after
+      # the last thing is put in it, or you are checking a different box.
+      - name: R10 — nothing private is in the upload
+        run: node test/public.js _site
       - uses: actions/configure-pages@v5
         id: pages
         continue-on-error: true
