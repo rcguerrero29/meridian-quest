@@ -127,7 +127,21 @@ that validation: `buildSafe` refuses a build whose door opens onto nothing.
 ---
 
 ## A5 · The tree cannot be drawn by a content pack
-**Status: open, and it gates the beautify work. 2026-09-09.**
+**Status: seam BUILT 2026-09-10. The move is step two.**
+
+> **What shipped.** `TILEART["J"] = {top, side, crown, iso}` — one entry per glyph with slots, rather
+> than the two tables and two holes it was. `crown` is what stands above a tile, so a pack can draw
+> its own tree, lamp globe or market umbrella. A bare function still means `top`, so nothing already
+> written changed, and both games render identically.
+>
+> **What did NOT ship, on purpose:** Meridian's jacaranda is still the engine's default crown. A pack
+> can now override it; nothing is forced through the seam yet. Moving the drawing out is a separate,
+> visible change to two games and it deserves its own ticket rather than riding along on a seam.
+>
+> **The owner's framing, which was better than mine** (2026-09-10): *"why cant we have like a pack
+> can draw its own tree and layer for art? maybe im mixing but just trying ot reuse what we can."*
+> He was not mixing them up. A5 and A7 were both *a pack cannot describe a view of a thing*, and my
+> plan had been two more globals on top of the two that existed — four mechanisms for one job.
 
 `[CODE]` The canopy is built inside `engine/engine3d.js:437–447` with a hardcoded green. A pack gets
 Meridian's jacaranda or nothing.
@@ -155,7 +169,14 @@ is blocked. **The reason it is written here rather than only in TAGS:** the next
 ---
 
 ## A7 · The camera set should be a pack's choice
-**Status: registered 2026-09-09, and it is now the first step of the structural goal.**
+**Status: BUILT 2026-09-10.**
+
+> `CAMERAS` in a pack's config. Say nothing and you get all four, so neither shipping game changed.
+> Declare fewer and the others have no button and cannot be reached — `camSet` refuses a camera the
+> game does not have, which is what makes a *saved* choice safe when a pack later drops one.
+> The expensive half — a third art layer for isometric — was **not** built, and that was the point:
+> **let a pack turn iso off before anyone spends a week making iso good.** The slot exists in
+> `TILEART` for whoever wants it.
 
 `[OWNER]` *"why do we have to lose the art for the isometric? cant it switch out depending on the
 goal? maybe a game doesnt need 3d."*
@@ -172,3 +193,29 @@ more. See `docs/TAGS.md` L15.
 **The order matters:** offering the choice is cheap and immediately useful; drawing for a camera
 nobody has to ship is expensive and might be wasted. Let a pack turn iso *off* before anyone spends
 a week making iso *good*.
+
+---
+
+## A8 · The interview should branch, and one day an agent should run it
+**Status: recorded 2026-09-10. Not built.**
+
+`[OWNER]` *"one day maybe let it be able to support an agent to ask the questions depending on
+initial answers."*
+
+Today `docs/NEW-WORLD.md` §0 is a flat list of questions a person reads. What is wanted is a
+**branching interview**: answer *from above* and it never asks about 3D lighting; answer *the world
+does not end* and it stops asking about endings and starts asking who you keep coming back to.
+
+The two questions that must lead it are settled and written (§0½ *does your world end?* and §0¾ *how
+do people see your world?*), because between them they decide the story shape and every drawing.
+
+**What makes this different from everything else on this board:** it is the first thing here where an
+agent would be talking to **somebody who is not the owner** — a person who wants a game and has never
+heard of this repository. Different job, different care. `docs/SOURCES.md`'s tagging and the plain-
+words rule matter more there, not less.
+
+| Option | What it costs |
+|---|---|
+| **Leave it as a doc** ← *today* | nothing. A person reads a list and answers what applies |
+| A written decision tree in the doc | small; a human can follow it, and it is what an agent would need anyway |
+| An agent that runs the interview and writes the pack skeleton | real work, and it wants the decision tree first |

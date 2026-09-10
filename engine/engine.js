@@ -572,7 +572,14 @@ let camXg=0,camYg=0;
    "3d", so camSet() happily SAVED a 3D choice that boot then refused to read back:
    picking 3D and reloading silently dropped you to another camera, and CAMDEF="3d"
    was ignored outright. */
-const CAMS=["top","front","iso","3d"];
+/* WHICH cameras this game has — a pack's choice, not the engine's (docs/TAGS.md L15).
+   The owner, 2026-09-10: "maybe a game doesnt need 3d." A pack declaring ["top","front"] shows two
+   buttons, never offers a camera it has no art for, and never pays for a renderer it does not use.
+   Say nothing and you get all four, so neither shipping game changes. Unknown names are dropped
+   rather than trusted: a typo must not put a button on screen that leads nowhere. */
+const CAMALL=["top","front","iso","3d"];
+const CAMS=(typeof CAMERAS!=="undefined"&&Array.isArray(CAMERAS)&&CAMERAS.filter(c=>CAMALL.includes(c)).length)
+  ?CAMALL.filter(c=>CAMERAS.includes(c)):CAMALL;
 let camMode=(typeof CAMDEF!=="undefined"&&CAMS.includes(CAMDEF))?CAMDEF:"top";
 try{const cm0=localStorage.getItem(SK("cam"));if(CAMS.includes(cm0))camMode=cm0;}catch(e){}
 const ISW=44,ISH=22;
@@ -694,7 +701,12 @@ function drawIso(){
   else if(hr>=18||hr<8)wash="rgba(255,150,60,.07)";
   if(wash){ctx.fillStyle=wash;ctx.fillRect(0,0,VW,VH);}
 }
-function camSet(m){camMode=m;
+function camSet(m){
+  /* a game only has the cameras it declares (CAMS). Refusing here rather than trusting the caller
+     is what makes the seam safe: a saved choice from before a pack dropped a camera, a stale button,
+     a test, all land on something the game can actually draw instead of a blank canvas. */
+  if(!CAMS.includes(m))m=CAMS.includes(camMode)?camMode:CAMS[0];
+  camMode=m;
   try{localStorage.setItem(SK("cam"),m);}catch(e){}
   document.querySelectorAll("#camRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.cam===camMode?"true":"false"));
   const is3=camMode==="3d",c3=$("cv3");
@@ -703,6 +715,9 @@ function camSet(m){camMode=m;
   sizeCanvas();  /* the world's height depends on which camera is running now */
   if($("rot3d"))$("rot3d").hidden=!is3;}
 document.querySelectorAll("#camRow button").forEach(b=>b.addEventListener("click",()=>camSet(b.dataset.cam)));
+/* and the row shows what the game HAS. A button for a camera this pack never declared is a promise
+   the game cannot keep, so it is not on screen at all. */
+document.querySelectorAll("#camRow button").forEach(b=>{if(!CAMS.includes(b.dataset.cam))b.hidden=true;});
 document.querySelectorAll("#easeRow button").forEach(b=>b.addEventListener("click",()=>{if(typeof camEaseSet==="function")camEaseSet(b.dataset.ease);}));
 /* ---------- tile renderer registry (graphics-prep, IDEAS §7 step 1) ----------
    Every glyph draws via TILEDRAW[ch](rc), rc={sx,sy,x,y,canopy}. Content packs
@@ -1358,6 +1373,33 @@ TILESIDE["V"]=rc=>{const{sx,sy}=rc; /* a stove from the front: burners over the 
       ctx.fillStyle="#AEB6BE";[8,13,19,24].forEach(px=>{ctx.beginPath();ctx.arc(sx+px,sy+12,1.6,0,7);ctx.fill();});
       ctx.fillStyle="#1B1E22";ctx.fillRect(sx+7,sy+16,18,10);ctx.fillStyle="#AEB6BE";ctx.fillRect(sx+7,sy+15,18,1.2);};
 if(typeof TILEART_SIDE!=="undefined")Object.assign(TILESIDE,TILEART_SIDE);
+/* ---------- ONE ENTRY PER GLYPH, WITH SLOTS — the view registry ----------
+   A pack describes what a glyph looks like. It used to do that in two tables with two holes:
+   TILEART said the top, TILEART_SIDE said the profile, the leafy top of a tree was hardcoded in
+   engine3d.js with a hardcoded green, and there was nowhere at all to describe the isometric view.
+   Four views of one object, in four unrelated shapes, two of which a content pack could not reach.
+   The owner, 2026-09-10: "why cant we have like a pack can draw its own tree and layer for art?
+   maybe im mixing but just trying ot reuse what we can." He was not mixing them up — they are one
+   thing, and the fix is one list with slots rather than four more globals:
+
+       TILEART["J"] = { top:fn, side:fn, crown:fn, iso:fn }   // fill in what you care about
+
+   A bare function still means `top`, exactly as before, so nothing any pack has written changes.
+   docs/TAGS.md L15, docs/ARCH-LOG.md A5+A7. */
+const TILECROWN={},TILEISO={};
+const TILEVIEWS=["top","side","crown","iso"];
+if(typeof TILEART!=="undefined")Object.entries(TILEART).forEach(([g,v])=>{
+  if(typeof v==="function"||!v||typeof v!=="object")return;   /* a bare function is `top`, merged above */
+  if(v.top)TILEDRAW[g]=v.top;
+  if(v.side)TILESIDE[g]=v.side;
+  if(v.crown)TILECROWN[g]=v.crown;
+  if(v.iso)TILEISO[g]=v.iso;});
+/* the one question every renderer asks: what does this glyph look like from HERE. A view a pack
+   never filled in comes back null, and the caller decides what to do about that — which is how a
+   game that has no isometric camera pays nothing for isometric art. */
+function tileView(g,view){
+  const T={top:TILEDRAW,side:TILESIDE,crown:TILECROWN,iso:TILEISO}[view];
+  return (T&&T[g])||null;}
 const sideArt=g=>TILESIDE[g]||TILEDRAW[g];
 /* ---------- TILES: glyph-class metadata (IDEAS §10 step ①) ----------
    What a tile IS — one row per glyph — so any camera derives drawing from meaning

@@ -178,7 +178,13 @@ and floor paint (`water`) — and everything else falls through to a cardboard c
 by `kind` alone is planning against nothing. This is the mechanism behind L7 and the reason the seven
 inert kinds went unnoticed for so long.
 
-### L15 · A game cannot choose which cameras it has
+### L15 · A game cannot choose which cameras it has — **CLOSED 2026-09-10**
+> **Built.** `CAMERAS` is a pack seam: a camera a game does not declare has no button and cannot be
+> reached, even by a stale saved choice. **And the art half closed with it** — `TILEART` now takes
+> `{top, side, crown, iso}`, so a pack can draw its own tree and its own isometric view.
+> **Still open, deliberately:** Meridian's jacaranda is still the engine's *default* crown. The seam
+> exists and nothing is forced through it yet; moving that drawing into the pack is step two, in
+> `docs/ARCH-LOG.md` A5.
 `engine/engine.js:575` — `const CAMS=["top","front","iso","3d"];` — **hardcoded in the engine.**
 `CAMDEF` lets a pack pick its *default* camera (`:576`), and that is all: every pack ships all four,
 and the button row offers all four whether or not the game wants them.
