@@ -58,6 +58,51 @@ error.** The town is immune only because it declares no chapters and gets one sy
 Until that is fixed, an endless world must have exactly one district. Registered as L12 in
 `docs/TAGS.md`.
 
+## 0¾ · How do people SEE your world? — the second question (2026-09-10)
+
+Ask this right after *does your world end?*. Those two decide more downstream than anything else:
+one shapes the story, the other shapes everything you will ever draw. **Ask it as a feel question,
+never a technical one** — "which cameras do you want" is unanswerable before somebody has seen their
+game, and it invites *all of them, why not*.
+
+> **How do you want people to see your world?**
+>
+> **a — Face to face.** You walk up to someone and see their face. Rooms have walls you look past,
+> things stand up and cast shadows. Warmer, and more to draw.
+>
+> **b — From above.** You see the whole room at once, laid out like a board. Clearer, calmer, less
+> to build — and you still see people's faces here, they just do not turn to you.
+>
+> **c — Both, and let the player pick.** What Meridian does.
+
+Then the follow-up that does the real work:
+
+> **Is there anything in your world you would want somebody to lean in and look at?**
+
+Yes means depth. No means the board. That question gets a true answer out of somebody who has never
+thought about cameras, which is the point. **Tell them it can change later — it costs art, not
+architecture.**
+
+    const CAMERAS = ["top","front"];   // in the pack's config.js — say nothing and you get all four
+
+A camera a pack does not declare has **no button** and cannot be reached, however it is asked for —
+including by a saved choice from before a pack dropped one.
+
+### And what a glyph looks like — one entry, four slots
+
+A glyph has four views. It used to be describable in two, with two holes: the leafy top of a tree
+was hardcoded in the engine, and there was nowhere at all to describe the isometric view.
+
+    TILEART["J"] = { top: fn, side: fn, crown: fn, iso: fn }
+
+Fill in the views you care about; the rest come back empty and the renderer decides. **A bare
+function still means `top`**, so nothing already written changes. `crown` is what stands *above* the
+tile — a tree's canopy, a lamp globe, a market umbrella.
+
+**A layer costs nothing to have.** It costs one drawing wherever you want to differ, and partial is
+normal: El Changarrito runs a whole world on **nine drawings** across 45 glyphs, and Meridian has
+18 solid glyphs with no side drawing at all.
+
 ## 1 · The folder — nine files, and which ones the engine actually needs
 
 ```

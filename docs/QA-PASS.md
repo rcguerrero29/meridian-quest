@@ -83,6 +83,24 @@ paths**; `.gitignore` carries the shapes, plural. **Four escapes in one day, eve
 who had been told and was being careful** — which is the whole argument for the guard being
 mechanical. Instructions did not work. The hook did.
 
+### E4 · The branch reset that ate a commit — 2026-09-10 (a near-miss, not an escape)
+**What happened:** mid-session, to start a clean part, I ran `git checkout -qB <branch> origin/main`.
+`-B` does not ask. It moved the branch to `origin/main` and the L15 commit — an hour of work — was
+gone from the working tree with no ceremony and no warning.
+**Why the owner never saw it:** luck, spelled *push*. The commit had been pushed minutes earlier, so
+`origin/<branch>` still had it. Recovery was `git stash -q -u`, `git reset -q --hard
+origin/<branch>`, `git stash pop`. **Unpushed, it would have been reflog-or-nothing.**
+**Which row would have caught it:** none. Like E3 it is not a viewport problem — it is a hand on a
+sharp tool.
+**What the rule is now:** **never `checkout -B` onto a branch you have commits on.** Starting a
+fresh part from `main` is `git fetch origin main` then a *new* branch name, or, if the name must be
+reused, `git push` first and reset to `origin/<branch>` rather than to `origin/main`. And check
+`git log origin/<branch>..<branch>` before any command with `-B`, `--hard` or `-f` in it.
+**The general lesson:** this register exists because instructions do not work and hooks do (E3). This
+row has no hook yet, and that is the honest state of it — it is written down as a gap below rather
+than claimed as fixed. **It is here at all because a near-miss that nobody records is just an escape
+that has not happened yet.**
+
 ---
 
 ## Known gaps in the list
@@ -98,3 +116,7 @@ Written down so they are counted rather than re-discovered:
 - **No suite checks the town at phone size**, only Meridian.
 - `test/smoke.js`'s portability scan is still Meridian's proper nouns, so it cannot catch a second
   world leaking its own names.
+- **E4 has no mechanical guard.** Nothing stops a session running `git checkout -B` over its own
+  unpushed work; the rule is words, and E3 is the proof that words are not enough. A pre-command
+  hook that refuses `-B`/`--hard`/`-f` while `git log origin/<branch>..<branch>` is non-empty would
+  be the real fix. **Until then, E4 can happen again, and next time the commit may not be pushed.**

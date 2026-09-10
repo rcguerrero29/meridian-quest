@@ -434,7 +434,19 @@ function t3Build(key){T3.pinatas=[];
       const trunk=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.7,0.16),
         new THREE.MeshLambertMaterial({color:0x6E4A2C}));
       trunk.position.set(cx,0.35,cz);grp.add(trunk);
-      if(!T3.canopyTex){ /* one jacaranda canopy, baked by hand */
+      /* the crown: what stands above this tile. A pack that declares one draws its own tree
+         (docs/ARCH-LOG.md A5) — the engine had this hardcoded, green and all, so every game on this
+         engine got Meridian's jacaranda or no tree at all. Baked per glyph, because two packs may
+         want two different trees. */
+      const ownCrown=(typeof tileView==="function")&&tileView(gch,"crown");
+      T3.crownTex=T3.crownTex||{};
+      if(ownCrown&&!T3.crownTex[gch]){
+        const cc=document.createElement("canvas");cc.width=40*K;cc.height=40*K;
+        const o2=ctx;ctx=cc.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
+        try{ownCrown({sx:0,sy:0,x,y});}catch(e){t3Note("crown "+gch,e);}finally{ctx=o2;}
+        T3.crownTex[gch]=t3Tex(cc);
+      }
+      if(!ownCrown&&!T3.canopyTex){ /* one jacaranda canopy, baked by hand */
         const cc=document.createElement("canvas");cc.width=40*K;cc.height=40*K;
         const g2=cc.getContext("2d");g2.scale(K,K);
         g2.fillStyle="#4E8A58";
@@ -446,7 +458,7 @@ function t3Build(key){T3.pinatas=[];
         if(typeof canopyDress==="function")canopyDress(g2,20,16); /* dressed in season; seasonSet drops the bake */
         T3.canopyTex=t3Tex(cc);
       }
-      const cs=new THREE.Sprite(new THREE.SpriteMaterial({map:T3.canopyTex,alphaTest:T3ALPHA}));
+      const cs=new THREE.Sprite(new THREE.SpriteMaterial({map:ownCrown?T3.crownTex[gch]:T3.canopyTex,alphaTest:T3ALPHA}));
       cs.scale.set(1.7,1.7,1);cs.position.set(cx,1.05,cz);
       cs.userData={flat:true,g:gch,x,y,canopy:true}; /* the canopy is a picture on a real trunk (#39) */
       T3.tintables.push(cs.material);grp.add(cs);

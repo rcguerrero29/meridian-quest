@@ -820,6 +820,58 @@ const { chromium } = require('playwright-core');
     return P;
   });
   fails.push(...grows);
+
+  /* ---- TAGS L15 / ARCH-LOG A5+A7: a pack says what a glyph looks like, and which cameras it has ----
+     The owner, 2026-09-10: "why cant we have like a pack can draw its own tree and layer for art?
+     maybe im mixing but just trying ot reuse what we can." He was not mixing them up.
+     A glyph has FOUR views and a pack could reach two. TILEART said the top, TILEART_SIDE said the
+     profile, the leafy top of a tree was hardcoded in engine3d.js with a hardcoded green, and there
+     was nowhere at all to describe the isometric view. And every game shipped all four cameras
+     whether it wanted them or not, including one that loses most of its art.
+     This asks for the CONTRACT and never for the picture, so it survives the art being redrawn. */
+  const views = await page.evaluate(() => {
+    const P = [];
+    if (typeof tileView !== 'function') {
+      P.push('a pack has no single place to say what a glyph looks like — the views are still scattered across tables it cannot all reach');
+    } else {
+      ['top', 'side', 'crown', 'iso'].forEach(v => {
+        try { tileView('#', v); }
+        catch (e) { P.push('nobody can ask what a glyph looks like from "' + v + '": ' + e.message); }
+      });
+      if (tileView('¡nope', 'crown') !== null)
+        P.push('asking for a view a pack never drew gives back something rather than nothing');
+      const treeG = Object.keys(TILES).find(g => (TILES[g] || {}).kind === 'tree');
+      if (!treeG) P.push('this pack has no tree, so the crown could not be checked');
+      else if (typeof TILECROWN === 'undefined') P.push('there is nowhere to declare what stands above a tile — a pack cannot draw its own tree');
+      else {
+        TILECROWN[treeG] = () => { ctx.fillStyle = '#ff00ff'; ctx.fillRect(0, 0, 40, 40); };
+        const w = Object.keys(WORLD_DEFS).find(k => WORLDS[k] && WORLDS[k].rows.some(r => r.indexOf(treeG) >= 0));
+        if (w) {
+          const before = camMode, bw = world;
+          camSet('3d'); world = w; t3Invalidate(); draw3d();
+          if (!(T3.crownTex && T3.crownTex[treeG]))
+            P.push('a pack declared what its tree looks like and the engine drew its own anyway');
+          world = bw; camSet(before);
+        }
+        delete TILECROWN[treeG]; t3Invalidate();
+      }
+    }
+    if (typeof CAMALL === 'undefined' || typeof CAMS === 'undefined') {
+      P.push('a game cannot say which cameras it has — all of them are on, always');
+    } else {
+      if (CAMS.some(c => !CAMALL.includes(c))) P.push('this pack offers a camera the engine cannot draw');
+      if (!CAMS.length) P.push('this pack offers no camera at all');
+      const shown = [...document.querySelectorAll('#camRow button')].filter(b => !b.hidden).map(b => b.dataset.cam);
+      const extra = shown.filter(c => !CAMS.includes(c));
+      if (extra.length) P.push('there is a button for a camera this game does not have: ' + extra.join(', '));
+      const was = camMode;
+      camSet('¡nosuchcamera');
+      if (!CAMS.includes(camMode)) P.push('asking for a camera the game does not have left it showing one it cannot draw');
+      camSet(was);
+    }
+    return P;
+  });
+  fails.push(...views);
   /* ---- the loop stops DRAWING behind a panel, and never stops thinking ----
      Measured before the change: 215 frames in six seconds with a document covering the world, all
      at full device resolution, none of them visible. The world must still tick — otherwise the dog
