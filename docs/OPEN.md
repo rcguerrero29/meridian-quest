@@ -55,6 +55,7 @@ happened, never from imagination.** Read the relevant one before proposing anyth
 | `docs/GAUGE.md` | What the engine demands of a brand-new world — **measured by building one**, not inferred | starting a pack, or changing the shared suite |
 | `docs/GIFTED-GAMES.md` | Sourced research on genres, physics, difficulty, multiplayer and occasion design, and **what this engine already ships** for each | proposing a mini-game or a new seam |
 | `docs/REGRESSION.md` | The regression map, R1–R10, and the rule they were bought with: **a guard has to read the noun it actually means** | writing any test |
+| `docs/SECURITY-NOTE-2026-09-10.md` | What the El Changarrito exposure **was and was not**, what the token can actually do, and the four things to check | any question about what leaked, or before touching the deploy |
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, **measured by building one** (2026-09-10) | proposing anything about a second world |
 | `docs/decisions/` | One file per settled decision: the ask verbatim, the answer, **and the options that were rejected, with reasons**. Opened 2026-09-10; three filed, and `docs/ASKS.md` is still where most decisions actually live | re-proposing anything that sounds already-answered |
 
