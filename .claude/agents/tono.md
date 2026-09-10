@@ -23,6 +23,14 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
+| **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
+
+**The last two are the ones that make an agent improve rather than just remember.** Everything above
+them is what the *code* learned. `ASKS.md` and `OWNER.md` are what the *owner* said, and a
+recommendation he has already made is not a suggestion to weigh — it is a decision to build on.
+Read them before proposing anything he might have already ruled on, and when he reverses himself,
+**the reversal is the rule and the reversal is written down next to what it replaced.**
 
 **Four rules that are not negotiable, because each was paid for:**
 

@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v134";
+const GAMEV="mq-v135";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -134,7 +134,7 @@ const SEASONS={
                 {world:"ex",from:[3,0],to:[9,0]},{world:"ex",from:[9,0],to:[15,0]},{world:"ex",from:[15,0],to:[20,0]}, /* the four jacarandas */
                 {world:"ex",from:[5,3],to:[17,3]},                                            /* Doña Tencha's roofline to El Portero's caseta — the neighbours tied it */
                 {world:"ex",from:[4,6],to:[18,6]},                                            /* inside the crew pen: it's their yard */
-                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[6,4],to:[13,4]}, /* the park: tree to tree, and one across the path NORTH of the bridge so you walk under it — never in a row the deck is in, or the two cuts tangle (owner, 2026-09-08: "overlay issues still in the park") */
+                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[8,3],to:[15,3]}   /* was [6,4]-[13,4]: its west pole was planted at the bridge's east mouth, so you walked into it and through it (owner, 2026-09-10). Moved two tiles east and one north — the strings now run PARALLEL to the crossing instead of ending in it. */, /* the park: tree to tree, and one across the path NORTH of the bridge so you walk under it — never in a row the deck is in, or the two cuts tangle (owner, 2026-09-08: "overlay issues still in the park") */
                 {world:"hq",from:[0,15],to:[9,15]},                                           /* one short swag over the lobby, tied to the west wall; the offices stay offices */
                 {world:"me",from:[0,1],to:[8,1]},{world:"me",from:[11,1],to:[19,1]},           /* El Mercado: along the awning line */
                 {world:"lc",from:[0,1],to:[7,1]},{world:"lc",from:[12,1],to:[19,1]},           /* La Cocina: the same */
@@ -148,7 +148,7 @@ const SEASONS={
                 {world:"st",x:2,y:0,kind:"calaverita",sill:true},{world:"st",x:6,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:10,y:0,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:12,y:0,kind:"calaverita",sill:true,foil:"#F2B705"},
                 {world:"st",x:17,y:0,kind:"calaverita",sill:true},{world:"st",x:22,y:0,w:1,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:2,y:5,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:9,y:5,kind:"calaverita",sill:true}, /* HQ's second window, La Cocina's awning windows */
                 /* ❗La ofrenda (Nacho; owner: "sounds like a good idea"): one at the foot of the marigold bridge, one on Doña Tencha's table — an empty frame, nobody named */
-                {world:"pk",x:6,y:2,kind:"ofrenda"} /* open ground at the top of the bridge's section — under no string (owner, 2026-09-08: "overlapping the papel picado and looks weird") */,{world:"casa-w",x:3,y:2,kind:"ofrenda"}],
+                {world:"pk",x:20,y:10,kind:"ofrenda"} /* the far south-east corner (owner, 2026-09-10: "the altar in the park is in a very buy area, put it in the corner that is further away and has little happening"). It was at (6,2), two tiles off the bridge mouth, stacked with a papel picado pole — the busiest square in the park. Nothing else is out here: no swag, no adoption spot, no crossing. */,{world:"casa-w",x:3,y:2,kind:"ofrenda"}],
          hangs:[{world:"ex",x:18,y:0,kind:"pinata"}],                                         /* over the paletera's corner, where the kids are; Kike hung it */
          bloom:"#F59E1B",                                                                     /* every planter blooms cempasúchil */
          facepaint:true, /* the calavera in Día de Muertos too (owner, 2026-09-07, night) — the engine's five looks */
@@ -171,7 +171,7 @@ const SEASONS={
                 {world:"ex",from:[3,0],to:[9,0]},{world:"ex",from:[9,0],to:[15,0]},{world:"ex",from:[15,0],to:[20,0]}, /* the four jacarandas */
                 {world:"ex",from:[5,3],to:[17,3]},                                            /* Doña Tencha's roofline to El Portero's caseta — the neighbours tied it */
                 {world:"ex",from:[4,6],to:[18,6]},                                            /* inside the crew pen: it's their yard */
-                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[6,4],to:[13,4]}, /* the park: tree to tree, and one across the path NORTH of the bridge so you walk under it — never in a row the deck is in, or the two cuts tangle (owner, 2026-09-08: "overlay issues still in the park") */
+                {world:"pk",from:[13,1],to:[19,1]},{world:"pk",from:[7,9],to:[13,9]},{world:"pk",from:[8,3],to:[15,3]}   /* was [6,4]-[13,4]: its west pole was planted at the bridge's east mouth, so you walked into it and through it (owner, 2026-09-10). Moved two tiles east and one north — the strings now run PARALLEL to the crossing instead of ending in it. */, /* the park: tree to tree, and one across the path NORTH of the bridge so you walk under it — never in a row the deck is in, or the two cuts tangle (owner, 2026-09-08: "overlay issues still in the park") */
                 {world:"hq",from:[0,15],to:[9,15]},                                           /* one short swag over the lobby, tied to the west wall; the offices stay offices */
                 {world:"me",from:[0,1],to:[8,1]},{world:"me",from:[11,1],to:[19,1]},           /* El Mercado: along the awning line */
                 {world:"lc",from:[0,1],to:[7,1]},{world:"lc",from:[12,1],to:[19,1]},           /* La Cocina: the same */
@@ -185,7 +185,7 @@ const SEASONS={
                 {world:"st",x:2,y:0,kind:"calaverita",sill:true},{world:"st",x:6,y:0,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:10,y:0,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:12,y:0,kind:"calaverita",sill:true,foil:"#F2B705"},
                 {world:"st",x:17,y:0,kind:"calaverita",sill:true},{world:"st",x:22,y:0,w:1,kind:"calaverita",sill:true,foil:"#2FA5A0"},{world:"st",x:2,y:5,kind:"calaverita",sill:true,foil:"#7B4BA8"},{world:"st",x:9,y:5,kind:"calaverita",sill:true}, /* HQ's second window, La Cocina's awning windows */
                 /* ❗La ofrenda (Nacho; owner: "sounds like a good idea"): one at the foot of the marigold bridge, one on Doña Tencha's table — an empty frame, nobody named */
-                {world:"pk",x:6,y:2,kind:"ofrenda"} /* open ground at the top of the bridge's section — under no string (owner, 2026-09-08: "overlapping the papel picado and looks weird") */,{world:"casa-w",x:3,y:2,kind:"ofrenda"}],
+                {world:"pk",x:20,y:10,kind:"ofrenda"} /* the far south-east corner (owner, 2026-09-10: "the altar in the park is in a very buy area, put it in the corner that is further away and has little happening"). It was at (6,2), two tiles off the bridge mouth, stacked with a papel picado pole — the busiest square in the park. Nothing else is out here: no swag, no adoption spot, no crossing. */,{world:"casa-w",x:3,y:2,kind:"ofrenda"}],
          hangs:[{world:"ex",x:18,y:0,kind:"pinata"}],                                         /* over the paletera's corner, where the kids are; Kike hung it */
          bloom:"#F59E1B",                                                                     /* every planter blooms cempasúchil */
          alebrije:{looks:[ /* Pili's five, the same five on every animal so the night reads as one; wings on the wingless */

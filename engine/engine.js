@@ -940,7 +940,8 @@ function fiestaDraw2D(wid,toScreen,front){ /* toScreen(x,y) → the tile's top-l
     if(p.kind!=="calaverita")return;
     const win=propSill(wid,p); /* on a window sill (owner: "as in human reality"): the facade's own window says where */
     if(win){const z=win.size; /* centred on its own window, standing on the sill, small enough to leave glass around it */
-      if(front)drawCalaverita(ctx,sx+win.cx-z/2,sy+win.sill-z,p.foil,z);
+      if(front){drawSillLit(ctx,sx+win.cx-win.w/2,sy+win.sill-win.h,win.w,win.h);
+        drawCalaverita(ctx,sx+win.cx-z/2,sy+win.sill-z,p.foil,z);}
       else drawCalaverita(ctx,sx+win.cx-z/2,sy+TS-1-z,p.foil,z);
       return;}
     drawCalaverita(ctx,sx+ox-4,front?(isSolidAt(wid,p.x,p.y)||p.h?sy+2:sy+TS-9):sy+oy-4,p.foil);});}
@@ -993,6 +994,26 @@ function drawPapelRow(g,x0,x1,ly,pal,seed){ /* a string of cut paper (Pili, 2026
     g.fillStyle=col;g.fillRect(px-1.8,fy,3.6,3.6);
     g.beginPath();g.moveTo(px-1.8,fy+3.6);g.lineTo(px-0.9,fy+4.8);g.lineTo(px,fy+3.6);g.lineTo(px+0.9,fy+4.8);g.lineTo(px+1.8,fy+3.6);g.closePath();g.fill();
     g.fillStyle="rgba(40,30,20,.55)";g.fillRect(px-0.4,fy+1.2,0.8,0.8);}});}
+/* A LIT WINDOW behind a sill candy (#131 again, owner 2026-09-10: "skulls are still hidden").
+   Twice now this was answered by changing the sweet's SIZE — 8px to 5px, then back up to 0.85 of
+   the pane — and twice the owner came back saying he still could not see them. He was right both
+   times, and the size was never the fault. A calaverita is eight pixels on a forty-pixel tile, on a
+   wall about a unit high, seen from a dozen tiles back: at that distance it is three or four screen
+   pixels of cream against a dark recess, and NO ratio makes three pixels read. Look at what does
+   read in the same shot — the papel picado. Bright, saturated, repeated.
+   So light the window instead of growing the candy. A warm pane among dark ones is a big saturated
+   shape that carries all the way to the back of the street, and it is the true picture besides: a
+   veladora is lit on the sill and the sugar skull sits in front of it. The candy stops being the
+   thing you must see and becomes the thing you find when you walk up to it, which is the right job
+   for an eight-pixel sweet. */
+function drawSillLit(g,x,y,w,h){
+  if(!(w>0&&h>0))return;
+  g.save();
+  const gr=g.createLinearGradient(0,y,0,y+h);
+  gr.addColorStop(0,"#F2B705");gr.addColorStop(0.55,"#E8873A");gr.addColorStop(1,"#8A3F1E");
+  g.fillStyle=gr;g.fillRect(x,y,w,h);
+  g.fillStyle="rgba(255,241,200,.85)";g.fillRect(x+w/2-0.6,y+h*0.28,1.2,h*0.42); /* the veladora's flame */
+  g.restore();}
 function drawCalaverita(g,x,y,foil,size){ /* a calaverita de azúcar, 8×8 (Pili): white sugar, FOIL sockets — black would read Halloween, foil reads
   candy — an icing brow, dots across the crown, a line under the jaw so it sits instead of floats.
   size: draw it smaller than 8 when it has to fit a window (#131). The whole sweet scales; nothing
