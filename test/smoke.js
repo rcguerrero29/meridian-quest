@@ -2213,6 +2213,7 @@ const CANDIDATES = [
       // done per-line. Newlines are preserved so reported line numbers stay true.
       const bare = src.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' '))
                       .replace(/\/\/[^\n]*/g, '');
+      const rawLines = src.split('\n'); // the UNstripped source: some things hide in comments
       bare.split('\n').forEach((code, i) => {
         NAMES.forEach(n => {
           if (new RegExp(n, 'i').test(code))
@@ -2225,6 +2226,18 @@ const CANDIDATES = [
           fails.push(`portability: ${f}:${i + 1} compares or sets world to a literal id — read it from PL (the PLACES seam)`);
         if (f === 'engine/engine3d.js' && /catch\(e\)\{\}/.test(code))
           fails.push(`${f}:${i + 1} swallows an error — route it through t3Note (#24)`);
+        // A deliberate break left behind. 2026-09-10: an agent doing mutation testing replaced
+        // `setTimeout(sizeCanvas,80)` and the fullscreenchange listener with `/*MUTANT*/` to find
+        // out whether any suite noticed, and did not put them back. It was caught by reading
+        // `git status --short` before a commit — which is the discipline, and this is the net under
+        // it, because the discipline is a human habit and the net is not. Broken fullscreen would
+        // have shipped: docs/QA-PASS.md E1 is already a fullscreen escape.
+        // read the RAW line, not the comment-stripped one: a mutant marker IS a comment, so the
+        // first version of this check could not see the thing it was written for. Proved by
+        // planting one and watching it pass — the same class of mistake as the guarantee scan that
+        // could not see the town (docs/QA-PASS.md E5). Check the noun you actually mean.
+        if (/\bMUTANT\b|\bDELIBERATELY BROKEN\b/.test(rawLines[i] || ''))
+          fails.push(`${f}:${i + 1} still carries a deliberate break left by a test or an agent — put the real code back`);
         if (/WORLDS\.[a-z][a-z0-9]\b/.test(code) && !/\b(PLDEF|ANIDEF)=/.test(code))
           fails.push(`portability: ${f}:${i + 1} reaches WORLDS.<id> by name — read the id from PL`);
       });

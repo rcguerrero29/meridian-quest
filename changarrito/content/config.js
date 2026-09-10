@@ -12,7 +12,13 @@ const GAMEV="ch-v77 · engine mq-v135";   /* the town's own version, and the eng
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;
-const LEVELS=[0,5,10];
+/* ONE band, because this pack awards no grade — see the disclaimer three lines above. It carried
+   [0,5,10] against FOUR rank names inherited from Meridian's strings, so walking your own backlog
+   promoted you to "Delivery Lead" and then "Senior Lead". A ladder in a tool that says it has no
+   ladder. GitHub #154; the strip half was fixed by HUDFACT, this is the other half.
+   The three CAREER classes are a separate thing and cannot be dropped yet — the shell hardcodes
+   them and applyLang crashes without them (docs/TAGS.md L17). */
+const LEVELS=[0];
 const STAKES={mode:"none",hearts:3};
 /* Which of the town's worlds play which ROLE for the engine (#25, the PLACES seam, engine mq-v71).
    The engine never assumes a room name; it asks this table. The stall is home, the street is the

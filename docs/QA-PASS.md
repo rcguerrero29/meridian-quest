@@ -137,6 +137,28 @@ Both historical commits go red against it, which is why it is evidence and not a
 unchanged code.
 **The general lesson:** a test that two things are EQUAL says nothing about whether either MOVED.
 
+### E7 · An agent left the engine deliberately broken — 2026-09-10 (caught by review, not by a test)
+**What happened:** during a crew work session, an agent doing mutation testing replaced
+`setTimeout(sizeCanvas,80)` in the fullscreen button and the whole `fullscreenchange` listener with
+`/*MUTANT*/`, and a `t3Resize()` call in `draw3d` with the same — to find out whether any suite
+noticed. **It did not put them back.** Both files sat modified in the working tree while other work
+carried on around them.
+**What it would have cost:** fullscreen would have stopped resizing the canvas. `E1` on this very
+page is a fullscreen escape that took two rounds to diagnose and reached the owner. This would have
+been the same bug, shipped deliberately, by us.
+**What caught it:** `git status --short` before staging, then reading the diff. Nothing else. Every
+suite was green with the mutants in place, which was the agent's actual finding and is worth keeping.
+**What the list is now:** the guarantee scan fails any `engine/` or `content/` line carrying `MUTANT`
+or `DELIBERATELY BROKEN`, and `.claude/skills/crew-fix/SKILL.md` tells an agent to return patches as
+**text** and never to edit a file, with the review steps marked not-delegable.
+**The mistake inside the fix, which is the better lesson:** the first version of that net could not
+see a single mutant. The scan blanks comments before testing each line — and a marker *is* a comment.
+It was written, it looked right, and it caught nothing until one was planted to check.
+**That is E5's lesson twice in one day: a guard has to read the noun it actually means.** The
+guarantee scan could not see the town because it read what `index.html` loads. This could not see a
+mutant because it read the code with the comments removed. Both looked correct. Neither was, and
+only planting a real violation told us so.
+
 ---
 
 ## Known gaps in the list
