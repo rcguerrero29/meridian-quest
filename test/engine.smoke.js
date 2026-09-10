@@ -291,7 +291,11 @@ const { chromium } = require('playwright-core');
     // 1440x900 a 2880x2304 buffer was resampled down to 1125x900, letterboxed with bars either
     // side, and every edge in the world went soft. A 3D camera has no fixed frame to protect, so
     // it renders the box it is actually given.
-    {
+    /* only if this GAME has a 3D camera. CAMERAS (mq-v133) lets a pack ship without one, and
+       camSet refuses a camera the game does not have — so on such a pack the lines below were
+       measuring a 3D camera that never ran and failing the build for it. Found by the gauge
+       pack, which declares CAMERAS=["top","front"]: the seam existed and the gate ignored it. */
+    if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
       const c3 = T3.renderer.domElement, vp = document.getElementById('vp');
       const before = { cam: camMode, w: world, x: px, y: py, hid: document.getElementById('world').hidden };
       document.getElementById('world').hidden = false; /* this suite never enters the world; the box needs to be real */
@@ -613,7 +617,11 @@ const { chromium } = require('playwright-core');
 // up-and-down and LESS left-and-right: measured, 10.9 tiles of street across became 7.7. So the
 // angle widens below the game's own 10:8 to hold the width. Both halves are checked, because
 // either one alone is a regression.
-{
+    /* only if this GAME has a 3D camera. CAMERAS (mq-v133) lets a pack ship without one, and
+       camSet refuses a camera the game does not have — so on such a pack the lines below were
+       measuring a 3D camera that never ran and failing the build for it. Found by the gauge
+       pack, which declares CAMERAS=["top","front"]: the seam existed and the gate ignored it. */
+if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   const wd3 = document.getElementById('world'), wh3 = wd3.hidden; wd3.hidden = false;
   const before = camMode;
   camSet('3d'); sizeCanvas(); draw3d();
@@ -926,6 +934,10 @@ const { chromium } = require('playwright-core');
      This asks what the PLAYER can see, never which function ran, so it survives a rewrite. */
   const fell = await page.evaluate(async () => {
     const P = [];
+    /* engine3d.js is always loaded, so T3 existing proves nothing about whether this GAME has a
+       3D camera — CAMERAS lets a pack drop it (mq-v133). Ask the seam, not the file. A pack that
+       never offers 3D cannot fall back from it and must not be failed for that. */
+    if (typeof CAMS !== 'undefined' && CAMS.indexOf('3d') < 0) return P;
     if (typeof T3 === 'undefined' || typeof draw3d !== 'function') { P.push('this pack has no 3D at all, so the fallback could not be checked'); return P; }
     camSet('3d'); draw();
     await new Promise(r => setTimeout(r, 400));

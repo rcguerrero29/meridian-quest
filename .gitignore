@@ -15,3 +15,6 @@ shots/
 # ./undefined/ at the repo root. It happened 2026-09-09; the cure for the mistake is not
 # committing it, but this stops the next one reaching a commit at all.
 /undefined/
+
+# the gauge shell is GENERATED from index.html by test/gauge.js — never commit a copy
+content/gauge/index.html
