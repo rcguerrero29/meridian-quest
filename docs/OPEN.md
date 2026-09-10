@@ -36,22 +36,28 @@ then this sheet, then the open GitHub issues. Nothing else is required reading.
 | The ungraded station seam | 2026-09-09 | GitHub #157 |
 | `ENDLESS` in the template + the world-that-does-not-end lane | 2026-09-09 | GitHub #156 |
 | Quests get names instead of array positions | 2026-09-09 | GitHub #153 — **the largest single blocker to a template** |
-| The town's career ladder ("AI LEGEND") in a pack that disclaims one | 2026-09-09 | GitHub #154 |
+| The town's career ladder ("AI LEGEND") in a pack that disclaims one — **half built, and this row did not say so.** The **strip** is fixed: `HUDFACT` ships (`engine/engine.js:401-411`) and the town prints a fact instead of rank-and-XP (`changarrito/content/record.js:638-648`). **The door is not:** the town still asks you to pick The Architect / The Diplomat / The Operator (`changarrito/index.html:384-388`) and still carries `levels:[…,"AI LEGEND"]` in its own strings (`changarrito/content/strings.js:32`, `:240`). A pack **cannot** drop the three careers today — that is `docs/TAGS.md` L17, confirmed by `docs/GAUGE.md`. Verified against the code 2026-09-10 | 2026-09-09 | GitHub #154 · `docs/decisions/0001-the-strip-carries-a-fact.md` |
 | The city ledger's wrong lines + four small map faults | 2026-09-09 | GitHub #158 |
 | ❗El espejo option B — Naye's three quests | 2026-09-09 | `docs/CITY.md` |
 | Nacho's 35 door lines | earlier | `docs/changarrito/DOOR-nacho.md` |
 
 ## 3 · The registers — where knowledge lives now
 
-Four files, each opened this week, each with the same discipline: **they grow from what actually
+Six files now, each opened this week, each with the same discipline: **they grow from what actually
 happened, never from imagination.** Read the relevant one before proposing anything in its area.
 
 | File | What it holds | Read it before |
 |---|---|---|
-| `docs/TAGS.md` | The tag vocabulary, and **14 leaks** — tags that look universal and are not | proposing any tag, kind, glyph or seam |
+| `docs/TAGS.md` | The tag vocabulary, and **18 leaks** — tags that look universal and are not. L15 closed, L12 half-closed, **L16-L18 added 2026-09-10 by building a real pack and measuring** | proposing any tag, kind, glyph or seam |
 | `docs/3D-LOG.md` | Every 3D attempt with its measurement, **and every rejected approach with its reason** | proposing anything about the 3D view |
 | `docs/QA-PASS.md` | The test checklist and the **escape register** — what reached the owner that should have been caught | shipping anything |
 | `docs/BEAUTIFY.md` | What every object renders as, what it should be, and which are correctly flat | touching any art |
+| `docs/GAUGE.md` | What the engine demands of a brand-new world — **measured by building one**, not inferred | starting a pack, or changing the shared suite |
+| `docs/GIFTED-GAMES.md` | Sourced research on genres, physics, difficulty, multiplayer and occasion design, and **what this engine already ships** for each | proposing a mini-game or a new seam |
+| `docs/REGRESSION.md` | The regression map, R1–R10, and the rule they were bought with: **a guard has to read the noun it actually means** | writing any test |
+| `docs/SECURITY-NOTE-2026-09-10.md` | What the El Changarrito exposure **was and was not**, what the token can actually do, and the four things to check | any question about what leaked, or before touching the deploy |
+| `docs/GAUGE.md` | What the engine demands of a brand-new world, **measured by building one** (2026-09-10) | proposing anything about a second world |
+| `docs/decisions/` | One file per settled decision: the ask verbatim, the answer, **and the options that were rejected, with reasons**. Opened 2026-09-10; three filed, and `docs/ASKS.md` is still where most decisions actually live | re-proposing anything that sounds already-answered |
 
 ## 4 · The traps — things that have already bitten, written so they bite nobody twice
 

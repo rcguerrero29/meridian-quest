@@ -20,7 +20,25 @@ function t3Note(where,e){const msg=String((e&&e.message)||e||"?").slice(0,160),k
   try{localStorage.setItem(SK("err3d"),JSON.stringify({where,msg,at:Date.now(),v:typeof GAMEV==="string"?GAMEV:""}));}catch(err){}}
 function t3Fell(){if(T3.said)return;T3.said=true;const last=T3.errors[T3.errors.length-1];
   if(typeof mqwarn==="function")mqwarn("3d","fell to the flat camera"+(last?" — "+last.where+": "+last.msg:""),true); /* critical: the camera the game boots into could not draw (#8) */
-  try{toast((typeof lang!=="undefined"&&lang==="es"?"El 3D no pudo dibujar — cámara plana. ":"3D could not draw — flat camera instead. ")+(last?last.where+": "+last.msg:""),5200);}catch(err){}}
+  /* and ACTUALLY fall. draw() already paints the front profile when 3D cannot draw — but camSet is
+     the only thing that ever shows the flat canvas, and nothing on this path called it. Measured on
+     both shells: the fallback painted a full picture into a canvas still marked hidden while the
+     dead 3D canvas stayed on screen, under a message telling the player they were looking at the
+     flat camera. The drawing was never the broken part; being seen was. Both packs boot into 3D,
+     so this is the camera nearly every player starts in.
+     The camera is taken from what the PACK declared (CAMS), never assumed: a game that ships only
+     3D has nothing to fall back to and is told that, instead of being promised a view it does not
+     have. */
+  const CS=((typeof CAMS!=="undefined"&&Array.isArray(CAMS))?CAMS:[]).filter(c=>c!=="3d");
+  /* prefer "front": draw() already paints the front profile on the frame 3D fails (engine.js:1605),
+     so settling there means the picture the player is shown and the camera the buttons claim are
+     the same one. Any other flat camera the pack has will do if it has no front. */
+  const flat=CS.indexOf("front")>=0?"front":CS[0];
+  if(flat&&typeof camSet==="function"){try{camSet(flat);}catch(err){}}
+  const es=typeof lang!=="undefined"&&lang==="es";
+  const head=flat?(es?"El 3D no pudo dibujar — cámara plana. ":"3D could not draw — flat camera instead. ")
+                 :(es?"El 3D no pudo dibujar y este juego no tiene otra cámara. ":"3D could not draw, and this game has no other camera. ");
+  try{toast(head+(last?last.where+": "+last.msg:""),5200);}catch(err){}}
 /* ---------- which way is screen-right? ----------
    Billboards always show their painted face to the camera, but the painters mirror an
    animal by its WORLD facing (`face` = ±x). Turn the camera to the north stop and a dog
@@ -533,10 +551,25 @@ function t3Build(key){T3.pinatas=[];
         /* on a sill the candy is cut to the window it stands in (#131) — 7 tile-pixels of sweet in a
            7-pixel pane was the overlap. Off a sill it keeps its full 8. */
         const z=win?win.size:8;
+        if(win){ /* THE WHOLE WINDOW is the sprite now, not just the sweet (#131, owner 2026-09-10:
+            "skulls are still hidden"). Twice this was answered by resizing the candy and twice he
+            came back. The arithmetic says why he was right: the sprite was z/32 world units, so an
+            eight-pixel sweet is 0.25 of a unit on a wall about 1.1 high, seen from T3CAMD = 7.4
+            units back. Three or four screen pixels of cream in a dark recess. No ratio fixes that.
+            A LIT PANE is a big saturated shape at the same distance — it reads the way the papel
+            picado reads, which is the thing in the same frame that never had this problem. The
+            candy sits in front of the veladora, where it belongs, and is now what you find when you
+            walk up rather than what you are asked to spot from across the street. */
+          const c=document.createElement("canvas");c.width=win.w*K;c.height=win.h*K;
+          const g2=c.getContext("2d");g2.scale(K,K);
+          if(typeof drawSillLit==="function")drawSillLit(g2,0,0,win.w,win.h);
+          drawCalaverita(g2,(win.w-z)/2,win.h-z,p.foil,z);
+          const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));
+          sp.center.set(0.5,0.02);sp.scale.set(win.w/32,win.h/32,1);
+          const H=wallH(g);sp.position.set(p.x+win.cx/32,H*(1-win.sill/32)+0.005,p.y+1.03);
+          sp.userData={prop:true,calaverita:true,sill:true,x:p.x,y:p.y,win:win.i};grp.add(sp);return;}
         const c=document.createElement("canvas");c.width=z*K;c.height=z*K;const g2=c.getContext("2d");g2.scale(K,K);drawCalaverita(g2,0,0,p.foil,z);
         const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.02);sp.scale.set(z/32,z/32,1);
-        if(win){ /* the facade's window says how high and where along the face; it stands just proud of the south face */
-          const H=wallH(g);sp.position.set(p.x+win.cx/32,H*(1-win.sill/32)+0.005,p.y+1.03);sp.userData={prop:true,calaverita:true,sill:true,x:p.x,y:p.y,win:win.i};grp.add(sp);return;}
         const h=p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y));
         sp.position.set(p.x+(p.ox===undefined?0.5:p.ox),h+0.01,p.y+(p.oy===undefined?0.5:p.oy));sp.userData={prop:true,calaverita:true,x:p.x,y:p.y};grp.add(sp);});
       fiestaHangs(world).forEach(h=>{if(h.kind!=="pinata")return;

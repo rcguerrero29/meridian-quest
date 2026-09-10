@@ -80,6 +80,24 @@ and no engine change at all.
 
 *This is the part of the file that earns its keep. A second game breaks on exactly these.*
 
+**2026-09-10 — the register stopped guessing.** Every leak L1–L15 was found by *reading code*, and
+nobody had ever built a second game to check which one a real pack hits first. So one was built: five
+tiles, two people, one room, booted against the unmodified engine, driven through a quest, and run
+against the shared suite. **The order it hit them is not the order they were written in.**
+
+| | |
+|---|---|
+| **Blocks a five-tile pack** | `L7` `L11` `L13` — and `L16`, which is hit *first* and was not on the register at all |
+| **Annoys** | `L1` `L2` `L6` `L10` `L14` |
+| **Never tripped at that size** | `L3` `L4` `L5` `L8` `L9` |
+| **Already fixed, register was stale** | `L12` |
+
+Three corrections came out of it, and they matter more than the ranking: **`L12` was fixed in the
+engine and the register never said so**; **the fix is still forbidden by the shared suite**, which is
+a failure mode this file had not seen — *a leak can be closed in the engine and stay shut by the
+gate*; and **the first thing a new pack actually hits (`L16`) was unregistered**, because it lives in
+a default rather than in a name.
+
 ### L1 · The engine carries Meridian's alphabet
 `engine/engine.js:1329–1355` pre-assigns about **thirty glyphs** — `# B Q Z D K T A S H I W V F G C
 X P J ~ ^ 1 ⊓ ≡ ▲ ▼ ◺ 3 4 5` — each with a kind, a height, window rectangles. A new game inherits
@@ -148,7 +166,25 @@ side.**
 preferences, not answers. The only ungraded conversation today is `INTERVIEW`, which is not a quest
 and pays nothing.
 
-### L12 · `ENDLESS` is the district-advance switch, not a story flag
+### L12 · `ENDLESS` is the district-advance switch, not a story flag — **HALF CLOSED 2026-09-10**
+
+> **The engine half shipped and nobody updated this entry.** `chOpenDue()` (`engine/engine.js:311`,
+> the city) and `chDue()` (`:312`, the ceremony) are split, and `chAdvance()` (`:315`) runs from the
+> Next handler whether or not the world ends. The recommendation below — *split, not rename* — is
+> exactly what was built. **Everything after this box describes the world before that fix**; the line
+> numbers `:303` and `:3439` no longer point at anything. It is left standing rather than deleted
+> because the reasoning is still the best statement of why the coupling was wrong.
+>
+> **The half still open is in the TEST, not the engine.** `test/engine.smoke.js:734` fails any pack
+> declaring `ENDLESS` and `CHAPTERS` together. That assertion was correct while the two were one
+> switch; after the split it forbids the exact configuration the engine was taught to handle, because
+> `CHAPTERS` does double duty — it is both **the endings** and **the districts**, and a world that
+> never ends may still have a second neighbourhood. **A leak can be fixed in the engine and stay shut
+> by the gate**, which is a failure mode this register had not seen before and should now look for.
+>
+> Found by building a real two-district endless pack and pressing Next, not by reading — `chSeen`
+> went 0→1 with no ending panel. It is measured, not inferred.
+
 `engine/engine.js:303`, `:3439`, `changarrito/content/config.js:10`. It reads as "skip the epilogue."
 It is not. `chDue()` returns false when `ENDLESS` is set, so the ending panel never opens — and
 `$("endGo")`'s click handler is the **only** writer of `chSeen` in the engine. `chSeen` gates which
@@ -209,6 +245,81 @@ exactly why iso falls back to extruding a box and losing the drawing).
 button to be disappointed by, and never has to answer for art in a camera it does not use.
 
 ---
+
+### L16 · `PLDEF` — the room roles fall back to Meridian's world ids, and a partial answer is worse than none
+**Registered 2026-09-10. Found by MEASUREMENT: it is the FIRST thing a five-tile pack hits, before any
+leak already on this register.**
+
+`[CODE]` `const PLDEF={home:"hq",spawn:[10,11],street:"st",park:"pk",…,friends:["st","me","lc","lo"],
+upstairs:"f2"}` (`engine/engine.js:37`), merged as `const PL=Object.assign({},PLDEF,PLACES||{})`
+(`:39`).
+
+The seam is real and it works. **The defaults are Meridian's**, and `Object.assign` merges
+key-by-key, so a pack that declares the two roles it actually has —
+
+    const PLACES={home:"room",spawn:[1,1]};
+
+— silently inherits `street:"st"`, `park:"pk"`, `friends:["st","me","lc","lo"]` and `upstairs:"f2"`,
+none of which exist in it. Measured: the shared suite fails immediately with *"PLACES.street names a
+missing world st"* and *"no PLACES.friends world exists"*. **A pack that declares nothing at all is
+in better shape than one that declares half**, which is the opposite of what a reader expects from a
+table of optional settings.
+
+**Why it is not caught by the portability guard:** `test/smoke.js:2225` deliberately exempts the line
+matching `PLDEF=` / `ANIDEF=`, because those two tables are the one sanctioned home for a world id in
+engine code. That exemption is correct. Its consequence — that Meridian's ids are the fallback for
+every future game — is what was never written down.
+
+**Why it matters more than it reads:** `docs/TAGS.md`'s own inventory lists `PLACES` under *"What is
+genuinely reusable."* The **seam** is reusable. Its **defaults** are one town's proper nouns. This is
+`L4` (`ANIDEF`) wearing a different name, and `L4` was registered while this one was not.
+
+| Option | What it costs | Note |
+|---|---|---|
+| **Warn on a partial `PLACES`** ← *recommended* | small; one boot check naming the roles that fell back to a world the pack does not have | Turns a confusing suite failure into a sentence that says what to do |
+| Empty defaults, every role required | a migration for both packs, and a longer first day for every new world | Honest, and hostile to the five-minute start |
+| Fall back to `home` for every unset role | tiny | A world where the park and the street are the kitchen. Wrong, but never broken |
+| Leave it | nothing | Every new pack's first hour is spent on an error about a town it has never heard of |
+
+---
+
+### L17 · The engine still names Meridian's career classes and the owner's dog
+**Registered 2026-09-10. Both verified in live code, not comments.**
+
+`[CODE]` `const SHIRTS={architect:"#E0A430",diplomat:"#8B5CF6",operator:"#2AA47C"}`
+(`engine/engine.js:341`), read at `:3443`. Meridian's three career roles, with their colours, in the
+shared engine. A pack whose people are not architects, diplomats and operators cannot rename them —
+and the shell's character creator is keyed to the same three (`index.html:386-388`), so the town
+carries them too, unused.
+
+`[CODE]` `CRIT.find(c=>isDog(c)&&c.name==="Sonny")` (`engine/engine.js:4679`) — **the owner's dog, by
+name, in a conditional in the shared engine.** Not a comment. The paw menu's last-resort fallback.
+
+**The part worth the entry:** `test/smoke.js:2204-2209` is a 38-name blocklist built exactly to catch
+this, and it lists `chelo`, `nando`, `perla`, `pelusa`, `frijol` — and **not `sonny`**. The guard that
+exists to stop one pack's names reaching the engine is missing the one name the owner would recognise
+fastest. `[TRAINING]` A blocklist is a list of the mistakes somebody already made; it can only ever be
+as complete as yesterday. `docs/NEW-WORLD.md` §3 already says the honest fix is to make the scan
+generic — *scan the pack for capitalised names and forbid them in `engine/`* — and this is the
+evidence for doing it rather than adding a 39th word.
+
+---
+
+### L18 · A pack may not have more than 99 quests, and nothing says so
+**Registered 2026-09-10.**
+
+`[CODE]` `sanitizeSave` clamps every persisted quest index to **0–98** (`engine/engine.js:442`, `:445`,
+`:452`) and keeps at most **64** `qa` keys (`:444`) and 64 `hd` entries (`:454`).
+
+The clamps are right — they are the guard against a hand-edited or corrupted save — but the bound is a
+**literal, undocumented, and lower than a real course**. A pack with 100 quests writes a save whose
+hundredth quest is silently dropped on load: not an error, not a warning, a quietly shorter game.
+Meridian has 56 and has never been near it.
+
+It belongs on this register rather than in a bug list because it is a **template ceiling wearing a
+sanitizer's clothes** — the number that decides how big a second world may be lives in a validation
+helper, and the person who hits it will be reading their content files, not `sanitizeSave`.
+
 
 ## Collisions — one word, several jobs
 

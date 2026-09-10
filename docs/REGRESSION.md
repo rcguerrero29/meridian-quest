@@ -29,6 +29,15 @@ should have been caught by, and the assertions to add. Nothing here is built.*
 
 ## 3 · The gaps, each with its assertion and cost
 
+> **The rule R10 was bought with, and it costs nothing to apply everywhere:** *a guard has to read
+> the noun it actually means.* Three guards in this repo were written, looked correct, ran green for
+> weeks, and could not see the thing they were written for — R8 read what the index loads and could
+> not see the town; the mutant-marker net read the source with comments stripped and a marker *is* a
+> comment; and the version test asked whether two strings were *equal* when what mattered was that
+> one *moved*. **None of them was discovered by review. Each was discovered by planting a real
+> violation and watching it pass.** So: for every assertion below, plant one before you believe it.
+
+
 | # | Gap | Assertion to add | Where | Cost |
 |---|---|---|---|---|
 | ~~**R1**~~ **built 2026-09-06 (mq-v68)** — the `ANIMALS` seam; both suites assert something under every animal, Meridian's defaults byte-identical | pinned animals have no test that the tile under them carries what they need, and appear in any world with the right id | for every animal the engine draws: the world's pack declared it (or the engine's pin is opt-in), and the drawn foot height equals the declared `lift` of its tile, in all four cameras. **Red first on the town** | `smoke.js` + `town.smoke.js` | a quarter sitting, after the engine change in §10.1 |
@@ -39,7 +48,8 @@ should have been caught by, and the assertions to add. Nothing here is built.*
 | ~~**R9**~~ **found and built 2026-09-06 (mq-v69)** — the town smoke renders the street in 3D and counts the counter, the back wall and the roof strip on her tile; `winAt()` answers null one tile in front | a person's station was asserted by coordinates only: la ventanilla "at (9,0)" passed while every camera drew a hole in city hall where her map letter had been (the owner: *"how did this pass a test for a teller?"*). Placement is not a picture | for every station a pack marks `win`, the 3D scene holds the wall's three pieces at that tile and no full box; the 2D pass draws the wall's face under her and a counter over her legs | `town.smoke.js` | done |
 | **R6** | the town's index is held to a line count | a diff assertion: the town index equals the public one under a fixed set of allowed substitutions (CSP line, title, script paths, no SW, no manifest) and nothing else | `town.smoke.js` | a quarter |
 | **R7** | four-camera pixels are looked at by nobody | `shots.js --cams` in CI, uploading the PNGs as an artifact; a "looked at" step is still a person. Optional: a per-spot pixel-hash baseline that fails on drift | `ci.yml` | a quarter; the baseline is a sitting |
-| ~~**R8**~~ **built 2026-09-06** — the shell is derived from the public index's script tags | the guarantee scans `content/` for Meridian only; a second public pack would go unscanned | scan every pack folder the public index loads, derived from the script tags, not a hardcoded list | `smoke.js` | minutes |
+| ~~**R8**~~ **built 2026-09-06 — and its mechanism caused R10. See below.** — the shell is derived from the public index's script tags | the guarantee scans `content/` for Meridian only; a second public pack would go unscanned | scan every pack folder the public index loads, derived from the script tags, not a hardcoded list | `smoke.js` | minutes |
+| **R10** — **built 2026-09-10, `test/public.js`, wired into `pages.yml`** | **El Changarrito — the owner's private backlog tool, carrying a GitHub sign-in, a "make a new token" flow and calls to `api.github.com` — was published on GitHub Pages and reachable at `/changarrito/` by anyone who guessed the path.** The deploy used a *denylist* of three names and shipped the whole repository. **R8 was built to close this exact class and could not see it**, because "derive the shell from the index's script tags" is blind to anything the index does not load. The fix for the last exposure was the cause of this one | **Do not derive. Read the directory we are about to upload and ask what is in it.** Five sections, each proved by planting a real violation: nothing whose *presence* is private (named, not derived, so a folder added tomorrow is private by default); nothing that *carries* a credential surface (the four forbidden words, plus token/key *shapes*); nothing the page may *reach* (CSP, off-origin scripts, script tags with no file); the offline app must actually *install* (`addAll` is all-or-nothing, and the shipped cache string must equal the shipped version); and the game must actually *be there* | `test/public.js` + `pages.yml` | **done** |
 
 ## 4 · Order
 

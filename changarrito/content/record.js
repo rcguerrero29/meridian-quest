@@ -610,17 +610,27 @@ const RECORDSRC={
     this.people=bodies.map(b=>b.i);
     this.notesList=this.all.filter(i=>this.tier(i)==="low"&&this.matches(i)).concat(pinned).concat(aside); /* whoever has no body is on a board */
     this.notes=this.notesList.length;
-    /* who left, or moved: a body whose issue is gone, or whose house changed, goes home and the tile comes back */
-    Object.keys(this.placed).forEach(n=>{const b=this.placed[n],want=bodies.find(x=>String(x.i.n)===n);
-      if(!want||want.house!==b.house){if(b.st)removeChill(b.st);if(b.in)removeChill(b.in);delete this.placed[n];}});
-    const put=(i,wid,x,y)=>{const w=WORLDS[wid];if(!w||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")return null;
-      const key=addChill({name:{en:this.name(i),es:this.name(i)},world:wid,x,y,look:this.look(i)});
-      if(key){const n=w.npcs.find(m=>m.key===key);n.doc=this.doc(i);n.tier=this.tier(i);n.issue=i.n;}return key;};
-    bodies.forEach(b=>{if(this.placed[b.i.n])return;
-      const rec={st:null,in:null,house:b.house};
-      if(b.step)rec.st=put(b.i,this.world,b.step[0],b.step[1]);
-      if(b.in)rec.in=put(b.i,b.in.wid,b.in.x,b.in.y);
-      if(rec.st||rec.in)this.placed[b.i.n]=rec;});
+    /* Who stands where — the whole set at once, through the engine's syncChill.
+       This used to be a hand-rolled diff and it had the bug syncChill exists to remove: it evicted
+       a body when its HOUSE changed and never when its SLOT did. Filing a second issue of the same
+       tier sorts it first (sortPeople, :475), onto a tile the previous one is still standing on;
+       addChill refuses a tile already marked "N"; and the new person landed nowhere while people,
+       HUDFACT and the console all reported it standing. A reload cured it, so nobody caught it.
+       Reported from play 2026-09-06 — "i dont see any people/characters anymore at all other than
+       the teller" — and not found then.
+       A body may be TWO placements, one on the street and one indoors, so the id is per-placement
+       and not per-issue. */
+    const want=[],meta={};
+    bodies.forEach(b=>{const nm={en:this.name(b.i),es:this.name(b.i)},lk=this.look(b.i);
+      if(b.step){want.push({id:b.i.n+":st",name:nm,look:lk,world:this.world,x:b.step[0],y:b.step[1]});meta[b.i.n+":st"]=b.i;}
+      if(b.in){want.push({id:b.i.n+":in",name:nm,look:lk,world:b.in.wid,x:b.in.x,y:b.in.y});meta[b.i.n+":in"]=b.i;}});
+    const keys=syncChill(want);
+    Object.keys(keys).forEach(id=>{const i=meta[id];if(!i)return; /* the paper each body carries */
+      for(const wid of Object.keys(WORLDS)){const n=WORLDS[wid].npcs.find(m=>m.key===keys[id]);
+        if(n){n.doc=this.doc(i);n.tier=this.tier(i);n.issue=i.n;break;}}});
+    this.placed={};
+    bodies.forEach(b=>{const st=keys[b.i.n+":st"]||null,inside=keys[b.i.n+":in"]||null;
+      if(st||inside)this.placed[b.i.n]={st,in:inside,house:b.house};});
     auditReach().forEach(p=>console.warn("REACH "+p)); /* a placed person may never wall the hero */
     this.signs();
     console.log("RECORD: "+bodies.length+" standing ("+bodies.filter(b=>b.step).length+" on the street), "+this.notesList.length+" note(s) on the boards");

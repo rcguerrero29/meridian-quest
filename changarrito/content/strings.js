@@ -29,7 +29,7 @@ const UI={
   mariposa:["It rests on a bloom, just for you.","Wings like papel picado.","It does one slow loop around your head. Blessed."],
   colibri:["It hovers an arm away, inspecting you. You pass.","A tiny emerald helicopter with opinions.","Doña Rosa says a colibrí visit means good news is coming."],
   tlTitle:"Text lab",tlHint:"Edit names, quest titles and bump lines (JSON). Applies to the current language.",tlApply:"Save",tlClose:"Close",tlOk:"Texts updated.",tlErr:"That JSON didn't parse — nothing changed.",
-  levels:["Junior","Delivery Lead","Senior Lead","AI LEGEND"],
+  levels:["Changarrero"],   /* one band, no ladder: this pack awards no grade (#154) */
   quest:"Quest",followup:" · follow-up",codexLb:"📜 Codex",
   okH:"⚔️ QUEST COMPLETE",midH:"🟡 SHIPPED WITH INCIDENTS",badH:"💔 SLIP — reputation takes a hit",
   lvlUp:"⬆ LEVEL UP — you are now ",
@@ -237,7 +237,7 @@ One source of truth for one very good pet.
   mariposa:["Se posa en una flor, solo para ti.","Alas como papel picado.","Da una vuelta lenta alrededor de tu cabeza. Bendecido."],
   colibri:["Se queda flotando a un brazo de ti, inspeccionándote. Apruebas.","Un helicopterito esmeralda con opiniones.","Doña Rosa dice que la visita de un colibrí anuncia buenas noticias."],
   tlTitle:"Laboratorio de textos",tlHint:"Edita nombres, títulos de misiones y frases de choque (JSON). Aplica al idioma actual.",tlApply:"Guardar",tlClose:"Cerrar",tlOk:"Textos actualizados.",tlErr:"Ese JSON no se pudo leer — no cambió nada.",
-  levels:["Junior","Líder de Delivery","Líder Senior","LEYENDA DE LA IA"],
+  levels:["Changarrero"],   /* una sola: este pack no otorga ningún grado (#154) */
   quest:"Misión",followup:" · seguimiento",codexLb:"📜 Códice",
   okH:"⚔️ MISIÓN CUMPLIDA",midH:"🟡 ENTREGADO CON INCIDENTES",badH:"💔 RESBALÓN — tu reputación sufre",
   lvlUp:"⬆ SUBISTE DE NIVEL — ahora eres ",

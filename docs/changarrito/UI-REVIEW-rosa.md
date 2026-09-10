@@ -634,3 +634,319 @@ dark water, or a marigold blaze depending on where you stand and what season it 
 tint is not enough; HUD text over a live scene needs a guaranteed backing, or a check that samples
 what is actually behind each box. That one is cheap now and very expensive to retrofit after
 someone has tuned every panel by eye.
+
+---
+
+# Second visit — 2026-09-10: the promises, and which of them anybody is actually keeping
+
+*Rosa Villalobos again, headless Chromium, `mq-v136` / `ch-v78 · engine mq-v136`. Both games, at
+390×844, 390×560, 844×390, 740×360 and 1440×900, in both languages, 3D and the flat cameras. This
+time I was not looking for what is ugly. The owner asked what is **supposed** to work — so I took
+every promise this project has made to a person, found the check that claims to keep it, and tried
+to break the promise without making the check go red. I edited nothing and filed nothing.*
+
+A word first, because it is deserved: since my last visit the things I found have not just been
+fixed, they have been fixed **with a guard attached**, and the guards are unusually well written.
+The one that opens every document a pack declares and asks the browser what is on top of each
+visible button is better than what most teams ship. The 3D buffer/box aspect check is real
+engineering. The habit is right.
+
+The habit has one blind spot, and it is the same one that let the town onto the public internet:
+**every one of these guards knows its subject by name.** By the id of a panel, by the class of a
+button, by the file set that `index.html` loads, by one window shape, by one language. Each was
+right on the day it was written. Each is now a guard standing at the one door that was open when
+somebody last looked.
+
+If I could change one thing it is not a pixel: **turn the phone sideways.** At 844×390 — a row that
+is already in the pass list and covered by no suite — the world box is 427 px tall in a 390 px
+window, the page is 697 px long, and standing next to Priya with a quest mark over her head the
+**Talk button is 174 px below the bottom of the screen**. The check that exists for exactly this
+measures the buttons against the *world*, and inside the world they are perfectly placed. The world
+is what is off the screen.
+
+Eight findings, best first. Tier is my suggestion.
+
+---
+
+## 1. Turn the phone sideways and the game runs off the bottom of the screen — Talk with it
+
+**In plain words:** Hold the phone in landscape and the play area is taller than the screen. You see
+the title, the rank strip, the room name and the top of the room; the bottom third of the world, the
+joystick and every button that does something are below the fold, and the page has to be scrolled to
+reach them. Standing right next to a character with a quest mark, the Talk button — the single most
+important control in the game — sits 174 px past the bottom edge. Nothing tells you it is there. A
+person who picks the phone up sideways sees a header and a picture and no way to play.
+
+**Notes:** Measured, not guessed. At 844×390, with the 3D camera on, the world box comes back
+332→534 px wide and **427 px tall in a 390 px window — 109 % of the screen**; the whole document is
+697 px long. At 740×360 it is 119 %. Both games, identically. The cause is one line: the world's
+height is the larger of *the width's 5:4* and *46 % of the screen*, and in a short wide window the
+first term wins and there is no ceiling. The comment beside it says "never shorter than it is
+today", which is the rule that breaks here — in landscape "never shorter" means "taller than the
+screen". Two checks stand next to this and neither can see it: one asserts the world is **at least**
+40 % of the screen and never that it is at most anything, and it only ever runs in portrait; the
+other checks that the floating buttons sit inside the world's frame, which they do — it is the frame
+that has left the screen. The pass list already admits landscape is covered by no suite; what it
+does not say is what that costs, which is the whole game in that orientation.
+
+**Questions to consider:** Should the world simply be capped at the screen (say 62 % of it) in a
+short window, which is one term in one expression? Or is landscape a shape this game does not
+support, in which case it should say so rather than half-work? Is the header worth 95 px of a 390 px
+screen when the world is what people came for?
+
+**Areas affected:** How tall the play area is; every control anchored to the bottom of it; the pass
+list's landscape row.
+
+**Done when:** At 844×390 and 740×360, in both games, standing beside a character: the world fits
+the screen, and every button that can be pressed is on the screen at scroll position zero — checked
+by a test, in landscape, against the **window** and not against the world's frame.
+
+*Tier: high. Seen at: 844×390, Meridian HQ, standing at (2,3) beside Priya — Talk's bottom edge
+reports 564 in a 390-tall window with the page unscrolled. Screenshot `mq-talk-844x390.png`.*
+
+---
+
+## 2. In landscape, the text lab opens with no way out on the screen — and Escape does not answer
+
+**In plain words:** From the gear menu, "Text lab" opens a panel whose Apply and Close buttons are
+below the bottom of the panel *and* below the bottom of the screen. Pressing Escape does nothing.
+Tapping the dark outside does nothing. The panel does scroll, but most of its face is a text box
+that takes the scroll instead, so the way out is discoverable only by luck. This is the same shape
+as the chair that trapped the owner in #126, in a panel he can reach from the gear in two taps, and
+it only happens sideways.
+
+**Notes:** At 844×390 the panel's box ends at 367 and the Close button's rectangle is 433–477 — 87 px
+past its own box and outside the window; asking the browser what is at that point answers nothing at
+all. At 390×560 and 390×844 the same panel does not scroll and Close is plainly visible, which is
+why nobody has seen it. The exporter behind the next row down has the same construction. The panel
+check that would catch a way out below the fold is written for two panels by name and neither of
+these is one of them (see finding 5), and the Escape contract is checked by nothing anywhere (see
+finding 4).
+
+**Questions to consider:** Should every panel's way out ride the bottom of its box the way Settings'
+does, as a rule rather than per panel? Should a panel whose contents cannot fit be scrollable
+*outside* its text areas, so a drag anywhere in the padding moves it?
+
+**Areas affected:** The text lab and the exporter; the way out of any panel; the pass list's
+landscape row.
+
+**Done when:** Every panel either game can open, at every size in the matrix including landscape,
+shows its way out on the screen without scrolling — and Escape leaves it.
+
+*Tier: high. Seen at: 844×390 → gear → Text lab. Screenshot `mq-textlab-844x390.png`: no Close, no
+Apply, Escape inert.*
+
+---
+
+## 3. The 44-pixel rule is kept in exactly one place, and broken in the two places a thumb goes most
+
+**In plain words:** After my last visit the sheet buttons were rebuilt to a scale — 48 for the thing
+you came to do, 44 for the rest, nothing under a 44-pixel target — and a check was written to hold
+it. That check only ever looks at buttons on a sheet. The buttons that float over the world are
+**39 px tall**. The three corner icons — map, fullscreen, theme — are **38 × 38**. The way out of
+every panel — Settings, the map, the music box, the trolley pass, the fitting room — is **35 px
+tall**. None of them reaches 44. Missing the way out of a panel is the worst one to miss.
+
+**Notes:** Measured with every button forced visible, at 390×844, 844×390 and 1440×900, both games,
+identical numbers: Talk 52×39, Treat 58×39, the two look buttons 48×39, the corner icons 38×38.
+**One correction to my own first pass, kept rather than quietly deleted:** I first measured those
+panel closes at 20 px and that was an artifact — a panel forced open by hand has not had its labels
+filled in yet, and an empty button is only its padding. Opened the way a player opens them (gear →
+Music, gear → Trolley pass, gear → Fitting room) every one reports 282×35 with the word *Done* in
+it. 35 is the real number, and it is still under the floor. Nothing anywhere is 44. The check that
+enforces 44 reads only
+`.dbtn, .opt` inside the paper sheet — and in **Meridian** it measures *nothing at all*, because no
+Meridian document declares any buttons (see finding 7). So the public game has a 44-pixel rule with
+no instance of it under test.
+
+**Questions to consider:** Is the floor a rule for the whole interface or only for paper? (I would
+make it the whole interface — the failure that matters is pressing the wrong thing silently.) Should
+the ink stay as it is and the *target* be padded to 44, which changes nothing visually?
+
+**Areas affected:** The buttons over the world; the corner icons; the way out of every panel; the
+one check that knows about 44.
+
+**Done when:** A check opens every panel and every sheet both games can open, at 390×560 and
+1440×900, in both languages, reads each button's real rectangle, and fails the build on any target
+under 44 × 44 — which is the check I recommended last time, applied to more than sheets.
+
+*Tier: normal — high if he agrees the way out of a panel counts as safety. Seen at: every size;
+world-button numbers from 390×844 with all buttons shown, panel numbers from opening each panel
+from the gear at 390×844.*
+
+---
+
+## 4. Escape and "tap the dark to leave" are promised for every panel; five of fourteen never answer, and no test has ever pressed Escape
+
+**In plain words:** The game promises that a panel over the world can be left by pressing Escape or
+tapping outside it. For five panels — the text lab, the exporter, the character maker, adopting a
+dog and renaming one — neither does anything. The button is right there and says Cancel or Close,
+but the game cannot find it, because it recognises a way out by how it was *named* rather than by
+what it *does*. And no test in this repository has ever pressed the Escape key, so this has been
+untrue since the day it was written down.
+
+**Notes:** Reproduced on all fourteen panels at 390×844: Escape and a click on the backdrop close
+nine of them and leave five open. The matcher accepts a button carrying the `close` class or an id
+that *begins* with close/done/back — so `tlClose`, `exClose`, `nmCancel`, `adoptX` and `renX` are
+invisible to it while `tvClose` passes only because somebody also gave it the class. That is a
+naming convention doing a contract's job. Searching the whole test folder for the word Escape
+returns zero hits.
+
+**Questions to consider:** Should a panel declare its own way out (a `data-` attribute or one shared
+class), rather than the engine guessing from names? Should the first-boot language chooser stay the
+one deliberate exception, as it is today?
+
+**Areas affected:** How a panel says which button is its way out; the two ways out that are not a
+button; the engine suite.
+
+**Done when:** For every panel either game can open, Escape leaves it and a tap on the dark leaves
+it — except the ones deliberately held — and a test presses both, red first against today's engine.
+
+*Tier: normal. Seen at: 390×844, each panel opened in turn, Escape then a click at (5,5).*
+
+---
+
+## 5. The check that a panel can be got out of knows two panels by name, and this shell has fourteen
+
+**In plain words:** The guard written after my finding 4 is a good guard: it checks that a panel's
+way out sits inside its own box, is on the screen when it opens, and rides the bottom so it cannot
+scroll away. It runs on Settings and the map. There are fourteen panels. The other twelve — the
+trolley, the fitting room, the dog, the park card, the theme editor, the text lab, the exporter, the
+adoption form, the rename box, the trolley pass, the character maker — can regress in any of those
+three ways with every suite green, and one of them already has (finding 2).
+
+**Notes:** The list of ids is written into the check by hand. A companion check does sweep *all*
+panels — but only to assert each one is positioned over the page rather than inside the world's
+frame; it says nothing about whether you can get out. Three panels have no button the matcher can
+recognise at all and are simply skipped in silence rather than reported. Silence is the part I would
+change: a guard that cannot find its subject should say so, not pass.
+
+**Questions to consider:** Should the check enumerate every element that is a panel and require each
+to satisfy the contract, so a new panel is covered on the day it is added? Should a panel with no
+recognisable way out be a build failure rather than a skip?
+
+**Areas affected:** The engine suite's panel check; anything new that becomes a panel.
+
+**Done when:** The check derives its list from the shell instead of carrying one, covers every
+panel in both games at every size in the matrix, and fails on a panel it cannot find a way out of.
+
+*Tier: normal. Seen at: reading the check against a sweep of all fourteen panels at three sizes.*
+
+---
+
+## 6. Every layout check runs in English — including the one that exists because Spanish overflowed
+
+**In plain words:** My finding 6 last time was that the rows of choices in Settings ran off the panel
+**in Spanish**, on a laptop as well as a phone. It was fixed and a check was written, and that check
+even prints the language in its failure message. The language is always English. No suite anywhere
+switches the game to Spanish before measuring anything. So the guard for a Spanish bug has never
+once looked at Spanish, and the same is true of every other measurement in the interface pass.
+
+**Notes:** The engine starts in English and only a click on the language button or a saved
+preference changes it; searching the suites for anything that sets it turns up nothing. I re-ran the
+wrap check by hand in Spanish at 390×844 and 1440×900 with every drawer open and it is clean today —
+so this is not a live overflow, it is a guard that cannot see the half of the product the bug was
+in. Spanish is reliably 15–30 % longer than English; the next long label lands unmeasured. Worth
+noting beside it: the two shells carry the same 350 lines of interface CSS and are byte-identical
+today, with nothing checking that they stay that way.
+
+**Questions to consider:** Should the interface pass simply run twice, once per language, which is
+one loop around what already exists? Or should the fixture be the longest string in either language,
+so it is measured whatever it is set to?
+
+**Areas affected:** The engine suite's interface section; anything that measures a row, a button or
+a label.
+
+**Done when:** Every measurement in the interface pass runs in both languages, in both games, and
+one of them goes red if a Spanish label is made long enough to overflow.
+
+*Tier: normal. Seen at: 390×844 and 1440×900, Settings with all drawers open, English and Spanish.*
+
+---
+
+## 7. The rule that the copy buttons must not dominate the sheet is unenforceable in Meridian and half-enforced in the town
+
+**In plain words:** The scale I proposed included one rule with a reason: the buttons that only copy
+or download the page may never be the most prominent thing on it, because the sheet is there to be
+read and acted on. The check compares the copy bar's *height* against the height of the buttons that
+do something — so on a sheet with nothing to do it never runs, and in Meridian **no document has any
+buttons at all**, which means the whole rule is a no-op in the public game. In the town at phone size
+the copy bar is 37 % of the paper and in landscape 42 %: three big buttons under five lines of text.
+
+**Notes:** Measured across every document both packs declare. Meridian: 0 action buttons on every
+sheet, doc body 193–213 px against a 61 px bar. The town: the window sheet has 6, the request sheet
+2, the board sheet 0 — and the board is the one where the bar is 37 % portrait, 42 % landscape.
+Prominence is area and position, not height, and the check only knows height.
+
+**Questions to consider:** Should Close move to the corner of the sheet at 44 × 44 and let Copy and
+Download be a quiet pair, as I suggested last time? Should the rule be expressed as a share of the
+paper — the bar may never take more than a quarter of it — which is measurable on any sheet with or
+without action buttons?
+
+**Areas affected:** The bar at the foot of every sheet; the check that ranks buttons by prominence.
+
+**Done when:** On every document both games declare, at every size in the matrix, the bar at the
+foot is under a stated share of the sheet, and the check reports the sheets where it had nothing to
+compare rather than passing them.
+
+*Tier: normal. Seen at: 390×844, 390×560 and 844×390, both games, every declared document.*
+
+---
+
+## 8. The pass list is wrong about itself in two rows, and a wrong list is worse than a short one
+
+**In plain words:** The checklist's own "known gaps" section says the fullscreen row is not
+automated and that no suite checks the town at phone size. Both are now out of date: fullscreen is
+checked automatically in both games, and the town is driven at 390×560 and 390×844 by the shared
+engine suite every run. The one gap on that list that is completely true is landscape — which is
+where findings 1 and 2 came from. I am reporting this because the list decides what a person does by
+hand, and a list that cries wolf on two rows is a list people stop reading before they reach the row
+that matters.
+
+**Notes:** The engine suite adds the fullscreen class to the viewport and asserts the render buffer's
+shape matches the box it is shown in, windowed and fullscreen, in both games — that is E1's exact
+fault, automated. It runs at one window shape only (480 × 900, portrait), so the honest sentence is
+"automated at one shape", not "not automated". The town is run at phone size by the same suite,
+though the town's *own* suite still opens no window size at all and therefore sees the street, the
+sheets and the request form only at a desktop default. Correcting the register also has a cost worth
+naming: two of the three gaps disappear and the remaining one gets sharper.
+
+**Questions to consider:** Should each gap row carry the file and line of the check that closed it,
+so the row can be verified rather than believed? Should the town's own suite adopt the matrix, given
+that its street and its sheets are the parts the shared suite never sees?
+
+**Areas affected:** The pass list; the town's own suite's window size.
+
+**Done when:** Every row of the gap list is either true or gone, and the landscape row names what it
+costs.
+
+*Tier: low, but cheap. Seen at: reading the register against the suites and re-running both.*
+
+---
+
+## Two smaller things, written down rather than made findings
+
+- **The floor on in-scene text is enforced by reading the source for a literal.** It matches a font
+  size written as a plain number inside double quotes. A size that is computed — and one already is,
+  in the town plan's labels — or written in single quotes or a template string is invisible to it,
+  so a new world can author a five-pixel sign and pass. The rule's other half, that information must
+  never exist *only* in the scene, is not checked by anything at all; it may not be checkable, but
+  it should be labelled as a promise a person keeps.
+- **The two shells' interface CSS is duplicated and identical, and nothing keeps it that way.** A
+  fix applied to one and forgotten in the other ships with four green suites, because the shared
+  suite runs the same assertions against both and only catches divergences somebody thought to
+  assert.
+
+## What I could not judge from here
+
+- **A real thumb.** Every hit-target number above is geometry. Whether 39 px feels bad in the hand,
+  and whether the 20 px way out is as bad as I think, wants the owner's own thumb on his own phone.
+- **A real rotation.** I set a landscape viewport; I did not rotate a device. The address bar, the
+  safe-area insets on a notched phone and the small-viewport height behave differently on hardware,
+  and finding 1 could be worse there, not better.
+- **Whether landscape is supported at all.** I am treating it as supported because it is a row in
+  the pass list. If the owner's answer is "the game is portrait", finding 1 becomes a one-line
+  message instead of a layout fix — but it should be a decision, not the current silence.
+- **The town's street at phone size.** The shared suite drives the town's engine at 390, but I did
+  not audit the street's own furniture — the boards, the signs, the six houses — at that size this
+  visit. My last visit's notes on in-scene text still stand as far as I know.

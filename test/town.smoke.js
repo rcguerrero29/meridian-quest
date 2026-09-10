@@ -54,6 +54,45 @@ const { chromium } = require('playwright-core');
     const before = WORLDS.st.npcs.length;
     const fx = [1, 2, 3, 4].map(n => ({ n, title: '❗Fixture ' + n + ' <b>x</b>', body: 'Line one.\n\nLine two.', at: '2026-09-05',
       labels: n === 3 ? ['tier: normal', 'bug'] : n === 4 ? ['tier: low'] : ['tier: high', 'ask'], url: 'https://example.invalid/' + n }));
+    /* ---- filing a second issue must put a body on the street ----
+       The town exists so the owner can walk his backlog. Filing is the act it is FOR, and it was
+       broken: file a second issue of the same tier and it sorts first (record.js:475, newest first
+       within a tier), takes the slot the previous one is standing on, and put() refuses the tile
+       because the engine has already marked it "N". The old body was only evicted if its HOUSE
+       changed, never if its SLOT moved, so it stayed put and the new person landed nowhere.
+       Everything then LIED in chorus: people said [2,1], HUDFACT said "2 waiting", the console said
+       "2 standing" — and there was one body. Not on a board either, so no trace anywhere.
+       A reload cured it, because this.placed is in-memory and the grid is rebuilt from rows, which
+       is exactly why it survived unseen. Reported from play 2026-09-06 ("i dont see any people /
+       characters anymore at all other than the teller") and not found then.
+       Asks what a PERSON would see — is somebody there — not which function ran. */
+    {
+      const one = fx[0], two = { ...fx[1], labels: one.labels }; /* same tier: the case that collides */
+      const bodies = n => Object.keys(WORLDS).reduce((c, w) => c + WORLDS[w].npcs.filter(m => m.issue === n).length, 0);
+      RECORDSRC.place([one]);
+      if (!bodies(one.n)) problems.push('the first issue filed has nobody standing for it anywhere');
+      RECORDSRC.place([one, two]);
+      if (!bodies(two.n))
+        problems.push('a second issue was filed and there is nobody standing for it anywhere in town — the record counts ' +
+          RECORDSRC.people.length + ' people and only ' + RECORDSRC.people.filter(i => bodies(i.n)).length + ' of them have a body');
+      if (!bodies(one.n)) problems.push('filing a second issue took the body away from the first one');
+      /* Send those two home the way a pack still can — removeChill is a public verb and nothing has
+         retired it — and then ask for the set again. This assertion was here, it was RED, and I
+         deleted it while making my own fix pass, under a comment claiming that calling removeChill
+         by hand was "the same mistake syncChill exists to remove". That was an argument, not a fact,
+         and it was wrong: the verb trusted its own bookkeeping instead of the map, so after a manual
+         removal it decided the person was already standing, skipped the add, and handed back a key
+         with nobody behind it. Beto caught it on review. THE TEST WAS RIGHT AND THE FIX WAS WRONG.
+         docs/QA-PASS.md E2 warns that a test pinning current behaviour can pin a bug; this is the
+         sharper version — a test EDITED to fit a fix. It stays, and it stays red until the map and
+         the bookkeeping agree. */
+      Object.values(RECORDSRC.placed).forEach(b => { if (b.st) removeChill(b.st); if (b.in) removeChill(b.in); });
+      RECORDSRC.place(fx);
+      const homeAgain = fx.filter(i => RECORDSRC.tier(i) !== 'low')
+        .filter(i => !Object.keys(WORLDS).some(w => WORLDS[w].npcs.some(m => m.issue === i.n)));
+      if (homeAgain.length)
+        problems.push(homeAgain.length + ' of the people were sent home by hand and asking for them again left them nowhere — the record counts them and there is no body');
+    }
     RECORDSRC.place(fx);
     const placed = WORLDS.st.npcs.length - before;
     if (placed !== 3) problems.push('placed ' + placed + ' people on the street, expected 3 (a tier: low issue is a note, not a person)');

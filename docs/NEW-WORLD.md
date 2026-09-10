@@ -49,14 +49,26 @@ That already happened to El Changarrito before this flag existed.
 **Do not keep the chapter skeleton with the lesson removed.** Nacho's warning, and it is the whole
 trap: *a Saturday with nothing to graduate from is a countdown to nothing.* Pick one shape.
 
-**❗ Known fault, not yet fixed, and it bites exactly here.** `ENDLESS = true` today does more than
-suppress the ending — it **freezes district progression.** `chDue()` (`engine/engine.js:303`) returns
-false, so the ending panel never opens, and `$("endGo")` (`:3439`) is the *only* place in the engine
-that advances `chSeen`. `chSeen` gates which quests are on offer, which storefronts are up, and city
-growth. **An endless pack with two or more districts is locked in district one forever, with no
-error.** The town is immune only because it declares no chapters and gets one synthesised district.
-Until that is fixed, an endless world must have exactly one district. Registered as L12 in
-`docs/TAGS.md`.
+**✅ The fault this section used to warn about is FIXED — the warning itself had gone stale, which
+is why it is rewritten rather than deleted.** `ENDLESS = true` once froze district progression: the
+ending ceremony and the city's growth were the same switch, so an endless pack with two or more
+districts sat in district one forever with no error. The two were **split** (`chOpenDue()` at
+`engine/engine.js:311` is the city, `chDue()` at `:312` is the ceremony, and `chAdvance()` at `:315`
+runs from the Next handler whether or not the world ends). L12's own recommendation — *split, not
+rename* — is what shipped.
+
+**This paragraph spent an unknown number of days telling a new world a fixed bug was unfixed, with
+two line numbers that no longer pointed at anything.** That is the failure mode this whole file
+exists to prevent, and it is recorded rather than quietly corrected: a doc that describes a game we
+do not have has now cost this project time three times.
+
+**❗ What IS still true, and it is a different fault.** The *engine* now handles endless-with-districts;
+the **shared suite still forbids shipping it.** `test/engine.smoke.js:741` fails any pack that
+declares `ENDLESS` and `CHAPTERS` together — *"a world that does not end cannot also have a last
+day"* — which was right before the split and is wrong after it, because `CHAPTERS` does double duty:
+it is both **the endings** and **the districts**. A world that never ends may still have a second
+neighbourhood. Until that assertion is corrected, the table below stands as written, not because the
+engine cannot do it but because the gate will not let it out. Registered as L12 in `docs/TAGS.md`.
 
 ## 0¾ · How do people SEE your world? — the second question (2026-09-10)
 
@@ -118,6 +130,22 @@ content/<name>/
   docs.js        DOCS READS DOCUI  — the paper the world produces (optional)
 ```
 
+**Nine is Meridian's number, not the engine's.** A pack may drop files and add its own — El
+Changarrito has no `room.js` and adds `record.js` (its `RECORDSRC`, §9). Two rules that only
+became visible once a second world existed:
+
+- **Dropping a file means dropping its `<script>` tag too.** `changarrito/index.html:782` still
+  loads `content/room.js`, and `changarrito/content/room.js` does not exist: a 404 on every load
+  of the town since the folder was made. It is harmless — `INTERVIEW` stays undefined and the
+  engine does less, which is the intended off state — but nothing catches it. `test/town.smoke.js`
+  aborts every non-`file://` request and only records `pageerror`, and a `<script>` that 404s is
+  neither (`test/town.smoke.js:33-36`). **A new world's smoke should assert that every path its
+  shell loads exists on disk.** That check does not exist yet in any suite.
+- **A file the shell loads before `engine/engine.js` may reference nothing from the engine at load
+  time.** The town's `record.js` is loaded last of the content files and still only *defines* an
+  object; everything that touches `WORLDS`, `SK()` or `docOpen` runs inside `boot()`, which the
+  engine calls (`engine/engine.js:5129`).
+
 **Required — the engine reads these bare and dies without them** (verified: no `typeof` guard):
 
 | global | file | what it is |
@@ -127,13 +155,14 @@ content/<name>/
 | `WNPC` | maps.js/npcs.js | which glyph in which world is which person |
 | `NPCE` `NPCN` `NPCLOOK` | npcs.js | emoji, names (en/es), and the look of every person |
 | `QEN` `QES` `FQEN` `FQES` | quests.*.js | the quests, both languages |
-| `UI` | strings.js | every UI string |
+| `UI` | strings.js | every UI string — **about eighty keys, not one line.** `applyLang()` bare-dereferences ~82 of them; a missing key is a crash on the title screen, not a blank label. Copy Meridian's file whole and edit the words (measured 2026-09-10, `docs/GAUGE.md`) |
 | `MAXXP` `LEVELS` | config.js | how far the game goes and the level bands |
+| `GAMENAME` `GAMEV` | config.js | the name and the version. **Both are required by the shared suite** — `test/engine.smoke.js:64-65` fails the build without either, and `:67` fails if the title screen does not print `GAMEV`. This file listed `GAMEV` as optional until 2026-09-10; it was wrong |
 
 **Optional — guarded by `typeof`, the engine simply does less without them:**
-`GAMEV CAMDEF STAKES GROWTH SEASONS CHAPTERS INTERVIEW CRITTERS EGGS CHATTER CHILL NPCACT TRV
+`CAMDEF CAMERAS STAKES GROWTH SEASONS CHAPTERS ENDLESS INTERVIEW CRITTERS EGGS CHATTER CHILL NPCACT TRV
 DECOR DECOART READS DOCS DOCUI BUILDTPL BUILDS TILEART TILEART_SIDE TILEMETA MAPCOL MAPDOT
-TOWNLBL DOORS DOORLOOK SOLIDX PLACES FLOORS ANIMALS READERLOOK` — and a template part's `link`
+TOWNLBL DOORS DOORLOOK SOLIDX PLACES FLOORS ANIMALS READERLOOK RECORDSRC HUDFACT` — and a template part's `link`
 (`{door:[dy,dx], landing:[x,y], exit:[x,y], interior:{rows, people, locs, arrive}}`, #10): the
 build stamps the interior as a world named after the lot and keys both doors by place
 (`PORTALSAT`), so one template can be stamped on many lots and every door opens — and, since `mq-v65`, **`STOREPFX`** (config.js): the prefix on
@@ -400,7 +429,25 @@ its foundations changed four answers above. A world started after this date inhe
   from **one origin**; `localStorage` is per-origin. The guarantee test fails a literal key.
 - **The switch is a folder.** §2 said there is no pack selector; the chosen answer is a
   second `index.html` in its own folder (`changarrito/`) that loads `../engine/` and its own
-  `content/`. Nothing is copied, one CI covers both, and the first world's index is untouched.
+  `content/`. One CI covers both, and the first world's index is untouched.
+
+  **⚠️ "Nothing is copied" was written of the engine and the content, and it is false of the
+  shell.** Corrected 2026-09-10 by reading both files. `changarrito/index.html` is 791 lines
+  against the public shell's 803, and roughly 770 of them are the same CSS and markup —
+  including the comments that record *why* each rule is there (Rosa's findings, #126, #127, #130
+  appear verbatim in both). The differences are real but small: the CSP allows `api.github.com`
+  (`changarrito/index.html:10`), there is no manifest and no service worker (`:788`), the title
+  and script paths change, and the town adds `.dred` / `#toast.crit` for the red category (#8).
+
+  **The only guard on those 770 lines is a line count**, one-directional:
+  `test/town.smoke.js:23` fails when the town's index is more than 20 lines *shorter* than the
+  public one. A CSS rule fixed in one shell and not the other changes no line count and is not
+  detected. This is the exact rot `docs/GAUGE.md:53-58` describes, and the gauge pack chose the
+  other answer for the same reason: **generate the shell from `index.html` and assert that every
+  edit actually matched**, because "a `String.replace` that stops matching returns the input
+  unchanged and would otherwise print success while testing the wrong thing." A third world
+  should generate its shell. The town predates that decision and has not been converted;
+  converting it is a real piece of work, not a documentation fix.
 - **A service worker is per world, and optional.** A world that ships to players carries its
   own `sw.js` with its own `CACHE` name and its own `PFX` — the worker now deletes only caches
   it owns, serves only its own origin, and never stores a non-ok response. A world that runs
@@ -423,3 +470,130 @@ its foundations changed four answers above. A world started after this date inhe
   both against the real code with file:line, both adversarial to the plan. They found the
   storage collision, the cache poisoning and the hosting mistake the plan had written in. Run
   them for any world that touches a network.
+
+---
+
+## 9 · A world that is not a story — the five seams the town runs on *(added 2026-09-10)*
+
+*Written after an audit that did the exercise the owner asked for: pretend El Changarrito does not
+exist and rebuild it from this file alone. Everything in §0–§8 was reachable. **Nothing below was.**
+Every one of these is a real, guarded, tested engine seam that a stranger following this template
+could only have found by reading `engine/engine.js`.*
+
+**This is the shape of the gap.** §0–§8 describe a *story* world: districts, quests, chapters,
+seasons, cameras. El Changarrito is not a story, it is **a live view of something outside the game**,
+and the engine already has seams for exactly that — they were simply never written down here.
+
+### 9.1 · `RECORDSRC` — where a world's people come from something that is not a map
+
+> `engine/engine.js:376-383`. A pack may declare `RECORDSRC = {enabled, boot()}`. The engine calls
+> `boot()` **once**, after `NET`, and never again (`engine.js:5129`, inside a `try`). What the record
+> holds and where it comes from is entirely the pack's business — a same-origin file, or an API the
+> **pack's own** `index.html` allows in its CSP. The public build's CSP allows neither, by test.
+
+This is the whole of El Changarrito: `changarrito/content/record.js:9` declares it, and everything
+else in that 649-line file hangs off `boot()`. Without this seam in the template, a second world that
+wants to show live data has no idea the engine will hand it a starting gun at the right moment, and
+would try to run at script-load time — before `WORLDS` exists.
+
+**The ask this seam answers is not in §0's interview.** Add two questions to it:
+*"Does your world show something that changes when you are not playing?"* and, if yes,
+*"Can the player change it back?"* The first is `RECORDSRC`; the second is a token, a CSP entry, and
+the two reviews above.
+
+### 9.2 · `HUDFACT` — a world with no score
+
+> `engine/engine.js:393-411`. A pack may declare `HUDFACT()`, a function returning a string. When it
+> exists, the strip at the door prints that string instead of `NAME · RANK` and `N XP`, the XP bar is
+> hidden (`:405`, and `:3468` / `:5102` hide the wrapper at boot and after a chapter), and the chip in
+> the corner of the world carries the same fact. Return `""` and the strip stays **empty** rather than
+> lying.
+
+The reasoning is the part worth keeping, and it lives only in a code comment today
+(`engine.js:393-400`, and again at `changarrito/content/record.js:630-637`): *whatever XP counts, it
+teaches* — and in a backlog neither filing more nor closing more is reliably good, while a permanent
+`0 XP` is a verdict delivered at the door every session. **The rule: a fact must be able to go DOWN as
+well as up, and neither direction is praised.** The town's is `HUDFACT()` at `record.js:638-648` —
+*"14 waiting · 3 moved"*.
+
+**Pair this with §0½.** A world that answers *"it does not end"* almost certainly also wants
+`HUDFACT`, because the same argument applies: a place you inhabit does not grade you. §0½ never says
+so, and the town shipped Meridian's rank ladder — Rookie to AI LEGEND — on its front door until
+somebody looked (GitHub #154).
+
+### 9.3 · The reader is an application surface, not a sheet of paper
+
+§1 gives `DOCS READS DOCUI` one line — *"the paper the world produces (optional)"*. That is true of
+Meridian and badly incomplete. The reader renders **twelve** block kinds
+(`h p note red blank kv t q btn sel form docs`, `engine.js:2919-2979`), and four of them are live:
+
+| block | what it is | engine |
+|---|---|---|
+| `{btn, run}` | a button. The reader never learns what it does; content does | `engine.js:2939-2943` |
+| `{sel, opts, value, run}` | a dropdown, options optionally grouped by `o.g` | `:2944-2953` |
+| `{form:{fields, submit, cancel, onCancel, run, noFocus}}` | a whole form — `text`, `password`, `area`, `select`, `checks` — every field on one screen beside the paperwork. The reader collects the values and hands them to `run(v)` | `:2954-2975` |
+| `{red}` | a line in red, for what is critical | `:2923` |
+
+And the two that make it composable:
+
+- **A document may be an object, not an id.** `docDef()` returns `id` itself when `id` is an object
+  (`engine.js:2883`), so `docOpen(self.commentDoc(i))` opens a sheet that was built one line earlier
+  and never registered in `DOCS`. That is how the town gets a comment box per person
+  (`record.js:434-436`).
+- **`build()` runs on every open** (`engine.js:2884-2885`), so a document is *live*: the town's
+  people cycle through three lines because `doc(i).build()` advances a counter each time
+  (`record.js:503-506`).
+
+**Why this matters more than it looks:** `docMarkdown()` (`engine.js:2887`) exports `h p note blank
+kv t q docs` and deliberately **not** `btn sel form red`. So the Copy/Download buttons on any sheet
+silently drop every interactive part. That is correct — a button is not text — but a new world that
+promises "copy this document" has to know its form will not be in the copy.
+
+### 9.4 · People who arrive and leave while the game is running
+
+> `addChill(c)` → `engine.js:154`, returns a key or `null`. `removeChill(key)` → `:166`, *"the
+> inverse `addChill` never had"*. §1 lists `CHILL` as an optional global — a **static** list read once
+> at `:172` — and never says the pair exists.
+
+Four rules the town paid for, none of them in this file until now:
+
+1. **A placed person may carry a `doc`, and then behaves differently**: they wear the mark, stand
+   still instead of wandering, and open the document when talked to (`engine.js:376-382`, and
+   `changarrito/content/record.js:616-618` sets `n.doc`, `n.tier`, `n.issue`).
+2. **Placing a person writes `"N"` into the grid, and removing them must give the tile back.** Get
+   this wrong and the map grows permanent invisible walls. `test/town.smoke.js:76` walks every tile of
+   every world and fails on any `"N"` with nobody on it — **that check belongs in the shared suite,
+   not the town's**, because it is a property of `addChill`/`removeChill` and not of a backlog.
+3. **Anything you place at runtime can wall the player in, and there is a function that says so.**
+   `auditReach(grown)` (`engine.js:219`) returns the places you can no longer reach; the engine runs
+   it once at boot (`:252`) and the town runs it again after every placement
+   (`record.js:624`). A world that adds people, props or buildings after boot **must** call it.
+4. **Check the tile first.** `record.js:616` refuses to place on a solid or on an existing `"N"`.
+   `addChill` does not do this for you.
+
+### 9.5 · Decor is baked in 3D — changing content data does nothing until you say so
+
+The engine draws `DECOR` entries through `DECODRAW`; `sign` prints `d.text`, **capped at four
+characters** (`engine.js:1480-1484`). A pack may mutate `d.text` at runtime — the town's signs count
+the open issues of each house (`record.js:182-186`).
+
+**The trap, and it is a whole class of bug:** the 3D scene bakes its decor at build time, so the
+mutation is invisible until `t3Invalidate()` is called. The town calls it, guarded, and only when
+something actually changed (`record.js:184-186`, and again in `goBeside` at `:149`). A new world that
+animates any content data and forgets this will see it work in three cameras and not in the fourth,
+which reads as "3D is broken" rather than "the scene is stale".
+
+### 9.6 · What this audit could NOT settle
+
+Named rather than smoothed over, per the rule at the top of `docs/OPEN.md`:
+
+- **Whether these five should stay pack seams or become template defaults.** `HUDFACT` in particular
+  looks like it wants to be the default for `ENDLESS` worlds. That is a design decision nobody has
+  made; it is not written down here as if it had been.
+- **Whether the town's shell should be generated like the gauge's** (§8). Costed at "a real piece of
+  work", not costed in hours.
+- **Whether a pack that stores a credential needs an engine rule.** The town keeps a GitHub token
+  under `SK("token")` (`record.js:338`), and it is kept out of the save by construction — `save()`
+  enumerates fixed fields (`engine.js:413`) and the QR pass carries `loadSave()` only (`:4341`). The
+  *test* for it exists but is the town's own (`test/town.smoke.js:329`, *"the token leaked into the
+  save"*). Nothing in the engine or the shared suite would stop a third world getting it wrong.

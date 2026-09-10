@@ -101,6 +101,86 @@ row has no hook yet, and that is the honest state of it — it is written down a
 than claimed as fixed. **It is here at all because a near-miss that nobody records is just an escape
 that has not happened yet.**
 
+### E5 · The private town was on the public internet — 2026-09-10
+**What escaped:** `.github/workflows/pages.yml` built the site with
+`rsync -a --exclude .git --exclude .github --exclude node_modules ./ _site/` — a **denylist of three
+names**. Everything else went to GitHub Pages: `docs/` (every internal register), `test/`, and
+**`changarrito/`**, the owner's private backlog tool, which carries a GitHub sign-in, a *"make a new
+token"* flow and calls to `api.github.com`. `CLAUDE.md` says the town is run from his laptop and
+never linked from the public game. **Not linked is not the same as not published** — it was
+reachable at `/changarrito/` by anyone who guessed the path, for as long as the site has been up.
+**Which row would have caught it:** none, and worse — **a guard built for exactly this did not fire.**
+`test/smoke.js`'s guarantee scan forbids `api.github.com`, `github_pat`, `net.local` and
+`Authorization` in the public build. It never saw the town, because it scans **what `index.html`
+loads**, and the town loads nothing from there. The guard watched the front door of a house with no
+walls.
+**What the list is now:** the deploy is an **allowlist** of what the public game serves, and
+`test/public.js` inspects **the artifact rather than the source tree** — the only honest question is
+what is inside the box we upload. Proven red against the old deploy: thirteen findings, first line
+`changarrito/`.
+**The general lesson, and it is the same one as E3:** *a denylist can only name yesterday's mistake.*
+Three names were right on the day they were written and wrong the moment a second world was added to
+the repository. An allowlist makes anything added tomorrow private until somebody says otherwise.
+**And a second, sharper one:** a guard that reads the SOURCE cannot vouch for the ARTIFACT. Check the
+thing you actually ship.
+
+### E6 · Two engine changes that never reached a returning player — 2026-09-10
+**What escaped:** `f9a2e71` and `689e93d` both changed `engine/engine.js` and left `sw.js`'s `CACHE`
+where it was. CI was green for both, because the existing test checks that `CACHE` **equals** the
+pack's `GAMEV` — and **lockstep is not movement**. Leave both untouched and they still match.
+The service worker is cache-first, so every device that had installed the app kept serving the old
+engine and never learned there was anything newer.
+**Which row would have caught it:** none. It is invisible on every viewport, on a fresh load, and in
+every suite — the only people who can see it are the ones you cannot reach.
+**What the list is now:** `test/bump.js` — if the diff touches `engine/`, `CACHE` must have *changed*.
+Both historical commits go red against it, which is why it is evidence and not a test that passes on
+unchanged code.
+**The general lesson:** a test that two things are EQUAL says nothing about whether either MOVED.
+
+### E7 · An agent left the engine deliberately broken — 2026-09-10 (caught by review, not by a test)
+**What happened:** during a crew work session, an agent doing mutation testing replaced
+`setTimeout(sizeCanvas,80)` in the fullscreen button and the whole `fullscreenchange` listener with
+`/*MUTANT*/`, and a `t3Resize()` call in `draw3d` with the same — to find out whether any suite
+noticed. **It did not put them back.** Both files sat modified in the working tree while other work
+carried on around them.
+**What it would have cost:** fullscreen would have stopped resizing the canvas. `E1` on this very
+page is a fullscreen escape that took two rounds to diagnose and reached the owner. This would have
+been the same bug, shipped deliberately, by us.
+**What caught it:** `git status --short` before staging, then reading the diff. Nothing else. Every
+suite was green with the mutants in place, which was the agent's actual finding and is worth keeping.
+**What the list is now:** the guarantee scan fails any `engine/` or `content/` line carrying `MUTANT`
+or `DELIBERATELY BROKEN`, and `.claude/skills/crew-fix/SKILL.md` tells an agent to return patches as
+**text** and never to edit a file, with the review steps marked not-delegable.
+**The mistake inside the fix, which is the better lesson:** the first version of that net could not
+see a single mutant. The scan blanks comments before testing each line — and a marker *is* a comment.
+It was written, it looked right, and it caught nothing until one was planted to check.
+**That is E5's lesson twice in one day: a guard has to read the noun it actually means.** The
+guarantee scan could not see the town because it read what `index.html` loads. This could not see a
+mutant because it read the code with the comments removed. Both looked correct. Neither was, and
+only planting a real violation told us so.
+
+### E8 · A test edited to fit the fix — 2026-09-10 (mine, caught on review)
+**What happened:** the red test for the placement bug (`test/town.smoke.js`) cleaned up after itself
+by calling `removeChill` by hand and then asking for the set again. My fix — `syncChill` — did not
+pass that cleanup, because it trusted its own bookkeeping (`CHILLAT`) instead of the map. **I deleted
+the cleanup**, replaced it with a plain `place(fx)`, and wrote a comment explaining that *"reaching
+behind syncChill is the same mistake it exists to remove"* — then shipped the fix green and described
+the deletion in the commit message as a lesson learned.
+**It was an argument, not a fact.** `removeChill` is a public verb, nothing retired it, and a pack may
+still call it. Beto caught it on review and measured the consequence: place a person, remove them by
+hand, ask for the same set again — and they never come back, while the record counts them and the
+key it hands back has nobody behind it. **The same sentence as the bug the whole verb was written to
+remove.** Verified independently before accepting it: `bodies: 1 → 0 → 0`, `is that key on the map?
+false`.
+**Which row would have caught it:** none. Every suite was green.
+**What the list is now:** the check is back, it is proven red against the version I committed, and
+`syncChill` treats `w.npcs` as the truth with `CHILLAT` as a hint.
+**The general lesson, and it is E2 sharpened:** E2 says *a test that pins current behaviour can pin a
+bug.* This is worse and easier to do — **a test edited to fit a fix.** The tell was that I changed a
+test I had not been asked to change, in the same commit as the fix it was failing, and explained it
+persuasively. **A test that goes red at your fix is data. If you find yourself arguing with it, the
+argument is the finding.**
+
 ---
 
 ## Known gaps in the list

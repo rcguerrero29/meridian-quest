@@ -53,6 +53,24 @@ const { chromium } = require('playwright-core');
       fails.push('in-scene text below the floor: ' + msg + ' — under ' + SCENE_MIN + ' units it lands around five CSS pixels on a phone and stops resolving in every camera'));
   }
 
+  /* ---- every script this shell loads has to exist ----
+     changarrito/index.html loaded content/room.js from the day the folder was made, and that file
+     was never created: a 404 on every load of the town, for weeks, seen by nobody. It was harmless
+     — INTERVIEW stays undefined and the engine does less, which is the intended off state — but
+     NOTHING CAUGHT IT, and the next dropped file will not be harmless. The suites cannot see it
+     from inside the page: they abort every non-file:// request and collect `pageerror`, and a
+     <script> that 404s is neither. So it is checked on disk, from outside.
+     Found by an agent asked to rebuild the town from the template and report what it could not say. */
+  {
+    const fs2 = require('fs');
+    const shellDir = path.dirname(path.resolve(root, idx));
+    const html = fs2.readFileSync(path.resolve(root, idx), 'utf8');
+    [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
+      .filter(s => !/^https?:/.test(s))
+      .forEach(s => { if (!fs2.existsSync(path.resolve(shellDir, s)))
+        fails.push('this shell loads "' + s + '" and there is no such file — every load of it is a 404 nobody sees'); });
+  }
+
   if (pageErrors.length) fails.push('page errors: ' + pageErrors.join(' | '));
   warns.filter(w => /^(REACH|PORTAL) /.test(w)).forEach(w => fails.push('boot warning: ' + w));
 
@@ -291,7 +309,11 @@ const { chromium } = require('playwright-core');
     // 1440x900 a 2880x2304 buffer was resampled down to 1125x900, letterboxed with bars either
     // side, and every edge in the world went soft. A 3D camera has no fixed frame to protect, so
     // it renders the box it is actually given.
-    {
+    /* only if this GAME has a 3D camera. CAMERAS (mq-v133) lets a pack ship without one, and
+       camSet refuses a camera the game does not have — so on such a pack the lines below were
+       measuring a 3D camera that never ran and failing the build for it. Found by the gauge
+       pack, which declares CAMERAS=["top","front"]: the seam existed and the gate ignored it. */
+    if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
       const c3 = T3.renderer.domElement, vp = document.getElementById('vp');
       const before = { cam: camMode, w: world, x: px, y: py, hid: document.getElementById('world').hidden };
       document.getElementById('world').hidden = false; /* this suite never enters the world; the box needs to be real */
@@ -613,7 +635,11 @@ const { chromium } = require('playwright-core');
 // up-and-down and LESS left-and-right: measured, 10.9 tiles of street across became 7.7. So the
 // angle widens below the game's own 10:8 to hold the width. Both halves are checked, because
 // either one alone is a regression.
-{
+    /* only if this GAME has a 3D camera. CAMERAS (mq-v133) lets a pack ship without one, and
+       camSet refuses a camera the game does not have — so on such a pack the lines below were
+       measuring a 3D camera that never ran and failing the build for it. Found by the gauge
+       pack, which declares CAMERAS=["top","front"]: the seam existed and the gate ignored it. */
+if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   const wd3 = document.getElementById('world'), wh3 = wd3.hidden; wd3.hidden = false;
   const before = camMode;
   camSet('3d'); sizeCanvas(); draw3d();
@@ -914,6 +940,79 @@ const { chromium } = require('playwright-core');
     return P;
   });
   fails.push(...loopq);
+
+  /* ---- the flat camera the game promises when 3D cannot draw ----
+     Both packs boot into 3D (CAMDEF="3d"), so this is the camera nearly every player starts in.
+     When draw3d() throws, the engine does three of the four things it should: it records the
+     fault, it stops trying, and it draws the front-profile camera instead. It does NOT show it.
+     camSet is the only writer of cv.hidden (engine.js:714) and nothing on the failure path calls
+     it, so the flat picture is painted into a canvas that is still hidden while the dead 3D canvas
+     is still the one on screen. Measured on both shells: 82 samples of ink on a canvas the player
+     cannot see, under a message that says the flat camera is what they are looking at.
+     This asks what the PLAYER can see, never which function ran, so it survives a rewrite. */
+  const fell = await page.evaluate(async () => {
+    const P = [];
+    /* engine3d.js is always loaded, so T3 existing proves nothing about whether this GAME has a
+       3D camera — CAMERAS lets a pack drop it (mq-v133). Ask the seam, not the file. A pack that
+       never offers 3D cannot fall back from it and must not be failed for that. */
+    if (typeof CAMS !== 'undefined' && CAMS.indexOf('3d') < 0) return P;
+    if (typeof T3 === 'undefined' || typeof draw3d !== 'function') { P.push('this pack has no 3D at all, so the fallback could not be checked'); return P; }
+    camSet('3d'); draw();
+    await new Promise(r => setTimeout(r, 400));
+    if (!T3.renderer) { P.push('3D never started, so what happens when it fails could not be checked'); return P; }
+    const realRender = T3.renderer.render;
+    T3.renderer.render = () => { throw new Error('simulated context loss'); };
+    T3.fail = false; T3.said = false; T3.builtKey = null;
+    draw();
+    await new Promise(r => setTimeout(r, 300));
+    const flat = document.getElementById('cv'), dead = document.getElementById('cv3');
+    const said = [...document.querySelectorAll('#ticker div')].map(e => e.textContent).join(' ');
+    const promised = /flat camera|c.mara plana/i.test(said);
+    if (!promised) P.push('3D failed and the player was never told');
+    if (promised && flat.hidden)
+      P.push('the game says it fell back to the flat camera and the flat camera is still hidden — it is painting where nobody can look');
+    if (promised && !dead.hidden)
+      P.push('3D failed and the dead 3D canvas is still the one on screen');
+    // put it back so the rest of the run is honest
+    T3.renderer.render = realRender; T3.fail = false; T3.said = false; T3.builtKey = null;
+    camSet('3d'); draw();
+    return P;
+  });
+  fails.push(...fell);
+
+  /* ---- one bad frame must not be the last frame ----
+     loop() asked for its next frame as its LAST statement (engine.js:2826), so anything that threw
+     anywhere in the frame took the game with it: measured, the loop ticked once more and then never
+     again, and it did not come back when the faulty code was removed. Not one dropped frame — the
+     screen, forever, until a reload.
+     Nothing in either shipping pack is known to throw here today, so this is insurance rather than
+     a bug players are hitting. It is worth a rule anyway, because it decides what EVERY future bug
+     costs: with the frame re-armed first, a fault is a glitch; re-armed last, every fault is fatal.
+     It injects at a site UPSTREAM of draw() on purpose. A narrower fix that only wraps draw() makes
+     the obvious version of this test pass while the game still freezes on anything else — that was
+     tried, and it did. It also never counts frames: a headless page throttles rAF hard (see the
+     note above), so the only honest question is whether the clock moved at all. */
+  const badframe = await page.evaluate(async () => {
+    const P = [];
+    const moved = async (ms) => { const a = last; await new Promise(r => setTimeout(r, ms)); return last !== a; };
+    if (typeof last === 'undefined') { P.push('cannot tell whether the loop is alive'); return P; }
+    if (!(await moved(700))) { P.push('the loop was not running before this check, so nothing it says can be trusted'); return P; }
+    for (const site of ['fredCheck', 'troUpdate', 'draw']) {
+      if (typeof window[site] !== 'function') { P.push('the frame no longer calls ' + site + ', so this check has stopped checking anything — point it at whatever the frame calls now'); continue; }
+      const real = window[site];
+      window[site] = function () { throw new Error('BADFRAME on purpose'); };
+      /* the frame that throws writes the clock BEFORE it throws, so the first window after
+         injecting always looks alive whether or not it was the last one. Spend one window
+         letting it die, and ask the second. Without this the check names the wrong function. */
+      await moved(700);
+      const alive = await moved(700);
+      window[site] = real;
+      if (!alive) P.push('one frame threw in ' + site + ' and the game stopped forever — the loop only asks for the next frame when nothing went wrong, so any fault anywhere is the last thing that ever happens');
+      if (!alive) break; /* the loop is dead; the remaining sites cannot be told apart */
+    }
+    return P;
+  });
+  fails.push(...badframe);
 
   await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();

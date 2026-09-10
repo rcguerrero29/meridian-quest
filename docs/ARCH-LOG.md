@@ -28,9 +28,22 @@ strict array order and **there is no way to express "the mercado is open but the
 **Why it came up:** the owner's pulled-story idea — walk into a business and ask for work — requires
 districts to open in whatever order the player finds them.
 
-**Why it was deferred:** `chSeen` is in every save. Changing it to a set is a save migration, and it
-is the *same class of problem* as `docs/TAGS.md` L9 (quests are array indices) — both should be paid
-for once, together, or not at all.
+**Why it was deferred:** `chSeen` is in every save. Changing it to a set is a save migration.
+
+> **CORRECTION, 2026-09-10 — the second half of that sentence was wrong, and it was holding up #153.**
+> This row used to say L9 (quests are array indices) is *"the same class of problem"* and that both
+> *"should be paid for once, together, or not at all."* **They are not the same class.** `chSeen` is a
+> scalar whose **meaning** changes — a high-water number becoming a set — and no amount of mapping
+> helps that; it genuinely needs a migration. Quest indices are **positions whose meaning is stable**,
+> so identity can be fitted *forward* for nothing.
+>
+> `[CODE]` Verified in this repo's own history, not assumed: `ab1e519` shipped 24 quests, `27429f2`
+> shipped 56, and the first 24 titles are byte-identical **in the same order**. Nothing has ever been
+> inserted or reordered. **Every save ever written still means, index for index, exactly what it meant
+> the day it was written.** There is nothing to repair — only something to guarantee going forward.
+>
+> **So L9 does not have to wait for A1**, and waiting is not free: the append-only guarantee lasts
+> only until somebody inserts a quest. See A9 below. A1 itself stays deferred on its own merits.
 
 | Option | What it costs | Note |
 |---|---|---|
@@ -219,3 +232,55 @@ words rule matter more there, not less.
 | **Leave it as a doc** ← *today* | nothing. A person reads a list and answers what applies |
 | A written decision tree in the doc | small; a human can follow it, and it is what an agent would need anyway |
 | An agent that runs the interview and writes the pack skeleton | real work, and it wants the decision tree first |
+
+---
+
+## A9 · Quests have no identifiers — the options, costed
+**Status: options costed 2026-09-10, recommendation taken, nothing built yet.**
+**GitHub #153 · `docs/TAGS.md` L9 · `docs/OPEN.md` calls it "the largest single blocker to a template."**
+
+`[OWNER]` *"ok try the proof pack sure and start naming quests"* (2026-09-10).
+
+`[CODE]` Ground truth, every line verified against the code and this repo's git history rather than
+inferred — several long-standing assumptions turned out to be wrong:
+
+- **56 quests**, `content/meridian/quests.en.js` / `.es.js`. A quest object carries exactly five keys:
+  `npc, title, late, start, nodes`. There is no id, and the key set never varies across all 56.
+- **Adding a field is 56 line-heads per language, not a re-authoring.** Each file has exactly 56 lines
+  beginning `` {npc:``. This is the single most important cost fact here and it has been assumed the
+  other way round every time this came up — "180 KB per language" is the file size, not the edit.
+- **The array has only ever grown by append.** Verified: `ab1e519` = 24 quests, `27429f2` = 56, and the
+  first 24 titles are identical in the same order. Nothing has ever been inserted or reordered.
+- **EN and ES titles share no slug — 0 of 56 match**, and titles are **player-editable at runtime**
+  (`labData`/`applyText`, `engine/engine.js:4006–4011`, persisted to `SK("text_"+lang)`).
+- **Three** stores are keyed by array position, not one: the save (`d`, `qa`, `mk`, `:413`), the record
+  (`dlog[].qi`, `:4043`, in its own key `clearSave()` never touches), and the Text Lab's overrides.
+- **A ceiling nobody had named:** `sanitizeSave` clamps quest indices to **0–98** (`:442`, `:445`,
+  `:452`). Registered separately as `docs/TAGS.md` L18 — it is its own problem.
+
+| Option | What it costs | Note |
+|---|---|---|
+| **A · A parallel id table** (index → name), arrays untouched | one content array; no engine change; no save change | Names positions without owning them. An insertion still renumbers the table *and* every save — a vocabulary, not a fix. `[TRAINING]` It is the shape A1 already refused: two sources of truth for one fact |
+| **B · `id:` on each quest, arrays kept, ids resolved at boot** ← *recommended* | 56 mechanical line edits per language; one resolver; `shape()` extended; one new save field | **The only option that ships red-first in one change with no migration.** Content refs (`CHAPTERS[].quests`, `GROWTH.staged.quests`, `wardrobeQuest`, `WNPC[].q`) take ids *or* numbers, normalised once at boot, so all 17 index-consuming engine sites keep receiving numbers and are never touched |
+| **C · Quests become an object keyed by id** | both files restructure in lockstep; ~17 engine sites and ~10 test literals break at once; `gradeAll`'s `Object.keys(marks).map(Number)` (`:291`) silently yields `NaN`; a real save migration | Its genuine advantage: EN/ES key drift becomes **structurally impossible**. Worth having — not worth having *first*. It is B plus a migration, and B is what unblocks the template |
+| **D · Ids generated from the title slug** | nothing up front, then everything | **Refused, and the refusal is the point of writing it down.** `[CODE]` 0 of 56 EN slugs equal their ES slug, so the two languages would carry two different id sets for the same quests — and `applyText` lets a *player* rewrite any title at boot. **An id that changes when a player edits text is not an id.** Slugging the EN title once, by hand, frozen as a literal, is Option B with a naming convention |
+| **E · Do nothing; enforce append-only with a test** | one test | It would have been green for the entire history, so it proves nothing new — but it costs nothing and it guards B's key assumption. **Worth doing as B's guard rail, not as B's alternative** |
+
+### Why this ships in one change with no migration
+
+Because of the history above: every save ever written already means what an id map would say it means.
+That turns the change from a **backward repair** into a **forward guarantee**:
+
+1. **Red first.** Extend `shape()` (`test/smoke.js:183`) to require `q.id`, plus missing / duplicate /
+   EN≠ES checks. It fails on today's code — which is what `docs/OPEN.md` §4 demands.
+2. `id:"…"` on 56 lines per language, same ids both sides. Mechanical.
+3. One resolver; the four content reference lists accept ids or numbers, normalised once at boot.
+4. The save keeps `d`/`qa`/`mk` as indices. **Nothing migrates.** The 0–98 clamps stay as they are.
+5. One new save field — `qo`, the id order this save was written against — and on load, remap only if
+   it is present and differs. Every save that exists has no `qo` and is read exactly as today, which
+   is **correct**. `[CODE]` The precedent is in the file already: the `SV.v===undefined` block (`:5055`).
+
+**The caveats, on the row and not in a footnote:** saves written before this ships are index-safe only
+until the first insertion — an argument for shipping it **before the next quest is written**, not for
+making it bigger. `dlog` (`:4043`) and the Text Lab overrides (`:4010`) are two more positional stores;
+each is one line and each is its own row, not this one.

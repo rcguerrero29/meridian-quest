@@ -169,6 +169,40 @@ function removeChill(key){ /* the inverse addChill never had — a person the re
     if(w.grid[n.y]&&w.grid[n.y][n.x]==="N")w.grid[n.y][n.x]=w.rows[n.y][n.x]; /* the glyph the map had, not "." */
     delete CHILLN[key];delete NPCLOOK[key];delete CHILLEGG[key];return true;}
   return false;}
+const CHILLAT={}; /* a caller's own id → {key,world,x,y}: what it has standing, so it can be MOVED */
+function syncChill(want){
+  /* The whole desired set at once, keyed by the caller's own stable id. Adds the new, removes the
+     gone, and MOVES the ones whose tile changed. The third of those is why this exists: addChill
+     and removeChill cannot express a move between them, so every caller hand-rolls the diff — and
+     the first one to try it got it wrong in a way nothing could see.
+     What it got wrong: it evicted a body when its ROOM changed and never when its SLOT did. So in
+     El Changarrito, filing a second issue of the same tier put it first in the order, onto a tile
+     the previous one was still standing on; addChill refuses a tile already marked "N"; and the
+     newcomer landed NOWHERE, while people, HUDFACT and the console all went on reporting it
+     standing. A reload cured it, so it survived unseen for weeks.
+     THE ORDERING IS THE WHOLE POINT. Every removal happens before any addition, because a body
+     still on a tile blocks whoever is moving onto it. Two loops, never interleaved.
+     Returns {id: key} for everyone still standing, so a caller can decorate the npc it just
+     placed. A pack that never calls this is untouched — CHILLAT stays empty and nothing moves. */
+  const list=Array.isArray(want)?want.filter(c=>c&&c.id!==undefined&&c.name&&c.world):[];
+  const by={};list.forEach(c=>{by[String(c.id)]=c;});
+  Object.keys(CHILLAT).forEach(id=>{const at=CHILLAT[id],c=by[id],w=WORLDS[at.world];
+    /* w.npcs is the truth; CHILLAT is only a hint. addChill and removeChill are still public verbs,
+       so a pack may take one of these people off the map by hand. Trusting the hint left this
+       function certain somebody was standing on a tile nobody was standing on: it skipped the add,
+       handed back a key with no person behind it, and the caller recorded a placement for a body
+       that did not exist — the same sentence as the bug this whole verb was written to remove.
+       Found by Beto reviewing the first version of it, and measured: place, removeChill by hand,
+       place the same set again, and the person never came back. */
+    const here=!!(w&&w.npcs.some(n=>n.key===at.key));
+    if(here&&c&&c.world===at.world&&(c.x|0)===at.x&&(c.y|0)===at.y)return;
+    if(here)removeChill(at.key);
+    delete CHILLAT[id];});
+  const keys={};Object.keys(CHILLAT).forEach(id=>{keys[id]=CHILLAT[id].key;});
+  list.forEach(c=>{const id=String(c.id);if(CHILLAT[id])return;
+    const key=addChill(c);
+    if(key){CHILLAT[id]={key,world:c.world,x:c.x|0,y:c.y|0};keys[id]=key;}});
+  return keys;}
 (typeof CHILL!=="undefined"?CHILL:[]).forEach(c=>addChill(c));
 /* ---------- the room interview seam ----------
    A pack may declare INTERVIEW (content/<pack>/room.js): people who stand in a room and
@@ -463,7 +497,14 @@ function sanitizeSave(s){
   return{n,c:str2(s.c,24,""),lk,xp:num(s.xp,0,999,0),he:num(s.he,0,3,3),d,
     px:num(s.px,0,63,10),py:num(s.py,0,63,11),tr:num(s.tr,0,9999,0),fq:num(s.fq,0,3,0),
     w:str2(s.w,12,PL.home),wr:wearIn("wr"),wc:wearIn("wc"),qa,cs:num(s.cs,0,32,0),mk,so,hd,bl,
-    v:s.v===undefined?undefined:num(s.v,0,99,0)};
+    v:s.v===undefined?undefined:num(s.v,0,99,0),
+    /* hairV must survive the wash. It is the field that records what "long" MEANS (#132), and
+       :473 reads it to decide whether a long-haired hero keeps their hair or is turned back into
+       the beard the style used to draw. Dropping it here meant a sanitized save no longer carried
+       its own meaning, so a hero who crossed on a Trolley Pass grew a beard on arrival. Found by
+       the security crew reading sanitizeSave for injection and noticing a field that goes in and
+       does not come out. */
+    hairV:s.hairV===undefined?undefined:num(s.hairV,0,9,0)};
 }
 function loadSave(){try{return sanitizeSave(JSON.parse(localStorage.getItem(SK("1"))||""));}catch(e){return null;}}
 /* belt & suspenders: flush progress when the tab is backgrounded or closed (only once a run exists) */
@@ -940,7 +981,8 @@ function fiestaDraw2D(wid,toScreen,front){ /* toScreen(x,y) → the tile's top-l
     if(p.kind!=="calaverita")return;
     const win=propSill(wid,p); /* on a window sill (owner: "as in human reality"): the facade's own window says where */
     if(win){const z=win.size; /* centred on its own window, standing on the sill, small enough to leave glass around it */
-      if(front)drawCalaverita(ctx,sx+win.cx-z/2,sy+win.sill-z,p.foil,z);
+      if(front){drawSillLit(ctx,sx+win.cx-win.w/2,sy+win.sill-win.h,win.w,win.h);
+        drawCalaverita(ctx,sx+win.cx-z/2,sy+win.sill-z,p.foil,z);}
       else drawCalaverita(ctx,sx+win.cx-z/2,sy+TS-1-z,p.foil,z);
       return;}
     drawCalaverita(ctx,sx+ox-4,front?(isSolidAt(wid,p.x,p.y)||p.h?sy+2:sy+TS-9):sy+oy-4,p.foil);});}
@@ -993,6 +1035,26 @@ function drawPapelRow(g,x0,x1,ly,pal,seed){ /* a string of cut paper (Pili, 2026
     g.fillStyle=col;g.fillRect(px-1.8,fy,3.6,3.6);
     g.beginPath();g.moveTo(px-1.8,fy+3.6);g.lineTo(px-0.9,fy+4.8);g.lineTo(px,fy+3.6);g.lineTo(px+0.9,fy+4.8);g.lineTo(px+1.8,fy+3.6);g.closePath();g.fill();
     g.fillStyle="rgba(40,30,20,.55)";g.fillRect(px-0.4,fy+1.2,0.8,0.8);}});}
+/* A LIT WINDOW behind a sill candy (#131 again, owner 2026-09-10: "skulls are still hidden").
+   Twice now this was answered by changing the sweet's SIZE — 8px to 5px, then back up to 0.85 of
+   the pane — and twice the owner came back saying he still could not see them. He was right both
+   times, and the size was never the fault. A calaverita is eight pixels on a forty-pixel tile, on a
+   wall about a unit high, seen from a dozen tiles back: at that distance it is three or four screen
+   pixels of cream against a dark recess, and NO ratio makes three pixels read. Look at what does
+   read in the same shot — the papel picado. Bright, saturated, repeated.
+   So light the window instead of growing the candy. A warm pane among dark ones is a big saturated
+   shape that carries all the way to the back of the street, and it is the true picture besides: a
+   veladora is lit on the sill and the sugar skull sits in front of it. The candy stops being the
+   thing you must see and becomes the thing you find when you walk up to it, which is the right job
+   for an eight-pixel sweet. */
+function drawSillLit(g,x,y,w,h){
+  if(!(w>0&&h>0))return;
+  g.save();
+  const gr=g.createLinearGradient(0,y,0,y+h);
+  gr.addColorStop(0,"#F2B705");gr.addColorStop(0.55,"#E8873A");gr.addColorStop(1,"#8A3F1E");
+  g.fillStyle=gr;g.fillRect(x,y,w,h);
+  g.fillStyle="rgba(255,241,200,.85)";g.fillRect(x+w/2-0.6,y+h*0.28,1.2,h*0.42); /* the veladora's flame */
+  g.restore();}
 function drawCalaverita(g,x,y,foil,size){ /* a calaverita de azúcar, 8×8 (Pili): white sugar, FOIL sockets — black would read Halloween, foil reads
   candy — an icing brow, dots across the crown, a line under the jaw so it sits instead of floats.
   size: draw it smaller than 8 when it has to fit a window (#131). The whole sweet scales; nothing
@@ -2798,6 +2860,17 @@ function tryPortal(ts){
 }
 let last=0;
 function loop(ts){
+  /* ASK FOR THE NEXT FRAME FIRST. It used to be the last statement of this function, which meant
+     the game only kept running when nothing went wrong: measured, one frame that threw ticked once
+     more and then stopped forever, and it did not come back when the faulty code was taken away.
+     Not a dropped frame — the screen, until a reload. Nothing in either pack is known to throw in
+     here today, so this is not a bug players are hitting; it is what decides the PRICE of every
+     future one. Re-armed first, a fault is a glitch. Re-armed last, every fault is fatal.
+     It is safe to arm first because this function has no early return on any path, `last` is still
+     written before anything reads it, and there are exactly two requestAnimationFrame call sites in
+     the repo (here and the boot arm) with no cancelAnimationFrame anywhere — so nothing can
+     double-schedule and nothing reorders. Measured identical frame rates before and after. */
+  requestAnimationFrame(loop);
   const dt=Math.min(50,ts-last);last=ts;
   if(moving){
     mt+=dt/240;bob+=dt/70;
@@ -2823,7 +2896,6 @@ function loop(ts){
       setTimeout(()=>held.forEach(([m,d,c],i)=>setTimeout(()=>toast(m,d,c),i*120)),260);}
   }
   if(!$("world").hidden&&!covered)draw();
-  requestAnimationFrame(loop);
 }
 /* the door marker — the third door affordance (owner, 2026-09-02: "i think we should have a
    marker"). Within three steps of a door that LEADS somewhere, a bouncing arrow floats over
