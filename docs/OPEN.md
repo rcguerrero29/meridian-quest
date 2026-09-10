@@ -48,7 +48,7 @@ happened, never from imagination.** Read the relevant one before proposing anyth
 
 | File | What it holds | Read it before |
 |---|---|---|
-| `docs/TAGS.md` | The tag vocabulary, and **14 leaks** — tags that look universal and are not | proposing any tag, kind, glyph or seam |
+| `docs/TAGS.md` | The tag vocabulary, and **18 leaks** — tags that look universal and are not. L15 closed, L12 half-closed, **L16-L18 added 2026-09-10 by building a real pack and measuring** | proposing any tag, kind, glyph or seam |
 | `docs/3D-LOG.md` | Every 3D attempt with its measurement, **and every rejected approach with its reason** | proposing anything about the 3D view |
 | `docs/QA-PASS.md` | The test checklist and the **escape register** — what reached the owner that should have been caught | shipping anything |
 | `docs/BEAUTIFY.md` | What every object renders as, what it should be, and which are correctly flat | touching any art |

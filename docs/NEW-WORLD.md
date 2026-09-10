@@ -49,14 +49,26 @@ That already happened to El Changarrito before this flag existed.
 **Do not keep the chapter skeleton with the lesson removed.** Nacho's warning, and it is the whole
 trap: *a Saturday with nothing to graduate from is a countdown to nothing.* Pick one shape.
 
-**❗ Known fault, not yet fixed, and it bites exactly here.** `ENDLESS = true` today does more than
-suppress the ending — it **freezes district progression.** `chDue()` (`engine/engine.js:303`) returns
-false, so the ending panel never opens, and `$("endGo")` (`:3439`) is the *only* place in the engine
-that advances `chSeen`. `chSeen` gates which quests are on offer, which storefronts are up, and city
-growth. **An endless pack with two or more districts is locked in district one forever, with no
-error.** The town is immune only because it declares no chapters and gets one synthesised district.
-Until that is fixed, an endless world must have exactly one district. Registered as L12 in
-`docs/TAGS.md`.
+**✅ The fault this section used to warn about is FIXED — the warning itself had gone stale, which
+is why it is rewritten rather than deleted.** `ENDLESS = true` once froze district progression: the
+ending ceremony and the city's growth were the same switch, so an endless pack with two or more
+districts sat in district one forever with no error. The two were **split** (`chOpenDue()` at
+`engine/engine.js:311` is the city, `chDue()` at `:312` is the ceremony, and `chAdvance()` at `:315`
+runs from the Next handler whether or not the world ends). L12's own recommendation — *split, not
+rename* — is what shipped.
+
+**This paragraph spent an unknown number of days telling a new world a fixed bug was unfixed, with
+two line numbers that no longer pointed at anything.** That is the failure mode this whole file
+exists to prevent, and it is recorded rather than quietly corrected: a doc that describes a game we
+do not have has now cost this project time three times.
+
+**❗ What IS still true, and it is a different fault.** The *engine* now handles endless-with-districts;
+the **shared suite still forbids shipping it.** `test/engine.smoke.js:734` fails any pack that
+declares `ENDLESS` and `CHAPTERS` together — *"a world that does not end cannot also have a last
+day"* — which was right before the split and is wrong after it, because `CHAPTERS` does double duty:
+it is both **the endings** and **the districts**. A world that never ends may still have a second
+neighbourhood. Until that assertion is corrected, the table below stands as written, not because the
+engine cannot do it but because the gate will not let it out. Registered as L12 in `docs/TAGS.md`.
 
 ## 0¾ · How do people SEE your world? — the second question (2026-09-10)
 
