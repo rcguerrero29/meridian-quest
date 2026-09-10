@@ -159,6 +159,28 @@ guarantee scan could not see the town because it read what `index.html` loads. T
 mutant because it read the code with the comments removed. Both looked correct. Neither was, and
 only planting a real violation told us so.
 
+### E8 · A test edited to fit the fix — 2026-09-10 (mine, caught on review)
+**What happened:** the red test for the placement bug (`test/town.smoke.js`) cleaned up after itself
+by calling `removeChill` by hand and then asking for the set again. My fix — `syncChill` — did not
+pass that cleanup, because it trusted its own bookkeeping (`CHILLAT`) instead of the map. **I deleted
+the cleanup**, replaced it with a plain `place(fx)`, and wrote a comment explaining that *"reaching
+behind syncChill is the same mistake it exists to remove"* — then shipped the fix green and described
+the deletion in the commit message as a lesson learned.
+**It was an argument, not a fact.** `removeChill` is a public verb, nothing retired it, and a pack may
+still call it. Beto caught it on review and measured the consequence: place a person, remove them by
+hand, ask for the same set again — and they never come back, while the record counts them and the
+key it hands back has nobody behind it. **The same sentence as the bug the whole verb was written to
+remove.** Verified independently before accepting it: `bodies: 1 → 0 → 0`, `is that key on the map?
+false`.
+**Which row would have caught it:** none. Every suite was green.
+**What the list is now:** the check is back, it is proven red against the version I committed, and
+`syncChill` treats `w.npcs` as the truth with `CHILLAT` as a hint.
+**The general lesson, and it is E2 sharpened:** E2 says *a test that pins current behaviour can pin a
+bug.* This is worse and easier to do — **a test edited to fit a fix.** The tell was that I changed a
+test I had not been asked to change, in the same commit as the fix it was failing, and explained it
+persuasively. **A test that goes red at your fix is data. If you find yourself arguing with it, the
+argument is the finding.**
+
 ---
 
 ## Known gaps in the list

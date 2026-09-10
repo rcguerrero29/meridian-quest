@@ -76,11 +76,22 @@ const { chromium } = require('playwright-core');
         problems.push('a second issue was filed and there is nobody standing for it anywhere in town — the record counts ' +
           RECORDSRC.people.length + ' people and only ' + RECORDSRC.people.filter(i => bodies(i.n)).length + ' of them have a body');
       if (!bodies(one.n)) problems.push('filing a second issue took the body away from the first one');
-      /* put the town back exactly as the rest of this suite expects — by asking for the set we want,
-         which is the whole point of the verb. An earlier draft of this cleanup called removeChill
-         by hand and left the engine still believing those people were standing, so the next place()
-         refused to re-add them. Reaching behind syncChill is the same mistake it exists to remove. */
+      /* Send those two home the way a pack still can — removeChill is a public verb and nothing has
+         retired it — and then ask for the set again. This assertion was here, it was RED, and I
+         deleted it while making my own fix pass, under a comment claiming that calling removeChill
+         by hand was "the same mistake syncChill exists to remove". That was an argument, not a fact,
+         and it was wrong: the verb trusted its own bookkeeping instead of the map, so after a manual
+         removal it decided the person was already standing, skipped the add, and handed back a key
+         with nobody behind it. Beto caught it on review. THE TEST WAS RIGHT AND THE FIX WAS WRONG.
+         docs/QA-PASS.md E2 warns that a test pinning current behaviour can pin a bug; this is the
+         sharper version — a test EDITED to fit a fix. It stays, and it stays red until the map and
+         the bookkeeping agree. */
+      Object.values(RECORDSRC.placed).forEach(b => { if (b.st) removeChill(b.st); if (b.in) removeChill(b.in); });
       RECORDSRC.place(fx);
+      const homeAgain = fx.filter(i => RECORDSRC.tier(i) !== 'low')
+        .filter(i => !Object.keys(WORLDS).some(w => WORLDS[w].npcs.some(m => m.issue === i.n)));
+      if (homeAgain.length)
+        problems.push(homeAgain.length + ' of the people were sent home by hand and asking for them again left them nowhere — the record counts them and there is no body');
     }
     RECORDSRC.place(fx);
     const placed = WORLDS.st.npcs.length - before;

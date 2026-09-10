@@ -22,8 +22,17 @@ let changed;
 try { changed = git('diff', '--name-only', base + '...' + head).split('\n').filter(Boolean); }
 catch (e) { changed = git('diff', '--name-only', base, head).split('\n').filter(Boolean); }
 
-const touchedEngine = changed.filter(f => f.startsWith('engine/'));
-if (!touchedEngine.length) { console.log('OK — this change does not touch engine/, so no cache bump is owed.'); process.exit(0); }
+/* Everything the SERVICE WORKER PRECACHES, not just engine/ — read from sw.js's own ASSETS list so
+   this can never drift from what is actually cached. The first version of this check watched
+   engine/ alone, and sw.js precaches index.html and every content/meridian file too, all served
+   cache-first with no revalidation: change a quest's words, ship it, and every installed device
+   keeps the old words until some unrelated engine change happens to move CACHE. Found by Yaz, who
+   committed a change to index.html and quests.en.js and watched this exit 0. */
+const swSrc = require('fs').readFileSync('sw.js', 'utf8');
+const precached = [...swSrc.matchAll(/"\.\/([^"]+)"/g)].map(m => m[1]).filter(Boolean);
+const watched = changed.filter(f => f.startsWith('engine/') || precached.includes(f));
+if (!watched.length) { console.log('OK — this change touches nothing the offline app has already cached, so no bump is owed.'); process.exit(0); }
+const touchedEngine = watched;
 
 const cacheOf = (src) => (src.match(/CACHE\s*=\s*"([^"]+)"/) || [])[1] || null;
 const was = cacheOf(git('show', base + ':sw.js'));
@@ -31,8 +40,8 @@ const now = cacheOf(head === 'HEAD' ? require('fs').readFileSync('sw.js', 'utf8'
 
 if (!now) { console.log('FAIL — sw.js no longer declares a CACHE this check can read.'); process.exit(1); }
 if (was === now) {
-  console.log('FAIL — this change edits the engine and every returning player would keep the old one.\n' +
-    '- it touches ' + touchedEngine.join(', ') + '\n' +
+  console.log('FAIL — this change edits something already sitting in every returning player\'s cache, and they would keep the old one.\n' +
+    '- it touches ' + touchedEngine.join(', ') + ' — every one of those is precached by the service worker\n' +
     '- and sw.js CACHE is still "' + now + '"\n' +
     '- the service worker is cache-first, so an installed device serves what it already has and never\n' +
     '  learns there is anything newer. Bump CACHE in sw.js and GAMEV in every pack config together.');

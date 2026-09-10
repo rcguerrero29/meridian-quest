@@ -186,8 +186,18 @@ function syncChill(want){
      placed. A pack that never calls this is untouched — CHILLAT stays empty and nothing moves. */
   const list=Array.isArray(want)?want.filter(c=>c&&c.id!==undefined&&c.name&&c.world):[];
   const by={};list.forEach(c=>{by[String(c.id)]=c;});
-  Object.keys(CHILLAT).forEach(id=>{const at=CHILLAT[id],c=by[id];
-    if(!c||c.world!==at.world||(c.x|0)!==at.x||(c.y|0)!==at.y){removeChill(at.key);delete CHILLAT[id];}});
+  Object.keys(CHILLAT).forEach(id=>{const at=CHILLAT[id],c=by[id],w=WORLDS[at.world];
+    /* w.npcs is the truth; CHILLAT is only a hint. addChill and removeChill are still public verbs,
+       so a pack may take one of these people off the map by hand. Trusting the hint left this
+       function certain somebody was standing on a tile nobody was standing on: it skipped the add,
+       handed back a key with no person behind it, and the caller recorded a placement for a body
+       that did not exist — the same sentence as the bug this whole verb was written to remove.
+       Found by Beto reviewing the first version of it, and measured: place, removeChill by hand,
+       place the same set again, and the person never came back. */
+    const here=!!(w&&w.npcs.some(n=>n.key===at.key));
+    if(here&&c&&c.world===at.world&&(c.x|0)===at.x&&(c.y|0)===at.y)return;
+    if(here)removeChill(at.key);
+    delete CHILLAT[id];});
   const keys={};Object.keys(CHILLAT).forEach(id=>{keys[id]=CHILLAT[id].key;});
   list.forEach(c=>{const id=String(c.id);if(CHILLAT[id])return;
     const key=addChill(c);
