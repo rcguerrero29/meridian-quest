@@ -99,6 +99,123 @@ write."*
 
 ---
 
+## THE RUNBOOK — click by click
+
+*GitHub moves its wording occasionally. Where the label differs, the thing you are looking for is
+described as well as named, so you can find it anyway.*
+
+---
+
+### STEP 1 · Find out whether any of this is urgent (about 20 seconds)
+
+**Go to:** `https://github.com/rcguerrero29/meridian-quest/settings/pages`
+
+*(or: repo → **Settings** tab, top of the page → **Pages** in the left sidebar, under "Code and
+automation")*
+
+**Look at:** the **"Build and deployment"** box, the **"Source"** dropdown.
+
+| What it says | What it means | What to do |
+|---|---|---|
+| **GitHub Actions** | The workflow builds the site. The allowlist will take effect the moment the branch merges | Nothing here. Go to Step 2 |
+| **Deploy from a branch** | ⚠️ **GitHub is serving your repository tree directly.** `/changarrito/`, `/docs/` and `/test/` are live right now, and merging the fix changes nothing about what is served | **Change it to "GitHub Actions"** — click the dropdown, pick it. Then Step 2 |
+
+> **Why this is first:** it is the only item that changes how urgent everything else is. If Source is
+> "Deploy from a branch", every artifact-side guard built on 2026-09-10 is inert.
+
+**To confirm afterwards:** open `https://rcguerrero29.github.io/meridian-quest/changarrito/` in a
+private/incognito window. **You want a 404.** If the town loads, it is still being served.
+
+---
+
+### STEP 2 · Answer the exposure question directly, instead of guessing (about 30 seconds)
+
+**Go to:** `https://github.com/settings/personal-access-tokens`
+
+*(or: click your avatar, top right → **Settings** → scroll the left sidebar to the bottom →
+**Developer settings** → **Personal access tokens** → **Fine-grained tokens**)*
+
+**Find** the token named `changarrito` (that is the name `changarrito/README.md:146` tells you to
+give it) and **look at the "Last used" column.**
+
+| What you see | What it tells you |
+|---|---|
+| Only dates you were actually playing the town, and it says used on **your** machine | **Nothing happened.** This is the answer, not an inference |
+| A date you were not using it | Worth a closer look — click the token, read its log |
+| **Never used** | Then there is nothing to worry about at all |
+
+> **This is the single highest-value check on this page**, because it answers "was it used by
+> anybody else" *directly*. Everything else in this note is reasoning about what *could* have
+> happened.
+
+---
+
+### STEP 3 · Rotate it anyway (about 60 seconds)
+
+Not because something went wrong — because it makes the question permanently moot.
+
+**3a · Delete the old one.** Same page as Step 2 → click the `changarrito` token → **Delete** (red
+button, bottom of the page) → confirm.
+
+**3b · Make the replacement.** Go to
+`https://github.com/settings/personal-access-tokens/new` *(this is the exact URL the town's own
+"Make a new token" button opens — `changarrito/content/record.js:346`)* and set, **exactly**:
+
+- **Token name:** `changarrito`
+- **Expiration:** 30 days
+- **Repository access:** **Only select repositories** → pick **`meridian-quest`** — *not* "All
+  repositories"
+- **Permissions → Repository permissions → Issues:** **Read and write**
+- **Everything else: leave untouched.** No code access, no other repository, nothing else. That is
+  what makes the worst case "somebody edits issues on one repo"
+
+Click **Generate token**, then **copy it** — GitHub shows it once and never again.
+
+**3c · Give it to the town.** Start the town the documented way
+(`changarrito/README.md:34-37`):
+
+```
+cd ~/code/meridian-quest
+python3 -m http.server 8765 --bind 127.0.0.1
+```
+
+then open **`http://127.0.0.1:8765/changarrito/`** — **that address, not github.io.** Walk to **la
+ventanilla**, use **Sign out** first if it offers it, then **Sign in** and paste the new token.
+
+---
+
+### STEP 4 · Only if you ever signed in at the github.io address
+
+If Step 2 or your own memory says you once signed in at
+`https://rcguerrero29.github.io/...`, that browser still holds the old token under that origin.
+Deleting the token on GitHub (Step 3a) already made it useless — this is tidiness, not safety.
+
+**Chrome/Edge:** open the published URL → `F12` → **Application** tab → **Local Storage** in the left
+sidebar → click `https://rcguerrero29.github.io` → find the row `chtoken` → right-click → **Delete**.
+**Safari:** Settings → Privacy → Manage Website Data → search `github.io` → Remove.
+
+---
+
+### STEP 5 · Merge the fix
+
+There are **13 commits** on `claude/small-remaining-updates-58xsy6` and **no open pull request** for
+them. They carry the allowlist deploy, R10, the PR gate, the cache-bump guard, and the day's other
+fixes. **Say the word and the PR gets opened** — it is deliberately not opened without asking.
+
+**After it merges, confirm in a private window:**
+
+| Open this | You want |
+|---|---|
+| `https://rcguerrero29.github.io/meridian-quest/changarrito/` | **404** |
+| `https://rcguerrero29.github.io/meridian-quest/docs/OWNER.md` | **404** |
+| `https://rcguerrero29.github.io/meridian-quest/` | **the game, working** |
+
+If the first two still load after a merge **and** Source says "GitHub Actions", the deploy did not
+run — check the **Actions** tab for a failed or skipped `Pages` run. Note `pages.yml` marks its
+deploy steps `continue-on-error`, so **a green Pages run does not prove anything was published.**
+
+---
+
 ## What to actually do, in order
 
 1. **Settings → Pages → Source.** Ten seconds. It decides whether anything else here is urgent.
