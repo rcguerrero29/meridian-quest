@@ -169,6 +169,30 @@ function removeChill(key){ /* the inverse addChill never had — a person the re
     if(w.grid[n.y]&&w.grid[n.y][n.x]==="N")w.grid[n.y][n.x]=w.rows[n.y][n.x]; /* the glyph the map had, not "." */
     delete CHILLN[key];delete NPCLOOK[key];delete CHILLEGG[key];return true;}
   return false;}
+const CHILLAT={}; /* a caller's own id → {key,world,x,y}: what it has standing, so it can be MOVED */
+function syncChill(want){
+  /* The whole desired set at once, keyed by the caller's own stable id. Adds the new, removes the
+     gone, and MOVES the ones whose tile changed. The third of those is why this exists: addChill
+     and removeChill cannot express a move between them, so every caller hand-rolls the diff — and
+     the first one to try it got it wrong in a way nothing could see.
+     What it got wrong: it evicted a body when its ROOM changed and never when its SLOT did. So in
+     El Changarrito, filing a second issue of the same tier put it first in the order, onto a tile
+     the previous one was still standing on; addChill refuses a tile already marked "N"; and the
+     newcomer landed NOWHERE, while people, HUDFACT and the console all went on reporting it
+     standing. A reload cured it, so it survived unseen for weeks.
+     THE ORDERING IS THE WHOLE POINT. Every removal happens before any addition, because a body
+     still on a tile blocks whoever is moving onto it. Two loops, never interleaved.
+     Returns {id: key} for everyone still standing, so a caller can decorate the npc it just
+     placed. A pack that never calls this is untouched — CHILLAT stays empty and nothing moves. */
+  const list=Array.isArray(want)?want.filter(c=>c&&c.id!==undefined&&c.name&&c.world):[];
+  const by={};list.forEach(c=>{by[String(c.id)]=c;});
+  Object.keys(CHILLAT).forEach(id=>{const at=CHILLAT[id],c=by[id];
+    if(!c||c.world!==at.world||(c.x|0)!==at.x||(c.y|0)!==at.y){removeChill(at.key);delete CHILLAT[id];}});
+  const keys={};Object.keys(CHILLAT).forEach(id=>{keys[id]=CHILLAT[id].key;});
+  list.forEach(c=>{const id=String(c.id);if(CHILLAT[id])return;
+    const key=addChill(c);
+    if(key){CHILLAT[id]={key,world:c.world,x:c.x|0,y:c.y|0};keys[id]=key;}});
+  return keys;}
 (typeof CHILL!=="undefined"?CHILL:[]).forEach(c=>addChill(c));
 /* ---------- the room interview seam ----------
    A pack may declare INTERVIEW (content/<pack>/room.js): people who stand in a room and
