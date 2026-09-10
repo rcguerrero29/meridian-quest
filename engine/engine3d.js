@@ -20,7 +20,25 @@ function t3Note(where,e){const msg=String((e&&e.message)||e||"?").slice(0,160),k
   try{localStorage.setItem(SK("err3d"),JSON.stringify({where,msg,at:Date.now(),v:typeof GAMEV==="string"?GAMEV:""}));}catch(err){}}
 function t3Fell(){if(T3.said)return;T3.said=true;const last=T3.errors[T3.errors.length-1];
   if(typeof mqwarn==="function")mqwarn("3d","fell to the flat camera"+(last?" — "+last.where+": "+last.msg:""),true); /* critical: the camera the game boots into could not draw (#8) */
-  try{toast((typeof lang!=="undefined"&&lang==="es"?"El 3D no pudo dibujar — cámara plana. ":"3D could not draw — flat camera instead. ")+(last?last.where+": "+last.msg:""),5200);}catch(err){}}
+  /* and ACTUALLY fall. draw() already paints the front profile when 3D cannot draw — but camSet is
+     the only thing that ever shows the flat canvas, and nothing on this path called it. Measured on
+     both shells: the fallback painted a full picture into a canvas still marked hidden while the
+     dead 3D canvas stayed on screen, under a message telling the player they were looking at the
+     flat camera. The drawing was never the broken part; being seen was. Both packs boot into 3D,
+     so this is the camera nearly every player starts in.
+     The camera is taken from what the PACK declared (CAMS), never assumed: a game that ships only
+     3D has nothing to fall back to and is told that, instead of being promised a view it does not
+     have. */
+  const CS=((typeof CAMS!=="undefined"&&Array.isArray(CAMS))?CAMS:[]).filter(c=>c!=="3d");
+  /* prefer "front": draw() already paints the front profile on the frame 3D fails (engine.js:1605),
+     so settling there means the picture the player is shown and the camera the buttons claim are
+     the same one. Any other flat camera the pack has will do if it has no front. */
+  const flat=CS.indexOf("front")>=0?"front":CS[0];
+  if(flat&&typeof camSet==="function"){try{camSet(flat);}catch(err){}}
+  const es=typeof lang!=="undefined"&&lang==="es";
+  const head=flat?(es?"El 3D no pudo dibujar — cámara plana. ":"3D could not draw — flat camera instead. ")
+                 :(es?"El 3D no pudo dibujar y este juego no tiene otra cámara. ":"3D could not draw, and this game has no other camera. ");
+  try{toast(head+(last?last.where+": "+last.msg:""),5200);}catch(err){}}
 /* ---------- which way is screen-right? ----------
    Billboards always show their painted face to the camera, but the painters mirror an
    animal by its WORLD facing (`face` = ±x). Turn the camera to the north stop and a dog

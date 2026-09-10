@@ -2798,6 +2798,17 @@ function tryPortal(ts){
 }
 let last=0;
 function loop(ts){
+  /* ASK FOR THE NEXT FRAME FIRST. It used to be the last statement of this function, which meant
+     the game only kept running when nothing went wrong: measured, one frame that threw ticked once
+     more and then stopped forever, and it did not come back when the faulty code was taken away.
+     Not a dropped frame — the screen, until a reload. Nothing in either pack is known to throw in
+     here today, so this is not a bug players are hitting; it is what decides the PRICE of every
+     future one. Re-armed first, a fault is a glitch. Re-armed last, every fault is fatal.
+     It is safe to arm first because this function has no early return on any path, `last` is still
+     written before anything reads it, and there are exactly two requestAnimationFrame call sites in
+     the repo (here and the boot arm) with no cancelAnimationFrame anywhere — so nothing can
+     double-schedule and nothing reorders. Measured identical frame rates before and after. */
+  requestAnimationFrame(loop);
   const dt=Math.min(50,ts-last);last=ts;
   if(moving){
     mt+=dt/240;bob+=dt/70;
@@ -2823,7 +2834,6 @@ function loop(ts){
       setTimeout(()=>held.forEach(([m,d,c],i)=>setTimeout(()=>toast(m,d,c),i*120)),260);}
   }
   if(!$("world").hidden&&!covered)draw();
-  requestAnimationFrame(loop);
 }
 /* the door marker — the third door affordance (owner, 2026-09-02: "i think we should have a
    marker"). Within three steps of a door that LEADS somewhere, a bouncing arrow floats over
