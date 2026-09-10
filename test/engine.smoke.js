@@ -53,6 +53,24 @@ const { chromium } = require('playwright-core');
       fails.push('in-scene text below the floor: ' + msg + ' — under ' + SCENE_MIN + ' units it lands around five CSS pixels on a phone and stops resolving in every camera'));
   }
 
+  /* ---- every script this shell loads has to exist ----
+     changarrito/index.html loaded content/room.js from the day the folder was made, and that file
+     was never created: a 404 on every load of the town, for weeks, seen by nobody. It was harmless
+     — INTERVIEW stays undefined and the engine does less, which is the intended off state — but
+     NOTHING CAUGHT IT, and the next dropped file will not be harmless. The suites cannot see it
+     from inside the page: they abort every non-file:// request and collect `pageerror`, and a
+     <script> that 404s is neither. So it is checked on disk, from outside.
+     Found by an agent asked to rebuild the town from the template and report what it could not say. */
+  {
+    const fs2 = require('fs');
+    const shellDir = path.dirname(path.resolve(root, idx));
+    const html = fs2.readFileSync(path.resolve(root, idx), 'utf8');
+    [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1])
+      .filter(s => !/^https?:/.test(s))
+      .forEach(s => { if (!fs2.existsSync(path.resolve(shellDir, s)))
+        fails.push('this shell loads "' + s + '" and there is no such file — every load of it is a 404 nobody sees'); });
+  }
+
   if (pageErrors.length) fails.push('page errors: ' + pageErrors.join(' | '));
   warns.filter(w => /^(REACH|PORTAL) /.test(w)).forEach(w => fails.push('boot warning: ' + w));
 

@@ -101,6 +101,42 @@ row has no hook yet, and that is the honest state of it — it is written down a
 than claimed as fixed. **It is here at all because a near-miss that nobody records is just an escape
 that has not happened yet.**
 
+### E5 · The private town was on the public internet — 2026-09-10
+**What escaped:** `.github/workflows/pages.yml` built the site with
+`rsync -a --exclude .git --exclude .github --exclude node_modules ./ _site/` — a **denylist of three
+names**. Everything else went to GitHub Pages: `docs/` (every internal register), `test/`, and
+**`changarrito/`**, the owner's private backlog tool, which carries a GitHub sign-in, a *"make a new
+token"* flow and calls to `api.github.com`. `CLAUDE.md` says the town is run from his laptop and
+never linked from the public game. **Not linked is not the same as not published** — it was
+reachable at `/changarrito/` by anyone who guessed the path, for as long as the site has been up.
+**Which row would have caught it:** none, and worse — **a guard built for exactly this did not fire.**
+`test/smoke.js`'s guarantee scan forbids `api.github.com`, `github_pat`, `net.local` and
+`Authorization` in the public build. It never saw the town, because it scans **what `index.html`
+loads**, and the town loads nothing from there. The guard watched the front door of a house with no
+walls.
+**What the list is now:** the deploy is an **allowlist** of what the public game serves, and
+`test/public.js` inspects **the artifact rather than the source tree** — the only honest question is
+what is inside the box we upload. Proven red against the old deploy: thirteen findings, first line
+`changarrito/`.
+**The general lesson, and it is the same one as E3:** *a denylist can only name yesterday's mistake.*
+Three names were right on the day they were written and wrong the moment a second world was added to
+the repository. An allowlist makes anything added tomorrow private until somebody says otherwise.
+**And a second, sharper one:** a guard that reads the SOURCE cannot vouch for the ARTIFACT. Check the
+thing you actually ship.
+
+### E6 · Two engine changes that never reached a returning player — 2026-09-10
+**What escaped:** `f9a2e71` and `689e93d` both changed `engine/engine.js` and left `sw.js`'s `CACHE`
+where it was. CI was green for both, because the existing test checks that `CACHE` **equals** the
+pack's `GAMEV` — and **lockstep is not movement**. Leave both untouched and they still match.
+The service worker is cache-first, so every device that had installed the app kept serving the old
+engine and never learned there was anything newer.
+**Which row would have caught it:** none. It is invisible on every viewport, on a fresh load, and in
+every suite — the only people who can see it are the ones you cannot reach.
+**What the list is now:** `test/bump.js` — if the diff touches `engine/`, `CACHE` must have *changed*.
+Both historical commits go red against it, which is why it is evidence and not a test that passes on
+unchanged code.
+**The general lesson:** a test that two things are EQUAL says nothing about whether either MOVED.
+
 ---
 
 ## Known gaps in the list

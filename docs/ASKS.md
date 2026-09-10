@@ -15,6 +15,21 @@ and never built is still open; saying it aloud is not shipping it.
 Paraphrasing is how requirements die. *"the activity record should only delete after two
 activities"* is a rule; "improve the ticker" is a mood. Quote the rule.
 
+## What this file is not (2026-09-10)
+
+**This is the ledger of asks, not the store of decisions.** A row says *what was asked* and *where it
+landed*; it has one cell for the answer, so the **reasoning** — and above all **what was rejected and
+why** — does not fit and has never been kept here.
+
+`docs/decisions/` is where that goes: one file per settled decision, with the ask verbatim, the
+decision in plain words, the rejected options with their reasons, the `file:line` it lives at, and
+the test that pins it. Three are written so far (`docs/decisions/README.md` is the index).
+
+**Be honest about the split while it is uneven:** most of this project's decisions still live only as
+a row in the table below, or only as a comment in the code. When you settle something, write the
+decision file *and* the row. When you find an old decision whose reasoning is only in a code comment,
+that is a decision file waiting to be written.
+
 ## Open
 
 | Asked | Verbatim | State |

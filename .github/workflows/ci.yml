@@ -40,3 +40,8 @@ jobs:
           git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
           git diff "origin/${{ github.base_ref }}"...HEAD > /tmp/pr.diff || git diff "origin/${{ github.base_ref }}" HEAD > /tmp/pr.diff
           node test/closes.js --diff-file /tmp/pr.diff
+      - name: An engine change that never reaches a returning player is not shipped
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --no-tags --depth=50 origin "${{ github.base_ref }}"
+          node test/bump.js "origin/${{ github.base_ref }}"
