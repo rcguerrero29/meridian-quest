@@ -300,8 +300,21 @@ function gradeAll(){
    single quest in it — ran Meridian's LAST-DAY EPILOGUE the moment he answered Don Güero. Doña
    Chelo counting the drawer at El Mercado Robles, in a town that has no mercado and no Chelo.
    Meridian declares nothing and ends exactly as it always has. */
-const chDue=()=>{if(typeof ENDLESS!=="undefined"&&ENDLESS)return false;
-  const L=CHS();return chSeen<L.length&&((livesOn()&&hearts<=0)||chClosed(L[chSeen]));};
+/* TWO questions, and they had been one. "Has this district finished, so the next should open?"
+   is about the CITY. "Does a curtain play?" is about the CEREMONY. `ENDLESS` switched off the
+   ceremony — and the ceremony was carrying the city, because the ending panel's button was the only
+   writer of `chSeen` in the engine. So an endless pack with two districts sat in district one
+   forever, silently: no quests from district two, no storefront, no growth, and no error to read.
+   The town never noticed because it declares no CHAPTERS and gets one synthesised district.
+   Tavo and Nacho reached the same first move independently, from opposite ends:
+   "that is a coupling bug, not a design flaw in pushing." (#156, docs/TAGS.md L12.) */
+const chOpenDue=()=>{const L=CHS();return chSeen<L.length&&((livesOn()&&hearts<=0)||chClosed(L[chSeen]));};
+const chDue=()=>!(typeof ENDLESS!=="undefined"&&ENDLESS)&&chOpenDue();
+/* the city grows by one district. The ONLY writer of chSeen outside loading a save and starting
+   over — which is what makes the pair above safe to reason about. */
+function chAdvance(){
+  if(chSeen>=CHS().length)return false;
+  chSeen=Math.min(chSeen+1,CHS().length);applyGrowth();return true;}
 /* which district a quest belongs to; -1 for quests that belong to none */
 const qChapter=qi=>{const L=CHS();for(let i=0;i<L.length;i++)if(L[i].quests.indexOf(qi)>=0)return i;return -1;};
 /* Districts open and stay open. A quest is on offer once its district has opened
@@ -3230,6 +3243,12 @@ function pick(c,btn,t){
 }
 $("next").addEventListener("click",()=>{
   if(chDue()){wasFs=false;finish(livesOn()&&hearts<=0);return;}
+  /* A world that does not end still grows. No curtain, no goodbye, no grade, and nobody is moved
+     to a doorstep — a place you inhabit does not stop to tell you a chapter closed. The street
+     simply says what opened, which is the only announcement it owes you. */
+  if(chOpenDue()){
+    const L=CHS(),K=epiKeys(Math.min(chSeen,L.length-1),chSeen>=L.length-1);
+    if(chAdvance()){seenOpen.add(K.open);setTimeout(()=>{toast(T()[K.open]||"",3600);ribbonSay();},600);}}
   $("card").hidden=true;showWorld();restoreFs();checkTalk();
   /* the site grows behind a short curtain, after the card — not mid-sentence */
   if(growthPend){growthPend=false;curtain(()=>{applyStaged();if(typeof t3Invalidate==="function")t3Invalidate();},()=>toast(T().growthUp,2800));}
@@ -3442,8 +3461,7 @@ function epiKeys(i,last){const c=CHS()[i]||{};
           open:c.open||(last?"endStayToast":"weekTwoToast")};}
 $("endGo").addEventListener("click",()=>{
   const last=chSeen>=CHS().length-1;const K=epiKeys(Math.min(chSeen,CHS().length-1),last);
-  chSeen=Math.min(chSeen+1,CHS().length);hearts=startHearts();
-  applyGrowth();
+  chAdvance();hearts=startHearts();
   /* the handover doorstep: the storefront that just opened says where you stand. It was
      the mercado's front step, hardcoded here in the shared engine; with nothing declared
      you simply stay where you were. */

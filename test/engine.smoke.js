@@ -769,6 +769,57 @@ const { chromium } = require('playwright-core');
     return P;
   });
   fails.push(...orphan);
+
+  /* ---- #156 / TAGS L12: a world that does not end still GROWS ----
+     `ENDLESS` switched off the ending panel, and the ending panel's button was the only writer of
+     `chSeen` in the whole engine — the one number that decides which quests are on offer, which
+     storefronts are up, and whether the city grows. So an endless pack with two districts sat in
+     district one forever: no error, no message, nothing to read. The town never noticed because it
+     declares no CHAPTERS and gets one synthesised district.
+     Two questions had been one. `chOpenDue()` is about the CITY — has this district finished.
+     `chDue()` is about the CEREMONY — does a curtain play. Only the second one may ever ask about
+     ENDLESS. The test walks the real path: close a district, press the button a player presses, and
+     the city must have grown whichever kind of world this is. */
+  const grows = await page.evaluate(async () => {
+    const P = [];
+    const L = (typeof CHS === 'function') ? CHS() : [];
+    const endless = (typeof ENDLESS !== 'undefined') && !!ENDLESS;
+    if (typeof chOpenDue !== 'function' || typeof chAdvance !== 'function') {
+      P.push('#156: the engine has no way to open the next district except by playing an ending — so a world that does not end can never grow');
+      return P;
+    }
+    if (!L.length) { P.push('#156: this pack has no districts at all, so nothing could be checked'); return P; }
+    const keepSeen = chSeen, keepDone = new Set(done);
+    // close the district the city is currently on
+    chSeen = 0; done.clear();
+    (L[0].quests || []).slice(0, L[0].need).forEach(i => done.add(i));
+    if (!chOpenDue())
+      P.push('#156: the first district has all the answers it asks for and the city does not consider it finished');
+    // the ceremony is the ONLY thing ENDLESS may touch
+    if (chDue() !== (chOpenDue() && !endless))
+      P.push('#156: whether a curtain plays and whether the city has grown are still the same question — that is the coupling the ticket is about');
+    // and now the path a player actually takes: the button on the card
+    const before = chSeen;
+    document.getElementById('card').hidden = false;
+    document.getElementById('next').hidden = false;
+    document.getElementById('next').click();
+    await new Promise(r => setTimeout(r, 60));
+    if (endless) {
+      if (chSeen === before)
+        P.push('#156: this world never ends, its first district is finished, and pressing on left the city exactly where it was — nothing new opened and nothing said so');
+    } else {
+      if (document.getElementById('end').hidden)
+        P.push('#156: this world ends and its first district is finished, but pressing on did not play the ending');
+      document.getElementById('end').hidden = true;
+    }
+    // and nothing may write chSeen except the advance
+    if (chSeen > L.length) P.push('#156: the city grew past its own last district');
+    chSeen = keepSeen; done.clear(); keepDone.forEach(i => done.add(i));
+    document.getElementById('card').hidden = true;
+    if (typeof applyGrowth === 'function') applyGrowth();
+    return P;
+  });
+  fails.push(...grows);
   /* ---- the loop stops DRAWING behind a panel, and never stops thinking ----
      Measured before the change: 215 frames in six seconds with a document covering the world, all
      at full device resolution, none of them visible. The world must still tick — otherwise the dog
