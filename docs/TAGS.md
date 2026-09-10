@@ -178,6 +178,30 @@ and floor paint (`water`) — and everything else falls through to a cardboard c
 by `kind` alone is planning against nothing. This is the mechanism behind L7 and the reason the seven
 inert kinds went unnoticed for so long.
 
+### L15 · A game cannot choose which cameras it has
+`engine/engine.js:575` — `const CAMS=["top","front","iso","3d"];` — **hardcoded in the engine.**
+`CAMDEF` lets a pack pick its *default* camera (`:576`), and that is all: every pack ships all four,
+and the button row offers all four whether or not the game wants them.
+
+**The owner found this, 2026-09-09:** *"why do we have to lose the art for the isometric? cant it
+switch out depending on the goal? maybe a game doesnt need 3d."* Both halves are right and they are
+one fault.
+
+A 2D-only game still ships the whole 3D renderer, still shows a ⛰ button, and still exposes ◆
+isometric — which `docs/BEAUTIFY.md` records as losing about **90% of the art**: trees become a
+brown box with three green circles glued on the top face, and the bridge, the playground props and
+the doghouse **disappear entirely**. A pack has no way to say *"this game is played from above"* and
+be spared all of it.
+
+**The seam is two things, not one.** *Which cameras does this game offer* (a list, defaulting to all
+four so nothing changes for either shipping game), and *what does this glyph look like in each*
+(already half-solved — `TILEART` and `TILEART_SIDE` exist; there is no third for iso, which is
+exactly why iso falls back to extruding a box and losing the drawing).
+
+**Why it matters beyond tidiness:** it is the cheapest possible answer to "maybe a game does not need
+3D." A pack that declares `top` and `front` only never pays for `engine3d.js`, never has an iso
+button to be disappointed by, and never has to answer for art in a camera it does not use.
+
 ---
 
 ## Collisions — one word, several jobs

@@ -151,3 +151,24 @@ labels no renderer reads. And there is no `flat` kind, so `water` is doing that 
 Deferred because renaming a kind is a migration across two packs and the tests, and nothing shipping
 is blocked. **The reason it is written here rather than only in TAGS:** the next person to add a
 "flower bed" will reach for `nature`, get a cardboard cutout, and spend an afternoon finding out why.
+
+---
+
+## A7 · The camera set should be a pack's choice
+**Status: registered 2026-09-09, and it is now the first step of the structural goal.**
+
+`[OWNER]` *"why do we have to lose the art for the isometric? cant it switch out depending on the
+goal? maybe a game doesnt need 3d."*
+
+`[CODE]` `engine/engine.js:575` hardcodes all four cameras. `CAMDEF` picks a default and nothing
+more. See `docs/TAGS.md` L15.
+
+| Option | What it costs | Note |
+|---|---|---|
+| **`CAMS` becomes a pack seam** ← *recommended* | small; default to all four so neither shipping game changes | A pack declaring `["top","front"]` never pays for the 3D renderer at all |
+| Also add a third art layer for iso | real art work per glyph | `[TRAINING]` Do not do this first — most packs would rather **drop** iso than draw for it |
+| Leave it | nothing | Every future game inherits four cameras and one of them loses 90% of its art |
+
+**The order matters:** offering the choice is cheap and immediately useful; drawing for a camera
+nobody has to ship is expensive and might be wasted. Let a pack turn iso *off* before anyone spends
+a week making iso *good*.
