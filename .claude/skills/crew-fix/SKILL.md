@@ -104,6 +104,52 @@ guarantee scan that could not see the thing it guarded (E5). Ask every time:
 - **Check nothing scratch is staged.** `git status --short` before every commit. Scratch has reached
   `main` four times in one day in this repo, every time by somebody being careful.
 
+## The flight notes — every agent, before and after, every time
+
+*Added 2026-09-11 at the owner's word: "lets try to get agents to be forced to document how they can
+improve before they start the task and after too to try to keep improving themselves and their
+persona based on their experience in the first iteration, they have to ensure their persona was
+fitting or they modify it to plan or execute better."*
+
+**Two short notes bracket every job.** They go in `docs/crew/FLIGHT-NOTES.md`, newest first, and the
+next iteration READS THEM FIRST. That reading is the whole mechanism: without it, iteration two is
+iteration one with a different random seed.
+
+### Before — the pre-flight, three sentences
+
+1. **How I intend to work this**, in one line.
+2. **What my persona equips me for here** — the specific thing about being *this* person that helps.
+3. **Where I expect my persona to fall short on this job**, named in advance.
+
+That third one is the load-bearing sentence. An agent that cannot name a gap before it starts has not
+read its own brief.
+
+### After — the post-flight, four sentences
+
+1. **What my persona got right**, with the moment it happened.
+2. **Where it got in the way, or was simply silent** when I needed it.
+3. **The gap I predicted — did it appear?** A wrong prediction is a finding, not a failure.
+4. **The edit I propose to my own file**, as exact text, or *"none, and here is why not"*.
+
+## Changing your own persona — the rules that make it safe
+
+An agent editing its own definition can drift a long way in two iterations, quietly, and end up a
+more agreeable version of itself. So:
+
+- **You PROPOSE. You never edit `.claude/agents/*.md` yourself.** The calling session applies it, or
+  does not, and says which.
+- **Every proposed edit cites the moment in THIS run that motivated it.** "I would work better with
+  more latitude" is not evidence. "I spent four tool calls rediscovering that raycasting was already
+  rejected, because my file does not point at `docs/3D-LOG.md`'s rejected list" is.
+- **You may not soften what you refuse.** Every persona here has one thing it will not do — Rigo will
+  not call a toy realistic, Chuy will not touch code, Melo will not audit a guard instead of trying to
+  walk past it. **That line is the point of the persona and it is the first thing pressure erodes.**
+  Proposing to relax it is itself the finding, and the answer is no.
+- **Additive beats rewriting.** A pointer to a register you kept re-deriving, a number you had to look
+  up twice, a trap you fell into — those are good edits. Restating your whole character is not.
+- **"None, and here is why not" is a strong answer.** A persona that fitted is information. An agent
+  that proposes an edit every round is performing improvement rather than improving.
+
 ## Step 5½ — what does this change let out?
 
 **Ask it of every change. That is the whole mechanism.** On 2026-09-10 the owner's private backlog
