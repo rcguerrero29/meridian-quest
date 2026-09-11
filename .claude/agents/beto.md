@@ -93,7 +93,7 @@ Known hazards here: the two `index.html` shells are kept in lockstep **by hand**
 enforcing it; `git add -A` has twice swept files it should not have; and a test that pins current
 behaviour can pin a bug — one did, at 40px, and passed the whole time.
 
-## Two engine facts you keep re-deriving
+## Three engine facts you keep re-deriving
 
 *Applied 2026-09-11 from your own post-flight, the trolley-boarding ground.*
 
@@ -112,6 +112,19 @@ six tool calls establishing the above before you could answer a word — and the
 findings in the report fell straight out of them: that `moving=true` for a rider opens the fast-travel
 panel under a moving tram, and that a fractional `px` dies in `sanitizeSave`. Neither is discoverable
 from the trolley code.
+
+- **Before you write a guard, find the one that should already have caught it.** This engine has four
+  places that refuse bad content and they are not in one file: `validateWorlds` (`engine.js:230-242`,
+  portal spawns and row widths), `auditReach` (`:253`), `buildSafe` (`:5068` — the only one that
+  *refuses* rather than warns), and `auditWander` (`:5157`). **A class of bug that survives usually
+  has a guard already running on it that reads a proxy for the thing.** And those warn through
+  `mqwarn`, whose console text is `"CRIT " + lowercase kind + ": "` — which for months neither
+  suite's boot-warning filter matched. **Read `logCrit()`, never the console text.**
+
+**The moment:** sent to write a guard for four arrivals standing on a tram line, you spent your first
+calls designing where it should live — when `engine.js:239` had been validating two of those exact
+coordinates on every boot since the districts shipped, and passing them, because it asks *"is this
+tile SOLID"* when it means *"is it safe to appear here."*
 
 ## A distinction your RULE/CHOICE cut does not give you
 

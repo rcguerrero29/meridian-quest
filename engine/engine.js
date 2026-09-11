@@ -240,6 +240,33 @@ const chillLines=k=>{
     if(portalAt(p.to,p.x,p.y))mqwarn("portal",from+":"+ch+" spawns ON a portal tile — ping-pong risk",true);
   }));
 })();
+/* ---- ARRIVALS: every place the game itself STANDS a player ----
+   An arrival is a PROMISE, not a tile. A pack declares it on the first byte, and the map does not
+   carry it until the district that owns it opens (applyRibbon only stamps when ribbonUp is true),
+   so nothing that reads w.rows can ever see one. That is why troBlocked returns [] both at boot and
+   grown while four arrivals sit on the rails: it is a snapshot predicate and this is a declaration
+   audit. Found by Beto, 2026-09-11, by walking out of the bakery's front door in the real game.
+   And the guard that SHOULD have caught it already existed: validateWorlds at :239 asks "is this
+   tile SOLID" when it means "is it safe to appear here" — the seventh time in this repo that a
+   guard has read a proxy for the thing (docs/REGRESSION.md). */
+function arrivals(){const out=[],add=(why,wid,x,y)=>{
+    if(wid&&WORLDS[wid]&&x!=null&&y!=null)out.push({why:why,world:wid,x:x|0,y:y|0});};
+  add("the hero's own spawn",PL.home,PL.spawn&&PL.spawn[0],PL.spawn&&PL.spawn[1]);
+  if(PL.park&&PL.parkIn)add("the way into the park",PL.park,PL.parkIn[0],PL.parkIn[1]);
+  ribbons().forEach(r=>{const d=r.doorstep;if(d)
+    add((r.id||"a storefront")+"'s handover doorstep",d.world||r.world,d.x,d.y);});
+  const gs=GRW().staged;if(gs&&gs.safe)add("the building site's step-out",gs.world,gs.safe.x,gs.safe.y);
+  (typeof TRV!=="undefined"?TRV:[]).forEach(t=>add("the trolley pass stop in "+t.w,t.w,t.x,t.y));
+  Object.keys(WORLDS).forEach(from=>portalsOf(from).forEach(function(e){
+    add("the door "+from+":"+e.ch,e.p.to,e.p.x,e.p.y);}));
+  return out;}
+/* ...and none of them may stand you on a line a vehicle runs down. You appear in front of the tram,
+   it brakes for you (troAhead), and troUpdate resets its hold timer every frame you are there — so
+   it never starts again until you move, and nothing told you that you were the reason. */
+function arrivalsOnRails(){return arrivals().filter(function(a){const L=troLine(a.world);
+    return !!L&&a.y===L.row&&a.x>=Math.min(L.from,L.to)&&a.x<=Math.max(L.from,L.to);})
+  .map(function(a){return a.why+" stands the player on the trolley's own line in "+a.world+
+    " ("+a.x+","+a.y+") — you arrive on the rails, and the tram stops short of you and will not go on until you move";});}
 /* full-universe reachability audit: BFS from the hero's spawn across every world THROUGH portals.
    Guarantees: every walkable tile is reachable, and every character always has a reachable adjacent tile. */
 /* `grown`: audit a city with every lot raised, where NOTHING may be unreachable. Left off, a world
@@ -5155,6 +5182,7 @@ function lateOpenToast(){
 /* ---------- boot ---------- */
 wanderInit();
 {const bad=auditWander();if(bad.length)mqwarn("world","nowhere to walk for "+bad.join(" | "),false);}
+arrivalsOnRails().forEach(function(m){mqwarn("arrival",m,true);});
 const SV=loadSave();
 if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").textContent=T().contBtn(SV.n,SV.xp,SV.d.length);

@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v142";
+const GAMEV="mq-v143";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -66,8 +66,15 @@ const GROWTH={
   ribbons:[
    {id:"me",world:"st",district:1,tiles:MERCADO,  doorstep:{world:"st",x:6, y:12,dir:"down"}},
    {id:"ta",world:"st",district:2,tiles:TALLER,   doorstep:{world:"st",x:23,y:12,dir:"down"}},
-   {id:"pa",world:"ex",district:3,tiles:ESPIGA,   doorstep:{world:"ex",x:6, y:1, dir:"down"}},
-   {id:"li",world:"ex",district:4,tiles:VELAZQUEZ,doorstep:{world:"ex",x:12,y:1, dir:"down"}},
+   {id:"pa",world:"ex",district:3,tiles:ESPIGA,   doorstep:{world:"ex",x:7, y:2, dir:"up"}},
+   {id:"li",world:"ex",district:4,tiles:VELAZQUEZ,doorstep:{world:"ex",x:12,y:2, dir:"up"}},
+   /* Both moved off ex row 1 on 2026-09-11: row 1 is the trolley's line, so the handover was
+      standing the player on live rails and the tram then braked and would not start again.
+      Row 2 is the south pavement, and `dir:"up"` faces the storefront that just opened instead of
+      away from it — the old "down" was copied from the two shops on st whose doors are on the other
+      side of the street. Deleting the doorsteps outright was the first fix and test/smoke.js refused
+      it: a ribbon without one "lands somewhere you are not standing — that one has to say where",
+      and neither of these says anything. The rule was right and the fix was lazy. */
    {id:"no",world:"st",district:5,tiles:NOLASCO,  doorstep:{world:"st",x:25,y:1, dir:"down"}},
    /* gifts upstairs — a delivery IS a storefront aimed at f2. Two land where a box stood
       (Tacho's, Nolasco's), Vero's crew hauls two boxes away, and Chelo's corner and Licha's

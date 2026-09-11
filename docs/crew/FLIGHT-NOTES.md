@@ -34,6 +34,7 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 11 | `don-guero` | A map's row count is load-bearing; an inserted row is never one edit | **APPLIED 2026-09-11, one run late.** Proposed iteration 2. He re-proposed it in iteration 3 asking only for *a row*, not for application |
 | 12 | `pili` | A look is five keys and only two are silhouette; the letter half of `NPCLOOK` is a global namespace | **APPLIED** — it is the finding that found Doña Tencha |
 | 13 | `don-guero` | `CITY.md` tells you which parcel, not what a person's boots are on | **APPLIED** |
+| 14 | `beto` | Before you write a guard, find the one that should already have caught it | **APPLIED** — it is the finding that found `validateWorlds` passing four arrivals on live rails, and the two blind suite filters |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 

@@ -429,3 +429,65 @@ MURALS.push(
     g.fillStyle=P.ink;g.fillRect(bx+W*0.018,by+bh2,4,5);g.fillRect(bx+W*0.070,by+bh2,4,5);}
 }
 );
+
+MURALS.push(
+{
+  id:"beto-aprobado-por-la-prueba-del-muro", iter:3, date:"2026-09-11",
+  title:{en:"Approved by the wall test", es:"Aprobado por la prueba del muro"},
+  said:{en:"The check asked \u201Cis it a wall\u201D. What it meant was \u201Cis it safe to stand here\u201D. It ran on those four tiles at every boot for weeks, and stamped every one of them PASSED.",
+        es:"La revisi\u00F3n preguntaba \u201C\u00BFes un muro?\u201D. Lo que quer\u00EDa decir era \u201C\u00BFse puede parar uno aqu\u00ED?\u201D. Corri\u00F3 sobre esas cuatro casillas en cada arranque durante semanas, y a todas les puso APROBADO."},
+  who:{en:"Beto, who went and stood on the tile", es:"Beto, que fue y se par\u00F3 en la casilla"},
+  cap:{en:"He was sent to add a check and found the check already there. He walked out of the bakery the way a player does, and the ground under his feet was painted the colour of a pavement, the door was behind him, a house wall in front, and the tram standing two and a half tiles away with nowhere to go. The overlay that painted that tile also painted out the neighbours\u2019 zebra crossing, and nobody had noticed that either. Then he planted a real fault to see what the suites would catch, and found that the two filters watching for exactly that warning have never matched a single character.",
+       es:"Lo mandaron a poner una revisi\u00F3n y encontr\u00F3 que la revisi\u00F3n ya estaba. Sali\u00F3 de la panader\u00EDa como sale un jugador, y el suelo bajo sus pies estaba pintado del color de una banqueta, la puerta atr\u00E1s, un muro de casa enfrente, y el tranv\u00EDa parado a dos casillas y media sin a d\u00F3nde ir. La capa que pint\u00F3 esa casilla tambi\u00E9n borr\u00F3 el paso peatonal de los vecinos, y eso tampoco lo hab\u00EDa visto nadie. Luego plant\u00F3 una falla de verdad para ver qu\u00E9 atrapaban las pruebas, y hall\u00F3 que los dos filtros que vigilan justo ese aviso nunca han coincidido con un solo car\u00E1cter."},
+  aspect:0.46,
+  /* Beto's OTHER paper: a buff setting-out sheet with a tracing overlay laid over it, and the
+     approval stamp on the wrong one. Not the blueprint again — the wall already has that from him. */
+  art:(g,W,H)=>{const P=MURPAL;
+    murPaper(g,W,H,"#DCCFAE",null);
+    const x0=W*0.07,x1=W*0.93,ry=H*0.44,rh=H*0.15;
+    g.fillStyle="#54555B";g.fillRect(x0,ry,x1-x0,rh);                       /* the lane, as the map ships it */
+    g.fillStyle="#6A6B72";for(let x=x0+6;x<x1-8;x+=22)g.fillRect(x,ry+rh*0.52,10,2);
+    const zx=x0+(x1-x0)*0.115;                                              /* the neighbours' zebra */
+    g.fillStyle="#D8D6CE";for(let i=0;i<3;i++)g.fillRect(zx,ry+4+i*(rh/3),16,rh*0.15);
+    g.fillStyle="#9E7A55";g.fillRect(zx-4,ry+rh,24,H*0.10);
+    g.fillStyle="#5A3E28";g.fillRect(zx+5,ry+rh+3,6,H*0.07);
+    const ty=H*0.10,tb=ry+rh*0.62;                                          /* the tracing overlay */
+    g.save();
+    g.beginPath();g.moveTo(x0-10,ty);g.lineTo(x1+10,ty);g.lineTo(x1+10,tb);g.lineTo(x0-10,tb);g.closePath();g.clip();
+    g.globalAlpha=0.88;g.fillStyle="#F1EADA";g.fillRect(x0-10,ty,x1-x0+20,tb-ty);g.globalAlpha=1;
+    const sx=x0+(x1-x0)*0.30,sw=(x1-x0)*0.30;
+    g.fillStyle=P.gold;g.fillRect(sx,ty+8,sw,H*0.13);
+    g.fillStyle="#B8892F";for(let x=sx+3;x<sx+sw-4;x+=10)g.fillRect(x,ty+8+H*0.13,6,4);
+    g.fillStyle="#E8B85A";g.fillRect(sx+sw*0.42,ty+8+H*0.05,sw*0.17,H*0.09);
+    g.fillStyle="#7A4E17";g.fillRect(sx+sw*0.42,ty+8+H*0.05,sw*0.17,3);
+    g.fillStyle="#D5D2C6";g.fillRect(sx,ry,sw,rh);                          /* the pavement it poured in the lane */
+    g.strokeStyle="#B9B19D";g.lineWidth=1;g.strokeRect(sx+0.5,ry+0.5,sw-1,rh-1);
+    g.restore();
+    g.fillStyle="#C9BC9A";g.beginPath();g.moveTo(x1+10,tb);g.lineTo(x1-16,tb);g.lineTo(x1+10,tb-20);g.closePath();g.fill();
+    g.fillStyle=P.rust;g.font="bold 9px ui-monospace,monospace";g.textAlign="center";
+    [0.34,0.46,0.62,0.74].forEach(t=>{const x=x0+(x1-x0)*t;                 /* the four arrivals */
+      g.beginPath();g.moveTo(x,ry-13);g.lineTo(x-4,ry-5);g.lineTo(x+4,ry-5);g.closePath();g.fill();});
+    g.fillText("x4",x0+(x1-x0)*0.54,ry-17);g.textAlign="left";
+    const mx=x0+(x1-x0)*0.46;
+    murBody(g,mx,ry+rh*0.20,P.sky,8);
+    g.fillStyle="#8A7A66";g.fillRect(mx-8,ry+rh,22,6);                      /* the wall at his back */
+    murTram(g,mx+(x1-x0)*0.18,ry+rh*0.16,58,rh*0.66,{});
+    murDim(g,mx+7,mx+(x1-x0)*0.18,ry+rh+18,P.ink,"2.57");
+    g.save();                                                               /* the stamp, crooked, red */
+    g.translate(W*0.74,H*0.20);g.rotate(-0.19);
+    g.strokeStyle="#C0392B";g.lineWidth=3;g.globalAlpha=0.85;g.strokeRect(-52,-19,104,38);
+    g.fillStyle="#C0392B";g.font="bold 17px ui-monospace,monospace";g.textAlign="center";
+    g.fillText("PASSED",0,2);
+    g.font="bold 8px ui-monospace,monospace";g.fillText("is it a wall? no",0,13);
+    g.textAlign="left";g.globalAlpha=1;g.restore();
+    const bw=W*0.30,bh=H*0.13,bx=W-bw-8,by=H-bh-7;                          /* the title block */
+    g.fillStyle="#EFE7D2";g.fillRect(bx,by,bw,bh);
+    g.strokeStyle=P.ink;g.lineWidth=1;g.strokeRect(bx+0.5,by+0.5,bw-1,bh-1);
+    g.beginPath();g.moveTo(bx,by+bh*0.5);g.lineTo(bx+bw,by+bh*0.5);g.stroke();
+    g.fillStyle=P.ink;g.font="bold 8px ui-monospace,monospace";
+    g.fillText("CALLE DOS \u00B7 ROW 1",bx+5,by+bh*0.33);
+    g.fillStyle="#6B6458";g.font="8px ui-monospace,monospace";
+    g.fillText("arrivals on the line: 4",bx+5,by+bh*0.80);}
+}
+);
+

@@ -72,7 +72,10 @@ const { chromium } = require('playwright-core');
   }
 
   if (pageErrors.length) fails.push('page errors: ' + pageErrors.join(' | '));
-  warns.filter(w => /^(REACH|PORTAL) /.test(w)).forEach(w => fails.push('boot warning: ' + w));
+  /* same blindness, same cause — see test/smoke.js. mqwarn writes a lowercase kind and a colon;
+     this asked for an uppercase word and a space, so it has never matched anything. */
+  warns.filter(w => /^(?:CRIT )?(reach|portal|world|room|wander|arrival):/i.test(w))
+       .forEach(w => fails.push('the engine warned at boot and nobody was listening: ' + w));
 
   const r0 = await page.evaluate(() => {
     const P = [];

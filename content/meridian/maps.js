@@ -192,8 +192,8 @@ const PORTALS={hq:{"▲":{to:"f2",x:14,y:14,dir:"left",mark:"up"},"E":{to:"st",x
                pk:{"2":{to:"st",x:22,y:10,dir:"down"}},
                /* the four parcels: each street door → its interior; each interior door → its doorstep */
                ta:{"%":{to:"st",x:23,y:12,dir:"up"}},
-               pa:{"@":{to:"ex",x:6,y:1,dir:"down"}},
-               li:{"*":{to:"ex",x:12,y:1,dir:"down"}},
+               pa:{"@":{to:"ex",x:7,y:2,dir:"up"}},
+               li:{"*":{to:"ex",x:12,y:2,dir:"up"}},
                /* #7 (owner, 2026-09-07: "expand the building for meridian in the right side and add the
                   staircase through a door from that room"): the office grew EAST; a door at (15,2) opens into
                   a stair room whose railed well goes down to the avenue — the last old `1` left the city */
@@ -207,9 +207,14 @@ const TALLER=[[13,18,"="],[13,19,"="],[13,20,"="],[13,21,"="],[13,22,"="],[13,23
               [13,24,"="],[13,25,"="],[13,26,"="],[13,27,"="],[13,28,"="],
               [14,19,"6"],[14,25,"0"]];                   /* the Caprice and the tire stack on the apron */
 const ESPIGA=[[0,4,"&"],[0,5,"&"],[0,6,"@"],[0,7,"&"],[0,8,"&"],
-              [1,4,"."],[1,5,"."],[1,6,"."],[1,7,"."],[1,8,"."]];   /* a sidewalk poured over the road */
+              ];  /* NO sidewalk row. Until 2026-09-11 this stamped [1,4..8,"."] — ten cream tiles
+                     painted across the tram's own lane (TROLLEYAT ex row 1), which is the only ground in
+                     either game that lied about what it was, and [1,5,"."] painted out the neighbours'
+                     zebra crossing at (5,1) that maps.js:277 promises. The north pavement is row 0 and
+                     the storefront consumed it; the answer is a third row (Don Güero's La banqueta),
+                     not paint in the carriageway. */
 const VELAZQUEZ=[[0,10,"!"],[0,11,"!"],[0,12,"*"],[0,13,"!"],[0,14,"!"],
-                 [1,10,"."],[1,11,"."],[1,12,"."],[1,13,"."],[1,14,"."]];
+                 ];  /* same — see ESPIGA above */
 const NOLASCO=[[0,25,"$"]];                                /* one door in the avenue wall; the climb is inside */
 /* city growth: helping La Obra visibly advances the construction site */
 const OBRA=[[],
