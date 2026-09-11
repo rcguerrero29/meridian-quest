@@ -30,6 +30,7 @@ by trusting.**
 
     1. GROUND      one agent establishes what is actually true, in code, with file:line
     2. RED         one agent writes the FAILING test — and proves it fails on today's code
+    2½. MOCK       what DONE looks like — RENDERED in the real game, never drawn. Before and after
     3. REVIEW      ← you. Does the test test the right thing? Would a wrong fix pass it?
     4. FIX         one agent makes it green, smallest change that removes the class
     5. REVIEW      ← you. Read the diff. Run every suite yourself. Look at it if it is visual.
@@ -111,6 +112,53 @@ insubordination. Two rules follow, and they are cheap:
   `[MEMORY]` lines is a brief that has not been honest about itself.**
 - **Never write "settled" over anything but a quote.** If you cannot paste the owner's words and the
   file they live in, it is your inference, and it must be labelled as one and put to him.
+
+## Step 2½ — the MOCK: show what DONE looks like before you fix anything
+
+*Owner, 2026-09-11: "mocks as goals to fix (this is newly mentioned but sounds like something we
+should do if we dont already for all agents)."*
+
+**We have done this once, ad hoc, and it was the best-run change on this board.** Asked to make a tall
+thing turn to glass, the crew did not argue about a number — three panels were **rendered in the real
+game** at today, depth-only, and ghost-at-0.55, and the owner picked by looking. One message, no
+rounds. Everything else on this board has cost three.
+
+**So it is a step now, between RED and FIX.**
+
+### The rule that makes a mock worth anything
+
+> **Render it. Do not draw it.**
+
+A drawn mock can promise something the engine cannot do, and then the fix is measured against a
+picture nobody can reach. A mock produced *by the real code* — even code you throw away ten minutes
+later — is a promise the engine has already kept once.
+
+Order of preference, and say which one you used:
+
+1. **The real game, real screenshot**, with the change forced in by any hack you like (stub the
+   update, pin a value, inject a function). Throw the hack away. Keep the picture.
+2. **The real game, measured** — the numbers the fix must produce, taken from a forced state.
+   A dwell of 4200 ms is a mock. A table of `TRO.state` over a full run is a mock.
+3. **A canvas drawing**, only when the thing does not exist yet at all. Say so out loud.
+
+### What a mock is, and is not
+
+| A mock is | A mock is not |
+|---|---|
+| **Before and after, in one message** — the reader must be able to see the difference without being told it | An after with no before |
+| **The smallest thing that shows it** — one tile, one panel, one frame | A tour of the feature |
+| **Two or three options when the call is the owner's** — and you say which you recommend | One option presented as inevitable |
+| **Honest about what is faked** — "the tram is pinned, the dwell is a literal" | A picture that implies more works than does |
+
+### Why this is between RED and FIX, and not before RED
+
+Because **a mock of the wrong thing is worse than no mock.** The red test is what proves you are
+looking at the real defect; the mock is what proves you know what fixing it looks like. In that
+order, the mock is a goal. In the other order, it is a guess with a picture attached.
+
+**And it is what the owner reviews.** He reads code when he has to and pictures when he can. A run
+that hands him three screenshots and one sentence costs him a minute; a run that hands him a diff
+costs him an evening.
 
 ## Reviewing a test — the four questions
 
