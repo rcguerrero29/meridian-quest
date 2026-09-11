@@ -284,3 +284,53 @@ That turns the change from a **backward repair** into a **forward guarantee**:
 until the first insertion — an argument for shipping it **before the next quest is written**, not for
 making it bigger. `dlog` (`:4043`) and the Text Lab overrides (`:4010`) are two more positional stores;
 each is one line and each is its own row, not this one.
+
+---
+
+## A10 · Why this is plain JavaScript and not Unreal
+**Status: answered 2026-09-11. The decision was never written down, which is why it keeps being asked.**
+
+`[OWNER]` *"also how come we dont use a tool like the unreal engine again?"* — and the *again* is the
+point: this has been decided by accretion and never recorded, so nobody could look it up.
+
+### The fact that decides it
+
+`[WEB]` **Unreal has no supported web export.** Epic dropped HTML5/WebGL after **UE 4.24** and UE5
+has never shipped a browser target; what exists is experimental community work over WebGPU/WASM.
+Epic's own framing was commercial — they did not want to fund it.
+([Epic forums](https://forums.unrealengine.com/t/does-html5-export-work-for-unreal-4-27-and-5/503734) ·
+[the deprecation thread](https://forums.unrealengine.com/t/html5-deprecation-sadness/130748) ·
+[The New Stack, on third-party tools](https://thenewstack.io/a-new-tool-for-unreal-engine-developers-to-export-to-the-web/))
+
+**That single fact ends it**, because the distribution *is* the product here. `[CODE]` This game is
+**18 files, 1.8 MB** — and 596 KB of that is three.js, so the game itself is about 1.2 MB. It is a
+link you open on a phone, it installs as an app, and it runs on a plane. An Unreal build is a
+download and an install, per platform. **You cannot give somebody a gift they have to install a
+launcher for.**
+
+### The three reasons that would still hold even if web export came back
+
+| | |
+|---|---|
+| **A pack is a folder of text files** | The whole product is that a second game is *content*, not a fork. `docs/GAUGE.md` measures that; `docs/TAGS.md` guards it. In Unreal a level is a binary `.umap`, and "your gift is an afternoon of filling in a pack" stops being true |
+| **An LLM can read all of it** | `[CODE]` 6,135 lines of plain JS. Claude reads the whole engine, edits it, runs the suites, takes the screenshot and looks at it. Unreal's assets are binary `.uasset` and Blueprints are binary graphs. **Everything built this week — `/crew-fix`, Melo planting violations, the gauge, red-before-green — would be impossible.** The stack was chosen before that mattered and it is now the reason the method works |
+| **It is the wrong thing to be good at** | `[OWNER]` The stated goal is AI-delivery work. What is employable in this repo is the **judgment**: the registers, the decision log, the security write-up, red-before-green. Unreal would make him a junior Unreal dev competing with people who have ten years in it |
+
+### What Unreal would genuinely win, said plainly rather than dismissed
+
+Real lighting, shadows and materials — which is `docs/3D-LOG.md`'s standing goal, pursued by hand at
+the moment. Physics for free, which `docs/GIFTED-GAMES.md` lists as a gap. Animation tooling. If the
+ambition were ever a downloadable premium title rather than a link, the maths changes.
+
+### The honest alternative is not Unreal
+
+| Option | What it costs | Note |
+|---|---|---|
+| **Stay** ← *taken* | nothing | 18 files, a link, offline, and an engine an AI can read end to end |
+| **Push three.js further** | real work, no migration | Already vendored and running. Shadows, better materials and lighting are available **without leaving the web** — this is where `3D-LOG.md`'s goal actually lives |
+| **Godot**, if this is ever outgrown | a rewrite | The real door: a *working* HTML5 export, small builds, open source, and **scene files are text** (`.tscn`), so the AI-readable property survives. `[TRAINING]` This is the one to look at first if the answer ever changes — not Unreal |
+| **Unreal** | the product | No web target, binary assets, a download to install. It would buy rendering and cost the thing that makes this giftable |
+
+**The rule underneath, and it is the same one this project keeps rediscovering:** the constraint that
+decides an architecture is rarely the one people argue about. Everybody argues rendering. **The
+constraint here is that somebody must be able to open it on their phone from a message.**
