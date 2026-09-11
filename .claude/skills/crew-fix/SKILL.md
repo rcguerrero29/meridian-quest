@@ -33,6 +33,7 @@ by trusting.**
     3. REVIEW      ← you. Does the test test the right thing? Would a wrong fix pass it?
     4. FIX         one agent makes it green, smallest change that removes the class
     5. REVIEW      ← you. Read the diff. Run every suite yourself. Look at it if it is visual.
+    5½. WHAT GOES OUT  ask it of EVERY change, not the ones that look security-shaped
     6. RECORD      the finding goes in a register, not only in a reply
 
 **Steps 3 and 5 are not optional and are not delegable.** If you find yourself approving a diff you
@@ -58,6 +59,8 @@ have not read, stop: that is the failure mode this skill exists to prevent.
 | what is actually next, is the backlog honest | `remedios` | the ledger |
 | would a player even notice | `chava` | he plays it, badly, on purpose |
 | starting a whole new pack | `mari` | idea → first playable |
+| **what this change lets OUT — every time, not when somebody remembers** | **`zeni`** | **the register of every edge, what we promised there, and which guard reads that exact noun** |
+| **proving a guard actually fires** | **`melo`** | **planting real violations. He does not review a guard, he tries to walk past it** |
 
 Every one of them opens with the same shared-memory block (see any file in `.claude/agents/`), so
 they all read the registers before answering. **You still check them.**
@@ -100,6 +103,31 @@ guarantee scan that could not see the thing it guarded (E5). Ask every time:
   because two engine changes shipped without it and no returning player ever got them.
 - **Check nothing scratch is staged.** `git status --short` before every commit. Scratch has reached
   `main` four times in one day in this repo, every time by somebody being careful.
+
+## Step 5½ — what does this change let out?
+
+**Ask it of every change. That is the whole mechanism.** On 2026-09-10 the owner's private backlog
+tool — with a GitHub sign-in and a "make a new token" flow — was found on the public internet, served
+for as long as the site had been up. A guard existed for exactly that and could not see it, because
+it read *what `index.html` loads* and the town loads nothing from there.
+
+**Nobody had decided that change was security-relevant, and that is precisely why it got through.**
+A step that only fires when somebody notices the risk is not a step, it is a hope.
+
+So, three questions, on every change, cheap enough that skipping them saves nothing:
+
+1. **Does this change what we publish?** Anything touching `.github/workflows/`, `scripts/build-site.sh`,
+   `sw.js`, `manifest.webmanifest`, or adding a top-level folder. If yes → **`zeni`**, and R10 must
+   have run on the built artifact, not on the source tree.
+2. **Does this change a GUARD?** If the diff touches `test/`, ask what noun that guard now reads, and
+   whether it is the noun it means. Three guards in this repo read a proxy for the thing —
+   `docs/REGRESSION.md` R8 read what the index loads; the mutant net read the source with comments
+   stripped; the version test asked whether two strings were *equal* when what mattered was that one
+   *moved*. **None was caught by review. Each was caught by planting a violation** → **`melo`**.
+3. **Does this touch a credential, a save, or something a stranger's browser evaluates?**
+   `sanitizeSave`, the QR transfer, anything written into the DOM, anything read from an API.
+
+**A "no" to all three is a fine answer and takes ten seconds. The cost is asking, not answering.**
 
 ## Where the finding goes afterwards
 

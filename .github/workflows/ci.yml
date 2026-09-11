@@ -35,12 +35,7 @@ jobs:
       # continue-on-error. So a pull request that widened the copy list was green and the failure
       # surfaced on the public internet. Build the same box here and check it before it can merge.
       - name: R10 — what we would publish is only the public game
-        run: |
-          rm -rf /tmp/_site && mkdir -p /tmp/_site
-          cp index.html sw.js qr.js manifest.webmanifest icon-192.png icon-512.png /tmp/_site/
-          cp -r engine vendor /tmp/_site/
-          mkdir -p /tmp/_site/content && cp -r content/meridian /tmp/_site/content/
-          node test/public.js /tmp/_site
+        run: bash scripts/build-site.sh /tmp/_site && node test/public.js /tmp/_site
       - name: The issues this PR closes are the ones it talks about (R3)
         if: github.event_name == 'pull_request'
         env:
