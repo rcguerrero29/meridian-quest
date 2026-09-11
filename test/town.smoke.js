@@ -34,6 +34,12 @@ const { chromium } = require('playwright-core');
   await page.goto('file://' + path.join(root, 'changarrito', 'index.html'));
   await page.waitForTimeout(1500);
   if (pageErrors.length) fails.push('page errors: ' + pageErrors.join(' | '));
+  /* ...and the ENGINE's own boot warnings, which this suite has never read. /^REACH / matches the
+     town CONTENT's own console.warn, not mqwarn — so CRIT portal:, CRIT world:, CRIT arrival: and
+     CRIT build: are detected by the engine and invisible on the town's side, which is the same hole
+     that was closed on the public side and left open here. Found by Melo, by dumping the console. */
+  warns.filter(w => /^(?:CRIT )?(world|portal|reach|room|wander|arrival|build|docart|trolley):/i.test(w))
+       .forEach(w => fails.push('the engine warned at boot and nobody was listening: ' + w));
   warns.filter(w => /^REACH /.test(w)).forEach(w => fails.push('reach: ' + w));
   const r = await page.evaluate(() => {
     const problems = [];
@@ -780,15 +786,39 @@ const { chromium } = require('playwright-core');
   {
     const crypto = require('crypto');
     const SEP = String.fromCharCode(31);
+    /* ALL SIX strings, not the English three. Melo reversed one panel's Spanish to say the opposite
+       of what it recorded — "the tram does reverse and the cabs are fine" — and the suite passed;
+       changing one ENGLISH word in the same panel failed the build. The owner reads Spanish. A guard
+       whose message says "the words" must weigh the words, not the English words. */
     const fp = m => crypto.createHash('sha1')
-      .update([m.title.en, m.said.en, m.cap.en].join(SEP)).digest('hex').slice(0, 12);
+      .update([m.title.en, m.title.es, m.said.en, m.said.es, m.cap.en, m.cap.es].join(SEP))
+      .digest('hex').slice(0, 12);
     const ledgerPath = path.resolve(__dirname, '..', 'docs', 'crew', 'MURAL-LEDGER.txt');
     const onWall = await page.evaluate(() => (typeof MURALS === 'undefined' || !MURALS) ? null
-      : MURALS.map(m => ({ id: m.id, iter: m.iter, title: { en: m.title.en }, said: { en: m.said.en },
-                           cap: { en: m.cap.en }, draws: typeof m.art === 'function' })));
+      /* BOTH languages out of the page, because the fingerprint weighs both. The first version of
+         this fix widened the hash to six strings and left this extractor at three, so every Spanish
+         value arrived `undefined` — which is the same mistake Melo had just found in the hash,
+         committed again one line away from it, inside the commit fixing it. */
+      : MURALS.map(m => ({ id: m.id, iter: m.iter,
+                           title: { en: m.title.en, es: m.title.es },
+                           said:  { en: m.said.en,  es: m.said.es  },
+                           cap:   { en: m.cap.en,   es: m.cap.es   },
+                           /* not `typeof m.art === "function"` — Melo put a typo in one panel's art
+                              (murPaper -> murPaperr) and the suite passed, while the engine caught the
+                              throw and wrote mqwarn("docart") that nobody listens to. Run it. */
+                           draws: (function(){ try { const c = document.createElement('canvas');
+                             c.width = 400; c.height = 180; m.art(c.getContext('2d'), 400, 180); return true; }
+                             catch (e) { return 'it throws: ' + e.message; } })() })));
     if (onWall === null) {
       fails.push('the town declares no mural — the crew has a wall in docs/crew/MURALS.md and nothing painted on it');
     } else {
+      /* ...and the ledger has to EXIST, and every panel has to be in it. Melo deleted the file and
+         the suite passed in silence — fs.existsSync false, ledger = [], the whole fingerprint check
+         evaporating without a word — and appended an un-ledgered panel, which is then unprotected
+         forever. That is docs/GAUGE.md's silent zero, inside the guard written this week to stop a
+         different one. */
+      if (!fs.existsSync(ledgerPath))
+        fails.push('the crew wall has no ledger — docs/crew/MURAL-LEDGER.txt is gone, and without it any panel can be rewritten and nothing would say so');
       const ledger = fs.existsSync(ledgerPath)
         ? fs.readFileSync(ledgerPath, 'utf8').split(String.fromCharCode(10)).map(l => l.trim())
             .filter(l => l && l[0] !== '#').map(l => { const p2 = l.split('|'); return { id: p2[0], h: p2[1] }; })
@@ -803,7 +833,11 @@ const { chromium } = require('playwright-core');
           fails.push('the crew wall was reordered — panel ' + (i + 1) + ' is "' + (onWall[i] || {}).id + '" where the ledger says "' + L.id + '"');
       });
       onWall.forEach(m => {
-        if (!m.draws) fails.push('mural panel "' + m.id + '" has no drawing — the owner asked to see it from across the street and read it up close, not to read a caption');
+        if (!ledger.some(L => L.id === m.id))
+          fails.push('panel "' + m.id + '" is on the wall and in no ledger line — its words are not recorded, so they could be changed tomorrow and this check would not notice');
+        if (m.draws !== true) fails.push('mural panel "' + m.id + '" does not draw — ' +
+          (typeof m.draws === 'string' ? m.draws : 'it has no art at all') +
+          ' — the owner asked to see it from across the street and read it up close, not to read a caption');
         if (!m.said || !m.said.en) fails.push('mural panel "' + m.id + '" records no decision');
       });
       if (!onWall.length) fails.push('the crew mural has no panels');
@@ -855,6 +889,16 @@ const { chromium } = require('playwright-core');
          What a proposal always contains is the PATH IT WANTS TO CHANGE — "`.claude/agents/pili.md`"
          — so read that. It cannot be anonymised away, because the edit is useless without it. */
       const proposed = [];
+      /* Reading the AGENT PATH saw 5 proposals out of 21 — most flight notes say "yaz's persona
+         file" rather than spelling `.claude/agents/yaz.md`, and Melo walked past this with a
+         realistic note that simply did not type the path. R8's shape exactly: the guard chose what
+         to look at by following something the writer controls.
+         Read the heading the template guarantees instead, and require one ledger row per block. */
+      const blocks = (txt.match(/\*\*Proposed persona edit\*\*/g) || []).length;
+      const rows = (ledger.match(/\n\| *\d+ *\|/g) || []).length;
+      if (blocks > rows)
+        fails.push(blocks + ' persona edits have been proposed in docs/crew/FLIGHT-NOTES.md and the ledger at the top has ' + rows +
+                   ' rows — at least ' + (blocks - rows) + ' proposal(s) nobody ever said yes or no to, and an un-actioned proposal looks exactly like a declined one');
       const re = /\.claude\/agents\/([a-z0-9-]+)\.md/gi;
       let m; while ((m = re.exec(txt))) proposed.push(m[1].toLowerCase());
       [...new Set(proposed)].forEach(who => {
