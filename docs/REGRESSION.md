@@ -30,12 +30,49 @@ should have been caught by, and the assertions to add. Nothing here is built.*
 ## 3 · The gaps, each with its assertion and cost
 
 > **The rule R10 was bought with, and it costs nothing to apply everywhere:** *a guard has to read
-> the noun it actually means.* Three guards in this repo were written, looked correct, ran green for
-> weeks, and could not see the thing they were written for — R8 read what the index loads and could
-> not see the town; the mutant-marker net read the source with comments stripped and a marker *is* a
-> comment; and the version test asked whether two strings were *equal* when what mattered was that
-> one *moved*. **None of them was discovered by review. Each was discovered by planting a real
-> violation and watching it pass.** So: for every assertion below, plant one before you believe it.
+> the noun it actually means.* **None of the instances below was discovered by review. Every one was
+> discovered by planting a real violation and watching it pass.** So: for every assertion in this
+> file, plant one before you believe it.
+
+### The register of guards that read a proxy — ten, and counting
+
+*Opened 2026-09-11, because by then it had happened eight times in five days and the pattern was
+costing more than any individual bug in it. **This is the most expensive recurring mistake in this
+repository.** It is not carelessness: every one of these was written deliberately, by somebody
+trying to close a real hole, and every one looked correct on the page.*
+
+| # | The guard | It asked | It meant | Found by |
+|---|---|---|---|---|
+| 1 | R8, the exposure scan | what `index.html` loads | **what we publish** | the town being on the public internet |
+| 2 | the mutant-marker net | the source with comments stripped | **every line** — and a marker *is* a comment | planting a marker |
+| 3 | the version test | are these two strings **equal** | did one **move** | planting an unbumped engine change |
+| 4 | the portability guard (TAGS L20) | is the pack's **brand** in the engine | is the pack's **glyph** in the engine — `Y` appears five times, three lines below a comment saying exactly this | Toño's gap analysis |
+| 5 | the look check | did a look **come back** | is the look **hers** — two npcs resolved to one object for four days | Pili, counting letters by hand |
+| 6 | `validateWorlds`' spawn check | is this tile **solid** | is it **safe to appear here** — it passed four arrivals standing on live tram rails, every boot | Beto, walking out of the bakery door |
+| 7 | both suites' boot-warning filters | `/^(WORLD\|PORTAL\|REACH\|ROOM)/` | `"CRIT " + **lowercase** kind + ":"` — **zero characters matched, ever**, so #6 could not have been heard even if it had fired | planting a spawn-in-a-wall |
+| 8 | `.gitignore` | `shots/` | **any scratch directory** — `shots.tmp/` walked past it | the stop hook |
+| 9 | the tram's ground check | does the **bounding box** reach the road | do the **wheels** — it returns 0.0000 with all four wheels deleted, because the skirt satisfies it | Chema, asking the scene graph |
+| 10 | the fauna guard's **first draft** | is **any** critter in that world | is **this animal** one the tram stops for — it went green because the hummingbird is on the same street | the session, one commit later |
+
+**Two of those are guards written by the session that had just found the other eight** (#10, and the
+mural-ledger guard that split on `### <agent>` headings when every heading in that file is the
+anonymised literal `### (agent)`, so it went green on a file with three un-actioned proposals in it).
+**Knowing about the mistake does not stop you making it.** That is the single most useful line in
+this register.
+
+**What the ten have in common, stated so it can be checked against a new guard before it lands:**
+
+1. **The proxy is always cheaper to read than the thing.** A filename, a string equality, a bounding
+   box, a membership test. The correct noun usually needs a behaviour to be exercised.
+2. **The proxy is usually correct *today*.** #4 named the right brand; #9's box really did reach the
+   road. They fail when the world grows a second case.
+3. **A green guard is not evidence.** Eight of these ran green for days or weeks. **The only thing
+   that distinguishes a working guard from a decorative one is a planted violation** — which is why
+   `melo` exists and why step 5½ of `/crew-fix` asks it of every change.
+
+**The question to ask of any new guard, before it lands:** *if I break the thing this is for, in the
+smallest and most plausible way, does it print a sentence a person would say?* If you have not run
+that, the guard is untested no matter how green the suite is.
 
 
 | # | Gap | Assertion to add | Where | Cost |
