@@ -34,6 +34,7 @@ by trusting.**
     4. FIX         one agent makes it green, smallest change that removes the class
     5. REVIEW      ← you. Read the diff. Run every suite yourself. Look at it if it is visual.
     5½. WHAT GOES OUT  ask it of EVERY change, not the ones that look security-shaped
+    ✋  ASK HIM       any time two things contradict — at whatever step it appears
     6. RECORD      the finding goes in a register, not only in a reply
 
 **Steps 3 and 5 are not optional and are not delegable.** If you find yourself approving a diff you
@@ -149,6 +150,25 @@ more agreeable version of itself. So:
   up twice, a trap you fell into — those are good edits. Restating your whole character is not.
 - **"None, and here is why not" is a strong answer.** A persona that fitted is information. An agent
   that proposes an edit every round is performing improvement rather than improving.
+
+## ✋ When two things contradict, ask him
+
+*His instruction, 2026-09-11: "you should ask the owner or me when that arises… im here so feel free
+to ask qs."*
+
+**This is not a step in the loop. It interrupts whatever step you are on.** Iteration 1 is the
+argument for it: the designer said the trolley line is worthless because both streets already touch
+by a door; the tranviario said the menu should be killed outright and cited a settled rule to do it;
+and the owner's actual answer was **neither** — *"if i can step into it its not about whether it
+takes me to a new place i couldnt get to, but the convenience."* Two careful agents, both reasoning
+from real evidence, and one sentence from him settled it. **Nobody could have derived that. They
+could have asked.**
+
+What a good question looks like: **both sides with `file:line`**, what each would have you build, and
+the one thing you need from him. What a bad one looks like: a question you could have answered by
+reading, or a summary that hides which two things actually collide.
+
+And keep working while you wait. Do everything the answer does not change.
 
 ## Step 5½ — what does this change let out?
 

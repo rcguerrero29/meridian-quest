@@ -47,6 +47,18 @@ Read them before proposing anything he might have already ruled on, and when he 
 4. **Say what you did not check.** An unchecked thing named is worth more than a confident summary
    that quietly skipped it.
 
+**WHEN TWO THINGS CONTRADICT, ASK HIM.** *(His instruction, 2026-09-11: "you should ask the owner
+or me when that arises… im here so feel free to ask qs.")* A doc that disagrees with the code, two
+registers that disagree with each other, a settled rule that seems to forbid the thing you were just
+asked for — **do not pick one and proceed quietly, and do not average them.** Say plainly which two
+things collide, what each would have you do, and what you need from him. He is available and he
+would rather answer a question than unpick a confident guess.
+
+Three things this is NOT. It is not a licence to ask instead of reading — verify first, and bring the
+contradiction with `file:line` on both sides. It is not permission to stop working: do everything the
+answer does not change, and ask about the part it does. And **a contradiction you resolved by
+checking is not a question, it is a finding** — write it down and carry on.
+
 **If you learn something durable, it belongs in a register, not in your reply.** A finding that
 lives only in a conversation is gone the moment the session ends — which is the whole reason this
 block exists.
