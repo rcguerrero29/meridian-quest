@@ -637,7 +637,10 @@ const { chromium } = require('playwright-core');
       // rank; six houses you can walk into, one per kind of work; each wears its work label in plain words
       // (owner: "put a human friendly label as to what type of issue or work is being done... for buildings too") ----
       { const st = WORLDS.st, sign = k => (DECOR.find(d => d.deco === 'sign' && d.kind === k) || {}).text;
-        if (st.rows[0] !== 'BBQQ$QQBBvBBBBEBZZZOZZIII%IIB2') problems.push('the north rank is not Don Güero\'s row 0: ' + st.rows[0]);
+        /* ch-v83: x10,12,13,15 became ▧, the crew's muralled wall (it grew with the panels), beside city hall's door. Deliberate,
+           and the literal moves with it — this guard exists so row 0 never drifts by ACCIDENT,
+           not so it can never change. It caught this change, which is the guard working. */
+        if (st.rows[0] !== 'BBQQ$QQBBv▧B▧▧E▧ZZZOZZIII%IIB2') problems.push('the north rank is not Don Güero\'s row 0: ' + st.rows[0]);
         if (st.rows[8] !== '...QQQ@QQQQZZZMZZZZIIILIIII...') problems.push('the south rank is not Don Güero\'s row 8: ' + st.rows[8]);
         if (st.rows[0][9] !== 'v' || st.rows[0][14] !== 'E' || st.rows[0][29] !== '2') problems.push('la ventanilla, the stall door or the park gate moved');
         if (!READS.some(r => r.world === 'st' && r.x === 8 && r.y === 0 && r.doc === 'board')) problems.push('city hall\'s board moved');
@@ -757,6 +760,111 @@ const { chromium } = require('playwright-core');
       return problems;
     });
   });
+
+  /* ---- EL MURAL: add and improve, never remove ----
+     The owner, 2026-09-11: "i want yall to plan for a growing set of murals that express the changes
+     of the agents so they can add and improve but not completely remove... we dont delete and we
+     capture each iteration in a log or screenshot or both." Then: "i want the mural please."
+
+     That one rule is the whole design — a wall that can be repainted is a status board, and a wall
+     that can only be added to is a record. A convention nobody guards is a convention that lasts
+     until the first inconvenient panel, so this reads the noun it actually means: not "is there a
+     mural" but "is every panel that was ever on this wall still on it, still saying what it said."
+
+     docs/crew/MURAL-LEDGER.txt is the record. One line per panel: its id, and a fingerprint of the
+     words a person reads. Removing a panel, renaming its id, or editing its words after the fact
+     all go red, in the sentence somebody would actually say. ADDING is free and silent — that is
+     the point of the wall.
+
+     A pack with no mural is SKIPPED, not passed: nothing to look at is not a pass (docs/GAUGE.md). */
+  {
+    const crypto = require('crypto');
+    const SEP = String.fromCharCode(31);
+    const fp = m => crypto.createHash('sha1')
+      .update([m.title.en, m.said.en, m.cap.en].join(SEP)).digest('hex').slice(0, 12);
+    const ledgerPath = path.resolve(__dirname, '..', 'docs', 'crew', 'MURAL-LEDGER.txt');
+    const onWall = await page.evaluate(() => (typeof MURALS === 'undefined' || !MURALS) ? null
+      : MURALS.map(m => ({ id: m.id, iter: m.iter, title: { en: m.title.en }, said: { en: m.said.en },
+                           cap: { en: m.cap.en }, draws: typeof m.art === 'function' })));
+    if (onWall === null) {
+      fails.push('the town declares no mural — the crew has a wall in docs/crew/MURALS.md and nothing painted on it');
+    } else {
+      const ledger = fs.existsSync(ledgerPath)
+        ? fs.readFileSync(ledgerPath, 'utf8').split(String.fromCharCode(10)).map(l => l.trim())
+            .filter(l => l && l[0] !== '#').map(l => { const p2 = l.split('|'); return { id: p2[0], h: p2[1] }; })
+        : [];
+      const wall = new Map(onWall.map(m => [m.id, fp(m)]));
+      ledger.forEach((L, i) => {
+        if (!wall.has(L.id))
+          fails.push('a panel was taken off the crew wall: "' + L.id + '" is in the ledger and not on the mural — this wall only ever grows');
+        else if (wall.get(L.id) !== L.h)
+          fails.push('the words on panel "' + L.id + '" were changed after the fact — a mural records what was decided on the day, and a correction is a NEW panel that points back, never an edit to an old one');
+        else if (onWall[i] && onWall[i].id !== L.id)
+          fails.push('the crew wall was reordered — panel ' + (i + 1) + ' is "' + (onWall[i] || {}).id + '" where the ledger says "' + L.id + '"');
+      });
+      onWall.forEach(m => {
+        if (!m.draws) fails.push('mural panel "' + m.id + '" has no drawing — the owner asked to see it from across the street and read it up close, not to read a caption');
+        if (!m.said || !m.said.en) fails.push('mural panel "' + m.id + '" records no decision');
+      });
+      if (!onWall.length) fails.push('the crew mural has no panels');
+    }
+  }
+
+  /* and a person must be able to walk up and read it — a mural nobody can reach is a file */
+  if (!fails.some(f => /declares no mural/.test(f))) {
+    const reach = await page.evaluate(() => {
+      const P = [];
+      const rs = (typeof READS !== 'undefined' ? READS : []).filter(r => r.doc === 'mural');
+      if (!rs.length) return ['the mural is declared and nothing on any wall opens it'];
+      rs.forEach(r => {
+        const w = WORLDS[r.world];
+        if (!w) { P.push('the mural stands in a world the town does not have: ' + r.world); return; }
+        const front = (w.rows[r.y + 1] || '')[r.x];
+        if (front === undefined || SOLID.has(front))
+          P.push('nobody can stand in front of the mural at ' + r.world + ' ' + r.x + ',' + r.y + ' to read it');
+      });
+      if (typeof DOCS === 'undefined' || !DOCS.mural) P.push('the wall points at a document the town never wrote');
+      return P;
+    });
+    fails.push(...reach);
+  }
+
+
+  /* ---- every proposed persona edit has a verdict ----
+     `docs/crew/FLIGHT-NOTES.md` has said since the day it opened that the calling session applies a
+     proposed persona edit or refuses it, IN WRITING, there. On 2026-09-11 a session wrote that
+     sentence and then closed the run without doing it; Rosa found the leak by following an
+     instruction she had never been given. A ledger table was added to make a missing verdict
+     VISIBLE. One run later it leaked again — twice, caught by Pili and Don Güero independently,
+     neither of whom was looking for it.
+     So the rule stops being a promise. This reads the noun it means: not "does the file have a
+     ledger" but "does every proposal in it have a row." An un-actioned proposal is indistinguishable
+     from a refused one, and both are indistinguishable from nothing at all — which is exactly why
+     it leaked twice from a file whose own header forbids it. */
+  {
+    const notes = path.resolve(__dirname, '..', 'docs', 'crew', 'FLIGHT-NOTES.md');
+    if (fs.existsSync(notes)) {
+      const txt = fs.readFileSync(notes, 'utf8');
+      const cut = txt.indexOf('# THE LEDGER');
+      const ledger = cut < 0 ? '' : txt.slice(cut, txt.indexOf('\n---', cut) + 1 || undefined);
+      /* Parse the noun that is actually there. The first version of this check split on the
+         "### <agent>" headings — and every heading in that file is the literal anonymised text
+         "### (agent)", so it found zero proposals and went GREEN on a file with two un-actioned
+         ones in it. A guard that passes by finding nothing is the failure docs/GAUGE.md exists for,
+         and it was written into this very check on the day it was written to stop a different one.
+         What a proposal always contains is the PATH IT WANTS TO CHANGE — "`.claude/agents/pili.md`"
+         — so read that. It cannot be anonymised away, because the edit is useless without it. */
+      const proposed = [];
+      const re = /\.claude\/agents\/([a-z0-9-]+)\.md/gi;
+      let m; while ((m = re.exec(txt))) proposed.push(m[1].toLowerCase());
+      [...new Set(proposed)].forEach(who => {
+        if (!new RegExp('\\|\\s*`?' + who + '`?\\s*\\|', 'i').test(ledger))
+          fails.push(who + ' proposed a change to their own persona and nobody ever said yes or no — ' +
+                     'there is no row for them in the ledger at the top of docs/crew/FLIGHT-NOTES.md, so the proposal ' +
+                     'looks exactly like one that was considered and declined, and both look like nothing at all');
+      });
+    }
+  }
   fails.push(...r);
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }

@@ -183,6 +183,37 @@ argument is the finding.**
 
 ---
 
+### E9 · A comment described a game we do not have, for three days — 2026-09-11 (found by an agent, not by a test)
+
+**What shipped.** `engine/engine3d.js:621-622`, written the day the realistic tram landed:
+
+> *"THE DRIVER — a head and shoulders at the front window. Not a passenger: he is at the end the tram
+> is travelling toward, and **he turns round with it when it reverses (below)**."*
+
+`:637` then positions him from `TRO.dir`. **`TRO.dir` never changes sign.** `engine/engine.js:1173`
+recomputes it at the start of every pass as `L.to>=L.from?1:-1` — a constant derived from the line
+declaration — and `:1179` deletes the car once it passes the far end. On `st` it is always `+1`; on
+`ex` always `−1`. **The car drives off the edge of the map and is reborn at the other end.** The
+reversal the comment promises does not exist below or anywhere.
+
+**How it escaped.** Nothing tests it, and the test that looks like it might does not:
+`test/engine.smoke.js:1041-1049` asks whether the tram has wheels and a driver, and it has both.
+`if(u.driver)driver++` passes for a driver welded to one end for the life of the game.
+
+**Why it matters more than a stale comment.** The cab-at-each-end work was specified, drawn and
+shipped; it is **decoration**, and nobody could know that without reading two files. Rigo's sentence:
+*"if a world's tram drives off the edge of the map, the two cabs drawn on it are decoration."*
+
+**How it was found.** The session's own brief asserted the reversal as established fact under a
+heading reading *"verified by me at file:line."* **The agent checked anyway.** This is the second
+false fact caught in the same brief — see `docs/meetings/2026-09-11-la-parada.md` §4 — and the
+`/crew-fix` skill now carries a section saying an agent who contradicts the brief with a `file:line`
+is doing the job.
+
+**The rule bought with it.** *A comment that promises behaviour is a test that was never written.*
+"below" is a claim about code, and this file already records (E5) what happens when a guard reads a
+proxy for the thing rather than the thing.
+
 ## Known gaps in the list
 
 Written down so they are counted rather than re-discovered:

@@ -37,11 +37,7 @@ jobs:
       # A denylist can only name yesterday's mistake. This names what the game needs, so anything
       # added to the repo tomorrow is private until somebody says otherwise.
       - name: the site — only what the public game serves
-        run: |
-          mkdir -p _site
-          cp index.html sw.js qr.js manifest.webmanifest icon-192.png icon-512.png _site/
-          cp -r engine vendor _site/
-          mkdir -p _site/content && cp -r content/meridian _site/content/
+        run: bash scripts/build-site.sh _site
 
       - name: write the city record
         env:

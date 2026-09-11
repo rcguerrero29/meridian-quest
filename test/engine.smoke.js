@@ -72,7 +72,10 @@ const { chromium } = require('playwright-core');
   }
 
   if (pageErrors.length) fails.push('page errors: ' + pageErrors.join(' | '));
-  warns.filter(w => /^(REACH|PORTAL) /.test(w)).forEach(w => fails.push('boot warning: ' + w));
+  /* same blindness, same cause — see test/smoke.js. mqwarn writes a lowercase kind and a colon;
+     this asked for an uppercase word and a space, so it has never matched anything. */
+  warns.filter(w => /^(?:CRIT )?(reach|portal|world|room|wander|arrival):/i.test(w))
+       .forEach(w => fails.push('the engine warned at boot and nobody was listening: ' + w));
 
   const r0 = await page.evaluate(() => {
     const P = [];
@@ -112,6 +115,38 @@ const { chromium } = require('playwright-core');
       if (n.doc && !docDef(n.doc)) P.push(id + ':' + n.npc + " carries a document that does not exist ('" + n.doc + "')");
       (n.q || []).forEach(qi => { if (!QEN[qi]) P.push(id + ':' + n.npc + ' gives quest ' + qi + ' which does not exist'); });
     }));
+    /* ---- and the look is HERS ---- 
+       `lookOf` resolves by npc id first and map letter second (engine.js:3768), and that fall-back
+       is deliberate and load-bearing — it is what lets an unnamed extra render at all, and
+       test/smoke.js pins it using Lupe, who has no named look and is not meant to need one.
+       But the letter half of NPCLOOK is a GLOBAL namespace while map letters are assigned per
+       world: `m` is Marcus in hq, Moy in ta, and Doña Meche in ex. Three people, one key, one
+       table, no warning. So a person placed on a letter somebody else already owns silently wears
+       that person's clothes, and nothing anywhere says a word.
+       The check one line above this asked whether a look CAME BACK. It means whether the look is
+       HERS, and it has passed two wrong characters every run in both shells since 2026-09-07 —
+       the sixth guard in this repo to read a proxy for the thing (docs/REGRESSION.md: a guard has
+       to read the noun it actually means).
+       Measured, not reasoned: on unchanged content this goes red on exactly two pairs, and both
+       are the two people added after the letter table was full.
+       Asked by OBJECT IDENTITY rather than by counting distinct looks — a count passes vacuously
+       in any pack with fewer people than letters, which is what docs/GAUGE.md exists for. */
+    {
+      const byLook = new Map();
+      const seen = new Set();
+      Object.entries(WORLDS).forEach(([id, w]) => w.npcs.forEach(n => {
+        if (!n.npc || seen.has(n.npc)) return; seen.add(n.npc);
+        const lk = lookOf(n); if (!lk) return;
+        if (!byLook.has(lk)) byLook.set(lk, []);
+        byLook.get(lk).push(n.npc);
+      }));
+      byLook.forEach(who => { if (who.length > 1) {
+        const names = who.map(k => npcName(k) || k);
+        P.push(names.join(' and ') + ' are drawn as the same person — ' +
+               who.slice(1).join(', ') + ' never got a look, so they are wearing ' + (npcName(who[0]) || who[0]) + "'s clothes");
+      }});
+    }
+
     // ---- every document builds; every readable thing points at one ----
     Object.keys(DC()).forEach(id => { let s = null; try { s = docSections(id); } catch (e) { P.push("document '" + id + "' throws: " + e.message); return; }
       if (!Array.isArray(s)) P.push("document '" + id + "' does not build"); });
@@ -1013,6 +1048,160 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     return P;
   });
   fails.push(...badframe);
+
+  /* ---- the trolley is a vehicle ----
+     The owner, 2026-09-11: "i mentioned at some point having a driver and stuff as well as wheels,
+     we want to be realistic, crew!" He was describing it exactly. t3Trolley's own comment called it
+     "the tram, one box on the line", and it was: a body box, a roof box, and six window slabs on the
+     two long sides only, floating 0.09 above the road on nothing.
+     Measured before this test existed, in the engine's own units, which is what makes the sentence
+     below fair rather than rhetorical: the tram's roof stood at 0.555; a DOOR in this engine is 1.0
+     (engine3d.js, BoxGeometry(1,1,0.14) at y=0.5) and an ordinary prop with no declared lift stands
+     0.844. So a traffic cone was taller than the whole tram.
+     This asks what a PERSON would say about a vehicle — can you get in it, does it touch the road,
+     is anybody driving — and never which function drew what, so it survives the art being redrawn.
+     A pack with no trolley line is skipped rather than failed: nothing to look at is not a pass. */
+  const tram = await page.evaluate(() => {
+    const P = [];
+    if (typeof troLine !== 'function' || !troLine('' + (typeof PL !== 'undefined' ? PL.street : ''))) {
+      const any = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT.length) ? TROLLEYAT[0] : null;
+      if (!any) return P;                       /* this game has no trolley; nothing to hold to account */
+    }
+    const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
+    if (!L) return P;
+    const bw = world, bc = camMode, bs = TRO.state, bx = TRO.x;
+    document.getElementById('world').hidden = false;
+    world = L.world; camSet('3d'); sizeCanvas(); draw3d();
+    TRO.state = 'run'; TRO.x = L.from + 1; draw3d();
+    if (!T3.tram) { P.push('the trolley never appears in the world it runs in'); }
+    else {
+      const box = new THREE.Box3().setFromObject(T3.tram);
+      const DOOR = 1.0;
+      if (box.max.y < DOOR)
+        P.push('the trolley is ' + box.max.y.toFixed(2) + ' tall where a doorway is ' + DOOR.toFixed(2) +
+               ' — it is knee-high, and an ordinary prop in the same street stands taller than the whole tram');
+      if (box.min.y > 0.04)
+        P.push('the trolley floats ' + box.min.y.toFixed(2) + ' above the road with nothing under it — it has no wheels touching the ground');
+      let wheels = 0, driver = 0;
+      T3.tram.traverse(o => { const u = o.userData || {}; if (u.wheel) wheels++; if (u.driver) driver++; });
+      if (wheels < 2) P.push('the trolley has ' + wheels + ' wheels — a tram that rolls down a street has wheels you can see');
+      if (!driver) P.push('nobody is driving the trolley');
+      /* and it must read as a tram from every stop you can turn the camera to, not just the two
+         long sides — six window slabs at z=±0.37 left a bare brown slab at 90 degrees */
+      let faces = 0; T3.tram.traverse(o => { if ((o.userData || {}).glazing) faces++; });
+      if (faces && faces < 3) P.push('the trolley only has windows on its long sides, so from a quarter turn it is a blank brown brick');
+    }
+    TRO.state = bs; TRO.x = bx; world = bw; camSet(bc); sizeCanvas();
+    document.getElementById('world').hidden = true;
+    return P;
+  });
+  fails.push(...tram);
+
+  /* ---- and it is there in EVERY camera it is drawn in ----
+     Measured: with the trolley running, switching the camera changed 1466 pixels in top, 1704 in
+     front, and ZERO in isometric. Not "looks wrong" — the trolley does not exist there. troDraw2D
+     has exactly two call sites and drawIso is not one of them, so a player on the isometric camera
+     watches an empty street forever while a tram drives down it. test/smoke.js exercises top, front
+     and 3D by name and skips iso, which is why nobody noticed. Found by Chava, riding it. */
+  const troCams = await page.evaluate(() => {
+    const P = [];
+    const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
+    if (!L) return P;
+    const bw = world, bc = camMode, bs = TRO.state, bx = TRO.x;
+    document.getElementById('world').hidden = false; world = L.world;
+    TRO.state = 'run'; TRO.x = L.from + 1;
+    /* Asked by counting whether the trolley is DRAWN AT ALL in each camera, not by diffing pixels.
+       Pixels were tried first and they cannot answer this: petals fall, critters move and the light
+       drifts, so two frames differ whether or not a tram was in either of them — the check passed
+       while the isometric camera was measurably showing nothing (0 changed pixels against 1466 in
+       top and 1704 in front). A test that passes for a reason that is not the thing it is about is
+       the failure this file's own comments keep recording. */
+    const real = window.troDraw2D; const seen = {};
+    ['top', 'front', 'iso'].forEach(c => {
+      let n = 0; window.troDraw2D = function () { n++; return real.apply(this, arguments); };
+      camSet(c); sizeCanvas(); draw(); seen[c] = n;
+    });
+    window.troDraw2D = real;
+    Object.keys(seen).forEach(c => { if (!seen[c])
+      P.push('the trolley drives down the street and the ' + c + ' camera never draws it at all — a player on that camera watches an empty road forever'); });
+    TRO.state = bs; TRO.x = bx; world = bw; camSet(bc); sizeCanvas();
+    document.getElementById('world').hidden = true;
+    return P;
+  });
+  fails.push(...troCams);
+
+  /* ---- a document may carry a DRAWING, not only words ----
+     The owner, 2026-09-11, on the crew mural: "can we have functionality there wehre you see
+     tiles/icons from afar but you get close and can interact to see it full screen- then thats how
+     pixels/art can be used there by agents".
+     Both halves of that nearly existed. A thing you notice from across a room and walk up to is
+     READS + the breathing mark + the Read button. A panel that opens over the world is docOpen. But
+     the reader could only render WORDS — h, p, note, red, blank, kv, table, q, btn, sel, form — so
+     the largest picture a pack could put in front of a person was a 32-pixel tile seen from twelve
+     tiles back. That is the sugar-skull mistake as a rule rather than an accident: this engine has
+     had no surface where art is meant to be looked at closely.
+     `art` is that surface. The pack hands a draw function; the engine gives it a canvas and never
+     learns what is on it — the same bargain as TILEART and DECOART.
+     Asks what a PERSON gets: is there a picture, and is it big enough to be worth walking up to. */
+  const docArt = await page.evaluate(() => {
+    const P = [];
+    const body = document.getElementById('docBody');
+    if (!body) { P.push('this shell has no reader at all'); return P; }
+    let drew = 0, gotW = 0, gotH = 0;
+    const probe = { h: 'A drawing', art: (g, w, h) => { drew++; gotW = w; gotH = h;
+      g.fillStyle = '#C6DCEA'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#7A3FE0'; g.fillRect(8, 8, w - 16, h - 16); } };
+    if (typeof docRender !== 'function') {
+      P.push('a pack cannot put a picture in front of a person — the reader renders words and nothing else, so the biggest art in this game is a tile seen from across the street');
+      return P;
+    }
+    /* the reader must actually be OPEN to measure it — a hidden element has no box, and the first
+       version of this check read 0 and blamed the code. Open it, measure, put it back. */
+    const rd = document.getElementById('reader'); const wasHidden = rd ? rd.hidden : true;
+    if (rd) rd.hidden = false;
+    body.innerHTML = '';
+    docRender(body, [probe]);
+    const cv = body.querySelector('canvas');
+    if (!cv) P.push('a document carrying a drawing rendered no drawing');
+    else {
+      if (!drew) P.push('the reader made a canvas and never asked the pack to draw on it');
+      const box = cv.getBoundingClientRect();
+      if (box.width < 200)
+        P.push('the picture is only ' + Math.round(box.width) + ' pixels across — not worth walking up to, which was the whole point');
+      if (gotW < 200 || gotH < 100)
+        P.push('the pack was handed a ' + gotW + '×' + gotH + ' canvas to draw on — too small to be the close-up view of anything');
+    }
+      /* ---- and it must FIT the column it sits in ----
+         The first version of this check asked only whether the picture was big ENOUGH and never
+         whether it was too big, which is the same one-sided guard this repo has now paid for five
+         times (docs/REGRESSION.md: a guard has to read the noun it actually means).
+         Measured when the crew's mural landed: a 512 px canvas in a 412 px column — a fifth of
+         every drawing off the right-hand edge, in both packs, for anyone who opened a document.
+         The cause is worth keeping in the message: docOpen renders while the reader is still
+         hidden, a hidden element's clientWidth is 0, and the `|| 520` fallback then invented a
+         width nobody has. So this renders the way docOpen really does — hidden, then shown — and
+         asks the browser what it actually got. Rendering into an already-open reader does not
+         reproduce it and would pass forever. */
+      if (rd) {
+        rd.hidden = true;                       /* exactly what docOpen does */
+        body.innerHTML = '';
+        docRender(body, [probe]);
+        rd.hidden = false;
+        const cv2 = body.querySelector('canvas');
+        if (cv2) {
+          const col = cv2.parentElement, room = col ? col.clientWidth : 0;
+          const wide = cv2.getBoundingClientRect().width;
+          if (room && wide > room + 1)
+            P.push('a drawing in a document is ' + Math.round(wide) + ' pixels wide in a ' + Math.round(room) +
+                   ' pixel column — ' + Math.round(wide - room) + ' pixels of every picture hang off the edge where nobody can see them');
+        }
+      }
+
+    body.innerHTML = '';
+    if (rd) rd.hidden = wasHidden;
+    return P;
+  });
+  fails.push(...docArt);
 
   await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();

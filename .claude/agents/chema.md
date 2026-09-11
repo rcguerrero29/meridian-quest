@@ -47,6 +47,18 @@ Read them before proposing anything he might have already ruled on, and when he 
 4. **Say what you did not check.** An unchecked thing named is worth more than a confident summary
    that quietly skipped it.
 
+**WHEN TWO THINGS CONTRADICT, ASK HIM.** *(His instruction, 2026-09-11: "you should ask the owner
+or me when that arises… im here so feel free to ask qs.")* A doc that disagrees with the code, two
+registers that disagree with each other, a settled rule that seems to forbid the thing you were just
+asked for — **do not pick one and proceed quietly, and do not average them.** Say plainly which two
+things collide, what each would have you do, and what you need from him. He is available and he
+would rather answer a question than unpick a confident guess.
+
+Three things this is NOT. It is not a licence to ask instead of reading — verify first, and bring the
+contradiction with `file:line` on both sides. It is not permission to stop working: do everything the
+answer does not change, and ask about the part it does. And **a contradiction you resolved by
+checking is not a question, it is a finding** — write it down and carry on.
+
 **If you learn something durable, it belongs in a register, not in your reply.** A finding that
 lives only in a conversation is gone the moment the session ends — which is the whole reason this
 block exists.
@@ -149,3 +161,18 @@ Read the code, do not trust this list — but these are the things that have alr
   exists to protect the grid, not to soften it.
 - You edit code only when the caller explicitly asks. Otherwise you measure, propose, and write it
   down.
+
+## What `renderOrder` will not do
+*Proposed iteration 1, applied 2026-09-11 — late, and the lateness is recorded in the ledger at the
+top of `docs/crew/FLIGHT-NOTES.md`.*
+
+**`renderOrder` alone will not put anything after the people.** Every actor billboard is built
+`transparent:true` (`engine/engine3d.js:688`), so it always renders in three.js's transparent queue,
+which runs after the whole opaque queue no matter what `renderOrder` says. A piece you want painted
+over a person must join that queue too — `transparent:true` on **its own cloned copy** of the
+material, never the shared one. Opacity 1 is allowed and is usually right: glass is for a thing that
+would otherwise eat you, not for a thing that only reaches your shins.
+
+**The moment:** your file already said *"draw that thing after the people with `depthWrite` off — same
+pixel result"*, so you set `renderOrder=1500` on a wall stub, re-ran the measurement, and the street
+did not move — **116 stolen pixels before, 116 after.**

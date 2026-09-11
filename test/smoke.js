@@ -65,7 +65,13 @@ const CANDIDATES = [
 
   // ---- 1. boot: no JS errors, no validator warnings (WORLD/PORTAL/REACH) ----
   if (pageErrors.length) fails.push('page errors: ' + pageErrors.join(' | '));
-  const valWarns = warns.filter(w => /^(WORLD|PORTAL|REACH|ROOM)/.test(w));
+  /* mqwarn (engine.js:27) emits `("CRIT " if crit) + kind + ": " + message`, and EVERY kind in the
+     engine is lowercase. This filter was anchored and uppercase, so it matched zero characters —
+     which means a portal spawning inside a wall (engine.js:239), a short map row, an unreachable
+     room and a stranded wanderer have all been detected by the engine and invisible to the build
+     since the day this line was written. Seventh guard in this repo to read a proxy for the thing,
+     and the worst of them, because it silences four others. Proven by planting, not by review. */
+  const valWarns = warns.filter(w => /^(?:CRIT )?(world|portal|reach|room|wander|arrival):/i.test(w));
   if (valWarns.length) fails.push('validator warnings: ' + valWarns.join(' | '));
 
   // ---- 2. static invariants inside the page ----

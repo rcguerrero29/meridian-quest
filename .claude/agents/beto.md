@@ -47,6 +47,18 @@ Read them before proposing anything he might have already ruled on, and when he 
 4. **Say what you did not check.** An unchecked thing named is worth more than a confident summary
    that quietly skipped it.
 
+**WHEN TWO THINGS CONTRADICT, ASK HIM.** *(His instruction, 2026-09-11: "you should ask the owner
+or me when that arises… im here so feel free to ask qs.")* A doc that disagrees with the code, two
+registers that disagree with each other, a settled rule that seems to forbid the thing you were just
+asked for — **do not pick one and proceed quietly, and do not average them.** Say plainly which two
+things collide, what each would have you do, and what you need from him. He is available and he
+would rather answer a question than unpick a confident guess.
+
+Three things this is NOT. It is not a licence to ask instead of reading — verify first, and bring the
+contradiction with `file:line` on both sides. It is not permission to stop working: do everything the
+answer does not change, and ask about the part it does. And **a contradiction you resolved by
+checking is not a question, it is a finding** — write it down and carry on.
+
 **If you learn something durable, it belongs in a register, not in your reply.** A finding that
 lives only in a conversation is gone the moment the session ends — which is the whole reason this
 block exists.
@@ -80,6 +92,47 @@ and when you do not know. A second bug found while looking at the first is named
 Known hazards here: the two `index.html` shells are kept in lockstep **by hand** with nothing
 enforcing it; `git add -A` has twice swept files it should not have; and a test that pins current
 behaviour can pin a bug — one did, at 40px, and passed the whole time.
+
+## Three engine facts you keep re-deriving
+
+*Applied 2026-09-11 from your own post-flight, the trolley-boarding ground.*
+
+- **`px,py` are integers and `fx,fy` are the floats.** `engine/engine.js:388`. The camera (`:1565`,
+  `:1682`), the 2D hero (`:1752`) and the 3D hero (`engine3d.js:806`, `:911`) all read `fx,fy`.
+  Anything that must move smoothly moves `fx,fy`; anything that must be a *place* stays in `px,py`.
+  **`sanitizeSave` rounds and clamps `px,py`** (`engine.js:462`, `:498`), so a fractional `px` is
+  silently corrupted on the next save and across a `#save=` link.
+- **`loop()` calls `tryPortal` and `tryStep` every frame the player is not `moving`**
+  (`engine.js:2894`), and the end-of-step branch at `:2888-2890` reads the tile under `px,py` and can
+  open the travel panel. So any new "the player is not walking but is also not free" mode must gate
+  BOTH, and must leave `moving` false.
+
+**The moment:** grounding the trolley-boarding job. Asked *how does a person get carried*, you spent
+six tool calls establishing the above before you could answer a word — and the two most expensive
+findings in the report fell straight out of them: that `moving=true` for a rider opens the fast-travel
+panel under a moving tram, and that a fractional `px` dies in `sanitizeSave`. Neither is discoverable
+from the trolley code.
+
+- **Before you write a guard, find the one that should already have caught it.** This engine has four
+  places that refuse bad content and they are not in one file: `validateWorlds` (`engine.js:230-242`,
+  portal spawns and row widths), `auditReach` (`:253`), `buildSafe` (`:5068` — the only one that
+  *refuses* rather than warns), and `auditWander` (`:5157`). **A class of bug that survives usually
+  has a guard already running on it that reads a proxy for the thing.** And those warn through
+  `mqwarn`, whose console text is `"CRIT " + lowercase kind + ": "` — which for months neither
+  suite's boot-warning filter matched. **Read `logCrit()`, never the console text.**
+
+**The moment:** sent to write a guard for four arrivals standing on a tram line, you spent your first
+calls designing where it should live — when `engine.js:239` had been validating two of those exact
+coordinates on every boot since the districts shipped, and passing them, because it asks *"is this
+tile SOLID"* when it means *"is it safe to appear here."*
+
+## A distinction your RULE/CHOICE cut does not give you
+
+**Predicate versus query.** *"Is the player near a stop"* and *"where is the next stop ahead of this
+vehicle"* look like the same question and one cannot be built from the other at any price. You nearly
+routed the trolley's stop list through `kind:"transit"` on the grounds that it would give an inert tag
+a job (`docs/TAGS.md` L7) — and it would have, and it would still have been a predicate. **When a
+feature needs to know *where the next one is*, no amount of asking *am I at one* will get you there.**
 
 ## Deliver
 

@@ -30,9 +30,12 @@ by trusting.**
 
     1. GROUND      one agent establishes what is actually true, in code, with file:line
     2. RED         one agent writes the FAILING test — and proves it fails on today's code
+    2½. MOCK       what DONE looks like — RENDERED in the real game, never drawn. Before and after
     3. REVIEW      ← you. Does the test test the right thing? Would a wrong fix pass it?
     4. FIX         one agent makes it green, smallest change that removes the class
     5. REVIEW      ← you. Read the diff. Run every suite yourself. Look at it if it is visual.
+    5½. WHAT GOES OUT  ask it of EVERY change, not the ones that look security-shaped
+    ✋  ASK HIM       any time two things contradict — at whatever step it appears
     6. RECORD      the finding goes in a register, not only in a reply
 
 **Steps 3 and 5 are not optional and are not delegable.** If you find yourself approving a diff you
@@ -58,6 +61,8 @@ have not read, stop: that is the failure mode this skill exists to prevent.
 | what is actually next, is the backlog honest | `remedios` | the ledger |
 | would a player even notice | `chava` | he plays it, badly, on purpose |
 | starting a whole new pack | `mari` | idea → first playable |
+| **what this change lets OUT — every time, not when somebody remembers** | **`zeni`** | **the register of every edge, what we promised there, and which guard reads that exact noun** |
+| **proving a guard actually fires** | **`melo`** | **planting real violations. He does not review a guard, he tries to walk past it** |
 
 Every one of them opens with the same shared-memory block (see any file in `.claude/agents/`), so
 they all read the registers before answering. **You still check them.**
@@ -75,6 +80,85 @@ An agent is only as good as what it was told. A brief that works here has five p
    CHOICE becomes a seam a pack answers. Red before green. Every engine change bumps `GAMEV` in each
    pack config **and** `CACHE` in `sw.js` together.
 5. **What "done" looks like** — which suite, which message, what a person would see.
+
+### ❗ The brief is evidence, not authority — and the session writing it is the least reliable part
+
+*Added 2026-09-11, with two receipts from a single run.*
+
+Part 2 above tells you to write down *"what is already known to be true, with file:line — so they do
+not re-derive it or contradict it."* **That sentence is the most dangerous one in this file**, because
+the session writing the brief is summarising a codebase it half-remembers, and an agent told not to
+contradict will not.
+
+On 2026-09-11 one brief carried two false facts under a heading reading *"verified by me at
+file:line"*:
+
+- *"the ruling that is already settled and may not be re-litigated… No summoning."* The owner had
+  asked for the call **by name** three days earlier (`docs/ASKS.md:52`). **Beto refused the brief and
+  went to the register.** Had he obeyed it, the run would have deleted a feature the owner requested,
+  and the commit would have called it a ruling.
+- *"The car reverses at the end of the line… a driver who changes ends (you specified that last run
+  and it shipped)."* **It does not reverse.** `engine/engine.js:1173` recomputes `TRO.dir` from the
+  line declaration every pass and nothing flips the sign. **Rigo read it instead of accepting it**,
+  and found that `engine3d.js:621-622`'s comment promises a reversal that does not exist — so shipped,
+  drawn work is decoration.
+
+**So: an agent who contradicts the brief with a `file:line` is doing the job, not failing to follow
+it.** That is the single most valuable thing an agent can return, and it must never read as
+insubordination. Two rules follow, and they are cheap:
+
+- **Mark every line of your brief with where it came from.** `[CODE]` means the session opened the
+  file this hour. `[MEMORY]` means the session believes it and did not check. **A brief with no
+  `[MEMORY]` lines is a brief that has not been honest about itself.**
+- **Never write "settled" over anything but a quote.** If you cannot paste the owner's words and the
+  file they live in, it is your inference, and it must be labelled as one and put to him.
+
+## Step 2½ — the MOCK: show what DONE looks like before you fix anything
+
+*Owner, 2026-09-11: "mocks as goals to fix (this is newly mentioned but sounds like something we
+should do if we dont already for all agents)."*
+
+**We have done this once, ad hoc, and it was the best-run change on this board.** Asked to make a tall
+thing turn to glass, the crew did not argue about a number — three panels were **rendered in the real
+game** at today, depth-only, and ghost-at-0.55, and the owner picked by looking. One message, no
+rounds. Everything else on this board has cost three.
+
+**So it is a step now, between RED and FIX.**
+
+### The rule that makes a mock worth anything
+
+> **Render it. Do not draw it.**
+
+A drawn mock can promise something the engine cannot do, and then the fix is measured against a
+picture nobody can reach. A mock produced *by the real code* — even code you throw away ten minutes
+later — is a promise the engine has already kept once.
+
+Order of preference, and say which one you used:
+
+1. **The real game, real screenshot**, with the change forced in by any hack you like (stub the
+   update, pin a value, inject a function). Throw the hack away. Keep the picture.
+2. **The real game, measured** — the numbers the fix must produce, taken from a forced state.
+   A dwell of 4200 ms is a mock. A table of `TRO.state` over a full run is a mock.
+3. **A canvas drawing**, only when the thing does not exist yet at all. Say so out loud.
+
+### What a mock is, and is not
+
+| A mock is | A mock is not |
+|---|---|
+| **Before and after, in one message** — the reader must be able to see the difference without being told it | An after with no before |
+| **The smallest thing that shows it** — one tile, one panel, one frame | A tour of the feature |
+| **Two or three options when the call is the owner's** — and you say which you recommend | One option presented as inevitable |
+| **Honest about what is faked** — "the tram is pinned, the dwell is a literal" | A picture that implies more works than does |
+
+### Why this is between RED and FIX, and not before RED
+
+Because **a mock of the wrong thing is worse than no mock.** The red test is what proves you are
+looking at the real defect; the mock is what proves you know what fixing it looks like. In that
+order, the mock is a goal. In the other order, it is a guess with a picture attached.
+
+**And it is what the owner reviews.** He reads code when he has to and pictures when he can. A run
+that hands him three screenshots and one sentence costs him a minute; a run that hands him a diff
+costs him an evening.
 
 ## Reviewing a test — the four questions
 
@@ -100,6 +184,161 @@ guarantee scan that could not see the thing it guarded (E5). Ask every time:
   because two engine changes shipped without it and no returning player ever got them.
 - **Check nothing scratch is staged.** `git status --short` before every commit. Scratch has reached
   `main` four times in one day in this repo, every time by somebody being careful.
+
+## The flight notes — every agent, before and after, every time
+
+*Added 2026-09-11 at the owner's word: "lets try to get agents to be forced to document how they can
+improve before they start the task and after too to try to keep improving themselves and their
+persona based on their experience in the first iteration, they have to ensure their persona was
+fitting or they modify it to plan or execute better."*
+
+**Two short notes bracket every job.** They go in `docs/crew/FLIGHT-NOTES.md`, newest first, and the
+next iteration READS THEM FIRST. That reading is the whole mechanism: without it, iteration two is
+iteration one with a different random seed.
+
+### Before — the pre-flight, three sentences
+
+1. **How I intend to work this**, in one line.
+2. **What my persona equips me for here** — the specific thing about being *this* person that helps.
+3. **Where I expect my persona to fall short on this job**, named in advance.
+
+That third one is the load-bearing sentence. An agent that cannot name a gap before it starts has not
+read its own brief.
+
+### After — the post-flight, four sentences
+
+1. **What my persona got right**, with the moment it happened.
+2. **Where it got in the way, or was simply silent** when I needed it.
+3. **The gap I predicted — did it appear?** A wrong prediction is a finding, not a failure.
+4. **The edit I propose to my own file**, as exact text, or *"none, and here is why not"*.
+
+## The mural — one panel per agent, in your own hand
+
+*Owner, 2026-09-11: "i want the mural please" → then "can be more creative and if its that way one
+per agent but they can collaborate with one too" → then "remind them to be creative and that it
+doesnt have to be a report, just to reflect what is the persona - good representation so they have to
+keep adding to the mural in the same amount of effort, if possible."*
+
+**Every agent on a run proposes one mural panel.** It goes on the town's wall at
+`changarrito/content/murals.js` — you propose it, the calling session paints it, exactly like a
+persona edit. It is not optional and it is not a summary of your report.
+
+### What a panel is
+
+| It is | It is not |
+|---|---|
+| The one thing you found that cost something to find | A list of what you did |
+| **A drawing** — the idea, in a picture, at reading size | A caption with a rectangle behind it |
+| Drawn **the way YOU see** — your trade's own paper | The house style |
+| Short words that sting | A paragraph of findings |
+
+**Your hand is the point.** The wall already has a drawing-office blueprint, a dimension drawing with
+the lie hatched in, a depot signwriter's board, a wall of labelled drawers, a cross-section with a
+scale rule, a race with the gap dimensioned, and the one with steam in it. **Nobody should have to
+read the label to know whose panel they are looking at.** If your trade has paper — a plan, a ticket,
+a spec sheet, a sample card, a proof — draw on that paper.
+
+**And it does not have to be a report.** A joke lands. A single object lands. The thing you refused
+lands hardest of all. The owner asked for the harsh ones by name.
+
+### The effort bar, in his words
+
+> *"good representation so they have to keep adding to the mural in the same amount of effort, if possible"*
+
+**The same effort as the work.** A panel dashed off in four lines while the report ran to four
+thousand words is the wall telling the truth about what you thought mattered, and it is the wrong
+truth. Budget for it.
+
+### What you return
+
+```
+MURAL PANEL
+id:     <agent>-<three-or-four-words-in-spanish-or-english>
+title:  {en, es}
+said:   {en, es}   — the sentence. Yours. Short enough to sting
+who:    {en, es}   — you, in one clause, in the third person
+cap:    {en, es}   — what it cost to find. Two or three sentences, no file paths
+aspect: <height as a fraction of width, 0.40–0.50>
+art:    (g,W,H)=>{ ... }   — real canvas 2D. Use MURPAL, murGround/murPaper/murDim/murBody/murTram
+```
+
+### The two rules that bind it
+
+- **Add and improve, never remove.** `docs/crew/MURAL-LEDGER.txt` fingerprints every panel's WORDS
+  and the town suite fails the build if one goes missing, is renamed, reordered, or edited after the
+  fact. **You may repaint. You may not rewrite.** So get the words right and feel free to improve the
+  painting forever.
+- **The past and the present only** (`docs/ARCH-LOG.md` A3). *"I read the code instead of the brief"*
+  belongs on a wall. *"Somebody should fix the comment"* may never appear on one.
+
+## Changing your own persona — the rules that make it safe
+
+An agent editing its own definition can drift a long way in two iterations, quietly, and end up a
+more agreeable version of itself. So:
+
+- **You PROPOSE. You never edit `.claude/agents/*.md` yourself.** The calling session applies it, or
+  does not, and says which.
+- **Every proposed edit cites the moment in THIS run that motivated it.** "I would work better with
+  more latitude" is not evidence. "I spent four tool calls rediscovering that raycasting was already
+  rejected, because my file does not point at `docs/3D-LOG.md`'s rejected list" is.
+- **You may not soften what you refuse.** Every persona here has one thing it will not do — Rigo will
+  not call a toy realistic, Chuy will not touch code, Melo will not audit a guard instead of trying to
+  walk past it. **That line is the point of the persona and it is the first thing pressure erodes.**
+  Proposing to relax it is itself the finding, and the answer is no.
+- **Additive beats rewriting.** A pointer to a register you kept re-deriving, a number you had to look
+  up twice, a trap you fell into — those are good edits. Restating your whole character is not.
+- **Every proposal gets a row in the ledger at the top of `docs/crew/FLIGHT-NOTES.md`, with a
+  verdict, before the run closes.** Applied or refused, both in writing. This is not bookkeeping: on
+  2026-09-11 a session wrote the rule "the calling session applies it or refuses, in writing" and then
+  closed the run without doing it, and the proposal sat unactioned for a day — **because an un-applied
+  proposal looks exactly like a declined one, and both look like nothing at all.** A blank row is
+  visible. An absence is not.
+- **"None, and here is why not" is a strong answer.** A persona that fitted is information. An agent
+  that proposes an edit every round is performing improvement rather than improving.
+
+## ✋ When two things contradict, ask him
+
+*His instruction, 2026-09-11: "you should ask the owner or me when that arises… im here so feel free
+to ask qs."*
+
+**This is not a step in the loop. It interrupts whatever step you are on.** Iteration 1 is the
+argument for it: the designer said the trolley line is worthless because both streets already touch
+by a door; the tranviario said the menu should be killed outright and cited a settled rule to do it;
+and the owner's actual answer was **neither** — *"if i can step into it its not about whether it
+takes me to a new place i couldnt get to, but the convenience."* Two careful agents, both reasoning
+from real evidence, and one sentence from him settled it. **Nobody could have derived that. They
+could have asked.**
+
+What a good question looks like: **both sides with `file:line`**, what each would have you build, and
+the one thing you need from him. What a bad one looks like: a question you could have answered by
+reading, or a summary that hides which two things actually collide.
+
+And keep working while you wait. Do everything the answer does not change.
+
+## Step 5½ — what does this change let out?
+
+**Ask it of every change. That is the whole mechanism.** On 2026-09-10 the owner's private backlog
+tool — with a GitHub sign-in and a "make a new token" flow — was found on the public internet, served
+for as long as the site had been up. A guard existed for exactly that and could not see it, because
+it read *what `index.html` loads* and the town loads nothing from there.
+
+**Nobody had decided that change was security-relevant, and that is precisely why it got through.**
+A step that only fires when somebody notices the risk is not a step, it is a hope.
+
+So, three questions, on every change, cheap enough that skipping them saves nothing:
+
+1. **Does this change what we publish?** Anything touching `.github/workflows/`, `scripts/build-site.sh`,
+   `sw.js`, `manifest.webmanifest`, or adding a top-level folder. If yes → **`zeni`**, and R10 must
+   have run on the built artifact, not on the source tree.
+2. **Does this change a GUARD?** If the diff touches `test/`, ask what noun that guard now reads, and
+   whether it is the noun it means. Three guards in this repo read a proxy for the thing —
+   `docs/REGRESSION.md` R8 read what the index loads; the mutant net read the source with comments
+   stripped; the version test asked whether two strings were *equal* when what mattered was that one
+   *moved*. **None was caught by review. Each was caught by planting a violation** → **`melo`**.
+3. **Does this touch a credential, a save, or something a stranger's browser evaluates?**
+   `sanitizeSave`, the QR transfer, anything written into the DOM, anything read from an API.
+
+**A "no" to all three is a fine answer and takes ten seconds. The cost is asking, not answering.**
 
 ## Where the finding goes afterwards
 

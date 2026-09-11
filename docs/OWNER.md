@@ -23,6 +23,23 @@ preference that outlives one phase; cite the date and their words.
   only helps somebody already in the room. Deliveries name the room they landed in; the smoke
   test fails a delivery that lands silently.
 
+- **A vehicle stops for traffic — pedestrian, vehicle or fauna.** *(2026-09-11)* Owner, settling a
+  crew disagreement: *"a realistic trolley, in my boook does stop for traffic- pedestrian, vehicle
+  or even fauna so theres taht."* There is no species list to maintain and no judgement to make.
+  One question — **is there something alive on the rails** — and the answer does not depend on what
+  kind of thing it is. Braking for the hummingbird and running over the pigeon is not a policy, it
+  is a blind spot.
+- **A queue is realistic. Do not send another one.** *(2026-09-11)* *"stops get backed up. if so we
+  dont send a new one. its ok."* One car on the line at a time. A service that spawns a fresh
+  vehicle whenever the last one is busy is a fairground ride, and the owner would rather wait behind
+  a tram than watch eight of them.
+- **Convenience IS the point — it does not have to go somewhere new.** *(2026-09-11)* *"if i can
+  step into it its not about whether it takes me to a new place i couldnt get to, but the
+  convenience... i dont have to press an arrow, etc."* This settles a disagreement the crew could
+  not: the designer argued the line is worthless because both streets already touch by a door, and
+  the tranviario argued the menu should be killed outright. **Neither.** Not walking is the value.
+  A ride that saves you twenty arrow presses has earned itself even if you could have walked — and
+  it must be a RIDE, not a teleport, because of the rule immediately below.
 - **The world stays realistic — not perfect, but never nonsense.** *(2026-09-03)* Owner, on a
   trolley that could drop you on the second floor of a building: *"i dont like that i go from a
   train to a floor. dont do that. i asked to make the world realistic. not perfect but so if

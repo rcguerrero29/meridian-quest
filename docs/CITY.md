@@ -237,10 +237,18 @@ would have none left unless looks key by npc instead.
   house in the way, or it stops for people crossing or if i call it."* Calle Dos becomes one lane (`ex` row 1)
   with the sidewalk its two houses stand on below it (row 2, was bed — Doña Tencha's casa and El Portero's
   caseta were literally stamped in the road), and a crossing at each of their doors. Calle Principal keeps both
-  lanes and its crossing. **El trolley** (`TROLLEYAT` in the pack, `TRO`/`troUpdate` in the engine): it comes on
-  its own every nineteen seconds, runs the line, **waits for anyone standing on it** — you, a neighbour or an
-  animal — and **comes when you stand at a stop**. It is never a wall: you may stand where it will pass and it
-  stops for you. Drawn in both flat cameras (`troDraw2D`) and as a car in 3D (`t3Trolley`). The smoke fails if a
+  lanes and its crossing. **El trolley** (`TROLLEYAT` in the pack, `TRO`/`troUpdate` in the engine): **⚠️ this paragraph described a
+  game we do not have; corrected 2026-09-11 against measurement.** What is TRUE: it is never a wall, you may
+  stand where it will pass, and it brakes for the hero, the world's people and one class of creature. What was
+  FALSE: it does **not** come "every nineteen seconds" — standing within one tile of a stop re-summons it the
+  moment the last one leaves, and sixty seconds of standing still produced **eight** trams. It does **not**
+  wait for "an animal" — the rails check is blind to the pigeon, the dog, the cat and the parrot, so it brakes
+  for the hummingbird and runs over Paloma, who crosses that road unprompted. And it does not stop at the stop
+  **at all** — the stop is not in the trolley's logic; standing there summons it and it then runs the length of
+  the street and off the far end without slowing.
+  Found by Chava riding it and by Rigo reading this line against his own measurements. **This is the fourth
+  time a doc in this repo has described a game that does not exist** (`docs/QA-PASS.md`; `docs/TAGS.md` L12),
+  which is why the correction is left visible rather than tidied away. Drawn in both flat cameras (`troDraw2D`) and as a car in 3D (`t3Trolley`). The smoke fails if a
   wall, a lot, a person or a door stands anywhere on a line — proven red against the old map, which named all
   six tiles of the two houses. Still open below: what the strip is *called* in the ledger.
 - ⏳ **❗El camino, the leftovers** — Don Güero's four ledger lines are still wrong (CITY.md calls `ex` row 10

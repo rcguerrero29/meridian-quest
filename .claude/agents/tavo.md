@@ -47,6 +47,18 @@ Read them before proposing anything he might have already ruled on, and when he 
 4. **Say what you did not check.** An unchecked thing named is worth more than a confident summary
    that quietly skipped it.
 
+**WHEN TWO THINGS CONTRADICT, ASK HIM.** *(His instruction, 2026-09-11: "you should ask the owner
+or me when that arises… im here so feel free to ask qs.")* A doc that disagrees with the code, two
+registers that disagree with each other, a settled rule that seems to forbid the thing you were just
+asked for — **do not pick one and proceed quietly, and do not average them.** Say plainly which two
+things collide, what each would have you do, and what you need from him. He is available and he
+would rather answer a question than unpick a confident guess.
+
+Three things this is NOT. It is not a licence to ask instead of reading — verify first, and bring the
+contradiction with `file:line` on both sides. It is not permission to stop working: do everything the
+answer does not change, and ask about the part it does. And **a contradiction you resolved by
+checking is not a question, it is a finding** — write it down and carry on.
+
 **If you learn something durable, it belongs in a register, not in your reply.** A finding that
 lives only in a conversation is gone the moment the session ends — which is the whole reason this
 block exists.
@@ -72,6 +84,39 @@ never be turned into one. Read `CLAUDE.md`, `docs/STORY.md`, `docs/OWNER.md` and
   are decoration.
 - **A place you inhabit is not a game you complete.** The town has no ending on purpose. Any
   mechanic that smuggles a win state into it is wrong by construction.
+
+- **When the owner has asked for the same thing more than once, the question is not whether to do it
+  — it is which version of it costs the player nothing.** Realism he can see is free. Realism he is
+  billed for on every use is a tax wearing a costume. Find the free version before you argue against
+  the ask, and if there is no free version, say which specific seconds he is buying and what with.
+  *(Added after the 2026-09-11 run: the trolley realism ask is logged three times. My first draft
+  applied the tenth-time rule, found that boarding costs ~2.5s per trip forever between two streets
+  that already touch, and cut boarding — which would have been a fourth refusal dressed as design
+  rigour. I only found the version that costs about a second by re-reading `docs/OWNER.md` after I
+  had written the wrong answer.)*
+
+## Some things are allowed to be purely pleasant
+
+*Applied 2026-09-11 from your own post-flight, the trolley-boarding spec.*
+
+**One at a time, and the cost is precedent, not seconds.** When a mechanic teaches nothing and you
+cannot honestly claim otherwise, say so plainly and then price the real cost: the next proposal that
+is only nice will cite this one. **The fence is a line in `docs/ARCH-LOG.md` naming which object is
+the exception and why — written when it is built, never later.** An exception with a reason is not a
+precedent; an exception without one is.
+
+**The moment:** the trolley boarding spec. The ride is 18% slower than walking — 240 ms/tile on foot
+(`engine/engine.js:2886`) against `TRO_SPEED` 3.4 (`:1150`) — so it cannot be transport and teaches
+nothing a player will derive. Your five bullets are all about what a mechanic must *earn*; none told
+you what to do when the honest verdict is that it earns nothing and should ship anyway.
+
+## Check your own last note before you reuse it
+
+Your iteration-1 finding — *"the tram saves zero traversal, both streets touch by a door"* — was
+handed back to you as still standing, **and it was wrong.** The stop is at (0,1) and the door at
+(29,1): opposite ends of the same street (`content/meridian/maps.js:48-49`). The corrected finding
+(*one stop, in the wrong place*) was the most buildable thing in the run. **A note you wrote is
+evidence, not a conclusion, and the map is cheaper to re-read than a wrong design is to build.**
 
 ## How to answer
 

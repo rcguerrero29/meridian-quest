@@ -49,7 +49,10 @@ const WORLD_DEFS={
      "#........◺▼≡≡≡.....#",
      "#.........◺◺◺◺.....#",
      "####################"],
- st:["BBQQ$QQBBvBBBBEBZZZOZZIII%IIB2",
+ st:["BBQQ$QQBBv▧B▧▧E▧ZZZOZZIII%IIB2",   /* x10,12,13,15: el mural de la cuadrilla. It GREW when the owner made it one panel per agent,
+        and it paints around the sugar skull at x11 and around city hall's door at x14 the way a real
+        muralist paints around a window. One M per panel — when the
+        panels outgrow the paint, the NEXT B becomes an M. The wall grows; it never scrolls. */
      "..............................",
      "...........c..................",
      ".g.........g..........g.......",
@@ -175,7 +178,7 @@ const WNPC={hq:{g:{npc:"guero",q:[],chat:1,doc:"guero"}},st:{v:{npc:"ventanilla"
   an:{r:{npc:"remedios",q:[],chat:1,doc:"h_an"}},pp:{c:{npc:"chuy",q:[],chat:1,doc:"h_pp"}},es:{p:{npc:"pili",q:[],chat:1,doc:"h_es"}},
   mo:{b:{npc:"beto",q:[],chat:1,doc:"h_mo"}},ob:{k:{npc:"cuca",q:[],chat:1,doc:"h_ob"}},co:{n:{npc:"nacho",q:[],chat:1,doc:"h_co"}},pk:{}};
 /* the pack's own solid glyphs (the engine draws them; the pack says they are walls) */
-const SOLIDX="~9ZISH";                   /* S shelves and H racks stand in the houses */
+const SOLIDX="~9ZISH▧";                  /* S shelves and H racks stand in the houses; ▧ is the crew's muralled wall */
 const DOORS="+E2$O%@ML";
 const DOORLOOK={E:{wood:"#8A5A2B",wood2:"#A06A35",frame:"#4A2E14",glass:true},   /* the stall: warm wood */
                 "2":{wood:"#4E7A4A",wood2:"#5F8F5A",frame:"#2C4A2A"},           /* the park gate: green */

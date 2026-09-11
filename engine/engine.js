@@ -240,6 +240,33 @@ const chillLines=k=>{
     if(portalAt(p.to,p.x,p.y))mqwarn("portal",from+":"+ch+" spawns ON a portal tile — ping-pong risk",true);
   }));
 })();
+/* ---- ARRIVALS: every place the game itself STANDS a player ----
+   An arrival is a PROMISE, not a tile. A pack declares it on the first byte, and the map does not
+   carry it until the district that owns it opens (applyRibbon only stamps when ribbonUp is true),
+   so nothing that reads w.rows can ever see one. That is why troBlocked returns [] both at boot and
+   grown while four arrivals sit on the rails: it is a snapshot predicate and this is a declaration
+   audit. Found by Beto, 2026-09-11, by walking out of the bakery's front door in the real game.
+   And the guard that SHOULD have caught it already existed: validateWorlds at :239 asks "is this
+   tile SOLID" when it means "is it safe to appear here" — the seventh time in this repo that a
+   guard has read a proxy for the thing (docs/REGRESSION.md). */
+function arrivals(){const out=[],add=(why,wid,x,y)=>{
+    if(wid&&WORLDS[wid]&&x!=null&&y!=null)out.push({why:why,world:wid,x:x|0,y:y|0});};
+  add("the hero's own spawn",PL.home,PL.spawn&&PL.spawn[0],PL.spawn&&PL.spawn[1]);
+  if(PL.park&&PL.parkIn)add("the way into the park",PL.park,PL.parkIn[0],PL.parkIn[1]);
+  ribbons().forEach(r=>{const d=r.doorstep;if(d)
+    add((r.id||"a storefront")+"'s handover doorstep",d.world||r.world,d.x,d.y);});
+  const gs=GRW().staged;if(gs&&gs.safe)add("the building site's step-out",gs.world,gs.safe.x,gs.safe.y);
+  (typeof TRV!=="undefined"?TRV:[]).forEach(t=>add("the trolley pass stop in "+t.w,t.w,t.x,t.y));
+  Object.keys(WORLDS).forEach(from=>portalsOf(from).forEach(function(e){
+    add("the door "+from+":"+e.ch,e.p.to,e.p.x,e.p.y);}));
+  return out;}
+/* ...and none of them may stand you on a line a vehicle runs down. You appear in front of the tram,
+   it brakes for you (troAhead), and troUpdate resets its hold timer every frame you are there — so
+   it never starts again until you move, and nothing told you that you were the reason. */
+function arrivalsOnRails(){return arrivals().filter(function(a){const L=troLine(a.world);
+    return !!L&&a.y===L.row&&a.x>=Math.min(L.from,L.to)&&a.x<=Math.max(L.from,L.to);})
+  .map(function(a){return a.why+" stands the player on the trolley's own line in "+a.world+
+    " ("+a.x+","+a.y+") — you arrive on the rails, and the tram stops short of you and will not go on until you move";});}
 /* full-universe reachability audit: BFS from the hero's spawn across every world THROUGH portals.
    Guarantees: every walkable tile is reachable, and every character always has a reachable adjacent tile. */
 /* `grown`: audit a city with every lot raised, where NOTHING may be unreachable. Left off, a world
@@ -734,6 +761,16 @@ function drawIso(){
   doorMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawDoorMark(ctx,bx,by,0,d.mark)));
   readMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawReadMark(ctx,bx,by,0)));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
+  /* The trolley, the petals and the papel picado are drawn in the top-down and front cameras and
+     were drawn in NEITHER here — troDraw2D had exactly two call sites and this was not one of them.
+     Measured with the tram running: 1466 pixels changed in top, 1704 in front, and ZERO in iso. Not
+     "looks wrong" — a player on this camera watched an empty street while a tram drove down it, and
+     test/smoke.js exercises top, front and 3D by name and skips iso, which is why nobody saw it.
+     Found by Chava, riding it. `P` is this camera's own tile-to-screen, so the tram lands on the
+     rails rather than on a guess. */
+  troDraw2D(world,P,false);
+  petalTrail(world,P);
+  fiestaDraw2D(world,P,false);
   /* shared time-of-day wash (door spills are top-down-only for now) */
   const dnow=new Date(),hr=dnow.getHours()+dnow.getMinutes()/60;
   let wash=null;
@@ -2947,17 +2984,39 @@ function docMarkdown(id){
   });
   return out.join("\n");
 }
-function docOpen(id,from){
-  const secs=docSections(id);if(!secs)return;
-  const d=docDef(id)||{},body=$("docBody");
-  docCur=id;docBack=from==="card"?"card":null;body.innerHTML="";
+/* THE READER'S BLOCKS, in one place, so the reader and the suite walk the same path. Lifted out
+   of docOpen 2026-09-11 to add `art`: until then a pack could put WORDS in front of a person and
+   nothing else, so the biggest picture this game could show was a 32-pixel tile seen from twelve
+   tiles back. The owner: "you see tiles/icons from afar but you get close and can interact to see
+   it full screen- then thats how pixels/art can be used there by agents."
+   A block the reader does not know is skipped, exactly as before. */
+function docRender(body,secs){
   const el=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;
     if(txt!==undefined)n.textContent=txt;body.appendChild(n);return n;};
-  $("docTitle").textContent=docTitle(id);
-  $("docSub").textContent=(d.sub&&(d.sub[lang]||d.sub.en))||"";
-  $("docTmpl").textContent=d.tmpl?(DCU().tmplLb?DCU().tmplLb(d.tmpl):d.tmpl):"";
-  $("docTmpl").hidden=!d.tmpl;
   secs.forEach(s2=>{
+    if(s2.art&&typeof s2.art==="function"){ /* A DRAWING. The pack draws; the engine never learns
+       what is on it — the same bargain as TILEART and DECOART. It gets a real canvas at the width
+       the reader actually has, because a picture worth walking up to must not be a thumbnail. */
+      if(s2.h)el("h3","dh",s2.h);
+      const cv=document.createElement("canvas");cv.className="dart";
+      /* docOpen renders while the reader is still HIDDEN, and a hidden element's clientWidth is 0 —
+         so the old `||520` fallback invented a width nobody has and every picture hung 100-190px off
+         the right of its column, in both packs, for anyone who opened a document. Ask the column,
+         then the reader, then the window, and take the first that is a real number. The CSS cap
+         below is the belt: whatever this arithmetic decides, the drawing can never outgrow its box. */
+      const room=(body.clientWidth||(body.parentElement&&body.parentElement.clientWidth)||
+                  (document.documentElement&&document.documentElement.clientWidth)||520);
+      const W=Math.max(240,Math.min(560,room-8)),H=Math.round(W*(s2.aspect||0.55));
+      const K=Math.min(3,window.devicePixelRatio||1);
+      cv.width=W*K;cv.height=H*K;cv.style.width=W+"px";cv.style.height=H+"px";
+      cv.style.display="block";cv.style.margin="10px auto";cv.style.borderRadius="6px";
+      cv.style.maxWidth="100%";cv.style.height="auto";   /* it may be smaller than asked. It may never be wider than the column */
+      const g=cv.getContext("2d");g.setTransform(K,0,0,K,0,0);g.imageSmoothingEnabled=false;
+      try{s2.art(g,W,H);}catch(e){if(typeof mqwarn==="function")mqwarn("docart",String((e&&e.message)||e),false);}
+      body.appendChild(cv);
+      if(s2.cap)el("p","dnote",s2.cap);
+    }
+    else
     if(s2.h)el("h3","dh",s2.h);
     else if(s2.p)el("p","dp",s2.p);
     else if(s2.note)el("p","dnote",s2.note);
@@ -3019,6 +3078,13 @@ function docOpen(id,from){
         b.className="opt";b.textContent=docTitle(k);
         b.addEventListener("click",()=>docOpen(k,docBack));row.appendChild(b);});}
   });
+}
+function docOpen(id,from){
+  const secs=docSections(id);if(!secs)return;
+  const d=docDef(id)||{},body=$("docBody");
+  docCur=id;docBack=from==="card"?"card":null;body.innerHTML="";
+  $("docTitle").textContent=docTitle(id);
+  docRender(body,secs);
   body.scrollTop=0;{const sc=$("paperScroll");if(sc)sc.scrollTop=0;}  /* the paper scrolls in its own box now, so that is what returns to the top */
   /* a document handed over inside a quest must NOT re-run exitFsForCard: questStart already
      ran it, and a second call records wasFs=false, so the player never gets fullscreen back. */
@@ -5116,6 +5182,7 @@ function lateOpenToast(){
 /* ---------- boot ---------- */
 wanderInit();
 {const bad=auditWander();if(bad.length)mqwarn("world","nowhere to walk for "+bad.join(" | "),false);}
+arrivalsOnRails().forEach(function(m){mqwarn("arrival",m,true);});
 const SV=loadSave();
 if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").textContent=T().contBtn(SV.n,SV.xp,SV.d.length);

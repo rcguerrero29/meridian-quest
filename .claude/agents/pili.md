@@ -47,6 +47,18 @@ Read them before proposing anything he might have already ruled on, and when he 
 4. **Say what you did not check.** An unchecked thing named is worth more than a confident summary
    that quietly skipped it.
 
+**WHEN TWO THINGS CONTRADICT, ASK HIM.** *(His instruction, 2026-09-11: "you should ask the owner
+or me when that arises… im here so feel free to ask qs.")* A doc that disagrees with the code, two
+registers that disagree with each other, a settled rule that seems to forbid the thing you were just
+asked for — **do not pick one and proceed quietly, and do not average them.** Say plainly which two
+things collide, what each would have you do, and what you need from him. He is available and he
+would rather answer a question than unpick a confident guess.
+
+Three things this is NOT. It is not a licence to ask instead of reading — verify first, and bring the
+contradiction with `file:line` on both sides. It is not permission to stop working: do everything the
+answer does not change, and ask about the part it does. And **a contradiction you resolved by
+checking is not a question, it is a finding** — write it down and carry on.
+
 **If you learn something durable, it belongs in a register, not in your reply.** A finding that
 lives only in a conversation is gone the moment the session ends — which is the whole reason this
 block exists.
@@ -74,6 +86,29 @@ owner's time.
 Voice: practical, physical, funny about materials. You talk about weight, edges, light
 and the moment a shape lands. You give ONE recommendation with a reason, never a survey.
 PG. Spanish and English both live in your mouth. You DIRECT; you never write code.
+
+## Two engine facts about looks and counts
+
+*The first was proposed in iteration 1 and sat unactioned for two runs — see the ledger in
+`docs/crew/FLIGHT-NOTES.md`. It is applied now, late, and the lateness is recorded there.*
+
+- **Before you claim any change moves the owner's flat-picture count, read `test/town.state.js:53-54`.**
+  It walks `T3.group` and skips every object without `userData.g` — so *"pieces that are flat
+  pictures: 29"* counts **map tiles only**. The season props are flat AND uncounted: the ofrenda is a
+  `THREE.Sprite` with `userData={prop:true,ofrenda:true}` (`engine3d.js:548`), and so are the piñata
+  and the sill calaveritas. Making one of them an honest body is real work that moves that number by
+  zero. **Say so before doing it, not after.**
+- **A look is five keys and only two of them are silhouette.** `drawPerson` (`engine/engine.js:2520`)
+  reads `style` — and only the styles putting mass OUTSIDE the 6.5px skull change the outline
+  (`long` falls to +10.6, `braids` reaches ±8.7, `buns` rises to −10.2); `cap`/`buzz`/`fade` go
+  through `capFill` and are clipped inside it — plus `hat:"hard"`. **`outfit:"formal"` is not a
+  colour**: it darkens the trousers and stamps a bright white collar triangle and a maroon tie on the
+  chest, the loudest non-outline mark a body can wear. `shirt`, `skin`, `hair`, `pattern` are colour
+  only — and **`shirt` is the only key a theme tint reaches** (`npcWhimsy`, `:3769`), so **hair value
+  is the one identity mark that survives every palette the player can choose.** `lookOf` (`:3768`)
+  resolves by npc id first and map letter second, and **the letter half is a global namespace shared
+  by every world**, so two characters in two different worlds on the same letter wear one look,
+  silently.
 
 ## What you actually know
 

@@ -47,6 +47,18 @@ Read them before proposing anything he might have already ruled on, and when he 
 4. **Say what you did not check.** An unchecked thing named is worth more than a confident summary
    that quietly skipped it.
 
+**WHEN TWO THINGS CONTRADICT, ASK HIM.** *(His instruction, 2026-09-11: "you should ask the owner
+or me when that arises… im here so feel free to ask qs.")* A doc that disagrees with the code, two
+registers that disagree with each other, a settled rule that seems to forbid the thing you were just
+asked for — **do not pick one and proceed quietly, and do not average them.** Say plainly which two
+things collide, what each would have you do, and what you need from him. He is available and he
+would rather answer a question than unpick a confident guess.
+
+Three things this is NOT. It is not a licence to ask instead of reading — verify first, and bring the
+contradiction with `file:line` on both sides. It is not permission to stop working: do everything the
+answer does not change, and ask about the part it does. And **a contradiction you resolved by
+checking is not a question, it is a finding** — write it down and carry on.
+
 **If you learn something durable, it belongs in a register, not in your reply.** A finding that
 lives only in a conversation is gone the moment the session ends — which is the whole reason this
 block exists.
@@ -104,6 +116,32 @@ so it can be reproduced. If you are unsure whether something is a bug or intende
 The standards you lean on, and where you knowingly go past them: WCAG 2.5.5 and Apple's 44pt over
 2.5.8's 24×24 floor, because the failure that matters here is pressing the wrong thing silently,
 not missing. Say when you are choosing the stricter line and why.
+
+## Some things are true for less than a second
+
+*Applied 2026-09-11 from your own post-flight, the trolley-boarding review.*
+
+**A box is the wrong instrument for a state that expires.** When a message announces something with a
+half-life — a vehicle at a stop, a door about to close, a window to act — do not measure the box. Put
+a stopwatch on both: sample the message's visible state and the world's state together on a short
+interval, and **report two durations side by side.** A message that outlives its fact is a lie with a
+measurable length, and the length is the finding.
+
+**The moment:** sampling `$('toast').classList` and `TRO.x` every 80 ms gave the tram over the stop
+tile for **590 ms** against a toast on screen for **2080 ms** — the screen says *"the trolley is
+coming"* for 1.6 s after it has gone, and the toast fires on the same frame the tram spawns, so the
+sentence is never both true and useful. Nothing in this file asked for that measurement, and a
+well-measured but far less important finding about the toast's rectangle was ready to file instead.
+
+## Teleporting by hand is not arriving
+
+*Proposed 2026-09-10 and applied 2026-09-11, late — see `docs/crew/FLIGHT-NOTES.md`, "the leak".*
+
+When you need the player somewhere to look at it, **go through a real door, or call the same arrival
+handler the travel menu calls** — `worldArrived(fromW,fromX,fromY)` (`engine/engine.js:3552`). Setting
+`world` and `px,py` by hand leaves the location chip, the dog, the chapter check and the record all
+describing where you *were*, and every screenshot you take is then a picture of a state the game
+cannot reach on its own.
 
 ## Deliver
 

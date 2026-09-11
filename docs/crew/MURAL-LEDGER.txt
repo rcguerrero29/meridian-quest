@@ -1,0 +1,22 @@
+# EL MURAL DE LA CUADRILLA — the ledger
+#
+# One line per panel: id|fingerprint of the words a person reads (title.en, said.en, cap.en).
+# This file is the guard for the one rule the owner set on 2026-09-11:
+#   "they can add and improve but not completely remove... we dont delete"
+# test/town.smoke.js goes RED if a listed panel leaves the wall, is renamed, is reordered,
+# or has its words edited after the fact. ADDING is free and needs no permission — append the
+# new line here in the same commit that paints the panel.
+#
+# A correction to an old panel is a NEW panel that points back at it. Never an edit.
+
+i1-dos-cabinas|ec40c29cd5ef
+i2-paso-que-nadie-vio|4cf486fd42ae
+owner-uno-por-mano|ef71a7faa498
+beto-predicado-no-consulta|e5446b347dc4
+rosa-590-contra-2080|d7f40ba31ab0
+tavo-mas-lento-que-caminar|4137b8ede087
+tono-la-marca-y-el-glifo|a81921b84bb0
+guero-tres-carriles|1bc8aec84e05
+rigo-el-claxon|d72a457b0eb1
+nacho-la-esquina-volvio|d38c41030818
+beto-aprobado-por-la-prueba-del-muro|6a32cdc7ea3f

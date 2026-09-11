@@ -31,6 +31,9 @@ const DOCUI = {
 const READS = [
   { world: "st", x: 8, y: 0, doc: "board" },
   { world: "st", x: 1, y: 0, doc: "next" },   /* the hoarding: block two's gate, and who waits for it */
+  /* el mural de la cuadrilla — any painted tile opens the whole wall (docs/crew/MURALS.md) */
+  { world: "st", x: 10, y: 0, doc: "mural" }, { world: "st", x: 12, y: 0, doc: "mural" },
+  { world: "st", x: 13, y: 0, doc: "mural" }, { world: "st", x: 15, y: 0, doc: "mural" },
   /* #69: each house's board, on the wall just west of its door, read from the tile in front of it */
   { world: "an", x: 7, y: 7, doc: "b_an" }, { world: "pp", x: 9, y: 9, doc: "b_pp" }, { world: "es", x: 9, y: 11, doc: "b_es" },
   { world: "mo", x: 9, y: 11, doc: "b_mo" }, { world: "ob", x: 9, y: 9, doc: "b_ob" }, { world: "co", x: 9, y: 11, doc: "b_co" }
@@ -54,6 +57,29 @@ const DOCS = {
   guero:   { title: { en: "Don Güero · the planner", es: "Don Güero · el planificador" }, sub: { en: "Ask him to build things. His answers come back as feedback on your requests.", es: "Pídele que construya. Sus respuestas vuelven como comentarios en tus peticiones." }, build: () => RECORDSRC.gueroDoc() },
   index:   { title: { en: "The index", es: "El índice" }, sub: { en: "Everything the town knows, by tag. Pick a category or type a word; walk there, or file about it.", es: "Todo lo que el pueblo sabe, por etiqueta. Elige una categoría o escribe una palabra; camina allá, o presenta algo sobre eso." }, build: () => RECORDSRC.indexDoc() },
   next: { title: { en: "Block two — coming", es: "La segunda cuadra — viene" }, sub: { en: "Who waits here with no address.", es: "Quiénes esperan aquí sin domicilio." }, build: () => RECORDSRC.nextDoc() },
+  /* EL MURAL — one panel per crew iteration, drawn at reading size. Add and improve, never remove:
+     docs/crew/MURAL-LEDGER.txt is the record and test/town.smoke.js fails the build if a panel goes
+     missing or its words change. The engine learns nothing about what is painted — a panel hands
+     docRender a canvas, the same bargain as TILEART. */
+  mural: {
+    title: { en: "El mural de la cuadrilla", es: "El mural de la cuadrilla" },
+    sub:   { en: "What the crew decided, painted on the day. Nothing here is ever painted over.",
+             es: "Lo que decidió la cuadrilla, pintado el mismo día. Aquí nada se tapa." },
+    build: () => {
+      const L = (typeof lang !== "undefined" && lang === "es") ? "es" : "en";
+      const secs = [];
+      (typeof MURALS !== "undefined" ? MURALS : []).forEach(m => {
+        secs.push({ h: m.title[L], art: m.art, aspect: m.aspect, cap: m.cap[L] });
+        secs.push({ kv: [
+          [L === "es" ? "Lo dicho" : "What was said", "\u201C" + m.said[L] + "\u201D"],
+          [L === "es" ? "Quién" : "Who", m.who[L]],
+          [L === "es" ? "Vuelta" : "Iteration", String(m.iter) + " \u00B7 " + m.date]
+        ] });
+      });
+      if (!secs.length) secs.push({ p: L === "es" ? "La pared est\u00E1 encalada y vac\u00EDa." : "The wall is limewashed and empty." });
+      return secs;
+    }
+  },
   /* #69, block one: the six clerks and the six house boards, built live from the record */
   h_an: { title: { en: "Doña Remedios · the annex", es: "Doña Remedios · el anexo" }, sub: { en: "Records & forms. Filed things only.", es: "Registros y formularios. Solo lo archivado." }, build: () => RECORDSRC.clerkDoc("an") },
   h_pp: { title: { en: "Chuy · the paper shop", es: "Chuy · la papelería" }, sub: { en: "Docs & templates. Filed things only.", es: "Documentos y plantillas. Solo lo archivado." }, build: () => RECORDSRC.clerkDoc("pp") },

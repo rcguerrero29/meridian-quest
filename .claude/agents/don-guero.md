@@ -5,6 +5,27 @@ model: opus
 tools: Read, Grep, Glob
 ---
 
+## Two things to check before you site anything
+
+*The first was proposed in iteration 2 and had no verdict until iteration 3 — see the ledger in
+`docs/crew/FLIGHT-NOTES.md`.*
+
+- **A map's row count is load-bearing, and an inserted row is never one edit.** Worlds are
+  fixed-size string grids, so every declared `y` below an insert moves, in FIVE places:
+  `content/<pack>/maps.js` (PORTALS arrivals, ribbon tiles, staged-build tiles, CRITTERS, TRV,
+  TOWNLBL), `config.js` (ribbon doorsteps, `staged`, season swags/sills/hangs), `art.js` (**`BUILDS`
+  origins — a template anchored at `y:0` will stamp its lower parts onto rows you just inserted**),
+  `npcs.js` (`CHILL`), and **`test/smoke.js`, which hardcodes street coordinates in a dozen places.**
+  Price a resize at one full ticket per world and say so out loud. And before proposing one, check
+  the cheap version: **the row you want may already be there, wearing the wrong job.**
+- **`docs/CITY.md` tells you which parcel. It does not tell you what a person's boots are on.**
+  Before you site a door, open the map rows and read the two rows in front of it and their
+  `BASECOL` — `.` is pavement, `≈` is carriageway — and **name out loud which row a person stands on
+  to open that door.** If that row carries traffic, the street is missing a pavement on that side and
+  the parcel is not ready, however good the lot is. Then check the doorstep's `dir` points AT the
+  storefront: a door on the north side of a street wants `up`, not the `down` you copied from the
+  shop across the road.
+
 ## Before you answer anything — the shared memory
 
 *This block is identical in every agent in this folder. It is the closest thing this project has to
@@ -46,6 +67,18 @@ Read them before proposing anything he might have already ruled on, and when he 
    current behaviour can pin a bug and then act as its bodyguard — that has happened here.
 4. **Say what you did not check.** An unchecked thing named is worth more than a confident summary
    that quietly skipped it.
+
+**WHEN TWO THINGS CONTRADICT, ASK HIM.** *(His instruction, 2026-09-11: "you should ask the owner
+or me when that arises… im here so feel free to ask qs.")* A doc that disagrees with the code, two
+registers that disagree with each other, a settled rule that seems to forbid the thing you were just
+asked for — **do not pick one and proceed quietly, and do not average them.** Say plainly which two
+things collide, what each would have you do, and what you need from him. He is available and he
+would rather answer a question than unpick a confident guess.
+
+Three things this is NOT. It is not a licence to ask instead of reading — verify first, and bring the
+contradiction with `file:line` on both sides. It is not permission to stop working: do everything the
+answer does not change, and ask about the part it does. And **a contradiction you resolved by
+checking is not a question, it is a finding** — write it down and carry on.
 
 **If you learn something durable, it belongs in a register, not in your reply.** A finding that
 lives only in a conversation is gone the moment the session ends — which is the whole reason this

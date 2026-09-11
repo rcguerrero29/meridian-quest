@@ -284,3 +284,141 @@ That turns the change from a **backward repair** into a **forward guarantee**:
 until the first insertion — an argument for shipping it **before the next quest is written**, not for
 making it bigger. `dlog` (`:4043`) and the Text Lab overrides (`:4010`) are two more positional stores;
 each is one line and each is its own row, not this one.
+
+---
+
+## A10 · Why this is plain JavaScript and not Unreal
+**Status: answered 2026-09-11. The decision was never written down, which is why it keeps being asked.**
+
+`[OWNER]` *"also how come we dont use a tool like the unreal engine again?"* — and the *again* is the
+point: this has been decided by accretion and never recorded, so nobody could look it up.
+
+### The fact that decides it
+
+`[WEB]` **Unreal has no supported web export.** Epic dropped HTML5/WebGL after **UE 4.24** and UE5
+has never shipped a browser target; what exists is experimental community work over WebGPU/WASM.
+Epic's own framing was commercial — they did not want to fund it.
+([Epic forums](https://forums.unrealengine.com/t/does-html5-export-work-for-unreal-4-27-and-5/503734) ·
+[the deprecation thread](https://forums.unrealengine.com/t/html5-deprecation-sadness/130748) ·
+[The New Stack, on third-party tools](https://thenewstack.io/a-new-tool-for-unreal-engine-developers-to-export-to-the-web/))
+
+**That single fact ends it**, because the distribution *is* the product here. `[CODE]` This game is
+**18 files, 1.8 MB** — and 596 KB of that is three.js, so the game itself is about 1.2 MB. It is a
+link you open on a phone, it installs as an app, and it runs on a plane. An Unreal build is a
+download and an install, per platform. **You cannot give somebody a gift they have to install a
+launcher for.**
+
+### The three reasons that would still hold even if web export came back
+
+| | |
+|---|---|
+| **A pack is a folder of text files** | The whole product is that a second game is *content*, not a fork. `docs/GAUGE.md` measures that; `docs/TAGS.md` guards it. In Unreal a level is a binary `.umap`, and "your gift is an afternoon of filling in a pack" stops being true |
+| **An LLM can read all of it** | `[CODE]` 6,135 lines of plain JS. Claude reads the whole engine, edits it, runs the suites, takes the screenshot and looks at it. Unreal's assets are binary `.uasset` and Blueprints are binary graphs. **Everything built this week — `/crew-fix`, Melo planting violations, the gauge, red-before-green — would be impossible.** The stack was chosen before that mattered and it is now the reason the method works |
+| **It is the wrong thing to be good at** | `[OWNER]` The stated goal is AI-delivery work. What is employable in this repo is the **judgment**: the registers, the decision log, the security write-up, red-before-green. Unreal would make him a junior Unreal dev competing with people who have ten years in it |
+
+### What Unreal would genuinely win, said plainly rather than dismissed
+
+Real lighting, shadows and materials — which is `docs/3D-LOG.md`'s standing goal, pursued by hand at
+the moment. Physics for free, which `docs/GIFTED-GAMES.md` lists as a gap. Animation tooling. If the
+ambition were ever a downloadable premium title rather than a link, the maths changes.
+
+### The honest alternative is not Unreal
+
+| Option | What it costs | Note |
+|---|---|---|
+| **Stay** ← *taken* | nothing | 18 files, a link, offline, and an engine an AI can read end to end |
+| **Push three.js further** | real work, no migration | Already vendored and running. Shadows, better materials and lighting are available **without leaving the web** — this is where `3D-LOG.md`'s goal actually lives |
+| **Godot**, if this is ever outgrown | a rewrite | The real door: a *working* HTML5 export, small builds, open source, and **scene files are text** (`.tscn`), so the AI-readable property survives. `[TRAINING]` This is the one to look at first if the answer ever changes — not Unreal |
+| **Unreal** | the product | No web target, binary assets, a download to install. It would buy rendering and cost the thing that makes this giftable |
+
+**The rule underneath, and it is the same one this project keeps rediscovering:** the constraint that
+decides an architecture is rarely the one people argue about. Everybody argues rendering. **The
+constraint here is that somebody must be able to open it on their phone from a message.**
+
+---
+
+### A10½ · What moving to Godot would actually take
+*Asked 2026-09-11: "what would it take to use godot and what would be the steps and benefits, and downfalls?"*
+
+`[WEB]` Godot 4 does have a real web export — `index.html` plus `.wasm`, `.pck` and `.js` — and it
+generates a **service worker and an offline page**, so the installable-PWA property survives. Any
+browser with WebAssembly and WebGL 2.0 runs it.
+([Godot web export docs](https://godotengine-godot-47.mintlify.app/deployment/web) ·
+[export guide](https://www.summerengine.com/blog/godot-web-export-guide))
+
+#### The steps, honestly ordered
+
+1. Install Godot 4.x and the web export templates. *(an afternoon)*
+2. **Rebuild the world model.** `WORLD_DEFS` is rows of glyph strings; Godot wants a `TileSet` and
+   `TileMap` nodes. Every map in both packs is re-authored. *(days)*
+3. **Rewrite the engine.** ~6,100 lines of JS → GDScript: movement, quests, chapters, growth,
+   seasons, the reader, the character creator, the record, the trolley. *(weeks)*
+4. **Redo the save layer** — `sanitizeSave`, `STOREPFX`, and the QR transfer, which is bespoke.
+5. **Rebuild every test.** See the downfall below; this is the one people underestimate.
+6. **Re-establish the pack seam** so a second game is still content and not a fork.
+
+#### What you would genuinely gain
+
+Real physics without writing any. Animation, tilemap and scene tooling instead of hand-drawn
+canvas. A proper scene graph. **And the AI-readable property survives** — `.tscn` scene files and
+GDScript are both text, which is why Godot is the honest door and Unreal is not.
+
+#### The downfalls, and the first two are decisive
+
+**1. The renderer you would be moving FOR is the one web export does not give you.**
+`[WEB]` Godot 4 ships three renderers and they are **not tiers of one thing** — Compatibility is the
+Godot 3 renderer forward-ported, a separate code path, not a "lite mode". Web builds get
+Compatibility. What lives only in Forward+, and therefore **cannot reach a browser**:
+
+| Forward+ only | what it is |
+|---|---|
+| **SDFGI / VoxelGI** | real-time global illumination — light bouncing off surfaces |
+| **Volumetric fog** | light you can see the shape of |
+| **SSR** | screen-space reflections |
+
+And the one that bites hardest for a world with a day/night cycle: `[WEB]` **Compatibility is limited
+to ONE directional light, and a maximum of eight omni or spot lights affecting any single object**,
+because it uses a UBO rather than Forward+'s clustered light grid — which carries hundreds of lights
+with no per-object limit.
+([Godot renderer docs](https://docs.godotengine.org/en/stable/tutorials/rendering/renderers.html) ·
+[a technical comparison](https://slicker.me/godot/renderers.html) ·
+[the Compatibility issue tracker](https://github.com/godotengine/godot/issues/66458))
+
+So `docs/3D-LOG.md`'s standing goal — *"a pixel world that obeys real light and real depth"* — is
+asking for exactly the bucket that stops at the browser door. **That is the case collapsing on its
+own terms.** `[TRAINING]` One caveat stated rather than hidden: sources disagree about whether SSAO
+survives in Compatibility, so do not plan around it either way without checking the version you would
+actually ship.
+
+**2. Every test you own would have to be rewritten, and the method with them.**
+`[CODE]` All seven suites drive the real game through `page.evaluate()` and read its own globals —
+`WORLDS`, `TRO`, `T3`, `camSet()`, `sanitizeSave()`. **A wasm build has no JS globals to read.**
+The gauge, R10, `test/bump.js`, Melo planting violations, Chava riding the trolley, every "I measured
+it rather than reasoned about it" in this repo — all of it rests on the game being readable text that
+an agent can poke at from outside. That is not a port. **It is starting the quality practice again
+from nothing**, and the practice is the part that is worth something.
+
+**3. Size — and it is a first-impression problem, not a technical one.** `[WEB]` A stock Godot web
+build ships a **~33 MB `.wasm`**; the ~2.4 MB figure people quote needs a custom engine build with
+modules stripped, which is its own project.
+([size optimisation write-up](https://amann.dev/blog/2025/godot_web_size/)) `[CODE]` This game is
+**1.8 MB total, 18 files.**
+
+Nothing *breaks* at 33 MB. GitHub Pages' limits are far above it, the browser will cache it, and on a
+laptop nobody notices. **What breaks is the gift.** `docs/GIFTED-GAMES.md` measured the whole product
+at forty minutes of attention across its entire life, opened from a message on a phone. Ten or twenty
+seconds of blank screen and a progress bar, on someone else's data, before anything appears — **that
+is where a present dies, and it is the one moment the format cannot afford.** `[TRAINING]` The wasm
+compresses substantially over the wire and this has not been measured for a real build; the argument
+does not rest on the exact number, it rests on there being a wait at all where today there is none.
+
+#### The answer
+
+**Not now, and the trigger is specific rather than a feeling.** Move if — and only if — the product
+becomes one where *physics and animation are the point* and a 2.4 MB download is acceptable. A gifted
+game that opens from a message is not that product.
+
+**And there is a cheaper 80%.** `[CODE]` three.js is already vendored and running; shadows, better
+materials and real lighting are available inside it, at a fraction of the cost, without touching the
+tests or the packs. `docs/3D-LOG.md`'s goal lives there. **Before anyone prices a migration, price
+that.**
