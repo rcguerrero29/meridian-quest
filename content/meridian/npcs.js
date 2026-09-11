@@ -17,7 +17,20 @@ const WNPC={hq:STATIONS,lc:{r:{npc:"rosa",q:[10]},y:{npc:"chuy",q:[11]}},st:{e:{
             me:{s:{npc:"chelo",q:[16,17,23]},n:{npc:"nando",q:[18,20]},
                 u:{npc:"perla",q:[19,21]},v:{npc:"chava",q:[22],chat:1}}};
 /* looks keyed by WHO (npc id) win over the map letter — the four casts wear their own colours */
-const NPCLOOK={portero:{robot:true,shirt:"#9AA3AD",skin:"#B8C0C8",hair:"#5B6470",style:"cap"}, /* the tin man (#8); `robot` sends drawPerson to drawRobot */
+/* Doña Meche and Doña Tencha, added 2026-09-11. Both were placed on 2026-09-07 on map letters that
+   were already taken — m is Marcus the CFO, c is the CEO — and NPCLOOK's letter half is a GLOBAL
+   namespace while map letters are per world, so for four days the tamalera at the trolley stop wore
+   a charcoal suit, a white collar and a necktie, and the neighbour with the plants wore the CEO's.
+   Pili, iteration 3: "a person with no look does not crash. She just quietly becomes somebody else."
+   Judged silhouette first: Yola owns braids+pink on that street and Mari owns pony+hard hat, so
+   Meche gets `buns` — the only style that adds mass ABOVE the crown, which is what a woman working
+   over a steam pot does with her hair — over the darkest female torso on Calle Dos. Tencha gets the
+   same grey DOWN past the jaw: she is at home, Meche is working, and that is the only character note
+   either of them gets for free. `pattern` reads as apron weave up close and vanishes at ten tiles,
+   which is honest: it is a close-up gift, not silhouette work. */
+const NPCLOOK={meche:{shirt:"#7A3B2E",skin:"#B97E52",hair:"#B9B9C0",style:"buns",pattern:"stripes"},
+               tencha:{shirt:"#4E7A5A",skin:"#D9995F",hair:"#9A9AA2",style:"long"},
+               portero:{robot:true,shirt:"#9AA3AD",skin:"#B8C0C8",hair:"#5B6470",style:"cap"}, /* the tin man (#8); `robot` sends drawPerson to drawRobot */
   naye:{shirt:"#2FA5A0",skin:"#C08356",hair:"#171219",style:"long"}, /* Naye Robles, 29 — Doña Chelo's niece, Xochi's apprentice; the chair (Nacho, 2026-09-07) */
   tacho:{shirt:"#3A3F46",skin:"#B97E52",hair:"#8E8E96",style:"buzz"},yesenia:{shirt:"#B3352B",skin:"#D9995F",hair:"#171219",style:"long"},
   moy:{shirt:"#2AA47C",skin:"#C08356",hair:"#26202B",style:"curly"},licha:{shirt:"#D9A441",skin:"#E5AC82",hair:"#8E8E96",style:"braids"},

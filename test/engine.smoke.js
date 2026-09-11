@@ -112,6 +112,38 @@ const { chromium } = require('playwright-core');
       if (n.doc && !docDef(n.doc)) P.push(id + ':' + n.npc + " carries a document that does not exist ('" + n.doc + "')");
       (n.q || []).forEach(qi => { if (!QEN[qi]) P.push(id + ':' + n.npc + ' gives quest ' + qi + ' which does not exist'); });
     }));
+    /* ---- and the look is HERS ---- 
+       `lookOf` resolves by npc id first and map letter second (engine.js:3768), and that fall-back
+       is deliberate and load-bearing — it is what lets an unnamed extra render at all, and
+       test/smoke.js pins it using Lupe, who has no named look and is not meant to need one.
+       But the letter half of NPCLOOK is a GLOBAL namespace while map letters are assigned per
+       world: `m` is Marcus in hq, Moy in ta, and Doña Meche in ex. Three people, one key, one
+       table, no warning. So a person placed on a letter somebody else already owns silently wears
+       that person's clothes, and nothing anywhere says a word.
+       The check one line above this asked whether a look CAME BACK. It means whether the look is
+       HERS, and it has passed two wrong characters every run in both shells since 2026-09-07 —
+       the sixth guard in this repo to read a proxy for the thing (docs/REGRESSION.md: a guard has
+       to read the noun it actually means).
+       Measured, not reasoned: on unchanged content this goes red on exactly two pairs, and both
+       are the two people added after the letter table was full.
+       Asked by OBJECT IDENTITY rather than by counting distinct looks — a count passes vacuously
+       in any pack with fewer people than letters, which is what docs/GAUGE.md exists for. */
+    {
+      const byLook = new Map();
+      const seen = new Set();
+      Object.entries(WORLDS).forEach(([id, w]) => w.npcs.forEach(n => {
+        if (!n.npc || seen.has(n.npc)) return; seen.add(n.npc);
+        const lk = lookOf(n); if (!lk) return;
+        if (!byLook.has(lk)) byLook.set(lk, []);
+        byLook.get(lk).push(n.npc);
+      }));
+      byLook.forEach(who => { if (who.length > 1) {
+        const names = who.map(k => npcName(k) || k);
+        P.push(names.join(' and ') + ' are drawn as the same person — ' +
+               who.slice(1).join(', ') + ' never got a look, so they are wearing ' + (npcName(who[0]) || who[0]) + "'s clothes");
+      }});
+    }
+
     // ---- every document builds; every readable thing points at one ----
     Object.keys(DC()).forEach(id => { let s = null; try { s = docSections(id); } catch (e) { P.push("document '" + id + "' throws: " + e.message); return; }
       if (!Array.isArray(s)) P.push("document '" + id + "' does not build"); });

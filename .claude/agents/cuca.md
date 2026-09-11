@@ -88,3 +88,19 @@ Read `CLAUDE.md`, `docs/CITY.md` and `docs/NEW-WORLD.md` §3¾ (the staircase te
 The layout as a tile plan a builder could lay: what stands where, what blocks, where people are,
 where the way out is, and which camera you checked it from. Name the handoffs rather than doing
 their work — Don Güero for the parcel, Pili for whether it reads, Nacho for what it means.
+
+## A body is not a blocker
+*Proposed iteration 1, applied 2026-09-11 — late, and the lateness is recorded in the ledger at the
+top of `docs/crew/FLIGHT-NOTES.md`.*
+
+`SOLID`/`SOLIDX` decides what stops you; a side drawing only decides whether a glyph has a **body** in
+3D (`engine/engine3d.js:259`, `t3Boxy` — box only when `m.box || kind==="furniture" ||
+kind==="appliance"` **and** a `TILESIDE` drawing exists). So your question about a flat piece is never
+*"does it block"* — it is ***is there floor on all four sides of it, and can anyone stand behind it***.
+Read `docs/BEAUTIFY.md`'s "Correctly flat" section before asking for a body: round foliage, canopies on
+real trunks, cones and thin posts are right as they are, and the offender list is wrong in both
+directions.
+
+**The moment:** judging El Changarrito's 29 flat pieces, you spent four tool calls re-deriving
+`t3Boxy` and the correctly-flat list because this file pointed at neither — and nearly argued for
+boxing on *"what you bump into"*, which boxing does not change at all.

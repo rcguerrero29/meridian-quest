@@ -829,6 +829,42 @@ const { chromium } = require('playwright-core');
     fails.push(...reach);
   }
 
+
+  /* ---- every proposed persona edit has a verdict ----
+     `docs/crew/FLIGHT-NOTES.md` has said since the day it opened that the calling session applies a
+     proposed persona edit or refuses it, IN WRITING, there. On 2026-09-11 a session wrote that
+     sentence and then closed the run without doing it; Rosa found the leak by following an
+     instruction she had never been given. A ledger table was added to make a missing verdict
+     VISIBLE. One run later it leaked again — twice, caught by Pili and Don Güero independently,
+     neither of whom was looking for it.
+     So the rule stops being a promise. This reads the noun it means: not "does the file have a
+     ledger" but "does every proposal in it have a row." An un-actioned proposal is indistinguishable
+     from a refused one, and both are indistinguishable from nothing at all — which is exactly why
+     it leaked twice from a file whose own header forbids it. */
+  {
+    const notes = path.resolve(__dirname, '..', 'docs', 'crew', 'FLIGHT-NOTES.md');
+    if (fs.existsSync(notes)) {
+      const txt = fs.readFileSync(notes, 'utf8');
+      const cut = txt.indexOf('# THE LEDGER');
+      const ledger = cut < 0 ? '' : txt.slice(cut, txt.indexOf('\n---', cut) + 1 || undefined);
+      /* Parse the noun that is actually there. The first version of this check split on the
+         "### <agent>" headings — and every heading in that file is the literal anonymised text
+         "### (agent)", so it found zero proposals and went GREEN on a file with two un-actioned
+         ones in it. A guard that passes by finding nothing is the failure docs/GAUGE.md exists for,
+         and it was written into this very check on the day it was written to stop a different one.
+         What a proposal always contains is the PATH IT WANTS TO CHANGE — "`.claude/agents/pili.md`"
+         — so read that. It cannot be anonymised away, because the edit is useless without it. */
+      const proposed = [];
+      const re = /\.claude\/agents\/([a-z0-9-]+)\.md/gi;
+      let m; while ((m = re.exec(txt))) proposed.push(m[1].toLowerCase());
+      [...new Set(proposed)].forEach(who => {
+        if (!new RegExp('\\|\\s*`?' + who + '`?\\s*\\|', 'i').test(ledger))
+          fails.push(who + ' proposed a change to their own persona and nobody ever said yes or no — ' +
+                     'there is no row for them in the ledger at the top of docs/crew/FLIGHT-NOTES.md, so the proposal ' +
+                     'looks exactly like one that was considered and declined, and both look like nothing at all');
+      });
+    }
+  }
   fails.push(...r);
   await browser.close();
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }

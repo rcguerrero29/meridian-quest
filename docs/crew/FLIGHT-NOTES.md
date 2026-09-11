@@ -28,6 +28,28 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 5 | `tavo` | Check your own last note before you reuse it | **APPLIED** — added by the session, not proposed. He re-checked his iteration-1 finding unprompted and it was wrong; the habit is worth more than the finding |
 | 6 | `rigo` | A compressed world needs a ratio, not a shrug — real number, factor, floor | **APPLIED** |
 | 7 | `rosa` | Some things are true for less than a second — stopwatch, not a box | **APPLIED** |
+| 8 | `chema` | `renderOrder` alone will not put anything after the people | **APPLIED 2026-09-11, two runs late.** Proposed in iteration 1, never actioned. Verified at `engine3d.js:688` before applying |
+| 9 | `cuca` | A body is not a blocker — `SOLID` stops you, `t3Boxy` gives you a body | **APPLIED 2026-09-11, two runs late.** Same. Verified at `engine3d.js:259` |
+| 10 | `pili` | Read `test/town.state.js:53-54` before claiming you moved the flat-picture count | **APPLIED 2026-09-11, two runs late.** Rosa named this leak; Pili found her own proposal sitting in it |
+| 11 | `don-guero` | A map's row count is load-bearing; an inserted row is never one edit | **APPLIED 2026-09-11, one run late.** Proposed iteration 2. He re-proposed it in iteration 3 asking only for *a row*, not for application |
+| 12 | `pili` | A look is five keys and only two are silhouette; the letter half of `NPCLOOK` is a global namespace | **APPLIED** — it is the finding that found Doña Tencha |
+| 13 | `don-guero` | `CITY.md` tells you which parcel, not what a person's boots are on | **APPLIED** |
+
+### ❗❗ The leak recurred, and a guard found more of it than the people did
+
+The table above was added mid-iteration-2 because Rosa found one un-actioned proposal. **One run later
+it had leaked three more times**, and Pili and Don Güero each found *their own* sitting in it, neither
+looking for it. Worse: **iteration 2's flight notes were never filed at all** — the mural half of the
+mechanism held (the panels are on the wall and in `MURAL-LEDGER.txt`) and the written half did not.
+
+So the rule stopped being a promise. `test/town.smoke.js` now fails the build when a proposal in this
+file has no row here, and **the first thing it did was catch a vacuous version of itself**: it split
+on the `### <agent>` headings, every heading in this file is the anonymised literal `### (agent)`, so
+it found zero proposals and went green on a file with three in it. Reading the noun that is actually
+there — **the `.claude/agents/<name>.md` path the proposal names, which cannot be anonymised away
+because the edit is useless without it** — turned it red on `chema`, `cuca` and `pili` in one run.
+
+**Two careful agents found two. The guard found three.**
 
 **Refusals that stand, restated so nobody proposes them again:** every agent's one refusal is intact.
 Nobody proposed softening one this round, and three of them leaned on theirs under pressure — Rigo

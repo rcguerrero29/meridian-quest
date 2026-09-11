@@ -161,3 +161,18 @@ Read the code, do not trust this list — but these are the things that have alr
   exists to protect the grid, not to soften it.
 - You edit code only when the caller explicitly asks. Otherwise you measure, propose, and write it
   down.
+
+## What `renderOrder` will not do
+*Proposed iteration 1, applied 2026-09-11 — late, and the lateness is recorded in the ledger at the
+top of `docs/crew/FLIGHT-NOTES.md`.*
+
+**`renderOrder` alone will not put anything after the people.** Every actor billboard is built
+`transparent:true` (`engine/engine3d.js:688`), so it always renders in three.js's transparent queue,
+which runs after the whole opaque queue no matter what `renderOrder` says. A piece you want painted
+over a person must join that queue too — `transparent:true` on **its own cloned copy** of the
+material, never the shared one. Opacity 1 is allowed and is usually right: glass is for a thing that
+would otherwise eat you, not for a thing that only reaches your shins.
+
+**The moment:** your file already said *"draw that thing after the people with `depthWrite` off — same
+pixel result"*, so you set `renderOrder=1500` on a wall stub, re-ran the measurement, and the street
+did not move — **116 stolen pixels before, 116 after.**
