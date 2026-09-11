@@ -69,7 +69,57 @@ contain; both are worth knowing and neither was known before.
 hand count that disagreed with the machine, declared honestly, which forced the instrument to be
 checked before it was trusted. A round that produces that is not a wasted round.
 
-## Iteration 2 — *(to be filled after the run)*
+## Iteration 2 — 2026-09-11
+
+**The scoreboard is still 29.** Nothing has landed from either iteration; ~30 patches are in hand
+awaiting review. **The number was never the result.**
+
+### The result: a second iteration DID build on the first, and it is not close
+
+Every one of the four read `FLIGHT-NOTES.md` and named what it changed, with the moment:
+
+- **Beto had no entry of his own and used four other people's.** Pili's note told him the scoreboard
+  counts map tiles only, so a flat prop added to the tram would move it by zero — he ran the
+  scoreboard on pristine `main` and on his patched tree and diffed: identical, 29 both sides.
+  **He avoided reporting a win the owner's eyes would never find, by reading somebody else's note
+  rather than by being clever.** Chema's note on the transparent queue told him not to reach for
+  `renderOrder`; he used opaque meshes and a pixel diff instead. Rosa's told him teleporting by hand
+  is not arriving, so he judged nothing in the HUD from a teleported frame.
+- **Three of four asked the owner a question** — the rule added hours earlier, used on its first run,
+  each with both sides cited.
+- **None re-derived the settled facts.** The 29 and its breakdown, `troUpdate`'s three states, the
+  unreferenced `troCall()`, the arrival-summons-a-tram loop: all taken as given.
+
+### What iteration 2 found that iteration 1 could not
+
+**A test was standing guard over the bug.** `test/smoke.js` asserted *"standing at the stop does not
+call the trolley"* — **the summon, written down as a requirement**, passing every day while nine
+trams a minute ran past an empty stop. Beto predicted in his pre-flight that his instinct would be to
+shrink the fix to keep the old assertion green; the gap appeared exactly as predicted
+(`ReferenceError: TRO_EVERY is not defined`), he recognised it because he had named it, and deleted
+the assertion in the open with the reason written above the block. **That is `QA-PASS.md` E2 — a test
+that pins current behaviour becomes the bug's bodyguard — caught by an agent, in advance, because it
+was in the shared memory he reads.**
+
+### Two agent claims that were wrong, caught by review
+
+- **The chromium path.** Beto reported `CHROMIUM_PATH=/opt/pw-browsers/chromium` is "not a directory"
+  and that the real path is `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`. **It is a symlink
+  to precisely that file.** His conclusion (check your shell first) was right; his diagnosis was
+  wrong, and acting on it would have changed the env var everywhere for nothing.
+- **`H`.** Iteration 1 recorded that `H` "does not fall through to the cutout". Cuca challenged it:
+  the code says it should build. **Both were half right.** `SOLID` does not contain `H`, and
+  `engine3d.js:417` skips any non-solid glyph *before* `kind` is read — so `H` produces zero flat
+  pieces **because it produces no piece at all.** Which surfaces its own finding: **the produce crate
+  is something you walk straight through.**
+
+### The honest verdict
+
+Iteration 2 did not move the metric. It read the first round, avoided its wrong turns, found a test
+guarding a bug, and asked four questions nobody could have answered alone. **If the question was
+"does a second pass compound", the answer is yes.** If the question was "do two passes make the town
+measurably better on their own", the answer is no — **because review is the bottleneck, not
+generation**, and that is the finding worth acting on.
 
 ## What we are actually testing
 
