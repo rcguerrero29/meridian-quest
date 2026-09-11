@@ -162,3 +162,42 @@ against it is measured against the wrong thing. — *Chema, 2026-09-09*
 4. **A named baseline.** Every number above was taken ad hoc. A `test/` script that renders the same
    six frames and prints the same six numbers would make "continuously improve" mean something
    arithmetic rather than something remembered.
+
+### 2026-09-11 · the tram's wheels were never wheels — and the strobe that wasn't
+
+- **Asked:** would raising `TRO_SPEED` 3.4 → 6.0 make a 12-segment wheel wagon-wheel? Derived answer,
+  not looked at: 28.2°/frame today, 49.8° at 6.0, past the 30°/segment limit.
+- **Measured instead, in the real game at 390×844, 3D, side on** — and the control came first:
+  a screenshot diff with **nothing changed** read **1864 px** while the first "wheels vs no wheels"
+  measurement read **1506**. The opening answer was smaller than its own noise floor. Everything
+  below was taken after the control read **0**.
+- **The wheel's world axle as `rotation.y` sweeps:** `(-1,0,0)` at 0°, `(-0.866,-0.5,0)` at 30°,
+  `(0,-1,0)` at 90°. **A rolling wheel's axle is `(0,0,±1)`. It is never once near it.**
+  `engine3d.js` set the axle correctly along Z and the very next line (`rotation.z=Math.PI/2`,
+  commented *"turn it to face along the rails"*) undid it. So the per-frame `rotation.y` did not spin
+  a wheel — **it tumbled a cylinder end over end.**
+- **Per-frame changed pixels in the 3663-px wheel strip**, tram pinned, only the angle moving:
+  **today 3.4 = 160 · today 6.0 = 204 · fixed 3.4 = 12 · fixed 6.0 = 41.** All four wheels together
+  occupy **168 px**. At the shipped speed the wheel repainted itself completely, every frame.
+- **Ground contact, from real vertices:** as shipped the wheel bobbed to **+0.080 tiles (2.66 CSS px)**
+  twice a revolution, on a wheel **5.5 CSS px across** — half its own diameter, off the road.
+  Reproduced independently by the calling session: **−0.0051 shipped, −0.0000 fixed.**
+- **Shipped:** one line deleted. Guarded by a check that reads the **axle**, not a bounding box.
+- **REJECTED — more segments (12 → 24).** Measured with the bug in place: **209 px/frame against
+  203.** It is not an aliasing fault and more segments cannot touch it. **Do not try this again.**
+- **REJECTED — scaling the visual rotation below 15°/frame.** With the real fix applied, 0.28× gave
+  **39.9 against 41.0** — no measurable effect, and it decouples the wheel from the ground it rolls
+  on, which is its own kind of fake.
+- **The wagon-wheel effect is not a risk here at any speed under discussion.** A 12-gon 5.5 px across
+  has a circular silhouette; six consecutive frames at 6.0 with the fix are identical discs.
+- **Watch out — the guard could not see the wheels.** The old check read
+  `Box3.setFromObject(T3.tram).min.y`: **0.0000 with four wheels, 0.0000 with all four deleted**,
+  because the skirt satisfies it. Ninth guard in this repo to read a proxy for the thing.
+- **Not done, logged:** `TRO_SPEED` stays 3.4 for now. Chema signs 6.0 and widens the readability
+  ceiling to ~7.9 tiles/s (the 3D window on that row is **9.9 tiles**, not the 10.4 in circulation —
+  that number was CSS width ÷ TS and conflated CSS with world). **The wheel ships alone first**, so
+  that whatever anyone thinks of 6.0 afterwards, they are judging a tram with wheels on it.
+- **Also logged, not proposed:** the tram goes full speed → zero **in one frame at any speed**, and
+  the only sign it stopped is a red lamp drawn in **2D only** — `t3Trolley` has no hold state. At 6.0
+  the look-ahead gives 433 ms and a 2-tile brake ramp needs 333 ms, so a ramp fits.
+

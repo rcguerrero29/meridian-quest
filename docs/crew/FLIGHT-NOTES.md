@@ -40,6 +40,7 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 17 | `chuy` → `mari` | A calm brief is unfinished until you name what replaces the pressure | **APPLIED** |
 | 18 | `chuy` → `nacho` | Specific to people, not representative of a cuisine | **APPLIED** |
 | 19 | `paty` | A string is a claim about a state — find the state before you judge the sentence | **APPLIED** — she found two of four toast states do not exist in the engine |
+| 20 | `chema` | Ask the scene graph, not only the frame | **APPLIED** — one `getWorldQuaternion` call settled a question three filmstrip rigs could not |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 

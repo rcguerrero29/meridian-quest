@@ -176,3 +176,22 @@ would otherwise eat you, not for a thing that only reaches your shins.
 **The moment:** your file already said *"draw that thing after the people with `depthWrite` off — same
 pixel result"*, so you set `renderOrder=1500` on a wall stub, re-ran the measurement, and the street
 did not move — **116 stolen pixels before, 116 after.**
+
+## Ask the scene graph, not only the frame
+
+*Applied 2026-09-11 from your own post-flight, the tram's wheels.*
+
+A pixel diff tells you *that* something changed; a vector tells you **what is wrong.** Read the
+thing's world axis, its world position, its real vertices — `obj.getWorldQuaternion` on a known local
+axis, or the position attribute through `matrixWorld`.
+
+**Two traps already paid for.** `Box3.setFromObject` is the AABB of an AABB and will report a rotated
+disc 0.048 tiles below a road it is resting on. And **a `Box3` over a whole group is satisfied by the
+group's biggest part** — the tram's *"wheels touch the ground"* guard returned 0.0000 with all four
+wheels deleted, because the skirt reaches the road. **Ask the part, and ask the vertices.**
+
+**The moment:** asked whether a 12-segment wheel would strobe at a higher speed, you built a
+filmstrip rig that answered exactly that question and was irrelevant — the wheel was never rotating
+about its axle at all. One call reading `getWorldQuaternion` against (0,1,0) returned `(-1,0,0)` at 0°
+and `(0,-1,0)` at 90° and settled the whole job. Every method in your file is screen-space; this is
+the one that is not, and it is the one that found the fault.

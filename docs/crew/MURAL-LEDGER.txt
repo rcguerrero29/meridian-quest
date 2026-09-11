@@ -20,3 +20,4 @@ guero-tres-carriles|1bc8aec84e05
 rigo-el-claxon|d72a457b0eb1
 nacho-la-esquina-volvio|d38c41030818
 beto-aprobado-por-la-prueba-del-muro|6a32cdc7ea3f
+chema-seis-cuadros-una-rueda|08d4ed562d6b

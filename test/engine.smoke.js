@@ -1086,6 +1086,32 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
       T3.tram.traverse(o => { const u = o.userData || {}; if (u.wheel) wheels++; if (u.driver) driver++; });
       if (wheels < 2) P.push('the trolley has ' + wheels + ' wheels — a tram that rolls down a street has wheels you can see');
       if (!driver) P.push('nobody is driving the trolley');
+      /* ---- and a wheel turns about its axle ----
+         The check above asks whether the tram's bounding box reaches the road. Measured: it reads
+         0.0000 with all four wheels present AND 0.0000 with all four deleted, because the skirt
+         (engine3d.js:602) satisfies it. A guard written to prove the tram has wheels on the ground
+         cannot see the wheels — the ninth time in this repo that a guard has read a proxy for the
+         thing (docs/REGRESSION.md).
+         This reads the noun: a wheel that rolls down a street turns about an axle that lies ACROSS
+         the rails. Measured as shipped, the axle swept (-1,0,0) at 0 degrees to (0,-1,0) at 90 and
+         was never once near (0,0,+/-1) — so what rolled down Calle was a cylinder tumbling end over
+         end and lifting half its own diameter off the road, twice a turn, at the shipped speed,
+         since the day it landed. Found by Chema, by cropping the wheel to 8x and looking at it,
+         after his own first measurement came back smaller than his control. */
+      const axle = new THREE.Vector3(), q = new THREE.Quaternion();
+      let spun = 0, tumbling = [];
+      T3.tram.traverse(o => { if (!(o.userData || {}).wheel) return;
+        spun++;
+        [0, 30, 90].forEach(deg => {
+          o.rotation.y = deg * Math.PI / 180; o.updateMatrixWorld(true);
+          o.getWorldQuaternion(q);
+          axle.set(0, 1, 0).applyQuaternion(q);
+          if (Math.abs(axle.z) < 0.9) tumbling.push(deg);
+        });
+        o.rotation.y = 0; o.updateMatrixWorld(true); });
+      if (spun && tumbling.length)
+        P.push('the trolley\'s wheels do not turn like wheels — the axle points along the street instead of across it, so each wheel flips end over end and lifts off the road twice a turn instead of rolling');
+
       /* and it must read as a tram from every stop you can turn the camera to, not just the two
          long sides — six window slabs at z=±0.37 left a bare brown slab at 90 degrees */
       let faces = 0; T3.tram.traverse(o => { if ((o.userData || {}).glazing) faces++; });
