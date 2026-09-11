@@ -392,3 +392,82 @@ distinguishes *waiting here* from *living here*, and the two look identical to a
 question of the form *"is somebody at X"* must say which somebodies count, in the code, at the point
 it asks.
 
+### L20 · The engine guards the transit **brand** and not the transit **glyph**
+
+**The guard that exists.** `test/smoke.js:3283-3288` fails the build if `\bMQT\b` appears in
+`engine/engine.js` or `engine/engine3d.js`, with the message *"a pack name in engine code is the one
+thing the portability law forbids."* It is a good guard. It passes.
+
+**The thing it cannot see.** `"Y"` — Meridian's stop glyph, declared by the pack at
+`content/meridian/art.js:198` — appears in `engine/engine.js` **five times**: `:679` (isometric
+colour), `:1165` (`troAtStop`, *where the vehicle serves*), `:2890` (stepping here opens the travel
+panel), `:4300` (`BASECOL`), `:4501` (a mural may not paint here). Nothing objects. **Three lines
+below a comment in the same test saying a hardcoded pack glyph list was deleted because engine code
+naming a pack's glyphs is the portability law wearing a different hat.**
+
+**This is the fourth time in this repository.** `docs/REGRESSION.md` R8 read *what `index.html`
+loads* when it meant *what we publish*; the mutant net read source with comments stripped when it
+meant *every line*; the version test asked whether two strings were **equal** when what mattered was
+that one **moved**. Now the portability guard reads a **name** when it means a **glyph**. Same shape,
+fourth instance, and the rule bought with the last one is at the top of `REGRESSION.md`: **a guard has
+to read the noun it actually means.**
+
+**What a second game hits.** Its own stop glyph does nothing — no braking, no travel panel, no
+colour — while its map's `Y`s, whatever they mean in its alphabet, come out red, are protected from
+murals, and open a menu it never declared.
+
+**The fix, and the part of it that is not negotiable.** Two of the five sites are **mechanism** and
+they are *the same fact said twice*: `:1165` asks where the vehicle serves, `:2890` asks where the
+pass opens. **They move to the seam together or not at all** — splitting them ships an engine that
+locates a stop one way for the tram and another way for the panel, which is two names for one part
+created deliberately inside the change whose whole purpose is to stop having two. `:679` and `:4300`
+are art and are already L1. `:4501` is the interesting leftover: after this change it is the only
+trolley-shaped `Y` left in the engine **and it is not trolley-shaped at all** — it is a mural rule
+wearing a transit glyph, and it wants a `protect:true` flag in the tile, not a letter.
+
+**And the tag on the tile fails rule 1.** `"Y":{lift:13,kind:"transit",stand:true}`. Run it out loud:
+it is a **billboard**, it stands **1.3 tiles**, it is **walkable**, it shows art on **two faces**
+(`art.js:107`, `:166`). Four clean geometry answers and not one of them is the word *transit*.
+`kind:"transit"` has **zero readers in the repository** — verified by grep, the declaration is its
+only occurrence. L7 predicted it; it is now confirmed live. **It is not a kind, it is a label**, and
+it should not survive the change that gives the stop a real home.
+
+**Found by** Toño, 2026-09-11, on the gap analysis the owner asked for by name.
+
+### L21 · One world, one line — `.find()` is the ceiling, and three dead words are inside it
+
+**`engine/engine.js:1152`** — `const L=TROLLEYAT.find(r=>r.world===(wid||world))`. **A pack that
+declares two lines in one world silently loses the second.** No error, no warning. And `TROLLEYAT`
+entries carry no `id`, so nothing anywhere can refer to a line in order to complain about it.
+
+Dead vocabulary found in the same block, all verified by grep:
+
+- **`troCall()` (`engine/engine.js:1167`) has zero callers in the entire repository** — its own
+  definition is its only occurrence. Summoning happens inline at `:1171`. **The verb the owner asked
+  for by name** (`docs/ASKS.md:52`, *"or if i call it"*) **exists as an unreachable function.**
+- **`TRO.said` (`:1151`)** is declared and never read.
+- **`kind:"transit"`** — see L20.
+
+And `TROLLEYAT` is **absent from `docs/NEW-WORLD.md`'s optional-seam list** while `TRV` is on it: a
+new world is told about the menu and not about the line.
+
+**The related collision, four lines apart in one file:** `TROLLEYAT` uses `world`
+(`content/meridian/maps.js:281`) and `TRV` uses `w` (`:282`). One part, two names. `world` is the
+name that keeps.
+
+### L22 · `TRO_LEN` is not merely undeclared — it is unrepresentable
+
+Three of the four trolley constants (`TRO_SPEED`, `TRO_EVERY`, `TRO_HOLD`, `engine/engine.js:1150`)
+are engine-wide values a pack cannot set; a second world's tram runs at Meridian's speed on
+Meridian's headway. That is an ordinary seam gap.
+
+**`TRO_LEN` is worse in kind.** It is read at **mesh build time**, inside `if(!T3.tram)` —
+`engine/engine3d.js:601` `BoxGeometry(TRO_LEN-0.1-CAB*2,…)`, `:603` `(TRO_LEN-0.06,…)`, `:605`
+`(TRO_LEN-0.02,…)`, plus `:619` and `:637`. The geometry is baked once and cached. **So a second
+length is not undeclared, it is unrepresentable without rebuilding the mesh** — a distinction no
+amount of asking a second pack would ever have surfaced, because the town declares no tram at all.
+
+**Which is the register's own lesson this round:** the town can answer **yes**, **no**, or **nothing
+at all**, and *silence is not a pass.* A tag the town never declares has not been tested by the town;
+it has been skipped by it. Say **untested**, not *travels*.
+
