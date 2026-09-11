@@ -32,7 +32,8 @@ const READS = [
   { world: "st", x: 8, y: 0, doc: "board" },
   { world: "st", x: 1, y: 0, doc: "next" },   /* the hoarding: block two's gate, and who waits for it */
   /* el mural de la cuadrilla — any painted tile opens the whole wall (docs/crew/MURALS.md) */
-  { world: "st", x: 12, y: 0, doc: "mural" }, { world: "st", x: 13, y: 0, doc: "mural" },
+  { world: "st", x: 10, y: 0, doc: "mural" }, { world: "st", x: 12, y: 0, doc: "mural" },
+  { world: "st", x: 13, y: 0, doc: "mural" }, { world: "st", x: 15, y: 0, doc: "mural" },
   /* #69: each house's board, on the wall just west of its door, read from the tile in front of it */
   { world: "an", x: 7, y: 7, doc: "b_an" }, { world: "pp", x: 9, y: 9, doc: "b_pp" }, { world: "es", x: 9, y: 11, doc: "b_es" },
   { world: "mo", x: 9, y: 11, doc: "b_mo" }, { world: "ob", x: 9, y: 9, doc: "b_ob" }, { world: "co", x: 9, y: 11, doc: "b_co" }

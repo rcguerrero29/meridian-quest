@@ -49,7 +49,9 @@ const WORLD_DEFS={
      "#........◺▼≡≡≡.....#",
      "#.........◺◺◺◺.....#",
      "####################"],
- st:["BBQQ$QQBBvBB▧▧EBZZZOZZIII%IIB2",   /* x12-13: el mural de la cuadrilla, on the wall beside city hall's own door. One M per panel — when the
+ st:["BBQQ$QQBBv▧B▧▧E▧ZZZOZZIII%IIB2",   /* x10,12,13,15: el mural de la cuadrilla. It GREW when the owner made it one panel per agent,
+        and it paints around the sugar skull at x11 and around city hall's door at x14 the way a real
+        muralist paints around a window. One M per panel — when the
         panels outgrow the paint, the NEXT B becomes an M. The wall grows; it never scrolls. */
      "..............................",
      "...........c..................",

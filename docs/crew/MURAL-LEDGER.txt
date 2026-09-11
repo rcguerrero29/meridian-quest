@@ -11,3 +11,11 @@
 
 i1-dos-cabinas|ec40c29cd5ef
 i2-paso-que-nadie-vio|4cf486fd42ae
+owner-uno-por-mano|ef71a7faa498
+beto-predicado-no-consulta|e5446b347dc4
+rosa-590-contra-2080|d7f40ba31ab0
+tavo-mas-lento-que-caminar|4137b8ede087
+tono-la-marca-y-el-glifo|a81921b84bb0
+guero-tres-carriles|1bc8aec84e05
+rigo-el-claxon|d72a457b0eb1
+nacho-la-esquina-volvio|d38c41030818

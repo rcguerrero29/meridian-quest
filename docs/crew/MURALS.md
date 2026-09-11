@@ -23,6 +23,59 @@ afar but you get close and can interact to see it full screen"*), so the "readab
 now a wall you read **pictures** off, not a plaque. The third option — a room that gets longer —
 stays unbuilt and stays the honest most-faithful answer.
 
+### ❗ The owner overruled the spec the same day, and he was right
+
+The spec below says **one panel per iteration, never per agent**, and gives a reason: the panel is
+what the crew decided *together*. He read the first two and said:
+
+> *"ok thats fine but in the future can be more creative and if its that way one per agent but they
+> can collaborate with one too"*
+
+**Both halves are now the rule.** One panel per agent, painted **in their own hand** — and a shared
+panel when two of them get somewhere neither would have got alone.
+
+*Why he is right, in one sentence:* **a panel signed by everybody is signed by nobody**, and the
+harsh line that makes a wall worth looking at belongs to whoever actually said it. Rigo's *"the two
+cabs drawn on it are decoration"* is not a crew position. It is a man with forty-one years on the
+trolleys, refusing.
+
+**Nothing above the line was repainted to match.** The first two panels stay exactly as they were, and
+the wall now records *that its own rule changed* — which is information, and is what add-never-remove
+is for. His overruling got the first panel under the new rule, because the table below says the owner
+overruling the crew is the sharpest kind there is.
+
+### "In their own hand" is the creative half, and it is the part that was thin
+
+His first word was **"can be more creative"**, and the first two panels deserved it. So the rule now
+has teeth: **each agent's panel is drawn the way that agent sees**, not in one house style.
+
+| Agent | Their hand |
+|---|---|
+| `beto` | a drawing-office **blueprint** — dark blue, ruled grid, thin white line |
+| `rosa` | a **dimension drawing** — bars with end ticks, real numbers, the lie hatched in |
+| `rigo` | a **depot signwriter's board** — heavy bands, gold rule, nothing cute |
+| `tono` | **labelled drawers**, one of them caught and five walking past |
+| `don-guero` | a **cross-section with a scale rule** |
+| `tavo` | a **race**, flat and bold, with the gap dimensioned |
+| `nacho` | **paint** — he is the actual muralist, so his is the one with steam in it |
+| the owner | a **proclamation**: five boards, five hands, five loaded brushes, one shared board |
+
+**The wall grew with the panels**, as the spec said it would: two tiles became four, and it paints
+around the sugar skull at `st` (11,0) and around city hall's door at (14,0) the way a real muralist
+paints around a window.
+
+### What the ledger fingerprints, and why that turned out to matter
+
+The ledger hashes **`title`, `said` and `cap` — the words.** It does not hash the drawing. That was a
+design choice made before anyone needed it, and the repaint proved it right:
+
+> **You may repaint. You may not rewrite.**
+
+*Add and improve* has to permit improving, or the first clumsy panel is on the wall forever. *Never
+remove* has to bite on the record, or the wall is a status board. Splitting them at **words versus
+brushwork** is what lets both be true at once — three panels were repainted in the hour after they
+first landed, because a mural that reads badly says nothing, and not one word moved.
+
 **The one rule is guarded, not merely written.** `docs/crew/MURAL-LEDGER.txt` holds one line per
 panel: its id and a fingerprint of the words a person reads. `test/town.smoke.js` fails the build if
 a listed panel leaves the wall, is renamed, is reordered, or has its words edited after the fact.

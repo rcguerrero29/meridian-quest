@@ -637,10 +637,10 @@ const { chromium } = require('playwright-core');
       // rank; six houses you can walk into, one per kind of work; each wears its work label in plain words
       // (owner: "put a human friendly label as to what type of issue or work is being done... for buildings too") ----
       { const st = WORLDS.st, sign = k => (DECOR.find(d => d.deco === 'sign' && d.kind === k) || {}).text;
-        /* ch-v83: x12-13 became ▧, the crew's muralled wall, beside city hall's door. Deliberate,
+        /* ch-v83: x10,12,13,15 became ▧, the crew's muralled wall (it grew with the panels), beside city hall's door. Deliberate,
            and the literal moves with it — this guard exists so row 0 never drifts by ACCIDENT,
            not so it can never change. It caught this change, which is the guard working. */
-        if (st.rows[0] !== 'BBQQ$QQBBvBB▧▧EBZZZOZZIII%IIB2') problems.push('the north rank is not Don Güero\'s row 0: ' + st.rows[0]);
+        if (st.rows[0] !== 'BBQQ$QQBBv▧B▧▧E▧ZZZOZZIII%IIB2') problems.push('the north rank is not Don Güero\'s row 0: ' + st.rows[0]);
         if (st.rows[8] !== '...QQQ@QQQQZZZMZZZZIIILIIII...') problems.push('the south rank is not Don Güero\'s row 8: ' + st.rows[8]);
         if (st.rows[0][9] !== 'v' || st.rows[0][14] !== 'E' || st.rows[0][29] !== '2') problems.push('la ventanilla, the stall door or the park gate moved');
         if (!READS.some(r => r.world === 'st' && r.x === 8 && r.y === 0 && r.doc === 'board')) problems.push('city hall\'s board moved');
