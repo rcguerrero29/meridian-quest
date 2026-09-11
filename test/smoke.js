@@ -176,7 +176,7 @@ const CANDIDATES = [
       const en = new Set(Object.keys(UI.en)), es = new Set(Object.keys(UI.es));
       problems.push('UI keys differ: EN-only=' + [...en].filter(k => !es.has(k)) + ' ES-only=' + [...es].filter(k => !en.has(k)));
     }
-    ['flavor', 'locs', 'classes', 'chat', 'arrive', 'trolley'].forEach(k => {
+    ['flavor', 'locs', 'classes', 'chat', 'arrive', 'pass'].forEach(k => {
       if (keys(UI.en[k]) !== keys(UI.es[k])) problems.push('UI.' + k + ' subkeys differ');
     });
     if (UI.en.careEvents('X').length !== UI.es.careEvents('X').length) problems.push('careEvents length differs');

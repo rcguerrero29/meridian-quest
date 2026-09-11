@@ -1174,7 +1174,20 @@ function petalSpill(w,x,y,sx,sy,scale){
   ctx.drawImage(c,sx,sy);}
 /* ---------- el trolley (owner, 2026-09-08) — it comes on its own, it stops for anyone on the line, and it comes
    when you stand at a stop. Content declares the line in TROLLEYAT; the engine knows nothing about where. ---------- */
-const TRO_EVERY=19000,TRO_SPEED=3.4,TRO_LEN=2,TRO_HOLD=1400;
+/* TRO_SPEED 3.4 -> 6.0, owner 2026-09-11 ("ok tram can be faster", then "do both the wheel and
+   speed please"). At 3.4 the tram was 18% SLOWER than the hero's legs (240 ms/tile = 4.17 tiles/s),
+   which is why it could never be transport and why "convenience, not transport" was the only
+   coherent reading of it. At 6.0 it is 44% faster.
+   The window, measured rather than argued. FLOOR 5.4: a person notices a speed difference at about
+   30%, and "barely beats walking" is not convenience. CEILING ~7.9: the 3D window on that row is
+   9.9 tiles and nose-in to tail-out is 11.9, and a vehicle must be on screen 1.5 s or it reads as a
+   smear rather than a thing that arrived. (The 10.4 that circulated for a day was CSS width / TS and
+   conflated CSS pixels with world tiles.) 6.0 sits inside rather than near an edge.
+   The wagon-wheel worry that gated this is answered and it was never the risk: a 12-gon 5.5 CSS px
+   across has a circular silhouette. The real wheel fault was a second rotation undoing the axle, it
+   shipped in mq-v144, and this change is deliberately AFTER it so the faster tram is one with wheels
+   on it. docs/3D-LOG.md 2026-09-11. */
+const TRO_EVERY=19000,TRO_SPEED=6.0,TRO_LEN=2,TRO_HOLD=1400;
 const TRO={x:0,dir:1,state:"away",t:0,called:false,said:0};
 function troLine(wid){const L=(typeof TROLLEYAT!=="undefined"&&TROLLEYAT)?TROLLEYAT:[];return L.find(r=>r.world===(wid||world))||null;}
 function troTiles(L){const a=Math.min(L.from,L.to),b=Math.max(L.from,L.to),out=[];for(let x=a;x<=b;x++)out.push([x,L.row]);return out;}
@@ -2002,7 +2015,12 @@ function pigFlee(now){
      result was a tram stopped in the street forever waiting for a bird with no reason to move.
      So: she goes at 5 tiles, comfortably outside the brake, and the lift is also allowed to fire
      while the tram is already holding, which is what unsticks that case rather than hiding it. */
-  if(d<-0.6||d>5.0)return;
+  if(d<-0.6||d>TRO_SPEED*0.9)return;   /* she hears it ~0.9 s out, not ~5 tiles out: a lead measured
+     in TIME survives the next speed change, and a lead measured in tiles does not. At 3.4 that was
+     3.1 tiles and at 6.0 it is 5.4, and in both cases she is going before the brake window (2.6) is
+     reached. She is still airborne when the tram first eases — deliberately. A car that checks, sees
+     her go, and picks its power back up is what a driver actually does; a bird that leaves six tiles
+     early reads as psychic. */
   const up=(PIG.y>0&&!SOLID.has((WORLDS[AW("pig")].grid[PIG.y-1]||"")[PIG.x]));
   PIG.lift={t:0,fromY:PIG.y,toY:up?PIG.y-1:PIG.y+1,fromX:PIG.x,drift:TRO.dir*0.35};
   PIG.moving=false;PIG.peck=false;PIG.next=now+PIGLIFT+400;}
@@ -4426,7 +4444,7 @@ function openMap(){
 $("mapbtn").addEventListener("click",openMap);
 $("mapClose").addEventListener("click",()=>{$("mapov").hidden=true;});
 function openTravel(){
-  const t=T().trolley,list=$("tvList");
+  const t=T().pass,list=$("tvList");
   $("tvTitle").textContent=t.title;$("tvNote").textContent=t.note;$("tvClose").textContent=t.close;
   list.innerHTML="";
   TRV.forEach(d=>{const b=document.createElement("button");b.className="opt";
