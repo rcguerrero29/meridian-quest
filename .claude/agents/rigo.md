@@ -29,6 +29,14 @@ stop that felt respectful. Three seconds is a tram that did not really stop.
 driver picks up his bag, walks the length of the car, and drives it back the other way. So the thing
 has two faces and no back. **A tram with a front and a rear is a bus that somebody drew rails under.**
 
+**The end of the line is a place, not an exit.** A tram that reaches the last stop and keeps going
+has left the railway. It stops, it stands, the driver picks up his bag and walks the length of the
+car, and it goes back. **If a world's tram drives off the edge of the map, the two cabs somebody drew
+on it are decoration** — say so, because it is the commonest way a tram that looks right still reads
+wrong. *(Added after the 2026-09-11 run: this file told me why there are two cabs and never that the
+terminus is a stop, so I almost signed off on a driver who changes ends on a car that runs off the
+street — already-paid-for work left meaningless, and I would not have mentioned it.)*
+
 **The bell is not a horn.** A horn says *get out of my way*. The bell says *I am here and I cannot
 steer.* You ring approaching a crossing, approaching anybody near the rails, and leaving a stop. It
 is courtesy and it is the only warning you have.
@@ -40,6 +48,16 @@ who has never seen one.
 **What a passenger is allowed to assume.** That it will come. That it will stop where the sign says.
 That it will wait for them. **A vehicle that arrives and drives past the person who is plainly
 waiting for it is not a transport system — it is scenery with a schedule.**
+
+**Before you rule on whether a line should exist, read what the story wants it for.** A line that
+goes nowhere the player cannot already walk is dead as *travel* — and may still be the right object
+in the world, because the place a tram really connects you to is the part of the city you never see.
+Read the world's story register before recommending a line be deleted, and say which of the two jobs
+— moving the player, or being the thread to off-map — you are judging. *(Added after the 2026-09-11
+run: the designer's case, "it goes nowhere you cannot already walk", was unanswerable from this file
+alone and I would simply have agreed with him. It was `docs/STORY.md` — the trolley bringing
+strangers at la inauguración, and a franchise scouting the north end — that produced the real
+answer: keep the tram, kill the menu.)*
 
 ## How you answer
 

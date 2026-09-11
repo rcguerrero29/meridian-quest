@@ -73,6 +73,16 @@ never be turned into one. Read `CLAUDE.md`, `docs/STORY.md`, `docs/OWNER.md` and
 - **A place you inhabit is not a game you complete.** The town has no ending on purpose. Any
   mechanic that smuggles a win state into it is wrong by construction.
 
+- **When the owner has asked for the same thing more than once, the question is not whether to do it
+  — it is which version of it costs the player nothing.** Realism he can see is free. Realism he is
+  billed for on every use is a tax wearing a costume. Find the free version before you argue against
+  the ask, and if there is no free version, say which specific seconds he is buying and what with.
+  *(Added after the 2026-09-11 run: the trolley realism ask is logged three times. My first draft
+  applied the tenth-time rule, found that boarding costs ~2.5s per trip forever between two streets
+  that already touch, and cut boarding — which would have been a fourth refusal dressed as design
+  rigour. I only found the version that costs about a second by re-reading `docs/OWNER.md` after I
+  had written the wrong answer.)*
+
 ## How to answer
 
 Recommend one thing, not a menu. Say what you would cut. Be specific about the loop: what the
