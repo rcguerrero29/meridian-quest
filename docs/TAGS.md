@@ -392,16 +392,23 @@ distinguishes *waiting here* from *living here*, and the two look identical to a
 question of the form *"is somebody at X"* must say which somebodies count, in the code, at the point
 it asks.
 
-### L20 · The engine guards the transit **brand** and not the transit **glyph**
+### L20 · The engine guards the transit **brand** and not the transit **glyph** — **CLOSED 2026-09-11**
+
+> **Closed by the `stops` seam.** Both mechanism sites moved together, as this entry demanded: the
+> stop query and the travel-panel trigger now read `troIsStop`, which reads what the line *declares*
+> rather than what the map *paints*. The three art/mural sites stay and are L1's, not this entry's.
+> **And the citations below had all slid again by the time it was closed** — a register that cites
+> line numbers rots faster than the code it cites. Grep the identifier.
+
 
 **The guard that exists.** `test/smoke.js:3283-3288` fails the build if `\bMQT\b` appears in
 `engine/engine.js` or `engine/engine3d.js`, with the message *"a pack name in engine code is the one
 thing the portability law forbids."* It is a good guard. It passes.
 
 **The thing it cannot see.** `"Y"` — Meridian's stop glyph, declared by the pack at
-`content/meridian/art.js:198` — appears in `engine/engine.js` **five times**: `:679` (isometric
-colour), `:1191` (`troAtStop`, *where the vehicle serves*), `:2890` (stepping here opens the travel
-panel), `:4300` (`BASECOL`), `:4501` (a mural may not paint here). Nothing objects. **Three lines
+`content/meridian/art.js:198` — appears in `engine/engine.js` **five times**: `:706` (isometric
+colour), `:1216` (`troAtStop`, *where the vehicle serves*), `:2982` (stepping here opens the travel
+panel), `:4400` (`BASECOL`), `:4601` (a mural may not paint here). Nothing objects. **Three lines
 below a comment in the same test saying a hardcoded pack glyph list was deleted because engine code
 naming a pack's glyphs is the portability law wearing a different hat.**
 

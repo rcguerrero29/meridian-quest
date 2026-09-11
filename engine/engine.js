@@ -267,6 +267,29 @@ function arrivalsOnRails(){return arrivals().filter(function(a){const L=troLine(
     return !!L&&a.y===L.row&&a.x>=Math.min(L.from,L.to)&&a.x<=Math.max(L.from,L.to);})
   .map(function(a){return a.why+" stands the player on the trolley's own line in "+a.world+
     " ("+a.x+","+a.y+") — you arrive on the rails, and the tram stops short of you and will not go on until you move";});}
+/* ---- what the pack SAID about its trolley line, read back to it once, out loud ----
+   The PLDEF lesson (docs/TAGS.md L16): a pack that declares NOTHING is in good shape, and a pack
+   that declares HALF is the one that gets hurt — so an omitted `stops` is legal and silent, and
+   every other way of getting it wrong is named here. A word this engine does not read is the
+   loudest of all: it is the one where somebody wrote a line, saw nothing happen, and had no way to
+   find out why. Every key added to the seam joins TROKEYS in the same commit as its reader. */
+const TROKEYS=["world","row","from","to","stops"];
+function troAudit(){const out=[],lines=(typeof TROLLEYAT!=="undefined"&&TROLLEYAT)?TROLLEYAT:[],seen={};
+  lines.forEach(function(L){if(!L||!L.world)return;
+    const w=WORLDS[L.world],at=function(s){return L.world+" ("+s.x+","+s.y+")";};
+    if(seen[L.world])out.push("the trolley line in "+L.world+" is the second one declared there, and only the first one ever runs");
+    seen[L.world]=true;
+    Object.keys(L).forEach(function(k){if(TROKEYS.indexOf(k)<0)
+      out.push("the trolley line in "+L.world+" declares "+k+", which this engine does not read — whatever it was meant to do, nothing does it");});
+    if(!w)return;
+    const a=Math.min(L.from,L.to),b=Math.max(L.from,L.to);
+    troStops(L).forEach(function(s){const g=w.grid[s.y]&&w.grid[s.y][s.x];
+      if(g===undefined){out.push("the trolley stop in "+at(s)+" is off the edge of the map");return;}
+      if(SOLID.has(g)||g==="N")out.push("the trolley stop in "+at(s)+" is inside something — nobody can stand at it");
+      if(s.y===L.row)out.push("the trolley stop in "+at(s)+" stands on the trolley's own rails — the pass opens under the tram, and the tram brakes for whoever opened it");
+      else if(Math.abs(s.y-L.row)>1||s.x<a-1||s.x>b+1)out.push("the trolley stop in "+at(s)+" is out of reach of the line it serves — nobody can tell what it is");
+      if(s.x<a||s.x>b)out.push("the trolley stop in "+at(s)+" is past the end of the run its own line declares ("+a+" to "+b+")");});});
+  return out;}
 /* full-universe reachability audit: BFS from the hero's spawn across every world THROUGH portals.
    Guarantees: every walkable tile is reachable, and every character always has a reachable adjacent tile. */
 /* `grown`: audit a city with every lot raised, where NOTHING may be unreachable. Left off, a world
@@ -1190,6 +1213,16 @@ function petalSpill(w,x,y,sx,sy,scale){
 const TRO_EVERY=19000,TRO_SPEED=6.0,TRO_LEN=2,TRO_HOLD=1400;
 const TRO={x:0,dir:1,state:"away",t:0,called:false,said:0};
 function troLine(wid){const L=(typeof TROLLEYAT!=="undefined"&&TROLLEYAT)?TROLLEYAT:[];return L.find(r=>r.world===(wid||world))||null;}
+/* ---- WHERE THE LINE SERVES — the pack says it, in tile coordinates ----
+   `stops` is a list of PLATFORM tiles: the tile a person stands on to be served. It is beside the
+   rails, never on them, and it is a LIST, so a reader can ask both questions — "is this a stop"
+   (troIsStop) and "where is the next one ahead of the car". The second is what braking needs and no
+   amount of asking the first will ever give it to you.
+   Omit `stops` and the line has none: nothing calls the car, nothing opens the pass, and the run is
+   frame-for-frame what it was. Until 2026-09-11 this was one town's letter "Y", read straight out of
+   the engine in two places (docs/TAGS.md L20). */
+function troStops(L){return (L&&Array.isArray(L.stops))?L.stops.filter(function(s){return s&&typeof s.x==="number"&&typeof s.y==="number";}):[];}
+function troIsStop(wid,x,y){return troStops(troLine(wid)).some(function(s){return s.x===x&&s.y===y;});}
 function troTiles(L){const a=Math.min(L.from,L.to),b=Math.max(L.from,L.to),out=[];for(let x=a;x<=b;x++)out.push([x,L.row]);return out;}
 /* what stands on the line — a wall, a lot, a person, a door. The owner's rule: nothing may. */
 function troBlocked(wid){const L=troLine(wid);if(!L)return [];const w=WORLDS[L.world];if(!w)return [];
@@ -1197,7 +1230,18 @@ function troBlocked(wid){const L=troLine(wid);if(!L)return [];const w=WORLDS[L.w
     return g===undefined||SOLID.has(g)||SOLID.has(lg)||lg==="N"||(typeof portalAt==="function"&&portalAt(L.world,x,y));})
     .map(([x,y])=>x+","+y);}
 /* is anyone standing on the rails just ahead of the nose? then it waits */
-function troAhead(L){const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),near=v=>{const d=(v-nose)*TRO.dir;return d>=-0.6&&d<=2.6;};
+/* `near` spans the car's WHOLE BODY plus the look-ahead: from the tail at -TRO_LEN to 2.6 ahead of
+   the nose. It used to start at -0.6, which left the 1.4 tiles between the tram's own door and its
+   own tail invisible to it — 30% of the span where anything can interact with the tram at all, and
+   exactly where you end up if you step onto the rails just after the front of it goes past you.
+   Chava filmed both halves of it in one trace: Paloma sat out the whole approach on the kerb and
+   then stepped on at d=-0.70, a tenth of a tile past the edge, and six consecutive samples show her
+   drawn inside the car with the tram still running; then he did it to himself at d=-1.13 and stood
+   chest-deep in a moving tram for 230 ms. Both the brake AND the bird's lift keyed off the same
+   -0.6, so a thing that steps on beside the door missed both at once.
+   A ratio of distances, so it was identical at 3.4 and 6.0 — the speed neither caused it nor
+   changed it, it only made the band sweep past twice as fast. */
+function troAhead(L){const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),near=v=>{const d=(v-nose)*TRO.dir;return d>=-TRO_LEN&&d<=2.6;};
   if(world===L.world&&Math.round(py)===L.row&&near(px))return true;
   const w=WORLDS[L.world];if(w&&w.npcs.some(n=>n.y===L.row&&near(n.x)))return true;
   if((typeof CRIT!=="undefined"?CRIT:[]).some(c=>c.world===L.world&&Math.round(c.y)===L.row&&near(c.x)))return true;
@@ -1211,10 +1255,27 @@ function troAhead(L){const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),near=v=>{const d=(v-
      rails, and the answer does not depend on what kind of thing it is. */
   return [["dog",typeof DOG!=="undefined"?DOG:null],["cat",typeof CAT!=="undefined"?CAT:null],
           ["pig",typeof PIG!=="undefined"?PIG:null]]
-    .some(function(e){const a=e[1];return a&&AW(e[0])===L.world&&Math.round(a.y)===L.row&&near(a.x);});}
-function troAtStop(L){const w=WORLDS[L.world];if(!w||world!==L.world)return false;
-  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const r=w.rows[py+dy];if(r&&r[px+dx]==="Y")return true;}
-  return false;}
+    .some(function(e){const a=e[1];
+      /* ...and a bird that is ALREADY IN THE AIR is not on the rails. It is one condition and it is
+         simply true, which is why it is here rather than in the lift's threshold.
+         Lupe measured the alternative and it is the reason this line exists: the lift's lead was
+         written as a fraction of the speed (TRO_SPEED*0.9) precisely so it would survive a speed
+         change, and the comment above it said so — but she stays logically on the rails for the whole
+         560 ms flight, so the lead must clear the brake window PLUS the flight, and 0.9v > 2.6+0.56v
+         only holds above v=7.65. At 3.4 the tram never braked for her; at 6.0 it braked 83 ms before
+         she was clear, so every fourth tram made a 1.4 s unexplained stop for a bird already flying
+         away. Widening the threshold to 2.6+0.56v would also have worked and is a magic number that
+         couples the bird to the brake window and rots the next time either moves. This does not:
+         she is off the rails when she is off the ground, at any speed, forever.
+         The brake is still the backstop. A bird that is standing there — because the lift could not
+         fire, or because she never lifted — stops the tram exactly as the owner ruled. */
+      if(a&&a===(typeof PIG!=="undefined"?PIG:null)&&a.lift)return false;
+      return a&&AW(e[0])===L.world&&Math.round(a.y)===L.row&&near(a.x);});}
+/* is the PLAYER at a stop — the player and nobody else. docs/TAGS.md L19: the tamale lady stands
+   beside the ex stop for ever and she is not a passenger. Same 3x3 reach as the glyph sniff it
+   replaces, over the tiles the line declares instead of over the tiles the map paints. */
+function troAtStop(L){if(!L||world!==L.world)return false;
+  return troStops(L).some(function(s){return Math.abs(s.x-px)<=1&&Math.abs(s.y-py)<=1;});}
 function troCall(){TRO.called=true;}
 function troUpdate(dt){const L=troLine();
   if(!L){TRO.state="away";return;}
@@ -2015,7 +2076,7 @@ function pigFlee(now){
      result was a tram stopped in the street forever waiting for a bird with no reason to move.
      So: she goes at 5 tiles, comfortably outside the brake, and the lift is also allowed to fire
      while the tram is already holding, which is what unsticks that case rather than hiding it. */
-  if(d<-0.6||d>TRO_SPEED*0.9)return;   /* she hears it ~0.9 s out, not ~5 tiles out: a lead measured
+  if(d<-TRO_LEN||d>TRO_SPEED*0.9)return;   /* the same edge as the brake, moved with it */   /* she hears it ~0.9 s out, not ~5 tiles out: a lead measured
      in TIME survives the next speed change, and a lead measured in tiles does not. At 3.4 that was
      3.1 tiles and at 6.0 it is 5.4, and in both cases she is going before the brake window (2.6) is
      reached. She is still airborne when the tram first eases — deliberately. A car that checks, sees
@@ -2977,9 +3038,8 @@ function loop(ts){
   if(moving){
     mt+=dt/240;bob+=dt/70;
     if(mt>=1){moving=false;fx=px;fy=py;petalDrop(world,px,py,HEROFEET);
-      const pch=CW().rows[py][px];
       if(tryPortal(ts)){}
-      else if(pch==="Y"&&ts>portalT){portalT=performance.now()+900;held=null;openTravel();}
+      else if(troIsStop(world,px,py)&&ts>portalT){portalT=performance.now()+900;held=null;openTravel();}
       else{save();checkTalk();tryStep();}
     }
     else{const[dx,dy]=DIRS[dir];fx=px-dx*(1-mt);fy=py-dy*(1-mt);}
@@ -5248,6 +5308,7 @@ function lateOpenToast(){
 wanderInit();
 {const bad=auditWander();if(bad.length)mqwarn("world","nowhere to walk for "+bad.join(" | "),false);}
 arrivalsOnRails().forEach(function(m){mqwarn("arrival",m,true);});
+troAudit().forEach(function(m){mqwarn("trolley",m,true);});
 const SV=loadSave();
 if(SV&&SV.n){$("continueBtn").hidden=false;
   $("continueBtn").textContent=T().contBtn(SV.n,SV.xp,SV.d.length);

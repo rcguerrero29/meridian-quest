@@ -1123,6 +1123,75 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...tram);
 
+  /* ---- a pack must be able to SAY where its trolley serves, in its own alphabet ----
+     Until 2026-09-11 it could not: "is there a stop here" was Meridian's letter "Y", read straight
+     out of the engine in the two places that matter — where the car is served and where the pass
+     opens (docs/TAGS.md L20). A second world's stop glyph did nothing at all, and its ordinary Y
+     tiles, whatever they meant in its alphabet, opened a menu it had never declared.
+     This plants a REAL violation rather than reading source: a line whose stop is a tile carrying no
+     stop glyph anywhere in it. Then it asks the two questions a person asks standing at a stop —
+     does the tram come, and is this a stop — and it asks them of whatever game it was pointed at.
+     It is non-vacuous in a pack with no trolley at all: the line is planted, not borrowed. */
+  const troSeam = await page.evaluate(() => {
+    const P = [];
+    const walk = (w, x, y) => { const g = w.grid[y] && w.grid[y][x]; return g !== undefined && !SOLID.has(g) && g !== 'N'; };
+    let pick = null;
+    Object.keys(WORLDS).some(id => { const w = WORLDS[id];
+      for (let y = 1; y < w.H - 1 && !pick; y++) for (let x = 1; x < w.W - 4; x++) {
+        if (!walk(w, x, y + 1)) continue;
+        let ok = true; for (let i = 0; i < 4; i++) if (!walk(w, x + i, y)) ok = false;
+        if (ok) { pick = { world: id, row: y, from: x, to: x + 3, stops: [{ x: x + 1, y: y + 1 }] }; break; }
+      }
+      return !!pick; });
+    if (!pick) { P.push('this game has no four walkable tiles in a row anywhere — the trolley seam cannot be tested at all, which is not a pass'); return P; }
+
+    const had = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT) ? TROLLEYAT : null, restore = had ? had.slice() : null;
+    if (had) { had.length = 0; had.push(pick); } else { window.TROLLEYAT = [pick]; }
+    const keep = { world, px, py, st: TRO.state, x: TRO.x, t: TRO.t, called: TRO.called, moving };
+    const s0 = pick.stops[0];
+    world = pick.world; px = fx = s0.x; py = fy = s0.y; moving = false;
+
+    if (typeof troIsStop !== 'function' || typeof troStops !== 'function')
+      P.push('nothing in this engine can be asked where a trolley stop is — the only way to say it is one town\'s letter');
+    else if (!troIsStop(pick.world, s0.x, s0.y))
+      P.push('the line says it serves ' + s0.x + ',' + s0.y + ' and the engine does not agree that is a stop');
+
+    /* the tell is that the car SETS OFF. troUpdate clears TRO.called in the same tick it acts on
+       it, so a test that reads the flag afterwards is reading something already spent. */
+    TRO.state = 'away'; TRO.t = 0; TRO.x = 0; TRO.called = false;
+    troUpdate(50);
+    if (TRO.state !== 'run') P.push('standing at the stop this line declares does not bring the trolley');
+
+    world = keep.world; px = fx = keep.px; py = fy = keep.py; moving = keep.moving;
+    TRO.state = keep.st; TRO.x = keep.x; TRO.t = keep.t; TRO.called = keep.called;
+    if (had) { had.length = 0; restore.forEach(r => had.push(r)); } else { try { delete window.TROLLEYAT; } catch (e) {} }
+    return P;
+  });
+  fails.push(...troSeam);
+
+  /* ---- and the pack is told, out loud, when it says something the engine will not act on ----
+     The PLDEF lesson (docs/TAGS.md L16): declaring NOTHING is safe and declaring HALF is what
+     hurts, so silence is the wrong answer to a half-declared line. Planted, not read: give a line
+     a word this engine does not have a reader for and check that somebody says so. */
+  const troLoud = await page.evaluate(() => {
+    const P = [];
+    if (typeof troAudit !== 'function') { P.push('nothing ever reads a trolley line back to the pack that wrote it'); return P; }
+    const had = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT) ? TROLLEYAT : null, restore = had ? had.slice() : null;
+    const wid = Object.keys(WORLDS)[0];
+    const plant = [{ world: wid, row: 1, from: 0, to: 3, dwell: 4200 },
+                   { world: wid, row: 2, from: 0, to: 3 },
+                   { world: wid, row: 3, from: 0, to: 3, stops: [{ x: 0, y: 3 }] }];
+    if (had) { had.length = 0; plant.forEach(p => had.push(p)); } else { window.TROLLEYAT = plant; }
+    const said = troAudit().join(' | ');
+    if (!/dwell/.test(said)) P.push('a trolley line can declare a word this engine has no reader for and nothing says so — somebody writes it, nothing happens, and there is no way to find out why');
+    if (!/second one declared/.test(said)) P.push('a world can declare two trolley lines and lose one of them in silence');
+    if (!/rails/.test(said)) P.push('a stop can be put on the tram\'s own rails and nothing objects — the pass opens under the tram');
+    if (had) { had.length = 0; restore.forEach(r => had.push(r)); } else { try { delete window.TROLLEYAT; } catch (e) {} }
+    if (troAudit().length) P.push('this game\'s own trolley line does not survive the check the engine makes of it: ' + troAudit().join(' | '));
+    return P;
+  });
+  fails.push(...troLoud);
+
   /* ---- and it is there in EVERY camera it is drawn in ----
      Measured: with the trolley running, switching the camera changed 1466 pixels in top, 1704 in
      front, and ZERO in isometric. Not "looks wrong" — the trolley does not exist there. troDraw2D

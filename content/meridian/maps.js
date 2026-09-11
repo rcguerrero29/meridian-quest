@@ -283,7 +283,8 @@ const MAPDOT={ta:[23,13],pa:[29,1],li:[29,1],no:[25,0],hq:[14,0],f2:[14,0],lc:[6
    Principal keeps both lanes and its crossing at x13–14; Calle Dos is one lane (row 1) with the sidewalk its
    two houses stand on below it (row 2) and a crossing at each door. The smoke fails if anything stands on a
    line: a wall, a person, a lot or a door. */
-const TROLLEYAT=[{world:"st",row:2,from:0,to:29},{world:"ex",row:1,from:20,to:0}];
+const TROLLEYAT=[{world:"st",row:2,from:0,to:29,stops:[{x:0,y:1}]},
+                 {world:"ex",row:1,from:20,to:0,stops:[{x:20,y:2}]}];
 const TRV=[{w:"st",x:1,y:1,dir:"right"},{w:"ex",x:22,y:3,dir:"left"}];
 /* ambient critters: kinds live in the engine (butterfly, colibri, gato); spawns are
    content. Each wanders a small radius around home; the gato is pettable. */
