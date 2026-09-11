@@ -334,3 +334,63 @@ ambition were ever a downloadable premium title rather than a link, the maths ch
 **The rule underneath, and it is the same one this project keeps rediscovering:** the constraint that
 decides an architecture is rarely the one people argue about. Everybody argues rendering. **The
 constraint here is that somebody must be able to open it on their phone from a message.**
+
+---
+
+### A10½ · What moving to Godot would actually take
+*Asked 2026-09-11: "what would it take to use godot and what would be the steps and benefits, and downfalls?"*
+
+`[WEB]` Godot 4 does have a real web export — `index.html` plus `.wasm`, `.pck` and `.js` — and it
+generates a **service worker and an offline page**, so the installable-PWA property survives. Any
+browser with WebAssembly and WebGL 2.0 runs it.
+([Godot web export docs](https://godotengine-godot-47.mintlify.app/deployment/web) ·
+[export guide](https://www.summerengine.com/blog/godot-web-export-guide))
+
+#### The steps, honestly ordered
+
+1. Install Godot 4.x and the web export templates. *(an afternoon)*
+2. **Rebuild the world model.** `WORLD_DEFS` is rows of glyph strings; Godot wants a `TileSet` and
+   `TileMap` nodes. Every map in both packs is re-authored. *(days)*
+3. **Rewrite the engine.** ~6,100 lines of JS → GDScript: movement, quests, chapters, growth,
+   seasons, the reader, the character creator, the record, the trolley. *(weeks)*
+4. **Redo the save layer** — `sanitizeSave`, `STOREPFX`, and the QR transfer, which is bespoke.
+5. **Rebuild every test.** See the downfall below; this is the one people underestimate.
+6. **Re-establish the pack seam** so a second game is still content and not a fork.
+
+#### What you would genuinely gain
+
+Real physics without writing any. Animation, tilemap and scene tooling instead of hand-drawn
+canvas. A proper scene graph. **And the AI-readable property survives** — `.tscn` scene files and
+GDScript are both text, which is why Godot is the honest door and Unreal is not.
+
+#### The downfalls, and the first two are decisive
+
+**1. The renderer you would be moving FOR is the one web export does not give you.**
+`[WEB]` Forward+ and Mobile renderers **are not supported on the web**; web builds run the
+Compatibility renderer. So the main argument for leaving — real lighting, shadows, materials, which
+is `docs/3D-LOG.md`'s standing goal — is largely unavailable *at the only target that matters here.*
+That is the whole case collapsing on its own terms.
+
+**2. Every test you own would have to be rewritten, and the method with them.**
+`[CODE]` All seven suites drive the real game through `page.evaluate()` and read its own globals —
+`WORLDS`, `TRO`, `T3`, `camSet()`, `sanitizeSave()`. **A wasm build has no JS globals to read.**
+The gauge, R10, `test/bump.js`, Melo planting violations, Chava riding the trolley, every "I measured
+it rather than reasoned about it" in this repo — all of it rests on the game being readable text that
+an agent can poke at from outside. That is not a port. **It is starting the quality practice again
+from nothing**, and the practice is the part that is worth something.
+
+**3. Size.** `[WEB]` A stock Godot web build ships a **~33 MB `.wasm`**; getting a simple game down to
+~2.4 MB means a custom engine build with modules stripped, which is its own project.
+([size optimisation write-up](https://amann.dev/blog/2025/godot_web_size/)) `[CODE]` This game is
+**1.8 MB total, 18 files** today.
+
+#### The answer
+
+**Not now, and the trigger is specific rather than a feeling.** Move if — and only if — the product
+becomes one where *physics and animation are the point* and a 2.4 MB download is acceptable. A gifted
+game that opens from a message is not that product.
+
+**And there is a cheaper 80%.** `[CODE]` three.js is already vendored and running; shadows, better
+materials and real lighting are available inside it, at a fraction of the cost, without touching the
+tests or the packs. `docs/3D-LOG.md`'s goal lives there. **Before anyone prices a migration, price
+that.**
