@@ -366,10 +366,29 @@ GDScript are both text, which is why Godot is the honest door and Unreal is not.
 #### The downfalls, and the first two are decisive
 
 **1. The renderer you would be moving FOR is the one web export does not give you.**
-`[WEB]` Forward+ and Mobile renderers **are not supported on the web**; web builds run the
-Compatibility renderer. So the main argument for leaving — real lighting, shadows, materials, which
-is `docs/3D-LOG.md`'s standing goal — is largely unavailable *at the only target that matters here.*
-That is the whole case collapsing on its own terms.
+`[WEB]` Godot 4 ships three renderers and they are **not tiers of one thing** — Compatibility is the
+Godot 3 renderer forward-ported, a separate code path, not a "lite mode". Web builds get
+Compatibility. What lives only in Forward+, and therefore **cannot reach a browser**:
+
+| Forward+ only | what it is |
+|---|---|
+| **SDFGI / VoxelGI** | real-time global illumination — light bouncing off surfaces |
+| **Volumetric fog** | light you can see the shape of |
+| **SSR** | screen-space reflections |
+
+And the one that bites hardest for a world with a day/night cycle: `[WEB]` **Compatibility is limited
+to ONE directional light, and a maximum of eight omni or spot lights affecting any single object**,
+because it uses a UBO rather than Forward+'s clustered light grid — which carries hundreds of lights
+with no per-object limit.
+([Godot renderer docs](https://docs.godotengine.org/en/stable/tutorials/rendering/renderers.html) ·
+[a technical comparison](https://slicker.me/godot/renderers.html) ·
+[the Compatibility issue tracker](https://github.com/godotengine/godot/issues/66458))
+
+So `docs/3D-LOG.md`'s standing goal — *"a pixel world that obeys real light and real depth"* — is
+asking for exactly the bucket that stops at the browser door. **That is the case collapsing on its
+own terms.** `[TRAINING]` One caveat stated rather than hidden: sources disagree about whether SSAO
+survives in Compatibility, so do not plan around it either way without checking the version you would
+actually ship.
 
 **2. Every test you own would have to be rewritten, and the method with them.**
 `[CODE]` All seven suites drive the real game through `page.evaluate()` and read its own globals —
@@ -379,10 +398,19 @@ it rather than reasoned about it" in this repo — all of it rests on the game b
 an agent can poke at from outside. That is not a port. **It is starting the quality practice again
 from nothing**, and the practice is the part that is worth something.
 
-**3. Size.** `[WEB]` A stock Godot web build ships a **~33 MB `.wasm`**; getting a simple game down to
-~2.4 MB means a custom engine build with modules stripped, which is its own project.
+**3. Size — and it is a first-impression problem, not a technical one.** `[WEB]` A stock Godot web
+build ships a **~33 MB `.wasm`**; the ~2.4 MB figure people quote needs a custom engine build with
+modules stripped, which is its own project.
 ([size optimisation write-up](https://amann.dev/blog/2025/godot_web_size/)) `[CODE]` This game is
-**1.8 MB total, 18 files** today.
+**1.8 MB total, 18 files.**
+
+Nothing *breaks* at 33 MB. GitHub Pages' limits are far above it, the browser will cache it, and on a
+laptop nobody notices. **What breaks is the gift.** `docs/GIFTED-GAMES.md` measured the whole product
+at forty minutes of attention across its entire life, opened from a message on a phone. Ten or twenty
+seconds of blank screen and a progress bar, on someone else's data, before anything appears — **that
+is where a present dies, and it is the one moment the format cannot afford.** `[TRAINING]` The wasm
+compresses substantially over the wire and this has not been measured for a real build; the argument
+does not rest on the exact number, it rests on there being a wait at all where today there is none.
 
 #### The answer
 
