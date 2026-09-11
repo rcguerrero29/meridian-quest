@@ -6,7 +6,47 @@ at parts, but should remind us of artful decisions and progress… we dont delet
 iteration in a log or screenshot or both… if one of them has a very agressive persona, maybe their
 harshest decisions can be on the mural."*
 
-**Planned, not built.** This file is the spec so the idea survives the session it was had in.
+**BUILT 2026-09-11** (`ch-v84`), at the owner's word: *"i want the mural please."* This file stays as
+the spec; what follows is what actually shipped and what it cost.
+
+## What shipped
+
+**El mural de la cuadrilla** — `changarrito/content/murals.js`, painted on two tiles of city hall's
+own wall at `st` (12,0) and (13,0), immediately left of the door. Two panels, one per crew iteration
+of the trolley job. From across the street it is a limewashed wall with a red band on it; you walk
+up, press, and the panels draw at reading width with the decision, who made it, and the iteration.
+
+**It took Option A and Option B at once**, and the reason the table below did not see that coming is
+that the table was written before a document could carry a drawing. `mq-v140` shipped the `art`
+section that morning (the owner: *"can we have functionality there wehre you see tiles/icons from
+afar but you get close and can interact to see it full screen"*), so the "readable wall" option is
+now a wall you read **pictures** off, not a plaque. The third option — a room that gets longer —
+stays unbuilt and stays the honest most-faithful answer.
+
+**The one rule is guarded, not merely written.** `docs/crew/MURAL-LEDGER.txt` holds one line per
+panel: its id and a fingerprint of the words a person reads. `test/town.smoke.js` fails the build if
+a listed panel leaves the wall, is renamed, is reordered, or has its words edited after the fact.
+Adding is free and silent. **Both violations were planted and both fired** — and the second plant is
+the one worth recording: the session softened Rigo's harshest line from *"the two cabs drawn on it
+are decoration"* to *"could be improved"*, and the wall refused it by name. That is the failure mode
+the owner's rule exists for, reproduced on purpose, on the first day.
+
+**What it cost, honestly.** Three things went wrong and all three were caught by guards rather than
+by care:
+1. The first tiles chosen had a sugar skull on one of them (`st` 11,0), and a guard that pins the
+   town's north rank caught the map edit the same second.
+2. The glyph chosen was **`M` — which is already this town's door to Pili's paint shop.** Adding it
+   to `SOLIDX` made that door solid and an entire district fell out of the city. One part, one name
+   (`docs/TAGS.md`); the wall is `▧` now, a glyph free in **both** packs.
+3. Opening the wall exposed a live bug in the `art` block shipped that morning: `docOpen` renders
+   while the reader is still hidden, a hidden element's `clientWidth` is 0, and the fallback invented
+   a width nobody has — **a 512 px canvas in a 412 px column, so a fifth of every picture in either
+   game hung off the right edge where nobody could see it.** Fixed in `mq-v141` with a guard that
+   renders the way `docOpen` really does; the old check asked only whether a picture was big *enough*.
+
+---
+
+*(The original spec follows, unchanged.)*
 
 ---
 

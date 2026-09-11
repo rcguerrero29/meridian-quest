@@ -1136,6 +1136,32 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
       if (gotW < 200 || gotH < 100)
         P.push('the pack was handed a ' + gotW + '×' + gotH + ' canvas to draw on — too small to be the close-up view of anything');
     }
+      /* ---- and it must FIT the column it sits in ----
+         The first version of this check asked only whether the picture was big ENOUGH and never
+         whether it was too big, which is the same one-sided guard this repo has now paid for five
+         times (docs/REGRESSION.md: a guard has to read the noun it actually means).
+         Measured when the crew's mural landed: a 512 px canvas in a 412 px column — a fifth of
+         every drawing off the right-hand edge, in both packs, for anyone who opened a document.
+         The cause is worth keeping in the message: docOpen renders while the reader is still
+         hidden, a hidden element's clientWidth is 0, and the `|| 520` fallback then invented a
+         width nobody has. So this renders the way docOpen really does — hidden, then shown — and
+         asks the browser what it actually got. Rendering into an already-open reader does not
+         reproduce it and would pass forever. */
+      if (rd) {
+        rd.hidden = true;                       /* exactly what docOpen does */
+        body.innerHTML = '';
+        docRender(body, [probe]);
+        rd.hidden = false;
+        const cv2 = body.querySelector('canvas');
+        if (cv2) {
+          const col = cv2.parentElement, room = col ? col.clientWidth : 0;
+          const wide = cv2.getBoundingClientRect().width;
+          if (room && wide > room + 1)
+            P.push('a drawing in a document is ' + Math.round(wide) + ' pixels wide in a ' + Math.round(room) +
+                   ' pixel column — ' + Math.round(wide - room) + ' pixels of every picture hang off the edge where nobody can see them');
+        }
+      }
+
     body.innerHTML = '';
     if (rd) rd.hidden = wasHidden;
     return P;

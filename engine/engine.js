@@ -2972,10 +2972,18 @@ function docRender(body,secs){
        the reader actually has, because a picture worth walking up to must not be a thumbnail. */
       if(s2.h)el("h3","dh",s2.h);
       const cv=document.createElement("canvas");cv.className="dart";
-      const W=Math.max(240,Math.min(560,(body.clientWidth||520)-8)),H=Math.round(W*(s2.aspect||0.55));
+      /* docOpen renders while the reader is still HIDDEN, and a hidden element's clientWidth is 0 —
+         so the old `||520` fallback invented a width nobody has and every picture hung 100-190px off
+         the right of its column, in both packs, for anyone who opened a document. Ask the column,
+         then the reader, then the window, and take the first that is a real number. The CSS cap
+         below is the belt: whatever this arithmetic decides, the drawing can never outgrow its box. */
+      const room=(body.clientWidth||(body.parentElement&&body.parentElement.clientWidth)||
+                  (document.documentElement&&document.documentElement.clientWidth)||520);
+      const W=Math.max(240,Math.min(560,room-8)),H=Math.round(W*(s2.aspect||0.55));
       const K=Math.min(3,window.devicePixelRatio||1);
       cv.width=W*K;cv.height=H*K;cv.style.width=W+"px";cv.style.height=H+"px";
       cv.style.display="block";cv.style.margin="10px auto";cv.style.borderRadius="6px";
+      cv.style.maxWidth="100%";cv.style.height="auto";   /* it may be smaller than asked. It may never be wider than the column */
       const g=cv.getContext("2d");g.setTransform(K,0,0,K,0,0);g.imageSmoothingEnabled=false;
       try{s2.art(g,W,H);}catch(e){if(typeof mqwarn==="function")mqwarn("docart",String((e&&e.message)||e),false);}
       body.appendChild(cv);
