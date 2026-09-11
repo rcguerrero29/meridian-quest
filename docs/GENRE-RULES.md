@@ -163,6 +163,46 @@ filed; two held and five were stale**, by 27 to 122 lines:
 **So: grep the identifier, never paste the number.** The identifiers are stable and are the durable
 part; the numbers were true for about a day. This is the repo's rule 1 applied to its own research.
 
+---
+
+## ❗ Anything alive near anything moving — the two rules, and the trap that is not the obvious one
+
+> **RULE. Threat is asymmetric, and it must point the right way: the thing that gets hurt has to
+> notice the vehicle FURTHER OUT than the vehicle notices it.** In ECO the player's threat circle
+> *extends forward as velocity rises* and animals inside it flee — the reaction radius is deliberately
+> larger than the collision one. Ours is the degenerate case (one axis, one speed), so it is two
+> constants: `TRO_SHY` (how far up the line a critter reads the car) strictly greater than `TRO_LOOK`
+> (how far ahead the car brakes).
+>
+> **THE TRAP — and it is not "it gets run over".** Put the two radii the wrong way round and nothing
+> gets hurt at all: **the brake fires first, so the vehicle stops before it is ever close enough to
+> frighten anything, so nothing ever moves, so the vehicle never starts again.** A deadlock, not a
+> collision. It looks like a hang, it reads to a player as "the tram is broken", and it passes every
+> test that asks "did anybody get run over".
+>
+> **THE TELL.** Two numbers, in two different functions, written weeks apart, that have to be ordered
+> — and nothing in the file says so. Whenever you find a pair like that, the ordering is an invariant
+> and it belongs in a test, not in a comment. `[WEB]` ECO / `[CODE]` `TRO_SHY`, `TRO_LOOK`, and the
+> guard that compares them in `test/smoke.js`.
+
+> **RULE. Evade the path, not the position — which on a grid means step SIDEWAYS, never along.**
+> Reynolds' distinction: *flee* runs from where the threat is, *evade* runs from where it is going to
+> be. Flee a tram and you get a cartoon pigeon sprinting down the rails in front of it, correctly
+> fleeing, for ever. The short way out of a road is across it. **Tell:** if your escape move can ever
+> keep the fleeing thing on the threat's path, you built flee and wanted evade.
+
+> **RULE. Getting out of the way must never quietly become being ignored.** The moment an animal
+> reliably steps clear, the brake looks like dead code and the next person deletes it — and then the
+> one animal that is cornered, or asleep, or mid-animation, gets driven through. **Keep both, and
+> write the test for the cornered one**: wall a critter in on the line and assert the vehicle still
+> stops. `[CODE]` this repo did the species version of exactly this mistake on 2026-09-11 and it cost
+> a pigeon; see the fauna row in `docs/REGRESSION.md`.
+
+**The reassurance, which is really a warning:** *Cyberpunk 2077* shipped a city where pedestrians
+commonly let cars run them over, and the community fix was a mod that **changed the distance
+thresholds**. A studio of that size, in public, with the same bug and the same fix. This class is
+invisible in review and obvious in play — which is the entire argument for playing the thing.
+
 ## What we already have, and it is the surprising half
 
 `[CODE]` verified 2026-09-11 where marked. **The chill spec is already law in this engine, not a
@@ -185,6 +225,7 @@ See `docs/GIFTED-GAMES.md` §3 for that inventory, and re-grep every identifier 
 | **Cooking games, 2026-09-11** | What is left to do when you remove the timer? And what does a mistake mean with no fail state? | `docs/research/2026-09-11-cooking-games.md` |
 | **Gifted games, 2026-09-10** | What genre survives being a gift played five times for eight minutes? | `docs/GIFTED-GAMES.md` |
 | **Transit & occlusion, 2026-09-11** | How do shipped games handle "the vehicle is not here yet", and what is best practice for standing behind things? | `docs/meetings/2026-09-11-la-parada.md` §1–§2 |
+| **Critters and vehicles, 2026-09-11** | Somebody must have a better answer for critters in gameplay — has this been solved, and what is the shape of the answer? | `docs/research/2026-09-11-critters-in-play.md` |
 
 ## Where the NEXT sweep goes — the convention, so nobody has to remember it
 

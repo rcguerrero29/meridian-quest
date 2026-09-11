@@ -3,7 +3,80 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-05)
+## STATE OF PLAY — read this first (2026-09-11)
+
+### ⇢ 2026-09-11, end of session — START HERE (the block below it is two days old)
+
+**Read `docs/OPEN.md` first** — it is still the index. This block is what happened on 2026-09-10/11
+and it is written for a session that has never seen any of it.
+
+#### Where the code is
+
+- **Merged to `main`:** PR #165 (`d1f5d5b`, `mq-v148`) — the crew mural, the tram's wheel fix, Meche
+  and Tencha's faces, and four arrivals that stood players on live tram rails.
+- **NOT merged:** the branch `claude/small-remaining-updates-58xsy6`, **nine commits** ending at
+  `mq-v149`. The owner has been asked twice whether to merge and has not said yes. **Do not merge it
+  behind him.** What is on it: the tram's speed (3.4 → 6.0), Paloma's lift, the Barrio Pass and
+  Transbordo strings, Melo's five guard fixes, the `stops` seam, the blind spot under the tram, and
+  (this session) the critters keeping off the rails and the tram waiting at its stop.
+- **Seven suites green** at `mq-v149` / `ch-v92`, including R10 against a built artifact and
+  `test/bump.js origin/main`.
+
+#### The trolley, which is the whole of this branch
+
+The owner has been on this one subject for days, in his words *"its gone on forever - the topic of
+the tram"*. What is settled and built:
+
+| His ruling | Where it lives |
+|---|---|
+| keep the summon | `troAtStop` → `TRO.called`; standing at a stop calls a car |
+| the tram can be faster | `TRO_SPEED` 6.0 |
+| stops are declared by the pack, option B | `TROLLEYAT[].stops`, a **list of platform tiles beside the rails**, audited at boot |
+| the road is wider and characters rarely interrupt it | ten pavement tiles removed from the `ex` lane; two doorsteps moved off the rails |
+| *"paloma shouldnt be run over, can she be smart enough to jump away?"* | `pigFlee`/`PIGLIFT` — a 560 ms sine arc off the rails |
+| *"she should be small enough and smart enough to stay away from the tram"* | `troDanger` + `critShy` + `critFree` — **this session** |
+| *"why wouldnt they stop for me? if im walking close to the tram, it should wait if it is already at the tram stop"* | `troServing` + `troDwell`, `TRO_DWELL`=3.2 s — **this session** |
+| the teleport survives *"for now"*, but should become a slow teleport with the tram honking | **NOT BUILT.** Still the open design question on this topic |
+
+**The three numbers a next session will want** (measured, four minutes, hero standing at the st stop,
+`ride.js` pattern in the session scratchpad — rewrite it, it is four lines of `page.evaluate`):
+brake time for animals **22.3 s → 5.2 s**; trams per four minutes 40 → 27; stationary share 9.3% →
+38.2%, and almost all of the new share is the car **waiting for you at the platform**, which is what
+he asked for.
+
+**One invariant binds two constants and it has a guard:** `TRO_SHY > TRO_LOOK`. Reverse them and the
+tram and the critter deadlock in the street for ever. Planting `TRO_SHY=2` reproduces it.
+
+#### The expensive lesson of these two days, and it is not about trams
+
+`docs/REGRESSION.md` — **the register of guards that read a proxy, ten of them, in five days.** Every
+single one was found by *planting a real violation*, never by review, and **two were written by the
+session that had just found the other eight.** *Knowing about the mistake does not stop you making
+it.* If you write a guard this session, break it on purpose in a copy outside the repository before
+you believe it. The register now also lists the five guards added at `mq-v149` and the eight
+violations planted at them.
+
+**The standing practice the owner named on 2026-09-11:** *"mocks as goals to fix"* — render the thing
+before building it, in the real game, not as a drawing. It has already caught a bug in a fix before
+that fix shipped (the pigeon's lift would have parked a tram in the street for ever).
+
+#### Research, filed this session
+
+`docs/GENRE-RULES.md` is the two-page file an agent reads (rule + trap). The long sweeps live in
+`docs/research/`. New: **critters and vehicles** — ECO's forward-extending threat shape, Reynolds'
+*evade the path, not the position*, and Cyberpunk 2077 shipping pedestrians who let cars run them
+over, fixed by a mod that changed a threshold number.
+
+#### Open, in the order he is likely to ask
+
+1. **Merge or not** — nine commits are waiting on his word, and he was told *"say the word and they go"*.
+2. **The slow teleport / riding the tram** — his own idea, unbuilt: *"itd be fun to ride it and have a quest or game inside it"*.
+3. Three missing trolley strings (two of them describe engine states that no longer exist).
+4. Quest naming (#153); Don Güero's ❗La banqueta (row inserts); the wheels still read as *rolling*
+   because they have no hub; `docs/NEW-WORLD.md` still owes `TROLLEYAT` a `stops` row.
+5. 43 live patches from crew iteration 1 of the older trolley run, still unreviewed.
+
+---
 
 ### ⇢ 2026-09-09, end of session — START HERE
 

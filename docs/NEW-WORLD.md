@@ -195,13 +195,32 @@ became visible once a second world existed:
 **Optional — guarded by `typeof`, the engine simply does less without them:**
 `CAMDEF CAMERAS STAKES GROWTH SEASONS CHAPTERS ENDLESS INTERVIEW CRITTERS EGGS CHATTER CHILL NPCACT TRV
 DECOR DECOART READS DOCS DOCUI BUILDTPL BUILDS TILEART TILEART_SIDE TILEMETA MAPCOL MAPDOT
-TOWNLBL DOORS DOORLOOK SOLIDX PLACES FLOORS ANIMALS READERLOOK RECORDSRC HUDFACT` — and a template part's `link`
+TOWNLBL DOORS DOORLOOK SOLIDX PLACES FLOORS ANIMALS READERLOOK RECORDSRC HUDFACT TROLLEYAT` — and a template part's `link`
 (`{door:[dy,dx], landing:[x,y], exit:[x,y], interior:{rows, people, locs, arrive}}`, #10): the
 build stamps the interior as a world named after the lot and keys both doors by place
 (`PORTALSAT`), so one template can be stamped on many lots and every door opens — and, since `mq-v65`, **`STOREPFX`** (config.js): the prefix on
 every storage key. Optional in the engine, **required in practice for any second world served
 from the same origin**, or it loads the first world's save and overwrites it (§8). A world with none of these is a walkable town with people and
 quests. Everything else is a layer you add when its answer arrives.
+
+**`TROLLEYAT` — the one optional seam with a boot audit of its own, so it is worth its own paragraph.**
+One entry per line: `{world, row, from, to, stops}`. `stops` is a **list of platform tiles — the tile
+a person stands on to be served — beside the rails, never on them**, and it is a list rather than a
+number because two different readers need it: *is this tile a stop* (the travel panel opens there)
+and *which stop is the car's doors at* (the car waits there). Declare no `stops` and the line has
+none: nothing calls the car, nothing opens the pass, and it simply runs. **Declaring half is what
+hurts** (`docs/TAGS.md` L16), so `troAudit()` warns at boot about a second line in one world, any key
+with no reader, and a stop that is off the map, inside something, **on the rails**, out of reach, or
+past the end of the run. Read your console the first time.
+
+Three behaviours come free and none of them is a Meridian choice: it **brakes** for anything alive on
+the rails ahead (`TRO_LOOK` tiles); **critters keep clear of it themselves** (`TRO_SHY` tiles, and
+`TRO_SHY > TRO_LOOK` is an invariant with a guard on it — reverse them and the car and the critter
+deadlock for ever); and it **waits at a platform** for up to `TRO_DWELL` while somebody is within
+`TRO_REACH` of it, then goes. All four are engine constants, deliberately not pack keys: `troAudit`
+refuses a line that declares a word no reader exists for, so a `dwell:` key with no seam behind it
+would be a promise the engine does not keep. If your game needs its own numbers, that is one seam,
+added once, with an audit entry each.
 
 ## 2 · The switch — honest state: there is no pack selector
 

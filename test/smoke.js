@@ -3819,6 +3819,173 @@ const CANDIDATES = [
   });
   fails.push(...under);
 
+  /* ---- the small things keep off the rails, and the tram does not have to stop for them ----
+     The owner, 2026-09-11: "i mean she should be small enough and smart enough to stay away from the
+     tram please." "She" is the colibri. CRITTERS declares her at st(16,4) and the engine lets a
+     critter wander four tiles of Manhattan around home, which reaches row 2 — the rails. She hovers
+     rather than walks, so she can stand on the line indefinitely, and she did: three of six trams in
+     four minutes stopped dead for a hummingbird.
+     THE NOUN IS NOT "does the tram avoid her". That is the blind spot this branch already closed
+     once, by species, and the brake must keep catching a critter that is genuinely cornered. The
+     noun is "does the tram HAVE TO STOP for her" — she must be off the rail row before the brake
+     window ever reaches her, by her own doing.
+     Every critter is given `next = 1e9` so its ordinary wander cannot fire. Nothing but the rule can
+     move it, so a random walk that happened to clear the line in time cannot be mistaken for one. */
+  const shy = await page.evaluate(() => {
+    const P = [];
+    const lines = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT) ? TROLLEYAT : [];
+    if (!lines.length || typeof CRIT === 'undefined' || typeof critUpdate !== 'function') return P;
+    lines.forEach(L => {
+      const w = WORLDS[L.world]; if (!w) return;
+      const mid = Math.round((L.from + L.to) / 2);
+      const g = w.grid[L.row] && w.grid[L.row][mid];
+      if (g === undefined || SOLID.has(g) || g === 'N') return;   /* nothing could stand there anyway */
+      CRIT.filter(c => c.world === L.world).forEach(cr => {
+        const keep = { w: world, px: px, py: py, x: cr.x, y: cr.y, fx: cr.fx, fy: cr.fy,
+                       mv: cr.moving, mt: cr.mt, nx: cr.next, sit: cr.sit, tk: cr.task,
+                       st: TRO.state, tx: TRO.x, dir: TRO.dir, t: TRO.t };
+        world = L.world;
+        /* the hero: off the rails, and far from the stop, so he is not the reason for anything */
+        px = fx = mid; py = fy = Math.min(w.H - 1, L.row + 4);
+        cr.x = cr.fx = mid; cr.y = cr.fy = L.row; cr.moving = false; cr.mt = 0;
+        cr.sit = false; cr.task = null; cr.next = 1e9;   /* its turn never comes: only the rule can move it */
+        TRO.dir = L.to >= L.from ? 1 : -1;
+        TRO.x = mid - TRO.dir * 10; TRO.state = 'run'; TRO.t = 0;
+        TRO.dwelt = 0; TRO.dwellAt = null;
+        let clearAt = null, brakeAt = null;
+        for (let i = 0; i < 200; i++) { const t = i * 16.67;
+          troUpdate(16.67); critUpdate(16.67, 1e6 + t);
+          if (clearAt === null && Math.round(cr.y) !== L.row) clearAt = t;
+          if (brakeAt === null && TRO.state === 'hold') brakeAt = t; }
+        const who = cr.name || ('the ' + cr.kind);
+        if (clearAt === null)
+          P.push(who + ' never leaves the trolley line in ' + L.world + ' — standing on the rails while the ' +
+                 'tram comes, waiting for the tram to stop instead of getting out of the way');
+        else if (brakeAt !== null && brakeAt <= clearAt)
+          P.push('the tram has to brake for ' + who + ' in ' + L.world + ', ' + Math.round(clearAt - brakeAt) +
+                 ' ms before the line is clear — that is the tram staying away from the critter, not the critter staying away from the tram');
+        world = keep.w; px = fx = keep.px; py = fy = keep.py;
+        cr.x = keep.x; cr.y = keep.y; cr.fx = keep.fx; cr.fy = keep.fy;
+        cr.moving = keep.mv; cr.mt = keep.mt; cr.next = keep.nx; cr.sit = keep.sit; cr.task = keep.tk;
+        TRO.state = keep.st; TRO.x = keep.tx; TRO.dir = keep.dir; TRO.t = keep.t;
+      });
+    });
+    return P;
+  });
+  fails.push(...shy);
+
+  /* ---- ...and the two radii cannot be put in the wrong order ----
+     The one line of arithmetic the rule above rests on, asserted instead of promised. The critter's
+     awareness must reach FURTHER than the tram's brake, or the brake fires first, the car stops
+     before it is ever frightening, the critter never becomes endangered, and both of them stand in
+     the street for ever. That deadlock is not hypothetical: it is exactly what the pigeon's lift
+     threshold did on 2026-09-11 (the lift fired at 3.2, the brake at 2.6, the tram entered the
+     window first and the lift's own "the tram must be running" test then refused to fire — a tram
+     stopped in the street for good), and it was found by rendering a mock, not by reading the code.
+     Two constants, one comparison, and the thing this file exists to prevent. */
+  const radii = await page.evaluate(() => {
+    const P = [];
+    if (typeof TRO_SHY === 'undefined' || typeof TRO_LOOK === 'undefined') return P;
+    if (!(TRO_SHY > TRO_LOOK)) P.push('the tram brakes at ' + TRO_LOOK + ' tiles and a critter only ' +
+      'notices it at ' + TRO_SHY + ' — the tram stops before it is frightening, so nothing ever moves ' +
+      'out of its way and the car and the critter stand in the street looking at each other for ever');
+    return P;
+  });
+  fails.push(...radii);
+
+  /* ---- ...and a critter that IS cornered still stops it ----
+     The half of the rule above that is easy to lose. "She gets out of the way" must never become
+     "she is ignored": the fauna guard higher up in this file is the record of what that costs, and
+     it was written by this repository about this tram. A critter walled in on both sides of the line
+     cannot leave it, and the tram brakes, exactly as the owner ruled in the first place. */
+  const cornered = await page.evaluate(() => {
+    const P = [];
+    const lines = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT) ? TROLLEYAT : [];
+    if (!lines.length || typeof CRIT === 'undefined') return P;
+    const L = lines[0], w = WORLDS[L.world]; if (!w) return P;
+    const cr = CRIT.filter(c => c.world === L.world)[0]; if (!cr) return P;
+    const mid = Math.round((L.from + L.to) / 2);
+    const keep = { w: world, px: px, py: py, x: cr.x, y: cr.y, mv: cr.moving, nx: cr.next,
+                   st: TRO.state, tx: TRO.x, dir: TRO.dir,
+                   up: w.grid[L.row - 1], dn: w.grid[L.row + 1],
+                   upv: w.grid[L.row - 1] && w.grid[L.row - 1][mid],
+                   dnv: w.grid[L.row + 1] && w.grid[L.row + 1][mid] };
+    /* wall the two tiles beside it — a real violation, put back before we leave */
+    const solidGlyph = [...SOLID].find(g => g && g.length === 1) || '#';
+    const wall = (row) => { if (!w.grid[row]) return;
+      if (typeof w.grid[row] === 'string') { const g = w.grid[row].split(''); g[mid] = solidGlyph; w.grid[row] = g.join(''); }
+      else w.grid[row][mid] = solidGlyph; };
+    wall(L.row - 1); wall(L.row + 1);
+    world = L.world; px = fx = mid; py = fy = Math.min(w.H - 1, L.row + 4);
+    cr.x = cr.fx = mid; cr.y = cr.fy = L.row; cr.moving = false; cr.next = 1e9;
+    TRO.dir = L.to >= L.from ? 1 : -1;
+    TRO.x = mid - TRO.dir * 6; TRO.state = 'run'; TRO.t = 0; TRO.dwelt = 0; TRO.dwellAt = null;
+    let held = false;
+    for (let i = 0; i < 120 && !held; i++) { troUpdate(16.67); if (typeof critUpdate === 'function') critUpdate(16.67, 1e6 + i * 16.67);
+      if (TRO.state === 'hold' && Math.round(cr.y) === L.row) held = true; }
+    if (!held) P.push((cr.name || ('a ' + cr.kind)) + ', walled in on the trolley line in ' + L.world +
+      ', cannot get off it and the tram drives straight through — getting out of the way has quietly become being ignored');
+    if (w.grid[L.row - 1]) { if (typeof w.grid[L.row - 1] === 'string') w.grid[L.row - 1] = keep.up; else w.grid[L.row - 1][mid] = keep.upv; }
+    if (w.grid[L.row + 1]) { if (typeof w.grid[L.row + 1] === 'string') w.grid[L.row + 1] = keep.dn; else w.grid[L.row + 1][mid] = keep.dnv; }
+    world = keep.w; px = fx = keep.px; py = fy = keep.py;
+    cr.x = cr.fx = keep.x; cr.y = cr.fy = keep.y; cr.moving = keep.mv; cr.next = keep.nx;
+    TRO.state = keep.st; TRO.x = keep.tx; TRO.dir = keep.dir;
+    return P;
+  });
+  fails.push(...cornered);
+
+  /* ---- it waits at the stop for somebody walking up to it, and the waiting ends ----
+     The owner, 2026-09-11: "why wouldnt they stop for me? if im walking close to the tram, it should
+     wait if it is already at the tram stop, if i missed it then its ok, itll take me a second and
+     then i should be at the stop anyhow and wont mind a second to arrive."
+     Until now `stops` was read by exactly two things — the boot audit and the summon check — so the
+     car passed its own platform at full speed with a passenger standing on it, and the summon made
+     that WORSE rather than better: standing at the stop called a tram every 8.5 seconds and not one
+     of them stopped. Chava's verdict at the new speed was "worse", in one word.
+     Three things are measured, and the third is the one that keeps it a tram instead of a lift:
+     it waits; it stops waiting; and it does not wait for an empty platform. The brake is checked to
+     be OFF throughout, because "the tram stopped" is also true of a person standing on the rails and
+     that is a different rule with a different reason. */
+  const dwell = await page.evaluate(() => {
+    const P = [];
+    const lines = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT) ? TROLLEYAT : [];
+    if (!lines.length || typeof troStops !== 'function') return P;
+    lines.forEach(L => {
+      const s = troStops(L)[0], w = WORLDS[L.world]; if (!s || !w) return;
+      const keep = { w: world, px: px, py: py, st: TRO.state, x: TRO.x, d: TRO.dir, t: TRO.t, c: TRO.called };
+      const ride = (atStop) => {
+        world = L.world;
+        if (atStop) { px = fx = s.x; py = fy = s.y; }
+        else { px = fx = L.to; py = fy = Math.min(w.H - 1, L.row + 5); }
+        TRO.dir = L.to >= L.from ? 1 : -1;
+        TRO.state = 'run'; TRO.t = 0; TRO.called = false; TRO.dwelt = 0; TRO.dwellAt = null;
+        TRO.x = s.x - TRO.dir * 3;
+        let still = 0, served = 0, braked = false;
+        for (let i = 0; i < 200; i++) {
+          const x0 = TRO.x, at = (s.x >= TRO.x - 0.5 && s.x <= TRO.x + TRO_LEN + 0.5);
+          troUpdate(50);
+          if (typeof troAhead === 'function' && TRO.state !== 'away' && troAhead(L)) braked = true;
+          if (at && TRO.state !== 'away') { served += 50; if (TRO.x === x0) still += 50; }
+        }
+        return { still: still, served: served, braked: braked };
+      };
+      const mine = ride(true);
+      if (!mine.served) P.push('this check never got the tram as far as its own stop in ' + L.world + ' — it proves nothing');
+      else if (mine.braked) P.push('standing at the stop in ' + L.world + ' puts the hero in front of the tram, so this check is reading the brake and not the stop — it proves nothing');
+      else if (mine.still < 800) P.push('the trolley runs straight past its own stop in ' + L.world +
+        ' with somebody standing on it: you call it, it comes, and it does not stop for you');
+      else if (mine.still > 7000) P.push('the trolley stands at the stop in ' + L.world + ' for ' + mine.still +
+        ' ms and shows no sign of leaving — one person on a platform can park the line for ever');
+      const empty = ride(false);
+      if (empty.served && empty.still > 400) P.push('the trolley stands at the stop in ' + L.world + ' for ' +
+        empty.still + ' ms with nobody anywhere near it — it is not waiting for a passenger, it is just slow');
+      world = keep.w; px = fx = keep.px; py = fy = keep.py;
+      TRO.state = keep.st; TRO.x = keep.x; TRO.dir = keep.d; TRO.t = keep.t; TRO.called = keep.c;
+    });
+    return P;
+  });
+  fails.push(...dwell);
+
 
 
   await browser.close();

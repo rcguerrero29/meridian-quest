@@ -74,6 +74,36 @@ this register.
 smallest and most plausible way, does it print a sentence a person would say?* If you have not run
 that, the guard is untested no matter how green the suite is.
 
+### The five guards added after the register was opened, and the eight violations planted at them
+
+*2026-09-11, `mq-v149` — the critters-keep-off-the-rails rule and the tram that waits at its stop.
+Listed here rather than in the table above because **none of them is in the table**: each was written,
+then broken on purpose in a copy outside the repository, and each printed a sentence a person would
+say. That is the whole procedure and it takes about ten minutes.*
+
+| Guard | What was planted at it | What it printed |
+|---|---|---|
+| every critter clears the rails in time | the rule's one call site disabled | *"the colibri never leaves the trolley line in st — standing on the rails while the tram comes, waiting for the tram to stop instead of getting out of the way"* |
+| (same) | the escape step turned to run **along** the line instead of across it | the same sentence — a pigeon correctly fleeing down the rails for ever is indistinguishable from one that never moved |
+| (same) | the shy radius dropped **below** the brake's | the same sentence, by deadlock: the tram stops before it is frightening, so nothing is ever frightened |
+| `TRO_SHY > TRO_LOOK` | `TRO_SHY=2` | *"…the car and the critter stand in the street looking at each other for ever"* |
+| a **cornered** critter still stops the tram | the brake's critter clause disabled | *"a butterfly, walled in on the trolley line in st, cannot get off it and the tram drives straight through — getting out of the way has quietly become being ignored"* |
+| the tram waits at its stop | the dwell never fires | *"the trolley runs straight past its own stop in st with somebody standing on it: you call it, it comes, and it does not stop for you"* |
+| …and the waiting **ends** | the dwell budget removed | *"…stands at the stop for 9900 ms and shows no sign of leaving — one person on a platform can park the line for ever"* |
+| …and it does not wait for an **empty** platform | the "is anyone near" test removed | *"…stands at the stop for 3200 ms with nobody anywhere near it — it is not waiting for a passenger, it is just slow"* |
+
+**Two of the eight are the interesting ones and neither was on the list when the guards were written.**
+The *along-the-line* plant and the *radii-reversed* plant both produce the identical failure sentence
+as simply deleting the rule — three completely different mistakes, one symptom. A guard that had
+asked *"did the critter move?"* would have gone green for two of the three. It asks *"was the line
+clear before the brake had to fire?"*, which is the noun, and that is the only reason it survives all
+three. **The proxy version of this guard was one word away and the word was "move".**
+
+The third guard in that list — the cornered one — is the register's own lesson turned into a test.
+This branch had already lost a pigeon to *getting out of the way* quietly becoming *being ignored*,
+by species. The rule that keeps critters off the rails is exactly the pressure that makes the brake
+look like dead code, so the brake now has a test that fails without it.
+
 
 | # | Gap | Assertion to add | Where | Cost |
 |---|---|---|---|---|

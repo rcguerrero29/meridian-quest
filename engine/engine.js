@@ -1210,8 +1210,23 @@ function petalSpill(w,x,y,sx,sy,scale){
    across has a circular silhouette. The real wheel fault was a second rotation undoing the axle, it
    shipped in mq-v144, and this change is deliberately AFTER it so the faster tram is one with wheels
    on it. docs/3D-LOG.md 2026-09-11. */
-const TRO_EVERY=19000,TRO_SPEED=6.0,TRO_LEN=2,TRO_HOLD=1400;
-const TRO={x:0,dir:1,state:"away",t:0,called:false,said:0};
+const TRO_EVERY=19000,TRO_SPEED=6.0,TRO_LEN=2,TRO_HOLD=1400,TRO_LOOK=2.6;
+/* TRO_SHY — how far up the line a small living thing reads the car, in tiles. TRO_DWELL/TRO_REACH —
+   how long the car stands at a platform for somebody walking up to it, and how close "walking up"
+   is. All three are engine constants and not pack keys, like TRO_HOLD beside them: a tram waiting
+   for a passenger is a RULE (every game with a tram wants it), and troAudit deliberately refuses a
+   line that declares a word no reader exists for, so a `dwell:` key with no seam behind it would be
+   a promise the engine does not keep. If a pack ever needs its own numbers they become one seam,
+   once, with an audit entry each. docs/TAGS.md L16.
+   ONE INVARIANT BINDS TWO OF THEM, AND IT IS CHECKED IN test/smoke.js rather than left to this
+   comment: TRO_SHY > TRO_LOOK. If the critter reads the car later than the car reads the critter,
+   the brake fires first, the car stops, it never gets close enough to frighten anything, and the two
+   of them stand in the street looking at each other for ever. That is not a theory: it is the same
+   deadlock the pigeon's lift threshold produced on 2026-09-11, found by a rendered mock and not by
+   reading, and planting TRO_SHY=2 here reproduces it exactly — every critter in the city then fails
+   the guard above with "never leaves the trolley line". */
+const TRO_SHY=4,TRO_DWELL=3200,TRO_REACH=2;
+const TRO={x:0,dir:1,state:"away",t:0,called:false,said:0,dwelt:0,dwellAt:null};
 function troLine(wid){const L=(typeof TROLLEYAT!=="undefined"&&TROLLEYAT)?TROLLEYAT:[];return L.find(r=>r.world===(wid||world))||null;}
 /* ---- WHERE THE LINE SERVES — the pack says it, in tile coordinates ----
    `stops` is a list of PLATFORM tiles: the tile a person stands on to be served. It is beside the
@@ -1241,7 +1256,7 @@ function troBlocked(wid){const L=troLine(wid);if(!L)return [];const w=WORLDS[L.w
    -0.6, so a thing that steps on beside the door missed both at once.
    A ratio of distances, so it was identical at 3.4 and 6.0 — the speed neither caused it nor
    changed it, it only made the band sweep past twice as fast. */
-function troAhead(L){const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),near=v=>{const d=(v-nose)*TRO.dir;return d>=-TRO_LEN&&d<=2.6;};
+function troAhead(L){const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),near=v=>{const d=(v-nose)*TRO.dir;return d>=-TRO_LEN&&d<=TRO_LOOK;};
   if(world===L.world&&Math.round(py)===L.row&&near(px))return true;
   const w=WORLDS[L.world];if(w&&w.npcs.some(n=>n.y===L.row&&near(n.x)))return true;
   if((typeof CRIT!=="undefined"?CRIT:[]).some(c=>c.world===L.world&&Math.round(c.y)===L.row&&near(c.x)))return true;
@@ -1276,15 +1291,58 @@ function troAhead(L){const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),near=v=>{const d=(v-
    replaces, over the tiles the line declares instead of over the tiles the map paints. */
 function troAtStop(L){if(!L||world!==L.world)return false;
   return troStops(L).some(function(s){return Math.abs(s.x-px)<=1&&Math.abs(s.y-py)<=1;});}
+/* ---- the rails are a road, and the things that live beside it know that ----
+   troDanger answers one question with no side effects: is that tile a rail with a car close enough
+   to matter? It is deliberately WIDER than the brake window (TRO_SHY against TRO_LOOK), so
+   a critter is already moving by the time the tram would have had to stop, and the tram never has to.
+   The owner, 2026-09-11: "i mean she should be small enough and smart enough to stay away from the
+   tram please." That is the colibri, declared in CRITTERS at st(16,4) with a four-tile Manhattan
+   wander around home — which reaches row 2, the rails — and she hovers, so she could stand there
+   indefinitely, and did: three of six trams in four minutes stopped for a hummingbird.
+   The shipped answer to this in other games is ECO's: the player (here, the vehicle) carries a
+   threat radius that grows FORWARD with speed, and an animal inside it leaves. docs/research/
+   2026-09-11-critters-in-play.md. Ours is the same shape with a fixed lead, because our vehicle has
+   one speed and runs on one axis.
+   The brake in troAhead is untouched and stays the backstop. This is not a way of IGNORING a critter
+   on the rails — that is the blind spot this same tram had two days ago, by species, and it cost a
+   pigeon. It is a reason for there not to be one. */
+function troDanger(wid,x,y){const L=troLine(wid);
+  if(!L||L.row!==y||TRO.state==="away")return false;
+  const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),d=(x-nose)*TRO.dir;
+  return d>=-TRO_LEN&&d<=TRO_SHY;}
+/* ---- which platform the car's doors are at, and whether it should stand there ----
+   The car always spans [TRO.x, TRO.x+TRO_LEN] whichever way it is pointed; only the nose swaps ends.
+   The owner, 2026-09-11: "why wouldnt they stop for me? if im walking close to the tram, it should
+   wait if it is already at the tram stop, if i missed it then its ok, itll take me a second and then
+   i should be at the stop anyhow and wont mind a second to arrive."
+   Both halves of that sentence are in troDwell. It waits — and the waiting ENDS, TRO_DWELL per
+   platform per run, so one person standing on a kerb can never park the line. The budget is keyed by
+   platform (`dwellAt`) rather than by run, because a line with two stops must be patient at the
+   second one having already been patient at the first; and it is cleared when a run begins, so the
+   next tram is as patient as this one was. */
+function troServing(L){if(!L||TRO.state==="away")return null;
+  return troStops(L).find(function(s){return s.x>=TRO.x-0.5&&s.x<=TRO.x+TRO_LEN+0.5;})||null;}
+function troDwell(L,dt){const s=troServing(L);
+  if(!s||world!==L.world)return false;
+  const k=s.x+","+s.y;
+  if(TRO.dwellAt!==k){TRO.dwellAt=k;TRO.dwelt=0;}
+  if(TRO.dwelt>=TRO_DWELL)return false;                       /* "if i missed it then its ok" */
+  if(Math.abs(px-s.x)+Math.abs(py-s.y)>TRO_REACH)return false; /* nobody walking up: it does not dawdle */
+  TRO.dwelt+=dt;return true;}
 function troCall(){TRO.called=true;}
 function troUpdate(dt){const L=troLine();
   if(!L){TRO.state="away";return;}
   if(TRO.state==="away"){
     if(troAtStop(L)&&!TRO.called){TRO.called=true;if(T().troCome)toast(T().troCome,2200);}
     TRO.t+=dt;
-    if(TRO.called||TRO.t>=TRO_EVERY){TRO.called=false;TRO.t=0;TRO.dir=L.to>=L.from?1:-1;TRO.x=L.from-TRO.dir*TRO_LEN;TRO.state="run";}
+    if(TRO.called||TRO.t>=TRO_EVERY){TRO.called=false;TRO.t=0;TRO.dwelt=0;TRO.dwellAt=null;
+      TRO.dir=L.to>=L.from?1:-1;TRO.x=L.from-TRO.dir*TRO_LEN;TRO.state="run";}
     return;}
   if(troAhead(L)){TRO.state="hold";TRO.t=0;return;}          /* somebody is crossing: wait */
+  /* ...and somebody walking up to the platform it is standing at: doors open, and they close. This
+     is BELOW the brake on purpose — a person on the rails is a different rule with a different
+     reason, and it must be the one that answers first. */
+  if(troDwell(L,dt)){TRO.state="dwell";return;}
   if(TRO.state==="hold"){TRO.t+=dt;if(TRO.t<TRO_HOLD)return;TRO.t=0;}
   TRO.state="run";TRO.x+=TRO.dir*TRO_SPEED*dt/1000;
   const end=L.to+TRO.dir*TRO_LEN;
@@ -1296,7 +1354,10 @@ function drawTram(g,sx,sy,front){const W=TS*TRO_LEN,H=TS;
   g.fillStyle="#D8E6F0";for(let i=0;i<3;i++)g.fillRect(sx+8+i*(W-20)/3,sy+(front?7:9),(W-24)/3,front?9:7);
   g.fillStyle="#E0A430";g.fillRect(sx+W/2-4,sy+(front?2:5)-2,8,2);
   g.fillStyle="#2B2536";[0.22,0.78].forEach(t2=>{g.beginPath();g.arc(sx+W*t2,sy+H-6,2.6,0,7);g.fill();});
-  if(TRO.state==="hold"){g.fillStyle="#D9342B";g.beginPath();g.arc(sx+(TRO.dir>0?W-5:5),sy+(front?5:8),2,0,7);g.fill();}}
+  if(TRO.state==="hold"||TRO.state==="dwell"){
+    /* red: it has stopped BECAUSE OF YOU, get off the rails. amber: the doors are open, come on. */
+    g.fillStyle=TRO.state==="hold"?"#D9342B":"#E0A430";
+    g.beginPath();g.arc(sx+(TRO.dir>0?W-5:5),sy+(front?5:8),2,0,7);g.fill();}}
 function troDraw2D(wid,toScreen,front){const L=troLine(wid);
   if(!L||L.world!==wid||TRO.state==="away")return;
   const[sx,sy]=toScreen(TRO.x,L.row);drawTram(ctx,sx,sy,front);}
@@ -2067,7 +2128,7 @@ const PIGLIFT=560;
 function pigFlee(now){
   if(PIG.lift)return;
   const L=(typeof troLine==="function")?troLine(AW("pig")):null;
-  if(!L||(TRO.state!=="run"&&TRO.state!=="hold")||Math.round(PIG.y)!==L.row)return;
+  if(!L||TRO.state==="away"||Math.round(PIG.y)!==L.row)return;  /* a car on the line is a car on the line, whatever it is doing */
   const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),d=(PIG.x-nose)*TRO.dir;
   /* She must be GOING before the brake window, or the tram stops for her and she never learns why.
      Measured before this line existed: the brake fires at d<=2.6 and the lift triggered at d<=3.2,
@@ -2147,8 +2208,35 @@ const CRIT=(typeof CRITTERS!=="undefined"?CRITTERS:[]).map(c=>({...c,fx:c.x,fy:c
 function critFree(cr,x,y){const w=WORLDS[cr.world];
   return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")
     &&!(world===cr.world&&x===px&&y===py)
+    &&!(typeof troDanger==="function"&&troDanger(cr.world,x,y))  /* nothing alive WALKS INTO a road with a car on it */
     &&Math.abs(x-cr.home[0])+Math.abs(y-cr.home[1])<=4;}
+/* ---- ...and a thing that finds itself in the road leaves it ----
+   Avoidance alone is not enough: the line is empty ground when no car is running, so a critter is
+   free to cross it and will be standing on it when the next tram is summoned. Flight alone is not
+   enough either: it would step straight back on. So the pair — critFree refuses the step in,
+   critShy takes the step out — and between them a critter is on the rails only while it is crossing.
+   Three things about the step out, each of which cost something to learn elsewhere in this file:
+   · It is SIDEWAYS, never along the line. Running down the rails ahead of a tram is what a bird does
+     in a cartoon; the short way out of a road is across it.
+   · It ignores the four-tile leash to home. Getting out of the road beats being homesick, and a
+     critter clamped to a radius that straddles the rails is exactly the colibri's case.
+   · It does not clear `stayT`. A dog told to STAY steps off the rails and then goes on staying,
+     beside them. The promise is about wandering off, not about being run over.
+   · If both sides are blocked it returns false and does nothing, and troAhead brakes for it. That
+     is the owner's original ruling and it is still the backstop: getting out of the way must never
+     quietly become being ignored. */
+function critShy(cr,now){
+  if(typeof troDanger!=="function"||!troDanger(cr.world,cr.x,cr.y))return false;
+  const w=WORLDS[cr.world];if(!w)return false;
+  const ok=(x,y)=>!(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")
+    &&!(world===cr.world&&x===px&&y===py)&&!troDanger(cr.world,x,y);
+  const d=[[0,-1],[0,1]].filter(o=>ok(cr.x+o[0],cr.y+o[1]))[0];
+  if(!d)return false;
+  cr.sit=false;cr.dx=d[0];cr.dy=d[1];
+  cr.x+=d[0];cr.y+=d[1];cr.moving=true;cr.mt=0;cr.next=now+260;
+  return true;}
 function critUpdate(dt,now){CRIT.forEach(cr=>{
+  if(!cr.moving&&critShy(cr,now))return;   /* the road first: a critter does not wait its turn to live */
   if(cr.moving){cr.mt+=dt/(cr.kind==="gato"?520:cr.kind==="butterfly"?300:160);
     if(cr.mt>=1){cr.moving=false;cr.fx=cr.x;cr.fy=cr.y;}
     else{cr.fx=cr.x-cr.dx*(1-cr.mt);cr.fy=cr.y-cr.dy*(1-cr.mt);}return;}
