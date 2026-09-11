@@ -1095,6 +1095,53 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...troCams);
 
+  /* ---- a document may carry a DRAWING, not only words ----
+     The owner, 2026-09-11, on the crew mural: "can we have functionality there wehre you see
+     tiles/icons from afar but you get close and can interact to see it full screen- then thats how
+     pixels/art can be used there by agents".
+     Both halves of that nearly existed. A thing you notice from across a room and walk up to is
+     READS + the breathing mark + the Read button. A panel that opens over the world is docOpen. But
+     the reader could only render WORDS — h, p, note, red, blank, kv, table, q, btn, sel, form — so
+     the largest picture a pack could put in front of a person was a 32-pixel tile seen from twelve
+     tiles back. That is the sugar-skull mistake as a rule rather than an accident: this engine has
+     had no surface where art is meant to be looked at closely.
+     `art` is that surface. The pack hands a draw function; the engine gives it a canvas and never
+     learns what is on it — the same bargain as TILEART and DECOART.
+     Asks what a PERSON gets: is there a picture, and is it big enough to be worth walking up to. */
+  const docArt = await page.evaluate(() => {
+    const P = [];
+    const body = document.getElementById('docBody');
+    if (!body) { P.push('this shell has no reader at all'); return P; }
+    let drew = 0, gotW = 0, gotH = 0;
+    const probe = { h: 'A drawing', art: (g, w, h) => { drew++; gotW = w; gotH = h;
+      g.fillStyle = '#C6DCEA'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#7A3FE0'; g.fillRect(8, 8, w - 16, h - 16); } };
+    if (typeof docRender !== 'function') {
+      P.push('a pack cannot put a picture in front of a person — the reader renders words and nothing else, so the biggest art in this game is a tile seen from across the street');
+      return P;
+    }
+    /* the reader must actually be OPEN to measure it — a hidden element has no box, and the first
+       version of this check read 0 and blamed the code. Open it, measure, put it back. */
+    const rd = document.getElementById('reader'); const wasHidden = rd ? rd.hidden : true;
+    if (rd) rd.hidden = false;
+    body.innerHTML = '';
+    docRender(body, [probe]);
+    const cv = body.querySelector('canvas');
+    if (!cv) P.push('a document carrying a drawing rendered no drawing');
+    else {
+      if (!drew) P.push('the reader made a canvas and never asked the pack to draw on it');
+      const box = cv.getBoundingClientRect();
+      if (box.width < 200)
+        P.push('the picture is only ' + Math.round(box.width) + ' pixels across — not worth walking up to, which was the whole point');
+      if (gotW < 200 || gotH < 100)
+        P.push('the pack was handed a ' + gotW + '×' + gotH + ' canvas to draw on — too small to be the close-up view of anything');
+    }
+    body.innerHTML = '';
+    if (rd) rd.hidden = wasHidden;
+    return P;
+  });
+  fails.push(...docArt);
+
   await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();
   if (fails.length) { console.log('FAIL (' + idx + ')\n- ' + fails.join('\n- ')); process.exit(1); }

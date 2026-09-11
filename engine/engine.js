@@ -2957,17 +2957,31 @@ function docMarkdown(id){
   });
   return out.join("\n");
 }
-function docOpen(id,from){
-  const secs=docSections(id);if(!secs)return;
-  const d=docDef(id)||{},body=$("docBody");
-  docCur=id;docBack=from==="card"?"card":null;body.innerHTML="";
+/* THE READER'S BLOCKS, in one place, so the reader and the suite walk the same path. Lifted out
+   of docOpen 2026-09-11 to add `art`: until then a pack could put WORDS in front of a person and
+   nothing else, so the biggest picture this game could show was a 32-pixel tile seen from twelve
+   tiles back. The owner: "you see tiles/icons from afar but you get close and can interact to see
+   it full screen- then thats how pixels/art can be used there by agents."
+   A block the reader does not know is skipped, exactly as before. */
+function docRender(body,secs){
   const el=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;
     if(txt!==undefined)n.textContent=txt;body.appendChild(n);return n;};
-  $("docTitle").textContent=docTitle(id);
-  $("docSub").textContent=(d.sub&&(d.sub[lang]||d.sub.en))||"";
-  $("docTmpl").textContent=d.tmpl?(DCU().tmplLb?DCU().tmplLb(d.tmpl):d.tmpl):"";
-  $("docTmpl").hidden=!d.tmpl;
   secs.forEach(s2=>{
+    if(s2.art&&typeof s2.art==="function"){ /* A DRAWING. The pack draws; the engine never learns
+       what is on it — the same bargain as TILEART and DECOART. It gets a real canvas at the width
+       the reader actually has, because a picture worth walking up to must not be a thumbnail. */
+      if(s2.h)el("h3","dh",s2.h);
+      const cv=document.createElement("canvas");cv.className="dart";
+      const W=Math.max(240,Math.min(560,(body.clientWidth||520)-8)),H=Math.round(W*(s2.aspect||0.55));
+      const K=Math.min(3,window.devicePixelRatio||1);
+      cv.width=W*K;cv.height=H*K;cv.style.width=W+"px";cv.style.height=H+"px";
+      cv.style.display="block";cv.style.margin="10px auto";cv.style.borderRadius="6px";
+      const g=cv.getContext("2d");g.setTransform(K,0,0,K,0,0);g.imageSmoothingEnabled=false;
+      try{s2.art(g,W,H);}catch(e){if(typeof mqwarn==="function")mqwarn("docart",String((e&&e.message)||e),false);}
+      body.appendChild(cv);
+      if(s2.cap)el("p","dnote",s2.cap);
+    }
+    else
     if(s2.h)el("h3","dh",s2.h);
     else if(s2.p)el("p","dp",s2.p);
     else if(s2.note)el("p","dnote",s2.note);
@@ -3029,6 +3043,13 @@ function docOpen(id,from){
         b.className="opt";b.textContent=docTitle(k);
         b.addEventListener("click",()=>docOpen(k,docBack));row.appendChild(b);});}
   });
+}
+function docOpen(id,from){
+  const secs=docSections(id);if(!secs)return;
+  const d=docDef(id)||{},body=$("docBody");
+  docCur=id;docBack=from==="card"?"card":null;body.innerHTML="";
+  $("docTitle").textContent=docTitle(id);
+  docRender(body,secs);
   body.scrollTop=0;{const sc=$("paperScroll");if(sc)sc.scrollTop=0;}  /* the paper scrolls in its own box now, so that is what returns to the top */
   /* a document handed over inside a quest must NOT re-run exitFsForCard: questStart already
      ran it, and a second call records wasFs=false, so the player never gets fullscreen back. */
