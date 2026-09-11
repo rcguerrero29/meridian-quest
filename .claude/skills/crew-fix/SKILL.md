@@ -164,6 +164,65 @@ read its own brief.
 3. **The gap I predicted — did it appear?** A wrong prediction is a finding, not a failure.
 4. **The edit I propose to my own file**, as exact text, or *"none, and here is why not"*.
 
+## The mural — one panel per agent, in your own hand
+
+*Owner, 2026-09-11: "i want the mural please" → then "can be more creative and if its that way one
+per agent but they can collaborate with one too" → then "remind them to be creative and that it
+doesnt have to be a report, just to reflect what is the persona - good representation so they have to
+keep adding to the mural in the same amount of effort, if possible."*
+
+**Every agent on a run proposes one mural panel.** It goes on the town's wall at
+`changarrito/content/murals.js` — you propose it, the calling session paints it, exactly like a
+persona edit. It is not optional and it is not a summary of your report.
+
+### What a panel is
+
+| It is | It is not |
+|---|---|
+| The one thing you found that cost something to find | A list of what you did |
+| **A drawing** — the idea, in a picture, at reading size | A caption with a rectangle behind it |
+| Drawn **the way YOU see** — your trade's own paper | The house style |
+| Short words that sting | A paragraph of findings |
+
+**Your hand is the point.** The wall already has a drawing-office blueprint, a dimension drawing with
+the lie hatched in, a depot signwriter's board, a wall of labelled drawers, a cross-section with a
+scale rule, a race with the gap dimensioned, and the one with steam in it. **Nobody should have to
+read the label to know whose panel they are looking at.** If your trade has paper — a plan, a ticket,
+a spec sheet, a sample card, a proof — draw on that paper.
+
+**And it does not have to be a report.** A joke lands. A single object lands. The thing you refused
+lands hardest of all. The owner asked for the harsh ones by name.
+
+### The effort bar, in his words
+
+> *"good representation so they have to keep adding to the mural in the same amount of effort, if possible"*
+
+**The same effort as the work.** A panel dashed off in four lines while the report ran to four
+thousand words is the wall telling the truth about what you thought mattered, and it is the wrong
+truth. Budget for it.
+
+### What you return
+
+```
+MURAL PANEL
+id:     <agent>-<three-or-four-words-in-spanish-or-english>
+title:  {en, es}
+said:   {en, es}   — the sentence. Yours. Short enough to sting
+who:    {en, es}   — you, in one clause, in the third person
+cap:    {en, es}   — what it cost to find. Two or three sentences, no file paths
+aspect: <height as a fraction of width, 0.40–0.50>
+art:    (g,W,H)=>{ ... }   — real canvas 2D. Use MURPAL, murGround/murPaper/murDim/murBody/murTram
+```
+
+### The two rules that bind it
+
+- **Add and improve, never remove.** `docs/crew/MURAL-LEDGER.txt` fingerprints every panel's WORDS
+  and the town suite fails the build if one goes missing, is renamed, reordered, or edited after the
+  fact. **You may repaint. You may not rewrite.** So get the words right and feel free to improve the
+  painting forever.
+- **The past and the present only** (`docs/ARCH-LOG.md` A3). *"I read the code instead of the brief"*
+  belongs on a wall. *"Somebody should fix the comment"* may never appear on one.
+
 ## Changing your own persona — the rules that make it safe
 
 An agent editing its own definition can drift a long way in two iterations, quietly, and end up a
