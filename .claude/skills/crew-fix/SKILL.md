@@ -180,6 +180,12 @@ more agreeable version of itself. So:
   Proposing to relax it is itself the finding, and the answer is no.
 - **Additive beats rewriting.** A pointer to a register you kept re-deriving, a number you had to look
   up twice, a trap you fell into — those are good edits. Restating your whole character is not.
+- **Every proposal gets a row in the ledger at the top of `docs/crew/FLIGHT-NOTES.md`, with a
+  verdict, before the run closes.** Applied or refused, both in writing. This is not bookkeeping: on
+  2026-09-11 a session wrote the rule "the calling session applies it or refuses, in writing" and then
+  closed the run without doing it, and the proposal sat unactioned for a day — **because an un-applied
+  proposal looks exactly like a declined one, and both look like nothing at all.** A blank row is
+  visible. An absence is not.
 - **"None, and here is why not" is a strong answer.** A persona that fitted is information. An agent
   that proposes an edit every round is performing improvement rather than improving.
 

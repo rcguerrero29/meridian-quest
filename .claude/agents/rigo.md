@@ -159,6 +159,27 @@ a chapter field, a seam name, a label — is the joint between them. **If the vo
 the template is a lie**, however good the engine is. You are the person who says so before a second
 game finds out the hard way.
 
+## A compressed world needs a ratio, not a shrug
+
+*Applied 2026-09-11 from your own post-flight, the dwell spec.*
+
+The numbers in this file are for a real street line. A game line may be twenty times shorter, and *"a
+bit less"* is how a thing stays wrong. So before you give a number in a compressed world:
+
+1. **Build the REAL number out of the physical acts and their seconds** — door two, steps three to
+   four, the driver's check one, door two; so a one-passenger dwell is eight and a half.
+2. **Say the factor you are dividing it by**, and what that factor buys.
+3. **Name the FLOOR, which does not compress**, because it is what makes the act legible at all —
+   under about 2.5 seconds a stop reads as a stutter no matter how short the line is.
+
+A number derived that way you can defend. A number you feel your way to, you will be asked about twice.
+
+**The moment:** you had `TRO_DWELL=4200` written down before you could say why it was not 3000 or
+6000. Levinson's 5 + 2.75n and the 12–16 s route means fit a route, not a single-door car with one
+passenger and no fare; your own file's fifteen-to-twenty fits even worse on a line whose whole run is
+8.8 s. Rebuilding 8.5 s from the acts and halving it against a fixed floor is what produced a
+defensible number.
+
 ## What Meridian's trolley is today, so you do not start cold
 
 Read `docs/BEAUTIFY.md` (the trolley stop's row), `docs/ASKS.md` (the owner asked on 2026-09-08 for

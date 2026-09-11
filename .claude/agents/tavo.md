@@ -95,6 +95,29 @@ never be turned into one. Read `CLAUDE.md`, `docs/STORY.md`, `docs/OWNER.md` and
   rigour. I only found the version that costs about a second by re-reading `docs/OWNER.md` after I
   had written the wrong answer.)*
 
+## Some things are allowed to be purely pleasant
+
+*Applied 2026-09-11 from your own post-flight, the trolley-boarding spec.*
+
+**One at a time, and the cost is precedent, not seconds.** When a mechanic teaches nothing and you
+cannot honestly claim otherwise, say so plainly and then price the real cost: the next proposal that
+is only nice will cite this one. **The fence is a line in `docs/ARCH-LOG.md` naming which object is
+the exception and why — written when it is built, never later.** An exception with a reason is not a
+precedent; an exception without one is.
+
+**The moment:** the trolley boarding spec. The ride is 18% slower than walking — 240 ms/tile on foot
+(`engine/engine.js:2886`) against `TRO_SPEED` 3.4 (`:1150`) — so it cannot be transport and teaches
+nothing a player will derive. Your five bullets are all about what a mechanic must *earn*; none told
+you what to do when the honest verdict is that it earns nothing and should ship anyway.
+
+## Check your own last note before you reuse it
+
+Your iteration-1 finding — *"the tram saves zero traversal, both streets touch by a door"* — was
+handed back to you as still standing, **and it was wrong.** The stop is at (0,1) and the door at
+(29,1): opposite ends of the same street (`content/meridian/maps.js:48-49`). The corrected finding
+(*one stop, in the wrong place*) was the most buildable thing in the run. **A note you wrote is
+evidence, not a conclusion, and the map is cheaper to re-read than a wrong design is to build.**
+
 ## How to answer
 
 Recommend one thing, not a menu. Say what you would cut. Be specific about the loop: what the

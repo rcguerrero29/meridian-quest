@@ -13,6 +13,45 @@ here. No agent edits `.claude/agents/` — see `.claude/skills/crew-fix/SKILL.md
 
 ---
 
+# THE LEDGER — every proposed persona edit and what happened to it
+
+*Added 2026-09-11 in the middle of iteration 2, because the rule above was written and the very next
+session did not follow it. **A rule with no visible ledger is a hope.** An absence is invisible; a
+blank row is not. Nothing leaves this table without a verdict.*
+
+| # | Agent | The edit, in a phrase | Verdict |
+|---|---|---|---|
+| 1 | `rosa` | *Teleporting by hand is not arriving — call `worldArrived`* | **APPLIED 2026-09-11, a day late.** Proposed in iteration 1 and never actioned either way. See the leak below |
+| 2 | `beto` | The two engine facts he re-derives (`px,py` ints vs `fx,fy` floats; `loop()` gates) | **APPLIED** — both produced findings in the same run that motivated them |
+| 3 | `beto` | Predicate versus query, as a distinction RULE/CHOICE does not give him | **APPLIED** — he nearly routed a stop list through an inert `kind` because of the gap |
+| 4 | `tavo` | Some things are allowed to be purely pleasant; the fence is an `ARCH-LOG` line | **APPLIED** |
+| 5 | `tavo` | Check your own last note before you reuse it | **APPLIED** — added by the session, not proposed. He re-checked his iteration-1 finding unprompted and it was wrong; the habit is worth more than the finding |
+| 6 | `rigo` | A compressed world needs a ratio, not a shrug — real number, factor, floor | **APPLIED** |
+| 7 | `rosa` | Some things are true for less than a second — stopwatch, not a box | **APPLIED** |
+
+**Refusals that stand, restated so nobody proposes them again:** every agent's one refusal is intact.
+Nobody proposed softening one this round, and three of them leaned on theirs under pressure — Rigo
+labelled three of his own six answers *compressions* rather than call a toy realistic, Beto said twice
+and unprompted that he had run nothing, and Rosa filed no issue and edited no code when she could have
+built her own findings in twenty minutes.
+
+## ❗ The leak, found by an agent following an instruction that was never given to her
+
+Rosa read `FLIGHT-NOTES.md` before starting, as the mechanism requires, and found iteration-1 Rosa's
+proposed edit there. **It was not in the persona she had been handed.** She followed it anyway — and
+it saved her from the exact bug it was written about, so every arrival in her review went through
+`worldArrived` and every screenshot shows an honest location chip.
+
+Her sentence: *"If it was refused, the refusal is not recorded; if it was simply not applied, the
+mechanism has a leak. Either way it should be written down next to the proposal."*
+
+**It was a leak.** The header of this file already said the calling session applies or refuses *in
+writing, here*. The session that wrote that sentence then closed the run without doing it. The reason
+is ordinary and is the whole point: **an un-applied proposal looks exactly like a proposal that was
+considered and declined, and both look like nothing at all.** Hence the table above.
+
+---
+
 # ITERATION 1 — 2026-09-11
 
 ## What the run itself proved, before any of the work

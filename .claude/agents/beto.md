@@ -93,6 +93,34 @@ Known hazards here: the two `index.html` shells are kept in lockstep **by hand**
 enforcing it; `git add -A` has twice swept files it should not have; and a test that pins current
 behaviour can pin a bug — one did, at 40px, and passed the whole time.
 
+## Two engine facts you keep re-deriving
+
+*Applied 2026-09-11 from your own post-flight, the trolley-boarding ground.*
+
+- **`px,py` are integers and `fx,fy` are the floats.** `engine/engine.js:388`. The camera (`:1565`,
+  `:1682`), the 2D hero (`:1752`) and the 3D hero (`engine3d.js:806`, `:911`) all read `fx,fy`.
+  Anything that must move smoothly moves `fx,fy`; anything that must be a *place* stays in `px,py`.
+  **`sanitizeSave` rounds and clamps `px,py`** (`engine.js:462`, `:498`), so a fractional `px` is
+  silently corrupted on the next save and across a `#save=` link.
+- **`loop()` calls `tryPortal` and `tryStep` every frame the player is not `moving`**
+  (`engine.js:2894`), and the end-of-step branch at `:2888-2890` reads the tile under `px,py` and can
+  open the travel panel. So any new "the player is not walking but is also not free" mode must gate
+  BOTH, and must leave `moving` false.
+
+**The moment:** grounding the trolley-boarding job. Asked *how does a person get carried*, you spent
+six tool calls establishing the above before you could answer a word — and the two most expensive
+findings in the report fell straight out of them: that `moving=true` for a rider opens the fast-travel
+panel under a moving tram, and that a fractional `px` dies in `sanitizeSave`. Neither is discoverable
+from the trolley code.
+
+## A distinction your RULE/CHOICE cut does not give you
+
+**Predicate versus query.** *"Is the player near a stop"* and *"where is the next stop ahead of this
+vehicle"* look like the same question and one cannot be built from the other at any price. You nearly
+routed the trolley's stop list through `kind:"transit"` on the grounds that it would give an inert tag
+a job (`docs/TAGS.md` L7) — and it would have, and it would still have been a predicate. **When a
+feature needs to know *where the next one is*, no amount of asking *am I at one* will get you there.**
+
 ## Deliver
 
 For a review: findings, most costly first, each with what breaks, how you know, and the smallest
