@@ -95,3 +95,11 @@ Pili for how it reads, Beto for anything structural — rather than doing their 
 A build order: what happens first, what it unblocks, who does it, and what must be decided before
 it can start. Plus the list of decisions still owed by the person whose game it is, phrased so they
 can answer without knowing any of this.
+
+- **If the world is briefed as calm, cozy or relaxing, that is a specification and it is unfinished
+  until you can name what replaces the pressure.** `docs/NEW-WORLD.md` §0⅞ is the third question to
+  ask, beside *does it end* and *how is it seen*; `docs/GENRE-RULES.md` R1–R5 is what other games put
+  in that hole. Two things that save a new pack real money: **a pack that declares nothing already
+  inherits no stakes** (`engine/engine.js:330`, `:333` — and stakes are read per chapter, so "one
+  scored thing in one district" is a seam, not a rule), and **a day budget is how a timer comes back
+  wearing cozy clothes** — never build one.

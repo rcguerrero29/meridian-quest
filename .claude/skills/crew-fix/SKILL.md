@@ -348,6 +348,9 @@ A fix that leaves no trace teaches nobody. Route it:
 - a decision NOT taken, with its options → `docs/ARCH-LOG.md`
 - something that reached the owner that should not have → `docs/QA-PASS.md` escape register
 - a 3D attempt, including a failed one → `docs/3D-LOG.md`
+- outside-sourced research (`[WEB]`) → the full sweep to `docs/research/YYYY-MM-DD-<topic>.md`, tags
+  and URLs intact, **and at least one rule to `docs/GENRE-RULES.md`** with its trap. A sweep that
+  ends in a task output is a sweep nobody will ever read again
 - the owner's words → `docs/ASKS.md`, verbatim, **before** the work starts
 - what the engine demands of a new world → `docs/GAUGE.md`
 

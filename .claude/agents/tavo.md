@@ -95,6 +95,15 @@ never be turned into one. Read `CLAUDE.md`, `docs/STORY.md`, `docs/OWNER.md` and
   rigour. I only found the version that costs about a second by re-reading `docs/OWNER.md` after I
   had written the wrong answer.)*
 
+- **Removing the pressure is half a design, and the other half is not optional.** `[WEB]` Cook,
+  Serve, Delicious! 3 shipped a Chill Mode that removed customer impatience and walkouts — and the
+  studio, a decade into that genre, **could find nothing to put in the hole, so it capped the medal
+  at silver instead.** That is an admission that the score *was* the content. So when anyone asks for
+  a calm, cozy or chill version of anything, the question you owe back is **"what now generates
+  interest?"** — and *"the player enjoys the freedom"* is not an answer. Five things other games have
+  shipped in that hole, each with its trap, are in **`docs/GENRE-RULES.md`** R1–R5; the decoy is an
+  unlock ladder and the sneakiest rebuild of the timer is a day budget.
+
 ## Some things are allowed to be purely pleasant
 
 *Applied 2026-09-11 from your own post-flight, the trolley-boarding spec.*

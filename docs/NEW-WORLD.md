@@ -115,6 +115,39 @@ tile — a tree's canopy, a lamp globe, a market umbrella.
 normal: El Changarrito runs a whole world on **nine drawings** across 45 glyphs, and Meridian has
 18 solid glyphs with no side drawing at all.
 
+## 0⅞ · If the world is meant to be CALM, say what replaces the pressure — before you build (2026-09-11)
+
+**This is the third question, and it is the one a new world is most likely to skip**, because
+"relaxing" sounds like a description of a mood rather than a specification.
+
+`[WEB]` Cook, Serve, Delicious! 3 shipped a Chill Mode that removed customer impatience and walkouts
+entirely. The studio — a decade into the genre — **could find nothing to put in the hole, so it
+capped the medal at silver instead.** That is an admission that the score was the content.
+(https://www.thexboxhub.com/cook-serve-delicious-3-review/)
+
+**So a world briefed as calm owes an answer to one question before a file is written: *what now
+generates interest?* "The player enjoys the freedom" is not an answer.** The five that other games
+have shipped are in `docs/GENRE-RULES.md` R1–R5, each with its trap: **comprehension** (the thing is
+incomplete and you reconstruct it), **reading a person** (what you make is the reply, and it changes
+what they say next), **fit** (a light constraint that yields instead of punishing — the expensive
+one, it needs an inventory this engine does not have), **unrushable duration with abundance**, and
+**tactility** (spend it last, on two or three objects).
+
+Three rules that travel with this, and each is cheap to honour and expensive to retrofit:
+
+- **`[CODE]` A pack that declares nothing inherits no stakes.** `STK()` defaults to `{mode:"none"}`
+  (`engine/engine.js:330`) and `stakesCfg()` reads stakes **per chapter** (`:333`), so *"a calm world
+  with exactly one scored thing in one district"* is already a seam. **The calm version is the cheap
+  version here, which is unusual — do not spend engine work buying it.**
+- **Never build a day budget.** `[WEB]` It is how a timer comes back wearing cozy clothes: it never
+  counts down in front of you, it just makes every action cost something scarce. `[CODE]` The engine
+  reads the real clock for light only (`drawDaylight`) and nothing in it spends a day. **That is a
+  property to preserve, not an omission to fix.**
+- **Decide what a mistake MEANS, and write it down.** Eight shipped answers are in
+  `docs/research/2026-09-11-cooking-games.md` §3. The two cheapest: *the mistake becomes dialogue you
+  would not otherwise have seen*, and *a named, blameless skip* ("Let It Be"). **A mistake is only a
+  punishment if it SUBTRACTS.**
+
 ## 1 · The folder — nine files, and which ones the engine actually needs
 
 ```

@@ -352,7 +352,7 @@ Una sola fuente de verdad para una gran mascota.
   mpBtn:"🌐 Multijugador 🚧",mpTitle:"🌐 Multijugador",
   mpNote:"🚧 En construcción. La cuadrilla del MQT está tendiendo vías hacia Barrio Norte — un día otros consultores rondarán estas calles contigo. Por ahora, la oficina es toda tuya. (El casco no se quita hasta que abra la línea.)",
   lbTheme:"Tema de color",
-  updToast:"¡actualizado! Hay cosas nuevas.",lbSeason:"Temporada",lbAle:"Alebrijes",aleYou:"Tu cara",troCome:"🚋 Ahí viene el trolley.",petalLines:["Nos volveremos a encontrar, amor…","Guárdame un lugar junto al agua, amor.","Adelántate. Yo te alcanzo."],seasonAuto:"📅 Según el calendario",seasonOff:"Todo el año",lbCam:"Cámara",camTop:"🗺️ Cenital",camFront:"🏘 Frontal 2.5D",camIso:"◆ Isométrica",cam3d:"⛰ 3D",
+  updToast:"¡actualizado! Hay cosas nuevas.",lbSeason:"Temporada",lbAle:"Alebrijes",aleYou:"Tu cara",troCome:"🚋 Ahí viene el tranvía.",petalLines:["Nos volveremos a encontrar, amor…","Guárdame un lugar junto al agua, amor.","Adelántate. Yo te alcanzo."],seasonAuto:"📅 Según el calendario",seasonOff:"Todo el año",lbCam:"Cámara",camTop:"🗺️ Cenital",camFront:"🏘 Frontal 2.5D",camIso:"◆ Isométrica",cam3d:"⛰ 3D",
   ballLb:"🎾 Lanza la pelota",ballNoRoom:"No hay espacio para lanzar aquí.",
   fetchYes:["¡Entregada! Un poco babeada, totalmente perfecta.","La trae como si fuera toda su carrera.","Recuperada. La cola dice que otra vez."],
   fetchNo:["Mira la pelota. Te mira a ti. Se sienta.","La pelota rueda. Él decidió que es problema de la pelota.","Hoy no. Es un perro de principios."],

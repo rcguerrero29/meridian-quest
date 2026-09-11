@@ -422,3 +422,45 @@ game that opens from a message is not that product.
 materials and real lighting are available inside it, at a fraction of the cost, without touching the
 tests or the packs. `docs/3D-LOG.md`'s goal lives there. **Before anyone prices a migration, price
 that.**
+
+---
+
+## A11 · What replaces the pressure in a calm game — undecided, and the options are costed
+**Status: deferred, 2026-09-11. Nobody has decided this and nothing is being built from it.**
+
+**Why it is here and not in a plan:** the owner asked for a *"chiller"* cooking game
+(`docs/ASKS.md` 2026-09-11) and then asked for the research to be filed rather than built. So this
+row exists to stop the same question being answered from taste three times.
+
+**The evidence that makes it a real decision rather than a preference.** `[WEB]` Cook, Serve,
+Delicious! 3 shipped a Chill Mode that removes customer impatience and walkouts — and the studio, a
+decade into the genre, **could find nothing to put in the hole and capped the medal at silver
+instead.** That is an admission that the score was the content.
+(https://www.thexboxhub.com/cook-serve-delicious-3-review/) **Removing a timer is half a design; the
+other half is not optional.**
+
+**The options, from `docs/GENRE-RULES.md` R1–R5, cheapest first for THIS engine:**
+
+| Option | What it costs us |
+|---|---|
+| **Reading a person** — the made thing IS the reply, and what you made changes what they say next | `[CODE]` Cheapest. `INTERVIEW` is already *"questions with no right answer"* (`engine/engine.js:208`, `:214`). A pack-level table mapping made-thing → line. **No RULE.** |
+| **Comprehension** — the recipe is incomplete and you reconstruct it | Cheap. The reader already draws a labelled blank and takes real forms (`docSections` `engine/engine.js:2962`, `docOpen` `:3082`). **No RULE.** The cost is writing and research, which is not small |
+| **Unrushable duration with abundance** — a thing that takes as long as it takes, and there is always more | A content rule and a trigger. Nearly free; `petalMomentTick` (`engine/engine.js:1224`) is the primitive and is welded to petals — the same unwelding `docs/GIFTED-GAMES.md` §5 already ranked cheapest |
+| **Fit** — a light spatial constraint that yields instead of punishing | **Expensive. Needs the inventory we do not have** (`[CODE]` grep "inventory" in `engine/engine.js` → 0 hits). Same gap `GIFTED-GAMES` §4 ranked first. Only buy it if the owner's answers point at it |
+| **Tactility** — the stroke, the pour, judged on two or three objects | The 3D half of the owner's own ask. Spend it LAST. `[WEB]` Nour is the control case: remove the timer, add only tactility, and you get twenty beautiful minutes |
+
+**Refused in advance, and the refusals are the useful half:**
+- **A day budget.** `[WEB]` Chef RPG is the case — warm art over a clock that never counts down in
+  front of you, it just makes every action cost something scarce. This is the most likely way we fail
+  because we can produce the warm half convincingly.
+- **A collection / unlock ladder as the reward.** `[TRAINING]` The sweep's decoy; it is what turns a
+  calm game into a chore list.
+- **Reaching for the hearts toggle.** `[CODE]` `STK()` (`engine/engine.js:330`) defaults to
+  `{mode:"none"}` and `stakesCfg()` (`:333`) reads stakes **per chapter**, so *"a calm world with
+  exactly one scored thing in one district"* is **already a seam, not a rule change**. That makes it
+  easy to reach for and it is not an answer to this question — it is a way of not answering it.
+
+**What would settle it:** the owner's own answers to the six cooking questions in
+`docs/research/2026-09-11-cooking-games.md` §6 — in particular *"what's the nicest part of cooking
+for you — the chopping, the smell, the waiting, or the face they make when they eat it?"*, which
+selects between five games that look identical in a one-line pitch. **Nobody should pick for him.**
