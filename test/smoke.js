@@ -3674,7 +3674,61 @@ const CANDIDATES = [
       fails.push(`guarantee: a URL flag changed admin mode (admin=${adm.admin}, brushes hidden=${adm.brushes})`);
   }
 
+  /* ---- everything alive that can reach the rails is something the tram can SEE ----
+     docs/OWNER.md, settled by the owner 2026-09-11: "a realistic trolley, in my boook does stop for
+     traffic- pedestrian, vehicle or even fauna", and the sentence under it — "braking for the
+     hummingbird and running over the pigeon is not a policy, it is a blind spot."
+     Meridian did that, by species, by name, literally. Chava filmed Paloma being drawn INSIDE the
+     tram's third window, twice inside sixty seconds of standing at the stop, on the same rails where
+     the same tram stopped dead for him and waited fifty seconds.
+     TWO WRONG VERSIONS OF THIS CHECK WERE WRITTEN FIRST AND BOTH ARE WORTH THE COMMENT.
+     The first asked whether ANY critter was in that world and went green — because the colibri is on
+     the same street, so the guard written to catch "it brakes for the hummingbird and runs over the
+     pigeon" passed for precisely the reason that sentence names. The second asked whether the animal
+     was a member of CRIT, which is an implementation detail: the fix does not add it to CRIT, so a
+     correct engine would have stayed red.
+     This one puts each animal on the rails in front of a running tram and asks whether the tram
+     stops. That is the noun. It survives any rewrite of how the engine keeps its list. */
+  const blind = await page.evaluate(() => {
+    const P = [];
+    const lines = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT) ? TROLLEYAT : [];
+    if (!lines.length) return P;
+    const beasts = [['dog', typeof DOG !== 'undefined' ? DOG : null],
+                    ['cat', typeof CAT !== 'undefined' ? CAT : null],
+                    ['pigeon', typeof PIG !== 'undefined' ? PIG : null]];
+    const key = { dog: 'dog', cat: 'cat', pigeon: 'pig' };
+    lines.forEach(L => {
+      const keep = { st: TRO.state, x: TRO.x, dir: TRO.dir, w: world, px: px, py: py };
+      beasts.forEach(([name, a]) => {
+        if (!a || AW(key[name]) !== L.world) return;       /* not on a trolley street at all */
+        const w = WORLDS[L.world];
+        const mid = Math.round((L.from + L.to) / 2);
+        const g = w.grid[L.row] && w.grid[L.row][mid];
+        if (g === undefined || SOLID.has(g) || g === 'N') return;   /* it could not stand there anyway */
+        /* park the hero far away so HE is not what stops it, put the animal on the rails,
+           and roll the tram up to it */
+        world = L.world; px = fx = 0; py = fy = 0;
+        const was = { x: a.x, y: a.y, fx: a.fx, fy: a.fy, lift: a.lift };
+        a.x = a.fx = mid; a.y = a.fy = L.row; a.lift = null;
+        TRO.dir = L.to >= L.from ? 1 : -1;
+        TRO.x = mid - TRO.dir * 3.0; TRO.state = 'run'; TRO.t = 0;
+        let held = false;
+        for (let i = 0; i < 40 && !held; i++) { troUpdate(50); if (TRO.state === 'hold') held = true; }
+        if (!held) P.push('the trolley does not stop for the ' + name + ' on its own line in ' +
+          L.world + ' — it drives straight through, while it brakes for a hummingbird on the same street');
+        a.x = was.x; a.y = was.y; a.fx = was.fx; a.fy = was.fy; a.lift = was.lift;
+      });
+      TRO.state = keep.st; TRO.x = keep.x; TRO.dir = keep.dir;
+      world = keep.w; px = fx = keep.px; py = fy = keep.py;
+    });
+    return P;
+  });
+  fails.push(...blind);
+
   await browser.close();
+
+
+
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

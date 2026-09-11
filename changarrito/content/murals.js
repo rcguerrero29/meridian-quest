@@ -551,3 +551,58 @@ MURALS.push(
 }
 );
 
+MURALS.push(
+{
+  id:"chava-cuatro-cuadros", iter:3, date:"2026-09-11",
+  title:{en:"Four frames", es:"Cuatro cuadros"},
+  said:{en:"I didn't press anything. I stood at the stop for a minute and it happened twice.",
+        es:"No apret\u00E9 nada. Me par\u00E9 en la parada un minuto y pas\u00F3 dos veces."},
+  who:{en:"Chava, who plays it wrong on purpose and films what happens",
+       es:"Chava, el que juega mal a prop\u00F3sito y filma lo que pasa"},
+  cap:{en:"Nobody had to reproduce it. She lives at the west end, which is where the game tells you to go and wait for the trolley, and she spends a fifth of her life standing in its lane. Nine minutes of standing still: seventeen trams, four of them straight through her, and not one toast, sound or flinch \u2014 while the same tram stopped dead four tiles short of him and held there until he got bored.",
+       es:"Nadie tuvo que reproducirlo. Ella vive en la punta poniente, que es adonde el juego te manda a esperar el tranv\u00EDa, y se pasa una quinta parte de su vida parada en el carril. Nueve minutos sin moverse: diecisiete tranv\u00EDas, cuatro encima de ella, y ni un aviso, ni un sonido, ni un respingo \u2014 mientras el mismo tranv\u00EDa se fren\u00F3 en seco cuatro casillas antes de \u00E9l y ah\u00ED se qued\u00F3 hasta que se aburri\u00F3."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+    /* CHAVA'S HAND: a strip of 35mm. Nobody else on this wall has a filmstrip, and nobody else's
+       panel is a COUNT. Four frames, timecoded, the pigeon in the same spot in every one because
+       she never moves — and the one where she is painted inside the tram is ringed in chinagraph. */
+    const fx=W*0.04, fy=H*0.22, fw=W*0.68, fh=H*0.42;
+    g.fillStyle="#1A1620";g.fillRect(fx,fy-8,fw,fh+16);
+    g.fillStyle="#0E0C12";
+    for(let x=fx+4;x<fx+fw-4;x+=11){g.fillRect(x,fy-6,6,4);g.fillRect(x,fy+fh+2,6,4);}
+    const n=4, pad=4, cw=(fw-pad*(n+1))/n;
+    const tc=["0:00","0:11","0:13","0:15"];
+    for(let i=0;i<n;i++){const x=fx+pad+i*(cw+pad);
+      g.fillStyle="#4A4B52";g.fillRect(x,fy,cw,fh);                       /* the road */
+      g.fillStyle="#3A3F46";g.fillRect(x,fy+fh*0.42,cw,2);g.fillRect(x,fy+fh*0.70,cw,2);
+      if(i===1){murTram(g,x-cw*0.55,fy+fh*0.20,cw*0.9,fh*0.46,{driverAt:1});}
+      if(i===2){murTram(g,x+cw*0.02,fy+fh*0.20,cw*0.9,fh*0.46,{driverAt:1});}
+      if(i===3){murTram(g,x+cw*0.72,fy+fh*0.20,cw*0.9,fh*0.46,{driverAt:1});}
+      /* her, in the same tile in every frame, because she never moves */
+      const bx=x+cw*0.46, by=fy+fh*0.52;
+      g.fillStyle="#9AA0A8";g.fillRect(bx,by,5,4);
+      g.fillStyle="#7E858E";g.fillRect(bx+3,by-3,4,4);
+      g.fillStyle="#E0A430";g.fillRect(bx+6,by-2,2,1);
+      g.fillStyle="#C87F1E";g.fillRect(bx+1,by+4,1,2);g.fillRect(bx+3,by+4,1,2);
+      g.strokeStyle="#0E0C12";g.lineWidth=1;g.strokeRect(x+0.5,fy+0.5,cw-1,fh-1);
+      g.fillStyle="#8A8090";g.font="7px ui-monospace,monospace";g.fillText(tc[i],x+2,fy+fh-3);}
+    /* the chinagraph ring on frame 3 — where she is inside the third window */
+    const rx=fx+pad+2*(cw+pad);
+    g.strokeStyle="#D9342B";g.lineWidth=3;
+    g.beginPath();g.ellipse(rx+cw/2,fy+fh/2,cw*0.56,fh*0.56,0,0,7);g.stroke();
+    g.lineWidth=2;
+    g.beginPath();g.ellipse(rx+cw/2,fy+fh/2,cw*0.46,fh*0.46,0,0,7);g.stroke();
+    /* the count, in mono, under the strip */
+    g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("9 min \u00b7 17 pasadas \u00b7 4 encima \u00b7 0 avisos",fx,H*0.76);
+    g.fillStyle=P.deep;g.font="10px ui-monospace,monospace";
+    g.fillText("y el mismo tranv\u00EDa se para en seco por m\u00ED \u2192",fx,H*0.84);
+    /* ...and there it is, at the right-hand edge, stopped, with one small green person in front */
+    const sx=W*0.76;
+    murTram(g,sx+W*0.07,H*0.66,W*0.17,H*0.13,{driverAt:-1});
+    g.fillStyle="#D9342B";g.beginPath();g.arc(sx+W*0.075,H*0.70,3,0,7);g.fill();
+    murBody(g,sx,H*0.71,P.moss,8);
+    g.fillStyle=P.shade;g.fillRect(W*0.74,H*0.885,W*0.22,2);}
+}
+);
+

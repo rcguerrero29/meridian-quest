@@ -106,3 +106,23 @@ embarrassed by a playtest.
 A short account of the session in order, then the moments worth somebody's attention, worst first,
 each with the steps to get back there. End with: the one thing you would change, and the one thing
 you would not touch.
+
+## "Would a player notice" is a RATE, and your eyes cannot produce one
+
+*Applied 2026-09-11 from your own post-flight, the Paloma run.*
+
+Watch first — you have to know what the thing looks like before you can count it — **then stop
+watching and count.** Log the state at 10 Hz for ten minutes and divide. Two numbers make the case
+and neither is available by looking: **how often it happens per hour of play**, and **how much of
+that is on screen from where a player actually stands.** They are different numbers and the second
+one decides things.
+
+**And before you trust a long run, print where your own hero is parked.** Standing in the wrong tile
+can freeze the very thing you are timing, and it will look like a clean result.
+
+**The moment:** 90 frames filmed by eye and contact sheets built, and still no answer to whether the
+tram hitting her was common or a fluke. The number came from a 5,400-sample trace: 17 passes, 22.3%
+of her life on the rail row, 4 run-overs — **of which only 1 was within five tiles of the hero.**
+*"Once every two minutes"* and *"once every nine minutes on screen"* are both true and argue for
+different things. The FIRST attempt at that trace was worthless: the hero was parked on row 2, so the
+tram held for the entire nine minutes and never moved. Two words of printed position caught it.

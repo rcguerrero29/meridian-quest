@@ -1187,7 +1187,18 @@ function troBlocked(wid){const L=troLine(wid);if(!L)return [];const w=WORLDS[L.w
 function troAhead(L){const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),near=v=>{const d=(v-nose)*TRO.dir;return d>=-0.6&&d<=2.6;};
   if(world===L.world&&Math.round(py)===L.row&&near(px))return true;
   const w=WORLDS[L.world];if(w&&w.npcs.some(n=>n.y===L.row&&near(n.x)))return true;
-  return (typeof CRIT!=="undefined"?CRIT:[]).some(c=>c.world===L.world&&Math.round(c.y)===L.row&&near(c.x));}
+  if((typeof CRIT!=="undefined"?CRIT:[]).some(c=>c.world===L.world&&Math.round(c.y)===L.row&&near(c.x)))return true;
+  /* ...and the animals the engine moves through their own globals rather than through CRITTERS.
+     The owner, 2026-09-11: "braking for the hummingbird and running over the pigeon is not a policy,
+     it is a blind spot." Meridian did exactly that, by species, by name — the colibri is declared in
+     CRITTERS so the tram braked for her, and Paloma was a separate global so it drove through her.
+     Chava filmed her being drawn INSIDE the tram's third window, twice inside sixty seconds of
+     standing at the stop, on the same rails where the same tram stopped dead for him and waited
+     fifty seconds. There is no species list here: one question, is there something alive on the
+     rails, and the answer does not depend on what kind of thing it is. */
+  return [["dog",typeof DOG!=="undefined"?DOG:null],["cat",typeof CAT!=="undefined"?CAT:null],
+          ["pig",typeof PIG!=="undefined"?PIG:null]]
+    .some(function(e){const a=e[1];return a&&AW(e[0])===L.world&&Math.round(a.y)===L.row&&near(a.x);});}
 function troAtStop(L){const w=WORLDS[L.world];if(!w||world!==L.world)return false;
   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const r=w.rows[py+dy];if(r&&r[px+dx]==="Y")return true;}
   return false;}
@@ -1967,7 +1978,42 @@ function drawCat(g,sx,sy){
 /* ---------- Paloma the pigeon (street) & Lorenzo the parrot (perched on the fence) ---------- */
 const PIG=aniXY("pig",{x:4,y:1,fx:4,fy:1,moving:false,mt:0,dx:0,dy:0,face:1,next:0,peck:false});
 function pigFree(x,y){const w=WORLDS[AW("pig")];if(!w)return false;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world===AW("pig")&&x===px&&y===py);}
+/* PALOMA GETS OUT OF THE WAY (owner, 2026-09-11: "paloma shouldnt be run over, can she be smart
+   enough to jump away?"). A bird, not a rule: she hears it coming three tiles out and lifts off the
+   rail — 560 ms, a sine arc about two thirds of a tile high, drifting a little downstream, landing
+   on the kerb. Three things decide whether a player reads it as a bird or as a glitch, all three
+   measured by Chava in a ten-minute hack before any of this was built: she must LEAVE THE GROUND
+   (a tile change at the same height is a teleport, and this game already has a shape for that);
+   she must go BEFORE the tram touches her, or one overlapping frame undoes it; and she must land
+   somewhere a bird would land and then act normal.
+   It fires roughly every fourth tram, forever — she stands on the rail row 22% of her life — so it
+   is deliberately SMALL. A hop, not a flight across the street. And the tram still brakes if she is
+   somehow still there: the lift is what means it rarely has to, never what excuses it. */
+const PIGLIFT=560;
+function pigFlee(now){
+  if(PIG.lift)return;
+  const L=(typeof troLine==="function")?troLine(AW("pig")):null;
+  if(!L||(TRO.state!=="run"&&TRO.state!=="hold")||Math.round(PIG.y)!==L.row)return;
+  const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),d=(PIG.x-nose)*TRO.dir;
+  /* She must be GOING before the brake window, or the tram stops for her and she never learns why.
+     Measured before this line existed: the brake fires at d<=2.6 and the lift triggered at d<=3.2,
+     which is 0.6 tiles of lead — about 176 ms at the shipped speed — so in practice the tram entered
+     the window first, held, and pigFlee's "state must be run" test then refused to fire at all. The
+     result was a tram stopped in the street forever waiting for a bird with no reason to move.
+     So: she goes at 5 tiles, comfortably outside the brake, and the lift is also allowed to fire
+     while the tram is already holding, which is what unsticks that case rather than hiding it. */
+  if(d<-0.6||d>5.0)return;
+  const up=(PIG.y>0&&!SOLID.has((WORLDS[AW("pig")].grid[PIG.y-1]||"")[PIG.x]));
+  PIG.lift={t:0,fromY:PIG.y,toY:up?PIG.y-1:PIG.y+1,fromX:PIG.x,drift:TRO.dir*0.35};
+  PIG.moving=false;PIG.peck=false;PIG.next=now+PIGLIFT+400;}
 function pigUpdate(dt,now){
+  if(PIG.lift){const k=(PIG.lift.t+=dt)/PIGLIFT;
+    if(k>=1){PIG.y=PIG.lift.toY;PIG.x=Math.max(0,Math.round(PIG.lift.fromX+PIG.lift.drift));
+      PIG.fx=PIG.x;PIG.fy=PIG.y;PIG.hop=0;PIG.lift=null;return;}
+    PIG.hop=20*Math.sin(Math.PI*k);                       /* the height is the tell */
+    PIG.fy=PIG.lift.fromY+(PIG.lift.toY-PIG.lift.fromY)*k;
+    PIG.fx=PIG.lift.fromX+PIG.lift.drift*k;return;}
+  pigFlee(now);
   if(PIG.moving){PIG.mt+=dt/180;
     if(PIG.mt>=1){PIG.moving=false;PIG.fx=PIG.x;PIG.fy=PIG.y;}
     else{PIG.fx=PIG.x-PIG.dx*(1-PIG.mt);PIG.fy=PIG.y-PIG.dy*(1-PIG.mt);}return;}
@@ -1986,6 +2032,7 @@ function pigUpdate(dt,now){
     lastBump=Date.now();const L=T().pigeon;toast(L[Math.floor(Math.random()*L.length)],1700);}
 }
 function drawPigeon(g,sx,sy){
+  sy-=(PIG.hop||0);                                       /* mid-lift she is off the ground */
   const cx=sx+16,pk=PIG.peck?2.2:0;
   g.save();g.translate(cx,0);g.scale(PIG.face,1);g.translate(-cx,0);
   g.fillStyle="rgba(0,0,0,.12)";g.beginPath();g.ellipse(cx,sy+27,4.5,1.8,0,0,7);g.fill();
