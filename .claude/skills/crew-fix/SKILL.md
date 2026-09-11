@@ -80,6 +80,38 @@ An agent is only as good as what it was told. A brief that works here has five p
    pack config **and** `CACHE` in `sw.js` together.
 5. **What "done" looks like** — which suite, which message, what a person would see.
 
+### ❗ The brief is evidence, not authority — and the session writing it is the least reliable part
+
+*Added 2026-09-11, with two receipts from a single run.*
+
+Part 2 above tells you to write down *"what is already known to be true, with file:line — so they do
+not re-derive it or contradict it."* **That sentence is the most dangerous one in this file**, because
+the session writing the brief is summarising a codebase it half-remembers, and an agent told not to
+contradict will not.
+
+On 2026-09-11 one brief carried two false facts under a heading reading *"verified by me at
+file:line"*:
+
+- *"the ruling that is already settled and may not be re-litigated… No summoning."* The owner had
+  asked for the call **by name** three days earlier (`docs/ASKS.md:52`). **Beto refused the brief and
+  went to the register.** Had he obeyed it, the run would have deleted a feature the owner requested,
+  and the commit would have called it a ruling.
+- *"The car reverses at the end of the line… a driver who changes ends (you specified that last run
+  and it shipped)."* **It does not reverse.** `engine/engine.js:1173` recomputes `TRO.dir` from the
+  line declaration every pass and nothing flips the sign. **Rigo read it instead of accepting it**,
+  and found that `engine3d.js:621-622`'s comment promises a reversal that does not exist — so shipped,
+  drawn work is decoration.
+
+**So: an agent who contradicts the brief with a `file:line` is doing the job, not failing to follow
+it.** That is the single most valuable thing an agent can return, and it must never read as
+insubordination. Two rules follow, and they are cheap:
+
+- **Mark every line of your brief with where it came from.** `[CODE]` means the session opened the
+  file this hour. `[MEMORY]` means the session believes it and did not check. **A brief with no
+  `[MEMORY]` lines is a brief that has not been honest about itself.**
+- **Never write "settled" over anything but a quote.** If you cannot paste the owner's words and the
+  file they live in, it is your inference, and it must be labelled as one and put to him.
+
 ## Reviewing a test — the four questions
 
 This project has shipped a test that pinned a bug and guarded it (`docs/QA-PASS.md` E2), and a

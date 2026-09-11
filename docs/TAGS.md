@@ -367,3 +367,28 @@ helper, and the person who hits it will be reading their content files, not `san
 4. `test/smoke.js`'s portability blocklist is still Meridian's proper nouns. **A vocabulary role
    cannot enforce anything until that scan is generic** — that is the first thing to build if this
    register is ever to become a test.
+
+### L19 · A fixture standing beside a stop holds the vehicle forever
+
+**The tag.** `still:true` on an NPC (`content/meridian/npcs.js:10`) means *this person does not
+wander*. It is a perfectly portable tag and it is not the leak.
+
+**The leak** is that `troAtStop` (`engine/engine.js:1164-1166`) sniffs a 3×3 block for a stop glyph
+and asks *"is somebody at the stop"* — and the obvious generalisation, from the player to anyone,
+silently turns every permanent fixture next to a stop into a passenger who never boards.
+
+**The live case, which is why this is a register entry and not a hypothetical.** Doña Meche is
+declared `still:true` at `ex` and her `m` stands at column 21 row 3 (`content/meridian/maps.js:67`) —
+**diagonally adjacent to the only `ex` stop at (20,2), permanently.** The day anyone widens that sniff
+beyond the player, she holds the tram on every pass for the rest of the game, and the symptom is *"the
+trolley is broken"*, not *"the tamale lady is standing too close."*
+
+**Found by** Rigo, 2026-09-11, grounding the boarding job — not by running anything, by knowing that
+a stop is a place and asking who is standing at it.
+
+**The rule.** **Only the player is a passenger.** A second world that puts a bench, a vendor, a
+statue or a sleeping dog beside a transit tile hits this the same way; nothing in the vocabulary
+distinguishes *waiting here* from *living here*, and the two look identical to a 3×3 scan. Any engine
+question of the form *"is somebody at X"* must say which somebodies count, in the code, at the point
+it asks.
+
