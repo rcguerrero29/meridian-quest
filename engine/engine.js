@@ -734,6 +734,16 @@ function drawIso(){
   doorMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawDoorMark(ctx,bx,by,0,d.mark)));
   readMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawReadMark(ctx,bx,by,0)));
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
+  /* The trolley, the petals and the papel picado are drawn in the top-down and front cameras and
+     were drawn in NEITHER here — troDraw2D had exactly two call sites and this was not one of them.
+     Measured with the tram running: 1466 pixels changed in top, 1704 in front, and ZERO in iso. Not
+     "looks wrong" — a player on this camera watched an empty street while a tram drove down it, and
+     test/smoke.js exercises top, front and 3D by name and skips iso, which is why nobody saw it.
+     Found by Chava, riding it. `P` is this camera's own tile-to-screen, so the tram lands on the
+     rails rather than on a guess. */
+  troDraw2D(world,P,false);
+  petalTrail(world,P);
+  fiestaDraw2D(world,P,false);
   /* shared time-of-day wash (door spills are top-down-only for now) */
   const dnow=new Date(),hr=dnow.getHours()+dnow.getMinutes()/60;
   let wash=null;

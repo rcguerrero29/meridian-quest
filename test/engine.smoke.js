@@ -1014,6 +1014,87 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...badframe);
 
+  /* ---- the trolley is a vehicle ----
+     The owner, 2026-09-11: "i mentioned at some point having a driver and stuff as well as wheels,
+     we want to be realistic, crew!" He was describing it exactly. t3Trolley's own comment called it
+     "the tram, one box on the line", and it was: a body box, a roof box, and six window slabs on the
+     two long sides only, floating 0.09 above the road on nothing.
+     Measured before this test existed, in the engine's own units, which is what makes the sentence
+     below fair rather than rhetorical: the tram's roof stood at 0.555; a DOOR in this engine is 1.0
+     (engine3d.js, BoxGeometry(1,1,0.14) at y=0.5) and an ordinary prop with no declared lift stands
+     0.844. So a traffic cone was taller than the whole tram.
+     This asks what a PERSON would say about a vehicle — can you get in it, does it touch the road,
+     is anybody driving — and never which function drew what, so it survives the art being redrawn.
+     A pack with no trolley line is skipped rather than failed: nothing to look at is not a pass. */
+  const tram = await page.evaluate(() => {
+    const P = [];
+    if (typeof troLine !== 'function' || !troLine('' + (typeof PL !== 'undefined' ? PL.street : ''))) {
+      const any = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT.length) ? TROLLEYAT[0] : null;
+      if (!any) return P;                       /* this game has no trolley; nothing to hold to account */
+    }
+    const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
+    if (!L) return P;
+    const bw = world, bc = camMode, bs = TRO.state, bx = TRO.x;
+    document.getElementById('world').hidden = false;
+    world = L.world; camSet('3d'); sizeCanvas(); draw3d();
+    TRO.state = 'run'; TRO.x = L.from + 1; draw3d();
+    if (!T3.tram) { P.push('the trolley never appears in the world it runs in'); }
+    else {
+      const box = new THREE.Box3().setFromObject(T3.tram);
+      const DOOR = 1.0;
+      if (box.max.y < DOOR)
+        P.push('the trolley is ' + box.max.y.toFixed(2) + ' tall where a doorway is ' + DOOR.toFixed(2) +
+               ' — it is knee-high, and an ordinary prop in the same street stands taller than the whole tram');
+      if (box.min.y > 0.04)
+        P.push('the trolley floats ' + box.min.y.toFixed(2) + ' above the road with nothing under it — it has no wheels touching the ground');
+      let wheels = 0, driver = 0;
+      T3.tram.traverse(o => { const u = o.userData || {}; if (u.wheel) wheels++; if (u.driver) driver++; });
+      if (wheels < 2) P.push('the trolley has ' + wheels + ' wheels — a tram that rolls down a street has wheels you can see');
+      if (!driver) P.push('nobody is driving the trolley');
+      /* and it must read as a tram from every stop you can turn the camera to, not just the two
+         long sides — six window slabs at z=±0.37 left a bare brown slab at 90 degrees */
+      let faces = 0; T3.tram.traverse(o => { if ((o.userData || {}).glazing) faces++; });
+      if (faces && faces < 3) P.push('the trolley only has windows on its long sides, so from a quarter turn it is a blank brown brick');
+    }
+    TRO.state = bs; TRO.x = bx; world = bw; camSet(bc); sizeCanvas();
+    document.getElementById('world').hidden = true;
+    return P;
+  });
+  fails.push(...tram);
+
+  /* ---- and it is there in EVERY camera it is drawn in ----
+     Measured: with the trolley running, switching the camera changed 1466 pixels in top, 1704 in
+     front, and ZERO in isometric. Not "looks wrong" — the trolley does not exist there. troDraw2D
+     has exactly two call sites and drawIso is not one of them, so a player on the isometric camera
+     watches an empty street forever while a tram drives down it. test/smoke.js exercises top, front
+     and 3D by name and skips iso, which is why nobody noticed. Found by Chava, riding it. */
+  const troCams = await page.evaluate(() => {
+    const P = [];
+    const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
+    if (!L) return P;
+    const bw = world, bc = camMode, bs = TRO.state, bx = TRO.x;
+    document.getElementById('world').hidden = false; world = L.world;
+    TRO.state = 'run'; TRO.x = L.from + 1;
+    /* Asked by counting whether the trolley is DRAWN AT ALL in each camera, not by diffing pixels.
+       Pixels were tried first and they cannot answer this: petals fall, critters move and the light
+       drifts, so two frames differ whether or not a tram was in either of them — the check passed
+       while the isometric camera was measurably showing nothing (0 changed pixels against 1466 in
+       top and 1704 in front). A test that passes for a reason that is not the thing it is about is
+       the failure this file's own comments keep recording. */
+    const real = window.troDraw2D; const seen = {};
+    ['top', 'front', 'iso'].forEach(c => {
+      let n = 0; window.troDraw2D = function () { n++; return real.apply(this, arguments); };
+      camSet(c); sizeCanvas(); draw(); seen[c] = n;
+    });
+    window.troDraw2D = real;
+    Object.keys(seen).forEach(c => { if (!seen[c])
+      P.push('the trolley drives down the street and the ' + c + ' camera never draws it at all — a player on that camera watches an empty road forever'); });
+    TRO.state = bs; TRO.x = bx; world = bw; camSet(bc); sizeCanvas();
+    document.getElementById('world').hidden = true;
+    return P;
+  });
+  fails.push(...troCams);
+
   await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();
   if (fails.length) { console.log('FAIL (' + idx + ')\n- ' + fails.join('\n- ')); process.exit(1); }

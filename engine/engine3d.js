@@ -579,20 +579,65 @@ function t3Build(key){T3.pinatas=[];
         sp.position.set(h.x+0.5,PH+0.02,h.y+0.5);sp.userData={pinata:true,x:h.x,y:h.y};grp.add(sp);T3.pinatas=(T3.pinatas||[]);T3.pinatas.push(sp);});}}
   T3.scene.add(grp);
 }
-function t3Trolley(){ /* the tram, one box on the line; it is never a wall — you may stand where it will pass, and it waits */
+function t3Trolley(){ /* the tram on the line; it is never a wall — you may stand where it will pass, and it waits.
+  The owner, 2026-09-11: "i mentioned at some point having a driver and stuff as well as wheels, we
+  want to be realistic, crew!" He was describing it exactly. This was a body box, a roof box and six
+  window slabs on the two LONG SIDES ONLY, floating 0.09 above the road on nothing — and the numbers
+  say how bad that was in the engine's own units: the roof stood at 0.555, where a DOOR is 1.0 and an
+  ordinary prop with no declared lift stands 0.844. A traffic cone was taller than the whole tram,
+  and from a quarter turn of the camera it was a bare brown slab.
+  So it is a vehicle now: it stands a door tall, its wheels touch the road, it is glazed on all four
+  sides, and somebody is driving it. Every part carries userData the suite reads, because a test that
+  counts wheels survives the tram being redrawn and a test that counts pixels does not. */
   const L=(typeof troLine==="function")?troLine():null;
   if(!T3.tram){const g=new THREE.Group();
-    const body=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.1,0.42,0.72),new THREE.MeshLambertMaterial({color:new THREE.Color("#B0563A")}));
-    body.position.y=0.28;g.add(body);
-    const roof=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.05,0.05,0.78),new THREE.MeshLambertMaterial({color:new THREE.Color("#8E4230")}));
-    roof.position.y=0.51;g.add(roof);
+    const DK=new THREE.MeshLambertMaterial({color:new THREE.Color("#8E4230")});
+    const BD=new THREE.MeshLambertMaterial({color:new THREE.Color("#B0563A")});
+    const H=1.02,FL=0.20;                     /* a door is 1.0; the floor rides above the wheels */
+    /* the body stops short of both ends, leaving an open cab under the roof at each. Without that
+       gap the driver was sealed INSIDE a solid box: the suite counted him and nobody could see him,
+       which is a test passing for a reason that is not the thing it is about. Verified by looking. */
+    const CAB=0.15;   /* an open driver's platform, the way an old tram has one — not a hole */
+    const body=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.1-CAB*2,H-FL-0.06,0.72),BD);
+    body.position.y=FL+(H-FL-0.06)/2;g.add(body);
+    const floor=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.06,FL+0.10,0.74),DK);
+    floor.position.y=(FL+0.10)/2;g.add(floor);   /* the skirt over the wheels, full length, so the platform has a deck */
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.02,0.06,0.80),DK);
+    roof.position.y=H-0.03;g.add(roof);
+    /* WHEELS — four, on the ground, turned to roll along the line rather than across it */
+    const wm=new THREE.MeshLambertMaterial({color:new THREE.Color("#2B2B31")});
+    [-TRO_LEN/2+0.42,TRO_LEN/2-0.42].forEach(dx=>{[-1,1].forEach(sd=>{
+      const w=new THREE.Mesh(new THREE.CylinderGeometry(0.115,0.115,0.07,12),wm);
+      w.rotation.x=Math.PI/2;                  /* lay the disc into the road's plane … */
+      w.rotation.z=Math.PI/2;                  /* … then turn it to face along the rails */
+      w.position.set(dx,0.115,sd*0.34);w.userData={wheel:true};g.add(w);});});
+    /* GLAZING on all four sides, so a quarter turn still shows a tram and not a brick */
     const win=new THREE.MeshLambertMaterial({color:new THREE.Color("#D8E6F0")});
-    [-0.55,0,0.55].forEach(dx=>{[-1,1].forEach(sd=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.16,0.02),win);
-      m.position.set(dx,0.34,sd*0.37);g.add(m);});});
+    [-0.55,0,0.55].forEach(dx=>{[-1,1].forEach(sd=>{
+      const m=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.26,0.02),win);
+      m.position.set(dx,0.62,sd*0.37);m.userData={glazing:true};g.add(m);});});
+    [-1,1].forEach(ed=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.30,0.50),win);
+      m.position.set(ed*(TRO_LEN/2-0.05),0.66,0);m.userData={glazing:true};g.add(m);});
+    /* THE DRIVER — a head and shoulders at the front window. Not a passenger: he is at the end the
+       tram is travelling toward, and he turns round with it when it reverses (below). */
+    const drv=new THREE.Group();
+    const sh=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.16,0.30),new THREE.MeshLambertMaterial({color:new THREE.Color("#3B4A6B")}));
+    sh.position.y=0.60;drv.add(sh);
+    const hd=new THREE.Mesh(new THREE.BoxGeometry(0.11,0.13,0.14),new THREE.MeshLambertMaterial({color:new THREE.Color("#C08A5E")}));
+    hd.position.y=0.755;drv.add(hd);
+    const cap=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.05,0.16),DK);
+    cap.position.y=0.835;drv.add(cap);
+    drv.userData={driver:true};g.add(drv);T3.tramDriver=drv;
     g.userData={tram:true};T3.tram=g;T3.scene.add(g);}
   const on=!!(L&&L.world===world&&typeof TRO!=="undefined"&&TRO.state!=="away");
   T3.tram.visible=on;
-  if(on)T3.tram.position.set(TRO.x+TRO_LEN/2,0.02,L.row+0.5);}
+  if(on){
+    T3.tram.position.set(TRO.x+TRO_LEN/2,0.0,L.row+0.5);
+    /* he drives from the leading end, whichever way it is going */
+    if(T3.tramDriver)T3.tramDriver.position.x=(TRO.dir>0?1:-1)*(TRO_LEN/2-0.16); /* on the platform, not behind a wall */
+    /* and the wheels turn with the distance covered, so it rolls instead of sliding */
+    T3.tram.traverse(o=>{if(o.userData&&o.userData.wheel)o.rotation.y=-TRO.x/0.115;});
+  }}
 function t3Fiesta(){ /* the piñata sways; it is never hit and gives nothing (Nacho's guardrail) */
   (T3.pinatas||[]).forEach(sp=>{if(!sp.parent)return;sp.material.rotation=Math.sin(Date.now()/700+sp.userData.x)*0.08;});}
 /* the petal trail in 3D: a pool of little flat planes, three per drop, lying on the ground where
