@@ -83,6 +83,25 @@ paths**; `.gitignore` carries the shapes, plural. **Four escapes in one day, eve
 who had been told and was being careful** — which is the whole argument for the guard being
 mechanical. Instructions did not work. The hook did.
 
+### E3½ · The ignore rule read a name when it meant a kind — 2026-09-11
+
+**What happened.** `.gitignore` has carried `shots/` since E3. On 2026-09-11 an agent taking
+screenshots wrote 22 files into **`shots.tmp/`** and it appeared untracked in a tree that was about
+to be committed. Caught by the stop hook, not by the rule that exists for it.
+
+**Why it is its own entry and not a footnote to E3.** E3 was *somebody forgot*. This is the rule
+itself being too narrow: it named one directory when what it meant was *any directory an agent
+writes pictures into to answer a question*. An agent names that folder whatever it likes.
+
+**It is the same shape as the seven guards on this branch** — R8 read what the index loads, the
+mutant net read comment-stripped source, the version test read equality, the portability guard read
+the brand, the look check read whether a look came back, `validateWorlds` read solidity, and both
+boot-warning filters read uppercase. **A rule has to read the noun it actually means**, and that is
+as true of a `.gitignore` line as of a test.
+
+**Fixed by shape:** `*.tmp/` and `*.scratch/` alongside `shots/`. The next agent's folder can be
+called anything ending in `.tmp` and it will never reach a commit.
+
 ### E4 · The branch reset that ate a commit — 2026-09-10 (a near-miss, not an escape)
 **What happened:** mid-session, to start a clean part, I ran `git checkout -qB <branch> origin/main`.
 `-B` does not ask. It moved the branch to `origin/main` and the L15 commit — an hour of work — was
