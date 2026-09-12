@@ -26,7 +26,17 @@ const MURPAL={wash:"#E6DFCF",lime:"#D6CDB8",ink:"#2B2536",rust:"#B0563A",deep:"#
               gold:"#E0A430",sky:"#7E93A8",bone:"#D8D6CE",moss:"#5F7A52",shade:"#C4BBA6"};
 
 /* a painted ground with the wall's own grain, so every panel looks like the same wall */
+/* ONE GROUND, OR NINETEEN. On its own, in the reading-size section below the wall, a panel paints
+   its own patch of limewash and that is right — it is a picture and it needs a ground. ON THE WALL
+   it must not, or nineteen slightly different rectangles of the same wash are nineteen visible
+   edges, and edges are exactly what makes a grid a grid. So the wall raises this flag while it is
+   painting, and every panel ever written stops painting its own ground without one of them being
+   edited — which matters, because the rule here is add and improve, never remove.
+   This is also the answer to the obvious question about future panels: you do not have to remember.
+   Call murGround like everybody else and the wall decides whether you get one. */
+let MURONWALL=false;
 function murGround(g,W,H){const P=MURPAL;
+  if(MURONWALL)return;                       /* the wall already painted it, end to end */
   g.fillStyle=P.wash;g.fillRect(0,0,W,H);
   for(let y=0;y<H;y+=3){g.fillStyle=(y/3|0)%2?P.lime:P.wash;g.globalAlpha=.35;g.fillRect(0,y,W,1);}
   g.globalAlpha=1;
@@ -1097,98 +1107,120 @@ MURALS.push(
 /* the width every panel in this file was painted for. docRender clamps a picture to 240..560 and
    the phone column is 412, which is what the crew drew against and what the type was sized for. */
 const MURREF=412;
+/* ================================================================================================
+   EL MURO — one wall, one bay each. (Owner, 2026-09-12: "is there a way to get idea on how to have
+   the agents ensure they add to their own mural area? you get what a mural is right? THIS ISNT GOING
+   TO BE PAGES.")
+
+   He is right and the quilt was the wrong shape. A grid of framed patches is a contact sheet: nineteen
+   separate pictures that happen to share a page. Pili said it in her own panel before he did — "what
+   a mural does that a grid structurally cannot is CROSS A BOUNDARY" — and the answer I built for her
+   was a tighter grid, which is a better contact sheet and still not a wall.
+
+   A MURAL IS ONE SURFACE YOU WALK ALONG. So:
+   · One continuous painted ground, one horizon, one dado, running the whole length. No frames. No
+     hems. Nothing is a tile.
+   · It is WIDE, not tall, and you pan along it, the way you walk along a wall. A wall that fits in a
+     phone column is a postcard.
+   · **Every painter owns a BAY** — a stretch of the wall that is theirs. Everything they ever paint
+     lands in it, stacked, oldest at the bottom, because a wall grows upward as people keep coming
+     back to it.
+   · Bays are not separated. They are divided by nothing at all; a painter's work simply stops and
+     the next one's starts, and the wash, the horizon and the dado carry straight through.
+   · A painter SIGNS the foot of their own bay, on the wall, in paint.
+
+   HOW AN AGENT ADDS TO THEIR OWN AREA — the whole of the mechanism, and it is one word:
+       by:"melo"
+   Declare it and the wall does the rest. You never choose coordinates; you are handed a canvas that
+   is your bay's own, at your own scale, with 0,0 at the top-left of the space you are allowed to
+   paint, and the wall puts it where it goes. Paint two panels and your bay grows taller, not wider —
+   the wall stays the length it was and your stretch of it gets denser, which is exactly what happens
+   to a real wall when somebody keeps coming back.
+   A panel with no `by` is filed under the first word of its `who`, so the nineteen painted before
+   this existed land in their own bays without anybody editing them. Add and improve, never remove.
+   ============================================================================================== */
+
+/* the thread of an iteration: 1 rust, 2 gold, 3 moss, 4 sky, then it cycles. On the wall it is a
+   short line under a painter's name on the dado, not a border round their work — a wall is not
+   divided, and the one mark that says whose stretch this is belongs on the skirting. */
 function murThread(iter){const P=MURPAL,t=[P.rust,P.gold,P.moss,P.sky,P.deep];
   return t[((iter|0)-1+t.length)%t.length]||P.rust;}
+/* the bay each painter owns, in the order they first painted. Derived from the list, so a new
+   painter tomorrow is a new bay and nobody has to maintain a roster. */
+/* who painted it. `by` if the panel says so; otherwise the name at the front of `who`, which is how
+   the nineteen painted before bays existed land in their own without anybody editing them.
+   "Rigo again" is Rigo \u2014 a painter who came back is the same painter, and the first build of this
+   gave him two bays, which is precisely the opposite of what the owner asked for. */
+function murPainter(m){
+  if(m&&m.by)return m.by;
+  return String((m&&m.who&&m.who.en)||"").split(/[,\u2014(]/)[0]
+    .replace(/\s+(again|otra vez|de nuevo)$/i,"").trim()||"?";}
+function murBays(list){const L=list||(typeof MURALS!=="undefined"?MURALS:[]),order=[],by={};
+  L.forEach(m=>{const k=murPainter(m);if(!by[k]){by[k]=[];order.push(k);}by[k].push(m);});
+  return order.map(k=>({who:k,panels:by[k]}));}
 
-/* one patch: the panel's own hand, clipped into the cell, with a hem and a running stitch */
-function murPatchAt(g,m,x,y,w,h){const P=MURPAL;
-  const hem=Math.max(3,Math.round(Math.min(w,h)*0.045));
-  g.save();g.beginPath();g.rect(x,y,w,h);g.clip();
-  g.translate(x,y);
-  const draw=(typeof m.patch==="function")?m.patch:m.art;
-  /* A PATCH IS A SMALLER COPY, NOT A RE-LAYOUT. The first version handed the panel a smaller W and H
-     and let it lay itself out again, which is wrong for one reason that is invisible until you look:
-     every panel in this file writes text at absolute pixel sizes — `g.font="11px ui-monospace"` —
-     chosen for a column about MURREF wide. Give the same code 211 px and the drawing shrinks and the
-     words do not, so four labels that sat side by side end up stacked on top of each other. The
-     render at 900 px wide made it unmistakable: "EL TROLLEY" printed straight through "LA RUEDA".
-     So the panel is drawn at the size it was painted for and the whole patch is SCALED down. The
-     composition survives exactly, type and all, which is also what a quilt patch is. */
-  const a=m.aspect||0.5, inner=Math.max(8,w-hem*2), sc=inner/MURREF;
-  const ih=MURREF*a*sc, iy=Math.max(hem,(h-ih)/2);
-  g.save();g.translate(hem,iy);g.scale(sc,sc);
-  try{ if(typeof draw==="function")draw(g,MURREF,MURREF*a); }
-  catch(e){ g.fillStyle=P.lime;g.fillRect(0,0,MURREF,MURREF*a); }
-  g.restore();
-  /* whose hand it is, along the bottom hem — the owner asked for the persona's STATE on the wall,
-     and a wall of unsigned patches is a wall you cannot read that from */
-  if(m.who&&m.who.en){const nm=String(m.who.en).split(/[,\u2014(]/)[0].trim();
-    /* on a chip, not on the art. It used to be ink at 55% straight onto the patch, which survived
-       only because a loose cell left a band of pale wash under every drawing. Tighten the cells —
-       which is the whole fix above — and the same name lands on Rigo's near-black board and Chema's
-       dark sleeve and disappears. Pili called it before it happened. */
-    g.font="8px ui-monospace,monospace";
-    const tw=g.measureText(nm).width;
-    g.fillStyle=P.bone;g.globalAlpha=.88;g.fillRect(hem,h-hem-10,tw+6,10);g.globalAlpha=1;
-    g.fillStyle=P.ink;g.globalAlpha=.75;g.fillText(nm,hem+3,h-hem-2);g.globalAlpha=1;}
-  /* a pinned photograph, if the panel attached one and the browser managed to decode it */
-  if(m.img&&m.__im&&m.__im.complete&&m.__im.naturalWidth){
-    const im=m.__im,s=Math.min((w-hem*4)/im.naturalWidth,(h-hem*4)/im.naturalHeight);
-    const iw=im.naturalWidth*s,ihh=im.naturalHeight*s;
-    g.fillStyle=P.bone;g.fillRect((w-iw)/2-3,(h-ihh)/2-3,iw+6,ihh+6);
-    g.drawImage(im,(w-iw)/2,(h-ihh)/2,iw,ihh);}
-  g.restore();
-  /* the hem, then the running stitch that holds this patch to the wall */
-  g.strokeStyle=MURPAL.shade;g.lineWidth=1;g.strokeRect(x+0.5,y+0.5,w-1,h-1);
-  g.strokeStyle=murThread(m.iter);g.lineWidth=1.5;g.setLineDash([4,4]);
-  g.strokeRect(x+hem+0.5,y+hem+0.5,w-hem*2-1,h-hem*2-1);
-  g.setLineDash([]);}
+/* the wall's natural size, in the same tile-pixels a panel is painted in. A bay is one panel wide;
+   a bay with three panels is three panels tall. The wall is as tall as its busiest painter. */
+const MURBAY=MURREF*0.62;                      /* how much wall one painter gets, across */
+const MURSKY=26, MURDADO=22;                   /* above the work, and the painted skirting below it */
+function murWallSize(list){const bays=murBays(list);
+  const deep=bays.reduce((m,b)=>Math.max(m,b.panels.length),1);
+  const tall=deep*(MURBAY*0.46)+MURSKY+MURDADO+18;
+  return {w:Math.max(MURBAY,bays.length*MURBAY),h:tall,bays:bays,deep:deep};}
 
-/* the whole wall, in the order the crew painted it */
-function murQuilt(g,W,H){const P=MURPAL,list=(typeof MURALS!=="undefined"?MURALS:[]);
-  murGround(g,W,H);
-  if(!list.length){g.fillStyle=P.ink;g.globalAlpha=.4;
-    g.font="12px ui-monospace,monospace";g.fillText("—",W/2,H/2);g.globalAlpha=1;return;}
-  /* columns chosen from the WIDTH the reader actually gave us, not from a number typed here: on a
-     phone the wall is two patches across and on a laptop it is four, and the patch stays the size a
-     patch should be. The reader's own width fix (mq-v141) is what makes this measurable at all. */
-  const L=murLayout(W,list);
-  list.forEach((m,i)=>{const c=i%L.cols,r=(i/L.cols)|0;
-    murPatchAt(g,m,L.pad+c*(L.cw+L.pad),L.tops[r],L.cw,L.rowH[r]);});
-  const rows=L.rowH.length;
-  /* the binding along the bottom, and the count — a quilt says how many evenings went into it */
-  const foot=L.h-L.pad, pad=L.pad;
-  g.fillStyle=P.shade;g.fillRect(0,Math.min(H-5,foot+2),W,3);
-  g.fillStyle=P.ink;g.globalAlpha=.65;g.font="9px ui-monospace,monospace";
-  const iters=[...new Set(list.map(m=>m.iter))].sort((a,b)=>a-b);
-  g.fillText(list.length+" · "+iters.map(i=>"v"+i).join(" "),pad,Math.min(H-9,foot+14));
-  g.globalAlpha=1;}
-
-/* ---- the layout, in ONE place, because two copies of it is how a wall lies about itself ----
-   Pili measured this wall before she painted on it and came back with two numbers and a
-   contradiction, 2026-09-12:
-   · A CELL WAS A FIXED 0.78 OF ITS WIDTH and every panel ever painted here is aspect 0.42–0.48, so
-     the art filled 54% of its cell and floated in a box that was not its shape. **That gap is the
-     owner's "i see little drawings"** — the drawings were never small, the cells were tall. A row is
-     now as tall as the tallest panel IN THAT ROW, which is also what a hand-sewn quilt looks like.
-   · THE PHONE BREAK WAS WRONG AND THE COMMENT ABOVE IT SAID SO OUT LOUD. `W<340?2` gave THREE across
-     at the town's real 412-pixel reading column while the comment beside it claimed two — so every
-     panel was scaled to 0.29 and every 11px label on this wall was drawn at three pixels. A comment
-     that contradicts the line under it is worth less than no comment. The break is 460 now, which is
-     what "a phone" actually measures here.
-   Derived from the list, so a panel added tomorrow makes the wall taller by itself. */
-function murLayout(w,list){
-  const L=list||(typeof MURALS!=="undefined"?MURALS:[]);
-  const cols=w<460?2:w<760?3:4, pad=Math.max(4,Math.round(w*0.012));
-  const cw=(w-pad*(cols+1))/cols;
-  const rowH=[],tops=[];let y=pad;
-  for(let i=0;i<Math.max(1,L.length);i+=cols){
-    const row=L.slice(i,i+cols);
-    const a=row.reduce((m,p)=>Math.max(m,p&&p.aspect||0.46),0.3);
-    const h=cw*a+Math.max(6,Math.round(cw*0.09)*2);   /* the hem, top and bottom, and room to sign it */
-    tops.push(y);rowH.push(h);y+=h+pad;}
-  return {cols:cols,pad:pad,cw:cw,rowH:rowH,tops:tops,h:y+16};}
-function murQuiltAspect(w){return murLayout(w).h/w;}
+/* ---- the wall itself ---- */
+function murWall(g,W,H){const P=MURPAL,S=murWallSize();
+  const sx=W/S.w, sy=H/S.h, k=Math.min(sx,sy);   /* drawn at its own size and fitted, never re-laid-out */
+  g.save();g.scale(W/S.w,H/S.h);
+  const w=S.w,h=S.h;
+  /* ONE GROUND. Lime wash, the grain of a real wall, a horizon line that runs the whole length, and
+     the dado along the foot — painted once, across everything, which is the difference. */
+  g.fillStyle=P.wash;g.fillRect(0,0,w,h);
+  for(let y=0;y<h;y+=3){g.fillStyle=(y/3|0)%2?P.lime:P.wash;g.globalAlpha=.30;g.fillRect(0,y,w,1);}
+  g.globalAlpha=1;
+  g.fillStyle=P.lime;g.fillRect(0,0,w,MURSKY*0.5);                       /* the sky above the work */
+  g.fillStyle=P.shade;g.globalAlpha=.5;g.fillRect(0,MURSKY*0.5,w,1);g.globalAlpha=1;
+  const foot=h-MURDADO;
+  g.fillStyle=P.shade;g.fillRect(0,foot,w,MURDADO);                      /* the dado, end to end */
+  g.fillStyle=P.lime;g.fillRect(0,foot,w,1.5);
+  g.fillStyle=P.ink;g.globalAlpha=.10;g.fillRect(0,h-4,w,4);g.globalAlpha=1;
+  /* ---- the bays. A painter's work stacks upward from the dado: the first thing they painted sits
+          on the ground and everything since is above it. ---- */
+  S.bays.forEach((b,i)=>{
+    const bx=i*MURBAY, ph=MURBAY*0.46;
+    b.panels.forEach((m,j)=>{
+      const py=foot-(j+1)*ph;
+      g.save();g.beginPath();g.rect(bx,Math.max(MURSKY*0.5,py),MURBAY,ph);g.clip();
+      g.translate(bx,py);
+      /* the panel is drawn at the size it was painted for and scaled — its type scales with it */
+      const sc=MURBAY/MURREF, a=m.aspect||0.46;
+      g.scale(sc,sc);
+      const draw=(typeof m.patch==="function")?m.patch:m.art;
+      MURONWALL=true;
+      try{ if(typeof draw==="function")draw(g,MURREF,MURREF*a); }
+      catch(e){ g.fillStyle=P.lime;g.fillRect(0,0,MURREF,MURREF*a); }
+      finally{ MURONWALL=false; }
+      g.restore();
+      if(m.img&&m.__im&&m.__im.complete&&m.__im.naturalWidth){       /* a picture somebody pasted up */
+        const im=m.__im,s2=Math.min(MURBAY*0.8/im.naturalWidth,ph*0.8/im.naturalHeight);
+        g.save();g.beginPath();g.rect(bx,py,MURBAY,ph);g.clip();
+        g.fillStyle=P.bone;g.fillRect(bx+(MURBAY-im.naturalWidth*s2)/2-2,py+(ph-im.naturalHeight*s2)/2-2,im.naturalWidth*s2+4,im.naturalHeight*s2+4);
+        g.drawImage(im,bx+(MURBAY-im.naturalWidth*s2)/2,py+(ph-im.naturalHeight*s2)/2,im.naturalWidth*s2,im.naturalHeight*s2);
+        g.restore();}
+    });
+    /* the signature, painted ON the dado at the foot of the painter's own stretch */
+    g.fillStyle=P.ink;g.globalAlpha=.72;g.font="bold 11px ui-monospace,monospace";
+    g.fillText(b.who,bx+6,foot+14);g.globalAlpha=1;
+    /* a thin thread of the painter's latest iteration, run along the dado under their name only —
+       the one mark that says where one hand stops and the next begins, and it is on the SKIRTING,
+       not between the pictures, because a wall is not divided */
+    const it=b.panels[b.panels.length-1];
+    g.fillStyle=murThread(it&&it.iter);g.fillRect(bx+6,foot+17,Math.min(MURBAY-12,b.who.length*7),2);});
+  g.restore();}
+/* how wide the wall wants to be, given the column it is offered. It is a wall: it may be wider than
+   the page, and the reader scrolls it. */
+function murWallAspect(w){const S=murWallSize();return S.h/S.w;}
+function murWallNatural(){const S=murWallSize();return Math.round(S.w);}
 
 /* decode any attached images once, off the drawing path. A patch that is still loading draws its
    panel's own hand, which is what it would have drawn anyway. */

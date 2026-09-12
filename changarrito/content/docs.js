@@ -72,12 +72,15 @@ const DOCS = {
          should be able to append images and attach them like a quilt"). Every panel in MURALS is a
          patch on it, automatically, in the order it was added; the reading-size panels and their
          words follow underneath, unchanged. */
-      if (typeof murQuilt === "function") {
-        secs.push({ h: L === "es" ? "La colcha" : "The quilt",
-          art: murQuilt, aspect: (typeof murQuiltAspect === "function") ? murQuiltAspect : 1.3,
+      /* EL MURO first — one wall, one bay each, and you walk along it (owner, 2026-09-12: "you get
+         what a mural is right? this isnt going to be pages"). `wide` tells the reader this picture
+         may be wider than the column and belongs in its own scroller; see docRender in engine.js. */
+      if (typeof murWall === "function") {
+        secs.push({ h: L === "es" ? "El muro" : "The wall",
+          art: murWall, aspect: murWallAspect, wide: murWallNatural,
           cap: L === "es"
-            ? "Toda la pared de una vez, en el orden en que se pint\u00F3. Cada parche es la mano de quien lo pint\u00F3; el hilo dice de qu\u00E9 vuelta es. Aqu\u00ED nada se tapa: un parche puesto se queda."
-            : "The whole wall at once, in the order it was painted. Every patch is the hand of whoever painted it; the thread says which iteration it came from. Nothing here is ever painted over: a patch that is on is on." });
+            ? "Una sola pared, de punta a punta. Cada quien tiene su tramo: lo primero que pint\u00F3 va en el suelo y todo lo que ha vuelto a pintar desde entonces va encima, as\u00ED que un tramo no se hace m\u00E1s ancho, se hace m\u00E1s alto. No hay marcos ni divisiones \u2014 el encalado, la l\u00EDnea del horizonte y el z\u00F3calo pasan derecho por todas. Cada quien firma al pie de lo suyo. Camine a lo largo."
+            : "One wall, end to end. Everybody has their own stretch of it: the first thing they painted stands on the ground and everything they have come back and added since goes above it, so a stretch never gets wider \u2014 it gets taller. There are no frames and no divisions; the limewash, the horizon and the dado run straight through all of them. Each painter signs the foot of their own. Walk along it." });
       }
       (typeof MURALS !== "undefined" ? MURALS : []).forEach(m => {
         secs.push({ h: m.title[L], art: m.art, aspect: m.aspect, cap: m.cap[L] });

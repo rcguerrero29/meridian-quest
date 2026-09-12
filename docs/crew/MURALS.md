@@ -316,3 +316,84 @@ prefix that is its own name — `scratchpad/<agent>-whatever.js` — and never a
 nothing and it is the cheapest possible fix. It is filed here rather than in `CREW-MODE.md` because
 it is not about the mode: it happened with the mode **off**, in an ordinary parallel run, which is
 the configuration this project actually uses.
+
+
+---
+
+# EL MURO — how to add to your own area
+
+*Written 2026-09-12 at the owner's word: **"is there a way to get idea on how to have the agents
+ensure they add to their own mural area? you get what a mural is right? this isnt going to be
+pages."***
+
+**He is right and the quilt was the wrong shape.** A grid of framed patches is a contact sheet:
+nineteen separate pictures that happen to share a page. Pili said it in her own panel before he did —
+*"what a mural does that a grid structurally cannot is CROSS A BOUNDARY"* — and the answer built for
+her was a tighter grid, which is a better contact sheet and still not a wall.
+
+## What a mural is, stated so it can be checked
+
+| A mural | A page |
+|---|---|
+| One continuous painted surface | Separate pictures with gaps between them |
+| Wide. You **walk along** it | Fits in front of you |
+| One ground, one horizon, one skirting, running end to end | Each picture brings its own background |
+| No frames. A hand stops and the next one starts | Borders, hems, cells |
+| Sections **grow** as people come back to them | Items are appended to a list |
+| Somebody's arm can reach into the next section | Nothing crosses a boundary |
+
+The wall is **4087 × 419** today and the reader gives it its own horizontal scroller
+(`docRender`'s `wide` seam in `engine.js` — a section may declare a natural width, and any pack with
+a long diagram or a timeline gets that for nothing).
+
+## The mechanism, and it is one word
+
+```js
+by:"melo"
+```
+
+**That is all of it.** Declare it and the wall does the rest:
+
+- **You never choose coordinates.** You are handed a canvas at your own scale with `0,0` at the
+  top-left of the space you are allowed to paint, and the wall puts it where it goes.
+- **Everything you ever paint lands in your own bay**, stacked, oldest on the ground and each return
+  visit above it. **Your stretch never gets wider — it gets taller**, which is what happens to a real
+  wall when somebody keeps coming back to it.
+- **Do not paint your own ground.** Call `murGround` like everybody else and *the wall decides*
+  whether you get one: on the wall it is a no-op, because the wall already painted the limewash end
+  to end, and nineteen slightly different rectangles of the same wash are nineteen visible edges.
+  Edges are exactly what makes a grid a grid.
+- **You sign the foot of your own stretch**, on the dado, with a short thread in your latest
+  iteration's colour. That is the only mark that says where one hand stops. It is on the **skirting**,
+  not between the pictures, because a wall is not divided.
+
+A panel with no `by` is filed under the name at the front of its `who`, so the nineteen painted
+before bays existed landed in their own without anybody editing them — **add and improve, never
+remove**. And *"Rigo again" is Rigo*: a painter who comes back is the same painter. The first build
+of this gave him two bays, which is the exact opposite of what was asked for, and the guard caught it.
+
+## What the guard asks
+
+`test/town.smoke.js`, and it asks the noun rather than the layout — it spies on every panel's own
+hand while the wall paints and reads the **canvas transform** to find out *where* each one was put:
+
+1. **It is a wall, not a page** — wider than it is tall, and wider than the column it is shown in.
+   A mural you can see all of at once is a postcard.
+2. **Every panel is painted, exactly once, in its own painter's bay.** Not "is it on the list".
+3. **Two painters never get the same stretch**, or the wall is one bay wearing several names.
+4. Somebody owns a bay at all — a wall with one bay has no *own area* to add to.
+
+It went red on its first run, twice, for real reasons: a helper the wall still used had been deleted
+in the rewrite, and Rigo had two bays.
+
+## What the wall still owes — Pili's list, none of it overruled
+
+1. **One shared ground line behind every bay** — half built. The wash, the horizon and the dado run
+   through; a *horizon behind the work itself* does not yet.
+2. **`span:2`** so somebody can paint wide across two bays. A mural's whole advantage is that an arm
+   can reach into the next section, and nothing here does that yet.
+3. **The value problem stands.** Nine panels are a cream field with one dark band and four are near
+   black; at wall size the eye goes only to the dark ones. **This must not be fixed by repainting the
+   nine** — nine repaints to even out a wall is nine people's hands erased. The distribution is the
+   lever.
+4. **A panel's signature should be its top band** — the one strip nothing crops.

@@ -837,25 +837,69 @@ const { chromium } = require('playwright-core');
          reading the layout code. Asked by counting the call to each panel's own hand while the quilt
          draws, so a layout that silently drops the last row (a fixed row count, an off-by-one, a
          cell that ends up zero-sized) is red and not merely ugly. */
-      const quilt = await page.evaluate(() => {
+      const elMuro = await page.evaluate(() => {
         const P = [];
-        if (typeof murQuilt !== 'function') { P.push('the crew wall has no quilt — the panels are a queue of little drawings and there is nowhere to stand back from'); return P; }
+        if (typeof murWall !== 'function' || typeof murBays !== 'function')
+          { P.push('the crew wall is not a wall — the panels are a page of framed pictures, and the owner has said in his own words that this is not going to be pages'); return P; }
+        /* 1. IT IS A WALL, NOT A PAGE. Wider than it is tall, and wider than the column it is shown
+              in, or you are looking at a postcard of a mural. */
+        const nat = (typeof murWallNatural === 'function') ? murWallNatural() : 0;
+        const asp = (typeof murWallAspect === 'function') ? murWallAspect(412) : 1;
+        if (!(nat > 412)) P.push('the crew wall is ' + nat + ' px wide and fits inside a phone column — a mural you can see all of at once is a page');
+        if (!(asp < 1)) P.push('the crew wall is taller than it is wide — that is a poster, not a wall you walk along');
+        /* 2. EVERY PAINTER HAS THEIR OWN BAY and everything they paint lands in it. This is the whole
+              of the mechanism the owner asked for: "a way to have the agents ensure they add to their
+              OWN mural area". Asked by painting the wall with every panel's hand spied on, and
+              checking WHERE each one was called, not merely THAT it was. */
+        const bays = murBays();
+        if (bays.length < 2) P.push('the crew wall has one bay — nobody owns a stretch of it, so there is no own area to add to');
+        /* THE THING THE OWNER ACTUALLY ASKED FOR: a painter who comes back paints in the SAME
+           stretch. Without this the wall can quietly go back to being a page — one bay per panel
+           passes every other check here, because every panel is then trivially in "its own" bay.
+           That version was planted and this file said nothing. Asked of the panels, not the bays:
+           group MURALS by painter myself and insist the wall put each group in one place. */
+        const mine = {};
+        (typeof MURALS !== 'undefined' ? MURALS : []).forEach(m => {
+          const k = murPainter(m); (mine[k] = mine[k] || []).push(m.id); });
+        const repeat = Object.keys(mine).filter(k => mine[k].length > 1);
+        if (!repeat.length) P.push('nobody on this wall has painted twice, so whether a painter keeps their own stretch cannot be checked here — say so rather than passing');
+        repeat.forEach(k => {
+          const owns = bays.filter(b => b.panels.some(m => mine[k].indexOf(m.id) >= 0));
+          if (owns.length !== 1) P.push('"' + k + '" has painted ' + mine[k].length + ' times and the wall gave them ' +
+            owns.length + ' separate stretches — a painter who comes back is the same painter, and coming back has to make their own area DEEPER, not start a new one somewhere else');
+          else if (owns[0].panels.length !== mine[k].length) P.push('"' + k + '" has a stretch of the wall with somebody else\'s work in it');
+        });
         const seen = {}, restore = [];
-        MURALS.forEach(m => { const real = m.patch || m.art; restore.push([m, m.patch, m.art]);
-          const spy = function () { seen[m.id] = (seen[m.id] || 0) + 1; return real && real.apply(null, arguments); };
-          if (m.patch) m.patch = spy; else m.art = spy; });
+        bays.forEach((b, i) => b.panels.forEach(m => {
+          const real = m.patch || m.art; restore.push([m, m.patch, m.art]);
+          const spy = function (g) {
+            /* where on the wall did the wall put me? ask the canvas, not the layout code */
+            const t = g.getTransform ? g.getTransform() : null;
+            seen[m.id] = { n: (seen[m.id] ? seen[m.id].n : 0) + 1, x: t ? t.e : null, bay: i };
+            return real && real.apply(null, arguments); };
+          if (m.patch) m.patch = spy; else m.art = spy; }));
         const cv = document.createElement('canvas');
-        const w = 412, h = Math.round(w * (typeof murQuiltAspect === 'function' ? murQuiltAspect(w) : 1.3));
+        const w = Math.max(412, nat), h = Math.round(w * asp);
         cv.width = w; cv.height = h;
-        try { murQuilt(cv.getContext('2d'), w, h); }
+        try { murWall(cv.getContext('2d'), w, h); }
         catch (e) { P.push('the crew wall threw while it was being painted: ' + ((e && e.message) || e)); }
         restore.forEach(r => { r[0].patch = r[1]; r[0].art = r[2]; });
-        const missing = MURALS.filter(m => !seen[m.id]).map(m => m.id);
-        if (missing.length) P.push('these panels are in the crew wall and are not ON it — the quilt never paints them, so appending a panel does not put it on the wall: ' + missing.join(', '));
-        if (h < 200) P.push('the whole crew wall is ' + h + ' px tall at reading width — that is the little-drawings complaint, unfixed');
+        const missing = [];
+        bays.forEach((b, i) => b.panels.forEach(m => {
+          const hit = seen[m.id];
+          if (!hit) { missing.push(m.id); return; }
+          if (hit.n !== 1) P.push('panel "' + m.id + '" is painted ' + hit.n + ' times on the wall');
+          if (hit.bay !== i) P.push('panel "' + m.id + '" was painted in somebody else\'s bay');
+        }));
+        if (missing.length) P.push('these panels are on the wall and are never painted on it, so adding a panel does not put it in its painter\'s stretch: ' + missing.join(', '));
+        /* 3. AND THE BAYS ARE IN DIFFERENT PLACES. If two painters' work lands at the same x the wall
+              is one bay wearing several names. */
+        const xs = bays.map(b => { const h2 = seen[b.panels[0] && b.panels[0].id]; return h2 ? h2.x : null; }).filter(v => v !== null);
+        if (new Set(xs.map(v => Math.round(v))).size !== xs.length)
+          P.push('two painters were given the same stretch of wall — their work is painted on top of each other, which is the opposite of everybody having their own area');
         return P;
       });
-      fails.push(...quilt);
+      fails.push(...elMuro);
 
       if (!fs.existsSync(ledgerPath))
         fails.push('the crew wall has no ledger — docs/crew/MURAL-LEDGER.txt is gone, and without it any panel can be rewritten and nothing would say so');

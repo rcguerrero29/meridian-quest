@@ -3414,7 +3414,18 @@ function docRender(body,secs){
          below is the belt: whatever this arithmetic decides, the drawing can never outgrow its box. */
       const room=(body.clientWidth||(body.parentElement&&body.parentElement.clientWidth)||
                   (document.documentElement&&document.documentElement.clientWidth)||520);
-      const W=Math.max(240,Math.min(560,room-8));
+      /* ---- A PICTURE MAY BE WIDER THAN THE PAGE, AND YOU WALK ALONG IT ----
+         The owner, 2026-09-12, on the crew's wall: "you get what a mural is right? this isnt going to
+         be pages." A mural is one surface you walk along; a mural that fits in a phone column is a
+         postcard. So a section may declare `wide` — a natural width in CSS pixels, or a function that
+         returns one — and it is drawn at that width inside its own horizontal scroller instead of
+         being squeezed into the column. Everything else in the reader is unchanged: a section with no
+         `wide` is fitted to the column exactly as it always was.
+         This is a RULE and not one town's mural: any pack with a long diagram, a timeline or a
+         panorama wants it, and the alternative is every such pack inventing its own scroller. */
+      const natural=(typeof s2.wide==="function")?s2.wide():(typeof s2.wide==="number"?s2.wide:0);
+      const wide=natural>0&&natural>room-8;
+      const W=wide?Math.round(natural):Math.max(240,Math.min(560,room-8));
       /* `aspect` may be a FUNCTION of the width. A picture whose shape depends on how wide it is
          drawn — a wall that reflows to two patches across on a phone and four on a laptop — cannot
          state its height as a constant, and the alternative is a pack reaching into the reader to
@@ -3424,10 +3435,16 @@ function docRender(body,secs){
       const K=Math.min(3,window.devicePixelRatio||1);
       cv.width=W*K;cv.height=H*K;cv.style.width=W+"px";cv.style.height=H+"px";
       cv.style.display="block";cv.style.margin="10px auto";cv.style.borderRadius="6px";
-      cv.style.maxWidth="100%";cv.style.height="auto";   /* it may be smaller than asked. It may never be wider than the column */
+      if(wide){cv.style.maxWidth="none";cv.style.margin="10px 0";}
+      else{cv.style.maxWidth="100%";cv.style.height="auto";}   /* it may be smaller than asked. It may never be wider than the column */
       const g=cv.getContext("2d");g.setTransform(K,0,0,K,0,0);g.imageSmoothingEnabled=false;
       try{s2.art(g,W,H);}catch(e){if(typeof mqwarn==="function")mqwarn("docart",String((e&&e.message)||e),false);}
-      body.appendChild(cv);
+      if(wide){const box=document.createElement("div");
+        box.style.overflowX="auto";box.style.overflowY="hidden";box.style.maxWidth="100%";
+        box.style.webkitOverflowScrolling="touch";box.style.borderRadius="6px";
+        box.setAttribute("tabindex","0");                 /* a keyboard can walk the wall too */
+        box.appendChild(cv);body.appendChild(box);}
+      else body.appendChild(cv);
       if(s2.cap)el("p","dnote",s2.cap);
     }
     else
