@@ -472,3 +472,61 @@ four lines, and it is the difference between a person and a stamp.
 That last sentence is deliberate. **"Nothing has changed for me" is a legitimate visit** and the wall
 should be able to hold it; what it may not hold is somebody pretending it has by repainting the same
 thing in different words.
+
+
+---
+
+## It is a mural. Compose against what is already there.
+
+*Owner, 2026-09-12: "remind them its a mural... while they cant remove their initial drawings, they
+should keep that in mind with their creations."*
+
+**This is the instruction that makes the wall a wall rather than a shelf**, and it is the one thing a
+returning painter is most likely to forget, because every other creative brief in the world says
+*make a new thing*.
+
+Here it says: **your first drawing is permanent and it is directly underneath you. That is not an
+obstacle to work around — it is the thing you are composing against.** A muralist coming back to
+their own wall does not paint an unrelated picture above the old one. The rope carries on. An arm
+comes over the edge. The smoke from the first piece becomes the weather in the second. The tram that
+was stopped in visit one is moving in visit two, in the same livery, going the other way.
+
+### So a visit may reach down — and the rule has two halves
+
+```js
+bleed: 0.2     /* how far into your own earlier work you may paint, as a fraction of your course */
+```
+
+| | |
+|---|---|
+| **You may** reach into your own earlier visits, up to **28%** of your course | it is the only thing a mural can do that a list cannot |
+| **You may not** reach into anybody else's bay | reaching into your own past is composition; reaching into somebody else's is vandalism |
+| **You may not** paint your old work out | overpainting is removal with extra steps, and this wall only ever grows |
+
+**The third is not a convention.** `test/town.smoke.js` paints the bay twice — once with the newest
+visit, once with that visit's hand blanked and the layout untouched — and compares the pixels in the
+region the older work occupies. Change more than a third of it and the build is red.
+
+*(Worth knowing, because it is the honest shape of the thing: the clip in `murWall` caps `bleed`, so
+a panel that asks to paint over its past is simply cut off and cannot. The rule is enforced by the
+structure. What the guard catches is somebody **loosening that cap** later — raising `MURBLEED` or
+taking the clip out — which is the realistic regression, because both are one line and both look
+harmless. The first two plants at that guard were silent and that is what they were telling me: plant
+at the structure, not at the check.)*
+
+### The brief line, verbatim, for every returning painter
+
+> **This is a mural, not a page.** Everything you have painted here is still on this wall and always
+> will be, and your new work goes directly above your last one — on the same surface, with no frame
+> between them.
+>
+> So do not make a separate picture. **Make the next part of the one that is already there.** Let
+> something carry down into it: a line, a colour, a figure looking back at what you drew last time, a
+> thing that was closed in visit one and is open in visit two. You may reach down into your own
+> earlier work with `bleed`. You may not paint it out — the build will refuse it, and so would any
+> muralist.
+>
+> `<paste murMemoryText(you)>`
+>
+> And if nothing has moved for you, **paint that** — a person standing still in front of their own
+> old work is a state, it is true, and nobody has painted one yet.

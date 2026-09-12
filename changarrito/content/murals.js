@@ -1163,7 +1163,11 @@ function murMemory(who){
     drew:(m.cap&&m.cap.en||"").slice(0,160)};});}
 function murMemoryText(who){const M=murMemory(who);
   if(!M.length)return who+" has not painted on this wall before. Anything is new.";
-  return who+" has been to this wall "+M.length+" time"+(M.length>1?"s":"")+". Do not repeat any of it:\n"+
+  return who+" has been to this wall "+M.length+" time"+(M.length>1?"s":"")+
+    ". Your next work goes DIRECTLY ABOVE visit "+M.length+", on the same wall, for good \u2014 "+
+    "it is a mural, so compose against what is already there rather than beside it. You may reach "+
+    "down into your own earlier work (`bleed`, up to "+Math.round(MURBLEED*100)+"% of your course). "+
+    "You may not paint it out. Do not repeat any of it:\n"+
     M.map(function(v){return "  visit "+v.visit+" ("+v.date+") \u2014 said: \u201C"+v.said+"\u201D"+
       (v.state?"\n      state: \u201C"+v.state+"\u201D":"\n      state: (not recorded \u2014 the field did not exist yet)")+
       "\n      drew: "+v.drew;}).join("\n");}
@@ -1193,6 +1197,7 @@ const MURSKY=26, MURDADO=22;                   /* above the work, and the painte
    was. Read a bay bottom to top and you are reading one person changing their mind over four days.
    That is the expression, and it is not a feeling — it is a POSITION, held on a date, in public,
    next to the last position the same person held. A wall is very good at that and prose is not. */
+const MURBLEED=0.28;                           /* the most of your own past a visit may reach into */
 const MURSTATE=15;                             /* the strip under each visit where the state is written */
 const murCourse=()=>MURBAY*0.46+MURSTATE;
 function murWallSize(list){const bays=murBays(list);
@@ -1222,7 +1227,26 @@ function murWall(g,W,H){const P=MURPAL,S=murWallSize();
     const bx=i*MURBAY, ph=MURBAY*0.46, cH=murCourse();
     b.panels.forEach((m,j)=>{
       const py=foot-(j+1)*cH;
-      g.save();g.beginPath();g.rect(bx,Math.max(MURSKY*0.5,py),MURBAY,ph);g.clip();
+      /* ---- HOW FAR A VISIT MAY REACH ----
+         The owner, 2026-09-12: "remind them its a mural... while they cant remove their initial
+         drawings, they should keep that in mind with their creations."
+         That is the whole difference between a mural and a stack, and it cuts both ways. A muralist
+         coming back to their own wall does not paint an unrelated picture in the space above the old
+         one — they let the new thing REACH DOWN into the old: a rope carries on, an arm comes over
+         the edge, smoke from the first piece becomes weather in the second. The old work is permanent
+         and that is the constraint you compose against, not the thing you work around.
+         So a panel may declare `bleed` — how far, as a fraction of its own course, it may paint below
+         itself into its own earlier visit. It is capped at MURBLEED and it can NEVER cross into
+         another painter's bay, because reaching into your own past is composition and reaching into
+         somebody else's is vandalism.
+         WHAT IT MAY NOT DO IS PAINT THE OLD WORK OUT. That is not a convention: test/town.smoke.js
+         renders the bay with and without the newest visit and fails the build if the earlier work
+         stops being substantially visible. You may answer your first drawing. You may not erase it
+         by painting on top of it, which is the same rule as "add and improve, never remove" applied
+         to paint instead of to words. */
+      const bleed=Math.max(0,Math.min(MURBLEED,+m.bleed||0))*ph;
+      g.save();g.beginPath();
+      g.rect(bx,Math.max(MURSKY*0.5,py),MURBAY,Math.min(ph+bleed,foot-py));g.clip();
       g.translate(bx,py);
       /* the panel is drawn at the size it was painted for and scaled — its type scales with it */
       const sc=MURBAY/MURREF, a=m.aspect||0.46;

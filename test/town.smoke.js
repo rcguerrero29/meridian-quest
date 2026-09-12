@@ -943,6 +943,69 @@ const { chromium } = require('playwright-core');
       });
       fails.push(...twice);
 
+      /* ---- YOU MAY ANSWER YOUR FIRST DRAWING. YOU MAY NOT PAINT IT OUT. ----
+         The owner, 2026-09-12: "remind them its a mural... while they cant remove their initial
+         drawings, they should keep that in mind with their creations."
+         A visit may reach DOWN into the painter's own earlier work — that is what makes a bay one
+         composition instead of three pictures in a pile, and it is the only thing a mural can do that
+         a list cannot. What it may not do is use that reach to cover the old work, because
+         overpainting is removal with extra steps, and the one rule this wall has had since the day it
+         was opened is add and improve, NEVER REMOVE.
+         Asked the only way it can be: paint the bay with everything on it, paint it again with the
+         newest visit left off, and compare the pixels in the region the OLDER work occupies. If the
+         newest visit has changed most of what was underneath it, it did not answer it — it erased
+         it. Nothing about the layout code can tell you that, and neither can reading the panel. */
+      const overpaint = await page.evaluate(() => {
+        const P = [];
+        if (typeof murBays !== 'function' || typeof murWall !== 'function' || typeof murCourse !== 'function') return P;
+        const bays = murBays().map((b, i) => ({ b: b, i: i })).filter(x => x.b.panels.length > 1);
+        if (!bays.length) { P.push('nobody has come back to this wall yet, so whether a second visit can paint out the first cannot be checked here — say so rather than passing'); return P; }
+        const nat = murWallNatural(), W = nat, H = Math.round(W * murWallAspect(W));
+        const shoot = () => { const c = document.createElement('canvas'); c.width = W; c.height = H;
+          const g = c.getContext('2d'); g.imageSmoothingEnabled = false; murWall(g, W, H);
+          return g.getImageData(0, 0, W, H); };
+        const all = shoot();
+        /* SUPPRESS THE PAINT, DO NOT REMOVE THE PANEL. The first version spliced the newest visit out
+           of MURALS — which changes how many courses deep the wall is, which changes its natural
+           height, which rescales everything, so the two pictures were of different walls and it
+           reported 76% of Rigo painted out on a clean tree. Blanking the newest visit's hand leaves
+           the layout identical and changes exactly one thing: what that visit put on the wall.
+           AND A NOTE ON WHAT IT IS FOR, because the first two plants at it were SILENT and that is
+           the interesting part: the clip in murWall caps `bleed` at MURBLEED, so a panel asking to
+           paint over its own past is simply cut off and cannot. The rule is enforced by the
+           structure, not by this check. What this check catches is somebody LOOSENING THAT CAP —
+           raising MURBLEED, or taking the clip out — which is the realistic regression, because both
+           are one line and both look harmless. Planted both ways and it names Rigo in each. A guard
+           whose plant cannot fail is telling you the invariant is structural; the right response is
+           to plant at the structure instead of deleting the guard. */
+        const bayW = nat / murBays().length, course = murCourse(), foot = (H / murWallAspect(W) * murWallAspect(W));
+        const S = { h: H / (H / (murWallNatural() * murWallAspect(nat))) };
+        const scale = H / (nat * murWallAspect(nat));          /* natural units → pixels (it is 1 here, kept honest anyway) */
+        const footPx = H - (typeof MURDADO === 'number' ? MURDADO : 22) * scale;
+        bays.forEach(x => {
+          const top = x.b.panels[x.b.panels.length - 1], n = x.b.panels.length;
+          const real = top.patch || top.art, key = top.patch ? 'patch' : 'art';
+          top[key] = function () {};                            /* this visit paints nothing */
+          let without; try { without = shoot(); } finally { top[key] = real; }
+          const x0 = Math.round(x.i * bayW * scale), x1 = Math.min(W, Math.round((x.i + 1) * bayW * scale));
+          const yTopCourse = footPx - n * course * scale;       /* where the newest visit starts */
+          const y0 = Math.max(0, Math.round(yTopCourse + course * scale));   /* everything BELOW it */
+          const y1 = Math.max(0, Math.round(footPx));
+          let looked = 0, changed = 0;
+          for (let y = y0; y < y1; y++) for (let px2 = x0; px2 < x1; px2++) {
+            const i = (y * W + px2) * 4; looked++;
+            if (Math.abs(all.data[i] - without.data[i]) > 12 || Math.abs(all.data[i + 1] - without.data[i + 1]) > 12
+              || Math.abs(all.data[i + 2] - without.data[i + 2]) > 12) changed++; }
+          if (looked < 200) return;
+          const pct = changed / looked;
+          if (pct > 0.35) P.push('"' + x.b.who + '"\'s newest visit "' + top.id + '" changes ' +
+            Math.round(pct * 100) + '% of what was already painted underneath it. Reaching down into your own ' +
+            'earlier work is the point of a wall; covering it is removal with extra steps, and this wall only ever grows');
+        });
+        return P;
+      });
+      fails.push(...overpaint);
+
       if (!fs.existsSync(ledgerPath))
         fails.push('the crew wall has no ledger — docs/crew/MURAL-LEDGER.txt is gone, and without it any panel can be rewritten and nothing would say so');
       const ledger = fs.existsSync(ledgerPath)
