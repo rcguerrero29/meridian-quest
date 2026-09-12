@@ -606,3 +606,593 @@ MURALS.push(
 }
 );
 
+
+/* ---- iteration 4: the painter's own STATE, at the owner's word, 2026-09-12 ----
+   "the drawing itself doesnt have to be about their work, more about the persona 'state'. could be
+   a state of confusion because there are questions, so it can still do what it wants and if it wants
+   to paint work then that is fine." Panels from here carry `state`. ---- */
+MURALS.push(
+{
+  id:"paty-la-ultima-frase", iter:4, date:"2026-09-12",
+  title:{en:"The last sentence", es:"La \u00FAltima frase"},
+  state:{en:"Nobody asked me. So I counted.", es:"Nadie me pregunt\u00F3. As\u00ED que cont\u00E9."},
+  said:{en:"Four of these thirteen say materially less in Spanish than in English, and in each one the clause that went missing is the finding.",
+        es:"Cuatro de estos trece dicen bastante menos en espa\u00F1ol que en ingl\u00E9s, y en cada uno la frase que se cay\u00F3 era el hallazgo."},
+  who:{en:"Paty, the thirteenth hand on this wall \u2014 the one nobody signed",
+       es:"Paty, la mano trece de este muro \u2014 la que nadie firm\u00F3"},
+  cap:{en:"The wall's one rule is add and improve, never remove. It has been bent four times in one language only. Nine of the thirteen Spanish captions sit between 0.94 and 1.12 of their English, which is ordinary compression; four fall off a cliff \u2014 0.65, 0.74, 0.77, 0.78 \u2014 and each of those is a dropped final clause rather than a tighter sentence. The worst is not merely short: Rigo's ES ends \u201Ca quien no se mueva, lo tiene que tocar\u201D and the same caption two lines above uses tocar for sounding the horn, so the Spanish reader is told the honk is the test \u2014 the reverse of what he came to say. It happens because the Spanish is written last, by the hand that has just finished thinking in English, and the last sentence is where it runs out. PAINTED WITH MEASURED NUMBERS, NOT REMEMBERED ONES: the first version of this panel said six, from counting by eye, and the machine said four. The picture was right and the number was not, which is the same defect it is about.",
+       es:"La \u00FAnica regla de este muro es agregar y mejorar, nunca quitar. Se dobl\u00F3 cuatro veces, y nada m\u00E1s en un idioma. Nueve de los trece pies en espa\u00F1ol andan entre 0.94 y 1.12 de su ingl\u00E9s, que es compresi\u00F3n normal; cuatro se caen del risco \u2014 0.65, 0.74, 0.77, 0.78 \u2014 y cada uno es una \u00FAltima frase que se solt\u00F3, no una frase m\u00E1s apretada. El peor no nada m\u00E1s es corto: el de Rigo cierra con \u201Ca quien no se mueva, lo tiene que tocar\u201D y ese mismo pie, dos renglones arriba, usa tocar para el claxon; al lector en espa\u00F1ol le queda que el claxon es la prueba, al rev\u00E9s de lo que \u00E9l vino a decir. Pasa porque el espa\u00F1ol se escribe al \u00FAltimo, con la mano que acaba de pensar en ingl\u00E9s, y la \u00FAltima frase es donde se le acaba. PINTADO CON N\u00DAMEROS MEDIDOS, NO RECORDADOS: la primera versi\u00F3n de este tablero dec\u00EDa seis, contados a ojo, y la m\u00E1quina dijo cuatro. El dibujo estaba bien y el n\u00FAmero no, que es justo el defecto del que habla."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+    /* PATY'S HAND: a proofreader's galley. Not a drawing of the trolley \u2014 a measurement of THIS
+       WALL. One column per panel that was already here when I arrived, in painting order, and the
+       only number that matters: how long each Spanish caption runs against its own English. A column
+       hanging below the rule is a caption that stopped early; the dotted outline is the sentence
+       that is not there. The four long ones are marked because four is the finding.
+       Counted in node against murals.js, not by eye. */
+    const R=[1.12,0.97,0.94,0.85,0.65,0.97,0.96,0.78,0.77,0.74,0.96,1.02,1.02];
+    const SHORT=0.85;
+    const x0=W*0.05,x1=W*0.95,base=H*0.40,span=(x1-x0)/R.length,K=H*0.92;
+    g.fillStyle=P.ink;g.font="bold 12px ui-monospace,monospace";
+    g.fillText("13 TABLEROS \u00b7 ES contra EN",x0,H*0.11);
+    g.fillStyle=P.rust;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("4 con el final cortado",x0,H*0.22);
+    g.strokeStyle=P.gold;g.lineWidth=2;
+    g.beginPath();g.moveTo(x0,base);g.lineTo(x1,base);g.stroke();
+    g.fillStyle=P.gold;g.font="bold 9px ui-monospace,monospace";g.textAlign="right";
+    g.fillText("la frase completa",x1,base-6);g.textAlign="left";
+    R.forEach((r,i)=>{const x=x0+i*span+span*0.18,bw=span*0.64,d=r-1;
+      if(d>=0){const h=Math.max(2,d*K);g.fillStyle=P.moss;g.fillRect(x,base-h,bw,h);}
+      else{const h=Math.max(2,-d*K);
+        g.fillStyle=(r<SHORT)?P.rust:P.shade;g.fillRect(x,base,bw,h);
+        if(r<SHORT){g.strokeStyle=P.deep;g.lineWidth=1;g.setLineDash([2,2]);
+          g.strokeRect(x+0.5,base+0.5,bw-1,h-1);g.setLineDash([]);}
+        /* the ninth column is Rigo's, and his is not merely short \u2014 it says the opposite */
+        if(i===8){const cx=x+bw/2,cy=base+h*0.55,sz=Math.min(bw,h)*0.30;
+          g.strokeStyle=P.bone;g.lineWidth=2;
+          g.beginPath();g.moveTo(cx-sz,cy-sz);g.lineTo(cx+sz,cy+sz);
+          g.moveTo(cx+sz,cy-sz);g.lineTo(cx-sz,cy+sz);g.stroke();}}});
+    g.fillStyle=P.shade;g.fillRect(x0,H*0.74,x1-x0,1);
+    g.fillStyle=P.ink;g.font="10px ui-monospace,monospace";
+    g.fillText("\u201Ca quien no se mueva, lo tiene que TOCAR\u201D",x0,H*0.83);
+    g.fillStyle=P.rust;g.font="bold 10px ui-monospace,monospace";
+    g.fillText("\u2192 se lo tiene que LLEVAR",x0,H*0.925);
+    g.font="9px ui-monospace,monospace";
+    g.fillStyle=P.moss;g.fillRect(W*0.72,H*0.79,7,7);
+    g.fillStyle=P.rust;g.fillRect(W*0.72,H*0.885,7,7);
+    g.fillStyle=P.ink;g.globalAlpha=.7;
+    g.fillText("ES largo",W*0.72+11,H*0.79+7);
+    g.fillText("ES corto",W*0.72+11,H*0.885+7);g.globalAlpha=1;}
+}
+);
+
+MURALS.push(
+{
+  id:"cuca-dos-pisos-una-casilla", iter:4, date:"2026-09-12",
+  title:{en:"Two floors, one tile", es:"Dos pisos, una casilla"},
+  state:{en:"Holding two facts that will not fit", es:"Sosteniendo dos hechos que no caben"},
+  said:{en:"Thirty years letting rooms and I never let one that did not fit behind its own door. Every room in this town is wider than its house.",
+        es:"Treinta años rentando cuartos y nunca renté uno que no cupiera detrás de su propia puerta. Aquí todos los cuartos son más anchos que su casa."},
+  who:{en:"Doña Cuca, who keeps the rooms and the stairs", es:"Doña Cuca, la de los cuartos y las escaleras"},
+  cap:{en:"She was asked whether the town could show two storeys. She painted what she was actually holding instead, because it is the thing that decides the answer: every house here is ONE tile of frontage with a twenty-by-seventeen room behind it, and the only knob the engine has for height is the same number that tells the camera when to cut a wall down to a knee-high stub. Build the second floor and you have built the thing the camera is most willing to take away — whoever stands beside their own new storey sees less of it than somebody across the street. The floor is not the hard part. The door is.",
+       es:"Le preguntaron si el pueblo podía enseñar dos pisos. Pintó lo que de verdad traía en la cabeza, porque es lo que decide la respuesta: cada casa de aquí es UNA casilla de frente con un cuarto de veinte por diecisiete detrás, y la única perilla que el motor tiene para la altura es el mismo número que le dice a la cámara cuándo recortar un muro a la altura de la rodilla. Construye el segundo piso y habrás construido justo lo que la cámara está más dispuesta a quitarte: quien se para junto a su propio piso nuevo ve menos de él que quien lo mira desde la otra acera. El piso no es lo difícil. La puerta sí."},
+  aspect:0.46,
+  /* CUCA'S HAND: chalk on the limewash. She does not own paper. She chalks the elevation on the
+     wall by the door, and the key hangs on its nail beside it with the room's size on the tag.
+     Nobody else on this wall has drawn a BUILDING, an interior, or a thing that is not there. */
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+    const chalk="#F4F1E8",plaster="#B9A98E",roof="#8E8574";
+    const gy=H*0.675;
+    const fx=W*0.07,fw=W*0.26,sh=H*0.245;
+    const y1=gy-sh,y0=y1-sh;
+    g.fillStyle=chalk;g.globalAlpha=.95;g.font="bold 12px ui-monospace,monospace";
+    g.fillText("¿dos pisos?",W*0.06,H*0.115);g.globalAlpha=1;
+    const kx=W*0.79,ky=H*0.05;
+    g.fillStyle=P.ink;g.fillRect(kx,ky-4,3,3);
+    g.strokeStyle=P.gold;g.lineWidth=2;g.beginPath();g.arc(kx+1.5,ky+7,6,0,7);g.stroke();
+    g.fillStyle=P.gold;g.fillRect(kx,ky+12,3,14);g.fillRect(kx+3,ky+21,4,3);g.fillRect(kx+3,ky+25,5,3);
+    g.fillStyle="#E7DCC4";g.fillRect(kx+12,ky+4,W*0.13,H*0.10);
+    g.strokeStyle=P.shade;g.lineWidth=1;g.strokeRect(kx+12.5,ky+4.5,W*0.13-1,H*0.10-1);
+    g.fillStyle=P.ink;g.font="bold 8px ui-monospace,monospace";g.fillText("20 x 17",kx+16,ky+13);
+    g.fillStyle=P.deep;g.font="7px ui-monospace,monospace";g.fillText("1 casilla",kx+16,ky+21);
+    g.fillStyle=P.ink;g.globalAlpha=.16;g.fillRect(fx+4,gy-4,fw,5);g.globalAlpha=1;
+    g.fillStyle=plaster;g.fillRect(fx,y1,fw,sh);
+    g.fillStyle=roof;g.fillRect(fx,y1,fw,4);
+    g.fillStyle=P.shade;g.fillRect(fx,gy-6,fw,6);
+    const dw=fw*0.20,dx=fx+fw*0.40;
+    g.fillStyle=P.deep;g.fillRect(dx,gy-sh*0.72,dw,sh*0.72-6);
+    g.fillStyle=P.gold;g.fillRect(dx+dw-5,gy-sh*0.40,2,4);
+    g.globalAlpha=.35;g.fillRect(dx-3,gy-6,dw+6,6);g.globalAlpha=1;
+    [0.08,0.68].forEach(t=>{g.fillStyle=P.bone;g.fillRect(fx+fw*t,y1+sh*0.30,fw*0.22,sh*0.34);
+      g.fillStyle=P.ink;g.fillRect(fx+fw*t+fw*0.10,y1+sh*0.30,2,sh*0.34);});
+    g.save();g.strokeStyle=chalk;g.lineWidth=2;g.globalAlpha=.9;g.setLineDash([5,4]);
+    g.strokeRect(fx+0.5,y0+0.5,fw-1,sh-1);
+    [0.10,0.62].forEach(t=>g.strokeRect(fx+fw*t+0.5,y0+sh*0.28+0.5,fw*0.26,sh*0.40));
+    g.setLineDash([]);g.beginPath();g.moveTo(fx-6,y0);g.lineTo(fx+fw+6,y0);g.stroke();
+    g.restore();g.globalAlpha=1;
+    g.strokeStyle=chalk;g.lineWidth=1.5;g.globalAlpha=.8;
+    g.beginPath();g.moveTo(fx-9,y0);g.lineTo(fx-9,gy);g.stroke();
+    [y0,y1,gy].forEach(yy=>{g.beginPath();g.moveTo(fx-13,yy);g.lineTo(fx-5,yy);g.stroke();});
+    g.globalAlpha=1;
+    g.fillStyle=chalk;g.font="bold 10px ui-monospace,monospace";
+    g.fillText("2",fx-22,y0+sh*0.62);g.fillText("1",fx-22,y1+sh*0.62);
+    const ay=y0+sh*0.45,sx=W*0.70,sw=W*0.24,stub=H*0.075;
+    g.strokeStyle=P.rust;g.lineWidth=2;
+    g.beginPath();g.moveTo(fx+fw+14,ay);g.lineTo(sx-12,ay);g.stroke();
+    g.fillStyle=P.rust;g.beginPath();g.moveTo(sx-4,ay);g.lineTo(sx-13,ay-5);g.lineTo(sx-13,ay+5);g.closePath();g.fill();
+    g.strokeStyle=P.ink;g.globalAlpha=.18;g.lineWidth=1.5;g.setLineDash([3,4]);
+    g.strokeRect(sx+0.5,y0+0.5,sw-1,gy-y0-1);g.setLineDash([]);g.globalAlpha=1;
+    g.fillStyle=P.ink;g.globalAlpha=.16;g.fillRect(sx+4,gy-4,sw,5);g.globalAlpha=1;
+    g.fillStyle=roof;g.fillRect(sx,gy-stub,sw,stub);
+    g.fillStyle="#A29881";g.fillRect(sx,gy-stub,sw,2);
+    murBody(g,sx+sw*0.66,gy-12,P.moss,9);
+    g.fillStyle=P.ink;g.font="bold 9px ui-monospace,monospace";
+    g.fillText("lo que deja",sx,gy-stub-8);
+    g.fillStyle=P.deep;g.font="9px ui-monospace,monospace";
+    g.fillText("h > 0.65 d + 0.3",sx-4,H*0.80);
+    const qx=W*0.05,qw=W*0.62,qy=H*0.775,qh=H*0.135;
+    g.fillStyle=P.ink;g.font="bold 9px ui-monospace,monospace";
+    g.fillText("el cuarto que hay detrás",qx+2,qy-9);
+    g.strokeStyle=chalk;g.lineWidth=2;g.globalAlpha=.9;
+    g.strokeRect(qx+0.5,qy+0.5,qw-1,qh-1);g.globalAlpha=1;
+    g.fillStyle=P.rust;g.fillRect(qx+qw*0.44,qy-6,qw*0.10,4);
+    g.fillStyle=P.deep;g.fillRect(qx+qw*0.48,qy-2,qw*0.03,4);
+    g.fillStyle=chalk;g.globalAlpha=.55;
+    g.fillRect(qx+8,qy+qh*0.60,qw*0.16,5);g.fillRect(qx+qw*0.70,qy+8,qw*0.18,5);
+    g.globalAlpha=1;
+    murBody(g,qx+qw*0.30,qy+qh*0.38,P.moss,7);}
+}
+);
+
+MURALS.push(
+{
+  id:"melo-la-doce-era-mia", iter:4, date:"2026-09-12",
+  title:{en:"The twelfth one was mine", es:"La doce era mía"},
+  state:{en:"tired of being right", es:"cansado de tener razón"},
+  said:{en:"Eleven of these were somebody else's lock. The twelfth I fitted myself, that same morning, and it opened with the same key.",
+        es:"Once de éstas eran cerraduras de otro. La doce la puse yo, esa misma mañana, y abrió con la misma llave."},
+  who:{en:"Melo, el cerrajero, at the hour he works", es:"Melo, el cerrajero, a la hora en que trabaja"},
+  cap:{en:"Twelve padlocks strung on a wire above his head, every one of them hanging open, and not one of them fought. That is the register of guards that read a proxy, and the twelfth entry in it is his own — written by the same session that was writing up the eleventh, an hour later, by somebody who already knew. The bicycle underneath carries four keys, because four is all it has ever taken. He is not proud of the row: a man whose keys never fail is not a good locksmith, he is a man in a town with bad locks, sitting on the kerb at three in the morning because tomorrow somebody fits the thirteenth.",
+       es:"Doce candados colgados de un alambre sobre su cabeza, todos abiertos, y ninguno se defendió. Ese es el registro de guardias que leen un sustituto en vez de la cosa, y la entrada doce es suya — la escribió la misma sesión que estaba redactando la once, una hora después, alguien que ya lo sabía. La bicicleta de abajo carga cuatro llaves, porque con cuatro ha bastado siempre. No está orgulloso de la hilera: un hombre al que nunca le falla una llave no es buen cerrajero, es un hombre en un pueblo de cerraduras malas, sentado en la banqueta a las tres de la mañana porque mañana alguien pone la trece."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+    /* MELO'S HAND: not a diagram. Nobody draws a diagram at three in the morning. A night, a lamp,
+       and the only thing a cerrajero has to show for a good week — a wire full of other people's
+       locks, all of them open. Twelve of them, and the twelfth is the one he fitted himself. */
+    g.fillStyle=P.ink;g.globalAlpha=.44;g.fillRect(0,0,W,H);g.globalAlpha=1;
+    const lx=W*0.115;
+    g.fillStyle="#1D1926";g.fillRect(lx-2,0,4,H*0.17);
+    g.fillStyle=P.gold;g.fillRect(lx-8,H*0.155,17,6);
+    g.fillStyle="#7A5A18";g.fillRect(lx-8,H*0.215,17,2);
+    g.fillStyle=P.gold;g.globalAlpha=.12;
+    g.beginPath();g.moveTo(lx-8,H*0.22);g.lineTo(lx+9,H*0.22);
+    g.lineTo(lx+W*0.115,H*0.90);g.lineTo(lx-W*0.105,H*0.90);g.closePath();g.fill();
+    g.globalAlpha=1;
+    g.fillStyle="#2E2B36";g.fillRect(0,H*0.875,W,H-H*0.875-4);
+    g.fillStyle="#4A4552";g.fillRect(0,H*0.875,W,2);
+    const x0=W*0.185,x1=W*0.955,y0=H*0.245,y1=H*0.205,sag=H*0.075;
+    const wy=t=>y0+(y1-y0)*t+sag*4*t*(1-t);
+    g.strokeStyle="#8C8798";g.lineWidth=1.5;g.beginPath();
+    for(let i=0;i<=32;i++){const t=i/32,x=x0+(x1-x0)*t;i?g.lineTo(x,wy(t)):g.moveTo(x,wy(t));}
+    g.stroke();
+    g.fillStyle="#1D1926";g.fillRect(x0-4,y0-7,4,14);g.fillRect(x1,y1-7,4,14);
+    for(let i=0;i<12;i++){
+      const t=(i+0.5)/12, x=x0+(x1-x0)*t, y=wy(t), mine=(i===11);
+      const bw=17,bh=15,by=y+11;
+      g.save();g.translate(x-bw/2+3.5,by+2);g.rotate(-1.02);
+      g.strokeStyle=mine?"#D8B36A":"#B9B4C2";g.lineWidth=3;g.lineCap="round";
+      g.beginPath();g.moveTo(0,0);g.lineTo(0,-7);
+      g.arc(5,-7,5,Math.PI,0,false);g.lineTo(10,-1);g.stroke();
+      g.restore();
+      g.lineCap="butt";
+      g.fillStyle=P.ink;g.globalAlpha=.35;g.fillRect(x-bw/2+2,by+3,bw,bh);g.globalAlpha=1;
+      g.fillStyle=mine?P.rust:"#6E6A7A";g.fillRect(x-bw/2,by,bw,bh);
+      g.fillStyle=mine?P.deep:"#565265";g.fillRect(x-bw/2,by,bw,3);
+      g.fillStyle=P.ink;g.beginPath();g.arc(x,by+bh*0.42,2.6,0,7);g.fill();
+      g.fillRect(x-1,by+bh*0.42,2,bh*0.36);
+      g.fillStyle=mine?"#E8D4A8":"#9E99AA";g.font="bold 8px ui-monospace,monospace";
+      g.textAlign="center";g.fillText(String(i+1),x,by+bh+9);g.textAlign="left";}
+    const mx12=x0+(x1-x0)*(11.5/12), my12=wy(11.5/12)+18;
+    g.strokeStyle=P.gold;g.lineWidth=2;g.globalAlpha=.85;
+    g.beginPath();g.ellipse(mx12,my12,17,22,0,0,7);g.stroke();g.globalAlpha=1;
+    g.strokeStyle=P.gold;g.lineWidth=1.5;
+    g.beginPath();g.moveTo(mx12-15,my12+21);g.lineTo(mx12-42,my12+33);g.stroke();
+    g.fillStyle=P.gold;g.font="bold 11px ui-monospace,monospace";g.textAlign="right";
+    g.fillText("ésta la puse yo",mx12-44,my12+37);g.textAlign="left";
+    const mx=W*0.045, base=H*0.875;
+    g.fillStyle=P.ink;g.globalAlpha=.30;g.fillRect(mx-3,base-2,42,3);g.globalAlpha=1;
+    g.fillStyle="#26313C";g.fillRect(mx+17,base-17,7,17);
+    g.fillStyle=P.ink;g.fillRect(mx+17,base-4,13,4);
+    g.fillStyle="#26313C";g.fillRect(mx+3,base-22,19,7);
+    g.fillStyle=P.sky;g.fillRect(mx,base-40,14,20);
+    g.fillStyle=P.sky;g.fillRect(mx+10,base-31,13,6);
+    g.fillStyle="#C08A5E";g.fillRect(mx+20,base-27,6,6);
+    g.fillStyle="#C08A5E";g.fillRect(mx+2,base-51,12,12);
+    g.fillStyle=P.ink;g.fillRect(mx+1,base-53,14,5);
+    g.fillStyle=P.gold;g.fillRect(mx+23,base-21,2,8);g.fillRect(mx+25,base-15,3,2);
+    const r=H*0.105, fy=base-r-1, bx=W*0.585, fx=bx+W*0.155;
+    g.strokeStyle="#7E7A8A";g.lineWidth=2.5;
+    [bx,fx].forEach(cx=>{g.beginPath();g.arc(cx,fy,r,0,7);g.stroke();});
+    g.strokeStyle="#4E4A58";g.lineWidth=1;
+    [bx,fx].forEach(cx=>{for(let k=0;k<4;k++){const a=k*Math.PI/4;
+      g.beginPath();g.moveTo(cx-Math.cos(a)*r,fy-Math.sin(a)*r);g.lineTo(cx+Math.cos(a)*r,fy+Math.sin(a)*r);g.stroke();}});
+    const sadl=[bx+(fx-bx)*0.30,fy-r*1.55], bars=[fx-4,fy-r*1.45];
+    g.strokeStyle=P.rust;g.lineWidth=3;g.beginPath();
+    g.moveTo(bx,fy);g.lineTo(sadl[0],sadl[1]);g.lineTo(bars[0],bars[1]);
+    g.moveTo(sadl[0],sadl[1]);g.lineTo(fx,fy);g.moveTo(bx,fy);g.lineTo(bars[0],bars[1]);g.stroke();
+    g.fillStyle=P.ink;g.fillRect(sadl[0]-6,sadl[1]-4,13,4);
+    g.strokeStyle=P.ink;g.lineWidth=3;g.beginPath();
+    g.moveTo(bars[0]-9,bars[1]-3);g.lineTo(bars[0]+8,bars[1]-3);g.stroke();
+    const rx=bars[0]+8, ry=bars[1]+2;
+    g.strokeStyle=P.gold;g.lineWidth=2;g.beginPath();g.arc(rx,ry,4.5,0,7);g.stroke();
+    for(let k=0;k<4;k++){const a=0.55+k*0.30;
+      const kx2=rx+Math.cos(a)*4.5, ky2=ry+Math.sin(a)*4.5;
+      g.strokeStyle=P.gold;g.lineWidth=2;
+      g.beginPath();g.moveTo(kx2,ky2);g.lineTo(kx2+Math.cos(a)*11,ky2+Math.sin(a)*11);g.stroke();
+      g.fillStyle=P.gold;g.fillRect(kx2+Math.cos(a)*11-1,ky2+Math.sin(a)*11,3,2);}
+    g.fillStyle="#C9C3D2";g.font="bold 12px ui-monospace,monospace";
+    g.fillText("12 abiertos · 0 se defendieron",W*0.185,H*0.985-6);
+    g.fillStyle="#B4AEC0";g.font="10px ui-monospace,monospace";g.textAlign="right";
+    g.fillText("3:14 a.m.",W*0.955,H*0.105);g.textAlign="left";}
+}
+);
+
+MURALS.push(
+{
+  id:"pili-la-que-jala-la-cuerda", iter:4, date:"2026-09-12",
+  title:{en:"The one on the rope", es:"La que jala la cuerda"},
+  state:{en:"at the back of the yard, watching", es:"hasta atrás del patio, mirando"},
+  said:{en:"I hang it and I never swing. The whole trade is standing far enough back.",
+        es:"Yo la cuelgo y nunca le pego. Todo el oficio es pararse lo bastante lejos."},
+  who:{en:"Pili, la piñatera, who directs and never paints code",
+       es:"Pili, la piñatera, que dirige y nunca pinta código"},
+  cap:{en:"She is the one person in this crew whose trade is whether a thing reads, and she arrived at a wall with thirteen paintings already on it. So her first act was to stand back from other people's work instead of adding to it, and the measurement came back uncomfortable: the quilt gave every patch a cell 0.78 of its width while every panel on this wall was painted at 0.46, so close to half of each patch was bare wall — the drawings were never small, the cells were tall. On the phone's own 412-pixel column the wall came out three patches across, which scaled each panel to 29% and put every 11-pixel label it carries at three pixels. Both were fixed the hour she said it. Hers is the only panel on the wall with no type on it at all, because a piñata is recognised in a dark yard, at ten paces, by a five-year-old, or it is not recognised.",
+       es:"Es la única de la cuadrilla cuyo oficio es si una cosa se entiende o no, y llegó a una pared con trece pinturas ya puestas. Así que su primer acto fue echarse para atrás a mirar el trabajo ajeno en vez de agregar el suyo, y la medida salió incómoda: la colcha le daba a cada parche una celda de 0.78 de su ancho y todos los tableros de esta pared se pintaron a 0.46, así que casi la mitad de cada parche era pared vacía — los dibujos nunca fueron chicos, las celdas eran altas. En la columna de 412 píxeles del teléfono la pared salía de tres, lo que encogía cada tablero al 29% y dejaba en tres píxeles cada letrero de once que carga. Las dos cosas se arreglaron la misma hora en que lo dijo. El suyo es el único de la pared sin una sola letra, porque una piñata se reconoce en un patio oscuro, a diez pasos y por un niño de cinco años, o no se reconoce."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;
+    /* PILI'S HAND: periódico y papel de china. Nobody else on this wall works in materials — they
+       work in papers (blueprint, tracing, contact sheet, filmstrip). Mine is the stuff a piñata is
+       actually made of: a torn column of newsprint, crepe cut into fringe over it, and the yard
+       painted on top. And it carries NO TYPE, on purpose. */
+    g.fillStyle="#DCD8CB";g.fillRect(0,0,W,H);
+    g.fillStyle="#B9B4A6";g.globalAlpha=.5;
+    for(let c=0;c<5;c++){const cx0=8+c*(W-16)/5,cwd=(W-16)/5-10;
+      for(let y=20;y<H-4;y+=4)g.fillRect(cx0,y,cwd,1);}
+    g.globalAlpha=1;
+    const fr=[P.rust,P.gold,P.moss,P.sky,P.deep],nf=22,fw2=W/nf;
+    for(let i=0;i<nf;i++){g.fillStyle=fr[i%5];
+      g.fillRect(i*fw2,0,fw2-1,13);
+      for(let k=0;k<3;k++)g.fillRect(i*fw2+k*(fw2/3),13,fw2/3-1,5);}
+    const yx=9,yy=22,yw=W-18,yh=H-52,gnd=yy+yh*0.78;
+    g.fillStyle=P.ink;g.fillRect(yx,yy,yw,yh);
+    g.fillStyle="#3D3547";g.fillRect(yx,gnd,yw,yy+yh-gnd);
+    g.fillStyle="#4A4156";g.fillRect(yx,gnd,yw,2);
+    g.fillStyle="#5A4A3A";g.fillRect(yx,yy+1,yw,6);
+    const px=W*0.34,py=yy+yh*0.44,top=yy+8,cleat=W-30;
+    g.strokeStyle="#C9B98E";g.lineWidth=2;
+    g.beginPath();g.moveTo(px,py);g.lineTo(px,top);g.lineTo(cleat,top);g.lineTo(cleat,gnd-34);g.stroke();
+    const star=(cx,cy,r,rot,body,tip,al)=>{
+      g.save();g.translate(cx,cy);g.rotate(rot);g.globalAlpha=al;
+      for(let i=0;i<7;i++){const a=i*(Math.PI*2/7);
+        g.fillStyle=tip;g.beginPath();
+        g.moveTo(Math.cos(a-0.30)*r*0.9,Math.sin(a-0.30)*r*0.9);
+        g.lineTo(Math.cos(a)*r*2.1,Math.sin(a)*r*2.1);
+        g.lineTo(Math.cos(a+0.30)*r*0.9,Math.sin(a+0.30)*r*0.9);
+        g.closePath();g.fill();}
+      g.fillStyle=body;g.beginPath();g.arc(0,0,r,0,7);g.fill();
+      g.globalAlpha=1;g.restore();};
+    star(px,py,15,-0.30,P.shade,P.shade,.22);
+    star(px,py,15, 0.34,P.shade,P.shade,.22);
+    star(px,py,15, 0.06,P.gold,P.rust,1);
+    g.fillStyle=P.moss;g.fillRect(px-14,py-4,28,3);
+    g.fillStyle=P.bone;g.fillRect(px-13,py+3,26,2);
+    const kid=(x,shirt,bh)=>{
+      g.fillStyle=P.ink;g.globalAlpha=.35;
+      g.beginPath();g.ellipse(x+4,gnd+3,9,3,0,0,7);g.fill();g.globalAlpha=1;
+      g.fillStyle=shirt;g.fillRect(x,gnd-bh,8,bh*0.62);
+      g.fillStyle="#3A3346";g.fillRect(x,gnd-bh*0.38,8,bh*0.38);
+      g.fillStyle="#C08A5E";g.fillRect(x,gnd-bh-9,8,9);
+      g.fillStyle="#2A2230";g.fillRect(x-1,gnd-bh-12,10,4);
+      g.fillStyle=P.bone;g.fillRect(x-2,gnd-bh-6,12,4);};
+    kid(W*0.58,P.moss,30);kid(W*0.685,P.sky,26);kid(W*0.79,P.rust,33);
+    g.strokeStyle="#9A7B4F";g.lineWidth=3;g.lineCap="round";
+    g.beginPath();g.moveTo(W*0.58-2,gnd-24);g.lineTo(W*0.47,gnd-48);g.stroke();
+    g.lineCap="butt";
+    g.strokeStyle=P.bone;g.globalAlpha=.32;g.lineWidth=1.5;g.setLineDash([4,4]);
+    g.beginPath();g.arc(W*0.58,gnd-24,44,Math.PI*1.04,Math.PI*1.54);g.stroke();
+    g.setLineDash([]);g.globalAlpha=1;
+    const mx=cleat-5;
+    g.fillStyle=P.ink;g.globalAlpha=.35;
+    g.beginPath();g.ellipse(mx+5,gnd+3,11,3,0,0,7);g.fill();g.globalAlpha=1;
+    g.fillStyle=P.moss;g.fillRect(mx,gnd-34,11,20);
+    g.fillStyle=P.deep;g.fillRect(mx,gnd-14,11,14);
+    g.fillStyle="#2A2230";g.fillRect(mx+10,gnd-42,3,16);
+    g.fillStyle="#C08A5E";g.fillRect(mx+1,gnd-45,9,11);
+    g.fillStyle="#2A2230";g.fillRect(mx,gnd-49,11,5);
+    g.fillStyle=P.ink;g.fillRect(mx+3,gnd-41,2,2);g.fillRect(mx+7,gnd-41,2,2);
+    g.fillStyle="#C08A5E";g.fillRect(mx+8,gnd-40,8,4);
+    g.fillRect(mx+12,gnd-45,4,7);
+    const bs=yy+yh+2;
+    g.fillStyle="#B9B4A6";g.globalAlpha=.7;g.fillRect(yx,bs,yw,1);g.globalAlpha=1;
+    const tiny=(cx,cy,r)=>{g.fillStyle=P.ink;
+      for(let i=0;i<7;i++){const a=i*(Math.PI*2/7);g.beginPath();
+        g.moveTo(cx+Math.cos(a-0.32)*r*0.9,cy+Math.sin(a-0.32)*r*0.9);
+        g.lineTo(cx+Math.cos(a)*r*2.0,cy+Math.sin(a)*r*2.0);
+        g.lineTo(cx+Math.cos(a+0.32)*r*0.9,cy+Math.sin(a+0.32)*r*0.9);
+        g.closePath();g.fill();}
+      g.beginPath();g.arc(cx,cy,r,0,7);g.fill();};
+    tiny(26,bs+14,5);tiny(58,bs+14,3.2);tiny(80,bs+14,2);
+    g.strokeStyle=P.shade;g.lineWidth=1;g.setLineDash([3,3]);
+    g.strokeRect(12.5,bs+2.5,84,25);g.setLineDash([]);}
+}
+);
+
+MURALS.push(
+{
+  id:"yaz-diez-focos-verdes", iter:4, date:"2026-09-12",
+  title:{en:"Ten green lamps", es:"Diez focos verdes"},
+  state:{en:"Vindicated, and not reassured", es:"Con la razón y sin calma"},
+  said:{en:"A guard that has never been red has never been tested. Ten runs in green is not a record, it is a rumour.",
+        es:"Un guardia que nunca ha estado en rojo nunca ha sido probado. Diez corridas en verde no son un historial, son un rumor."},
+  who:{en:"Yaz, who takes the three a.m. call", es:"Yaz, a quien le llaman a las tres de la mañana"},
+  cap:{en:"The guard for the one rule this repository states in its own words — bump the cache and the version together whenever the engine changes — compared two commits, and the only moment a person ever runs it is before there is a commit. It was planted at today and printed that no bump was owed. An hour after the fix landed she ran both versions against the same working tree, a live engine change sitting in it and the cache string untouched: the old one said OK and exited 0, the new one failed with a sentence a person would say. Then she counted. Ten engine-touching commits since that guard was written, and every one of them moved the cache — by hand, every time, because somebody remembered. That is why the board stayed green and it is exactly why the green was worth nothing. In CI the check ran only on a pull request, never on a push. And cache-first means the one mistake it exists to catch is the one nobody can report, because the player is never told there is anything newer.",
+       es:"El guardia de la única regla que este repositorio escribe con sus propias palabras — mueve el caché y la versión juntos cada vez que cambia el motor — comparaba dos commits, y el único momento en que una persona lo corre es antes de que haya commit. Hoy le plantaron una falla y contestó que no se debía ningún cambio. Una hora después de la corrección corrió las dos versiones contra el mismo árbol de trabajo, con un cambio de motor vivo adentro y la cadena del caché sin tocar: la vieja dijo OK y salió con cero, la nueva falló con una frase que diría una persona. Luego contó. Diez commits que tocaron el motor desde que se escribió ese guardia, y los diez movieron el caché — a mano, cada vez, porque alguien se acordó. Por eso el tablero se mantuvo verde y por eso mismo el verde no valía nada. En CI la revisión sólo corría en un pull request, nunca en un push. Y servir primero del caché quiere decir que el único error que existe para atrapar es el que nadie puede reportar, porque al jugador nunca le avisan que hay algo más nuevo."},
+  aspect:0.50,
+  art:(g,W,H)=>{const P=MURPAL;
+    /* YAZ'S HAND: a depot status board. Enamel, a brushed rail, glass lamps and an engraved strip
+       under each one. Nobody else on this wall paints in lamps; a release engineer reads nothing
+       else all day, and the whole trade is knowing that a lit lamp is a claim, not a measurement. */
+    g.fillStyle="#1E2228";g.fillRect(0,0,W,H);
+    for(let x=0;x<W;x+=3){g.fillStyle=(x/3|0)%2?"#434A53":"#383E46";g.fillRect(x,0,Math.min(3,W-x),H*0.13);}
+    g.fillStyle="#2A2F36";g.fillRect(0,H*0.13,W,2);
+    g.fillStyle=P.bone;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("CACHE = GAMEV",8,H*0.09);
+    g.fillStyle=P.gold;g.font="bold 9px ui-monospace,monospace";
+    g.fillText("solo en PR",W-72,H*0.09);
+    const bx=W*0.04,bw=W*0.58/5,r=Math.min(bw*0.28,H*0.075),rows=[H*0.29,H*0.53];
+    for(let k=0;k<10;k++){const cx=bx+bw*(k%5+0.5),cy=rows[(k/5)|0];
+      g.fillStyle="#14171B";g.beginPath();g.arc(cx,cy,r+3.5,0,7);g.fill();
+      g.fillStyle="#4F9A4C";g.beginPath();g.arc(cx,cy,r,0,7);g.fill();
+      g.fillStyle="#8FC886";g.beginPath();g.arc(cx-r*0.30,cy-r*0.34,r*0.34,0,7);g.fill();
+      g.fillStyle="#2A2F36";g.fillRect(cx-r-3,cy+r+5,(r+3)*2,10);
+      g.fillStyle=P.bone;g.font="8px ui-monospace,monospace";g.textAlign="center";
+      g.fillText("v"+(k+1),cx,cy+r+13);g.textAlign="left";}
+    const gx=W*0.775,gy=H*0.35,R=H*0.18;
+    g.fillStyle="#14171B";g.beginPath();g.arc(gx,gy,R+5,0,7);g.fill();
+    g.fillStyle="#4F9A4C";g.beginPath();g.arc(gx,gy,R,Math.PI*0.5,Math.PI*1.5);g.fill();
+    g.fillStyle="#C0392B";g.beginPath();g.arc(gx,gy,R,Math.PI*1.5,Math.PI*2.5);g.fill();
+    g.strokeStyle="#14171B";g.lineWidth=3;g.lineCap="round";
+    g.beginPath();g.moveTo(gx,gy-R);g.lineTo(gx,gy+R);g.stroke();
+    g.beginPath();g.moveTo(gx-R*0.64,gy+R*0.04);g.lineTo(gx-R*0.42,gy+R*0.30);g.lineTo(gx-R*0.12,gy-R*0.32);g.stroke();
+    g.beginPath();g.moveTo(gx+R*0.20,gy-R*0.28);g.lineTo(gx+R*0.62,gy+R*0.30);
+    g.moveTo(gx+R*0.62,gy-R*0.28);g.lineTo(gx+R*0.20,gy+R*0.30);g.stroke();
+    g.lineCap="butt";
+    g.fillStyle="#2A2F36";g.fillRect(gx-R-16,gy+R+7,(R+16)*2,12);
+    g.fillStyle=P.bone;g.font="bold 9px ui-monospace,monospace";g.textAlign="center";
+    g.fillText("hoy · dos guardias",gx,gy+R+16);g.textAlign="left";
+    const sy=H*0.70,sh=H*0.107,sa=W*0.635,sb=W*0.80,sw=W*0.105;
+    [[sa,true],[sb,false]].forEach(s=>{
+      g.fillStyle="#2A2F36";g.fillRect(s[0],sy,sw,sh);
+      g.fillStyle="#14171B";g.fillRect(s[0]+sw*0.24,sy+sh*0.26,5,4);g.fillRect(s[0]+sw*0.60,sy+sh*0.26,5,4);});
+    g.fillStyle="#6B7480";g.fillRect(sa+sw*0.12,sy-2,sw*0.76,sh*0.72);
+    g.strokeStyle="#6B7480";g.lineWidth=3;
+    g.beginPath();g.moveTo(gx-R*0.30,gy+R+19);g.lineTo(sa+sw*0.5,sy-14);g.lineTo(sa+sw*0.5,sy-2);g.stroke();
+    g.fillStyle=P.bone;g.font="8px ui-monospace,monospace";g.textAlign="center";
+    g.fillText("commits",sa+sw/2,sy+sh+10);
+    g.fillStyle=P.rust;g.fillText("el árbol",sb+sw/2,sy+sh+10);g.textAlign="left";
+    const ty=H*0.735,tx=bx+4;
+    g.strokeStyle=P.gold;g.lineWidth=2;
+    for(let k=0;k<10;k++){const s2=tx+((k/5)|0)*54+(k%5)*8;
+      g.beginPath();
+      if(k%5===4){g.moveTo(s2-30,ty+15);g.lineTo(s2+4,ty-1);}
+      else{g.moveTo(s2,ty-1);g.lineTo(s2,ty+15);}
+      g.stroke();}
+    g.fillStyle=P.gold;g.font="bold 10px ui-monospace,monospace";
+    g.fillText("a mano ×10",tx+118,ty+12);
+    g.fillStyle="#2A2F36";g.fillRect(0,H*0.885,W,2);
+    g.fillStyle=P.bone;g.font="bold 10px ui-monospace,monospace";
+    g.fillText("10 verdes · 0 pruebas",8,H*0.965);
+    g.fillStyle=P.rust;g.font="bold 9px ui-monospace,monospace";
+    g.fillText("sw.js mq-v150",W-84,H*0.965);}
+}
+);
+
+MURALS.push(
+{
+  id:"lupe-el-renglon-que-nadie-corrio", iter:4, date:"2026-09-12",
+  title:{en:"The row nobody ran", es:"El renglón que nadie corrió"},
+  state:{en:"unsurprised, and still counting", es:"sin sorpresa, y contando"},
+  said:{en:"A green row is not evidence. It is a receipt saying the row ran.",
+        es:"Un renglón verde no es prueba. Es un recibo de que el renglón corrió."},
+  who:{en:"Lupe, who runs the same list on everybody's car", es:"Lupe, que le corre la misma lista al carro de todos"},
+  cap:{en:"Her week on one slip. The register of guards that read the wrong noun is twelve entries long and three of them were written by the session that was documenting the one before, so she has stopped reading green as an answer and started reading it as a receipt: this row ran, nothing more. The ringed tick is the mark she trusts least — green and lying, and its cause was thirty checks upstream with four legs on a tram line. The bottom row is the one she exists for: nobody ever ran it, everything was measured in a window, and what reached the owner was waiting in fullscreen at 0.885 against 2.24.",
+       es:"Su semana en una hoja. El registro de guardias que leen el sustantivo equivocado va en doce entradas y tres las escribió la misma sesión que documentaba la anterior, así que dejó de leer el verde como respuesta y lo lee como recibo: este renglón corrió, nada más. La palomita del círculo es la que menos le cree — verde y mentirosa, y su causa estaba treinta revisiones antes, con cuatro patas sobre la vía. El renglón de abajo es por el que ella existe: nadie lo corrió nunca, todo se midió en ventana, y lo que le llegó al dueño estaba esperando en pantalla completa, 0.885 contra 2.24."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;
+    /* LUPE'S HAND: the carbon copy of a bay slip - pale green paper, a perforated stub, and a form
+       whose rows are the five sizes. Nobody else on this wall paints a FORM, and nobody else leaves a
+       row blank on purpose. */
+    murPaper(g,W,H,"#DCE2CE",null);
+    g.fillStyle="#CBD3BB";g.fillRect(0,0,W*0.055,H-3);
+    g.fillStyle="#AEB89C";for(let y=6;y<H-8;y+=9)g.fillRect(W*0.055-2,y,2,4);
+    const x0=W*0.085,x1=W*0.975;
+    g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("VERIFICACIÓN · CALLE DOS",x0,H*0.105);
+    g.fillStyle=P.deep;g.font="9px ui-monospace,monospace";g.textAlign="right";
+    g.fillText("ESTADO: sin sorpresa, y contando",x1,H*0.105);g.textAlign="left";
+    g.fillStyle="#6B6458";g.font="9px ui-monospace,monospace";
+    g.fillText("un resultado de un solo tamaño no es un resultado",x0,H*0.185);
+    g.strokeStyle="#9AA48A";g.lineWidth=1;
+    g.beginPath();g.moveTo(x0,H*0.215);g.lineTo(x1,H*0.215);g.stroke();
+    const rows=[["390×844",1],["844×390",1],["480×900",1],["1280×800",1],["PANT. COMPLETA",0]];
+    const n=12,top=H*0.245,rh=H*0.111,lab=W*0.235,bx0=x0+lab,bw=(x1-bx0)/n;
+    const s0=Math.min(bw-4,rh*0.62);
+    g.fillStyle=P.rust;g.globalAlpha=.10;
+    g.fillRect(x0-3,top+4*rh+rh*0.02,x1-x0+6,rh*0.96);g.globalAlpha=1;
+    rows.forEach((r,ri)=>{const by=top+ri*rh+rh*0.12;
+      g.fillStyle=r[1]?P.ink:P.rust;g.font="bold 9px ui-monospace,monospace";
+      g.fillText(r[0],x0,by+s0*0.85);
+      for(let i=0;i<n;i++){const bx=bx0+i*bw;
+        if(r[1]){g.strokeStyle="#8E997E";g.lineWidth=1;g.strokeRect(bx+0.5,by+0.5,s0,s0);
+          g.strokeStyle=P.moss;g.lineWidth=2;g.beginPath();
+          g.moveTo(bx+s0*0.20,by+s0*0.55);g.lineTo(bx+s0*0.44,by+s0*0.82);
+          g.lineTo(bx+s0*0.86,by+s0*0.16);g.stroke();}
+        else{g.strokeStyle=P.rust;g.lineWidth=1;g.setLineDash([2,2]);
+          g.strokeRect(bx+0.5,by+0.5,s0,s0);g.setLineDash([]);}}});
+    const rx=bx0+9*bw,ry=top+2*rh+rh*0.12;
+    g.strokeStyle="#C0392B";g.lineWidth=2.5;
+    g.beginPath();g.ellipse(rx+s0/2,ry+s0/2,s0*0.92,s0*0.82,0,0,7);g.stroke();
+    /* ...and the thread out of the sheet to the thing that actually did it, which is never in the
+       row that printed red. It is thirty checks upstream and it has four legs. */
+    const cy=H*0.888,dx=W*0.775,ds=17,mx=x1+4;
+    g.lineWidth=1.5;g.setLineDash([3,3]);
+    g.beginPath();g.moveTo(rx+s0*0.92+s0/2,ry+s0/2);g.lineTo(mx,ry+s0/2);
+    g.lineTo(mx,cy);g.lineTo(dx+ds+3,cy);g.stroke();g.setLineDash([]);
+    g.fillStyle="#3A3F46";
+    g.fillRect(dx-4,cy-ds*0.10,ds+10,1.5);g.fillRect(dx-4,cy+ds*0.34,ds+10,1.5);
+    g.fillStyle="#6B5A46";
+    g.fillRect(dx+ds*0.16,cy-ds*0.44,ds*0.52,ds*0.30);
+    g.fillRect(dx+ds*0.62,cy-ds*0.60,ds*0.26,ds*0.24);
+    g.fillRect(dx+ds*0.02,cy-ds*0.56,ds*0.12,ds*0.16);
+    g.fillStyle=P.ink;
+    [0.24,0.56].forEach(t=>g.fillRect(dx+ds*t,cy-ds*0.14,ds*0.10,ds*0.24));
+    g.fillStyle="#C0392B";g.font="bold 8px ui-monospace,monospace";g.textAlign="right";
+    g.fillText("verde, y mentirosa; la causa, 30 revisiones antes:",dx-12,cy+2);
+    g.textAlign="left";
+    g.strokeStyle="#9AA48A";g.lineWidth=1;
+    g.beginPath();g.moveTo(x0,H*0.825);g.lineTo(x1,H*0.825);g.stroke();
+    g.fillStyle=P.rust;g.font="bold 9px ui-monospace,monospace";
+    g.fillText("pantalla completa: nadie corrió esta fila — 0.885 contra 2.24",x0,H*0.975);}
+}
+);
+
+/* ================================================================================================
+   LA COLCHA — the quilt. (Owner, 2026-09-12: "you have to help the agents with this mural my friend,
+   i see little drawings. they should be able to append images and attach them like a quilt.")
+
+   He is right, and the diagnosis is not "the drawings are small" — it is that there was no WALL.
+   Thirteen panels rendered one under another at reading width are thirteen postcards in a queue; a
+   mural is one surface you stand back from. So the wall is now drawn first, as a quilt: every panel
+   in MURALS becomes a patch, stitched to its neighbours, in the order it was added.
+
+   THREE THINGS AN AGENT GETS FOR FREE, which is the whole point of doing this part for them:
+   · APPEND. Push to MURALS and your patch is in the quilt. Nothing to register, no layout to edit,
+     no second drawing to make — the quilt calls your own `art` with the patch's size and clips it.
+   · ATTACH AN IMAGE. A panel may carry `img` (a data: URI) instead of, or as well as, `art`. If it
+     loads it is drawn as the patch; if it does not, `art` is drawn and nobody sees a hole. No pack
+     may reach off-origin for it: docs/SECURITY-NOTE-2026-09-10.md, and test/public.js R10 would
+     refuse the build anyway. A quilt of hand-cut patches is exactly the metaphor he used.
+   · PAINT BIG. `patch:(g,W,H)=>…` is drawn in the quilt INSTEAD of `art` when a panel has one, so a
+     panel whose reading-size drawing is a diagram can put something bolder on the wall. Optional.
+     Most panels want the same picture twice and get it for nothing.
+
+   The one rule is unchanged and is now enforced twice over: add and improve, never remove. The quilt
+   has no opinion about what is in a patch, so a panel cannot be quietly dropped from the wall by
+   layout — if it is in MURALS it is on the wall, and docs/crew/MURAL-LEDGER.txt plus
+   test/town.smoke.js still fail the build if its words move.
+   ============================================================================================== */
+
+/* the thread: iteration 1 is rust, 2 gold, 3 moss, and anything later cycles. A quilt made over
+   several evenings has several threads in it and you can see where one evening stopped. */
+/* the width every panel in this file was painted for. docRender clamps a picture to 240..560 and
+   the phone column is 412, which is what the crew drew against and what the type was sized for. */
+const MURREF=412;
+function murThread(iter){const P=MURPAL,t=[P.rust,P.gold,P.moss,P.sky,P.deep];
+  return t[((iter|0)-1+t.length)%t.length]||P.rust;}
+
+/* one patch: the panel's own hand, clipped into the cell, with a hem and a running stitch */
+function murPatchAt(g,m,x,y,w,h){const P=MURPAL;
+  const hem=Math.max(3,Math.round(Math.min(w,h)*0.045));
+  g.save();g.beginPath();g.rect(x,y,w,h);g.clip();
+  g.translate(x,y);
+  const draw=(typeof m.patch==="function")?m.patch:m.art;
+  /* A PATCH IS A SMALLER COPY, NOT A RE-LAYOUT. The first version handed the panel a smaller W and H
+     and let it lay itself out again, which is wrong for one reason that is invisible until you look:
+     every panel in this file writes text at absolute pixel sizes — `g.font="11px ui-monospace"` —
+     chosen for a column about MURREF wide. Give the same code 211 px and the drawing shrinks and the
+     words do not, so four labels that sat side by side end up stacked on top of each other. The
+     render at 900 px wide made it unmistakable: "EL TROLLEY" printed straight through "LA RUEDA".
+     So the panel is drawn at the size it was painted for and the whole patch is SCALED down. The
+     composition survives exactly, type and all, which is also what a quilt patch is. */
+  const a=m.aspect||0.5, inner=Math.max(8,w-hem*2), sc=inner/MURREF;
+  const ih=MURREF*a*sc, iy=Math.max(hem,(h-ih)/2);
+  g.save();g.translate(hem,iy);g.scale(sc,sc);
+  try{ if(typeof draw==="function")draw(g,MURREF,MURREF*a); }
+  catch(e){ g.fillStyle=P.lime;g.fillRect(0,0,MURREF,MURREF*a); }
+  g.restore();
+  /* whose hand it is, along the bottom hem — the owner asked for the persona's STATE on the wall,
+     and a wall of unsigned patches is a wall you cannot read that from */
+  if(m.who&&m.who.en){const nm=String(m.who.en).split(/[,\u2014(]/)[0].trim();
+    /* on a chip, not on the art. It used to be ink at 55% straight onto the patch, which survived
+       only because a loose cell left a band of pale wash under every drawing. Tighten the cells —
+       which is the whole fix above — and the same name lands on Rigo's near-black board and Chema's
+       dark sleeve and disappears. Pili called it before it happened. */
+    g.font="8px ui-monospace,monospace";
+    const tw=g.measureText(nm).width;
+    g.fillStyle=P.bone;g.globalAlpha=.88;g.fillRect(hem,h-hem-10,tw+6,10);g.globalAlpha=1;
+    g.fillStyle=P.ink;g.globalAlpha=.75;g.fillText(nm,hem+3,h-hem-2);g.globalAlpha=1;}
+  /* a pinned photograph, if the panel attached one and the browser managed to decode it */
+  if(m.img&&m.__im&&m.__im.complete&&m.__im.naturalWidth){
+    const im=m.__im,s=Math.min((w-hem*4)/im.naturalWidth,(h-hem*4)/im.naturalHeight);
+    const iw=im.naturalWidth*s,ihh=im.naturalHeight*s;
+    g.fillStyle=P.bone;g.fillRect((w-iw)/2-3,(h-ihh)/2-3,iw+6,ihh+6);
+    g.drawImage(im,(w-iw)/2,(h-ihh)/2,iw,ihh);}
+  g.restore();
+  /* the hem, then the running stitch that holds this patch to the wall */
+  g.strokeStyle=MURPAL.shade;g.lineWidth=1;g.strokeRect(x+0.5,y+0.5,w-1,h-1);
+  g.strokeStyle=murThread(m.iter);g.lineWidth=1.5;g.setLineDash([4,4]);
+  g.strokeRect(x+hem+0.5,y+hem+0.5,w-hem*2-1,h-hem*2-1);
+  g.setLineDash([]);}
+
+/* the whole wall, in the order the crew painted it */
+function murQuilt(g,W,H){const P=MURPAL,list=(typeof MURALS!=="undefined"?MURALS:[]);
+  murGround(g,W,H);
+  if(!list.length){g.fillStyle=P.ink;g.globalAlpha=.4;
+    g.font="12px ui-monospace,monospace";g.fillText("—",W/2,H/2);g.globalAlpha=1;return;}
+  /* columns chosen from the WIDTH the reader actually gave us, not from a number typed here: on a
+     phone the wall is two patches across and on a laptop it is four, and the patch stays the size a
+     patch should be. The reader's own width fix (mq-v141) is what makes this measurable at all. */
+  const L=murLayout(W,list);
+  list.forEach((m,i)=>{const c=i%L.cols,r=(i/L.cols)|0;
+    murPatchAt(g,m,L.pad+c*(L.cw+L.pad),L.tops[r],L.cw,L.rowH[r]);});
+  const rows=L.rowH.length;
+  /* the binding along the bottom, and the count — a quilt says how many evenings went into it */
+  const foot=L.h-L.pad, pad=L.pad;
+  g.fillStyle=P.shade;g.fillRect(0,Math.min(H-5,foot+2),W,3);
+  g.fillStyle=P.ink;g.globalAlpha=.65;g.font="9px ui-monospace,monospace";
+  const iters=[...new Set(list.map(m=>m.iter))].sort((a,b)=>a-b);
+  g.fillText(list.length+" · "+iters.map(i=>"v"+i).join(" "),pad,Math.min(H-9,foot+14));
+  g.globalAlpha=1;}
+
+/* ---- the layout, in ONE place, because two copies of it is how a wall lies about itself ----
+   Pili measured this wall before she painted on it and came back with two numbers and a
+   contradiction, 2026-09-12:
+   · A CELL WAS A FIXED 0.78 OF ITS WIDTH and every panel ever painted here is aspect 0.42–0.48, so
+     the art filled 54% of its cell and floated in a box that was not its shape. **That gap is the
+     owner's "i see little drawings"** — the drawings were never small, the cells were tall. A row is
+     now as tall as the tallest panel IN THAT ROW, which is also what a hand-sewn quilt looks like.
+   · THE PHONE BREAK WAS WRONG AND THE COMMENT ABOVE IT SAID SO OUT LOUD. `W<340?2` gave THREE across
+     at the town's real 412-pixel reading column while the comment beside it claimed two — so every
+     panel was scaled to 0.29 and every 11px label on this wall was drawn at three pixels. A comment
+     that contradicts the line under it is worth less than no comment. The break is 460 now, which is
+     what "a phone" actually measures here.
+   Derived from the list, so a panel added tomorrow makes the wall taller by itself. */
+function murLayout(w,list){
+  const L=list||(typeof MURALS!=="undefined"?MURALS:[]);
+  const cols=w<460?2:w<760?3:4, pad=Math.max(4,Math.round(w*0.012));
+  const cw=(w-pad*(cols+1))/cols;
+  const rowH=[],tops=[];let y=pad;
+  for(let i=0;i<Math.max(1,L.length);i+=cols){
+    const row=L.slice(i,i+cols);
+    const a=row.reduce((m,p)=>Math.max(m,p&&p.aspect||0.46),0.3);
+    const h=cw*a+Math.max(6,Math.round(cw*0.09)*2);   /* the hem, top and bottom, and room to sign it */
+    tops.push(y);rowH.push(h);y+=h+pad;}
+  return {cols:cols,pad:pad,cw:cw,rowH:rowH,tops:tops,h:y+16};}
+function murQuiltAspect(w){return murLayout(w).h/w;}
+
+/* decode any attached images once, off the drawing path. A patch that is still loading draws its
+   panel's own hand, which is what it would have drawn anyway. */
+(function murLoadImages(){
+  if(typeof MURALS==="undefined"||typeof Image==="undefined")return;
+  MURALS.forEach(m=>{if(!m.img)return;const im=new Image();im.src=m.img;m.__im=im;});
+})();

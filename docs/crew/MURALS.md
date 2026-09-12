@@ -174,3 +174,145 @@ The owner called it an experiment for fun, and it is. It is also the thing that 
 self-improvement **visible instead of buried in a 20,000-character file** — and a project whose
 decisions are visible is the project that gets somebody hired. **The murals are the portfolio,
 drawn.**
+
+---
+
+# Iteration 4 — what the crew learned from painting
+
+*Opened 2026-09-12 at the owner's word: **"they have to note their findings in documentation from
+being creative but the drawing itself doesnt have to be about their work, more about the persona
+'state'. could be a state of confusion because there are questions, so it can still do what it wants
+and if it wants to paint work then that is fine."***
+
+*Six were asked. Five painted. Each was told the panel is about their **state** and not their work,
+and each was asked what having to draw it forced them to decide that words let them dodge. **The
+answers are almost unanimous and none of them is about art.***
+
+## The finding all five arrived at separately
+
+**A drawing makes you choose a number, and prose does not.**
+
+- **Paty** set out to paint confusion and ended up painting a bar chart, because the moment she had
+  to choose a bar height she had to count characters — and *the counting is what found it*. "Not
+  confused, just uncounted."
+- **Yaz** reached first for a picture of a cable lying unplugged, "which is a lie, and I only found
+  that out because I had to decide where the loose end went." The guard was never unplugged; it was
+  plugged into the wrong socket. So she painted two sockets. **A more accurate sentence than the one
+  she would have written.**
+- **Melo**: "In words I say *I planted at it and it passed* one finding at a time, and each sentence
+  feels like a win; on a wire you have to draw twelve locks side by side, and twelve open shackles in
+  a row stops looking like twelve wins and starts looking like **a town with bad locks**."
+- **Doña Cuca** had been carrying "the building is one tile" and "the room inside is 20×17" in two
+  different sentences. "A single drawing at one scale would not let me, and the moment I drew the
+  plan under the elevation the panel became a contradiction I had been carrying without noticing."
+- **Pili** read the warning about type not scaling, "and still did not believe it until I did the
+  arithmetic on my own panel."
+
+**Lupe** made the same discovery about her own trade: *"A table of pass/fail lets you write 'green'
+without ever saying what green is a claim about; drawing it forced me to put a tick in a box, and the
+moment there were twelve boxes in a row I could see that I was drawing twelve receipts, not twelve
+pieces of evidence."*
+
+Hers went one step further than anyone else's, and it is the best single observation of the round:
+**she could not put the cause in the row that failed, because it was never there.** The cause of an
+intermittent red lives thirty checks upstream, so the thread had to leave the sheet — *"and a table
+has no way to say that at all."* Nor could a pass/fail table say what her bottom row says: the
+fullscreen row is **blank, not failing**. The escape that made her job exist was never a red result,
+it was an absent one, and a table has no cell for *nobody asked*.
+
+### ...and she failed her own rule while proving it
+
+> *"My own drawing failed my own rule twice: the bounds probe I wrote said clean while the rendered
+> panel printed two lines straight through each other, because a coordinate inside 0..W and a
+> collision are different nouns and I had automated the cheaper one. That is entry thirteen in shape
+> if not in name, made by the person who keeps the register, one hour after reading it. **Look at the
+> picture.** The numbers cannot see a collision, and neither can I without a screenshot."*
+
+**That is the fourth time a session has made the register's own mistake while holding the register.**
+It is also the only one of the four that was caught by the person who made it, before it shipped, and
+the thing that caught it was looking at a rendered picture rather than reading a number about one.
+
+## The second finding, which is about honesty and cost the painters something
+
+Three of the five reported that the honest picture was the less flattering one, and that they had to
+choose it deliberately.
+
+Melo's first sketch had all twelve padlocks the same grey — "a better-looking picture and a
+dishonest one", because the twelfth entry in the register is his own. It is painted rust now, with a
+ring round it and a label saying *ésta la puse yo*, "so the panel costs me something to hang."
+
+Yaz went looking for the damage her finding had caused and **found none** — ten engine-touching
+commits and all ten moved the cache by hand — so she had to paint ten lit lamps and a chalk tally and
+let the wall say the uncomfortable version: *the board was green because people remembered, and that
+is exactly why the green was worth nothing.*
+
+## The third, which changed the wall itself
+
+**Pili measured the quilt before adding to it**, and both numbers were wrong:
+
+- A cell was a fixed **0.78** of its width while every panel ever painted here is aspect **0.46**, so
+  the art filled 54% of its cell and floated in a box that was not its shape. **That gap was the
+  owner's "i see little drawings" — the drawings were never small, the cells were tall.**
+- The phone break was `W<340`, which gives **three** patches across at the town's real 412-pixel
+  column, not two — and the comment directly above that line claimed two. **A comment that
+  contradicts the line under it is worth less than no comment.** Every 11px label on the wall was
+  being drawn at three pixels.
+
+Both were fixed the hour she said them: a row is now as tall as the tallest panel in it, and the
+break is 460. She also called, in advance, that the painter's signature would disappear once the
+cells tightened — it was ink at 55% relying on a band of pale wash that was about to go. It sits on a
+bone chip now.
+
+**Her line about the medium is the one to keep:** *a panel that survives the quilt has to be a
+composition, not a diagram — the difference between a poster and a spec sheet is that a poster still
+says something when you throw away every word on it.* Her own patch is the only one on the wall with
+no type on it at all.
+
+And the one she did not expect to learn about herself: *"given a wall, my instinct was to measure it
+before adding to it, which took two thirds of my time and produced the only findings in my panel
+worth having."*
+
+## What the wall still owes, in Pili's words and not overruled
+
+1. **Thirteen panels from one palette against one wash come out as one VALUE.** At wall size the eye
+   goes only to the four dark ones and the other nine read as a single grey texture. *"Painting from
+   a shared palette makes a wall coherent; painting from a shared value makes it invisible."* **This
+   must not be fixed by repainting the nine** — nine repaints to even out a wall is nine people's
+   hands erased. The distribution is the lever.
+2. **A panel's signature should be its top band**, because that is the one strip the quilt never
+   crops and never blurs. Her crepe fringe is fourteen rectangles and is the only mark on her panel
+   that reads at a thumbnail.
+3. **What a mural does that a grid structurally cannot is cross a boundary.** Build toward one shared
+   ground line drawn by the *wall* behind every patch, then an optional `span:2` so somebody can
+   eventually paint wide. **Do not** add captions under the patches — the words already live under
+   the wall, and captions in the cells would guarantee the contact sheet forever.
+4. **The cold read applies to the wall itself:** show it to somebody who has never seen it and ask
+   them to name three of the panels. If they can only name the dark ones, finding 1 is confirmed.
+
+## Two things the round found that are not about murals at all
+
+**The `state` field was the one thing on this wall nothing guarded.** Pili and Doña Cuca found it
+independently within the hour: the ledger fingerprinted `title`, `said` and `cap` in both languages,
+so the field carrying exactly what the owner had asked this round to be about could be rewritten
+tomorrow in silence. It is a **second column** in `MURAL-LEDGER.txt` now, not six more strings in the
+first — folding it in would have changed the fingerprint of all thirteen panels painted before he
+asked for it, and *a rule about never rewriting the past must not be enforced by rewriting every line
+of the past.* Planted: changing one word of Melo's state now fails the build by name.
+
+**Doña Cuca found the ledger's own header stale** while reading the code to answer a question about
+staircases — it still claimed the fingerprint covered `title.en, said.en, cap.en` when the code had
+hashed all six strings since Melo rewrote a Spanish caption into its own opposite and the suite
+passed. Corrected.
+
+## ⚠ A crew-mode finding, and it is the first real one: agents overwrite each other in the scratchpad
+
+**Melo wrote `scratchpad/panel.js`, read it back, and got Lupe's panel. Lupe hit it from the other side in the same hour** — her first probe run measured somebody else's panel while printing her own name over the result, which she noted is "exactly the shape of the thing this register keeps recording"; she moved her work into `scratchpad/lupe/` and every later result came from a file only she had written. Six agents ran in parallel
+with one shared scratch directory and no convention, and two of them chose the same obvious filename
+in the same minute. He noticed only because the content was visibly not his; had the collision been
+subtler, **one agent would have silently shipped another's work under their own name.**
+
+**The rule, from now on, and it belongs in any brief that fans out:** every agent writes under a
+prefix that is its own name — `scratchpad/<agent>-whatever.js` — and never a bare noun. This costs
+nothing and it is the cheapest possible fix. It is filed here rather than in `CREW-MODE.md` because
+it is not about the mode: it happened with the mode **off**, in an ordinary parallel run, which is
+the configuration this project actually uses.

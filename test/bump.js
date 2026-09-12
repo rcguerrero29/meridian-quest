@@ -18,9 +18,28 @@ const base = process.argv[2], head = process.argv[3] || 'HEAD';
 if (!base) { console.error('usage: node test/bump.js <base-ref>'); process.exit(2); }
 const git = (...a) => execFileSync('git', a, { encoding: 'utf8' });
 
+/* WHAT IS ABOUT TO SHIP, not what has already been committed. Until 2026-09-12 this read
+   `git diff base...HEAD`, which compares two COMMITS — so every run of this test before the commit
+   was decorative, and that is the only time anybody runs it. Planted: an engine change plus a
+   reverted CACHE string, sitting in the working tree, and it printed "this change touches nothing
+   the offline app has already cached". The one guard whose whole job is the rule in CLAUDE.md
+   ("bump GAMEV and CACHE together whenever engine/ changes") could not see an unbumped engine change
+   in the tree it was being asked about. Proxy #11 in docs/REGRESSION.md: it asked what the COMMITS
+   changed when it meant what the BUILD contains.
+   With an explicit head it still compares two commits, which is what CI does and how the two
+   historical reds in the comment above were proved. */
 let changed;
-try { changed = git('diff', '--name-only', base + '...' + head).split('\n').filter(Boolean); }
-catch (e) { changed = git('diff', '--name-only', base, head).split('\n').filter(Boolean); }
+const uncommitted = () => {
+  let from = base;
+  try { from = git('merge-base', base, 'HEAD').trim() || base; } catch (e) {}
+  const tracked = git('diff', '--name-only', from).split('\n').filter(Boolean);
+  let untracked = [];
+  try { untracked = git('ls-files', '--others', '--exclude-standard').split('\n').filter(Boolean); } catch (e) {}
+  return [...new Set([...tracked, ...untracked])];
+};
+if (head === 'HEAD') changed = uncommitted();
+else { try { changed = git('diff', '--name-only', base + '...' + head).split('\n').filter(Boolean); }
+       catch (e) { changed = git('diff', '--name-only', base, head).split('\n').filter(Boolean); } }
 
 /* Everything the SERVICE WORKER PRECACHES, not just engine/ — read from sw.js's own ASSETS list so
    this can never drift from what is actually cached. The first version of this check watched

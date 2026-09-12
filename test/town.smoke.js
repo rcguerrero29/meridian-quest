@@ -793,13 +793,25 @@ const { chromium } = require('playwright-core');
     const fp = m => crypto.createHash('sha1')
       .update([m.title.en, m.title.es, m.said.en, m.said.es, m.cap.en, m.cap.es].join(SEP))
       .digest('hex').slice(0, 12);
+    /* ---- and the painter's STATE, in a column of its own ----
+       The owner asked on 2026-09-12 that this round's panels be about the persona's state, and both
+       Pili and Do\u00F1a Cuca came back with the same finding, independently: `state` was the one
+       thing on this wall that add-and-improve-never-remove did not cover. It could be silently
+       rewritten and nothing would say so — the field carrying exactly what he asked for was the only
+       unguarded one.
+       It is a SECOND COLUMN rather than six more strings in the first, and that is the whole design:
+       widening the existing hash would have changed the fingerprint of all thirteen panels painted
+       before he said it, so a rule about never rewriting the past would have been enforced by
+       rewriting every line of the past. A panel with no state has two columns and is untouched. */
+    const sfp = m => (m.state && m.state.en) ? crypto.createHash('sha1')
+      .update([m.state.en, m.state.es || ''].join(SEP)).digest('hex').slice(0, 12) : '';
     const ledgerPath = path.resolve(__dirname, '..', 'docs', 'crew', 'MURAL-LEDGER.txt');
     const onWall = await page.evaluate(() => (typeof MURALS === 'undefined' || !MURALS) ? null
       /* BOTH languages out of the page, because the fingerprint weighs both. The first version of
          this fix widened the hash to six strings and left this extractor at three, so every Spanish
          value arrived `undefined` — which is the same mistake Melo had just found in the hash,
          committed again one line away from it, inside the commit fixing it. */
-      : MURALS.map(m => ({ id: m.id, iter: m.iter,
+      : MURALS.map(m => ({ id: m.id, iter: m.iter, state: m.state || null,
                            title: { en: m.title.en, es: m.title.es },
                            said:  { en: m.said.en,  es: m.said.es  },
                            cap:   { en: m.cap.en,   es: m.cap.es   },
@@ -817,11 +829,39 @@ const { chromium } = require('playwright-core');
          evaporating without a word — and appended an un-ledgered panel, which is then unprotected
          forever. That is docs/GAUGE.md's silent zero, inside the guard written this week to stop a
          different one. */
+      /* ---- and the WALL is a wall: every panel is actually ON the quilt ----
+         The owner, 2026-09-12: "i see little drawings. they should be able to append images and
+         attach them like a quilt." Thirteen panels rendered one under another is thirteen postcards
+         in a queue. The quilt is the wall, and the noun is not "is there a quilt section" — it is
+         "is MY patch on it", which is what an agent appending a panel needs to be true without
+         reading the layout code. Asked by counting the call to each panel's own hand while the quilt
+         draws, so a layout that silently drops the last row (a fixed row count, an off-by-one, a
+         cell that ends up zero-sized) is red and not merely ugly. */
+      const quilt = await page.evaluate(() => {
+        const P = [];
+        if (typeof murQuilt !== 'function') { P.push('the crew wall has no quilt — the panels are a queue of little drawings and there is nowhere to stand back from'); return P; }
+        const seen = {}, restore = [];
+        MURALS.forEach(m => { const real = m.patch || m.art; restore.push([m, m.patch, m.art]);
+          const spy = function () { seen[m.id] = (seen[m.id] || 0) + 1; return real && real.apply(null, arguments); };
+          if (m.patch) m.patch = spy; else m.art = spy; });
+        const cv = document.createElement('canvas');
+        const w = 412, h = Math.round(w * (typeof murQuiltAspect === 'function' ? murQuiltAspect(w) : 1.3));
+        cv.width = w; cv.height = h;
+        try { murQuilt(cv.getContext('2d'), w, h); }
+        catch (e) { P.push('the crew wall threw while it was being painted: ' + ((e && e.message) || e)); }
+        restore.forEach(r => { r[0].patch = r[1]; r[0].art = r[2]; });
+        const missing = MURALS.filter(m => !seen[m.id]).map(m => m.id);
+        if (missing.length) P.push('these panels are in the crew wall and are not ON it — the quilt never paints them, so appending a panel does not put it on the wall: ' + missing.join(', '));
+        if (h < 200) P.push('the whole crew wall is ' + h + ' px tall at reading width — that is the little-drawings complaint, unfixed');
+        return P;
+      });
+      fails.push(...quilt);
+
       if (!fs.existsSync(ledgerPath))
         fails.push('the crew wall has no ledger — docs/crew/MURAL-LEDGER.txt is gone, and without it any panel can be rewritten and nothing would say so');
       const ledger = fs.existsSync(ledgerPath)
         ? fs.readFileSync(ledgerPath, 'utf8').split(String.fromCharCode(10)).map(l => l.trim())
-            .filter(l => l && l[0] !== '#').map(l => { const p2 = l.split('|'); return { id: p2[0], h: p2[1] }; })
+            .filter(l => l && l[0] !== '#').map(l => { const p2 = l.split('|'); return { id: p2[0], h: p2[1], s: p2[2] || '' }; })
         : [];
       const wall = new Map(onWall.map(m => [m.id, fp(m)]));
       ledger.forEach((L, i) => {
@@ -831,6 +871,8 @@ const { chromium } = require('playwright-core');
           fails.push('the words on panel "' + L.id + '" were changed after the fact — a mural records what was decided on the day, and a correction is a NEW panel that points back, never an edit to an old one');
         else if (onWall[i] && onWall[i].id !== L.id)
           fails.push('the crew wall was reordered — panel ' + (i + 1) + ' is "' + (onWall[i] || {}).id + '" where the ledger says "' + L.id + '"');
+        else if (sfp(onWall.find(m => m.id === L.id)) !== L.s)
+          fails.push('the painter\'s own state on panel "' + L.id + '" was changed after the fact — that is the one thing the owner asked this round to be about, and it is the last part of a panel anybody would notice being rewritten');
       });
       onWall.forEach(m => {
         if (!ledger.some(L => L.id === m.id))
