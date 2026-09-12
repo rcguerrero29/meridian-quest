@@ -817,6 +817,34 @@ const { chromium } = require('playwright-core');
          evaporating without a word — and appended an un-ledgered panel, which is then unprotected
          forever. That is docs/GAUGE.md's silent zero, inside the guard written this week to stop a
          different one. */
+      /* ---- and the WALL is a wall: every panel is actually ON the quilt ----
+         The owner, 2026-09-12: "i see little drawings. they should be able to append images and
+         attach them like a quilt." Thirteen panels rendered one under another is thirteen postcards
+         in a queue. The quilt is the wall, and the noun is not "is there a quilt section" — it is
+         "is MY patch on it", which is what an agent appending a panel needs to be true without
+         reading the layout code. Asked by counting the call to each panel's own hand while the quilt
+         draws, so a layout that silently drops the last row (a fixed row count, an off-by-one, a
+         cell that ends up zero-sized) is red and not merely ugly. */
+      const quilt = await page.evaluate(() => {
+        const P = [];
+        if (typeof murQuilt !== 'function') { P.push('the crew wall has no quilt — the panels are a queue of little drawings and there is nowhere to stand back from'); return P; }
+        const seen = {}, restore = [];
+        MURALS.forEach(m => { const real = m.patch || m.art; restore.push([m, m.patch, m.art]);
+          const spy = function () { seen[m.id] = (seen[m.id] || 0) + 1; return real && real.apply(null, arguments); };
+          if (m.patch) m.patch = spy; else m.art = spy; });
+        const cv = document.createElement('canvas');
+        const w = 412, h = Math.round(w * (typeof murQuiltAspect === 'function' ? murQuiltAspect(w) : 1.3));
+        cv.width = w; cv.height = h;
+        try { murQuilt(cv.getContext('2d'), w, h); }
+        catch (e) { P.push('the crew wall threw while it was being painted: ' + ((e && e.message) || e)); }
+        restore.forEach(r => { r[0].patch = r[1]; r[0].art = r[2]; });
+        const missing = MURALS.filter(m => !seen[m.id]).map(m => m.id);
+        if (missing.length) P.push('these panels are in the crew wall and are not ON it — the quilt never paints them, so appending a panel does not put it on the wall: ' + missing.join(', '));
+        if (h < 200) P.push('the whole crew wall is ' + h + ' px tall at reading width — that is the little-drawings complaint, unfixed');
+        return P;
+      });
+      fails.push(...quilt);
+
       if (!fs.existsSync(ledgerPath))
         fails.push('the crew wall has no ledger — docs/crew/MURAL-LEDGER.txt is gone, and without it any panel can be rewritten and nothing would say so');
       const ledger = fs.existsSync(ledgerPath)

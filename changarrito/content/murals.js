@@ -606,3 +606,110 @@ MURALS.push(
 }
 );
 
+
+/* ================================================================================================
+   LA COLCHA — the quilt. (Owner, 2026-09-12: "you have to help the agents with this mural my friend,
+   i see little drawings. they should be able to append images and attach them like a quilt.")
+
+   He is right, and the diagnosis is not "the drawings are small" — it is that there was no WALL.
+   Thirteen panels rendered one under another at reading width are thirteen postcards in a queue; a
+   mural is one surface you stand back from. So the wall is now drawn first, as a quilt: every panel
+   in MURALS becomes a patch, stitched to its neighbours, in the order it was added.
+
+   THREE THINGS AN AGENT GETS FOR FREE, which is the whole point of doing this part for them:
+   · APPEND. Push to MURALS and your patch is in the quilt. Nothing to register, no layout to edit,
+     no second drawing to make — the quilt calls your own `art` with the patch's size and clips it.
+   · ATTACH AN IMAGE. A panel may carry `img` (a data: URI) instead of, or as well as, `art`. If it
+     loads it is drawn as the patch; if it does not, `art` is drawn and nobody sees a hole. No pack
+     may reach off-origin for it: docs/SECURITY-NOTE-2026-09-10.md, and test/public.js R10 would
+     refuse the build anyway. A quilt of hand-cut patches is exactly the metaphor he used.
+   · PAINT BIG. `patch:(g,W,H)=>…` is drawn in the quilt INSTEAD of `art` when a panel has one, so a
+     panel whose reading-size drawing is a diagram can put something bolder on the wall. Optional.
+     Most panels want the same picture twice and get it for nothing.
+
+   The one rule is unchanged and is now enforced twice over: add and improve, never remove. The quilt
+   has no opinion about what is in a patch, so a panel cannot be quietly dropped from the wall by
+   layout — if it is in MURALS it is on the wall, and docs/crew/MURAL-LEDGER.txt plus
+   test/town.smoke.js still fail the build if its words move.
+   ============================================================================================== */
+
+/* the thread: iteration 1 is rust, 2 gold, 3 moss, and anything later cycles. A quilt made over
+   several evenings has several threads in it and you can see where one evening stopped. */
+/* the width every panel in this file was painted for. docRender clamps a picture to 240..560 and
+   the phone column is 412, which is what the crew drew against and what the type was sized for. */
+const MURREF=412;
+function murThread(iter){const P=MURPAL,t=[P.rust,P.gold,P.moss,P.sky,P.deep];
+  return t[((iter|0)-1+t.length)%t.length]||P.rust;}
+
+/* one patch: the panel's own hand, clipped into the cell, with a hem and a running stitch */
+function murPatchAt(g,m,x,y,w,h){const P=MURPAL;
+  const hem=Math.max(3,Math.round(Math.min(w,h)*0.045));
+  g.save();g.beginPath();g.rect(x,y,w,h);g.clip();
+  g.translate(x,y);
+  const draw=(typeof m.patch==="function")?m.patch:m.art;
+  /* A PATCH IS A SMALLER COPY, NOT A RE-LAYOUT. The first version handed the panel a smaller W and H
+     and let it lay itself out again, which is wrong for one reason that is invisible until you look:
+     every panel in this file writes text at absolute pixel sizes — `g.font="11px ui-monospace"` —
+     chosen for a column about MURREF wide. Give the same code 211 px and the drawing shrinks and the
+     words do not, so four labels that sat side by side end up stacked on top of each other. The
+     render at 900 px wide made it unmistakable: "EL TROLLEY" printed straight through "LA RUEDA".
+     So the panel is drawn at the size it was painted for and the whole patch is SCALED down. The
+     composition survives exactly, type and all, which is also what a quilt patch is. */
+  const a=m.aspect||0.5, inner=Math.max(8,w-hem*2), sc=inner/MURREF;
+  const ih=MURREF*a*sc, iy=Math.max(hem,(h-ih)/2);
+  g.save();g.translate(hem,iy);g.scale(sc,sc);
+  try{ if(typeof draw==="function")draw(g,MURREF,MURREF*a); }
+  catch(e){ g.fillStyle=P.lime;g.fillRect(0,0,MURREF,MURREF*a); }
+  g.restore();
+  /* whose hand it is, along the bottom hem — the owner asked for the persona's STATE on the wall,
+     and a wall of unsigned patches is a wall you cannot read that from */
+  if(m.who&&m.who.en){const nm=String(m.who.en).split(/[,—(]/)[0].trim();
+    g.fillStyle=P.ink;g.globalAlpha=.55;g.font="8px ui-monospace,monospace";
+    g.fillText(nm,hem+1,h-hem-2);g.globalAlpha=1;}
+  /* a pinned photograph, if the panel attached one and the browser managed to decode it */
+  if(m.img&&m.__im&&m.__im.complete&&m.__im.naturalWidth){
+    const im=m.__im,s=Math.min((w-hem*4)/im.naturalWidth,(h-hem*4)/im.naturalHeight);
+    const iw=im.naturalWidth*s,ihh=im.naturalHeight*s;
+    g.fillStyle=P.bone;g.fillRect((w-iw)/2-3,(h-ihh)/2-3,iw+6,ihh+6);
+    g.drawImage(im,(w-iw)/2,(h-ihh)/2,iw,ihh);}
+  g.restore();
+  /* the hem, then the running stitch that holds this patch to the wall */
+  g.strokeStyle=MURPAL.shade;g.lineWidth=1;g.strokeRect(x+0.5,y+0.5,w-1,h-1);
+  g.strokeStyle=murThread(m.iter);g.lineWidth=1.5;g.setLineDash([4,4]);
+  g.strokeRect(x+hem+0.5,y+hem+0.5,w-hem*2-1,h-hem*2-1);
+  g.setLineDash([]);}
+
+/* the whole wall, in the order the crew painted it */
+function murQuilt(g,W,H){const P=MURPAL,list=(typeof MURALS!=="undefined"?MURALS:[]);
+  murGround(g,W,H);
+  if(!list.length){g.fillStyle=P.ink;g.globalAlpha=.4;
+    g.font="12px ui-monospace,monospace";g.fillText("—",W/2,H/2);g.globalAlpha=1;return;}
+  /* columns chosen from the WIDTH the reader actually gave us, not from a number typed here: on a
+     phone the wall is two patches across and on a laptop it is four, and the patch stays the size a
+     patch should be. The reader's own width fix (mq-v141) is what makes this measurable at all. */
+  const cols=W<340?2:W<560?3:4, pad=Math.max(4,Math.round(W*0.012));
+  const cw=(W-pad*(cols+1))/cols, ch=cw*0.78;
+  const rows=Math.ceil(list.length/cols);
+  list.forEach((m,i)=>{const c=i%cols,r=(i/cols)|0;
+    murPatchAt(g,m,pad+c*(cw+pad),pad+r*(ch+pad),cw,ch);});
+  /* the binding along the bottom, and the count — a quilt says how many evenings went into it */
+  const foot=pad+rows*(ch+pad);
+  g.fillStyle=P.shade;g.fillRect(0,Math.min(H-5,foot+2),W,3);
+  g.fillStyle=P.ink;g.globalAlpha=.65;g.font="9px ui-monospace,monospace";
+  const iters=[...new Set(list.map(m=>m.iter))].sort((a,b)=>a-b);
+  g.fillText(list.length+" · "+iters.map(i=>"v"+i).join(" "),pad,Math.min(H-9,foot+14));
+  g.globalAlpha=1;}
+
+/* how tall the wall is, for the aspect the reader needs. Derived, so a panel added tomorrow makes
+   the wall taller by itself and nobody has to remember to change a number. */
+function murQuiltAspect(w){const n=(typeof MURALS!=="undefined"?MURALS:[]).length||1;
+  const cols=w<340?2:w<560?3:4, pad=Math.max(4,Math.round(w*0.012));
+  const cw=(w-pad*(cols+1))/cols, ch=cw*0.78, rows=Math.ceil(n/cols);
+  return (pad+rows*(ch+pad)+20)/w;}
+
+/* decode any attached images once, off the drawing path. A patch that is still loading draws its
+   panel's own hand, which is what it would have drawn anyway. */
+(function murLoadImages(){
+  if(typeof MURALS==="undefined"||typeof Image==="undefined")return;
+  MURALS.forEach(m=>{if(!m.img)return;const im=new Image();im.src=m.img;m.__im=im;});
+})();

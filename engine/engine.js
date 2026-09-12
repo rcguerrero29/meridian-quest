@@ -3311,7 +3311,13 @@ function docRender(body,secs){
          below is the belt: whatever this arithmetic decides, the drawing can never outgrow its box. */
       const room=(body.clientWidth||(body.parentElement&&body.parentElement.clientWidth)||
                   (document.documentElement&&document.documentElement.clientWidth)||520);
-      const W=Math.max(240,Math.min(560,room-8)),H=Math.round(W*(s2.aspect||0.55));
+      const W=Math.max(240,Math.min(560,room-8));
+      /* `aspect` may be a FUNCTION of the width. A picture whose shape depends on how wide it is
+         drawn — a wall that reflows to two patches across on a phone and four on a laptop — cannot
+         state its height as a constant, and the alternative is a pack reaching into the reader to
+         measure the column itself. A number still means exactly what it meant. */
+      const A=(typeof s2.aspect==="function")?s2.aspect(W):s2.aspect;
+      const H=Math.round(W*((typeof A==="number"&&isFinite(A)&&A>0?A:0.55)));
       const K=Math.min(3,window.devicePixelRatio||1);
       cv.width=W*K;cv.height=H*K;cv.style.width=W+"px";cv.style.height=H+"px";
       cv.style.display="block";cv.style.margin="10px auto";cv.style.borderRadius="6px";

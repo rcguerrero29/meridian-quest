@@ -68,13 +68,30 @@ const DOCS = {
     build: () => {
       const L = (typeof lang !== "undefined" && lang === "es") ? "es" : "en";
       const secs = [];
+      /* the WALL first — la colcha, the quilt (owner, 2026-09-12: "i see little drawings. they
+         should be able to append images and attach them like a quilt"). Every panel in MURALS is a
+         patch on it, automatically, in the order it was added; the reading-size panels and their
+         words follow underneath, unchanged. */
+      if (typeof murQuilt === "function") {
+        secs.push({ h: L === "es" ? "La colcha" : "The quilt",
+          art: murQuilt, aspect: (typeof murQuiltAspect === "function") ? murQuiltAspect : 1.3,
+          cap: L === "es"
+            ? "Toda la pared de una vez, en el orden en que se pint\u00F3. Cada parche es la mano de quien lo pint\u00F3; el hilo dice de qu\u00E9 vuelta es. Aqu\u00ED nada se tapa: un parche puesto se queda."
+            : "The whole wall at once, in the order it was painted. Every patch is the hand of whoever painted it; the thread says which iteration it came from. Nothing here is ever painted over: a patch that is on is on." });
+      }
       (typeof MURALS !== "undefined" ? MURALS : []).forEach(m => {
         secs.push({ h: m.title[L], art: m.art, aspect: m.aspect, cap: m.cap[L] });
-        secs.push({ kv: [
+        const kv = [
           [L === "es" ? "Lo dicho" : "What was said", "\u201C" + m.said[L] + "\u201D"],
-          [L === "es" ? "Quién" : "Who", m.who[L]],
-          [L === "es" ? "Vuelta" : "Iteration", String(m.iter) + " \u00B7 " + m.date]
-        ] });
+          [L === "es" ? "Quién" : "Who", m.who[L]]
+        ];
+        /* the painter's STATE, from iteration 4 on (owner, 2026-09-12: "the drawing itself doesnt
+           have to be about their work, more about the persona 'state'. could be a state of confusion
+           because there are questions"). Optional, so the thirteen panels painted before he said it
+           are unchanged — and they have to be: add and improve, never remove. */
+        if (m.state && m.state[L]) kv.push([L === "es" ? "De \u00E1nimo" : "State", m.state[L]]);
+        kv.push([L === "es" ? "Vuelta" : "Iteration", String(m.iter) + " \u00B7 " + m.date]);
+        secs.push({ kv: kv });
       });
       if (!secs.length) secs.push({ p: L === "es" ? "La pared est\u00E1 encalada y vac\u00EDa." : "The wall is limewashed and empty." });
       return secs;
