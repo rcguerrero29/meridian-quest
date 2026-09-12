@@ -523,3 +523,96 @@ below is built.
 **The recommendation, when he comes back to it:** the second row. It is one phase, it is reversible,
 and it answers the actual complaint — *"i dont see anything about me riding it"* — without inventing
 a mechanic nobody has asked to play twice.
+
+---
+
+## A13 · The ride, part two — the rider reads as luggage, and the driver is five pixels wide · 2026-09-12
+
+*The owner, having ridden it again: **"i think its a bit of an animation and eventually something to
+do. does that make sense yet? so like now it looks fine except it appears as if the character is just
+laying down on it. there should be a rail infront of him. i still cant see the driver. dont build,
+just plan."***
+
+**NOTHING HERE IS BUILT.** This is the plan and its causes, so the next session does not spend an
+afternoon rediscovering them.
+
+### First: A12's open question is answered
+
+> **"a bit of an animation and eventually something to do"**
+
+That is A12's option 2 now and option 3 later, in his own words, and it settles a question that had
+been open since the ride shipped. **Build the animation. Do not build a mechanic.** The quest-on-the-
+tram idea stays filed and stays unbuilt until he asks for it by name.
+
+*"Does that make sense yet"* — yes, and it is a better answer than the one I recommended, because it
+says what the ride is FOR. A ride is a held beat. It is not a menu with a delay and it is not a
+mini-game; it is the thirty seconds where the town goes past and you are not steering. Everything
+below serves that and nothing below adds a verb.
+
+### The three faults, with the cause read rather than guessed
+
+| # | What he saw | The actual cause | Where |
+|---|---|---|---|
+| 1 | *"the character is just laying down on it"* | `troDraw2D` is called **before the actor depth pass** — a flat layer under everything. So the hero, a standing figure, is painted over the whole car body on the same tile. Nothing is in front of him because nothing ever can be | `engine.js`, the two `troDraw2D(world,…)` call sites, and the `R.push({d:…})` depth loop under them |
+| 2 | *"there should be a rail infront of him"* | there is no near side to the tram at all — `drawTram` paints body, trim, three windows, a strip, wheels, a lamp, and stops | `drawTram` |
+| 3 | *"i still cant see the driver"* | **two different answers, and the first one is the embarrassing one.** In the 2D cameras *there is no driver* — `drawTram` has no figure in it. In 3D there is one, correctly placed at the leading end, standing on an open cab **0.15 tiles wide — about five screen pixels** between the body box and the end glazing | `drawTram`; `engine3d.js` `T3.tramDriver` |
+
+**Fault 3 is the sugar skull again, exactly.** A thing that is really there, correctly placed, and a
+handful of pixels wide in a recess. That took four attempts because three of them changed its size.
+**Do not change the driver's size.** See the traps below.
+
+### The plan, in order, and the first item fixes two of the three
+
+**1 · The tram joins the depth pass instead of being a layer under it.** *(the structural one)*
+
+This repo already does exactly this for a shopfront: la ventanilla's counter is pushed at depth
+`y+0.7` so that it lands **after** the person at `y+0.55` and her legs are behind it. The tram wants
+the same treatment — a far half at the row's depth and a **near half after the actors**.
+
+Then fault 1 and fault 2 are one change: the near side *is* the rail. The rider stops being painted
+over the car and starts being inside it, in every 2D camera, for free.
+
+Cost: one sitting. Risk: the tram is currently drawn by one function called from two places; splitting
+it into far/near is the whole job and it is mechanical.
+
+**2 · The near side is the thing you see, so it is what should be worth looking at.** A waist-high
+rail, the window mullions, and the lower body panel. A hand on the rail if the rider is the hero.
+This is the "animation" half of his answer: a ride is a held beat, so the one thing in front of you
+for those seconds should reward looking at it.
+
+Cost: one sitting of art. **Pili should direct this and Rigo should say what a real car has at waist
+height**, because between them they already established that the cabs are decoration and the bell is
+the warning, and both facts constrain what may be drawn here.
+
+**3 · The driver becomes visible by being given somewhere to stand, not by being made bigger.** The
+cab is 0.15 tiles. The options, and only the first is likely right:
+- **widen the cab** — move the body box in, so the platform he stands on is a real platform. Changes
+  the tram's proportions, which is a Pili and Rigo question, not a programmer's;
+- put him **in the end glazing** rather than behind it;
+- give him a **silhouette that survives five pixels** — a cap brim and a shoulder line, the same
+  trick the window sill's ledge used: a hard horizontal edge survives what a small shape does not.
+
+And in 2D he has to exist at all. One figure at the leading end of `drawTram`, mirrored with
+`TRO.dir` — Rigo's canon is one driver at one end and no reversing, and the mural's `murTram` helper
+already has `driverAt` doing precisely this, so the shape is settled and only the drawing is missing.
+
+### The traps, written down because two of them have already cost days here
+
+1. **Do not fix the driver by resizing him.** That is the sugar-skull loop: four rounds, all measured,
+   all defensible, all wrong, because the fault was never a dimension. He needs a *place*, or an
+   *edge* — a cap brim reads at five pixels and a face does not.
+2. **Do not fix the rider by moving him up the tile.** It would look better and it would still be a
+   figure painted over a vehicle. The noun is *occlusion*, not *position*.
+3. **Do not add a verb.** He asked for an animation and said the something-to-do comes later. A quest
+   node on the tram is A12 option 3 and is still unbuilt on purpose.
+4. **Whatever is built, look at it.** Every fault in this entry was found by rendering the thing and
+   looking at it, and every one of them passed a suite that was green at the time.
+
+### What is still his
+
+- **Does the tram get wider?** Widening the cab so the driver has a platform changes the car's
+  proportions on a street he has already signed off. That is a look decision and it is his, via Pili.
+- **Whose ride is it?** The rider is drawn as the hero. If a ride is eventually *something to do*,
+  the person at the rail might be somebody else's back and the hero's hand on the rail in the
+  foreground — a different camera entirely. Worth knowing before the near side is drawn, because it
+  decides whether the near side is a rail seen from outside or from inside.
