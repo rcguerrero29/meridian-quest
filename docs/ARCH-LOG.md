@@ -616,3 +616,110 @@ already has `driverAt` doing precisely this, so the shape is settled and only th
   the person at the rail might be somebody else's back and the hero's hand on the rail in the
   foreground — a different camera entirely. Worth knowing before the near side is drawn, because it
   decides whether the near side is a rail seen from outside or from inside.
+
+### A13½ · His answer to the driver problem, and it is better than mine · 2026-09-12
+
+> **"why dont you make the characters smaller? its not like we dont do that already where buildings
+> are larger in the inside. this is the vehicle looks smaller on the outside but looking in the
+> characters look smaller."**
+
+**Take this one. It is right, it is cheaper than every option in A13, and it is already law here.**
+
+#### Why it is already law
+
+Doña Cuca found the same fact from the other end on 2026-09-12 and filed it as a contradiction she
+had been carrying without noticing: **every house in this town is ONE tile of frontage with a
+twenty-by-seventeen room behind it.** The interior is bigger than the block it stands in and nobody
+has ever complained, because a player reads an interior on its own terms.
+
+**He is pointing out that this is a SCALE SEAM, not a bug, and it runs in both directions.** A
+building is bigger inside than out. A vehicle is smaller inside than out. Both are the same rule:
+*what you see through an opening is drawn at the scale that lets you read it, not at the scale of the
+opening.*
+
+That is worth naming, because it is a rule a second game gets for free and nobody had written it
+down:
+
+> **THE APERTURE RULE.** The scale of what is behind an opening is a property of the *view*, not of
+> the *world*. A room may be larger than its door. A passenger may be smaller than the car. The
+> player never compares the two and will not thank you for making them agree.
+
+#### What it does to A13
+
+A13 listed three options for the driver and recommended *widening the cab*, which would have changed
+the proportions of a tram on a street the owner had already signed off. **Withdraw that.** The cab is
+0.15 tiles; the answer is not a bigger cab, it is **a smaller person in it**, drawn at a reduced
+scale so that a WHOLE figure fits — head, shoulders, torso, a hand on something — instead of a
+head-and-shoulders cropped into five pixels.
+
+**A whole small person reads. A cropped normal one does not.** That is the same finding as the window
+sill's ledge, stated about figures instead of stone: a complete silhouette survives being small; a
+fragment of a big thing does not.
+
+The same applies to the rider. At a reduced scale the hero fits *inside* the car with the rail in
+front of him, instead of being a full-size sprite lying across the roof.
+
+#### The seam this needs, and it is one number
+
+Not a special case for the tram. **A `ride` scale on the vehicle, read by whatever draws a person who
+is in it** — the same shape as `lift` on a tile. A pack that wants a bus, a boat or a lift declares
+its own and gets the same behaviour; a pack that declares nothing draws people at full size and is
+byte-for-byte unchanged.
+
+Open: whether it belongs on the vehicle (`TROLLEYAT[].ride`) or is an engine constant like
+`TRO_SPEED`. **Toño decides that one** — it is exactly his question, and `docs/TAGS.md` L16 says
+declaring nothing is safe and declaring half is what hurts.
+
+---
+
+### A13¾ · The pivot: who is riding · 2026-09-12
+
+> **"we may have others ride the tram one day but me for now. can we architecture this pivot one
+> day?"**
+
+**Yes, and it costs nothing today if the seam is put in the right place now.** The whole of the
+change is that the engine currently knows *the hero is on the tram* when what it should know is
+*there is a list of who is on the tram, and today it has one entry*.
+
+#### What exists now
+
+`RIDE = {on, phase, t, held, to, fromW, fromX, fromY}` — a single object, and the rider is implicit:
+`troTick` sets `fx`/`fy` to the car and everything follows from that.
+
+#### What the pivot needs, stated so it can be costed
+
+| | Today | After the pivot |
+|---|---|---|
+| who is aboard | implicit — it is you | `RIDE.aboard = [{who, seat}]`, and you are `aboard[0]` |
+| where they are drawn | `fx`/`fy` follow the car | each rider drawn at their `seat` along the car, at the ride scale |
+| who may board | only `rideStart` | anything that can be told to board — an NPC waiting at a stop, a dog that follows you |
+| what a rider does on arrival | `worldArrived()` for the hero | the hero arrives; a passenger gets off and goes back to being an NPC |
+
+**The seat is the only genuinely new idea**, and it is small: a position along the car, 0..1, so two
+riders do not stand in each other. A car has three windows already; three seats is the obvious first
+answer and Rigo should say whether it is the right one.
+
+#### What NOT to do now
+
+**Do not build the list today.** A one-entry list with no second case is four mechanisms for one job
+waiting to happen — the exact mistake `A5`/`A7` records. What to do *today*, when the near side is
+built, is smaller and sufficient:
+
+> **Draw the rider from a `who`, not from the hero's globals.** One function, `rideDraw(who, seat)`,
+> called once with the hero. The day a second passenger exists it is called twice and nothing else
+> changes. That is the entire pivot, bought for the price of a parameter.
+
+---
+
+### The follow-up questions, which are his and are genuinely blocking
+
+*He asked to be asked. These are the ones where two different answers produce two different builds,
+so guessing costs a rebuild rather than a tweak.*
+
+| # | Question | Why it changes the build | My recommendation |
+|---|---|---|---|
+| 1 | **Is a ride seen from OUTSIDE the car or from INSIDE it?** Outside: you watch a small figure at a rail go past. Inside: the rail is in the foreground, close, and the town goes past behind it | This decides everything drawn on the near side, and the two share almost no art | **Outside**, for now. It is the camera the game already has, and "inside" is a second camera that would need its own everything |
+| 2 | **Does the rest of the town shrink too?** If the passenger is drawn small, is that scale only for people inside vehicles, or is it a general aperture scale that a shop interior could also use? | One is a tram feature; the other is the engine rule named above, and a second game inherits it | **The general rule**, named and documented, used in one place. Rules are cheaper than special cases and we have the evidence |
+| 3 | **Does anything happen on the ride, or is it purely to look at?** He has said *"a bit of an animation and eventually something to do"* — this asks how long *eventually* is | If something happens later, the near side may want to be a surface things can appear on | **Nothing yet.** Build the beat; let it be boring on purpose for a while and see whether you miss it |
+| 4 | **Who is the second passenger, when there is one?** A named neighbour going somewhere, a stranger, or your dog? | It decides whether a passenger needs a reason to be aboard — a neighbour needs somewhere to be going | **Your dog first.** He already follows you through doors; the tram is the one door he cannot follow you through, and that is a bug shaped like a feature |
+| 5 | **Is the driver a person we know?** | If he is somebody, he wants a name, a face in `NPCLOOK`, and eventually a line. If he is nobody, he is a silhouette and stays one | **Ask Nacho before drawing him.** Rigo has already established what he DOES; whether he is anyone is a story question |
