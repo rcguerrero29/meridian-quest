@@ -12,6 +12,13 @@ then this sheet, then the open GitHub issues. Nothing else is required reading.
 
 ---
 
+## 0 · The two newest, added 2026-09-12 — both are his to answer, both have the work written
+
+| Question | Why it is blocking | Where it is written |
+|---|---|---|
+| **The ride: a picture, or something to do?** He rode it: *"i dont see anything about me riding it other than selecting another stop. for now it is ok, but architecture should be ready to edit again."* | Any richer ride is three lines and a shape; which three depends entirely on his answer | `docs/ARCH-LOG.md` **A12** — the seams, what is deliberately not a seam yet, and four options ranked by what they cost him. **Recommended: the second row** |
+| **Two visible storeys: a picture, a room, or the two joined?** | This repo already has a room upstairs and nothing ties it to the street facade. Joining them is a third thing and nobody has costed it | `docs/rooms/2026-09-12-two-visible-storeys.md` — yes it is possible with no engine change, and the camera takes most of it back |
+
 ## 1 · Waiting on the owner — nothing moves until he answers
 
 | Question | Why it is blocking | Where it is written |

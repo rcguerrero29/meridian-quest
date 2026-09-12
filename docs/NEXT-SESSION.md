@@ -108,19 +108,42 @@ and two of them picked the same filename in the same minute.** Melo read back a 
 panel; Lupe measured Melo's while printing her own name over the result. **Every agent writes under
 its own name now, and a brief that fans out must say so.** It happened with crew mode OFF.
 
-#### Open, in the order he is likely to ask
+#### What is merged — all of it, as of 2026-09-12 evening
 
-1. **Feedback on the ride** — he asked for it explicitly. The open question above is the first thing
-   to put to him.
-2. **Two visible storeys in El Changarrito** — answered but NOT built:
-   `docs/rooms/2026-09-12-two-visible-storeys.md`. Yes, no engine change needed, and the camera takes
-   most of it back (`t3Hides` — the closer you stand to your own second floor, the less of it exists).
-   No to skyscrapers. **The question that is genuinely his: a picture, a room, or the two joined?**
-   This repo already has a room upstairs and nothing ties it to the facade.
-3. Merge `mq-v150`/`mq-v151` when he says so.
-4. Still open from before: the three missing trolley strings; quest naming (#153); Don Güero's
-   ❗La banqueta; the wheels have no hub so they read as rolling; 43 unreviewed patches from crew
-   iteration 1 of the older trolley run.
+`main` is at **`mq-v154` / `ch-v97`**. PRs #166, #167 and #168 are all merged. **Nothing is waiting
+on a merge.** The tram branch, the ride, the quilt, iteration 4 of the mural and the window sills are
+all in. Seven suites green, R10 clean on a built artifact.
+
+#### The open sheet, re-ranked 2026-09-12 — and the two things only he can answer
+
+**Blocking on the owner (nothing moves until he says):**
+
+1. **The ride: a picture, or something to do?** He rode it and said *"i dont see anything about me
+   riding it other than selecting another stop. for now it is ok, but architecture should be ready to
+   edit again."* `docs/ARCH-LOG.md` **A12** has the three lines that would change, and four options
+   ranked by what they cost him. **Recommended: the second row** — the street named as it goes past,
+   a stop called out, the conductor's line. One phase, reversible.
+2. **Two visible storeys: a picture, a room, or the two joined?**
+   `docs/rooms/2026-09-12-two-visible-storeys.md`. This repo already has a room upstairs and nothing
+   ties it to the facade; joining them is a third thing nobody has costed.
+3. The four older ones in `docs/OPEN.md` §1 — endless-Meridian, the 3D standing goal, the plaque's
+   four jobs, and how wide "wide" is.
+
+**Ready to build, cheapest first** (every one of these is a filed issue or a written plan, so none
+needs a design round first):
+
+| | What | Where | Rough size |
+|---|---|---|---|
+| 1 | **`docs/BEAUTIFY.md`'s top four** — the rug, the crates, the counter, the quest marker | `BEAUTIFY.md` | **art only, no engine, no version bump** |
+| 2 | **#21 — lit windows never light in 3D.** The night pass is 2D-only; the 3D scene has no equivalent. Adjacent to the sills work just done and the code is now familiar | GitHub #21 | one sitting |
+| 3 | **#158 — the city ledger describes a city we do not have** | GitHub #158 | one sitting, docs |
+| 4 | **#153 — quests have no names, only array positions.** *The largest single blocker to using this as a template* | GitHub #153 | a real change, engine + both packs |
+| 5 | **#155 / #156 — the `ENDLESS` split and its landmine** (an endless pack with 2+ districts is locked in district one, silently) | GitHub | one sitting each |
+| 6 | **#161 — the comfort-and-crowding pass at fullscreen.** The one row in `QA-PASS.md` nobody has ever run, and the row the blur escaped through | GitHub #161 | a harness, then a person looks |
+
+**Still true and still not done:** the three missing trolley strings; Don Güero's ❗La banqueta; the
+tram wheels have no hub so they read as rolling; 43 unreviewed patches from crew iteration 1 of the
+older trolley run.
 
 ---
 
