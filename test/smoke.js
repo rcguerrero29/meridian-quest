@@ -3435,12 +3435,39 @@ const CANDIDATES = [
       // the dog you were walking with was still standing at the stop.
       {
         world = 'st'; px = fx = 1; py = fy = 1;
-        put('st', 1, 2); sonny.follow = true; sonny.holdT = 0; sonny.stayT = 0; sonny.moving = false;
+        /* row 2 in st is the tram's own line. He used to be put there, and since the critters
+           learned to keep off the rails he sometimes could not get out of the way — the player is on
+           one side of him and a wall on the other — so the ride waited for him and this check went
+           intermittently red thirty checks later, on a traffic cone. The dog belongs beside you. */
+        put('st', 1, 3); sonny.follow = true; sonny.holdT = 0; sonny.stayT = 0; sonny.moving = false;
         openTravel();
         const btn = [...document.querySelectorAll('#tvList button')].find(b2 => !b2.disabled);
         if (!btn) problems.push('the trolley offered nowhere to go, so this proves nothing');
         else {
           btn.click();
+          /* since mq-v150 the pass starts a RIDE, so the world changes at the end of the line and
+             not on the click. The dog is the point of this check and the dog is handed over by
+             worldArrived() either way — which is exactly why worldArrived() exists. Ride it out. */
+          /* the car only, and deliberately NOT the critters. Ticking them here wandered the whole
+             city's fauna six hundred frames forward inside one check, and a butterfly that ended up
+             beside the traffic cone made the cone-kick check thirty checks later go red — a cone
+             cannot be kicked onto a tile something is standing on. A check that moves the world on
+             behalf of its own subject has to put it back, and the cheapest way to put it back is not
+             to move it. The dog beside this stop is off the rails, so nothing needs to clear. */
+          for (let i = 0; i < 600 && typeof RIDE !== 'undefined' && RIDE.on; i++) {
+            troTick(16.67); wanderUpdate(16.67); }
+          /* and if it is STILL running, say why in the words of the thing that stopped it — the dog
+             this check deliberately stands on the rails is the likeliest answer and "did not travel"
+             would send the next person to the wrong function entirely. */
+          if (typeof RIDE !== 'undefined' && RIDE.on)
+            problems.push('the trolley ride never finished — the car is in state "' + TRO.state +
+              '" at x=' + TRO.x.toFixed(1) + ', so something alive is standing on the line and it is waiting for it');
+          /* worldArrived() sets a 450 ms no-step window and a ride ends 3 s later than a teleport
+             did, so the window now lands ON the checks that follow this one instead of expiring
+             under them. That is a fact about this FILE's pacing, not about the game — a player has
+             no trouble waiting half a second after getting off a tram — so the window is spent here
+             rather than papered over downstream. It cost two intermittent reds on a traffic cone. */
+          warpT = 0;
           if (world === 'st') problems.push('the trolley did not travel');
           else if (sonny.world === 'st') problems.push('the trolley left the dog standing at the stop — it does not arrive the way a door does');
         }
@@ -3529,11 +3556,27 @@ const CANDIDATES = [
         // the top camera so held-direction maps 1:1 to world direction, and clear the warp
         // cooldown a previous section left behind — tryStep refuses to move inside it
         const keepCam = camMode; camSet('top'); warpT = 0; portalHold = '';
+        /* AND clear the fauna out of the three tiles the cone can skitter into. propFree() refuses a
+           tile a critter is standing on, so a butterfly beside the cone makes this check red while
+           saying "kickProp is never reached from tryStep" — which sends the next person into the
+           movement code for a bug that is a butterfly. The page's game loop is LIVE for the whole
+           suite, so the critters really do wander between checks; they wander more since they learned
+           to keep off the tram's line, because that pushes them onto the rows either side of it and
+           the cone sits on one. Parked and put straight back, inside this block. */
+        /* Count the CALL, not the cone's new tile. The message below has always said "kickProp is
+           never reached from tryStep" and the check underneath it read the grid instead — so any
+           frame where all three tiles the cone can skitter into happened to be occupied (a butterfly,
+           a wandering neighbour, a wall) printed a sentence about movement code for a bug that was a
+           butterfly standing still. It cost six red runs to notice. kickProp is a function
+           declaration, so it is a property of the global object and can be counted from here. */
+        const realKick = kickProp; let reached = 0;
+        window.kickProp = function () { reached++; return realKick.apply(null, arguments); };
         px = fx = cx; py = fy = cy - 1; world = 'st'; moving = false; dir = 'down';
         held = 'down';
         tryStep();
         if (px !== cx || py !== cy) problems.push('walking into the cone did not move the player onto its tile — it is still a wall in practice');
-        if (w.grid[cy][cx] === 'C') problems.push('walking into the cone did not kick it: kickProp is never reached from tryStep');
+        window.kickProp = realKick;
+        if (!reached) problems.push('walking into the cone did not kick it: kickProp is never reached from tryStep');
         held = null; moving = false; camSet(keepCam);
         propsReset();
       }
@@ -3960,18 +4003,23 @@ const CANDIDATES = [
         TRO.dir = L.to >= L.from ? 1 : -1;
         TRO.state = 'run'; TRO.t = 0; TRO.called = false; TRO.dwelt = 0; TRO.dwellAt = null;
         TRO.x = s.x - TRO.dir * 3;
-        let still = 0, served = 0, braked = false;
+        let still = 0, served = 0;
         for (let i = 0; i < 200; i++) {
           const x0 = TRO.x, at = (s.x >= TRO.x - 0.5 && s.x <= TRO.x + TRO_LEN + 0.5);
           troUpdate(50);
-          if (typeof troAhead === 'function' && TRO.state !== 'away' && troAhead(L)) braked = true;
-          if (at && TRO.state !== 'away') { served += 50; if (TRO.x === x0) still += 50; }
+          if (at && TRO.state !== 'away') { served += 50;
+            /* standing still AND with nothing on the rails in front of it. The first draft counted
+               every still frame and then asked separately whether the brake had ever fired — which
+               made this check intermittently blame the hero for a dog that had wandered onto the
+               line thirty tiles away. The brake and the platform both stop the car; only one of them
+               is what this check is about, so the condition has to carry both halves. */
+            if (TRO.x === x0 && !(typeof troAhead === 'function' && troAhead(L))) still += 50; }
         }
-        return { still: still, served: served, braked: braked };
+        return { still: still, served: served, onRails: Math.round(py) === L.row };
       };
       const mine = ride(true);
       if (!mine.served) P.push('this check never got the tram as far as its own stop in ' + L.world + ' — it proves nothing');
-      else if (mine.braked) P.push('standing at the stop in ' + L.world + ' puts the hero in front of the tram, so this check is reading the brake and not the stop — it proves nothing');
+      else if (mine.onRails) P.push('the stop this line declares in ' + L.world + ' is ON the rails, so standing at it puts the hero in front of the tram and this check is reading the brake — it proves nothing');
       else if (mine.still < 800) P.push('the trolley runs straight past its own stop in ' + L.world +
         ' with somebody standing on it: you call it, it comes, and it does not stop for you');
       else if (mine.still > 7000) P.push('the trolley stands at the stop in ' + L.world + ' for ' + mine.still +
@@ -3985,6 +4033,105 @@ const CANDIDATES = [
     return P;
   });
   fails.push(...dwell);
+
+  /* ---- and you RIDE it: the pass no longer swaps the world under you ----
+     The owner, 2026-09-11: "lets have the teleport survive for now but maybe the tram goes quickly
+     if im on it, honks and everyone gets out of the way and we zip by in a 'slow' teleport or
+     teleport with animation… am i describing literal decoration?" Then, 2026-09-12: "lets just
+     build one and i'll give you feedback."
+     Four nouns, and the third is the one with the trap in it:
+     1. picking a destination does NOT change the world on that frame;
+     2. it does change it, by itself, by the end of the line;
+     3. the tram does not brake for its own passenger — the hero's DRAW position rides the car and
+        his GRID position stays on the platform, and if those two ever became one thing the tram
+        would see a person on the rails directly under its nose and hold for ever, which is this
+        branch's own signature bug wearing a new hat;
+     4. you cannot walk off a moving tram.
+     Driven through troTick, which is the function loop() calls, so this is the shipped path. */
+  const paseo = await page.evaluate(() => {
+    const P = [];
+    if (typeof RIDE === 'undefined' || typeof troTick !== 'function' ||
+        typeof TRV === 'undefined' || TRV.length < 2) return P;
+    const L = troLine(TRV[0].w); if (!L) return P;
+    const here = TRV[0], there = TRV.find(t => t.w !== here.w);
+    const keep = { w: world, px: px, py: py, st: TRO.state, x: TRO.x };
+    world = here.w; px = fx = here.x; py = fy = here.y; moving = false;
+    if (!rideCan()) P.push('the world the pass stands you in has no line the engine will ride — the trolley pass is a menu that teleports and nothing else');
+    else {
+      /* THROUGH THE BUTTON, not through rideStart(). The first version of this check called
+         rideStart() directly and went green with the pass's own wiring cut out of openTravel() — it
+         proved the ride works and NOT that anything ever starts one. That is the same mistake this
+         repository has now made twelve times (docs/REGRESSION.md), on a guard written by the session
+         that was writing the register entry for the eleventh. Planted, and it printed nothing. */
+      openTravel();
+      const btn = [...document.querySelectorAll('#tvList button')].find(b2 => !b2.disabled);
+      if (!btn) { P.push('the trolley pass offered nowhere to go, so this proves nothing'); return P; }
+      btn.click();
+      if (world !== here.w) P.push('picking a destination in the trolley pass changes the world on the spot — there is no ride, it is still a teleport wearing a tram');
+      if (!RIDE.on) P.push('picking a destination in the trolley pass does not start a ride at all');
+      const asked = RIDE.to;
+      let braked = false, walked = false, rode = false, n = 0;
+      const startX = px, startY = py;
+      while (RIDE.on && n++ < 600) {
+        troTick(16.67);
+        if (typeof critUpdate === 'function') critUpdate(16.67, performance.now() + n * 16.67);
+        if (!RIDE.on) break;
+        if (TRO.state === 'hold' && troAhead(L)) braked = true;
+        if (Math.abs(fx - px) > 0.9) rode = true;          /* the DRAW position left the platform */
+        if (px !== startX || py !== startY) walked = true; /* the GRID position must not have */
+        held = 'right'; tryStep(); if (px !== startX || py !== startY) walked = true;
+      }
+      held = null;
+      if (n >= 600) P.push('the trolley ride never ends — you get on and the line never runs out');
+      if (!rode) P.push('the ride never moves: you board, the bell rings and the car stands there until the world changes around you');
+      if (braked) P.push('the tram brakes for its own passenger — the rider is on the rails as far as the brake is concerned, so the ride holds for the person taking it');
+      if (walked) P.push('you can walk off a moving trolley');
+      const want = asked || there;
+      if (world !== want.w) P.push('the trolley ride ends somewhere other than where you asked for: ' + world + ' instead of ' + want.w);
+      else if (px !== want.x || py !== want.y) P.push('the trolley ride puts you down at ' + px + ',' + py + ' and the pass says ' + want.x + ',' + want.y);
+      if (RIDE.on) P.push('the ride is still running after it arrived');
+    }
+    RIDE.on = false; RIDE.to = null; document.getElementById('travel').hidden = true;
+    world = keep.w; px = fx = keep.px; py = fy = keep.py;
+    TRO.state = keep.st; TRO.x = keep.x; held = null; warpT = 0;
+    return P;
+  });
+  fails.push(...paseo);
+
+  /* ---- and a ride never traps you ----
+     The brake stays on during a ride and that is right. What is not right is the consequence nobody
+     writes down: the thing it brakes for might be a neighbour who wanders once every 1.6 to 4.8
+     seconds and is standing on the line, and while the tram waits the player cannot move, cannot get
+     off and cannot see why. It is the worst class of bug this game can have — not wrong, stuck — and
+     it is invisible unless you hold something on the rails on purpose, which is what this does. */
+  const trapped = await page.evaluate(() => {
+    const P = [];
+    if (typeof RIDE === 'undefined' || typeof TRV === 'undefined' || TRV.length < 2) return P;
+    const L = troLine(TRV[0].w); if (!L) return P;
+    const here = TRV[0], there = TRV.find(t => t.w !== here.w);
+    const keep = { w: world, px: px, py: py, st: TRO.state, x: TRO.x,
+                   dx: typeof DOG !== 'undefined' ? DOG.x : 0, dy: typeof DOG !== 'undefined' ? DOG.y : 0,
+                   dw: typeof AW === 'function' ? AW('dog') : null };
+    world = here.w; px = fx = here.x; py = fy = here.y; moving = false;
+    /* a real violation: something alive, parked on the rails, that will not move */
+    const mid = Math.round((L.from + L.to) / 2), cr = CRIT.filter(c => c.world === L.world)[0];
+    const was = cr ? { x: cr.x, y: cr.y, mv: cr.moving, nx: cr.next } : null;
+    if (cr) { cr.x = cr.fx = mid; cr.y = cr.fy = L.row; cr.moving = false; cr.next = 1e9; }
+    rideStart(there);
+    let n = 0, everHeld = false;
+    while (RIDE.on && n++ < 3000) { troTick(16.67);
+      if (cr) { cr.x = cr.fx = mid; cr.y = cr.fy = L.row; cr.moving = false; cr.next = 1e9; }  /* it will not move */
+      if (TRO.state === 'hold') everHeld = true; }
+    if (cr && !everHeld) P.push('this check never got anything onto the rails in front of the ride — it proves nothing');
+    else if (RIDE.on) P.push('a trolley ride with something standing on the line never ends: you are on a tram that will not move, you cannot walk off it, and nothing tells you why');
+    else if (world !== there.w) P.push('a held trolley ride gives up and puts you somewhere that is not where you asked for: ' + world);
+    RIDE.on = false; RIDE.to = null;
+    if (cr && was) { cr.x = cr.fx = was.x; cr.y = cr.fy = was.y; cr.moving = was.mv; cr.next = was.nx; }
+    world = keep.w; px = fx = keep.px; py = fy = keep.py;
+    TRO.state = keep.st; TRO.x = keep.x; held = null; warpT = 0;
+    return P;
+  });
+  fails.push(...trapped);
 
 
 

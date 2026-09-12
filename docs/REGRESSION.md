@@ -34,7 +34,7 @@ should have been caught by, and the assertions to add. Nothing here is built.*
 > discovered by planting a real violation and watching it pass.** So: for every assertion in this
 > file, plant one before you believe it.
 
-### The register of guards that read a proxy — ten, and counting
+### The register of guards that read a proxy — twelve, and counting
 
 *Opened 2026-09-11, because by then it had happened eight times in five days and the pattern was
 costing more than any individual bug in it. **This is the most expensive recurring mistake in this
@@ -53,6 +53,18 @@ trying to close a real hole, and every one looked correct on the page.*
 | 8 | `.gitignore` | `shots/` | **any scratch directory** — `shots.tmp/` walked past it | the stop hook |
 | 9 | the tram's ground check | does the **bounding box** reach the road | do the **wheels** — it returns 0.0000 with all four wheels deleted, because the skirt satisfies it | Chema, asking the scene graph |
 | 10 | the fauna guard's **first draft** | is **any** critter in that world | is **this animal** one the tram stops for — it went green because the hummingbird is on the same street | the session, one commit later |
+| 11 | **`test/bump.js`, the version guard itself** | what the **commits** changed (`git diff base...HEAD`) | **what is about to ship** — so every run before a commit, which is the only time anybody runs it, was decorative. Planted an engine change with the CACHE string reverted, sitting in the working tree, and it printed *"this change touches nothing the offline app has already cached"* | the session, planting at it on the way past |
+| 12 | **the ride guard, first draft (mine, same day)** | does `rideStart()` work | does **picking a destination in the pass** give you a ride — it called `rideStart()` directly, so cutting the pass's own wiring out of `openTravel()` left it green | planting the cut |
+
+**#11 is the one to read twice.** It is the guard for the rule `CLAUDE.md` states in its own words —
+*bump `GAMEV` and `CACHE` together whenever `engine/` changes* — and it could not see an unbumped
+engine change in the working tree it was being asked about. It compared two commits, and the moment
+anybody actually runs it is **before** the commit. It had been green for every change this repository
+has shipped since it was written.
+
+**#12 was written by the session writing the entry for #11, one hour later.** That is now the third
+time this has happened and the count is the point: knowing about the mistake, writing the register
+entry for the mistake, and making the mistake are not mutually exclusive activities.
 
 **Two of those are guards written by the session that had just found the other eight** (#10, and the
 mural-ledger guard that split on `### <agent>` headings when every heading in that file is the

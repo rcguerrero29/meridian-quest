@@ -109,6 +109,12 @@ function wanderUpdate(dt){
     const opts=[[1,0],[-1,0],[0,1],[0,-1]].map(d=>[n.x+d[0],n.y+d[1]]).filter(([x,y])=>
       x>=0&&y>=0&&x<w.W&&y<w.H&&!SOLID.has(w.grid[y][x])&&w.grid[y][x]!=="N"
       &&!DOORSET.has(w.rows[y][x])
+      /* ...and not into the path of a tram. The owner, 2026-09-11: "lets make the road wider and
+         RARELY have characters interrupt the tram." Rarely, not never — somebody already standing on
+         the line when a car appears still stops it, and should. This is the other half: a person
+         does not step in FRONT of one. Same question every animal in this engine now asks, and the
+         last mover in the game that was not asking it. */
+      &&!troDanger(world,x,y)
       &&Math.abs(x-n.hx)+Math.abs(y-n.hy)<=WANDER_R
       &&!(x===px&&y===py));
     if(!opts.length){n.wnext=now+2500;return;}
@@ -1347,6 +1353,82 @@ function troUpdate(dt){const L=troLine();
   TRO.state="run";TRO.x+=TRO.dir*TRO_SPEED*dt/1000;
   const end=L.to+TRO.dir*TRO_LEN;
   if((TRO.dir>0&&TRO.x>end)||(TRO.dir<0&&TRO.x<end)){TRO.state="away";TRO.t=0;}}
+/* ---------- EL PASEO — you ride it, you do not blink and arrive ----------
+   The owner has circled this for days. 2026-09-11: "lets have the teleport survive for now but maybe
+   the tram goes quickly if im on it, honks and everyone gets out of the way and we zip by in a
+   'slow' teleport or teleport with animation before it lol am i describing literal decoration?" And
+   2026-09-12, closing it: "so we still need clarification on the trolley? lets just build one and
+   i'll give you feedback."
+   So: built, and built to be argued with. Picking a destination in the pass no longer swaps the
+   world under you. The bell rings, the car you are standing at takes you, it runs the line at
+   RIDE_ZIP instead of TRO_SPEED — "we zip by" — and the world changes at the END of the line, where
+   a ride ends. Everything that must happen on arrival still goes through worldArrived(), the one
+   place it lives, because the last time the trolley had its own arrival path it quietly skipped the
+   dog you were walking.
+   WHAT IS DELIBERATELY CHEAP, so the feedback is about the right thing:
+   · The hero is not hidden and re-drawn inside the car. `fx`/`fy` are the DRAW position and the
+     camera reads them, so putting him on the tram's tile rides him and pans the camera in all four
+     cameras for nothing. `px`/`py` never move, which is why the tram does not brake for its own
+     passenger and why talk, doors and the brake all still think he is on the platform.
+   · A pack with no line still travels instantly. The ride is what a tram adds, not a new rule about
+     how travel works.
+   · The brake stays ON during a ride. A tram that runs somebody over because the player was in a
+     hurry is a worse bug than a ride that pauses. The honk is the answer to that and the critters
+     already clear for it: troDanger asks TRO.state !== "away", and a ride is not away.
+   The open question for the owner, stated here so the next session does not have to rediscover it:
+   the ride always runs to the END of the line, because a line does not know which of its stops
+   corresponds to which TRV destination. Making it stop AT the destination's platform needs one more
+   fact in the pack — a stop that names a world — and that is a seam, not a tweak. */
+/* RIDE_STUCK — a passenger is never trapped. The brake stays on during a ride, which is right, but
+   the thing it brakes for might be a neighbour who wanders once every 1.6 to 4.8 seconds and happens
+   to be standing on the line; the tram then waits, correctly, and the PLAYER cannot get off, cannot
+   move and cannot see why. A held ride gives up after this long and puts you down where you asked to
+   go. It is a soft-lock guard, not a feature: if you see it, the line has something living on it that
+   is not moving, and that is the bug to fix. */
+const RIDE_ZIP=11.0,RIDE_BELL=700,RIDE_STUCK=6000;
+const RIDE={on:false,phase:"",t:0,held:0,to:null,fromW:"",fromX:0,fromY:0};
+function rideCan(){const L=troLine();return !!(L&&troStops(L).length);}
+function rideStart(d){
+  const L=troLine();
+  if(!L||RIDE.on)return false;
+  RIDE.on=true;RIDE.phase="bell";RIDE.t=0;RIDE.held=0;RIDE.to=d;
+  RIDE.fromW=world;RIDE.fromX=px;RIDE.fromY=py;
+  /* stand the car at the platform you are on, doors open, whatever it was doing elsewhere */
+  const s=troStops(L).reduce(function(a,b){return (Math.abs(b.x-px)<Math.abs(a.x-px))?b:a;});
+  TRO.dir=L.to>=L.from?1:-1;
+  TRO.x=s.x-(TRO.dir>0?TRO_LEN:0);TRO.state="dwell";TRO.dwelt=0;TRO.dwellAt=null;
+  held=null;moving=false;
+  if(T().troRide)toast(T().troRide,1800);
+  return true;}
+function rideUpdate(dt){
+  if(!RIDE.on)return;
+  const L=troLine(RIDE.fromW);
+  if(!L){rideArrive();return;}
+  RIDE.t+=dt;
+  if(RIDE.phase==="bell"){                       /* the honk: everything alive reads TRO.state */
+    if(RIDE.t<RIDE_BELL)return;
+    RIDE.phase="zip";RIDE.t=0;TRO.state="run";}
+  if(troAhead(L)){TRO.state="hold";RIDE.held+=dt;   /* still brakes. the honk is not a licence */
+    if(RIDE.held>=RIDE_STUCK)rideArrive();return;}
+  RIDE.held=0;
+  TRO.state="run";TRO.x+=TRO.dir*RIDE_ZIP*dt/1000;
+  const end=L.to+TRO.dir*TRO_LEN;
+  if((TRO.dir>0&&TRO.x>end)||(TRO.dir<0&&TRO.x<end))rideArrive();}
+/* one entry point for the car, whether it is running the timetable or carrying you. Named and
+   separate from loop() so the suite can drive the real path rather than a re-implementation of it —
+   the ride's whole tell is that px/py do NOT move while fx/fy do, and a test that ticked rideUpdate
+   by hand would be asserting its own copy of the interesting line. */
+function troTick(dt){
+  if(!RIDE.on){troUpdate(dt);return;}
+  rideUpdate(dt);
+  if(RIDE.on){fx=TRO.x+(TRO_LEN-1)/2;fy=(troLine(RIDE.fromW)||{row:fy}).row;}}
+function rideArrive(){
+  const d=RIDE.to;
+  RIDE.on=false;RIDE.phase="";RIDE.t=0;RIDE.held=0;RIDE.to=null;
+  TRO.state="away";TRO.t=0;TRO.called=false;TRO.dwelt=0;TRO.dwellAt=null;
+  if(!d){fx=px;fy=py;return;}
+  world=d.w;px=fx=d.x;py=fy=d.y;held=null;moving=false;dir=d.dir||"down";
+  worldArrived(RIDE.fromW,RIDE.fromX,RIDE.fromY);}
 function drawTram(g,sx,sy,front){const W=TS*TRO_LEN,H=TS;
   g.fillStyle="rgba(0,0,0,.18)";g.fillRect(sx+3,sy+H-5,W-6,4);
   g.fillStyle="#B0563A";g.beginPath();g.roundRect(sx+2,sy+(front?2:5),W-4,H-(front?8:12),5);g.fill();
@@ -1354,9 +1436,12 @@ function drawTram(g,sx,sy,front){const W=TS*TRO_LEN,H=TS;
   g.fillStyle="#D8E6F0";for(let i=0;i<3;i++)g.fillRect(sx+8+i*(W-20)/3,sy+(front?7:9),(W-24)/3,front?9:7);
   g.fillStyle="#E0A430";g.fillRect(sx+W/2-4,sy+(front?2:5)-2,8,2);
   g.fillStyle="#2B2536";[0.22,0.78].forEach(t2=>{g.beginPath();g.arc(sx+W*t2,sy+H-6,2.6,0,7);g.fill();});
-  if(TRO.state==="hold"||TRO.state==="dwell"){
-    /* red: it has stopped BECAUSE OF YOU, get off the rails. amber: the doors are open, come on. */
-    g.fillStyle=TRO.state==="hold"?"#D9342B":"#E0A430";
+  if(TRO.state==="hold"||TRO.state==="dwell"||(RIDE.on&&RIDE.phase==="bell")){
+    /* red: it has stopped BECAUSE OF YOU, get off the rails. amber: the doors are open, come on.
+       white, flashing: the bell before a ride — the honk the owner asked for, drawn rather than heard
+       because this game has never made a sound and is not going to start on a tram. */
+    g.fillStyle=(RIDE.on&&RIDE.phase==="bell")?((Math.floor(RIDE.t/120)%2)?"#FFF6E0":"#E0A430")
+      :TRO.state==="hold"?"#D9342B":"#E0A430";
     g.beginPath();g.arc(sx+(TRO.dir>0?W-5:5),sy+(front?5:8),2,0,7);g.fill();}}
 function troDraw2D(wid,toScreen,front){const L=troLine(wid);
   if(!L||L.world!==wid||TRO.state==="away")return;
@@ -2013,7 +2098,13 @@ const ANI=k=>(typeof ANIMALS!=="undefined"&&ANIMALS&&Object.prototype.hasOwnProp
 const AW=k=>{const a=ANI(k);return a&&a.world&&WORLDS[a.world]?a.world:null;};
 const aniXY=(k,o)=>{const a=ANI(k);if(a){o.x=a.x|0;o.y=a.y|0;if("fx" in o){o.fx=o.x;o.fy=o.y;}}return o;};
 const DOG=aniXY("dog",{x:12,y:5,fx:12,fy:5,moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:false});
-function dogFree(x,y){const w=WORLDS[AW("dog")];if(!w)return false;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world===AW("dog")&&x===px&&y===py);}
+/* ---- one question, asked by every animal in the engine, however it happens to move ----
+   troDanger is the noun. The four `…Free` predicates below and the follow path all had their own
+   copy of "can I stand there", and the rails were absent from every one of them — which is how a
+   dog walking at your heel strolled onto the line and parked the tram, found by test/smoke.js going
+   intermittently red on a check about a traffic cone. A wander that avoids the rails and a FOLLOW
+   that does not is not a rule, it is a coincidence: bfsStep goes where bfsStep wants. */
+function dogFree(x,y){const w=WORLDS[AW("dog")];if(!w)return false;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world===AW("dog")&&x===px&&y===py)&&!troDanger(AW("dog"),x,y);}
 function dogUpdate(dt,now){
   if(world!==AW("dog")&&!DOG.moving){DOG.next=now+800;return;}
   if(DOG.moving){
@@ -2068,7 +2159,7 @@ function drawDog(g,sx,sy){
 }
 /* ---------- Canela, La Cocina's cat ---------- */
 const CAT=aniXY("cat",{x:16,y:9,fx:16,fy:9,moving:false,mt:0,dx:0,dy:0,face:1,next:0,sit:true});
-function catFree(x,y){const w=WORLDS[AW("cat")];if(!w)return false;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world===AW("cat")&&x===px&&y===py);}
+function catFree(x,y){const w=WORLDS[AW("cat")];if(!w)return false;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world===AW("cat")&&x===px&&y===py)&&!troDanger(AW("cat"),x,y);}
 function catUpdate(dt,now){
   if(CAT.moving){CAT.mt+=dt/520;
     if(CAT.mt>=1){CAT.moving=false;CAT.fx=CAT.x;CAT.fy=CAT.y;}
@@ -2112,7 +2203,7 @@ function drawCat(g,sx,sy){
 }
 /* ---------- Paloma the pigeon (street) & Lorenzo the parrot (perched on the fence) ---------- */
 const PIG=aniXY("pig",{x:4,y:1,fx:4,fy:1,moving:false,mt:0,dx:0,dy:0,face:1,next:0,peck:false});
-function pigFree(x,y){const w=WORLDS[AW("pig")];if(!w)return false;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world===AW("pig")&&x===px&&y===py);}
+function pigFree(x,y){const w=WORLDS[AW("pig")];if(!w)return false;return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!(world===AW("pig")&&x===px&&y===py)&&!troDanger(AW("pig"),x,y);}
 /* PALOMA GETS OUT OF THE WAY (owner, 2026-09-11: "paloma shouldnt be run over, can she be smart
    enough to jump away?"). A bird, not a rule: she hears it coming three tiles out and lifts off the
    rail — 560 ms, a sine arc about two thirds of a tile high, drifting a little downstream, landing
@@ -2250,7 +2341,7 @@ function critUpdate(dt,now){CRIT.forEach(cr=>{
     if(d>2){
       if(Math.random()<0.10){cr.next=now+700;return;} /* something smelled important */
       const st=bfsStep(cr,px,py);
-      if(st&&(st[0]||st[1])&&!(cr.x+st[0]===px&&cr.y+st[1]===py)){
+      if(st&&(st[0]||st[1])&&!(cr.x+st[0]===px&&cr.y+st[1]===py)&&!troDanger(cr.world,cr.x+st[0],cr.y+st[1])){
         cr.dx=st[0];cr.dy=st[1];if(st[0])cr.face=st[0];cr.sit=false;
         cr.x+=st[0];cr.y+=st[1];cr.moving=true;cr.mt=0;cr.next=now+60;return;}}
   }
@@ -2283,8 +2374,8 @@ function fetchRoll(cr){ /* a fresh shuffled 7-cycle per dog — streaks stay dog
     for(let i=6;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cr.fseq[i],cr.fseq[j]]=[cr.fseq[j],cr.fseq[i]];}
     cr.fi=0;}
   return !!cr.fseq[cr.fi++];}
-function taskFree(cr,x,y){const w=WORLDS[cr.world]; /* the home leash comes off on a job */
-  return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N");}
+function taskFree(cr,x,y){const w=WORLDS[cr.world]; /* the home leash comes off on a job; the rails do not */
+  return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N")&&!troDanger(cr.world,x,y);}
 /* real pathfinding for a dog with a job — greedy stepping wedged on walls
    (owner: "sometimes sonny cant get the ball"). BFS floods from the target;
    the first tile to touch the dog is his next step. null = no path exists. */
@@ -3061,7 +3152,7 @@ function worldDir(d){
   return d;
 }
 function tryStep(){
-  if(moving||!held)return;
+  if(moving||!held||RIDE.on)return;   /* you cannot walk off a moving tram */
   if(performance.now()<warpT)return;
   /* `dir` becomes the WORLD direction, so sprite facing and the move interpolation
      at the bottom of loop() (which reads DIRS[dir]) stay in step with the actual move. */
@@ -3132,7 +3223,8 @@ function loop(ts){
     }
     else{const[dx,dy]=DIRS[dir];fx=px-dx*(1-mt);fy=py-dy*(1-mt);}
   }else if(!tryPortal(ts))tryStep(); /* standing on a door whose cooldown just ran out: go through */
-  petalMomentTick(dt);troUpdate(dt);
+  petalMomentTick(dt);
+  troTick(dt);
   dogUpdate(dt,ts);catUpdate(dt,ts);pigUpdate(dt,ts);loroTick(ts);critUpdate(dt,ts);ballUpdate(dt,ts);wanderUpdate(dt);fredCheck();
   /* The world keeps thinking behind a panel — the dog walks, the trolley comes, petals fall — so
      nothing jumps when you put the paper down. It is not DRAWN, though: measured at 215 frames in
@@ -4599,6 +4691,10 @@ function openTravel(){
     b.textContent=(d.w===world?"◉ ":"🚋 ")+T().locs[d.w]+(d.w===world?" · "+t.here:"");
     if(d.w===world){b.disabled=true;b.style.opacity=".55";}
     else b.addEventListener("click",()=>{$("travel").hidden=true;
+      /* a line with platforms gives you the ride; anything else still travels the way it always
+         did. The ride is what a tram ADDS, not a new rule about how travel works, so a pack with no
+         TROLLEYAT is byte-for-byte unchanged here. */
+      if(rideCan()&&rideStart(d))return;
       const fromW=world,fromX=px,fromY=py;
       world=d.w;px=fx=d.x;py=fy=d.y;held=null;dir=d.dir;
       worldArrived(fromW,fromX,fromY);});
