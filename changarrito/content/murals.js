@@ -1145,6 +1145,28 @@ const MURREF=412;
    divided, and the one mark that says whose stretch this is belongs on the skirting. */
 function murThread(iter){const P=MURPAL,t=[P.rust,P.gold,P.moss,P.sky,P.deep];
   return t[((iter|0)-1+t.length)%t.length]||P.rust;}
+/* ---- WHAT A PAINTER HAS ALREADY SAID — their own memory, handed back to them ----
+   The owner, 2026-09-12: "i want to make sure that if they are about to be repetitive, that they try
+   to improvise from MEMORY or again state or persona."
+   A returning painter cannot avoid repeating themselves if nobody shows them what they did. So this
+   is the one call a brief makes before it asks anybody to paint again: it returns their own visits,
+   oldest first, with what they said, what state they were in and what they drew. Paste it into the
+   brief. It is four lines and it is the difference between a person and a stamp.
+   Used by test/town.smoke.js too, which fails the build if a return visit repeats any of the three. */
+function murMemory(who){
+  const b=murBays().find(x=>x.who===who);
+  if(!b)return [];
+  return b.panels.map(function(m,i){return {
+    visit:i+1, id:m.id, iter:m.iter, date:m.date,
+    title:m.title&&m.title.en, said:m.said&&m.said.en,
+    state:(m.state&&m.state.en)||null,
+    drew:(m.cap&&m.cap.en||"").slice(0,160)};});}
+function murMemoryText(who){const M=murMemory(who);
+  if(!M.length)return who+" has not painted on this wall before. Anything is new.";
+  return who+" has been to this wall "+M.length+" time"+(M.length>1?"s":"")+". Do not repeat any of it:\n"+
+    M.map(function(v){return "  visit "+v.visit+" ("+v.date+") \u2014 said: \u201C"+v.said+"\u201D"+
+      (v.state?"\n      state: \u201C"+v.state+"\u201D":"\n      state: (not recorded \u2014 the field did not exist yet)")+
+      "\n      drew: "+v.drew;}).join("\n");}
 /* the bay each painter owns, in the order they first painted. Derived from the list, so a new
    painter tomorrow is a new bay and nobody has to maintain a roster. */
 /* who painted it. `by` if the panel says so; otherwise the name at the front of `who`, which is how
@@ -1163,9 +1185,19 @@ function murBays(list){const L=list||(typeof MURALS!=="undefined"?MURALS:[]),ord
    a bay with three panels is three panels tall. The wall is as tall as its busiest painter. */
 const MURBAY=MURREF*0.62;                      /* how much wall one painter gets, across */
 const MURSKY=26, MURDADO=22;                   /* above the work, and the painted skirting below it */
+/* A COURSE is one visit: the work, and under it the line the painter was in when they painted it.
+   The owner, 2026-09-12: "i want to make sure that if they are about to be repetitive, that they try
+   to improvise from memory or again state or persona... it is important for me to see some way of
+   EXPRESSION for my changarrito mates."
+   So a bay is not a stack of pictures, it is a stack of visits, and each visit says what the painter
+   was. Read a bay bottom to top and you are reading one person changing their mind over four days.
+   That is the expression, and it is not a feeling — it is a POSITION, held on a date, in public,
+   next to the last position the same person held. A wall is very good at that and prose is not. */
+const MURSTATE=15;                             /* the strip under each visit where the state is written */
+const murCourse=()=>MURBAY*0.46+MURSTATE;
 function murWallSize(list){const bays=murBays(list);
   const deep=bays.reduce((m,b)=>Math.max(m,b.panels.length),1);
-  const tall=deep*(MURBAY*0.46)+MURSKY+MURDADO+18;
+  const tall=deep*murCourse()+MURSKY+MURDADO+18;
   return {w:Math.max(MURBAY,bays.length*MURBAY),h:tall,bays:bays,deep:deep};}
 
 /* ---- the wall itself ---- */
@@ -1187,9 +1219,9 @@ function murWall(g,W,H){const P=MURPAL,S=murWallSize();
   /* ---- the bays. A painter's work stacks upward from the dado: the first thing they painted sits
           on the ground and everything since is above it. ---- */
   S.bays.forEach((b,i)=>{
-    const bx=i*MURBAY, ph=MURBAY*0.46;
+    const bx=i*MURBAY, ph=MURBAY*0.46, cH=murCourse();
     b.panels.forEach((m,j)=>{
-      const py=foot-(j+1)*ph;
+      const py=foot-(j+1)*cH;
       g.save();g.beginPath();g.rect(bx,Math.max(MURSKY*0.5,py),MURBAY,ph);g.clip();
       g.translate(bx,py);
       /* the panel is drawn at the size it was painted for and scaled — its type scales with it */
@@ -1207,6 +1239,15 @@ function murWall(g,W,H){const P=MURPAL,S=murWallSize();
         g.fillStyle=P.bone;g.fillRect(bx+(MURBAY-im.naturalWidth*s2)/2-2,py+(ph-im.naturalHeight*s2)/2-2,im.naturalWidth*s2+4,im.naturalHeight*s2+4);
         g.drawImage(im,bx+(MURBAY-im.naturalWidth*s2)/2,py+(ph-im.naturalHeight*s2)/2,im.naturalWidth*s2,im.naturalHeight*s2);
         g.restore();}
+      /* ...and what they were, that time, written on the wall under the work in the painter's own
+         thread. Nothing is written for a visit that declared no state, which is honest: the state
+         field did not exist until the fourth iteration and the wall should show that it did not. */
+      const LA=(typeof lang!=="undefined"&&lang==="es")?"es":"en";
+      const st=m.state&&(m.state[LA]||m.state.en);
+      if(st){g.save();g.beginPath();g.rect(bx,py+ph,MURBAY,MURSTATE);g.clip();
+        g.fillStyle=murThread(m.iter);g.fillRect(bx+5,py+ph+5,2,7);
+        g.fillStyle=P.ink;g.globalAlpha=.62;g.font="italic 9px ui-monospace,monospace";
+        g.fillText(st,bx+11,py+ph+12);g.globalAlpha=1;g.restore();}
     });
     /* the signature, painted ON the dado at the foot of the painter's own stretch */
     g.fillStyle=P.ink;g.globalAlpha=.72;g.font="bold 11px ui-monospace,monospace";

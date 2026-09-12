@@ -901,6 +901,48 @@ const { chromium } = require('playwright-core');
       });
       fails.push(...elMuro);
 
+      /* ---- A RETURN VISIT HAS TO SAY SOMETHING NEW ----
+         The owner, 2026-09-12: "i want to make sure that if they are about to be repetitive, that
+         they try to improvise from memory or again state or persona. i know you all may not have
+         feelings but it is important for me to see some way of EXPRESSION for my changarrito mates."
+         A wall where somebody comes back and paints the same thing again is not a wall with a person
+         on it, it is a wall with a stamp on it. So a painter's second visit must differ from their
+         first in all three of the things a visit is made of: what they said, what state they were in,
+         and WHAT THEY DREW. The third is the one that matters and the only one that cannot be faked
+         by changing a word, so it is asked by rendering both and comparing the pixels — the same way
+         the window sill was finally settled, and for the same reason. */
+      const twice = await page.evaluate(() => {
+        const P = [];
+        if (typeof murBays !== 'function' || typeof MURALS === 'undefined') return P;
+        const norm = t => String(t || '').toLowerCase().replace(/[^a-z0-9\u00c0-\u024f]+/g, ' ').trim();
+        const shot = m => {                       /* what this visit actually looks like */
+          const W = 206, H = Math.round(W * (m.aspect || 0.46));
+          const c = document.createElement('canvas'); c.width = W; c.height = H;
+          const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+          g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+          try { (m.patch || m.art)(g, W, H); } catch (e) { return 'threw'; }
+          const d = g.getImageData(0, 0, W, H).data; let h = 5381;
+          for (let i = 0; i < d.length; i += 7) h = ((h * 33) ^ d[i]) >>> 0;
+          return String(h); };
+        murBays().forEach(b => {
+          if (b.panels.length < 2) return;        /* they have not come back yet */
+          const seenSaid = {}, seenState = {}, seenArt = {};
+          b.panels.forEach(m => {
+            const said = norm(m.said && m.said.en), st = norm(m.state && m.state.en), art = shot(m);
+            if (said && seenSaid[said]) P.push('"' + b.who + '" came back to the wall and said the same thing again ("' +
+              m.id + '" repeats "' + seenSaid[said] + '") — a return visit that repeats itself is a stamp, not a person');
+            if (st && seenState[st]) P.push('"' + b.who + '" came back in the same state they were in last time ("' +
+              m.id + '" repeats "' + seenState[st] + '") — the one thing on this wall that is supposed to move is the thing that did not');
+            if (art !== 'threw' && seenArt[art]) P.push('"' + b.who + '" painted the same picture twice: "' +
+              m.id + '" is pixel-for-pixel "' + seenArt[art] + '". The words can be changed and it is still the same visit');
+            if (said) seenSaid[said] = m.id;
+            if (st) seenState[st] = m.id;
+            if (art !== 'threw') seenArt[art] = m.id; });
+        });
+        return P;
+      });
+      fails.push(...twice);
+
       if (!fs.existsSync(ledgerPath))
         fails.push('the crew wall has no ledger — docs/crew/MURAL-LEDGER.txt is gone, and without it any panel can be rewritten and nothing would say so');
       const ledger = fs.existsSync(ledgerPath)

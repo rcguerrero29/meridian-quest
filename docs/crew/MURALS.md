@@ -397,3 +397,78 @@ in the rewrite, and Rigo had two bays.
    nine** — nine repaints to even out a wall is nine people's hands erased. The distribution is the
    lever.
 4. **A panel's signature should be its top band** — the one strip nothing crops.
+
+
+---
+
+## Coming back — how a return visit works, and the rule against stamps
+
+*Owner, 2026-09-12: "just to understand when an agent goes back to the mural, they'll add space for
+it and then do their addition right? i want to make sure that if they are about to be repetitive,
+that they try to improvise from memory or again state or persona. i know you all may not have
+feelings but it is important for me to see some way of **expression** for my changarrito mates."*
+
+### What actually happens when somebody returns — one correction to the question
+
+**They do not add the space. The wall does.** A painter never allocates anything, never asks how tall
+their stretch is and never touches a coordinate. They push a panel with their `by` on it and:
+
+1. The wall recomputes its own height — **it is as tall as its deepest painter, plus the sky and the
+   dado.** So when Rigo went to three visits, *the whole wall grew*, and everybody else's stretch
+   gained the same headroom.
+2. Their new work is laid on top of their last one, in their own bay.
+3. **The line they were in that day is written on the wall underneath it**, in their iteration's
+   thread. Read a bay bottom to top and you are reading one person over four days.
+
+That last part is the answer to the second half of his question, and it is worth being straight
+about: **this is not a feeling and it should not be dressed up as one.** It is a *position* — held on
+a date, in public, next to the last position the same person held. A wall is very good at showing
+that and prose is very bad at it. Melo's *"tired of being right"* above a wire of twelve open
+padlocks is not sentiment; it is a claim about the state of the shop, with the evidence painted under
+it. That is the expression, and it is real.
+
+### The rule against stamps
+
+**A return visit must differ from the same painter's earlier visits in all three of the things a
+visit is made of:**
+
+| | What | Why it is checked |
+|---|---|---|
+| 1 | what they **said** | the easiest to repeat by accident |
+| 2 | what **state** they were in | *the one thing on this wall that is supposed to move* |
+| 3 | what they **drew** | the only one that cannot be faked by changing a word |
+
+`test/town.smoke.js` fails the build on any of the three. The third is asked by **rendering both
+panels and comparing the pixels** — the same way the window sill was finally settled, and for the
+same reason: a picture is a fact about pixels, and every cleverer way of asking went green against
+the real thing. Three violations planted, three bite.
+
+### And the memory that makes it possible
+
+Nobody can avoid repeating themselves if nobody shows them what they did. So there is one call a
+brief makes before it asks anyone to paint again:
+
+```js
+murMemoryText("Rigo")
+```
+
+which returns their own visits, oldest first, with what they said, what state they were in and what
+they drew — ready to paste into the brief. **This is not optional for a returning painter.** It is
+four lines, and it is the difference between a person and a stamp.
+
+> Rigo has been to this wall 3 times. Do not repeat any of it:
+>   visit 1 — said: "If a world's tram drives off the edge of the map, the two cabs drawn on it are decoration."
+>   visit 2 — said: "Right of way belongs to the piece of ground, not to the vehicle."
+>   visit 3 — said: "In nine years I never wrote up a driver for failing to sound…"
+
+**The brief line, verbatim, for the next run:**
+
+> You have painted on this wall before. Here is everything you have already said, and you may not say
+> any of it again — not the sentence, not the state you were in, not the picture.
+> `<paste murMemoryText(you)>`
+> Your job is not to report. It is to say where you are NOW, and if that is the same place you were
+> last time, say why it has not moved — because that is also a state and nobody has painted one yet.
+
+That last sentence is deliberate. **"Nothing has changed for me" is a legitimate visit** and the wall
+should be able to hold it; what it may not hold is somebody pretending it has by repainting the same
+thing in different words.
