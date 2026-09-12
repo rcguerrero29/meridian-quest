@@ -38,3 +38,4 @@ cuca-dos-pisos-una-casilla|eefc003ccb6d|1ba98c81d3ae
 melo-la-doce-era-mia|4ca5896308f4|a05a3f5ee797
 pili-la-que-jala-la-cuerda|d8d18d49f9e8|d4020a9dfd36
 yaz-diez-focos-verdes|281157670d01|9447074e58c5
+lupe-el-renglon-que-nadie-corrio|f22e19bc3c6c|e892d90d3fa7

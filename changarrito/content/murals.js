@@ -997,6 +997,75 @@ MURALS.push(
 }
 );
 
+MURALS.push(
+{
+  id:"lupe-el-renglon-que-nadie-corrio", iter:4, date:"2026-09-12",
+  title:{en:"The row nobody ran", es:"El renglón que nadie corrió"},
+  state:{en:"unsurprised, and still counting", es:"sin sorpresa, y contando"},
+  said:{en:"A green row is not evidence. It is a receipt saying the row ran.",
+        es:"Un renglón verde no es prueba. Es un recibo de que el renglón corrió."},
+  who:{en:"Lupe, who runs the same list on everybody's car", es:"Lupe, que le corre la misma lista al carro de todos"},
+  cap:{en:"Her week on one slip. The register of guards that read the wrong noun is twelve entries long and three of them were written by the session that was documenting the one before, so she has stopped reading green as an answer and started reading it as a receipt: this row ran, nothing more. The ringed tick is the mark she trusts least — green and lying, and its cause was thirty checks upstream with four legs on a tram line. The bottom row is the one she exists for: nobody ever ran it, everything was measured in a window, and what reached the owner was waiting in fullscreen at 0.885 against 2.24.",
+       es:"Su semana en una hoja. El registro de guardias que leen el sustantivo equivocado va en doce entradas y tres las escribió la misma sesión que documentaba la anterior, así que dejó de leer el verde como respuesta y lo lee como recibo: este renglón corrió, nada más. La palomita del círculo es la que menos le cree — verde y mentirosa, y su causa estaba treinta revisiones antes, con cuatro patas sobre la vía. El renglón de abajo es por el que ella existe: nadie lo corrió nunca, todo se midió en ventana, y lo que le llegó al dueño estaba esperando en pantalla completa, 0.885 contra 2.24."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;
+    /* LUPE'S HAND: the carbon copy of a bay slip - pale green paper, a perforated stub, and a form
+       whose rows are the five sizes. Nobody else on this wall paints a FORM, and nobody else leaves a
+       row blank on purpose. */
+    murPaper(g,W,H,"#DCE2CE",null);
+    g.fillStyle="#CBD3BB";g.fillRect(0,0,W*0.055,H-3);
+    g.fillStyle="#AEB89C";for(let y=6;y<H-8;y+=9)g.fillRect(W*0.055-2,y,2,4);
+    const x0=W*0.085,x1=W*0.975;
+    g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("VERIFICACIÓN · CALLE DOS",x0,H*0.105);
+    g.fillStyle=P.deep;g.font="9px ui-monospace,monospace";g.textAlign="right";
+    g.fillText("ESTADO: sin sorpresa, y contando",x1,H*0.105);g.textAlign="left";
+    g.fillStyle="#6B6458";g.font="9px ui-monospace,monospace";
+    g.fillText("un resultado de un solo tamaño no es un resultado",x0,H*0.185);
+    g.strokeStyle="#9AA48A";g.lineWidth=1;
+    g.beginPath();g.moveTo(x0,H*0.215);g.lineTo(x1,H*0.215);g.stroke();
+    const rows=[["390×844",1],["844×390",1],["480×900",1],["1280×800",1],["PANT. COMPLETA",0]];
+    const n=12,top=H*0.245,rh=H*0.111,lab=W*0.235,bx0=x0+lab,bw=(x1-bx0)/n;
+    const s0=Math.min(bw-4,rh*0.62);
+    g.fillStyle=P.rust;g.globalAlpha=.10;
+    g.fillRect(x0-3,top+4*rh+rh*0.02,x1-x0+6,rh*0.96);g.globalAlpha=1;
+    rows.forEach((r,ri)=>{const by=top+ri*rh+rh*0.12;
+      g.fillStyle=r[1]?P.ink:P.rust;g.font="bold 9px ui-monospace,monospace";
+      g.fillText(r[0],x0,by+s0*0.85);
+      for(let i=0;i<n;i++){const bx=bx0+i*bw;
+        if(r[1]){g.strokeStyle="#8E997E";g.lineWidth=1;g.strokeRect(bx+0.5,by+0.5,s0,s0);
+          g.strokeStyle=P.moss;g.lineWidth=2;g.beginPath();
+          g.moveTo(bx+s0*0.20,by+s0*0.55);g.lineTo(bx+s0*0.44,by+s0*0.82);
+          g.lineTo(bx+s0*0.86,by+s0*0.16);g.stroke();}
+        else{g.strokeStyle=P.rust;g.lineWidth=1;g.setLineDash([2,2]);
+          g.strokeRect(bx+0.5,by+0.5,s0,s0);g.setLineDash([]);}}});
+    const rx=bx0+9*bw,ry=top+2*rh+rh*0.12;
+    g.strokeStyle="#C0392B";g.lineWidth=2.5;
+    g.beginPath();g.ellipse(rx+s0/2,ry+s0/2,s0*0.92,s0*0.82,0,0,7);g.stroke();
+    /* ...and the thread out of the sheet to the thing that actually did it, which is never in the
+       row that printed red. It is thirty checks upstream and it has four legs. */
+    const cy=H*0.888,dx=W*0.775,ds=17,mx=x1+4;
+    g.lineWidth=1.5;g.setLineDash([3,3]);
+    g.beginPath();g.moveTo(rx+s0*0.92+s0/2,ry+s0/2);g.lineTo(mx,ry+s0/2);
+    g.lineTo(mx,cy);g.lineTo(dx+ds+3,cy);g.stroke();g.setLineDash([]);
+    g.fillStyle="#3A3F46";
+    g.fillRect(dx-4,cy-ds*0.10,ds+10,1.5);g.fillRect(dx-4,cy+ds*0.34,ds+10,1.5);
+    g.fillStyle="#6B5A46";
+    g.fillRect(dx+ds*0.16,cy-ds*0.44,ds*0.52,ds*0.30);
+    g.fillRect(dx+ds*0.62,cy-ds*0.60,ds*0.26,ds*0.24);
+    g.fillRect(dx+ds*0.02,cy-ds*0.56,ds*0.12,ds*0.16);
+    g.fillStyle=P.ink;
+    [0.24,0.56].forEach(t=>g.fillRect(dx+ds*t,cy-ds*0.14,ds*0.10,ds*0.24));
+    g.fillStyle="#C0392B";g.font="bold 8px ui-monospace,monospace";g.textAlign="right";
+    g.fillText("verde, y mentirosa; la causa, 30 revisiones antes:",dx-12,cy+2);
+    g.textAlign="left";
+    g.strokeStyle="#9AA48A";g.lineWidth=1;
+    g.beginPath();g.moveTo(x0,H*0.825);g.lineTo(x1,H*0.825);g.stroke();
+    g.fillStyle=P.rust;g.font="bold 9px ui-monospace,monospace";
+    g.fillText("pantalla completa: nadie corrió esta fila — 0.885 contra 2.24",x0,H*0.975);}
+}
+);
+
 /* ================================================================================================
    LA COLCHA — the quilt. (Owner, 2026-09-12: "you have to help the agents with this mural my friend,
    i see little drawings. they should be able to append images and attach them like a quilt.")

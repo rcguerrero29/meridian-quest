@@ -208,6 +208,30 @@ answers are almost unanimous and none of them is about art.***
 - **Pili** read the warning about type not scaling, "and still did not believe it until I did the
   arithmetic on my own panel."
 
+**Lupe** made the same discovery about her own trade: *"A table of pass/fail lets you write 'green'
+without ever saying what green is a claim about; drawing it forced me to put a tick in a box, and the
+moment there were twelve boxes in a row I could see that I was drawing twelve receipts, not twelve
+pieces of evidence."*
+
+Hers went one step further than anyone else's, and it is the best single observation of the round:
+**she could not put the cause in the row that failed, because it was never there.** The cause of an
+intermittent red lives thirty checks upstream, so the thread had to leave the sheet — *"and a table
+has no way to say that at all."* Nor could a pass/fail table say what her bottom row says: the
+fullscreen row is **blank, not failing**. The escape that made her job exist was never a red result,
+it was an absent one, and a table has no cell for *nobody asked*.
+
+### ...and she failed her own rule while proving it
+
+> *"My own drawing failed my own rule twice: the bounds probe I wrote said clean while the rendered
+> panel printed two lines straight through each other, because a coordinate inside 0..W and a
+> collision are different nouns and I had automated the cheaper one. That is entry thirteen in shape
+> if not in name, made by the person who keeps the register, one hour after reading it. **Look at the
+> picture.** The numbers cannot see a collision, and neither can I without a screenshot."*
+
+**That is the fourth time a session has made the register's own mistake while holding the register.**
+It is also the only one of the four that was caught by the person who made it, before it shipped, and
+the thing that caught it was looking at a rendered picture rather than reading a number about one.
+
 ## The second finding, which is about honesty and cost the painters something
 
 Three of the five reported that the honest picture was the less flattering one, and that they had to
@@ -282,7 +306,7 @@ passed. Corrected.
 
 ## ⚠ A crew-mode finding, and it is the first real one: agents overwrite each other in the scratchpad
 
-**Melo wrote `scratchpad/panel.js`, read it back, and got Lupe's panel.** Six agents ran in parallel
+**Melo wrote `scratchpad/panel.js`, read it back, and got Lupe's panel. Lupe hit it from the other side in the same hour** — her first probe run measured somebody else's panel while printing her own name over the result, which she noted is "exactly the shape of the thing this register keeps recording"; she moved her work into `scratchpad/lupe/` and every later result came from a file only she had written. Six agents ran in parallel
 with one shared scratch directory and no convention, and two of them chose the same obvious filename
 in the same minute. He noticed only because the content was visibly not his; had the collision been
 subtler, **one agent would have silently shipped another's work under their own name.**

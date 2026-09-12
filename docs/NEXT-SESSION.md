@@ -86,13 +86,37 @@ a real violation and never by review. **Three of the twelve were written by the 
 writing up the previous one.** If you write a guard, break it on purpose in a copy outside the
 repository before you believe it. It takes ten minutes and it has never once been wasted.
 
+#### The mural, iteration 4 — and the wall now measures itself
+
+Six agents were asked, six painted: Paty, Doña Cuca, Melo, Pili, Yaz, Lupe. Nineteen patches on the
+quilt. **Read `docs/crew/MURALS.md` before running another mural round** — the whole of "what the
+crew learned from painting" is there and it is not about art. The short version: *a drawing makes you
+choose a number and prose does not*, arrived at independently by five of six.
+
+**Pili measured the quilt before painting on it and both of my numbers were wrong** (cell aspect
+fixed at 0.78 against panels drawn at 0.46, and a phone break that gave three patches across while
+the comment above it said two). Both fixed. **That was the answer to "i see little drawings" — the
+drawings were never small.**
+
+**`state` is guarded by a SECOND ledger column**, not by widening the first, because widening it
+would have rewritten the fingerprint of all thirteen panels painted before the owner asked for the
+field. If you add a panel, append its ledger line **in the same commit and in the same position** —
+the order is checked by index.
+
+**The crew-mode finding that matters more than the wall: parallel agents share one scratch directory
+and two of them picked the same filename in the same minute.** Melo read back a file that was Lupe's
+panel; Lupe measured Melo's while printing her own name over the result. **Every agent writes under
+its own name now, and a brief that fans out must say so.** It happened with crew mode OFF.
+
 #### Open, in the order he is likely to ask
 
 1. **Feedback on the ride** — he asked for it explicitly. The open question above is the first thing
    to put to him.
-2. **Two visible storeys in El Changarrito** — his ask this session, *"a thought for 2 floors to be
-   visible in this changarrito to test for the rest"*, with Doña Cuca. He also asked, and answered
-   himself, whether we need skyscrapers: probably not.
+2. **Two visible storeys in El Changarrito** — answered but NOT built:
+   `docs/rooms/2026-09-12-two-visible-storeys.md`. Yes, no engine change needed, and the camera takes
+   most of it back (`t3Hides` — the closer you stand to your own second floor, the less of it exists).
+   No to skyscrapers. **The question that is genuinely his: a picture, a room, or the two joined?**
+   This repo already has a room upstairs and nothing ties it to the facade.
 3. Merge `mq-v150`/`mq-v151` when he says so.
 4. Still open from before: the three missing trolley strings; quest naming (#153); Don Güero's
    ❗La banqueta; the wheels have no hub so they read as rolling; 43 unreviewed patches from crew
