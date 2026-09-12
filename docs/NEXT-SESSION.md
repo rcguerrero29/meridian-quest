@@ -3,7 +3,102 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-11)
+## STATE OF PLAY — read this first (2026-09-12)
+
+### ⇢ 2026-09-12 — START HERE
+
+*Written mid-session, on purpose: the owner said "im about to run out of tokens so feel free to
+document everything before and after in case you run out for next session." So this is the before
+and the after. If the session ended without the second half being filled in, everything described as
+"pushed" really is on the branch and really is green.*
+
+#### What is merged and what is not
+
+- **PR #166 is MERGED** (`211a2b9`): nine commits, `mq-v143` → `mq-v149`, the whole tram branch —
+  the speed, Paloma's lift, the `stops` seam, the Barrio Pass and Transbordo, the blind spot under
+  the car, the critters keeping off the rails, and the tram waiting at its platform.
+- **On the branch `claude/small-remaining-updates-58xsy6`, unmerged:** `mq-v150` (the ride) and
+  `mq-v151` (the quilt). Both green on all seven suites. He has not been asked to merge these yet —
+  he asked for the ride so he could give feedback on it, so **do not merge without his word**.
+
+#### mq-v150 — el paseo, the ride he asked for
+
+His words: *"so we still need clarification on the trolley? lets just build one and i'll give you
+feedback."* So it is built to be argued with, not to be defended.
+
+Picking a destination in the Barrio Pass no longer swaps the world under you. The bell rings
+(`RIDE_BELL`, a flashing white lamp on the car — this game has never made a sound and is not going to
+start on a tram), the car standing at your platform takes you, it runs the line at `RIDE_ZIP`=11
+instead of `TRO_SPEED`=6, and the world changes at the **end of the line**, where a ride ends.
+Arrival still goes through `worldArrived()`.
+
+**Read this before you change any of it:**
+- The hero is *not* hidden and re-drawn inside the car. `fx`/`fy` are the DRAW position and the
+  camera reads them, so putting him on the tram's tile rides him and pans the camera in all four
+  cameras for free. `px`/`py` never move — which is why the tram does not brake for its own
+  passenger, and why talk, doors and the brake all still think he is on the kerb. **If you ever make
+  those one thing, the tram will hold for ever for the person taking it**, and there is a guard.
+- **A pack with no line still travels instantly.** The ride is what a tram adds, not a new rule about
+  how travel works.
+- `RIDE_STUCK` (6 s) exists because the brake stays on during a ride and the thing it brakes for
+  might be a neighbour who moves once every few seconds. It is a soft-lock guard, not a feature. **If
+  you see it fire, something living is parked on the line and that is the bug.**
+
+**THE OPEN QUESTION, so nobody has to rediscover it:** a ride always runs to the END of the line,
+because a line does not know which of its stops answers to which `TRV` destination. Stopping at the
+destination's own platform needs one more fact in the pack — a stop that names a world — and that is
+a seam, not a tweak. This is the first thing to put to the owner about the ride.
+
+#### mq-v151 — la colcha, the quilt
+
+His words: *"i see little drawings. they should be able to append images and attach them like a
+quilt."* The diagnosis was not that the drawings are small — there was **no wall**. The mural
+document now draws the quilt first: every panel in `MURALS` is a patch, in painting order, signed,
+stitched in its iteration's thread colour (1 rust, 2 gold, 3 moss, 4 sky).
+
+- **Append**: push to `MURALS` and you are on the wall. Nothing to register.
+- **Attach an image**: optional `img` (a `data:` URI), drawn pinned; if it does not decode the
+  panel's own hand draws and nobody sees a hole.
+- **Paint big**: optional `patch(g,W,H)` is drawn on the wall instead of `art`.
+- **A patch is a SCALED COPY, not a re-layout.** Panels write type at absolute pixel sizes for a
+  412-wide column (`MURREF`), so re-laying them out at 211 px shrank the drawing and not the words.
+- `docRender`'s `aspect` may now be **a function of the width** — the wall reflows 2/3/4 patches
+  across and cannot state its height as a constant.
+- Panels may carry `state` from iteration 4 on: the painter's own state, which is what the owner
+  asked this round to be about.
+
+#### Three things the week found that are not about trams at all
+
+1. **`test/bump.js` — the guard for this repository's own version rule — compared two COMMITS** when
+   it meant what is about to ship, so every run before a commit was decorative, which is the only
+   time anybody runs it. Register entry #11.
+2. **Every mover in the engine had its own copy of "can I stand there"** and the tram's line was in
+   none of them: a following dog and a wandering neighbour walked onto the rails. They all ask
+   `troDanger` now. The owner's *"rarely have characters interrupt the tram"* — rarely, not never.
+3. **A check's failure message named the right noun and the check read a different one.** The cone
+   check said "kickProp is never reached from tryStep" and then read the grid; it now counts the
+   call. Two red runs and forty minutes.
+
+#### The register is the most important file in this repo
+
+`docs/REGRESSION.md` — **twelve guards that read a proxy, in six days**, every one found by planting
+a real violation and never by review. **Three of the twelve were written by the session that was
+writing up the previous one.** If you write a guard, break it on purpose in a copy outside the
+repository before you believe it. It takes ten minutes and it has never once been wasted.
+
+#### Open, in the order he is likely to ask
+
+1. **Feedback on the ride** — he asked for it explicitly. The open question above is the first thing
+   to put to him.
+2. **Two visible storeys in El Changarrito** — his ask this session, *"a thought for 2 floors to be
+   visible in this changarrito to test for the rest"*, with Doña Cuca. He also asked, and answered
+   himself, whether we need skyscrapers: probably not.
+3. Merge `mq-v150`/`mq-v151` when he says so.
+4. Still open from before: the three missing trolley strings; quest naming (#153); Don Güero's
+   ❗La banqueta; the wheels have no hub so they read as rolling; 43 unreviewed patches from crew
+   iteration 1 of the older trolley run.
+
+---
 
 ### ⇢ 2026-09-11, end of session — START HERE (the block below it is two days old)
 
