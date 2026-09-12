@@ -34,7 +34,7 @@ should have been caught by, and the assertions to add. Nothing here is built.*
 > discovered by planting a real violation and watching it pass.** So: for every assertion in this
 > file, plant one before you believe it.
 
-### The register of guards that read a proxy — twelve, and counting
+### The register of guards that read a proxy — fourteen, and counting
 
 *Opened 2026-09-11, because by then it had happened eight times in five days and the pattern was
 costing more than any individual bug in it. **This is the most expensive recurring mistake in this
@@ -56,6 +56,8 @@ trying to close a real hole, and every one looked correct on the page.*
 | 11 | **`test/bump.js`, the version guard itself** | what the **commits** changed (`git diff base...HEAD`) | **what is about to ship** — so every run on somebody's desk, which is where a person actually runs it, was decorative. Planted an engine change with the CACHE string reverted, sitting in the working tree, and it printed *"this change touches nothing the offline app has already cached"* | the session, planting at it on the way past |
 | 11½ | **the CI step that runs #11** | *(it ran at all)* | **it carried `if: github.event_name == 'pull_request'`, so a push ran the whole suite and skipped this check entirely** — and this repository's history is mostly direct commits. Yaz went looking for the damage and found none: ten engine-touching commits since the guard was written and all ten moved `CACHE`, **by hand, because somebody remembered**. The board was green because people remembered, which is exactly why the green was worth nothing | Yaz, refusing to relay a finding she had not re-run |
 | 12 | **the ride guard, first draft (mine, same day)** | does `rideStart()` work | does **picking a destination in the pass** give you a ride — it called `rideStart()` directly, so cutting the pass's own wiring out of `openTravel()` left it green | planting the cut |
+| 13 | **the window-sill guard, first draft (mine, one hour after writing up 11 and 12)** | the shape of `SEASONS` in one config file | **what the engine thinks is on a sill** — `props` is nested under `art` in this pack, so the lookup found nothing, took an early return and went green against THREE planted violations, including *"there is no sill at all"*, which is the state that had shipped through four owner reports | planting them |
+| 13½ | **its second and third drafts, also mine** | is another OBJECT in the way (a raycast, then a per-tile probe) | **do the pixels arrive** — both were correct about the scene graph and both went green against the real bug, because the occluder is not an object: a sprite is a billboard that turns to face the camera, the camera looks down at the street, so the lower half of a tall billboard tilts back INTO the wall it hangs on. Only reading the framebuffer could answer it | planting the real bug twice and watching two clever checks pass |
 
 **#11 is the one to read twice.** It is the guard for the rule `CLAUDE.md` states in its own words —
 *bump `GAMEV` and `CACHE` together whenever `engine/` changes* — and it could not see an unbumped
@@ -63,9 +65,17 @@ engine change in the working tree it was being asked about. It compared two comm
 anybody actually runs it is **before** the commit. It had been green for every change this repository
 has shipped since it was written.
 
-**#12 was written by the session writing the entry for #11, one hour later.** That is now the third
-time this has happened and the count is the point: knowing about the mistake, writing the register
-entry for the mistake, and making the mistake are not mutually exclusive activities.
+**#12 was written by the session writing the entry for #11, one hour later. #13 and #13½ were written
+by the same session, in the same hour, in the guard FOR the bug it was fixing — and #13½ happened
+TWICE, two different clever checks, both correct about the scene graph and both green against the
+real fault.** That is now five times, and the count is the point: knowing about the mistake, writing
+the register entry for the mistake, and making the mistake are not mutually exclusive activities.
+
+**#13½ is the one to keep, because it is the only entry here where the proxy was more sophisticated
+than the noun.** A raycast through the scene is a better piece of engineering than counting pale
+pixels in a framebuffer. It is also the wrong question. *"Hidden" is a fact about pixels* — it is the
+owner's own word, he used it three times across four days, and no check in this repository read it
+until one did the obvious stupid thing and looked at the screen.
 
 **Two of those are guards written by the session that had just found the other eight** (#10, and the
 mural-ledger guard that split on `### <agent>` headings when every heading in that file is the

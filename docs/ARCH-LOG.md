@@ -464,3 +464,62 @@ other half is not optional.**
 `docs/research/2026-09-11-cooking-games.md` §6 — in particular *"what's the nicest part of cooking
 for you — the chopping, the smell, the waiting, or the face they make when they eat it?"*, which
 selects between five games that look identical in a one-line pitch. **Nobody should pick for him.**
+
+---
+
+## A12 · The ride is one function and a shape, and it is meant to be replaced — 2026-09-12
+
+*The owner, having ridden it: **"well its ok, i dont see anything about me riding it other than
+selecting another stop. for now it is ok, but architecture should be ready to edit again. we will
+prepare for next reset with that."***
+
+**He is right and the verdict is fair.** What shipped is a cut with a bell on it: you pick a
+destination, the car you are standing at takes you, the street goes past at `RIDE_ZIP` and the world
+changes at the end of the line. From the seat, that is a slightly longer menu. Nothing asks anything
+of you between boarding and arriving, which is the whole of what "riding" would mean.
+
+**This entry exists so the next session does not have to re-derive where the seams are.** Nothing
+below is built.
+
+### What the ride is today, precisely
+
+| Piece | Where | What it decides |
+|---|---|---|
+| `RIDE` | `engine/engine.js` | one object: `{on, phase, t, held, to, fromW, fromX, fromY}` |
+| `rideCan()` | same | may this world ride at all — a line with platforms |
+| `rideStart(d)` | same | the bell, the car snapped to your platform, `RIDE.to` = where you asked for |
+| `rideUpdate(dt)` | same | the phases: `bell` → `zip`, the brake, `RIDE_STUCK` |
+| `troTick(dt)` | same | THE ONE ENTRY POINT. `loop()` calls only this; it chooses between the timetable and a ride |
+| `rideArrive()` | same | the world change, through `worldArrived()` like every other arrival |
+| the hero | `troTick` | `fx`/`fy` ride the car, `px`/`py` never move — the draw position and the grid position are different things and that is what makes the whole thing cheap |
+
+**The three lines that would have to change and no others**, for any version of a richer ride:
+
+1. `rideUpdate`'s phase machine — `bell` and `zip` are two strings in one `if`. A third phase costs
+   a branch.
+2. `troTick`'s two-line body — everything a ride does to the world happens there.
+3. `rideArrive()` — the only writer of the world change.
+
+### What is deliberately NOT a seam yet, and why that is the honest state
+
+- **The ride always runs to the END of the line.** A line does not know which of its stops answers to
+  which `TRV` destination. That needs one more fact in the pack — a stop that names a world — and it
+  is the first thing to put to the owner, because it changes the shape of `stops`.
+- **`RIDE_ZIP`, `RIDE_BELL`, `RIDE_STUCK` are engine constants.** Not pack keys, because `troAudit`
+  refuses a line that declares a word no reader exists for, and a `ride:` key with no seam behind it
+  would be a promise the engine does not keep (`docs/TAGS.md` L16).
+- **There is no `onRide` hook.** Adding one before anybody knows what would hang off it is how this
+  repository got four mechanisms for one job the last time (`A5`/`A7`).
+
+### The options, ranked by what they cost the owner
+
+| Option | What it costs | What it buys |
+|---|---|---|
+| **Leave it.** A ride is transport with a bell | nothing | it already works and he said "for now it is ok" |
+| **Something to look at** — the street named as it goes by, a stop called out, the conductor's line | one phase and two strings a pack declares | it stops being a menu without becoming a mechanic |
+| **Something to do** — a quest node that only exists on the tram | a `RIDE` phase that can open a card, and a rule about what happens if you arrive mid-conversation | his own earlier idea: *"itd be fun to ride it and have a quest or game inside it"* |
+| **Stop at the destination's platform** | a new fact in the pack — see above | the ride becomes a journey with a destination rather than a line with an end |
+
+**The recommendation, when he comes back to it:** the second row. It is one phase, it is reversible,
+and it answers the actual complaint — *"i dont see anything about me riding it"* — without inventing
+a mechanic nobody has asked to play twice.

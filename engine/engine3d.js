@@ -560,13 +560,50 @@ function t3Build(key){T3.pinatas=[];
             picado reads, which is the thing in the same frame that never had this problem. The
             candy sits in front of the veladora, where it belongs, and is now what you find when you
             walk up rather than what you are asked to spot from across the street. */
+          /* THE PANE, byte-for-byte what it was: this sprite has been right since mq-v133 and the
+             owner's complaint was never about it. */
           const c=document.createElement("canvas");c.width=win.w*K;c.height=win.h*K;
           const g2=c.getContext("2d");g2.scale(K,K);
           if(typeof drawSillLit==="function")drawSillLit(g2,0,0,win.w,win.h);
           drawCalaverita(g2,(win.w-z)/2,win.h-z,p.foil,z);
           const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));
           sp.center.set(0.5,0.02);sp.scale.set(win.w/32,win.h/32,1);
-          const H=wallH(g);sp.position.set(p.x+win.cx/32,H*(1-win.sill/32)+0.005,p.y+1.03);
+          const H=wallH(g),paneBottom=H*(1-win.sill/32)+0.005;
+          sp.position.set(p.x+win.cx/32,paneBottom,p.y+1.03);
+          /* ---- AND THE SILL ITSELF, hung under it as a SECOND sprite (mq-v154) ----
+             The owner, four times now, most recently 2026-09-12: "another attempt at showing the
+             window sills." Read literally, which the three previous attempts did not: there was never
+             a sill. `propSill` has always computed a y called `sill` and nothing ever DREW one — the
+             candy stood on the bottom edge of a hole in a wall.
+             The three answers before this were all the same answer wearing different numbers: 8px of
+             sweet, then 5, then 0.85 of the pane, then the whole pane lit. Each was measured and each
+             was defensible and after each one he came back, because the missing thing was not a
+             dimension. A ledge is a HARD HORIZONTAL EDGE, bright on top, dark underneath, throwing a
+             shadow, and wider than the opening — the one kind of shape that survives being three
+             screen pixels tall. It is why the papel picado in the same frame never had this problem.
+             A second sprite rather than a bigger one, because the pane already worked and the surest
+             way to lose it was to rebuild it. Measured before and after, side by side, at the same
+             spot with the hero moved out of his own shot. */
+          if(typeof drawSillLedge==="function"){
+            const LW=sillBoxW(win.w),LH=sillLedgeH();
+            /* supersampled 3x. Everything else on this wall is a 32-pixel tile stretched over a
+               whole box, so it can afford K; a ledge is FIVE tile-pixels tall and at K it is five
+               device pixels, which is not enough to hold a bright band, a dark lip and a shadow.
+               The world size is unchanged — only the texture is sharper. */
+            const KS=K*3;
+            const c2=document.createElement("canvas");c2.width=Math.ceil(LW*KS);c2.height=Math.ceil(LH*KS);
+            const g3=c2.getContext("2d");g3.scale(KS,KS);g3.imageSmoothingEnabled=false;drawSillLedge(g3,0,0,win.w);
+            /* t3Tex's third argument turns MIPMAPS OFF. With them on, this texture is a three-pixel
+               bright band over a three-pixel dark one, and every mip level box-filters the two
+               together until the whole ledge is one dark smear — which is exactly what it looked
+               like, and which no amount of changing the colours would have fixed. A stripe this thin
+               cannot survive being averaged with its own shadow. */
+            const le=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c2,false,true),transparent:true,alphaTest:T3ALPHA}));
+            le.center.set(0.5,0.02);le.scale.set(LW/32,LH/32,1);
+            /* hung from the pane's own bottom, in WORLD units and not in fractions of the wall — the
+               two are different lengths and mixing them is how a ledge ends up a third of a tile out */
+            le.position.set(p.x+win.cx/32,paneBottom-LH/32,p.y+1.08);
+            le.userData={prop:true,sill:true,ledge:true,x:p.x,y:p.y,win:win.i}; /* NOT calaverita: a ledge is not a sweet, and the guard that counts sweets in 3D said so the moment this landed */grp.add(le);}
           sp.userData={prop:true,calaverita:true,sill:true,x:p.x,y:p.y,win:win.i};grp.add(sp);return;}
         const c=document.createElement("canvas");c.width=z*K;c.height=z*K;const g2=c.getContext("2d");g2.scale(K,K);drawCalaverita(g2,0,0,p.foil,z);
         const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.02);sp.scale.set(z/32,z/32,1);
