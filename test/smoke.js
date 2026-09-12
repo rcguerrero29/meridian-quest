@@ -4133,6 +4133,89 @@ const CANDIDATES = [
   });
   fails.push(...trapped);
 
+  /* ---- the window sills are not HIDDEN — asked with a ray, which is what that word means ----
+     The owner has reported this four times: 2026-09-08 "the sugar skulls share a sill", 2026-09-09
+     and 2026-09-10 "the skulls are still hidden on the sills", 2026-09-12 "another attempt at
+     showing the window sills". Four answers were shipped and all four were about SIZE — 8 pixels of
+     sweet, then 5, then 0.85 of the pane, then the whole pane lit. Each was measured. Each was
+     defensible. He came back every time.
+     Two things were actually wrong and neither is a dimension. **There was never a sill**: propSill
+     has always computed a y called `sill` and nothing ever drew a ledge, so the candy stood on the
+     bottom edge of a hole in a wall. And when the ledge was finally drawn, it was **behind the
+     shopfront** — the sprite sat 0.035 in front of the wall face and something in front of the wall
+     covered it, so the texture was perfect, the position was right, the sprite was visible:true, and
+     the screen showed a dark smear. Found by rendering it and looking, after five rounds of reading
+     the code and reasoning about it correctly and being wrong.
+     So this does not measure anything. It asks the one question the owner has been asking: cast a
+     ray from the camera at the sill and see whether the sill is what it hits. */
+  const sills = await page.evaluate(() => {
+    const P = [];
+    if (typeof SEASONS === 'undefined' || typeof seasonSet !== 'function' || typeof THREE === 'undefined') return P;
+    /* ASK THE ENGINE WHAT IS ON A SILL, not the config file. The first version of this check read
+       `SEASONS[k].props`, and in this pack `props` is nested under `art` — so it found nothing, took
+       an early return, and went green against THREE planted violations including "there is no sill
+       at all", which is the state this shipped in for four owner reports. It read the shape of one
+       file when it meant the thing the game draws. Entry thirteen, written by the session that had
+       just written up eleven and twelve, in the same hour, in the guard FOR the bug. */
+    const keep = { w: world, px: px, py: py, cam: camMode, season: (typeof seasonNow === 'function' ? seasonNow() : null) };
+    let dressed = null, prop = null;
+    for (const k of Object.keys(SEASONS)) { seasonSet(k);
+      for (const wid of Object.keys(WORLDS)) {
+        const q = (typeof fiestaProps === 'function' ? fiestaProps(wid) : []).find(r => r.sill && r.kind === 'calaverita');
+        if (q) { dressed = k; prop = { ...q, world: wid }; break; } }
+      if (prop) break; }
+    if (!prop) { seasonSet(keep.season); return P; }   /* this pack hangs nothing on a sill */
+    world = prop.world; px = fx = prop.x + 3; py = fy = prop.y + 2; moving = false;
+    camSet('3d'); if (typeof draw3d === 'function') draw3d();
+    const root = (typeof T3 !== 'undefined' && T3) ? (T3.group || T3.scene) : null;
+    if (!root) { seasonSet(keep.season); return P; }
+    let pane = null, ledge = null;
+    root.traverse(o => { if (!o.userData) return;
+      if (o.userData.ledge && o.userData.x === prop.x && o.userData.y === prop.y) ledge = o;
+      else if (o.userData.sill && o.userData.x === prop.x && o.userData.y === prop.y) pane = o; });
+    if (!pane) { P.push('the window this season dresses has no lit pane in 3D at all'); }
+    if (!ledge) {
+      P.push('there is no sill under the window in 3D — the candy is standing on the bottom edge of a hole in a wall, which is what "the skulls are hidden on the sills" has meant every time it was reported');
+    } else {
+      /* it must sit immediately UNDER the pane, not floating and not overlapping it */
+      if (pane) { const gap = (pane.position.y) - (ledge.position.y + ledge.scale.y);
+        if (Math.abs(gap) > 0.02) P.push('the sill is ' + gap.toFixed(3) + ' world units from the window it belongs to — a ledge that is not touching its own window is a shelf hanging in a wall'); }
+      /* AND IT IS NOT HIDDEN — asked of the SCREEN, because nothing else can answer it.
+         Two cleverer versions of this check were written first and both went green against the real
+         bug. A raycast against the scene's meshes found nothing in the way; a probe of the objects
+         on that tile found nothing but the two sprites. Both were right and both were useless,
+         because the occluder is not another object — it is the wall the sprite hangs on. A sprite is
+         a billboard that turns to face the camera, the camera looks DOWN at the street, so the lower
+         half of a tall billboard tilts back INTO the wall behind it and is swallowed. Moving it
+         0.045 further out fixed it; no amount of asking the scene graph would ever have said so.
+         So: render, find where the ledge lands on screen, and count the pale stone pixels that
+         actually arrived there. "Hidden" is a fact about pixels. It is the owner's own word, he has
+         used it three times, and this is the first check in this file that reads it. */
+      const gl = T3.renderer.getContext();
+      if (typeof draw3d === 'function') draw3d();                 /* the drawing buffer is only valid right after */
+      const cv = T3.renderer.domElement;
+      const mid = ledge.position.clone(); mid.y += ledge.scale.y * 0.55;
+      const v = mid.project(T3.cam);
+      const sx = Math.round((v.x * 0.5 + 0.5) * cv.width), sy = Math.round((v.y * 0.5 + 0.5) * cv.height);
+      const R = Math.max(6, Math.round(ledge.scale.x * cv.width / 12));
+      const w2 = R * 2, h2 = Math.max(6, R);
+      const buf = new Uint8Array(w2 * h2 * 4);
+      gl.readPixels(Math.max(0, sx - R), Math.max(0, sy - h2 / 2), w2, h2, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+      /* the stone is #F7F2E2 — the palest thing anywhere near a night facade. Count what survived. */
+      let stone = 0;
+      for (let i = 0; i < buf.length; i += 4)
+        if (buf[i] > 190 && buf[i + 1] > 185 && buf[i + 2] > 165 && buf[i + 3] > 200) stone++;
+      if (stone < 3) P.push('the window sill is drawn, correctly placed, reports itself visible — and ' +
+        stone + ' of its pixels reach the screen. It is hidden: either something is in front of it, or ' +
+        'it is the colour of what is behind it. (The known cause is the wall it hangs on — a billboard ' +
+        'tilts into the surface behind it when the camera looks down — but this check only knows that ' +
+        'nothing arrived.) The owner has reported this as "the skulls are hidden on the sills" three times');
+    }
+    seasonSet(keep.season); world = keep.w; px = fx = keep.px; py = fy = keep.py; camSet(keep.cam);
+    return P;
+  });
+  fails.push(...sills);
+
 
 
   await browser.close();

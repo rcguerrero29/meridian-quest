@@ -1047,8 +1047,7 @@ function fiestaDraw2D(wid,toScreen,front){ /* toScreen(x,y) → the tile's top-l
     if(p.kind!=="calaverita")return;
     const win=propSill(wid,p); /* on a window sill (owner: "as in human reality"): the facade's own window says where */
     if(win){const z=win.size; /* centred on its own window, standing on the sill, small enough to leave glass around it */
-      if(front){drawSillLit(ctx,sx+win.cx-win.w/2,sy+win.sill-win.h,win.w,win.h);
-        drawCalaverita(ctx,sx+win.cx-z/2,sy+win.sill-z,p.foil,z);}
+      if(front)drawSillBox(ctx,sx+win.cx-sillBoxW(win.w)/2,sy+win.sill-win.h,win.w,win.h,p.foil,z);
       else drawCalaverita(ctx,sx+win.cx-z/2,sy+TS-1-z,p.foil,z);
       return;}
     drawCalaverita(ctx,sx+ox-4,front?(isSolidAt(wid,p.x,p.y)||p.h?sy+2:sy+TS-9):sy+oy-4,p.foil);});}
@@ -1079,6 +1078,110 @@ function propSill(wid,p){
      0.85 leaves a pixel of glass each side — a sweet ON a sill, not a sweet AVOIDING one. */
   const size=Math.max(4,Math.min(8,Math.round(win[2]*0.85),Math.round(win[3]*0.9)));
   return {cx:win[0]+win[2]/2,sill:win[1]+win[3],size,i,w:win[2],h:win[3],g};}
+function drawOfrenda(g,x,y){ /* la ofrenda (Nacho, 2026-09-07; the owner: "sounds like a good idea"): a tiered table under a marigold arch —
+  the cloth, three candles, pan de muerto, a calaverita, and at the top an EMPTY frame, nobody named: "that one's for whoever needs it".
+  The owner's own document with the basics refines this when it arrives. */
+  const P=petalPal();
+  g.fillStyle="#5A2E7A";g.fillRect(x+2,y+20,28,10);g.fillStyle="#7B4BA8";g.fillRect(x+2,y+20,28,2);      /* the lower cloth */
+  g.fillStyle="#E2620F";g.fillRect(x+6,y+13,20,7);g.fillStyle="#F2870F";g.fillRect(x+6,y+13,20,1.5);        /* the upper tier */
+  g.strokeStyle="#7A2E12";g.lineWidth=2.4;g.beginPath();g.arc(x+16,y+14,13,Math.PI*1.05,Math.PI*1.95);g.stroke(); /* the arch */
+  for(let i=0;i<11;i++){const t=Math.PI*(1.08+0.84*i/10);petalShape(g,x+16+Math.cos(t)*13,y+14+Math.sin(t)*13,t+Math.PI/2,0.9,P[2+(i%4)]);}
+  [[8,21],[16,14],[24,21]].forEach(([cx,cy],i)=>{g.fillStyle="#F6F2E8";g.fillRect(x+cx-1.2,y+cy-6,2.4,6);g.fillStyle="#FFC300";g.beginPath();g.ellipse(x+cx,y+cy-7,1,1.8,0,0,7);g.fill();}); /* candles */
+  g.fillStyle="#3A2E26";g.fillRect(x+12,y+3,8,7);g.fillStyle="#F6F2E8";g.fillRect(x+13,y+4,6,5);         /* the empty frame */
+  g.fillStyle="#B8722E";g.beginPath();g.arc(x+11,y+18,3,0,7);g.fill();g.fillStyle="#E8B86A";g.fillRect(x+10.5,y+15.5,1,5);g.fillRect(x+8.5,y+17.5,5,1); /* pan de muerto */
+  drawCalaverita(g,x+18,y+12.5,"#E8478F");
+  g.fillStyle="#F6F2E8";g.beginPath();g.arc(x+4,y+24,1.4,0,7);g.arc(x+28,y+24,1.4,0,7);g.fill();          /* two cups of water */
+  drawPapelRow(g,x+2,x+30,y+25,art("papel",["#E8478F","#2FA5A0","#F2B705"]),3);}
+function fiestaProps(wid){return (art("props",[])||[]).filter(p=>p.world===wid);} /* small things set down by place: {world,x,y,kind,ox,oy,h,foil} */
+function drawPapelRow(g,x0,x1,ly,pal,seed){ /* a string of cut paper (Pili, 2026-09-07): little squares with a scalloped hem and a punched
+  hole — paper, not bunting — in TWO rows, the second half a flag over; two rows is what makes a street look dressed */
+  g.strokeStyle="#3A2E26";g.lineWidth=1;g.beginPath();g.moveTo(x0+2,ly);g.lineTo(x1-2,ly);g.moveTo(x0+4,ly+5.5);g.lineTo(x1-4,ly+5.5);g.stroke();
+  [0,1].forEach(row=>{let k=row*3;for(let px=x0+3+row*2.3;px<x1-3;px+=4.6,k++){const col=pal[(k+seed)%pal.length],fy=ly+row*5.5;
+    g.fillStyle=col;g.fillRect(px-1.8,fy,3.6,3.6);
+    g.beginPath();g.moveTo(px-1.8,fy+3.6);g.lineTo(px-0.9,fy+4.8);g.lineTo(px,fy+3.6);g.lineTo(px+0.9,fy+4.8);g.lineTo(px+1.8,fy+3.6);g.closePath();g.fill();
+    g.fillStyle="rgba(40,30,20,.55)";g.fillRect(px-0.4,fy+1.2,0.8,0.8);}});}
+/* A LIT WINDOW behind a sill candy (#131 again, owner 2026-09-10: "skulls are still hidden").
+   Twice now this was answered by changing the sweet's SIZE — 8px to 5px, then back up to 0.85 of
+   the pane — and twice the owner came back saying he still could not see them. He was right both
+   times, and the size was never the fault. A calaverita is eight pixels on a forty-pixel tile, on a
+   wall about a unit high, seen from a dozen tiles back: at that distance it is three or four screen
+   pixels of cream against a dark recess, and NO ratio makes three pixels read. Look at what does
+   read in the same shot — the papel picado. Bright, saturated, repeated.
+   So light the window instead of growing the candy. A warm pane among dark ones is a big saturated
+   shape that carries all the way to the back of the street, and it is the true picture besides: a
+   veladora is lit on the sill and the sugar skull sits in front of it. The candy stops being the
+   thing you must see and becomes the thing you find when you walk up to it, which is the right job
+   for an eight-pixel sweet. */
+function drawSillLit(g,x,y,w,h){
+  if(!(w>0&&h>0))return;
+  g.save();
+  const gr=g.createLinearGradient(0,y,0,y+h);
+  gr.addColorStop(0,"#F2B705");gr.addColorStop(0.55,"#E8873A");gr.addColorStop(1,"#8A3F1E");
+  g.fillStyle=gr;g.fillRect(x,y,w,h);
+  g.fillStyle="rgba(255,241,200,.85)";g.fillRect(x+w/2-0.6,y+h*0.28,1.2,h*0.42); /* the veladora's flame */
+  g.restore();}
+/* ---------- THE SILL ITSELF — the fourth attempt, and the first one that is not about size ----------
+   The owner has asked four times. 2026-09-08: the skulls share a sill. 2026-09-09 and 2026-09-10:
+   "the skulls are still hidden on the sills." 2026-09-12: "another attempt at showing the WINDOW
+   SILLS." Read that last one literally, because it is the clue the three previous fixes all missed:
+   he is not only asking to see the candy. **There was never a sill.** `propSill` computes a y called
+   `sill` and nothing has ever DRAWN one — the candy stood on the bottom edge of a hole in a wall.
+   The three answers so far were all the same answer: 8px of sweet, then 5px, then 0.85 of the pane,
+   then the whole pane lit. Each was measured, each was defensible, and after each one he came back,
+   because the thing missing was not a dimension.
+   What a sill is, and why it reads when a 7-pixel sweet does not: it is a HORIZONTAL EDGE, the full
+   width of the opening and wider, bright on top and dark underneath, with a shadow cast on the wall
+   below it. A hard light/dark horizontal boundary survives being scaled down to three pixels — it is
+   the one shape that does — which is exactly why the papel picado in the same frame never had this
+   problem and the candy did. And it gives the sweet a thing to stand ON and to silhouette against,
+   instead of floating in a dark recess the same colour as itself.
+   One drawing, used by the front camera and by the 3D sprite, so the two cannot drift. Top-down and
+   iso get nothing: you cannot see a ledge from directly above, and pretending otherwise is the
+   "drawn in some cameras" bug this repo already has a register entry for. */
+/* ---------- THE SILL ITSELF — the fourth attempt, and the first one that is not about size ----------
+   The owner has asked four times. 2026-09-08: the skulls share a sill. 2026-09-09 and 2026-09-10:
+   "the skulls are still hidden on the sills." 2026-09-12: "another attempt at showing the WINDOW
+   SILLS." Read that last one literally, because it is the clue the three previous fixes all missed:
+   he is not only asking to see the candy. **There was never a sill.** `propSill` computes a y called
+   `sill` and nothing has ever DRAWN one — the candy stood on the bottom edge of a hole in a wall.
+   The three answers so far were all the same answer: 8px of sweet, then 5px, then 0.85 of the pane,
+   then the whole pane lit. Each was measured, each was defensible, and after each one he came back,
+   because the thing missing was not a dimension.
+   What a sill is, and why it reads when a 7-pixel sweet does not: it is a HORIZONTAL EDGE, the full
+   width of the opening and wider, bright on top and dark underneath, with a shadow cast on the wall
+   below it. A hard light/dark horizontal boundary survives being scaled down to three pixels — it is
+   the one shape that does — which is exactly why the papel picado in the same frame never had this
+   problem and the candy did. And it gives the sweet a thing to stand ON and to silhouette against,
+   instead of floating in a dark recess the same colour as itself.
+   One drawing, used by the front camera and by the 3D sprite, so the two cannot drift. Top-down and
+   iso get nothing: you cannot see a ledge from directly above, and pretending otherwise is the
+   "drawn in some cameras" bug this repo already has a register entry for. */
+/* WHOLE TILE-PIXELS, and the stone gets most of them. The first build of this ledge used 2.5 and
+   2.5 with fractional bands inside them, and in 3D the sprite's canvas is FIVE DEVICE PIXELS TALL —
+   so the pale stone came out one and a half pixels of antialiased mush under two and a half pixels
+   of shadow, and the whole ledge read as a dark smear. Rendered, looked at, and only then believed.
+   The stone is the thing that has to read; the shadow only has to say the stone is in front. */
+const SILL_OUT=1.5, SILL_LIP=4, SILL_CAST=2;
+const sillBoxW=w=>w+SILL_OUT*2, sillLedgeH=()=>SILL_LIP+SILL_CAST;
+/* the ledge on its own, drawn from its own top-left. Separate from the pane on purpose: in 3D the
+   pane is a sprite that has worked for two versions and the ledge is a SECOND sprite hung under it,
+   so adding the sill cannot move, resize or dim the thing that was already right. That is not
+   tidiness — the third attempt at this bug was lost exactly there, by rebuilding the sprite that
+   worked in order to add the piece that was missing. */
+function drawSillLedge(g,x,y,w){
+  const W=sillBoxW(w);
+  g.fillStyle="#F7F2E2";g.fillRect(x,y,W,3);                      /* the stone, lit from above: THREE whole pixels */
+  g.fillStyle="#8A7F66";g.fillRect(x,y+3,W,1);                    /* its hard underside — the edge that does the work */
+  g.fillStyle="rgba(16,12,22,.42)";g.fillRect(x+1,y+4,W-2,2);}    /* and what it throws on the wall */
+/* pane, candy and ledge together, for the one camera that can draw them in one go */
+function drawSillBox(g,x,y,w,h,foil,z){
+  const ox=x+SILL_OUT, by=y+h;
+  drawSillLit(g,ox,y,w,h);
+  if(z>0){const cx=ox+(w-z)/2;
+    /* a soft dark halo, so cream sugar on a warm pane still has an edge at three screen pixels */
+    g.save();g.fillStyle="rgba(26,20,32,.45)";g.fillRect(cx-0.8,by-z-0.8,z+1.6,z+0.8);g.restore();
+    drawCalaverita(g,cx,by-z,foil,z);}
+  drawSillLedge(g,x,by,w);}
 function drawOfrenda(g,x,y){ /* la ofrenda (Nacho, 2026-09-07; the owner: "sounds like a good idea"): a tiered table under a marigold arch —
   the cloth, three candles, pan de muerto, a calaverita, and at the top an EMPTY frame, nobody named: "that one's for whoever needs it".
   The owner's own document with the basics refines this when it arrives. */
