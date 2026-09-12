@@ -837,25 +837,174 @@ const { chromium } = require('playwright-core');
          reading the layout code. Asked by counting the call to each panel's own hand while the quilt
          draws, so a layout that silently drops the last row (a fixed row count, an off-by-one, a
          cell that ends up zero-sized) is red and not merely ugly. */
-      const quilt = await page.evaluate(() => {
+      const elMuro = await page.evaluate(() => {
         const P = [];
-        if (typeof murQuilt !== 'function') { P.push('the crew wall has no quilt — the panels are a queue of little drawings and there is nowhere to stand back from'); return P; }
+        if (typeof murWall !== 'function' || typeof murBays !== 'function')
+          { P.push('the crew wall is not a wall — the panels are a page of framed pictures, and the owner has said in his own words that this is not going to be pages'); return P; }
+        /* 1. IT IS A WALL, NOT A PAGE. Wider than it is tall, and wider than the column it is shown
+              in, or you are looking at a postcard of a mural. */
+        const nat = (typeof murWallNatural === 'function') ? murWallNatural() : 0;
+        const asp = (typeof murWallAspect === 'function') ? murWallAspect(412) : 1;
+        if (!(nat > 412)) P.push('the crew wall is ' + nat + ' px wide and fits inside a phone column — a mural you can see all of at once is a page');
+        if (!(asp < 1)) P.push('the crew wall is taller than it is wide — that is a poster, not a wall you walk along');
+        /* 2. EVERY PAINTER HAS THEIR OWN BAY and everything they paint lands in it. This is the whole
+              of the mechanism the owner asked for: "a way to have the agents ensure they add to their
+              OWN mural area". Asked by painting the wall with every panel's hand spied on, and
+              checking WHERE each one was called, not merely THAT it was. */
+        const bays = murBays();
+        if (bays.length < 2) P.push('the crew wall has one bay — nobody owns a stretch of it, so there is no own area to add to');
+        /* THE THING THE OWNER ACTUALLY ASKED FOR: a painter who comes back paints in the SAME
+           stretch. Without this the wall can quietly go back to being a page — one bay per panel
+           passes every other check here, because every panel is then trivially in "its own" bay.
+           That version was planted and this file said nothing. Asked of the panels, not the bays:
+           group MURALS by painter myself and insist the wall put each group in one place. */
+        const mine = {};
+        (typeof MURALS !== 'undefined' ? MURALS : []).forEach(m => {
+          const k = murPainter(m); (mine[k] = mine[k] || []).push(m.id); });
+        const repeat = Object.keys(mine).filter(k => mine[k].length > 1);
+        if (!repeat.length) P.push('nobody on this wall has painted twice, so whether a painter keeps their own stretch cannot be checked here — say so rather than passing');
+        repeat.forEach(k => {
+          const owns = bays.filter(b => b.panels.some(m => mine[k].indexOf(m.id) >= 0));
+          if (owns.length !== 1) P.push('"' + k + '" has painted ' + mine[k].length + ' times and the wall gave them ' +
+            owns.length + ' separate stretches — a painter who comes back is the same painter, and coming back has to make their own area DEEPER, not start a new one somewhere else');
+          else if (owns[0].panels.length !== mine[k].length) P.push('"' + k + '" has a stretch of the wall with somebody else\'s work in it');
+        });
         const seen = {}, restore = [];
-        MURALS.forEach(m => { const real = m.patch || m.art; restore.push([m, m.patch, m.art]);
-          const spy = function () { seen[m.id] = (seen[m.id] || 0) + 1; return real && real.apply(null, arguments); };
-          if (m.patch) m.patch = spy; else m.art = spy; });
+        bays.forEach((b, i) => b.panels.forEach(m => {
+          const real = m.patch || m.art; restore.push([m, m.patch, m.art]);
+          const spy = function (g) {
+            /* where on the wall did the wall put me? ask the canvas, not the layout code */
+            const t = g.getTransform ? g.getTransform() : null;
+            seen[m.id] = { n: (seen[m.id] ? seen[m.id].n : 0) + 1, x: t ? t.e : null, bay: i };
+            return real && real.apply(null, arguments); };
+          if (m.patch) m.patch = spy; else m.art = spy; }));
         const cv = document.createElement('canvas');
-        const w = 412, h = Math.round(w * (typeof murQuiltAspect === 'function' ? murQuiltAspect(w) : 1.3));
+        const w = Math.max(412, nat), h = Math.round(w * asp);
         cv.width = w; cv.height = h;
-        try { murQuilt(cv.getContext('2d'), w, h); }
+        try { murWall(cv.getContext('2d'), w, h); }
         catch (e) { P.push('the crew wall threw while it was being painted: ' + ((e && e.message) || e)); }
         restore.forEach(r => { r[0].patch = r[1]; r[0].art = r[2]; });
-        const missing = MURALS.filter(m => !seen[m.id]).map(m => m.id);
-        if (missing.length) P.push('these panels are in the crew wall and are not ON it — the quilt never paints them, so appending a panel does not put it on the wall: ' + missing.join(', '));
-        if (h < 200) P.push('the whole crew wall is ' + h + ' px tall at reading width — that is the little-drawings complaint, unfixed');
+        const missing = [];
+        bays.forEach((b, i) => b.panels.forEach(m => {
+          const hit = seen[m.id];
+          if (!hit) { missing.push(m.id); return; }
+          if (hit.n !== 1) P.push('panel "' + m.id + '" is painted ' + hit.n + ' times on the wall');
+          if (hit.bay !== i) P.push('panel "' + m.id + '" was painted in somebody else\'s bay');
+        }));
+        if (missing.length) P.push('these panels are on the wall and are never painted on it, so adding a panel does not put it in its painter\'s stretch: ' + missing.join(', '));
+        /* 3. AND THE BAYS ARE IN DIFFERENT PLACES. If two painters' work lands at the same x the wall
+              is one bay wearing several names. */
+        const xs = bays.map(b => { const h2 = seen[b.panels[0] && b.panels[0].id]; return h2 ? h2.x : null; }).filter(v => v !== null);
+        if (new Set(xs.map(v => Math.round(v))).size !== xs.length)
+          P.push('two painters were given the same stretch of wall — their work is painted on top of each other, which is the opposite of everybody having their own area');
         return P;
       });
-      fails.push(...quilt);
+      fails.push(...elMuro);
+
+      /* ---- A RETURN VISIT HAS TO SAY SOMETHING NEW ----
+         The owner, 2026-09-12: "i want to make sure that if they are about to be repetitive, that
+         they try to improvise from memory or again state or persona. i know you all may not have
+         feelings but it is important for me to see some way of EXPRESSION for my changarrito mates."
+         A wall where somebody comes back and paints the same thing again is not a wall with a person
+         on it, it is a wall with a stamp on it. So a painter's second visit must differ from their
+         first in all three of the things a visit is made of: what they said, what state they were in,
+         and WHAT THEY DREW. The third is the one that matters and the only one that cannot be faked
+         by changing a word, so it is asked by rendering both and comparing the pixels — the same way
+         the window sill was finally settled, and for the same reason. */
+      const twice = await page.evaluate(() => {
+        const P = [];
+        if (typeof murBays !== 'function' || typeof MURALS === 'undefined') return P;
+        const norm = t => String(t || '').toLowerCase().replace(/[^a-z0-9\u00c0-\u024f]+/g, ' ').trim();
+        const shot = m => {                       /* what this visit actually looks like */
+          const W = 206, H = Math.round(W * (m.aspect || 0.46));
+          const c = document.createElement('canvas'); c.width = W; c.height = H;
+          const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+          g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+          try { (m.patch || m.art)(g, W, H); } catch (e) { return 'threw'; }
+          const d = g.getImageData(0, 0, W, H).data; let h = 5381;
+          for (let i = 0; i < d.length; i += 7) h = ((h * 33) ^ d[i]) >>> 0;
+          return String(h); };
+        murBays().forEach(b => {
+          if (b.panels.length < 2) return;        /* they have not come back yet */
+          const seenSaid = {}, seenState = {}, seenArt = {};
+          b.panels.forEach(m => {
+            const said = norm(m.said && m.said.en), st = norm(m.state && m.state.en), art = shot(m);
+            if (said && seenSaid[said]) P.push('"' + b.who + '" came back to the wall and said the same thing again ("' +
+              m.id + '" repeats "' + seenSaid[said] + '") — a return visit that repeats itself is a stamp, not a person');
+            if (st && seenState[st]) P.push('"' + b.who + '" came back in the same state they were in last time ("' +
+              m.id + '" repeats "' + seenState[st] + '") — the one thing on this wall that is supposed to move is the thing that did not');
+            if (art !== 'threw' && seenArt[art]) P.push('"' + b.who + '" painted the same picture twice: "' +
+              m.id + '" is pixel-for-pixel "' + seenArt[art] + '". The words can be changed and it is still the same visit');
+            if (said) seenSaid[said] = m.id;
+            if (st) seenState[st] = m.id;
+            if (art !== 'threw') seenArt[art] = m.id; });
+        });
+        return P;
+      });
+      fails.push(...twice);
+
+      /* ---- YOU MAY ANSWER YOUR FIRST DRAWING. YOU MAY NOT PAINT IT OUT. ----
+         The owner, 2026-09-12: "remind them its a mural... while they cant remove their initial
+         drawings, they should keep that in mind with their creations."
+         A visit may reach DOWN into the painter's own earlier work — that is what makes a bay one
+         composition instead of three pictures in a pile, and it is the only thing a mural can do that
+         a list cannot. What it may not do is use that reach to cover the old work, because
+         overpainting is removal with extra steps, and the one rule this wall has had since the day it
+         was opened is add and improve, NEVER REMOVE.
+         Asked the only way it can be: paint the bay with everything on it, paint it again with the
+         newest visit left off, and compare the pixels in the region the OLDER work occupies. If the
+         newest visit has changed most of what was underneath it, it did not answer it — it erased
+         it. Nothing about the layout code can tell you that, and neither can reading the panel. */
+      const overpaint = await page.evaluate(() => {
+        const P = [];
+        if (typeof murBays !== 'function' || typeof murWall !== 'function' || typeof murCourse !== 'function') return P;
+        const bays = murBays().map((b, i) => ({ b: b, i: i })).filter(x => x.b.panels.length > 1);
+        if (!bays.length) { P.push('nobody has come back to this wall yet, so whether a second visit can paint out the first cannot be checked here — say so rather than passing'); return P; }
+        const nat = murWallNatural(), W = nat, H = Math.round(W * murWallAspect(W));
+        const shoot = () => { const c = document.createElement('canvas'); c.width = W; c.height = H;
+          const g = c.getContext('2d'); g.imageSmoothingEnabled = false; murWall(g, W, H);
+          return g.getImageData(0, 0, W, H); };
+        const all = shoot();
+        /* SUPPRESS THE PAINT, DO NOT REMOVE THE PANEL. The first version spliced the newest visit out
+           of MURALS — which changes how many courses deep the wall is, which changes its natural
+           height, which rescales everything, so the two pictures were of different walls and it
+           reported 76% of Rigo painted out on a clean tree. Blanking the newest visit's hand leaves
+           the layout identical and changes exactly one thing: what that visit put on the wall.
+           AND A NOTE ON WHAT IT IS FOR, because the first two plants at it were SILENT and that is
+           the interesting part: the clip in murWall caps `bleed` at MURBLEED, so a panel asking to
+           paint over its own past is simply cut off and cannot. The rule is enforced by the
+           structure, not by this check. What this check catches is somebody LOOSENING THAT CAP —
+           raising MURBLEED, or taking the clip out — which is the realistic regression, because both
+           are one line and both look harmless. Planted both ways and it names Rigo in each. A guard
+           whose plant cannot fail is telling you the invariant is structural; the right response is
+           to plant at the structure instead of deleting the guard. */
+        const bayW = nat / murBays().length, course = murCourse(), foot = (H / murWallAspect(W) * murWallAspect(W));
+        const S = { h: H / (H / (murWallNatural() * murWallAspect(nat))) };
+        const scale = H / (nat * murWallAspect(nat));          /* natural units → pixels (it is 1 here, kept honest anyway) */
+        const footPx = H - (typeof MURDADO === 'number' ? MURDADO : 22) * scale;
+        bays.forEach(x => {
+          const top = x.b.panels[x.b.panels.length - 1], n = x.b.panels.length;
+          const real = top.patch || top.art, key = top.patch ? 'patch' : 'art';
+          top[key] = function () {};                            /* this visit paints nothing */
+          let without; try { without = shoot(); } finally { top[key] = real; }
+          const x0 = Math.round(x.i * bayW * scale), x1 = Math.min(W, Math.round((x.i + 1) * bayW * scale));
+          const yTopCourse = footPx - n * course * scale;       /* where the newest visit starts */
+          const y0 = Math.max(0, Math.round(yTopCourse + course * scale));   /* everything BELOW it */
+          const y1 = Math.max(0, Math.round(footPx));
+          let looked = 0, changed = 0;
+          for (let y = y0; y < y1; y++) for (let px2 = x0; px2 < x1; px2++) {
+            const i = (y * W + px2) * 4; looked++;
+            if (Math.abs(all.data[i] - without.data[i]) > 12 || Math.abs(all.data[i + 1] - without.data[i + 1]) > 12
+              || Math.abs(all.data[i + 2] - without.data[i + 2]) > 12) changed++; }
+          if (looked < 200) return;
+          const pct = changed / looked;
+          if (pct > 0.35) P.push('"' + x.b.who + '"\'s newest visit "' + top.id + '" changes ' +
+            Math.round(pct * 100) + '% of what was already painted underneath it. Reaching down into your own ' +
+            'earlier work is the point of a wall; covering it is removal with extra steps, and this wall only ever grows');
+        });
+        return P;
+      });
+      fails.push(...overpaint);
 
       if (!fs.existsSync(ledgerPath))
         fails.push('the crew wall has no ledger — docs/crew/MURAL-LEDGER.txt is gone, and without it any panel can be rewritten and nothing would say so');

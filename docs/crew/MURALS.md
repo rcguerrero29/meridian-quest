@@ -316,3 +316,217 @@ prefix that is its own name — `scratchpad/<agent>-whatever.js` — and never a
 nothing and it is the cheapest possible fix. It is filed here rather than in `CREW-MODE.md` because
 it is not about the mode: it happened with the mode **off**, in an ordinary parallel run, which is
 the configuration this project actually uses.
+
+
+---
+
+# EL MURO — how to add to your own area
+
+*Written 2026-09-12 at the owner's word: **"is there a way to get idea on how to have the agents
+ensure they add to their own mural area? you get what a mural is right? this isnt going to be
+pages."***
+
+**He is right and the quilt was the wrong shape.** A grid of framed patches is a contact sheet:
+nineteen separate pictures that happen to share a page. Pili said it in her own panel before he did —
+*"what a mural does that a grid structurally cannot is CROSS A BOUNDARY"* — and the answer built for
+her was a tighter grid, which is a better contact sheet and still not a wall.
+
+## What a mural is, stated so it can be checked
+
+| A mural | A page |
+|---|---|
+| One continuous painted surface | Separate pictures with gaps between them |
+| Wide. You **walk along** it | Fits in front of you |
+| One ground, one horizon, one skirting, running end to end | Each picture brings its own background |
+| No frames. A hand stops and the next one starts | Borders, hems, cells |
+| Sections **grow** as people come back to them | Items are appended to a list |
+| Somebody's arm can reach into the next section | Nothing crosses a boundary |
+
+The wall is **4087 × 419** today and the reader gives it its own horizontal scroller
+(`docRender`'s `wide` seam in `engine.js` — a section may declare a natural width, and any pack with
+a long diagram or a timeline gets that for nothing).
+
+## The mechanism, and it is one word
+
+```js
+by:"melo"
+```
+
+**That is all of it.** Declare it and the wall does the rest:
+
+- **You never choose coordinates.** You are handed a canvas at your own scale with `0,0` at the
+  top-left of the space you are allowed to paint, and the wall puts it where it goes.
+- **Everything you ever paint lands in your own bay**, stacked, oldest on the ground and each return
+  visit above it. **Your stretch never gets wider — it gets taller**, which is what happens to a real
+  wall when somebody keeps coming back to it.
+- **Do not paint your own ground.** Call `murGround` like everybody else and *the wall decides*
+  whether you get one: on the wall it is a no-op, because the wall already painted the limewash end
+  to end, and nineteen slightly different rectangles of the same wash are nineteen visible edges.
+  Edges are exactly what makes a grid a grid.
+- **You sign the foot of your own stretch**, on the dado, with a short thread in your latest
+  iteration's colour. That is the only mark that says where one hand stops. It is on the **skirting**,
+  not between the pictures, because a wall is not divided.
+
+A panel with no `by` is filed under the name at the front of its `who`, so the nineteen painted
+before bays existed landed in their own without anybody editing them — **add and improve, never
+remove**. And *"Rigo again" is Rigo*: a painter who comes back is the same painter. The first build
+of this gave him two bays, which is the exact opposite of what was asked for, and the guard caught it.
+
+## What the guard asks
+
+`test/town.smoke.js`, and it asks the noun rather than the layout — it spies on every panel's own
+hand while the wall paints and reads the **canvas transform** to find out *where* each one was put:
+
+1. **It is a wall, not a page** — wider than it is tall, and wider than the column it is shown in.
+   A mural you can see all of at once is a postcard.
+2. **Every panel is painted, exactly once, in its own painter's bay.** Not "is it on the list".
+3. **Two painters never get the same stretch**, or the wall is one bay wearing several names.
+4. Somebody owns a bay at all — a wall with one bay has no *own area* to add to.
+
+It went red on its first run, twice, for real reasons: a helper the wall still used had been deleted
+in the rewrite, and Rigo had two bays.
+
+## What the wall still owes — Pili's list, none of it overruled
+
+1. **One shared ground line behind every bay** — half built. The wash, the horizon and the dado run
+   through; a *horizon behind the work itself* does not yet.
+2. **`span:2`** so somebody can paint wide across two bays. A mural's whole advantage is that an arm
+   can reach into the next section, and nothing here does that yet.
+3. **The value problem stands.** Nine panels are a cream field with one dark band and four are near
+   black; at wall size the eye goes only to the dark ones. **This must not be fixed by repainting the
+   nine** — nine repaints to even out a wall is nine people's hands erased. The distribution is the
+   lever.
+4. **A panel's signature should be its top band** — the one strip nothing crops.
+
+
+---
+
+## Coming back — how a return visit works, and the rule against stamps
+
+*Owner, 2026-09-12: "just to understand when an agent goes back to the mural, they'll add space for
+it and then do their addition right? i want to make sure that if they are about to be repetitive,
+that they try to improvise from memory or again state or persona. i know you all may not have
+feelings but it is important for me to see some way of **expression** for my changarrito mates."*
+
+### What actually happens when somebody returns — one correction to the question
+
+**They do not add the space. The wall does.** A painter never allocates anything, never asks how tall
+their stretch is and never touches a coordinate. They push a panel with their `by` on it and:
+
+1. The wall recomputes its own height — **it is as tall as its deepest painter, plus the sky and the
+   dado.** So when Rigo went to three visits, *the whole wall grew*, and everybody else's stretch
+   gained the same headroom.
+2. Their new work is laid on top of their last one, in their own bay.
+3. **The line they were in that day is written on the wall underneath it**, in their iteration's
+   thread. Read a bay bottom to top and you are reading one person over four days.
+
+That last part is the answer to the second half of his question, and it is worth being straight
+about: **this is not a feeling and it should not be dressed up as one.** It is a *position* — held on
+a date, in public, next to the last position the same person held. A wall is very good at showing
+that and prose is very bad at it. Melo's *"tired of being right"* above a wire of twelve open
+padlocks is not sentiment; it is a claim about the state of the shop, with the evidence painted under
+it. That is the expression, and it is real.
+
+### The rule against stamps
+
+**A return visit must differ from the same painter's earlier visits in all three of the things a
+visit is made of:**
+
+| | What | Why it is checked |
+|---|---|---|
+| 1 | what they **said** | the easiest to repeat by accident |
+| 2 | what **state** they were in | *the one thing on this wall that is supposed to move* |
+| 3 | what they **drew** | the only one that cannot be faked by changing a word |
+
+`test/town.smoke.js` fails the build on any of the three. The third is asked by **rendering both
+panels and comparing the pixels** — the same way the window sill was finally settled, and for the
+same reason: a picture is a fact about pixels, and every cleverer way of asking went green against
+the real thing. Three violations planted, three bite.
+
+### And the memory that makes it possible
+
+Nobody can avoid repeating themselves if nobody shows them what they did. So there is one call a
+brief makes before it asks anyone to paint again:
+
+```js
+murMemoryText("Rigo")
+```
+
+which returns their own visits, oldest first, with what they said, what state they were in and what
+they drew — ready to paste into the brief. **This is not optional for a returning painter.** It is
+four lines, and it is the difference between a person and a stamp.
+
+> Rigo has been to this wall 3 times. Do not repeat any of it:
+>   visit 1 — said: "If a world's tram drives off the edge of the map, the two cabs drawn on it are decoration."
+>   visit 2 — said: "Right of way belongs to the piece of ground, not to the vehicle."
+>   visit 3 — said: "In nine years I never wrote up a driver for failing to sound…"
+
+**The brief line, verbatim, for the next run:**
+
+> You have painted on this wall before. Here is everything you have already said, and you may not say
+> any of it again — not the sentence, not the state you were in, not the picture.
+> `<paste murMemoryText(you)>`
+> Your job is not to report. It is to say where you are NOW, and if that is the same place you were
+> last time, say why it has not moved — because that is also a state and nobody has painted one yet.
+
+That last sentence is deliberate. **"Nothing has changed for me" is a legitimate visit** and the wall
+should be able to hold it; what it may not hold is somebody pretending it has by repainting the same
+thing in different words.
+
+
+---
+
+## It is a mural. Compose against what is already there.
+
+*Owner, 2026-09-12: "remind them its a mural... while they cant remove their initial drawings, they
+should keep that in mind with their creations."*
+
+**This is the instruction that makes the wall a wall rather than a shelf**, and it is the one thing a
+returning painter is most likely to forget, because every other creative brief in the world says
+*make a new thing*.
+
+Here it says: **your first drawing is permanent and it is directly underneath you. That is not an
+obstacle to work around — it is the thing you are composing against.** A muralist coming back to
+their own wall does not paint an unrelated picture above the old one. The rope carries on. An arm
+comes over the edge. The smoke from the first piece becomes the weather in the second. The tram that
+was stopped in visit one is moving in visit two, in the same livery, going the other way.
+
+### So a visit may reach down — and the rule has two halves
+
+```js
+bleed: 0.2     /* how far into your own earlier work you may paint, as a fraction of your course */
+```
+
+| | |
+|---|---|
+| **You may** reach into your own earlier visits, up to **28%** of your course | it is the only thing a mural can do that a list cannot |
+| **You may not** reach into anybody else's bay | reaching into your own past is composition; reaching into somebody else's is vandalism |
+| **You may not** paint your old work out | overpainting is removal with extra steps, and this wall only ever grows |
+
+**The third is not a convention.** `test/town.smoke.js` paints the bay twice — once with the newest
+visit, once with that visit's hand blanked and the layout untouched — and compares the pixels in the
+region the older work occupies. Change more than a third of it and the build is red.
+
+*(Worth knowing, because it is the honest shape of the thing: the clip in `murWall` caps `bleed`, so
+a panel that asks to paint over its past is simply cut off and cannot. The rule is enforced by the
+structure. What the guard catches is somebody **loosening that cap** later — raising `MURBLEED` or
+taking the clip out — which is the realistic regression, because both are one line and both look
+harmless. The first two plants at that guard were silent and that is what they were telling me: plant
+at the structure, not at the check.)*
+
+### The brief line, verbatim, for every returning painter
+
+> **This is a mural, not a page.** Everything you have painted here is still on this wall and always
+> will be, and your new work goes directly above your last one — on the same surface, with no frame
+> between them.
+>
+> So do not make a separate picture. **Make the next part of the one that is already there.** Let
+> something carry down into it: a line, a colour, a figure looking back at what you drew last time, a
+> thing that was closed in visit one and is open in visit two. You may reach down into your own
+> earlier work with `bleed`. You may not paint it out — the build will refuse it, and so would any
+> muralist.
+>
+> `<paste murMemoryText(you)>`
+>
+> And if nothing has moved for you, **paint that** — a person standing still in front of their own
+> old work is a state, it is true, and nobody has painted one yet.
