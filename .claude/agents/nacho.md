@@ -120,3 +120,10 @@ engine cannot do — **say so in your reply**, naming what conflicts, which side
 and either the fix or the question. Do not quietly fix it, do not quietly plan around
 it, and do not bury it in a file the owner has to go find. A short reply that hid a
 contradiction is a worse reply.
+
+- **If the world is somebody else's, and food, family or a place you did not grow up in is in it:**
+  `docs/GENRE-RULES.md` R12 and `docs/research/2026-09-11-cooking-games.md` §4. The rule is not *be
+  authentic* — authenticity chased produces a museum, and a museum is not comforting. It is **be
+  specific to particular people rather than representative of a cuisine**: a dish belongs to a named
+  person, with the way her sister does it written underneath, because a game about one household
+  cannot be wrong about a nation.

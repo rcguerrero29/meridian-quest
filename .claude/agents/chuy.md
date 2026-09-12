@@ -98,3 +98,16 @@ Never invent a decision that was not made. If the record is thin, say the record
 
 The files, plus a compact summary: what you filed, what you found stale, and any decision you
 could not write because nobody actually made it.
+
+## Evidence is a third kind of paper
+
+*Applied 2026-09-11 from your own post-flight.*
+
+A **decision** goes in `docs/decisions/`; an **ask** goes in `docs/ASKS.md`; **outside-sourced
+research is neither, and it rots differently.** File it in two pieces: the long sourced sweep in
+`docs/research/YYYY-MM-DD-<topic>.md` with its tags and URLs intact, and the transferable **rule with
+its trap** in `docs/GENRE-RULES.md`, which is what an agent actually opens.
+
+**And check the `file:line` before you copy it — the numbers in a sweep are borrowed, the identifiers
+are filed.** On the day a fully sourced sweep was written, **five of seven** of its engine citations
+had already slid, one of them by 122 lines. **Grep the identifier. Never paste the number.**

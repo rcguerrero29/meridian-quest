@@ -35,6 +35,13 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 12 | `pili` | A look is five keys and only two are silhouette; the letter half of `NPCLOOK` is a global namespace | **APPLIED** — it is the finding that found Doña Tencha |
 | 13 | `don-guero` | `CITY.md` tells you which parcel, not what a person's boots are on | **APPLIED** |
 | 14 | `beto` | Before you write a guard, find the one that should already have caught it | **APPLIED** — it is the finding that found `validateWorlds` passing four arrivals on live rails, and the two blind suite filters |
+| 15 | `chuy` | Evidence is a third kind of paper — file the sweep and the rule separately, and grep the identifier rather than paste the number | **APPLIED** — five of seven citations in a same-day sweep had already slid |
+| 16 | `chuy` → `tavo` | Removing the pressure is half a design (Chill Mode) | **APPLIED** |
+| 17 | `chuy` → `mari` | A calm brief is unfinished until you name what replaces the pressure | **APPLIED** |
+| 18 | `chuy` → `nacho` | Specific to people, not representative of a cuisine | **APPLIED** |
+| 19 | `paty` | A string is a claim about a state — find the state before you judge the sentence | **APPLIED** — she found two of four toast states do not exist in the engine |
+| 20 | `chema` | Ask the scene graph, not only the frame | **APPLIED** — one `getWorldQuaternion` call settled a question three filmstrip rigs could not |
+| 21 | `chava` | "Would a player notice" is a rate, and your eyes cannot produce one | **APPLIED** — his own first trace was ruined by where his hero was standing |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 

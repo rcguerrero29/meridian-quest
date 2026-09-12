@@ -112,6 +112,7 @@ const CANDIDATES = [
     const t = await page.evaluate(() => {
       const problems = [];
       if (typeof TROLLEYAT === 'undefined' || !TROLLEYAT.length) { problems.push('the city declares no trolley line'); return problems; }
+      if (typeof troStops !== 'function') { problems.push('this engine cannot be asked where a trolley stop is — the city says where its stops are and nothing reads it'); return problems; }
       TROLLEYAT.forEach(L => {
         const w = WORLDS[L.world];
         if (!w) { problems.push('the trolley runs in a world that does not exist: ' + L.world); return; }
@@ -129,12 +130,19 @@ const CANDIDATES = [
            stop, standing two rows off its own rails at the far corner of the site, past the end of the
            run. Nothing on screen could tell you it was a stop, because it was nowhere near a trolley.
            A stop belongs beside the line it serves, within reach of where the trolley actually goes. */
-        const onLine = troTiles(L);
-        for (let yy = 0; yy < w.H; yy++) for (let xx = 0; xx < w.W; xx++) {
-          if (w.rows[yy][xx] !== 'Y') continue;
-          const near = onLine.some(([lx, ly]) => Math.abs(lx - xx) <= 1 && Math.abs(ly - yy) <= 1);
-          if (!near) problems.push(`the trolley stop at ${xx},${yy} in ${L.world} stands away from the trolley's own line — nobody can tell what it is`);
-        }
+        /* Since 2026-09-11 a stop is a thing the LINE declares, not a letter the engine reads out
+           of one town's alphabet (docs/TAGS.md L20), and "the stop stands away from its own line"
+           moved into the engine's own boot audit, where a second world gets it too. What is left
+           here is a PACK CONSISTENCY question the engine cannot ask and must not: the map's stop
+           glyph and the line's declared stops are one fact said twice, and they must agree.
+           A painted stop nobody serves is a bench that summons nothing; a served stop nobody
+           painted is a place the tram stops for no reason a player can see. */
+        const declared = troStops(L).map(s => s.x + ',' + s.y);
+        const painted = [];
+        for (let yy = 0; yy < w.H; yy++) for (let xx = 0; xx < w.W; xx++) if (w.rows[yy][xx] === 'Y') painted.push(xx + ',' + yy);
+        declared.filter(k => painted.indexOf(k) < 0).forEach(k => problems.push(`the trolley line in ${L.world} serves ${k}, and the map paints no stop there — the tram stops for nothing anyone can see`));
+        painted.filter(k => declared.indexOf(k) < 0).forEach(k => problems.push(`a trolley stop is painted at ${k} in ${L.world} and the line does not serve it — a bench that summons nothing`));
+        if (!declared.length) problems.push(`the trolley line in ${L.world} serves no stops at all`);
         // it comes on its own
         TRO.state = 'away'; TRO.t = 0; TRO.called = false; px = fx = park; py = fy = L.row + 2;
         troUpdate(100); if (TRO.state !== 'away') problems.push('the trolley leaves before its time');
@@ -147,10 +155,20 @@ const CANDIDATES = [
         py = fy = L.row + 2; troUpdate(TRO_HOLD + 200); if (TRO.state === 'hold') problems.push('the trolley never starts again once the way is clear');
         // it comes when you stand at a stop
         TRO.state = 'away'; TRO.t = 0; TRO.called = false;
-        let stop = null; for (let y = 0; y < w.H && !stop; y++) for (let x = 0; x < w.W; x++) if (w.rows[y][x] === 'Y') { stop = [x, y]; break; }
-        if (!stop) problems.push('the trolley\'s world has no stop to call it from');
-        else { px = fx = stop[0]; py = fy = stop[1]; troUpdate(50);
+        const s0 = troStops(L)[0];
+        if (!s0) problems.push('the trolley\'s world has no stop to call it from');
+        else { px = fx = s0.x; py = fy = s0.y; troUpdate(50);
           if (!TRO.called && TRO.state === 'away') problems.push('standing at the stop does not call the trolley'); }
+        /* ...and a stop is what the line SAYS. Plant the violation: take the stops away and stand
+           on the very tile the map still paints as one. If the trolley still comes, the engine is
+           reading the picture instead of the declaration, which is the bug this seam removed and
+           the shape every wrong fix for it takes. */
+        { const saved = L.stops; delete L.stops;
+          TRO.state = 'away'; TRO.t = 0; TRO.called = false;
+          if (s0) { px = fx = s0.x; py = fy = s0.y; troUpdate(50);
+            if (TRO.state === 'run') problems.push('standing where the map draws a stop brings the trolley to a line that serves no stops — the engine is reading the picture, not the line');
+            if (troIsStop(L.world, s0.x, s0.y)) problems.push('a tile the line does not serve is still a stop — the trolley pass opens where nothing stops'); }
+          if (saved) L.stops = saved; TRO.state = 'away'; TRO.t = 0; TRO.called = false; }
         world = keep.world; px = fx = keep.px; py = fy = keep.py; TRO.state = keep.st; TRO.x = keep.x; TRO.t = keep.t;
       });
       // it draws in the flat cameras and stands in 3D
@@ -176,7 +194,7 @@ const CANDIDATES = [
       const en = new Set(Object.keys(UI.en)), es = new Set(Object.keys(UI.es));
       problems.push('UI keys differ: EN-only=' + [...en].filter(k => !es.has(k)) + ' ES-only=' + [...es].filter(k => !en.has(k)));
     }
-    ['flavor', 'locs', 'classes', 'chat', 'arrive', 'trolley'].forEach(k => {
+    ['flavor', 'locs', 'classes', 'chat', 'arrive', 'pass'].forEach(k => {
       if (keys(UI.en[k]) !== keys(UI.es[k])) problems.push('UI.' + k + ' subkeys differ');
     });
     if (UI.en.careEvents('X').length !== UI.es.careEvents('X').length) problems.push('careEvents length differs');
@@ -2752,9 +2770,9 @@ const CANDIDATES = [
       // A trolley stops where there are rails. Every destination must be a world that actually
       // holds a trolley tile — which is why the office came off the list (owner, 2026-09-03:
       // "i dont like that i go from a train to a floor... i asked to make the world realistic").
-      TRV.forEach(d => { const w = WORLDS[d.w];
-        if (!w) return;
-        if (!w.rows.join('').includes('Y')) problems.push('the trolley stops somewhere with no trolley stop in it: ' + d.w); });
+      TRV.forEach(d => { const L = troLine(d.w);
+        if (!WORLDS[d.w]) return;
+        if (!L || !troStops(L).length) problems.push('the trolley stops somewhere with no trolley stop in it: ' + d.w); });
       if (TRV.some(d => d.w === 'f2')) problems.push('the office is back on the trolley list');
       TRV.forEach(d => { const w = WORLDS[d.w];
         if (!w) problems.push('travel points at a world that does not exist: ' + d.w);
@@ -3674,7 +3692,306 @@ const CANDIDATES = [
       fails.push(`guarantee: a URL flag changed admin mode (admin=${adm.admin}, brushes hidden=${adm.brushes})`);
   }
 
+  /* ---- everything alive that can reach the rails is something the tram can SEE ----
+     docs/OWNER.md, settled by the owner 2026-09-11: "a realistic trolley, in my boook does stop for
+     traffic- pedestrian, vehicle or even fauna", and the sentence under it — "braking for the
+     hummingbird and running over the pigeon is not a policy, it is a blind spot."
+     Meridian did that, by species, by name, literally. Chava filmed Paloma being drawn INSIDE the
+     tram's third window, twice inside sixty seconds of standing at the stop, on the same rails where
+     the same tram stopped dead for him and waited fifty seconds.
+     TWO WRONG VERSIONS OF THIS CHECK WERE WRITTEN FIRST AND BOTH ARE WORTH THE COMMENT.
+     The first asked whether ANY critter was in that world and went green — because the colibri is on
+     the same street, so the guard written to catch "it brakes for the hummingbird and runs over the
+     pigeon" passed for precisely the reason that sentence names. The second asked whether the animal
+     was a member of CRIT, which is an implementation detail: the fix does not add it to CRIT, so a
+     correct engine would have stayed red.
+     This one puts each animal on the rails in front of a running tram and asks whether the tram
+     stops. That is the noun. It survives any rewrite of how the engine keeps its list. */
+  const blind = await page.evaluate(() => {
+    const P = [];
+    const lines = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT) ? TROLLEYAT : [];
+    if (!lines.length) return P;
+    const beasts = [['dog', typeof DOG !== 'undefined' ? DOG : null],
+                    ['cat', typeof CAT !== 'undefined' ? CAT : null],
+                    ['pigeon', typeof PIG !== 'undefined' ? PIG : null]];
+    const key = { dog: 'dog', cat: 'cat', pigeon: 'pig' };
+    lines.forEach(L => {
+      const keep = { st: TRO.state, x: TRO.x, dir: TRO.dir, w: world, px: px, py: py };
+      beasts.forEach(([name, a]) => {
+        if (!a || AW(key[name]) !== L.world) return;       /* not on a trolley street at all */
+        const w = WORLDS[L.world];
+        const mid = Math.round((L.from + L.to) / 2);
+        const g = w.grid[L.row] && w.grid[L.row][mid];
+        if (g === undefined || SOLID.has(g) || g === 'N') return;   /* it could not stand there anyway */
+        /* park the hero far away so HE is not what stops it, put the animal on the rails,
+           and roll the tram up to it */
+        world = L.world; px = fx = 0; py = fy = 0;
+        const was = { x: a.x, y: a.y, fx: a.fx, fy: a.fy, lift: a.lift };
+        a.x = a.fx = mid; a.y = a.fy = L.row; a.lift = null;
+        TRO.dir = L.to >= L.from ? 1 : -1;
+        TRO.x = mid - TRO.dir * 3.0; TRO.state = 'run'; TRO.t = 0;
+        let held = false;
+        for (let i = 0; i < 40 && !held; i++) { troUpdate(50); if (TRO.state === 'hold') held = true; }
+        if (!held) P.push('the trolley does not stop for the ' + name + ' on its own line in ' +
+          L.world + ' — it drives straight through, while it brakes for a hummingbird on the same street');
+        a.x = was.x; a.y = was.y; a.fx = was.fx; a.fy = was.fy; a.lift = was.lift;
+      });
+      TRO.state = keep.st; TRO.x = keep.x; TRO.dir = keep.dir;
+      world = keep.w; px = fx = keep.px; py = fy = keep.py;
+    });
+    return P;
+  });
+  fails.push(...blind);
+
+  /* ---- a bird already in the air is not something to brake for ----
+     The lift exists so the tram does NOT have to stop for her. Lupe measured that it stopped doing
+     that the moment TRO_SPEED moved: at 3.4 the tram never braked for her at all; at 6.0 it braked
+     83 ms BEFORE she was clear of the rail, so every fourth tram made a 1.4 s unexplained stop in
+     the street for a bird that was already flying away.
+     The cause is worth the comment because it is E10's whole shape: the lift's lead was written as
+     a fraction of the speed — `TRO_SPEED*0.9` — precisely so it would survive a speed change, and
+     the comment above it SAID so. But she stays logically on the rails for the whole 560 ms flight,
+     so the lead has to clear the brake window PLUS the flight, and 0.9v > 2.6 + 0.56v only holds
+     above v=7.65. A constant expressed as a fraction of another constant is not automatically safe
+     when that constant moves, and a comment promising an invariant is a claim about arithmetic
+     nobody did.
+     This measures the thing itself: from the frame she leaves the rail row to the frame the tram
+     first holds. It must be positive at whatever speed the pack is running. */
+  const birdLead = await page.evaluate(() => {
+    const P = [];
+    const L = (typeof troLine === 'function') ? troLine(typeof AW === 'function' ? AW('pig') : null) : null;
+    if (!L || typeof PIG === 'undefined') return P;
+    const keep = { w: world, px: px, py: py, x: PIG.x, y: PIG.y, st: TRO.state, tx: TRO.x };
+    world = L.world; px = fx = 0; py = fy = 0;            /* the hero must not be what stops it */
+    const mid = Math.round((L.from + L.to) / 2);
+    PIG.x = PIG.fx = mid; PIG.y = PIG.fy = L.row; PIG.lift = null; PIG.hop = 0;
+    PIG.moving = false; PIG.next = 1e9;
+    TRO.dir = L.to >= L.from ? 1 : -1;
+    TRO.x = mid - TRO.dir * 12; TRO.state = 'run'; TRO.t = 0;
+    let clearAt = null, brakeAt = null;
+    for (let i = 0; i < 220; i++) { const t = i * 16.67;
+      troUpdate(16.67); pigUpdate(16.67, performance.now() + t);
+      if (clearAt === null && Math.round(PIG.y) !== L.row) clearAt = t;
+      if (brakeAt === null && TRO.state === 'hold') brakeAt = t; }
+    if (clearAt === null) P.push('the pigeon never gets off the trolley line at all — she is standing on the rails when the tram arrives and the lift never fires');
+    else if (brakeAt !== null && brakeAt < clearAt)
+      P.push('the tram brakes ' + Math.round(clearAt - brakeAt) + ' ms before the pigeon is clear of the rail — ' +
+             'she is already in the air and it stops for her anyway, so every pass makes an unexplained stop in the middle of the street');
+    world = keep.w; px = fx = keep.px; py = fy = keep.py;
+    PIG.x = PIG.fx = keep.x; PIG.y = PIG.fy = keep.y; PIG.lift = null; PIG.hop = 0;
+    TRO.state = keep.st; TRO.x = keep.tx;
+    return P;
+  });
+  fails.push(...birdLead);
+
+  /* ---- and it sees what is UNDER it, not only what is in front of the nose ----
+     troAhead's window was d ∈ [-0.6, 2.6] measured from the nose, and the car is TRO_LEN=2 long —
+     so the 1.4 tiles between its own door and its own tail were invisible to it. That is 30% of the
+     span where anything can interact with the tram at all, and it is where you end up if you step
+     onto the rails just after the front of it goes past you.
+     Chava filmed both halves in one ten-minute trace: Paloma waited out the whole approach on the
+     kerb, correctly, then stepped onto the rails at d = -0.70 — a TENTH OF A TILE past the edge —
+     and six consecutive samples show her drawn inside the tram's body with the tram in state `run`.
+     Then he did it to himself on purpose at d = -1.13 and stood chest-deep in a moving tram for
+     230 ms. Both the brake and the bird's lift start at the same -0.6, so a thing that steps on
+     beside the door misses both.
+     It is a ratio of distances, so it was identical at 3.4 and at 6.0 — the speed did not cause it.
+     What the speed changed is that the band now sweeps past in 233 ms instead of 412, so you fall
+     into it half as often and it reads more like a glitch than a collision when you do. */
+  const under = await page.evaluate(() => {
+    const P = [];
+    const L = (typeof troLine === 'function' && typeof TROLLEYAT !== 'undefined' && TROLLEYAT[0])
+      ? troLine(TROLLEYAT[0].world) : null;
+    if (!L) return P;
+    const keep = { w: world, px: px, py: py, st: TRO.state, x: TRO.x, d: TRO.dir };
+    world = L.world; TRO.dir = L.to >= L.from ? 1 : -1; TRO.state = 'run';
+    const mid = Math.round((L.from + L.to) / 2);
+    py = fy = L.row; px = fx = mid;                       /* the hero, standing on the rails */
+    /* put him dead in the middle of the car: want d = -1, and d = (px-nose)*dir, so nose = px+dir */
+    TRO.x = (px + TRO.dir) - (TRO.dir > 0 ? TRO_LEN : 0);
+    const nose = TRO.x + (TRO.dir > 0 ? TRO_LEN : 0), d = (px - nose) * TRO.dir;
+    if (d < -TRO_LEN || d > 0) P.push('this check did not manage to stand the hero under the tram (d=' + d.toFixed(2) + ') — it proves nothing');
+    else if (!troAhead(L))
+      P.push('a person standing on the rails INSIDE the tram is invisible to it — it is ' + Math.abs(d).toFixed(2) +
+             ' tiles behind the nose, under the car, and the tram rolls straight through without slowing');
+    world = keep.w; px = fx = keep.px; py = fy = keep.py; TRO.state = keep.st; TRO.x = keep.x; TRO.dir = keep.d;
+    return P;
+  });
+  fails.push(...under);
+
+  /* ---- the small things keep off the rails, and the tram does not have to stop for them ----
+     The owner, 2026-09-11: "i mean she should be small enough and smart enough to stay away from the
+     tram please." "She" is the colibri. CRITTERS declares her at st(16,4) and the engine lets a
+     critter wander four tiles of Manhattan around home, which reaches row 2 — the rails. She hovers
+     rather than walks, so she can stand on the line indefinitely, and she did: three of six trams in
+     four minutes stopped dead for a hummingbird.
+     THE NOUN IS NOT "does the tram avoid her". That is the blind spot this branch already closed
+     once, by species, and the brake must keep catching a critter that is genuinely cornered. The
+     noun is "does the tram HAVE TO STOP for her" — she must be off the rail row before the brake
+     window ever reaches her, by her own doing.
+     Every critter is given `next = 1e9` so its ordinary wander cannot fire. Nothing but the rule can
+     move it, so a random walk that happened to clear the line in time cannot be mistaken for one. */
+  const shy = await page.evaluate(() => {
+    const P = [];
+    const lines = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT) ? TROLLEYAT : [];
+    if (!lines.length || typeof CRIT === 'undefined' || typeof critUpdate !== 'function') return P;
+    lines.forEach(L => {
+      const w = WORLDS[L.world]; if (!w) return;
+      const mid = Math.round((L.from + L.to) / 2);
+      const g = w.grid[L.row] && w.grid[L.row][mid];
+      if (g === undefined || SOLID.has(g) || g === 'N') return;   /* nothing could stand there anyway */
+      CRIT.filter(c => c.world === L.world).forEach(cr => {
+        const keep = { w: world, px: px, py: py, x: cr.x, y: cr.y, fx: cr.fx, fy: cr.fy,
+                       mv: cr.moving, mt: cr.mt, nx: cr.next, sit: cr.sit, tk: cr.task,
+                       st: TRO.state, tx: TRO.x, dir: TRO.dir, t: TRO.t };
+        world = L.world;
+        /* the hero: off the rails, and far from the stop, so he is not the reason for anything */
+        px = fx = mid; py = fy = Math.min(w.H - 1, L.row + 4);
+        cr.x = cr.fx = mid; cr.y = cr.fy = L.row; cr.moving = false; cr.mt = 0;
+        cr.sit = false; cr.task = null; cr.next = 1e9;   /* its turn never comes: only the rule can move it */
+        TRO.dir = L.to >= L.from ? 1 : -1;
+        TRO.x = mid - TRO.dir * 10; TRO.state = 'run'; TRO.t = 0;
+        TRO.dwelt = 0; TRO.dwellAt = null;
+        let clearAt = null, brakeAt = null;
+        for (let i = 0; i < 200; i++) { const t = i * 16.67;
+          troUpdate(16.67); critUpdate(16.67, 1e6 + t);
+          if (clearAt === null && Math.round(cr.y) !== L.row) clearAt = t;
+          if (brakeAt === null && TRO.state === 'hold') brakeAt = t; }
+        const who = cr.name || ('the ' + cr.kind);
+        if (clearAt === null)
+          P.push(who + ' never leaves the trolley line in ' + L.world + ' — standing on the rails while the ' +
+                 'tram comes, waiting for the tram to stop instead of getting out of the way');
+        else if (brakeAt !== null && brakeAt <= clearAt)
+          P.push('the tram has to brake for ' + who + ' in ' + L.world + ', ' + Math.round(clearAt - brakeAt) +
+                 ' ms before the line is clear — that is the tram staying away from the critter, not the critter staying away from the tram');
+        world = keep.w; px = fx = keep.px; py = fy = keep.py;
+        cr.x = keep.x; cr.y = keep.y; cr.fx = keep.fx; cr.fy = keep.fy;
+        cr.moving = keep.mv; cr.mt = keep.mt; cr.next = keep.nx; cr.sit = keep.sit; cr.task = keep.tk;
+        TRO.state = keep.st; TRO.x = keep.tx; TRO.dir = keep.dir; TRO.t = keep.t;
+      });
+    });
+    return P;
+  });
+  fails.push(...shy);
+
+  /* ---- ...and the two radii cannot be put in the wrong order ----
+     The one line of arithmetic the rule above rests on, asserted instead of promised. The critter's
+     awareness must reach FURTHER than the tram's brake, or the brake fires first, the car stops
+     before it is ever frightening, the critter never becomes endangered, and both of them stand in
+     the street for ever. That deadlock is not hypothetical: it is exactly what the pigeon's lift
+     threshold did on 2026-09-11 (the lift fired at 3.2, the brake at 2.6, the tram entered the
+     window first and the lift's own "the tram must be running" test then refused to fire — a tram
+     stopped in the street for good), and it was found by rendering a mock, not by reading the code.
+     Two constants, one comparison, and the thing this file exists to prevent. */
+  const radii = await page.evaluate(() => {
+    const P = [];
+    if (typeof TRO_SHY === 'undefined' || typeof TRO_LOOK === 'undefined') return P;
+    if (!(TRO_SHY > TRO_LOOK)) P.push('the tram brakes at ' + TRO_LOOK + ' tiles and a critter only ' +
+      'notices it at ' + TRO_SHY + ' — the tram stops before it is frightening, so nothing ever moves ' +
+      'out of its way and the car and the critter stand in the street looking at each other for ever');
+    return P;
+  });
+  fails.push(...radii);
+
+  /* ---- ...and a critter that IS cornered still stops it ----
+     The half of the rule above that is easy to lose. "She gets out of the way" must never become
+     "she is ignored": the fauna guard higher up in this file is the record of what that costs, and
+     it was written by this repository about this tram. A critter walled in on both sides of the line
+     cannot leave it, and the tram brakes, exactly as the owner ruled in the first place. */
+  const cornered = await page.evaluate(() => {
+    const P = [];
+    const lines = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT) ? TROLLEYAT : [];
+    if (!lines.length || typeof CRIT === 'undefined') return P;
+    const L = lines[0], w = WORLDS[L.world]; if (!w) return P;
+    const cr = CRIT.filter(c => c.world === L.world)[0]; if (!cr) return P;
+    const mid = Math.round((L.from + L.to) / 2);
+    const keep = { w: world, px: px, py: py, x: cr.x, y: cr.y, mv: cr.moving, nx: cr.next,
+                   st: TRO.state, tx: TRO.x, dir: TRO.dir,
+                   up: w.grid[L.row - 1], dn: w.grid[L.row + 1],
+                   upv: w.grid[L.row - 1] && w.grid[L.row - 1][mid],
+                   dnv: w.grid[L.row + 1] && w.grid[L.row + 1][mid] };
+    /* wall the two tiles beside it — a real violation, put back before we leave */
+    const solidGlyph = [...SOLID].find(g => g && g.length === 1) || '#';
+    const wall = (row) => { if (!w.grid[row]) return;
+      if (typeof w.grid[row] === 'string') { const g = w.grid[row].split(''); g[mid] = solidGlyph; w.grid[row] = g.join(''); }
+      else w.grid[row][mid] = solidGlyph; };
+    wall(L.row - 1); wall(L.row + 1);
+    world = L.world; px = fx = mid; py = fy = Math.min(w.H - 1, L.row + 4);
+    cr.x = cr.fx = mid; cr.y = cr.fy = L.row; cr.moving = false; cr.next = 1e9;
+    TRO.dir = L.to >= L.from ? 1 : -1;
+    TRO.x = mid - TRO.dir * 6; TRO.state = 'run'; TRO.t = 0; TRO.dwelt = 0; TRO.dwellAt = null;
+    let held = false;
+    for (let i = 0; i < 120 && !held; i++) { troUpdate(16.67); if (typeof critUpdate === 'function') critUpdate(16.67, 1e6 + i * 16.67);
+      if (TRO.state === 'hold' && Math.round(cr.y) === L.row) held = true; }
+    if (!held) P.push((cr.name || ('a ' + cr.kind)) + ', walled in on the trolley line in ' + L.world +
+      ', cannot get off it and the tram drives straight through — getting out of the way has quietly become being ignored');
+    if (w.grid[L.row - 1]) { if (typeof w.grid[L.row - 1] === 'string') w.grid[L.row - 1] = keep.up; else w.grid[L.row - 1][mid] = keep.upv; }
+    if (w.grid[L.row + 1]) { if (typeof w.grid[L.row + 1] === 'string') w.grid[L.row + 1] = keep.dn; else w.grid[L.row + 1][mid] = keep.dnv; }
+    world = keep.w; px = fx = keep.px; py = fy = keep.py;
+    cr.x = cr.fx = keep.x; cr.y = cr.fy = keep.y; cr.moving = keep.mv; cr.next = keep.nx;
+    TRO.state = keep.st; TRO.x = keep.tx; TRO.dir = keep.dir;
+    return P;
+  });
+  fails.push(...cornered);
+
+  /* ---- it waits at the stop for somebody walking up to it, and the waiting ends ----
+     The owner, 2026-09-11: "why wouldnt they stop for me? if im walking close to the tram, it should
+     wait if it is already at the tram stop, if i missed it then its ok, itll take me a second and
+     then i should be at the stop anyhow and wont mind a second to arrive."
+     Until now `stops` was read by exactly two things — the boot audit and the summon check — so the
+     car passed its own platform at full speed with a passenger standing on it, and the summon made
+     that WORSE rather than better: standing at the stop called a tram every 8.5 seconds and not one
+     of them stopped. Chava's verdict at the new speed was "worse", in one word.
+     Three things are measured, and the third is the one that keeps it a tram instead of a lift:
+     it waits; it stops waiting; and it does not wait for an empty platform. The brake is checked to
+     be OFF throughout, because "the tram stopped" is also true of a person standing on the rails and
+     that is a different rule with a different reason. */
+  const dwell = await page.evaluate(() => {
+    const P = [];
+    const lines = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT) ? TROLLEYAT : [];
+    if (!lines.length || typeof troStops !== 'function') return P;
+    lines.forEach(L => {
+      const s = troStops(L)[0], w = WORLDS[L.world]; if (!s || !w) return;
+      const keep = { w: world, px: px, py: py, st: TRO.state, x: TRO.x, d: TRO.dir, t: TRO.t, c: TRO.called };
+      const ride = (atStop) => {
+        world = L.world;
+        if (atStop) { px = fx = s.x; py = fy = s.y; }
+        else { px = fx = L.to; py = fy = Math.min(w.H - 1, L.row + 5); }
+        TRO.dir = L.to >= L.from ? 1 : -1;
+        TRO.state = 'run'; TRO.t = 0; TRO.called = false; TRO.dwelt = 0; TRO.dwellAt = null;
+        TRO.x = s.x - TRO.dir * 3;
+        let still = 0, served = 0, braked = false;
+        for (let i = 0; i < 200; i++) {
+          const x0 = TRO.x, at = (s.x >= TRO.x - 0.5 && s.x <= TRO.x + TRO_LEN + 0.5);
+          troUpdate(50);
+          if (typeof troAhead === 'function' && TRO.state !== 'away' && troAhead(L)) braked = true;
+          if (at && TRO.state !== 'away') { served += 50; if (TRO.x === x0) still += 50; }
+        }
+        return { still: still, served: served, braked: braked };
+      };
+      const mine = ride(true);
+      if (!mine.served) P.push('this check never got the tram as far as its own stop in ' + L.world + ' — it proves nothing');
+      else if (mine.braked) P.push('standing at the stop in ' + L.world + ' puts the hero in front of the tram, so this check is reading the brake and not the stop — it proves nothing');
+      else if (mine.still < 800) P.push('the trolley runs straight past its own stop in ' + L.world +
+        ' with somebody standing on it: you call it, it comes, and it does not stop for you');
+      else if (mine.still > 7000) P.push('the trolley stands at the stop in ' + L.world + ' for ' + mine.still +
+        ' ms and shows no sign of leaving — one person on a platform can park the line for ever');
+      const empty = ride(false);
+      if (empty.served && empty.still > 400) P.push('the trolley stands at the stop in ' + L.world + ' for ' +
+        empty.still + ' ms with nobody anywhere near it — it is not waiting for a passenger, it is just slow');
+      world = keep.w; px = fx = keep.px; py = fy = keep.py;
+      TRO.state = keep.st; TRO.x = keep.x; TRO.dir = keep.d; TRO.t = keep.t; TRO.called = keep.c;
+    });
+    return P;
+  });
+  fails.push(...dwell);
+
+
+
   await browser.close();
+
+
+
   if (fails.length) { console.log('FAIL\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log(`OK — ${stat.quests} quests, maxXP ${stat.maxXP}, all invariants hold.`);
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

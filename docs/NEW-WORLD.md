@@ -115,6 +115,39 @@ tile — a tree's canopy, a lamp globe, a market umbrella.
 normal: El Changarrito runs a whole world on **nine drawings** across 45 glyphs, and Meridian has
 18 solid glyphs with no side drawing at all.
 
+## 0⅞ · If the world is meant to be CALM, say what replaces the pressure — before you build (2026-09-11)
+
+**This is the third question, and it is the one a new world is most likely to skip**, because
+"relaxing" sounds like a description of a mood rather than a specification.
+
+`[WEB]` Cook, Serve, Delicious! 3 shipped a Chill Mode that removed customer impatience and walkouts
+entirely. The studio — a decade into the genre — **could find nothing to put in the hole, so it
+capped the medal at silver instead.** That is an admission that the score was the content.
+(https://www.thexboxhub.com/cook-serve-delicious-3-review/)
+
+**So a world briefed as calm owes an answer to one question before a file is written: *what now
+generates interest?* "The player enjoys the freedom" is not an answer.** The five that other games
+have shipped are in `docs/GENRE-RULES.md` R1–R5, each with its trap: **comprehension** (the thing is
+incomplete and you reconstruct it), **reading a person** (what you make is the reply, and it changes
+what they say next), **fit** (a light constraint that yields instead of punishing — the expensive
+one, it needs an inventory this engine does not have), **unrushable duration with abundance**, and
+**tactility** (spend it last, on two or three objects).
+
+Three rules that travel with this, and each is cheap to honour and expensive to retrofit:
+
+- **`[CODE]` A pack that declares nothing inherits no stakes.** `STK()` defaults to `{mode:"none"}`
+  (`engine/engine.js:330`) and `stakesCfg()` reads stakes **per chapter** (`:333`), so *"a calm world
+  with exactly one scored thing in one district"* is already a seam. **The calm version is the cheap
+  version here, which is unusual — do not spend engine work buying it.**
+- **Never build a day budget.** `[WEB]` It is how a timer comes back wearing cozy clothes: it never
+  counts down in front of you, it just makes every action cost something scarce. `[CODE]` The engine
+  reads the real clock for light only (`drawDaylight`) and nothing in it spends a day. **That is a
+  property to preserve, not an omission to fix.**
+- **Decide what a mistake MEANS, and write it down.** Eight shipped answers are in
+  `docs/research/2026-09-11-cooking-games.md` §3. The two cheapest: *the mistake becomes dialogue you
+  would not otherwise have seen*, and *a named, blameless skip* ("Let It Be"). **A mistake is only a
+  punishment if it SUBTRACTS.**
+
 ## 1 · The folder — nine files, and which ones the engine actually needs
 
 ```
@@ -162,13 +195,32 @@ became visible once a second world existed:
 **Optional — guarded by `typeof`, the engine simply does less without them:**
 `CAMDEF CAMERAS STAKES GROWTH SEASONS CHAPTERS ENDLESS INTERVIEW CRITTERS EGGS CHATTER CHILL NPCACT TRV
 DECOR DECOART READS DOCS DOCUI BUILDTPL BUILDS TILEART TILEART_SIDE TILEMETA MAPCOL MAPDOT
-TOWNLBL DOORS DOORLOOK SOLIDX PLACES FLOORS ANIMALS READERLOOK RECORDSRC HUDFACT` — and a template part's `link`
+TOWNLBL DOORS DOORLOOK SOLIDX PLACES FLOORS ANIMALS READERLOOK RECORDSRC HUDFACT TROLLEYAT` — and a template part's `link`
 (`{door:[dy,dx], landing:[x,y], exit:[x,y], interior:{rows, people, locs, arrive}}`, #10): the
 build stamps the interior as a world named after the lot and keys both doors by place
 (`PORTALSAT`), so one template can be stamped on many lots and every door opens — and, since `mq-v65`, **`STOREPFX`** (config.js): the prefix on
 every storage key. Optional in the engine, **required in practice for any second world served
 from the same origin**, or it loads the first world's save and overwrites it (§8). A world with none of these is a walkable town with people and
 quests. Everything else is a layer you add when its answer arrives.
+
+**`TROLLEYAT` — the one optional seam with a boot audit of its own, so it is worth its own paragraph.**
+One entry per line: `{world, row, from, to, stops}`. `stops` is a **list of platform tiles — the tile
+a person stands on to be served — beside the rails, never on them**, and it is a list rather than a
+number because two different readers need it: *is this tile a stop* (the travel panel opens there)
+and *which stop is the car's doors at* (the car waits there). Declare no `stops` and the line has
+none: nothing calls the car, nothing opens the pass, and it simply runs. **Declaring half is what
+hurts** (`docs/TAGS.md` L16), so `troAudit()` warns at boot about a second line in one world, any key
+with no reader, and a stop that is off the map, inside something, **on the rails**, out of reach, or
+past the end of the run. Read your console the first time.
+
+Three behaviours come free and none of them is a Meridian choice: it **brakes** for anything alive on
+the rails ahead (`TRO_LOOK` tiles); **critters keep clear of it themselves** (`TRO_SHY` tiles, and
+`TRO_SHY > TRO_LOOK` is an invariant with a guard on it — reverse them and the car and the critter
+deadlock for ever); and it **waits at a platform** for up to `TRO_DWELL` while somebody is within
+`TRO_REACH` of it, then goes. All four are engine constants, deliberately not pack keys: `troAudit`
+refuses a line that declares a word no reader exists for, so a `dwell:` key with no seam behind it
+would be a promise the engine does not keep. If your game needs its own numbers, that is one seam,
+added once, with an audit entry each.
 
 ## 2 · The switch — honest state: there is no pack selector
 

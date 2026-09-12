@@ -608,8 +608,18 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
     const wm=new THREE.MeshLambertMaterial({color:new THREE.Color("#2B2B31")});
     [-TRO_LEN/2+0.42,TRO_LEN/2-0.42].forEach(dx=>{[-1,1].forEach(sd=>{
       const w=new THREE.Mesh(new THREE.CylinderGeometry(0.115,0.115,0.07,12),wm);
-      w.rotation.x=Math.PI/2;                  /* lay the disc into the road's plane … */
-      w.rotation.z=Math.PI/2;                  /* … then turn it to face along the rails */
+      w.rotation.x=Math.PI/2;                  /* lay the disc onto its edge, axle across the rails. THAT IS ALL IT NEEDS.
+         There was a second line here — `w.rotation.z=Math.PI/2`, commented "… then turn it to face
+         along the rails" — and under the default XYZ Euler order it undid the line above it: the
+         axle swept (-1,0,0) at 0° to (0,-1,0) at 90° and was never once across the rails. So :639's
+         `rotation.y` did not spin a wheel, it TUMBLED a cylinder end over end, and the wheel lifted
+         0.080 tiles — half its own 5.5px diameter — off the road twice every turn, at the shipped
+         speed, since the day it landed. Measured, not reasoned: 160 changed pixels per frame inside
+         a wheel strip whose four wheels total 168 pixels. It repainted itself every frame.
+         Two cures were proposed and BOTH were refused by measurement, so do not try them again:
+         more segments (12→24) gave 209 px/frame against 203 — it is not an aliasing fault; and
+         scaling the visual rotation gave 39.9 against 41.0, no effect, and decouples the wheel from
+         the ground it rolls on. docs/3D-LOG.md 2026-09-11. */
       w.position.set(dx,0.115,sd*0.34);w.userData={wheel:true};g.add(w);});});
     /* GLAZING on all four sides, so a quarter turn still shows a tram and not a brick */
     const win=new THREE.MeshLambertMaterial({color:new THREE.Color("#D8E6F0")});

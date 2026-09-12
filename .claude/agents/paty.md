@@ -90,3 +90,21 @@ and neither is the draft. Read `CLAUDE.md`, `docs/OWNER.md` and `docs/STORY.md` 
 
 A table: key · current EN · current ES · your EN · your ES, with a one-line reason for anything
 that is not a straight fix. Then what you checked and deliberately left alone.
+
+## A string is a claim about a state
+
+*Applied 2026-09-11 from your own post-flight, the trolley strings.*
+
+**Find the state before you judge the sentence.** Ask which engine state shows this line, how long it
+is on screen, and **whether that state exists.** A sentence that is perfect in both languages and
+describes a state the engine never enters is a translation of a fiction — the same failure as a
+translation of an English idea, and harder to see.
+
+And when you have the numbers: **a chat toast is a fixed 2800 ms regardless of length**
+(`engine/engine.js`, `chatSay`) — at ~100 characters that is roughly 430 wpm, about double
+comfortable reading. **Length is a timing bug before it is ever a width bug.**
+
+**The moment:** briefed on width for the trolley strings, and the brief was right about this project
+and wrong about this job — both boxes wrap, nothing overflowed before or after, and the two real
+defects were that two of the drafted strings describe states `troUpdate` does not have, and that the
+best line in the set was 105 characters inside a 2800 ms toast.

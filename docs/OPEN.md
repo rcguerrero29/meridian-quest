@@ -43,7 +43,8 @@ then this sheet, then the open GitHub issues. Nothing else is required reading.
 
 ## 3 · The registers — where knowledge lives now
 
-Six files now, each opened this week, each with the same discipline: **they grow from what actually
+**Ten now** — the count said "six" for a day after the table had nine rows, and `GAUGE.md` was listed
+twice; both corrected 2026-09-11. Each has the same discipline: **they grow from what actually
 happened, never from imagination.** Read the relevant one before proposing anything in its area.
 
 | File | What it holds | Read it before |
@@ -53,10 +54,10 @@ happened, never from imagination.** Read the relevant one before proposing anyth
 | `docs/QA-PASS.md` | The test checklist and the **escape register** — what reached the owner that should have been caught | shipping anything |
 | `docs/BEAUTIFY.md` | What every object renders as, what it should be, and which are correctly flat | touching any art |
 | `docs/GAUGE.md` | What the engine demands of a brand-new world — **measured by building one**, not inferred | starting a pack, or changing the shared suite |
+| **`docs/GENRE-RULES.md`** | **What other games already proved, as a RULE with its TRAP — two pages, `[WEB]`-sourced.** The five things that survive removing a timer, the eight things a mistake can mean with no fail state, and the line that stops a calm game being an empty one. The long sweeps live in `docs/research/` | **proposing any mechanic, and before saying the word "chill", "cozy" or "relaxing" about anything** |
 | `docs/GIFTED-GAMES.md` | Sourced research on genres, physics, difficulty, multiplayer and occasion design, and **what this engine already ships** for each | proposing a mini-game or a new seam |
 | `docs/REGRESSION.md` | The regression map, R1–R10, and the rule they were bought with: **a guard has to read the noun it actually means** | writing any test |
 | `docs/SECURITY-NOTE-2026-09-10.md` | What the El Changarrito exposure **was and was not**, what the token can actually do, and the four things to check | any question about what leaked, or before touching the deploy |
-| `docs/GAUGE.md` | What the engine demands of a brand-new world, **measured by building one** (2026-09-10) | proposing anything about a second world |
 | `docs/decisions/` | One file per settled decision: the ask verbatim, the answer, **and the options that were rejected, with reasons**. Opened 2026-09-10; three filed, and `docs/ASKS.md` is still where most decisions actually live | re-proposing anything that sounds already-answered |
 
 ## 4 · The traps — things that have already bitten, written so they bite nobody twice

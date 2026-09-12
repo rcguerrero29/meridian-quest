@@ -491,3 +491,118 @@ MURALS.push(
 }
 );
 
+MURALS.push(
+{
+  id:"chema-seis-cuadros-una-rueda", iter:3, date:"2026-09-11",
+  title:{en:"Six frames, one wheel", es:"Seis cuadros, una rueda"},
+  said:{en:"The arithmetic said the wheel would strobe if we sped it up. The contact sheet said it had never been a wheel.",
+        es:"La aritm\u00E9tica dec\u00EDa que la rueda parpadear\u00EDa si la acelerábamos. La hoja de contactos dec\u00EDa que nunca hab\u00EDa sido una rueda."},
+  who:{en:"Chema, who photographed it before he believed it", es:"Chema, que lo fotografi\u00F3 antes de creerlo"},
+  cap:{en:"He was sent to check somebody else's arithmetic \u2014 twelve segments, thirty degrees each, and at the new speed the wheels would run backwards. The arithmetic was sound and it was about a thing that is not on the screen. One line lays each wheel on its side, so what rolls down that street is a black cylinder flipping end over end and bouncing half its own height off the road, twice every turn, and it has been doing it at today's speed since the day it shipped. The speed was never the danger. He also learned to distrust his own first frame: his opening measurement said the wheels changed 1506 pixels, and a control that changed nothing at all changed 1864.",
+       es:"Lo mandaron a revisar la aritm\u00E9tica de otro \u2014 doce segmentos, treinta grados cada uno, y a la nueva velocidad las ruedas girar\u00EDan al rev\u00E9s. La aritm\u00E9tica estaba bien y hablaba de algo que no est\u00E1 en la pantalla. Una l\u00EDnea acuesta cada rueda de lado, y lo que rueda por esa calle es un cilindro negro que da vuelta de campana y brinca la mitad de su propia altura sobre el asfalto, dos veces por giro, y lo lleva haciendo a la velocidad de hoy desde el d\u00EDa que se entreg\u00F3. La velocidad nunca fue el peligro. Tambi\u00E9n aprendi\u00F3 a desconfiar de su propia primera toma: su medici\u00F3n inicial dijo que las ruedas cambiaban 1506 p\u00EDxeles, y un control que no cambiaba nada cambi\u00F3 1864."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+    /* CHEMA'S HAND: a contact sheet. Black film sleeve, sprocket holes, two strips of six frames a
+       sixtieth of a second apart, and the grease pencil that says which strip is a keeper. */
+    const shx=W*0.035, shy=H*0.17, shw=W*0.93, shh=H*0.64;
+    g.fillStyle=P.ink;g.globalAlpha=.18;g.fillRect(shx+5,shy+6,shw,shh);g.globalAlpha=1;
+    g.fillStyle="#241F2E";g.fillRect(shx,shy,shw,shh);
+    g.fillStyle="#15121B";g.fillRect(shx,shy,shw,3);g.fillRect(shx,shy+shh-3,shw,3);
+    g.fillStyle=P.ink;g.font="bold 13px ui-monospace,monospace";
+    g.fillText("EL TROLLEY \u00b7 LA RUEDA \u00b7 1/60 s",shx,H*0.105);
+    g.font="11px ui-monospace,monospace";g.fillStyle=P.deep;
+    g.fillText("390\u00d7844 \u00b7 c\u00e1mara 3D \u00b7 de costado \u00b7 8\u00d7",shx+W*0.42,H*0.105);
+    const n=6, pad=W*0.012, fw=(shw-pad*(n+1))/n, fh=shh*0.33, sp=shh*0.11;
+    const strip=(y0,draw)=>{
+      for(let i=0;i<n;i++){const x=shx+pad+i*(fw+pad);
+        g.fillStyle="#7A3B29";g.fillRect(x,y0,fw,fh);
+        g.fillStyle="#66311F";g.fillRect(x,y0+fh*0.44,fw,fh*0.18);
+        g.fillStyle="#4A4A50";g.fillRect(x,y0+fh*0.62,fw,fh*0.38);
+        g.fillStyle="#D8CBB4";g.fillRect(x+fw*0.52,y0+fh*0.60,fw*0.48,2);
+        draw(x,y0,i);
+        g.strokeStyle="#15121B";g.lineWidth=1;g.strokeRect(x+0.5,y0+0.5,fw-1,fh-1);
+        g.fillStyle="#8A8090";g.font="8px ui-monospace,monospace";g.fillText(String(i+1),x+2,y0+fh-3);}
+      g.fillStyle="#15121B";
+      for(let x=shx+pad;x<shx+shw-pad;x+=fw/4){g.fillRect(x,y0-5,5,3);g.fillRect(x,y0+fh+2,5,3);}};
+    const yA=shy+shh*0.17, yB=yA+fh+sp;
+    strip(yA,(x,y,i)=>{const cx=x+fw*0.34, cy=y+fh*0.50, r=fh*0.21;
+      const a=[-0.35,0.55,1.42,-1.15,0.15,1.05][i];
+      g.save();g.translate(cx,cy);g.rotate(a);
+      g.fillStyle="#1B1B20";g.fillRect(-r,-r*0.42,r*2,r*0.84);
+      g.fillStyle="#3A3A42";g.fillRect(-r,-r*0.42,r*0.46,r*0.84);
+      g.restore();});
+    strip(yB,(x,y,i)=>{const cx=x+fw*0.34, cy=y+fh*0.52, r=fh*0.23;
+      g.fillStyle="#1B1B20";g.beginPath();g.ellipse(cx,cy,r,r*0.88,0,0,7);g.fill();
+      g.fillStyle="#33333A";g.beginPath();g.ellipse(cx-r*0.22,cy-r*0.26,r*0.30,r*0.26,0,0,7);g.fill();});
+    g.strokeStyle="#D9342B";g.lineWidth=3;g.lineCap="round";
+    for(let i=0;i<n;i++){const x=shx+pad+i*(fw+pad);
+      g.beginPath();g.moveTo(x+4,yA+4);g.lineTo(x+fw-4,yA+fh-4);
+      g.moveTo(x+fw-4,yA+4);g.lineTo(x+4,yA+fh-4);g.stroke();}
+    g.fillStyle="#D9342B";g.font="bold 12px ui-monospace,monospace";
+    g.fillText("NO RUEDA",shx+pad,yA-9);
+    g.strokeStyle="#E0A430";g.lineWidth=4;
+    g.beginPath();g.ellipse(shx+shw/2,yB+fh/2,shw*0.475,fh*0.86,0,0,7);g.stroke();
+    g.fillStyle="#E0A430";g.font="bold 12px ui-monospace,monospace";
+    g.fillText("RUEDA \u2713",shx+pad,yB-11);
+    g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("160 px por cuadro \u2014 y la rueda entera mide 168",shx,H*0.955);
+    g.fillStyle=P.moss;
+    g.fillText("41 \u2014 a 6.0, sin parpadeo",shx+W*0.66,H*0.955);}
+}
+);
+
+MURALS.push(
+{
+  id:"chava-cuatro-cuadros", iter:3, date:"2026-09-11",
+  title:{en:"Four frames", es:"Cuatro cuadros"},
+  said:{en:"I didn't press anything. I stood at the stop for a minute and it happened twice.",
+        es:"No apret\u00E9 nada. Me par\u00E9 en la parada un minuto y pas\u00F3 dos veces."},
+  who:{en:"Chava, who plays it wrong on purpose and films what happens",
+       es:"Chava, el que juega mal a prop\u00F3sito y filma lo que pasa"},
+  cap:{en:"Nobody had to reproduce it. She lives at the west end, which is where the game tells you to go and wait for the trolley, and she spends a fifth of her life standing in its lane. Nine minutes of standing still: seventeen trams, four of them straight through her, and not one toast, sound or flinch \u2014 while the same tram stopped dead four tiles short of him and held there until he got bored.",
+       es:"Nadie tuvo que reproducirlo. Ella vive en la punta poniente, que es adonde el juego te manda a esperar el tranv\u00EDa, y se pasa una quinta parte de su vida parada en el carril. Nueve minutos sin moverse: diecisiete tranv\u00EDas, cuatro encima de ella, y ni un aviso, ni un sonido, ni un respingo \u2014 mientras el mismo tranv\u00EDa se fren\u00F3 en seco cuatro casillas antes de \u00E9l y ah\u00ED se qued\u00F3 hasta que se aburri\u00F3."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+    /* CHAVA'S HAND: a strip of 35mm. Nobody else on this wall has a filmstrip, and nobody else's
+       panel is a COUNT. Four frames, timecoded, the pigeon in the same spot in every one because
+       she never moves — and the one where she is painted inside the tram is ringed in chinagraph. */
+    const fx=W*0.04, fy=H*0.22, fw=W*0.68, fh=H*0.42;
+    g.fillStyle="#1A1620";g.fillRect(fx,fy-8,fw,fh+16);
+    g.fillStyle="#0E0C12";
+    for(let x=fx+4;x<fx+fw-4;x+=11){g.fillRect(x,fy-6,6,4);g.fillRect(x,fy+fh+2,6,4);}
+    const n=4, pad=4, cw=(fw-pad*(n+1))/n;
+    const tc=["0:00","0:11","0:13","0:15"];
+    for(let i=0;i<n;i++){const x=fx+pad+i*(cw+pad);
+      g.fillStyle="#4A4B52";g.fillRect(x,fy,cw,fh);                       /* the road */
+      g.fillStyle="#3A3F46";g.fillRect(x,fy+fh*0.42,cw,2);g.fillRect(x,fy+fh*0.70,cw,2);
+      if(i===1){murTram(g,x-cw*0.55,fy+fh*0.20,cw*0.9,fh*0.46,{driverAt:1});}
+      if(i===2){murTram(g,x+cw*0.02,fy+fh*0.20,cw*0.9,fh*0.46,{driverAt:1});}
+      if(i===3){murTram(g,x+cw*0.72,fy+fh*0.20,cw*0.9,fh*0.46,{driverAt:1});}
+      /* her, in the same tile in every frame, because she never moves */
+      const bx=x+cw*0.46, by=fy+fh*0.52;
+      g.fillStyle="#9AA0A8";g.fillRect(bx,by,5,4);
+      g.fillStyle="#7E858E";g.fillRect(bx+3,by-3,4,4);
+      g.fillStyle="#E0A430";g.fillRect(bx+6,by-2,2,1);
+      g.fillStyle="#C87F1E";g.fillRect(bx+1,by+4,1,2);g.fillRect(bx+3,by+4,1,2);
+      g.strokeStyle="#0E0C12";g.lineWidth=1;g.strokeRect(x+0.5,fy+0.5,cw-1,fh-1);
+      g.fillStyle="#8A8090";g.font="7px ui-monospace,monospace";g.fillText(tc[i],x+2,fy+fh-3);}
+    /* the chinagraph ring on frame 3 — where she is inside the third window */
+    const rx=fx+pad+2*(cw+pad);
+    g.strokeStyle="#D9342B";g.lineWidth=3;
+    g.beginPath();g.ellipse(rx+cw/2,fy+fh/2,cw*0.56,fh*0.56,0,0,7);g.stroke();
+    g.lineWidth=2;
+    g.beginPath();g.ellipse(rx+cw/2,fy+fh/2,cw*0.46,fh*0.46,0,0,7);g.stroke();
+    /* the count, in mono, under the strip */
+    g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("9 min \u00b7 17 pasadas \u00b7 4 encima \u00b7 0 avisos",fx,H*0.76);
+    g.fillStyle=P.deep;g.font="10px ui-monospace,monospace";
+    g.fillText("y el mismo tranv\u00EDa se para en seco por m\u00ED \u2192",fx,H*0.84);
+    /* ...and there it is, at the right-hand edge, stopped, with one small green person in front */
+    const sx=W*0.76;
+    murTram(g,sx+W*0.07,H*0.66,W*0.17,H*0.13,{driverAt:-1});
+    g.fillStyle="#D9342B";g.beginPath();g.arc(sx+W*0.075,H*0.70,3,0,7);g.fill();
+    murBody(g,sx,H*0.71,P.moss,8);
+    g.fillStyle=P.shade;g.fillRect(W*0.74,H*0.885,W*0.22,2);}
+}
+);
+

@@ -212,6 +212,24 @@ read its own brief.
 3. **The gap I predicted — did it appear?** A wrong prediction is a finding, not a failure.
 4. **The edit I propose to my own file**, as exact text, or *"none, and here is why not"*.
 
+## Before you write a guard, read the register of proxies
+
+`docs/REGRESSION.md` now carries **ten guards that read a proxy for the thing they meant** — eight
+found in five days, and **two of them written by the session that had just found the other eight.**
+That last fact is the useful one: **knowing about the mistake does not stop you making it.**
+
+Three things they had in common, worth checking your own guard against before it lands:
+
+1. **The proxy is always cheaper to read than the thing** — a filename, a string equality, a bounding
+   box, a membership test. The correct noun usually needs a behaviour to be exercised.
+2. **The proxy is usually correct today.** They fail when the world grows a second case.
+3. **A green guard is not evidence.** Eight ran green for days or weeks.
+
+**The question, and it is not optional:** *if I break the thing this is for, in the smallest and most
+plausible way, does it print a sentence a person would say?* **If you have not run that, the guard is
+untested however green the suite is** — which is what `melo` is for, and what step 5½ asks of every
+change.
+
 ## The mural — one panel per agent, in your own hand
 
 *Owner, 2026-09-11: "i want the mural please" → then "can be more creative and if its that way one
@@ -348,6 +366,9 @@ A fix that leaves no trace teaches nobody. Route it:
 - a decision NOT taken, with its options → `docs/ARCH-LOG.md`
 - something that reached the owner that should not have → `docs/QA-PASS.md` escape register
 - a 3D attempt, including a failed one → `docs/3D-LOG.md`
+- outside-sourced research (`[WEB]`) → the full sweep to `docs/research/YYYY-MM-DD-<topic>.md`, tags
+  and URLs intact, **and at least one rule to `docs/GENRE-RULES.md`** with its trap. A sweep that
+  ends in a task output is a sweep nobody will ever read again
 - the owner's words → `docs/ASKS.md`, verbatim, **before** the work starts
 - what the engine demands of a new world → `docs/GAUGE.md`
 

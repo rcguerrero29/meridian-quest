@@ -8,15 +8,16 @@
 # new line here in the same commit that paints the panel.
 #
 # A correction to an old panel is a NEW panel that points back at it. Never an edit.
-
-i1-dos-cabinas|ec40c29cd5ef
-i2-paso-que-nadie-vio|4cf486fd42ae
-owner-uno-por-mano|ef71a7faa498
-beto-predicado-no-consulta|e5446b347dc4
-rosa-590-contra-2080|d7f40ba31ab0
-tavo-mas-lento-que-caminar|4137b8ede087
-tono-la-marca-y-el-glifo|a81921b84bb0
-guero-tres-carriles|1bc8aec84e05
-rigo-el-claxon|d72a457b0eb1
-nacho-la-esquina-volvio|d38c41030818
-beto-aprobado-por-la-prueba-del-muro|6a32cdc7ea3f
+i1-dos-cabinas|e1f94af59184
+i2-paso-que-nadie-vio|945b7c049b72
+owner-uno-por-mano|bb941613df2b
+beto-predicado-no-consulta|3c8b20343022
+rosa-590-contra-2080|b2b9b4631674
+tavo-mas-lento-que-caminar|959331f1c72d
+tono-la-marca-y-el-glifo|96fb886af239
+guero-tres-carriles|0046ffadc48b
+rigo-el-claxon|209f95e18bf7
+nacho-la-esquina-volvio|416a19be78e7
+beto-aprobado-por-la-prueba-del-muro|fba7c7026682
+chema-seis-cuadros-una-rueda|f75abb673997
+chava-cuatro-cuadros|10671e6968a6

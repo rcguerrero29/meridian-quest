@@ -4,6 +4,13 @@ _site/
 package.json
 package-lock.json
 shots/
+# ...and any scratch DIRECTORY, by shape rather than by name. `shots/` was here and
+# `shots.tmp/` walked straight past it on 2026-09-11 — the rule read a name when it meant
+# a kind, which is the same mistake seven guards in this repo have now made. An agent that
+# takes screenshots to answer a question names its folder whatever it likes; none of them
+# belong in a commit. See docs/QA-PASS.md E3.
+*.tmp/
+*.scratch/
 # scratch a session writes at the repo root because playwright-core resolves from here.
 # *.png at the root only — the game's real icons live in subdirectories and at named paths,
 # and screenshots taken to answer a question must never be committed as if they were art.

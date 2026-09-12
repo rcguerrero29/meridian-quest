@@ -373,7 +373,7 @@ helper, and the person who hits it will be reading their content files, not `san
 **The tag.** `still:true` on an NPC (`content/meridian/npcs.js:10`) means *this person does not
 wander*. It is a perfectly portable tag and it is not the leak.
 
-**The leak** is that `troAtStop` (`engine/engine.js:1164-1166`) sniffs a 3×3 block for a stop glyph
+**The leak** is that `troAtStop` (`engine/engine.js:1190-1192`) sniffs a 3×3 block for a stop glyph
 and asks *"is somebody at the stop"* — and the obvious generalisation, from the player to anyone,
 silently turns every permanent fixture next to a stop into a passenger who never boards.
 
@@ -392,16 +392,23 @@ distinguishes *waiting here* from *living here*, and the two look identical to a
 question of the form *"is somebody at X"* must say which somebodies count, in the code, at the point
 it asks.
 
-### L20 · The engine guards the transit **brand** and not the transit **glyph**
+### L20 · The engine guards the transit **brand** and not the transit **glyph** — **CLOSED 2026-09-11**
+
+> **Closed by the `stops` seam.** Both mechanism sites moved together, as this entry demanded: the
+> stop query and the travel-panel trigger now read `troIsStop`, which reads what the line *declares*
+> rather than what the map *paints*. The three art/mural sites stay and are L1's, not this entry's.
+> **And the citations below had all slid again by the time it was closed** — a register that cites
+> line numbers rots faster than the code it cites. Grep the identifier.
+
 
 **The guard that exists.** `test/smoke.js:3283-3288` fails the build if `\bMQT\b` appears in
 `engine/engine.js` or `engine/engine3d.js`, with the message *"a pack name in engine code is the one
 thing the portability law forbids."* It is a good guard. It passes.
 
 **The thing it cannot see.** `"Y"` — Meridian's stop glyph, declared by the pack at
-`content/meridian/art.js:198` — appears in `engine/engine.js` **five times**: `:679` (isometric
-colour), `:1165` (`troAtStop`, *where the vehicle serves*), `:2890` (stepping here opens the travel
-panel), `:4300` (`BASECOL`), `:4501` (a mural may not paint here). Nothing objects. **Three lines
+`content/meridian/art.js:198` — appears in `engine/engine.js` **five times**: `:706` (isometric
+colour), `:1216` (`troAtStop`, *where the vehicle serves*), `:2982` (stepping here opens the travel
+panel), `:4400` (`BASECOL`), `:4601` (a mural may not paint here). Nothing objects. **Three lines
 below a comment in the same test saying a hardcoded pack glyph list was deleted because engine code
 naming a pack's glyphs is the portability law wearing a different hat.**
 
@@ -417,7 +424,7 @@ colour — while its map's `Y`s, whatever they mean in its alphabet, come out re
 murals, and open a menu it never declared.
 
 **The fix, and the part of it that is not negotiable.** Two of the five sites are **mechanism** and
-they are *the same fact said twice*: `:1165` asks where the vehicle serves, `:2890` asks where the
+they are *the same fact said twice*: `:1191` asks where the vehicle serves, `:2890` asks where the
 pass opens. **They move to the seam together or not at all** — splitting them ships an engine that
 locates a stop one way for the tram and another way for the panel, which is two names for one part
 created deliberately inside the change whose whole purpose is to stop having two. `:679` and `:4300`
