@@ -1,6 +1,18 @@
 # EL MURAL DE LA CUADRILLA — the ledger
 #
-# One line per panel: id|fingerprint of the words a person reads (title.en, said.en, cap.en).
+# One line per panel: id|fingerprint of the words a person reads|fingerprint of the painter's state.
+#
+# The first fingerprint covers ALL SIX strings a reader sees — title, said and cap, in BOTH
+# languages. This header said "title.en, said.en, cap.en" until 2026-09-12 and was stale by exactly
+# the fix the comment above the hash describes: Melo had rewritten a Spanish caption into the
+# opposite of what it recorded and the suite passed. Doña Cuca found the header still claiming the
+# old three while reading the code to answer a question about staircases.
+#
+# The second fingerprint is the painter's `state`, present only on panels that carry one (iteration
+# 4 onward, at the owner's word: "more about the persona 'state'"). It is a SEPARATE column on
+# purpose — folding it into the first would have changed the fingerprint of all thirteen panels
+# painted before he asked for it, so a rule about never rewriting the past would have been enforced
+# by rewriting every line of the past. Pili and Cuca both found the gap, independently, in one hour.
 # This file is the guard for the one rule the owner set on 2026-09-11:
 #   "they can add and improve but not completely remove... we dont delete"
 # test/town.smoke.js goes RED if a listed panel leaves the wall, is renamed, is reordered,
@@ -21,3 +33,8 @@ nacho-la-esquina-volvio|416a19be78e7
 beto-aprobado-por-la-prueba-del-muro|fba7c7026682
 chema-seis-cuadros-una-rueda|f75abb673997
 chava-cuatro-cuadros|10671e6968a6
+paty-la-ultima-frase|667c4752f8fa|3b2af4b949ce
+cuca-dos-pisos-una-casilla|eefc003ccb6d|1ba98c81d3ae
+melo-la-doce-era-mia|4ca5896308f4|a05a3f5ee797
+pili-la-que-jala-la-cuerda|d8d18d49f9e8|d4020a9dfd36
+yaz-diez-focos-verdes|281157670d01|9447074e58c5

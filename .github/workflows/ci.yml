@@ -50,3 +50,21 @@ jobs:
         run: |
           git fetch --no-tags --depth=50 origin "${{ github.base_ref }}"
           node test/bump.js "origin/${{ github.base_ref }}"
+      # ...AND ON A PUSH. Yaz, 2026-09-12: the step above carried `if: pull_request`, so a push ran
+      # the whole suite and skipped this check entirely — and this repository's history is mostly
+      # direct commits. Register entry #11 in docs/REGRESSION.md is about the same guard reading two
+      # commits when it meant the working tree; this is its other half, and it is the half that
+      # decides whether the hole was ever theoretical. The two halves have different right answers:
+      # on the desk the question is "what is about to ship" (the tree); in CI the checkout is clean
+      # and the question really is "what did these commits change", which is why the base is passed
+      # explicitly here.
+      - name: ...and the same, on a push, because most of this repo's history never saw a PR
+        if: github.event_name == 'push'
+        run: |
+          git fetch --no-tags --depth=50 origin "${{ github.ref_name }}" || true
+          BASE="${{ github.event.before }}"
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            # a brand-new branch, or a shallow clone that cannot see the previous push
+            if git cat-file -e "HEAD~1^{commit}" 2>/dev/null; then BASE="HEAD~1"; else echo "no base to compare against; nothing to check"; exit 0; fi
+          fi
+          node test/bump.js "$BASE" HEAD

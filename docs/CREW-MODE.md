@@ -15,6 +15,20 @@ a word in this file. Turning it off is the same word.
 
 ---
 
+## ⚠ One thing that bites with the mode OFF, found 2026-09-12
+
+Parallel agents **share one scratch directory**, and on the first six-agent run two of them wrote the
+same obvious filename in the same minute: one wrote `scratchpad/panel.js`, read it back, and got
+somebody else's panel. He caught it because the content was visibly not his. Subtler, and an agent
+ships another's work under their own name.
+
+**Every agent writes under a prefix that is its own name** — `scratchpad/<agent>-thing.js`, never a
+bare noun — and a brief that fans out says so. This has nothing to do with crew mode: it happened
+with the mode **off**, in an ordinary parallel run, which is what this project actually does. See
+`docs/crew/MURALS.md`, iteration 4.
+
+---
+
 ## How to switch it
 
 **On:** change the line to `MODE: on`, or just tell a session *"crew mode on for this one."*
