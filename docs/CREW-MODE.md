@@ -85,9 +85,10 @@ his attention, and he can stop after any of them without breaking what came befo
 2. Read that PR and merge it.
 3. Say *"add claiming by label."* — a `taken: <name>` label as the lock, and a few lines so the town
    renders it. **Built 2026-09-13 (`ch-v102`): the person wears a sash, says who has them when you
-   talk to them, and the house board lists who has what.** The label is created the first time it is
-   applied; the agent applies it with `gh`, and the owner can untick a stale one from the person's own
-   Labels card.
+   talk to them, and the house board lists who has what.** Create the label once per name — `gh label
+   create "taken: beto"` — because `gh issue edit --add-label` refuses a label that does not exist; the
+   agent then applies it with `gh`, and the owner can untick a stale one from the person's own Labels
+   card.
 4. Read that PR and merge it.
 5. **Pick three open issues and say "run these three together."** ← the actual switch-on.
 6. Read the three PRs, merge the ones he likes. **The output of this evening is the answer to
