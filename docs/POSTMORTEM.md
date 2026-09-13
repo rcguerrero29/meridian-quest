@@ -150,9 +150,36 @@ to happen to you today.
 
 ---
 
-## 10 · The shape of every one of these
+## 11 · A word that means two things, one of which has an incident report attached
 
-Read the nine sections again and they are one sentence:
+The session wrote that putting a crew persona into the public game would be **"a leak, not a cameo."**
+It meant the *content* sense — `docs/TAGS.md` keeps a **leak register** of tags that look universal
+and are not — and it was describing **a thing that had not happened and was being refused in
+advance.**
+
+The owner read the other sense. This project has had exactly one real exposure, it is written up in
+`docs/SECURITY-NOTE-2026-09-10.md`, and his reply was *"lets fix the leak... firstly- log how it
+happened please for the security reasons."*
+
+**Nothing had happened.** The cost was an alarmed message and an afternoon's trust spent on a
+non-event, and the fault is entirely the session's: it used a word with a loaded second meaning, in a
+project that owns the loaded meaning, without qualifying it.
+
+> **The rule: never write the bare word "leak". Say "a content leak" or "a persona leak".** Four extra
+> characters. And when somebody asks whether they are exposed, **measure before you reassure** — the
+> greps that proved it took two minutes and are worth more than any sentence starting "don't worry".
+
+**The second half of this entry is the better half.** When he asked for a log, the honest thing was
+not to write an incident report for an incident that did not occur — it was to **check, and publish
+what the check found.** The check turned up three things nobody knew: the crew personas were named
+*after* Meridian's own cast and not the reverse; Meridian already ships a character called Rigo who
+sells software; and source comments in shipped JS are public, which is fine here and worth knowing in
+general. **A question asked in alarm produced better facts than the same question asked calmly would
+have.**
+
+## 12 · The shape of every one of these
+
+Read the sections above again and they are one sentence:
 
 > **The thing you are checking and the thing you mean are different, and the gap is invisible from
 > inside your own reasoning.**
