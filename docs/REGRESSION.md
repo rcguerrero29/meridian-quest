@@ -11,10 +11,20 @@ should have been caught by, and the assertions to add. Nothing here is built.*
 |---|---|---|
 | `test/smoke.js` — Meridian | CI, every push and PR | ~40 sections: boot with no errors or validator warnings; static invariants; the retry/XP flow; chapters and endings; hearts as a layer; WCAG contrast on every theme; the theme editor; the NET stub; the care pack and the decision report; hostile save payloads; the Trolley Pass round-trip; TILES metadata and Sonny's program; the park (leash → bridge → chill → recap); screen-relative swipes; door plausibility and cooldown; 3D doors and wall faces; bake resolution; seasons; furniture per camera; the button priority; fences in 3D; door markers; per-district endings; looks keyed by id; the whole city raised; the record's growth; multi-storefront; the room upstairs and its off switch; the version on the opening page; the camera round-trip; **the portability guard**; the owner's 2026-09-03 reports; **the public build's guarantee** (Part 1) |
 | `test/town.smoke.js` — El Changarrito | CI, after Meridian's | the town's index is a known diff of the public one; own prefix; own name and the engine's version (the value, since 2026-09-13); the park, the faces, the clerk with her document, the board; the record's fixture: people by tier, plain words, the three-line cycle, per-label stands, leaving and restoring the tile, **a claimed person wearing the mark and the house board saying who has what**; Sonny; the animals' tiles walkable. **And the crew-process guards, because the crew lives in the town:** the mural ledger, the flight-notes ledger, **the nineteen personas' shared block (first, once, one person, identical, names the post-mortem and this register)**, and `test/leaves.js`'s soundness half — a persona file fault reports under this step's name, so its sentence starts with the path |
-| `test/leaves.js` | in `town.smoke.js` (soundness), by hand with a base ref (routing) | `docs/BOUNDARY.md` is sound — every path real, every reviewer a persona, every row dated, no persona citing a file that was never written, no workflow a label or a comment can start. With a base: which boundary paths a change touches and who must see it, exit 0 always |
+| `test/leaves.js` | in `town.smoke.js` (soundness + completeness), by hand with a base ref (routing). **Its eighteen red cases (`--selftest`) run NOWHERE** — not CI, not `town.smoke.js`; same for `test/closes.js --selftest` | `docs/BOUNDARY.md` is sound — every path real, every reviewer a persona, every row dated, **no persona citing a PATH that was never written** (it calls `fs.existsSync` on the path only — **the line number inside a citation is not read**, and three in `.claude/agents/pili.md` are 400+ lines stale), no workflow a label or a comment can start, every derivable edge covered by a row. With a base: which boundary paths a change touches and who must see it, exit 0 always |
+| `test/engine.smoke.js --index <shell>` | CI, against **both** indexes (`ci.yml`, step *"Engine smoke, against both games"*); by hand | R4 — the engine's own invariants against either game: the worlds hang together, every person reachable and named, every document builds, every camera draws every world, every door stands in 3D, every animal has ground, storage under the pack's prefix |
+| `test/gauge.js` | CI | the smallest thing that can be a world, run against the shared suite — what the engine demands of a brand-new pack, measured by building one (`docs/GAUGE.md`) |
+| `test/public.js <dir>` | CI on every push and PR, against a box built by `scripts/build-site.sh`, **and again in the deploy after `status.json` is written into it** (`pages.yml`) | R10 — what we would publish is only the public game |
+| `test/closes.js` | CI, **pull requests only**; `--selftest` by hand and by nothing else | R3 — every `Closes #N` names an open issue the PR actually talks about |
+| `test/bump.js <base> [head]` | CI on a pull request **and on a push** (added 2026-09-12 because most of this repo's history never saw a PR); by hand on the desk | an engine change that never reaches a returning player is not shipped — `GAMEV` and `CACHE` must have **moved**, not merely match |
+| `test/record.js _site/status.json` | **`pages.yml` only — after the merge, on `main`** | the city record is what a clerk can read (#14). A check that runs only in the deploy cannot stop the commit that breaks it |
 | `docs/templates/build-branded.js --check` | CI | the branded copies of the docs templates match the neutral ones plus `brand.yml` |
 | `test/shots.js` (`--cams`, `--index`, `--spots`) | **nobody** — by hand | four-camera screenshots of named spots; the only pixel-level look at the game |
 | `test/tilesheet.js` | by hand | the cold read of every glyph |
+
+**No suite in this repository runs either game in a landscape viewport** (checked 2026-09-13): every
+run is 480×900, 390×560 or 390×844. `docs/QA-PASS.md`'s matrix has had a landscape row since
+2026-09-09 and nothing can run it — see `docs/POSTMORTEM.md` §13o and QA-PASS E12.
 
 ## 2 · What the last five days found, and what should have caught it
 
@@ -62,6 +72,13 @@ trying to close a real hole, and every one looked correct on the page.*
 | 14 | **the flight-notes ledger guard, first draft** (2026-09-11) | how many `### <agent>` headings the file has | **how many proposals it has** — every heading in that file is the anonymised literal `### (agent)`, so it counted zero and went green on a file with three un-actioned proposals in it. Reading the `**Proposed persona edit**` heading the template guarantees turned it red | Rosa, finding her own un-actioned proposal; then the guard, once it read the noun |
 | 15 | **the town's version check** (`test/town.smoke.js`, until 2026-09-13) | does the title screen match `/engine mq-v/` | **is it the engine that is running** — bump Meridian to `mq-v159` and the town keeps claiming `mq-v158` with every suite green. A shape is not a value; #3's mistake inverted. Reads the value now | Yaz, costing a town-only version bump |
 | 16 | **the hostile-save test's `protoClean` assertion** (`test/smoke.js`, still open) | is `Object.prototype` unpolluted after the payload | **does the prototype clause in `sanitizeSave` hold** — the payload puts `__proto__` in `qa`, which numeric coercion filters anyway, and carries no `bl` key at all, which is the loop the clause guards. It asserts that a pollution nobody attempted did not occur. The three-line plant is `docs/BOUNDARY.md` G2 | Zeni, reading the extraction step |
+| 17 | **the shared-block check the calling session ran by hand** (2026-09-13; ad-hoc, never a committed guard) | are the nineteen **extracted** blocks byte-identical | **is each persona one person, with that block first and once** — they *were* identical, and `.claude/agents/rigo.md` also held a second copy at line 84 with Toño's whole persona under it, while `don-guero.md` opened with a section above it. **The extraction discarded position before the comparison began**, so the answer was true and the published claim was not the question | Beto, extracting the same block to design a guard on it; Chuy, independently, reading a file to its end for a roster line |
+| 18 | **the personas guard, first draft** (`test/town.smoke.js`, written the morning of 2026-09-13, beaten that afternoon) | how many `You are **…**` lines the file has | **which person it hands the model** — `You are **Toño**` in `rigo.md` is a count of one and it passed: the exact fault the guard had been written for that morning, one keystroke to the left. Reads the name now (grep `the person it hands the model is somebody else`) | Melo, a one-word replacement |
+| 19 | **(the same guard)** | is the shared block **byte-identical across all nineteen** | **does it still say the things it was bought with** — the four paid-for rules and *ASK HIM* deleted from all nineteen at once hashes identical and the suite printed OK. #3 across copies instead of across time: *equal* says nothing about *right*. Eight spine strings are pinned by content now (grep `the post-mortem — .claude/skills`) | Melo, editing nineteen files |
+| 20 | **`test/leaves.js`'s permissions check, first draft** (2026-09-13) | is there a line `  <scope>: write` under `permissions:` | **what may this token write** — `permissions: write-all` has no indent and no scope name and passed; so did `contents: write   # to push the release tag` (a trailing comment after an end-anchored pattern) and the inline `{contents: write}` | Melo, three legal spellings |
+| 21 | **(the same script) the trigger check** (2026-09-13) | does a line begin `on:` | **what can start this workflow** — yamllint's truthy rule teaches people to write `"on":`, so `/^on:/` matched nothing, the scan ran over the empty string, and the check **printed its pass sentence about a file it had failed to parse**. Not finding the key is a red, not a pass | Melo, one quoted key |
+| 22 | **`test/leaves.js`'s ledger check, first draft** (2026-09-13) | are the rows it has **sound** — paths real, reviewers real, dated | **does every edge have a row** — delete the row for the file that holds the owner's key and it printed OK; add a script that POSTs to `api.github.com` with a bearer and it printed OK. `docs/BOUNDARY.md` called what it read *completeness*. `completeness()` derives three sets now (grep `function completeness`) | Melo; written up by Zeni, `docs/POSTMORTEM.md` §13b |
+| 23 | **the claim-mark pixel probe** (Lupe, 2026-09-13; a measurement, not a committed guard) | what pixels are in the canvas's **backing buffer** | **what a person sees on a screen** — the town boots to its creator with `#world` hidden, so `#vp` was `0 × 0`; the buffer is sized from constants and `draw()` fills it with no layout box, so twenty-eight rows returned real, correct, meaningless pixels and every one "passed" | a screenshot, three hours in |
 
 **#11 is the one to read twice.** It is the guard for the rule `CLAUDE.md` states in its own words —
 *bump `GAMEV` and `CACHE` together whenever `engine/` changes* — and it could not see an unbumped
@@ -96,10 +113,43 @@ this register.
 3. **A green guard is not evidence.** Eight of these ran green for days or weeks. **The only thing
    that distinguishes a working guard from a decorative one is a planted violation** — which is why
    `melo` exists and why step 5½ of `/crew-fix` asks it of every change.
+4. **The extraction step is a proxy before the comparison is** (added 2026-09-13, from #17 and #19).
+   The hash that compared nineteen persona blocks was correct; what it hashed had already been lifted
+   out of the file, so position, count and neighbours were gone before anything was compared. **Ask
+   what your check normalised away to make the comparison easy** — a hash throws away position, a sort
+   throws away order, a trim throws away the blank line that separated two people. The committed guard
+   survives only because three **shape** assertions run before the hash: how many copies, who the file
+   hands the model, and what is read first.
+5. **A red guard is not evidence either** (added 2026-09-13). `test/leaves.js`' first run named five
+   persona citations of files that did not exist; **two were invented by its own pattern**, because a
+   regex alternation takes the first branch that matches and it listed `.js` before `.json`. The remedy
+   those two names prescribed was *edit two files that were already correct*. **Point a new guard at one
+   case whose answer you already know before you carry its output anywhere — red or green.**
+
+**Rows 17–23 were all added on 2026-09-13, and five of them were guards written that morning and
+walked past that afternoon**, by the agent whose only job is walking past them; fourteen other plants
+that day were locked out by guards that said something a person would say. All five are closed and each
+fix carries the plant that bought it in a comment. **Four of the five read an aggregate — a count, a
+hash, a shape — where the noun was an identity or a content.** That is the shape to look for first in a
+new guard, and the morning-to-afternoon gap is the shortest this register has recorded: **a guard's most
+dangerous hour is the one right after it first goes green.**
+
+**One suspicion filed here as prose and deliberately NOT as a row, because nobody planted at it.** Pili,
+2026-09-13: the claim guard (`test/town.smoke.js`, grep `the hard hat is the mark`) has a failure
+sentence about the claimed person's **outline** and an assertion that reads `lk.hat !== 'hard'` — a
+string in a look object. Blanking the hard-hat drawing branch, or drawing the hat inside the skull the
+way the other caps are clipped, would leave the field `"hard"` and the silhouette identical to
+everybody else's. **That reasoning is from the extraction step, not from a fired plant. Plant it before
+you believe it — and if it fires, that is the finding and this paragraph is wrong.**
 
 **The question to ask of any new guard, before it lands:** *if I break the thing this is for, in the
 smallest and most plausible way, does it print a sentence a person would say?* If you have not run
 that, the guard is untested no matter how green the suite is.
+
+**And the question under it, bought on 2026-09-13:** *what does this guard print when it cannot read its
+subject at all?* #21 answered that with its pass sentence — a positive claim about triggers, about a
+file it had just failed to parse. **Not finding the thing is a RED. Silence about a file you failed to
+parse is a claim you did not check.**
 
 ### The five guards added after the register was opened, and the eight violations planted at them
 
@@ -144,6 +194,7 @@ look like dead code, so the brake now has a test that fails without it.
 | **R7** | four-camera pixels are looked at by nobody | `shots.js --cams` in CI, uploading the PNGs as an artifact; a "looked at" step is still a person. Optional: a per-spot pixel-hash baseline that fails on drift | `ci.yml` | a quarter; the baseline is a sitting |
 | ~~**R8**~~ **built 2026-09-06 — and its mechanism caused R10. See below.** — the shell is derived from the public index's script tags | the guarantee scans `content/` for Meridian only; a second public pack would go unscanned | scan every pack folder the public index loads, derived from the script tags, not a hardcoded list | `smoke.js` | minutes |
 | **R10** — **built 2026-09-10, `test/public.js`, wired into `pages.yml`** | **El Changarrito — the owner's private backlog tool, carrying a GitHub sign-in, a "make a new token" flow and calls to `api.github.com` — was published on GitHub Pages and reachable at `/changarrito/` by anyone who guessed the path.** The deploy used a *denylist* of three names and shipped the whole repository. **R8 was built to close this exact class and could not see it**, because "derive the shell from the index's script tags" is blind to anything the index does not load. The fix for the last exposure was the cause of this one | **Do not derive. Read the directory we are about to upload and ask what is in it.** Five sections, each proved by planting a real violation: nothing whose *presence* is private (named, not derived, so a folder added tomorrow is private by default); nothing that *carries* a credential surface (the four forbidden words, plus token/key *shapes*); nothing the page may *reach* (CSP, off-origin scripts, script tags with no file); the offline app must actually *install* (`addAll` is all-or-nothing, and the shipped cache string must equal the shipped version); and the game must actually *be there* | `test/public.js` + `pages.yml` | **done** |
+| **R11** — found 2026-09-13 by Yaz and Lupe, **not fixed** | **a person standing on a tile is a wall, and nothing re-audits after a wander step.** A person is stamped into the grid as `"N"` — at boot, by `addChill`, and on every wander step — and `"N"` is impassable both to `isSolid` and to `auditReach`'s own `walk`. The wander filter asks about solidity, doors and tram danger and never asks whether the step cuts the map in two. In `ex`, a neighbour in the one-tile gap at (19,1) puts 35 tiles and Doña Meche out of reach **of the player as well as the audit**. Reds `test/smoke.js` about **one run in twenty-five**, and has for longer than the branch that found it. (Backlog row 8 is the *spawn* half of this; this is the *wander* half, which is every second of play) | nobody may be walled out by somebody standing: with every wanderer pinned in turn to each single-width gap, `auditReach` reports nothing and every NPC keeps a reachable neighbour. **Red first by occupying `ex` (19,1) on purpose.** The fix site is the stamp or the auditor's read of it — **not a person-check; neither reader looks at people at all** | `engine/engine.js` + `smoke.js` | a quarter, plus the engine decision: does a person block, or do you walk around them (`docs/ARCH-LOG.md`) |
 
 ## 4 · Order
 
