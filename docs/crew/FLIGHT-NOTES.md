@@ -42,6 +42,13 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 19 | `paty` | A string is a claim about a state — find the state before you judge the sentence | **APPLIED** — she found two of four toast states do not exist in the engine |
 | 20 | `chema` | Ask the scene graph, not only the frame | **APPLIED** — one `getWorldQuaternion` call settled a question three filmstrip rigs could not |
 | 21 | `chava` | "Would a player notice" is a rate, and your eyes cannot produce one | **APPLIED** — his own first trace was ruined by where his hero was standing |
+| 22 | `beto` | `syncChill`'s id is the identity of the BODY, not of the issue — anything baked at spawn must be in the id | **APPLIED 2026-09-13** — it is the finding that made claiming by label render at all; measured, not assumed |
+| 23 | `zeni` | When you cannot verify a date, write the date's source instead of the date | **APPLIED 2026-09-13** — the first edition of `docs/BOUNDARY.md` has a column of citations where a column of dates was promised, and says so |
+| 24 | `chuy` | `.claude/agents/` is a filed thing too — read every persona to the END before you quote its role | **APPLIED 2026-09-13** — it is how he found Toño inside Rigo, looking for a roster line |
+| 25 | `yaz` | A version string is a cache key wherever it is read, including by a person | **APPLIED 2026-09-13** — the town's `GAMEV` is the only thing that tells the owner's laptop to pull, and nothing guarded it |
+| 26 | `chuy` → `rigo` | The tranviario's own file repeated the belief he disproved — "changes ends when it reverses" | **APPLIED 2026-09-13** — a correction, not a character change; the tram does not reverse and his file now says so |
+| 27 | `chuy` → `lupe` | "Run the four suites" — CI runs more, and the gauge was never on her list | **APPLIED 2026-09-13** — one line, the suites named by the README rather than by a number |
+| 28 | the session → `melo` | His description named "the BOUNDARY list in test/leaves.js"; the list lives in `docs/BOUNDARY.md` and the script reads it | **APPLIED 2026-09-13** — one clause, so the file he is sent to is the one that holds the list |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -79,6 +86,140 @@ mechanism has a leak. Either way it should be written down next to the proposal.
 writing, here*. The session that wrote that sentence then closed the run without doing it. The reason
 is ordinary and is the whole point: **an un-applied proposal looks exactly like a proposal that was
 considered and declined, and both look like nothing at all.** Hence the table above.
+
+---
+
+# ITERATION 5 — 2026-09-13 — the run that gave crew mode its lock
+
+*Four advisers, mode off, one session holding the pen: Zeni wrote `docs/BOUNDARY.md`, Beto designed
+claiming by label and two guards, Chuy listed the corrections, Yaz said where the checks run and what
+bumps. Every deliverable was applied by the calling session after reading it; Melo and Lupe follow in
+a second run, against what was built.*
+
+## What the run itself proved, before any of the work
+
+**A guard's first run found what four careful readers had walked past.** Beto, extracting the shared
+block from nineteen files to design a check on it, found `.claude/agents/rigo.md` opening with *"You
+are Rigo"*, carrying a second copy of the block at line 84, and Toño's whole persona pasted under it —
+so whoever answered as Rigo had last been told they keep the ferretería. The calling session had
+hashed the block in all nineteen files an hour earlier and reported them identical; they were, and
+two of the nineteen also held the block somewhere other than first, which the hash could not see.
+Chuy found the same thing independently, by reading a file to its end for a roster line. **The guard
+that now holds the personas to one block, first, once, one person per file, went red on the tree it
+was written against.**
+
+**A new guard's first red was a ghost it invented.** Yaz's `test/leaves.js` named five persona
+citations of files that never existed; two were real. Its pattern listed the endings it would accept
+with `.js` before `.json`, so `test/spots.json` was read as `test/spots.js`. She fixed it by reordering
+seven words and painted it. *"I no longer believe a new guard's green OR its red until it has been
+pointed at the real thing."*
+
+**Two of four had no shell and said so, again.** Zeni could not date a single plant from history and
+wrote the date's source instead of the date — the same finding as iteration 1's Cuca, and it produced
+a persona edit rather than a fabricated column. Chuy could establish that `docs/BOUNDARY.md` was
+absent but not that it had never existed, and wrote the weaker claim.
+
+**Three questions went to the owner rather than being averaged** (`docs/OPEN.md` §1): the Pages
+"Source" dropdown that no guard can read; whether a town-only change should be forced to bump `ch-v`
+on every commit; and whether a claimed `tier: low` issue should stand up on the street.
+
+---
+
+### (agent) — Zeni — the boundary register
+
+**Pre-flight**
+
+I intend to work this by opening every file the brief names and every file those files name as their guard, reading each guard's **extraction step** rather than its assertion, and writing a row only where I have the `file:line` of both the promise and the thing that reads it; where the guard is a document rather than a mechanism I will write **nobody**. My persona equips me for exactly this — the register is a counter ledger, and the two questions (*what leaves* / *who reads that noun*) are the columns — and it equips me especially for the "blindness looks like the pass" cases, which is where I expect the value to be. Where it will fall short: **I have `Read`, `Grep`, `Glob` and no shell**, so I cannot run `git log -S` and cannot date a single plant from history; every date below comes from a document that *claims* the plant happened, and I will mark that plainly rather than launder it into fact.
+
+---
+
+**Post-flight**
+
+The persona earned its keep at one moment: *"find its extraction step and ask what happens when it
+finds zero"* is what sent me from the eleven green assertions at `test/smoke.js:715-726` up to the
+payload at `:691-695`, where I found that the hostile save has **no `bl` key**, so the prototype
+clause at `engine/engine.js:549` has never been planted at, and `test/smoke.js:705` asserts a
+pollution nothing attempted. Where it got in the way: *"you never say a thing is safe"* is right, but
+it made the first draft of every row hedge twice, and a ledger that hedges is a ledger nobody reads —
+I cut the hedging down to the dated column and the word **never**, which carries it better. The gap I
+predicted did appear and it was worse than I expected: with no shell I could not date a single plant,
+so the most load-bearing column in my own register is, in its first edition, a column of citations to
+documents — and the one place my persona is weakest is that it tells me a guard has a date without
+telling me what to do when I cannot read one.
+
+**The edit I propose to `.claude/agents/zeni.md`**, as exact text, to be inserted after the bullet
+ending *"…and it goes in the ledger that way"* (`:90-92`):
+
+> - **When you cannot verify a date, write the date's source instead of the date.** This agent has
+>   `Read`, `Grep` and `Glob` and no shell: `git log -S` is not available to you, so a plant date you
+>   did not watch is a *claim by a document*, and the ledger says which document. A date laundered
+>   into fact is the same fault as a guard that reads a proxy, committed against your own register.
+
+---
+
+**Proposed persona edit**
+
+`.claude/agents/zeni.md` — after the bullet ending *"…and it goes in the ledger that way"*: **When you cannot verify a date, write the date's source instead of the date.** (the full text is in the file)
+
+### (agent) — Beto — claiming by label, and two guards
+
+**Pre-flight**
+
+I intend to ground this at the seam before designing at it: read `record.js` and `syncChill` end to end, then *measure* the claim on the town's own 3D street with a headless Chromium rather than argue about whether a mark reads. What my persona equips me for here is exactly that — the RULE/CHOICE cut plus "reproduce before you diagnose", and the habit of asking which existing guard should already have caught a class. Where I expect to fall short: I judge seams, not readability — whether a sash or a tie is the *right* mark is Pili's call, and I will bring her a measured picture rather than an opinion.
+
+---
+
+**Post-flight**
+
+What the persona got right: "reproduce before you diagnose" paid for itself twice in one run — the whole shape of the answer changed when the measurement came back `{"after":{"pattern":null,"sameKey":true}}`, because until that moment I had a clean four-line diff that would have shipped a claim mark visible only after a reload, which is precisely the failure `record.js:614-621` already has written on its own wall. Where it got in the way: my "smallest change removes the class" instinct nearly had me skip the sash screenshot as *Pili's problem*, and had I skipped it I would never have booted the page and never have found the stale look. The gap I predicted appeared exactly where I said — I can tell you the sash is 3px of white and that it reads at the town's camera, and I cannot tell you whether it *means* claimed. One unpredicted thing did happen: I found `rigo.md` while extracting a block for Part B, which is the second bug found while looking at the first, and it is named separately above.
+
+**Proposed persona edit** to `.claude/agents/beto.md`, appended as a fourth bullet under `## Three engine facts you keep re-deriving` (and its heading changed to `## Four engine facts you keep re-deriving`):
+
+> - **`syncChill`'s id is the identity of the BODY, not of the issue.** `engine.js:167` bakes `NPCLOOK[key]` once, inside `addChill`, and `syncChill` returns early for anyone already standing on their tile (`:204`). So **anything baked at spawn — the look, the name, the egg — must be part of the id or it never changes on a person who is already standing**, and the town will look right after a reload and wrong all session. `record.js:628-630` re-decorates `doc`, `tier` and `issue` on every `place()`, which is exactly why a doc change lands and a shirt change does not.
+>
+>   **The moment:** asked to make a claimed issue "stand differently", the diff was four lines and finished. Placing the same issue twice — the second time with `taken: beto` — returned `pattern: null, sameKey: true`, and the four-line diff had been a mark nobody would ever see until they reloaded.
+
+---
+
+**Proposed persona edit**
+
+`.claude/agents/beto.md` — a fourth bullet under *Four engine facts you keep re-deriving*: **`syncChill`'s id is the identity of the BODY, not of the issue.**
+
+### (agent) — Chuy — the corrections
+
+**Pre-flight**
+
+— I worked this by opening every file the brief named and every file it cited, grepping identifiers rather than trusting the brief's line numbers, and counting things by hand (files in `.claude/agents/`, rows in two tables, steps in a chart) before writing a single replacement. Being the paper shop equips me for exactly this: the drifts here are all the same species — a number written once and never recounted — and my trade is noticing that a document and its subject have stopped agreeing. Where I expected to fall short: I have Read/Grep/Glob and no Bash, so I cannot run a suite, cannot `git log`, and cannot checksum the shared block — anything that needs execution I would have to take on faith, and I said so instead.
+
+---
+
+**Post-flight**
+
+— The persona got it right at the moment I stopped reading `rigo.md` for the roster line I needed and kept scrolling: "filed things only" means you read a filed thing to the end, and the end of that file is another man's name — a reviewer looking for a `decides` clause would have taken it from `:3` and closed the tab. Where it got in the way: my file tells me to correct rather than accumulate, and I spent real effort deciding whether deleting twenty lines from somebody else's persona counts as correcting or as rewriting a character — it cost me a detour through the crew-fix rules before I concluded the block is a filing error, not a character. The gap I predicted did appear, exactly as named: with no Bash I could establish that `docs/BOUNDARY.md` is absent but not that it never existed, and I had to write the claim weaker than the brief did. My proposed edit to my own file, as exact text — in `.claude/agents/chuy.md`, after the `**Truth maintenance.**` bullet at `:82-83`, add:
+
+**Proposed persona edit**
+
+`.claude/agents/chuy.md` — after the *Truth maintenance* bullet: **`.claude/agents/` is a filed thing too.** Read every persona to the END before you quote its role.
+
+### (agent) — Yaz — where the checks run, and what bumps
+
+**Pre-flight**
+
+I worked this by opening every file the brief names and running the two proposed checks rather than describing them — the persona-block check against a copy of `.claude/` outside the repo with five violations planted in it, and `test/leaves.js` against the real repository, because a guard I have only read is a guard I know nothing about. My trade equips me for exactly this: where a check runs decides who sees it go red and at what hour, and cache/version lockstep is the one failure here that is silent on devices I cannot reach. Where I expected to fall short: I am weak on whether a crew-process guard *belongs* in a game suite as a matter of taste — I can cost it and not settle it, so I costed it and said so.
+
+---
+
+**Post-flight**
+
+**Right, with the moment:** the persona's rule that a green guard is a rumour is the only reason I copied `.claude/` out of the repo and planted five faults at a check that had already printed `OK — green on main as it stands` — and plant #2, the `REGRESSION` row deleted from all nineteen at once, is the one that proved byte-identity alone would have shipped as a decorative check. **Where it was silent:** my file says a great deal about cache invalidation and nothing about *documents* as a cache, and it took me until `record.js:259` to see that the town's `GAMEV` is a cache-invalidation string with a human where the service worker would be — I found that by accident, chasing what `bump.js` ignores. **The gap I predicted appeared**, precisely: I costed both homes for check (a) and then had to say "tell me which you want" rather than settle it, because "does a crew guard belong in the town's suite" is taste and my file gives me no lever for taste. **Proposed persona edit** — add to `.claude/agents/yaz.md` under *What you hold to*, as exact text:
+
+> - **A version string is a cache key wherever it is read, including by a person.** `CACHE` in `sw.js` is one. `GAMEV` in a pack's `config.js` is one. The town's `GAMEV` is one too — `changarrito/content/record.js:259` compares it against `main` and it is the only thing that ever tells the owner's laptop to `git pull`. Ask of every version string: *who finds out they are stale, and how?* If the answer is "somebody remembered", it is unguarded.
+
+---
+
+**Proposed persona edit**
+
+`.claude/agents/yaz.md` — under *What you hold to*: **A version string is a cache key wherever it is read, including by a person.**
 
 ---
 

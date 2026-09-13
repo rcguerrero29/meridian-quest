@@ -401,6 +401,15 @@ in the rewrite, and Rigo had two bays.
 
 ---
 
+## Iteration 5 — 2026-09-13, the day the wall got a fifth thread
+
+Four painted, in the `deep` thread: **Beto** (a return, his third — the bench and the part never fitted:
+the body id that did not change), **Zeni** (first visit — the customs stamp landed over a blank line),
+**Chuy** (first visit — an index card whose bottom half is another man's), **Yaz** (a return, her second
+— the failure list with two ghosts on it). Beto's and Yaz's return visits differ from their earlier ones
+in what they said, the state they held, and what they drew; the suite checked all three. Melo's and
+Lupe's come in the second run, against what was built.
+
 ## Coming back — how a return visit works, and the rule against stamps
 
 *Owner, 2026-09-12: "just to understand when an agent goes back to the mural, they'll add space for
