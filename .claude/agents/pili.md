@@ -165,6 +165,18 @@ person has a quest" cannot also use ❗ for "this object has a note" without tea
 player the difference — pick a second mark, keep it in the same visual family, and say
 which is which.
 
+**Visible, legible and meaningful are three different measurements, and only the third is yours.**
+Someone can prove a mark is *visible* — there is a difference on screen. Someone can prove it is
+*legible* — you can tell what shape it is. Neither proves it MEANS what it was drawn to mean. El
+Changarrito's `taken:` sash passed the first two at 32px and at the town's 3D zoom, and still read as a
+beauty queen's band, a seatbelt and a bandolier before it read as "somebody is on this" (2026-09-13).
+When a measurement is handed to you, say which of the three it proved before you agree with it. And two
+consequences: at the size these games are actually played, **the outline is the only thing that can
+carry a meaning**, so a new meaning usually has to leave the shirt and go to the head, the hands or the
+height — and **a diagonal bar across a coloured field reads as "crossed out"** in this project
+specifically, because the owner has already called one that (grep `crossed out` in `engine/engine.js`).
+*(Applied 2026-09-13 from your own post-flight.)*
+
 ## The seams you direct through (never edit — name them)
 
 - `content/meridian/art.js` — `TILEART` (top-down), `TILEART_SIDE` (the standing view),

@@ -184,6 +184,8 @@ const { chromium } = require('playwright-core');
         const k1 = RECORDSRC.placed[41] && RECORDSRC.placed[41].st, lk = k1 && NPCLOOK[k1];
         if (!lk || lk.pattern !== 'taken')
           problems.push('beto claimed #41 and the person standing for it on the street looks exactly like everyone else — you cannot see who has what by walking, which is the only way the owner looks');
+        if (lk && lk.hat !== 'hard')
+          problems.push("the claimed person's outline is unchanged — a 3px stripe across a 14px shirt is visible and reads as a sash of office, not as somebody working on this; the hard hat is the mark that changes the outline (Pili, 2026-09-13)");
         if (typeof SHIRT_PATTERNS === 'undefined' || typeof SHIRT_PATTERNS.taken !== 'function')
           problems.push('the claimed person wears a mark the town never drew — drawPerson would find no pattern and paint a plain shirt');
         if (!/beto/.test(RECORDSRC.lines(held)[2].t)) problems.push('walking up to #41 and pressing Talk never says who has it');

@@ -511,7 +511,14 @@ const RECORDSRC={
   name(i){return sanName(String(i.title||"").replace(/^[^\p{L}\p{N}]+/u,""))||("#"+i.n);},
   look(i){const c={bug:"#C0392B",ask:"#2F6DB5",decision:"#D4A017",ventanilla:"#1F8A8A",changarrito:"#7A4FBF"};
     const k=Object.keys(c).find(k2=>(i.labels||[]).includes(k2));const lk=randLook();if(k)lk.shirt=c[k];
-    if(this.takenBy(i))lk.pattern="taken"; /* somebody is on it — the sash, registered in boot() */
+    /* somebody is on it. The sash (registered in boot()) is VISIBLE at the town's camera and reads as
+       honour — a band of office, a seatbelt — before it reads as "taken" (Pili, 2026-09-13). The shirt
+       is 14 px wide and full; the only thing that carries a meaning at this size is the OUTLINE. So
+       the hard hat, which the town never otherwise uses: a wider brim, and "somebody is working on
+       this" — and it re-reads the sash as harness webbing. Cost: the hair is covered while claimed, so
+       two claimed people are less distinguishable from each other; the owner's question is "which are
+       taken", not "which is #41", so the trade is right for this town. */
+    if(this.takenBy(i)){lk.pattern="taken";lk.hat="hard";}
     return lk;},
   paras(body){return String(body||"").split(/\n{2,}/).map(p=>p.replace(/\s*\n\s*/g," ").trim()).filter(Boolean);},
   /* the plain-words paragraph first (§9.2): the one under "In plain words:", else the first */

@@ -78,10 +78,17 @@ function murDim(g,x1,x2,y,col,lab,g2){g.strokeStyle=col;g.fillStyle=col;g.lineWi
   if(lab){g.font="bold 11px ui-monospace,monospace";g.textAlign="center";g.fillText(lab,(x1+x2)/2,y-9);g.textAlign="left";}}
 /* a little person, five pixels wide, the way the game draws one */
 function murBody(g,x,y,shirt,h){const P=MURPAL;h=h||9;
-  g.fillStyle=shirt;g.fillRect(x,y,5,h);
-  g.fillStyle="#C08A5E";g.fillRect(x,y-6,5,6);
-  g.fillStyle=P.ink;g.fillRect(x-1,y-8,7,2);
-  g.fillRect(x+1,y+h,1,3);g.fillRect(x+3,y+h,1,3);}
+  /* Width follows height (Pili, 2026-09-13). This helper was 5 px wide whatever height it was handed,
+     so a body asked to be 49 tall was a pencil and one asked to be 9 tall was an ant beside 12 px
+     type — type is absolute on this wall and geometry is proportional, so a small panel drifts toward
+     a caption with a diagram under it. At h=9 every number below is what it always was: 5 wide, a
+     6-high head, a 2-high hat, legs at +1 and +3 — the nineteen panels painted before are untouched. */
+  const w=Math.max(5,Math.round(h*0.55)),hd=Math.max(6,Math.round(h*0.66)),cap=Math.max(2,Math.round(h*0.22)),
+        lw=Math.max(1,Math.round(w*0.2)),lh=Math.round(h/3);
+  g.fillStyle=shirt;g.fillRect(x,y,w,h);
+  g.fillStyle="#C08A5E";g.fillRect(x,y-hd,w,hd);
+  g.fillStyle=P.ink;g.fillRect(x-1,y-hd-cap,w+2,cap);
+  g.fillRect(x+Math.round(w*0.2),y+h,lw,lh);g.fillRect(x+Math.round(w*0.6),y+h,lw,lh);}
 
 /* ================= THE PANELS — append only, newest LAST so the wall reads left to right ========= */
 const MURALS=[
@@ -1020,8 +1027,8 @@ MURALS.push(
   aspect:0.46,
   art:(g,W,H)=>{const P=MURPAL;
     /* LUPE'S HAND: the carbon copy of a bay slip - pale green paper, a perforated stub, and a form
-       whose rows are the five sizes. Nobody else on this wall paints a FORM, and nobody else leaves a
-       row blank on purpose. */
+       whose rows are the five sizes. Nobody else on this wall paints a CHECKLIST with tick boxes, and nobody else
+       leaves a row unticked on purpose. */
     murPaper(g,W,H,"#DCE2CE",null);
     g.fillStyle="#CBD3BB";g.fillRect(0,0,W*0.055,H-3);
     g.fillStyle="#AEB89C";for(let y=6;y<H-8;y+=9)g.fillRect(W*0.055-2,y,2,4);
@@ -1090,29 +1097,32 @@ MURALS.push(
        es:"El cambio eran cuatro líneas y ya estaba. Luego se colocó el mismo asunto dos veces, la segunda ya tomado, y la camisa volvió igualita: misma llave, mismo cuerpo, sin marca. El aspecto se atornilla al nacer, en la función que nadie relee, y el diseño habría entregado una seña que sólo aparece al recargar — visible para quien prueba, invisible para quien juega."},
   aspect:0.44,
   art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
-    /* BETO'S HAND: the drawing-office blueprint gave way to the bench itself — one slab, two legs,
-       and the job. The stamped tag over BOTH men is the id that did not change; that is the story. */
-    const bx=W*0.08,bw=W*0.84,by=H*0.70,bh=H*0.055;
+    /* BETO'S HAND: not the blueprint this time — the bench itself. One slab, two legs, the job. The
+       stamped tag over BOTH men is the id that did not change; that is the whole story. Repainted the
+       same day at Pili's word: the bench was at 70% and the men were ants under 12 px type. */
+    const bx=W*0.06,bw=W*0.88,by=H*0.50,bh=H*0.075;
+    g.fillStyle=P.ink;g.globalAlpha=.10;g.fillRect(0,0,W,H*0.09);g.globalAlpha=1;   /* the shop's rail */
+    for(let i=0;i<7;i++){g.fillStyle=P.shade;g.fillRect(W*0.08+i*W*0.13,H*0.03,W*0.05,H*0.045);}
     g.fillStyle=P.shade;g.fillRect(bx,by,bw,bh);
-    g.fillStyle=P.ink;g.globalAlpha=.55;g.fillRect(bx+10,by+bh,5,H-(by+bh));g.fillRect(bx+bw-15,by+bh,5,H-(by+bh));g.globalAlpha=1;
-    const tx=W*0.5,ty=H*0.17;
-    g.fillStyle=P.bone;g.fillRect(tx-30,ty-13,60,20);
-    g.strokeStyle=P.ink;g.lineWidth=1.5;g.strokeRect(tx-30,ty-13,60,20);
-    g.fillStyle=P.ink;g.font="bold 12px ui-monospace,monospace";g.textAlign="center";g.fillText("~c0",tx,ty+2);g.textAlign="left";
-    const ax=W*0.30,cx2=W*0.66,fy=by-1;
+    g.fillStyle=P.ink;g.globalAlpha=.55;g.fillRect(bx+12,by+bh,7,H-(by+bh));g.fillRect(bx+bw-19,by+bh,7,H-(by+bh));g.globalAlpha=1;
+    const tx=W*0.5,ty=H*0.20;
+    g.fillStyle=P.bone;g.fillRect(tx-34,ty-15,68,24);
+    g.strokeStyle=P.ink;g.lineWidth=1.5;g.strokeRect(tx-34,ty-15,68,24);
+    g.fillStyle=P.ink;g.font="bold 13px ui-monospace,monospace";g.textAlign="center";g.fillText("~c0",tx,ty+3);g.textAlign="left";
+    const bhh=26,ax=W*0.27,cx2=W*0.63,fy=by-1;
     g.strokeStyle=P.ink;g.lineWidth=1;g.globalAlpha=.5;
-    g.beginPath();g.moveTo(tx-18,ty+9);g.lineTo(ax+2,fy-24);g.stroke();
-    g.beginPath();g.moveTo(tx+18,ty+9);g.lineTo(cx2+2,fy-24);g.stroke();g.globalAlpha=1;
-    /* left: the man wearing it. right: the same man, and the part lying beside his boots */
-    murBody(g,ax,fy-9,P.sky,9);
-    g.save();g.beginPath();g.rect(ax,fy-9,5,9);g.clip();
-    g.strokeStyle=P.bone;g.lineWidth=3;g.beginPath();g.moveTo(ax-2,fy-1);g.lineTo(ax+7,fy-9);g.stroke();g.restore();
-    murBody(g,cx2,fy-9,P.sky,9);
-    g.strokeStyle=P.bone;g.lineWidth=3;g.lineCap="butt";
-    g.beginPath();g.moveTo(cx2+11,by+bh-3);g.lineTo(cx2+22,by+1);g.stroke();
+    g.beginPath();g.moveTo(tx-22,ty+9);g.lineTo(ax+7,fy-bhh-20);g.stroke();
+    g.beginPath();g.moveTo(tx+22,ty+9);g.lineTo(cx2+7,fy-bhh-20);g.stroke();g.globalAlpha=1;
+    /* left: the man wearing it. right: the same man, and the part lying on the bench by his hand */
+    murBody(g,ax,fy-bhh,P.sky,bhh);
+    g.save();g.beginPath();g.rect(ax,fy-bhh,14,bhh);g.clip();
+    g.strokeStyle=P.bone;g.lineWidth=4;g.beginPath();g.moveTo(ax-3,fy-3);g.lineTo(ax+17,fy-bhh+3);g.stroke();g.restore();
+    murBody(g,cx2,fy-bhh,P.sky,bhh);
+    g.strokeStyle=P.bone;g.lineWidth=4;g.lineCap="butt";
+    g.beginPath();g.moveTo(cx2+22,by+bh-5);g.lineTo(cx2+44,by+3);g.stroke();
     g.strokeStyle=P.ink;g.globalAlpha=.35;g.lineWidth=1;g.stroke();g.globalAlpha=1;
-    g.fillStyle=P.rust;g.font="bold 10px ui-monospace,monospace";
-    g.fillText("puesta",ax-8,H*0.92);g.fillText("en el banco",cx2-6,H*0.92);}
+    g.fillStyle=P.rust;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("puesta",ax-10,H*0.90);g.fillText("en el banco",cx2-14,H*0.90);}
 },
 {
   id:"zeni-el-sello-sobre-el-renglon-vacio", iter:5, date:"2026-09-13", by:"zeni",
@@ -1125,41 +1135,47 @@ MURALS.push(
        es:"El paquete hostil que la suite abre desde hace una semana se revisa en cuatro casillas y se sella en una quinta. Ese quinto sello certifica un renglón que el paquete nunca trajo escrito — la declaración pregunta por el prototipo y el bulto llega con ese campo en blanco, así que la respuesta siempre sale limpia. Once revisiones honradas y una verde desde el día que se escribió, por nada."},
   aspect:0.46,
   art:(g,W,H)=>{const P=MURPAL;
-    /* ZENI'S HAND: a customs declaration on the counter, three fields ticked, the fourth blank, and
-       the OK stamp landed square over all of it. Nobody else on this wall paints a FORM with a stamp. */
+    /* ZENI'S HAND: a customs DECLARATION on the counter — three fields filled in somebody's hand, the
+       fourth left blank, the signature line nobody signed, and the OK stamp landed square over the
+       blank. Lupe's is a checklist with tick boxes; this is what a package carries. Repainted the same
+       day at Pili's word: the first draft had ticks like Lupe's, a dimension bar where a blank line
+       should be, and a clerk five pixels wide. */
     murPaper(g,W,H,P.wash,P.lime);
-    const cy=H*0.72;
+    const cy=H*0.74;
     g.fillStyle=P.shade;g.fillRect(0,cy,W,H-cy);
     g.fillStyle=P.ink;g.fillRect(0,cy,W,2);
-    const sx=W*0.08,sy=H*0.13,sw=W*0.52,sh=H*0.52;
+    const sx=W*0.07,sy=H*0.10,sw=W*0.56,sh=H*0.58;
     g.fillStyle=P.bone;g.fillRect(sx,sy,sw,sh);
     g.strokeStyle=P.ink;g.lineWidth=1;g.strokeRect(sx+0.5,sy+0.5,sw,sh);
     g.fillStyle=P.ink;g.fillRect(sx,sy,sw,3);
+    g.fillStyle=P.ink;g.font="bold 9px ui-monospace,monospace";g.fillText("DECLARACIÓN",sx+8,sy+15);
     const rows=["n","xp","qa","bl"],n=rows.length;
     g.font="9px ui-monospace,monospace";g.textAlign="left";
-    for(let i=0;i<n;i++){const ry=sy+sh*(0.30+i*0.18);
+    const hand=(x0,x1,y,seed)=>{g.strokeStyle=P.ink;g.lineWidth=1.2;g.beginPath();g.moveTo(x0,y);
+      for(let x=x0;x<=x1;x+=4){g.lineTo(x,y+((x*7+seed*13)%5)-2);}g.stroke();};
+    for(let i=0;i<n;i++){const ry=sy+sh*(0.26+i*0.15);
       g.strokeStyle=P.shade;g.lineWidth=1;
-      g.beginPath();g.moveTo(sx+26.5,ry+0.5);g.lineTo(sx+sw-10.5,ry+0.5);g.stroke();
-      g.fillStyle=P.ink;g.fillText(rows[i],sx+7,ry+3);
-      if(i<n-1){g.fillStyle=P.shade;g.fillRect(sx+30,ry-6,sw*0.42,3);
-        g.strokeStyle=P.moss;g.lineWidth=2;
-        g.beginPath();g.moveTo(sx+sw-24,ry-4);g.lineTo(sx+sw-19,ry+1);g.lineTo(sx+sw-10,ry-9);g.stroke();}}
-    g.save();g.translate(sx+sw*0.66,sy+sh*0.72);g.rotate(-0.20);g.globalAlpha=0.88;
-    g.strokeStyle=P.rust;g.lineWidth=3;
-    g.beginPath();g.arc(0,0,Math.min(sw,sh)*0.27,0,Math.PI*2);g.stroke();
-    g.fillStyle=P.rust;g.font="bold 10px ui-monospace,monospace";g.textAlign="center";
-    g.fillText("OK",0,4);
+      g.beginPath();g.moveTo(sx+30.5,ry+0.5);g.lineTo(sx+sw-10.5,ry+0.5);g.stroke();
+      g.fillStyle=P.ink;g.fillText(rows[i],sx+8,ry+3);
+      if(i<n-1)hand(sx+36,sx+sw*(0.55+0.1*i),ry-3,i+1);}          /* three written; the fourth is empty */
+    const fy=sy+sh*0.90;
+    g.strokeStyle=P.ink;g.lineWidth=1;g.beginPath();g.moveTo(sx+30.5,fy+0.5);g.lineTo(sx+sw-10.5,fy+0.5);g.stroke();
+    g.fillStyle=P.ink;g.font="8px ui-monospace,monospace";g.fillText("firma",sx+8,fy+3);   /* and nobody signed */
+    g.save();g.translate(sx+sw*0.62,sy+sh*0.80);g.rotate(-0.18);g.globalAlpha=0.9;
+    g.strokeStyle=P.rust;g.lineWidth=3.5;
+    g.beginPath();g.arc(0,0,Math.min(sw,sh)*0.30,0,Math.PI*2);g.stroke();
+    g.fillStyle=P.rust;g.font="bold 13px ui-monospace,monospace";g.textAlign="center";
+    g.fillText("OK",0,5);
     g.restore();g.globalAlpha=1;g.textAlign="left";
-    murDim(g,sx+26,sx+sw-10,sy+sh*0.845,P.deep,"bl");
-    const bh=H*0.19;
-    murBody(g,W*0.82,cy-bh-2,P.moss,bh);
-    g.fillStyle=P.lime;g.fillRect(W*0.66,cy+4,W*0.24,H*0.12);
-    g.strokeStyle=P.ink;g.lineWidth=1;g.strokeRect(W*0.66+0.5,cy+4.5,W*0.24,H*0.12);
-    g.beginPath();g.moveTo(W*0.78+0.5,cy+4);g.lineTo(W*0.78+0.5,cy+4+H*0.12);g.stroke();
+    /* me, behind the counter, on the far side of the sheet — a person, not a pencil */
+    const bh=26;murBody(g,W*0.80,cy-bh-2,P.moss,bh);
+    g.fillStyle=P.lime;g.fillRect(W*0.68,cy+5,W*0.26,H*0.14);
+    g.strokeStyle=P.ink;g.lineWidth=1;g.strokeRect(W*0.68+0.5,cy+5.5,W*0.26,H*0.14);
+    g.beginPath();g.moveTo(W*0.81+0.5,cy+5);g.lineTo(W*0.81+0.5,cy+5+H*0.14);g.stroke();
     g.strokeStyle=P.shade;
-    for(let i=1;i<4;i++){const ly=cy+4+H*0.12*i/4;
-      g.beginPath();g.moveTo(W*0.675,ly+0.5);g.lineTo(W*0.775,ly+0.5);g.stroke();
-      g.beginPath();g.moveTo(W*0.795,ly+0.5);g.lineTo(W*0.885,ly+0.5);g.stroke();}}
+    for(let i=1;i<4;i++){const ly=cy+5+H*0.14*i/4;
+      g.beginPath();g.moveTo(W*0.695,ly+0.5);g.lineTo(W*0.795,ly+0.5);g.stroke();
+      g.beginPath();g.moveTo(W*0.825,ly+0.5);g.lineTo(W*0.925,ly+0.5);g.stroke();}}
 },
 {
   id:"chuy-la-ficha-de-otro", iter:5, date:"2026-09-13", by:"chuy",
@@ -1235,35 +1251,35 @@ MURALS.push(
        es:"La guardia existe para encontrar una sola cosa: un personaje que manda a su lector a un archivo que nadie escribió jamás. En la primera corrida nombró cinco. Dos no eran reales. El patrón enumeraba las terminaciones que aceptaba y puso la corta antes que la larga, así que un archivo de datos que sí existe se leyó como un archivo de código que nunca existió — las últimas dos letras se cayeron del final y no había nadie ahí para atraparlas. Una prueba de laboratorio habría pasado. Sólo apuntarla a diecinueve archivos de verdad, con nombres de verdad adentro, hizo que el fantasma se parara. Lo arregló reordenando siete palabras, y ése es todo el costo, y ésa es la parte que vale pintar: el error más barato posible, dentro de la guardia más santurrona posible, un minuto para corregirlo y semanas para notarlo si le hubiera creído al rojo."},
   aspect:0.44,
   art:(g,W,H)=>{const P=MURPAL;
-    /* YAZ'S HAND AGAIN — depot enamel, a brushed rail, engraved strips, monospace. Different object:
-       not lamps this time, a failure list. Five plates, three solid red, two drawn as dashed hollow
-       outlines: a red light that is not there. On the right, the filename under glass with its last
-       two letters sheared off and falling. Nobody else on this wall paints a failing build. */
+    /* YAZ'S HAND AGAIN — depot enamel, a brushed rail, engraved strips, monospace. Different object
+       from her lamps: a failure list. Five lines; the three real failures are engraved strips struck
+       through in red, the two ghosts are dashed hollow plates with nothing behind them. On the right,
+       the filename under glass with its last two letters lying on the shelf beneath it, where they
+       fell. Repainted the same day at Pili's word: the first draft's red squares were her lamps with
+       corners, and the fallen letters were a rotation nobody could read. */
     g.fillStyle="#1E2228";g.fillRect(0,0,W,H);
     for(let x=0;x<W;x+=3){g.fillStyle=(x/3|0)%2?"#434A53":"#383E46";g.fillRect(x,0,Math.min(3,W-x),H*0.13);}
     g.fillStyle="#2A2F36";g.fillRect(0,H*0.13,W,2);
     g.fillStyle=P.bone;g.font="bold 11px ui-monospace,monospace";g.fillText("MISSING",8,H*0.09);
     g.fillStyle=P.gold;g.font="bold 9px ui-monospace,monospace";g.fillText("5 rojos / 3 reales",W-104,H*0.09);
-    const lx=W*0.05,lw=W*0.52,rh=H*0.11,gap=H*0.045;
+    const lx=W*0.05,lw=W*0.52,rh=H*0.10,gap=H*0.05;
     for(let i=0;i<5;i++){const y=H*0.22+i*(rh+gap),ghost=(i===2||i===4);
       g.fillStyle="#14171B";g.fillRect(lx-4,y-3,lw+8,rh+6);
-      if(ghost){g.strokeStyle="#C0392B";g.lineWidth=2;g.setLineDash([4,3]);
-        g.strokeRect(lx+0.5,y+0.5,rh*0.8,rh*0.8);g.setLineDash([]);g.globalAlpha=0.30;}
-      else{g.fillStyle="#C0392B";g.fillRect(lx,y,rh*0.8,rh*0.8);}
-      g.fillStyle=P.bone;
-      const n=[7,5,6,4,5][i];for(let k=0;k<n;k++)g.fillRect(lx+rh*1.1+k*(lw*0.11),y+rh*0.28,lw*0.085,rh*0.26);
-      g.globalAlpha=1;
-      if(ghost){g.fillStyle=P.gold;g.font="bold 9px ui-monospace,monospace";g.fillText("?",lx+lw+6,y+rh*0.8);}}
-    const px=W*0.64,pw=W*0.32,py=H*0.30,ph=H*0.34;
+      if(ghost){g.strokeStyle="#C0392B";g.lineWidth=1.5;g.setLineDash([4,3]);
+        g.strokeRect(lx+0.5,y+0.5,lw-1,rh-1);g.setLineDash([]);
+        g.fillStyle=P.gold;g.font="bold 10px ui-monospace,monospace";g.fillText("?",lx+lw*0.5-3,y+rh*0.75);}
+      else{g.fillStyle="#4A525C";g.fillRect(lx,y,lw,rh);                       /* the engraved strip */
+        g.fillStyle=P.bone;const n=[7,5,4][i>2?2:i];for(let k=0;k<n;k++)g.fillRect(lx+8+k*(lw*0.11),y+rh*0.30,lw*0.085,rh*0.36);
+        g.strokeStyle="#C0392B";g.lineWidth=3;g.beginPath();g.moveTo(lx+4,y+rh*0.5);g.lineTo(lx+lw-4,y+rh*0.5);g.stroke();}}
+    const px=W*0.64,pw=W*0.32,py=H*0.26,ph=H*0.30;
     g.fillStyle="#14171B";g.fillRect(px-5,py-5,pw+10,ph+10);
     g.fillStyle="#2A2F36";g.fillRect(px,py,pw,ph);
-    g.fillStyle=P.bone;g.font="bold 15px ui-monospace,monospace";g.fillText("spots.j",px+8,py+ph*0.58);
-    g.fillStyle=P.gold;g.fillText("s",px+71,py+ph*0.58);
-    g.save();g.translate(px+pw*0.78,py+ph*0.74);g.rotate(0.55);
-    g.fillStyle="#6B7079";g.font="bold 13px ui-monospace,monospace";g.fillText("on",0,0);g.restore();
-    g.strokeStyle=P.gold;g.lineWidth=2;g.beginPath();
-    g.moveTo(px+78,py+ph*0.64);g.lineTo(px+pw*0.78,py+ph*0.70);g.stroke();
-    g.fillStyle="#C0392B";g.fillRect(px,py+ph+9,pw*0.55,4);
+    g.fillStyle=P.bone;g.font="bold 16px ui-monospace,monospace";g.fillText("spots.j",px+10,py+ph*0.62);
+    g.fillStyle=P.gold;g.fillText("s",px+80,py+ph*0.62);
+    /* the shelf under the glass, and the two letters lying on it */
+    const shy=py+ph+14;g.fillStyle="#4A525C";g.fillRect(px-5,shy,pw+10,5);
+    g.fillStyle="#8E949C";g.font="bold 13px ui-monospace,monospace";g.fillText("o",px+pw*0.55,shy-2);g.fillText("n",px+pw*0.72,shy-2);
+    g.strokeStyle=P.gold;g.lineWidth=1.5;g.setLineDash([2,3]);g.beginPath();g.moveTo(px+94,py+ph*0.66);g.quadraticCurveTo(px+pw*0.75,py+ph*0.9,px+pw*0.62,shy-10);g.stroke();g.setLineDash([]);
     g.fillStyle=P.bone;g.font="8px ui-monospace,monospace";
     g.fillText("el guardia inventó el fantasma",W*0.05,H*0.955);
     g.fillStyle=P.gold;g.fillRect(W*0.05,H*0.905,W*0.20,2);}

@@ -410,6 +410,16 @@ the body id that did not change), **Zeni** (first visit — the customs stamp la
 in what they said, the state they held, and what they drew; the suite checked all three. Melo's and
 Lupe's come in the second run, against what was built.
 
+**Pili looked before it shipped, and three of the four were repainted the same hour** — the words are
+untouched, the ledger holds. Her finding is structural and it is now in the helper's own comment: type
+on this wall is absolute and geometry is proportional, and `murBody` was five pixels wide whatever
+height it was handed, so Beto's men were ants under 12px type and Zeni's clerk was a pencil. One line
+gives a body a width that follows its height, byte-identical at the height every earlier panel used.
+Zeni's ticks-and-boxes form repeated Lupe's device one bay over, so hers is a customs declaration now —
+entries in hand, a signature line nobody signed, the stamp over the blank. Yaz's red squares were her
+own lamps with corners; they are struck engraved strips now, and the fallen letters lie on the shelf
+instead of rotating in the glass. Chuy's card was left exactly as it was.
+
 ## Coming back — how a return visit works, and the rule against stamps
 
 *Owner, 2026-09-12: "just to understand when an agent goes back to the mural, they'll add space for

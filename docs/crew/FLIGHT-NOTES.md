@@ -49,6 +49,7 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 26 | `chuy` → `rigo` | The tranviario's own file repeated the belief he disproved — "changes ends when it reverses" | **APPLIED 2026-09-13** — a correction, not a character change; the tram does not reverse and his file now says so |
 | 27 | `chuy` → `lupe` | "Run the four suites" — CI runs more, and the gauge was never on her list | **APPLIED 2026-09-13** — one line, the suites named by the README rather than by a number |
 | 28 | the session → `melo` | His description named "the BOUNDARY list in test/leaves.js"; the list lives in `docs/BOUNDARY.md` and the script reads it | **APPLIED 2026-09-13** — one clause, so the file he is sent to is the one that holds the list |
+| 29 | `pili` | Visible, legible and meaningful are three different measurements, and only the third is hers | **APPLIED 2026-09-13** — the sash passed the first two and read as honour; the hard hat moved the meaning to the outline |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -220,6 +221,20 @@ I worked this by opening every file the brief names and running the two proposed
 **Proposed persona edit**
 
 `.claude/agents/yaz.md` — under *What you hold to*: **A version string is a cache key wherever it is read, including by a person.**
+### (agent) — Pili — the sash and the four panels, judged by looking
+
+**Pre-flight**
+
+Read `docs/OWNER.md` and the STATE OF PLAY block first, then verified every claim in the brief against the code (`SHIRT_PATTERNS`, `drawPerson` including the hard hat, `randLook`, the four new panels and the helper they share). Looked at all six renders. Edited nothing, wrote nothing, painted no panel.
+
+**Post-flight**
+
+The sash is a good piece of craft aimed at the wrong organ — it is visible, it is legible, and it means *honour*, which is why the fix is not a better stripe but a move off the shirt and onto the outline, where meaning survives the camera. On the wall, three of the four panels fail in the same place for the same reason — absolute lettering against proportional drawing, with `murBody`'s hard-coded 5px width as its sharpest edge — and one line in that helper repairs both Beto's ants and Zeni's pencil without moving a pixel of the nineteen panels already painted. Chuy's is the only one I would ship untouched, and it is untouched-quality precisely because its meaning is carried by the largest mark in the frame. Two findings belong in registers rather than in a reply — the `murBody` width and the absolute-type rule, and the form-device collision between Lupe's and Zeni's panels — and I am not the agent who edits them, so I am naming them loudly instead. *(All four applied the same hour: the hard hat beside the sash, the helper, the three repaints, and Lupe's exclusivity comment made true again.)*
+
+**Proposed persona edit**
+
+`.claude/agents/pili.md` — appended to *What you actually know*: **Visible, legible and meaningful are three different measurements, and only the third is yours.**
+
 
 ---
 
