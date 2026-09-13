@@ -56,7 +56,7 @@ function rows(src) {
    legitimately writes `.claude/agents/*.md` as a set, not a file. The extension list is longest
    first: `.json` before `.js`, or `test/spots.json` reads as `test/spots.js` — a ghost the first
    draft of this file invented and then reported as missing. */
-const CITE = /(?:docs|test|engine|content|changarrito|scripts|\.github|\.claude)\/[A-Za-z0-9_./*-]*\.(?:json|html|yml|txt|md|js|sh)(?![A-Za-z0-9])/g;
+const CITE = /(?:docs|test|engine|content|changarrito|scripts|vendor|\.github|\.claude)\/[A-Za-z0-9_./*-]*\.(?:json|html|yaml|yml|txt|md|js|sh)(?![A-Za-z0-9])/g;
 
 /* the workflows: what CI itself is allowed to do (docs/BOUNDARY.md row 11, gap G4). A `taken:` label
    is crew mode's lock, and docs/story/el-changarrito.md R4a says nothing automated may ever gate on a
@@ -74,13 +74,23 @@ function workflows(root) {
     if (!/^permissions:/m.test(src))
       P.push(rel + ' declares no permissions: block, so it runs with whatever GitHub hands it by default — ' +
              'a bad dependency in CI with a write token can push to main (docs/story/el-changarrito.md R9b)');
-    const writes = [...src.matchAll(/^\s+([a-z-]+):\s*write\s*$/gm)].map(m => m[1]);
+    /* Melo, 2026-09-13: the first draft read `^\s+scope: write$` and printed OK on `permissions: write-all`
+       (no indent, no scope name) and on `contents: write  # to push the tag` (a trailing comment). Read
+       every syntax GitHub accepts for saying what a workflow may write: the two words, the block form
+       at any indent (job-level too), and the flow form `{contents: write}`. */
+    const writes = [];
+    if (/^\s*permissions:\s*write-all\b/m.test(src)) writes.push('write-all (every scope)');
+    [...src.matchAll(/^[ \t]+([a-z-]+)\s*:\s*write\b/gm)].forEach(m => writes.push(m[1]));
+    [...src.matchAll(/permissions:\s*\{([^}]*)\}/g)].forEach(m => [...m[1].matchAll(/([a-z-]+)\s*:\s*write\b/g)].forEach(x => writes.push(x[1])));
     writes.forEach(scope => { if (!(WRITE_OK[f] || []).includes(scope))
       P.push(rel + ' asks for "' + scope + ': write" — CI never writes to this repository; the only write scopes ' +
              'allowed are the deploy\'s own (pages, id-token) in pages.yml, and this is not one of them'); });
     /* triggers live under `on:` and nowhere else — `permissions:` also has an `issues:` line, and the
        first run of this check read that one as a trigger. Read the block the noun lives in. */
-    const on = (src.match(/^on:\n((?:[ \t]+.*\n?|\n)*)/m) || [])[1] || (/^on:\s*\[?([^\n]*)/m.exec(src) || [])[1] || '';
+    /* Melo, 2026-09-13: yamllint's truthy rule pushes people to write `"on":`, and `/^on:/` then reads
+       nothing and prints a sentence claiming the opposite. The key may be quoted. */
+    const on = (src.match(/^["']?on["']?:\n((?:[ \t]+.*\n?|\n)*)/m) || [])[1] || (/^["']?on["']?:\s*\[?([^\n]*)/m.exec(src) || [])[1] || '';
+    if (!/^["']?on["']?:/m.test(src)) P.push(rel + ' has no on: key this check can read — a workflow with no trigger it can see is not a workflow it has checked');
     const trig = on.match(/(?:^|[\s\[,])(pull_request_target|issue_comment|issues|label|discussion_comment)(?=\s*[:\],]|$)/m);
     if (trig)
       P.push(rel + ' can be started by "' + trig[1] + '" — a trigger a label, a comment or an issue can pull. ' +
@@ -130,7 +140,37 @@ function consistency(root) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(r.since))
       P.push('the row for "' + r.path + '" carries no date — a guard is a promise and a promise has a date on it (.claude/agents/zeni.md)');
   });
+  P.push(...completeness(root, R));
   return P.concat(workflows(root));
+}
+
+/* Melo, 2026-09-13: docs/BOUNDARY.md said the check reads the ledger's COMPLETENESS and it read only
+   its soundness — delete the row for the file that holds the owner's token and it printed OK; add a
+   new script that POSTs to api.github.com with a bearer and it printed OK. A denylist cannot know
+   every edge, but three sets are nouns and can be derived: every file under .github/ (what CI runs),
+   every path scripts/build-site.sh copies (what ships), and every source file that names the API host
+   or an Authorization header (what carries a key). Each must be covered by a row. */
+function completeness(root, R) {
+  const P = [];
+  const covered = p => R.some(r => r.path.endsWith('/') ? p.startsWith(r.path) : (p === r.path || (p.endsWith('/') && r.path.startsWith(p))));
+  const need = (p, why) => { if (!covered(p)) P.push('docs/BOUNDARY.md has no row for ' + p + ' — ' + why); };
+  const gh = path.join(root, '.github');
+  const walk = d => { if (!fs.existsSync(d)) return; for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+    const f = path.join(d, e.name); if (e.isDirectory()) walk(f); else need(path.relative(root, f), 'it runs in CI or writes into the deploy, and nothing routes a change to it'); } };
+  walk(gh);
+  const bs = path.join(root, 'scripts', 'build-site.sh');
+  if (fs.existsSync(bs)) {
+    const src = fs.readFileSync(bs, 'utf8');
+    const m = src.match(/^\s*for f in ([^;\n]+);/m);
+    (m ? m[1].trim().split(/\s+/) : []).forEach(p => need(p, 'scripts/build-site.sh copies it into the public build'));
+    [...src.matchAll(/cp -r "\$ROOT\/([A-Za-z0-9_./-]+)"/g)].forEach(x => need(x[1].replace(/\/?$/, '/'), 'scripts/build-site.sh copies it into the public build'));
+  }
+  let tracked = [];
+  try { tracked = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).split('\n').filter(Boolean); } catch (e) { return P; }
+  tracked.filter(f => !/^(docs|test|node_modules|\.claude)\//.test(f) && /\.(js|html|sh|yml|yaml|json)$/.test(f)).forEach(f => {
+    let src = ''; try { src = fs.readFileSync(path.join(root, f), 'utf8'); } catch (e) { return; }
+    if (/api\.github\.com|\bAuthorization\b/.test(src)) need(f, 'it names the API host or an Authorization header, so it carries a key or reaches one'); });
+  return P;
 }
 
 /* the same shape as test/bump.js, and for the same reason it was changed on 2026-09-12:
@@ -162,7 +202,8 @@ if (require.main === module) {
   if (args[0] === '--selftest') {
     const os = require('os'), t = fs.mkdtempSync(path.join(os.tmpdir(), 'leaves-'));
     const W = (p, s) => { fs.mkdirSync(path.dirname(path.join(t, p)), { recursive: true }); fs.writeFileSync(path.join(t, p), s); };
-    const TABLE = who => '| path | who | what it lets out | since |\n|---|---|---|---|\n| sw.js | ' + who + ' | every installed player | 2026-09-13 |\n';
+    const TABLE = (who, extra) => '| path | who | what it lets out | since |\n|---|---|---|---|\n| sw.js | ' + who + ' | every installed player | 2026-09-13 |\n' + (extra || '');
+    const WF = '| .github/workflows/ci.yml | zeni | what CI runs | 2026-09-13 |\n| .github/workflows/pages.yml | zeni | the deploy | 2026-09-13 |\n';
     W('.claude/agents/zeni.md', 'Read docs/BOUNDARY.md and docs/GHOST.md and test/spots.json before you touch anything.\n');
     W('test/spots.json', '{}\n');
     let out = consistency(t);
@@ -183,6 +224,7 @@ if (require.main === module) {
     W('docs/BOUNDARY.md', TABLE('zeni'));
     out = consistency(t);
     cases.push(['a sound register says nothing', out.length === 0]);
+    W('docs/BOUNDARY.md', TABLE('zeni', WF));
     W('.github/workflows/ci.yml', 'name: CI\non:\n  push:\n  pull_request:\njobs:\n  x:\n    runs-on: ubuntu-latest\n');
     out = consistency(t);
     cases.push(['a workflow with no permissions block', out.some(s => /declares no permissions/.test(s))]);
@@ -192,10 +234,33 @@ if (require.main === module) {
     W('.github/workflows/ci.yml', 'name: CI\npermissions:\n  contents: read\non:\n  push:\n  issue_comment:\n    types: [created]\njobs:\n  x:\n    runs-on: ubuntu-latest\n');
     out = consistency(t);
     cases.push(['a workflow a comment can start', out.some(s => /issue_comment/.test(s))]);
+    W('.github/workflows/ci.yml', 'name: CI\npermissions: write-all\non:\n  push:\njobs:\n  x:\n    runs-on: ubuntu-latest\n');
+    out = consistency(t);
+    cases.push(['permissions: write-all', out.some(s => /write-all/.test(s))]);
+    W('.github/workflows/ci.yml', 'name: CI\npermissions:\n  contents: write   # to push the release tag\non:\n  push:\njobs:\n  x:\n    runs-on: ubuntu-latest\n');
+    out = consistency(t);
+    cases.push(['a write scope followed by a comment', out.some(s => /contents: write/.test(s))]);
+    W('.github/workflows/ci.yml', 'name: CI\npermissions: {contents: write}\non:\n  push:\njobs:\n  x:\n    runs-on: ubuntu-latest\n');
+    out = consistency(t);
+    cases.push(['a write scope in flow form', out.some(s => /contents: write/.test(s))]);
+    W('.github/workflows/ci.yml', 'name: CI\npermissions:\n  contents: read\n"on":\n  push:\n  issue_comment:\n    types: [created]\njobs:\n  x:\n    runs-on: ubuntu-latest\n');
+    out = consistency(t);
+    cases.push(['a comment trigger under a quoted on: key', out.some(s => /issue_comment/.test(s))]);
     W('.github/workflows/pages.yml', 'name: Pages\npermissions:\n  contents: read\n  pages: write\n  id-token: write\non:\n  push:\njobs:\n  x:\n    runs-on: ubuntu-latest\n');
     W('.github/workflows/ci.yml', 'name: CI\npermissions:\n  contents: read\non:\n  push:\n  pull_request:\njobs:\n  x:\n    runs-on: ubuntu-latest\n');
     out = consistency(t);
     cases.push(['the deploy\'s own write scopes are allowed, and only in pages.yml', out.length === 0]);
+    /* completeness: the three derivable sets must each be covered by a row */
+    W('.github/scripts/post-status.js', 'fetch("https://api.github.com/x",{headers:{Authorization:"Bearer x"}})\n');
+    out = consistency(t);
+    cases.push(['a new file under .github/ with no row', out.some(s => /post-status\.js/.test(s))]);
+    fs.rmSync(path.join(t, '.github', 'scripts'), { recursive: true, force: true });
+    W('tool/poster.js', 'fetch("https://api.github.com/x",{headers:{Authorization:"Bearer x"}})\n');
+    const q = { cwd: t, stdio: ['ignore', 'ignore', 'ignore'] };
+    try { execFileSync('git', ['init', '-q'], q); execFileSync('git', ['add', '-A'], q); } catch (e) {}
+    out = consistency(t);
+    cases.push(['a tracked source file that reaches the API with no row', out.some(s => /tool\/poster\.js/.test(s))]);
+    fs.rmSync(path.join(t, 'tool'), { recursive: true, force: true }); try { execFileSync('git', ['add', '-A'], q); } catch (e) {}
     const R = rows(fs.readFileSync(path.join(t, 'docs', 'BOUNDARY.md'), 'utf8'));
     cases.push(['a diff that touches the row is seen', touched(['sw.js', 'docs/OPEN.md'], R).length === 1]);
     cases.push(['a diff that touches nothing on the list is quiet', touched(['docs/OPEN.md'], R).length === 0]);
@@ -203,7 +268,7 @@ if (require.main === module) {
     const bad = cases.filter(c => !c[1]);
     bad.forEach(c => console.log('SELFTEST FAIL — ' + c[0]));
     if (bad.length) process.exit(1);
-    console.log('OK — ' + cases.length + ' cases, including the three that were red on main the day this was written.');
+    console.log('OK — ' + cases.length + ' cases, including the three that were red on main the day this was written and the six Melo walked past that afternoon.');
     process.exit(0);
   }
   if (!args.length) {

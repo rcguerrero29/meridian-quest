@@ -50,6 +50,8 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 27 | `chuy` → `lupe` | "Run the four suites" — CI runs more, and the gauge was never on her list | **APPLIED 2026-09-13** — one line, the suites named by the README rather than by a number |
 | 28 | the session → `melo` | His description named "the BOUNDARY list in test/leaves.js"; the list lives in `docs/BOUNDARY.md` and the script reads it | **APPLIED 2026-09-13** — one clause, so the file he is sent to is the one that holds the list |
 | 29 | `pili` | Visible, legible and meaningful are three different measurements, and only the third is hers | **APPLIED 2026-09-13** — the sash passed the first two and read as honour; the hard hat moved the meaning to the outline |
+| 30 | `melo` | A count instead of an identity — when a guard counts, ask what a count of one would let through | **APPLIED 2026-09-13** — the persona guard now reads the file's name against the person it hands the model; his other four plants that got past are closed the same hour |
+| 31 | `lupe` | Look at a screenshot FIRST, then at the end — no car on the rollers, no reading | **APPLIED 2026-09-13** — twenty-eight rows measured on a canvas with no layout box; the picture caught it three hours later |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -234,6 +236,52 @@ The sash is a good piece of craft aimed at the wrong organ — it is visible, it
 **Proposed persona edit**
 
 `.claude/agents/pili.md` — appended to *What you actually know*: **Visible, legible and meaningful are three different measurements, and only the third is yours.**
+
+### (agent) — Melo — nineteen plants against four locks fitted that morning
+
+**Pre-flight**
+
+I read `CLAUDE.md`, `docs/QA-PASS.md` (E5/E6/E7 twice), `docs/REGRESSION.md` §3 and `docs/BOUNDARY.md`, then copied the tree to `/tmp/claude-0/-home-user-meridian-quest/0f70be00-7ff9-5c2f-a84c-7edceebcd89f/scratchpad/melo-lab` and established green there before every plant: `node test/leaves.js` OK/0, `node test/leaves.js --selftest` OK/0 (12 cases), `CHROMIUM_PATH=/opt/pw-browsers/chromium node test/town.smoke.js` OK/0. Mid-session two commits landed on the branch under me (`e85fa81`, `52c26d8`, 18:44 and 18:45) so my 18:42 snapshot went stale — `git diff 673727d..HEAD` touches none of the four guards nor any file they read, but I re-synced the lab to HEAD, re-baselined green, and **re-ran all five got-past plants at HEAD** rather than infer it. Nineteen plants, one per run, each restored before the next; `diff -rq --exclude=.git --exclude=node_modules` proved the lab byte-identical to the real tree before I deleted it.
+
+**Post-flight**
+
+Nineteen plants, one guard and one violation per run, and fourteen of them were locked out by a guard that said something a person would say — which is the highest proportion I have seen here. The five that opened all opened the same way: **the guard counted, matched a shape, or compared two copies, where the noun was an identity or a content** — `yous.length !== 1` instead of *whose name*, `/^permissions:/` instead of *what it may write*, sha1-equality instead of *what the block still says*. The sharpest is finding 1, because the guard was written this morning by the session that found Toño inside Rigo, and it caught the fault in the shape it happened to arrive in and not the shape one keystroke away — `docs/REGRESSION.md` calls that *"knowing about the mistake does not stop you making it"* and I have now watched it happen on a guard less than twelve hours old. The lab is deleted, the working tree is clean, and I re-ran every got-past plant against HEAD rather than trust a snapshot that went stale under me.
+
+**Proposed persona edit** (`.claude/agents/melo.md`, proposed only — I edited nothing), to be inserted as a fifth shape under "Four shapes it comes in":
+
+> **a count instead of an identity** — the guard asks *how many* where the fault is *which one*. `test/town.smoke.js:1156` counts `You are **…**` lines and printed OK on a `rigo.md` that says, exactly once, that it is Toño; that is the same fault the guard was written for that morning, arriving one keystroke to the left. **When a guard counts, ask what a count of one would let through.**
+
+The moment in this run: I had already beaten this guard's shape twice before I recognised it, because I was working down the brief's list instead of asking what each assertion could not distinguish.
+
+**Proposed persona edit**
+
+`.claude/agents/melo.md` — a fifth shape under *the shapes it comes in*: **a count instead of an identity** — when a guard counts, ask what a count of one would let through.
+
+### (agent) — Lupe — the bay, at seven sizes, with a claimed person on the street
+
+**Pre-flight**
+
+I read `docs/QA-PASS.md` (the matrix and all nine escapes) and `docs/NEXT-SESSION.md`'s STATE OF PLAY before touching anything, then verified the claim code against `changarrito/content/record.js` rather than the brief. I ran all seven suites on the real tree first, found `test/smoke.js` red, and chased that to ground before starting the bay. I edited nothing: `git status --porcelain` is empty and no untracked file exists anywhere in `/home/user/meridian-quest`; every script and picture I made is under the scratchpad with my name on it.
+
+---
+
+**Post-flight**
+
+The thing that was built today holds: the sash is on the claimed person and on nobody else, in four cameras at seven sizes, and it survives a negative control that takes the claim away and watches the number fall to zero. The two real fails I am handing back are both older than this branch, and neither is a reason to hold it. What cost me the afternoon was not the product — it was believing a canvas that was drawing into a buffer in an empty room, and the only thing that caught it was looking at the picture. My list is now one line longer, and that line is not about a viewport.
+
+**Persona edit I propose, as exact text.** In `.claude/agents/lupe.md`, replace the line
+
+> `**4 · Look at a screenshot at the end.** A prototype here once passed every pixel test while putting teeth along every wall in HQ. Numbers do not see that; a person does.`
+
+with
+
+> **4 · Look at a screenshot FIRST, then at the end.** A prototype here once passed every pixel test while putting teeth along every wall in HQ. Numbers do not see that; a person does. And on 2026-09-13 I measured twenty-eight rows of a canvas nobody could see: the town boots to its class picker, `#vp` was `0×0`, and `draw()` fills the backing buffer whether or not the element has a layout box — so `getImageData` returned real, correct, meaningless pixels and every row "passed". **A canvas draws in an empty room.** Before you measure anything, take one picture and prove you are actually in the game: `#vp` has a non-zero box, and the shot shows the world and not the front door.
+
+---
+
+**Proposed persona edit**
+
+`.claude/agents/lupe.md` — bullet 4 becomes **Look at a screenshot FIRST, then at the end**: before the first number, one screenshot that shows the thing you are about to measure is on a screen.
 
 
 ---

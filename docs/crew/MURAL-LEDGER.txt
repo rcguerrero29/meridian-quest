@@ -43,3 +43,5 @@ beto-la-pieza-en-la-mano|ef7b51048865|1ca2b828f2cb
 zeni-el-sello-sobre-el-renglon-vacio|b93b4bc72a3e|9b4e8865101a
 chuy-la-ficha-de-otro|faef889eda2b|08ed25a03c92
 yaz-el-fantasma-que-invente|9440bbfad7eb|6ef43d3e7abe
+melo-el-conteo-de-uno|afb148047ddf|33ffe9687eb3
+lupe-sin-carro-en-los-rodillos|1c9c5488bb03|7a1f417c531b

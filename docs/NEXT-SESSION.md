@@ -3,12 +3,77 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-13)
+## STATE OF PLAY — read this first (2026-09-13, end of the crew-mode sitting)
 
-### ⇢ 2026-09-13 — START HERE. Everything below this block is history.
+### ⇢ 2026-09-14 — START HERE. Everything below this block is history.
 
-**`main` is at `mq-v158` / `ch-v101`; this branch takes the town to `ch-v102` (claiming by label). Seven suites green, R10 clean.**
-PRs #166–#170 are all in.
+**`main` is at `mq-v158` / `ch-v101`. Branch `claude/happy-ritchie-84qbbc` carries the whole of
+2026-09-13 and takes the town to `ch-v102`; it is pushed, all seven suites and `test/leaves.js` are
+green on it, and no PR has been opened — the owner asked for the work, not for the PR yet.** Nothing
+touched `engine/`, so `mq-v158` and `sw.js` did not move (`test/bump.js` confirms).
+
+### What shipped on that branch, in the order the owner will meet it
+
+| | |
+|---|---|
+| **Claiming by label** | `taken: <name>` on an issue is crew mode's lock. The town reads it (`takenBy`, `record.js`): the person wears a **hard hat and a white sash**, Talk's third line says who has them, the house board lists *Taken*. The claim rides in the body's id (a look is baked at spawn; a mark that only changes `look()` lands on nobody until a reload — measured). The form never offers or copies a `taken:` label. Create each label once with `gh label create` |
+| **`docs/BOUNDARY.md` + `test/leaves.js`** | Zeni's ledger of every edge (what leaves town, the promise with `file:line`, which guard reads that noun, when last planted) and the script that reads it: soundness, completeness on three derivable sets (what CI runs, what ships, what carries a key), the workflows' permissions and triggers, and a routing slip (`node test/leaves.js origin/main`, exit 0 always). Two personas had cited both files since 2026-09-11; neither existed |
+| **The personas guard** | `test/town.smoke.js`: nineteen files, one shared block, first, once, one person per file, byte-identical, and it must still say the four paid-for rules, ASK HIM, and name the post-mortem and the proxy register. Its first run found `rigo.md` carrying Toño's whole persona under a second copy of the block. Repaired |
+| **The wall, iteration 5** | Six panels (Beto, Zeni, Chuy, Yaz, Melo, Lupe); `by:"beto"` used on a real panel for the first time, which opened a second bay — fixed; `murBody` width follows height (was 5px at any height); three panels repainted at Pili's word, words untouched |
+| **Docs** | roster of nineteen; counts agree with the files; `OPEN.md` merged and pointing at `BOUNDARY.md`; this file is one block, history in `docs/NEXT-SESSION-ARCHIVE.md`; `CREW-MODE.md` has "Where the switch stands" and "What running many agents teaches" |
+
+### IN FLIGHT when this block was written — pick these up first
+
+1. **The agents' post-mortem** (owner: *"make sure that we have the agents do a post mortem for
+   lessons learned to update and or help agents update documentation"*). A workflow was running:
+   six agents wrote lessons in the register's house style and **Chuy was writing them into
+   `docs/POSTMORTEM.md` §13 and the documents they name — directly, on `docs/` only.** Its return is
+   at `/tmp/claude-0/…/tasks/w1vrudft1.output` on the box that ran it; **if that box is gone, look at
+   `git status` — Chuy's edits are in the working tree or already committed with the message that
+   names §13. Verify them the way you verify anything: open the file, run `node test/town.smoke.js`
+   (it counts the flight-notes and mural ledgers), commit with explicit paths.** If nothing is there,
+   re-run the post-mortem: the six agents' returns from the two runs are summarised in
+   `docs/crew/FLIGHT-NOTES.md` iteration 5, and the calling session's own mistakes are listed in the
+   §13 brief below.
+2. **Chava's walk of the wall** (owner: *"make sure the mural concept works please"*). He was playing
+   it at phone and desktop widths and reading two bays as a record. His return, if it exists, is a
+   task output beside the one above; his panel and persona proposal need a ledger row each. What the
+   calling session verified itself: the wall opens from the street tiles, scrolls sideways at phone
+   width to the last bay, the reading-size panels are legible, `murMemoryText("Beto")` returns three
+   visits, 25 panels, 25 ledger lines, zero page errors.
+
+### The calling session's own mistakes, for §13 if Chuy did not get them
+
+A hash of the shared block proved nineteen copies identical and could not see that one file held it
+twice and another not first · the first workflow-trigger check read `permissions: issues: read` as a
+trigger · the first run of the personas guard crashed the suite on a `crypto` reference in the wrong
+scope · a doc-correction script asserted on a stale anchor after applying eleven edits · two ledger
+lines were appended by a script that had already failed · a claim that GitHub creates a missing label
+on first use was written unverified (egress blocked) and rewritten · 31 of 172 citations in the new
+register had slid within the hour because the session inserted a test above them.
+
+### Waiting on the owner (also in `docs/OPEN.md` §1)
+
+- **GitHub → Settings → Pages → Source** — nobody here can read it; if it says "deploy from a
+  branch", every guard on the public build is inert (`docs/BOUNDARY.md` row 1, G1).
+- **Force a `ch-v` bump on every town commit?** The town's `GAMEV` is the only thing that tells his
+  laptop to pull, and nothing guards that it moved.
+- **A claimed `tier: low` issue — a body on the street, or the board only?** Built as board-only.
+- **The tablet rows** Lupe ran are not in `docs/QA-PASS.md`'s matrix; her rule says the list grows
+  from escapes only. Left off.
+
+### Found, not fixed — older than the branch (Lupe, 2026-09-13)
+
+- **`test/smoke.js` goes red about one run in twenty-five**: a wandering neighbour in the one-tile
+  gap by the barbería (`ex` (19,1)) walls off 35 tiles from Doña Meche; `auditReach` and `isSolid`
+  both treat a standing person as a wall, so it blocks the player too. Repro: occupy `(19,1)`.
+- **Phone landscape**: the joystick and Talk sit 100–120 px below the fold in both games until you
+  scroll or go fullscreen.
+
+### The next sitting, in order
+
+1. Land the in-flight items above; open the PR for `claude/happy-ritchie-84qbbc` when he says so.
+2. The queue below is unchanged: the tram depth pass first (A13 item 1), then the aperture rule.
 
 ## The five minutes that save you an afternoon
 

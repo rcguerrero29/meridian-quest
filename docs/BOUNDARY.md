@@ -56,7 +56,7 @@ added to the repo tomorrow is private by default (`.github/workflows/pages.yml:2
 `.github/workflows/ci.yml:37-38` and **again after the last file is written into the box** at
 `.github/workflows/pages.yml:55-56`.
 **Last planted against: 2026-09-10** — proven red against the old deploy, thirteen findings, first
-line `changarrito/` (`docs/QA-PASS.md:138-139`; `docs/REGRESSION.md:142`).
+line `changarrito/` (`docs/QA-PASS.md:138-139`; `docs/REGRESSION.md:146`).
 **Read the shape.** The NEVER list is *named rather than derived* on purpose (`test/public.js:42-43`)
 — deriving is what failed as R8. But the positive half, the allowlist in `scripts/build-site.sh:18`,
 is the file that decides what becomes public, and **adding a line to it is a decision, not a chore**
@@ -70,7 +70,7 @@ and off the allowlist (`scripts/build-site.sh:9-10`).
 **Guard.** `test/public.js:55-57` — the four words `api.github.com`, `net.local`, `github_pat`,
 `Authorization`, asked of every shipped text file — and `:60-62`, four *shapes* (`gh[pousr]_…`,
 `AKIA…`, `-----BEGIN … PRIVATE KEY-----`, `xox[baprs]-…`).
-**Last planted against: 2026-09-10** (`docs/REGRESSION.md:142`, "each proved by planting a real
+**Last planted against: 2026-09-10** (`docs/REGRESSION.md:146`, "each proved by planting a real
 violation").
 **Read the shape. Both halves are denylists, and a denylist can only name yesterday's mistake.** Four
 words and four shapes. A GitLab token, a Slack webhook URL, an `.npmrc` line, a bearer written
@@ -84,19 +84,19 @@ for a longer list; it is the reason row 1 exists.
 — never Pages, never `file://` (`docs/story/el-changarrito.md:170`, `:181-187`;
 `changarrito/README.md:23,34,37,39`). The key is fine-grained, this repository only, Issues read and
 write, 30 days (`changarrito/README.md:146-148`). It lives under the town's own prefix and goes with
-sign-out (`changarrito/content/record.js:338-341`).
+sign-out (`changarrito/content/record.js:353-356`).
 **Guards, and they are the densest set in the repo.**
-- a write with no token never reaches the wire — `test/town.smoke.js:348`
-- a write carries the token — `:353`
-- **the token never enters a save** — `:374`
-- sign-out leaves no `tokenAt`/`tokenExp` behind — `:439`
-- a signed-**out** read carries no `Authorization` — `:459`; a signed-in read does — `:453`
-- a refused signed read retries **unsigned** rather than giving up — `:456`
-  (`changarrito/content/record.js:274`)
-- the new-token link goes to GitHub's own settings page — `:440`
+- a write with no token never reaches the wire — `test/town.smoke.js:382`
+- a write carries the token — `:387`
+- **the token never enters a save** — `:408`
+- sign-out leaves no `tokenAt`/`tokenExp` behind — `:473`
+- a signed-**out** read carries no `Authorization` — `:493`; a signed-in read does — `:487`
+- a refused signed read retries **unsigned** rather than giving up — `:490`
+  (`changarrito/content/record.js:289`)
+- the new-token link goes to GitHub's own settings page — `:474`
 - the town's own how-to sheet, the one el pregonero carries, must contain the literal
   `python3 -m http.server 8765 --bind 127.0.0.1` and `127.0.0.1:8765/changarrito` —
-  `test/town.smoke.js:299`. **That is the origin promise, read as the exact noun, inside the game.**
+  `test/town.smoke.js:333`. **That is the origin promise, read as the exact noun, inside the game.**
 **Last planted against: 2026-09-06**, the day the writes were built (`docs/story/el-changarrito.md:251`,
 Part 3). The suite stubs `window.fetch` and inspects the calls, which is the behaviour and not a proxy.
 **What has no guard in this row:** the token's **scope**. Nothing can read what permissions a token
@@ -116,9 +116,9 @@ because most of this repository's history never saw a PR**. The weaker lockstep 
 strings **as shipped**.
 **Last planted against: 2026-09-12** — an engine change with the `CACHE` string reverted, sitting in
 the working tree, against which the guard printed *"this change touches nothing the offline app has
-already cached"* (`test/bump.js:21-30`; `docs/REGRESSION.md:56`, proxy #11). Before that,
+already cached"* (`test/bump.js:21-30`; `docs/REGRESSION.md:57`, proxy #11). Before that,
 **2026-09-10**, red against two real historical commits (`test/bump.js:9-11`; `docs/QA-PASS.md:154-156`).
-**Not planted:** the push-branch step at `.github/workflows/ci.yml:61-70` itself. `docs/REGRESSION.md:57`
+**Not planted:** the push-branch step at `.github/workflows/ci.yml:61-70` itself. `docs/REGRESSION.md:58`
 (#11½) records that the hole it closed was real and that ten engine commits had crossed it green
 **because people remembered** — which is precisely why a green board was worth nothing there.
 
@@ -157,21 +157,21 @@ contains no `bl` key at all**, and `bl` is the loop the prototype clause at `eng
 actually guards — the one line `docs/story/el-changarrito.md:179` (R3) was opened to buy. And
 `test/smoke.js:705` asserts `protoClean`: that `Object.prototype` has no `polluted` key and `({}).x`
 is undefined — **neither of which anything in the payload ever tries to set.** It is green because
-nothing was attempted. That is the shape this repository names in `docs/QA-PASS.md:98-100`: *the
-blindness looks exactly like the pass.* See gap **G2**.
+nothing was attempted. That is the shape this file's own keeper names (`.claude/agents/zeni.md`, *the blindness looks
+exactly like the pass*). See gap **G2**.
 
 ### 8 · Where the public page is allowed to talk
 **Line: a person's browser.**
 **Promise.** `index.html:10` — `connect-src 'self'`, `object-src 'none'`, `form-action 'none'`,
 `base-uri 'self'`. The engine's server seam is deliberately dead: `NET={enabled:false,…}`
 (`engine/engine.js:458`), and the pack-side record seam is off unless a pack declares one
-(`:473` — "the public build's CSP allows neither, by test").
+(`:469-473` — "the public build's CSP allows neither, by test").
 **Guards.** Three, reading three different nouns:
 - the **source** CSP must equal a pinned literal — `test/smoke.js:3720-3723`
 - the **shipped** CSP must exist and must not name `api.github.com` — `test/public.js:66-70`
 - **every way the shipped page reaches out** — `src` *and* `href`, script, link, img, iframe, font —
   against a declared allowlist of exactly two hosts — `test/public.js:77-87`
-**Last planted against: 2026-09-10** for the artifact-side checks (`docs/REGRESSION.md:142`). **never**
+**Last planted against: 2026-09-10** for the artifact-side checks (`docs/REGRESSION.md:146`). **never**
 for the pinned literal at `test/smoke.js:3722`.
 **Read the shape, and read the comment above it.** `test/public.js:71-76` records that the first
 version of the reach check read `<script src>` alone — and `index.html:19` pulls a stylesheet from
@@ -203,7 +203,7 @@ file under `content/` — so a second *public* pack is scanned the day it lands.
 **Promise.** `docs/QA-PASS.md:170-172`: no `engine/` or `content/` line carries `MUTANT` or
 `DELIBERATELY BROKEN`; agents return patches as text.
 **Guard.** `test/smoke.js:2254-2263`, testing **raw** lines.
-**Last planted against: 2026-09-10** (`docs/QA-PASS.md:173-176`; `docs/REGRESSION.md:47`, proxy #2)
+**Last planted against: 2026-09-10** (`docs/QA-PASS.md:173-176`; `docs/REGRESSION.md:48`, proxy #2)
 — and the plant is the whole story: the first version blanked comments before testing each line, and
 **a marker is a comment**, so it caught nothing and looked correct.
 
@@ -214,11 +214,14 @@ file under `content/` — so a second *public* pack is scanned the day it lands.
 **unacceptable, ever: a `contents: write` or `pull_requests: write` token in any browser**, and no
 agent auto-started on an issue by anyone but the owner, or gated on a label
 (`docs/story/el-changarrito.md:216-219`, R4a at `:172`).
-**Guard: nobody.** No test reads a `permissions:` block; no test asserts the absence of an
-`issue_comment` or `pull_request_target` trigger. I verified by hand today that `.github/workflows/`
+**Guard, since the afternoon this file was written: `test/leaves.js`** (grep `function workflows`) — every
+workflow declares `permissions:`; no `write` scope outside the deploy's own `pages`/`id-token` in
+`pages.yml`, in any syntax (`write-all`, a block at any indent, `{flow}`); no `pull_request_target`,
+`issue_comment`, `issues`, `label` or `discussion_comment` under `on:`, quoted or not. Run inside
+`test/town.smoke.js` on every push and PR. **Last planted against: 2026-09-13**, by Melo: `write-all`,
+a trailing comment and `"on":` all walked past the first draft; the six plants are its self-test. I verified by hand today that `.github/workflows/`
 contains exactly two workflows, both triggered on `push`/`pull_request`/`workflow_dispatch`, and that
 `pages.yml`'s only write scopes are `pages: write` and `id-token: write`, which are the deploy's own.
-**Last planted against: never.**
 **Why this rises as crew mode approaches.** `docs/CITY-AS-MEMORY.md:76-86` makes **a label the lock**
 for claiming an issue. `docs/story/el-changarrito.md:172` (R4a) says a trigger gates on
 `issue.user.login == owner`, **never a label**, and `:206-208` refuses a label-gated merge action for
@@ -248,10 +251,10 @@ separate" was never true at the browser level.* See gap **G6**.
 **Promise.** `CLAUDE.md:44-45`: never commit a token, a `?dev=` flag, or anything naming a personal
 build in the public shell. `docs/QA-PASS.md:81-84`: scratch goes in the scratchpad; every commit
 stages explicit paths.
-**Guards.** `.gitignore:12-19` — by **shape**, not by name (`*.tmp/`, `*.scratch/`, `*.tmp.*`,
+**Guards.** `.gitignore:12-20` — by **shape**, not by name (`*.tmp/`, `*.scratch/`, `*.tmp.*`,
 `/*.png` with `!/icon-*.png`) — and the stop hook.
 **Last planted against: 2026-09-11**, when `shots.tmp/` walked past `shots/` and the hook, not the
-rule, caught it (`docs/QA-PASS.md:86-104`, E3½; `docs/REGRESSION.md:53`, proxy #8).
+rule, caught it (`docs/QA-PASS.md:86-104`, E3½; `docs/REGRESSION.md:54`, proxy #8).
 **One correction to the promise as written.** `CLAUDE.md:44-45` says *"`test/smoke.js` fails the
 build if you do."* For a `?dev=` flag that is true (`test/smoke.js:3710-3712`, `:3728-3735`). **For a
 token it is not.** `test/smoke.js:3702` looks for the literal `github_pat` and three other words; a
@@ -269,8 +272,8 @@ list (`test/public.js:44`).
 that is meant to be byte-identical, and until 2026-09-13 nothing read that. `test/town.smoke.js` now
 does — the block must be first in every file, appear exactly once, name exactly one person, be identical
 across all nineteen, and name `docs/POSTMORTEM.md` and `docs/REGRESSION.md`. Its first run against the
-tree found Rigo's file carrying Toño's whole persona below a second copy of the block. `test/town.smoke.js:1080-1093` reads `.claude/agents/<name>.md`
-paths out of mural proposals — that is a different noun. See gap **G5**.
+tree found Rigo's file carrying Toño's whole persona below a second copy of the block. `test/town.smoke.js` (grep `\.claude\/agents\/`) reads `.claude/agents/<name>.md`
+paths out of persona-edit proposals in `docs/crew/FLIGHT-NOTES.md` — that is a different noun. See gap **G5**.
 
 ---
 
@@ -303,7 +306,7 @@ today asserts that a pollution nobody attempted did not occur.
 ### G3 · Nothing holds the town's writes to `/issues`
 **Smallest guard.** In `test/town.smoke.js`, over the source of `changarrito/content/record.js`:
 every string literal passed as the second argument of `this.write(` must start `"/issues"`. Today all
-six do — `:384` (PATCH close), `:387` and `:391` (comments), `:393` and `:394` (labels), `:405`
+six do — `:399` (PATCH close), `:402` and `:406` (comments), `:408` and `:409` (labels), `:420`
 (file a request) — so it is green on arrival, which means **it must be planted at**: change one to
 `"/merges"` and watch it print.
 **What it would have caught.** The v2 that `docs/story/el-changarrito.md:177` refuses outright
@@ -311,7 +314,7 @@ six do — `:384` (PATCH close), `:387` and `:391` (comments), `:393` and `:394`
 It is also the only mechanical half of the token-scope promise: a key minted wider than Issues is
 invisible to us, but a *town* that asks for more than Issues is not.
 
-### G4 · Nothing reads a workflow's `permissions:` block, or its triggers *(row 11)*
+### G4 · ~~Nothing reads a workflow's `permissions:` block, or its triggers~~ — built the same day, see row 11 *(row 11)*
 **Smallest guard.** A dozen lines of Node over `.github/workflows/*.yml`: every file declares a
 `permissions:` block; no `write` scope outside an allowlist of `{pages, id-token}` in `pages.yml`;
 no `pull_request_target` and no `issue_comment` trigger anywhere.
@@ -320,7 +323,7 @@ at all and an unpinned install (`docs/story/el-changarrito.md:235`, R9b, Medium:
 CI with a write token can push to `main`"*). And it is the row that will matter on the day crew mode
 tempts somebody to automate a label.
 
-### G5 · The shared block in the nineteen personas is guarded by nobody *(row 14)*
+### G5 · ~~The shared block in the nineteen personas is guarded by nobody~~ — built the same day, see row 14 *(row 14)*
 **Smallest guard.** Read the block between the front-matter and the first `You are **…**` line out of
 every `.claude/agents/*.md` and fail if any two differ byte for byte.
 **What it would have caught.** This morning: the block named neither `docs/POSTMORTEM.md` (0 of 19)
@@ -340,7 +343,7 @@ owner not to open the root URL on that server. A sentence is not a guard — `do
 is this project's own evidence that instructions did not work and the hook did.
 
 ### G7 · Only one of the two copies of the `--bind 127.0.0.1` command is guarded
-**Smallest guard.** Extend the assertion that already exists at `test/town.smoke.js:299` to
+**Smallest guard.** Extend the assertion that already exists at `test/town.smoke.js:333` to
 `changarrito/README.md:34`, which carries the same command for the same reason
 (`changarrito/README.md:39`: *"a bare `http.server` listens to the whole network"*).
 **What it would have caught.** Nothing yet. It is here because the repo already knows what two
@@ -353,7 +356,7 @@ run `node test/smoke.js`; change one character of `index.html:10` and run it aga
 sentences it printed into `docs/REGRESSION.md` §3 and the date into this ledger.
 **What it would have caught.** Unknown, and that is the point —
 `docs/REGRESSION.md:92-98`: *a green guard is not evidence; the only thing that distinguishes a
-working guard from a decorative one is a planted violation.* Fifteen entries in that register say so.
+working guard from a decorative one is a planted violation.* Every entry in that register says so.
 
 ---
 
@@ -393,26 +396,29 @@ A script that (a) lists those paths, (b) fails when a listed path has no row in 
 (c) prints which listed paths a diff touches does **two different things, and only one of them reads
 a noun.**
 
-- **(b) reads a real noun, and the noun is the ledger's completeness** — *"is every path we said we
-  watch actually written up here?"* That is answerable from two files and it is exactly true. Keep it.
+- **(b) reads a real noun, and the noun is the ledger's soundness and its completeness on three
+  derivable sets** — every path in the table exists and is routed to a persona that exists; and every
+  file under `.github/`, every path `scripts/build-site.sh` copies, and every source file naming the API
+  host or an `Authorization` header has a row. *(The first draft read soundness only and called it
+  completeness; Melo deleted the row for the file that holds the owner's key and it printed OK.)*
 - **(a) and (c) read a proxy.** The noun is *did something leave town*. What they read is *did a file
   whose name somebody already thought of change*. That is a **denylist wearing an allowlist's coat**,
   and by this project's own rule it can only name yesterday's edges (`docs/QA-PASS.md:140-142`). It
   cannot see:
   - a **new** file that becomes an edge — a third workflow, a second public pack, a new fetch in a
-    file not on the list. `scripts/build-site.sh:18` copies `engine/` and `vendor/` wholesale, so a
+    file not on the list. `scripts/build-site.sh:19` copies `engine/` and `vendor/` wholesale, so a
     new file under either ships without any listed path changing;
   - **anything that is not a file**: the Pages Source dropdown (row 1), a repository secret, a
     token's scope, a branch protection rule. Row 1 — the most costly row on this page — is
     structurally invisible to this script;
-  - a change whose *meaning* moved while its bytes did not: `docs/REGRESSION.md:48` (proxy #3) is the
+  - a change whose *meaning* moved while its bytes did not: `docs/REGRESSION.md:49` (proxy #3) is the
     same species — *lockstep is not movement*.
 
 **So say it in the file rather than in a commit message:** `test/leaves.js` is an **announcer, not a
 gate**. Its honest output is *"these edges moved; go read their rows"*, plus a hard failure when a
 listed path has no row. It must never print a sentence of the shape "nothing left town", because it
 cannot know that — and `OK` printed by a check that matched nothing is the most expensive line of
-output in this repository (`docs/QA-PASS.md:98-100`). The check it must **also** carry, or it joins
+output in this repository (`.claude/agents/zeni.md`, *what you hold to*). The check it must **also** carry, or it joins
 the register at `docs/REGRESSION.md:37` as proxy sixteen: **if its extraction finds zero listed paths
 in the diff, it says so out loud with the count**, because "zero paths matched" and "the list is
 broken" are the same printout otherwise — which is precisely how boot-warning filter #7 matched zero

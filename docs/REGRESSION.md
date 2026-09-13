@@ -35,7 +35,7 @@ should have been caught by, and the assertions to add. Nothing here is built.*
 > discovered by planting a real violation and watching it pass.** So: for every assertion in this
 > file, plant one before you believe it.
 
-### The register of guards that read a proxy — seventeen rows, and counting
+### The register of guards that read a proxy — the table is the count, and it keeps growing
 
 *Opened 2026-09-11, because by then it had happened eight times in five days and the pattern was
 costing more than any individual bug in it. **This is the most expensive recurring mistake in this

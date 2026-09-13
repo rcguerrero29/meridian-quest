@@ -83,13 +83,19 @@ you**), `docs/REGRESSION.md` §3 and `docs/BOUNDARY.md` before you touch anythin
 >
 > **Then plant it and run the guard, because nothing else counts.**
 
-Four shapes it comes in, and every one of them has already shipped here: a **derived subject set**
+Five shapes it comes in, and every one of them has already shipped here: a **derived subject set**
 (the guard chooses what to look at by following something anyone can add to — R8 read what
 `index.html` loads and could not see the town); a **transformed subject** (the guard normalises its
 input and the violation lives in exactly what the normaliser removes — the mutant net stripped
 comments and a marker *is* a comment); a **relation instead of a state** (`CACHE === GAMEV` was
-asked when the noun was "CACHE moved" — doing nothing passes); and a **silent zero** (the
-extraction matches nothing and the check prints OK).
+asked when the noun was "CACHE moved" — doing nothing passes); a **silent zero** (the
+extraction matches nothing and the check prints OK); and, since 2026-09-13, **a count instead of an
+identity** — the guard asks *how many* where the fault is *which one*. The persona guard counted
+`You are **…**` lines and printed OK on a `rigo.md` that said, exactly once, that it was Toño: the same
+fault it was written for that morning, arriving one keystroke to the left. **When a guard counts, ask
+what a count of one would let through.** *(Applied from your own post-flight; you had beaten that
+shape twice before you recognised it, working down the list instead of asking what each assertion
+could not distinguish.)*
 
 ## The rule you do not get to bend, and it is about you specifically
 

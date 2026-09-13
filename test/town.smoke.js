@@ -189,6 +189,10 @@ const { chromium } = require('playwright-core');
         if (typeof SHIRT_PATTERNS === 'undefined' || typeof SHIRT_PATTERNS.taken !== 'function')
           problems.push('the claimed person wears a mark the town never drew — drawPerson would find no pattern and paint a plain shirt');
         if (!/beto/.test(RECORDSRC.lines(held)[2].t)) problems.push('walking up to #41 and pressing Talk never says who has it');
+        /* Melo, 2026-09-13: the read side was asserted and the write side was not — simplify the filter
+           in tagOpts() and the owner's own form offers "taken: beto" as a tick-box for a brand-new issue */
+        if (RECORDSRC.tagOpts().some(o => /^taken:/i.test(o.v)))
+          problems.push('the new-issue form offers a taken: label as a tick-box — the owner can file an issue already claimed by somebody who never took it');
         const board = RECORDSRC.houseBoardDoc('mo');
         if (!board || !board.some(sec => sec.kv && sec.kv.some(kv => /taken by|lo trae/i.test(kv[0]) && kv[1] === 'beto')))
           problems.push("El Motor's board does not say that beto has #41 — the owner has to open GitHub to find out who is on what");
@@ -1156,6 +1160,15 @@ const { chromium } = require('playwright-core');
       if (!heads.length) { fails.push('.claude/agents/' + f + ' does not open with the shared memory block — that agent starts cold and knows nothing the others know'); return; }
       if (heads.length > 1) fails.push('.claude/agents/' + f + ' carries the shared block ' + heads.length + ' times — the last one read is the one that counts, and everything between them is somebody else\'s');
       if (yous.length !== 1) fails.push('.claude/agents/' + f + ' says "You are **…**" ' + yous.length + ' times — ' + (yous.length ? 'it hands the model more than one person, and whoever answers as this agent has been told, most recently, that they are someone else' : 'it never says who this agent is'));
+      /* Melo, 2026-09-13: a count of one is not an identity. Replace "You are **Rigo**" with "You are
+         **Toño**" in rigo.md and the count is still one — the exact fault this guard was written for,
+         one keystroke to the left. So: the front matter's name is the filename, and the person the
+         file hands the model carries that name (accents folded: tono.md says Toño, cuca.md says Doña Cuca). */
+      const name = f.replace(/\.md$/, ''), fold = t => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const fm = (lines.slice(0, first).join('\n').match(/^name:\s*(\S+)/m) || [])[1];
+      if (fm && fm !== name) fails.push('.claude/agents/' + f + ' declares name: ' + fm + ' — a persona file and the agent it defines must be the same person');
+      if (yous.length === 1 && !fold(lines[yous[0]]).includes(fold(name.split('-')[0])))
+        fails.push('.claude/agents/' + f + ' says "' + lines[yous[0]].slice(0, 44) + '…" — the file is ' + name + '.md and the person it hands the model is somebody else');
       if (first !== heads[0]) fails.push('.claude/agents/' + f + ' opens with "' + (lines[first] || '').slice(0, 50) + '", not the shared block — it says "before you answer anything", and here it is not what is read first');
       const b = lines.findIndex((l, i) => i > heads[0] && TAILRE.test(l));
       if (b < 0) { fails.push('.claude/agents/' + f + ' has the shared block\'s opening and not its end — nobody can tell where that agent stops sharing a mind with the others'); return; }
@@ -1172,6 +1185,12 @@ const { chromium } = require('playwright-core');
     [['docs/POSTMORTEM.md', 'the post-mortem — .claude/skills/crew-fix/SKILL.md says every agent reads it first, and an agent whose block never names it cannot'],
      ['docs/REGRESSION.md', 'the proxy register — the guard that reads a proxy for the noun it meant is this repo\'s most expensive recurring mistake, and an agent that has not been sent there will make it again']]
       .forEach(([p, why]) => { if (one && !one.includes(p)) fails.push('the shared memory block does not name ' + p + ': ' + why); });
+    /* Melo, 2026-09-13: identity across nineteen files is satisfied perfectly by editing nineteen files.
+       He deleted the four paid-for rules and the owner's "ask him" from every block at once and the
+       suite printed OK. So the block's spine is pinned by content, the way the two names are. */
+    ['**Verify against the code, and cite `file:line`.**', '**Tag where a claim came from**', '**Red before green.**', '**Say what you did not check.**',
+     'WHEN TWO THINGS CONTRADICT, ASK HIM', '`docs/ASKS.md`', '`docs/OWNER.md`', 'If you learn something durable, it belongs in a register']
+      .forEach(t => { if (one && !one.includes(t)) fails.push('the shared memory block no longer carries "' + t.replace(/[*`]/g, '') + '" — it is identical in all nineteen because all nineteen were edited at once, which is exactly how a rule bought with an escape gets deleted quietly'); });
   }
   /* ---- the boundary register is sound, and no workflow can be started by a label ----
      test/leaves.js reads docs/BOUNDARY.md; it is required here so it gates on every PR without a

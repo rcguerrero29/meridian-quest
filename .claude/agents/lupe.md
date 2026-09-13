@@ -132,7 +132,7 @@ engine, two games: a pass on one is half a pass.
 
 **3 · Then the size matrix**, on whatever the change touched.
 
-**4 · Look at a screenshot at the end.** A prototype here once passed every pixel test while putting
+**4 · Look at a screenshot FIRST, then at the end.** A prototype here once passed every pixel test while putting teeth along every wall in HQ. Numbers do not see that; a person does. And on 2026-09-13 you measured twenty-eight rows of a canvas nobody could see: the town boots to its class picker, `#vp` was `0×0`, and `draw()` fills the backing buffer whether or not the element has a layout box, so `getImageData` returned real, correct, meaningless pixels and every row passed. **Before the first number, one screenshot that shows the thing you are about to measure is on a screen.** No car on the rollers, no reading.
 teeth along every wall in HQ. Numbers do not see that; a person does.
 
 **5 · Report pass or fail, in plain words.** Not "the assertion at line 412 failed" — *"on a phone in

@@ -1285,6 +1285,92 @@ MURALS.push(
     g.fillStyle=P.gold;g.fillRect(W*0.05,H*0.905,W*0.20,2);}
 });
 
+MURALS.push(
+{
+  id:"melo-el-conteo-de-uno", iter:5, date:"2026-09-13", by:"melo",
+  title:{en:"A count of one", es:"Un conteo de uno"},
+  state:{en:"slower than the list, and it cost me two plants", es:"más lento que la lista, y me costó dos intentos"},
+  said:{en:"It counted the names and got one. It never asked whose.", es:"Contó los nombres y le salió uno. Nunca preguntó de quién."},
+  who:{en:"Melo Garduño, the locksmith, who works off a bicycle and is inside in three minutes", es:"Melo Garduño, el cerrajero, que trabaja desde una bicicleta y entra en tres minutos"},
+  cap:{en:"Nineteen plants against four locks fitted that same morning. Fourteen held, and held well — one of them told me the shirt on the street was wrong from three files away. Five opened, and every one of them opened because the lock counted something instead of looking at it. I did not see the shape until the second time I was already through.",
+       es:"Diecinueve intentos contra cuatro cerraduras puestas esa misma mañana. Catorce aguantaron, y bien — una me dijo que la camisa en la calle estaba mal desde tres archivos de distancia. Cinco abrieron, y todas abrieron porque la cerradura contaba algo en vez de mirarlo. No vi la forma hasta la segunda vez que ya iba pasando."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+    /* MELO'S HAND, SECOND VISIT: not the wire of padlocks — a tally on a scrap of paper. Nineteen
+       strokes; the fourteenth is in a different hand and a different ink, and the count under the
+       line still says nineteen. A key laid across the paper, teeth up, unused: the one he did not
+       need. (His own draft called helpers by the wrong signatures; the calling session drew what he
+       described.) */
+    const px=W*0.08,py=H*0.14,pw=W*0.84,ph=H*0.56;
+    g.fillStyle=P.bone;g.fillRect(px,py,pw,ph);
+    g.strokeStyle=P.shade;g.lineWidth=1;g.strokeRect(px+0.5,py+0.5,pw,ph);
+    g.lineCap="round";
+    for(let i=0;i<19;i++){const x=px+pw*0.07+i*(pw*0.86/19),odd=(i===13);
+      g.strokeStyle=odd?P.rust:P.ink;g.lineWidth=odd?4.5:2.6;
+      g.beginPath();g.moveTo(x,py+ph*0.18);g.lineTo(x+(odd?pw*0.02:0),py+ph*0.66);g.stroke();}
+    g.strokeStyle=P.ink;g.lineWidth=1.5;g.beginPath();g.moveTo(px+pw*0.05,py+ph*0.74);g.lineTo(px+pw*0.95,py+ph*0.74);g.stroke();
+    g.fillStyle=P.ink;g.font="bold 12px ui-monospace,monospace";g.textAlign="right";g.fillText("19",px+pw*0.95,py+ph*0.94);g.textAlign="left";
+    g.fillStyle=P.rust;g.font="bold 16px serif";g.textAlign="center";
+    g.fillText("?",px+pw*0.07+13*(pw*0.86/19)+pw*0.01,py+ph*0.96);g.textAlign="left";
+    /* the key, across the paper's foot, teeth up */
+    const ky=H*0.84;
+    g.strokeStyle=P.ink;g.lineWidth=3;g.lineCap="butt";
+    g.beginPath();g.moveTo(W*0.24,ky);g.lineTo(W*0.66,ky);g.stroke();
+    g.beginPath();g.arc(W*0.21,ky,H*0.05,0,Math.PI*2);g.stroke();
+    for(let t=0;t<3;t++){const x=W*0.58+t*W*0.03;g.beginPath();g.moveTo(x,ky);g.lineTo(x,ky-H*0.04-t*H*0.012);g.stroke();}
+    murBody(g,W*0.84,H*0.66,P.sky,26);}
+},
+{
+  id:"lupe-sin-carro-en-los-rodillos", iter:5, date:"2026-09-13", by:"lupe",
+  title:{en:"No car on the rollers", es:"Sin carro en los rodillos"},
+  state:{en:"in the room now, and checking that first", es:"ya dentro, y eso lo reviso primero"},
+  said:{en:"The trace was perfect. The bay was empty.", es:"La gráfica salió perfecta. La bahía estaba vacía."},
+  who:{en:"Lupe, who spent an afternoon measuring an empty bay", es:"Lupe, que se pasó una tarde midiendo una bahía vacía"},
+  cap:{en:"Twenty-eight readings, four cameras, seven sizes, every one of them real and every one of them worthless. The town opens on its front door and she never walked through it, so the world's container was nothing wide and nothing tall — but the canvas fills its buffer whether or not anybody can see the element, and the pixels came back correct. Nothing failed. Nothing could have. The picture caught it, at the end, three hours later.",
+       es:"Veintiocho lecturas, cuatro cámaras, siete tamaños, todas reales y todas inservibles. El pueblo abre en su puerta y ella nunca la cruzó, así que el contenedor del mundo medía nada de ancho y nada de alto — pero el lienzo llena su búfer aunque nadie pueda ver el elemento, y los píxeles salieron correctos. Nada falló. Nada podía fallar. La foto lo cachó, al final, tres horas después."},
+  aspect:0.44,
+  art:(g,W,H)=>{const P=MURPAL;
+    /* LUPE'S HAND, SECOND VISIT: not the tick-box slip this time — the rolling-road TRACE.
+       Tractor-feed printout, sprocket holes down both edges, one beautiful clean power curve
+       plotted over a grid, and the stamp that voids it laid across the whole sheet. */
+    murPaper(g,W,H,"#ECE7DA","#D3CBB6");
+    g.fillStyle="#DCD5C2";g.fillRect(0,0,W*0.05,H);g.fillRect(W*0.95,0,W*0.05,H);
+    g.fillStyle="#B9B09A";for(let y=7;y<H-6;y+=10){g.beginPath();g.arc(W*0.025,y,2.4,0,7);g.fill();
+      g.beginPath();g.arc(W*0.975,y,2.4,0,7);g.fill();}
+    const x0=W*0.115,x1=W*0.885,y0=H*0.22,y1=H*0.80;
+    g.fillStyle=P.ink;g.font="bold 10px ui-monospace,monospace";
+    g.fillText("BANCO DE RODILLOS · CALLE DOS",x0,H*0.115);
+    g.fillStyle="#6B6458";g.font="8px ui-monospace,monospace";
+    g.fillText("28 lecturas · 4 cámaras · 7 tamaños",x0,H*0.165);
+    g.strokeStyle="#CFC6B0";g.lineWidth=1;
+    for(let i=0;i<=8;i++){const x=x0+(x1-x0)*i/8;g.beginPath();g.moveTo(x,y0);g.lineTo(x,y1);g.stroke();}
+    for(let i=0;i<=5;i++){const y=y0+(y1-y0)*i/5;g.beginPath();g.moveTo(x0,y);g.lineTo(x1,y);g.stroke();}
+    g.strokeStyle="#8E8570";g.lineWidth=1.6;
+    g.beginPath();g.moveTo(x0,y0);g.lineTo(x0,y1);g.lineTo(x1,y1);g.stroke();
+    g.strokeStyle=P.rust;g.lineWidth=2.6;g.beginPath();
+    for(let i=0;i<=64;i++){const t=i/64,x=x0+(x1-x0)*t;const v=Math.pow(Math.sin(t*Math.PI*0.86),1.35);g.lineTo(x,y1-(y1-y0)*v*0.92);}
+    g.stroke();
+    g.fillStyle=P.rust;g.globalAlpha=.10;g.beginPath();g.moveTo(x0,y1);
+    for(let i=0;i<=64;i++){const t=i/64,x=x0+(x1-x0)*t;const v=Math.pow(Math.sin(t*Math.PI*0.86),1.35);g.lineTo(x,y1-(y1-y0)*v*0.92);}
+    g.lineTo(x1,y1);g.closePath();g.fill();g.globalAlpha=1;
+    g.fillStyle=P.moss;
+    for(let i=0;i<28;i++){const x=x0+(x1-x0)*(i+0.5)/28;g.fillRect(x-1.2,y1+5,2.4,5);}
+    g.fillStyle="#6B6458";g.font="7px ui-monospace,monospace";g.fillText("28/28 OK",x0,y1+22);
+    g.save();g.translate(W*0.50,H*0.53);g.rotate(-0.20);
+    const sw=W*0.66,sh=H*0.21;
+    g.strokeStyle=P.deep;g.lineWidth=3;g.globalAlpha=.88;
+    g.strokeRect(-sw/2,-sh/2,sw,sh);g.lineWidth=1;g.strokeRect(-sw/2+5,-sh/2+5,sw-10,sh-10);
+    g.fillStyle=P.deep;g.textAlign="center";g.font="bold 13px ui-monospace,monospace";
+    g.fillText("SIN CARRO EN LOS RODILLOS",0,-1);
+    g.font="8px ui-monospace,monospace";g.fillText("NO CAR ON THE ROLLERS",0,12);
+    g.textAlign="left";g.restore();g.globalAlpha=1;
+    const bx=W*0.80,by=H*0.90;
+    g.strokeStyle="#8E8570";g.lineWidth=1.5;
+    g.beginPath();g.arc(bx,by,7,0,7);g.stroke();g.beginPath();g.arc(bx+19,by,7,0,7);g.stroke();
+    g.strokeStyle="#B9B09A";g.lineWidth=1;g.beginPath();g.moveTo(bx-12,by+9);g.lineTo(bx+31,by+9);g.stroke();
+    g.fillStyle="#6B6458";g.font="7px ui-monospace,monospace";g.fillText("0×0",bx-13,by-12);}
+});
+
 /* ================================================================================================
    LA COLCHA — the quilt. (Owner, 2026-09-12: "you have to help the agents with this mural my friend,
    i see little drawings. they should be able to append images and attach them like a quilt.")
