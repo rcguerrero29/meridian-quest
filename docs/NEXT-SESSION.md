@@ -25,22 +25,20 @@ touched `engine/`, so `mq-v158` and `sw.js` did not move (`test/bump.js` confirm
 ### IN FLIGHT when this block was written — pick these up first
 
 1. **The agents' post-mortem** (owner: *"make sure that we have the agents do a post mortem for
-   lessons learned to update and or help agents update documentation"*). A workflow was running:
-   six agents wrote lessons in the register's house style and **Chuy was writing them into
-   `docs/POSTMORTEM.md` §13 and the documents they name — directly, on `docs/` only.** Its return is
-   at `/tmp/claude-0/…/tasks/w1vrudft1.output` on the box that ran it; **if that box is gone, look at
-   `git status` — Chuy's edits are in the working tree or already committed with the message that
-   names §13. Verify them the way you verify anything: open the file, run `node test/town.smoke.js`
-   (it counts the flight-notes and mural ledgers), commit with explicit paths.** If nothing is there,
-   re-run the post-mortem: the six agents' returns from the two runs are summarised in
-   `docs/crew/FLIGHT-NOTES.md` iteration 5, and the calling session's own mistakes are listed in the
-   §13 brief below.
-2. **Chava's walk of the wall** (owner: *"make sure the mural concept works please"*). He was playing
-   it at phone and desktop widths and reading two bays as a record. His return, if it exists, is a
-   task output beside the one above; his panel and persona proposal need a ledger row each. What the
-   calling session verified itself: the wall opens from the street tiles, scrolls sideways at phone
-   width to the last bay, the reading-size panels are legible, `murMemoryText("Beto")` returns three
-   visits, 25 panels, 25 ledger lines, zero page errors.
+   lessons learned to update and or help agents update documentation"*). **Cut off by the account's
+   session rate limit.** Six agents were writing lessons and Chuy was to carry them into the documents;
+   only Zeni's came back, and they are in `docs/POSTMORTEM.md` §13 (with her G2 correction in
+   `docs/BOUNDARY.md`). **To finish:** re-run the pass for beto, yaz, pili, melo, lupe (and chava), then
+   Chuy consolidates into §13 and updates the documents the lessons name — `docs/` only, never
+   `.claude/agents/` or code. The brief that was used is in this repo's history at the commit that
+   added §13; the day's record it carried is the list under "The calling session's own mistakes"
+   below plus `docs/crew/FLIGHT-NOTES.md` iteration 5.
+2. **Chava's walk of the wall** (owner: *"make sure the mural concept works please"*) — **also cut
+   off by the rate limit before he played.** What the calling session verified itself: the wall opens
+   from the street tiles, scrolls sideways at phone width to the last bay, the reading-size panels are
+   legible, `murMemoryText("Beto")` returns three visits, 25 panels, 25 ledger lines, zero page errors.
+   Lupe opened it at seven sizes with no page error. **Not yet done by anyone: a player walking up to it
+   cold and saying whether they could tell it was something to press** — give that to Chava first.
 
 ### The calling session's own mistakes, for §13 if Chuy did not get them
 

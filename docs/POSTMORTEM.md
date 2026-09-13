@@ -223,6 +223,75 @@ Everything else in here is a special case of failing to do one of those three.
 
 ---
 
+## 13 · 2026-09-13 — the day crew mode got its lock (partial: the rate limit cut the run)
+
+*The owner asked for the agents' own post-mortem of this day. Six were writing it and Chuy was to carry
+it into the documents; the account's session limit stopped five of them and Chuy mid-run. **Zeni's two
+came back and are below, in her words.** The rest of the day's mistakes — the calling session's own,
+Melo's five plants, Lupe's empty bay, Pili's sash — are listed in `docs/NEXT-SESSION.md` and
+`docs/crew/FLIGHT-NOTES.md` iteration 5 for the next session to finish this section from. The workflow
+that was cut off can be resumed on the box that ran it (`crew-postmortem-wf_29e063ac-762`, Zeni's
+result is cached); on any other box, re-run it from the record in that handoff.*
+
+### 13a · I prescribed a plant that cannot fire, inside the fix for an assertion that cannot fail (Zeni)
+
+**What was believed.** `docs/BOUNDARY.md` G2 told the next agent that three lines close the oldest
+untested clause in the sanitiser: add `bl: { __proto__: { a: 'b' }, ok: { part: 'opt' } }` to the hostile
+payload in `test/smoke.js` (grep `const evil =`), assert the prototype survived, delete the clause in
+`engine/engine.js` (grep `a #save= link may not reach the prototype`) and watch it go red first.
+`docs/REGRESSION.md` #16 cited that recipe as the remedy.
+
+**What was true.** The payload is a **JavaScript object literal** and reaches the engine through
+`JSON.stringify` and back through `JSON.parse` in `readPass`. In an object literal `__proto__:` is the
+prototype *setter*, not a property, so `JSON.stringify` never puts it on the wire; the prescribed plant
+arrives as `{"ok":{"part":"opt"}}` and the clause can be deleted with the plant green. The same reading
+condemns the payload already there: `qa: { __proto__: 9, … }` assigns a primitive, sets no prototype
+and creates no own key — `__proto__` was never on the wire at all, so proxy #16 is worse than the
+register records. The plant that works must be built **as text**: a literal JSON string carrying
+`"bl":{"__proto__":{"a":"b"},"ok":{"part":"opt"}}`, because `JSON.parse`, unlike a literal, defines
+`__proto__` as an own property.
+
+**What it cost.** The `protoClean` assertion has asserted, for eight days, in the security section of
+the public game's suite, that a pollution nobody attempted did not occur. The remedy was published into
+two registers and cited from a third the same morning; anyone spending the prescribed ten minutes would
+have watched it print green and recorded a clean bill for the one `if` that R3 was opened to buy.
+
+> **The rule: a plant recipe is a guard, so run it and read the sentence it prints before you publish it
+> as the fix.** An unexecuted remedy in a register of gaps is the most persuasive kind of wrong — it is
+> written in the voice of the thing that catches wrongness. **And: `__proto__` in a JS object literal is
+> not a key. If your payload crosses `JSON.stringify`, build it as text.**
+
+### 13b · The ledger used a stronger noun for its own guard than the guard could read (Zeni)
+
+**What was believed.** `docs/BOUNDARY.md` said `test/leaves.js` reads "the ledger's soundness and its
+completeness".
+
+**What was true.** The first draft read soundness only. Melo deleted the ledger row for the file that
+holds the owner's key and the suite printed OK; he added a script that POSTs to `api.github.com` with a
+bearer and it printed OK. The word "completeness" existed in the prose and nowhere in the extraction step.
+
+**What it cost.** One plant, closed the same hour by `completeness()` in `test/leaves.js`. The real cost
+is that, for the span between the ledger landing and the plant, the only document that routes every
+edge to a person vouched in writing for a property it did not read — signed by the person whose whole
+job is naming which noun a guard reads.
+
+> **The rule: a register's prose is an unguarded claim about a guard.** §0's mistake one level up: not a
+> check reading a proxy, but a *document* describing the check with the noun the author wanted. **When
+> you write what a check reads, quote its extraction step next to the sentence — or write the weaker
+> word.**
+
+### 8, extended · it recurred on 2026-09-13, at four times the scale (Zeni)
+
+`docs/BOUNDARY.md` was written with 172 `file:line` citations, every one read out of the open file. By
+the time a verifier read it, **31 had slid, most by +34**, because the calling session inserted a test
+above them in the same hour. Two were worse than stale: they attributed a sentence to `docs/QA-PASS.md`
+that exists in exactly one place — `.claude/agents/zeni.md` — one agent's private instruction dressed as
+a settled register. **Cost: a full verifier pass over 172 citations and 31 corrections.**
+
+> **Extends the rule: grep the identifier, never paste the number — and write the identifier *beside*
+> the number in the register, so the citation survives the next insertion. And never cite
+> `.claude/agents/*.md` as a source: a persona is one agent's instructions, not a register.**
+
 ## How to add to this file
 
 Same discipline as every register here: **it grows from what happened, never from imagination.** An

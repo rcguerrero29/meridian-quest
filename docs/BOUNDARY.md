@@ -293,15 +293,19 @@ hand, a deploy silently skipped by `continue-on-error`
 **It reads the noun exactly** — the noun is *what a stranger receives*, and this asks a stranger's
 question from outside. It is the only check on this page that does.
 
-### G2 · The `#save=` prototype clause has never been planted at *(row 7)*
-**Smallest guard.** Three lines inside the payload that already exists at `test/smoke.js:691-695`:
-add `bl: { __proto__: { a: 'b' }, ok: { part: 'opt' } }`, then assert
-`Object.getPrototypeOf(p.s.bl) === Object.prototype` and `p.s.bl.ok.part === 'opt'`. Delete
-`engine/engine.js:549` and watch it go red first.
-**What it would have caught.** The clause being dropped by any refactor of `sanitizeSave` — it is
-one `if` in a loop with no test behind it, and it is the exact line
-`docs/story/el-changarrito.md:179` was opened to buy. And it retires `test/smoke.js:705`, which
-today asserts that a pollution nobody attempted did not occur.
+### G2 · The `#save=` prototype clause has never been planted at *(row 7)* — and the first recipe here could not fire
+**Smallest guard.** The payload in `test/smoke.js` (grep `const evil =`) is a JS object literal and goes
+on the wire through `JSON.stringify` — and **`__proto__:` in a literal is the prototype setter, not a
+key**, so it never reaches the wire; the recipe this file first carried (add `bl: { __proto__: … }` to
+the literal) would have printed green with the clause deleted. Build the plant **as text**: put a
+literal JSON string carrying `"bl":{"__proto__":{"a":"b"},"ok":{"part":"opt"}}` through the `#save=`
+hash, then assert `Object.getPrototypeOf(p.s.bl) === Object.prototype` and `p.s.bl.ok.part === 'opt'`.
+Delete the clause in `engine/engine.js` (grep `a #save= link may not reach the prototype`) and watch it
+go red first. The same reading condemns the payload already there: `qa: { __proto__: 9, … }` assigns a
+primitive and creates no key at all.
+**What it would have caught.** The clause being dropped by any refactor of `sanitizeSave`. And it retires
+the `protoClean` assertion, which today asserts that a pollution nobody attempted did not occur
+(`docs/POSTMORTEM.md` §13a).
 
 ### G3 · Nothing holds the town's writes to `/issues`
 **Smallest guard.** In `test/town.smoke.js`, over the source of `changarrito/content/record.js`:
