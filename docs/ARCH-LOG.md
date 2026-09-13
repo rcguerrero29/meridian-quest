@@ -723,3 +723,41 @@ so guessing costs a rebuild rather than a tweak.*
 | 3 | **Does anything happen on the ride, or is it purely to look at?** He has said *"a bit of an animation and eventually something to do"* — this asks how long *eventually* is | If something happens later, the near side may want to be a surface things can appear on | **Nothing yet.** Build the beat; let it be boring on purpose for a while and see whether you miss it |
 | 4 | **Who is the second passenger, when there is one?** A named neighbour going somewhere, a stranger, or your dog? | It decides whether a passenger needs a reason to be aboard — a neighbour needs somewhere to be going | **Your dog first.** He already follows you through doors; the tram is the one door he cannot follow you through, and that is a bug shaped like a feature |
 | 5 | **Is the driver a person we know?** | If he is somebody, he wants a name, a face in `NPCLOOK`, and eventually a line. If he is nobody, he is a silhouette and stays one | **Ask Nacho before drawing him.** Rigo has already established what he DOES; whether he is anyone is a story question |
+
+### A13 — SIGNED, 2026-09-13. The five answers, in his words.
+
+*He answered all five the next morning. They are recorded here as decisions, not as preferences, and
+the build order underneath them follows from the answers rather than from what is interesting.*
+
+| # | Question | **His answer** | What it settles |
+|---|---|---|---|
+| 1 | inside the car or outside it | **"for now, from outside the car"** | The near side is a rail seen from OUTSIDE. One camera, not two. A small figure at a rail goes past you — you are not sitting in it looking out. **Do not draw an interior.** |
+| 2 | vehicle-only scale, or the general rule | **"general rule sounds good"** | **THE APERTURE RULE is law.** Named, documented, used in one place today. A second game inherits it. A room may be larger than its door; a passenger may be smaller than the car |
+| 3 | does anything happen on the ride | **"not yet"** | The ride is a held beat and stays one. **No quest node, no conversation, nothing to press.** Build it and let it be boring on purpose for a while |
+| 4 | who is the second passenger | **"sure the dog first"** | When the pivot happens, it is **your dog**. He follows you through every door except this one, which is a bug shaped like a feature. It also means the second passenger needs no reason to be aboard, no name and no dialogue — the cheapest possible proof the seam works |
+| 5 | is the driver anyone | **"yeah ask nacho please"** | Put to Nacho 2026-09-13. Until he answers, **nobody draws a face on the driver** |
+
+#### The build order these answers produce
+
+1. **The tram joins the depth pass** (A13 item 1). Fixes *"laying down on it"* and *"a rail in front
+   of him"* as one change, in every 2D camera. Unaffected by all five answers — do this first.
+2. **The aperture rule**, as one number read by whatever draws a person in a vehicle (A13½). Answer 2
+   makes it a rule rather than a tram special case; answer 1 means it only ever has to look right
+   from outside, which is much easier than making an interior read.
+3. **The near side is drawn** — rail, mullions, lower panel — with Pili directing and Rigo saying what
+   a real car carries at waist height. Answer 3 means it does not have to support anything appearing
+   on it later, so it may be solid.
+4. **`rideDraw(who, seat)`** — one function, called once with the hero (A13¾). Answer 4 names the
+   second caller when it comes, and it is a dog, which needs no seat semantics beyond standing still.
+5. **The driver**, after Nacho answers. Answer 5.
+
+#### What these answers take OFF the table, which is the more useful half
+
+- an interior camera for the tram
+- a tram-only scale hack
+- a quest, a conversation, a minigame or a button on the ride
+- a passenger list, seats, boarding rules or a queue at the stop
+- a named driver, a driver's face, or a line from the driver — until Nacho says otherwise
+
+**Five decisions, and four of the five say "less".** Worth noticing: every one of them makes the build
+smaller than the version I had planned.
