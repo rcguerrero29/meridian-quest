@@ -735,7 +735,7 @@ the build order underneath them follows from the answers rather than from what i
 | 2 | vehicle-only scale, or the general rule | **"general rule sounds good"** | **THE APERTURE RULE is law.** Named, documented, used in one place today. A second game inherits it. A room may be larger than its door; a passenger may be smaller than the car |
 | 3 | does anything happen on the ride | **"not yet"** | The ride is a held beat and stays one. **No quest node, no conversation, nothing to press.** Build it and let it be boring on purpose for a while |
 | 4 | who is the second passenger | **"sure the dog first"** | When the pivot happens, it is **your dog**. He follows you through every door except this one, which is a bug shaped like a feature. It also means the second passenger needs no reason to be aboard, no name and no dialogue — the cheapest possible proof the seam works |
-| 5 | is the driver anyone | **"yeah ask nacho please"** | Put to Nacho 2026-09-13. Until he answers, **nobody draws a face on the driver** |
+| 5 | is the driver anyone | **"yeah ask nacho please"** → **NACHO ANSWERED 2026-09-13: nobody, on purpose** | **He is a uniform, not a neighbour.** No name, no `NPCLOOK` entry, no line, no ❗. See `docs/STORY.md` ❗El chofer for the three structural reasons — the strongest being that **he is the only person in Meridian who would have been to Barrio Norte**, and the window is signed as the only surface for that promise |
 
 #### The build order these answers produce
 
@@ -750,6 +750,32 @@ the build order underneath them follows from the answers rather than from what i
 4. **`rideDraw(who, seat)`** — one function, called once with the hero (A13¾). Answer 4 names the
    second caller when it comes, and it is a dog, which needs no seat semantics beyond standing still.
 5. **The driver**, after Nacho answers. Answer 5.
+
+#### ❗El chofer — what to draw, and the one thing to fix before drawing it
+
+Nacho's answer is *nobody*, and nobody here means **a livery**, not a blank. Three parts, in the
+order of how much each buys:
+
+| What | Why it reads at five pixels | State today |
+|---|---|---|
+| **The cap brim** — a hard horizontal edge over a head | A13's own finding about the sill's ledge, restated: *a hard horizontal edge survives what a small shape does not.* A brim reads; a face does not | **Already built** (`engine3d.js`, the cap box above the head) — the right idea, never made legible |
+| **A gold band at chest height**, the same `#E0A430` as the car's trim and the door lamp | You read *"the tram has its crew on it"*, not *"a person in a tram"* | not there — the shoulders are one flat colour |
+| **The hand comes off the power when something alive is on the rails** | Rigo's canon as animation instead of prose: *"I wrote them up for sounding and not coming off the power."* The states already exist — `TRO.state` is `run`, `dwell`, `hold` | not there, and **it is the cheapest storytelling on this vehicle.** A player on their fifth ride notices the hand move before they notice why |
+
+**Two things the livery must not include:** no fleet number (one car on the line is signed, and a
+number implies siblings that will never exist), and **no face detail at any scale** — A13's trap 1 is
+that the driver's problem was never a dimension, and a face is exactly what will tempt the next four
+attempts.
+
+> **ITEM ZERO of the sitting that draws him, before a line of art is written.**
+> `engine/engine3d.js` carries a comment saying the driver *"turns round with it when it reverses"*.
+> **The tram does not reverse** — the direction is computed once a pass and never flips. **It is the
+> same wrong belief that produced the two decorative cabs**, it is sitting in the exact file the next
+> session will open to draw this driver, and it will re-teach the mistake. Nacho found it and asked
+> for it to be corrected in that sitting rather than as its own ticket. Do that.
+
+*(Not corrected today because the owner said plan, not build, and a comment in `engine/` still costs a
+version bump in both packs. It is two lines and it goes first.)*
 
 #### What these answers take OFF the table, which is the more useful half
 
