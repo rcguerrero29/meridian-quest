@@ -22,23 +22,36 @@ touched `engine/`, so `mq-v158` and `sw.js` did not move (`test/bump.js` confirm
 | **The wall, iteration 5** | Six panels (Beto, Zeni, Chuy, Yaz, Melo, Lupe); `by:"beto"` used on a real panel for the first time, which opened a second bay — fixed; `murBody` width follows height (was 5px at any height); three panels repainted at Pili's word, words untouched |
 | **Docs** | roster of nineteen; counts agree with the files; `OPEN.md` merged and pointing at `BOUNDARY.md`; this file is one block, history in `docs/NEXT-SESSION-ARCHIVE.md`; `CREW-MODE.md` has "Where the switch stands" and "What running many agents teaches" |
 
-### IN FLIGHT when this block was written — pick these up first
+### IN FLIGHT when this block was written (2026-09-13, 21:40 UTC) — pick these up first
 
-1. **The agents' post-mortem** (owner: *"make sure that we have the agents do a post mortem for
-   lessons learned to update and or help agents update documentation"*). **Cut off by the account's
-   session rate limit.** Six agents were writing lessons and Chuy was to carry them into the documents;
-   only Zeni's came back, and they are in `docs/POSTMORTEM.md` §13 (with her G2 correction in
-   `docs/BOUNDARY.md`). **To finish:** re-run the pass for beto, yaz, pili, melo, lupe (and chava), then
-   Chuy consolidates into §13 and updates the documents the lessons name — `docs/` only, never
-   `.claude/agents/` or code. The brief that was used is in this repo's history at the commit that
-   added §13; the day's record it carried is the list under "The calling session's own mistakes"
-   below plus `docs/crew/FLIGHT-NOTES.md` iteration 5.
-2. **Chava's walk of the wall** (owner: *"make sure the mural concept works please"*) — **also cut
-   off by the rate limit before he played.** What the calling session verified itself: the wall opens
-   from the street tiles, scrolls sideways at phone width to the last bay, the reading-size panels are
-   legible, `murMemoryText("Beto")` returns three visits, 25 panels, 25 ledger lines, zero page errors.
-   Lupe opened it at seven sizes with no page error. **Not yet done by anyone: a player walking up to it
-   cold and saying whether they could tell it was something to press** — give that to Chava first.
+Four runs were launched after the rate limit reset, all advisers, mode off, one pen. Their returns
+land as JSON under `/tmp/claude-0/…/tasks/<id>.output` on the box that ran them; on any other box
+the work is re-run from the briefs, which are in the workflow scripts committed nowhere — so the
+substance of each brief is in `docs/ASKS.md` (the seven rows of 2026-09-13, late) and below.
+
+1. **The agents' post-mortem, resumed** (`w1vrudft1` → resumed as `wzamewbzl`, run `wf_29e063ac-762`).
+   Six lessons in the register's house style, then **Chuy writes `docs/POSTMORTEM.md` §13 and the
+   documents the lessons name, directly, `docs/` only.** Zeni's part is already in §13. When it lands:
+   `git status`, read §13, run `node test/town.smoke.js`, commit with explicit paths.
+2. **Chava at the wall, cold** (`a2c2ad27e579976b8`). His report, a persona proposal (ledger row),
+   a panel (ledger line). The mural is otherwise verified — see "The wall" above.
+3. **The design run** (`wz1ajjvdd`, run `wf_fa62f12f-d01`): Beto the tram livery seam (a wardrobe
+   for the car, chosen at Taller Herrera), Rigo what a real car may carry, Pili the skulls (fifth
+   report — not a size) and the livery at five pixels, Tavo whether it is worth a player's attention,
+   Cuca two storeys with a mural upstairs and the one-sided rail as a class, Don Güero the parcel,
+   Chema the skulls measured. **Outputs are designs: file them in `docs/ARCH-LOG.md` (a new A14 for
+   the livery), `docs/rooms/`, `docs/3D-LOG.md`, and the skulls fix goes through `/crew-fix` red
+   first.** Nothing from this run is built until the owner reads it.
+4. **The healthy-eating game** (`wasj27qri`, run `wf_4ca511c9-170`): four sourced research sweeps
+   → seven designers (Mari, Tavo, Nacho, Pili, Beto, Paty, Toño) → **Chuy writes
+   `docs/research/2026-09-13-healthy-eating-game.md`, a plan file named from Mari's title, a rule in
+   `docs/GENRE-RULES.md`, and a row in `docs/OPEN.md` §1.** Then the owner's ask is **high-fidelity
+   mocks** of the surfaces Pili names — make them with the `design` skill (a design canvas artifact),
+   and render in the real engine whatever the reader can already show. No build.
+
+**The owner also asked** (all in `docs/ASKS.md`): a security triple-check — done, in the reply of that
+hour: R10 clean, the town bound to `127.0.0.1`, CSPs pinned, workflows read-only, no lockfile so
+`npm audit` cannot run; **the terminal failures he saw were never pasted — ask again.**
 
 ### The calling session's own mistakes, for §13 if Chuy did not get them
 
