@@ -282,22 +282,36 @@ word.** It is four extra characters and it is the difference between a design no
 Every crew persona name grepped against everything the public build ships — `content/meridian/`,
 `index.html`, `sw.js`, `engine/`:
 
-- **Rigo, Melo, Chema** — the crew personas most likely to be mistaken for cast — appear in shipped
-  files **only as comment attributions** (`/* Rigo, 2026-09-11 */`). **No shipped string carries any
-  of their biographies.** The trolley inspector's forty-one years exist nowhere in the public game.
+- ~~**Rigo, Melo, Chema** appear in shipped files **only as comment attributions**~~
+  **❗ CORRECTED 2026-09-13, within the hour, by Nacho — and the correction matters more than the
+  line it replaces. THE FIRST VERSION OF THIS CHECK WAS A PROXY.** It used `grep -ril`, which is
+  case-insensitive *and* matches inside other words, and what it was actually finding for "Rigo" was
+  **"marigold" — sixteen times.** Re-run word-boundary and case-sensitive, thenumbers are:
+  **`Rigo` 4, and all four are the cousin in quest 30. `Melo` 0. `Chema` 0. `Yaz` 0. `Zeni` 0.
+  `Toño` 0. `Remedios` 0. `Cuca` 0.** They appear **not at all** — not even as comments.
+  **The conclusion is stronger than the sentence it replaces, and the evidence given for it was
+  false.** A security register with a wrong fact in it is worse than one with no fact, so the wrong
+  line stays struck rather than deleted. See `docs/POSTMORTEM.md` §11½.
 - **Lupe and Chava ARE Meridian NPCs** — `Lupe · Estimator & Permits`, `Chava · Carnicero` — and have
   been all along. **The crew personas were named after the town's own clerks, not the other way
   round**, so name overlap between crew and cast is pre-existing and by design. The same is true of
   several others; check before calling any of them a leak.
-- **"Rigo" is already in Meridian's shipped dialogue** as Don Güero's cousin who *sells software*
-  (`content/meridian/quests.en.js`), named, offstage and never seen. **Not the trolley inspector, and
-  not a leak — a coincidence of names inside one family's street.**
+- **"Rigo" is already in Meridian's shipped dialogue** — ~~Don Güero's~~ **DON TACHO's** cousin who
+  *sells software* (`quests.en.js:339`, speaker `npc:"tacho"`), named, offstage and never seen. *(The
+  session said Don Güero. Wrong cousin, wrong uncle; corrected by Nacho the same hour.)* **Not the
+  trolley inspector, and not a leak.** And the date settles the direction for good: Meridian's Rigo
+  was written **2026-09-02**, and the crew's tranviario first appears **2026-09-11** — **the cast is
+  nine days older than the persona.** The name was never borrowed from the crew; if anything it went
+  the other way.
 - The word **"changarrito"** appears in the public build twice, both times **inside a source comment**
   pointing at a doc path (`sw.js`, `content/meridian/config.js`). Source comments in shipped JS *are*
   public — worth knowing in general — but both point at files already in this public repository, so
   nothing is disclosed that was not already disclosed.
 
-**Conclusion: the public build contains no crew persona, no crew biography and no private tooling.**
+**Conclusion, unchanged and now properly measured: the public build contains no crew persona, no crew
+biography and no private tooling.** Eight of the nineteen crew personas share a name with a shipped
+Meridian NPC (`npcs.js`) because **they were named after the cast** — the overlap is the house
+pattern, not a breach. **The name was never the leak. A biography would be, and none is there.**
 The one real exposure this project has had is the one the rest of this file documents, and it is
 closed.
 

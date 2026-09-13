@@ -177,6 +177,35 @@ sells software; and source comments in shipped JS are public, which is fine here
 general. **A question asked in alarm produced better facts than the same question asked calmly would
 have.**
 
+## 11½ · I wrote "measure before you reassure", and then reassured him with a proxy
+
+**In the same file, in the same hour, in the paragraph that states the rule.**
+
+Section 11 ends: *"when somebody asks whether they are exposed, **measure before you reassure** — the
+greps that proved it took two minutes."* Those greps used `grep -ril`, which is case-insensitive and
+matches **inside other words**. For the name "Rigo" what it was actually finding was **"marigold",
+sixteen times** — a game about Día de Muertos is full of marigolds.
+
+So the security note was published saying the crew personas *"appear in shipped files only as comment
+attributions"*. **There are no such comments.** Nacho re-ran it word-boundary and case-sensitive
+within the hour: `Rigo` 4 — all four the cousin in quest 30 — and `Melo`, `Chema`, `Yaz`, `Zeni`,
+`Toño`, `Remedios`, `Cuca` all **zero**.
+
+**The conclusion was right and stronger than what was written. The evidence for it was false.** In a
+*security* register, which is the one place a wrong fact is worse than no fact.
+
+> **The rule: `grep -i <short name>` is not a measurement.** Use `-w`, drop `-i` for proper nouns, and
+> **print the matches, not the count of files.** One line of output would have shown "marigold"
+> immediately.
+>
+> **And the bigger one: a reassurance is a claim, so it gets the same treatment as a guard.** Plant a
+> violation against your own evidence — ask what ELSE this pattern would match — before you hand
+> somebody a number and tell them they are fine.
+
+**Fifth time this session** a check read something other than what it meant. It is the only one that
+went into a security document, and it is the only one where the person being reassured had asked
+because he was worried.
+
 ## 12 · The shape of every one of these
 
 Read the sections above again and they are one sentence:
