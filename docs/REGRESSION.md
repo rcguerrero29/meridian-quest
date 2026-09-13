@@ -10,7 +10,8 @@ should have been caught by, and the assertions to add. Nothing here is built.*
 | Suite | Runs where | Holds |
 |---|---|---|
 | `test/smoke.js` — Meridian | CI, every push and PR | ~40 sections: boot with no errors or validator warnings; static invariants; the retry/XP flow; chapters and endings; hearts as a layer; WCAG contrast on every theme; the theme editor; the NET stub; the care pack and the decision report; hostile save payloads; the Trolley Pass round-trip; TILES metadata and Sonny's program; the park (leash → bridge → chill → recap); screen-relative swipes; door plausibility and cooldown; 3D doors and wall faces; bake resolution; seasons; furniture per camera; the button priority; fences in 3D; door markers; per-district endings; looks keyed by id; the whole city raised; the record's growth; multi-storefront; the room upstairs and its off switch; the version on the opening page; the camera round-trip; **the portability guard**; the owner's 2026-09-03 reports; **the public build's guarantee** (Part 1) |
-| `test/town.smoke.js` — El Changarrito | CI, after Meridian's | the town's index is a known diff of the public one; own prefix; own name and the engine's version; the park, the faces, the clerk with her document, the board; the record's fixture: people by tier, plain words, the three-line cycle, per-label stands, leaving and restoring the tile; Sonny; the animals' tiles walkable |
+| `test/town.smoke.js` — El Changarrito | CI, after Meridian's | the town's index is a known diff of the public one; own prefix; own name and the engine's version (the value, since 2026-09-13); the park, the faces, the clerk with her document, the board; the record's fixture: people by tier, plain words, the three-line cycle, per-label stands, leaving and restoring the tile, **a claimed person wearing the mark and the house board saying who has what**; Sonny; the animals' tiles walkable. **And the crew-process guards, because the crew lives in the town:** the mural ledger, the flight-notes ledger, **the nineteen personas' shared block (first, once, one person, identical, names the post-mortem and this register)**, and `test/leaves.js`'s soundness half — a persona file fault reports under this step's name, so its sentence starts with the path |
+| `test/leaves.js` | in `town.smoke.js` (soundness), by hand with a base ref (routing) | `docs/BOUNDARY.md` is sound — every path real, every reviewer a persona, every row dated, no persona citing a file that was never written, no workflow a label or a comment can start. With a base: which boundary paths a change touches and who must see it, exit 0 always |
 | `docs/templates/build-branded.js --check` | CI | the branded copies of the docs templates match the neutral ones plus `brand.yml` |
 | `test/shots.js` (`--cams`, `--index`, `--spots`) | **nobody** — by hand | four-camera screenshots of named spots; the only pixel-level look at the game |
 | `test/tilesheet.js` | by hand | the cold read of every glyph |
@@ -34,7 +35,7 @@ should have been caught by, and the assertions to add. Nothing here is built.*
 > discovered by planting a real violation and watching it pass.** So: for every assertion in this
 > file, plant one before you believe it.
 
-### The register of guards that read a proxy — fourteen, and counting
+### The register of guards that read a proxy — seventeen rows, and counting
 
 *Opened 2026-09-11, because by then it had happened eight times in five days and the pattern was
 costing more than any individual bug in it. **This is the most expensive recurring mistake in this
@@ -58,6 +59,9 @@ trying to close a real hole, and every one looked correct on the page.*
 | 12 | **the ride guard, first draft (mine, same day)** | does `rideStart()` work | does **picking a destination in the pass** give you a ride — it called `rideStart()` directly, so cutting the pass's own wiring out of `openTravel()` left it green | planting the cut |
 | 13 | **the window-sill guard, first draft (mine, one hour after writing up 11 and 12)** | the shape of `SEASONS` in one config file | **what the engine thinks is on a sill** — `props` is nested under `art` in this pack, so the lookup found nothing, took an early return and went green against THREE planted violations, including *"there is no sill at all"*, which is the state that had shipped through four owner reports | planting them |
 | 13½ | **its second and third drafts, also mine** | is another OBJECT in the way (a raycast, then a per-tile probe) | **do the pixels arrive** — both were correct about the scene graph and both went green against the real bug, because the occluder is not an object: a sprite is a billboard that turns to face the camera, the camera looks down at the street, so the lower half of a tall billboard tilts back INTO the wall it hangs on. Only reading the framebuffer could answer it | planting the real bug twice and watching two clever checks pass |
+| 14 | **the flight-notes ledger guard, first draft** (2026-09-11) | how many `### <agent>` headings the file has | **how many proposals it has** — every heading in that file is the anonymised literal `### (agent)`, so it counted zero and went green on a file with three un-actioned proposals in it. Reading the `**Proposed persona edit**` heading the template guarantees turned it red | Rosa, finding her own un-actioned proposal; then the guard, once it read the noun |
+| 15 | **the town's version check** (`test/town.smoke.js`, until 2026-09-13) | does the title screen match `/engine mq-v/` | **is it the engine that is running** — bump Meridian to `mq-v159` and the town keeps claiming `mq-v158` with every suite green. A shape is not a value; #3's mistake inverted. Reads the value now | Yaz, costing a town-only version bump |
+| 16 | **the hostile-save test's `protoClean` assertion** (`test/smoke.js`, still open) | is `Object.prototype` unpolluted after the payload | **does the prototype clause in `sanitizeSave` hold** — the payload puts `__proto__` in `qa`, which numeric coercion filters anyway, and carries no `bl` key at all, which is the loop the clause guards. It asserts that a pollution nobody attempted did not occur. The three-line plant is `docs/BOUNDARY.md` G2 | Zeni, reading the extraction step |
 
 **#11 is the one to read twice.** It is the guard for the rule `CLAUDE.md` states in its own words —
 *bump `GAMEV` and `CACHE` together whenever `engine/` changes* — and it could not see an unbumped
@@ -77,13 +81,13 @@ pixels in a framebuffer. It is also the wrong question. *"Hidden" is a fact abou
 owner's own word, he used it three times across four days, and no check in this repository read it
 until one did the obvious stupid thing and looked at the screen.
 
-**Two of those are guards written by the session that had just found the other eight** (#10, and the
-mural-ledger guard that split on `### <agent>` headings when every heading in that file is the
+**Two of those are guards written by the session that had just found the first eight** (#10, and #14 —
+the mural-ledger guard that split on `### <agent>` headings when every heading in that file is the
 anonymised literal `### (agent)`, so it went green on a file with three un-actioned proposals in it).
 **Knowing about the mistake does not stop you making it.** That is the single most useful line in
 this register.
 
-**What the ten have in common, stated so it can be checked against a new guard before it lands:**
+**What they have in common, stated so it can be checked against a new guard before it lands:**
 
 1. **The proxy is always cheaper to read than the thing.** A filename, a string equality, a bounding
    box, a membership test. The correct noun usually needs a behaviour to be exercised.

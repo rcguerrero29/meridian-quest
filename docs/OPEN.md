@@ -12,18 +12,12 @@ then this sheet, then the open GitHub issues. Nothing else is required reading.
 
 ---
 
-## 0 · The two newest, added 2026-09-12 — both are his to answer, both have the work written
+## 0 · The two newest, added 2026-09-12 — one answered, one still his
 
 | Question | Why it is blocking | Where it is written |
 |---|---|---|
 | ~~**The ride: a picture, or something to do?**~~ **ANSWERED 2026-09-12/13** — *"a bit of an animation and eventually something to do"*, then all five follow-ups signed | — | `docs/ARCH-LOG.md` **A13 — SIGNED**: outside the car, the aperture rule is law, nothing happens on the ride yet, the dog is the second passenger, the driver is with Nacho. **Planned, not built** |
-| **Two visible storeys: a picture, a room, or the two joined?** | This repo already has a room upstairs and nothing ties it to the street facade. Joining them is a third thing and nobody has costed it | `docs/rooms/2026-09-12-two-visible-storeys.md` — yes it is possible with no engine change, and the camera takes most of it back |
-
-## 0 · The two newest, added 2026-09-12 — both are his to answer, both have the work written
-
-| Question | Why it is blocking | Where it is written |
-|---|---|---|
-| **Two visible storeys: a picture, a room, or the two joined?** | This repo already has a room upstairs and nothing ties it to the street facade. Joining them is a third thing and nobody has costed it | `docs/rooms/2026-09-12-two-visible-storeys.md` — yes, no engine change needed, and the camera takes most of it back. No to skyscrapers |
+| **Two visible storeys: a picture, a room, or the two joined?** | This repo already has a room upstairs and nothing ties it to the street facade. Joining them is a third thing and nobody has costed it | `docs/rooms/2026-09-12-two-visible-storeys.md` — possible with no engine change, and the camera takes most of it back. **No to skyscrapers** |
 
 ## 1 · Waiting on the owner — nothing moves until he answers
 
@@ -56,7 +50,7 @@ then this sheet, then the open GitHub issues. Nothing else is required reading.
 
 ## 3 · The registers — where knowledge lives now
 
-**Ten now** — the count said "six" for a day after the table had nine rows, and `GAUGE.md` was listed
+**Twelve now** — the count said "six" for a day after the table had nine rows, and "ten" for two days after it had eleven; `GAUGE.md` was also listed
 twice; both corrected 2026-09-11. Each has the same discipline: **they grow from what actually
 happened, never from imagination.** Read the relevant one before proposing anything in its area.
 
@@ -72,6 +66,7 @@ happened, never from imagination.** Read the relevant one before proposing anyth
 | `docs/REGRESSION.md` | The regression map, R1–R10, and the rule they were bought with: **a guard has to read the noun it actually means** | writing any test |
 | **`docs/POSTMORTEM.md`** | **Every way the sessions have actually got it wrong — the expensive ones and the silly ones — with what each cost.** Opened 2026-09-12 at the owner's word: *"give them a post mortem and to learn from it so it is ready for them for next time they build"* | **building ANYTHING.** It is the shortest register here and the one most likely to save you an afternoon |
 | `docs/SECURITY-NOTE-2026-09-10.md` | What the El Changarrito exposure **was and was not**, what the token can actually do, and the four things to check | any question about what leaked, or before touching the deploy |
+| **`docs/BOUNDARY.md`** | **Every edge of the project — what leaves town, what we promised there with `file:line`, which guard reads that exact noun or the word nobody, and when it was last planted against.** Opened 2026-09-13; Zeni's ledger, Melo's list. `test/leaves.js` reads its path table | any change to a workflow, a shell, the service worker, a sanitiser, a token, a fetch, or the deploy |
 | `docs/decisions/` | One file per settled decision: the ask verbatim, the answer, **and the options that were rejected, with reasons**. Opened 2026-09-10; three filed, and `docs/ASKS.md` is still where most decisions actually live | re-proposing anything that sounds already-answered |
 
 ## 4 · The traps — things that have already bitten, written so they bite nobody twice
@@ -124,5 +119,5 @@ is next" — which is itself a finding, because the street has one person on it 
 
 **The two games:** Meridian Quest is public and teaches AI delivery judgment. El Changarrito is the
 owner's backlog as a street, localhost only, never linked from the public game. One engine, and
-**every engine change must be behaviour-identical for both, proven the same day by all four
-suites.**
+**every engine change must be behaviour-identical for both, proven the same day by every suite CI
+runs — see `README.md` "Test before shipping".**

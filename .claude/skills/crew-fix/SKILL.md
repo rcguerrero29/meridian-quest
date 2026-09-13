@@ -108,9 +108,9 @@ file:line"*:
   went to the register.** Had he obeyed it, the run would have deleted a feature the owner requested,
   and the commit would have called it a ruling.
 - *"The car reverses at the end of the line… a driver who changes ends (you specified that last run
-  and it shipped)."* **It does not reverse.** `engine/engine.js:1173` recomputes `TRO.dir` from the
-  line declaration every pass and nothing flips the sign. **Rigo read it instead of accepting it**,
-  and found that `engine3d.js:621-622`'s comment promises a reversal that does not exist — so shipped,
+  and it shipped)."* **It does not reverse.** `engine/engine.js` sets `TRO.dir` once from the
+  line declaration (grep `TRO.dir=`) and nothing ever flips the sign. **Rigo read it instead of accepting it**,
+  and found that the `engine3d.js` comment promising a reversal (grep `reverses`) describes something that does not exist — so shipped,
   drawn work is decoration.
 
 **So: an agent who contradicts the brief with a `file:line` is doing the job, not failing to follow
@@ -224,7 +224,7 @@ read its own brief.
 
 ## Before you write a guard, read the register of proxies
 
-`docs/REGRESSION.md` now carries **ten guards that read a proxy for the thing they meant** — eight
+`docs/REGRESSION.md` carries **a register of guards that read a proxy for the thing they meant** (its table holds the count) — the first eight
 found in five days, and **two of them written by the session that had just found the other eight.**
 That last fact is the useful one: **knowing about the mistake does not stop you making it.**
 
@@ -282,8 +282,10 @@ truth. Budget for it.
 ```
 MURAL PANEL
 id:     <agent>-<three-or-four-words-in-spanish-or-english>
+by:     "<agent>"          (lowercase; the wall files the panel in that painter's bay)
 title:  {en, es}
 said:   {en, es}   — the sentence. Yours. Short enough to sting
+state:  {en, es}   — where you are NOW, as a position held today, not a feeling
 who:    {en, es}   — you, in one clause, in the third person
 cap:    {en, es}   — what it cost to find. Two or three sentences, no file paths
 aspect: <height as a fraction of width, 0.40–0.50>

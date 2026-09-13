@@ -22,7 +22,7 @@ technology."* Realism here is never Meridian's realism. Every rendering improvem
 one of two things and nothing else:
 
 - **a RULE** — it belongs in `engine/`, it is behaviour-identical for Meridian, El Changarrito and
-  any world built from the template, and it is proven the same day by all four suites; or
+  any world built from the template, and it is proven the same day by every suite CI runs; or
 - **a SEAM** — the engine asks, the content pack answers, and a pack that says nothing gets a sane
   default. `PLACES · GROWTH · SEASONS · CHAPTERS · ENDLESS · HUDFACT · TILEART · DECOART · CRITTERS ·
   BUILDTPL · BUILDS · READS · DOCS · INTERVIEW · TOWNLBL` is the existing list; a new one joins it.

@@ -120,7 +120,7 @@ expect — not by calling a fullscreen API you cannot get in headless. Read `t3R
 job is to make the OLD code fail. A test that has never been red is a test that proves nothing —
 this project shipped one that pinned a sprite bug at 40px and passed the whole time it was wrong.
 
-**2 · Run the four suites, always, and say the words.**
+**2 · Run the boot suites, always, and say the words** — and then `node test/gauge.js`, which CI runs and this list never has.
 ```
 node test/smoke.js
 node test/town.smoke.js

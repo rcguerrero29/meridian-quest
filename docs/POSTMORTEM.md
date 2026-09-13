@@ -19,7 +19,7 @@ cost*. No entry is here because it sounds wise. If it did not cost something, it
 > and three of those five were written by the session that was, at that hour, writing up the previous
 > one.**
 
-`docs/REGRESSION.md` carries the register; it is fourteen entries long and six days old. **Knowing
+`docs/REGRESSION.md` carries the register; it was opened 2026-09-11 and its table holds the count. **Knowing
 about this mistake does not stop you making it.** That sentence is the single most useful line in
 this repository and it was earned the expensive way.
 

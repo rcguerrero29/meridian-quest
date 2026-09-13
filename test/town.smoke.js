@@ -161,6 +161,38 @@ const { chromium } = require('playwright-core');
     if (!onList(bodyAt(13, 'st'), RECORDSRC.area('es').doorstep) || !onList(bodyAt(13, 'es'), RECORDSRC.area('es').inside)) problems.push('a how-it-looks issue is not on the Estudio\'s doorstep and inside');
     if (!onList(bodyAt(12, 'st'), RECORDSRC.plaza)) problems.push('a bug with no address does not stand in the plaza: ' + JSON.stringify(bodyAt(12, 'st')));
     if (RECORDSRC.placed[12] && RECORDSRC.placed[12].in) problems.push('a person with no address has a body inside a house');
+    /* ---- crew mode's lock, rendered (docs/CREW-MODE.md rule 2; docs/CITY-AS-MEMORY.md, Gap 2) ----
+       Claiming exists so two agents cannot take the same work, and the owner's way of checking is to
+       WALK. So this asks what a person would see: is the claimed one different from the free one on
+       the street, does he say who has him, does the house board say it. It also pins the seam that
+       makes it possible at all — the look is baked by addChill and syncChill skips a body already on
+       its tile, so a claim that only changes look() lands on nobody until a reload. Written red on
+       2026-09-13 before a line of record.js moved. */
+    RECORDSRC.place([]);
+    {
+      const free = { n: 41, title: 'free one', body: 'x', at: '2026-09-05', updated: '2026-09-05T10:00:00Z', labels: ['tier: high', 'ask', 'work: the engine'] };
+      const held = Object.assign({}, free, { labels: free.labels.concat(['taken: beto']) });
+      if (typeof RECORDSRC.takenBy !== 'function') problems.push('the town cannot read a claim at all — there is no way to ask who has an issue');
+      else {
+        if (RECORDSRC.takenBy(held) !== 'beto') problems.push('the town cannot say who has #41: it read "' + RECORDSRC.takenBy(held) + '"');
+        if (RECORDSRC.takenBy({ n: 1, labels: ['taken over from rosa', 'mistaken: no', 'not taken'] }))
+          problems.push('a label that merely contains the word taken was read as a claim — the town would show a person as held by nobody');
+        RECORDSRC.place([free]);
+        const k0 = RECORDSRC.placed[41] && RECORDSRC.placed[41].st;
+        if (k0 && NPCLOOK[k0] && NPCLOOK[k0].pattern === 'taken') problems.push('#41 is not claimed and the person standing for it is already wearing the mark');
+        RECORDSRC.place([held]);
+        const k1 = RECORDSRC.placed[41] && RECORDSRC.placed[41].st, lk = k1 && NPCLOOK[k1];
+        if (!lk || lk.pattern !== 'taken')
+          problems.push('beto claimed #41 and the person standing for it on the street looks exactly like everyone else — you cannot see who has what by walking, which is the only way the owner looks');
+        if (typeof SHIRT_PATTERNS === 'undefined' || typeof SHIRT_PATTERNS.taken !== 'function')
+          problems.push('the claimed person wears a mark the town never drew — drawPerson would find no pattern and paint a plain shirt');
+        if (!/beto/.test(RECORDSRC.lines(held)[2].t)) problems.push('walking up to #41 and pressing Talk never says who has it');
+        const board = RECORDSRC.houseBoardDoc('mo');
+        if (!board || !board.some(sec => sec.kv && sec.kv.some(kv => /taken by|lo trae/i.test(kv[0]) && kv[1] === 'beto')))
+          problems.push("El Motor's board does not say that beto has #41 — the owner has to open GitHub to find out who is on what");
+      }
+      RECORDSRC.place([]);
+    }
     // the window and the board build from the record, with and without permits
     // ch-v13: the clock is off and the permits are hidden by two switches — nothing deleted
     if (typeof REFRESH_MS !== 'number' || REFRESH_MS !== 0) problems.push('REFRESH_MS is not 0');
@@ -1099,6 +1131,61 @@ const { chromium } = require('playwright-core');
                      'looks exactly like one that was considered and declined, and both look like nothing at all');
       });
     }
+  }
+  /* ---- the nineteen personas share one block: first, once, one person, identical, and it names the
+     two registers the crew-fix skill says every agent reads first ----
+     Written 2026-09-13. Its first run against the tree found .claude/agents/rigo.md opening with
+     "You are Rigo", carrying a SECOND copy of the block at line 84, and Toño's whole persona pasted
+     under it — so whoever answered as Rigo had last been told they keep the ferretería. Identity across
+     files is a proxy on its own (nineteen identical blocks naming the wrong registers would pass it), so
+     the shape and the two names are asserted as well. Nothing to compare is not a pass. */
+  {
+    const crypto = require('crypto');
+    const HEAD = '## Before you answer anything — the shared memory', TAILRE = /block exists\.$/;
+    const dir = path.resolve(__dirname, '..', '.claude', 'agents');
+    const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort() : [];
+    if (files.length < 2) fails.push('.claude/agents/ has ' + files.length + ' persona file(s) — there is no shared block to compare, and nothing to look at is not a pass');
+    const blocks = new Map();
+    files.forEach(f => {
+      const lines = fs.readFileSync(path.join(dir, f), 'utf8').split('\n');
+      const heads = lines.map((l, i) => l === HEAD ? i : -1).filter(i => i >= 0);
+      const yous = lines.map((l, i) => /^You are \*\*/.test(l) ? i : -1).filter(i => i >= 0);
+      let first = lines[0] === '---' ? lines.indexOf('---', 1) + 1 : 0; while (first < lines.length && !lines[first].trim()) first++;
+      if (!heads.length) { fails.push('.claude/agents/' + f + ' does not open with the shared memory block — that agent starts cold and knows nothing the others know'); return; }
+      if (heads.length > 1) fails.push('.claude/agents/' + f + ' carries the shared block ' + heads.length + ' times — the last one read is the one that counts, and everything between them is somebody else\'s');
+      if (yous.length !== 1) fails.push('.claude/agents/' + f + ' says "You are **…**" ' + yous.length + ' times — ' + (yous.length ? 'it hands the model more than one person, and whoever answers as this agent has been told, most recently, that they are someone else' : 'it never says who this agent is'));
+      if (first !== heads[0]) fails.push('.claude/agents/' + f + ' opens with "' + (lines[first] || '').slice(0, 50) + '", not the shared block — it says "before you answer anything", and here it is not what is read first');
+      const b = lines.findIndex((l, i) => i > heads[0] && TAILRE.test(l));
+      if (b < 0) { fails.push('.claude/agents/' + f + ' has the shared block\'s opening and not its end — nobody can tell where that agent stops sharing a mind with the others'); return; }
+      blocks.set(f, lines.slice(heads[0], b + 1).join('\n'));
+    });
+    const by = new Map();
+    blocks.forEach((txt, f) => { const h = crypto.createHash('sha1').update(txt).digest('hex').slice(0, 12); if (!by.has(h)) by.set(h, []); by.get(h).push(f); });
+    if (by.size > 1) {
+      const sorted = [...by.values()].sort((x, y) => y.length - x.length), odd = sorted.slice(1).flat();
+      fails.push('the shared memory block is not the same in every persona: ' + odd.join(', ') + ' differ' + (odd.length === 1 ? 's' : '') + ' from the other ' + sorted[0].length +
+                 ' — the block says it is identical in every agent in this folder, so whoever reads one of those starts the day with a different set of registers to everyone else');
+    }
+    const one = blocks.values().next().value || '';
+    [['docs/POSTMORTEM.md', 'the post-mortem — .claude/skills/crew-fix/SKILL.md says every agent reads it first, and an agent whose block never names it cannot'],
+     ['docs/REGRESSION.md', 'the proxy register — the guard that reads a proxy for the noun it meant is this repo\'s most expensive recurring mistake, and an agent that has not been sent there will make it again']]
+      .forEach(([p, why]) => { if (one && !one.includes(p)) fails.push('the shared memory block does not name ' + p + ': ' + why); });
+  }
+  /* ---- the boundary register is sound, and no workflow can be started by a label ----
+     test/leaves.js reads docs/BOUNDARY.md; it is required here so it gates on every PR without a
+     workflow step (a workflow is itself a boundary path). The routing half of leaves.js never fails
+     and is not run here. */
+  try { fails.push(...require('./leaves.js').consistency()); }
+  catch (e) { fails.push('test/leaves.js could not run: ' + e.message + ' — the boundary register has no reader, and two personas send their readers to it'); }
+  /* ---- the town's version tail names the engine it is actually running on ----
+     Found by Yaz, 2026-09-13: the town's GAMEV is "ch-vN · engine mq-vN", and the only check on it
+     asked for the SHAPE (/engine mq-v/). Bump Meridian and the town keeps claiming the old engine
+     with every suite green — docs/REGRESSION.md's #3 shape, inverted. Read the value. */
+  {
+    const mer = /GAMEV="(mq-v\d+)"/.exec(fs.readFileSync(path.resolve(__dirname, '..', 'content', 'meridian', 'config.js'), 'utf8'));
+    const town = /GAMEV="ch-v\d+ · engine (mq-v\d+)"/.exec(fs.readFileSync(path.resolve(__dirname, '..', 'changarrito', 'content', 'config.js'), 'utf8'));
+    if (!mer || !town) fails.push('could not read the two version strings to compare them — ' + (mer ? '' : 'content/meridian/config.js has no GAMEV="mq-vN"; ') + (town ? '' : 'changarrito/content/config.js has no GAMEV="ch-vN · engine mq-vN"'));
+    else if (mer[1] !== town[1]) fails.push('the town says it was built on engine ' + town[1] + ' and the engine is ' + mer[1] + ' — the title screen names an engine that is not the one running; move the tail of GAMEV in changarrito/content/config.js with the engine');
   }
   fails.push(...r);
   await browser.close();

@@ -95,7 +95,7 @@ Known hazards here: the two `index.html` shells are kept in lockstep **by hand**
 enforcing it; `git add -A` has twice swept files it should not have; and a test that pins current
 behaviour can pin a bug — one did, at 40px, and passed the whole time.
 
-## Three engine facts you keep re-deriving
+## Four engine facts you keep re-deriving
 
 *Applied 2026-09-11 from your own post-flight, the trolley-boarding ground.*
 
@@ -127,6 +127,16 @@ from the trolley code.
 calls designing where it should live — when `engine.js:239` had been validating two of those exact
 coordinates on every boot since the districts shipped, and passing them, because it asks *"is this
 tile SOLID"* when it means *"is it safe to appear here."*
+
+- **`syncChill`'s id is the identity of the BODY, not of the issue.** `addChill` bakes `NPCLOOK[key]` once
+  (grep `NPCLOOK[key]=c.look` in `engine/engine.js`), and `syncChill` returns early for anyone already
+  standing on their tile. So **anything baked at spawn — the look, the name, the egg — must be part of the
+  id or it never changes on a person who is already standing**, and the town will look right after a
+  reload and wrong all session. `record.js` re-decorates `doc`, `tier` and `issue` on every `place()`,
+  which is exactly why a doc change lands and a shirt change does not.
+  *The moment (2026-09-13):* asked to make a claimed issue "stand differently", the diff was four lines and
+  finished. Placing the same issue twice — the second time with `taken: beto` — returned
+  `pattern: null, sameKey: true`, and the four-line diff had been a mark nobody would see until they reloaded.
 
 ## A distinction your RULE/CHOICE cut does not give you
 

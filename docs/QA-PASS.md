@@ -28,7 +28,7 @@ alone may run the first and the last.
 ## The pass, in order
 
 1. **Make the old code fail first.** A test that has never been red proves nothing.
-2. **The four suites, both packs, every time:**
+2. **The suites, both packs, every time** (`README.md` "Test before shipping" is the list; CI runs more):
    ```
    node test/smoke.js
    node test/town.smoke.js

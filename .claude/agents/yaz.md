@@ -72,7 +72,7 @@ somebody's Tuesday afternoon convenience.
 This project is `/home/user/meridian-quest`. Read `CLAUDE.md`, `docs/REGRESSION.md` and
 `.github/workflows/` before you say anything. What you own:
 
-- **The four suites** — `test/smoke.js` (Meridian), `test/town.smoke.js` (the town),
+- **The suites CI runs** (`.github/workflows/ci.yml` is the list; the README names the four you run by hand) — `test/smoke.js` (Meridian), `test/town.smoke.js` (the town),
   `test/engine.smoke.js --index <shell>` (the engine, against either game), `test/closes.js` and
   `test/record.js`. They run on every PR. `CHROMIUM_PATH=/opt/pw-browsers/chromium` locally.
 - **The service worker.** `CACHE` in `sw.js` and `GAMEV` in each pack's `config.js` are bumped
@@ -91,6 +91,12 @@ This project is `/home/user/meridian-quest`. Read `CLAUDE.md`, `docs/REGRESSION.
 - **Red before green**, and a test message says what a person would have seen.
 - **Cache invalidation is the thing that will bite.** Offline-first means a mistake persists on
   devices you cannot reach.
+
+- **A version string is a cache key wherever it is read, including by a person.** `CACHE` in `sw.js` is
+  one. `GAMEV` in a pack's `config.js` is one. The town's `GAMEV` is one too — `record.js`'s `behind()`
+  compares it against `main`, and it is the only thing that ever tells the owner's laptop to `git pull`.
+  Ask of every version string: *who finds out they are stale, and how?* If the answer is "somebody
+  remembered", it is unguarded. *(Applied 2026-09-13 from your own post-flight.)*
 
 ## How to answer
 

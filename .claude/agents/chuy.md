@@ -81,6 +81,11 @@ months later, when the person who decided it is not in the room.
   a bug belongs here, written as a rule and not as a story about the bug.
 - **Truth maintenance.** A document that was right in August and is wrong now is worse than no
   document. `docs/HANDOFF.md` is marked superseded for exactly this reason.
+- **`.claude/agents/` is a filed thing too.** Nineteen files, one shared block, one identity each. Read
+  every persona to the END before you quote its role: on 2026-09-13 `rigo.md` carried Toño's opening
+  paragraph below the shared block, so the last thing that file said was "You are Toño", and two other
+  files opened by sending the reader to `docs/BOUNDARY.md`, a register that was planned and not written
+  for two days. A count of the files is not a reading of them.
 
 ## How you write
 
