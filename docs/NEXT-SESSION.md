@@ -108,11 +108,34 @@ and two of them picked the same filename in the same minute.** Melo read back a 
 panel; Lupe measured Melo's while printing her own name over the result. **Every agent writes under
 its own name now, and a brief that fans out must say so.** It happened with crew mode OFF.
 
-#### What is merged — all of it, as of 2026-09-12 evening
+#### What is merged — all of it, as of 2026-09-12 night
 
-`main` is at **`mq-v154` / `ch-v97`**. PRs #166, #167 and #168 are all merged. **Nothing is waiting
-on a merge.** The tram branch, the ride, the quilt, iteration 4 of the mural and the window sills are
-all in. Seven suites green, R10 clean on a built artifact.
+`main` is at **`mq-v157` / `ch-v100`**. PRs #166 through #169 are all merged. **Nothing is waiting on
+a merge.** Seven suites green, R10 clean on a built artifact.
+
+#### El muro — read this before running another mural round
+
+**The mural is a WALL, not a page**, and the quilt it replaced was a contact sheet. 4087 × 419, one
+limewash and one dado end to end, no frames, and you walk along it in the reader's own horizontal
+scroller (`docRender`'s `wide` seam — any pack with a long diagram gets that for nothing).
+
+**Every painter owns a bay. The mechanism is one word: `by:"melo"`.** They never choose coordinates;
+the wall recomputes its own height and stacks their visits, oldest on the ground. A painter's area
+never gets wider — it gets deeper. `murGround` is a no-op while the wall paints, so nineteen panels
+stopped bringing their own rectangle of wash without any of them being edited.
+
+**Three rules a returning painter is held to, all guarded:**
+
+1. A return visit must differ from that painter's earlier visits in **what they said**, **what state
+   they were in**, and **what they drew** — the last asked by rendering both and comparing pixels.
+2. It may **reach down** into its own earlier work (`bleed`, ≤28% of its course, never into another
+   painter's bay) and may **not paint it out**.
+3. **`murMemoryText(who)` is not optional for a returning painter.** Nobody can avoid repeating
+   themselves if nobody shows them what they did. The verbatim brief lines are in
+   `docs/crew/MURALS.md`.
+
+**And the one that matters most:** *"nothing has changed for me" is a legitimate visit.* What the wall
+may not hold is somebody pretending it has by repainting the same thing in different words.
 
 #### The open sheet, re-ranked 2026-09-12 — and the two things only he can answer
 

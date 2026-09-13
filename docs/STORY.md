@@ -243,6 +243,12 @@ otherwise. The same day the casa's neighbour got her own name back: Doña Tencha
   deferred until a sitting is priced for her. Do not read SIGNED as shipped.
   **Planned 2026-09-05:** `docs/story/la-ventanilla.md` — what she reads, where she could
   stand, every seam she touches with its tag, and the personal build (❗La puerta trasera).
+- **The names inside quests are people who can walk on** (2026-09-13). Rigo is the first off-screen
+  name in this city to take a tile. The rule it establishes is general and belongs to any pack: a
+  character mentioned inside a quest may appear ambiently anywhere — but **an ambient line may never
+  reveal which way that quest was answered**, because chat has no state and every quest has three or
+  four endings. Still waiting on the wall: the lady with the sister who checked her paperwork, the
+  kid from the tire place, Yesenia's nephew reading job postings.
 - **Barrio Norte** — PROMOTED to the city's through-line. The northbound track
   advances a visible segment per finished business and the sound gets closer.
   Never a place you visit — it stays a promise (kept free for multiplayer/AJ).
@@ -250,6 +256,15 @@ otherwise. The same day the casa's neighbour got her own name back: Doña Tencha
   where you know everybody, which is the whole reason it is comfortable. If the
   owner ever wants a fifth-and-beyond expansion, this is the sanctioned place —
   after the second lap, not instead of it.
+  **And the line has no face** (2026-09-13, ❗El chofer). The tram's driver is
+  deliberately nobody, so that nobody in Meridian can be asked what is at the other
+  end. **He is the only person in this city who would have had to have been there.**
+  Give him a name and a mouth and the first question every player asks him is *what is
+  up north* — and he either answers, and the promise is spent by a man instead of a
+  skyline, or he refuses, which is a character built to dodge. If the MQT ever needs a
+  human voice it is la ventanilla's, at a window the player can walk to — public works,
+  asked-only, already signed — never the driver's, behind glass where nothing can be
+  asked at all.
   **The window is now its only surface** (2026-09-02). The promise is visible from `f2`
   and nowhere else, which is what keeps it a promise: you can watch it, you cannot walk
   there. Two laws follow. The view may advance a stage as businesses finish (stakes →
@@ -667,6 +682,56 @@ what conflicts, why it is not Nacho's to decide, and the options. Owner's instru
    glossary); or add a glossary surface in the world (the mural wall, a codex index)
    that fills as terms are met. Nacho's call on the writing, Don Güero's on any new
    surface, the owner's on how far to push it.
+
+- 2026-09-13 · ❗El chofer · **the tram's driver is nobody, on purpose — he is a uniform,
+  not a neighbour.** Nacho, asked by the owner by name. Three rules make the call and
+  **none of them is taste**: the car is reborn off the edge of the map, so a PERSON would
+  owe the world an account of where he went and a LIVERY does not (Rigo, *"Two cabs, no
+  turn"*); a named man behind glass on a ride with no verbs is *"scenery pretending to be
+  a place"* pointed at a human being, and this city already carries 25 neighbours with no
+  chat lines; and he is the only person in Meridian who would have been to Barrio Norte,
+  which the window is signed as the only surface for. **He gets no name, no `NPCLOOK`
+  entry, no line in either language and no ❗.** He gets the MQT cap brim, a gold band
+  that matches the car's own trim, and **one gesture — the hand comes off the power when
+  something alive is on the rails**, which is Rigo's own rule made watchable instead of
+  written down. A player on their fifth ride notices the hand move before they notice
+  why. **Revisit trigger, and only this one: the day a second HUMAN passenger rides**
+  (`ARCH-LOG` A13¾'s pivot — the dog does not count, because a dog does not make the car
+  a room with people in it). Then he is named out of la ventanilla's world — a city
+  employee, never a Robles.
+  **Refused in advance, both expected within the month:** *a wise old motorman who says
+  one thing about the journey* — there is no press, no ❗ and no trigger a line could hang
+  off, so it would fire unprompted into a beat containing nothing else, which makes it
+  not a line but the entire content of the ride, i.e. the cutscene A12 exists to prevent;
+  and **"the driver is Rigo"** — Rigo is `changarrito` content, and putting a crew persona
+  into the public game is a leak, not a cameo (`CLAUDE.md`; `docs/story/el-changarrito.md`
+  §7½). His forty-one years belong on the wall that records how we work, not in a barrio
+  he was never a neighbour of.
+
+- 2026-09-13 · ❗El chofer, segunda parte · **the owner overruled the refusal above and asked for a
+  cameo. He was right, and the refusal was narrower than it was written.** Verbatim: *"welll lets fix
+  the leak... secondly, lets do a cameo to fix in game story."* Two corrections, both checked against
+  the code first. **One: there was no leak** — the tranviario's name appears zero times in `engine/`
+  and zero times in `content/meridian/`; the proposal was refused at plan time and never written to a
+  file. **Two: the name was never the leak — a biography would be.** Meridian has had a Rigo since
+  2026-09-02, **nine days older than the crew persona**: Don Tacho's cousin who sells shop software,
+  named in quest 30 in both languages, offstage and never seen. Eight of nineteen crew personas
+  already share a name with a shipped NPC, because they were named *after* the cast.
+  **So the cameo is the cousin, and he was always ours.** He takes a tile at the Calle Dos trolley
+  stop beside Doña Meche's cart — ambient, chat only, four lines EN+ES, no quest and no ❗: the man
+  who sells dashboards, riding, because his own car is in his cousin's bay. He wears Don Tacho's
+  exact skin value and the opposite clothes, so the family reads at ten tiles and the silhouette —
+  the only tie on Calle Dos — carries the cold read alone.
+  **What it refuses, and this is the load-bearing part: he never mentions the sale.** Ambient chat
+  has no state and quest 30 has four endings, so a Rigo who mentions it becomes a permanent
+  advertisement for a decision the player may have refused to his face. The player who bought the
+  board and the player who said no meet the same man. He talks about the family, the ride and the
+  bread.
+  **The cab is unchanged.** The driver keeps no name, no line, no ❗ and no face, for the reason that
+  was never about a name: he is the only person in this city who would have had to have been north.
+  And the tranviario's forty-one years stay on the wall that records how we work.
+  **A cameo that pays off a line already in the game costs Meridian nothing. One invented to nod at
+  us would have cost it a person.**
 
 **Dead text, flagged so it is not resurrected stale:** `vmTitle` / `vmHQ` / `vmSt` /
 `vmLc` / `vmSite0` / `vmSite2` / `vmPlots` / `vmHere` in `content/meridian/strings.js`

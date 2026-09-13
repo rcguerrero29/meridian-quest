@@ -243,3 +243,85 @@ it was published because **nothing in the system had ever been asked what was in
 
 That is now `docs/REGRESSION.md` R10, and the rule it was bought with: **a guard has to read the noun
 it actually means.**
+
+---
+
+# Addendum, 2026-09-13 · "Leak" means two different things here, and one of them alarmed the owner
+
+*He read a session line saying a crew persona in the public game would be **"a leak, not a cameo"**
+and replied: **"welll lets fix the leak... firstly- log how it happened please for the security
+reasons."** That is exactly the right instinct and it is why this addendum exists.*
+
+## The headline, first, because it is the only part that matters
+
+> **Nothing leaked. There is no incident. No action is required.**
+
+The word was used in this repository's *content* sense — `docs/TAGS.md` keeps a **"leak register"** of
+tags that look universal and are not — and it was used about **a thing that had not happened and was
+being refused in advance.** It was a hypothetical. The session did not flag the collision with the
+security meaning, and the owner reasonably read the more serious one.
+
+**That is a communication fault, not a security fault, and it cost him a real moment of worry.** It is
+logged here rather than waved away, because a project that keeps a register of its own mistakes does
+not get to skip the ones that are only embarrassing.
+
+## The two meanings, so this never happens again
+
+| | **Security leak** | **Content leak** |
+|---|---|---|
+| What crosses | the town's *tooling* — a GitHub sign-in, a token, the owner's private backlog — reaching the public internet | a *persona, name, glyph or tag* from one game appearing in the other |
+| Has it happened | **Yes, once: 2026-09-10.** That is what the rest of this file is about | **No. Not once.** Checked again below |
+| What guards it | `test/public.js` (R10), wired into `pages.yml` | `test/smoke.js`'s portability guard; `docs/TAGS.md`'s leak register |
+| Cost if it happens | real, and the reason this file exists | a product fault — Meridian's content edited for another world's sake (`CLAUDE.md`) |
+
+**From now on, in any session note: say "a content leak" or "a persona leak" in full. Never the bare
+word.** It is four extra characters and it is the difference between a design note and an alarm.
+
+## What was actually checked, 2026-09-13, so "nothing leaked" is measured and not asserted
+
+Every crew persona name grepped against everything the public build ships — `content/meridian/`,
+`index.html`, `sw.js`, `engine/`:
+
+- ~~**Rigo, Melo, Chema** appear in shipped files **only as comment attributions**~~
+  **❗ CORRECTED 2026-09-13, within the hour, by Nacho — and the correction matters more than the
+  line it replaces. THE FIRST VERSION OF THIS CHECK WAS A PROXY.** It used `grep -ril`, which is
+  case-insensitive *and* matches inside other words, and what it was actually finding for "Rigo" was
+  **"marigold" — sixteen times.** Re-run word-boundary and case-sensitive, thenumbers are:
+  **`Rigo` 4, and all four are the cousin in quest 30. `Melo` 0. `Chema` 0. `Yaz` 0. `Zeni` 0.
+  `Toño` 0. `Remedios` 0. `Cuca` 0.** They appear **not at all** — not even as comments.
+  **The conclusion is stronger than the sentence it replaces, and the evidence given for it was
+  false.** A security register with a wrong fact in it is worse than one with no fact, so the wrong
+  line stays struck rather than deleted. See `docs/POSTMORTEM.md` §11½.
+- **Lupe and Chava ARE Meridian NPCs** — `Lupe · Estimator & Permits`, `Chava · Carnicero` — and have
+  been all along. **The crew personas were named after the town's own clerks, not the other way
+  round**, so name overlap between crew and cast is pre-existing and by design. The same is true of
+  several others; check before calling any of them a leak.
+- **"Rigo" is already in Meridian's shipped dialogue** — ~~Don Güero's~~ **DON TACHO's** cousin who
+  *sells software* (`quests.en.js:339`, speaker `npc:"tacho"`), named, offstage and never seen. *(The
+  session said Don Güero. Wrong cousin, wrong uncle; corrected by Nacho the same hour.)* **Not the
+  trolley inspector, and not a leak.** And the date settles the direction for good: Meridian's Rigo
+  was written **2026-09-02**, and the crew's tranviario first appears **2026-09-11** — **the cast is
+  nine days older than the persona.** The name was never borrowed from the crew; if anything it went
+  the other way.
+- The word **"changarrito"** appears in the public build twice, both times **inside a source comment**
+  pointing at a doc path (`sw.js`, `content/meridian/config.js`). Source comments in shipped JS *are*
+  public — worth knowing in general — but both point at files already in this public repository, so
+  nothing is disclosed that was not already disclosed.
+
+**Conclusion, unchanged and now properly measured: the public build contains no crew persona, no crew
+biography and no private tooling.** Eight of the nineteen crew personas share a name with a shipped
+Meridian NPC (`npcs.js`) because **they were named after the cast** — the overlap is the house
+pattern, not a breach. **The name was never the leak. A biography would be, and none is there.**
+The one real exposure this project has had is the one the rest of this file documents, and it is
+closed.
+
+## The lesson, in the shape the post-mortem uses
+
+- **Believed:** "leak" would be read in the sense the sentence was using it.
+- **True:** the owner read the sense that has an incident report attached to it, and was right to.
+- **Cost:** one alarmed message, and an afternoon's trust spent on a non-event.
+- **Fix:** never use the bare word; and when somebody asks whether they are exposed, **measure before
+  you reassure** — the greps above took two minutes and are worth more than any sentence beginning
+  "don't worry".
+
+*Also filed in `docs/POSTMORTEM.md` §11.*

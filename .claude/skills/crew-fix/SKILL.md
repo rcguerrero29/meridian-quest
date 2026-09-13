@@ -16,6 +16,16 @@ paint shop, Cuca's works, Remedios' annex, Nacho's kitchen. They have been used 
 skill puts them to **work**: they diagnose, they write the failing test, they fix, and the session
 that called them **reviews every line before it lands.**
 
+## Before anything: two files, and the second one is new
+
+**Every agent on a crew run reads `docs/POSTMORTEM.md` first.** Opened 2026-09-12 at the owner's
+word — *"make sure we are documenting and informing all agents of your findings, be them silly or
+not, so they can make sure not to make your mistake"*. It is every way the sessions have actually got
+it wrong, with what each one cost, including the stupid ones. It is short, it is specific, and three
+of the mistakes in it were made *by the session that was writing up the previous one*.
+
+Then `docs/REGRESSION.md`'s proxy register, before you write any guard.
+
 ## The rule that makes it safe
 
 > **An agent may propose anything. Only a reviewed change lands.**

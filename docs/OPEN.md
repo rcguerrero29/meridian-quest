@@ -16,14 +16,13 @@ then this sheet, then the open GitHub issues. Nothing else is required reading.
 
 | Question | Why it is blocking | Where it is written |
 |---|---|---|
-| **The ride: a picture, or something to do?** He rode it: *"i dont see anything about me riding it other than selecting another stop. for now it is ok, but architecture should be ready to edit again."* | Any richer ride is three lines and a shape; which three depends entirely on his answer | `docs/ARCH-LOG.md` **A12** — the seams, what is deliberately not a seam yet, and four options ranked by what they cost him. **Recommended: the second row** |
+| ~~**The ride: a picture, or something to do?**~~ **ANSWERED 2026-09-12/13** — *"a bit of an animation and eventually something to do"*, then all five follow-ups signed | — | `docs/ARCH-LOG.md` **A13 — SIGNED**: outside the car, the aperture rule is law, nothing happens on the ride yet, the dog is the second passenger, the driver is with Nacho. **Planned, not built** |
 | **Two visible storeys: a picture, a room, or the two joined?** | This repo already has a room upstairs and nothing ties it to the street facade. Joining them is a third thing and nobody has costed it | `docs/rooms/2026-09-12-two-visible-storeys.md` — yes it is possible with no engine change, and the camera takes most of it back |
 
 ## 0 · The two newest, added 2026-09-12 — both are his to answer, both have the work written
 
 | Question | Why it is blocking | Where it is written |
 |---|---|---|
-| **The ride: a picture, or something to do?** He rode it: *"i dont see anything about me riding it other than selecting another stop. for now it is ok, but architecture should be ready to edit again."* | Any richer ride is three lines and a shape; WHICH three depends entirely on his answer | `docs/ARCH-LOG.md` **A12** — the seams, what is deliberately not a seam yet and why, and four options ranked by what they cost him. **Recommended: the second row** — something to look at, not something to do |
 | **Two visible storeys: a picture, a room, or the two joined?** | This repo already has a room upstairs and nothing ties it to the street facade. Joining them is a third thing and nobody has costed it | `docs/rooms/2026-09-12-two-visible-storeys.md` — yes, no engine change needed, and the camera takes most of it back. No to skyscrapers |
 
 ## 1 · Waiting on the owner — nothing moves until he answers
@@ -71,6 +70,7 @@ happened, never from imagination.** Read the relevant one before proposing anyth
 | **`docs/GENRE-RULES.md`** | **What other games already proved, as a RULE with its TRAP — two pages, `[WEB]`-sourced.** The five things that survive removing a timer, the eight things a mistake can mean with no fail state, and the line that stops a calm game being an empty one. The long sweeps live in `docs/research/` | **proposing any mechanic, and before saying the word "chill", "cozy" or "relaxing" about anything** |
 | `docs/GIFTED-GAMES.md` | Sourced research on genres, physics, difficulty, multiplayer and occasion design, and **what this engine already ships** for each | proposing a mini-game or a new seam |
 | `docs/REGRESSION.md` | The regression map, R1–R10, and the rule they were bought with: **a guard has to read the noun it actually means** | writing any test |
+| **`docs/POSTMORTEM.md`** | **Every way the sessions have actually got it wrong — the expensive ones and the silly ones — with what each cost.** Opened 2026-09-12 at the owner's word: *"give them a post mortem and to learn from it so it is ready for them for next time they build"* | **building ANYTHING.** It is the shortest register here and the one most likely to save you an afternoon |
 | `docs/SECURITY-NOTE-2026-09-10.md` | What the El Changarrito exposure **was and was not**, what the token can actually do, and the four things to check | any question about what leaked, or before touching the deploy |
 | `docs/decisions/` | One file per settled decision: the ask verbatim, the answer, **and the options that were rejected, with reasons**. Opened 2026-09-10; three filed, and `docs/ASKS.md` is still where most decisions actually live | re-proposing anything that sounds already-answered |
 
