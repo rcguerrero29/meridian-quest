@@ -243,6 +243,12 @@ otherwise. The same day the casa's neighbour got her own name back: Doña Tencha
   deferred until a sitting is priced for her. Do not read SIGNED as shipped.
   **Planned 2026-09-05:** `docs/story/la-ventanilla.md` — what she reads, where she could
   stand, every seam she touches with its tag, and the personal build (❗La puerta trasera).
+- **The names inside quests are people who can walk on** (2026-09-13). Rigo is the first off-screen
+  name in this city to take a tile. The rule it establishes is general and belongs to any pack: a
+  character mentioned inside a quest may appear ambiently anywhere — but **an ambient line may never
+  reveal which way that quest was answered**, because chat has no state and every quest has three or
+  four endings. Still waiting on the wall: the lady with the sister who checked her paperwork, the
+  kid from the tire place, Yesenia's nephew reading job postings.
 - **Barrio Norte** — PROMOTED to the city's through-line. The northbound track
   advances a visible segment per finished business and the sound gets closer.
   Never a place you visit — it stays a promise (kept free for multiplayer/AJ).
@@ -701,6 +707,31 @@ what conflicts, why it is not Nacho's to decide, and the options. Owner's instru
   into the public game is a leak, not a cameo (`CLAUDE.md`; `docs/story/el-changarrito.md`
   §7½). His forty-one years belong on the wall that records how we work, not in a barrio
   he was never a neighbour of.
+
+- 2026-09-13 · ❗El chofer, segunda parte · **the owner overruled the refusal above and asked for a
+  cameo. He was right, and the refusal was narrower than it was written.** Verbatim: *"welll lets fix
+  the leak... secondly, lets do a cameo to fix in game story."* Two corrections, both checked against
+  the code first. **One: there was no leak** — the tranviario's name appears zero times in `engine/`
+  and zero times in `content/meridian/`; the proposal was refused at plan time and never written to a
+  file. **Two: the name was never the leak — a biography would be.** Meridian has had a Rigo since
+  2026-09-02, **nine days older than the crew persona**: Don Tacho's cousin who sells shop software,
+  named in quest 30 in both languages, offstage and never seen. Eight of nineteen crew personas
+  already share a name with a shipped NPC, because they were named *after* the cast.
+  **So the cameo is the cousin, and he was always ours.** He takes a tile at the Calle Dos trolley
+  stop beside Doña Meche's cart — ambient, chat only, four lines EN+ES, no quest and no ❗: the man
+  who sells dashboards, riding, because his own car is in his cousin's bay. He wears Don Tacho's
+  exact skin value and the opposite clothes, so the family reads at ten tiles and the silhouette —
+  the only tie on Calle Dos — carries the cold read alone.
+  **What it refuses, and this is the load-bearing part: he never mentions the sale.** Ambient chat
+  has no state and quest 30 has four endings, so a Rigo who mentions it becomes a permanent
+  advertisement for a decision the player may have refused to his face. The player who bought the
+  board and the player who said no meet the same man. He talks about the family, the ride and the
+  bread.
+  **The cab is unchanged.** The driver keeps no name, no line, no ❗ and no face, for the reason that
+  was never about a name: he is the only person in this city who would have had to have been north.
+  And the tranviario's forty-one years stay on the wall that records how we work.
+  **A cameo that pays off a line already in the game costs Meridian nothing. One invented to nod at
+  us would have cost it a person.**
 
 **Dead text, flagged so it is not resurrected stale:** `vmTitle` / `vmHQ` / `vmSt` /
 `vmLc` / `vmSite0` / `vmSite2` / `vmPlots` / `vmHere` in `content/meridian/strings.js`

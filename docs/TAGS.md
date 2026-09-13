@@ -478,3 +478,29 @@ amount of asking a second pack would ever have surfaced, because the town declar
 at all**, and *silence is not a pass.* A tag the town never declares has not been tested by the town;
 it has been skipped by it. Say **untested**, not *travels*.
 
+
+---
+
+## Leak register · near-miss, 2026-09-13 — **a crew persona, caught at plan time**
+
+**Proposed:** make Meridian's tram driver *Rigo the tranviario* — the `changarrito` crew persona,
+forty-one years on the trolleys, nine as line inspector.
+
+**Refused before a file was touched**, by Nacho, on the rule in `CLAUDE.md`: Meridian's content is
+never edited for another world's sake. **Never written. Zero occurrences in `engine/`; four in
+`content/meridian/`, all of them Don Tacho's cousin, who is a different man and nine days older.**
+
+**Logged here and NOT in `docs/QA-PASS.md`.** That file's escape register is for what reached the
+owner; this reached nobody. Putting a near-miss in a register of escapes is a false entry, and a
+register that cries wolf stops being read.
+
+> **The rule this near-miss actually establishes, and it is the useful part:
+> THE NAME IS NOT THE LEAK. A BIOGRAPHY IS.**
+> Eight of the nineteen crew personas share a name with a shipped Meridian NPC — *because they were
+> named after the cast*, not the reverse. Name overlap between the crew and the city is the house
+> pattern. What may never cross is a persona's **history**: Rigo's forty-one years, Melo's bicycle,
+> Chema's negatives. Those belong on the wall that records how we work.
+>
+> **Check before you call one a leak:** `grep -rnw "<Name>" content/ engine/` — word-boundary and
+> case-sensitive. `grep -i` on a short name matches inside other words; the first run of this very
+> check was finding **"marigold"**. See `docs/POSTMORTEM.md` §11½.
