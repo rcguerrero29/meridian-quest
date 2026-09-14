@@ -22,32 +22,33 @@ touched `engine/`, so `mq-v158` and `sw.js` did not move (`test/bump.js` confirm
 | **The wall, iteration 5** | Six panels (Beto, Zeni, Chuy, Yaz, Melo, Lupe); `by:"beto"` used on a real panel for the first time, which opened a second bay — fixed; `murBody` width follows height (was 5px at any height); three panels repainted at Pili's word, words untouched |
 | **Docs** | roster of nineteen; counts agree with the files; `OPEN.md` merged and pointing at `BOUNDARY.md`; this file is one block, history in `docs/NEXT-SESSION-ARCHIVE.md`; `CREW-MODE.md` has "Where the switch stands" and "What running many agents teaches" |
 
-### IN FLIGHT when this block was written (2026-09-13, 21:40 UTC) — pick these up first
+### What the design run settled (2026-09-14, 03:00 UTC) — read these before the queue
+
+- **The tram livery** → `docs/ARCH-LOG.md` **A14**: the car has one colour, the band is missing from the tram, the paint goes on after A13's parts exist; the seam is the wardrobe's shape; three named cars, unlock at quest 28, picker in the gear menu with Tacho as a second door. **Two questions are his** (whose car; does the season repaint it).
+- **Two storeys** → `docs/rooms/2026-09-13-two-storeys-with-a-mural.md`: the mural already grows upward in the document; a taller building takes the painting away in 3D; if the street, Meridian x19–x23 first, after the sill sprite's height scales with the wall. **One question is his** (taller wall in the document, or taller building on the street).
+- **The skulls and the rail** → rows 7 and 8 of the queue below, red first.
+- **Six persona proposals** from that run are in `docs/crew/FLIGHT-NOTES.md` iteration 6 with verdicts; **six mural panels** are in the raw file and not yet painted — the next sitting paints them (return visits for Beto, Rigo, Pili, Tavo; Cuca's and Don Güero's are seconds too).
+
+### IN FLIGHT when this block was written (2026-09-14, 03:00 UTC) — pick these up first
 
 Four runs were launched after the rate limit reset, all advisers, mode off, one pen. Their returns
 land as JSON under `/tmp/claude-0/…/tasks/<id>.output` on the box that ran them; on any other box
 the work is re-run from the briefs, which are in the workflow scripts committed nowhere — so the
 substance of each brief is in `docs/ASKS.md` (the seven rows of 2026-09-13, late) and below.
 
-1. **The agents' post-mortem, resumed** (`w1vrudft1` → resumed as `wzamewbzl`, run `wf_29e063ac-762`).
-   Six lessons in the register's house style, then **Chuy writes `docs/POSTMORTEM.md` §13 and the
-   documents the lessons name, directly, `docs/` only.** Zeni's part is already in §13. When it lands:
-   `git status`, read §13, run `node test/town.smoke.js`, commit with explicit paths.
-2. **Chava at the wall, cold** (`a2c2ad27e579976b8`). His report, a persona proposal (ledger row),
-   a panel (ledger line). The mural is otherwise verified — see "The wall" above.
-3. **The design run** (`wz1ajjvdd`, run `wf_fa62f12f-d01`): Beto the tram livery seam (a wardrobe
-   for the car, chosen at Taller Herrera), Rigo what a real car may carry, Pili the skulls (fifth
-   report — not a size) and the livery at five pixels, Tavo whether it is worth a player's attention,
-   Cuca two storeys with a mural upstairs and the one-sided rail as a class, Don Güero the parcel,
-   Chema the skulls measured. **Outputs are designs: file them in `docs/ARCH-LOG.md` (a new A14 for
-   the livery), `docs/rooms/`, `docs/3D-LOG.md`, and the skulls fix goes through `/crew-fix` red
-   first.** Nothing from this run is built until the owner reads it.
-4. **The healthy-eating game** (`wasj27qri`, run `wf_4ca511c9-170`): four sourced research sweeps
-   → seven designers (Mari, Tavo, Nacho, Pili, Beto, Paty, Toño) → **Chuy writes
-   `docs/research/2026-09-13-healthy-eating-game.md`, a plan file named from Mari's title, a rule in
-   `docs/GENRE-RULES.md`, and a row in `docs/OPEN.md` §1.** Then the owner's ask is **high-fidelity
-   mocks** of the surfaces Pili names — make them with the `design` skill (a design canvas artifact),
-   and render in the real engine whatever the reader can already show. No build.
+1. **The agents' post-mortem — done except the document updates.** Six lessons are in
+   `docs/POSTMORTEM.md` §13 (Chuy wrote it before the limit); their DOCUMENTS TO UPDATE lists are in
+   `docs/crew/POSTMORTEM-2026-09-13-lessons-raw.md`, and **a fresh Chuy pass (`a1b75e1abe909fe95`) was
+   applying them, `docs/` only.** When it lands: `git status`, read the diff, run `node test/town.smoke.js`,
+   commit with explicit paths.
+2. **Chava at the wall, cold** (`a258b45ddfc859a74`, third attempt — two were cut off by the limit).
+3. **Chema, the skulls measured** (design run resumed as `wcodhipdc`): his numbers go into
+   `docs/3D-LOG.md` and beside queue row 7.
+4. **The healthy-eating game** (resumed as `w720r0ok9`): the four research sweeps are filed raw in
+   `docs/research/2026-09-13-healthy-eating-game.md`; the seven designers and Chuy's consolidation
+   (a plan file named from Mari's title, a rule in `docs/GENRE-RULES.md`, a row in `docs/OPEN.md` §1)
+   were re-running. **Then the mocks**: the `design` skill for the surfaces Pili names, and the real
+   engine for whatever the reader can already show. No build.
 
 **The owner also asked** (all in `docs/ASKS.md`): a security triple-check — done, in the reply of that
 hour: R10 clean, the town bound to `127.0.0.1`, CSPs pinned, workflows read-only, no lockfile so
@@ -150,6 +151,8 @@ two joined?**
 | 4 | **#153 — quests have no names, only array positions** | *the largest single blocker to a template* |
 | 5 | **#155/#156 — the `ENDLESS` split** and its landmine: an endless pack with 2+ districts is silently locked in district one | one sitting each |
 | 6 | **#161 — the comfort pass at fullscreen** | the one row in `QA-PASS.md` nobody has ever run |
+| 7 | **The skulls, fifth report — not a size** (Pili, `docs/meetings/2026-09-13-la-cuadrilla-disena.md`): the sweet `#F6F2E8` and the ledge `#F7F2E2` differ by 0.4 of 255, so skull and shelf are one pale mass, and eight identical marks in a row read as cornice. **The one change: redraw `drawCalaverita` with sockets a third of the face each, dark** (ours are 2 × 2 in 8 × 8), fold the halo into the drawing; five call sites inherit it. **Red first:** a guard that counts dark socket runs on the scanline at 35 % of the projected sprite's height (≥ 2), red on `main` today. Then a cold read. Chema's measurement was still running when this was written | half a day |
+| 8 | **The one-sided rail — it is the `hq` climbing flight, not the loft** (Cuca): the stair mass walls the north side and row 15 has nothing. The class is *a run whose two long sides are treated differently*, with three homes (the map; the 3D build's chained ternary that gives a rail tile with wells on two sides one panel; front-camera fence posts tested in X only). **Guard G-RAIL-1 is red on unchanged code in both packs** — write it first. The fix: `◺` on `hq` row 15 x11–14 **and wall x15–18**, or four tiles are orphaned. Don Güero owns row 15 losing four tiles in both games | one sitting |
 
 ## Three things about working with this owner
 

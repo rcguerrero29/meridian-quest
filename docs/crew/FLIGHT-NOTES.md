@@ -52,6 +52,12 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 29 | `pili` | Visible, legible and meaningful are three different measurements, and only the third is hers | **APPLIED 2026-09-13** — the sash passed the first two and read as honour; the hard hat moved the meaning to the outline |
 | 30 | `melo` | A count instead of an identity — when a guard counts, ask what a count of one would let through | **APPLIED 2026-09-13** — the persona guard now reads the file's name against the person it hands the model; his other four plants that got past are closed the same hour |
 | 31 | `lupe` | Look at a screenshot FIRST, then at the end — no car on the rollers, no reading | **APPLIED 2026-09-13** — twenty-eight rows measured on a canvas with no layout box; the picture caught it three hours later |
+| 32 | `tavo` | His own file quotes `TRO_SPEED` 3.4 and "18% slower than walking"; it is 6.0 and the tram is faster than legs — replace the sentence, grep the identifier | **DEFERRED, not refused** — a factual correction to apply in the next sitting from the raw file; the panel that carries the wrong number stays up, by the wall's rule |
+| 33 | `rigo` | Paint is two colours and a rule, and the rule is not taste: a dark panel below the waist and a light band round the windows, never two mid-tones | **DEFERRED, not refused** — apply from the raw file; it is A14's value rule in his words |
+| 34 | `pili` | Check the object against the thing it STANDS ON, not only against the wall behind it — the sweet and the ledge differ by 0.4 of 255 | **DEFERRED, not refused** — apply from the raw file with the skulls sitting |
+| 35 | `cuca` | Identify the room from the picture, not from the ticket; and know which cameras draw art at all | **DEFERRED, not refused** — apply from the raw file with the rail sitting |
+| 36 | `beto` | (his post-flight names the edit; see the raw file) | **DEFERRED, not refused** — read and decide in the next sitting |
+| 37 | `don-guero` | (his post-flight names the edit; see the raw file) | **DEFERRED, not refused** — read and decide in the next sitting |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -89,6 +95,21 @@ mechanism has a leak. Either way it should be written down next to the proposal.
 writing, here*. The session that wrote that sentence then closed the run without doing it. The reason
 is ordinary and is the whole point: **an un-applied proposal looks exactly like a proposal that was
 considered and declined, and both look like nothing at all.** Hence the table above.
+
+---
+
+# ITERATION 6 — 2026-09-13/14 — the design run (the tram livery, two storeys, the skulls, the rail)
+
+*Seven advisers, mode off; six returned before the rate limit (Chema re-ran after it). Their full
+pre-flights, post-flights, proposed persona edits and mural panels are verbatim in
+`docs/meetings/2026-09-13-la-cuadrilla-disena.md` — not copied here, because that file IS the record.
+The ledger rows below are the verdicts, which is the part that must not leak.*
+
+**What the run itself proved.** Three of six found the same fault independently and none had been
+asked for it: the tram is one colour (Rigo by luminance, Pili by delivered pixels, Beto by counting
+the photograph's parts against the code). Cuca identified the room from the picture and found the
+ticket named the wrong staircase. Tavo checked his own last note before reusing it and found the
+number he had painted on the wall was wrong the same evening he painted it — and left the panel up.
 
 ---
 

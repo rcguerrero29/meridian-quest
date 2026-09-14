@@ -787,3 +787,42 @@ version bump in both packs. It is two lines and it goes first.)*
 
 **Five decisions, and four of the five say "less".** Worth noticing: every one of them makes the build
 smaller than the version I had planned.
+
+## A14 · The tram livery — a wardrobe for the car, chosen at the mechanic shop · 2026-09-13
+**Status: designed, not built, and two questions are the owner's.** Raw returns: `docs/meetings/2026-09-13-la-cuadrilla-disena.md` (Beto, Rigo, Pili, Tavo). The owner's words: *"lets fix the design of the trolley further. give it customization abilities, maybe at the mechanic shop for meridian and figure out how to tie that into our engine."* — with a photograph of a heritage car: maroon below, a cream band around the windows, brass lamps, a pole.
+
+### The finding that reorders the job (Rigo, Pili, Beto — independently)
+**The car has one colour.** Body `#B0563A` and "trim" `#8E4230` are the same hue, about Δ23 of 255 in luminance — invisible at the 64 × 32 px the car ships at. His photograph's maroon-to-cream is Δ123. **The band was never missing from the menu; it is missing from the tram.** Of the seven things in the photograph the car has two, and the two draws have already drifted (a gold bar only in 2D, two wheels in 2D and four in 3D, end glazing only in 3D, two wheel colours). A livery table with keys nobody reads is the "loud word" fault the engine already guards against one screen away. **The paint goes on after the parts exist** — and the parts are A13's build order, none of which is built.
+
+### The seam (Beto) — the wardrobe's shape, exactly
+- **RULE, engine:** the car's colours come from one table and every camera reads it (`troCol`), with the engine's default byte-identical per camera to today (two wheel keys, because they differ today). `save()` gains `tl`; `sanitizeSave` gains a nullable livery, null meaning the default, so an old save and a `#save=` link from before the feature render as today's car. Enum keys are enforced in the draw, not the sanitiser (the house pattern).
+- **CHOICE, pack:** `TROLOOK` in `config.js`, shaped like `WEAR`: `def`, the option lists, and **`badge` as a painter, never a string** — the letters MQT were moved out of the engine on 2026-09-04 for breaking the portability law, and a text field is also how you get "Car 2".
+- **Unlock like the wardrobe:** `GROWTH.liveryQuest`, `GROWTH.liveryNpc`, `T().trHint`, `T().trUnlockToast`, attempt-gated; the engine never learns the word *taller*. Three NPCs owning a panel (barber, wardrobe, livery) is where the hardcoded chain earns a `PANELS` table — the one place this job may touch code A13 did not send it to.
+- **The gauge:** `typeof`-guarded, listed as optional in `docs/NEW-WORLD.md`; no check may fail a pack for having no tram; no new *required* `UI` key.
+- **What breaks in six months:** the 3D car is built once under `if(!T3.tram)` and **`t3Invalidate` cannot reach it** — a runtime repaint needs material handles kept on `T3`. The ride. The depth pass that is not built.
+
+### What the menu may carry (Rigo), and what reads at five pixels (Pili)
+| Option | Reads at 64 × 32? | Note |
+|---|---|---|
+| **Body panel** — the dark below the waist | yes, the largest field | must stay dark; a pale body on a pale road is a hole |
+| **The band** — the light colour around the windows, full length | **yes, the strongest mark available** | a value step ≥ 100 running the whole length is why every real tram has a waistline |
+| **Roof colour** | yes, as the band's top edge | our camera looks down; the roof is one of the largest surfaces a player sees |
+| Route board / destination blind | as a lit rectangle, never as letters | **not "BARRIO NORTE" until the track is laid** (`docs/STORY.md`) |
+| Gold lining, scrollwork, lamp rims, fender, doors, a second body tone within Δ40 | **invisible** | the last is what ships today |
+**Structure is never on the menu:** the pole, the fender, the doors and where they are, the bogie (wheel size is a gear ratio), length (the safety envelope), the number of cabs, the driver beyond A13's two signed pieces. **The menu must refuse:** a second cab as ornament, a face, a fleet number, **painting the signal lamp** (red *I stopped for you*, amber *doors open*, white *the bell* — the only sentence this car can say), removing the fender or the pole.
+
+**The one rule that makes customisation safe (Pili):** a livery picks **hues, never the value structure** — the engine enforces `|luma(band) − luma(body)| ≥ 90` and `luma(roof) ≤ luma(body)`; the pack and the player pick which cream and which dark. **The one default livery, from colours the project already owns:** body `#B0563A`, roof and skirt `#8E4230`, and a continuous cream band `#F2E8D8` (the bakery's cream) at window height, full length, the glazing inside it.
+
+**The one thing the car lacks (Rigo):** the **trolley pole** — about 14 px of ink, a diagonal (the rarest shape in this game, it reads before the body does), which *trails* away from the direction of travel and so answers the double-ended problem without a face or a number. The mount is already drawn (an 8 × 2 gold mark at roof centre) and nothing rises from it. A pole needs a wire; that is Chema's question.
+
+### Is it worth a player's attention (Tavo)
+Yes — but not the version asked for, and not yet. **Three named cars, not swatches** (the owner sent a scheme, not a colour). **Unlock at quest 28, "The sound"** — Tacho's own, the trolley is in its first line, fifth of eight so the reward lands while the district is still open; not 31 (already ends on a cosmetic), not 24 (Tacho does not trust you yet). **The picker lives in the gear menu, with Tacho as a second door** — making the player walk to the taller to change it is R9 busywork. No paint bay, no tram entering the shop, no unlock ladder, no name field. A13 answer 3 is untouched: the livery is chosen off the ride and observed on it. **If only one tram ticket fits this week, the second stop outranks the livery.**
+
+### The build order this produces
+1. A13 items 1–3 (the depth pass, the aperture rule, the near side) — a livery on the car we draw today is lipstick on five `fillRect`s.
+2. In the sitting that draws the near side: the band and the pole as parts; one `LIVERY` table both draws read; the value rule; the default above.
+3. Then the seam: `TROLOOK`, `tl` in the save, the unlock at 28, the panel from the gear menu and from Tacho. One sitting on top of 2.
+
+### The owner's, before anything is built
+1. **Whose car is it?** (a) **A commission** — you did the work for Don Tacho and the line, the repaint is the payment, chosen once and kept; the shop is the fiction and the picker is in the gear menu (Tavo and Rigo both recommend this). (b) **A settings screen with swatches** — cheaper, re-picked eleven times in the first minute and never again. (c) **Seeing the tram in the shop** — a bay, a new room, and it fights *never nonsense*: the car cannot leave its rails.
+2. **Does the season repaint the tram?** Día de Muertos may *dress* the world; a car in marigold is dressing or rebuilding depending on who you ask (Beto's question; both sides in the raw file).
