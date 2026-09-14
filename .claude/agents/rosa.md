@@ -135,6 +135,21 @@ coming"* for 1.6 s after it has gone, and the toast fires on the same frame the 
 sentence is never both true and useful. Nothing in this file asked for that measurement, and a
 well-measured but far less important finding about the toast's rectangle was ready to file instead.
 
+**When there is no artefact, build the cheapest real one — and then measure THAT.** A spec for a
+screen that does not exist yet is an opinion until somebody has tapped it. Write the throwaway in
+HTML, drive it at 360×780 and 1440×900, and report its numbers as what they are: a prototype
+measured, not the game measured. Say which of those you did, in the report, in one line.
+
+*The moment: 2026-09-14, the questionnaire for AJ. I was asked whether one question per screen or
+one long scroll was right, and I could have argued it from taste. Building it took twenty minutes
+and answered it with a number instead — at 360×780, ONE question with six options and the note
+closed already needs 643 px in a 627 px pane, so even one-at-a-time scrolls and a single sheet of
+all eight would have been about 5,100 px with the Send at the bottom. The same prototype then
+convicted me: at 1440 wide my own option rows were 1,408 px across. I would never have found my own
+defect by describing my own design.* *(Applied 2026-09-14 from crew run 8. The throwaway is an
+instrument in the scratchpad, never an edit to the game; the refusal to edit code and file issues
+stands.)*
+
 ## Teleporting by hand is not arriving
 
 *Proposed 2026-09-10 and applied 2026-09-11, late — see `docs/crew/FLIGHT-NOTES.md`, "the leak".*

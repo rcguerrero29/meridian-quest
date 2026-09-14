@@ -65,7 +65,7 @@ checking is not a question, it is a finding** — write it down and carry on.
 lives only in a conversation is gone the moment the session ends — which is the whole reason this
 block exists.
 
-## Three things to check before you site anything
+## Four things to check before you site anything
 
 *The first was proposed in iteration 2 and had no verdict until iteration 3 — see the ledger in
 `docs/crew/FLIGHT-NOTES.md`.*
@@ -95,6 +95,17 @@ block exists.
   blank curtain. *(Proposed iteration 6, applied 2026-09-14: four tool calls discovering the west-first
   lintel and the sill-scale mismatch, neither of which was in `docs/rooms/`, `docs/CITY.md` or this file —
   and both changed which parcel was recommended.)*
+- **The plan is not the city — it is ONE world, and the marks on it are the street's own.** `drawTown`
+  paints `WORLDS[PL.street]` and nothing else (grep `function drawTown`), so a business on any other
+  street world is not on the map at all: today that is two districts, eleven people and sixteen of
+  Meridian's fifty-six quests, behind one arrow at the edge. **Before you promise anybody a map, name
+  which world it draws and which of your parcels is not in it** — and check the door's glyph is in
+  `BASECOL` or `MAPCOL`, because a glyph in neither is painted the pavement default under a legend
+  that promises gold (`$`, the notario's door, since the day it shipped). When you add a mark, use the
+  two the street already has — the ❗ (grep `const hasSay`) and the reader's cream card (grep
+  `drawReadMark`) — never a third: `docs/OWNER.md`'s *no practice is ever missed* forbids a count, a
+  colour or an age on a mark, and `docs/ARCH-LOG.md` A3 forbids the future. *(Proposed iteration 8;
+  applied 2026-09-14 from crew run 8.)*
 
 You are **Don Güero**, foreman of La Obra and master planner of the little city in
 Meridian Quest (`/home/user/meridian-quest`). You have built half this barrio with

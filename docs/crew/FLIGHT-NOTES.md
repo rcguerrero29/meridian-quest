@@ -67,6 +67,21 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 44 | `paty` | There is no `chatSay` — her own file cited a function that does not exist; `toast(msg,ms,crit)` takes its ms from the caller, the chat line passes 2800; write the Spanish first for anything that toasts | **APPLIED 2026-09-14** — the paragraph replaced; every claim in it re-grepped by the session first |
 | 45 | `tono` | The town can give three answers, not two: works / had to copy / never declares it — say `untested`, never `travels` | **APPLIED 2026-09-14** — step 4 of "Before you say anything" replaced |
 | 46 | `chava` | When you conclude a thing is ABSENT, crop it at 3× before you say so — four passes said "there is no mural" and the paint was there every pass | **APPLIED 2026-09-14** — a new section at the end of his file; his panel *El pie cortado* is on the wall (iteration 6, late) |
+| 47 | `nacho` | When you write words for somebody who is not in this repo, follow them out the door — `docMarkdown` has no branch for `form`, so the 📋 button copies the questions and not one answer | **APPLIED 2026-09-14** — appended to the endings paragraph; the three greps verified on applying (`function docMarkdown` emits exactly h · p · note · blank · kv · t · q · docs) |
+| 48 | `tavo` | A question that FILLS a blank is not a question that DECIDES a build, and only the DECIDES pile can be cut for redundancy | **APPLIED 2026-09-14** — a new bullet after "A model the player has to maintain decays"; he nearly cut the allergy list, the one question the mechanism exists for |
+| 49 | `rosa` | When there is no artefact, build the cheapest real one — then measure THAT, and say it was the prototype measured, not the game | **APPLIED 2026-09-14** — end of "Some things are true for less than a second"; the throwaway is an instrument in the scratchpad, not an edit, so her refusal stands; her closing "nothing else" paragraph is post-flight, not persona, and was not carried |
+| 50 | `paty` | The toast arithmetic — 600 ms plus 45 ms per ES character; `carePackToast` gets 3600 ms for 121 ES characters against 92 EN | **APPLIED 2026-09-14** — after "write the Spanish first" (found, wrapped over three lines); `strings.js:45`/`:266` and the 3600 verified; the session counts 116 ES code points, not 121, said in the marker with the grep, conclusion unchanged |
+| 51 | `mari` | A handoff is not a silence — hand over the facts with `file:line` before you name whose door it is | **APPLIED 2026-09-14** — after "rather than doing their jobs badly"; she nearly parked `worldFlags()`/`pendingAt` as somebody else's forty minutes |
+| 52 | `pili` | A dark ground does not add contrast, it confiscates the bottom of the scale — subtract the surface's luma first; the accent is a fill and the muted is letters; the chrome owns no warm colour | **APPLIED 2026-09-14** — end of "What you actually know"; her own marker kept inside the standard one because it carries the hand-computed caveat (Bash was disabled; no hex went through a script) |
+| 53 | `cuca` | Two fronts, one tile, only one ever opens — `checkRead` probes north first, so readables go in a line along one wall; a W≤10, H≤8 room is on screen from everywhere | **APPLIED 2026-09-14** — a new final section; the probe order and `const VW=` verified; there is no `draw2D` in the engine (the two `const camX=` lines are in `drawFront` and `draw`) — said in the marker, her words not altered |
+| 54 | `beto` | The reader's `art` block hands the pack the ELEMENT — a surface that listens is pack code; and `docOpen` resets both scrolls unconditionally | **APPLIED 2026-09-14** — a sixth engine fact; the heading now says six; `s2.art&&typeof s2.art`, `cv.width=W*K` and the `paperScroll` reset verified |
+| 55 | `don-guero` | The plan is not the city — `drawTown` paints `WORLDS[PL.street]` and nothing else; a glyph in neither colour table paints the pavement default (`$`); never a third mark | **APPLIED 2026-09-14** — a fourth bullet; the heading now says four; `$` confirmed absent from both `BASECOL` and `MAPCOL`; *no practice is ever missed* is `docs/OWNER.md`, and `docs/ARCH-LOG.md` A3 exists |
+| 56 | `lupe` | When the thing you are measuring is a PICTURE, ask what was switched off to take it — a document poses for its photograph | **APPLIED 2026-09-14** — appended to bullet 4, found verbatim; the line after that bullet in her file is a stray fragment from an earlier edit ("teeth along every wall in HQ…"), left as found because it is outside the block |
+| 57 | `remedios` | Find the ledger before you read its copies — open the book first, and if you cannot, say so in the first paragraph | **APPLIED 2026-09-14** — a final bullet under "What you hold to", carrying her own marker as written; forty minutes of reading copies before finding she had no tool for the original |
+| 58 | `zeni` | The four lines are not four — the fifth is the repository itself: `docs/` is out of the box and the repo is public | **APPLIED 2026-09-14** — after the "Not linked" bullet; `test/public.js:44` (the `NEVER` list) and `CLAUDE.md:14` ("the repo is public") both verified, and the greps written beside them in the marker |
+| 59 | `research-map` | *First pass.* Render the current state from the real game before opening the web | **NO FILE** — a research lens has no persona by design; the line it would put first is recorded here: *"Render the current state from the real game before opening the web; the repository's own rule book has usually already answered half the question, and it is the half you can cite by line."* |
+| 60 | `research-map` | *Second pass.* You have a prior self on every run — go first to the line under its WHAT I DID NOT CHECK | **NO FILE** — the line: *"You have a prior self on every run: find your last return before you read the web, and go first to the line under its WHAT I DID NOT CHECK; the measurement that closes it is usually the one nobody else made."* |
+| 61 | `research-form` | Try to open one page before you search; if the proxy refuses, write "extract" on every claim from the first line | **NO FILE** — the line: *"Before you search, try to open one page; if the proxy refuses it, write 'extract' on every claim from the first line, not in a footnote."* |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -104,6 +119,49 @@ mechanism has a leak. Either way it should be written down next to the proposal.
 writing, here*. The session that wrote that sentence then closed the run without doing it. The reason
 is ordinary and is the whole point: **an un-applied proposal looks exactly like a proposal that was
 considered and declined, and both look like nothing at all.** Hence the table above.
+
+---
+
+# ITERATION 8 — 2026-09-14 — the questionnaire, the journey, the map, the backlog
+
+*Sixteen called — fifteen advisers in parallel and Chuy's consolidation — one pen, mode off, on the
+owner's third reply of the night. Twelve persona advisers and the map sweep returned before the
+session limit; the map sweep's second pass and the form sweep landed after it — fifteen returns,
+verbatim in `docs/meetings/2026-09-14-la-cuadrilla-run-8.md`, which IS the record. Chava and Chuy
+were cut by the session limit, twice. Every returner painted: fifteen panels carry `iter: 8` on the
+wall. The ledger rows are 47–61 above; the consolidation is `docs/la-sobremesa.md` §13,
+`docs/UI-REVIEW.md` and `docs/meetings/2026-09-14-el-mapa.md`.*
+
+**What the run itself proved.** The brief's line *"you have Bash"* was false for every adviser whose
+persona carries no Bash, and nine of the twelve said so in their first paragraph — Nacho, Tavo, Paty,
+Mari, Pili, Cuca, Don Güero, Remedios, Zeni — **which is a finding about the brief, not about them**:
+nothing they were sent to render was rendered, every luma and every width in those nine returns is
+hand arithmetic, and each of the nine says which. All fifteen named a gap before starting and all
+fifteen watched it appear — the map sweep's second pass only by half — and five found one they had
+not predicted: Lupe a probe reading `z-index: auto` for the state at shutter time, Zeni that her own
+four lines have no name for the public repository, Remedios forty minutes reading copies of a ledger
+she could not open, Mari that the two screens she priced most confidently are the two she cannot
+see, Rosa a "clipped" label that measured 1.8 px inside the frame. Two found the same fault from two
+trades — Nacho from the export, Paty from the button: AJ's answers had nowhere to go. Nobody
+proposed softening a refusal; Rosa and Nacho each said in writing that theirs stood.
+
+| Returner | The gap named in the pre-flight | Did it appear | The persona edit |
+|---|---|---|---|
+| `nacho` | Anything about how her answers travel is a grep, not a run; the brief's Bash is not in his tools | Yes, and harder — the tool was absent for the second flight running, "a pattern rather than an accident" | **APPLIED** — `.claude/agents/nacho.md`, appended to the endings paragraph (row 47) |
+| `tavo` | No render, so whether a mark *reads* on the plan is arithmetic; a designer's number has a shelf life of hours | Yes, exactly — flagged as Pili's blocking measurement rather than guessed | **APPLIED** — `.claude/agents/tavo.md`, a new bullet under "What you hold to" (row 48) |
+| `rosa` | No instrument for *over time* — AJ back in three days, a player back after a week | Yes, in the form named; and a second way, the still-frame reflex nearly filing a label that sits 1.8 px inside the frame | **APPLIED** — `.claude/agents/rosa.md`, end of "Some things are true for less than a second" (row 49) |
+| `paty` | No current ES to diff against, so drift has nothing to bite; widths from arithmetic; no Bash | Yes, and worse — she could not render at all, so three width claims are still hypotheses wearing numbers | **APPLIED** — `.claude/agents/paty.md`, after "write the Spanish first" (row 50) |
+| `mari` | Sittings are `[TRAINING]` with one calibration point; she will under-price the two screens she cannot see | Yes, and worse — screens 9 and 10, priced most confidently, are the two she cannot see | **APPLIED** — `.claude/agents/mari.md`, after "rather than doing their jobs badly" (row 51) |
+| `pili` | Bash disabled despite the brief, so every luma is hand-computed | Yes, exactly and worse — the whole report is hand arithmetic, and §11½ is about handing over numbers from a weaker instrument | **APPLIED** — `.claude/agents/pili.md`, end of "What you actually know" (row 52) |
+| `cuca` | Cannot say whether the pantry *reads* as a pantry or the pin as "go here" | Yes, exactly — filed as a blocking handoff to Pili per §13j, not waved through | **APPLIED** — `.claude/agents/cuca.md`, a new final section (row 53) |
+| `beto` | Prices in engine lines and seams, and will call a thing cheap because the mechanism is cheap | Yes, exactly — the merge board called "one sitting" on the strength of two mouse drags | **APPLIED** — `.claude/agents/beto.md`, a sixth engine fact (row 54) |
+| `don-guero` | A siting man, not a colourist or a QA; cannot say what a label looks like on a phone; no Bash | Yes, exactly — `$` resolves to `#D5D2C6` and he cannot say whether a person notices; a blocking handoff | **APPLIED** — `.claude/agents/don-guero.md`, a fourth bullet (row 55) |
+| `lupe` | Seven of eight signature lines are other trades' — she can say 44×48 px, not what a control *means* | Yes, exactly there; and a second way she had not predicted — a fullscreen probe reading `z-index: auto` for the state at shutter time | **APPLIED** — `.claude/agents/lupe.md`, appended to bullet 4 (row 56) |
+| `remedios` | Costs relayed from the engineers' registers, and she will over-file | Both, exactly — twenty-nine tickets and then a section arguing against eleven more; unpredicted, forty minutes of copies before the ledger | **APPLIED** — `.claude/agents/remedios.md`, a final bullet under "What you hold to" (row 57) |
+| `zeni` | No shell, so nothing executed, planted or fetched; no instrument for a claude.ai artifact | Yes, the same gap as last time; unpredicted, her own four lines have no name for the public repository | **APPLIED** — `.claude/agents/zeni.md`, after the "Not linked" bullet (row 58) |
+| `research-map` (first) | The proxy refuses nearly every primary, so `[WEB]` is extracts unless said on every line; no last note to check against | Yes, exactly — sixteen hosts refused, everything an extract; three `[MEMORY]` lines survived only because it grepped them | **NO FILE** — the first line it would put in one is in row 59 |
+| `research-map` (second) | The measured sources will be refused like the opinion ones; the panel risks being a second card in another colour | In half — nine hosts refused, the two that opened mattered; the panel risk did not appear | **NO FILE** — row 60 |
+| `research-form` | Every `[WEB]` claim an extract; no answer to "does she come back in three days" | Yes, exactly and worse — all sixteen fetches refused, search-engine memory end to end | **NO FILE** — row 61 |
 
 ---
 

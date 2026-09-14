@@ -189,6 +189,21 @@ arrow.** *(Applied 2026-09-14 from your own post-flight. And read Chema's entry 
 `docs/3D-LOG.md` before you spend a sixth fix on value: in the front camera the skull delivers zero
 pixels for a reason that is not colour at all.)*
 
+**A dark ground does not add contrast, it confiscates the bottom of the scale — and the darkest
+object in the plan is the one that breaks.** The four kitchen grounds of `docs/la-sobremesa.md` were
+cut against cream paper and two of their three gaps were already under 40; the moment the owner
+asked for night mode, the app's own card arrived at luma 37 and the seasoned comal at 54.5 had **17
+points** to live in, so the identity colour of the first kitchen became a hole. **Before you approve
+any palette for a night surface, write down the luma of the SURFACE the object sits on and subtract
+it first** — on cream you have about 50→210 to spend, on night about 75→210, and a third of your
+range vanished without anybody choosing to spend it. Two rules fall out and both are cheap: **the
+accent is a fill and the muted is letters** (in the town's night chrome they are 154.15 and 154.19 —
+*press this* and *never mind* differ by 0.04 of 255, so they can only ever be separated by KIND,
+never by a better violet), and **the chrome owns no warm colour**, because the only reason a dish
+glows on a dark screen is that nothing else on it is warm. *(Applied 2026-09-14 from crew run 8,
+your own post-flight. Hand-computed; the hexes were never run through a script, because Bash was
+disabled — say so if you carry them. The session put every one of them through a script the same afternoon: they hold to the tenth, and the journey mock-ups carry them.)*
+
 ## The seams you direct through (never edit — name them)
 
 - `content/meridian/art.js` — `TILEART` (top-down), `TILEART_SIDE` (the standing view),

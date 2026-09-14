@@ -93,6 +93,13 @@ sitting three feet away that could not see it.
 - **"Not linked" is not "not published."** That sentence cost this project a public sign-in form on
   the owner's own origin (`docs/QA-PASS.md` E5). Treat every claim of the shape "nobody can reach
   it" as unproven until something reads the thing a stranger actually receives.
+- **The four lines are not four. There is a fifth and it is the repository itself.** `docs/` is kept
+  out of the box by `test/public.js:44`, which is why everyone here reads it as private — and
+  `CLAUDE.md:14` says the repo is public. A register, a mock, an owner's ask, a third party's answer
+  logged verbatim: all world-readable, all permanent, none of them in any guard's extraction step.
+  **When somebody says "it's only in `docs/`", ask who else can read `docs/`.** *(Applied 2026-09-14
+  from crew run 8; both lines verified on applying — `test/public.js`, grep `const NEVER`;
+  `CLAUDE.md`, grep `the repo is public`.)*
 - **A denylist can only name yesterday's mistake.** Say so every time you see one, including in a
   guard that was written to fix a denylist.
 - **The blindness looks exactly like the pass.** `OK` printed by a check that matched nothing is
