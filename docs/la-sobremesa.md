@@ -845,6 +845,8 @@ stays on the list. He and AJ pick; nobody here does.
 
 ### 12.4 · Follow-up questions, in the order they block
 
+*Answered the same night — §12.6. Kept as the record of what was asked.*
+
 1. **(q1) One pantry, two phones:** is a snapshot sent on the pass (both directions, by hand) enough,
    or do you want it to sync by itself? The second is a new kind of thing for this engine.
 2. **(q2) Send the pantry photos** — each drawer open, the shelf, the fridge, the freezer.
@@ -867,3 +869,54 @@ have/missing on every recipe.** The crew recommended no grading; **the owner wan
 toggle.** The crew's week strip; **the owner wants shifts with no time limit.** Each of these is his
 call and each is recorded as his; the rules the crew wrote (R10, R11, R15–R17) still say what the
 build has to survive, and 12.3 says how.
+
+### 12.6 · The follow-ups, answered — 2026-09-14, late, his second reply
+
+**q1 · One pantry, two phones:** *"it can sync on its own honestly, but while testing we can use
+trolley pass."* So two phases. **Testing:** the Trolley Pass carries the pantry as a snapshot, both
+directions, by hand — that is G1 (§5), built once. **Later:** it syncs by itself, which needs
+somewhere to sync *to*, and this engine has never had one. The honest options: **(a)** a private
+GitHub repository written with a token from each phone — the town's own pattern, a token on the
+device and never in the public shell, R10 unchanged, a few seconds' lag, free; **(b)** a hosted store
+— an account, a key in the shell, and a brand-new edge on `docs/BOUNDARY.md`; **(c)** the household
+lives on his laptop like the town and AJ reads it from there. **Recommended: (a).** *One question
+left:* is a GitHub token on AJ's phone acceptable, or does the household stay on the laptop?
+
+**q2 · The pantry photos:** *"will need to work on this."* Later. Until they arrive, the pantry is
+authored as three drawers with placeholder contents, and re-authored from the photos in one sitting.
+
+**q3 · What a shift pays: "I get leftovers?"** Yes, and it is the best answer anybody has given
+this plan. **A shift pays leftovers.** The dish you cooked goes into the fridge as *el recalentado*
+(§6): tomorrow it is a meal that costs nothing, or it goes into the next shift as the *"mix in"*
+of a recipe pair (#5) — yesterday's beans in today's dish. **This makes the pantry a consequence of
+cooking instead of a chore**, which is exactly how R17's decay is beaten: the model is fed by play,
+not by typing. Nothing is scored; the fridge just fills.
+
+**He asked for best practices for a chill cooking game.** They are `docs/GENRE-RULES.md`, seventeen
+of them from the crew's research; the seven that decide this game: **no clock, ever** (R11, and R4:
+waiting is content, never a wait); **name what replaces the pressure** (R1–R5 — here it is *reading
+a person* and *tactility*); **collection is the decoy** — nothing is locked behind a ladder (R6); **no
+day budget** — nothing that can show a smaller number tomorrow (R10, R15); **the marks go on the
+kitchen, never the eater** (R16); **a maintained model decays** — feed it by play (R17); **attribution
+is a person** — every recipe carries who taught it (R12).
+
+**q4 · Grading: "more recipes?"** So the grade **pays recipe offers**: the good-intentions count
+(R15, up only) is what makes a cook *offer* you the next recipe pair sooner — a gift with a face
+on it. **Never a lock:** by R6 every recipe is always available by asking, and the toggle (his #7)
+turns the offers off, not the recipes. The grade is a rhythm of gifts, not a gate.
+
+**q5 · The two scope lines:** the food game **keeps Meridian's rule** — its restaurants are
+Hispanic-owned businesses, which costs nothing and reads true; the cast of §3 are *tenants*, not
+businesses, and cook whatever they cook, fusions included. No change to that line. The **seasons
+line he accepted** is in `docs/OWNER.md` now, dated and in his words.
+
+**q6 · "merge board?"** Read as *the merge board first*. It is the biggest piece; AJ's question 2 is
+still the tie-break. *One confirming question left:* merge board first, then the making surface?
+
+**q7 · "Two types of games — no timer, we chill and want to just encourage healthy habits."**
+Settled: **both surfaces, no timer anywhere.** Cookingdom's *+30s* is not carried. The making surface's
+"done" rule is coverage, never seconds.
+
+**What is still owed, all of it small:** confirm the merge board goes first; say where the
+household's sync should live (a token on AJ's phone, or the laptop); the pantry photos when ready;
+AJ's eight.

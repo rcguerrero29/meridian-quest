@@ -26,8 +26,10 @@ answers overrule in 12.5. He sent recordings of both games AJ plays, the merge g
 `docs/POSTMORTEM.md` §13p–13t.
 
 **Nothing on the second world is built, and nothing should be until:** AJ answers her eight (1, 2 and
-6 gate the merge board, the making surface and the pantry); the pantry photos arrive; he picks a
-grading shape and answers one-pantry-two-phones. **Then** a crew run turns §12 into a build order —
+6 gate the merge board, the making surface and the pantry); the pantry photos arrive; he confirms the merge board
+goes first and says where the household's sync lives (§12.6 — his seven follow-ups are answered:
+a shift pays leftovers, grading pays recipe offers, no timer anywhere, sync by itself later and the
+pass while testing). **Then** a crew run turns §12 into a build order —
 and every agent on it paints.
 
 **The queue below is unchanged:** row 8 (the rail), 8½, 8¾ (the wall's feet), Pili's socket redraw and

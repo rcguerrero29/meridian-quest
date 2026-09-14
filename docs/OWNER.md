@@ -201,6 +201,11 @@ preference that outlives one phase; cite the date and their words.
   otherwise. Note this is a SECOND palette layer
   from `THEMES`, which is UI chrome only — choosing a UI theme must never repaint the
   barrio.
+- **A season may also declare what it makes AVAILABLE.** *(2026-09-14, owner, on the eating-habits
+  world: "seasons would be fun — especially if you can research san diego trends"; to the scope line
+  proposed for this file, "sounds good".)* Colour and dressing stay exactly as above; a pack may
+  additionally say what is in the market in a given season — chard in March, the kimjang cabbage in
+  November. Availability is content, never a redesign of anything, and Meridian declares none.
 - **Movement is one press, one step — there is no turn-in-place.** *(2026-09-01,
   asked and answered.)* Nothing in the game requires facing: `checkTalk()` and every
   animal interaction use Manhattan distance only. So a Zelda-style turn-first step
