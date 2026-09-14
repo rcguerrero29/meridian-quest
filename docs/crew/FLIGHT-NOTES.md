@@ -58,6 +58,7 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 35 | `cuca` | Identify the room from the picture, not from the ticket; and know which cameras draw art at all | **DEFERRED, not refused** — apply from the raw file with the rail sitting |
 | 36 | `beto` | (his post-flight names the edit; see the raw file) | **DEFERRED, not refused** — read and decide in the next sitting |
 | 37 | `don-guero` | (his post-flight names the edit; see the raw file) | **DEFERRED, not refused** — read and decide in the next sitting |
+| 38 | `chema` | Blank one painter and diff the frame before measuring contrast — it turned "hard to see" into "the front camera delivers zero"; crop one object 8× twice, the whole viewport decided nothing; a Sprite is one quad at its anchor's depth, so a wall-hung billboard's offset is height × pitch, a formula not a constant | **DEFERRED, not refused** — the text is exact in the raw file (`docs/meetings/2026-09-13-la-cuadrilla-disena.md`, his POST-FLIGHT); apply with the other six |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -100,7 +101,7 @@ considered and declined, and both look like nothing at all.** Hence the table ab
 
 # ITERATION 6 — 2026-09-13/14 — the design run (the tram livery, two storeys, the skulls, the rail)
 
-*Seven advisers, mode off; six returned before the rate limit (Chema re-ran after it). Their full
+*Seven advisers, mode off; six returned before the rate limit and Chema after it, re-run from the same brief. Their full
 pre-flights, post-flights, proposed persona edits and mural panels are verbatim in
 `docs/meetings/2026-09-13-la-cuadrilla-disena.md` — not copied here, because that file IS the record.
 The ledger rows below are the verdicts, which is the part that must not leak.*
@@ -110,6 +111,8 @@ asked for it: the tram is one colour (Rigo by luminance, Pili by delivered pixel
 the photograph's parts against the code). Cuca identified the room from the picture and found the
 ticket named the wrong staircase. Tavo checked his own last note before reusing it and found the
 number he had painted on the wall was wrong the same evening he painted it — and left the panel up.
+Chema, sent to measure the skulls' contrast, blanked the one painter instead and found the front
+camera delivers zero of their pixels — a draw-order fault no contrast number could have named.
 
 ---
 

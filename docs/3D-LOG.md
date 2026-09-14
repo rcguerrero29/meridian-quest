@@ -201,3 +201,55 @@ against it is measured against the wrong thing. — *Chema, 2026-09-09*
   the only sign it stopped is a red lamp drawn in **2D only** — `t3Trolley` has no hold state. At 6.0
   the look-ahead gives 433 ms and a 2-tile brake ramp needs 333 ms, so a ramp fits.
 
+### 2026-09-14 · the skulls, measured in all four cameras — and the front camera renders zero
+
+- **Goal served:** a person can always tell what is there. The owner, five reports: the sugar skulls
+  on the sills cannot be found without an arrow.
+- **Conditions:** #vp 528×423 CSS @ dpr2 (1056×846 device; his frame is 1172), season `muertos`
+  forced on, clock pinned 22:00 so every night branch fires, Date.now/performance.now frozen,
+  hero at st (5,2). **Control — render twice, change nothing — 0 changed pixels in all four
+  cameras, every run.** Method: a thing's pixels are the pixels that change when its ONE painter
+  is a no-op. Luminance Rec.709 on sRGB bytes.
+- **Measured before, per skull:** front **0 px**. top 192–241 px, ΔL vs wall +44…+53, Weber
+  0.39–0.50. iso 176–239 px, ΔL +45…+71, Weber 0.36–0.68. 3d **66–193 px** (16×5 device px far,
+  25×9 near), ΔL +106…+139, Weber 1.45–3.04. On screen the flat buffers upscale ×2.72, so
+  top/iso give ≈520–660 screen px a skull and 3D gives 66–193.
+- **Diagnosis 1 — FRONT DRAWS THEM AND PAINTS OVER THEM.** `drawSillBox` is called 8 times a
+  frame and delivers 0 px of sweet, 0 of ledge, 0 of pane, at five positions tested. The fiesta
+  is drawn in the ground pass (`engine.js:1946`), the facade's own tile art runs later in the
+  row-sorted depth pass (`engine.js:1976`). Suppress `TILEDRAW` for those tiles and the whole
+  assembly appears: 992 / 1624 / 1281 px. Only props on SOLID tiles are affected, which is why
+  the papel picado never had this and the sills always did.
+- **Diagnosis 2 — 3D: the pane is three-quarters swallowed by its own wall.** A three.js Sprite is
+  a quad at ONE view-space depth — its anchor's. The anchor is the pane's bottom
+  (`engine3d.js:570`, `center.set(0.5,0.02)`) at `p.y+1.03` (`:572`), so every pixel above it is
+  drawn at the bottom's depth and the nearer wall wins. 21 projected px tall, 5 arrive. The ledge
+  already carries the cure at `p.y+1.08` (`:605`) — which is exactly why the ledge reads.
+- **Measured after (not shipped — advisory run, crew mode off):** front 0 → **1006 px**, ΔL +106,
+  by replaying the sill box after the facade art. 3d 396 → **1743 px (4.4×)** with pane and ledge
+  moved out together +0.09; sweep 0/0.03/0.06/0.09/0.12/0.18/0.25 = 396/832/1301/1743/2066/2112/2083.
+- **Recommendation — OCCLUSION, front camera first.** Both are engine RULES: (a) a prop on a solid
+  tile joins that tile's row in the depth queue — the slot and its comment already exist at
+  `engine.js:1953`; (b) a wall-hung billboard's offset is a function of its own height and the
+  camera's pitch, not a constant tuned for one sprite.
+- **REJECTED — light.** Measured at 12:00 against 22:00: pixel counts 1057/1066 top, 825/856 iso,
+  396/396 3d. **The night wash changes no pixel count anywhere.** It costs top 31% of contrast
+  (Weber 0.78 vs 1.13), costs iso nothing, and in 3D it slightly HELPS (1.10 vs 1.05) because the
+  sill sprites are never added to `T3.tintables` (zero `tintables.push` in engine3d.js:549–611),
+  so the sweet keeps full value while the wall is dimmed by `engine3d.js:834`. Do not chase light.
+- **REJECTED — value / the sweet's palette.** It already measures L 158–184 against walls at
+  46–127, the largest value separation in the frame; headroom to pure white is ≤ +70 L on a shape
+  that is 66 device pixels. This would be the fifth fix of the same kind (POSTMORTEM §1).
+  **One exception, logged not proposed: ISO is a genuine value fault** — Weber 0.11, Michelson
+  0.054, day and night. Second job.
+- **REJECTED — "the ledge is eating the sweet".** Plausible, and false: 396 px with the ledge,
+  396 with `drawSillLedge` blanked. Identical. Do not spend time on it again.
+- **Watch out — `engine/engine.js:1115` is DEAD CODE.** Four functions are declared twice
+  (`drawOfrenda` 1081/1185, `fiestaProps` 1095/1199, `drawPapelRow` 1096/1200, `drawSillLit`
+  1115/1219), byte-identical, on a clean `main`. Planted both ways in a lab outside the repo:
+  magenta in the first copy → 0 px anywhere; magenta in the second → 160 in the bake, 600 on the
+  street. `drawSillLit` is the fifth attempt's own function. A sixth attempt that edits 1115 will
+  watch the street not change.
+- **Watch out — the guard bought for the word "hidden" reads one camera and the wrong object.**
+  `test/smoke.js` (grep `camSet('3d')` near the sill block, and `stone < 3`) counts the LEDGE's
+  stone pixels in 3D only. In the front camera the ledge is at zero too and nothing asks.

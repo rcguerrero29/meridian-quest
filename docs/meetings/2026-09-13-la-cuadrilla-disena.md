@@ -1309,4 +1309,285 @@ art:    (g,W,H)=>{const P=MURPAL;
 
 # chema
 
-*(did not return — the rate limit)*
+## PRE-FLIGHT
+
+Read `docs/3D-LOG.md` end to end (the rejected list first — neither thing I propose below is on it) and `docs/POSTMORTEM.md` §1–§3, then `docs/NEW-WORLD.md` §3⅔/§3⅝ and the code paths for both cameras before touching a measurement. Set up the shot the way the owner had it: `#vp` 528×423 CSS at dpr 2 (1056×846 device — his frame is 1172), season `muertos` forced on because the props do not exist out of season (`SEASONS` at `content/meridian/config.js:130`, and today is 14 Sep), clock pinned to 22:00 so all four night branches fire (`engine/engine.js:807`, `:2131`, `:2152`, `engine/engine3d.js:834`), `Date.now`/`performance.now` frozen, hero at `st (5,2)` — the spot `test/smoke.js` itself uses for sills. **Control first: render twice, change nothing — 0 changed pixels in all four cameras, every run.**
+
+## THE DELIVERABLE
+
+### 1 · The number, four cameras
+
+Method: the sweet's pixels are the pixels that change when `drawCalaverita` is a no-op and *nothing else moves*; same for the ledge (`drawSillLedge`) and the lit pane (`drawSillLit`). Luminance is Rec.709 on sRGB bytes, 0–255. Per skull, in the buffer that camera actually renders:
+
+| camera | buffer | skull px | skull L | ledge L | wall L | ΔL skull−wall | Weber | Michelson |
+|---|---|---|---|---|---|---|---|---|
+| **front** | 640×512 | **0** | — | — | — | — | — | — |
+| top | 640×512 | 192–241 | 158–179 | *no ledge drawn* | 107–127 | **+44 … +53** | 0.39–0.50 | 0.163–0.199 |
+| iso | 640×512 | 176–239 | 170–174 | *no ledge drawn* | 103–125 | +45 … +71 | 0.36–0.68 | 0.153–0.255 |
+| 3d | 1056×920 | **66–193** | 174–184 | 119–123 | 46–73 | **+106 … +139** | 1.45–3.04 | 0.42–0.60 |
+
+Translated to what the eye gets: the flat cameras' 640×512 buffer is stretched ×1.65 to the screen (×2.72 in area), so top/iso deliver **≈520–660 screen pixels** per skull (≈11×13 CSS px). 3D delivers **66–193** (the far ones are a 16×5 device-pixel bbox = **8 × 2.5 CSS px**; the near one 25×9 = 12.5×4.5). Front delivers **nothing**.
+
+### 2 · The front camera renders the skulls and then paints over them — all of them, everywhere
+
+Not a contrast problem. A *zero*. `drawSillBox` is called **8 times** in every front frame and **0 pixels of sweet, 0 of ledge, 0 of lit pane** reach the canvas. Checked at five positions on Calle Dos — `(5,2) (11,2) (20,2) (5,7) (9,7)` — 8 calls, 0 px, control noise 0, at every one.
+
+Cause, planted not reasoned: the fiesta is drawn in the **ground pass** at `engine/engine.js:1946` (`…troDraw2D(…,true);fiestaDraw2D(…,true);`), and the facade's own tile art runs later in the row-sorted depth pass at `engine/engine.js:1976` (`const tf=face?(TILEDRAW[ch]||TILEDRAW[gch]):…`). Suppressing `TILEDRAW["B"]`/`TILEDRAW["Q"]` for exactly those tiles makes the whole assembly appear — **992 px of sweet, 1624 of ledge, 1281 of pane**. This only bites props on *solid* tiles, which is why the papel picado (strung over open rows) has never had the problem and the sills always have.
+
+Crops written to `/tmp/claude-0/-home-user-meridian-quest/0f70be00-7ff9-5c2f-a84c-7edceebcd89f/scratchpad/chema-shots/front-window-y5-shipped.png` and `…-facade-suppressed.png`: shipped, La Cocina's window is a cream awning pane with a bowl of soup in it; suppressed, it is a lit gold window with a pink-foil sugar skull on a stone ledge.
+
+### 3 · In 3D the lit pane is three-quarters swallowed by the wall it hangs on
+
+The pane sprite projects to 21 device px tall (screen y 358→379). **Only y 374–379 arrives.** The sweet is drawn in the bottom 7 of the pane's 9 canvas rows (`engine/engine3d.js:568`), so what survives is a 16×5 smear of cream.
+
+Mechanism — and the postmortem's prose is the right symptom with the wrong cause: a three.js `Sprite` is **not** a tilted quad, it is a quad at a *single* view-space depth, the depth of its anchor. The anchor here is the pane's **bottom** (`sp.center.set(0.5,0.02)`, `engine/engine3d.js:570`) at `p.y+1.03` (`:572`). Every pixel above the anchor is therefore drawn at the bottom's depth, and the wall above the anchor is nearer than that, so the wall wins. The ledge already carries the cure — it sits at `p.y+1.08` (`engine/engine3d.js:605`), 0.05 further out — **which is exactly why the ledge reads and the pane does not.** The fifth fix moved the ledge out and left the pane where it was.
+
+Ruled out by measurement, not argument: the ledge is **not** eating the sweet — skull px 396 with the ledge, **396** with `drawSillLedge` blanked. Identical.
+
+### 4 · Light, value, occlusion — measured against each other
+
+Same rig at 12:00 and at 22:00:
+
+| | skull px 22:00 | skull px 12:00 | Weber 22:00 | Weber 12:00 |
+|---|---|---|---|---|
+| top | 1057 | 1066 | 0.78 | 1.13 |
+| iso | 825 | 856 | 0.11 | 0.12 |
+| 3d | 396 | 396 | 1.10 | 1.05 |
+
+- **Light changes no pixel count anywhere.** The night wash costs the top camera 31% of its contrast on a shape that already reads; it costs iso nothing; and in 3D **night slightly helps**, because the sill sprites are never added to `T3.tintables` (zero `tintables.push` between `engine/engine3d.js:549` and `:611`), so the sweet keeps full value while the wall around it is dimmed by `engine3d.js:834`. Turning the wash off buys 0 pixels.
+- **Value cannot help either.** The sweet already measures L 158–184 against walls at 46–127 — the largest value separation in the frame. Its headroom to pure white is ≤ +70 L on a shape that is 66 device pixels. This would be the fifth fix of the same kind (`docs/POSTMORTEM.md` §1: four sizes). *The one place value genuinely is the fault is **iso** — Weber 0.11, Michelson 0.054, day and night — the sweet on a wall of almost its own value. Second job, not this one.*
+- **Occlusion is the whole of it**, and both cures are measured:
+
+| change | before | after |
+|---|---|---|
+| front: sill box drawn after the facade art | **0 px** | **1006 px**, L 195.5 on 89.5, ΔL **+106** |
+| 3d: pane + ledge pushed out together, +0.09 | **396 px** | **1743 px (4.4×)** |
+
+3D sweep (pane and ledge moved together so their 0.05 order is kept; control 0):
+
+`+0.00 → 396 · +0.03 → 832 · +0.06 → 1301 · +0.09 → 1743 · +0.12 → 2066 · +0.18 → 2112 · +0.25 → 2083`
+
+**+0.09 is the number.** Look at `3d-both-dz0.png` against `3d-both-dz0p09.png`: same texture, same palette, same light — at 0 a cream smear in an orange sliver, at +0.09 a whole sugar skull with teal sockets, gold brow and jaw, sitting in a lit window on a stone ledge. By +0.18 the pane arrives complete but hangs visibly proud of its recess and reads as a lit box under the window rather than in it.
+
+### 5 · The single change I would make, and its seam
+
+**Occlusion — and the front camera first, because it is the only zero on the board.** Both halves are engine RULES, not Meridian content; any pack that hangs anything on a wall has both bugs.
+
+- **Front (a RULE, and the slot already exists with a comment on it):** a prop standing on a **solid** tile belongs in that tile's row of the depth queue, not the ground pass. `engine/engine.js:1953` already says it for decor — `R.push({d:d.y+0.05,…}); /* after its row's facade, before actors */`. I measured the *painted-last* version (1006 px), which is an upper bound; at `d=y+0.05` it can only differ when somebody is standing in front of that window, which is the correct behaviour.
+- **3D (the same rule in the other camera):** the offset a wall-hung billboard needs is a function of **its own height and the camera's pitch**, not a constant hand-tuned for one sprite. 0.09 world units is what a 0.28-tall sprite needs at today's camera; a taller one needs more, and the ledge's 0.05 is a smaller sprite's answer copied to nothing else.
+
+### 6 · Found on the way, and planted both directions — `engine/engine.js:1115` is dead code
+
+`engine/engine.js` declares **four functions twice**: `drawOfrenda` (1081 / 1185), `fiestaProps` (1095 / 1199), `drawPapelRow` (1096 / 1200), `drawSillLit` (1115 / 1219). Lines 1081–1122 are byte-identical to 1185–1226 (`diff` empty), and the "THE SILL ITSELF" comment block appears twice back-to-back at 1122 and 1140. Clean tree, `git status` empty — this is on `main`.
+
+Planted in a lab copy **outside the repository** (`scratchpad/chema-lab`), both ways:
+
+- first copy (`:1115`) painted magenta → **0 magenta in the bake, 0 on the street in 3D**;
+- second copy (`:1219`) painted magenta → **160 in the bake, 600 on the street**.
+
+So the live `drawSillLit` is `:1219` and **an edit to `:1115` does nothing.** `drawSillLit` is the function of the fifth skull attempt. The sixth attempt has a very good chance of editing line 1115 and watching the street not change — this is `docs/POSTMORTEM.md` §9's "a regex replace inserted a whole block a second time", still in the tree.
+
+### 7 · The entry for `docs/3D-LOG.md`, in its shape
+
+```
+### 2026-09-14 · the skulls, measured in all four cameras — and the front camera renders zero
+
+- **Goal served:** a person can always tell what is there. The owner, five reports: the sugar skulls
+  on the sills cannot be found without an arrow.
+- **Conditions:** #vp 528×423 CSS @ dpr2 (1056×846 device; his frame is 1172), season `muertos`
+  forced on, clock pinned 22:00 so every night branch fires, Date.now/performance.now frozen,
+  hero at st (5,2). **Control — render twice, change nothing — 0 changed pixels in all four
+  cameras, every run.** Method: a thing's pixels are the pixels that change when its ONE painter
+  is a no-op. Luminance Rec.709 on sRGB bytes.
+- **Measured before, per skull:** front **0 px**. top 192–241 px, ΔL vs wall +44…+53, Weber
+  0.39–0.50. iso 176–239 px, ΔL +45…+71, Weber 0.36–0.68. 3d **66–193 px** (16×5 device px far,
+  25×9 near), ΔL +106…+139, Weber 1.45–3.04. On screen the flat buffers upscale ×2.72, so
+  top/iso give ≈520–660 screen px a skull and 3D gives 66–193.
+- **Diagnosis 1 — FRONT DRAWS THEM AND PAINTS OVER THEM.** `drawSillBox` is called 8 times a
+  frame and delivers 0 px of sweet, 0 of ledge, 0 of pane, at five positions tested. The fiesta
+  is drawn in the ground pass (`engine.js:1946`), the facade's own tile art runs later in the
+  row-sorted depth pass (`engine.js:1976`). Suppress `TILEDRAW` for those tiles and the whole
+  assembly appears: 992 / 1624 / 1281 px. Only props on SOLID tiles are affected, which is why
+  the papel picado never had this and the sills always did.
+- **Diagnosis 2 — 3D: the pane is three-quarters swallowed by its own wall.** A three.js Sprite is
+  a quad at ONE view-space depth — its anchor's. The anchor is the pane's bottom
+  (`engine3d.js:570`, `center.set(0.5,0.02)`) at `p.y+1.03` (`:572`), so every pixel above it is
+  drawn at the bottom's depth and the nearer wall wins. 21 projected px tall, 5 arrive. The ledge
+  already carries the cure at `p.y+1.08` (`:605`) — which is exactly why the ledge reads.
+- **Measured after (not shipped — advisory run, crew mode off):** front 0 → **1006 px**, ΔL +106,
+  by replaying the sill box after the facade art. 3d 396 → **1743 px (4.4×)** with pane and ledge
+  moved out together +0.09; sweep 0/0.03/0.06/0.09/0.12/0.18/0.25 = 396/832/1301/1743/2066/2112/2083.
+- **Recommendation — OCCLUSION, front camera first.** Both are engine RULES: (a) a prop on a solid
+  tile joins that tile's row in the depth queue — the slot and its comment already exist at
+  `engine.js:1953`; (b) a wall-hung billboard's offset is a function of its own height and the
+  camera's pitch, not a constant tuned for one sprite.
+- **REJECTED — light.** Measured at 12:00 against 22:00: pixel counts 1057/1066 top, 825/856 iso,
+  396/396 3d. **The night wash changes no pixel count anywhere.** It costs top 31% of contrast
+  (Weber 0.78 vs 1.13), costs iso nothing, and in 3D it slightly HELPS (1.10 vs 1.05) because the
+  sill sprites are never added to `T3.tintables` (zero `tintables.push` in engine3d.js:549–611),
+  so the sweet keeps full value while the wall is dimmed by `engine3d.js:834`. Do not chase light.
+- **REJECTED — value / the sweet's palette.** It already measures L 158–184 against walls at
+  46–127, the largest value separation in the frame; headroom to pure white is ≤ +70 L on a shape
+  that is 66 device pixels. This would be the fifth fix of the same kind (POSTMORTEM §1).
+  **One exception, logged not proposed: ISO is a genuine value fault** — Weber 0.11, Michelson
+  0.054, day and night. Second job.
+- **REJECTED — "the ledge is eating the sweet".** Plausible, and false: 396 px with the ledge,
+  396 with `drawSillLedge` blanked. Identical. Do not spend time on it again.
+- **Watch out — `engine/engine.js:1115` is DEAD CODE.** Four functions are declared twice
+  (`drawOfrenda` 1081/1185, `fiestaProps` 1095/1199, `drawPapelRow` 1096/1200, `drawSillLit`
+  1115/1219), byte-identical, on a clean `main`. Planted both ways in a lab outside the repo:
+  magenta in the first copy → 0 px anywhere; magenta in the second → 160 in the bake, 600 on the
+  street. `drawSillLit` is the fifth attempt's own function. A sixth attempt that edits 1115 will
+  watch the street not change.
+- **Watch out — the guard bought for the word "hidden" reads one camera and the wrong object.**
+  `test/smoke.js` (grep `camSet('3d')` near the sill block, and `stone < 3`) counts the LEDGE's
+  stone pixels in 3D only. In the front camera the ledge is at zero too and nothing asks.
+```
+
+## QUESTIONS FOR THE OWNER
+
+**Which camera was your screenshot?** Two things collide and I am not averaging them.
+
+- The brief says *"the screenshot: Meridian Street in the FRONT camera at night… three sugar skulls… each about 20 px wide in a 1172 px frame"*.
+- The front camera renders **zero** sugar-skull pixels — five positions, control noise 0 each (`engine/engine.js:1946` drawn, `engine/engine.js:1976` paints over). There would be nothing there to draw an arrow at.
+- The **3D** camera at `st (5,2)` puts skulls at 11.6%, 23.8%, 56.3% and 88.9% of the frame's width, at 16×5 and 25×9 device px — "about 20 px wide", and the leftmost at 24% is your leftmost arrow.
+
+It changes which fix you see first, nothing else. If you were in 3D, the +0.09 push (396 → 1743 px) is what you will notice. If you really were in front, the draw-order fix (0 → 1006) is, and the three things you arrowed were something else in the frame — which I did not identify and am not going to guess at.
+
+## WHAT I DID NOT CHECK
+
+- **El Changarrito.** `drawFront` and `fiestaDraw2D` are in shared `engine/`, so the town inherits the front-camera ordering — I did not render the town and did not run `node test/town.smoke.js`.
+- **I ran no suite this session.** The tree is unedited (`git status` clean) but I have not confirmed it is green today.
+- The front camera **at noon** — the zero is a draw-order fact and should be time-independent, but I only measured front at 22:00.
+- **One viewport only** (586×1000 @ dpr 2). No landscape, no 390×844, no 480×900, no fullscreen.
+- Whether pushing the 3D sprites +0.09 out collides with anything: the near-wall glass rule (`T3GHOST`/`t3Top`), a neighbouring prop, the tram's clearance, or the hero's depth exemption (#22/#92).
+- Any world but `st`, and any sill props outside Calle Dos.
+- Whether the front cure at `d=y+0.05` changes what a person standing in front of a window looks like. I measured the painted-last version, an upper bound.
+- Whether the `drawOfrenda` / `drawPapelRow` / `fiestaProps` duplication has any effect beyond dead code — I planted only `drawSillLit`, and only that its first copy is dead.
+- I worked from the brief's **description** of the owner's screenshot. I never saw the image.
+
+## POST-FLIGHT
+
+The instrument that decided this was not in my file: **blank one painter and diff the frame** tells you which object's pixels are missing without knowing where on screen it is, and it is what turned "the skulls are hard to see" into "the front camera delivers zero", which no contrast number could have said. The whole-viewport screenshot my file tells me to take at the end was **useless** here — HUD, a dialogue bubble, a busy street — and what actually showed the fault was an 8× crop of one window rendered twice side by side; that is a real correction to my own habit, not a refinement of it. I also learned the mechanism behind the postmortem's "a billboard tilts into the wall": it does not tilt, it is a quad at the single depth of its anchor, which is why the cure has a *formula* (its own height × the camera's pitch) instead of a constant somebody tuned once for a ledge. And I got the reminder about my own trade cheap: the ledge-eats-the-sweet theory was elegant, obvious and worth exactly the ten seconds it took to measure it at 396 against 396.
+
+**Persona edit proposed** — insert after the section "Ask the scene graph, not only the frame" in `.claude/agents/chema.md`, exact text:
+
+```markdown
+## Blank one painter, and crop the picture
+
+*Applied 2026-09-14 from the skulls, all four cameras.*
+
+**When a thing is hard to see, do not measure its contrast first — find out whether it is there.**
+Replace the ONE function that paints it with a no-op, render, and diff: the pixels that changed are
+that object's, wherever they landed, and you never had to project anything. It answered the sugar
+skulls in one pass — **the front camera calls `drawSillBox` eight times a frame and delivers zero
+pixels** (`engine/engine.js:1946` draws it, `engine/engine.js:1976` paints over it) — and no contrast
+number in any register could have said that, because there was nothing to take the contrast of.
+Freeze `Date.now` and `performance.now` first, and prove the control diff is 0 before you believe a
+single row.
+
+**And the screenshot at the end is the wrong screenshot.** A whole viewport is HUD, a dialogue
+bubble and a busy street; the fault lives in forty pixels. **Crop the one object and blow it up 8×,
+twice — as shipped and with the one change.** Two crops decided this job in a second. The full frame
+decided nothing.
+
+**One fact about billboards, because the register has the symptom and not the cause:** a three.js
+`Sprite` does not tilt into a wall. It is a quad at a **single** view-space depth — its anchor's — so
+every pixel above the anchor is drawn at the anchor's depth and a nearer wall wins there. That is why
+the window pane anchored at its bottom (`engine/engine3d.js:570`) loses three-quarters of itself and
+its own ledge, sitting 0.05 further out (`:605`), does not. **The offset a wall-hung billboard needs
+is its own height times the camera's pitch — a formula, not a constant somebody tuned for one sprite.**
+```
+
+## MURAL PANEL
+
+```
+MURAL PANEL
+id:     chema-la-copia-en-blanco
+by:     "chema"
+title:  {en:"The blank print", es:"La copia en blanco"}
+said:   {en:"The negative had the skull on it. The print came out empty. Nobody had asked the print.",
+         es:"El negativo tenía la calavera. La copia salió vacía. Nadie le había preguntado a la copia."}
+state:  {en:"Holding that the front camera is a zero and not a contrast — and refusing to grade the print until somebody tells me which camera he was standing in.",
+         es:"Sostengo que la cámara frontal es un cero y no un asunto de contraste — y me niego a corregir la copia hasta que alguien me diga en qué cámara estaba parado él."}
+who:    {en:"Chema, who developed it before he graded it", es:"Chema, que la reveló antes de corregirla"}
+cap:    {en:"Five reports in, and every answer had been a number about the sweet: eight pixels, then five, then a lit pane, then a ledge. He was sent to measure its contrast and instead he blanked the one hand that paints it and counted what moved. In the camera the owner photographs, the game draws the window eight times a frame and delivers nothing at all — the wall it hangs on is painted afterwards, over the top, every frame since it shipped. Contrast was the wrong question for a thing that is not on the paper. The negative was perfect. It always had been.",
+         es:"Cinco reportes después, y cada respuesta había sido un número sobre el dulce: ocho píxeles, luego cinco, luego un vidrio encendido, luego una repisa. Lo mandaron a medir su contraste y en vez de eso tapó la única mano que lo pinta y contó lo que se movió. En la cámara que el dueño fotografía, el juego dibuja la ventana ocho veces por cuadro y no entrega absolutamente nada — la pared donde cuelga se pinta después, encima, cada cuadro desde el día que se entregó. El contraste era la pregunta equivocada para algo que no está en el papel. El negativo estaba perfecto. Siempre lo estuvo."}
+aspect: 0.46
+art:    (g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* CHEMA'S HAND, and NOT the contact sheet again: a darkroom bench. On the left a lightbox with the
+     negative on it — the skull is plainly there, in reversed tones. On the right the finished print,
+     pinned up, wet, and blank where the skull should be. Between them the grease pencil. */
+  g.fillStyle=P.ink;g.font="bold 13px ui-monospace,monospace";
+  g.fillText("CALLE DOS \u00b7 REPISAS \u00b7 C\u00c1MARA FRONTAL",W*0.035,H*0.105);
+  g.font="11px ui-monospace,monospace";g.fillStyle=P.deep;
+  g.fillText("22:00 \u00b7 1056\u00d7846 \u00b7 control 0 px",W*0.66,H*0.105);
+
+  /* --- the lightbox, left --- */
+  const lx=W*0.035, ly=H*0.17, lw=W*0.42, lh=H*0.52;
+  g.fillStyle=P.ink;g.globalAlpha=.18;g.fillRect(lx+5,ly+6,lw,lh);g.globalAlpha=1;
+  g.fillStyle="#F4EFD9";g.fillRect(lx,ly,lw,lh);
+  g.fillStyle="#FFFBEA";g.fillRect(lx+3,ly+3,lw-6,lh-6);
+  g.strokeStyle=P.shade;g.lineWidth=2;g.strokeRect(lx+0.5,ly+0.5,lw-1,lh-1);
+  /* the negative strip laid across it, sprocket edges top and bottom */
+  const nx=lx+lw*0.10, ny=ly+lh*0.22, nw=lw*0.80, nh=lh*0.52;
+  g.fillStyle="#3A3320";g.fillRect(nx,ny-4,nw,nh+8);
+  g.fillStyle="#FFFBEA";
+  for(let x=nx+3;x<nx+nw-4;x+=nw/7){g.fillRect(x,ny-3,4,3);g.fillRect(x,ny+nh,4,3);}
+  /* the frame itself: reversed tones, so the cream sweet reads DARK on a light wall */
+  g.fillStyle="#C9BE9A";g.fillRect(nx+4,ny,nw-8,nh);                    /* wall, inverted */
+  const wx=nx+nw*0.34, wy=ny+nh*0.16, ww=nw*0.32, wh=nh*0.60;
+  g.fillStyle="#5B5230";g.fillRect(wx,wy,ww,wh);                        /* the lit pane, inverted */
+  g.fillStyle="#2B2618";                                                /* the sweet, inverted */
+  g.beginPath();g.ellipse(wx+ww*0.5,wy+wh*0.52,ww*0.32,wh*0.30,0,0,7);g.fill();
+  g.fillRect(wx+ww*0.34,wy+wh*0.66,ww*0.32,wh*0.20);
+  g.fillStyle="#C9BE9A";                                                /* its sockets, inverted */
+  g.fillRect(wx+ww*0.36,wy+wh*0.42,ww*0.10,wh*0.12);
+  g.fillRect(wx+ww*0.56,wy+wh*0.42,ww*0.10,wh*0.12);
+  g.fillStyle="#8C8256";g.fillRect(wx-ww*0.10,wy+wh*0.88,ww*1.20,wh*0.14); /* the ledge, inverted */
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("EL NEGATIVO",lx,ly-6);
+  g.font="10px ui-monospace,monospace";g.fillStyle=P.deep;
+  g.fillText("est\u00e1 ah\u00ed \u00b7 8 veces por cuadro",lx,ly+lh+14);
+
+  /* --- the print, right: pinned, wet, and empty --- */
+  const px2=W*0.545, py2=H*0.17, pw=W*0.42, ph=H*0.52;
+  g.fillStyle=P.ink;g.globalAlpha=.18;g.fillRect(px2+5,py2+6,pw,ph);g.globalAlpha=1;
+  g.fillStyle="#8A4A34";g.fillRect(px2,py2,pw,ph);                      /* the facade, as printed */
+  g.fillStyle="#7A4030";g.fillRect(px2,py2+ph*0.62,pw,ph*0.06);
+  /* the awning window the facade paints OVER the sill, every frame */
+  const ax=px2+pw*0.30, ay=py2+ph*0.24, aw=pw*0.40, ah=ph*0.30;
+  g.fillStyle="#E8DCB4";g.fillRect(ax,ay,aw,ah);
+  g.fillStyle="#D8C89A";g.fillRect(ax+2,ay+2,aw-4,ah-4);
+  g.fillStyle="#C87A55";g.beginPath();g.ellipse(ax+aw*0.5,ay+ah*0.72,aw*0.28,ah*0.20,0,0,Math.PI);g.fill();
+  g.strokeStyle="#6B3A28";g.lineWidth=1;g.strokeRect(ax+0.5,ay+0.5,aw-1,ah-1);
+  /* two drawing pins and a drip, so it reads as a wet print and not a window */
+  g.fillStyle=P.gold;[[px2+6,py2+6],[px2+pw-8,py2+6]].forEach(p=>{g.beginPath();g.arc(p[0],p[1],3,0,7);g.fill();});
+  g.fillStyle="#6B3A28";g.globalAlpha=.5;g.fillRect(px2+pw*0.5,py2+ph,2,H*0.03);g.globalAlpha=1;
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("LA COPIA",px2,py2-6);
+
+  /* --- the grease pencil, straight across the print --- */
+  g.strokeStyle="#D9342B";g.lineWidth=4;g.lineCap="round";
+  g.beginPath();g.moveTo(px2+pw*0.10,py2+ph*0.14);g.lineTo(px2+pw*0.92,py2+ph*0.86);g.stroke();
+  g.fillStyle="#D9342B";g.font="bold 15px ui-monospace,monospace";
+  g.fillText("0 px",px2+pw*0.60,py2+ph*0.22);
+
+  /* --- the arrow from negative to print, and the readings along the bottom --- */
+  g.strokeStyle=P.ink;g.lineWidth=2;
+  const my=py2+ph*0.50;
+  g.beginPath();g.moveTo(lx+lw+W*0.012,my);g.lineTo(px2-W*0.012,my);g.stroke();
+  g.beginPath();g.moveTo(px2-W*0.012,my);g.lineTo(px2-W*0.030,my-5);g.lineTo(px2-W*0.030,my+5);g.closePath();g.fill();
+
+  const by=H*0.79;
+  g.fillStyle=P.bone;g.fillRect(W*0.035,by,W*0.93,H*0.13);
+  g.fillStyle=P.shade;g.fillRect(W*0.035,by,W*0.93,2);
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("P\u00cdXELES DE DULCE QUE LLEGAN, POR CALAVERA",W*0.05,by+15);
+  g.font="12px ui-monospace,monospace";
+  const cols=[["frontal","0",true],["superior","241",false],["iso","239",false],["3D","68",false],["3D +0.09","1743",false]];
+  cols.forEach((c,i)=>{const cx=W*0.05+i*(W*0.185);
+    g.fillStyle=c[2]?"#D9342B":P.deep;g.font="10px ui-monospace,monospace";g.fillText(c[0],cx,by+32);
+    g.fillStyle=c[2]?"#D9342B":P.ink;g.font="bold 14px ui-monospace,monospace";g.fillText(c[1],cx,by+48);});
+}
+```
