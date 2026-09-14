@@ -420,6 +420,42 @@ entries in hand, a signature line nobody signed, the stamp over the blank. Yaz's
 own lamps with corners; they are struck engraved strips now, and the fallen letters lie on the shelf
 instead of rotating in the glass. Chuy's card was left exactly as it was.
 
+## Iteration 6 — 2026-09-13/14, seven came back and nobody came for the first time
+
+Seven painted, all return visits, in the `rust` thread (the sixth iteration cycles back to the first
+colour): **Beto** (his fourth — the pinned photograph and the paint chart with seven chips struck out),
+**Rigo** (his fourth — two swatch pairs, 9% against 44%, and the lamp ringed as the one thing no menu may
+touch), **Pili** (her second — the piñatera's sample card, two creams pinned edge to edge so the seam
+cannot be seen, and his three arrows), **Tavo** (his second — four sample cards on a rail and, under
+them, his own first panel torn out and getting a coat of maroon that does not cover it), **Doña Cuca**
+(her second — the loft's well ticked and the stall's flight with nothing on its open side), **Don
+Güero** (his second — an elevation: the wall we have, the wall we want, and the cutaway where the tall
+one stops existing as you walk up to it), and **Chema** (his second, a day later — the darkroom bench:
+the negative with the skull plainly on it, the print blank where it should be, and a grease-pencil
+`0 px`). Their words are verbatim from `docs/meetings/2026-09-13-la-cuadrilla-disena.md`; nobody's
+were edited on the way to the wall.
+
+**The wall split two of them in half, and the check that should have said so was green.** `by:"cuca"`
+on a panel signed *Doña Cuca* opened a bay called *Cuca* beside hers; `by:"don-guero"` opened
+*Don-guero* beside Don Güero's. The stretch guard groups the panels by `murPainter` and then asks the
+wall whether it kept each group together, so it cannot see `murPainter` itself naming one person twice —
+both sides of its comparison are the same function (`docs/REGRESSION.md` §3, a count instead of an
+identity). Planted before it was believed, as Melo's rule says, and it took three plants: the fault
+printed on `main` in a node context; the first repair (ask whether `by` is a *word* of `who`, hand back
+`who`) filed Melo's second visit — signed *Melo Garduño* — in a new bay beside *Melo*, and the first
+draft of the new guard, which compared whole names, let it through. **A person's key on this wall is
+their first name** now (`murKey`: accents off, hyphens to spaces, Doña/Don/the dropped, one word), the
+bay's name is whatever their first visit signed, and the second guard in `test/town.smoke.js` folds
+every bay's *name* the same way and insists no two agree — asked of the names, not of the function.
+Both earlier versions were planted in a lab copy outside the repository and both printed. Eighteen bays
+before, eighteen after, thirty-two panels. `docs/REGRESSION.md` row 24.
+
+**The return-visit check ran on all seven and passed**: each differs from the painter's earlier visits
+in what they said, the state they held, and the pixels they drew. **Nobody has looked at these seven
+before they shipped** — the run was advisers in parallel with one pen and Pili was one of the seven,
+not the reviewer; the next crew-fix run's step 4 is where she sees them, and what she says goes in
+this file.
+
 ## Coming back — how a return visit works, and the rule against stamps
 
 *Owner, 2026-09-12: "just to understand when an agent goes back to the mural, they'll add space for

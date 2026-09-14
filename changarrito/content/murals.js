@@ -1371,6 +1371,411 @@ MURALS.push(
     g.fillStyle="#6B6458";g.font="7px ui-monospace,monospace";g.fillText("0×0",bx-13,by-12);}
 });
 
+/* ---- ITERATION 6 — 2026-09-13/14: the design run (the tram livery, two storeys, the skulls, the rail) ----
+   Seven return visits, none a first: Beto, Rigo, Pili, Tavo, Doña Cuca, Don Güero, Chema. Their words are
+   verbatim from docs/meetings/2026-09-13-la-cuadrilla-disena.md; the drawings are their own hands. ---- */
+MURALS.push(
+{
+  id:"beto-seis-en-la-foto", iter:6, date:"2026-09-13", by:"beto",
+  title:{en:"Six in the photograph, two on the car", es:"Seis en la foto, dos en el carro"},
+  state:{en:"Chart pinned, nine chips cut, seven struck out. I will not hang a paint card over a part nobody draws — the option would exist, the word would save, and the car would come back the same colour.", es:"Carta pegada, nueve muestras cortadas, siete tachadas. No cuelgo una tarjeta de color sobre una pieza que nadie pinta — la opción existiría, la palabra se guardaría, y el carro volvería del mismo color."},
+  said:{en:"He handed us a photograph of seven parts. The car has the colour of one of them, and a gold line eight pixels wide that only one camera out of four has ever drawn.", es:"Nos dio una foto de siete piezas. El carro tiene el color de una, y una línea dorada de ocho píxeles que sólo una cámara de cuatro ha pintado jamás."},
+  who:{en:"Beto, who counted the parts before he chose the paint", es:"Beto, que contó las piezas antes de escoger la pintura"},
+  cap:{en:"He was sent to design the customisation and spent the first half of it counting. The band, the lamps, the pole and the fender are not in the code in any camera, and this engine already keeps a list of the words it can read on this exact seam — written the day somebody learned that a key with no reader is the quietest fault there is, because the line looks right and nothing happens. A menu of four such keys would have passed every suite, saved every choice, and repainted nothing.", es:"Lo mandaron a diseñar la personalización y la primera mitad se le fue contando. La franja, los faroles, el trole y la defensa no están en el código en ninguna cámara, y este motor ya guarda una lista de las palabras que sabe leer en esta misma costura — escrita el día que alguien aprendió que una llave sin lector es la falla más callada que hay, porque la línea se ve bien y no pasa nada. Un menú de cuatro llaves así habría pasado todas las pruebas, guardado cada elección, y no habría repintado nada."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;
+  murGround(g,W,H);                                   /* the shop wall, not paper: this one happened at the wall with the chart on it */
+  /* THE PINNED PHOTOGRAPH, top-left: a heritage car, warm, with all seven parts on it */
+  const px=W*0.06,py=H*0.10,pw=W*0.38,ph=H*0.42;
+  g.fillStyle="#EFE7D6";g.fillRect(px-4,py-4,pw+8,ph+10);              /* the white border of a print */
+  g.fillStyle="#3A3040";g.fillRect(px,py,pw,ph);
+  murTram(g,px+pw*0.08,py+ph*0.34,pw*0.84,ph*0.42,{cabs:true,driverAt:1});
+  g.fillStyle=P.gold;                                                   /* the parts the photo has and the car does not */
+  g.fillRect(px+pw*0.08,py+ph*0.74,pw*0.84,2);                          /* the lining */
+  [0.18,0.30,0.42,0.58,0.70,0.82].forEach(t=>{g.beginPath();g.arc(px+pw*t,py+ph*0.68,2.2,0,7);g.fill();});  /* the lamps */
+  g.strokeStyle=P.ink;g.lineWidth=2;g.beginPath();                      /* the pole */
+  g.moveTo(px+pw*0.60,py+ph*0.34);g.lineTo(px+pw*0.86,py+ph*0.12);g.stroke();
+  g.fillStyle=P.bone;g.fillRect(px+pw*0.08,py+ph*0.40,pw*0.84,3);       /* the cream band */
+  [0,1].forEach(i=>{g.fillStyle=P.ink;g.beginPath();g.arc(px+(i?pw-6:6),py+6,3,0,7);g.fill();});  /* two pins */
+  /* THE PAINT CHART, right: nine chips, seven struck through */
+  const cx=W*0.52,cy=H*0.08,cw=W*0.40,rows=3,cols=3,sw=cw/cols;
+  g.fillStyle=P.wash;g.fillRect(cx-6,cy-6,cw+12,sw*rows*0.86+22);
+  const chips=[["body",P.rust,1],["trim",P.deep,1],["glass",P.bone,0],
+               ["band",P.shade,0],["lamp",P.gold,0],["pole",P.ink,0],
+               ["fender",P.moss,0],["doors",P.sky,0],["badge",P.lime,0]];
+  chips.forEach((c,i)=>{const x=cx+(i%cols)*sw,y=cy+((i/cols)|0)*sw*0.86;
+    g.fillStyle=c[1];g.fillRect(x,y,sw-10,sw*0.52);
+    g.strokeStyle=P.ink;g.lineWidth=1;g.strokeRect(x+.5,y+.5,sw-10,sw*0.52);
+    g.fillStyle=P.ink;g.font="10px ui-monospace,monospace";g.fillText(c[0],x,y+sw*0.70);
+    if(!c[2]){g.strokeStyle=P.rust;g.lineWidth=2;g.beginPath();       /* struck out: no reader */
+      g.moveTo(x,y);g.lineTo(x+sw-10,y+sw*0.52);g.moveTo(x+sw-10,y);g.lineTo(x,y+sw*0.52);g.stroke();}});
+  /* THE CAR AS IT IS, bottom: ghosted, and only the two live chips carry any colour */
+  const tx=W*0.06,ty=H*0.74,tw=W*0.42,th=H*0.18;   /* moved 2026-09-14: as painted it lay under the chart's third row */
+  murTram(g,tx,ty,tw,th,{ghost:true});
+  g.fillStyle=P.rust;g.fillRect(tx,ty,tw,th*0.10);                     /* body: the one colour it really has */
+  g.fillStyle=P.gold;g.fillRect(tx+tw*0.46,ty-2,8,2);                  /* the eight pixels, at true width */
+  murDim(g,tx+tw*0.46,tx+tw*0.46+8,ty-12,P.gold,"8px");
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("2 / 7",W*0.52,H*0.96);}
+},
+{
+  id:"rigo-un-solo-color", iter:6, date:"2026-09-13", by:"rigo",
+  title:{en:"One colour, and they called it two", es:"Un solo color, y le decían dos"},
+  state:{en:"Holding that the paint menu must refuse things — starting with the lamp, because it is the only sentence this car can say.", es:"Sostengo que el menú de pintura tiene que negar cosas — empezando por el farol, porque es la única frase que este carro sabe decir."},
+  said:{en:"Nine per cent apart is not a livery. It is a brown car that somebody wrote two names on.", es:"Nueve por ciento de diferencia no es librea. Es un carro café al que alguien le puso dos nombres."},
+  who:{en:"Rigo, who went to add a colour and found there was only ever one", es:"Rigo, que fue a agregar un color y descubrió que nunca hubo más que uno"},
+  cap:{en:"The owner sent a photograph of a real car — maroon below, cream around the windows — and asked what a person could repaint. Before answering I put our two colours side by side and they are nine per cent apart in brightness, the same hue, one of them three pixels tall and called the trim. His car is forty-four per cent apart. The band was never missing from the menu. It was missing from the tram.", es:"El dueño mandó la foto de un carro de verdad — guinda abajo, crema alrededor de las ventanas — y preguntó qué podía repintar uno. Antes de contestar puse nuestros dos colores juntos: nueve por ciento de diferencia en brillo, el mismo tono, y uno de ellos mide tres pixeles y le dicen el filete. El de él anda en cuarenta y cuatro. La banda nunca faltó en el menú. Faltaba en el tranvía."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* Rigo's hand again: a signwriter's board. Heavy bands, a gold rule, nothing cute.
+     Two cars, one over the other. The top one is ours as it is painted today — the body
+     and the "trim" are laid as two bars that plainly do not part company. The bottom one
+     is his photograph: the same body, a real band, and a pole going up off the panel. */
+  g.fillStyle=P.ink;g.fillRect(0,0,W,H*0.14);
+  g.fillStyle=P.gold;g.fillRect(0,H*0.14,W,3);
+  
+  /* --- the swatch pair, top left: two bars butted together, no gap, so the eye is
+         forced to find the edge and cannot --- */
+  const sx=W*0.06,sy=H*0.22,sw=W*0.26,sh=H*0.11;
+  g.fillStyle=P.rust;g.fillRect(sx,sy,sw,sh);
+  g.fillStyle=P.deep;g.fillRect(sx,sy+sh,sw,sh*0.5);
+  g.fillStyle=P.ink;g.font="bold 10px ui-monospace,monospace";
+  g.fillText("9%",sx+sw+8,sy+sh);
+  
+  /* --- the same pair as it should be: body, then the band, a clear step --- */
+  const tx=W*0.58;
+  g.fillStyle=P.rust;g.fillRect(tx,sy,sw,sh);
+  g.fillStyle=P.wash;g.fillRect(tx,sy+sh,sw,sh*0.5);
+  g.fillStyle=P.ink;g.fillText("44%",tx+sw+8,sy+sh);
+  
+  /* --- our car, as painted: murTram gives the rust body and the deep strip, which is
+         exactly the thing being complained about, so it is drawn with no help --- */
+  const cw=W*0.34,ch=H*0.20,cy=H*0.44;
+  murTram(g,W*0.06,cy,cw,ch,{driverAt:1});
+  
+  /* --- his car: the same silhouette with a cream band laid across the window course,
+         a fender, and the pole leaning back against the way it is going --- */
+  const bx=W*0.55,by=H*0.44;
+  murTram(g,bx,by,cw,ch,{driverAt:1});
+  g.fillStyle=P.wash;g.fillRect(bx+2,by+ch*0.22,cw-4,ch*0.10);   /* the band */
+  g.fillStyle=P.bone;                                            /* re-cut the glass over it */
+  {const n=3,gw=(cw-10)/n;for(let i=0;i<n;i++)g.fillRect(bx+5+i*gw,by+ch*0.32,gw-4,ch*0.30);}
+  g.fillStyle=P.ink;g.fillRect(bx,by+ch-1,cw,2);                 /* the fender */
+  g.strokeStyle=P.ink;g.lineWidth=2;                             /* the pole, trailing */
+  g.beginPath();g.moveTo(bx+cw*0.55,by);g.lineTo(bx+cw*0.16,by-H*0.17);g.stroke();
+  g.fillStyle=P.gold;g.fillRect(bx+cw*0.52,by-3,7,3);            /* the shoe that is already drawn */
+  g.strokeStyle=P.shade;g.lineWidth=1;                           /* the wire it needs, edge to edge */
+  g.beginPath();g.moveTo(0,by-H*0.17);g.lineTo(W,by-H*0.17);g.stroke();
+  
+  /* --- the one thing the menu may not touch: the lamp, ringed --- */
+  g.fillStyle="#D9342B";g.beginPath();g.arc(bx+cw-6,by+ch*0.30,3,0,7);g.fill();
+  g.strokeStyle="#D9342B";g.lineWidth=1;
+  g.beginPath();g.arc(bx+cw-6,by+ch*0.30,7,0,7);g.stroke();
+  
+  g.fillStyle=P.gold;g.fillRect(0,H*0.88,W,3);}
+},
+{
+  id:"pili-el-muestrario-de-cremas", iter:6, date:"2026-09-13", by:"pili",
+  title:{en:"The cream sample card", es:"El muestrario de cremas"},
+  state:{en:"holding that at five pixels a face is holes, not paint", es:"sosteniendo que a cinco píxeles una cara son huecos, no pintura"},
+  said:{en:"The sweet and the shelf are the same white. That is not a small skull — it is no skull.", es:"El dulce y la repisa son el mismo blanco. No es una calaverita chica — no es calaverita."},
+  who:{en:"Pili, la piñatera, who is asked whether anyone can tell what they are looking at", es:"Pili, la piñatera, a quien le preguntan si alguien sabe qué está viendo"},
+  cap:{en:"Five fixes in five days: four were a size and the fifth was a shelf. Nobody ever laid the two creams side by side — they were chosen days apart by different hands and they differ by less than half a point of grey out of two hundred and fifty-five, so the sweet and the ledge it stands on are one pale lump on a wall, and a lump reads as masonry. The sixth is not more light. It is taking marks out, because twelve marks in six inks inside twelve pixels is mush, and a face at that size is two holes.", es:"Cinco arreglos en cinco días: cuatro fueron un tamaño y el quinto fue una repisa. Nadie puso los dos cremas juntos — se escogieron con días de diferencia, por manos distintas, y se llevan menos de medio punto de gris de doscientos cincuenta y cinco, así que el dulce y la repisa son un solo bulto pálido en el muro, y un bulto se lee como albañilería. El sexto no es más luz. Es quitar marcas, porque doce marcas en seis tintas dentro de doce píxeles son atole, y una cara de ese tamaño son dos huecos."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* PILI'S HAND, second visit: not the rope this time — EL MUESTRARIO, the strip of newsprint a
+     piñatera pins her crepe samples to before she cuts anything. Periódico y papel de china, the
+     same materials as my first panel, a different object entirely. Newsprint: tiny grey type lines,
+     never letters. The tabs hang and curl; two of them are the two creams of this report and they
+     are pinned edge to edge on purpose, because the whole finding is that you cannot see the seam. */
+  const px=W*0.05,py=H*0.12,pw=W*0.62,ph=H*0.20;
+  g.fillStyle="#CFC6B0";g.fillRect(px,py,pw,ph);                                   /* el periódico */
+  g.globalAlpha=.35;g.fillStyle=P.ink;
+  for(let i=0;i<7;i++)g.fillRect(px+7,py+6+i*((ph-12)/7),pw-14-((i*37)%23),1.2);    /* type, never letters */
+  g.globalAlpha=1;
+  g.fillStyle=P.shade;g.fillRect(px,py+ph,pw,3);
+  /* six tabs of papel de china hanging off the card. The first two are the report. */
+  const tabs=["#F6F2E8","#F7F2E2","#E8478F","#2FA5A0","#F2B705","#7B4BA8"];
+  const tw=pw/8,ty=py+ph+3;
+  tabs.forEach((c,i)=>{const tx=px+8+i*(tw*1.12);
+    g.fillStyle=c;g.fillRect(tx,ty,tw,H*0.17);
+    g.globalAlpha=.22;g.fillStyle=P.ink;g.fillRect(tx,ty+H*0.17-3,tw,3);g.globalAlpha=1;   /* the curl */
+    g.fillStyle=P.ink;g.fillRect(tx+tw*0.45,ty-4,2,5);});                                   /* the pin */
+  /* the seam that is not there: one hairline where the two creams meet, and it does not show */
+  g.fillStyle=P.ink;g.globalAlpha=.10;g.fillRect(px+8+tw*1.12-1,ty,1,H*0.17);g.globalAlpha=1;
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("242.0",px+6,ty+H*0.17+14);g.fillText("241.6",px+6+tw*1.12,ty+H*0.17+14);
+  g.font="bold 12px ui-monospace,monospace";g.fillStyle=P.rust;
+  g.fillText("\u0394 0.4",px+6,ty+H*0.17+30);
+  /* the history, in pencil, struck through — four sizes and a shelf */
+  g.font="10px ui-monospace,monospace";g.globalAlpha=.6;g.fillStyle=P.ink;
+  const hx=px+W*0.20,hy=ty+H*0.17+30;
+  g.fillText("8 \u00b7 5 \u00b7 7 \u00b7 luz \u00b7 repisa",hx,hy);   /* single-spaced 2026-09-14: it ran into her own label */
+  g.strokeStyle=P.ink;g.lineWidth=1;g.beginPath();g.moveTo(hx-2,hy-3);g.lineTo(hx+W*0.36,hy-3);g.stroke();
+  g.globalAlpha=1;
+  /* THE OBJECT, at the right, at the size it is actually delivered: gold pane, and one pale lump
+     that is a sweet and a ledge and reads as neither. Then his three arrows, in marker, over it. */
+  const ox=W*0.74,oy=H*0.22,ow=W*0.16,oh=H*0.30;
+  g.fillStyle="#5C4A50";g.fillRect(ox-8,oy-8,ow+16,oh+22);                          /* el muro morado */
+  const gr=g.createLinearGradient(0,oy,0,oy+oh);
+  gr.addColorStop(0,"#F2B705");gr.addColorStop(.55,"#E8873A");gr.addColorStop(1,"#8A3F1E");
+  g.fillStyle=gr;g.fillRect(ox,oy,ow,oh);                                           /* el vidrio */
+  g.fillStyle="#F6F2E8";g.fillRect(ox+ow*0.19,oy+oh*0.22,ow*0.62,oh*0.78);          /* el dulce */
+  g.fillStyle="#F7F2E2";g.fillRect(ox-4,oy+oh,ow+8,H*0.045);                        /* la repisa */
+  g.fillStyle="#8A7F66";g.fillRect(ox-4,oy+oh+H*0.045,ow+8,2);
+  g.globalAlpha=.42;g.fillStyle="#100C16";g.fillRect(ox-3,oy+oh+H*0.045+2,ow+6,4);g.globalAlpha=1;
+  /* sus tres flechas rojas — when the customer has to point, the pi\u00f1ata failed */
+  g.strokeStyle="#D9342B";g.fillStyle="#D9342B";g.lineWidth=3;
+  [[-0.9,-0.55],[-0.55,-0.95],[0.55,-0.75]].forEach(a=>{
+    const tx=ox+ow*0.5,ty2=oy+oh*0.55,sx=tx+a[0]*W*0.16,sy=ty2+a[1]*H*0.30;
+    g.beginPath();g.moveTo(sx,sy);g.lineTo(tx+a[0]*18,ty2+a[1]*18);g.stroke();
+    g.beginPath();g.moveTo(tx+a[0]*10,ty2+a[1]*10);
+    g.lineTo(tx+a[0]*24-a[1]*7,ty2+a[1]*24+a[0]*7);
+    g.lineTo(tx+a[0]*24+a[1]*7,ty2+a[1]*24-a[0]*7);g.closePath();g.fill();});
+  g.fillStyle=P.ink;g.font="bold 10px ui-monospace,monospace";
+  g.fillText("el cliente se\u00f1ala",ox-14,oy+oh+H*0.20);}
+},
+{
+  id:"tavo-encima-de-mis-palabras", iter:6, date:"2026-09-13", by:"tavo",
+  title:{en:"Over my own words", es:"Encima de mis propias palabras"},
+  state:{en:"Painting the car he photographed before building the picker he asked for — a colour is not worth choosing until the thing wearing it is worth looking at.", es:"Pintando el carro que fotografió antes de construir el selector que pidió — un color no vale la pena elegirlo hasta que la cosa que lo lleva valga la pena mirarla."},
+  said:{en:"I painted “18% slower than walking” on this wall. By that evening the constant was 6.0. The tram can be repainted. A panel cannot.", es:"Pinté «18% más lento que caminar» en esta pared. Esa misma tarde la constante ya era 6.0. Al tranvía se le puede dar otra mano. A un panel no."},
+  who:{en:"Tavo, who found his own panel out of date and left it up", es:"Tavo, que halló su propio panel caducado y lo dejó puesto"},
+  cap:{en:"He came back to the trolley with a number he was proud of and checked it anyway, out of habit. It had been overtaken hours after he wrote it, by the owner, who simply wanted the thing to go faster. So the first card on the rail is the one he can still paint, and the scrap underneath is the one he cannot — which is the whole argument for grepping the constant instead of quoting yourself.", es:"Volvió al trolley con un número del que estaba orgulloso y aun así lo verificó, por costumbre. Lo habían rebasado a las pocas horas de escribirlo, el dueño, que nada más quería que la cosa fuera más rápida. Por eso la primera tarjeta del riel es la que todavía puede pintar, y el recorte de abajo es la que ya no — que es todo el argumento para buscar la constante en vez de citarse a uno mismo."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* TAVO'S PAPER IS A SAMPLE CARD. Not a blueprint, not a signwriter's board \u2014 the chip you hold
+     up against the real thing and squint at. Four cards on a rail: one painted, three left for
+     the person whose job it is. And pinned under them, the scrap he is not allowed to correct. */
+  const car=(x,y,w,h,body,band,trim,blank)=>{
+    g.fillStyle=P.shade;g.fillRect(x+2,y+h*0.96,w-4,2);
+    if(blank){ g.strokeStyle=P.shade;g.lineWidth=1;g.setLineDash([3,3]);
+      g.strokeRect(x+.5,y+h*0.10+.5,w-1,h*0.78);g.setLineDash([]); return; }
+    g.fillStyle=body;g.fillRect(x,y+h*0.28,w,h*0.60);          /* the lower body */
+    g.fillStyle=band;g.fillRect(x,y+h*0.10,w,h*0.18);          /* the clerestory band \u2014 his photograph's cream */
+    g.fillStyle=trim;g.fillRect(x,y+h*0.06,w,h*0.05);          /* roof edge */
+    g.fillStyle=trim;g.fillRect(x,y+h*0.845,w,h*0.045);        /* the gold lining under the glass */
+    g.fillStyle=P.bone;
+    for(let i=0;i<3;i++)g.fillRect(x+4+i*((w-8)/3),y+h*0.36,(w-8)/3-3,h*0.24);
+    g.fillStyle=P.ink;[0.24,0.76].forEach(t=>g.fillRect(x+w*t-2,y+h*0.89,5,4));
+    g.fillStyle=P.ink;g.fillRect(x+w*0.52-1,y-h*0.20,2,h*0.26); /* the pole on the roof */
+    g.fillStyle=trim;g.fillRect(x+w*0.52-4,y-h*0.23,8,2);};
+  /* the rail the cards hang from */
+  const rail=H*0.15;
+  g.globalAlpha=.35;g.fillStyle=P.ink;g.fillRect(W*0.05,rail,W*0.90,2);g.globalAlpha=1;
+  const n=4,gp=W*0.022,cw=(W*0.90-gp*(n-1))/n,ct=rail+H*0.11,ch=H*0.34;
+  for(let i=0;i<n;i++){const x=W*0.05+i*(cw+gp);
+    g.fillStyle=P.ink;g.globalAlpha=.45;g.fillRect(x+cw/2-1,rail,2,ct-rail);g.globalAlpha=1;
+    g.fillStyle=P.bone;g.fillRect(x,ct,cw,ch);
+    g.fillStyle=P.shade;g.fillRect(x,ct+ch,cw,2);
+    car(x+cw*0.10,ct+ch*0.26,cw*0.80,ch*0.52,P.rust,P.wash,P.gold,i>0);
+    g.font="bold 9px ui-monospace,monospace";g.textAlign="center";
+    g.fillStyle=i?P.shade:P.ink;
+    g.fillText(i?"PILI":"LA FOTO",x+cw/2,ct+ch-6);g.textAlign="left";}
+  /* THE SCRAP \u2014 his own last panel, torn out, getting a coat that does not cover it */
+  const sx=W*0.05,sy=H*0.66,sw=W*0.56,sh=H*0.26;
+  g.fillStyle=P.wash;g.fillRect(sx,sy,sw,sh);
+  g.strokeStyle=P.shade;g.lineWidth=1;g.strokeRect(sx+.5,sy+.5,sw-1,sh-1);
+  for(let i=0;i<9;i++){g.fillStyle=P.wash;                    /* the torn top edge */
+    g.fillRect(sx+i*(sw/9),sy-3,sw/9-2,4);}
+  /* the old race, in miniature */
+  g.fillStyle=P.moss;g.fillRect(sx+sw*0.60,sy+sh*0.30,5,10);
+  g.fillStyle="#C08A5E";g.fillRect(sx+sw*0.60,sy+sh*0.30-6,5,6);
+  g.fillStyle=P.rust;g.fillRect(sx+sw*0.16,sy+sh*0.40,sw*0.16,9);
+  g.fillStyle=P.ink;g.font="bold 12px ui-monospace,monospace";
+  g.fillText("18% SLOWER",sx+8,sy+sh-8);
+  /* the coat of fresh maroon, brushed on, three-quarters opaque \u2014 it shows through. It always shows through */
+  g.globalAlpha=.72;g.fillStyle=P.rust;
+  for(let i=0;i<5;i++)g.fillRect(sx+4,sy+sh-24+i*4,sw*0.66-i*6,4);
+  g.globalAlpha=1;
+  /* the number that replaced it, stencilled clean, off the scrap where nothing can cover it */
+  g.fillStyle=P.gold;g.font="bold 26px ui-monospace,monospace";
+  g.fillText("6.0",W*0.68,sy+sh*0.62);
+  g.fillStyle=P.ink;g.font="bold 10px ui-monospace,monospace";
+  g.fillText("grep it. every time.",W*0.68,sy+sh*0.62+15);
+  /* the brush, laid across the rail, because somebody has to hold it */
+  g.fillStyle=P.deep;g.fillRect(W*0.80,H*0.70,W*0.15,4);
+  g.fillStyle=P.ink;g.fillRect(W*0.93,H*0.685,W*0.04,7);}
+},
+{
+  id:"cuca-la-escalera-de-un-lado", iter:6, date:"2026-09-13", by:"cuca",
+  title:{en:"The stair with one side", es:"La escalera de un solo lado"},
+  state:{en:"Certain the guard is honest and pointed at the wrong staircase", es:"Segura de que la prueba es honrada y está apuntando a la escalera equivocada"},
+  said:{en:"The check stood upstairs counting nine rails and printed green. He was downstairs, on the flight nobody ever drew a rail for.", es:"La prueba se quedó arriba contando nueve barandales y dio verde. Él estaba abajo, en la escalera para la que nadie dibujó nunca un barandal."},
+  who:{en:"Doña Cuca, who keeps the rooms and the stairs", es:"Doña Cuca, la de los cuartos y las escaleras"},
+  cap:{en:"The report named the loft and the loft is fine — nine panels, three sides, a check that counts every one of them. The picture he sent was the other flight, the one you climb out of the lobby: a wall along its north side because the map happens to put a wall there, and nothing at all along its south because nobody ever wrote the glyph. The tell was one pixel: the dark square at the head only exists downstairs. Thirty years letting rooms and I have never once been shown a stair railed on one side by a builder who meant it.", es:"El reporte nombró el desván y el desván está bien — nueve tramos, tres lados, y una prueba que los cuenta todos. La foto que mandó era la otra escalera, la que se sube desde el zaguán: un muro a su lado norte porque el mapa puso un muro ahí, y nada, absolutamente nada, a su lado sur, porque nadie escribió nunca el signo. La pista era un solo pixel: el cuadro oscuro de la cabecera sólo existe abajo. Treinta años rentando cuartos y ni una sola vez me enseñó un albañil una escalera con barandal de un solo lado a propósito."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  const chalk="#F4F1E8",mass="#8E8574",tread="#B9A98E";
+  g.fillStyle=chalk;g.globalAlpha=.95;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("arriba",W*0.10,H*0.13);g.fillText("abajo",W*0.60,H*0.13);g.globalAlpha=1;
+  /* ---- LEFT: the loft's well. Sunken, railed both visible sides, ticked. ---- */
+  const lx=W*0.08,lw=W*0.34,gy=H*0.60,st=H*0.052;
+  g.fillStyle=P.ink;g.globalAlpha=.14;g.fillRect(lx,gy,lw,H*0.055);g.globalAlpha=1;
+  g.fillStyle=tread;g.fillRect(lx,gy-5,lw,5);                       /* the floor line */
+  g.fillStyle=P.deep;g.fillRect(lx+lw*0.16,gy,lw*0.68,st*4.1);      /* the hole */
+  for(let i=0;i<4;i++){g.fillStyle=i%2?"#6E6858":"#7C7566";
+    g.fillRect(lx+lw*0.16+i*lw*0.17,gy+i*st,lw*0.17,st*(4-i)+2);}
+  [[lx+lw*0.13,1],[lx+lw*0.84,1]].forEach(q=>{                      /* rail, BOTH sides */
+    g.fillStyle="#8A6A3E";g.fillRect(q[0]-1,gy-H*0.085,3,H*0.085);
+    g.fillStyle="#6E5334";g.fillRect(q[0]-5,gy-H*0.088,11,3);});
+  g.strokeStyle=P.moss;g.lineWidth=2.4;g.beginPath();
+  g.moveTo(lx+lw*0.40,H*0.20);g.lineTo(lx+lw*0.48,H*0.26);g.lineTo(lx+lw*0.64,H*0.155);g.stroke();
+  g.fillStyle=P.moss;g.font="bold 8px ui-monospace,monospace";g.fillText("9",lx+lw*0.68,H*0.26);
+  /* ---- RIGHT: the stall's flight. Mass north, open south. ---- */
+  const rx=W*0.56,rw=W*0.34;
+  g.fillStyle=P.ink;g.globalAlpha=.14;g.fillRect(rx,gy,rw,H*0.055);g.globalAlpha=1;
+  g.fillStyle=mass;g.fillRect(rx,gy-H*0.30,rw*0.94,H*0.30);         /* the wall that is not a rail */
+  g.fillStyle="#A29881";g.fillRect(rx,gy-H*0.30,rw*0.94,3);
+  for(let i=0;i<4;i++){const bw=rw*0.20,bh=st*(i+1);                /* four treads, rising */
+    g.fillStyle=i===3?"#2B2536":tread;g.fillRect(rx+rw*0.06+i*bw,gy-bh,bw-2,bh);
+    g.fillStyle="rgba(255,255,255,.18)";g.fillRect(rx+rw*0.06+i*bw,gy-bh,bw-2,1.5);}
+  g.save();g.strokeStyle=P.rust;g.lineWidth=2;g.globalAlpha=.9;g.setLineDash([5,4]);
+  g.beginPath();g.moveTo(rx+rw*0.04,gy+H*0.072);g.lineTo(rx+rw*0.90,gy+H*0.072);g.stroke();
+  g.setLineDash([]);g.restore();g.globalAlpha=1;
+  g.fillStyle=P.rust;g.font="bold 9px ui-monospace,monospace";
+  g.fillText("nada",rx+rw*0.34,gy+H*0.125);
+  murBody(g,rx+rw*0.52,gy-st*2-2,P.bone,9);                          /* somebody on the open side */
+  /* ---- the tick hangs over the wrong stair: chalk string and an arrow ---- */
+  g.strokeStyle=P.rust;g.lineWidth=2;g.beginPath();
+  g.moveTo(rx+rw*0.10,H*0.215);g.lineTo(lx+lw*0.80,H*0.215);g.stroke();
+  g.fillStyle=P.rust;g.beginPath();g.moveTo(lx+lw*0.70,H*0.215);
+  g.lineTo(lx+lw*0.80,H*0.175);g.lineTo(lx+lw*0.80,H*0.255);g.closePath();g.fill();
+  g.strokeStyle=chalk;g.lineWidth=1.2;g.globalAlpha=.7;
+  g.beginPath();g.moveTo(W*0.50,H*0.10);g.lineTo(W*0.50,gy+H*0.10);g.stroke();g.globalAlpha=1;}
+},
+{
+  id:"guero-la-banqueta-manda", iter:6, date:"2026-09-13", by:"don-guero",
+  title:{en:"The pavement decides the height", es:"La banqueta manda la altura"},
+  state:{en:"I hold that the town has no good wall for an upper floor today, and Meridian has exactly one: five tiles with no door in them and the map's edge at their back.", es:"Sostengo que hoy el pueblo no tiene una buena pared para una planta alta, y Meridian tiene exactamente una: cinco losas sin puerta y la orilla del mapa a su espalda."},
+  said:{en:"A building is never taller than the ground in front of it. Three clear rows buys you a second floor; two buys you a canyon.", es:"Un edificio nunca es más alto que el suelo que tiene enfrente. Tres filas libres te compran un segundo piso; dos te compran un cañón."},
+  who:{en:"Don Güero, who was sent to the town's mural wall and came back saying not there", es:"Don Güero, a quien mandaron al muro del mural del pueblo y volvió diciendo ahí no"},
+  cap:{en:"Asked where a second storey could stand, he measured the cutaway instead of trusting the note, and found the rule is arithmetic: a wall hides you out to (its height minus three tenths) divided by sixty-five hundredths. The wall everyone wanted — the one with the mural on it — has a door in the middle, and the strip above a door takes its height from the wall beside it and wears no picture at all. He also found that the sugar skull's lit pane is placed by the wall's height and sized without it, so the two things the owner asked for on the same day were one line of code apart.", es:"Le preguntaron dónde cabía un segundo piso, midió el recorte en vez de fiarse de la nota, y halló que la regla es aritmética: una pared te tapa hasta (su altura menos tres décimas) entre sesenta y cinco centésimas. La pared que todos querían — la del mural — tiene una puerta en medio, y la franja sobre una puerta toma su altura de la pared de al lado y no lleva dibujo ninguno. También halló que el vidrio encendido de la calaverita se coloca con la altura del muro y se dimensiona sin ella."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;
+  murPaper(g,W,H,"#EDE7D8",null);                        /* an elevation, not a plan: this wall has had a plan */
+  const gy=H*0.80,u=H*0.30,x0=W*0.07,x1=W*0.93;
+  g.fillStyle=P.shade;g.fillRect(x0,gy,x1-x0,3);         /* the ground line */
+  g.fillStyle="#D9D2BE";g.fillRect(x0,gy+3,x1-x0,H*0.06);/* the banqueta itself */
+  /* LEFT: the wall we have — 1.10 units, whole from anywhere */
+  const wA=W*0.20,hA=1.096*u;
+  g.fillStyle="#5C4A50";g.fillRect(x0,gy-hA,wA,hA);
+  g.fillStyle="#8E8AA0";g.fillRect(x0+wA*0.18,gy-hA*0.62,wA*0.22,hA*0.30);
+  g.fillStyle="#8E8AA0";g.fillRect(x0+wA*0.60,gy-hA*0.62,wA*0.22,hA*0.30);
+  g.fillStyle=P.ink;g.font="bold 10px ui-monospace,monospace";g.fillText("1.10",x0+2,gy-hA-5);
+  /* RIGHT: the wall we want — 1.81 units, and the stub it becomes up close */
+  const xB=W*0.46,wB=W*0.34,hB=1.81*u;
+  g.fillStyle="#5C4A50";g.fillRect(xB,gy-hB,wB,hB);
+  g.fillStyle="#7A6470";g.fillRect(xB,gy-hB*0.52,wB,2);  /* the floor band: the whole trick */
+  [0.12,0.40,0.68].forEach(f=>{g.fillStyle="#8E8AA0";
+    g.fillRect(xB+wB*f,gy-hB*0.90,wB*0.16,hB*0.22);      /* the upper storey, the new windows */
+    g.fillRect(xB+wB*f,gy-hB*0.40,wB*0.16,hB*0.22);});
+  g.fillStyle=P.gold;g.fillRect(xB+wB*0.40+1,gy-hB*0.90+1,wB*0.16-2,hB*0.22-2); /* one pane lit: the sill */
+  g.fillStyle=P.bone;g.fillRect(xB+wB*0.38,gy-hB*0.68,wB*0.20,2);
+  g.fillStyle=P.ink;g.fillText("1.81",xB+2,gy-hB-5);
+  /* the cutaway: where it stops existing because you walked up to it */
+  const sy=gy-0.28*u;
+  g.strokeStyle=P.rust;g.lineWidth=2;g.setLineDash([5,4]);
+  g.beginPath();g.moveTo(xB-8,sy);g.lineTo(xB+wB+8,sy);g.stroke();g.setLineDash([]);
+  g.fillStyle=P.rust;g.font="bold 9px ui-monospace,monospace";g.fillText("stub 0.28",xB+wB+10,sy+3);
+  /* the camera, and the ray that decides everything */
+  g.fillStyle=P.ink;g.beginPath();g.arc(x1-10,H*0.10,5,0,7);g.fill();
+  g.strokeStyle=P.ink;g.globalAlpha=.45;g.lineWidth=1;
+  g.beginPath();g.moveTo(x1-10,H*0.10);g.lineTo(W*0.30,gy-6);g.stroke();g.globalAlpha=1;
+  murBody(g,W*0.30,gy-14,P.moss,11);                     /* him, on the far pavement, seeing it whole */
+  murBody(g,xB+wB*0.50,gy-14,P.rust,11);                 /* him, up close, seeing a stub */
+  /* the dimension that is the rule: three clear rows */
+  murDim(g,W*0.32,xB-4,H*0.93,P.moss,"W = 3 filas");
+  g.fillStyle=P.deep;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("h \u2264 0.65\u00B7W + 0.3",x0,H*0.10);}
+},
+{
+  id:"chema-la-copia-en-blanco", iter:6, date:"2026-09-14", by:"chema",
+  title:{en:"The blank print", es:"La copia en blanco"},
+  state:{en:"Holding that the front camera is a zero and not a contrast — and refusing to grade the print until somebody tells me which camera he was standing in.", es:"Sostengo que la cámara frontal es un cero y no un asunto de contraste — y me niego a corregir la copia hasta que alguien me diga en qué cámara estaba parado él."},
+  said:{en:"The negative had the skull on it. The print came out empty. Nobody had asked the print.", es:"El negativo tenía la calavera. La copia salió vacía. Nadie le había preguntado a la copia."},
+  who:{en:"Chema, who developed it before he graded it", es:"Chema, que la reveló antes de corregirla"},
+  cap:{en:"Five reports in, and every answer had been a number about the sweet: eight pixels, then five, then a lit pane, then a ledge. He was sent to measure its contrast and instead he blanked the one hand that paints it and counted what moved. In the camera the owner photographs, the game draws the window eight times a frame and delivers nothing at all — the wall it hangs on is painted afterwards, over the top, every frame since it shipped. Contrast was the wrong question for a thing that is not on the paper. The negative was perfect. It always had been.", es:"Cinco reportes después, y cada respuesta había sido un número sobre el dulce: ocho píxeles, luego cinco, luego un vidrio encendido, luego una repisa. Lo mandaron a medir su contraste y en vez de eso tapó la única mano que lo pinta y contó lo que se movió. En la cámara que el dueño fotografía, el juego dibuja la ventana ocho veces por cuadro y no entrega absolutamente nada — la pared donde cuelga se pinta después, encima, cada cuadro desde el día que se entregó. El contraste era la pregunta equivocada para algo que no está en el papel. El negativo estaba perfecto. Siempre lo estuvo."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* CHEMA'S HAND, and NOT the contact sheet again: a darkroom bench. On the left a lightbox with the
+     negative on it — the skull is plainly there, in reversed tones. On the right the finished print,
+     pinned up, wet, and blank where the skull should be. Between them the grease pencil. */
+  g.fillStyle=P.ink;g.font="bold 13px ui-monospace,monospace";
+  g.fillText("CALLE DOS \u00b7 REPISAS \u00b7 C\u00c1MARA FRONTAL",W*0.035,H*0.06);
+  g.font="10px ui-monospace,monospace";g.fillStyle=P.deep;g.textAlign="right";
+  g.fillText("22:00 \u00b7 control 0 px",W*0.965,H*0.06);g.textAlign="left";   /* pulled up 2026-09-14: the readings row was below the panel's edge */
+  
+  /* --- the lightbox, left --- */
+  const lx=W*0.035, ly=H*0.15, lw=W*0.42, lh=H*0.47;
+  g.fillStyle=P.ink;g.globalAlpha=.18;g.fillRect(lx+5,ly+6,lw,lh);g.globalAlpha=1;
+  g.fillStyle="#F4EFD9";g.fillRect(lx,ly,lw,lh);
+  g.fillStyle="#FFFBEA";g.fillRect(lx+3,ly+3,lw-6,lh-6);
+  g.strokeStyle=P.shade;g.lineWidth=2;g.strokeRect(lx+0.5,ly+0.5,lw-1,lh-1);
+  /* the negative strip laid across it, sprocket edges top and bottom */
+  const nx=lx+lw*0.10, ny=ly+lh*0.22, nw=lw*0.80, nh=lh*0.52;
+  g.fillStyle="#3A3320";g.fillRect(nx,ny-4,nw,nh+8);
+  g.fillStyle="#FFFBEA";
+  for(let x=nx+3;x<nx+nw-4;x+=nw/7){g.fillRect(x,ny-3,4,3);g.fillRect(x,ny+nh,4,3);}
+  /* the frame itself: reversed tones, so the cream sweet reads DARK on a light wall */
+  g.fillStyle="#C9BE9A";g.fillRect(nx+4,ny,nw-8,nh);                    /* wall, inverted */
+  const wx=nx+nw*0.34, wy=ny+nh*0.16, ww=nw*0.32, wh=nh*0.60;
+  g.fillStyle="#5B5230";g.fillRect(wx,wy,ww,wh);                        /* the lit pane, inverted */
+  g.fillStyle="#2B2618";                                                /* the sweet, inverted */
+  g.beginPath();g.ellipse(wx+ww*0.5,wy+wh*0.52,ww*0.32,wh*0.30,0,0,7);g.fill();
+  g.fillRect(wx+ww*0.34,wy+wh*0.66,ww*0.32,wh*0.20);
+  g.fillStyle="#C9BE9A";                                                /* its sockets, inverted */
+  g.fillRect(wx+ww*0.36,wy+wh*0.42,ww*0.10,wh*0.12);
+  g.fillRect(wx+ww*0.56,wy+wh*0.42,ww*0.10,wh*0.12);
+  g.fillStyle="#8C8256";g.fillRect(wx-ww*0.10,wy+wh*0.88,ww*1.20,wh*0.14); /* the ledge, inverted */
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("EL NEGATIVO",lx,ly-4);
+  g.font="10px ui-monospace,monospace";g.fillStyle=P.deep;
+  g.fillText("est\u00e1 ah\u00ed \u00b7 8 veces por cuadro",lx,ly+lh+12);
+  
+  /* --- the print, right: pinned, wet, and empty --- */
+  const px2=W*0.545, py2=H*0.15, pw=W*0.42, ph=H*0.47;
+  g.fillStyle=P.ink;g.globalAlpha=.18;g.fillRect(px2+5,py2+6,pw,ph);g.globalAlpha=1;
+  g.fillStyle="#8A4A34";g.fillRect(px2,py2,pw,ph);                      /* the facade, as printed */
+  g.fillStyle="#7A4030";g.fillRect(px2,py2+ph*0.62,pw,ph*0.06);
+  /* the awning window the facade paints OVER the sill, every frame */
+  const ax=px2+pw*0.30, ay=py2+ph*0.24, aw=pw*0.40, ah=ph*0.30;
+  g.fillStyle="#E8DCB4";g.fillRect(ax,ay,aw,ah);
+  g.fillStyle="#D8C89A";g.fillRect(ax+2,ay+2,aw-4,ah-4);
+  g.fillStyle="#C87A55";g.beginPath();g.ellipse(ax+aw*0.5,ay+ah*0.72,aw*0.28,ah*0.20,0,0,Math.PI);g.fill();
+  g.strokeStyle="#6B3A28";g.lineWidth=1;g.strokeRect(ax+0.5,ay+0.5,aw-1,ah-1);
+  /* two drawing pins and a drip, so it reads as a wet print and not a window */
+  g.fillStyle=P.gold;[[px2+6,py2+6],[px2+pw-8,py2+6]].forEach(p=>{g.beginPath();g.arc(p[0],p[1],3,0,7);g.fill();});
+  g.fillStyle="#6B3A28";g.globalAlpha=.5;g.fillRect(px2+pw*0.5,py2+ph,2,H*0.03);g.globalAlpha=1;
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("LA COPIA",px2,py2-4);
+  
+  /* --- the grease pencil, straight across the print --- */
+  g.strokeStyle="#D9342B";g.lineWidth=4;g.lineCap="round";
+  g.beginPath();g.moveTo(px2+pw*0.10,py2+ph*0.14);g.lineTo(px2+pw*0.92,py2+ph*0.86);g.stroke();
+  g.fillStyle="#D9342B";g.font="bold 15px ui-monospace,monospace";
+  g.fillText("0 px",px2+pw*0.60,py2+ph*0.22);
+  
+  /* --- the arrow from negative to print, and the readings along the bottom --- */
+  g.strokeStyle=P.ink;g.lineWidth=2;
+  const my=py2+ph*0.50;
+  g.beginPath();g.moveTo(lx+lw+W*0.012,my);g.lineTo(px2-W*0.012,my);g.stroke();
+  g.beginPath();g.moveTo(px2-W*0.012,my);g.lineTo(px2-W*0.030,my-5);g.lineTo(px2-W*0.030,my+5);g.closePath();g.fill();
+  
+  const by=H*0.74;
+  g.fillStyle=P.bone;g.fillRect(W*0.035,by,W*0.93,H*0.26);
+  g.fillStyle=P.shade;g.fillRect(W*0.035,by,W*0.93,2);
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("P\u00cdXELES DE DULCE QUE LLEGAN, POR CALAVERA",W*0.05,by+13);
+  g.font="12px ui-monospace,monospace";
+  const cols=[["frontal","0",true],["superior","241",false],["iso","239",false],["3D","68",false],["3D +0.09","1743",false]];
+  cols.forEach((c,i)=>{const cx=W*0.05+i*(W*0.185);
+    g.fillStyle=c[2]?"#D9342B":P.deep;g.font="10px ui-monospace,monospace";g.fillText(c[0],cx,by+27);
+    g.fillStyle=c[2]?"#D9342B":P.ink;g.font="bold 14px ui-monospace,monospace";g.fillText(c[1],cx,by+43);});
+  }
+}
+);
+
 /* ================================================================================================
    LA COLCHA — the quilt. (Owner, 2026-09-12: "you have to help the agents with this mural my friend,
    i see little drawings. they should be able to append images and attach them like a quilt.")
@@ -1472,19 +1877,34 @@ function murMemoryText(who){const M=murMemory(who);
    the nineteen painted before bays existed land in their own without anybody editing them.
    "Rigo again" is Rigo \u2014 a painter who came back is the same painter, and the first build of this
    gave him two bays, which is precisely the opposite of what the owner asked for. */
-function murPainter(m){
-  const who=String((m&&m.who&&m.who.en)||"").split(/[,\u2014(]/)[0]
-    .replace(/\s+(again|otra vez|de nuevo)$/i,"").trim();
-  if(m&&m.by){const b=String(m.by).trim();
-    /* `by` is the agent's lowercase name (by:"beto"); the nineteen panels painted before it existed
-       are filed by the first word of `who` ("Beto"). Found 2026-09-13, the first time a real panel
-       carried `by`: keyed raw, "beto" opened a SECOND bay at the far end of the wall instead of
-       deepening Beto's, and the return-visit guard compared it with nothing. So the name a bay is
-       filed under is the one `who` already gives when it is the same person, else `by` capitalised. */
-    return who.toLowerCase()===b.toLowerCase()?who:b.charAt(0).toUpperCase()+b.slice(1);}
+/* the words a name is made of, so "Doña Cuca", "cuca", "Don Güero" and "don-guero" can be compared */
+function murFold(t){return String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()
+  .replace(/[-_]+/g," ").replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim();}
+function murWho(m){return String((m&&m.who&&m.who.en)||"").split(/[,\u2014(]/)[0]
+  .replace(/\s+(again|otra vez|de nuevo)$/i,"").trim();}
+/* A PERSON'S KEY ON THIS WALL IS THEIR FIRST NAME. Doña, Don and "the" are not names.
+   Found 2026-09-14 by planting, twice in one sitting: by:"cuca" on a panel signed "Doña Cuca" opened a
+   bay called "Cuca" beside hers and by:"don-guero" opened "Don-guero" beside Don Güero's — the first
+   fix compared `by` with the whole of `who` and said "the same person" only when they were equal. The
+   second fix asked whether `by` was a WORD of `who`, and that filed Melo's "Melo Garduño" visit in a
+   new bay beside "Melo", because it then handed back the longer name. An agent's file name never
+   carries the honorific, the accent or the surname; the wall's signature sometimes does. So the
+   identity is one word, and the bay's NAME is whatever the person's first visit signed. */
+function murKey(m){const raw=(m&&m.by)?String(m.by):murWho(m);
+  const w=murFold(raw).replace(/^(dona|don|the)\s+/,"").split(" ")[0];return w||"?";}
+function murOwnName(m){const who=murWho(m);
+  if(m&&m.by){const b=String(m.by).trim(),w=murFold(who),bb=murFold(b);
+    if(w&&(w===bb||(" "+w+" ").indexOf(" "+bb+" ")>=0))return who;
+    return b.charAt(0).toUpperCase()+b.slice(1);}
   return who||"?";}
+/* who painted it — the name of the bay it belongs in, which is the name the person's FIRST visit
+   signed: "Melo" for melo-el-conteo-de-uno (signed "Melo Garduño"), "Doña Cuca" for a by:"cuca". A
+   painter who came back is the same painter; the first build of this gave Rigo two bays, the second
+   gave Beto two, the third gave Cuca, Güero and Melo two each. */
+function murPainter(m,list){const L=list||(typeof MURALS!=="undefined"?MURALS:[]),k=murKey(m);
+  const first=L.find(x=>murKey(x)===k)||m;return murOwnName(first);}
 function murBays(list){const L=list||(typeof MURALS!=="undefined"?MURALS:[]),order=[],by={},disp={};
-  L.forEach(m=>{const k0=murPainter(m),k=k0.toLowerCase();if(!by[k]){by[k]=[];order.push(k);disp[k]=k0;}by[k].push(m);});
+  L.forEach(m=>{const k0=murPainter(m,L),k=k0.toLowerCase();if(!by[k]){by[k]=[];order.push(k);disp[k]=k0;}by[k].push(m);});
   return order.map(k=>({who:disp[k],panels:by[k]}));}
 
 /* the wall's natural size, in the same tile-pixels a panel is painted in. A bay is one panel wide;

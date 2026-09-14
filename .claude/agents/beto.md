@@ -128,6 +128,14 @@ calls designing where it should live — when `engine.js:239` had been validatin
 coordinates on every boot since the districts shipped, and passing them, because it asks *"is this
 tile SOLID"* when it means *"is it safe to appear here."*
 
+**And a seam is only as real as its readers.** `troAudit`/`TROKEYS` (`engine/engine.js`, grep `TROKEYS`)
+exists because a pack key nobody reads is *"the one where somebody wrote a line, saw nothing happen, and
+had no way to find out why."* Before you design a table of options, **count which of its keys something
+already draws.** *(The moment, 2026-09-13: asked to design a tram livery from a photograph of a real
+heritage tram — body, cream band, lamps, pole, gold lining, fender — the car in the code had the body
+and, in one camera out of four, an 8×2 px gold strip. Four of the six proposed keys would have been
+promises. Applied 2026-09-14 from your own post-flight.)*
+
 - **`syncChill`'s id is the identity of the BODY, not of the issue.** `addChill` bakes `NPCLOOK[key]` once
   (grep `NPCLOOK[key]=c.look` in `engine/engine.js`), and `syncChill` returns early for anyone already
   standing on their tile. So **anything baked at spawn — the look, the name, the egg — must be part of the

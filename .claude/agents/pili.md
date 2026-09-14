@@ -177,6 +177,16 @@ height — and **a diagonal bar across a coloured field reads as "crossed out"**
 specifically, because the owner has already called one that (grep `crossed out` in `engine/engine.js`).
 *(Applied 2026-09-13 from your own post-flight.)*
 
+**Check the object against the thing it STANDS ON, not only against the wall behind it.** The sweet's
+`#F6F2E8` (`drawCalaverita`) and the ledge's `#F7F2E2` (`drawSillLedge`) were chosen five days apart by
+two different fixes and differ by **0.4 of 255** — so the fix that finally gave the skull a shelf also
+gave it camouflage, and the owner's next word was not "hidden" but *"arrows having to point them
+out"*. Before you approve any prop that sits on, hangs from or leans against another, take the luma of
+both hexes and say the difference out loud. **Under about 40 they are one mass, and one mass needs an
+arrow.** *(Applied 2026-09-14 from your own post-flight. And read Chema's entry of the same date in
+`docs/3D-LOG.md` before you spend a sixth fix on value: in the front camera the skull delivers zero
+pixels for a reason that is not colour at all.)*
+
 ## The seams you direct through (never edit — name them)
 
 - `content/meridian/art.js` — `TILEART` (top-down), `TILEART_SIDE` (the standing view),

@@ -939,6 +939,29 @@ const { chromium } = require('playwright-core');
       });
       fails.push(...elMuro);
 
+      /* ---- ONE PERSON, ONE BAY — asked of the NAMES, not of the function that assigns them ----
+         The stretch check above groups the panels by murPainter and then asks the wall whether it
+         kept each group together, so it can never see murPainter itself splitting a person in two:
+         both sides of the comparison use the same function (docs/REGRESSION.md §3, a count instead of
+         an identity). Planted 2026-09-14: by:"cuca" on a panel signed "Doña Cuca" opened a bay called
+         "Cuca" beside hers, by:"don-guero" opened "Don-guero" beside Don Güero's, and the check above
+         was green. So fold every bay's name to a first name — accents off, hyphens to spaces, Don/Doña
+         dropped, surname dropped — and insist no two bays fold to the same person. */
+      const twoBays = await page.evaluate(() => {
+        const P = [];
+        if (typeof murBays !== 'function') return P;
+        /* the FIRST NAME, not the whole name: the second draft of this compared whole names and let
+           "Melo Garduño" stand beside "Melo" — the fix it was guarding had just split him. */
+        const fold = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+          .replace(/[-_]+/g, ' ').replace(/^(don|dona|the)\s+/, '').trim().split(' ')[0];
+        const seen = {};
+        murBays().forEach(b => { const k = fold(b.who);
+          if (seen[k]) P.push('the wall gave "' + b.who + '" a bay of their own next to "' + seen[k] + '" — one person, two stretches; an agent\'s `by` is a file name (no Doña, no accent, a hyphen) and the wall\'s name is the person, and murPainter has to know they are the same');
+          else seen[k] = b.who; });
+        return P;
+      });
+      fails.push(...twoBays);
+
       /* ---- A RETURN VISIT HAS TO SAY SOMETHING NEW ----
          The owner, 2026-09-12: "i want to make sure that if they are about to be repetitive, that
          they try to improvise from memory or again state or persona. i know you all may not have

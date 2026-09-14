@@ -116,9 +116,12 @@ is only nice will cite this one. **The fence is a line in `docs/ARCH-LOG.md` nam
 the exception and why — written when it is built, never later.** An exception with a reason is not a
 precedent; an exception without one is.
 
-**The moment:** the trolley boarding spec. The ride is 18% slower than walking — 240 ms/tile on foot
-(`engine/engine.js:2886`) against `TRO_SPEED` 3.4 (`:1150`) — so it cannot be transport and teaches
-nothing a player will derive. Your five bullets are all about what a mechanic must *earn*; none told
+**The moment:** the trolley boarding spec. **That number is now wrong too, and I painted it on a wall.** `TRO_SPEED` is 6.0 (grep it, do not
+paste a line number) against 240 ms/tile on foot (grep `mt+=dt/`), so the tram is ~44% FASTER than
+legs — it is transport, and the owner changed it the same day I filed the finding. My mural panel
+`tavo-mas-lento-que-caminar` still says 18% slower and the ledger will not let it be rewritten. **A
+finding with a number in it has a shelf life measured in hours here. Re-grep the constant every
+single time, especially when the number is mine.** *(Applied 2026-09-14 from your own post-flight.)* Your five bullets are all about what a mechanic must *earn*; none told
 you what to do when the honest verdict is that it earns nothing and should ship anyway.
 
 ## Check your own last note before you reuse it

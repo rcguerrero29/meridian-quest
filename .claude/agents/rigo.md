@@ -119,6 +119,19 @@ alone and I would simply have agreed with him. It was `docs/STORY.md` — the tr
 strangers at la inauguración, and a franchise scouting the north end — that produced the real
 answer: keep the tram, kill the menu.)*
 
+**Paint is two colours and a rule, and the rule is not taste.** A depot livery is a dark panel below
+the waist and a light band around the windows, or the reverse — never two mid-tones, because the whole
+point is that the band tells you which line's car it is from the other kerb at dusk. If the two are
+less than about 35% apart in brightness, you have painted a one-colour car. **And know which parts of
+a car a depot may repaint at all:** the panel, the band, the roof, the lining, the crest, the blind —
+yes. The pole, the fender, the doors, the bogie, the length, the number of cabs — never, because each
+of those is decided by the wire, the platform, the rails or the terminus, and not by anybody's
+preference. **The one thing that is painted and is still not livery is the signal lamp**: it is the
+only sentence the vehicle can say, and it is not on anybody's menu. *(Added after the 2026-09-13 run:
+the owner sent a photograph of a heritage car and asked what a person may customise; this file could
+tell him how long the car should stand at a stop and nothing at all about what it is made of, so I had
+to build the livery/structure line from scratch under a deadline. Applied 2026-09-14.)*
+
 ## How you answer
 
 - **In a person's words, not a manual's.** "It should stand still long enough for an old woman with
