@@ -943,3 +943,83 @@ AJ's eight.
   can find the next quest or the open ones, the murals creative and completed, and the backlog put
   together while AJ takes her time. Its returns are `docs/meetings/2026-09-14-la-cuadrilla-run-8.md`,
   its consolidation is §13 and `docs/UI-REVIEW.md` and `docs/meetings/2026-09-14-el-mapa.md`.
+
+## 13 · Run 8, consolidated — 2026-09-14, and what it left standing
+
+*Sixteen agents were called; thirteen advisers and two research sweeps returned (verbatim in
+`docs/meetings/2026-09-14-la-cuadrilla-run-8.md`); Chava and Chuy were cut by the session limit twice,
+so this section is the session's consolidation and Chava's two cold plays are owed. Everything here
+cites a return; nothing here is a decision the owner has not taken.*
+
+### 13.1 · What the run produced, and where it is
+
+| Thing | Where | State |
+|---|---|---|
+| **AJ's questionnaire**, night mode, thirteen questions, a comment box under every choice | the artifact he forwards (`scratchpad` source `aj-questionnaire.html`; script `docs/for-aj/LA-SOBREMESA.md`) | v2 after the crew's review — Tavo's decision map, Nacho's eleven, Paty's copy, Rosa's four sizes, Zeni's promise: *her answers stay with him and are never copied into the repo* |
+| **The journey**, thirteen screens on a phone at night | the artifact *La Sobremesa, the journey*; documents `docs/mocks/2026-09-14-la-sobremesa/journey/mockdocs2.js`, camera `render2.js`, thirty pictures with `manifest.json` | published; every picture labelled real game / real reader / drawing, with Lupe's admission ticket (row · language · shell · `unmodified`/`unrolled` · the fold numbers) |
+| **The UI review process** — admission ticket, four verdicts, eight signature lines, the red tests a mock inherits, the ledger | `docs/UI-REVIEW.md` (Lupe) | written; block 1 opened for the journey; crew iteration 9 signs it |
+| **The map plan** | `docs/meetings/2026-09-14-el-mapa.md`; issue #160 raised to high | presence marks on the plan, a `TOWNPLAN` seam so Calle Dos exists, no list, no done tick; the ring on "next" is his call; built after his look |
+| **The backlog** | issues #173–#200 (Remedios's twenty-nine, one folded into #160), comments on #154 and #156; `docs/BACKLOG.md` §0 | filed and ranked; her pick is #173, the phone held sideways |
+| **The research** | `docs/research/2026-09-14-map-and-questionnaires.md`; `docs/GENRE-RULES.md` R18 | filed whole |
+| **The palette** | §13.2 below | Pili's eight chrome hexes and four re-cut kitchen grounds, machine-checked to the tenth |
+
+### 13.2 · What the returns change in this plan
+
+- **The night app palette (Pili).** Ground `#14121B` · surface `#26232E` (the note ground, promoted —
+  the one new hex) · line `#3B3546` · ink `#E8E4DC` · muted `#9C96AB` (letters only) · accent
+  `#A97FFF` (a fill only, never a word) · on-accent `#160F26`. The chrome owns no warm colour; the
+  warm band 150–230 is the food's. **Three rules:** accent is a fill and muted is letters (they are
+  0.1 apart in value and can only be told apart by kind); gold goes to the food; one violet on screen
+  at a time — choices are outlined chips, the accent fills only the chosen one.
+- **The four kitchens, re-cut so the grounds ladder ≥40 apart in Rec.601 value:** Mexican comal
+  `#554C41` (77) · Korean onggi `#977150` (121) · Italian floured wood `#BC9E75` (162) · Japanese
+  hinoki `#DCCFAE` (207, unchanged — it was already right). Accents per kitchen (masa `#F0E6CC`,
+  stainless `#D4D8DC`, black olive `#3B3A22`, nori `#23301F`). **§10's palette table is superseded by
+  this**; the cross-kitchen accent ladder is dropped because the arithmetic cannot hold both ladders —
+  the ground is the identity, and where four kitchens appear together they are told apart by ground.
+  Text never sits on a kitchen ground. The two reader faults Pili found are engine work with a red
+  first: submit and cancel share one class (`engine/engine.js`, grep `c.className="dbtn"`), and the
+  night shell paints every label violet.
+- **The journey and the build order (Mari).** Eleven screens plus the one nobody listed — *the day
+  nothing happened* — and the HUD, which without `HUDFACT` prints *Rookie → AI LEGEND* in a kitchen.
+  Eighteen build rows: **two blockers first and not billed to this game** — careers become a pack seam
+  (#154, one sitting) and the `ENDLESS`×`CHAPTERS` refusal in the engine smoke (#156, a quarter) — then
+  the shell generated not copied, a minimal pack, the household and the street, the cast, **the four
+  documents (recipe card, drawer sheets, shifts board, house card — the whole loop, zero engine
+  change)**, leftovers to the fridge, the paste seam with its wash, G4, print (#196), G1, the
+  Collection, **the listening canvas (one sitting, a rule: an `art` section may take a tap and a drag,
+  the engine never learns what a merge is)**, then whichever surface AJ picks. Roughly nine sittings
+  for the half he can use alone; rows 1–13 are not blocked on AJ. **Her decision, said out loud:** the
+  grades toggle and the allergy list live on the house card, not in Settings (zero engine change; the
+  gear is literal markup in three shells).
+- **The shifts board's one rule (Mari, Pili):** it is the surface where yesterday could change colour,
+  and it never does — no shift is late, aged, missed or coloured; a taken shift is a shape (a turned
+  corner and a tag), the only date on it is the one the player wrote, and nothing compares it to today.
+- **The household (Cuca, Don Güero):** one room, five objects, five outlines, zero words — three
+  drawers told apart by mass (1 : 1.6 : 2.4), an open shelf with a ragged top edge, a tall fridge door;
+  a drawer, a fridge and a stove are the box the engine already has. Don Güero's Phase 7 gives the
+  household its parcel and the plan its board; his ledger lines are in his return.
+- **The testing pantry (Beto, #197):** `content/sobremesa/foods.js`, names from a public-domain
+  database, nothing fetched at play.
+- **What may leave (Zeni):** AJ's answers never enter the repo; `docs/for-aj/LA-SOBREMESA.md` now
+  says so to her face. The household's sync is the town's own pattern (his laptop, the pass while
+  testing).
+- **What the questionnaire had to lose (Paty, Rosa, Tavo):** "Send" may not promise what a page with
+  no store can keep — the button is labelled by state and the fallback copies the sheet; the clock
+  question is asked as a feeling; a bare `✕` is not a label.
+
+### 13.3 · What only he can answer now
+
+The seven on the journey page, in a sentence each: what Tuesday's first screen says (drawn: nothing,
+and the door still open) · restaurants as people or a board (drawn: people, lightly) · one house or
+each their own half (drawn: one house) · the grades switch on the house card or in the gear (drawn:
+the card) · merge board or by hand, and which first (both drawn; AJ is asked) · names, his or drafted
+(all placeholders) · the ring on "next" on the map (§13.1, the map plan).
+
+### 13.4 · What sessions still owe from this run
+
+Chava's two cold plays (the mocked map, the journey) · the eight signatures of the UI review
+(iteration 9) · the run-8 panels on the wall and `docs/crew/FLIGHT-NOTES.md` iteration 8 with the
+thirteen persona proposals answered · Paty's two findings from her run-8 return (stale §6 drift lines
+here; the ES timing of the care-package toast) · Mari's three stale citations in `docs/NEW-WORLD.md` ·
+the one privacy check on the questionnaire (open it logged out once before it is forwarded).
