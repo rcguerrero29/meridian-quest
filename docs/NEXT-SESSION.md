@@ -24,6 +24,7 @@ touched `engine/`, so `mq-v158` and `sw.js` did not move (`test/bump.js` confirm
 | **The wall, iteration 6** | Seven return visits painted from the design run's raw file (Beto, Rigo, Pili, Tavo, Doña Cuca, Don Güero, Chema), words verbatim, thirty-two panels in eighteen bays. `by:"cuca"` and `by:"don-guero"` each opened a second bay beside the person's own — the stretch guard groups by `murPainter` on both sides and could not see it. A person's key on the wall is their first name now (`murKey`), and a second guard folds every bay's *name* the same way (`docs/REGRESSION.md` row 24; three plants in a lab copy, all printed). Three drawings adjusted by the session, words untouched (Chema's readings were below the wall's course height; Beto's ghost car lay under his chart; Pili's label ran into her struck line). **Pili has not seen these seven** |
 | **Seven persona edits** | Flight-notes rows 32–38 applied (Tavo's wrong constant replaced, Rigo's paint rule, Pili's stands-on check, Cuca's "which room", Beto's readers-of-a-seam, Don Güero's third thing to check, Chema's blank-one-painter). Line numbers replaced by greps where the proposals carried them |
 | **The healthy-eating game** | Research consolidated, plan filed, three genre rules, seven persona edits, five tag-register leaks, one town copy fix. Two agents found their own persona lying to them (Pili's `drawPerson` line 435 lines stale; Paty's `chatSay` does not exist). **Nobody was asked for a mural panel** — a fault of the brief, recorded in flight-notes iteration 7 |
+| **The mocks** | Six of Pili's seven surfaces plus the cream/night pair, four of them rendered by the shipped reader from real documents (`docs/mocks/2026-09-14-la-sobremesa/mockdocs.js`, `render.js`), two drawn in canvas on the review page; mock 2 (3D) honestly not drawn. The plate is vessels on a petate; the week strip has four unmarked bays; the badge exists to be refused |
 | **Docs** | roster of nineteen; counts agree with the files; `OPEN.md` merged and pointing at `BOUNDARY.md`; this file is one block, history in `docs/NEXT-SESSION-ARCHIVE.md`; `CREW-MODE.md` has "Where the switch stands" and "What running many agents teaches" |
 
 ### What the design run settled (2026-09-14, 03:00 UTC) — read these before the queue
@@ -60,7 +61,10 @@ substance of each brief is in `docs/ASKS.md` (the seven rows of 2026-09-13, late
    returns are verbatim in `docs/meetings/2026-09-14-la-sobremesa-disena.md`; their seven persona
    edits are applied (flight-notes rows 39–45); Toño's five leaks are `docs/TAGS.md` L24–L28. Paty's
    live finding is fixed (three English strings inside the town's Spanish block: `hq`, `arrive.hq`,
-   `vmHQ` → *El changarro*). **Then the mocks** — see the queue.
+   `vmHQ` → *El changarro*). **The mocks are drawn** — `docs/la-sobremesa.md` §10 "Drawn", the pictures
+   in `docs/mocks/2026-09-14-la-sobremesa/`, and the owner's review page
+   `https://claude.ai/code/artifact/01d868ff-32b6-4715-8831-ef42c6cf0f6c`. Nothing more happens on this
+   world until he answers §9 — the first two questions decide which game it is.
 
 **The owner also asked** (all in `docs/ASKS.md`): a security triple-check — done, in the reply of that
 hour: R10 clean, the town bound to `127.0.0.1`, CSPs pinned, workflows read-only, no lockfile so

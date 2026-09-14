@@ -632,6 +632,22 @@ What does a wrong turn in the kitchen cost — ✅ "they say something"? And wha
 **If the budget is three pictures, draw 1, 3 and 6.** They decide the game's whole look; the other
 four confirm it. *(Screenshots are genuinely expensive — `docs/OWNER.md` says so in his own terms.)*
 
+### Drawn, 2026-09-14 — the session, same day
+
+Six of the seven, plus the cream/night pair, are in `docs/mocks/2026-09-14-la-sobremesa/` and on one
+review page for the owner (`https://claude.ai/code/artifact/01d868ff-32b6-4715-8831-ef42c6cf0f6c`,
+private to him). **Mocks 3, 4, 5 and 6 are the shipped reader rendering real documents** — `mockdocs.js`
+beside the pictures is the documents (`docOpen` takes the object; nothing registered, no engine change),
+`render.js` took the pictures at 360 and 640 CSS px in Meridian's cream paper and the town's night
+paper. The plate is drawn as **vessels on a petate** (a comal with the tortilla stack, the olla, a salsa
+dish, a green, a lime), the week as an 840-px `wide` strip with three bays filled and four **unmarked**,
+the fact three ways (the `note`+`kv` to keep, a table whose second row is a ledger about you, and
+coloured badges drawn as `art` because the engine has no badge). **Mocks 1 and 7 are canvas on the review
+page**: eight glyphs at 32 px, unlabelled until a button reveals them, and one 10×7 room drawn four
+times with only the palette swapped. **Mock 2 (a kitchen in 3D, four yaws) is not drawn** — it needs a
+room laid in a pack, sitting 5, after §9 · 4. Nobody has cold-read plate 1 yet; that is Pili's step 4 on
+the next run, and the owner's own try on the page.
+
 ---
 
 ## 11 · What this plan has not checked
