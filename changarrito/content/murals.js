@@ -1842,6 +1842,1122 @@ MURALS.push(
 }
 );
 
+/* ---- ITERATION 8 — 2026-09-14: the questionnaire for AJ, La Sobremesa's journey, the map, the backlog ----
+   Thirteen advisers returned and thirteen painted: Nacho, Tavo, Rosa, Paty, Mari (first visit), Pili, Doña Cuca,
+   Beto, Don Güero, Lupe, Doña Remedios (first visit), Zeni, and the research-map sweep — a lens with no persona,
+   filed under by:"research". Their words are verbatim from docs/meetings/2026-09-14-la-cuadrilla-run-8.md; each
+   drawing is the painter's own hand in a material of its own. ---- */
+MURALS.push(
+{
+  id:"nacho-lo-que-ella-escribio", iter:8, date:"2026-09-14", by:"nacho",
+  title:{en:"What she wrote is not on it", es:"Lo que ella escribió no va ahí"},
+  state:{en:"Holding that no questionnaire leaves this house until somebody has pressed Copy on one that was already filled in — and that the thing which has to travel is the sheet, not the page.", es:"Sostengo que ningún cuestionario sale de esta casa hasta que alguien le dé Copiar a uno ya contestado — y que lo que tiene que viajar es la hoja, no la página."},
+  said:{en:"We wrote her eleven questions and a button that hands back eleven questions.", es:"Le escribimos once preguntas y un botón que devuelve once preguntas."},
+  who:{en:"Nacho, who wrote the questions and then followed the button", es:"Nacho, que escribió las preguntas y luego siguió el botón"},
+  cap:{en:"He had the eleven written and went to see how her answers come home. The export knows headings, paragraphs, notes, tables and blanks, and knows nothing at all about a field somebody typed into — so the copy that travels is the copy that went out, and everything she said stays on her phone. Nobody had caught it because nobody here has ever pressed Copy on a page that somebody else filled in.", es:"Ya tenía las once escritas y se fue a ver cómo vuelven sus respuestas. La exportación conoce títulos, párrafos, notas, tablas y espacios en blanco, y no conoce en absoluto un campo que alguien llenó — así que la copia que viaja es la copia que salió, y todo lo que ella dijo se queda en su teléfono. Nadie lo había visto porque aquí nadie le ha dado Copiar a una página llenada por otra persona."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* NACHO'S HAND, and not the street this time: a duplicate order pad, the kind a kitchen keeps
+     by the pass. Top sheet filled in by her in biro; the carbon slid out and never used; the
+     yellow copy — the one that travels — printed, ruled, and empty where she answered.
+     My own palette: biro blue, carbon violet, pad yellow, a pink third leaf. Not the wall's. */
+  const PAPER="#F7F3E7",COPY="#E9D98C",PINK="#E4A8A0",CARB="#2A2440",SHEEN="#3C3357",
+        BIRO="#2F5D8C",RULE="#A9A18C";
+  g.fillStyle=P.ink;g.font="bold 13px ui-monospace,monospace";
+  g.fillText("PARA AJ \u00b7 ONCE PREGUNTAS",W*0.035,H*0.07);
+  g.font="10px ui-monospace,monospace";g.fillStyle=P.deep;g.textAlign="right";
+  g.fillText("bot\u00f3n COPIAR \u00b7 hoja 2",W*0.965,H*0.07);g.textAlign="left";
+
+  /* the carbon, stood on its edge between the two sheets: clean, unused, the whole fault */
+  g.save();g.translate(W*0.500,H*0.520);g.rotate(-0.05);
+  g.fillStyle=P.ink;g.globalAlpha=.20;g.fillRect(-W*0.055+4,-H*0.285+5,W*0.11,H*0.57);g.globalAlpha=1;
+  g.fillStyle=CARB;g.fillRect(-W*0.055,-H*0.285,W*0.11,H*0.57);
+  g.fillStyle=SHEEN;g.fillRect(-W*0.055,-H*0.285,W*0.030,H*0.57);
+  g.restore();
+
+  /* one sheet of the pad. answered=true is hers; answered=false is the copy that travels */
+  const sheet=(x,y,w,h,rot,bg,answered)=>{
+    g.save();g.translate(x,y);g.rotate(rot);
+    if(!answered){g.fillStyle=PINK;g.fillRect(6,7,w,h);}            /* the third leaf, peeking */
+    g.fillStyle=P.ink;g.globalAlpha=.18;g.fillRect(4,5,w,h);g.globalAlpha=1;
+    g.fillStyle=bg;g.fillRect(0,0,w,h);
+    g.fillStyle=RULE;g.fillRect(0,0,w,3);                            /* the glued head of the pad */
+    g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("1 \u00b7 LO M\u00c1S RICO",w*0.09,h*0.135);
+    for(let i=0;i<3;i++){const oy=h*0.245+i*h*0.105;                 /* three choices, printed */
+      g.strokeStyle=P.ink;g.lineWidth=1.5;g.beginPath();g.arc(w*0.135,oy,4.5,0,7);g.stroke();
+      g.fillStyle=RULE;g.fillRect(w*0.215,oy-2,w*(0.56-i*0.09),3);}
+    if(answered){g.fillStyle=BIRO;g.beginPath();g.arc(w*0.135,h*0.35,4.5,0,7);g.fill();}
+    g.fillStyle=P.deep;g.font="10px ui-monospace,monospace";
+    g.fillText("algo que quieras agregar",w*0.09,h*0.605);            /* the comment box */
+    g.strokeStyle=RULE;g.lineWidth=1;g.strokeRect(w*0.09+0.5,h*0.635+0.5,w*0.82,h*0.29);
+    if(answered){g.strokeStyle=BIRO;g.lineWidth=2;                    /* her hand, three lines */
+      for(let k=0;k<3;k++){g.beginPath();
+        for(let i=0;i<=12;i++){const px=w*0.13+i*(w*0.60/12),
+                               py=h*0.705+k*h*0.075+Math.sin(i*1.25+k*1.7)*2.4;
+          i?g.lineTo(px,py):g.moveTo(px,py);}
+        g.stroke();}}
+    g.restore();};
+
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("LO QUE ELLA ESCRIBI\u00d3",W*0.055,H*0.19);
+  g.fillText("LO QUE LLEGA",W*0.585,H*0.19);
+  sheet(W*0.055,H*0.225,W*0.365,H*0.585,-0.045,PAPER,true);
+  sheet(W*0.585,H*0.225,W*0.365,H*0.585, 0.035,COPY,false);
+
+  /* the transfer that does not happen: a dashed run from her sheet, stopped dead at the carbon */
+  g.strokeStyle=P.rust;g.lineWidth=3;g.setLineDash([7,5]);
+  g.beginPath();g.moveTo(W*0.430,H*0.415);g.lineTo(W*0.470,H*0.415);g.stroke();
+  g.setLineDash([]);
+  g.lineWidth=4;g.beginPath();                                        /* the stop bar on the carbon */
+  g.moveTo(W*0.488,H*0.365);g.lineTo(W*0.488,H*0.465);g.stroke();
+  g.lineWidth=3;g.beginPath();                                        /* and nothing on the far side */
+  g.moveTo(W*0.545,H*0.415);g.lineTo(W*0.565,H*0.415);g.stroke();
+  g.beginPath();g.moveTo(W*0.558,H*0.394);g.lineTo(W*0.574,H*0.415);g.lineTo(W*0.558,H*0.436);g.stroke();
+  g.fillStyle=P.deep;g.font="10px ui-monospace,monospace";
+  g.fillText("el papel carb\u00f3n nunca se puso",W*0.055,H*0.885);}
+},
+{
+  id:"tavo-hoja-uno-de-dos", iter:8, date:"2026-09-14", by:"tavo",
+  title:{en:"Sheet 1 of 2", es:"Hoja 1 de 2"},
+  state:{en:"Holding that the first fix to a map is never a symbol — it is the survey. Refusing to rank three kinds of pin until the plan draws both streets.", es:"Sosteniendo que lo primero que se le arregla a un plano nunca es un símbolo: es el levantamiento. Me niego a calificar tres tipos de chincheta hasta que el plano dibuje las dos calles."},
+  said:{en:"Nobody said the map was wrong. They said it was not dynamic. It is a plan of one street in a town with two, and I was three paragraphs into designing pins for the half we draw.", es:"Nadie dijo que el plano estuviera mal. Dijeron que no era dinámico. Es el plano de una calle en un pueblo de dos, y yo ya llevaba tres párrafos diseñando chinchetas para la mitad que sí dibujamos."},
+  who:{en:"Tavo, who was handed three shapes to rank and went to see what the doors opened onto", es:"Tavo, a quien le dieron tres formas que calificar y fue a ver a dónde daban las puertas"},
+  cap:{en:"He was asked to rank pins on the plan, a list under the plan, or both, and he started ranking. Tracing where each door actually went ended the ranking instead: two of the town's shops open off a street the plan has never drawn, so every pin he could have designed would have been a pin on the half we already look at. He has painted a number on this wall before and watched it go stale the same evening, so there is no number on this one.", es:"Le pidieron calificar chinchetas sobre el plano, una lista debajo del plano, o las dos, y empezó a calificar. Seguir a dónde daba cada puerta acabó con la calificación: dos de los negocios del pueblo abren a una calle que el plano nunca ha dibujado, así que cualquier chincheta que hubiera diseñado habría ido sobre la mitad que ya miramos. Ya pintó una cifra en esta pared y esa misma tarde quedó caduca; por eso en éste no hay ninguna."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* TAVO'S PAPER, THIRD VISIT. Not a race chart, not a sample-card rail — a cheap folded
+     town plan off a hotel desk. Printed one colour too warm, creased once, and the fold
+     turns the bottom panel under so you can see the top centimetre of a second street and
+     nothing else. The three gold marks on Calle Principal read fine. The two on Calle Dos
+     are in the crease. Palette is a map printer's, not the wall's. */
+  const S={sheet:"#F0E7CE",blok:"#DCCFA8",road:"#FBF7EC",park:"#A8BE86",rail:"#9CB3B8",
+           ink:"#4A4034",faint:"#8C7F6A",gold:"#D9A441",fold:"#B9A886",under:"#E1D6B7",
+           here:"#7A3FE0",tape:"#E9E3D2"};
+  const sx=W*0.055, sw=W*0.89, sy=H*0.10, vh=H*0.46, cr=sy+vh;
+
+  /* --- the visible panel of the sheet ------------------------------------ */
+  g.fillStyle=P.shade;g.globalAlpha=.45;g.fillRect(sx+3,sy+4,sw,vh);g.globalAlpha=1;
+  g.fillStyle=S.sheet;g.fillRect(sx,sy,sw,vh);
+  g.strokeStyle=S.fold;g.lineWidth=1;g.strokeRect(sx+.5,sy+.5,sw-1,vh-1);
+  /* two bits of tape at the top corners — it is pinned to this wall, not framed */
+  g.fillStyle=S.tape;g.globalAlpha=.8;
+  g.fillRect(sx-5,sy-4,18,8);g.fillRect(sx+sw-13,sy-4,18,8);g.globalAlpha=1;
+
+  /* the road, Calle Principal, with its tram rail above it */
+  const ry=sy+vh*0.50, rh=vh*0.17;
+  g.fillStyle=S.road;g.fillRect(sx+4,ry,sw-8,rh);
+  g.fillStyle=S.rail;g.fillRect(sx+4,ry-3,sw-8,2);
+  g.fillStyle=S.faint;for(let x=sx+10;x<sx+sw-10;x+=14)g.fillRect(x,ry+rh*0.5-1,7,1);
+
+  /* five blocks along the top, the doors facing the road */
+  const bt=sy+vh*0.11, bh=vh*0.33;
+  const blocks=[[0.04,0.15],[0.22,0.14],[0.39,0.17],[0.59,0.15],[0.78,0.17]];
+  blocks.forEach(([fx,fw],i)=>{
+    const bx=sx+sw*fx, bw=sw*fw;
+    g.fillStyle=S.blok;g.fillRect(bx,bt,bw,bh);
+    g.fillStyle=S.fold;g.fillRect(bx,bt+bh-2,bw,2);          /* the door side */
+    g.fillStyle=S.faint;                                      /* printed windows */
+    for(let wx=bx+3;wx<bx+bw-4;wx+=6)g.fillRect(wx,bt+4,3,3);
+  });
+  /* two blocks below the road, one of them the park */
+  const lb=ry+rh+vh*0.05, lh2=vh*0.19;
+  g.fillStyle=S.blok;g.fillRect(sx+sw*0.06,lb,sw*0.22,lh2);
+  g.fillStyle=S.park;g.fillRect(sx+sw*0.40,lb,sw*0.20,lh2);
+  g.fillStyle=S.blok;g.fillRect(sx+sw*0.70,lb,sw*0.22,lh2);
+
+  /* the three marks that read. A gold disc and an ink bang — the game's own ❗, printed */
+  const mark=(mx,my,r)=>{g.fillStyle=S.gold;g.beginPath();g.arc(mx,my,r,0,7);g.fill();
+    g.strokeStyle=S.ink;g.lineWidth=1;g.stroke();
+    g.fillStyle=S.ink;g.font="bold 11px ui-monospace,monospace";g.textAlign="center";
+    g.textBaseline="middle";g.fillText("!",mx,my+.5);g.textBaseline="alphabetic";g.textAlign="left";};
+  [0,2,4].forEach(i=>{const [fx,fw]=blocks[i];mark(sx+sw*(fx+fw/2),bt+bh+7,7);});
+
+  /* you, on the road, with the dot at your feet */
+  const bx=sx+sw*0.30, by=ry+rh*0.55-17;
+  murBody(g,bx,by,P.sky,13);
+  g.fillStyle=S.here;g.beginPath();g.arc(bx+4,by+13+5,4,0,7);g.fill();
+  g.strokeStyle=S.sheet;g.lineWidth=1.5;g.stroke();
+
+  /* the sheet's own printed title, in map type */
+  g.fillStyle=S.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("CALLE PRINCIPAL",sx+6,sy+vh*0.09);
+
+  /* the label that is the whole joke: the real plan's only mention of the other street */
+  g.fillStyle=S.faint;g.font="bold 11px ui-monospace,monospace";g.textAlign="right";
+  g.fillText("CALLE DOS",sx+sw-8,cr-vh*0.07);g.textAlign="left";
+  g.strokeStyle=S.faint;g.lineWidth=2;                        /* an arrow bending into the crease */
+  g.beginPath();g.moveTo(sx+sw-14,cr-vh*0.05);g.lineTo(sx+sw-14,cr-4);g.stroke();
+  g.beginPath();g.moveTo(sx+sw-19,cr-8);g.lineTo(sx+sw-14,cr-2);g.lineTo(sx+sw-9,cr-8);g.stroke();
+
+  /* --- THE CREASE ------------------------------------------------------- */
+  g.fillStyle=S.fold;g.fillRect(sx,cr,sw,3);
+  g.fillStyle=P.shade;g.globalAlpha=.5;g.fillRect(sx,cr+3,sw,3);g.globalAlpha=1;
+
+  /* --- the folded-under panel: one centimetre of it, and then nothing ---- */
+  const fx2=sx+7, fw2=sw-14, fy=cr+6, fh=H*0.115;
+  g.fillStyle=S.under;g.fillRect(fx2,fy,fw2,fh);
+  g.save();g.beginPath();g.rect(fx2,fy,fw2,fh);g.clip();
+  g.fillStyle=S.park;for(let x=fx2+6;x<fx2+fw2-4;x+=13)g.fillRect(x,fy+2,3,3);  /* the tree row */
+  g.fillStyle=S.rail;g.fillRect(fx2+3,fy+fh*0.36,fw2-6,2);                       /* the rail */
+  g.fillStyle=S.road;g.fillRect(fx2+3,fy+fh*0.46,fw2-6,fh*0.26);
+  g.fillStyle=S.blok;                                                            /* two shop blocks, tops only */
+  g.fillRect(fx2+fw2*0.18,fy+fh*0.80,fw2*0.20,fh*0.6);
+  g.fillRect(fx2+fw2*0.56,fy+fh*0.80,fw2*0.22,fh*0.6);
+  mark(fx2+fw2*0.28,fy+fh*1.02,7);                                               /* the two marks */
+  mark(fx2+fw2*0.67,fy+fh*1.02,7);                                               /* nobody can see */
+  murBody(g,fx2+fw2*0.44,fy+fh*0.62,P.rust,13);                                  /* somebody, cut off */
+  g.restore();
+  g.fillStyle=S.fold;g.fillRect(fx2,fy+fh,fw2,2);
+  g.fillStyle=P.shade;g.globalAlpha=.35;g.fillRect(fx2,fy+fh+2,fw2,4);g.globalAlpha=1;
+
+  /* the stencil under it, the way a printed sheet numbers itself */
+  g.fillStyle=S.ink;g.font="bold 12px ui-monospace,monospace";g.textAlign="center";
+  g.fillText("PLANO DE LA CIUDAD  ·  HOJA 1 DE 2",W/2,H*0.855);
+  g.font="bold 11px ui-monospace,monospace";g.fillStyle=S.faint;
+  g.fillText("sheet 2 not printed",W/2,H*0.905);g.textAlign="left";}
+},
+{
+  id:"rosa-el-punto-sobre-el-nombre", iter:8, date:"2026-09-14", by:"rosa",
+  title:{en:"The pin over the name", es:"El punto sobre el nombre"},
+  state:{en:"Nothing on it can be pressed.", es:"Nada en \u00E9l se puede tocar."},
+  said:{en:"The dot that says where you are is painted on top of the word that names where you are. And in the park there is no dot at all \u2014 under a legend still promising one.", es:"El punto que dice d\u00F3nde est\u00E1s est\u00E1 pintado encima de la palabra que nombra d\u00F3nde est\u00E1s. Y en el parque no hay punto \u2014 bajo una leyenda que lo sigue prometiendo."},
+  who:{en:"Rosa, who opened the same map from four rooms instead of one", es:"Rosa, que abri\u00F3 el mismo mapa desde cuatro cuartos, no desde uno"},
+  cap:{en:"The first time she opened it she was standing in the lobby, and the collision looked like a rendering quirk worth half a line. Opening the same board from four different rooms gave the real shape: three places share one pin, four have none, and the legend promises a mark that is not drawn. She nearly filed a clipped label at the right edge instead \u2014 she measured it, and it ends one and a half pixels inside the frame.", es:"La primera vez que lo abri\u00F3 estaba en la recepci\u00F3n, y el choque parec\u00EDa una rareza de dibujo, media l\u00EDnea a lo mucho. Abrir el mismo tablero desde cuatro cuartos distintos dio la forma real: tres lugares comparten un solo punto, cuatro no tienen ninguno, y la leyenda promete una marca que no se dibuja. Casi levanta en su lugar una etiqueta cortada en la orilla derecha \u2014 la midi\u00F3, y termina p\u00EDxel y medio adentro del marco."},
+  aspect:0.46,
+  art:(g,W,H)=>{ murGround(g,W,H);
+  const EN="#123D2C",ENd="#0B2A1E",BR="#B98A3C",BRd="#7E5A22",SW="#F3F0E4",RED="#C8322B";
+  /* ---- the post ---- */
+  const bx=W*0.055,by=H*0.085,bw=W*0.615,bh=H*0.70;
+  g.fillStyle=BRd; g.fillRect(bx+bw*0.18,by+bh,7,H*0.115); g.fillRect(bx+bw*0.74,by+bh,7,H*0.115);
+  /* ---- vitreous enamel board, brass frame ---- */
+  g.fillStyle=BR;  g.fillRect(bx-5,by-5,bw+10,bh+10);
+  g.fillStyle=BRd; g.fillRect(bx-5,by+bh+2,bw+10,3);
+  g.fillStyle=EN;  g.fillRect(bx,by,bw,bh);
+  g.fillStyle=ENd; g.fillRect(bx,by,bw,bh*0.155);
+  /* gloss: enamel is glass, so it takes the light in one band */
+  g.save();g.beginPath();g.rect(bx,by,bw,bh);g.clip();
+  g.globalAlpha=.07;g.fillStyle="#FFFFFF";
+  g.beginPath();g.moveTo(bx,by+bh*0.62);g.lineTo(bx+bw*0.52,by);g.lineTo(bx+bw*0.78,by);g.lineTo(bx,by+bh*0.92);g.closePath();g.fill();
+  g.globalAlpha=1;g.restore();
+  /* four screws */
+  [[bx+7,by+7],[bx+bw-7,by+7],[bx+7,by+bh-7],[bx+bw-7,by+bh-7]].forEach(p=>{
+    g.fillStyle=BR;g.beginPath();g.arc(p[0],p[1],3.2,0,7);g.fill();
+    g.strokeStyle=BRd;g.lineWidth=1;g.beginPath();g.moveTo(p[0]-2,p[1]);g.lineTo(p[0]+2,p[1]);g.stroke();});
+  /* ---- signwriting: the header ---- */
+  g.fillStyle=SW;g.font="bold 11px ui-sans-serif,system-ui,sans-serif";g.textAlign="center";
+  g.fillText("VILLAGE MAP",bx+bw/2,by+bh*0.108);
+  g.textAlign="left";
+  /* ---- the plan, in white line ---- */
+  const px0=bx+14,py0=by+bh*0.24,pw=bw-28,ph=bh*0.48;
+  g.strokeStyle=SW;g.lineWidth=1.4;g.globalAlpha=.85;
+  g.strokeRect(px0,py0+ph*0.52,pw,2);                       /* the street */
+  g.globalAlpha=1;
+  const blk=(x,y,w,h)=>{g.strokeStyle=SW;g.lineWidth=1.4;g.strokeRect(x,y,w,h);
+    g.globalAlpha=.10;g.fillStyle=SW;g.fillRect(x,y,w,h);g.globalAlpha=1;};
+  blk(px0+2,py0,pw*0.46,ph*0.40);                            /* MERIDIAN HQ */
+  blk(px0+pw*0.56,py0,pw*0.42,ph*0.40);                      /* the far block */
+  blk(px0+pw*0.12,py0+ph*0.66,pw*0.40,ph*0.34);              /* EL MERCADO */
+  g.fillStyle=SW;g.font="bold 10px ui-sans-serif,system-ui,sans-serif";
+  const nameY=py0+ph*0.26;
+  g.fillText("MERIDIAN HQ",px0+8,nameY);
+  const m=g.measureText("MERIDIAN HQ");
+  g.fillText("EL MERCADO",px0+pw*0.15,py0+ph*0.90);
+  /* ---- THE PIN — painted last, straight over the letters it was meant to point at ---- */
+  const qx=px0+8+m.width-11, qy=nameY-4;
+  g.fillStyle="#FFFFFF";g.beginPath();g.arc(qx,qy,8.6,0,7);g.fill();
+  g.fillStyle=RED;g.beginPath();g.arc(qx,qy,6.4,0,7);g.fill();
+  g.globalAlpha=.35;g.fillStyle="#FFFFFF";g.beginPath();g.arc(qx-2,qy-2.4,2.1,0,7);g.fill();g.globalAlpha=1;
+  /* ---- the legend, still promising the mark ---- */
+  g.fillStyle=RED;g.beginPath();g.arc(px0+7,by+bh-14.5,4.2,0,7);g.fill();
+  g.fillStyle=SW;g.globalAlpha=.85;g.font="10px ui-sans-serif,system-ui,sans-serif";
+  g.fillText("YOU ARE HERE",px0+16,by+bh-11);g.globalAlpha=1;
+  /* ---- and, off the board entirely: the park, where there is no dot at all ---- */
+  const tx=W*0.795, gy=H*0.80;
+  g.fillStyle="#8B6A4A";g.fillRect(tx-2,gy-26,5,26);                       /* trunk */
+  g.fillStyle="#5C7F4A";g.beginPath();g.arc(tx,gy-33,15,0,7);g.fill();
+  g.fillStyle="#4E6E3E";g.beginPath();g.arc(tx-7,gy-28,9,0,7);g.fill();
+  g.fillStyle="#6E8F4E";g.fillRect(W*0.70,gy,W*0.27,3);                    /* grass */
+  murBody(g,tx+22,gy-24,MURPAL.sky,24);                                     /* her, looking back at it */
+  /* the dotted look from her to the board, ending in a question */
+  g.strokeStyle=MURPAL.ink;g.lineWidth=1.4;g.setLineDash([3,4]);
+  g.beginPath();g.moveTo(tx+27,gy-49);g.lineTo(bx+bw+13,by+bh*0.52);g.stroke();g.setLineDash([]);
+  g.fillStyle=MURPAL.ink;g.font="bold 12px ui-monospace,monospace";
+  g.fillText("?",(tx+27+bx+bw+13)/2-3,(gy-49+by+bh*0.52)/2-5);
+}
+},
+{
+  id:"paty-la-comanda-sin-destino", iter:8, date:"2026-09-14", by:"paty",
+  title:{en:"The order with nowhere to go", es:"La comanda que no va a ningún lado"},
+  state:{en:"I check what a button DOES before I check how it reads.", es:"Primero reviso qué HACE un botón, luego cómo se lee."},
+  said:{en:"Eight questions with not one word wrong in them, and the last button was a lie: there is nowhere to send it.", es:"Ocho preguntas sin una sola palabra mal, y el último botón era mentira: no hay a dónde mandarlas."},
+  who:{en:"Paty, who writes both languages and trusts neither button", es:"Paty, que escribe los dos idiomas y no le cree a ningún botón"},
+  cap:{en:"A questionnaire for somebody's partner is the one document you cannot debug in front of her. The words were fine — warm, short, tú and never usted — and the last card offered Send, on a page with no network, no server and no address. The answers would have gone to the clipboard or nowhere, and she would have found out after typing all eight. The fix is four words and a Copy button. The lesson is older than this run: a sentence is a claim about a state, and the state a BUTTON claims is the one nobody proofreads.", es:"Un cuestionario para la pareja de alguien es el único documento que no puedes depurar enfrente de ella. Las palabras estaban bien — cálidas, cortas, de tú y nunca de usted — y la última tarjeta ofrecía Mandar, en una página sin red, sin servidor y sin dirección. Las respuestas se iban al portapapeles o a ningún lado, y ella se enteraba después de escribir las ocho. El arreglo son cuatro palabras y un botón de Copiar. La lección es más vieja que esta corrida: una frase es una afirmación sobre un estado, y el estado que afirma un BOTÓN es el que nadie revisa."},
+  aspect:0.46,
+  art:(g,W,H)=>{ murGround(g,W,H);
+  /* PATY'S HAND, SECOND VISIT — and deliberately NOT the proofreader's galley of iteration 4.
+     This one is made of a fonda's CARBON COMANDA: the pink-and-manila duplicate pad, written in
+     grease pencil, spiked on the check spindle, with the pass window behind it. My own palette —
+     carbon pink, pencil brown, steel, and the hot red of a stamp. MURPAL is the wall's ground,
+     not mine. Nobody here has drawn a ticket, a spindle, or a copy that did not take. */
+  const PA={pad:"#E7DCC2",pink:"#DCA0AC",ink:"#39425A",pen:"#57452F",
+            steel:"#9AA1A8",red:"#BE3B34",hole:"#15121A",rule:"#B6A78C",ghost:"#C98E9B"};
+
+  /* the pass window — a kitchen-shaped hole with no kitchen in it */
+  g.fillStyle=PA.hole; g.fillRect(W*0.60,H*0.06,W*0.37,H*0.24);
+  g.fillStyle=PA.steel; g.fillRect(W*0.585,H*0.30,W*0.40,H*0.022);
+  g.fillStyle=PA.ink; g.font="bold 10px ui-monospace,monospace"; g.globalAlpha=.75;
+  g.fillText("COCINA",W*0.625,H*0.115); g.globalAlpha=1;
+
+  /* the spindle: base, spike */
+  const sx=W*0.305, sBase=H*0.855;
+  g.fillStyle=PA.steel;
+  g.beginPath(); g.ellipse(sx,sBase,W*0.075,H*0.026,0,0,7); g.fill();
+  g.strokeStyle=PA.steel; g.lineWidth=3;
+  g.beginPath(); g.moveTo(sx,sBase); g.lineTo(sx,H*0.185); g.stroke();
+
+  /* the top sheet — manila, impaled, tilted the way a spiked ticket sits */
+  g.save(); g.translate(sx,H*0.545); g.rotate(-0.05);
+  const tw=W*0.44, th=H*0.585;
+  g.fillStyle="rgba(0,0,0,.22)"; g.fillRect(-tw/2+3,-th/2+4,tw,th);
+  g.fillStyle=PA.pad; g.fillRect(-tw/2,-th/2,tw,th);
+  g.strokeStyle=PA.rule; g.lineWidth=1; g.strokeRect(-tw/2+.5,-th/2+.5,tw-1,th-1);
+  g.fillStyle=PA.hole; g.beginPath(); g.arc(0,-th/2+H*0.045,3,0,7); g.fill();
+  g.fillStyle=PA.ink; g.font="bold 10px ui-monospace,monospace";
+  g.fillText("PARA AJ",-tw/2+9,-th/2+H*0.105);
+  g.font="10px ui-monospace,monospace"; g.globalAlpha=.8;
+  g.fillText("8 preguntas",-tw/2+9,-th/2+H*0.175); g.globalAlpha=1;
+  /* seven answered rows in grease pencil, each ticked */
+  g.strokeStyle=PA.pen; g.lineWidth=1.5;
+  for(let i=0;i<7;i++){ const y=-th/2+H*0.225+i*H*0.052;
+    g.beginPath(); g.moveTo(-tw/2+22,y); g.lineTo(tw/2-14,y); g.stroke();
+    g.beginPath(); g.moveTo(-tw/2+9,y-3); g.lineTo(-tw/2+13,y+1); g.lineTo(-tw/2+18,y-7); g.stroke(); }
+  /* the eighth row is not a row, it is the button */
+  const by=-th/2+H*0.225+7*H*0.052, bh=H*0.075;
+  g.strokeStyle=PA.red; g.lineWidth=2; g.strokeRect(-tw/2+9,by-2,tw-24,bh);
+  g.fillStyle=PA.red; g.font="bold 11px ui-monospace,monospace";
+  g.fillText("MANDAR \u25B8",-tw/2+17,by+bh*0.72);
+  g.restore();
+
+  /* the spike above the sheet, so it reads as impaled */
+  g.strokeStyle=PA.steel; g.lineWidth=3;
+  g.beginPath(); g.moveTo(sx,H*0.255); g.lineTo(sx,H*0.185); g.stroke();
+  g.fillStyle=PA.steel; g.beginPath(); g.arc(sx,H*0.178,4,0,7); g.fill();
+
+  /* the carbon copy, slid out to the right — same rows, and the last box EMPTY */
+  g.save(); g.translate(W*0.755,H*0.665); g.rotate(0.07);
+  const cw=W*0.40, ch=H*0.42;
+  g.globalAlpha=.92; g.fillStyle=PA.pink; g.fillRect(-cw/2,-ch/2,cw,ch);
+  g.globalAlpha=1; g.strokeStyle=PA.ghost; g.lineWidth=1; g.strokeRect(-cw/2+.5,-ch/2+.5,cw-1,ch-1);
+  g.strokeStyle=PA.ghost; g.lineWidth=1.5; g.globalAlpha=.85;
+  for(let i=0;i<5;i++){ const y=-ch/2+H*0.075+i*H*0.045;
+    g.beginPath(); g.moveTo(-cw/2+10,y); g.lineTo(cw/2-12,y); g.stroke(); }
+  g.globalAlpha=1;
+  g.setLineDash([3,3]); g.strokeStyle=PA.red; g.lineWidth=1.5;
+  g.strokeRect(-cw/2+10,-ch/2+H*0.315,cw-22,H*0.062); g.setLineDash([]);
+  g.fillStyle=PA.ink; g.font="9px ui-monospace,monospace"; g.globalAlpha=.65;
+  g.fillText("copia",-cw/2+10,-ch/2+H*0.045); g.globalAlpha=1;
+  g.restore();
+
+  /* the wire from MANDAR toward the window — and it ends in the air */
+  g.strokeStyle=PA.red; g.lineWidth=2; g.setLineDash([5,4]);
+  g.beginPath(); g.moveTo(W*0.50,H*0.735);
+  g.quadraticCurveTo(W*0.60,H*0.60,W*0.63,H*0.435); g.stroke(); g.setLineDash([]);
+  g.strokeStyle=PA.red; g.lineWidth=2;
+  g.beginPath(); g.arc(W*0.635,H*0.405,W*0.018,0.6,5.2); g.stroke();
+
+  /* the stamp */
+  g.fillStyle=PA.ink; g.font="bold 12px ui-monospace,monospace";
+  g.fillText("COMANDA \u00B7 COPIA AL CARB\u00D3N",W*0.04,H*0.115);
+  g.fillStyle=PA.red; g.font="bold 11px ui-monospace,monospace";
+  g.fillText("NO HAY A D\u00D3NDE",W*0.68,H*0.41);
+}
+},
+{
+  id:"mari-nueve-cortadas-dos-en-blanco", iter:8, date:"2026-09-14", by:"mari",
+  title:{en:"Nine strips cut, two blank", es:"Nueve tiras cortadas, dos en blanco"},
+  state:{en:"Holding the board with two strips out. I will not slot a guess into AJ's place, and I will not let the other nine sit and wait on her.", es:"Con el tablero en la mano y dos tiras fuera. No meto una adivinanza en el lugar de AJ, y no dejo que las otras nueve se queden esperándola."},
+  said:{en:"Nine of these eleven screens are already shipping. The two that are not are the two she actually plays.", es:"Nueve de estas once pantallas ya están en el juego. Las dos que faltan son las dos que ella de veras juega."},
+  who:{en:"Mari, the producer, who counts the screens and names who owes each one", es:"Mari, la productora, que cuenta las pantallas y dice quién debe cada una"},
+  cap:{en:"I came to lay out a journey and found the cost was nowhere near where the brief put it. Six of the screens are the shipped reader rendering a sheet it has never been told is a recipe, and three more are words somebody writes. The whole build is the two at the end \u2014 a picture that takes a tap, which this engine has never had \u2014 and the person who decides which of the two it is has not answered yet. So the honest thing to hand over is a board with a gap in it.", es:"Vine a trazar un recorrido y el costo no estaba ni cerca de donde lo pon\u00eda el encargo. Seis pantallas son el lector de siempre pintando una hoja a la que nadie le ha dicho que es una receta, y otras tres son palabras que alguien escribe. Todo el trabajo son las dos del final \u2014 un dibujo que recibe un toque, cosa que este motor nunca ha tenido \u2014 y quien decide cu\u00e1l de las dos es todav\u00eda no contesta. As\u00ed que lo honrado es entregar un tablero con un hueco."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* MARI'S HAND: a film production STRIP BOARD — a wooden frame, coloured card strips slotted in,
+     one strip per screen. Nobody on this wall has drawn on card. My palette is the board's, not the
+     game's: manila, board-green, blank white, and the wood. Six cut strips are already shipping,
+     three are words somebody writes, and the last two are blank white with a pencilled ? — with a
+     torn note pinned over them that says whose answer they are waiting on. Type is absolute here,
+     so the strips are sized to hold 11px lettering turned on its side, which is how a real board
+     letters them anyway. Bottom 6% left clear for the wall's dado. */
+  const wood="#8A6A46",woodD="#654A31",ink="#3A2A20",pencil="#8A8271",
+        MAN="#E8D9A8",GRN="#A6BC8E",WHT="#F4F1E8",note="#EDE6D2";
+  /* the board */
+  const bx=W*0.05,bw=W*0.90,by=H*0.09,bh=H*0.75;
+  g.fillStyle=wood;g.fillRect(bx,by,bw,bh);
+  g.fillStyle=woodD;g.fillRect(bx,by,bw,Math.max(2,H*0.015));
+  g.fillStyle=woodD;g.fillRect(bx,by+bh-Math.max(2,H*0.02),bw,Math.max(2,H*0.02));
+  /* the header board across the top — the production info, in the producer's own hand */
+  const hx=bx+W*0.025,hw=bw-W*0.05,hy=by+H*0.045,hh=H*0.115;
+  g.fillStyle=WHT;g.fillRect(hx,hy,hw,hh);
+  g.strokeStyle=ink;g.lineWidth=1;g.strokeRect(hx+.5,hy+.5,hw-1,hh-1);
+  g.fillStyle=ink;g.font="bold 12px ui-monospace,monospace";g.textAlign="left";
+  g.fillText("LA SOBREMESA \u00b7 11 PANTALLAS",hx+6,hy+hh*0.64);
+  g.fillStyle=ink;g.globalAlpha=.45;g.fillRect(hx+6,hy+hh*0.80,hw*0.55,1);g.globalAlpha=1;
+  /* the slot rail and the strips */
+  const n=11,sy=hy+hh+H*0.045,sh=(by+bh)-sy-H*0.055,
+        gap=Math.max(2,W*0.005),sw=(hw-gap*(n-1))/n;
+  g.fillStyle=woodD;g.globalAlpha=.45;g.fillRect(hx,sy-3,hw,3);g.globalAlpha=1;
+  const LAB=["puerta","calle","casa","caj\u00f3n","turnos","receta","noche","libro","ajustes","",""];
+  for(let i=0;i<n;i++){
+    const x=hx+i*(sw+gap),col=i<6?MAN:(i<9?GRN:WHT);
+    g.fillStyle=col;g.fillRect(x,sy,sw,sh);
+    g.strokeStyle=woodD;g.globalAlpha=.55;g.lineWidth=1;g.strokeRect(x+.5,sy+.5,sw-1,sh-1);g.globalAlpha=1;
+    if(i<9){                                    /* a cut strip: ruled, filled in, slotted */
+      g.fillStyle=ink;g.globalAlpha=.30;
+      for(let k=1;k<=4;k++)g.fillRect(x+2,Math.round(sy+sh*(0.14*k+0.16)),sw-4,1);
+      g.globalAlpha=1;
+      if(LAB[i]&&sw>=14){                       /* lettering runs DOWN a strip, as it does on a real board */
+        g.save();g.translate(x+sw*0.62,sy+sh*0.90);g.rotate(-Math.PI/2);
+        g.fillStyle=ink;g.font="bold 11px ui-monospace,monospace";g.textAlign="left";
+        g.fillText(LAB[i],0,0);g.restore();}
+    } else {                                    /* a blank strip: nothing on it but a pencilled question */
+      g.fillStyle=pencil;g.font="bold 12px ui-monospace,monospace";g.textAlign="center";
+      g.fillText("?",x+sw/2,sy+sh*0.56);g.textAlign="left";}
+  }
+  /* the torn note pinned over the two blanks — who the board is waiting on */
+  const lx=hx+9*(sw+gap)-gap/2,lw2=sw*2+gap,ny=sy+sh*0.12,nh=Math.max(18,H*0.15);
+  g.save();g.translate(lx+lw2/2,ny+nh/2);g.rotate(-0.05);
+  g.fillStyle=note;g.fillRect(-lw2*0.62,-nh/2,lw2*1.24,nh);
+  g.strokeStyle=ink;g.globalAlpha=.35;g.lineWidth=1;g.strokeRect(-lw2*0.62+.5,-nh/2+.5,lw2*1.24-1,nh-1);g.globalAlpha=1;
+  g.fillStyle=ink;g.font="bold 11px ui-monospace,monospace";g.textAlign="center";
+  g.fillText("AJ",0,4);
+  g.fillStyle=P.rust;g.beginPath();g.arc(0,-nh/2+4,2.5,0,7);g.fill();   /* the pin */
+  g.restore();g.textAlign="left";
+  /* the count, in the producer's hand, under the board */
+  g.fillStyle=ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("9 cortadas",bx,H*0.925);
+  g.fillStyle=P.rust;g.fillText("2 sin cortar",bx+W*0.27,H*0.925);
+  g.fillStyle=pencil;g.fillText("\u2014 y son las que se juegan",bx+W*0.51,H*0.925);}
+},
+{
+  id:"pili-el-vidrio-ahumado", iter:8, date:"2026-09-14", by:"pili",
+  title:{en:"The smoked glass", es:"El vidrio ahumado"},
+  state:{en:"Holding that a dark app confiscates the bottom of the scale — the comal has to come up twenty-three points or it stops being a comal.", es:"Sosteniendo que una app oscura te confisca el fondo de la escala — el comal tiene que subir veintitrés puntos o deja de ser comal."},
+  said:{en:"Under the smoked glass the button and the small print are one grey. 154.15 and 154.19.", es:"Bajo el vidrio ahumado el botón y la letra chica son un solo gris. 154.15 y 154.19."},
+  who:{en:"Pili, la piñatera, who squints at a colour before she believes it", es:"Pili, la piñatera, que le entrecierra los ojos a un color antes de creerle"},
+  cap:{en:"He said only that the kitchen colours were not clear enough, and the four grounds and four accents had each been chosen on a different day by somebody who was right about one object. Squinting is free and nobody had done it: five of the seven pairs sit inside the band they were written to clear, and the one that passes is the one whose own note says the contrast is value. Then the glass turned on the app itself and found the colour you press and the colour that means never-mind four hundredths of a point apart — two hexes, two hands, one grey.", es:"Él nada más dijo que los colores de las cocinas no contrastaban lo suficiente, y los cuatro fondos y los cuatro acentos se habían escogido en días distintos, cada uno por alguien que tenía razón sobre un solo objeto. Entrecerrar los ojos no cuesta nada y nadie lo había hecho: cinco de los siete pares caen dentro de la banda que debían librar, y el único que pasa es aquel cuya propia nota dice que el contraste es de valor. Luego el vidrio se volvió hacia la app y halló que el color que se oprime y el color que dice no-importa están a cuatro centésimas de punto — dos hexadecimales, dos manos, un solo gris."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* PILI'S HAND, third visit — and not paper this time. My first two panels were periódico y papel
+     de china; this one is EL VIDRIO AHUMADO, the scrap of smoked glass you hold over a colour to
+     take the hue out and see what is left underneath. The palette is NOT MURPAL: every chip above
+     the glass is a real hex out of the report, and every bar under it is that same hex at its
+     measured luma, 0-255. Four kitchens, then the two the chrome uses for "press me" and "never
+     mind". Butted, on purpose — two neighbours of one value become one bar and stop being two. */
+  const CH=[["#3A3630",54.5],["#6B4A33",81.2],["#C9A97E",173.7],["#DCCFAE",207.1],
+            ["#A97FFF",154.15],["#9C96AB",154.19]];
+  const grey=v=>{const n=Math.round(v);return "rgb("+n+","+n+","+n+")";};
+  const x0=W*0.06,gp=W*0.035,bw=W*0.88,cw=(bw-gp)/6,cx=i=>x0+i*cw+(i>3?gp:0);
+  const ay=H*0.12,ah=H*0.24,by=H*0.45,bh=H*0.22;
+  const vx=W*0.03,vw=W*0.94,vy=H*0.40,vh=H*0.38;
+  /* ARRIBA — los colores, held apart so they read as six separate things */
+  CH.forEach((c,i)=>{g.fillStyle=c[0];g.fillRect(cx(i),ay,cw-2,ah);});
+  g.strokeStyle=P.ink;g.globalAlpha=.30;g.lineWidth=1;
+  CH.forEach((c,i)=>g.strokeRect(cx(i)+.5,ay+.5,cw-3,ah-1));g.globalAlpha=1;
+  /* ABAJO — los mismos seis, en valor, pegados */
+  CH.forEach((c,i)=>{g.fillStyle=grey(c[1]);g.fillRect(cx(i),by,cw,bh);});
+  /* EL VIDRIO */
+  g.fillStyle="rgba(22,19,30,0.34)";g.fillRect(vx,vy,vw,vh);
+  g.globalAlpha=.15;g.fillStyle="#FFFFFF";
+  g.beginPath();g.moveTo(vx+vw*0.10,vy+vh);g.lineTo(vx+vw*0.21,vy);
+  g.lineTo(vx+vw*0.27,vy);g.lineTo(vx+vw*0.16,vy+vh);g.closePath();g.fill();g.globalAlpha=1;
+  g.strokeStyle="#524B61";g.lineWidth=2;g.strokeRect(vx+1,vy+1,vw-2,vh-2);
+  g.fillStyle=P.wash;g.beginPath();                    /* el pedacito que se le rompió */
+  g.moveTo(vx+vw-W*0.055,vy);g.lineTo(vx+vw+1,vy);g.lineTo(vx+vw+1,vy+H*0.075);g.closePath();g.fill();
+  g.fillStyle=P.bone;g.globalAlpha=.80;                /* dos tiras de cinta */
+  g.save();g.translate(vx+vw*0.32,vy);g.rotate(-0.15);g.fillRect(-W*0.045,-H*0.028,W*0.09,H*0.056);g.restore();
+  g.save();g.translate(vx+vw*0.668,vy+vh);g.rotate(0.12);g.fillRect(-W*0.045,-H*0.028,W*0.09,H*0.056);g.restore();
+  g.globalAlpha=1;
+  /* las cuentas, en lápiz graso sobre el vidrio. Rojo = no libra la banda. Verde = la libra. */
+  const tick=(i,lab,col)=>{const X=cx(i);
+    g.strokeStyle=col;g.lineWidth=2;g.beginPath();g.moveTo(X,by+bh);g.lineTo(X,vy+vh);g.stroke();
+    g.fillStyle=col;g.textAlign="center";g.fillText(lab,X,vy+vh+H*0.085);g.textAlign="left";};
+  g.font="bold 10px ui-monospace,monospace";
+  tick(1,"27","#E0705A");tick(2,"92","#8FBF7A");tick(3,"33","#E0705A");tick(5,"0.04","#E0705A");
+  /* EL PULGAR — un vidrio que nadie sostiene es una ventana */
+  const tx=vx+vw*0.055,ty=vy+vh-H*0.05;
+  g.fillStyle="#C08A5E";
+  g.beginPath();g.moveTo(tx-W*0.028,ty+H*0.18);g.lineTo(tx-W*0.028,ty+H*0.03);
+  g.quadraticCurveTo(tx-W*0.028,ty-H*0.035,tx,ty-H*0.035);
+  g.quadraticCurveTo(tx+W*0.028,ty-H*0.035,tx+W*0.028,ty+H*0.03);
+  g.lineTo(tx+W*0.028,ty+H*0.18);g.closePath();g.fill();
+  g.fillStyle="#A9744B";g.fillRect(tx-W*0.028,ty+H*0.055,W*0.056,2);
+  g.fillStyle="#EBD6C2";g.fillRect(tx-W*0.016,ty-H*0.018,W*0.032,H*0.05);}
+},
+{
+  id:"cuca-el-norte-cobra-primero", iter:8, date:"2026-09-14", by:"cuca",
+  title:{en:"North collects first", es:"El norte cobra primero"},
+  state:{en:"Re-laying the cold corner so both doors face the same aisle", es:"Volviendo a trazar el rincón frío para que las dos puertas den al mismo pasillo"},
+  said:{en:"Two doors, one square of floor between them. Press Read and the north one answers — every time, for ever. The other might as well be a wall.", es:"Dos puertas, una baldosa en medio. Le picas Leer y contesta la del norte — siempre, para siempre. La otra bien podría ser pared."},
+  who:{en:"Doña Cuca, who keeps the rooms and the stairs", es:"Doña Cuca, la de los cuartos y las escaleras"},
+  cap:{en:"I was laying a kitchen and I put the fridge above the standing tile and the freezer below it, the way a real cold corner goes. Then I read the probe: it asks your own square, then north, then south, then west, then east, and it stops at the first yes. So the freezer wore a card that breathed at you from across the room, and a door that never opened. Both fronts face the same aisle now.", es:"Estaba trazando una cocina y puse el refri arriba de la baldosa y el congelador abajo, como va un rincón frío de verdad. Luego leí el sondeo: pregunta tu propia baldosa, luego norte, luego sur, luego oeste, luego este, y se para en el primer sí. Así que el congelador traía una tarjetita que respiraba desde el otro lado del cuarto, y una puerta que nunca abría. Ahora las dos dan al mismo pasillo."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* DOÑA CUCA, THIRD VISIT — AND NOT CHALK THIS TIME. She chalked an elevation on the limewash once
+     and two staircases once. A landlady also owns a talonario: the pink carbon receipt book, the
+     yellow duplicate under it, aniline-purple carbon, a red rubber stamp and a pencil word on the
+     stub. This palette is hers and it is nowhere else on this wall. Nothing here is random — the
+     stamp's broken ink is a fixed list, so two renders of this panel are identical to the pixel. */
+  const paper="#EBD2CE",dup="#DFCE93",carb="#4B3A6B",red="#B0413C",pen="#6C7A8A",glare="#F7E9E6";
+  const L=W*0.06,T=H*0.07,PW=W*0.88,PH=H*0.76;
+  g.fillStyle=dup;g.fillRect(L+W*0.012,T+H*0.035,PW,PH);           /* the duplicate, showing at two edges */
+  g.fillStyle=paper;g.fillRect(L,T,PW,PH);                          /* the flimsy */
+  g.fillStyle=glare;g.fillRect(L,T,PW,Math.max(1,H*0.012));         /* light on the top fold */
+  g.fillStyle=dup;for(let y=T+H*0.05;y<T+PH-H*0.02;y+=H*0.055){     /* the perforation */
+    g.beginPath();g.arc(L+W*0.028,y,1.7,0,7);g.fill();}
+  g.strokeStyle=carb;g.globalAlpha=.30;g.lineWidth=1;               /* two ruled lines */
+  g.beginPath();g.moveTo(L+W*0.055,T+H*0.20);g.lineTo(L+PW-W*0.03,T+H*0.20);g.stroke();
+  g.beginPath();g.moveTo(L+W*0.055,T+PH-H*0.09);g.lineTo(L+PW-W*0.03,T+PH-H*0.09);g.stroke();
+  g.globalAlpha=1;
+  g.fillStyle=carb;g.font="bold 11px ui-monospace,monospace";g.textAlign="left";
+  g.fillText("RECIBO",L+W*0.055,T+H*0.145);g.fillText("No 3",L+PW-W*0.145,T+H*0.145);
+  /* ---- the little plan she sketched on the receipt: fridge, the square you stand on, freezer ---- */
+  const cx=L+W*0.10,cw=W*0.20,bh=Math.max(9,Math.round(H*0.085));
+  const fy=T+H*0.22,fh=H*0.13, ty=T+H*0.37,th=H*0.24, zy=T+H*0.63,zh=H*0.08;
+  g.fillStyle=carb;g.fillRect(cx,fy,cw,fh);                         /* el refri */
+  g.fillStyle=paper;g.fillRect(cx,fy+fh*0.30,cw,1);g.fillRect(cx+cw*0.66,fy+fh*0.42,2,fh*0.42);
+  g.strokeStyle=carb;g.lineWidth=1.5;g.strokeRect(cx+.5,ty+.5,cw-1,th-1);   /* the square of floor */
+  murBody(g,cx+cw*0.34,ty+th*0.38,P.sky,bh);                        /* the tenant, standing on it */
+  g.fillStyle=carb;g.fillRect(cx,zy,cw,zh);                         /* el congelador, low and lidded */
+  g.fillStyle=paper;g.fillRect(cx,zy+zh*0.34,cw,1);
+  const ax=cx+cw*0.88;
+  g.strokeStyle=carb;g.lineWidth=2;                                  /* the question that gets answered */
+  g.beginPath();g.moveTo(ax,ty+th*0.28);g.lineTo(ax,fy+fh+7);g.stroke();
+  g.fillStyle=carb;g.beginPath();g.moveTo(ax,fy+fh);g.lineTo(ax-4,fy+fh+8);g.lineTo(ax+4,fy+fh+8);g.closePath();g.fill();
+  g.setLineDash([3,3]);g.globalAlpha=.5;                             /* the one that never gets asked */
+  g.beginPath();g.moveTo(ax,ty+th*0.74);g.lineTo(ax,zy-3);g.stroke();
+  g.setLineDash([]);g.globalAlpha=1;
+  g.strokeStyle=red;g.lineWidth=2;
+  g.beginPath();g.moveTo(ax-5,zy-H*0.055);g.lineTo(ax+5,zy-H*0.015);g.stroke();
+  g.beginPath();g.moveTo(ax+5,zy-H*0.055);g.lineTo(ax-5,zy-H*0.015);g.stroke();
+  g.fillStyle=carb;g.textAlign="center";g.font="bold 11px ui-monospace,monospace";
+  g.fillText("N",cx-W*0.030,fy+fh*0.72);g.fillText("S",cx-W*0.030,zy+zh*0.85);
+  /* ---- the writing, with its leaders and its column of what was collected ---- */
+  g.textAlign="left";const tx=cx+cw+W*0.055;
+  g.fillStyle=carb;g.fillText("REFRI",tx,fy+fh*0.78);
+  g.fillText("CONGELADOR",tx,zy+zh*0.95);
+  g.globalAlpha=.45;
+  for(let x=tx+W*0.10;x<L+PW-W*0.10;x+=4)g.fillRect(x,fy+fh*0.72,2,1);
+  for(let x=tx+W*0.20;x<L+PW-W*0.10;x+=4)g.fillRect(x,zy+zh*0.88,2,1);
+  g.globalAlpha=1;
+  g.fillStyle=carb;g.fillText("1",L+PW-W*0.085,fy+fh*0.78);
+  g.fillStyle=red;g.fillText("0",L+PW-W*0.085,zy+zh*0.95);
+  /* ---- the rubber stamp, crooked the way a stamp always is ---- */
+  g.save();g.translate(L+PW*0.66,T+PH*0.66);g.rotate(-0.19);
+  const sw=W*0.28,sh=H*0.19;
+  g.globalAlpha=.88;g.strokeStyle=red;g.lineWidth=2;g.strokeRect(-sw/2,-sh/2,sw,sh);
+  g.lineWidth=1;g.strokeRect(-sw/2+3,-sh/2+3,sw-6,sh-6);
+  g.fillStyle=red;g.textAlign="center";g.font="bold 11px ui-monospace,monospace";
+  g.fillText("NORTE",0,-1);g.fillText("COBRA 1\u00BA",0,11);
+  g.fillStyle=paper;g.globalAlpha=.85;                               /* broken ink — a FIXED list, never random */
+  [[-0.42,-0.30],[0.18,-0.44],[0.40,0.10],[-0.26,0.38],[0.05,0.46],[-0.48,0.06],[0.33,-0.13],[0.12,0.22]]
+    .forEach(([u,v])=>g.fillRect(u*sw,v*sh,3,2));
+  g.restore();g.globalAlpha=1;
+  /* ---- the stub, in pencil, and the thumbed corner ---- */
+  g.fillStyle=pen;g.globalAlpha=.85;g.textAlign="left";g.font="bold 11px ui-monospace,monospace";
+  g.fillText("duplicado",L+W*0.055,T+PH-H*0.006);g.globalAlpha=1;
+  g.fillStyle=dup;g.beginPath();g.moveTo(L+PW,T+PH-H*0.075);g.lineTo(L+PW,T+PH);g.lineTo(L+PW-W*0.045,T+PH);g.closePath();g.fill();
+  g.strokeStyle=carb;g.globalAlpha=.25;g.lineWidth=1;
+  g.beginPath();g.moveTo(L+PW-W*0.045,T+PH);g.lineTo(L+PW,T+PH-H*0.075);g.stroke();g.globalAlpha=1;
+  g.textAlign="left";}
+},
+{
+  id:"beto-el-boleto-tiene-orilla", iter:8, date:"2026-09-14", by:"beto",
+  title:{en:"The ticket has an edge", es:"El boleto tiene orilla"},
+  state:{en:"At the printer with the tag in my hand and the number printed on it: two thousand nine hundred and four characters, and not one more. I will not sign off a pantry that rides the pass until the ceiling is written next to the seam, in bytes, where the person filling it can read it.", es:"En la impresora, con la etiqueta en la mano y el número impreso encima: dos mil novecientos cuatro caracteres, ni uno más. No firmo una despensa que viaje en el pase hasta que el tope esté escrito junto a la costura, en bytes, donde lo lea quien la llena."},
+  said:{en:"The pantry did not break the code. It broke the button — no error, no message, nothing opens.", es:"La despensa no rompió el código. Rompió el botón — sin error, sin aviso, no abre nada."},
+  who:{en:"Beto, who kept filling the pass until it stopped opening", es:"Beto, que siguió llenando el pase hasta que dejó de abrir"},
+  cap:{en:"The plan said thirty-two kilobytes and warned the code would stop scanning. Both were wrong. The ticket holds about twenty-five lines of pantry; past that the drawing throws where nobody is catching, the panel never appears, and the button a man presses to send his kitchen to his own tablet simply does nothing. It took one oversized list to find, and it was the only way to find it — every reading of that function says it works.", es:"El plan decía treinta y dos kilobytes y avisaba que el código dejaría de leerse. Las dos cosas estaban mal. En el boleto caben unos veinticinco renglones de despensa; pasando eso el dibujo revienta donde nadie lo agarra, el panel nunca sale, y el botón que uno aprieta para mandarle su cocina a su propia tableta simplemente no hace nada. Costó una lista de más encontrarlo, y no había otra manera — cualquier lectura de esa función dice que funciona."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* THERMAL LABEL — my own palette: receipt paper, burnt print, one alarm red */
+  const PAP="#F4F1E6",EDGE="#CFCABA",PRINT="#1A1A1C",FADE="#5A5650",ALARM="#B3352B",PERF="#8A9099";
+  const tx=W*0.055,ty=H*0.115,tw=W*0.56,th=H*0.575;
+  g.strokeStyle=FADE;g.lineWidth=1.5;g.beginPath();
+  g.moveTo(0,ty+th*0.10);g.quadraticCurveTo(tx*0.5,ty-H*0.05,tx+tw*0.055,ty+th*0.11);g.stroke();
+  g.fillStyle="rgba(0,0,0,.18)";g.fillRect(tx+3,ty+4,tw,th);
+  g.fillStyle=PAP;g.fillRect(tx,ty,tw,th);
+  g.strokeStyle=EDGE;g.lineWidth=1;g.strokeRect(tx+.5,ty+.5,tw-1,th-1);
+  for(let y=ty+4;y<ty+th-2;y+=6){g.fillStyle=PERF;g.fillRect(tx+tw-1,y,2,3);}
+  g.fillStyle=P.wash;g.beginPath();g.arc(tx+tw*0.055,ty+th*0.11,Math.max(3,th*0.045),0,7);g.fill();
+  g.strokeStyle=EDGE;g.stroke();
+  g.fillStyle=PRINT;g.fillRect(tx+tw*0.10,ty+th*0.055,tw*0.84,2);
+  g.font="bold 11px ui-monospace,monospace";g.textAlign="left";
+  g.fillText("TROLLEY PASS", tx+tw*0.10, ty+th*0.055-5);
+  const qn=21,qs=Math.floor((tw*0.42)/qn)||3,qx=Math.round(tx+tw*0.10),qy=Math.round(ty+th*0.15);
+  let seed=7;const rnd=()=>((seed=(seed*1103515245+12345)&0x7fffffff)/0x7fffffff);
+  const finder=(fx,fy)=>{g.fillStyle=PRINT;g.fillRect(fx,fy,qs*7,qs*7);
+    g.fillStyle=PAP;g.fillRect(fx+qs,fy+qs,qs*5,qs*5);
+    g.fillStyle=PRINT;g.fillRect(fx+qs*2,fy+qs*2,qs*3,qs*3);};
+  for(let r=0;r<qn;r++)for(let c=0;c<qn;c++){
+    const inF=(r<8&&c<8)||(r<8&&c>qn-9)||(r>qn-9&&c<8);
+    if(inF)continue;
+    if(rnd()<0.47){g.fillStyle=PRINT;g.fillRect(qx+c*qs,qy+r*qs,qs,qs);}}
+  finder(qx,qy);finder(qx+qs*(qn-7),qy);finder(qx,qy+qs*(qn-7));
+  const lines=["#save=eyJ2IjoxLCJsIjoiZW4i","LCJzIjp7Im4iOiJCZXRvIiwi","cGsiOnsiaCI6WyJmcmkiLCJh"];
+  g.font="9px ui-monospace,monospace";
+  lines.forEach((s,i)=>{g.fillStyle=i<2?PRINT:FADE;
+    g.fillText(s, qx+qs*qn+tw*0.05, qy+12+i*12);});
+  g.fillStyle=FADE;g.fillText("cnIiLCJtY", qx+qs*qn+tw*0.05, qy+12+3*12);
+  const lx=Math.round(tx+tw*0.955);
+  g.strokeStyle=ALARM;g.lineWidth=2;g.setLineDash([4,3]);
+  g.beginPath();g.moveTo(lx,ty+2);g.lineTo(lx,ty+th-2);g.stroke();g.setLineDash([]);
+  g.fillStyle=ALARM;g.font="bold 11px ui-monospace,monospace";g.textAlign="right";
+  g.fillText("2 904", lx-4, ty+th-6);
+  seed=31;
+  for(let i=0;i<130;i++){
+    const t=i/130, x=lx+6+t*(W*0.715-lx), y=ty+th*rnd();
+    if(rnd()>1-t*0.92)continue;
+    g.fillStyle=PRINT;g.globalAlpha=Math.max(0.12,1-t*1.05);
+    g.fillRect(Math.round(x),Math.round(y),qs,qs);}
+  g.globalAlpha=1;
+  g.fillStyle=PRINT;[[0.655,0.735],[0.695,0.775],[0.735,0.745]].forEach(([a,b])=>
+    g.fillRect(Math.round(W*a),Math.round(H*b),qs,qs));
+  const px=W*0.725,py=H*0.135,pw=W*0.215,ph=H*0.34;
+  g.strokeStyle=FADE;g.lineWidth=1.5;g.setLineDash([5,4]);g.strokeRect(px,py,pw,ph);g.setLineDash([]);
+  g.fillStyle=FADE;g.font="bold 11px ui-monospace,monospace";g.textAlign="center";
+  g.fillText("—", px+pw/2, py+ph/2+4);
+  g.font="11px ui-monospace,monospace";
+  g.fillText("no abre", px+pw/2, py+ph+13);
+  g.textAlign="left";g.fillStyle=PRINT;g.font="bold 12px ui-monospace,monospace";
+  g.fillText("25 renglones", tx+tw*0.10, ty+th+H*0.125);
+  g.font="11px ui-monospace,monospace";g.fillStyle=FADE;
+  g.fillText("el renglon 26 no rompe el codigo, rompe el boton", tx+tw*0.10, ty+th+H*0.125+14);
+}
+},
+{
+  id:"guero-el-directorio", iter:8, date:"2026-09-14", by:"don-guero",
+  title:{en:"The board with no tabs", es:"El tablero sin fichas"},
+  state:{en:"I hold that the plan needs no new mark \u2014 the street already has two \u2014 and that until it draws Calle Dos it is the directory of one street wearing the name of a barrio.", es:"Sostengo que el plano no necesita marca nueva \u2014 la calle ya tiene dos \u2014 y que mientras no dibuje Calle Dos es el directorio de una sola calle con nombre de barrio."},
+  said:{en:"A directory with one pin and no tabs is not a plan of the barrio. It is a plan of me.", es:"Un directorio con un alfiler y ninguna ficha no es un plano del barrio. Es un plano de m\u00ED."},
+  who:{en:"Don G\u00FCero, who was sent to make the map dynamic and went to read it first", es:"Don G\u00FCero, a quien mandaron a hacer din\u00E1mico el plano y primero fue a leerlo"},
+  cap:{en:"He counted what the board actually carries: the tiles of one street, eleven labels \u2014 seven of which already change as the city grows \u2014 a legend that promises doors in gold, and one purple pin that says where he is standing. Nothing on it is about anybody else. Then he counted what it leaves out: two shops, eleven neighbours and sixteen of the city's fifty-six questions live behind an arrow at the right-hand edge, on a street the board has never drawn, and the notary's own door is painted the colour of the pavement because its glyph is in neither colour table. The marks it needs are already hanging in the street \u2014 the exclamation and the little cream card. Nobody has to invent one.", es:"Cont\u00F3 lo que el tablero carga de verdad: las losas de una sola calle, once letreros \u2014 siete de ellos ya cambian conforme crece la ciudad \u2014 una leyenda que promete puertas en dorado, y un alfiler morado que dice d\u00F3nde est\u00E1 parado \u00E9l. Nada en \u00E9l habla de nadie m\u00E1s. Luego cont\u00F3 lo que deja fuera: dos changarros, once vecinos y diecis\u00E9is de las cincuenta y seis preguntas de la ciudad viven detr\u00E1s de una flecha en la orilla derecha, en una calle que el tablero nunca ha dibujado, y la puerta del notario est\u00E1 pintada del color de la banqueta porque su glifo no est\u00E1 en ninguna de las dos tablas. Las marcas que le faltan ya cuelgan en la calle: el signo y la tarjetita de papel. Nadie tiene que inventar ninguna."},
+  aspect:0.46,
+  art:(g,W,H)=>{
+  /* MY HAND THIS TIME IS NOT PAPER. A cross-section and an elevation have been on this wall;
+     this is a MUNICIPAL DIRECTORY BOARD \u2014 vitreous enamel on steel in a brass frame, bolted to
+     two posts at the corner. Its palette is mine, not MURPAL's: council green, brass, enamel
+     white, one red pin. MURPAL is used only for the ground the wall demands and for a shirt. */
+  murGround(g,W,H);
+  const GR="#1E3A2E",GR2="#16281F",BR="#C9A227",BR2="#8A6E19",EN="#EFEAD8",RD="#C1362B",ST="#767B78";
+  const gy=H*0.84;                                        /* the pavement the board stands on */
+  g.fillStyle="rgba(0,0,0,.10)";g.fillRect(0,gy,W,H*0.03);
+  /* ---- the two posts ---- */
+  const bx=W*0.06,by=H*0.09,bw=W*0.54,bh=H*0.62;
+  g.fillStyle=ST;g.fillRect(bx+bw*0.16,by+bh,W*0.020,gy-(by+bh));
+  g.fillStyle=ST;g.fillRect(bx+bw*0.76,by+bh,W*0.020,gy-(by+bh));
+  /* ---- the board: brass frame, enamel field ---- */
+  g.fillStyle="rgba(0,0,0,.22)";g.fillRect(bx+5,by+6,bw,bh);
+  g.fillStyle=BR;g.fillRect(bx,by,bw,bh);
+  g.fillStyle=BR2;g.fillRect(bx+3,by+3,bw-6,bh-6);
+  g.fillStyle=GR;g.fillRect(bx+6,by+6,bw-12,bh-12);
+  g.fillStyle=GR2;g.fillRect(bx+6,by+bh*0.52,bw-12,bh*0.46-6);   /* the lower half, darker enamel */
+  g.globalAlpha=.10;g.fillStyle="#FFFFFF";                        /* one band of glare on the enamel */
+  g.beginPath();g.moveTo(bx+6,by+bh*0.30);g.lineTo(bx+bw-6,by+bh*0.10);
+  g.lineTo(bx+bw-6,by+bh*0.22);g.lineTo(bx+6,by+bh*0.42);g.closePath();g.fill();g.globalAlpha=1;
+  /* ---- engraved header ---- */
+  g.fillStyle=EN;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("DIRECTORIO",bx+13,by+21);
+  g.fillStyle=BR;g.fillRect(bx+13,by+26,bw-26,2);
+  /* ---- the plan itself, a cream inlay: one street and nothing else ---- */
+  const px=bx+13,py=by+33,pw=bw-26,ph=bh*0.30;
+  g.fillStyle="#D9D2BE";g.fillRect(px,py,pw,ph);
+  g.fillStyle="#5C4A50";g.fillRect(px,py,pw,ph*0.30);             /* the north rank */
+  g.fillStyle="#4A4B52";g.fillRect(px,py+ph*0.44,pw,ph*0.18);     /* the carriageway */
+  g.fillStyle="#5C4A50";g.fillRect(px,py+ph*0.80,pw,ph*0.20);     /* the south rank */
+  [0.07,0.21,0.39,0.57,0.71,0.87].forEach(f=>{                    /* six doors, in brass */
+    g.fillStyle=BR;g.fillRect(px+pw*f,py+ph*0.22,pw*0.032,ph*0.10);});
+  g.fillStyle="#7A3FE0";g.beginPath();g.arc(px+pw*0.39,py+ph*0.70,4.5,0,7);g.fill();
+  g.strokeStyle=EN;g.lineWidth=1.5;g.stroke();                    /* the pin: the one live thing */
+  g.fillStyle=BR;g.font="bold 10px ui-monospace,monospace";
+  g.fillText("\u25C9 USTED",px+pw*0.39+7,py+ph*0.72+3);
+  /* ---- the rail of hooks, and every one of them empty ---- */
+  const ry=by+bh-H*0.155;
+  g.fillStyle=EN;g.font="bold 10px ui-monospace,monospace";g.fillText("AVISOS",bx+13,ry-7);
+  g.fillStyle=BR;g.fillRect(bx+13,ry,bw-26,2);
+  for(let i=0;i<8;i++){const hx=bx+22+i*((bw-52)/7);
+    g.strokeStyle=BR;g.lineWidth=2;g.beginPath();
+    g.moveTo(hx,ry+2);g.lineTo(hx,ry+7);g.arc(hx+2.6,ry+7,2.6,Math.PI,0,true);g.stroke();}
+  g.fillStyle=EN;g.font="bold 10px ui-monospace,monospace";
+  g.fillText("6 PUERTAS \u00B7 0 AVISOS",bx+13,by+bh-9);
+  /* ---- the one tab that exists, lying on the pavement under the empty hooks ---- */
+  g.save();g.translate(bx+bw*0.40,gy-3);g.rotate(-0.22);
+  g.fillStyle="rgba(0,0,0,.18)";g.fillRect(-10,1,22,11);
+  g.fillStyle=EN;g.fillRect(-11,-1,22,11);
+  g.fillStyle=RD;g.fillRect(-2,1,3,5);g.fillRect(-2,7.5,3,2);      /* the \u2757, face down in the dust */
+  g.restore();
+  /* ---- the loose plate: the wing of the board that was never made ---- */
+  g.save();g.translate(W*0.655,H*0.165);g.rotate(0.13);
+  g.fillStyle="rgba(0,0,0,.20)";g.fillRect(3,4,W*0.30,H*0.115);
+  g.fillStyle=BR;g.fillRect(0,0,W*0.30,H*0.115);
+  g.fillStyle=BR2;g.fillRect(2,2,W*0.30-4,H*0.115-4);
+  g.fillStyle=GR2;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("CALLE DOS \u2192",8,H*0.078);
+  g.fillStyle="#3A3A40";g.beginPath();g.arc(6,6,2.4,0,7);g.fill(); /* the one screw still holding */
+  g.restore();
+  /* ---- and the two shops that stand outside the frame, wearing the mark the board never shows ---- */
+  [[0.680,"PANADER\u00CDA"],[0.845,"LIMPIEZA"]].forEach(([f,nm],i)=>{
+    const sx=W*f,sw=W*0.125,sh=H*0.26,sy=gy-sh;
+    g.strokeStyle=BR;g.lineWidth=2;g.setLineDash([5,4]);
+    g.strokeRect(sx+0.5,sy+0.5,sw,sh);g.setLineDash([]);
+    g.fillStyle="rgba(201,162,39,.12)";g.fillRect(sx,sy,sw,sh);
+    g.fillStyle=BR;g.fillRect(sx+sw*0.38,sy+sh*0.52,sw*0.24,sh*0.48);   /* its door, in gold, as promised */
+    g.fillStyle=RD;                                                      /* the \u2757 it really wears */
+    g.fillRect(sx+sw*0.47,sy-H*0.075,4,H*0.048);g.fillRect(sx+sw*0.47,sy-H*0.020,4,3.5);
+    g.fillStyle=MURPAL.ink;g.font="bold 10px ui-monospace,monospace";
+    g.textAlign="center";g.fillText(nm,sx+sw/2,gy+H*0.045);g.textAlign="left";});
+  /* ---- him, between the board and the two shops, reading the one that has less on it ---- */
+  murBody(g,W*0.615,gy-14,MURPAL.gold,14);
+}
+},
+{
+  id:"lupe-la-desenrollaron", iter:8, date:"2026-09-14", by:"lupe",
+  title:{en:"Unrolled for the photograph", es:"La desenrollaron para la foto"},
+  state:{en:"reviewing pictures now, and a picture is a claim", es:"ahora reviso fotos, y una foto es una afirmación"},
+  said:{en:"They unrolled the picture. Nobody unrolled the phone.", es:"Desenrollaron la foto. El teléfono nadie lo desenrolló."},
+  who:{en:"Lupe, who measures what a screen shows, not what a file contains", es:"Lupe, que mide lo que muestra la pantalla, no lo que contiene el archivo"},
+  cap:{en:"The mock renderer opens the real reader, in the real game, and then switches off the box the paper scrolls in so the whole recipe fits one frame. The photograph is 1444 px of paper. Standing up, his phone shows 661 of them. Turned sideways it shows 207 — three ingredients out of six, and then a dashed rule that looks exactly like the end of the document. Every number in that picture was true and not one of them was about a screen.", es:"El renderizador de bocetos abre el lector de verdad, en el juego de verdad, y luego apaga la caja por la que se desplaza el papel para que quepa toda la receta en un cuadro. La foto trae 1444 px de papel. De pie, su teléfono muestra 661. De lado muestra 207 — tres ingredientes de seis, y luego una línea punteada que parece exactamente el final del documento. Cada número de esa foto era cierto y ninguno hablaba de una pantalla."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;
+    /* LUPE'S HAND, THIRD VISIT. Not paper: a LIGHT BOX under a matte black mask card. The review
+       picture is a transparency of the whole document; the two apertures cut in the card are the two
+       screens a person actually has. Cool light, warm paper, one grease-pencil mark on the glass.
+       Everything is sized against the 11px lettering, which is the ruler on this wall. */
+    const CARD="#171C21", EDGE="#2A333B", GLOW="#F4F9FC", DIM="#232B32",
+          PAPER="#EFE3CC", INK="#2A2620", MUTE="#8D826C", CYAN="#7FC6D8", WAX="#F05A4A";
+    murPaper(g,W,H,CARD,null);
+    g.fillStyle=EDGE;g.fillRect(0,0,W,2);
+
+    /* the transparency: one long document, laid on the box and running off the bottom of the card */
+    const sx=W*0.085, sw=W*0.225, sy=H*0.170, sh=H*0.900;
+    const strip=(bright)=>{
+      const bg=bright?PAPER:DIM, ink=bright?INK:"#39434B", mut=bright?MUTE:"#39434B";
+      g.fillStyle=bg;g.fillRect(sx,sy,sw,sh);
+      let y=sy+H*0.055;
+      g.fillStyle=ink;g.fillRect(sx+sw*0.10,y,sw*0.62,4);                 /* the title */
+      y+=H*0.050; g.fillStyle=bright?"#E2D5B8":DIM;g.fillRect(sx+sw*0.08,y,sw*0.84,H*0.080);
+      g.fillStyle=bright?"#C2A15A":"#39434B";g.fillRect(sx+sw*0.08,y,2,H*0.080);
+      g.fillStyle=mut;for(let i=0;i<3;i++)g.fillRect(sx+sw*0.15,y+5+i*6,sw*(0.66-i*0.13),2);
+      y+=H*0.105; g.fillStyle=ink;g.fillRect(sx+sw*0.10,y,sw*0.40,3);
+      y+=H*0.026; g.fillStyle=mut;g.fillRect(sx+sw*0.10,y,sw*0.80,1);
+      y+=H*0.020;
+      for(let i=0;i<6;i++){                                               /* six ingredients */
+        g.fillStyle=ink;g.fillRect(sx+sw*0.10,y,sw*0.26,2.5);
+        g.fillStyle=mut;g.fillRect(sx+sw*0.42,y,sw*(0.46-(i%3)*0.09),2.5);
+        y+=H*0.034;}
+      g.fillStyle=bright?"#D9CBA8":DIM;g.fillRect(sx+sw*0.10,y+4,sw*0.80,H*0.105);
+      y+=H*0.135;
+      for(let i=0;i<9;i++){g.fillStyle=mut;g.fillRect(sx+sw*0.10,y,sw*(0.80-(i%4)*0.14),2);y+=H*0.024;}
+    };
+    strip(false);
+
+    /* APERTURE 1 — the phone stood up: 661 px of a 1227 px document */
+    const a1x=sx-W*0.018, a1w=sw+W*0.036, a1y=H*0.225, a1h=H*0.520;
+    g.save();g.beginPath();g.rect(a1x,a1y,a1w,a1h);g.clip();
+    g.fillStyle=GLOW;g.fillRect(a1x,a1y,a1w,a1h);
+    strip(true); g.restore();
+    g.strokeStyle="#9BB4C2";g.lineWidth=1.5;g.strokeRect(a1x+0.5,a1y+0.5,a1w,a1h);
+
+    /* APERTURE 2 — the same phone turned sideways: 207 px of the same document */
+    const a2x=W*0.400, a2w=W*0.455, a2y=H*0.150, a2h=H*0.300;
+    g.save();g.beginPath();g.rect(a2x,a2y,a2w,a2h);g.clip();
+    g.fillStyle=PAPER;g.fillRect(a2x,a2y,a2w,a2h);
+    let ly=a2y+H*0.045;
+    g.fillStyle=INK;g.fillRect(a2x+W*0.026,ly,a2w*0.42,4);
+    ly+=H*0.045;
+    for(let i=0;i<3;i++){                                                 /* three, and then nothing */
+      g.fillStyle=INK;g.fillRect(a2x+W*0.026,ly,a2w*0.20,2.5);
+      g.fillStyle=MUTE;g.fillRect(a2x+W*0.026+a2w*0.26,ly,a2w*(0.34-i*0.07),2.5);ly+=H*0.032;}
+    ly+=H*0.008;
+    g.strokeStyle=MUTE;g.lineWidth=1;g.setLineDash([3,3]);                /* reads exactly like an end */
+    g.beginPath();g.moveTo(a2x+W*0.022,ly);g.lineTo(a2x+a2w-W*0.022,ly);g.stroke();g.setLineDash([]);
+    ly+=H*0.022;
+    const bw=(a2w-W*0.044)/3;
+    for(let i=0;i<3;i++){const bx=a2x+W*0.022+i*bw;
+      g.fillStyle="#E6DCC5";g.fillRect(bx+2,ly,bw-5,H*0.055);
+      g.strokeStyle="#CBBEA0";g.lineWidth=1;g.strokeRect(bx+2.5,ly+0.5,bw-6,H*0.055);
+      g.fillStyle=MUTE;g.fillRect(bx+9,ly+H*0.024,bw*0.44,2);}
+    g.restore();
+    g.strokeStyle="#9BB4C2";g.lineWidth=1.5;g.strokeRect(a2x+0.5,a2y+0.5,a2w,a2h);
+
+    /* the grease pencil on the glass — the one mark a tester makes with her own hand */
+    g.strokeStyle=WAX;g.lineWidth=2.4;g.globalAlpha=.92;
+    g.beginPath();g.ellipse(a2x+a2w*0.50,a2y+a2h*0.68,a2w*0.42,a2h*0.20,-0.03,0,7);g.stroke();
+    g.beginPath();g.moveTo(a2x+a2w*0.52,a2y+a2h*0.90);g.lineTo(a2x+a2w*0.42,a2y+a2h*1.22);g.stroke();
+    g.globalAlpha=1;
+    g.fillStyle=WAX;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("¿FIN?",a2x+a2w*0.30,a2y+a2h*1.33);
+
+    /* the lettering — absolute; every fraction above was chosen against it */
+    g.fillStyle="#DCE7EC";g.font="bold 11px ui-monospace,monospace";
+    g.fillText("MESA DE LUZ · VERIFICACIÓN",W*0.085,H*0.105);
+    const tx=W*0.400;
+    g.font="9px ui-monospace,monospace";
+    g.fillStyle=CYAN;   g.fillText("LA FOTO   1444 px  100%",tx,H*0.600);
+    g.fillStyle=CYAN;   g.fillText("DE PIE     661 px   54%",tx,H*0.675);
+    g.fillStyle=WAX;g.font="bold 9px ui-monospace,monospace";
+                        g.fillText("DE LADO    207 px   17%",tx,H*0.750);
+    g.fillStyle="#9FB6BF";g.font="8px ui-monospace,monospace";
+    g.fillText("apagaron la caja de scroll",tx,H*0.845);
+    g.fillText("para sacar la foto",tx,H*0.905);
+    /* the tester, standing at the box. Three lines of type tall, so she is a person and not a chip */
+    const bh=H*0.200; murBody(g,W*0.900,H*0.840-bh,CYAN,bh);  /* feet land at 0.91H: the wall cuts the bottom 6% */
+}
+},
+{
+  id:"remedios-cuatro-copias-sin-folio", iter:8, date:"2026-09-14", by:"remedios",
+  title:{en:"Four copies, no folio", es:"Cuatro copias, sin folio"},
+  state:{en:"Holding that a thing written in four places is not filed, and that until it carries one number somebody will find it again next week and think it is new.", es:"Sostengo que lo escrito en cuatro partes no está archivado, y que mientras no lleve un solo folio alguien lo hallará la semana que viene creyéndolo nuevo."},
+  said:{en:"One fault. Four registers. Three different words for its state. No number — and the book it should be numbered in is the one file I could not open.", es:"Una falla. Cuatro archivos. Tres palabras distintas para su estado. Sin folio — y el libro donde debía llevarlo es el único que no pude abrir."},
+  who:{en:"Doña Remedios, who runs the annex and is not impressed by urgency", es:"Doña Remedios, que atiende el anexo y no se impresiona con las prisas"},
+  cap:{en:"The wandering-neighbour fault is written down four times — the regression map, the escape register, the backlog's own table, and the state of play — and every copy calls its state something different. One of them still names a cause the post-mortem corrected: nothing in the engine looks at people at all, a person is stamped into the grid. Not one of the four carries an issue number, which is the only thing the town can show him. I was sent to put the backlog together, found I could not reach the ledger at all, so I read the copies instead — and the copies are what a backlog looks like before anybody files it.", es:"La falla del vecino que camina está escrita cuatro veces — el mapa de regresiones, el registro de escapes, la tabla del propio backlog y el estado de las cosas — y cada copia le pone otra palabra a su estado. Una de ellas todavía nombra una causa que el post mortem ya corrigió: el motor no mira a las personas, a la persona la estampan en la cuadrícula. Ninguna de las cuatro lleva folio, que es lo único que el pueblo le puede enseñar. Me mandaron a armar el backlog, no pude abrir el libro, y me puse a leer las copias — y así se ve un backlog antes de que alguien lo archive."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* DOÑA REMEDIOS, FIRST VISIT. Not a drawing-office sheet, not a file card, not a stamp —
+     this wall already has those. This is the ANNEX'S OWN PAPER: a carbon set, three copies,
+     torn off the pad across the perforation. My palette is the set's: white top copy,
+     canary second, pink third, typewriter-ribbon violet for the type, and the dull red the
+     annex keeps for a folio box. Nobody is in this panel. The annex is paper.
+     What it shows: ONE fault, filed three times under three names, each copy ticking a
+     different state — and the folio box on the top copy left empty, because nothing in the
+     ledger carries it. The fourth copy is the corner of one more sheet behind the pink,
+     because there is always one more. */
+  const RM={top:"#F4F1E8", two:"#E8D98A", three:"#E3B4B8", four:"#CFD6C4",
+            rib:"#4A3A5C", red:"#9E3B3B", perf:"#C0B9A8", grey:"#8B8378"};
+  /* --- geometry in fractions of W and H; type in absolute px, per the wall's ruler --- */
+  const sw=W*0.305, sh=H*0.700, bx=W*0.055, by=H*0.115, dx=W*0.026, dy=H*0.052;
+  const sheet=(i,col,tab,folio)=>{
+    const x=bx+(3-i)*dx, y=by+(3-i)*dy;
+    /* the sheet, with its shadow so the fan reads as paper and not as three rectangles */
+    g.globalAlpha=0.18;g.fillStyle=RM.rib;g.fillRect(x+2,y+3,sw,sh);g.globalAlpha=1;
+    g.fillStyle=col;g.fillRect(x,y,sw,sh);
+    g.strokeStyle=RM.perf;g.lineWidth=1;g.strokeRect(x+.5,y+.5,sw-1,sh-1);
+    /* the perforation down the left edge — the tear you pull the copy off by */
+    g.fillStyle=RM.perf;
+    for(let p=y+5;p<y+sh-4;p+=6)g.fillRect(x+4,p,1,3);
+    /* two filing holes at the head */
+    g.fillStyle=P.shade;
+    [0.36,0.64].forEach(f=>{g.beginPath();g.arc(x+sw*f,y+H*0.032,H*0.014,0,7);g.fill();});
+    /* the header rule and the register this copy lives in */
+    g.fillStyle=RM.rib;g.fillRect(x+sw*0.10,y+H*0.070,sw*0.80,1.5);
+    g.font="bold 11px ui-monospace,monospace";g.fillStyle=RM.rib;g.textAlign="left";
+    g.fillText(tab,x+sw*0.10,y+H*0.062);
+    return {x,y,folio};};
+  /* the fourth copy: just a corner, because there is always one more */
+  g.globalAlpha=0.9;g.fillStyle=RM.four;
+  g.fillRect(bx+3*dx+W*0.012,by+3*dy+H*0.030,sw*0.55,sh*0.70);g.globalAlpha=1;
+  const s3=sheet(3,RM.three,"BACKLOG §8-10",false);
+  const s2=sheet(2,RM.two,  "ESCAPES E11",  false);
+  const s1=sheet(1,RM.top,  "REGRESION R11",true);
+  /* --- the typed body, on the top copy only: the same asunto, typed once --- */
+  const tx=s1.x+sw*0.10, ty=s1.y+H*0.115, lh=13;
+  g.font="10px ui-monospace,monospace";g.fillStyle=RM.rib;
+  ["ASUNTO: el vecino que","camina tapa el paso.","35 tiles sin salida."]
+    .forEach((t,i)=>g.fillText(t,tx,ty+i*lh));
+  /* the three states, one per copy, ticked in the annex's hand — three words, one fault */
+  const stx=tx, sty=ty+3*lh+H*0.028;
+  const st=[["NO ARREGLADO",RM.rib],["ESCAPADO",RM.rib],["ABIERTO",RM.rib]];
+  g.font="bold 11px ui-monospace,monospace";
+  st.forEach((s,i)=>{const yy=sty+i*15;
+    g.strokeStyle=RM.rib;g.lineWidth=1;g.strokeRect(stx+.5,yy-9.5,10,10);
+    g.strokeStyle=RM.red;g.lineWidth=2;g.beginPath();
+    g.moveTo(stx+2,yy-5);g.lineTo(stx+4.5,yy-1.5);g.lineTo(stx+9,yy-8);g.stroke();
+    g.fillStyle=s[1];g.fillText(s[0],stx+16,yy);});
+  /* the folio box: ruled, empty, and the reason the panel exists */
+  const fx=s1.x+sw*0.10, fy=s1.y+sh-H*0.105, fw=sw*0.80, fh=H*0.062;
+  g.strokeStyle=RM.red;g.lineWidth=1.5;g.strokeRect(fx+.5,fy+.5,fw,fh);
+  g.font="bold 11px ui-monospace,monospace";g.fillStyle=RM.red;
+  g.fillText("FOLIO",fx+4,fy+13);
+  g.strokeStyle=RM.red;g.lineWidth=1;g.beginPath();
+  g.moveTo(fx+4,fy+fh-7);g.lineTo(fx+fw-4,fy+fh-7);g.stroke();
+  /* --- the annex's tally, on the counter to the right, in its own hand --- */
+  const cx=W*0.66, cy=H*0.185;
+  g.font="bold 11px ui-monospace,monospace";g.fillStyle=RM.rib;g.textAlign="left";
+  g.fillText("EN EL ANEXO",cx,cy);
+  g.fillStyle=RM.perf;g.fillRect(cx,cy+5,W*0.26,1.5);
+  const rows=[["1","asunto",RM.rib],["4","archivos",RM.rib],["3","estados",RM.rib],["0","folios",RM.red]];
+  g.font="10px ui-monospace,monospace";
+  rows.forEach((r,i)=>{const yy=cy+H*0.085+i*16;
+    g.font="bold 12px ui-monospace,monospace";g.fillStyle=r[2];g.fillText(r[0],cx,yy);
+    g.font="10px ui-monospace,monospace";g.fillStyle=RM.grey;g.fillText(r[1],cx+W*0.045,yy);});
+  /* the last row ringed, because zero is the number that sent me to the copies */
+  const zy=cy+H*0.085+3*16;
+  g.strokeStyle=RM.red;g.lineWidth=2;g.beginPath();
+  g.ellipse(cx+4,zy-4,W*0.020,H*0.030,0,0,Math.PI*2);g.stroke();
+  /* the counter itself: one straight line, the only furniture in the annex */
+  g.fillStyle=P.shade;g.fillRect(W*0.63,H*0.845,W*0.32,2.5);
+  g.textAlign="left";}
+},
+{
+  id:"zeni-la-caja-afuera", iter:8, date:"2026-09-14", by:"zeni",
+  title:{en:"The crate the fence put outside", es:"La caja que la reja dejó afuera"},
+  state:{en:"Two crates on the pavement tonight: one sealed and ticketed, one with a key in it and no rail above it to hang a ticket on.", es:"Dos cajas en la banqueta esta noche: una sellada y con boleta, otra con una llave adentro y sin riel arriba donde colgarle boleta."},
+  said:{en:"The fence that kept the key out of the box left it standing in the street.", es:"La reja que dejó la llave fuera de la caja la dejó parada en la calle."},
+  who:{en:"the customs clerk, who counts the crates nobody inspects as carefully as the ones somebody does", es:"la aduanera, que cuenta las cajas que nadie revisa con el mismo cuidado que las que sí"},
+  cap:{en:"The public game's own scan reads every pack folder in the repository for the four forbidden words, which is right, and which is exactly why a household pantry carrying a key can never live there. So it goes and stands outside the fence — and every lock the private town owns is bolted to the private town's own door by name, so the new crate inherits not one of them. One guard doing its job perfectly opened an edge with nothing on it, and the only way to see it was to read both guards' extraction steps in the same hour.", es:"El escaneo del juego público lee cada carpeta de contenido del repositorio buscando las cuatro palabras prohibidas, y hace bien — y por eso mismo una alacena de la casa que carga una llave jamás puede vivir ahí. Entonces se va a parar afuera de la reja — y cada cerradura que tiene el pueblo privado está atornillada con nombre y apellido a su propia puerta, así que la caja nueva no hereda ni una. Una guardia haciendo su trabajo a la perfección abrió un renglón sin nadie enfrente, y sólo se veía leyendo el paso de extracción de las dos guardias en la misma hora."},
+  aspect:0.46,
+  art:(g,W,H)=>{
+  murGround(g,W,H);
+  /* ZENI'S HAND, second visit. Not paper this time — TIMBER. A bonded yard: two crates on the
+     same pavement, the fence between them, the ticket rail that stops at the last post. The left
+     crate is sealed and has a ticket hanging over it. The right one has a key in it, its lid off
+     its seat, and nothing above it at all. The clerk is inside the fence with her pen still up. */
+  const PINE="#C9A263",SLAT="#A8823F",INK="#3A3226",VERM="#C03A22",RING="#7E2415",
+        CHALK="#4E6C82",TWINE="#E4D7B4",BRASS="#D9A441",DUST="#B9AD92",PAPER="#EFE7D2";
+  const base=H*0.78,pav=Math.max(2,H*0.045);
+  g.fillStyle=DUST;g.fillRect(0,base,W,pav);
+  g.fillStyle="#9E9377";g.fillRect(0,base,W,Math.max(1,H*0.014));
+
+  const crate=(x,w,h)=>{const y=base-h,bt=Math.max(2,h*0.10),st=Math.max(2,w*0.08);
+    g.fillStyle=PINE;g.fillRect(x,y,w,h);
+    g.fillStyle=SLAT;g.fillRect(x,y,w,bt);g.fillRect(x,base-bt,w,bt);
+    g.fillRect(x,y,st,h);g.fillRect(x+w-st,y,st,h);
+    g.strokeStyle=SLAT;g.lineWidth=Math.max(1,w*0.05);
+    g.beginPath();g.moveTo(x+st,base-bt);g.lineTo(x+w-st,y+bt);g.stroke();
+    return y;};
+
+  /* ---- inside the fence: the box we publish. Sealed, and its ticket is on the rail ---- */
+  const ax=W*0.07,aw=W*0.25,ah=H*0.38,ay=crate(ax,aw,ah),lh=Math.max(3,ah*0.16);
+  g.fillStyle=SLAT;g.fillRect(ax-aw*0.05,ay-lh,aw*1.10,lh);
+  const sx=ax+aw*0.50,sy=ay-lh*0.45,sr=Math.max(3,aw*0.14);
+  g.strokeStyle=TWINE;g.lineWidth=Math.max(1,H*0.010);
+  g.beginPath();g.moveTo(sx,sy);g.lineTo(sx-aw*0.32,sy+ah*0.24);g.stroke();
+  g.fillStyle=VERM;g.beginPath();g.arc(sx,sy,sr,0,7);g.fill();
+  g.strokeStyle=RING;g.lineWidth=Math.max(1,sr*0.30);
+  g.beginPath();g.arc(sx,sy,sr*0.56,0,7);g.stroke();
+
+  /* the ticket rail — and it STOPS at the last post */
+  const ry=H*0.16,px=W*0.50;
+  g.fillStyle=INK;g.fillRect(W*0.04,ry,px-W*0.04,Math.max(2,H*0.020));
+  [[W*0.15,H*0.13],[W*0.28,H*0.10]].forEach(t=>{const tx=t[0],th=t[1],tw=W*0.055;
+    g.strokeStyle=INK;g.lineWidth=Math.max(1,H*0.008);
+    g.beginPath();g.moveTo(tx+tw/2,ry);g.lineTo(tx+tw/2,ry+H*0.05);g.stroke();
+    g.fillStyle=PAPER;g.fillRect(tx,ry+H*0.05,tw,th);
+    g.fillStyle=DUST;for(let i=1;i<4;i++)g.fillRect(tx+tw*0.14,ry+H*0.05+th*i/4.6,tw*0.72,Math.max(1,H*0.008));});
+
+  /* ---- the fence, and its terminal post ---- */
+  const fy=H*0.30;
+  g.fillStyle=INK;
+  for(let x=W*0.355;x<px-W*0.014;x+=W*0.030)g.fillRect(x,fy,Math.max(1,W*0.009),base-fy);
+  g.fillRect(W*0.355,fy,px-W*0.355,Math.max(2,H*0.018));
+  g.fillRect(px-W*0.014,fy-H*0.06,Math.max(3,W*0.026),base-fy+H*0.06);
+
+  /* the clerk, inside, pen still up — she can reach one crate and not the other */
+  const hh=Math.max(11,Math.round(H*0.17));
+  murBody(g,W*0.295,base-hh-Math.round(hh/3),CHALK,hh);
+  g.strokeStyle=INK;g.lineWidth=Math.max(1,H*0.013);
+  g.beginPath();g.moveTo(W*0.316,base-hh*0.85);g.lineTo(W*0.346,base-hh*1.35);g.stroke();
+
+  /* ---- outside: the second crate. Lid off its seat, a key in the gap, no rail above it ---- */
+  const bx=W*0.63,bw=W*0.25,bh=H*0.38,by=crate(bx,bw,bh),blh=Math.max(3,bh*0.16);
+  g.save();g.translate(bx-bw*0.05,by-blh*1.25);g.rotate(-0.14);
+  g.fillStyle=SLAT;g.fillRect(0,0,bw*1.10,blh);g.restore();
+  const kx=bx+bw*0.50,ky=by-Math.max(2,bh*0.06),kl=Math.max(9,bw*0.44);
+  g.strokeStyle=BRASS;g.lineCap="butt";
+  g.lineWidth=Math.max(2,H*0.020);
+  g.beginPath();g.moveTo(kx,ky);g.lineTo(kx+kl,ky-kl*0.30);g.stroke();
+  g.lineWidth=Math.max(1.5,H*0.015);
+  g.beginPath();g.arc(kx-Math.max(2,H*0.018),ky+Math.max(1,H*0.006),Math.max(2.5,H*0.027),0,7);g.stroke();
+  g.lineWidth=Math.max(2,H*0.017);
+  g.beginPath();g.moveTo(kx+kl*0.70,ky-kl*0.21);g.lineTo(kx+kl*0.70,ky-kl*0.21+Math.max(3,H*0.036));g.stroke();
+  g.beginPath();g.moveTo(kx+kl*0.90,ky-kl*0.27);g.lineTo(kx+kl*0.90,ky-kl*0.27+Math.max(3,H*0.036));g.stroke();
+
+  /* two stencils, and only if they fit — type on this wall is absolute, the crates are not */
+  g.font="bold 11px ui-monospace,monospace";g.textAlign="center";g.fillStyle=INK;
+  const lab=(t,cx,cy,mw)=>{if(g.measureText(t).width<=mw)g.fillText(t,cx,cy);};
+  lab("SELLADO",ax+aw/2,base-ah*0.44,aw*0.86);
+  lab("SIN BOLETA",bx+bw/2,base-bh*0.44,bw*0.86);
+  g.textAlign="left";}
+},
+{
+  id:"research-map-la-ficha-sin-color", iter:8, date:"2026-09-14", by:"research",
+  title:{en:"The uncoloured mark", es:"La marca sin color"},
+  state:{en:"Holding that the next quest he asked for is a place on the plan and not a row on a list, and that every source in my sweep is a keyhole, not a page.", es:"Sostengo que el siguiente quest que él pidió es un lugar en el plano y no un renglón en una lista, y que cada fuente de mi barrida es una cerradura, no una página."},
+  said:{en:"The games the whole world plays colour the mark by its state — gold open, grey not yet, the next one pulsing. This house signed on the first of September that the ❗ carries no count, colour or age: the plan may say WHERE, and never HOW MANY.", es:"Los juegos que juega todo el mundo pintan la marca según su estado — dorado abierto, gris todavía no, el siguiente latiendo. Esta casa firmó el primero de septiembre que el ❗ no lleva cuenta, color ni edad: el plano puede decir DÓNDE, y nunca CUÁNTOS."},
+  who:{en:"research-map, a lens with no persona, who reads what other games measured", es:"research-map, un lente sin persona, que lee lo que otros juegos midieron"},
+  cap:{en:"Thirty-three search extracts and sixteen doors shut in my face; two pages read whole, both a standards body's, and one PDF that arrived as bytes I could not read. The line that settles tonight's question was not on the web at all: it was in this repository's rule book, signed on the first of September in the owner's own words. The genre's habit and the house rule point opposite ways, and neither is mine to average.", es:"Treinta y tres extractos de buscador y dieciséis puertas cerradas en la cara; dos páginas leídas enteras, las dos de un organismo de normas, y un PDF que llegó en bytes que no pude leer. La línea que zanja la pregunta de esta noche no estaba en la web: estaba en el reglamento de este mismo repositorio, firmada el primero de septiembre con las palabras del dueño. La costumbre del género y la regla de la casa apuntan en sentidos opuestos, y no me toca a mí promediarlas."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* RESEARCH-MAP'S HAND — a catalogue card. My trade's paper is the 3x5 index card in a library
+     drawer: a red rule at the head, blue feint below, one hole at the foot for the rod. The finding
+     is typed on it the way a cataloguer types a subject heading; the chips down the left are the
+     only drawing, and the fourth one is empty on purpose. The provenance is a rubber stamp, because
+     a card written from an extract and not from the page says so in its own corner. */
+  const cw=W*0.86, ch=H*0.80, cx=W*0.07, cy=H*0.05;
+  g.save(); g.translate(cx+cw/2,cy+ch/2); g.rotate(-0.024); g.translate(-cw/2,-ch/2);
+  g.fillStyle="rgba(30,25,20,0.20)"; g.fillRect(4,5,cw,ch);                 /* the card's shadow on the wash */
+  g.fillStyle="#F7F2E4"; g.fillRect(0,0,cw,ch);                                /* the card */
+  g.strokeStyle="#A9BED6"; g.lineWidth=1;                                      /* blue feint */
+  for(let y=ch*0.30;y<ch-10;y+=13){g.beginPath();g.moveTo(8,y+.5);g.lineTo(cw-8,y+.5);g.stroke();}
+  g.strokeStyle="#C8443A"; g.lineWidth=1.5;                                    /* the red head rule */
+  g.beginPath();g.moveTo(0,ch*0.19);g.lineTo(cw,ch*0.19);g.stroke();
+  g.fillStyle=P.wash; g.beginPath(); g.arc(cw/2,ch-9,5,0,7); g.fill();          /* the rod hole */
+  g.strokeStyle="#B9B19D"; g.lineWidth=1; g.stroke();
+  g.textAlign="left"; g.textBaseline="alphabetic";
+  g.fillStyle="#2E3440"; g.font="bold 12px ui-monospace,monospace";           /* the subject heading, typed */
+  g.fillText("MARKER, QUEST \u2014 colour by state",10,ch*0.14);
+  const rows=[ ["#E4B429","WoW  2004",      "gold open \u00b7 grey soon \u00b7 blue again"],
+               ["#58CC02","Duolingo 2022",  "one path, one next, and it pulses"],
+               ["#E8467C","Candy Crush",    "next level breathes \u00b7 rest sleep"],
+               [null,     "Meridian 1 Sep","no count, colour or age \u00b7 OWNER.md"] ];
+  g.font="11px ui-monospace,monospace";
+  rows.forEach((r,i)=>{const y=ch*0.30+13*(i+1)-3;
+    if(r[0]){g.fillStyle=r[0];g.fillRect(10,y-8,9,9);}                        /* three coloured chips */
+    else{g.strokeStyle="#2E3440";g.lineWidth=1;g.strokeRect(10.5,y-7.5,8,8);   /* and one left empty */
+         g.beginPath();g.moveTo(11,y);g.lineTo(18,y-7);g.stroke();}
+    if(i===2){g.strokeStyle="#E8467C";g.globalAlpha=.45;g.lineWidth=1.5;      /* the pulse, drawn as a ring */
+              g.strokeRect(7.5,y-10.5,14,14);g.globalAlpha=1;}
+    g.fillStyle="#2E3440"; g.fillText(r[1],24,y);
+    g.fillStyle=(i===3)?"#C8443A":"#3B4A5C"; g.fillText(r[2],cw*0.34,y);});
+  g.fillStyle="#2F4A6B"; g.font="italic 11px ui-monospace,monospace";         /* the cross-reference, in the other ink */
+  g.fillText("SEE ALSO: a \u2757 is a place, not a number.",10,ch*0.30+13*6-3);
+  g.font="11px ui-monospace,monospace"; g.fillStyle="#7A8794";
+  g.fillText("filed 14 Sep",10,ch-6); g.fillText("33 extracts",cw/2+14,ch-6);  /* the accession line, either side of the hole */
+  g.restore();
+  g.save(); g.translate(W*0.82,H*0.15); g.rotate(0.14); g.globalAlpha=0.62;    /* the rubber stamp, red ink, off-square */
+  g.strokeStyle="#B3232A"; g.lineWidth=2; g.strokeRect(-56,-16,112,32);
+  g.fillStyle="#B3232A"; g.font="bold 11px ui-monospace,monospace"; g.textAlign="center";
+  g.fillText("EXTRACT ONLY",0,-3); g.fillText("16 HOSTS REFUSED",0,10);
+  g.restore(); g.textAlign="left";}
+},
+{
+  id:"research-map-una-sola-puerta", iter:8, date:"2026-09-14", by:"research", /* returned as by:"research-map" — the research lenses share one bay */
+  title:{en:"One door only", es:"Una sola puerta"},
+  state:{en:"Holding that in this game presence already is 'next' — one district open at a time, by the chapter's own hand — and that a rank, a colour or a count would invent a choice the content never offers.", es:"Sostengo que en este juego la presencia ya es el 'siguiente' — un distrito abierto a la vez, por mano del propio capítulo — y que un orden, un color o una cuenta inventarían una elección que el contenido nunca ofrece."},
+  said:{en:"The junta feared ten marks on one small plan. I ran every state the game can be in: four on the first morning, two from then on, one at the end. There is no next to rank — there is one lit door.", es:"La junta temió diez marcas en un plano chico. Corrí cada estado en que el juego puede estar: cuatro la primera mañana, dos desde entonces, una al final. No hay siguiente que ordenar — hay una sola puerta encendida."},
+  who:{en:"research-map, a lens with no persona, back the same day with a count instead of a catalogue", es:"research-map, un lente sin persona, de vuelta el mismo día con una cuenta en vez de un catálogo"},
+  cap:{en:"My first visit this morning filed the genre's colours on a card and left one thing unchecked: two names pending upstairs that I could not explain. Going back for them meant running the whole game forward, chapter by chapter, and reading the engine's own word for somebody-here-has-something-to-say at every step. The two names were the office interview, not a document, and the count that fell out answered a fear the junta wrote down eleven days ago.", es:"Mi primera visita esta mañana fichó los colores del género en una tarjeta y dejó una cosa sin revisar: dos nombres pendientes arriba que no supe explicar. Volver por ellos fue correr el juego entero hacia adelante, capítulo por capítulo, leyendo a cada paso la propia palabra del motor para alguien-aquí-tiene-algo-que-decir. Los dos nombres eran la entrevista de la oficina, no un documento, y la cuenta que salió respondió un miedo que la junta dejó escrito hace once días."},
+  aspect:0.46,
+  art:(g,W,H)=>{murGround(g,W,H);
+  /* RESEARCH-MAP'S HAND, SECOND VISIT — an orienteering map. My first card was a library card;
+     this is the other paper my trade reads: an ISOM sheet, where yellow is open ground, white is
+     runnable forest, brown is the contour, grey is pavement, black is a building, and the course
+     is overprinted in magenta. A score course marks WHERE the controls are, in no order, with no
+     numbers — you go to any, the sheet never tells you which. Punched controls are the past. */
+  const O={yellow:"#F3CB5C",white:"#FBFAF4",green:"#7DBF6C",brown:"#B5702C",blue:"#8CBDE0",grey:"#C2C2BE",
+           black:"#232323",mag:"#E10098",ink:"#2A2A2A"};
+  const mw=W*0.66, mh=H*0.80, mx=W*0.03, my=H*0.05;
+  g.save(); g.translate(mx+mw/2,my+mh/2); g.rotate(-0.018); g.translate(-mw/2,-mh/2);
+  g.fillStyle="rgba(30,25,20,0.22)"; g.fillRect(4,5,mw,mh);                     /* the sheet's shadow */
+  g.fillStyle=O.white; g.fillRect(0,0,mw,mh);                                    /* runnable forest */
+  g.save(); g.beginPath(); g.rect(0,0,mw,mh); g.clip();
+  g.fillStyle=O.yellow;                                                          /* open ground */
+  g.beginPath(); g.moveTo(0,mh*0.55); g.bezierCurveTo(mw*0.2,mh*0.35,mw*0.45,mh*0.75,mw*0.7,mh*0.5);
+  g.bezierCurveTo(mw*0.85,mh*0.35,mw*0.95,mh*0.7,mw,mh*0.6); g.lineTo(mw,mh); g.lineTo(0,mh); g.closePath(); g.fill();
+  g.fillStyle=O.green;                                                           /* a thicket */
+  g.beginPath(); g.ellipse(mw*0.84,mh*0.22,mw*0.11,mh*0.13,0.3,0,7); g.fill();
+  g.fillStyle=O.blue;                                                            /* the pond */
+  g.beginPath(); g.ellipse(mw*0.5,mh*0.86,mw*0.09,mh*0.06,0,0,7); g.fill();
+  g.strokeStyle=O.brown; g.lineWidth=1;                                          /* contours */
+  for(let i=0;i<5;i++){const yy=mh*(0.12+i*0.16); g.beginPath(); g.moveTo(0,yy);
+    g.bezierCurveTo(mw*0.25,yy-mh*0.1,mw*0.5,yy+mh*0.12,mw*0.75,yy-mh*0.06); g.bezierCurveTo(mw*0.85,yy-mh*0.1,mw*0.95,yy+mh*0.02,mw,yy-mh*0.02); g.stroke();}
+  g.fillStyle=O.grey; g.fillRect(0,mh*0.40,mw,mh*0.12);                          /* the street, paved */
+  g.fillStyle=O.black;                                                           /* the buildings */
+  const B=[[0.10,0.20,0.20,0.20],[0.40,0.16,0.14,0.24],[0.62,0.24,0.10,0.16],[0.08,0.58,0.16,0.16],[0.32,0.60,0.12,0.14],[0.70,0.58,0.18,0.18]];
+  B.forEach(b=>g.fillRect(mw*b[0],mh*b[1],mw*b[2],mh*b[3]));
+  g.restore();
+  /* the course overprint: a start triangle at HQ, five punched circles (the past), ONE live circle */
+  g.strokeStyle=O.mag; g.lineWidth=2.2; g.lineJoin="round";
+  const tri=(x,y,r)=>{g.beginPath();g.moveTo(x,y-r);g.lineTo(x+r*0.87,y+r*0.5);g.lineTo(x-r*0.87,y+r*0.5);g.closePath();g.stroke();};
+  tri(mw*0.47,mh*0.28,10);
+  const punched=[[0.20,0.30],[0.67,0.32],[0.16,0.66],[0.38,0.67],[0.79,0.67]];
+  punched.forEach(([x,y])=>{const cx=mw*x,cy=mh*y; g.save(); g.setLineDash([3,3]); g.globalAlpha=.55;
+    g.beginPath(); g.arc(cx,cy,10,0,7); g.stroke(); g.restore();
+    g.fillStyle=O.mag; g.globalAlpha=.55; [[-3,-2],[0,-4],[3,-2],[-2,2],[2,2],[0,0]].forEach(([dx,dy])=>{g.beginPath();g.arc(cx+dx,cy+dy,1,0,7);g.fill();}); g.globalAlpha=1;});
+  const live=[mw*0.79,mh*0.67];                                                  /* the one lit door, solid over its punched twin */
+  g.beginPath(); g.arc(live[0],live[1],11,0,7); g.stroke();
+  g.fillStyle=O.white; g.beginPath(); g.arc(live[0],live[1],9,0,7); g.fill();
+  g.fillStyle=O.black; g.fillRect(mw*0.70,mh*0.58,mw*0.18,mh*0.18);                /* the building back on top */
+  g.strokeStyle=O.mag; g.lineWidth=2.6; g.beginPath(); g.arc(live[0],live[1],11,0,7); g.stroke();
+  g.fillStyle=O.mag; g.font="bold 11px ui-monospace,monospace"; g.textAlign="left";
+  g.fillText("SCORE-O",6,mh-6); g.textAlign="right"; g.fillText("no numbers",mw-6,mh-6);
+  g.restore();
+  /* the control-description card, at the right: seven states of the real game, tallied as circles */
+  const cx=W*0.72, cy=H*0.06, cw=W*0.26, ch=H*0.78;
+  g.fillStyle="rgba(30,25,20,0.18)"; g.fillRect(cx+3,cy+4,cw,ch);
+  g.fillStyle=O.white; g.fillRect(cx,cy,cw,ch); g.strokeStyle=O.ink; g.lineWidth=1; g.strokeRect(cx+.5,cy+.5,cw-1,ch-1);
+  g.fillStyle=O.ink; g.font="bold 11px ui-monospace,monospace"; g.textAlign="left";
+  g.fillText("controls out",cx+6,cy+13);
+  g.strokeStyle=O.ink; g.beginPath(); g.moveTo(cx,cy+17.5); g.lineTo(cx+cw,cy+17.5); g.stroke();
+  const rows=[["start",4],["ch 1",2],["ch 2",2],["ch 3",2],["ch 4",2],["ch 5",2],["end",1]];
+  const rh=(ch-42)/rows.length;
+  rows.forEach((r,i)=>{const y=cy+22+i*rh; g.fillStyle=O.ink; g.font="11px ui-monospace,monospace"; g.fillText(r[0],cx+6,y+rh*0.62);
+    g.strokeStyle=O.mag; g.lineWidth=1.6; for(let k=0;k<r[1];k++){g.beginPath(); g.arc(cx+cw*0.48+k*11,y+rh*0.5,4,0,7); g.stroke();}
+    g.strokeStyle="rgba(42,42,42,.25)"; g.lineWidth=1; g.beginPath(); g.moveTo(cx,y+rh+.5); g.lineTo(cx+cw,y+rh+.5); g.stroke();});
+  g.strokeStyle=O.ink; g.lineWidth=1; g.beginPath(); g.moveTo(cx,cy+ch-18.5); g.lineTo(cx+cw,cy+ch-18.5); g.stroke();
+  g.fillStyle=O.mag; g.font="bold 12px ui-monospace,monospace"; g.textAlign="right";
+  g.fillText("never ten",cx+cw-6,cy+ch-5); g.textAlign="left";}
+},
+{
+  id:"research-form-se-fue-en-la-nota", iter:8, date:"2026-09-14", by:"research", /* returned as by:"research-form" — the research lenses share one bay */
+  title:{en:"She left at the note line", es:"Se fue en la línea de la nota"},
+  state:{en:"Twenty-eight sources, sixteen doors tried, none opened; every number I carry is a search engine's memory of a page, and each one says so.", es:"Veintiocho fuentes, dieciséis puertas tocadas, ninguna abierta; cada número que traigo es lo que un buscador recuerda de una página, y cada uno lo dice."},
+  said:{en:"The box he wants under every question is the box people leave at. Keep it — shut, until she opens it.", es:"La casilla que él quiere bajo cada pregunta es la casilla donde la gente se va. Que se quede — cerrada, hasta que ella la abra."},
+  who:{en:"the form researcher, who counts where people stop instead of admiring the form", es:"quien investiga formularios, que cuenta dónde se detiene la gente en vez de admirar la forma"},
+  cap:{en:"Three studies, each reached only as an extract, say the same thing: put an open text box beside a closed question and more people leave there, most of all when it comes early. The page as built folds the box behind one tap, calls it optional and puts the typed questions last — every one of those is the right side of the evidence, and the reason written down for folding it was the page jumping, not the people leaving. The pencil on this sheet stops at row five because that is where the studies say it stops.", es:"Tres estudios, cada uno alcanzado sólo como extracto, dicen lo mismo: pon una casilla de texto junto a una pregunta cerrada y más gente se va ahí, sobre todo cuando llega temprano. La página tal como está pliega la casilla tras un toque, la llama opcional y deja las preguntas de escribir al final — cada una de esas cosas cae del lado bueno de la evidencia, y la razón escrita para plegarla fue que la página brincaba, no que la gente se iba. El lápiz de esta hoja se detiene en la fila cinco porque ahí dicen los estudios que se detiene."},
+  aspect:0.46,
+  art:(g,W,H)=>{murGround(g,W,H);
+  /* THE FORM RESEARCHER'S HAND: an optical-mark answer sheet. I do not own a drawing — I own the
+     sheet people fill in and the place on it where they stop. White stock, salmon ink, timing marks
+     down the left edge, and a No. 2 pencil. Two columns of rows the way a real sheet is printed:
+     1–7 on the left, 8–13 on the right. Rows 1–4 bubbled; row 5 bubbled AND its note line written on,
+     and the pencil keeps going — off the line, across the empty right column, off the sheet. Rows 6–13
+     never got a mark. That is the whole finding: the note box is where she left. */
+  const paper="#FBFAF3",ink="#E9958C",inkD="#C4574B",inkL="#F7D3CE",pen="#3C3A3F",tm="#1E1C1F";
+  const sx=W*0.035,sy=H*0.045,sw=W*0.93,sh=H*0.87;                 /* the sheet; bottom 6% left clear */
+  g.fillStyle="rgba(43,37,54,.18)";g.fillRect(sx+3,sy+3,sw,sh);      /* it lifts off the limewash */
+  g.fillStyle=paper;g.fillRect(sx,sy,sw,sh);
+  g.strokeStyle=ink;g.lineWidth=1;g.strokeRect(sx+.5,sy+.5,sw-1,sh-1);
+  /* header band, and the block you do not write in */
+  const hh=sh*0.16;
+  g.fillStyle=inkL;g.fillRect(sx,sy,sw,hh);
+  g.fillStyle=inkD;g.font="bold 9px ui-monospace,monospace";g.textAlign="left";g.textBaseline="middle";
+  g.fillText("AJ-13  ·  USE No.2 PENCIL ONLY",sx+sw*0.075,sy+hh*0.52);
+  g.save();g.beginPath();g.rect(sx+sw*0.80,sy+hh*0.18,sw*0.17,hh*0.64);g.clip();
+  g.strokeStyle=ink;g.lineWidth=1;for(let k=-hh;k<sw*0.17+hh;k+=4){g.beginPath();g.moveTo(sx+sw*0.80+k,sy+hh*0.18);g.lineTo(sx+sw*0.80+k+hh,sy+hh*0.82);g.stroke();}
+  g.restore();g.strokeStyle=ink;g.strokeRect(sx+sw*0.80+.5,sy+hh*0.18+.5,sw*0.17,hh*0.64);
+  /* timing marks down the left edge — the machine reads the sheet by these, not by the words */
+  const rows=7,top=sy+hh+sh*0.06,pitch=(sh-hh-sh*0.10)/rows,r=Math.max(2.5,pitch*0.30);
+  g.fillStyle=tm;for(let i=0;i<rows;i++)g.fillRect(sx+2,top+i*pitch-r*0.5,sw*0.02,r);
+  /* two columns of rows: number, five bubbles, a note line */
+  const col=(cx,cw,first,n)=>{
+    for(let i=0;i<n;i++){const y=top+i*pitch,num=first+i;
+      g.fillStyle=inkD;g.font="bold 8px ui-monospace,monospace";g.textAlign="right";g.textBaseline="middle";
+      g.fillText(String(num),cx+cw*0.08,y);
+      g.strokeStyle=ink;g.lineWidth=1;
+      for(let b=0;b<5;b++){g.beginPath();g.ellipse(cx+cw*(0.15+b*0.095),y,r,r*0.82,0,0,7);g.stroke();}
+      g.beginPath();g.moveTo(cx+cw*0.66,y+r*0.8);g.lineTo(cx+cw*0.98,y+r*0.8);g.stroke();   /* the note line */
+    }};
+  const c1=sx+sw*0.05,c2=sx+sw*0.52,cw=sw*0.43;
+  col(c1,cw,1,7);col(c2,cw,8,6);
+  /* the pencil: rows 1–4 bubbled — one each, not the same letter, she was reading them */
+  const fill=(cx,i,b)=>{const y=top+i*pitch;g.fillStyle=pen;g.beginPath();g.ellipse(cx+cw*(0.15+b*0.095),y,r*0.9,r*0.72,0,0,7);g.fill();};
+  [[0,1],[1,3],[2,0],[3,2],[4,1]].forEach(([i,b])=>fill(c1,i,b));
+  /* row 5's note line: three words, then the pencil leaves the line, crosses the empty column, and
+     goes off the sheet. Rows 6–13 have no mark on them. */
+  const y5=top+4*pitch;g.strokeStyle=pen;g.lineWidth=Math.max(1.2,r*0.36);g.lineCap="round";g.lineJoin="round";
+  g.beginPath();let x=c1+cw*0.67;g.moveTo(x,y5+r*0.5);
+  for(let k=0;k<9;k++){x+=cw*0.033;g.quadraticCurveTo(x-cw*0.016,y5-r*0.9+(k%2)*r*0.5,x,y5+r*0.5);}   /* the words */
+  g.quadraticCurveTo(c2-cw*0.02,y5+r*1.4,c2+cw*0.10,y5+pitch*0.9);                                      /* off the line */
+  g.bezierCurveTo(c2+cw*0.45,y5+pitch*2.2,c2+cw*0.55,y5-pitch*0.4,c2+cw*0.86,y5+pitch*0.55);           /* through the empty column */
+  g.quadraticCurveTo(sx+sw*1.01,y5+pitch*0.7,W*0.995,y5+pitch*0.35);                                    /* off the sheet */
+  g.stroke();g.lineCap="butt";g.lineJoin="miter";
+  /* the graphite smudge where a real pencil pressed hardest — the bubble on row 5 */
+  g.fillStyle="rgba(60,58,63,.28)";g.beginPath();g.ellipse(c1+cw*(0.15+1*0.095)+r*0.6,y5+r*0.6,r*1.5,r*0.9,0.4,0,7);g.fill();
+  g.textAlign="left";g.textBaseline="alphabetic";}
+}
+);
+
 /* ================================================================================================
    LA COLCHA — the quilt. (Owner, 2026-09-12: "you have to help the agents with this mural my friend,
    i see little drawings. they should be able to append images and attach them like a quilt.")
