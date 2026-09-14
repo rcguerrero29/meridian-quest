@@ -68,3 +68,11 @@ zeni-la-caja-afuera|e6e7baf133a1|b2b5a17942c3
 research-map-la-ficha-sin-color|d6d64e579de3|90463da1ae43
 research-map-una-sola-puerta|984c6fe7900b|3b448d655bf8
 research-form-se-fue-en-la-nota|867b41686eae|c390816183c5
+lupe-el-segundo-no-venia|51dff93109d9|0984e80c3b2f
+rosa-el-tercer-renglon|d4769b0130cb|98c3face342e
+pili-el-mismo-burro|8142177e47c7|caa028cbf935
+beto-pieza-de-otro-cajon|ec1a08b4d756|261c13cc0b0f
+nacho-la-unica-que-cabe|e6b2905aff13|a9503d9cc2e6
+paty-carta-dos-columnas|cd416327bb77|3b7277107892
+chava-la-mancha-en-el-vidrio|fb5fad297a11|88aeb1f0ed81
+remedios-tres-sin-talon|a879fb0aad3e|86a24536492c

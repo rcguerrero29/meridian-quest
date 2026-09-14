@@ -509,6 +509,23 @@ visits in what they said, the state they held, and the pixels they drew. The two
 twenty-one names to twenty-one people. Nobody has looked at these fifteen before they shipped except the
 hand that painted them and the session that reviewed the words (every string verbatim against the meeting file, by script) and looked at three of them; the next crew-fix run's step 4 is where Pili sees them.
 
+## Iteration 9 — 2026-09-14, the UI review: eight came back the same night
+
+Eight painted, all return visits — Lupe (4th), Rosa (3rd), Pili (4th), Beto (6th), Nacho (3rd), Paty
+(3rd), Chava (3rd), Doña Remedios (2nd) — every one about the journey mock-ups they had just signed
+against (`docs/UI-REVIEW.md` block 1), words verbatim from `docs/meetings/2026-09-14-la-cuadrilla-run-9.md`
+(checked by script against the source after decoding its escapes). Twenty-one bays, fifty-six panels.
+**Every one in a material of its own:** Lupe a light box with a second aperture that never came; Rosa a
+registration acetate over the real sideways screen, marked in grease pencil; Pili the same donkey under
+two saddles; Beto a spares catalogue page off the bench with a red stamp on the part from the wrong bin;
+Nacho the one sentence that fits, on the paper it was never printed on; Paty a two-column letter; Chava
+the smudge on the glass; Doña Remedios the annex's admission ticket with three stubs missing. **One
+art-only adjustment:** Remedios's value column moved right of her longest label (`fx+W*0.218 → 0.29`)
+so `caja de scroll`, `real o dibujado` and `idioma · cascarón` no longer run into their values; her
+words untouched. Two blocks came unfenced (Beto's, Chava's) and one carried a stray closing fence; the
+paint script learned to read them. The return-visit check passed on all eight; the two-bays check folded
+twenty-one names to twenty-one people; the ledger gained eight lines by the guard's own recipe.
+
 ## Coming back — how a return visit works, and the rule against stamps
 
 *Owner, 2026-09-12: "just to understand when an agent goes back to the mural, they'll add space for

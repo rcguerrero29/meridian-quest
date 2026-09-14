@@ -1,10 +1,10 @@
-/* La Sobremesa — the JOURNEY's mock documents, 2026-09-14 (after crew run 8).
+/* La Sobremesa — the JOURNEY’s mock documents, 2026-09-14 (after crew run 8).
    Loaded AFTER ../mockdocs.js; extends window.MOCKDOCS. Every document here is a real reader document
    (engine/engine.js, grep `function docDef`): the pictures in this folder are the shipped reader
    drawing the shipped blocks — h · p · note · kv · blank · art · form · sel · btn. Where a picture
    contains a DRAWING (an `art` block), its caption says so. Nothing here is a pack and nothing is a
    decision — docs/la-sobremesa.md §9, §12.
-   Palette inside the drawings: Pili's re-cut kitchen grounds (run 8) — the ground is the identity.
+   Palette inside the drawings: Pili’s re-cut kitchen grounds (run 8) — the ground is the identity.
    Re-render: node docs/mocks/2026-09-14-la-sobremesa/journey/render2.js */
 (function(){
   const L=()=>(typeof lang!=="undefined"&&lang==="es");
@@ -37,10 +37,10 @@
   function shiftCards(g,W,H){
     const es=L();
     const rows=[
-      {k:"it",dish:"Pasta e ceci",kitchen:es?"De Nello · italiana":"Nello's · Italian",mine:true,note:es?"«jueves, saliendo del trabajo»":"“Thursday, after work”"},
-      {k:"mx",dish:"Frijoles de la olla",kitchen:es?"De Cande · mexicana":"Cande's · Mexican"},
-      {k:"kr",dish:"Doenjang-jjigae",kitchen:es?"De Seo · coreana":"Seo's · Korean"},
-      {k:"jp",dish:es?"Onigiri, de dos":"Onigiri, two ways",kitchen:es?"De Hana · japonesa":"Hana's · Japanese"}];
+      {k:"it",dish:"Pasta e ceci",kitchen:es?"De Nello · italiana":"Nello’s · Italian",mine:true,note:es?"«jueves, saliendo del trabajo»":"“Thursday, after work”"},
+      {k:"mx",dish:"Frijoles de la olla",kitchen:es?"De Cande · mexicana":"Cande’s · Mexican"},
+      {k:"kr",dish:"Doenjang-jjigae",kitchen:es?"De Seo · coreana":"Seo’s · Korean"},
+      {k:"jp",dish:es?"Onigiri, dos rellenos":"Onigiri, two ways",kitchen:es?"De Hana · japonesa":"Hana’s · Japanese"}];
     const ch=92,gap=10;g.textBaseline="alphabetic";
     rows.forEach((r,i)=>{const y=i*(ch+gap);
       g.fillStyle=N.surface;g.fillRect(0,y,W,ch);
@@ -61,9 +61,9 @@
     const es=L();
     const col=Math.floor(W/3),s=2;
     const spec=[
-      {h:10,name:es?"1 · el bajo":"1 · shallow",what:es?["tortillas","especias · papel"]:["tortillas","spices · foil"]},
-      {h:16,name:es?"2 · el mediano":"2 · medium",what:es?["arroz · frijol","masa"]:["rice · beans","masa"],cur:true},
-      {h:24,name:es?"3 · el hondo":"3 · deep",what:es?["frascos · latas","botellas"]:["jars · tins","bottles"]}];
+      {h:10,name:es?"1 · el bajo":"1 · shallow",what:es?"tortillas, especias":"tortillas, spices"},
+      {h:16,name:es?"2 · el mediano":"2 · medium",what:es?"arroz, frijol":"rice, beans",cur:true},
+      {h:24,name:es?"3 · el hondo":"3 · deep",what:es?"frascos, latas":"jars, tins"}];
     g.textBaseline="alphabetic";
     spec.forEach((d,i)=>{const cx=i*col+Math.round(col/2),base=H*0.60,w=32*s,h=d.h*s,x=cx-w/2,y=base-h;
       /* the one you are in is OPEN, not painted (Pili, run 9): its front is pulled 6 px proud and down, and the dark of the box shows above it */
@@ -77,7 +77,7 @@
         g.fillStyle="#3B3546";g.fillRect(x+6,y-14,10,14);g.fillRect(x+22,y-8,8,8);g.fillRect(x+40,y-18,12,18);   /* hard lids at different heights */
         g.fillStyle="#9C96AB";g.fillRect(x+6,y-14,10,3);g.fillRect(x+22,y-8,8,3);g.fillRect(x+40,y-18,12,3);}
       g.fillStyle=N.ink;g.font="600 12px ui-monospace,monospace";g.textAlign="center";g.fillText(d.name,cx,base+22);
-      g.fillStyle=N.muted;g.font="9px ui-monospace,monospace";g.fillText(d.what[0],cx,base+34);g.fillText(d.what[1],cx,base+45);g.textAlign="left";});
+      g.fillStyle=N.muted;g.font="9px ui-monospace,monospace";g.fillText(d.what,cx,base+35);g.textAlign="left";});
   }
 
   /* ================= THE DOCUMENTS ================= */
@@ -89,8 +89,8 @@
       {art:drawers,aspect:0.36,cap:es?"Dibujo: los tres cajones por masa — bajo, mediano, hondo. Las fotos de sus cajones de verdad vienen después.":"Drawing: the three drawers by mass — shallow, medium, deep. The photos of his real drawers come later."},
       {form:{fields:[{k:"find",type:"text",label:es?"Buscar":"Find",placeholder:es?"masa, arroz, lo de la bolsa azul…":"masa, rice, the thing in the blue bag…"}],submit:es?"Buscar":"Find",noFocus:true}},
       {h:es?"En el cajón":"In the drawer"},
-      {kv:[[es?"Arroz":"Rice",es?"2 kg, la bolsa grande, abierta":"2 kg, the big bag, opened"],[es?"Frijol negro":"Black beans","500 g"],[es?"Frijol pinto":"Pinto beans","1 kg"],["Masa harina",es?"1 kg, la mitad":"1 kg, half"],[es?"Pasta de garbanzo":"Chickpea pasta",es?"2 cajas":"2 boxes"],[es?"Lentejas":"Lentils",es?"un frasco, en el cajón equivocado":"a jar's worth, in the wrong drawer"]]},
-      {note:es?"Un renglón es una cosa que tienes. Lo que se acabó no es renglón — aparece en la receta como lo que falta, nunca aquí como una cruz.":"A line is a thing you have. What you ran out of is no line at all — it shows up on a recipe as what's missing, never here as a cross."},
+      {kv:[[es?"Arroz":"Rice",es?"2 kg, la bolsa grande, abierta":"2 kg, the big bag, opened"],[es?"Frijol negro":"Black beans","500 g"],[es?"Frijol pinto":"Pinto beans","1 kg"],["Masa harina",es?"1 kg, la mitad":"1 kg, half"],[es?"Pasta de garbanzo":"Chickpea pasta",es?"2 cajas":"2 boxes"],[es?"Lentejas":"Lentils",es?"un frasco, en el cajón equivocado":"a jar’s worth, in the wrong drawer"]]},
+      {note:es?"Un renglón es una cosa que tienes. Lo que se acabó no es renglón — aparece en la receta como lo que falta, nunca aquí como una cruz.":"A line is a thing you have. What you ran out of is no line at all — it shows up on a recipe as what’s missing, never here as a cross."},
       {btn:es?"Anotar lo que compraste":"Add what you bought"}
     ];}};
   const shifts={
@@ -98,9 +98,9 @@
     sub:{en:"Four kitchens post a dish each. A shift is one dish, it pays in leftovers, and it has no clock.",
          es:"Cuatro cocinas ponen un platillo cada una. Un turno es un platillo, paga con sobras y no tiene reloj."},
     build:()=>{const es=L();return [
-      {art:shiftCards,aspect:(W)=>398/W,cap:es?"Dibujo, a la tarjeta de Pili: una franja de 6 px con el color de la cocina, el platillo a 64 px, dos renglones. La de la esquina doblada es tuya.":"Drawing, to Pili's card: a 6-px stripe in the kitchen's ground, the dish at 64 px, two lines of type. The one with the turned corner is yours."},
-      {kv:[[es?"Tuyo":"Yours","Pasta e ceci — "+(es?"de Nello · «jueves, saliendo del trabajo»":"Nello's · “Thursday, after work”")],[es?"Abierto":"Open","Frijoles de la olla — "+(es?"de Cande":"Cande's")],[es?"Abierto":"Open","Doenjang-jjigae — "+(es?"de Seo":"Seo's")],[es?"Abierto":"Open",(es?"Onigiri, de dos — de Hana":"Onigiri, two ways — Hana's")]]},
-      {note:es?"Un turno que tomaste es tuyo hasta que lo cocinas. Nunca va tarde. Nada en este tablero cuenta, corre ni se apaga.":"A shift you took is yours until you cook it. It is never late. Nothing on this board counts, ticks or fades."},
+      {art:shiftCards,aspect:(W)=>398/W,cap:es?"Dibujo, a la tarjeta de Pili: una franja de 6 px con el color de la cocina, el platillo a 64 px, dos renglones. La de la esquina doblada es tuya.":"Drawing, to Pili’s card: a 6-px stripe in the kitchen’s ground, the dish at 64 px, two lines of type. The one with the turned corner is yours."},
+      {kv:[[es?"Tuyo":"Yours","Pasta e ceci — "+(es?"de Nello · «jueves, saliendo del trabajo»":"Nello’s · “Thursday, after work”")],[es?"Abierto":"Open","Frijoles de la olla — "+(es?"de Cande":"Cande’s")],[es?"Abierto":"Open","Doenjang-jjigae — "+(es?"de Seo":"Seo’s")],[es?"Abierto":"Open",(es?"Onigiri, dos rellenos — de Hana":"Onigiri, two ways — Hana’s")]]},
+      {note:es?"Un turno que tomaste es tuyo hasta que lo cocinas. Nunca va tarde. Aquí nada lleva cuenta, nada corre y nada se apaga.":"A shift you took is yours until you cook it. It is never late. Nothing on this board counts, ticks or fades."},
       {btn:es?"Tomar un turno":"Take a shift"}
     ];}};
   /* the recipe as the HOUSE reads it: what you have is a line; what is missing is one sentence and a door */
@@ -111,36 +111,36 @@
       s.splice(i-1,2,
         {h:es?"En la casa":"In the house"},
         {kv:[["Frijol negro",es?"500 g — cajón 2":"500 g — drawer 2"],[es?"Agua":"Water",es?"que cubra dos dedos":"to cover by two fingers"],[es?"Cebolla":"Onion",es?"media — el estante":"half — the shelf"],[es?"Ajo":"Garlic",es?"2 dientes — el estante":"2 cloves — the shelf"],["Sal","q.b."]]},
-        {note:es?"Falta uno: el epazote. Cande tiene una mata junto a su puerta y Ofelia lo vende seco.":"Missing one: epazote. Cande keeps a plant by her door, and Ofelia sells it dried."});
+        {note:es?"Falta uno: el epazote. Cande tiene una mata junto a su puerta y Ofelia lo vende seco.":"One thing missing: epazote. Cande keeps a plant by her door, and Ofelia sells it dried."});
       return s.filter(b=>!b.form);}};
   const collection={
     title:{en:"The Collection · Mexican",es:"La colección · mexicana"},
-    sub:{en:"Everything you have made, and the outline of what you haven't. It fills itself in.",
+    sub:{en:"Everything you have made, and the outline of what you haven’t. It fills itself in.",
          es:"Todo lo que has hecho, y el contorno de lo que no. Se llena solo."},
     build:()=>{const es=L();return [
       {h:"La olla"},
-      {kv:[["Frijoles de la olla","Cande · "+(es?"dos veces":"made twice")],["Frijoles refritos","Cande · "+(es?"una vez, de la olla del domingo":"made once, from Sunday's pot")]]},
+      {kv:[["Frijoles de la olla","Cande · "+(es?"dos veces":"twice")],["Frijoles refritos","Cande · "+(es?"una vez, de la olla del domingo":"once, from Sunday’s pot")]]},
       {blank:"Enfrijoladas"},{blank:"Sopa tarasca"},
       {h:"El comal"},
-      {kv:[["Tortillas de maíz","Cande · "+(es?"una vez":"made once")]]},
+      {kv:[["Tortillas de maíz","Cande · "+(es?"una vez":"once")]]},
       {blank:"Quesadillas de flor"},{blank:"Tlacoyos"},
       {note:es?"Un renglón en blanco es todavía no, no está prohibido. Nada aquí está cerrado con llave; una cocinera ofrece el siguiente cuando le nace.":"A blank line is not yet, not denied. Nothing here is locked; a cook offers the next one when she feels like it."}
     ];}};
   const house={
     title:{en:"The house",es:"La casa"},
-    sub:{en:"One house, nobody's name on anything. The switches live on this card, not in the gear.",
+    sub:{en:"One house, nobody’s name on anything. The switches live on this card, not in the gear.",
          es:"Una casa, sin nombre en nada. Los interruptores viven en esta tarjeta, no en el engrane."},
     build:()=>{const es=L();return [
       {kv:[[es?"Quién cocina aquí":"Who cooks here",es?"Dos personas, una casa":"Two people, one household"],[es?"Cajones":"Drawers",es?"Tres, un estante y el refri":"Three, and a shelf, and a fridge"],[es?"Temporada":"Season",es?"Fin de verano · San Diego":"Late summer · San Diego"]]},
-      {sel:es?"Calificación en el plato":"Show grades on a plate",opts:[{v:"off",t:es?"Apagada — sólo la comida":"Off — just the food"},{v:"on",t:es?"Encendida — una letra, en voz baja":"On — a quiet letter"}],value:"off"},
-      {form:{fields:[{k:"raw",type:"checks",label:es?"Verduras crudas que no entran en las recetas de la casa (ejemplos, no la lista de nadie)":"Raw vegetables that stay out of the house's recipes (example items, not anyone's list)",opts:[{v:"carrot",t:es?"Zanahoria":"Carrot"},{v:"celery",t:es?"Apio":"Celery"},{v:"bell",t:es?"Pimiento":"Bell pepper"},{v:"apple",t:es?"Manzana":"Apple"}],value:["carrot","celery"]}],submit:es?"Guardar":"Keep",noFocus:true}},
-      {note:es?"Una receta que pide una de éstas cruda la ofrece cocida, o te ofrece otra receta. Nunca dice «alergia» en un plato.":"A recipe that wants one of these raw offers it cooked, or offers another recipe. It never says “allergy” on a plate."}
+      {sel:es?"La calificación en el plato":"Grades on the plate",opts:[{v:"off",t:es?"Apagada — sólo la comida":"Off — just the food"},{v:"on",t:es?"Encendida — una letra, en voz baja":"On — a quiet letter"}],value:"off"},
+      {form:{fields:[{k:"raw",type:"checks",label:es?"Crudas no — la casa las cocina":"Not raw — the house cooks these",opts:[{v:"carrot",t:es?"Zanahoria":"Carrot"},{v:"celery",t:es?"Apio":"Celery"},{v:"bell",t:es?"Pimiento":"Pepper"},{v:"apple",t:es?"Manzana":"Apple"}],value:["carrot","celery"]}],submit:es?"Guardar":"Keep",noFocus:true}},
+      {note:es?"Ejemplos, no la lista de nadie. Una receta que pide una de éstas cruda la ofrece cocida, o te ofrece otra receta. Nunca dice «alergia» en un plato.":"Examples, not anyone’s list. A recipe that wants one of these raw offers it cooked, or offers another recipe. It never says “allergy” on a plate."}
     ];}};
   const quiet={
     title:{en:"Tuesday",es:"Martes"},
     sub:{en:"Nobody cooked since Friday. That is all that happened.",es:"Nadie cocinó desde el viernes. Eso es todo lo que pasó."},
     build:()=>{const es=L();return [
-      {p:es?"La puerta de Cande está abierta, como siempre. El turno de Nello sigue en el tablero con tu nota.":"Cande's door is open, same as always. Nello's shift is still on the board with your note on it."},
+      {p:es?"La puerta de Cande está abierta, como siempre. El turno de Nello sigue en el tablero con tu nota.":"Cande’s door is open, same as always. Nello’s shift is still on the board with your note on it."},
       {kv:[[es?"En el tablero":"On the board","Pasta e ceci — "+(es?"«jueves, saliendo del trabajo»":"“Thursday, after work”")],[es?"En el refri":"In the fridge",es?"Media olla de frijoles del domingo":"Half a pot of beans from Sunday"]]},
       {note:es?"Nadie dice nada de los días de en medio. No hay racha, y no se rompió nada.":"Nobody says a word about the days between. There is no streak, and nothing broke."},
       {btn:es?"Ver el tablero":"See the board"}

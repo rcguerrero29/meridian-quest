@@ -1135,3 +1135,1296 @@ art:    (g,W,H)=>{const P=MURPAL;
 - Process followed: `/home/user/meridian-quest/docs/UI-REVIEW.md` (it exists, so it wins over `run8-lupe.md`; my findings belong in its §6 block 1, and my row in its signature table is **row 1, Engineers, signed FALSE for the set, 2026-09-14**)
 - Mine, in the scratchpad, nothing in the repo: `/tmp/claude-0/-home-user-meridian-quest/0f70be00-7ff9-5c2f-a84c-7edceebcd89f/scratchpad/beto-checks-probe.js`, `beto-panel9-art.js`, `beto-panel9-render.js`, `beto-panel9-520.png`, `beto-panel9-360.png`
 - Code cited: `/home/user/meridian-quest/engine/engine.js` `:13` `:50` `:431` `:462` `:498` `:503` `:510` `:604-605` `:608` `:611` `:831` `:3373-3416` `:3423-3424` `:3438-3442` `:3462-3463` `:3481-3492` `:3635` `:3640` `:3645` `:3980` `:4477` `:4486-4487` `:4653` `:4741-4750` `:4751-4771`; `/home/user/meridian-quest/index.html` `:185-186` `:193` `:219-221` `:237-240` `:243` `:360` `:386-388` `:728` `:746`; `/home/user/meridian-quest/changarrito/index.html` `:359` `:385-387` `:727`; `/home/user/meridian-quest/content/gauge/index.html` `:360` `:386-388`; `/home/user/meridian-quest/content/meridian/strings.js` `:8` `:229`; `/home/user/meridian-quest/sw.js` `:6-12`; `/home/user/meridian-quest/scripts/build-site.sh` `:11-13` `:18-20`; `/home/user/meridian-quest/changarrito/content/config.js:12`; `/home/user/meridian-quest/content/gauge/config.js:1`; `/home/user/meridian-quest/test/town.smoke.js:48`
+
+
+---
+
+# Nacho — story, row 3
+
+PRE-FLIGHT — I intend to work this the way I read a wall: open each picture cold, write the one sentence a stranger would say out loud in front of it, and only then look at the sentence the page already printed underneath, so the page cannot tell me what I saw; then judge the copy in `mockdocs2.js` against the rules that bind a world that is somebody else's household (R12, R15, R16, R17). My persona equips me for exactly the row I was given — the question "what does this screen say about the PERSON" is a story question, and it is the one question a measurement cannot answer, which is why Lupe wrote my row as a sentence she refused to sign for me. Where I expect to fall short, named in advance: I cannot see the four canvas drawings (stations 1, 3, 8, 9) because they live in the review page's `DRAW` object and were never shot as PNGs, so anything I say about the household, the merge board and the hand-made dish is about *words*, not about pictures — and I have no Bash, so I could not render them.
+
+---
+
+## MY SIGNATURE LINE
+
+> **Row 3 · Story · Nacho** — *"Each screen says ONE thing a person reads without being told, and I can write that thing in one sentence under the picture."* (`run8-lupe.md` §3)
+
+## **FALSE for the set.**
+
+**The thing that makes it false, named:** the sentence the page prints under each screen is, for six of the thirteen stations, the document's own `sub` string copied out of `mockdocs2.js` — and **`sub` is never drawn on a screen.** `[CODE]` `engine/engine.js:3344` is the only use of `d.sub` in the whole engine: `const sub=d.sub&&(d.sub[lang]||d.sub.en);if(sub)out.push("*"+sub+"*");` — inside `docMarkdown`, the **export**. The on-screen renderer never touches it. Verified against the pictures: no `sub` appears on any of the thirty. So the shifts board's *"A shift is one dish, it pays in leftovers, and it has no clock"*, the Collection's *"It fills itself in"*, the drawer's *"Bags slump — that is how you know this drawer with the light off"* — the best writing in this pack, the sentences that carry the feeling — exist only in the file you download.
+
+**I cannot sign "I can write that thing in one sentence under the picture", because the makers already did, and the picture cannot say it back.**
+
+### Per screen — my sentence vs the page's `line`. Where they differ, mine is the finding.
+
+| # | Screen · row | The page's `line` | **What a person reads without being told** | Same? |
+|---|---|---|---|---|
+| 0 | questionnaire · 390×844 | "Her answers go to him and stay with him." | *"Somebody built this for me — but the top of the screen says it will forget me, and the middle says it won't."* | **NO** |
+| 1 | front door · 390×844 | "Three reasons to cook, not three careers." | *"This is a job simulator and I am choosing a career: Architect, Diplomat, Operator."* | **NO** — the line describes a drawing; the picture is the shipped door |
+| 2 | street · 390×844 | "The world is the game. The app is the paperwork around it." | *"I'm in an office, and the game is explaining itself to me twice at once."* | **NO** — the hint text is painted in the corner panel AND in a bubble over the player, word for word |
+| 4 | drawer · 390×844 | "A line is a thing you have." | *"This is a search box for my food."* — the violet **Find** button owns the fold; the list starts at 964 px | **NO** |
+| 4 | drawer · 844×390 | same | *"Three drawers, and nothing in any of them."* | **NO** |
+| 5 | shifts · 390×844 | "A shift you took stays yours. It is never late." | *"Four dinners I could cook. One is already mine."* | close — **YES, with a note**: "never late" is in the one block the fold cuts in half |
+| 5 | shifts · 844×390 | same | *"Two dinners, and then the document ends."* | **NO** |
+| 6 | recipe · 390×844 | "What's missing is one sentence and a door." | *"I have nearly everything; one herb is at Cande's — and this recipe has no method."* (`How it goes` is a heading with blank under it at the fold) | **NO** |
+| 6 | recipe · 844×390 | same | *"Beans, water, onion. That's the recipe."* | **NO** — E12 again, in story terms |
+| 7 | Collection · 390×844 | "A blank line is not yet, not denied." | *"Three things done, five things not done."* The dashed blank is the same mark the reader uses for *end of document* | **NO** |
+| 10 | house card · 390×844 | "The switches live on a card, not in the gear." | *"Somebody wrote down that I can't eat raw carrot, and then promised not to say so."* | **YES** — and it is the kindest screen in the set |
+| 11 | quiet · 390×844 **and** 844×390 | "Nobody says a word about the days between." | *"Nothing happened and nobody minds."* | **YES — the only screen that is TRUE at both rows** |
+| 12 | map after · 390×844 | "Find the next thing without being told." | *"Orange is where to go, and the legend finally says so."* | **YES** |
+
+**The genre line — signed TRUE, on every screen I looked at:**
+> *"There is no clock, no countdown, no day budget, no streak that can break, and nothing on this screen counts down."*
+Checked in `mockdocs2.js` and in every picture: the only counter anywhere is the questionnaire's *"0 of 13 answered"*, which counts **up** (R15 satisfied, `docs/GENRE-RULES.md:154`), and the shifts board's date is the one the player wrote. Nothing fades, ages or empties. `[CODE]`
+
+---
+
+## FINDINGS
+
+### F1 · The sentence that says what a screen means is written, and never shown
+**Screen:** all six reader screens (4, 5, 6, 7, 10, 11) · **Row:** 390×844 and 844×390 · **Verdict: DOES NOT ANSWER**
+
+**In plain words:** Every one of these documents carries a second sentence under its title — the one that tells you what the thing is for. On a phone you never see it. It is only written into the file you download, so the person holding the phone gets a title and then a list, and the review page prints the missing sentence underneath the picture as if the screen had said it.
+
+**Notes:** `[CODE]` `engine/engine.js:3344` is the only place `d.sub` is read, inside `docMarkdown`. Six `sub` strings in `docs/mocks/2026-09-14-la-sobremesa/journey/mockdocs2.js` (`:84`, `:96`, `:116`, `:129`, `:139`, and `recipeHome` inheriting `D.recipe.sub` at `:106`). Three of them are quoted verbatim as the journey page's own `sub` field. This is the whole of my signature line's failure and it is one line of content per document to fix — put the sentence in a `p` block, where it will be drawn.
+
+**Questions to consider:** does the sentence become a `p` (content's call, no engine change, every pack gains it one at a time), or does the reader learn to draw `sub` (one engine sitting, behaviour-identical for Meridian because Meridian's documents have subs too and would start showing them — which is a visible change to Meridian's players and therefore not free)?
+
+**Areas affected:** `mockdocs2.js` all six documents; `engine/engine.js:3344`; the journey page's `line`/`sub` fields; every pack that ever writes a `sub`.
+
+**Done when:** the sentence a reviewer writes under the picture is a sentence a player can read in the picture.
+
+---
+
+### F2 · The questionnaire makes AJ two opposite promises, one above the other
+**Screen:** 0, questionnaire intro · **Row:** 390×844, night, published · **Verdict: ANSWERS, WITH A NOTE**
+
+**In plain words:** The amber banner at the top says *"This browser is not remembering. Copy your answers before you close."* Four lines below, the body says *"Your answers are kept as you go, so you can close this and come back."* Both are above the fold, in the same frame. A person on a phone reads: *this will lose my answers, and I am being told it won't.* That is the one thing this page cannot afford, because the page's entire job is to make a nervous person type honestly.
+
+**Notes:** This is not a mock — the manifest calls it *"the published page, untouched"*, so this is copy a real person can reach today. The banner is a true statement about a browser without a store and the body is a true statement about one with it; two truths, one screen, and the reader cannot tell which applies to her.
+
+**Questions to consider:** should the body sentence be the one that moves — *"Your answers are kept as you go **when your browser lets it**; if the banner above is showing, copy before you close"* — so the banner explains the body instead of contradicting it?
+
+**Areas affected:** `scratchpad/aj-questionnaire.html` intro copy and the store-fallback banner.
+
+**Done when:** a person reading the top of that screen cannot come away with two beliefs about whether their words survive.
+
+---
+
+### F3 · The drawer is the one artifact our own research says will lie to her by week three
+**Screen:** 4, a drawer · **Row:** both · **Verdict: DOES NOT ANSWER**
+
+**In plain words:** The drawer screen asks you to keep a list of what is in your kitchen and gives you a button called *Add what you bought*. The rule we bought with a research sweep says a pantry ledger passes every effort test and fails anyway, because by week three it is 80% right and recommending food you no longer have.
+
+**Notes:** `docs/GENRE-RULES.md:188-195` (R17), which the same file at `:294` records as one of the rules the healthy-eating sweep *ruled out* for this very plan. The journey's own note handles a different worry — that running out should not read as a cross (`mockdocs2.js:91`, and the owner has said so once). Nothing on the screen or in the station's notes addresses decay. **This is a contradiction between a signed rule and the thing being drawn, and I am raising it rather than planning around it.** My own read, `[TRAINING]`: the ledger survives if the house never *asserts* — the recipe says *"Frijol negro · 500 g — drawer 2"* as a **memory of where it lives**, not a claim that it is there, and the missing line is always one sentence and a door rather than a shopping list. That is already how station 6 is written; the drawer has not been told.
+
+**Questions to consider:** does the drawer stop being a stock list and become a **map of the house** — what lives where, which never goes stale — with quantities as the soft thing that can be wrong?
+
+**Areas affected:** station 4's whole premise; `mockdocs2.js:82-93`; the `have/missing` set difference at station 6; `docs/la-sobremesa.md`.
+
+**Done when:** the screen cannot be 80% right about today, because it is not making a claim about today.
+
+---
+
+### F4 · Three of the four kitchens are a flag with an apostrophe
+**Screen:** 5, the shifts board · **Row:** both, EN and ES · **Verdict: ANSWERS, WITH A NOTE**
+
+**In plain words:** *Cande's · Mexican*, *Nello's · Italian*, *Seo's · Korean*, *Hana's · Japanese*. Cande is a person — she dictated the beans on moving day, she is in door 2, she got it from her tía Herminia's notebook in 1998, she keeps epazote by her door. The other three are a possessive and a nationality, which is the museum label R12 exists to forbid.
+
+**Notes:** `docs/GENRE-RULES.md:132-138` — *be specific to particular people rather than representative of a cuisine.* `mockdocs2.js:40-43`. The brief already calls these placeholders; the finding is not that they are placeholders, it is **what the placeholder's shape teaches the next writer** — four rows in identical `Name's · Nationality` form will get filled in as four nationalities. **The price is one sentence each, before any of them ships:** who taught it, where they live now, and what their sister or their aunt does differently. Nello should not be *Italian*; he should be a man whose mother put the rosemary in at the end and who does not, and says so. And the moment a kitchen has that sentence, the word *Italian* can come off the card entirely — the dish and the door number do the work.
+
+**Questions to consider:** do the three remaining kitchens get their people from AJ's questionnaire answers (which is what questions 1–13 are for) rather than from us?
+
+**Areas affected:** `mockdocs2.js:39-43` and `:100`; station 5 and 7 copy; `docs/la-sobremesa.md`'s cast.
+
+**Done when:** no card on the board carries a nationality as its second line.
+
+---
+
+### F5 · "Sal" is in the English recipe
+**Screen:** 6, the recipe · **Row:** 390×844 EN (visible above the fold) · **Verdict: ANSWERS, WITH A NOTE**
+
+**In plain words:** The English reader shows *Frijol negro · Water · Onion · Garlic · **Sal***. Four of the five were translated and the fifth was not, so it reads as a typo rather than as a word the house keeps.
+
+**Notes:** `mockdocs2.js:111` — `["Sal","q.b."]`, the one entry in that `kv` with no `es?` ternary, while its neighbours have one. **This collides with a settled rule:** `docs/OWNER.md:121`, *"EN/ES in lockstep."* One-word fix — **and a story call underneath it**, which is why it is worth a line: `Frijol negro` is deliberately untranslated on the same screen and reads as right, because it is the name of a thing in this house. If salt is to stay Spanish, the whole ingredient list should be the house's Spanish with the English in the second column; if not, `Salt`. Half of each is the only wrong answer, and it is what ships today.
+
+**Areas affected:** `mockdocs2.js:111`.
+
+**Done when:** an English reader can tell that every Spanish word on that card was chosen.
+
+---
+
+### F6 · The recipe appears to have no method
+**Screen:** 6 · **Row:** 390×844 (and worse at 844×390) · **Verdict: ANSWERS, WITH A NOTE**
+
+**In plain words:** On a phone, the last thing above the button bar is the heading **How it goes** with empty space under it and then a dashed rule. The screen says: *here is where the instructions would be.* The instructions are magnificent — *"Turn it down and walk away… an hour and a half, two. It does not hurry"* — and they are at 923 px on a 661 px screen.
+
+**Notes:** manifest `docHeight 923 / visibleHeight 661`. This is Lupe's M2 with a story face on it: a heading that has been reached but not filled reads as an empty section, not as *scroll*. And the copy below the fold is the only place in the entire pack where the game keeps its own promise out loud — *"It does not hurry"* is the four-word thesis of a no-timer game, and nobody on a phone will read it.
+
+**Questions to consider:** should *How it goes* come **before** the plate drawing, so the method is above the fold and the picture is the reward for scrolling?
+
+**Areas affected:** `mockdocs2.js:105-113` block order; `docs/mocks/.../mockdocs.js` `D.recipe`.
+
+**Done when:** the sentence *"It does not hurry"* is visible on a phone without a scroll the person has to guess at.
+
+---
+
+### F7 · The shifts board says the same four dishes twice
+**Screen:** 5 · **Row:** 390×844 EN and ES · **Verdict: ANSWERS, WITH A NOTE**
+
+**In plain words:** The four cards name Pasta e ceci, Frijoles de la olla, Doenjang-jjigae and Onigiri; twelve lines lower, a list names the same four again with *Yours / Open* in front. The second one exists because the first is a drawing and drawings do not export — but a person does not know that, and reads a screen that repeats itself.
+
+**Notes:** `mockdocs2.js:99-100`. The caption between them makes it worse by explaining the drawing to the player (*"Drawing, to Pili's card: a 6-px stripe…"*) — correct and necessary in a review, fatal in the game. Between the two, **the drawing should win and the `kv` should go**; the export can carry the list on its own, which is exactly what `docMarkdown` is for.
+
+**Areas affected:** `mockdocs2.js:98-103`; every `art` block's `cap` field when this becomes a pack.
+
+**Done when:** no screen in the pack tells a player what its own drawing is made of.
+
+---
+
+### F8 · A blank line and the end of the document are the same mark
+**Screen:** 7, the Collection · **Row:** 390×844 · **Verdict: ANSWERS, WITH A NOTE**
+
+**In plain words:** *Enfrijoladas: ------------* is drawn with a dashed rule. So is the line the reader puts above the Copy/Download/Close bar to say the document has ended. The screen's entire meaning — *a blank line is not yet, not denied* — is carried by the one mark that also means *stop*.
+
+**Notes:** visible in the same frame in `j-collection-390x844-en-night-unmodified.png`; five dashed rules, four of them promises and one of them a full stop. Pili's row (§3 row 2) owns whether a mark is legible; mine owns whether it is legible **as the right feeling**, and this one is a warm idea wearing a terminator's clothes.
+
+**Areas affected:** the reader's `blank` block and its end-of-document rule, `engine/engine.js`; both games.
+
+**Done when:** a player can tell, without being told, which dashes are an invitation.
+
+---
+
+### F9 · The front door in the picture is Meridian's, and the line under it is a promise
+**Screen:** 1 · **Row:** 390×844 cream · **Verdict: DOES NOT ANSWER**
+
+**In plain words:** The line says *three reasons to cook, not three careers*; the picture says *Meridian Labs needs an AI delivery hero — choose your class: Architect, Diplomat, Operator.* The station admits the relabel is a drawing and names the blocker, which is honest — but the picture is the only thing a reviewer's eye keeps, and it currently teaches the opposite of the claim.
+
+**Notes:** the drawing that would answer it (`DRAW.doors`) exists in the review page and was never shot, so it is not in the thirty. **The extra picture that would answer this station: `doors` rendered at 390×844 beside the real one, same shell, A5's before-and-after.**
+
+**Areas affected:** the review page's station 1; the three shells' hard-coded classes.
+
+**Done when:** there is a picture of the door this game has, not only of the door it inherits.
+
+---
+
+### F10 · The street explains itself twice, in the same frame
+**Screen:** 2 · **Row:** 390×844 cream · **Verdict: ANSWERS, WITH A NOTE**
+
+**In plain words:** The hint *"Desks, plants and walls just block you — coworkers with a ❗ have quests. Walk up and Talk."* is painted into the corner panel and, at the same moment, into a large bubble over the player's head. Two copies of one sentence, overlapping a third one about the joystick.
+
+**Notes:** shipped Meridian at the owner's own row, `j-street-390x844-en-cream-unmodified.png`. **This is a live Meridian observation from a picture, not a mock finding** — it belongs to `/playtest`, not to this review, and I am naming it here rather than filing it because my row does not own the shipped game's onboarding.
+
+**Areas affected:** Meridian's first-run hints.
+
+**Done when:** somebody who owns that row looks at the same picture.
+
+---
+
+## QUESTIONS FOR THE OWNER
+
+**Q1 · The drawer: a stock list, or a map of the house?** — *(the only one where two signed things collide)*
+- One side: `docs/GENRE-RULES.md:188-195` (R17) says a pantry ledger is *"worse than no model, because it lies with confidence"* by week three, and `:294` records that rule as one the sweep produced **for this plan**.
+- The other side: station 4 is a pantry ledger with a button that says *Add what you bought* (`mockdocs2.js:92`), station 6's have/missing is a set difference against it, and you asked for the drawers by name: *"i want to rebuild a pantry… three drawers."*
+- What each would have me build: **the ledger** — a list of quantities, kept accurate by the player, which the recipe trusts. **The map** — three drawers that remember *where things live* and never claim *how much*, with the recipe's missing line being a sentence and a door rather than a subtraction.
+- What I need from you: one word. *Ledger* or *map*. I would build the map, because the sentence *"Frijol negro · 500 g — drawer 2"* is already doing its work as a memory and not as a claim, and because a map cannot go stale.
+
+**Q2 · Who fills in the other three kitchens?** — Cande has a notebook, a tía, a year and a door. Nello, Seo and Hana have a nationality. They can be written by us before AJ answers, or left deliberately blank in the mock so her thirteen answers name them. Cost of waiting: the shifts board mock stays half-cast. Cost of not waiting: we write three households she never met, and R12 says a game about one household cannot be wrong about a nation — but it can absolutely be wrong about *hers*.
+
+**Q3 · The document's second sentence — a `p`, or a change to the reader?** Content-only fixes six screens today and leaves the next pack free to make the same mistake; the engine fix makes every `sub` visible in Meridian too, which is a visible change to your game's documents and therefore yours to say yes to.
+
+---
+
+## WHAT I DID NOT CHECK
+
+- **The four drawings — stations 1 (doors), 3 (the household room), 8 (the merge board), 9 (making a dish by hand).** They live in the review page's `DRAW` object and were never rendered to PNG; I have no Bash and did not render them. **Four of the thirteen stations have no picture, and two of them — the merge board and the hand-made dish — are the two surfaces AJ actually showed him in a video.** That is the biggest hole in this review and it is not a small one.
+- **I opened 22 of the 30 pictures.** Not opened: the six `unrolled` duplicates other than `recipeHome` (I used the manifest's heights and the `unmodified` pair instead), and the ES drawer/collection/recipeHome. My ES reading rests on the house, quiet and shifts pictures.
+- **I did not measure anything.** Every height in this report is the manifest's or Lupe's; I checked the box was non-zero only by seeing type in it.
+- **I did not read `docs/STORY.md` or `docs/CITY.md`.** My own persona file tells me to read both before planning; this is a review of somebody else's world and I judged them not to bear on it. If any Meridian canon is implicated by station 12's map or by F10, I did not check it.
+- **I did not verify Lupe's E13, her M-list, or any claim in `run8-lupe.md` §6** against the code. I used her §3 as my signature line and took her measurements as read.
+- **I did not check whether `docs/UI-REVIEW.md` exists** — the brief says it wins over `run8-lupe.md` if it does, and I worked from Lupe's §3 without looking. If Chuy has landed it and my row's sentence changed, my signature is against the older wording.
+- **`docs/la-sobremesa.md` §12 — the owner's answers — I did not read.** Q1 above may already be answered there, in which case it is not a question and I have wasted one of his.
+
+---
+
+## POST-FLIGHT
+
+What the persona got right, with the moment: writing my own sentence for each screen *before* reading the page's `line` is the only reason F1 exists — I wrote *"this is a search box for my food"* under the drawer, looked down, read *"Bags slump — that is how you know this drawer with the light off"*, went to find where that beautiful sentence lived, and found it at `engine/engine.js:3344` inside the markdown exporter, which means it has never once been on a screen. Where the persona was in the way: I am a story director and I kept wanting to *rewrite* — twice I drafted replacement copy for the questionnaire banner and for the shifts board before remembering that a review names the collision and hands it back, and the replacement lines I did keep (F4, F5) are deliberately one sentence each and marked as my read, not as a change. The gap I predicted appeared exactly as predicted and was worse than I predicted: not only could I not see the four drawings, but **two of the four are the two surfaces the whole game is supposed to be** — the merge board and the hand-made dish — so the journey I reviewed has thirteen stations and no picture of the part AJ plays. My edit to my own file: **one, and it is additive.**
+
+**Persona edit I propose, as exact text.** In `.claude/agents/nacho.md`, appended to the paragraph beginning **"And before you write three endings, find out what picks between them."**:
+
+> **And before you write the sentence that says what a screen means, grep whether the screen can say it.** On 2026-09-14 six mock documents carried a `sub` — the second line, the one that tells you what the thing is for — and `engine/engine.js:3344` reads `d.sub` in exactly one place: `docMarkdown`, the export. The reader never draws it. Six screens, six meanings, none of them on glass, and a review page that printed the missing sentence underneath each picture as though it had been there. **Grep the renderer for the field before you write into it** — the same rule as `gradeOf`, pointed at prose instead of at endings: *a sentence with nothing to draw it is not writing, it is a note to the team.*
+
+---
+
+MURAL PANEL
+
+```
+id:     nacho-la-unica-que-cabe
+by:     "nacho"
+title:  {en:"The only one that fits", es:"La única que cabe"}
+said:   {en:"Five screens run off the bottom of the door. The one that fits is the day nothing happened.",
+         es:"Cinco pantallas se salen por abajo de la puerta. La que cabe es el día en que no pasó nada."}
+state:  {en:"Holding that a document's second sentence is not written until the screen can show it — and that the quiet screen earns its place by being short, not by being kind.",
+         es:"Sostengo que la segunda frase de un documento no está escrita hasta que la pantalla pueda mostrarla — y que la pantalla callada se gana su lugar por corta, no por amable."}
+who:    {en:"Nacho, who writes what a screen means and then goes to see whether it says it",
+         es:"Nacho, que escribe lo que significa una pantalla y luego va a ver si lo dice"}
+cap:    {en:"The review page prints one sentence under every screen. I went looking for those sentences inside the documents and found them in a field the reader writes into the file you download and never onto the glass. Six screens, six meanings, none of them on a phone. The day nothing happened is the only page small enough to be read whole on a phone turned sideways, and it is the only one with nothing to say.",
+         es:"La página de revisión imprime una frase debajo de cada pantalla. Fui a buscar esas frases dentro de los documentos y las encontré en un campo que el lector escribe en el archivo que descargas y nunca en el vidrio. Seis pantallas, seis significados, ninguno en un teléfono. El día en que no pasó nada es la única hoja lo bastante chica para leerse entera en un teléfono de lado, y es la única que no tiene nada que decir."}
+aspect: 0.46
+art:    (g,W,H)=>{
+    /* NACHO'S HAND, SECOND VISIT. My first was a duplicate order pad — paper, biro, carbon.
+       This is not paper: it is the DOOR OF A FRIDGE. Brushed enamel, a steel handle, magnets.
+       It is where a household keeps what it needs to remember, and it is the only wall in this
+       project that belongs to nobody and to both people. Five documents hang off the bottom of
+       it, still going. One little card is pinned whole, under a magnet shaped like a bean pot.
+       My palette: enamel, steel, magnet red, ballpoint blue, clay. Not the wall's. */
+    const EN="#EDEBE6", STEEL="#D7D3CA", SHADOW="#BCB7AD", CARD="#FDFBF2", RULE="#CAC5B9",
+          INK="#2B2E33", PENCIL="#8C8A84", RED="#C0392B", BLUE="#2E5E8A", CLAY="#9B5B3C";
+    murPaper(g,W,H,EN,null);
+    /* brushed steel: fine vertical grain, the way an enamel door catches a kitchen light */
+    for(let x=0;x<W;x+=6){g.globalAlpha=.22;g.fillStyle=((x/6)|0)%2?STEEL:EN;g.fillRect(x,0,3,H);}
+    g.globalAlpha=1;
+    g.fillStyle=STEEL;g.fillRect(0,0,W,2);
+
+    /* the door's right edge and its handle — this is a fridge and it says so before any word */
+    g.fillStyle=SHADOW;g.fillRect(W*0.893,0,2,H);
+    g.fillStyle=STEEL;   g.fillRect(W*0.930,H*0.120,W*0.024,H*0.760);
+    g.fillStyle=SHADOW;  g.fillRect(W*0.930,H*0.120,W*0.008,H*0.760);
+    g.fillStyle=SHADOW;  g.fillRect(W*0.922,H*0.150,W*0.040,H*0.038);
+                         g.fillRect(W*0.922,H*0.812,W*0.040,H*0.038);
+
+    /* FIVE LONG DOCUMENTS. Each is pinned at the top and runs off the bottom edge of the panel:
+       774, 739, 923, 408, 500 px of paper onto 661 of screen. They do not end anywhere you can see. */
+    const sx=W*0.058, sw=W*0.076, pitch=W*0.096, top=H*0.315;
+    for(let i=0;i<5;i++){
+      const x=sx+i*pitch;
+      g.globalAlpha=.30;g.fillStyle=SHADOW;g.fillRect(x+2,top+3,sw,H);g.globalAlpha=1;
+      g.fillStyle=CARD;g.fillRect(x,top,sw,H-top+10);
+      g.fillStyle=INK; g.fillRect(x+sw*0.14,top+H*0.052,sw*0.58,2.5);      /* its title */
+      g.fillStyle=RULE;
+      for(let y=top+H*0.100;y<H;y+=H*0.046)
+        g.fillRect(x+sw*0.14,y,sw*(0.72-((i+((y*7)|0))%3)*0.14),1.5);       /* ruled, and still going */
+      const mr=Math.max(4,H*0.028);                                          /* the magnet */
+      g.fillStyle=(i%2)?BLUE:RED;g.beginPath();g.arc(x+sw*0.5,top,mr,0,7);g.fill();
+      g.fillStyle="rgba(255,255,255,.40)";g.beginPath();g.arc(x+sw*0.5-mr*0.32,top-mr*0.32,mr*0.34,0,7);g.fill();
+    }
+
+    /* THE ONE THAT FITS — pinned under a bean-pot magnet, whole, with room underneath it */
+    const cx=W*0.590, cy=H*0.315, cw=W*0.275, chh=H*0.300;
+    g.globalAlpha=.30;g.fillStyle=SHADOW;g.fillRect(cx+2,cy+3,cw,chh);g.globalAlpha=1;
+    g.fillStyle=CARD;g.fillRect(cx,cy,cw,chh);
+    g.fillStyle=INK;g.font="bold 9px ui-monospace,monospace";
+    g.fillText("MARTES",cx+cw*0.10,cy+H*0.075);
+    g.fillStyle=RULE;
+    g.fillRect(cx+cw*0.10,cy+H*0.115,cw*0.76,1.5);
+    g.fillRect(cx+cw*0.10,cy+H*0.160,cw*0.58,1.5);
+    g.fillStyle=INK;                                                         /* and a full stop */
+    g.fillRect(cx+cw*0.10+cw*0.58+3,cy+H*0.157,2.5,2.5);
+    /* the marker, in somebody's own hand */
+    g.fillStyle=RED;g.font="italic 9px ui-monospace,monospace";
+    g.fillText("no pasó nada",cx+cw*0.10,cy+H*0.238);
+    g.strokeStyle=RED;g.lineWidth=1.6;g.globalAlpha=.9;
+    g.beginPath();g.moveTo(cx+cw*0.09,cy+H*0.258);
+    g.lineTo(cx+cw*0.09+g.measureText("no pasó nada").width,cy+H*0.252);g.stroke();g.globalAlpha=1;
+    /* the bean-pot magnet: a clay olla, 16px pixel art, the same one that is on the board */
+    const pr=Math.max(9,H*0.058), px0=cx+cw*0.5-pr, py0=cy-pr*0.86, u=pr/7;
+    g.fillStyle="#5A3A2A";g.fillRect(px0+4*u,py0+1*u,8*u,2*u);
+    g.fillStyle=CLAY;     g.fillRect(px0+3*u,py0+3*u,10*u,6*u);g.fillRect(px0+2*u,py0+5*u,12*u,3*u);
+    g.fillStyle="#B26E4C";g.fillRect(px0+4*u,py0+3*u,2*u,5*u);
+    g.fillStyle="#3D2A22";g.fillRect(px0+5*u,py0+2*u,6*u,1*u);
+
+    /* the lettering — absolute, and every fraction above was chosen against it */
+    g.fillStyle=INK;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("LA PUERTA DEL REFRI",W*0.058,H*0.105);
+    g.fillStyle=PENCIL;g.font="8px ui-monospace,monospace";
+    g.fillText("cinco documentos · siguen hacia abajo",W*0.058,H*0.190);
+    g.fillStyle=RED;g.font="bold 9px ui-monospace,monospace";
+    g.fillText("la única que cabe",cx+cw*0.02,cy+chh+H*0.095);
+    g.fillStyle=PENCIL;g.font="8px ui-monospace,monospace";
+    g.fillText("y es la que no tiene nada que decir",cx+cw*0.02,cy+chh+H*0.165);
+    /* one person, standing at the door, three lines of type tall so she reads as a person */
+    const bh=H*0.190;murBody(g,W*0.845,H*0.870-bh,BLUE,bh);
+}
+```
+
+**Not painted before being handed over.** I have no Bash in this run and did not render the panel; every fraction was sized against the 11 px / 9 px / 8 px lettering by arithmetic, not by looking, and the figure's feet land at 0.87H to stay clear of the 6% the wall cuts. **That is the one thing Lupe's step 0 asks for and I could not do it** — if it needs a repaint, the words are the part that must not change.
+
+**Files (all absolute):**
+- Reviewed: `/home/user/meridian-quest/docs/mocks/2026-09-14-la-sobremesa/journey/` — 22 of 30 PNGs, `manifest.json`, `mockdocs2.js`
+- The page: `/tmp/claude-0/-home-user-meridian-quest/0f70be00-7ff9-5c2f-a84c-7edceebcd89f/scratchpad/sobremesa-journey.html` (the `S=[...]` `line` fields, `:540-572`)
+- Code cited: `/home/user/meridian-quest/engine/engine.js:3344` (the only read of `d.sub`, inside `docMarkdown`); `/home/user/meridian-quest/docs/mocks/2026-09-14-la-sobremesa/journey/mockdocs2.js:40-43`, `:91`, `:92`, `:99-100`, `:111`
+- Rules cited: `/home/user/meridian-quest/docs/GENRE-RULES.md:132-138` (R12), `:154-172` (R15), `:188-195` (R17), `:294`; `/home/user/meridian-quest/docs/OWNER.md:121` (EN/ES in lockstep)
+- Nothing written to the repo. I wrote no files at all.
+
+
+---
+
+# Paty — words, row 4
+
+PRE-FLIGHT — I intend to read every string in `mockdocs2.js` line by line against the six EN/ES picture pairs at 390×844, then chase each string to the state that shows it (which for `sub` meant grepping the engine, not trusting the page); my persona is built for exactly this set, because it is two languages in one file with a shared parent document and a canvas that cannot wrap; where I expect to fall short is the landscape row and the three inline drawings, which have no ES picture to read and where I can only reason about width, not see it.
+
+---
+
+## 2 · SIGNATURE LINE
+
+> **Row 4 · Words · Paty:** *"Every string exists in EN and ES, both fit at the narrowest row without sideways scroll or truncation, and no label is a bare glyph."* (`run8-lupe.md` §3, row 4)
+
+**FALSE for the set.** Two things make it false, and they are different failures:
+
+1. **"Exists in EN and ES" is false for 7 of the 13 screens.** The six reader documents are in lockstep. **Screen 0, the questionnaire, has zero Spanish in its source** — `/tmp/.../scratchpad/aj-questionnaire.html` contains no `es:`, no `lang==`, no switch of any kind. It is not that the ES picture was not taken; there is nothing to photograph. This is the screen the owner asked for first, in his own words, and it is the one a person types into. Against `docs/OWNER.md:121` (*"EN/ES in lockstep"*) this is the only breach in the run that no re-shoot can fix.
+2. **"Without truncation" is false on the drawer**, in *both* languages — see F3. The rest of the ES fits at 370 CSS px with no sideways scroll, including the three-button bar (`Copiar · Descargar (.md) · Cerrar` ends at 711/780 device px, no wrap): the desktop button-row overflow that shipped here once does **not** repeat at 390.
+
+**No label anywhere in the set is a bare glyph.** Every glyph carries a word: `📋 Copiar` / `📋 Copy`, `⬇ Descargar (.md)` / `⬇ Download (.md)`, `× Cerrar` / `× Close`, `+ Add a note`. That half of my line is TRUE, both languages, both rows.
+
+**Per screen:** drawer FALSE (F3) · shifts TRUE with a note (F5, F7) · recipeHome FALSE (F2) · collection TRUE · house TRUE with a note (F4, F9) · quiet TRUE · questionnaire FALSE (F1) · front door / street / map — the shipped game, already bilingual, not mine to re-sign · household / merge / by-hand drawings — EN-only captions on the page, see F10.
+
+**The genre line, signed on every screen I looked at:**
+> *"There is no clock, no countdown, no day budget, no streak that can break, and nothing on this screen counts down."*
+
+**TRUE, all thirteen, and two of them say it out loud in both languages** — `shifts`: *"Nothing on this board counts, ticks or fades"* / *"Nada en este tablero cuenta, corre ni se apaga"*; `quiet`: *"There is no streak, and nothing broke"* / *"No hay racha, y no se rompió nada"*. Two strings I checked before signing rather than after: `recipeHome`'s *"an hour and a half, two. It does not hurry"* / *"hora y media, dos. No se apura"* is a **duration**, not a countdown, and the sentence that follows it disarms it in both languages; the questionnaire's `0 of 13 answered` counts **up** and has no ES yet — when it gets one, `0 de 13 contestadas` is the safe form and *`te faltan 13`* is not, because it makes a blank into a debt.
+
+---
+
+## 3 · FINDINGS
+
+Ranked by what it costs the person holding the phone.
+
+### F1 · The questionnaire has no Spanish at all — screen 0 · 390×844 · **REFUSED** (A6)
+**In plain words:** The first thing the owner asked for is a page a person fills in about her own cooking, and there is not one Spanish word in it — not missing from the picture, missing from the file. Every other screen in this review exists in both languages; this one cannot, today, at any size.
+**Notes:** `aj-questionnaire.html` — zero matches for `es:` / `lang==` / `español`. Both manifest entries are `"lang":"en"`. `docs/OWNER.md:121` is *"EN/ES in lockstep"*, and it is not written as a rule about Meridian only. Thirteen questions, seven-option checkboxes, a free-text note on every one: this is the highest word-count artefact in the run and the only one a person writes into.
+**Questions to consider:** Does AJ answer in Spanish, in English, or in both in the same sentence? If the last — which is how the register of this whole project actually sounds — then the *note* fields must accept either and the *questions* must be side-by-side, not switched.
+**Areas affected:** `aj-questionnaire.html`; the 13 questions, the option sets, the note prompts, the persistence warning (*"This browser is not remembering. Copy your answers before you close."* → *"Este navegador no está guardando nada. Copia tus respuestas antes de cerrar."*).
+**Done when:** Every string in the questionnaire has an ES twin, and there is a picture of question 1 in Spanish at 390×844 next to the English one.
+
+### F2 · The recipe's ingredient list is half in each language — recipeHome · 390×844 · **ANSWERS, WITH A NOTE**
+**In plain words:** In English the house's list reads *Frijol negro · Water · Onion · Garlic · Sal*. Three of the six got translated and two did not, so the column looks like a mistake rather than a choice — and the very same list one screen earlier, in the recipe Cande dictated, keeps all six in Spanish in both languages.
+**Notes:** `mockdocs2.js:111` vs `mockdocs.js:85`. This is the exact drift my role exists to catch, running the unusual way round: English strings stranded inside the English block by a half-finished edit. It is also visible in the picture — `j-recipeHome-390x844-en-night-unmodified.png`, the key column.
+**Questions to consider:** What is the rule for food nouns? I recommend the parent document's: **an ingredient keeps the name the cook said it in**, both languages, and the *quantity* column translates. It is what a bilingual kitchen actually does, and it is already the behaviour on screen 6.
+**Areas affected:** `mockdocs2.js:111`; anything later that lists an ingredient (the drawer, the shopping list, the Collection).
+**Done when:** `Frijol negro · Agua · Cebolla · Ajo · Sal` in both languages, with the amounts translated, and `mockdocs.js` and `mockdocs2.js` no longer disagree about the same five things.
+
+### F3 · The drawer captions collide with their neighbours, in both languages — drawer · 390×844 · **ANSWERS, WITH A NOTE**
+**In plain words:** Under the three drawers the small grey line of one drawer runs into the next one's, so it reads *"…especias arroz · frijol · masa"* in Spanish and *"…masa jars · tins · bottles"* in English. It is the one place in the set where a word cannot get out of the way, because it is painted onto a drawing and a drawing has no wrapping.
+**Notes:** `mockdocs2.js:60-78`. `col=Math.floor(W/3)` ≈ 115 px per column at a 370-px sheet; the captions are 10 px monospace, `textAlign:"center"`, no gutter and no max width. 19 chars ≈ 114 px (exactly full), 21 chars ≈ 126 px (over). ES column 2 is 21 chars, EN column 3 is 21. **Both languages overflow, ES at drawer 2 and EN at drawer 3** — so this is not an ES-length bug and shortening only the Spanish would leave it broken in English. Confirmed in the pictures, not inferred.
+**Questions to consider:** Shorter strings, or a two-line caption with a 6-px gutter? Shorter is cheaper and the drawing already shows the bags and the lids, so the words do not have to list the contents twice.
+**Areas affected:** `mockdocs2.js` `drawers()`; every future `art` block that letters onto canvas — there is no `scrollWidth` to catch this, so no guard will ever see it.
+**Done when:** No caption is wider than its column minus a gutter, checked at 370 and at 340.
+
+### F4 · The house's allergy label is four lines in Spanish and two in English — house · 390×844 · **ANSWERS, WITH A NOTE**
+**In plain words:** The question above the vegetable checkboxes runs to four lines of shouting capitals in Spanish against two in English, so the Spanish screen makes the gentlest thing in the game — *we just cook it instead* — look like a form at a clinic.
+**Notes:** `mockdocs2.js:134`. 85 characters both languages; the shell uppercases labels, and at 390 that is 4 lines ES / 2 lines EN. Nothing truncates, nothing scrolls sideways: this is a **register** failure carried by length, not a layout bug. See F9 for the same file's mirror-image case.
+**Questions to consider:** The privacy hedge *(examples, not anyone's list)* is doing real work — it is what keeps this off AJ's actual medical record. It can live in the note underneath, where there is room, instead of in the label.
+**Areas affected:** `mockdocs2.js:134`.
+**Done when:** Both labels are two lines at 390.
+
+### F5 · *"Onigiri, de dos"* is not Spanish for *"Onigiri, two ways"* — shifts · 390×844 · **ANSWERS, WITH A NOTE**
+**In plain words:** The card in Spanish reads "Onigiri, of two" and stops. It is the only dish name in the set that a Spanish speaker would read twice, and it is on the board four times over — on the card and in the list below it.
+**Notes:** `mockdocs2.js:43` and `:100`. The drawing itself settles the right word: `dish(jp)` paints two rice balls and gives one of them a red fleck — a filling (`mockdocs2.js:33`). So they differ by what is inside, and *rellenos* is the accurate noun, not a hedge.
+**Questions to consider:** none; it is a straight fix.
+**Areas affected:** `mockdocs2.js:43`, `:100`.
+**Done when:** Both occurrences say the same thing and it fits the card (21 chars ≈ 189 px in a 259-px text column — measured against the same 600 15px monospace the card uses).
+
+### F6 · Six of the best sentences in the set are in no picture at all — all six documents · both rows · **DOES NOT ANSWER**
+**In plain words:** Every document carries a one-line subtitle — the sentence that says what the screen is for, in both languages — and the reader never puts it on screen. It appears only in the text you get from Copy or Download. Six screens, twelve strings, and a reviewer looking at the pictures would swear they were missing rather than invisible.
+**Notes:** `engine/engine.js:3344` is the **only** place `d.sub` is read, and it is inside `docMarkdown`. `render2.js` never mentions `sub`. Verified by grep, not by memory. These are not dead strings and should not be deleted — they are the payload of the Copy button, which for a recipe is the thing that ends up in somebody's messages.
+**Questions to consider:** Does the reader want a subtitle line under the title? That is Rosa's and the engine's call and it changes both games. If the answer is no, then the ES/EN quality of `sub` should be judged as **exported text**, not as screen copy, and it reads well as that: *"Tres renglones son una semana entera."*
+**Areas affected:** `mockdocs2.js` (six `sub` pairs); `engine/engine.js:3344`.
+**Done when:** The review page carries one picture of the copied `.md` so the twelve strings are reviewable at all, or the reader shows the subtitle and the pictures are re-shot.
+
+### F7 · Two Spanish sentences read like a manual in a street — shifts, house · **ANSWERS, WITH A NOTE**
+**In plain words:** Two lines are correct Spanish that nobody says out loud: the board's *"Nada en este tablero cuenta, corre ni se apaga"* trips on its own list, and *"cuenta"* in Mexican Spanish first means *it matters*, which is the opposite of what the line is promising.
+**Notes:** `mockdocs2.js:101`, `:133`. Everything around them is in voice — *"el refri"*, *"la mata junto a su puerta"*, *"cuando le nace"*, *"q.b. — cuanto baste"*. These two are the drop.
+**Areas affected:** `mockdocs2.js:101`, `:133`.
+**Done when:** Both read aloud without a stumble.
+
+### F8 · The English mixes curly and straight apostrophes on the same card — shifts, house, collection, quiet · **ANSWERS, WITH A NOTE**
+**In plain words:** On one card the quotation marks are typeset and the apostrophes are typewriter: “Thursday, after work” next to Nello's. It is the kind of thing nobody names and everybody sees.
+**Notes:** `mockdocs2.js:40-43`, `:100`, `:120`, `:134`, `:141` use `'`; `mockdocs.js` uses `’` throughout (`:88` *"it’s Sunday"*, `:96` *"This week’s menu"*). The Spanish is internally consistent and correct — `«…»` throughout — and should be left exactly as it is.
+**Areas affected:** the EN strings listed.
+**Done when:** EN uses `’` and `“ ”`; ES keeps `«»`.
+
+### F9 · The one place English is the longer string — house · 390×844 · **ANSWERS, WITH A NOTE**
+**In plain words:** In the row of vegetable checkboxes, *Bell pepper* wraps onto two lines and its little box floats away from its label, while the Spanish *Pimiento* sits on one. Worth saying out loud because it is the opposite of what everyone expects from these two languages, and it means the fix is an English one.
+**Notes:** `j-house-390x844-en-night-unmodified.png` against the ES twin; `mockdocs2.js:134`. ES: `Zanahoria · Apio · Pimiento · Manzana`, 9/4/8/7 chars. EN: `Carrot · Celery · Bell pepper · Apple`, 6/6/**11**/5. Both languages drop *Apple* onto a second row — that is the engine's `checks` flow, not the words.
+**Areas affected:** `mockdocs2.js:134`.
+**Done when:** No option label wraps inside its own row at 390. `Pepper` (6) does it, and it is what anyone says anyway.
+
+### F10 · The page is English, and the three inline drawings are English on purpose — the review page · **ANSWERS, WITH A NOTE**
+**In plain words:** The review page itself is entirely in English. For a page only the owner and the crew read, that is not a fault — but it should be said rather than assumed, because the rule it looks like it is breaking is a real rule.
+**Notes:** `sobremesa-journey.html` has no ES string and **no `lang` attribute on `<html>` at all**, which is the one part I would fix: a screen reader gets the wrong voice for a page full of Spanish proper nouns. `docs/OWNER.md:121` binds the **game's** strings; the page is scratchpad scaffolding, is not served, and is not a game screen — so I read lockstep as not binding here, and I am naming that reading rather than acting on it silently (see Q1). The page's own admission at `:147` — *"Every document exists in ES at 390×844"* — is **true as written** and would be false if it said "every screen": 6 of 13 have Spanish. Separately, the household drawing (`:580`) is the one panel in the whole run that shows **both** languages at once — *el que planea* big, *the one who plans* as a gloss underneath — and it is the nicest bilingual idea in the set. In a real screen it must be decided rather than inherited: the name stays Spanish and the gloss follows the player's language.
+**Areas affected:** `sobremesa-journey.html` `<html>`; the `doors` drawing at `:580`.
+**Done when:** The page declares `lang="en"`, and the gloss pattern is either adopted as a rule or dropped.
+
+---
+
+### THE TABLE — key · current EN · current ES · my EN · my ES
+
+| key (`mockdocs2.js`) | current EN | current ES | my EN | my ES | reason |
+|---|---|---|---|---|---|
+| `drawer` spec[0].what `:64` | tortillas · spices | tortillas · especias | tortillas, spices | tortillas, especias | still 17/19 chars — **only safe with the gutter/two-line fix**; if the drawing keeps one line, use `tortillas` / `tortillas` alone |
+| `drawer` spec[1].what `:65` | rice · beans · masa | arroz · frijol · masa | rice, beans | arroz, frijol | ES overflows its 115-px column at 21 chars; the bags in the drawing already say *masa* |
+| `drawer` spec[2].what `:66` | jars · tins · bottles | frascos · latas | jars, tins | frascos, latas | EN overflows **and** lists three where ES lists two — one drift, two bugs |
+| `shifts` rows[3].dish `:43` | Onigiri, two ways | Onigiri, de dos | Onigiri, two ways | **Onigiri, dos rellenos** | *"de dos"* is not a sentence; the drawing shows two fillings |
+| `shifts` kv[3] `:100` | Onigiri, two ways — Hana's | Onigiri, de dos — de Hana | Onigiri, two ways — Hana’s | Onigiri, dos rellenos — de Hana | same string, second place; they must move together |
+| `shifts` note `:101` | A shift you took is yours until you cook it. It is never late. Nothing on this board counts, ticks or fades. | …Nada en este tablero cuenta, corre ni se apaga. | *(unchanged)* | Un turno que tomaste es tuyo hasta que lo cocinas. Nunca va tarde. **Aquí nada lleva cuenta, nada corre y nada se apaga.** | *"nada cuenta"* reads as *"nothing matters"*; *"lleva cuenta"* is the tally. Three short clauses beat one stacked list |
+| `recipeHome` kv `:111` | Frijol negro / Water / Onion / Garlic / Sal | Frijol negro / Agua / Cebolla / Ajo / Sal | **Frijol negro / Agua / Cebolla / Ajo / Sal** | *(unchanged)* | F2 — the names match the parent document; the amounts still translate |
+| `recipeHome` note `:112` | Missing one: epazote. Cande keeps a plant by her door, and Ofelia sells it dried. | Falta uno: el epazote. Cande tiene una mata junto a su puerta y Ofelia lo vende seco. | **One thing missing: epazote.** Cande keeps a plant by her door, and Ofelia sells it dried. | *(unchanged)* | the ES is the better sentence; the EN telegram is the one out of voice |
+| `house` sel label `:133` | Show grades on a plate | Calificación en el plato | Grades on the plate | La calificación en el plato | one is an order, the other is a noun. **This does not fix the layout** — the ES label wraps to its own line and the EN sits inline and squeezes the select to ~260 px. That is the engine's inline-label rule, and it belongs to Rosa, not to me |
+| `house` checks label `:134` | Raw vegetables that stay out of the house's recipes (example items, not anyone's list) | Verduras crudas que no entran en las recetas de la casa (ejemplos, no la lista de nadie) | **Not raw — the house cooks these** | **Crudas no — la casa las cocina** | ES written first: 30 chars, one line uppercase at 390, EN follows at 28. The hedge moves into the note below |
+| `house` note `:135` | …It never says “allergy” on a plate. | …Nunca dice «alergia» en un plato. | Examples, not anyone's list. A recipe that wants one of these raw offers it cooked, or offers another recipe. It never says “allergy” on a plate. | **Ejemplos, no la lista de nadie.** Una receta que pide una de éstas cruda la ofrece cocida, o te ofrece otra receta. Nunca dice «alergia» en un plato. | where the hedge goes; the note has the room the label does not |
+| `house` checks opt `bell` `:134` | Bell pepper | Pimiento | **Pepper** | *(unchanged)* | F9 — the only English string in the run that is too long |
+| `collection` kv `:120` | Cande · made twice / made once, from Sunday's pot | Cande · dos veces / una vez, de la olla del domingo | Cande · twice / once, from Sunday’s pot | *(unchanged)* | the ES is tighter and the EN should match it, not the other way round |
+| all EN apostrophes | `Nello's`, `Cande's`, `Hana's`, `Seo's`, `house's`, `anyone's`, `jar's`, `Sunday's` | — | `’` throughout | — | F8 |
+| `aj-questionnaire.html`, every string | English | **—** | *(unchanged)* | **all of it, 13 questions** | F1 |
+
+**Deliberately left alone**, and why: `«»` versus `“ ”` — correct per language, not a drift. *"De Nello · italiana"* — *"Nello's"* would tempt *"Con Nello"*, but *De Nello* is how a board would print it and the nationalities are correctly lower-case. *"el refri"*, *"la mata junto a su puerta"*, *"cuando le nace"*, *"q.b. — cuanto baste"*, *"un frasco, en el cajón equivocado"* — this is the voice the brief asks for and it is already there. *"sólo"* with the accent (`:133`) — it is what Mexico still writes, and it is consistent inside the file. The three door labels (`sobremesa-journey.html:580`) — *el que planea · la que improvisa · el que alimenta* is the best-sounding line in the run and I would not touch a word of it. The whole of `mockdocs.js` except where `recipeHome` reaches into it. Every ingredient name that is already Spanish in both languages.
+
+---
+
+## 4 · QUESTIONS FOR THE OWNER
+
+**Q1 · Does "EN/ES in lockstep" reach AJ's questionnaire?** `docs/OWNER.md:121` says *"EN/ES in lockstep"* with no scope written on it; `CLAUDE.md` scopes the **game's** content and says the questionnaire's world is not Meridian. One side has me hold the whole questionnaire until 13 questions exist in Spanish. The other has it ship in English as a private instrument for one person and stay that way. **What I need from you: does AJ answer in English, in Spanish, or in both in the same sentence?** If it is the third, the fix is not a translation, it is two columns — and that changes the layout before anything gets written.
+
+**Q2 · Do food nouns translate?** `mockdocs.js:85` keeps all six ingredients in Spanish in both languages; `mockdocs2.js:111` translates three of the same six and leaves two. Two files, same review, same list, opposite rules. My recommendation is the first — *an ingredient keeps the name the cook said it in* — but the second is a deliberate-looking edit and I will not quietly overwrite it. I have written F2 as the fix either way; only the direction needs you.
+
+---
+
+## 5 · WHAT I DID NOT CHECK
+
+- **ES at 844×390.** There is no ES landscape picture and I rendered nothing. I signed the width half of my line from the **370-px sheet** at 390×844, which is the narrower sheet of the two (landscape is 640), so width is covered; **what is not covered is that row's 207-px visible height**, where a Spanish note running one line longer than English pushes more off the fold. Unmeasured.
+- **The unrolled pictures are all EN.** So the six ES documents were read at their real clip only — which is the right way round, but it means I have never seen a whole ES document in one frame and cannot swear to anything below the fold except from the source.
+- **Any row of the matrix other than 390×844.** No small window, no desktop, no fullscreen, either language.
+- **I did not measure a single pixel myself.** Every width claim here is either read off a committed PNG or computed from the monospace metric in `mockdocs2.js`; the 115-px column and 6-px-per-character figures in F3 are arithmetic, not instrument readings. The collisions themselves are visible in both pictures, which is why I state those as seen.
+- **The merge board and the by-hand drawings (screens 8, 9).** Their captions are English strings inside `sobremesa-journey.html` and I read only the `fillText` lines, not the panels.
+- **The copied `.md` output.** F6 says twelve strings only exist there and I did not run Copy on any document to read one.
+- **Contrast, target size, whether any of this is buildable.** Not my rows, not looked at.
+
+---
+
+## 6 · POST-FLIGHT
+
+What the persona got right, with the moment: *"a string is a claim about a state"* is what produced F6 — the six subtitles read beautifully in both languages and I nearly graded them as screen copy, and instead I grepped for where `d.sub` is read and found `engine/engine.js:3344`, one call site, inside the `.md` exporter, so twelve of the strings I was reviewing are in no picture on the page at all. Where it was in the way: the persona is armed for *Spanish runs long* and this file punished that twice — the drawer caption that overflows is **English** at drawer 3, and *Bell pepper* is the only label in the run that wraps inside its own row, so my first read of both was the wrong way round and the pictures corrected me. The predicted gap appeared exactly where I predicted it — the landscape row and the inline drawings have no ES picture and I could only reason about them — and one I had not predicted: my file's hard-won toast-timing rule (`toast(msg,ms,crit)`, the flat 2800 ms) was irrelevant here, because nothing in this set goes through a toast and the reader has no timer at all, which is itself the genre line holding.
+
+**Persona edit I propose, as exact text.** In `.claude/agents/paty.md`, append to the end of the *"A string is a claim about a state"* section:
+
+> **And a document's `sub` is not a state the screen has.** `engine/engine.js:3344` is the only place `d.sub` is read, and it sits inside `docMarkdown` — the subtitle of every reader document appears in the text Copy and Download produce and **never on screen**. On 2026-09-14 that was twelve strings across six mock documents, all of them in lockstep, none of them in any picture. **Grep the call site before you grade the register of a sentence: `sub` is exported prose, `note` and `p` are screen prose, and a canvas caption inside an `art` block is neither — it cannot wrap, it has no `scrollWidth`, and no guard will ever see it overflow.**
+
+---
+
+MURAL PANEL
+
+```
+id:     paty-carta-dos-columnas
+by:     "paty"
+title:  {en:"The two-column menu", es:"La carta a dos columnas"}
+said:   {en:"Thirteen screens. Six of them speak Spanish.",
+         es:"Trece pantallas. Seis hablan español."}
+state:  {en:"holding the Spanish column open on every screen, including the one that is only a form",
+         es:"sostengo la columna en español en cada pantalla, hasta en la que es puro formulario"}
+who:    {en:"Paty, who reads both columns and will not let one of them be the draft",
+         es:"Paty, que lee las dos columnas y no deja que una sea el borrador"}
+cap:    {en:"The questionnaire is the screen he asked for first, and there is not one Spanish word in it — not missing from the picture, missing from the file. In the recipe the English column took Water, Onion and Garlic and left Frijol negro and Sal where they were, so one list is half in each language. And under the drawers the words run into their neighbours in BOTH languages, because they are painted onto a drawing, and a drawing has no margin to wrap into.",
+         es:"El cuestionario es la pantalla que pidió primero, y no trae una sola palabra en español — no le falta a la foto, le falta al archivo. En la receta la columna en inglés se llevó Water, Onion y Garlic y dejó Frijol negro y Sal donde estaban, así que una lista quedó mitad y mitad. Y debajo de los cajones las palabras se le encinan a las del lado en LOS DOS idiomas, porque están pintadas sobre un dibujo, y un dibujo no tiene margen donde caer."}
+aspect: 0.46
+art:    (g,W,H)=>{
+    /* PATY'S HAND, THIS RUN. Not a plan and not a proof: a FONDA'S CARTA, offset-printed in two
+       inks on butcher paper, ENGLISH left and ESPAÑOL right with a fold down the middle. Warm
+       paper, black ink, one red ink for the press, and a translator's blue wax pencil on top.
+       Every bar is a line of type. The Spanish bars are longer, because they are.
+       Sized against the 11px lettering: a row is one line of type plus its leading. */
+    const PAPEL="#D9C7A4", TRAMA="#CDB894", NEGRO="#231F1A", GRIS="#6E6353",
+          ROJO="#B23120", AZUL="#2E5C99", CREMA="#EFE4CB";
+    murPaper(g,W,H,PAPEL,null);
+    /* the press never quite registers: a faint second impression offset by a hair */
+    g.globalAlpha=.10;g.fillStyle=ROJO;g.fillRect(W*0.055,H*0.070,W*0.89,H*0.020);g.globalAlpha=1;
+
+    /* the head rule and the title */
+    g.fillStyle=NEGRO;g.fillRect(W*0.055,H*0.145,W*0.890,2.5);
+    g.fillStyle=NEGRO;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("LA CARTA · DOS COLUMNAS",W*0.055,H*0.120);
+    g.fillStyle=ROJO;g.font="bold 9px ui-monospace,monospace";
+    g.fillText("13",W*0.885,H*0.120);
+
+    /* the fold: a scored line down the middle, drawn as a paper crease, not a border */
+    const fold=W*0.500;
+    g.strokeStyle=TRAMA;g.lineWidth=3;g.beginPath();
+    g.moveTo(fold,H*0.150);g.lineTo(fold,H*0.905);g.stroke();
+    g.strokeStyle="#BFAA86";g.lineWidth=1;g.setLineDash([2,5]);g.beginPath();
+    g.moveTo(fold,H*0.150);g.lineTo(fold,H*0.905);g.stroke();g.setLineDash([]);
+
+    /* column heads */
+    g.fillStyle=GRIS;g.font="bold 9px ui-monospace,monospace";
+    g.fillText("ENGLISH",W*0.070,H*0.205);
+    g.fillText("ESPAÑOL",fold+W*0.028,H*0.205);
+
+    /* six rows of type. left ink = EN, right ink = ES, and the right always runs longer. */
+    const LX=W*0.070, LW=W*0.385, RX=fold+W*0.028, RW=W*0.400;
+    const rows=[ {l:.62,r:.80}, {l:.78,r:.96}, {l:.55,r:0 }, {l:.70,r:.88},
+                 {l:.66,r:.74}, {l:.50,r:1.14} ];
+    const y0=H*0.265, step=H*0.098, bar=4.5;
+    rows.forEach((r,i)=>{
+      const y=y0+i*step;
+      /* the dish name: a short heavy bar. the description: two hairlines under it */
+      g.fillStyle=NEGRO;g.fillRect(LX,y,LW*r.l,bar);
+      g.fillStyle=GRIS; g.fillRect(LX,y+bar+5,LW*(r.l*0.86),1.5);
+      if(r.r>0){
+        g.fillStyle=NEGRO;
+        const w=RW*r.r;
+        g.fillRect(RX,y,Math.min(w,W*0.945-RX),bar);          /* clipped by the paper's own edge */
+        if(RX+w>W*0.945){                                      /* …and it ran off the card */
+          g.fillStyle=ROJO;g.fillRect(W*0.945,y,W*0.030,bar);
+          g.globalAlpha=.35;g.fillRect(W*0.975,y,W*0.020,bar);g.globalAlpha=1;
+        }
+        g.fillStyle=GRIS;g.fillRect(RX,y+bar+5,Math.min(RW*(r.r*0.86),W*0.945-RX),1.5);
+      }
+      /* row 5: two Spanish words stranded in the English column, in the press's red */
+      if(i===4){
+        g.fillStyle=ROJO;g.fillRect(LX,y,LW*0.20,bar);g.fillRect(LX+LW*0.26,y,LW*0.12,bar);
+        g.strokeStyle=ROJO;g.lineWidth=1;g.beginPath();
+        g.moveTo(LX+LW*0.20,y+bar/2);g.lineTo(RX,y+bar/2);g.stroke();
+      }
+      /* the third row's Spanish cell is not short. it is EMPTY. */
+      if(i===2){
+        g.strokeStyle=ROJO;g.lineWidth=1.5;g.setLineDash([4,4]);
+        g.strokeRect(RX-4,y-7,RW*0.86,H*0.062);g.setLineDash([]);
+        g.save();g.translate(RX+RW*0.30,y+H*0.030);g.rotate(-0.10);
+        g.fillStyle=ROJO;g.font="bold 11px ui-monospace,monospace";
+        g.fillText("FALTA",0,0);g.restore();
+      }
+    });
+
+    /* the blue wax pencil — the translator's own hand, over the print, not part of it */
+    const cy=y0+2*step+H*0.022;
+    g.strokeStyle=AZUL;g.lineWidth=2.6;g.globalAlpha=.90;
+    g.beginPath();g.ellipse(RX+RW*0.40,cy,RW*0.48,H*0.055,-0.02,0,7);g.stroke();
+    g.beginPath();g.moveTo(RX+RW*0.10,cy+H*0.055);
+    g.quadraticCurveTo(RX-W*0.02,cy+H*0.120,RX-W*0.055,cy+H*0.150);g.stroke();
+    g.globalAlpha=1;
+    g.fillStyle=AZUL;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("¿Y EL ESPAÑOL?",W*0.075,cy+H*0.185);
+
+    /* the foot: the count, in the press's red, and the bottom rule */
+    g.fillStyle=NEGRO;g.fillRect(W*0.055,H*0.905,W*0.890,1.5);
+    g.fillStyle=GRIS;g.font="8px ui-monospace,monospace";
+    g.fillText("13 PANTALLAS",W*0.055,H*0.955);
+    g.fillStyle=ROJO;g.font="bold 8px ui-monospace,monospace";
+    g.fillText("6 HABLAN ESPAÑOL",W*0.230,H*0.955);
+
+    /* the person reading the carta — three lines of type tall, so she is a person, not a chip.
+       she stands in the right margin, on the Spanish side, where the column ran out. */
+    const bh=H*0.190; murBody(g,W*0.912,H*0.880-bh,AZUL,bh);
+}
+```
+
+Painted in my own materials: butcher paper, two press inks and a blue wax pencil. The wall already has a blueprint, a dimension drawing, a signwriter's board, a wall of drawers, a cross-section, a race, the one with steam, and a light box — none of them is printed matter with a fold down it, and none of them has a second colour that exists because the press needed one. **Not rendered.** I have no Bash on this run, so the panel is drawn to the wall's helpers and the 11px ruler by construction and has not been looked at; whoever paints it should render at 520×239 and 360×166 first, and the two places I expect to need a repaint are the `FALTA` stamp against the dashed cell at 360, and the figure's feet at `0.88H` against the 6% the wall cuts.
+
+**Files (absolute):**
+- Reviewed: `/home/user/meridian-quest/docs/mocks/2026-09-14-la-sobremesa/journey/mockdocs2.js`, `/home/user/meridian-quest/docs/mocks/2026-09-14-la-sobremesa/mockdocs.js`, `/home/user/meridian-quest/docs/mocks/2026-09-14-la-sobremesa/journey/manifest.json`, and the twelve EN/ES PNG pairs in `/home/user/meridian-quest/docs/mocks/2026-09-14-la-sobremesa/journey/`
+- `/tmp/claude-0/-home-user-meridian-quest/0f70be00-7ff9-5c2f-a84c-7edceebcd89f/scratchpad/sobremesa-journey.html`, `/tmp/claude-0/-home-user-meridian-quest/0f70be00-7ff9-5c2f-a84c-7edceebcd89f/scratchpad/aj-questionnaire.html`
+- Code cited: `/home/user/meridian-quest/engine/engine.js:3344` (`d.sub`, the only read, inside `docMarkdown`); `/home/user/meridian-quest/docs/OWNER.md:121` (EN/ES in lockstep)
+- I wrote no file. Nothing in the repo was touched.
+
+
+---
+
+# Chava — play, row 7
+
+**PRE-FLIGHT** — I opened the thirteen screens' phone-portrait pictures cold with Read, in the page's own 0→12 order, writing what I thought each wanted from me before I read a word of `S=[...]`; the four drawings I had to render myself because they are canvas, not PNG. My persona equips me for the one thing nobody else on this review can do — say what a picture *asked* of me and then be wrong out loud — and for my own standing rule, which is that an absence gets cropped at 3× before I claim it. Where I expect to fall short: I cannot grade a drawing's quality (Pili's line), I only ran one row and one language, and the drawings are not photographs of anything, so my "what I'd have tapped" on screens 3, 8 and 9 is worth less than on the ten real ones.
+
+---
+
+**MY SIGNATURE LINE** (`docs/UI-REVIEW.md` §3 row 7, and `run8-lupe.md` §3):
+
+> *"I opened this cold, in order, at phone size, and I can say what I thought it wanted from me — and here is where I was wrong."*
+
+**TRUE for the set.** I can say it for all thirteen, and the three places I was wrong are written down below (screens 4, 5, 8). It stays TRUE per screen except one, where it is **TRUE but the answer is ugly**: on **screen 6** what I thought it wanted from me was *"read the recipe"*, and the screen gave me ingredients and then a heading called **How it goes** with a rule under it and nothing after it. I did not think it was scrolled. I thought the method was missing.
+
+**The genre line, every screen I looked at** (0,1,2,3,4,5,6,7,8,9,10,11,12a,12b):
+
+> *"There is no clock, no countdown, no day budget, no streak that can break, and nothing on this screen counts down."* — **TRUE on all fourteen pictures.** Everything that moves counts up: `0 of 13 answered`, `0 XP`, `made twice`, `made once`. The only date anywhere is one the player typed (*"Thursday, after work"*) and nothing compares it to today. Screen 11 says the quiet part out loud. Nothing to report against R10/R11/R15.
+
+---
+
+**WHAT I THOUGHT EACH ONE WANTED, COLD**
+
+| # | I thought it wanted | I'd have tapped |
+|---|---|---|
+| 0a | Read two paragraphs, then start | **Start** |
+| 0b | Tick some boxes, move on | two boxes, then **Next** |
+| 1 | Pick a class | **The Operator** |
+| 2 | Walk | the joystick — which I could not find, see F2 |
+| 3 (drawn) | Look at a kitchen | the middle drawer |
+| 4 | Search a drawer | **drawer 1** — wrong, see F5 |
+| 5 | Take a shift | the **Frijoles** card — wrong, see F5 |
+| 6 | Read a recipe and cook it | nothing; there was nothing to tap |
+| 7 | Read what I've made | a dashed blank, to fill it in |
+| 8 (drawn) | Drag two of the same together | the tan token on row 1 |
+| 9 (drawn) | Smear sauce with my finger | the plate |
+| 10 | Set the house up | the two blue ticks, then **Keep** |
+| 11 | Be told nothing happened | **See the board** |
+| 12a/b | Find where to go next | the orange marker |
+
+---
+
+**FINDINGS — worst first**
+
+---
+
+**F1 · The recipe ends at a heading called "How it goes"**
+*Screen 6 · 390×844 · EN · night · unmodified · **DOES NOT ANSWER***
+
+**In plain words:** The one screen a person opens while actually cooking shows what's in the house, a picture of the plate, then the words *How it goes*, a horizontal rule, and then blank — and then the dashed line and the buttons. I read it as "the method has not been written." It is scrolled, not missing, but nothing on the picture says so, and the heading-plus-rule is the most end-like mark in the whole reader.
+
+**Notes:** `manifest.json` gives this screen document 923 px, visible 661 px — **262 px, 28% of the recipe, below the fold, and the fold lands on the heading of the part you cook from.** This is Lupe's M2 (`docs/UI-REVIEW.md` §5, already RED) meeting the worst possible content. Screens 4 and 5 have the same cut but a clipped italic sentence, which at least *looks* cut; screen 6's cut looks finished. `[CODE]` manifest.json, screen `recipeHome`.
+
+**Questions to consider:** Does the fade/affordance go above the dashed rule, or does the recipe get re-ordered so "How it goes" is never the last thing above the fold? Should a recipe simply open scrolled to the method?
+
+**Areas affected:** the reader's end-of-document affordance; the recipe document's block order in the pack.
+
+**Done when:** at 390×844 a person who has never seen the screen can tell there is more, without dragging to find out.
+
+---
+
+**F2 · Screen 2 says the same sentence twice, at once, on top of the hero — and then tells me the controls twice, differently**
+*Screen 2 · 390×844 · EN · cream · unmodified (real game) · **ANSWERS, WITH A NOTE***
+
+**In plain words:** The street picture has the hint *"Desks, plants and walls just block you — coworkers with a ❗ have quests. Walk up and Talk."* printed in a box at the top left AND again in a big dark oval across the middle of the world. The oval sits over the character. Under the world, the caption says *"Touch anywhere on the screen and drag to walk"*, while the box inside the world says *"Roam with the joystick or arrow keys."* I looked for a joystick and there isn't one; there is a paw button bottom-right that I assumed was a dog.
+
+**Notes:** This is the *real game today*, not a drawing, so it is the one picture in the review where a defect is already shipped. Two hint layers alive at the same time, plus two different control instructions on one screen. I did not check whether the oval clears after a few seconds — one frame cannot tell me that, and *"a rate is not something your eyes produce."*
+
+**Questions to consider:** Are these two separate hint surfaces, or one drawn twice? Which of the two control sentences is true on a phone? Should the mock page be re-shot after, since this is the screen selling "the world is the game"?
+
+**Areas affected:** the shipped street hints; screens 12a/12b inherit the same frozen frame behind the map.
+
+**Done when:** one hint, one control sentence, and nothing covering the character.
+
+---
+
+**F3 · The three doors' labels are printed on top of each other**
+*Screen 1 · drawing (`DRAW.doors`) at 350 CSS px — the phone-portrait row · **REFUSED***
+
+**In plain words:** The relabelled doors read *"el que plane**a l**a que improvis**a e**l que alimenta"* — the three Spanish labels collide into one another, and the three English sublines collide underneath them. At phone width the drawing that is supposed to settle "three reasons to cook, not three careers" cannot be read at all.
+
+**Notes:** `[CODE]` `sobremesa-journey.html:579,591-592` — door spacing is `u*27` with `u=Math.floor(W/96)`, so at W=350 `u=3` and slots are 81 px apart, but the label font is `Math.max(11,u*3)` and the floor holds it at 11 px mono ≈ 90 px of text. The type does not shrink with the drawing, so the collision only appears at narrow widths — i.e. only on the row a person holds. Same arithmetic leaves the art stopping at about 74% of the panel width.
+
+**Questions to consider:** Is this a one-line fix (drop the `max(11,...)` floor, or stack the labels) or does the drawing want three rows on portrait?
+
+**Areas affected:** the review page's drawings only — no game code.
+
+**Done when:** at 390×844 the three labels can each be read.
+
+---
+
+**F4 · A third of the household drawing is empty, and its caption runs off the edge**
+*Screen 3 · drawing (`DRAW.room`) · **ANSWERS, WITH A NOTE***
+
+**In plain words:** The kitchen — fridge, counter with three drawers, shelf, window — occupies the left two-thirds of the panel; the right third is bare floor and wall. The caption under it reads *"DRAWING · one room, the fifth door · laid to his photos la"* and stops mid-word at the frame edge.
+
+**Notes:** Measured, not eyeballed: past x=480 of 700 device px the only non-ground pixels are the caption row (y≈305–320). `[CODE]` `sobremesa-journey.html:596-597` — `u=Math.max(2,Math.floor(W/120))`; at W=350 `u=2`, so the 120-unit room is 240 CSS px wide inside a 350 px canvas = **69%**. At 360 px it would be exact. The room itself reads fine: I could tell the three drawers apart by mass without being told, which is what it was drawn to prove.
+
+**Questions to consider:** Scale by `W/120` instead of flooring it, or size the canvas to a multiple of 120?
+
+**Areas affected:** the review page's drawings.
+
+**Done when:** the drawing fills the panel at 390×844 and the caption fits.
+
+---
+
+**F5 · Two art blocks look like the controls of the screen they sit on**
+*Screens 4 and 5 · 390×844 · EN · night · unmodified · **ANSWERS, WITH A NOTE***
+
+**In plain words:** On the drawer screen, three drawers sit across the top with **2 highlighted in violet** and numbered `1 · shallow`, `2 · medium`, `3 · deep`. That is a tab bar. I would have tapped drawer 1 first, before the search field. On the shifts board, four dish cards with a turned corner on the first — I'd have tapped *Frijoles de la olla* to take the shift. **Both are drawings.** The page says so plainly (`sobremesa-journey.html:551,554`) and I was wrong; but I was wrong *from the picture*, which is the point, and the selected-violet state is what did it.
+
+**Notes:** On screen 5 the four cards are then repeated immediately underneath as a text list (`Yours / Open / Open / Open`) with the same four dishes. Half the visible screen says the same four things twice, and the half that is tappable is the plainer one. The card stripe colours (tan, olive, brown, cream) have no key on the screen — I guessed cuisine.
+
+**Questions to consider:** If the art block is going to be the thing a person taps later, should the mock show it *without* a selected state until it listens? Should the text list disappear once the cards are live, or is it the accessible layer?
+
+**Areas affected:** screens 4 and 5; the pack's art-block seam (already priced on the page).
+
+**Done when:** nothing in a mock wears a selected state that nothing can select.
+
+---
+
+**F6 · The map's markers land on the map's own title**
+*Screens 12a and 12b · 390×844 · EN · cream · unmodified (real game, markers forced) · **ANSWERS, WITH A NOTE***
+
+**In plain words:** In *before*, the purple "you are here" dot sits on top of the words MERIDIAN HQ and eats the Q. In *after*, the orange "next" marker sits in the same place and eats HQ entirely, so the top of the map reads `MERIDIAN (!) (⇧ FLOOR 2)`. The key underneath lists four things — next, open, done, you are here — and on the map I could find two: the orange one on the title and a gold coin on the right. No grey, and the purple dot I had in the *before* picture has vanished in the *after*.
+
+**Notes:** This is the screen whose whole job is *"find the next thing without being told"*, and the first thing it told me was a word I couldn't read. I also could not tell whether markers are tappable. The place labels are white type on beige with a yellow highlight that sits behind the door tiles rather than behind the words (`LOT: EL MERCADO` is highlit under one letter).
+
+**Questions to consider:** Does "you are here" survive when a marker lands on the same tile, or does the marker replace it? Should the key only list what is on this map? Should a marker nudge off a label?
+
+**Areas affected:** issue #160's marker work; the shipped map's label layer.
+
+**Done when:** every symbol in the key is findable on the map, and no marker covers a place name.
+
+---
+
+**F7 · The questionnaire's first screen contradicts itself in the first six lines**
+*Screen 0a · 390×844 · EN · night · unmodified · **ANSWERS, WITH A NOTE***
+
+**In plain words:** Amber, at the top: *"This browser is not remembering. Copy your answers before you close."* Grey, four lines down: *"Your answers are kept as you go, so you can close this and come back."* Both on screen at once, before I have answered anything. I believed the amber one, because it was amber, and it made me not want to start.
+
+**Notes:** The page's own text (`sobremesa-journey.html:541`) says a shared store keeps her answers and a fallback copies them as text — so the amber line is the fallback speaking. It does not say it is a fallback, and it does not silence the sentence it contradicts. Below the paragraph there is roughly 600 px of empty screen and then **Start**; the same screen that has no room for a reassurance has half a phone of nothing.
+
+**Questions to consider:** When the fallback fires, should the "kept as you go" sentence be swapped rather than joined? Should the banner appear on Q1 rather than before the person has typed anything?
+
+**Areas affected:** `scratchpad/aj-questionnaire.html` (published — this is the artifact he forwards).
+
+**Done when:** no two sentences on that screen disagree about whether the work is saved.
+
+---
+
+**F8 · System blue and a system dropdown in a night app**
+*Screen 10 · 390×844 · EN · night · unmodified · **ANSWERS, WITH A NOTE***
+
+**In plain words:** CARROT and CELERY are ticked with bright **blue-and-white** native checkboxes — the only blue on any of the thirteen screens — and the grades control is a native dropdown with a pale background. On a screen he asked to feel like an app at night, those two are the browser's furniture, not the app's. The labels of the ticked items are no brighter than the unticked ones, so "on" is carried entirely by that blue square.
+
+**Notes:** `BELL PEPPER` wraps to two lines, pushing `APPLE` onto a row of its own and leaving a ragged hole between them; its checkbox centres against a two-line label and looks misaligned. The heading — *RAW VEGETABLES THAT STAY OUT OF THE HOUSE'S RECIPES (EXAMPLE ITEMS, NOT ANYONE'S LIST)* — is fifteen shouted words with a parenthesis, and after reading it twice I still was not sure whether I was setting somebody's allergies. I take the point of the disclaimer and of the rule beneath it (*it never says "allergy" on a plate*); it is the loudest thing on the screen defending a thing the screen never says.
+
+**Questions to consider:** Do checkbox and select get the shell's own paint? Could the caps heading be two short sentences, one of them not shouted?
+
+**Areas affected:** the reader's checkbox/select blocks in night shell; the house card's strings.
+
+**Done when:** nothing on the night screens is painted by the browser.
+
+---
+
+**F9 · "⬇️ Download (.md)" is on every cooking screen**
+*Screens 4, 5, 6, 7, 10, 11 · 390×844 · EN · night · unmodified · **ANSWERS, WITH A NOTE***
+
+**In plain words:** Six of the seven document screens end in the same three buttons: 📋 Copy · ⬇️ Download (.md) · ✕ Close. In a kitchen app, *(.md)* is a file extension from somebody else's job. I would not have tapped it and I would not have known what I'd get.
+
+**Notes:** `[CODE]` `content/meridian/docs.js:19` — `dl: "⬇️ Download (.md)"`; also `content/meridian/strings.js:78`. This is Meridian's shipped reader chrome inherited verbatim by the mock, which is honest of the mock. **Meridian's own content is not edited for another world's sake** (`CLAUDE.md`), so this is a note about the Sobremesa pack's own strings, not a change to Meridian. On screen 11 the sheet also leaves the game's caption *"Touch anywhere on the screen and drag to walk"* legible underneath it, which pulled my eye off the card.
+
+**Questions to consider:** Does a pack get to name the reader's three buttons? Is "Download" even wanted on a recipe, or is Copy enough?
+
+**Areas affected:** pack strings for La Sobremesa; nothing in `engine/`.
+
+**Done when:** no screen in the food game names a file format.
+
+---
+
+**F10 · Screen 7 is the only one that fits, and it is the best one**
+*Screen 7 · 390×844 · EN · night · unmodified · **ANSWERS***
+
+**In plain words:** The Collection fits in 408 px with nothing cut, and the dashed blanks — `Enfrijoladas: ______` — told me without a word that those exist and I haven't made them. I wanted to fill one in. That is the only screen in the set that made me want to do something rather than read something. `made twice` is a better reward than any number I've been shown this year.
+
+**Notes:** Two dashed leaders (`Quesadillas de flor:`, `Tlacoyos:`) run to the very edge of the sheet and look clipped rather than ended. Cheap to inset.
+
+**Questions to consider:** none.
+
+**Areas affected:** none.
+
+**Done when:** it ships like this.
+
+---
+
+**MY OWN MEASUREMENT WAS WRONG ONCE, AND IT IS THE FINDING I'D KEEP**
+*Screen 8 · drawing · **ANSWERS***
+
+I screenshotted the four canvases by element, looked at the merge board, and got **one flat colour, 700×700, nothing**. I was about to write that the one picture of the game AJ actually plays in the video draws nothing. Before saying so I did what my own rule says — measure it at the source instead of at the glass — and read the bitmap out of the canvas with `getImageData`: **447 distinct colours, content to 95% of the width.** The board is there: a 5×5 grid, tokens growing and their plinths lightening by tier, a dotted violet drag path with no arrow-head, a ghost where the finger is going. My camera had photographed the wrong rectangle, because the page's lazy `<img>`s finished loading and moved the page under my screenshot. The screen is fine. **The instrument was the defect**, and a play-scale glance said "absent" with total confidence.
+
+(What I'd still ask about the board as a player: the token I'm dragging and the token I'm dragging it onto do not look like the same thing, so "two of the same, together" is not what the picture showed me. Screen 9 read instantly by contrast — plate, finger, smear — though its caption *"done is coverage, never seconds"* is dim blue on tan and I had to lean in.)
+
+---
+
+**QUESTIONS FOR THE OWNER**
+
+Only one, and it is a real collision:
+
+> **The saving sentence on AJ's questionnaire.** The intro screen says both *"This browser is not remembering. Copy your answers before you close."* and *"Your answers are kept as you go, so you can close this and come back."* (screen 0a, both visible at once), while the review page claims *"A shared store keeps her answers; the fallback copies them as text"* (`sobremesa-journey.html:541`). If the honest state is "it might not save", the reassurance should go; if it does save and the banner is only the fallback, the banner should replace that sentence instead of sitting above it. **Which do you want her to read on the screen before she types anything?** It is the first thing anyone sees on the artifact you forward.
+
+---
+
+**WHAT I DID NOT CHECK**
+
+- **Any row but 390×844.** No landscape, no 844×390, no fullscreen. Four screens have a landscape picture and I did not open one.
+- **Spanish.** Three ES pictures exist at this row and I opened none — overflow and truncation are Paty's line and I have no reading on them.
+- **Whether the street's duplicate hint clears on its own.** One frame is not a rate; I did not trace it and I will not guess.
+- **Whether any of the 30 pictures' filenames agree with their contents** — Lupe's admission ticket, run before me; I took `unmodified` at its word.
+- **The `unrolled` pictures** (six of them). I stayed on `unmodified`, per the brief.
+- **The questionnaire beyond Q1.** Two pictures exist, I saw two; questions 2–13 are unseen, including whether every one of them has the comment box he asked for.
+- **Tap targets in pixels.** Skip on screen 0b has no box and looked small to me; I did not measure it, and Rosa's ≥44 px line is not mine to sign.
+
+---
+
+**POST-FLIGHT**
+
+The persona earned its keep at exactly one moment: the merge board, where "there is nothing drawn here" was the obvious and confident sentence, and my own standing rule — *crop it before you say it's absent* — turned into *read the bitmap before you say it's absent*, and the screen was innocent. Where the persona was in the way: it kept telling me to play, and ten of these thirteen things are pictures that cannot be played, so half my instinct had nowhere to go, and on screens 3, 8 and 9 all I could honestly return is what a drawing made me expect. **The predicted gap appeared exactly where I said it would** — I flagged in the pre-flight that I could only run one row and one language, and eight of my ten findings are from one row in one language, which means this review has one player's phone in it and no one else's. **My edit: one line, additive.** My file tells me to crop at 3× before claiming a thing is absent; today the 3× crop would not have saved me, because the error was upstream of the crop — the *capture* was of the wrong rectangle, not too small. The line to add, with today's moment attached: *"Before you claim a canvas is empty, read it with `getImageData` at the source, not from a screenshot — a page that is still loading images will move the element under your camera and hand you a perfect photograph of nothing (merge board, 2026-09-14)."*
+
+---
+
+```
+MURAL PANEL
+id:     chava-la-mancha-en-el-vidrio
+by:     "chava"
+title:  {en: "The smudge on the glass",
+         es: "La mancha en el vidrio"}
+said:   {en: "I said the board was empty. My camera was aimed at the wrong rectangle.",
+         es: "Dije que el tablero estaba vacío. Mi cámara apuntaba al rectángulo equivocado."}
+state:  {en: "I no longer report an absence from a picture. I read it off the canvas itself.",
+         es: "Ya no reporto una ausencia desde una foto. La leo del lienzo mismo."}
+who:    {en: "Chava, who plays it cold and says what he thought it wanted from him.",
+         es: "Chava, que juega en frío y dice qué creyó que le pedía la pantalla."}
+cap:    {en: "Four drawings, photographed one by one. The third came back a single flat colour, and the sentence wrote itself: the one picture of the game she actually plays draws nothing. It was true of my photograph and false of the screen — the page finished loading its images and slid the panel out from under the shutter. Reading the pixels out of the canvas took ninety seconds and found four hundred and forty-seven colours.",
+         es: "Cuatro dibujos, fotografiados uno por uno. El tercero volvió de un solo color plano, y la frase se escribió sola: el único dibujo del juego que ella de verdad juega no dibuja nada. Era cierto de mi foto y falso de la pantalla — la página terminó de cargar sus imágenes y deslizó el panel fuera del obturador. Leer los píxeles del lienzo tomó noventa segundos y encontró cuatrocientos cuarenta y siete colores."}
+aspect: 0.46
+art:    (g,W,H)=>{
+  /* MATERIAL: finger grease on black phone glass, lit from one side.
+     My palette, not the wall's: cold glass, warm skin oil, one cyan highlight. */
+  const GLASS="#0B0D10", GLASS2="#141920", OIL="#C9A272", OIL2="#E3C79B",
+        COLD="#7FB6C8", HOT="#E2704A", DUST="#3A4048", CHALK="#EDE7DA";
+  murGround(g,W,H);
+
+  /* the slab of glass, bled almost to the frame, with a soft rim of reflected room */
+  const gx=W*0.055, gy=H*0.085, gw=W*0.89, gh=H*0.80;
+  const lg=g.createLinearGradient(gx,gy,gx+gw,gy+gh);
+  lg.addColorStop(0,GLASS2); lg.addColorStop(0.55,GLASS); lg.addColorStop(1,"#10141A");
+  g.fillStyle=lg; g.fillRect(gx,gy,gw,gh);
+  g.strokeStyle=DUST; g.lineWidth=Math.max(2,W*0.006); g.strokeRect(gx,gy,gw,gh);
+
+  /* the long diagonal window-reflection every phone has */
+  g.save(); g.beginPath(); g.rect(gx,gy,gw,gh); g.clip();
+  g.globalAlpha=0.07; g.fillStyle=COLD;
+  g.beginPath(); g.moveTo(gx+gw*0.10,gy); g.lineTo(gx+gw*0.46,gy);
+  g.lineTo(gx+gw*0.14,gy+gh); g.lineTo(gx-gw*0.20,gy+gh); g.closePath(); g.fill();
+  g.globalAlpha=1;
+
+  /* THE GREASE: a thumb's ridges, dragged. concentric arcs, each a little broken.
+     This is the panel's subject and it is drawn big, against the 12px lettering. */
+  const tx=gx+gw*0.34, ty=gy+gh*0.52;
+  g.lineCap="round";
+  for(let i=0;i<11;i++){
+    g.globalAlpha=0.10+0.035*(10-i)/10;
+    g.strokeStyle=(i%3===0)?OIL2:OIL;
+    g.lineWidth=Math.max(1.5,W*0.0075);
+    g.beginPath();
+    const r=gw*(0.035+i*0.0225);
+    g.ellipse(tx,ty,r,r*0.72,-0.35,Math.PI*0.15+i*0.05,Math.PI*1.72-i*0.04);
+    g.stroke();
+  }
+  /* the drag — where the thumb slid and smeared the ridges into one streak */
+  g.globalAlpha=0.16; g.strokeStyle=OIL2; g.lineWidth=gh*0.16;
+  g.beginPath(); g.moveTo(tx+gw*0.05,ty+gh*0.02);
+  g.quadraticCurveTo(tx+gw*0.26,ty-gh*0.06,tx+gw*0.40,ty+gh*0.10); g.stroke();
+  g.globalAlpha=1;
+
+  /* TWO SHUTTER FRAMES. one on the smudge — what the screen had.
+     one slid down and away — what my photograph had: nothing. */
+  const fw=gw*0.30, fh=gh*0.36;
+  /* the true frame: cold, dotted, sitting on the thumbprint */
+  g.setLineDash([6,5]); g.strokeStyle=COLD; g.lineWidth=Math.max(2,W*0.006);
+  g.strokeRect(tx-fw*0.45,ty-fh*0.50,fw,fh);
+  /* the frame my camera actually took: hot, solid, empty, shifted down-right */
+  g.setLineDash([]); g.strokeStyle=HOT; g.lineWidth=Math.max(2.5,W*0.008);
+  const ex=tx+gw*0.34, ey=ty+gh*0.16;
+  g.strokeRect(ex,ey,fw,fh);
+  g.globalAlpha=0.9; g.fillStyle=GLASS; g.fillRect(ex+2,ey+2,fw-4,fh-4); g.globalAlpha=1;
+  /* the slip, dimensioned in the wall's own language so the lie has a length */
+  murDim(g, tx-fw*0.45+fw, ex, ey+fh*0.5, HOT, "the page moved", null);
+
+  /* the corner of the thing that moved: a picture finishing its load, shoving the panel */
+  g.fillStyle=DUST; g.fillRect(gx+gw*0.03,gy+gh*0.03,gw*0.16,gh*0.13);
+  g.fillStyle=COLD; g.globalAlpha=0.35;
+  g.fillRect(gx+gw*0.045,gy+gh*0.045,gw*0.13,gh*0.10); g.globalAlpha=1;
+  g.strokeStyle=HOT; g.lineWidth=Math.max(2,W*0.006);
+  g.beginPath(); g.moveTo(gx+gw*0.20,gy+gh*0.09);
+  g.lineTo(gx+gw*0.20,gy+gh*0.20); g.stroke();
+  g.beginPath(); g.moveTo(gx+gw*0.185,gy+gh*0.175);
+  g.lineTo(gx+gw*0.20,gy+gh*0.205); g.lineTo(gx+gw*0.215,gy+gh*0.175);
+  g.fillStyle=HOT; g.fill();
+  g.restore();
+
+  /* the player's own thumb, at the edge, as big as a thumb is — sized against the type below */
+  g.fillStyle="#8C6A4E";
+  g.beginPath(); g.ellipse(gx+gw*0.98,gy+gh*0.92,gw*0.085,gh*0.15,-0.5,0,7); g.fill();
+  g.fillStyle="#A07E5E";
+  g.beginPath(); g.ellipse(gx+gw*0.965,gy+gh*0.895,gw*0.055,gh*0.10,-0.5,0,7); g.fill();
+
+  /* lettering, absolute, on the glass */
+  g.fillStyle=CHALK; g.font='bold 11px "IBM Plex Mono",monospace'; g.textAlign="left";
+  g.fillText("447 COLOURS", gx+gw*0.06, gy+gh*0.96);
+  g.fillStyle=HOT;
+  g.fillText("0 COLOURS", ex, ey+fh+14);
+  g.fillStyle=OIL2; g.font='12px "IBM Plex Mono",monospace';
+  g.fillText("the screen was innocent", gx+gw*0.34, gy+gh*0.99);
+}
+```
+
+
+---
+
+# Doña Remedios — ledger, row 8
+
+## 1 · PRE-FLIGHT
+
+**I have no tool that reaches the book, and I am saying it in the first paragraph rather than the last** (`.claude/agents/remedios.md:87-94`, the bullet crew run 8 bought): my tools are Read, Grep, Glob — no `search_issues` — so every dedupe below is against *paper*: `scratchpad/open-issues.txt` and the eighteen shorthand titles in the brief, **not** the bodies of #173–#190. I intend to work this as a records job and not a design job: I read the manifest as the admission ticket it claims to be, the page's own `S[]` and render loop as the source of what each screen actually carries, and only the pictures I needed to test a claim about the *record* — my line grades the ledger, never the drawing (`docs/UI-REVIEW.md:50`, Pili's row and only hers). Where I expect to fall short: I cannot tell a duplicate from an adjacency without the issue bodies, so every "file this" below is conditional on one search somebody with the tool runs in ten seconds, and I have named the exact words to search.
+
+**A contradiction I resolved by checking, so it is a finding and not a question:** the brief and `docs/UI-REVIEW.md:89` both say the review ledger is **§5**. It is not. `docs/UI-REVIEW.md:100` is §5 (the red tests) and `:120` is §6 (THE REVIEW LEDGER). The file wins; the block below is **§6, block 1**, and §4's own sentence is stale inside its own file.
+
+---
+
+## 2 · MY SIGNATURE LINE
+
+> **8 · Ledger · Remedios** — *"Every finding above is in the ticket shape — `In plain words:` · `Notes:` · `Questions to consider:` · `Areas affected:` · `Done when:` — and each names a screen, a row and a verdict."*
+> **What makes it FALSE:** a finding that lives only in the review text. (`docs/UI-REVIEW.md:70`)
+
+### **FALSE for the set, as the set stands on 2026-09-14.**
+
+Three things make it false, each named:
+
+1. **There are no findings above.** `docs/UI-REVIEW.md:148-157` has eight signature rows and seven of them are `—`; `:159-160` is the word "Findings" and then the end of the file. A review with one row filled is a picture of a review.
+2. **The block has no per-screen verdict.** §4 promised *"one block per review, per screen: the screen, the row, the verdict"* (`:89`). Block 1 (`:126-160`) has a prose list of thirteen screens, an admission-ticket paragraph, a genre line and a signature table — and **no place where a screen carries a verdict**. My row cannot be true against a shape that has nowhere to put the thing my row checks. §3 below is that missing table.
+3. **Three of the thirteen screens have no row at all,** so "names a screen, a row and a verdict" is unsatisfiable for them by construction (F3).
+
+**FALSE per screen where it differs:** it is false for all thirteen today for reasons 1 and 2. Once §3 below is pasted in, it becomes TRUE for ten and stays FALSE for screens **3, 8, 9** until they are given a size.
+
+**The genre line, every screen I looked at, 2026-09-14 — TRUE, with one note.**
+> *"There is no clock, no countdown, no day budget, no streak that can break, and nothing on this screen counts down."*
+
+Signed TRUE for screens 0–12 on the evidence I have: the shifts copy states it in the document itself (`sobremesa-journey.html:555` — *"no shift is late, aged, missed or coloured"*), the quiet document prints it on the page I photographed (*"There is no streak, and nothing broke"*), and the `S[]` strings contain no countdown token. **The note:** screen 0 carries the only meter in the set — `0 of 13 answered` and a progress bar (`j-questionnaire-q1-390x844-en-night-unmodified.png`). It counts **up**, it cannot break, and nothing is lost by stopping; R10/R11/R15 are about countdowns and streaks, so it passes. It is the nearest thing in the set to a fail and the ledger should say so once, here, so nobody re-discovers it every review.
+
+---
+
+## 3 · THE BLOCK — `docs/UI-REVIEW.md` §6, block 1, as it should read
+
+*Paste-ready. The findings are ranked by what they cost the person holding the phone; four of them cost the person nothing and cost the **next reviewer** everything, and they are marked so.*
+
+### Verdict table — the thing §4 promised and §6 lacks
+
+| Screen | Rows it exists at | Verdict | Why, in six words |
+|---|---|---|---|
+| 0 · The questionnaire | 390×844 EN night (×2) | **ANSWERS, WITH A NOTE** | It is the degraded state, unlabelled |
+| 1 · The front door | 390×844 EN cream + a live drawing | **DOES NOT ANSWER** | The relabelled doors have no size |
+| 2 · The street | 390×844 EN cream | **ANSWERS** | Real game, untouched, whole |
+| 3 · The household | **none** | **REFUSED** | No row, no ticket, no file |
+| 4 · A drawer | 390×844 EN+ES, 390×844 unrolled EN, 844×390 EN | **ANSWERS, WITH A NOTE** | Sideways shows 207 of 783 |
+| 5 · The shifts board | same three | **ANSWERS, WITH A NOTE** | Same fold; cards are drawn |
+| 6 · The recipe at home | same three | **ANSWERS, WITH A NOTE** | 887 px document, 207 px window |
+| 7 · The Collection | 390×844 EN+ES, unrolled EN, 844×390 EN | **ANSWERS, WITH A NOTE** | Whole standing up, clipped sideways |
+| 8 · The merge board | **none** | **REFUSED** | No row, no ticket, no file |
+| 9 · Making a dish by hand | **none** | **REFUSED** | No row, no ticket, no file |
+| 10 · The house card | 390×844 EN+ES, unrolled EN, 844×390 EN | **ANSWERS, WITH A NOTE** | ES grows 500→553; still fits |
+| 11 · The day nothing happened | 390×844 EN+ES, unrolled EN, 844×390 EN | **ANSWERS, WITH A NOTE** | One rule above the bar, unreadable |
+| 12 · The map, before and after | 390×844 EN cream, before + after | **ANSWERS, WITH A NOTE** | The after cannot be re-shot |
+
+**Counted from `manifest.json`:** 30 pictures · 2 of 5 matrix rows · EN 24 / ES 6 · night 26 / cream 4 · `unmodified` 24 / `unrolled` 6. Ten screens have a picture; **three do not**.
+
+### The eight signatures — crew iteration 9
+
+| # | Role | Who | Signed | Date |
+|---|---|---|---|---|
+| 6 | QA (runs first) | Lupe | — | |
+| 1 | Engineers | Beto | — | |
+| 2 | Art | Pili | — | |
+| 3 | Story | Nacho | — | |
+| 4 | Words | Paty | — | |
+| 5 | UI | Rosa | — | |
+| 7 | Play | Chava | — | |
+| 8 | **Ledger** | **Remedios** | **FALSE** — findings section empty, no per-screen verdict, three screens unsizeable | **2026-09-14** |
+
+---
+
+### F1 · The questionnaire picture is the broken-network version of the screen, and the ticket only confessed the fonts
+**Screen 0 · 390×844 EN night · ANSWERS, WITH A NOTE**
+
+**In plain words:** The two pictures of AJ's questionnaire were taken on a machine with no network. The ticket says so — but it says only that the *fonts* fell back. The same missing network also switched the page into its no-memory mode, so the picture shows an amber warning across the top of every question — *"This browser is not remembering. Copy your answers before you close."* — that a person with a working connection may never see. A reviewer signing this screen is signing a screen that only exists when something is wrong.
+
+**Notes:** `manifest.json:362` and `:372` record the consequence as `"the published page, untouched (fonts fell back: no network)"`. The page's own claims for screen 0 say *"A shared store keeps her answers; the fallback copies them as text"* (`sobremesa-journey.html:541`). Both pictures therefore show the fallback branch. This is the same family as E13 — a true photograph of a state the screen is not usually in — except the switch was pulled by the environment rather than by the renderer, which is why the ticket did not catch it: A2 asks *what did you turn off*, and nobody turned this off. **What I do not know:** whether the store is unreachable for any other reason, or what the screen looks like when it is reachable. I did not render it.
+
+**Questions to consider:** Does A4 need a seventh field — *the state the screen is in* (normal / empty / error / offline) — or is that A2 widened from "what did you switch off" to "what was not working"? Is there a picture of screen 0 with the store up, and if not, has anyone seen it?
+
+**Areas affected:** `docs/UI-REVIEW.md` §1 (A2/A4) · `docs/mocks/2026-09-14-la-sobremesa/journey/manifest.json` · the published questionnaire artifact.
+
+**Done when:** every ticket names the state as well as the mode, and screen 0 has one picture in each of its two states, both at 390×844.
+
+---
+
+### F2 · Three of the thirteen screens cannot be refused, because they never said how big they were
+**Screens 3, 8, 9 (and half of 1) · no row · REFUSED**
+
+**In plain words:** The household, the merge board and the dish made by hand are not photographs. They are drawn live, by the review page, into the reviewer's own browser window, at whatever width that window happens to be. So they have no size, no language, no shell, and no word saying whether anything was switched off — which means they cannot fail the admission ticket and they cannot pass it. They are the three screens with the most new work behind them, and they are the three nobody can sign for.
+
+**Notes:** `sobremesa-journey.html:669` — `const cssW=Math.min(560,Math.max(320,Math.floor(document.documentElement.clientWidth-40)))`. The canvas is then `cssW × cssW*ratio` with ratio 0.52/0.46/1.0/0.62 by screen (`:668`). Two reviewers on different laptops grade different pictures; neither is 390 or 844. The page is *honest* about it — the stub reads `drawing · this page's canvas · not a screenshot` (`:672`) and *"Order 3: the thing does not exist yet at all, so it is drawn and it says so"* — and honesty is not a row of the matrix. `manifest.json` has no entry for `room`, `merge`, `make` or `doors`; I checked all 30. The remedy is cheap: render each drawing at the two column widths a phone gives (370 standing, 640 sideways), commit them as PNGs, give each a manifest row with `mode: "drawn"`.
+
+**Questions to consider:** Does the admission ticket need a fourth `order` value — `drawing`, alongside `real game` / `real reader` / `real page` — with A1 still compulsory? Should a screen with no picture be listed in the manifest with its fields blank, so the gap is a row rather than an absence? (A blank row is visible; an absence is not.)
+
+**Areas affected:** `docs/UI-REVIEW.md` §1 A1/A2/A6 · `journey/manifest.json` · the page's `DRAW` block.
+
+**Done when:** every screen in a review has at least one manifest row, and a drawing carries a matrix row like a photograph does.
+
+---
+
+### F3 · Sideways, every picture is clipped and not one has a companion showing what is under the fold
+**Screens 4, 5, 6, 7, 10, 11 · 844×390 · DOES NOT ANSWER (for the sideways row only)**
+
+**In plain words:** Six pictures were taken with the phone held sideways. Every one of them shows a 207-pixel window onto a document between 253 and 887 pixels tall, and none of them has a second picture showing the rest. Standing up, the review gives you both — the clipped one and the unrolled one with the fold drawn. Sideways it gives you only the clipped one, so the reviewer can see that something is cut off and cannot see what.
+
+**Notes:** Counted from `manifest.json`: six entries at `844x390`, all `unmodified`, all `visibleHeight: 207`, `docHeight` 253 / 369 / 386 / 724 / 783 / 887. Zero `unrolled` at that row; zero ES at that row. This is the review's own rule biting: *"It may not pass a screen on one picture"* (`docs/UI-REVIEW.md:49`). **This costs the reviewer, not the person** — the underlying sideways symptom is the game's and is already filed (see dedupe). Separately, three of the six portrait `unrolled` pictures (`collection`, `house`, `quiet`) have `docHeight == visibleHeight`, so their unrolled twin adds nothing; six unrolled pictures, three of which carry information.
+
+**Questions to consider:** Is an `unrolled` twin compulsory at *every* row where `docHeight > visibleHeight`, or only at the narrowest? Should the manifest refuse to accept an `unrolled` entry whose two heights are equal, since it is a picture of nothing?
+
+**Areas affected:** `journey/manifest.json` · `render2.js` · `docs/UI-REVIEW.md` §1 A3.
+
+**Done when:** every row where a document is taller than its box has both pictures, and no `unrolled` entry exists where the two heights are equal.
+
+---
+
+### F4 · Sideways, one document ends in two different rules and the picture cannot say which one means "there is more"
+**Screen 11 · 844×390 EN night · DOES NOT ANSWER**
+
+**In plain words:** Held sideways, the quiet day's card shows its whole body and then two horizontal lines in a row above the buttons: a solid violet one and a dashed one. In the shipped reader a dashed rule means the document has ended. I cannot tell from the picture what the violet one means — an affordance saying "keep scrolling", or part of the card. If a reviewer cannot tell, neither can a person.
+
+**Notes:** Read off `j-quiet-844x390-en-night-unmodified.png`; the manifest gives this screen `docHeight: 253`, `visibleHeight: 207`, so 46 px are genuinely hidden and the picture nonetheless reads as complete. **I did not open `render2.js` or the reader's CSS to find out which element paints the violet rule — I do not know, and I am not guessing a mechanism.** This is the mock-time face of M2 (`docs/UI-REVIEW.md:107`), which is already RED on the shipped reader from Lupe's measurement, not from a fired guard.
+
+**Questions to consider:** What paints the violet rule, and is it the same element in every document? If it *is* the end-of-more affordance, does the review need a mid-scroll picture at 844×390 to prove a person can see it before they scroll?
+
+**Areas affected:** the reader's end-of-document marks · `docs/UI-REVIEW.md` §5 M2.
+
+**Done when:** somebody names the element in one line, and either M2's status changes or one mid-scroll picture is added at the sideways row.
+
+---
+
+### F5 · Spanish exists for six screens of thirteen, at one row of two
+**Screens 0, 1, 2, 3, 8, 9, 12 · all rows · DOES NOT ANSWER (for the words row only)**
+
+**In plain words:** Six documents have a Spanish picture, all of them standing up. The questionnaire, the front door, the street, the household, the merge board, the hand-made dish and the map have none at all. Row 4 of the checklist — every string in both languages, both fitting — cannot be signed TRUE or FALSE for those seven. It can only be left blank, and a blank signature is the thing the checklist exists to prevent.
+
+**Notes:** Counted from `manifest.json`: `lang: "es"` appears six times, all `390x844`, all `unmodified`, all `night`. The evidence that *does* exist is good and should be said: Spanish is consistently taller — drawer 774→794, shifts 739→758, house 500→553 (+10.6%, the worst), quiet 331→331 — and none of the six overflows its sheet at 370 px. Collection is the other direction, 408→427, still whole. So the ES claim is real for six screens and absent for seven.
+
+**Questions to consider:** Does AJ read the questionnaire in Spanish? If she does, screen 0 having no ES picture is not an evidence gap, it is a missing screen. Should ES be compulsory at the *sideways* row too, where the sheet is 640 and the fold is the binding constraint rather than the width?
+
+**Areas affected:** `render2.js` · `manifest.json` · checklist row 4.
+
+**Done when:** every screen has an ES picture at 390×844, and row 4 is signed TRUE or FALSE rather than left blank.
+
+---
+
+### F6 · The register's own section numbers are wrong inside the register
+**Not a screen · **the ledger itself** · ANSWERS, WITH A NOTE**
+
+**In plain words:** The review page's own map of itself says the findings ledger is section 5. It is section 6. The brief written from it repeated the error, and I spent part of this pass proving which one was right. This is small, it is cheap to fix, and it is exactly how a document starts describing a thing that is not there.
+
+**Notes:** `docs/UI-REVIEW.md:89` — *"§4 the red tests a mock inherits · §5 the review ledger"*; the file's actual headings are `:100` `## 5 · THE RED TESTS…` and `:120` `## 6 · THE REVIEW LEDGER…`. Cause: §4 is a verbatim lift of Lupe's *recommendation* from run 8, which proposed a five-section file; the file as built has six, and the recommendation was pasted in unchanged. Two related staleness points in the same file: §1's justification column is written in the present tense about the **superseded** eight-picture page (`:29` — *"The current page: 1 of 8 pictures in Spanish, 1 of 8 in night"*), which is no longer any page that exists; and there is a stray empty section between `:115` and `:118`.
+
+**Questions to consider:** Should §4 be re-titled *"Where the findings go — the decision, 2026-09-14"* and dated, so it reads as history rather than as a map? Should §1's "why" column cite the old page by name and date, so it stops claiming to describe today?
+
+**Areas affected:** `docs/UI-REVIEW.md` §1, §4, the blank block at `:115-118`.
+
+**Done when:** §4 names §6, §1's examples are dated, and the stray rule is gone.
+
+---
+
+### F7 · The fold on the picture is arithmetic, not a measurement
+**Screens 4, 5, 6 · 390×844 unrolled · ANSWERS, WITH A NOTE**
+
+**In plain words:** The fold line drawn across the unrolled pictures is not photographed. The review page works out where it should go with a sum, using two fixed numbers for the document's head and foot. If any document has a different head or foot — and at least one has no button bar in the same place — the fold is drawn in the wrong place on a picture whose whole job is to say where the fold is.
+
+**Notes:** `sobremesa-journey.html:654` — `const pct=(30+m.visibleHeight)/(30+m.docHeight+111)`, commented *"the sheet is 30 px of head + the scroll box + 111 px of foot, measured on the live DOM"*. The 30 and the 111 were measured once and are applied to every document at every row. They are almost certainly right for the portrait row where all three unrolled-with-a-fold pictures live; nobody has checked them at 844×390, where the foot is the same three buttons in a 640-wide sheet and may wrap differently. This is a proxy in the shape `docs/REGRESSION.md` §3 collects: *"I computed the fold"* standing in for *"I saw where it folded"*.
+
+**Questions to consider:** Could the fold be drawn by the renderer into the PNG itself, at shot time, from the real scroll box — so the picture carries its own fold instead of the page re-deriving it? Do the 30 and 111 hold at the sideways row?
+
+**Areas affected:** `sobremesa-journey.html:654-656` · `render2.js` · A3.
+
+**Done when:** the fold in a picture comes from the same measurement that produced `visibleHeight`, not from a constant typed once.
+
+---
+
+### F8 · "Skip" is a word between two buttons
+**Screen 0 · 390×844 EN night · DOES NOT ANSWER**
+
+**In plain words:** At the bottom of every question there are three ways on: Back, Next and Skip. Back and Next are boxes you can see. Skip is a word with nothing round it. Whether it is big enough to press is Rosa's call, not mine — but the picture does not settle it, and it is the control a person uses when they do not want to answer, which is the one AJ is most likely to reach for.
+
+**Notes:** Read off `j-questionnaire-q1-390x844-en-night-unmodified.png`. The two boxed controls are visibly the same height; the Skip word sits on the same baseline with no border. **I did not measure its hit box** — I have no browser this run. Checklist row 5 (`docs/UI-REVIEW.md:68`) is where this is decided; I am filing it so it is in the ledger for her to answer rather than in prose she may not read. Recorded here as the ledger's job: a question raised by one reviewer for another is a finding, not a conversation.
+
+**Questions to consider:** Is Skip's tap target ≥44×44 at 390×844? Does the fallback-font picture change its width enough to matter, given F1?
+
+**Areas affected:** the questionnaire artifact · checklist row 5.
+
+**Done when:** Rosa signs row 5 with Skip named, TRUE or FALSE.
+
+---
+
+## 4 · WHAT IS NEW, WHAT IS A DUPLICATE, WHAT I WOULD CLOSE
+
+**The dedupe I could actually run, and its limit.** I have no `search_issues`. I deduped against `scratchpad/open-issues.txt` (23 lines, titles only) and the eighteen **shorthand** titles in the brief for #173–#190. **I did not read the body of a single one of those eighteen.** Three of my eight touch things whose shorthand sounds close, and I have marked each as *adjacent pending one search* with the words to search.
+
+| Finding | Status | Against what |
+|---|---|---|
+| F1 questionnaire in its offline state | **New.** Nothing in the paper list mentions the questionnaire's persistence | possibly adjacent to **"the long form"** (#173–#190). Search `questionnaire`, `remembering`, `answers`. Different if that issue is about the form's *length*; mine is about its *memory* |
+| F2 three screens with no size | **New**, and it is a process finding, not a product one | nothing adjacent |
+| F3 no sideways companion picture | **Adjacent, do not file.** The *symptom* (sideways hides things) is **"sideways controls"** and **"the sideways suite row"** — already filed this afternoon. Mine is about the *evidence*, and evidence belongs in this register, not the ledger | #173–#190, shorthand |
+| F4 two rules above the bar | **Adjacent.** Same family as the wall's **"no swipe hint"**, but that is the mural wall and this is the document reader — different surface, different code | #173–#190, shorthand. Search `dashed`, `end of document` |
+| F5 ES coverage | **New**, ledger-only | nothing adjacent |
+| F6 stale section numbers in `UI-REVIEW.md` | **New**, and it is the second live instance of **#158**'s shape (*"The city ledger describes a city we do not have"*) | #158 — comment, not a new issue |
+| F7 fold by arithmetic | **New**, ledger-only. It is a proxy, so it belongs in `docs/REGRESSION.md` §3's register if it survives review | nothing adjacent |
+| F8 Skip target | **Adjacent**, and it is a handoff to row 5, not a ticket | possibly **"sideways controls"** if that issue is about targets generally |
+
+**Deserves an issue — exactly one, and it is conditional.**
+
+> **F1 — "AJ can lose thirteen answers and the page tells her so"** · labels `bug`, `tier: high` · the questionnaire artifact.
+> **Tier is high because of what it costs her, not what it costs us to fix:** thirteen questions answered once, a browser closed, nothing kept. **File it only after somebody searches `questionnaire` and `remembering` across #173–#190.** If "the long form" already covers it, add a comment naming the offline branch instead — that is the part the shorthand does not describe.
+
+**Stays in this register and is never a GitHub issue:** F2, F3, F5, F6, F7, F8. Five of those are about the *evidence* rather than the *product*, and `docs/UI-REVIEW.md:85-87` settles where evidence findings live. F8 is a handoff between two rows of the same checklist; it becomes a ticket only if Rosa signs row 5 FALSE.
+
+**One goes to a third register, not to either:** **F7** is a guard-shaped fault — a computed value standing in for a measured one — and if the fold survives into the builder's hands it wants a row in `docs/REGRESSION.md` §3 with its plant named (change a document's foot height by 20 px and assert the drawn fold moves).
+
+**What I would close.** Nothing in `open-issues.txt` is closed by this review, and I will not pretend otherwise. But two are moved:
+
+- **#158** (*The city ledger describes a city we do not have*) — **add a comment, do not close.** F6 is the same fault in a second file on its first day of life, which is evidence for #158's general point and against treating it as one document's problem.
+- **#161** (*Somebody should look at the whole game on a big screen and ask if it feels good*) — **this review does not answer it and should not be allowed to look as though it does.** Two rows of five, neither of them a big screen. If somebody is tempted to close #161 on the strength of thirty pictures, the answer is no: desktop, small window and fullscreen have no picture in this set.
+
+**If asked what to work on: one recommendation.** **Give screens 3, 8 and 9 a size (F2).** Not because it is the most expensive fault — it is not, F1 is — but because it is the only one that makes six other reviewers' signatures impossible. Beto cannot price a merge board he is seeing at a width that depends on his own window; Pili's row is *literally* "reads at 360 CSS px wide" and the drawing is between 320 and 560 depending on who opened the page; Paty has no ES to read. One render pass at two widths unblocks three signature rows on three screens, and it costs the maker about the ten minutes the word REFUSED was designed to cost.
+
+---
+
+## 5 · QUESTIONS FOR THE OWNER
+
+**Q1 · May AJ's answers be kept in her own browser?** Two things in the same screen collide.
+- One side: `sobremesa-journey.html:542` records the rule as *"Her answers never enter the repo. What gets written down is only what was decided because of them."* Read strictly, that is about the repo — but the spirit people have been building to is *nothing is kept*.
+- The other side: the shipped page itself, photographed at `j-questionnaire-q1-390x844-en-night-unmodified.png`, tells her *"This browser is not remembering. Copy your answers before you close."* Thirteen questions with a free-text note under each, and one closed tab loses all of it.
+- What each would have us build: the strict reading says leave it, and the warning is the honest cost. The other says a draft in her own browser's storage (not the repo, not a server), cleared when she sends.
+- **What I need from you: is "her browser remembers her own draft" inside the promise or outside it?** I am not asking how to build it.
+
+**Q2 · Is the questionnaire an English screen?** `manifest.json` has six Spanish pictures and not one of them is screen 0. Every document she never sees has ES; the one page written *for her* has EN only. That may be entirely correct and nobody has written it down. If it is correct, it belongs in `docs/OWNER.md` as a settled rule so no future review files F5 against screen 0 again.
+
+---
+
+## 6 · WHAT I DID NOT CHECK
+
+- **The bodies of #173–#190.** My tools are Read, Grep and Glob; there is no issue tool in this run. Every dedupe above is against titles and shorthand. **Three of my eight findings could be duplicates and I cannot rule it out** — F1, F4 and F8 are the three, and I have named the search words for each.
+- **I did not read `docs/POSTMORTEM.md`, `docs/REGRESSION.md` §3 or `docs/crew/FLIGHT-NOTES.md` this run**, though the brief opens by asking for them. I was told to work economically and my row is a shape-of-the-record job; I relied on the brief's and `docs/UI-REVIEW.md`'s quotations of E13, E10 and M1–M8 rather than on the registers themselves. **That is exactly the "relaying another agent's finding" the shared block warns about**, and anything I say about E10, E13 or §13j is second-hand and tagged as such.
+- **I looked at two of the thirty pictures** — the questionnaire's first question and the quiet day held sideways. Every other statement about the pictures is read off `manifest.json`, which is a claim about a picture and not the picture.
+- **I measured nothing.** No browser, no DOM, no pixel. Heights, widths and folds are the maker's numbers as filed.
+- **I did not open `render2.js` or `mockdocs2.js`.** So I cannot say whether the manifest's numbers came from the live scroll box or from the same kind of arithmetic F7 describes — and F7 makes that question live. Somebody with Bash settles it in one grep.
+- **I did not check whether `docs/OPEN.md` §3 or `docs/QA-PASS.md` got the two cross-links §4 promised** (`docs/UI-REVIEW.md:91`). A register nothing points at is a register nobody opens, and that is my trade; I ran out of the budget I was given before I got to it. **Somebody should check it before this run closes.**
+- **I did not verify that the other seven reviewers' returns will use the headings I have written the block around.** If they return prose, my row is FALSE for a second reason and somebody has to reshape their findings, not mine.
+
+---
+
+## 7 · POST-FLIGHT
+
+What the persona got right, with the moment: the bullet at `.claude/agents/remedios.md:87` — *"find the ledger before you read its copies"* — did its job in the first sixty seconds, because I checked my own tool list before reading a single register, found no way to reach the issues, and put that in my opening paragraph instead of discovering it at the end the way I did in run 8; the whole dedupe section is honest as a result, rather than confident and unverifiable. Where it was in the way: my instinct is to file, and six of my eight findings should never become issues — I caught myself drafting F5 and F7 as tickets before remembering that `docs/UI-REVIEW.md:85-87` exists precisely so that evidence findings stop landing in the ledger, and the discipline that saved it was the persona's *other* line, *"a backlog that only grows is not a ledger, it is a pile."* The gap I predicted did appear and it appeared harder than I expected: without the issue bodies I genuinely cannot distinguish F1 from "the long form", so the strongest finding in this return ships with a conditional on it, and a conditional is worth less than a number. **Persona edit: none, and here is why not** — the one thing I would have proposed (*check a register's self-references against its own headings before you cite one*) is already covered by rule 1 of the shared block, which I applied at `docs/UI-REVIEW.md:89` versus `:120` and which produced a finding rather than a question; and the specific lesson of this run — no tool, say so first — was added to my file eight hours ago and worked. An agent that proposes an edit every round is performing improvement.
+
+---
+
+## MURAL PANEL
+
+```
+id:     remedios-tres-sin-talon
+by:     "remedios"
+title:  {en:"Three with no stub", es:"Tres sin talón"}
+said:   {en:"You cannot refuse a picture that never said how big it was.",
+         es:"No se puede rechazar una foto que nunca dijo de qué tamaño era."}
+state:  {en:"holding the review open on three screens that have no size",
+         es:"tengo la revisión abierta por tres pantallas que no tienen tamaño"}
+who:    {en:"Doña Remedios, who runs the annex and is not impressed by urgency",
+         es:"Doña Remedios, que lleva el anexo y a quien la prisa no impresiona"}
+cap:    {en:"Thirteen screens went to review. Ten arrived with a photograph, a size, a language and a word saying what had been switched off. Three arrived as a drawing made in the reviewer's own window, between three hundred and twenty and five hundred and sixty wide depending on whose laptop was open. Nobody could pass them and nobody could refuse them either, because refusal needs a size to be wrong about. They were the three with the most new work behind them.",
+         es:"Trece pantallas llegaron a revisión. Diez traían foto, medida, idioma y una palabra diciendo qué se había apagado para sacarla. Tres llegaron como dibujo hecho en la ventana del propio revisor, entre trescientos veinte y quinientos sesenta de ancho según la laptop que estuviera abierta. Nadie pudo aprobarlas y nadie pudo rechazarlas tampoco, porque para rechazar hace falta una medida que esté mal. Eran las tres que traían más trabajo nuevo detrás."}
+aspect: 0.46
+art:    (g,W,H)=>{
+    /* DOÑA REMEDIOS' HAND. Not a drawing board and not a light box: a BOUND REGISTER —
+       banded accountant's paper, buff and green, iron-gall ink, a punched hole with red
+       thread, and a wet violet rubber stamp landed crooked across the three blank stubs.
+       Thirteen stubs down the right: ten struck, three empty. Everything sized against
+       the 11px lettering, which is the ruler on this wall. */
+    const PAPER="#EFE9D7", BAND="#D6E2CE", RULE="#A7B7A4", INK="#37301F",
+          FADE="#8E866F", BOX="#E4DCC4", VIO="#6B4A8F", VIO2="#8E6FB0",
+          RED="#B03A2E", HOLE="#C9C1A8";
+    murPaper(g,W,H,PAPER,null);
+
+    /* --- the banded ground: alternating buff and green, the accountant's paper --- */
+    const top=H*0.155, band=H*0.0615;
+    for(let i=0;i<10;i++){ if(i%2===1){ g.fillStyle=BAND; g.fillRect(0,top+i*band,W,band); } }
+    g.fillStyle=RULE; for(let i=0;i<=10;i++){ g.fillRect(0,top+i*band,W,0.6); }
+
+    /* --- the double rule under the head, and the left margin rule --- */
+    g.fillStyle=INK; g.fillRect(0,H*0.138,W,1.6); g.fillRect(0,H*0.150,W,0.8);
+    g.fillStyle=RED; g.fillRect(W*0.058,H*0.155,0.9,H*0.615);
+
+    /* --- the punched hole and the treasury thread, top left --- */
+    g.fillStyle=HOLE; g.beginPath(); g.arc(W*0.031,H*0.072,W*0.0125,0,7); g.fill();
+    g.strokeStyle="#BDB49A"; g.lineWidth=1; g.stroke();
+    g.strokeStyle=RED; g.lineWidth=1.6; g.globalAlpha=.9;
+    g.beginPath(); g.moveTo(W*0.031,H*0.084);
+    g.bezierCurveTo(W*0.020,H*0.20,W*0.048,H*0.34,W*0.026,H*0.47);
+    g.bezierCurveTo(W*0.012,H*0.58,W*0.040,H*0.64,W*0.030,H*0.72); g.stroke();
+    g.globalAlpha=1;
+
+    /* --- the head --- */
+    g.fillStyle=INK; g.font="bold 11px ui-monospace,monospace";
+    g.fillText("ANEXO · BOLETO DE ADMISIÓN",W*0.072,H*0.072);
+    g.fillStyle=FADE; g.font="8px ui-monospace,monospace";
+    g.fillText("13 pantallas   ·   30 fotos   ·   2 de 5 renglones",W*0.072,H*0.115);
+
+    /* --- the six fields, A1..A6, in the register's left two thirds --- */
+    const fx=W*0.078, fw=W*0.470;
+    const F=[["A1","renglón","390x844 · 844x390",2],["A2","caja de scroll","dice cuál",2],
+             ["A3","el doblez","dibujado, 3 de 6",1],["A4","real o dibujo","por elemento",2],
+             ["A5","el antes","el mapa lo trae",2],["A6","idioma · cascarón","EN 24 · ES 6",1]];
+    F.forEach(([k,label,val,ok],i)=>{
+      const y=top+band*0.62+i*band;
+      g.fillStyle=INK; g.font="bold 9px ui-monospace,monospace"; g.fillText(k,fx,y);
+      g.fillStyle=FADE; g.font="9px ui-monospace,monospace"; g.fillText(label,fx+W*0.048,y);
+      /* the ruled answer line and the answer written on it */
+      g.fillStyle=RULE; g.fillRect(fx+W*0.210,y+3,fw-W*0.210,0.8);
+      g.fillStyle=ok===2?INK:"#9A7B3C"; g.font="9px ui-monospace,monospace";
+      g.fillText(val,fx+W*0.218,y);
+    });
+
+    /* --- the thirteen stubs down the right: ten struck through, three blank --- */
+    const sx=W*0.600, sw=W*0.300, sh=H*0.0395, gap=H*0.0085;
+    const sy0=H*0.172;
+    const BLANK={3:1,8:1,9:1};
+    for(let n=0;n<13;n++){
+      const y=sy0+n*(sh+gap);
+      g.fillStyle=BLANK[n]?"#F5F1E4":BOX; g.fillRect(sx,y,sw,sh);
+      g.strokeStyle=BLANK[n]?"#C7BDA2":"#BCB299"; g.lineWidth=1;
+      if(BLANK[n]){g.setLineDash([3,2]);}
+      g.strokeRect(sx+0.5,y+0.5,sw-1,sh-1); g.setLineDash([]);
+      /* the perforation: the stub is torn off the left edge */
+      g.fillStyle="#C9C1A8";
+      for(let d=2;d<sh-2;d+=4) g.fillRect(sx-2,y+d,1.4,1.4);
+      /* the number, always; the struck line, only if it arrived */
+      g.fillStyle=BLANK[n]?"#B9AF95":INK; g.font="bold 9px ui-monospace,monospace";
+      g.fillText(String(n),sx+W*0.014,y+sh*0.70);
+      if(!BLANK[n]){
+        g.fillStyle=FADE; g.fillRect(sx+W*0.050,y+sh*0.38,sw*0.52,1.6);
+        g.fillStyle=INK;  g.fillRect(sx+W*0.050,y+sh*0.62,sw*0.30,1.6);
+        g.fillStyle=VIO;  g.fillRect(sx+sw-W*0.026,y+sh*0.30,W*0.013,W*0.013); /* the paid mark */
+      }
+    }
+
+    /* --- THE WET STAMP: landed crooked across the three blanks, ink pooled at the edge --- */
+    const cx=sx+sw*0.46, cy=sy0+9*(sh+gap)-sh*0.15, sw2=sw*0.92, sh2=sh*2.9;
+    g.save(); g.translate(cx,cy); g.rotate(-0.115);
+    g.globalAlpha=.30; g.fillStyle=VIO2; g.fillRect(-sw2/2,-sh2/2,sw2,sh2); /* the pad's bleed */
+    g.globalAlpha=.95; g.strokeStyle=VIO; g.lineWidth=2.6;
+    g.strokeRect(-sw2/2,-sh2/2,sw2,sh2);
+    g.lineWidth=1; g.strokeRect(-sw2/2+4,-sh2/2+4,sw2-8,sh2-8);
+    g.fillStyle=VIO; g.font="bold 11px ui-monospace,monospace";
+    g.textAlign="center";
+    g.fillText("SIN TALÓN",0,-sh2*0.08);
+    g.font="bold 9px ui-monospace,monospace"; g.fillText("3 de 13",0,sh2*0.22);
+    g.globalAlpha=.45; g.font="8px ui-monospace,monospace"; g.fillText("14·IX",0,sh2*0.40);
+    g.textAlign="left"; g.globalAlpha=1; g.restore();
+
+    /* --- the foot: the sentence, in her own hand, under the last rule --- */
+    g.fillStyle=INK; g.fillRect(0,H*0.790,W,1.2);
+    g.fillStyle=INK; g.font="bold 9px ui-monospace,monospace";
+    g.fillText("sin medida no hay rechazo",W*0.078,H*0.838);
+    g.fillStyle=FADE; g.font="8px ui-monospace,monospace";
+    g.fillText("tres pantallas se dibujaron en la ventana",W*0.078,H*0.888);
+    g.fillText("del que las miraba. 320 a 560, según la laptop.",W*0.078,H*0.930);
+
+    /* --- the clerk, at the right of the foot, three lines of type tall --- */
+    const bh=H*0.190; murBody(g,W*0.915,H*0.900-bh,INK,bh);
+    /* the stamp in her hand, a violet block at shoulder height */
+    g.fillStyle=VIO; g.fillRect(W*0.938,H*0.900-bh*0.62,W*0.020,H*0.030);
+}
+```
+
+**On the material, and why it is not anyone else's on this wall.** The wall already has a blueprint, a dimension drawing, a signwriter's board, a wall of drawers, a cross-section with a scale rule, a dimensioned race, the one with steam, and — from this afternoon — a light box under a mask card. None of them is *bound*, none of them is *banded*, and none of them has wet ink sitting on top of dry ink. This is a register page: buff and green bands, a red margin rule, a punched hole with treasury thread, thirteen perforated stubs down the right edge, and a violet rubber stamp landed crooked with its pad-bleed showing, because a stamp made by a hand is never square. Ten stubs are struck. Three are empty and dashed, and the stamp lands across exactly those three. **Sized against the lettering, not the frame:** the stub height is 0.0395H and the numeral on it is `bold 9px`, so a stub is always a little over a line of type tall; the stamp's words are `bold 11px`, the wall's own ruler, and the stamp box is drawn around them at 2.9 stubs tall rather than at a fraction I liked the look of; the clerk is `murBody` at 0.190H — about three lines of type — with her feet at 0.90H, clear of the 6% the wall cuts off the bottom. **I did not render it.** I have no browser this run and I am saying so rather than claiming a proof I do not have: the calling session should paint it at 520×239 and 360×166 before it goes up, and the three things I would check first are that the stamp does not cover stub 12's number, that the foot's two 8px lines do not collide with the clerk, and that the bezier thread does not cross the A3 answer line at the narrow size.

@@ -46,7 +46,7 @@
   "lang": "es",
   "shell": "night",
   "mode": "unmodified",
-  "docHeight": 758,
+  "docHeight": 778,
   "visibleHeight": 661,
   "sheetWidth": 370,
   "order": "real reader"
@@ -111,8 +111,8 @@
   "lang": "en",
   "shell": "night",
   "mode": "unmodified",
-  "docHeight": 500,
-  "visibleHeight": 500,
+  "docHeight": 427,
+  "visibleHeight": 427,
   "sheetWidth": 370,
   "order": "real reader"
  },
@@ -124,8 +124,8 @@
   "lang": "es",
   "shell": "night",
   "mode": "unmodified",
-  "docHeight": 553,
-  "visibleHeight": 553,
+  "docHeight": 519,
+  "visibleHeight": 519,
   "sheetWidth": 370,
   "order": "real reader"
  },
@@ -215,8 +215,8 @@
   "lang": "en",
   "shell": "night",
   "mode": "unrolled",
-  "docHeight": 500,
-  "visibleHeight": 500,
+  "docHeight": 427,
+  "visibleHeight": 427,
   "sheetWidth": 370,
   "order": "real reader"
  },
@@ -293,7 +293,7 @@
   "lang": "en",
   "shell": "night",
   "mode": "unmodified",
-  "docHeight": 386,
+  "docHeight": 369,
   "visibleHeight": 207,
   "sheetWidth": 640,
   "order": "real reader"

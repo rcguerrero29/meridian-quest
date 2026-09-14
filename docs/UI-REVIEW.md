@@ -86,7 +86,7 @@ Three reasons, and the first is the only one that matters:
 2. **Seven of the eight signatories are not QA.** QA-PASS is "Lupe's list" by its title line; a wall Pili and Nacho sign needs a page that is nobody's.
 3. It keeps the two questions apart: *what escaped* (QA-PASS) and *what we decided from a picture* (UI-REVIEW).
 
-**The shape of `docs/UI-REVIEW.md`:** §1 the admission ticket · §2 what pass means · §3 the eight signature lines · §4 the red tests a mock inherits · §5 **the review ledger** — one block per review, per screen: the screen, the row, the verdict, the eight signatures with the date, and every finding in the ticket shape.
+**The shape of `docs/UI-REVIEW.md`, as it stands:** §1 the admission ticket · §2 what pass means · §3 the eight signature lines · §4 this recommendation, kept as the record of why · §5 the red tests a mock inherits · §6 **the review ledger** — one block per review, per screen: the screen, the row, the verdict, the eight signatures with the date, and every finding in the ticket shape.
 
 **Two cross-links, and nothing else moves:** a row in `docs/OPEN.md` §3's register table; one line under `docs/QA-PASS.md`'s matrix reading *"Mock-ups are reviewed under `docs/UI-REVIEW.md`; only what reaches the owner is written here."*
 
@@ -142,19 +142,115 @@ shipped game.
 **The genre line**, signed by the pen on every screen, 2026-09-14: *there is no clock, no countdown,
 no day budget, no streak that can break, and nothing on this screen counts down.*
 
-**The eight signatures.** Crew iteration 9 (`docs/crew/FLIGHT-NOTES.md`). Filled in as each return
-lands; a row left `—` was not signed.
+**The verdict table** (Doña Remedios, crew iteration 9 — counted from `manifest.json`: 30 pictures ·
+2 of 5 matrix rows · EN 24 / ES 6 · night 26 / cream 4 · `unmodified` 24 / `unrolled` 6; ten screens have
+a picture, three are drawings and have none).
 
-| # | Role | Who | Signed | Date |
+| Screen | Rows it exists at | Verdict | Why, in six words |
+|---|---|---|---|
+| 0 · The questionnaire | 390×844 EN night (×2) | **ANSWERS, WITH A NOTE** | It is the degraded state, unlabelled |
+| 1 · The front door | 390×844 EN cream + a live drawing | **DOES NOT ANSWER** | The relabelled doors have no size |
+| 2 · The street | 390×844 EN cream | **ANSWERS** | Real game, untouched, whole |
+| 3 · The household | none — a drawing | **REFUSED** | No row, no ticket, no file |
+| 4 · A drawer | 390×844 EN+ES, unrolled EN, 844×390 EN | **ANSWERS, WITH A NOTE** | Sideways shows 207 of 783 |
+| 5 · The shifts board | same three | **ANSWERS, WITH A NOTE** | Same fold; cards are drawn |
+| 6 · The recipe at home | same three | **ANSWERS, WITH A NOTE** | 887 px document, 207 px window |
+| 7 · The Collection | same three | **ANSWERS, WITH A NOTE** | Whole standing up, clipped sideways |
+| 8 · The merge board | none — a drawing | **REFUSED** | No row, no ticket, no file |
+| 9 · Making a dish by hand | none — a drawing | **REFUSED** | No row, no ticket, no file |
+| 10 · The house card | same three | **ANSWERS, WITH A NOTE** | ES grows 500→553; still fits |
+| 11 · The day nothing happened | same three | **ANSWERS, WITH A NOTE** | One rule above the bar, unreadable |
+| 12 · The map, before and after | 390×844 EN cream, before + after | **ANSWERS, WITH A NOTE** | The after cannot be re-shot |
+
+**The eight signatures.** Crew iteration 9, 2026-09-14. Every line is quoted in §3; the returns are
+verbatim in `docs/meetings/2026-09-14-la-cuadrilla-run-9.md`.
+
+| # | Role | Who | Signed | What makes it false, named |
 |---|---|---|---|---|
-| 6 | QA (runs first) | Lupe | — | |
-| 1 | Engineers | Beto | — | |
-| 2 | Art | Pili | — | |
-| 3 | Story | Nacho | — | |
-| 4 | Words | Paty | — | |
-| 5 | UI | Rosa | — | |
-| 7 | Play | Chava | — | |
-| 8 | Ledger | Remedios | — | |
+| 6 | QA (runs first) | Lupe | **FALSE** | rows three, four and five do not exist (480×900, 1280×800, fullscreen); the tickets pass A1, A2, A4; A3 the fold was drawn by the page, not in the PNG; A6 no cream document. M1 red on the owner's own phone (*Take a shift* at 691 in a 661 box), M3 red (13-px checkboxes, a 19-px select), M4 red in the reader |
+| 1 | Engineers | Beto | **FALSE** | one element in each column: the reader's checkboxes wear the settings panel's uniform (unpriced), and the doors are half a seam — the half that is missing is in the save. Priced: careers seam RULE; the listening canvas RULE with two unpriced things under it (touch, persistence); `pendingAt` on the map two lines; the ring a different kind of question |
+| 2 | Art | Pili | **FALSE** | the allergy ticks are iOS blue on a violet app; the household's drawer ladder contradicted the drawer screen's; the merge board is four colours of one object; six screens carry the engine's violet-label rule |
+| 3 | Story | Nacho | **FALSE** | the one sentence per screen is written on the page and shown on none of the pictures; the questionnaire made two opposite promises one above the other; three of four kitchens are a flag with an apostrophe |
+| 4 | Words | Paty | **FALSE** | the questionnaire has no Spanish (REFUSED under A6 — by the owner's own word, *"English is fine"*, so recorded, not built); six of the set's best sentences are `sub` lines the reader never shows; the drawer captions collided in both languages; *"Onigiri, de dos"* |
+| 5 | UI | Rosa | **FALSE** | sideways, four documents put their primary action under the 207-px box behind a mark that reads as the end; the house card's only switch is 19 px tall; on the questionnaire at 844×390 the bar sat on the third answer, so a tap there pressed Next |
+| 7 | Play | Chava | **TRUE** | for all thirteen, with three places he was wrong written down (screens 4, 5, 8); the genre line TRUE on all fourteen pictures — everything that moves counts up |
+| 8 | Ledger | Doña Remedios | **FALSE → TRUE for ten** | as the set stood: findings section empty, no per-screen verdict, three screens unsizeable; with the table above pasted it is TRUE for ten screens and stays FALSE for the three drawings |
 
-**Findings** — appended per return, in the ticket shape, each naming a screen, a row and a verdict.
+**The genre line**, signed by all eight and the pen: TRUE on every picture. The only date anywhere is
+one the player typed, and nothing compares it to today.
+
+**Fixed the same day, in the sources, before this block was written** — each re-rendered or
+republished; no picture was edited by hand:
+- Rosa F1 · the questionnaire is a fixed frame where only the question list scrolls; proven at both
+  phone rows with an answer already selected (`elementFromPoint` on every option answers that option).
+- Nacho F2 · the questionnaire's body promise now follows the same truth as the amber banner: with no
+  store it says so, in one voice.
+- Paty's table · every row applied to `mockdocs2.js` — *Onigiri, dos rellenos*; *Aquí nada lleva
+  cuenta, nada corre y nada se apaga*; *Grades on the plate*; *Not raw — the house cooks these*;
+  *Pepper*; *twice · once*; curly apostrophes throughout the English. Nacho's F5 (*Sal* in the English
+  list) is overruled by her F2: the names match the parent document.
+- Pili F4, F5, F9 · the drawer you are in is open, not painted; the household's counter carries the
+  drawer screen's own ladder (4 : 6 : 9 = 10 : 16 : 24); the captions are one short line each, in both
+  languages, with a measurable gap.
+- Lupe A3 / Remedios F7 · the fold is measured on the live document and drawn INTO the unrolled PNG by
+  the camera, so the picture carries it wherever it travels.
+- Remedios F2 · the three drawings say their size on their ticket (drawn at up to 560 CSS px, no
+  matrix row). Remedios F6 · this file's section numbers corrected.
+
+**Findings index** — every finding is in the ticket shape in the meeting file under its reviewer; here
+only the title, screen, row and verdict, ranked as each reviewer ranked them.
+
+| Reviewer | Finding | Screen · row | Verdict | Where it went |
+|---|---|---|---|---|
+| Lupe | A7, a new ticket field: what was switched off to take the picture — it cost her a false bug report | all | ANSWERS, WITH A NOTE | §1 gains A7 on the next revision |
+| Lupe | M1–M8 as they stand: M1 red on the owner's phone, M2 the end-of-document lie has a new shape (a 2-px violet sliver), M3 red on inputs, M4 red in the reader, M5 green by a proxy | 4, 5, 6, 10, 11 | — | the red tests stand; M1/M2 are the fold, with Rosa F3 |
+| Lupe | A5 · three things change between the map's before and after, not one | 12 | ANSWERS, WITH A NOTE | `docs/meetings/2026-09-14-el-mapa.md` |
+| Rosa | F1 · a tap on the third answer submits the question | 0 · 844×390 | DOES NOT ANSWER → fixed | questionnaire v3 |
+| Rosa | F2 · the house card's only switch is 19 px tall | 10 · both rows | ANSWERS, WITH A NOTE | the reader's `sel` block, engine — with M3 |
+| Rosa | F3 · sideways, four screens put their primary action below a 207-px window, and the mark above it means "the end" | 4, 5, 10, 11 · 844×390 | ANSWERS, WITH A NOTE | #173 (the sideways row) and the reader's end-of-document affordance (M2) |
+| Rosa | F4 · the primary button has no pressed state; the reader does not trap the keyboard | all documents | ANSWERS, WITH A NOTE | engine, red first |
+| Rosa | F5 · every document writes a subtitle the reader never shows | all six | ANSWERS, WITH A NOTE | with Paty F6: the reader renders `sub` or the documents stop writing it |
+| Rosa | F6 · the third checkbox comes loose from its own label | 10 | ANSWERS, WITH A NOTE | the reader's `checks` layout |
+| Rosa | F7 · the checked state is Chromium's blue in a violet night app | 10 | ANSWERS, WITH A NOTE | one `accent-color` line in both shells (with Pili F1, Beto 1) |
+| Rosa | F8 · the Collection's blank lines look like something you type into | 7 | ANSWERS, WITH A NOTE | Pili F7: outlines for the unmade, not underlines |
+| Pili | F1 · the house card asks her to tick the food she must not eat, in iOS blue | 10 | ANSWERS, WITH A NOTE | as Rosa F7 |
+| Pili | F2 · the merge board is four colours of the same object | 8 · drawing | DOES NOT ANSWER | drawn again when AJ answers |
+| Pili | F3 · the shift you took is marked with a 22-px corner you have to be told about | 5 | ANSWERS, WITH A NOTE | the taken state gets a second cue at 64 px |
+| Pili | F4 · the drawer you are in is painted, not opened | 4 | fixed | mockdocs2.js |
+| Pili | F5 · the household's drawer ladder contradicts the drawer screen's | 3 · drawing | fixed | the journey page |
+| Pili | F6 · the map's markers differ only in hue, on a map whose legend already spends gold | 12 | ANSWERS, WITH A NOTE | the map plan: one mark, the street's own ❗ |
+| Pili | F7 · the Collection shouts the blanks and whispers the dishes | 7 | ANSWERS, WITH A NOTE | as Rosa F8 |
+| Pili | F8 · six screens, one engine line: every label is violet and every violet looks pressable | all | ANSWERS, WITH A NOTE | the shell's `kv` label colour — engine, both games, red first |
+| Pili | F9 · the three drawer captions run into each other in Spanish | 4 · ES | fixed | mockdocs2.js |
+| Pili | F10 · the questionnaire's loudest colour is its bookkeeping | 0 | ANSWERS, WITH A NOTE | the gold on the progress row; next revision of the page |
+| Pili | F11 · the twins (submit and cancel) are not fixed; they are out of frame | 4, 6 | ANSWERS, WITH A NOTE | `engine/engine.js`, grep `c.className="dbtn"` — with run 8 |
+| Beto | 1 · the reader's checkboxes are wearing the settings panel's uniform | 10 | ANSWERS, WITH A NOTE | one CSS line, both shells, priced |
+| Beto | 2 · the doors are already half a seam, and the missing half is in the save | 1 | ANSWERS, WITH A NOTE | #154 — the careers seam must include the class in the save |
+| Beto | 3 · the only button on two screens is under the fold, behind a mark that reads as the end | 4, 5 | ANSWERS, WITH A NOTE | as Rosa F3 |
+| Beto | 4 · a canvas that listens: the claim and price are right; two things under it are not priced (touch, persistence) | 8, 9 | ANSWERS, WITH A NOTE | the build order, row 14 |
+| Beto | 5 · the markers are two lines; the ring is a different kind of question | 12 | ANSWERS, WITH A NOTE | the map plan, §2 |
+| Beto | 6 · a pack's own state survives a reload and dies on the Trolley Pass, and only one screen says so | 5, 10 | ANSWERS, WITH A NOTE | G1 in the build order |
+| Beto | 7 · print | 6 | ANSWERS, WITH A NOTE | #196 |
+| Nacho | F1 · the sentence that says what a screen means is written, and never shown | all | ANSWERS, WITH A NOTE | the page's `line` becomes the document's first line, or is dropped |
+| Nacho | F2 · the questionnaire makes AJ two opposite promises | 0 | fixed | questionnaire v4 |
+| Nacho | F3 · the drawer is the artifact our own research says will lie to her by week three | 4 | DOES NOT ANSWER | R17; the plan's answer is that leftovers feed it — say so on the screen |
+| Nacho | F4 · three of the four kitchens are a flag with an apostrophe | 5 | ANSWERS, WITH A NOTE | names are placeholders; the owner's decision 6 |
+| Nacho | F5 · "Sal" is in the English recipe | 6 | overruled | Paty F2 |
+| Nacho | F6 · the recipe appears to have no method | 6 · 390×844 | ANSWERS, WITH A NOTE | the method is below the fold; with the fold |
+| Nacho | F7 · the shifts board says the same four dishes twice | 5 | ANSWERS, WITH A NOTE | the rows are the document; the drawing is labelled |
+| Nacho | F8 · a blank line and the end of the document are the same mark | 7, 11 | ANSWERS, WITH A NOTE | with Rosa F8, M2 |
+| Nacho | F9 · the front door in the picture is Meridian's, and the line under it is a promise | 1 | DOES NOT ANSWER | as the verdict table says |
+| Nacho | F10 · the street explains itself twice, in the same frame | 2 | ANSWERS, WITH A NOTE | Meridian's own arrival text — not this world's |
+| Paty | F1 · the questionnaire has no Spanish at all | 0 | REFUSED (A6) → recorded | the owner: *English is fine* (§12.1 #15) |
+| Paty | F2–F5, F7–F9 · the table | 4, 5, 6, 7, 10 | ANSWERS, WITH A NOTE → applied | mockdocs2.js |
+| Paty | F6 · six of the best sentences in the set are in no picture at all | all six | DOES NOT ANSWER | as Rosa F5 |
+| Paty | F10 · the page is English, and the three inline drawings are English on purpose | the page | ANSWERS, WITH A NOTE | the page is the owner's reading copy; the game is both |
+| Chava | where he was wrong: the drawer (thought the search was live), the shifts board (tapped a drawn card), the merge board (looked for the tap) | 4, 5, 8 | TRUE, written down | the "drawing" plate belongs nearer the picture |
+| Remedios | F1 · the questionnaire picture is the broken-network version, and the ticket only confessed the fonts | 0 | ANSWERS, WITH A NOTE | the ticket now says what else fell back; re-shoot with a network when one exists |
+| Remedios | F2 · three of thirteen screens cannot be refused because they never said how big they were | 3, 8, 9 | REFUSED → sized | the drawings' ticket now carries their width |
+| Remedios | F3–F5 · sideways every picture is clipped with no companion; one document ends in two rules; Spanish at one row | 4–11 | ANSWERS, WITH A NOTE | the next camera pass |
+| Remedios | F6 · the register's own section numbers are wrong inside the register | this file | fixed | §4 and §6 in this revision |
+| Remedios | F7 · the fold on the picture is arithmetic, not a measurement | unrolled | fixed | the camera measures it and draws it |
+| Remedios | F8 · "Skip" is a word between two buttons | 0 | ANSWERS, WITH A NOTE | with Rosa F4; next revision of the page |
+
 

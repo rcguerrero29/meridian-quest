@@ -18,10 +18,11 @@ the mock-ups; the map revamped so a person can find the next quest; the murals c
 the backlog put together while AJ takes her time.
 
 **What shipped this sitting, and where:**
-- **AJ's questionnaire, v3** — the artifact he forwards (source: the session's scratchpad
+- **AJ's questionnaire, v4** — the artifact he forwards (source: the session's scratchpad
   `aj-questionnaire.html`; script `docs/for-aj/LA-SOBREMESA.md`). Thirteen questions, a comment box
   under every choice, night; her answers stay with him (Zeni) and are never copied into this repo. v3
-  fixed Rosa's run-9 finding: held sideways, the bottom bar sat on the third answer. **He still owes one
+  fixed Rosa's run-9 finding (held sideways, the bottom bar sat on the third answer); v4 Nacho's (two
+  opposite promises on one screen). **He still owes one
   check before forwarding: open the link logged out once (Zeni's "private by link").**
 - **The journey** — the artifact *La Sobremesa, the journey*
   (https://claude.ai/code/artifact/5a2858ba-51ca-49c6-ba7e-3e10170aab0c): thirteen screens on a phone at
@@ -36,8 +37,10 @@ the backlog put together while AJ takes her time.
   on "next" is his call**). Built after his look at screen 12 of the journey page.
 - **The backlog** — issues #173–#201 filed from Remedios's run-8 triage (her pick: #173, the phone held
   sideways), comments on #154 and #156, `docs/BACKLOG.md` §0 re-ranked onto the ledger.
-- **The wall** — iteration 8, fifteen panels in fifteen materials (`docs/crew/MURALS.md` iteration 8);
-  run 8's twelve persona edits applied (`docs/crew/FLIGHT-NOTES.md` rows 47–61, iteration 8).
+- **The wall** — iterations 8 and 9: fifteen and then eight panels, each in its own material
+  (`docs/crew/MURALS.md`); fifty-six panels, twenty-one bays, `ch-v105`. Run 8's twelve persona edits
+  applied (`docs/crew/FLIGHT-NOTES.md` rows 47–61); run 9's are the last thing this sitting did — check
+  the ledger rows 62–69 landed.
 - **Registers**: `docs/la-sobremesa.md` §13 (run 8 consolidated; §10's palette superseded by Pili's
   night palette and re-cut kitchens, machine-checked), `docs/GENRE-RULES.md` R18, the research sweeps in
   `docs/research/2026-09-14-map-and-questionnaires.md`, QA-PASS E13, three stale citations corrected.
@@ -48,7 +51,10 @@ the backlog put together while AJ takes her time.
    and which first · names · the ring on "next"); his look at the map pictures; the logged-out check.
 2. Chava's two cold plays (the mocked map, the journey) — cut by the limit twice; run 9's Chava return
    covers the journey if it landed (see the run-9 file).
-3. Run 9's panels on the wall (iteration 9) and its persona edits — see the flight-notes ledger.
+3. The review's open notes: the reader's own faults (19-px select, 13-px checkboxes, blue ticks, violet
+   labels, submit/cancel twins, no end-of-document affordance, scroll reset) are engine work with a red
+   first, all listed in `docs/UI-REVIEW.md` block 1; the three missing matrix rows (480×900, 1280×800,
+   fullscreen) for the next camera pass.
 4. Nothing on the second world is built, and nothing should be until AJ answers (#200).
 
 ---

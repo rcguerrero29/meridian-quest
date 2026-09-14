@@ -40,6 +40,12 @@ async function shotDoc(p,id,key,row,lng,shell,mode){
     await p.evaluate(()=>{const r=document.getElementById('reader'),ps=document.getElementById('paperSheet'),sc=document.getElementById('paperScroll');
       r.style.position='absolute';r.style.height='auto';r.style.maxHeight='none';r.style.minHeight='0';r.style.overflow='visible';
       ps.style.maxHeight='none';sc.style.maxHeight='none';sc.style.overflow='visible';sc.style.flex='none';});
+    /* the fold, MEASURED on this document before the walls came down (30 px of head + the scroll box), drawn INTO
+       the picture so the PNG carries it wherever it travels (Lupe, run 9, A3) */
+    await p.evaluate((v)=>{const ps=document.getElementById('paperSheet');ps.style.position='relative';
+      const f=document.createElement('div');f.style.cssText='position:absolute;left:0;right:0;top:'+(30+v)+'px;height:0;border-top:2px dashed #A97FFF;pointer-events:none;z-index:9';
+      const b=document.createElement('b');b.textContent='fold · '+v+' px visible';b.style.cssText='position:absolute;right:0;bottom:0;background:#A97FFF;color:#160F26;font:600 10px ui-monospace,monospace;padding:3px 6px';
+      f.appendChild(b);ps.appendChild(f);},fold.visible);
     await p.waitForTimeout(300);
     await (await p.$('#paperSheet')).screenshot({path:path.join(OUT,file)});
     await p.reload();await p.waitForTimeout(1500);await begin(p); /* put the walls back for the next picture */
