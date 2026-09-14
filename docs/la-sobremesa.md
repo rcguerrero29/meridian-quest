@@ -580,6 +580,8 @@ save prefixes is not the answer.
 
 ## 9 · The decisions the owner owes
 
+*Answered 2026-09-14 (late), all fifteen — see §12. The table stays as the record of what was asked.*
+
 *Consolidated by Chuy from all seven returns. **Nothing below has been answered.** The order is the
 order in which an unanswered one blocks work. Where an agent recommended something, the
 recommendation is marked ✅ — it is a recommendation, not a decision.*
@@ -683,3 +685,165 @@ skipped it.*
 *Filed 2026-09-14 by Chuy. The sourced evidence is `docs/research/2026-09-13-healthy-eating-game.md`;
 the transferable rules are `docs/GENRE-RULES.md` R10 (extended), R15, R16, R17. The owner's own words
 are at `docs/ASKS.md:43` and the 2026-09-11 row above it.*
+
+---
+
+## 12 · The owner's second pass — 2026-09-14, late — and the questions it leaves
+
+*His words are verbatim in `docs/ASKS.md` (the thirty-two rows of 2026-09-14, late). This section is
+the session reading them into the plan. Nothing here is built; he said "again, don't build, just
+plan" and "mostly document or ask follow-up questions". Where his answer overrules a crew
+recommendation above, the overruling is written down as one, not averaged.*
+
+### 12.1 · The fifteen, answered
+
+| # | His answer | What it settles | What it changes above |
+|---|---|---|---|
+| 1 | *"mostly for AJ but I want to have access to the household level to share"* | AJ's game, public; **a household level he and AJ both hold** | §3's fifth door stops being "yours, empty" — it is *the household*, shared. See 12.3a |
+| 2 | *"the flavor lol — but ask AJ too"* | His nicest part of cooking is **the flavour**; AJ's is still owed | A11's row for him is *tasting*; the AJ script asks her (`docs/for-aj/LA-SOBREMESA.md`) |
+| 3 | *"a meal plan would be ok"* | The plan is allowed | `docs/ARCH-LOG.md` A3 gets a scope note — *the game's demands on him* are banned, *his own intentions about his own week* are not; **but see #8 and 12.3b: the week strip is gone, the plan is a board of shifts** |
+| 4 | *"no ending"* | `ENDLESS` | Blocker B (an endless world may not have a second kitchen) is now on the critical path, sitting 2 |
+| 5 | *"mix, lean Mexican to start… while using initial recipes we must research and put together new ones 1 for 1, with a note to quickly mix in"* | First kitchen Mexican; **every initial recipe is paired one-for-one with a researched recipe from another cuisine**, each carrying a "mix in" note | §2's "three dishes a week" become pairs; the research file gains a recipe ledger with two columns |
+| 6 | *"it can be, but customizable for future templates — Mexicans can cook any cuisine… fusions… simple, available, popular dishes"* | The Hispanic-owned rule is **Meridian's**, and a template scopes its own; fusion is welcome; **simple, available, popular** is the dish rule | A scope line for `docs/OWNER.md` is proposed in 12.4 (his file; nobody edits it for him). The cast in §3 stands |
+| 7 | *"we can grade — any ideas for good intentions, with a toggle to turn off in settings"* | Grading is allowed, **with a toggle** | Three shapes in 12.3h; he picks; the toggle is a small engine seam |
+| 8 | *"these could just be different kitchens in restaurants"* | He read the question as *which kitchen*, and answered: **restaurants' kitchens** | This overrules §2's "home kitchens, not shops" and joins #12.3b: the shifts are at restaurants, the pantry is at home. The comida/cena question is answered by his other line: **US meals** (breakfast, lunch, dinner) and "a good schedule and habits" |
+| 9 | *"sure, to send to each other"* | The kitchen travels on the Trolley Pass, **and two people share one** | G1 (pack state on the pass) is confirmed worth building — and "share" is bigger than "carry": see 12.3a's open question |
+| 10 | *"not following — probably vessels"* | Vessels | In one line: a plate drawn as bowls and a stack, never as a pie chart of proportions. Plates 3–4 on the review page are this. Settled |
+| 11 | *"seasons would be fun — research San Diego trends"* | Seasons change **what is available**, not only colour | `docs/OWNER.md`'s "a season changes colour, never design" needs the same scope note as #6 (a pack may declare availability by season). A research task: San Diego produce by month — proxy-limited, `[WEB]` extracts only |
+| 12 | *"night looks better, but can we please print recipes"* | **Night paper**, and **print** | 12.3d: a print stylesheet on the reader is an engine RULE any pack gets |
+| 13 | *"could be fun if they were huge forms to search and grab"* | The pantry is a room **and** a big searchable form | 12.3a: each drawer opens a document with a search field and rows you grab |
+| 14 | *"wait for AJ"* | AJ's half waits | The script is ready: `docs/for-aj/LA-SOBREMESA.md` |
+| 15 | *"more comforting names, English is fine"* | Names owed | 12.3i, twelve of them; he and AJ pick |
+
+**And the three lettered ones.** (a) *"no diplomat etc — can we reuse for cooking and healthy habits?"* — **yes**, once careers are a pack seam (blocker A, sitting 1): the three doors become Nacho's three reasons people cook, *el que planea · la que improvisa · el que alimenta*, a greeting and not a mode. (b) *"def an endless world kitchen style"* — `ENDLESS`, as #4. (c) *"was there a question for me there?"* — **no.** C was a cost note: the shared suite fails a small pack for being small (`docs/GAUGE.md`); we carry that as a sitting, not as a question.
+
+### 12.2 · AJ's reference game, read from the recording
+
+The owner sent a 1:54 screen recording of the game AJ enjoys (frames read by the session, 2026-09-14;
+the game is not named here). What it is, as seen:
+
+- **A merge board.** A grid of small items; drag two of the same onto each other and they become the
+  next thing in a chain. Chains are food and kitchen: *dough → pizza → slice → whole pie*; *coal →
+  brick → oven*; *planks → table → counter*; and currency chains (*coin, energy, diamond*). **A
+  Collection** screen is the encyclopedia of every chain with the unmade tiers greyed out — this is
+  the part he means by *"builds on previous similar ingredients"*.
+- **Restaurants** as chapters — a Korean restaurant, a Japanese one, a beach one — each with a
+  dish-set counter (*"Korean Street Food Set 5/6 — complete 3 recipes to finish the dish"*).
+- **A recipe book** you open from the counter: **illustrated recipe cards** — a photo of two
+  characters with the dish, sticker notes in the margin, a step-by-step page (*"cut the pineapple in
+  half, scoop out the flesh…"*), a page per dish, tabs along the bottom. This is the surface AJ is
+  looking at when she *"looks up the recipe of something that looks good"*.
+- **Characters who talk** in a chat strip (a bear, a boy, the cook) while a dish is made.
+- **What we will not carry**, in his words: *"this is different because it is not to make more
+  money"* — three currencies, energy that refills on a timer, day-long countdowns on the sidebar.
+
+What that means for us, seam by seam: the **recipe book is the reader** (plates 3–4 already are it);
+the **Collection is a document per chain** (`kv` rows with the unmade tiers blank — the reader's
+`blank` block exists for exactly this); the **restaurants are the shifts** (12.3b); the **characters
+are the cast** in §3. **The merge board is the one thing this engine does not have** — a grid of
+draggable items with a chain table is a new surface, not a document; it is a CHOICE and it is the
+biggest single build in this whole plan. It is also the part AJ plays. **Do not decide it without
+her** (the script asks). The second game he named, *Cookingdom*, is *"the next video"* and has not
+arrived; nothing is written about it until it does.
+
+### 12.3 · The new requests, each with a sketch and its open questions
+
+**a · The home level, and the pantry as a rebuildable object.** *"I want to rebuild a pantry…
+generally speaking like three drawers, etc, and have those available to recreate said pantry… a home
+level… it uses our ingredients in the game or points out which we have and missing in the
+instructions."* So: a **household world** (the fifth door, shared by him and AJ) whose one room holds
+**the pantry — three drawers, a shelf, a fridge — built to match his** (he will send photos). Each
+drawer is a place you stand in front of (Pili's #13 ✅) **and** opens a document that is a big form:
+a search field, rows you grab (his #13). The pantry's list is the source for three things: **(i) on a
+recipe card, every ingredient line is marked *have* or *missing*** — a set difference over two small
+arrays, drawn as the presence or absence of a line, never a tick or a cross (Pili, §4); **(ii) "use
+our food"** — the recipes on offer are ranked by how many of their lines are in the house; **(iii)
+the shopping list is the missing lines**, one Copy button. **This overrules Tavo's "cut the pantry
+ledger" (§2) at the owner's word.** R17 (a maintained model decays) is not repealed — it is what the
+design has to survive: the pantry is **rebuilt from a photo** when it drifts (the drawers are
+authored from his pictures, so re-authoring is the same act), items are logged **by exception**
+(*"lo que llegó / lo que se acabó"*), and there is **no expiry red, ever**. Open: *(q1)* "share" — two
+people, two phones, one pantry. The pass carries a snapshot one way; it does not sync. Is a snapshot
+he sends her (and she sends back) enough, or does this want a real shared store (which this engine
+does not have and `docs/OWNER.md` has kept out)? *(q2)* the photos: three drawers, the shelf, the
+fridge, the freezer — send what exists.
+
+**b · Shifts, not a week.** *"I don't really like this Monday to Saturday plan but it could be like
+picking up shifts as a cooking contractor, but there is no time limit."* So the week strip (plate 5)
+is retired. In its place: **a shifts board** — each restaurant kitchen (his #8) posts shifts, a shift
+is *one dish at one kitchen*, you pick it up, and it waits for you with **no time limit**. Picking a
+shift *is* the plan (the implementation intention survives: *"Thursday, after work"* is written on
+the shift when you take it, and it is still his own intention, so A3 holds as scoped in #3). The
+board shows shifts taken and shifts open; **it never shows a shift missed** — a shift you did not
+cook is still open, which is R10's and R15's rule in a new shape. Cooking a shift uses the pantry
+(12.3a) and the pairs of #5. Open: *(q3)* does a shift pay anything at all — hearts from the cook,
+a stamp on the board, or nothing but the dish?
+
+**c · Product images.** *"Can we use a scraper for images of products?"* Three answers. **Licensed
+sources: yes.** Open Food Facts publishes product photos under CC BY-SA and its data under ODbL
+(`[TRAINING]` — the proxy blocked the licence page; confirm before shipping), so a build-time script
+may pull the images for the products in his pantry, with attribution; USDA FoodData Central has
+numbers, no pictures. **Scraping retailers: no** — their terms forbid it and the photographs are
+theirs. **Our own: always** — the pack's convention is drawn tiles, and his own photos of his own
+pantry are his to use. Whatever the source, **every image ships inside the pack** and the game never
+fetches one at play time (R10; the CSP refuses it anyway). Cost: an attribution page if the pack is
+public; a build step, not a runtime one.
+
+**d · Print recipes.** A `@media print` sheet on the reader that prints the paper alone, in cream
+whatever the theme, plus a **Print** button beside Copy and Download. Engine RULE, one sitting, every
+pack gets it; red first (a print stylesheet exists and hides the world).
+
+**e · AJ's allergies.** *"AJ has allergies, so if they are raw veggies we want to account for that."*
+A **household avoid list** in the pack (*who · what · raw or cooked*); an ingredient line carries
+`raw:true` where it is raw, and a card whose lines match the list prints one plain sentence — *"AJ:
+cook the tomato first"* or *"not this one for AJ"*. **Never a medical claim, never a verdict on a
+dish**; the list is hers to write. *(q4, for AJ)* the exact list, and whether cooked is fine.
+
+**f · Contrast.** *"The kitchen colors are not enough of a contrast to be clear."* Plate 7's four
+grounds were chosen for restraint and read too close. Pili's own rule applies: the four grounds must
+be four **values**, luma ≥ 40 apart, and the accent against its ground ≥ 90 (her band rule from
+A14). Redraw plate 7 with the values measured, not felt. No engine.
+
+**g · Animations.** *"Then we will need some animations."* What moves, in order of what it buys:
+steam off a pot, a stir, a drawer opening, the merge pop if the board is built. R11 holds — **nothing
+runs a clock**; every one is an idle loop. Toño's register says a pot mid-steep is *state, not a
+tile*; a prop animation is a gap (`docs/TAGS.md` Gaps) that this pack would be the first to need.
+
+**h · Grading with good intentions, and a toggle.** Three shapes, he picks: **(1) hearts from the
+cooks** — Meridian's own idiom, a person's opinion of your dish, never a number; **(2) the kitchen's
+marks** — waste avoided, a shift cooked as planned, the pantry found true (R16: the logistics, never
+the eater); **(3) a good-intentions count** — *Van 42 comidas*, up only. All three can be one
+document. The toggle: a settings row *Show grades*, on by default, off with one tap — the engine's
+Settings drawer has no pack-declared row today, so this is a small seam of `HUDFACT`'s shape.
+
+**i · Names**, English, for AJ's cooking-and-pantry game — twelve, with the feeling each one carries:
+*Second Helping* (the meal after the meal) · *The Long Table* (everyone still sitting) · *Low Heat*
+(nothing hurries) · *Warm Plate* (kept for you) · *Slow Sunday* · *Little Pantry* · *The Good Pot*
+(the one you always reach for) · *Soft Boil* · *Kitchen Lights* (someone is still up cooking) ·
+*Leftovers* (better the next day — *el recalentado*) · *Simmer* · *Home Plate*. And *Sobremesa*
+stays on the list. He and AJ pick; nobody here does.
+
+### 12.4 · Follow-up questions, in the order they block
+
+1. **(q1) One pantry, two phones:** is a snapshot sent on the pass (both directions, by hand) enough,
+   or do you want it to sync by itself? The second is a new kind of thing for this engine.
+2. **(q2) Send the pantry photos** — each drawer open, the shelf, the fridge, the freezer.
+3. **(q3) What does a shift pay:** hearts from the cook, a stamp on the board, or only the dish?
+4. **(q5) Grading:** hearts, the kitchen's marks, a good-intentions count — one, or all three behind
+   the toggle?
+5. **(q6) Two scope lines for `docs/OWNER.md`, yours to add or refuse:** *"every business is
+   Hispanic-owned" is Meridian's rule; a template scopes its own* — and — *a season changes colour,
+   never design; a pack may also declare what a season makes available.*
+6. **(q7) The merge board:** it is AJ's favourite part and the biggest build. Before or after the
+   pantry and the recipe book?
+7. **(q8) The second video** (Cookingdom) — send it when you can; nothing is written until it is seen.
+8. **For AJ**, in her own script: `docs/for-aj/LA-SOBREMESA.md`.
+
+### 12.5 · What this pass overrules, said plainly
+
+The crew recommended home kitchens; **the owner wants restaurants' kitchens for the shifts and one
+home level for the pantry.** The crew recommended no pantry ledger; **the owner wants a pantry, with
+have/missing on every recipe.** The crew recommended no grading; **the owner wants grading with a
+toggle.** The crew's week strip; **the owner wants shifts with no time limit.** Each of these is his
+call and each is recorded as his; the rules the crew wrote (R10, R11, R15–R17) still say what the
+build has to survive, and 12.3 says how.

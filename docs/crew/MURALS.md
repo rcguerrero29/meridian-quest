@@ -397,6 +397,16 @@ in the rewrite, and Rigo had two bays.
    nine** — nine repaints to even out a wall is nine people's hands erased. The distribution is the
    lever.
 4. **A panel's signature should be its top band** — the one strip nothing crops.
+5. **Every run paints — the owner, 2026-09-14: *"ensure any crew mode creates a mural entry."*** Iteration 7
+   (the healthy-eating design) is the first run since the wall opened with nothing on it; its brief was
+   written by hand and dropped the section. The suite refuses that from iteration 8 on.
+6. **The hand, not the subject — the owner, the same day: *"agents need to be more creative."*** Chava
+   named three unlabelled panels from what they were about and none from how they were painted; one
+   palette, one stroke, one lettering, one ground across thirty-two panels. The material is the lever:
+   a painter's panel is *made of* something the others' are not, in a palette that is not `MURPAL`'s.
+7. **Chava's eight** — the cut feet, the name nobody can follow, the sixteen swipes, the gutter that says
+   the wrong thing, the blank four-fifths, text over text, the sideways place lost on reopen, the
+   isometric wall — are queue row 8¾ in `docs/NEXT-SESSION.md`.
 
 
 ---

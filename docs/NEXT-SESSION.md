@@ -5,7 +5,36 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-13, end of the crew-mode sitting)
 
-### ⇢ 2026-09-14 — START HERE. Everything below this block is history.
+### ⇢ 2026-09-14, late — START HERE. Everything below this block is history.
+
+**`main` is at `mq-v159` / `ch-v104`: [PR #172](https://github.com/rcguerrero29/meridian-quest/pull/172)
+merged the whole of 2026-09-13/14 at the owner's word ("merge please"). The branch
+`claude/happy-ritchie-84qbbc` was restarted from that `main`; this pass on it is documents only.**
+
+**The owner's morning message, in `docs/ASKS.md` (thirty-two rows, "2026-09-14 (late)"):** he sees
+the skulls; the mural looks better but *agents need to be more creative* and *any crew mode creates
+a mural entry* (rules written: crew-fix skill, `docs/CREW-MODE.md` row 6, `docs/crew/MURALS.md` 5–7,
+and a guard in `test/town.smoke.js` from iteration 8 on); he answered **all fifteen** food-game
+decisions and added six requests — a home level with **his pantry rebuilt as an object (three
+drawers, from photos he will send)** that marks *have/missing* on every recipe; **shifts at
+restaurants' kitchens instead of the week, no time limit**; product images (answered: licensed or our
+own, never scraped, never fetched at play); print recipes; AJ's raw-vegetable allergies; more
+contrast in the kitchens, then animations. **All of it is `docs/la-sobremesa.md` §12**, his answers
+in 12.1, the new requests with sketches in 12.3, the questions back to him in 12.4, and what his
+answers overrule in 12.5. He sent a recording of the merge game AJ plays; it is read frame by frame in
+12.2. The brief for AJ is `docs/for-aj/LA-SOBREMESA.md`. Lessons of the sitting are
+`docs/POSTMORTEM.md` §13p–13t.
+
+**Nothing on the second world is built, and nothing should be until:** AJ answers her eight (1, 2 and
+6 gate the merge board and the pantry); the second video arrives; the pantry photos arrive; he picks a
+grading shape and answers one-pantry-two-phones. **Then** a crew run turns §12 into a build order —
+and every agent on it paints.
+
+**The queue below is unchanged:** row 8 (the rail), 8½, 8¾ (the wall's feet), Pili's socket redraw and
+a cold read of the skulls in the flat cameras, Chava's deferred panel and edit (flight-notes row 46).
+
+---
+
 
 **`main` is at `mq-v158` / `ch-v101`. Branch `claude/happy-ritchie-84qbbc` carries the whole of
 2026-09-13 and takes the town to `ch-v102`; it is pushed, all seven suites and `test/leaves.js` were

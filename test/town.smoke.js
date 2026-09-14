@@ -1225,6 +1225,20 @@ const { chromium } = require('playwright-core');
      Found by Yaz, 2026-09-13: the town's GAMEV is "ch-vN · engine mq-vN", and the only check on it
      asked for the SHAPE (/engine mq-v/). Bump Meridian and the town keeps claiming the old engine
      with every suite green — docs/REGRESSION.md's #3 shape, inverted. Read the value. */
+  /* ---- EVERY CREW RUN PAINTS. The owner, 2026-09-14: "ensure any crew mode creates a mural entry."
+     Iteration 7 (the healthy-eating design run) returned seven designers and no panel, because its
+     brief was written by hand and dropped the mural section. The record of a run is its header in
+     docs/crew/FLIGHT-NOTES.md; the paint is a panel on the wall carrying that iteration's number. So:
+     for every `# ITERATION N` header numbered 8 or later, at least one panel in MURALS has `iter: N`.
+     Iterations 7 and 7½ are recorded misses and are not asked; the rule starts where the owner said it. */
+  {
+    const notes = fs.readFileSync(path.resolve(__dirname, '..', 'docs', 'crew', 'FLIGHT-NOTES.md'), 'utf8');
+    const headed = [...notes.matchAll(/^# ITERATION (\d+)\b/gm)].map(m => parseInt(m[1], 10)).filter(n => n >= 8);
+    const painted = await page.evaluate(() => (typeof MURALS === 'undefined' || !MURALS) ? [] : MURALS.map(m => m.iter | 0));
+    headed.forEach(n => { if (!painted.includes(n))
+      fails.push('iteration ' + n + ' is in docs/crew/FLIGHT-NOTES.md and nobody painted: no panel on the wall carries iter ' + n +
+        ' — the owner asked that every crew run creates a mural entry (2026-09-14); copy the mural section of the crew-fix skill into every brief, verbatim'); });
+  }
   {
     const mer = /GAMEV="(mq-v\d+)"/.exec(fs.readFileSync(path.resolve(__dirname, '..', 'content', 'meridian', 'config.js'), 'utf8'));
     const town = /GAMEV="ch-v\d+ · engine (mq-v\d+)"/.exec(fs.readFileSync(path.resolve(__dirname, '..', 'changarrito', 'content', 'config.js'), 'utf8'));

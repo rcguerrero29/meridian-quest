@@ -202,3 +202,35 @@ that is a decision file waiting to be written.
 | 2026-09-14 | coming up on a limit, how much is left? | answered in the session: everything pushed, one report unfiled (filed the same minute) |
 | 2026-09-14 | you may want to document or wrap things up as the limit is here | this handoff; the skull fix committed with its record |
 | 2026-09-14 | merge please | PR opened from `claude/happy-ritchie-84qbbc` and merged by the session, at his word |
+| 2026-09-14 (late) | i see skulls | logged; the front-camera fix is visible to him |
+| 2026-09-14 (late) | the mural looks better but agents need to be more creative please and ensure any crew mode creates a mural entry | rule + creativity ask → `.claude/skills/crew-fix/SKILL.md`, `docs/CREW-MODE.md`, `docs/crew/MURALS.md` |
+| 2026-09-14 (late) | i need to read it but so far looks good for mocks so see my feedback below. any lessons learned? | lessons → `docs/POSTMORTEM.md` §13 and the reply |
+| 2026-09-14 (late) | dope so dont build but lets make t so we use our building engine but we will be using the mocks and even more detail, ill provide sample screenshots but i also want to rebuild a pantry. doesnt have to be perfect but generally speaking like three  drawers, etc and have those available to recreate said pantry. we can use some images from scrapers if those exist for food products. again dont build just plan please | plan only → `docs/la-sobremesa.md` §12 (the pantry as a rebuildable object; product images) |
+| 2026-09-14 (late) | the kitchen colors are not enough of a contrast to be clear, just some feedback. then we will need some animations | → §12, for Pili (mock 7's contrast) and the animation note |
+| 2026-09-14 (late) | how will we then make sure in terms of the plan to use our food and keep track of our pantry? i know the goal is  good eating habits but then maybe we need a different area for that but related so it uses our ingredients in the game or points oout which we have and missing in the instructions please. i know this changes things but this is another request. this could be like a home level or something | → §12, the home level: pantry tracking, have/missing marks on a recipe's instructions |
+| 2026-09-14 (late) | i dont really like this monday to saturday plan but it could be like picking up shifts as a cooking contractor but there is no time limit | → §12, shifts instead of the week strip; no time limit |
+| 2026-09-14 (late) | can we use a scraper for images of products? | answered in the reply and §12: licensed sources yes, scraping retailers no; nothing off-origin at play time |
+| 2026-09-14 (late) | can put the info about the game together in an easy way for AJ to go through or have a script ready to ask her whenever she has time | → `docs/for-aj/LA-SOBREMESA.md`, a plain-words brief with the questions in order |
+| 2026-09-14 (late) | also aj has allergies so if they are raw veggies we want to account for that | → §12, a household avoid list, no medical claims; the exact list is a question for AJ |
+| 2026-09-14 (late) | while we want to organize based on US meals, we jsut want a good schedule and habits | → §12, decision 8 read as US meal structure |
+| 2026-09-14 (late) | a - so no diplomat, etc - can we reuse for cooking and healthy habits? | answered: yes once careers are a pack seam (blocker A); the three doors become cooking roles |
+| 2026-09-14 (late) | b. - def an endless world kitchen style | answered: ENDLESS; blocker B must be fixed before a second kitchen |
+| 2026-09-14 (late) | c - ok was there a question for me there? | answered: no — C is a cost note about the suite, not a question |
+| 2026-09-14 (late) | decisions i owe — this is mostly for AJ but i want to have access to the household level to share if we separate it like this | decision 1 → §12 |
+| 2026-09-14 (late) | 2. the flavor lllol but you'll have to ask AJ too | decision 2 → §12 and the AJ script |
+| 2026-09-14 (late) | 3. i think a meal plan would beok yeah | decision 3 → §12; A3 gets a scope note |
+| 2026-09-14 (late) | 4. no ending | decision 4 → §12 |
+| 2026-09-14 (late) | 5. mix please but we can lean on mexican to start -  during testing, but while using initial recipes, we must research and put together new ones 1 for 1 - with a note to quickly mix in. | decision 5 → §12, the 1-for-1 recipe rule |
+| 2026-09-14 (late) | 6. it can be, but this should be customizeable for future templates - please note - but mexicans can cook any cuisine silly... so we do have fusions - you should be able to research some of these but generally speaking we can stick to simple but available and popular dishes | decision 6 → §12 and a scope note for `docs/OWNER.md`'s rule |
+| 2026-09-14 (late) | 7. i guess we can grade- any ideas how we can do this for good intentions but have a toggle to turn off in settings please | decision 7 → §12, three shapes proposed, a toggle |
+| 2026-09-14 (late) | 8. these could just be different kitchens in restaurants | decision 8 → §12; the shifts are restaurants' kitchens |
+| 2026-09-14 (late) | 9. well sure to send to each other | decision 9 → §12; the pass carries the kitchen, and two people share one |
+| 2026-09-14 (late) | 10. not following - probably vessels | decision 10 → vessels; explained in one line in §12 |
+| 2026-09-14 (late) | 11. seasons would be fun - especially if you can research san diego trends | decision 11 → §12; a research task, proxy-limited |
+| 2026-09-14 (late) | 12. night looks better ,but can we please print recipes | decision 12 → night paper; print → §12, a small engine rule |
+| 2026-09-14 (late) | 13. could be fun if they were huge forms to search and grab lol | decision 13 → §12; the pantry is a room and a big form |
+| 2026-09-14 (late) | 14. wait for AJ | decision 14 → the AJ script |
+| 2026-09-14 (late) | 15. give me more comforting names for aj and a cooking and pantry game - in english is fine | decision 15 → names in §12 and the reply |
+| 2026-09-14 (late) | again mostly document or ask followup questions please. | this pass: documents and questions, no build |
+| 2026-09-14 (late) | [video: ScreenRecording_09-13-2026_23-53-37_1.mov] Aj enjoys this game where you unite multiple foods to create another larger meal. its not always super intuitive but usually builds on previous similar ingredients. again, this is different because it is not to make more money, this is to have a journal, chill, play game, look up the recipe of something tha tlooks good, then or in a separate mode, ability to manage and cook or put together a mealplan from our pantry so a pantry builder and cooking assistant? | → §12, AJ's reference game (frames read from the recording) and the two-mode shape: journal + play, and the pantry builder + cooking assistant |
+| 2026-09-14 (late) | you could make a game similar or identical to this as AJ enjoys but also would like the cookingdom game which is the next video | → §12; the second video has not arrived yet — asked for |

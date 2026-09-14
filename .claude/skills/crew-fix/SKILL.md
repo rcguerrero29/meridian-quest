@@ -288,6 +288,20 @@ keep adding to the mural in the same amount of effort, if possible."*
 `changarrito/content/murals.js` — you propose it, the calling session paints it, exactly like a
 persona edit. It is not optional and it is not a summary of your report.
 
+> **2026-09-14, the owner, after the healthy-eating run painted nothing:** *"ensure any crew mode
+> creates a mural entry"* and *"agents need to be more creative please."* That run's brief was
+> written by hand for a workflow and dropped this section, so seven designers returned and the wall
+> got nothing. **Two rules from it.** (1) **A brief is never written by hand.** Copy this section into
+> the brief verbatim, for every agent, every run; `test/town.smoke.js` fails the build when an
+> iteration numbered 8 or later in `docs/crew/FLIGHT-NOTES.md` has no panel with its number on the
+> wall. (2) **Your hand is a MATERIAL, not a style.** Chava read the whole wall the same day and could
+> name every painter from their *subject* and none from their *hand*: the palette, the stroke, the
+> monospace lettering and the cream ground are the same on all thirty-two panels — one draughtsman's
+> notebook, not eighteen people. So choose what your panel is *made of* — chalk on slate, newsprint,
+> a wet photograph, a punched card, a napkin, a signwriter's enamel, a customs stamp, a rolling-road
+> printout — and paint it in **a palette of your own**. `MURPAL` is the wall's, for the ground and
+> the dado; it is not yours. A panel that could have been painted by anyone on the crew is not yours.
+
 ### What a panel is
 
 | It is | It is not |
