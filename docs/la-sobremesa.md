@@ -484,10 +484,9 @@ widower's Italian, same shape, smaller stakes. **Anything quoting the Guías Ali
 Plato del Bien Comer or NOM-043: these were written in Spanish first — quote the official Spanish and
 translate *into* English.** And the jokes, in both directions.
 
-**Live drift found in the shipped repo while doing this, and not fixed under this run's rules:**
-`changarrito/content/strings.js` has `locs.hq` = `"The stall"` and `arrive.hq` = `"The stall."`
-**inside the ES block** — two untranslated English strings in the town's Spanish. Suggested:
-`"El changarro"`.
+**Live drift found in the shipped repo while doing this** — `locs.hq` and `arrive.hq` were English
+inside the town's ES block — **found 2026-09-12, fixed the same sitting (`"El changarro"`), re-verified
+2026-09-14 by Paty at `changarrito/content/strings.js` (grep `hq:"El changarro`).**
 
 ---
 

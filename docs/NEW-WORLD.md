@@ -63,7 +63,7 @@ exists to prevent, and it is recorded rather than quietly corrected: a doc that 
 do not have has now cost this project time three times.
 
 **❗ What IS still true, and it is a different fault.** The *engine* now handles endless-with-districts;
-the **shared suite still forbids shipping it.** `test/engine.smoke.js:741` fails any pack that
+the **shared suite still forbids shipping it.** `test/engine.smoke.js:794` (`if (endless && chapters)`) fails any pack that
 declares `ENDLESS` and `CHAPTERS` together — *"a world that does not end cannot also have a last
 day"* — which was right before the split and is wrong after it, because `CHAPTERS` does double duty:
 it is both **the endings** and **the districts**. A world that never ends may still have a second
@@ -136,7 +136,7 @@ one, it needs an inventory this engine does not have), **unrushable duration wit
 Three rules that travel with this, and each is cheap to honour and expensive to retrofit:
 
 - **`[CODE]` A pack that declares nothing inherits no stakes.** `STK()` defaults to `{mode:"none"}`
-  (`engine/engine.js:330`) and `stakesCfg()` reads stakes **per chapter** (`:333`), so *"a calm world
+  (`engine/engine.js:359`) and `stakesCfg()` reads stakes **per chapter** (`:362`), so *"a calm world
   with exactly one scored thing in one district"* is already a seam. **The calm version is the cheap
   version here, which is unusual — do not spend engine work buying it.**
 - **Never build a day budget.** `[WEB]` It is how a timer comes back wearing cozy clothes: it never
@@ -576,8 +576,8 @@ somebody looked (GitHub #154).
 ### 9.3 · The reader is an application surface, not a sheet of paper
 
 §1 gives `DOCS READS DOCUI` one line — *"the paper the world produces (optional)"*. That is true of
-Meridian and badly incomplete. The reader renders **twelve** block kinds
-(`h p note red blank kv t q btn sel form docs`, `engine.js:2919-2979`), and four of them are live:
+Meridian and badly incomplete. The reader renders **thirteen** block kinds
+(`h p note red blank kv t q btn sel form docs art`, `engine.js`, grep `function docRender`; `art` is a real canvas the pack draws on), and four of them are live:
 
 | block | what it is | engine |
 |---|---|---|
