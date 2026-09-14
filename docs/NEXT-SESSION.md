@@ -8,8 +8,9 @@ current: each session rewrites the queue before signing off.)*
 ### ⇢ 2026-09-14 — START HERE. Everything below this block is history.
 
 **`main` is at `mq-v158` / `ch-v101`. Branch `claude/happy-ritchie-84qbbc` carries the whole of
-2026-09-13 and takes the town to `ch-v102`; it is pushed, all seven suites and `test/leaves.js` are
-green on it, and no PR has been opened — the owner asked for the work, not for the PR yet.** Nothing
+2026-09-13 and takes the town to `ch-v102`; it is pushed, all seven suites and `test/leaves.js` were
+green on it **on one run each — and see "Found, not fixed" below: `test/smoke.js` is red about one run
+in twenty-five on a real bug older than the branch** — and no PR has been opened — the owner asked for the work, not for the PR yet.** Nothing
 touched `engine/`, so `mq-v158` and `sw.js` did not move (`test/bump.js` confirms).
 
 ### What shipped on that branch, in the order the owner will meet it
@@ -152,6 +153,7 @@ two joined?**
 | 5 | **#155/#156 — the `ENDLESS` split** and its landmine: an endless pack with 2+ districts is silently locked in district one | one sitting each |
 | 6 | **#161 — the comfort pass at fullscreen** | the one row in `QA-PASS.md` nobody has ever run |
 | 7 | **The skulls, fifth report — not a size** (Pili, `docs/meetings/2026-09-13-la-cuadrilla-disena.md`): the sweet `#F6F2E8` and the ledge `#F7F2E2` differ by 0.4 of 255, so skull and shelf are one pale mass, and eight identical marks in a row read as cornice. **The one change: redraw `drawCalaverita` with sockets a third of the face each, dark** (ours are 2 × 2 in 8 × 8), fold the halo into the drawing; five call sites inherit it. **Red first:** a guard that counts dark socket runs on the scanline at 35 % of the projected sprite's height (≥ 2), red on `main` today. Then a cold read. Chema's measurement was still running when this was written | half a day |
+| 8½ | **Two code findings Chuy could only write down** (his pen is docs): the comment over `murBody` in `changarrito/content/murals.js` still says "five pixels wide" above a body whose width now follows its height; and `engine/engine.js` restores `"."` at one glyph-restore site and `w.rows[y][x]` in `removeChill` — two answers to "what was under a person" | minutes; the second is an engine change and bumps |
 | 8 | **The one-sided rail — it is the `hq` climbing flight, not the loft** (Cuca): the stair mass walls the north side and row 15 has nothing. The class is *a run whose two long sides are treated differently*, with three homes (the map; the 3D build's chained ternary that gives a rail tile with wells on two sides one panel; front-camera fence posts tested in X only). **Guard G-RAIL-1 is red on unchanged code in both packs** — write it first. The fix: `◺` on `hq` row 15 x11–14 **and wall x15–18**, or four tiles are orphaned. Don Güero owns row 15 losing four tiles in both games | one sitting |
 
 ## Three things about working with this owner

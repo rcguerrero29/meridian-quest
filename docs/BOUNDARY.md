@@ -24,6 +24,12 @@ file had `Read`/`Grep`/`Glob` and no shell. A date here therefore means *"a regi
 planted at on that day"*. **never** means no document in this repository records a plant at that
 guard, and that is the most useful word on the page.
 
+**And a date is worth what re-runs it** *(added 2026-09-13 by Zeni, from `docs/POSTMORTEM.md` §13h)*.
+A plant proves a guard fired **once**, against **one draft**, on **one afternoon**; the only thing that
+keeps it true is a step that runs on every push. So a date here is half an answer: read it with **what
+re-runs it** beside it, or with the word **unrepeated**. The freshest date on this page — row 11's
+2026-09-13 — is the one that taught us this, and its six plants are re-run by nothing.
+
 ---
 
 ## The ledger, most costly first
@@ -219,7 +225,11 @@ workflow declares `permissions:`; no `write` scope outside the deploy's own `pag
 `pages.yml`, in any syntax (`write-all`, a block at any indent, `{flow}`); no `pull_request_target`,
 `issue_comment`, `issues`, `label` or `discussion_comment` under `on:`, quoted or not. Run inside
 `test/town.smoke.js` on every push and PR. **Last planted against: 2026-09-13**, by Melo: `write-all`,
-a trailing comment and `"on":` all walked past the first draft; the six plants are its self-test. I verified by hand today that `.github/workflows/`
+a trailing comment and `"on":` all walked past the first draft. **The six plants are preserved as
+fixtures** — `node test/leaves.js --selftest`, eighteen cases (grep `--selftest` in `test/leaves.js`)
+— **and nothing invokes them**: `test/town.smoke.js` calls `require('./leaves.js').consistency()` and
+only that (grep `leaves.js').consistency`), and no workflow in `.github/` names `leaves` or
+`selftest` at all. **Re-run by: nothing. See gap G9.** I verified by hand today that `.github/workflows/`
 contains exactly two workflows, both triggered on `push`/`pull_request`/`workflow_dispatch`, and that
 `pages.yml`'s only write scopes are `pages: write` and `id-token: write`, which are the deploy's own.
 **Why this rises as crew mode approaches.** `docs/CITY-AS-MEMORY.md:76-86` makes **a label the lock**
@@ -270,8 +280,16 @@ list (`test/public.js:44`).
 **Guard.** `test/public.js:44-46`. **Last planted against: 2026-09-10** (with the rest of section 1).
 **The part that had no guard until this file was written.** The nineteen personas open with a block
 that is meant to be byte-identical, and until 2026-09-13 nothing read that. `test/town.smoke.js` now
-does — the block must be first in every file, appear exactly once, name exactly one person, be identical
-across all nineteen, and name `docs/POSTMORTEM.md` and `docs/REGRESSION.md`. Its first run against the
+does, and what it reads is worth stating exactly, because two halves of it were bought with a plant the
+same afternoon (grep the strings in `test/town.smoke.js`): the block must be **first** in every file
+(grep `not the shared block — it says "before you answer anything"`) and appear **exactly once** (grep
+`carries the shared block`); the front matter's `name:` must be the filename and the `You are **…**`
+line must carry that name, accents folded (grep `the person it hands the model is somebody else`) —
+**the count of identity lines was the first draft's noun, and one swapped name walked past it**; the
+block must **hash identically** across all nineteen (grep `the shared memory block is not the same in
+every persona`); and it must contain `docs/POSTMORTEM.md`, `docs/REGRESSION.md` and **eight pinned
+spine strings** (grep `no longer carries`), because identity across nineteen files is satisfied
+perfectly by editing nineteen files. Its first run against the
 tree found Rigo's file carrying Toño's whole persona below a second copy of the block. `test/town.smoke.js` (grep `\.claude\/agents\/`) reads `.claude/agents/<name>.md`
 paths out of persona-edit proposals in `docs/crew/FLIGHT-NOTES.md` — that is a different noun. See gap **G5**.
 
@@ -281,6 +299,12 @@ paths out of persona-edit proposals in `docs/crew/FLIGHT-NOTES.md` — that is a
 
 *Plainly, and each with the smallest thing that would become a guard, and what that thing would have
 caught in the past. "Smallest" means smallest — if it needs a sitting, it is not on this list.*
+
+**A gap is struck out by a plant, never by a guard existing** *(added 2026-09-13 by Zeni, from
+`docs/POSTMORTEM.md` §13i)*. Two of the gaps below were struck through on the day they were written, on
+the strength of the guard having been built; **both guards were walked past within the hour** by
+somebody trying to, and both had to be widened. Until something has been made false on purpose and has
+printed a sentence a person would say, the honest mark is ***guard written, not yet planted***.
 
 ### G1 · Nobody reads what a stranger is actually served *(row 1)*
 **Smallest guard.** A scheduled workflow, or one step in `pages.yml` after the deploy, that fetches
@@ -318,7 +342,7 @@ six do — `:399` (PATCH close), `:402` and `:406` (comments), `:408` and `:409`
 It is also the only mechanical half of the token-scope promise: a key minted wider than Issues is
 invisible to us, but a *town* that asks for more than Issues is not.
 
-### G4 · ~~Nothing reads a workflow's `permissions:` block, or its triggers~~ — built the same day, see row 11 *(row 11)*
+### G4 · ~~Nothing reads a workflow's `permissions:` block, or its triggers~~ — guard built **and planted at** the same day, see row 11 *(row 11)*
 **Smallest guard.** A dozen lines of Node over `.github/workflows/*.yml`: every file declares a
 `permissions:` block; no `write` scope outside an allowlist of `{pages, id-token}` in `pages.yml`;
 no `pull_request_target` and no `issue_comment` trigger anywhere.
@@ -327,7 +351,7 @@ at all and an unpinned install (`docs/story/el-changarrito.md:235`, R9b, Medium:
 CI with a write token can push to `main`"*). And it is the row that will matter on the day crew mode
 tempts somebody to automate a label.
 
-### G5 · ~~The shared block in the nineteen personas is guarded by nobody~~ — built the same day, see row 14 *(row 14)*
+### G5 · ~~The shared block in the nineteen personas is guarded by nobody~~ — guard built **and planted at** the same day, see row 14 *(row 14)*
 **Smallest guard.** Read the block between the front-matter and the first `You are **…**` line out of
 every `.claude/agents/*.md` and fail if any two differ byte for byte.
 **What it would have caught.** This morning: the block named neither `docs/POSTMORTEM.md` (0 of 19)
@@ -361,6 +385,21 @@ sentences it printed into `docs/REGRESSION.md` §3 and the date into this ledger
 **What it would have caught.** Unknown, and that is the point —
 `docs/REGRESSION.md:92-98`: *a green guard is not evidence; the only thing that distinguishes a
 working guard from a decorative one is a planted violation.* Every entry in that register says so.
+
+### G9 · The plants are kept as fixtures and no runner invokes them *(row 11)*
+**Smallest guard.** One line in `.github/workflows/ci.yml` beside the town step:
+`node test/leaves.js --selftest` — and `node test/closes.js --selftest`, which is invoked by nothing
+either (grep `--selftest` in `test/closes.js`).
+**What it would have caught.** Reverting `test/leaves.js`'s permissions pattern to the first draft's
+`^\s+scope: write$` — **the exact regression bought by a plant on 2026-09-13** — which the half that
+*does* run (`consistency()`, called from `test/town.smoke.js`) cannot see on a clean tree, because the
+real workflows carry no `write-all` for it to miss. Nothing else on the board would print a word. The
+same is true of the other five spellings Melo walked past, and of the three citation cases that were
+genuinely red on `main` that morning.
+**Honest note.** A self-test is a guard about a guard, and its own extraction can go blind the same
+way: `completeness()` returns silently when `git ls-files` throws (`test/leaves.js`, grep
+`catch (e) { return P; }`), so on a box without git the third derivable set is skipped and **nothing
+says so** — which is this file's own rule (*nothing to look at is not a pass*) applied to itself.
 
 ---
 

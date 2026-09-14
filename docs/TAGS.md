@@ -478,6 +478,35 @@ amount of asking a second pack would ever have surfaced, because the town declar
 at all**, and *silence is not a pass.* A tag the town never declares has not been tested by the town;
 it has been skipped by it. Say **untested**, not *travels*.
 
+### L23 · A pack may hand `syncChill` the whole cast, and cannot change anybody already standing
+
+*Added 2026-09-13 from Beto's run; the mechanism re-verified against the code 2026-09-14.*
+
+`syncChill` takes the entire desired set as data (`engine/engine.js`, grep `function syncChill`) and
+reads like a declarative API: hand it the cast, it makes the world match. **It does not.** `addChill`
+bakes `NPCLOOK[key]=c.look` **once** (grep `NPCLOOK[key]=c.look`), along with the name (`CHILLN[key]`)
+and the egg (`CHILLEGG[key]`), and `syncChill` returns early for any body already standing on its tile
+(grep `if(here&&c&&c.world===at.world`). So **`look`, `name` and `egg` are write-once per id.** Only
+the fields a pack decorates itself afterwards are live: El Changarrito re-writes `doc`, `tier` and
+`issue` on every `place()` (`changarrito/content/record.js`, grep `n.doc=this.doc(i)`), which is
+exactly why a document change lands on a person already standing and a shirt change does not.
+
+**What a second pack hits.** Any state it wants to *show* on a person — claimed, sick, on shift,
+holding something — must be **part of the id**, or the world is right after a reload and wrong for the
+whole session. El Changarrito pays this in `bodyId` (`changarrito/content/record.js`, grep
+`bodyId(i,slot)`), which concatenates the claim into the id so `syncChill` sends the old body home and
+spawns a new one on the same tile.
+
+**Untested by Meridian, but not for the reason first written.** Meridian *does* declare a chill cast —
+`const CHILL=[…]` in `content/meridian/npcs.js` (Yola la paletera) — and the engine places it once at
+boot (grep `.forEach(c=>addChill(c))`). What Meridian never does is call `syncChill`: it never asks a
+person already standing to become different. **Silence here is still not a pass**, and the first draft
+of this entry said "Meridian declares no chill cast at all", which is false — corrected here rather
+than quietly, per `docs/SOURCES.md` rule 5.
+
+**Measured, not inferred, 2026-09-13:** place the same issue twice, the second time with
+`taken: beto` — `{"pattern":null,"sameKey":true}`.
+
 
 ---
 

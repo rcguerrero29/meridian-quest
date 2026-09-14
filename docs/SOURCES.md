@@ -9,10 +9,19 @@ been written in the same voice.
 
 | Tag | Means | Can you check it? |
 |---|---|---|
-| **`[CODE]`** | Read out of this repository, cited `file:line` | **Yes, completely.** Open the file |
+| **`[CODE]`** | Read out of this repository, cited `file:line` **with the identifier beside the number** | **Yes — if you grep the identifier.** A bare line number is `[CODE]` the moment it is written and `[TRAINING]` an hour later: on 2026-09-13, **31 of `docs/BOUNDARY.md`'s 172 citations had slid within the hour** they were written (`docs/POSTMORTEM.md` §8-extended), and three in a persona file were **400+ lines** off with every suite green |
 | **`[WEB]`** | From a source outside this repo, cited with a URL | **Yes.** Follow the link |
 | **`[TRAINING]`** | What a model knows about games, design or craft, with no citation | **No.** It is a considered opinion and nothing more |
 | **`[OWNER]`** | The owner said it, quoted verbatim | **Yes.** It is in `docs/ASKS.md` |
+
+**Nothing in `.claude/agents/` is a source.** A persona is one agent's instructions, and the line
+numbers inside one are guarded by nothing: `test/leaves.js` calls `fs.existsSync` on the **path** in a
+citation (grep `sends its reader to`) and never reads the line, so a citation that points at a real
+file at a line saying something else entirely is green for ever. Measured 2026-09-13:
+`.claude/agents/pili.md` sends every reader to `drawPerson` at `engine/engine.js:2520` — `drawPerson`
+is at `:2955`, and 2520 is inside a dog's neighbour search — and cites `lookOf` and `npcWhimsy` about
+458 lines short of where they are. **The line half of every citation in this repository is unguarded.
+Grep the identifier; never paste the number.**
 
 ## The honest state of what has been published so far
 

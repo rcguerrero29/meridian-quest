@@ -56,21 +56,40 @@ then this sheet, then the open GitHub issues. Nothing else is required reading.
 **Twelve now** — the count said "six" for a day after the table had nine rows, and "ten" for two days after it had eleven; `GAUGE.md` was also listed
 twice; both corrected 2026-09-11. Each has the same discipline: **they grow from what actually
 happened, never from imagination.** Read the relevant one before proposing anything in its area.
+**Twelve is the count of the table below only** — the working papers under it are raw material, not
+registers, and they are listed because a thing the index cannot reach is a thing nobody reads.
+**Every count in this section was re-checked against the files on 2026-09-14**; two were wrong (the
+leak register said 18 and held 22, the regression map said R1–R10 and held R11), which is the third
+time a count in this file has gone stale and the reason the counts now name what they counted.
 
 | File | What it holds | Read it before |
 |---|---|---|
-| `docs/TAGS.md` | The tag vocabulary, and **18 leaks** — tags that look universal and are not. L15 closed, L12 half-closed, **L16-L18 added 2026-09-10 by building a real pack and measuring** | proposing any tag, kind, glyph or seam |
+| `docs/TAGS.md` | The tag vocabulary, and **23 leaks, L1–L23** — tags that look universal and are not. L15 and L20 closed, L12 half-closed; **L16-L18 added 2026-09-10 by building a real pack and measuring**, L19-L22 by the tram work, **L23 on 2026-09-13: a look is write-once per id, so a pack cannot change anybody already standing** | proposing any tag, kind, glyph or seam |
 | `docs/3D-LOG.md` | Every 3D attempt with its measurement, **and every rejected approach with its reason** | proposing anything about the 3D view |
 | `docs/QA-PASS.md` | The test checklist and the **escape register** — what reached the owner that should have been caught | shipping anything |
 | `docs/BEAUTIFY.md` | What every object renders as, what it should be, and which are correctly flat | touching any art |
 | `docs/GAUGE.md` | What the engine demands of a brand-new world — **measured by building one**, not inferred | starting a pack, or changing the shared suite |
 | **`docs/GENRE-RULES.md`** | **What other games already proved, as a RULE with its TRAP — two pages, `[WEB]`-sourced.** The five things that survive removing a timer, the eight things a mistake can mean with no fail state, and the line that stops a calm game being an empty one. The long sweeps live in `docs/research/` | **proposing any mechanic, and before saying the word "chill", "cozy" or "relaxing" about anything** |
 | `docs/GIFTED-GAMES.md` | Sourced research on genres, physics, difficulty, multiplayer and occasion design, and **what this engine already ships** for each | proposing a mini-game or a new seam |
-| `docs/REGRESSION.md` | The regression map, R1–R10, and the rule they were bought with: **a guard has to read the noun it actually means** | writing any test |
+| `docs/REGRESSION.md` | The regression map, **R1–R11** (R11 opened 2026-09-13 and **not fixed**: a standing person is a wall, and `test/smoke.js` is red about one run in twenty-five because of it), the suites and where each runs, and **the proxy register — 23 rows** — with the rule they were bought with: **a guard has to read the noun it actually means** | writing any test |
 | **`docs/POSTMORTEM.md`** | **Every way the sessions have actually got it wrong — the expensive ones and the silly ones — with what each cost.** Opened 2026-09-12 at the owner's word: *"give them a post mortem and to learn from it so it is ready for them for next time they build"* | **building ANYTHING.** It is the shortest register here and the one most likely to save you an afternoon |
 | `docs/SECURITY-NOTE-2026-09-10.md` | What the El Changarrito exposure **was and was not**, what the token can actually do, and the four things to check | any question about what leaked, or before touching the deploy |
 | **`docs/BOUNDARY.md`** | **Every edge of the project — what leaves town, what we promised there with `file:line`, which guard reads that exact noun or the word nobody, and when it was last planted against.** Opened 2026-09-13; Zeni's ledger, Melo's list. `test/leaves.js` reads its path table | any change to a workflow, a shell, the service worker, a sanitiser, a token, a fetch, or the deploy |
-| `docs/decisions/` | One file per settled decision: the ask verbatim, the answer, **and the options that were rejected, with reasons**. Opened 2026-09-10; three filed, and `docs/ASKS.md` is still where most decisions actually live | re-proposing anything that sounds already-answered |
+| `docs/decisions/` | One file per settled decision: the ask verbatim, the answer, **and the options that were rejected, with reasons**. Opened 2026-09-10; three filed (`0001`–`0003`), and `docs/ASKS.md` is still where most decisions actually live | re-proposing anything that sounds already-answered |
+
+### The working papers — not registers, and reachable from nowhere else
+
+*Added 2026-09-14, because four of these were written this week and the index did not know they
+existed. A register is distilled; these are the raw material it was distilled from, and none of them
+is re-checked against the code after the day it was written.*
+
+| Folder or file | What is in it |
+|---|---|
+| `docs/NEXT-SESSION-ARCHIVE.md` | **History, not instructions.** Every superseded STATE OF PLAY, newest first, moved out verbatim on 2026-09-13 when `docs/NEXT-SESSION.md` had reached 924 lines and only its first hundred were current. **A fact you find here is a fact about that date** |
+| `docs/crew/` | How the crew actually ran: `FLIGHT-NOTES.md` (pre- and post-flight per agent, and the ledger of persona-edit proposals with verdicts), `MURALS.md` and `MURAL-LEDGER.txt` (the wall and its fingerprints), `TOWN-STATE.md`, the crew-mode HTML sheets, and **`POSTMORTEM-2026-09-13-lessons-raw.md`** — the six agents' lessons as returned, before Chuy consolidated them into `docs/POSTMORTEM.md` §13 |
+| `docs/meetings/` | Seven dated notes where a decision was argued rather than announced — *la junta*, *el experto*, *la caja de escalera*, *la junta de la ciudad*, *el mandado*, *la parada*, *la cuadrilla diseña*. Read one before re-opening an argument it already had |
+| `docs/research/` | The long `[WEB]`-sourced sweeps with tags and URLs intact (cooking games, critters in play, healthy-eating game). **The transferable rule out of each one lives in `docs/GENRE-RULES.md`**, which is what an agent actually opens |
+| `docs/rooms/` | Per-room design notes, including the costed answer to "two visible storeys" |
 
 ## 4 · The traps — things that have already bitten, written so they bite nobody twice
 

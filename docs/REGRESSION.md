@@ -89,8 +89,10 @@ has shipped since it was written.
 **#12 was written by the session writing the entry for #11, one hour later. #13 and #13½ were written
 by the same session, in the same hour, in the guard FOR the bug it was fixing — and #13½ happened
 TWICE, two different clever checks, both correct about the scene graph and both green against the
-real fault.** That is now five times, and the count is the point: knowing about the mistake, writing
-the register entry for the mistake, and making the mistake are not mutually exclusive activities.
+real fault.** That is now five times in one session — **and twenty-three rows in the table above**, a
+number the prose is kept level with on purpose (Lupe, 2026-09-13) — and the count is the point:
+knowing about the mistake, writing the register entry for the mistake, and making the mistake are not
+mutually exclusive activities.
 
 **#13½ is the one to keep, because it is the only entry here where the proxy was more sophisticated
 than the noun.** A raycast through the scene is a better piece of engineering than counting pale

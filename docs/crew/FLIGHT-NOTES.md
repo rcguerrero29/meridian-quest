@@ -133,7 +133,7 @@ that now holds the personas to one block, first, once, one person per file, went
 was written against.**
 
 **A new guard's first red was a ghost it invented.** Yaz's `test/leaves.js` named five persona
-citations of files that never existed; two were real. Its pattern listed the endings it would accept
+citations of files that never existed; three were real and two were ghosts it invented. Its pattern listed the endings it would accept
 with `.js` before `.json`, so `test/spots.json` was read as `test/spots.js`. She fixed it by reordering
 seven words and painted it. *"I no longer believe a new guard's green OR its red until it has been
 pointed at the real thing."*

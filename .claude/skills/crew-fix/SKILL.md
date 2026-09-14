@@ -26,6 +26,14 @@ of the mistakes in it were made *by the session that was writing up the previous
 
 Then `docs/REGRESSION.md`'s proxy register, before you write any guard.
 
+**And one thing about how you check.** If your check **extracts** before it compares — a hash, a sort,
+a trim, a regex capture — it has already thrown away position, order and neighbours, and **it cannot
+report on any of them.** That is how nineteen persona files were verified byte-identical on 2026-09-13
+while one of them carried a second copy of the shared block with another agent's whole persona
+underneath it; it was live on `main` for two days and a published nineteen-file verification could not
+see it (`docs/POSTMORTEM.md` §13c). **Name what your extraction discarded, in the same breath as the
+result.**
+
 ## The rule that makes it safe
 
 > **An agent may propose anything. Only a reviewed change lands.**
@@ -228,17 +236,46 @@ read its own brief.
 found in five days, and **two of them written by the session that had just found the other eight.**
 That last fact is the useful one: **knowing about the mistake does not stop you making it.**
 
-Three things they had in common, worth checking your own guard against before it lands:
+Four things they had in common, worth checking your own guard against before it lands:
 
 1. **The proxy is always cheaper to read than the thing** — a filename, a string equality, a bounding
    box, a membership test. The correct noun usually needs a behaviour to be exercised.
 2. **The proxy is usually correct today.** They fail when the world grows a second case.
 3. **A green guard is not evidence.** Eight ran green for days or weeks.
+4. **A red guard is not evidence either.** `test/leaves.js`' first run named five persona citations of
+   files that did not exist; **two of the five were invented by its own pattern**, because a regex
+   alternation takes the first branch that matches and it listed `.js` before `.json`, so `test/spots.json`
+   was read as a file that has never existed (`docs/POSTMORTEM.md` §13g). The remedy those two names
+   prescribed was *edit two files that were already correct*. **Before you carry a new guard's output
+   anywhere — red or green — point it at one case whose answer you already know.**
 
 **The question, and it is not optional:** *if I break the thing this is for, in the smallest and most
 plausible way, does it print a sentence a person would say?* **If you have not run that, the guard is
 untested however green the suite is** — which is what `melo` is for, and what step 5½ asks of every
 change.
+
+**And the second question, which is cheaper: what does this guard print when it cannot read the file
+at all?** If the answer is its pass sentence, it is not a guard, it is a claim. A quoted `"on":` key
+made the workflow check report *"no workflow can be started by a label or a comment"* about a file it
+had just failed to parse (`docs/POSTMORTEM.md` §13f). **Not finding the thing is a RED.**
+
+**And when the plant lands, wire it.** A plant proves the guard fired once, against one draft, on one
+afternoon; what keeps it true is a case that runs on every push. **Say which step runs it, by name.**
+On 2026-09-13 six plants against `test/leaves.js`'s workflow check were written up in a register as
+its self-test, and `node test/leaves.js --selftest` is invoked by no workflow and no suite — so each
+of the six regressions they were bought against can quietly return (`docs/POSTMORTEM.md` §13h,
+`docs/BOUNDARY.md` G9).
+
+**And the lab has a timestamp.** A plant runs in a copy of the tree *outside* the repository, and the
+branch does not stop while you work: on 2026-09-13 two commits landed under a five-hour lab, so every
+result in it was a claim about a tree that no longer existed. `git diff <snapshot>..HEAD` showing
+"none of the guards moved" is reasoning, not evidence — re-sync, re-establish green, and **re-run every
+plant that GOT PAST**, because those are the only ones whose answer an upstream change can flip.
+
+**If your evidence is a number taken off a page, the plant is not enough.** Take the screenshot too,
+and check the element you measured had a non-zero box. A measurement of an unmounted element is green
+and true and about nothing (`docs/POSTMORTEM.md`, grep `the pixel instrument measured a canvas in an
+empty room`; `docs/QA-PASS.md` step 0 and E10).
 
 ## The mural — one panel per agent, in your own hand
 
@@ -292,8 +329,15 @@ aspect: <height as a fraction of width, 0.40–0.50>
 art:    (g,W,H)=>{ ... }   — real canvas 2D. Use MURPAL, murGround/murPaper/murDim/murBody/murTram
 ```
 
-### The two rules that bind it
+### The three rules that bind it — the ruler, and the two that make the wall a wall
 
+- **Type on this wall is absolute; your drawing is not.** Captions are set in pixels (`bold 11px`,
+  `12px`) and every panel is drawn in **fractions of `W` and `H`**, so the two scales come apart the
+  moment your panel is a different size from the one you copied. **Size your people against the
+  LETTERING, not against the frame.** `murBody`'s height is the ruler and its width now follows it
+  (`changarrito/content/murals.js`, grep `function murBody`) — until 2026-09-13 it was five pixels
+  wide at any height, which made one painter's crew ants under 12px type and another's clerk a pencil,
+  and cost three repaints in an hour (`docs/POSTMORTEM.md` §13l).
 - **Add and improve, never remove.** `docs/crew/MURAL-LEDGER.txt` fingerprints every panel's WORDS
   and the town suite fails the build if one goes missing, is renamed, reordered, or edited after the
   fact. **You may repaint. You may not rewrite.** So get the words right and feel free to improve the
@@ -361,10 +405,13 @@ So, three questions, on every change, cheap enough that skipping them saves noth
    `sw.js`, `manifest.webmanifest`, or adding a top-level folder. If yes → **`zeni`**, and R10 must
    have run on the built artifact, not on the source tree.
 2. **Does this change a GUARD?** If the diff touches `test/`, ask what noun that guard now reads, and
-   whether it is the noun it means. Three guards in this repo read a proxy for the thing —
-   `docs/REGRESSION.md` R8 read what the index loads; the mutant net read the source with comments
+   whether it is the noun it means. **The register in `docs/REGRESSION.md` §3 is the count, and it
+   keeps growing** — R8 read what the index loads; the mutant net read the source with comments
    stripped; the version test asked whether two strings were *equal* when what mattered was that one
-   *moved*. **None was caught by review. Each was caught by planting a violation** → **`melo`**.
+   *moved*; and on 2026-09-13 five guards written that morning were walked past the same afternoon,
+   **four of them because they read an aggregate — a count, a hash, a shape — where the noun was an
+   identity or a content**. **None was caught by review. Each was caught by planting a violation** →
+   **`melo`**. **A guard's most dangerous hour is the one right after it first goes green.**
 3. **Does this touch a credential, a save, or something a stranger's browser evaluates?**
    `sanitizeSave`, the QR transfer, anything written into the DOM, anything read from an API.
 

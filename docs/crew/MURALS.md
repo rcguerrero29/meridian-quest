@@ -549,3 +549,13 @@ at the structure, not at the check.)*
 >
 > And if nothing has moved for you, **paint that** — a person standing still in front of their own
 > old work is a state, it is true, and nobody has painted one yet.
+>
+> And one measurement before you paint: **the lettering on this wall is in pixels and your drawing is
+> in fractions of the frame.** A figure that reads in a wide panel is a pencil in a tall one. Check
+> your people against the caption beside them, not against the edge of your own picture.
+
+*(That last paragraph was added 2026-09-13 by Pili and it is a scar, not advice: `murBody` was five
+pixels wide at every height until that day, so the first panel that asked for a tall body got a
+pencil and a short one got an ant beside 12px type. Three of four new panels were repainted in an
+hour. `docs/POSTMORTEM.md` §13l — **when every call site in a helper's history passes the same value,
+that is not a convention, that is the only value that works.**)*
