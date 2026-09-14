@@ -14,19 +14,28 @@ and from nothing else. A check nobody can point at a bug for is a ritual, and ri
 
 ## The bay — the size matrix
 
-| Row | Viewport | Why this one |
-|---|---|---|
-| Phone portrait | 390 × 844 | The owner's actual device; where reach and text size fail |
-| Phone landscape | 844 × 390 | A short frame — where an anchored bar eats the world |
-| Small window | 480 × 900 | What the suites already use; keeps parity with CI |
-| Desktop | 1280 × 800 | Where the world is widest and the camera shows most |
-| **Fullscreen** | the element gets the screen's shape | **The one that has actually escaped** |
+**The "who runs it" column was added 2026-09-13 and it is the point of the table now.** A row nobody
+can run is a row that gets skipped, and it reads as covered every time somebody looks at the list.
+
+| Row | Viewport | Who runs it | Why this one |
+|---|---|---|---|
+| Phone portrait | 390 × 844 | `test/engine.smoke.js` | The owner's actual device; where reach and text size fail |
+| Phone landscape | 844 × 390 | **nobody — by hand** | A short frame — where an anchored bar eats the world. **No suite in this repo has ever run either game in a landscape viewport** (E12) |
+| Small window | 480 × 900 | all three suites | What the suites already use; keeps parity with CI |
+| Desktop | 1280 × 800 | **nobody — by hand** | Where the world is widest and the camera shows most |
+| **Fullscreen** | the element gets the screen's shape | **nobody — by hand** | **The one that has actually escaped** |
 
 A change to layout, camera, text or anything a person touches runs every row. A change to logic
 alone may run the first and the last.
 
 ## The pass, in order
 
+0. **Prove you are in the game before you measure it.** One screenshot, first, showing the thing you
+   are about to measure on a screen — and the element's box non-zero. **A canvas draws in an empty
+   room:** the backing buffer is sized from constants (`engine/engine.js`, grep `const VW=`) and
+   `draw()` fills it whether or not the element has a layout box, so reading the pixels returns real,
+   correct, meaningless numbers about a world nobody can see (E10). `test/shots.js` already knows how
+   to start the game. Copy it.
 1. **Make the old code fail first.** A test that has never been red proves nothing.
 2. **The suites, both packs, every time** (`README.md` "Test before shipping" is the list; CI runs more):
    ```
@@ -34,10 +43,22 @@ alone may run the first and the last.
    node test/town.smoke.js
    node test/engine.smoke.js --index index.html
    node test/engine.smoke.js --index changarrito/index.html
+   node test/gauge.js
    ```
-   One engine, two games: a pass on one is half a pass.
+   One engine, two games: a pass on one is half a pass. **And say how many runs your green is.**
+   `test/smoke.js` fails about one run in twenty-five on a real game bug (E11); a single run of it
+   prints green 96% of the time. When green is your evidence that something ships, run the suite the
+   change touches at least five times and **write the count next to the word "green".**
 3. **The size matrix**, on whatever the change touched.
-4. **Look at a screenshot.** Numbers do not see teeth along every wall in HQ. A person does.
+4. **Look at a screenshot — of the frame you measured.** Numbers do not see teeth along every wall in
+   HQ. A person does. And a number cannot see an empty room (E10).
+4½. **Measure the mark that carries the meaning, not the one it replaced.** When a fix moves a meaning
+   from one mark to another — a shirt pattern to a hat, a colour to a height, a label to a posture —
+   **the old mark's evidence does not transfer.** On 2026-09-13 the claim mark moved from the sash to
+   the hard hat and the day's entire pixel pass — seven sizes, four cameras, twenty-eight rows —
+   counted *sash* pixels; nothing ever counted an outline. Ask of every number before you accept it:
+   **is this counting the thing the change was for?** And *"visible"* is a fact about pixels;
+   *"reads as X"* is not — for that, the instrument is a person who has not seen it before.
 5. **Report in plain words** — what a person would have seen, not what line asserted.
 
 ---
@@ -233,6 +254,60 @@ is doing the job.
 "below" is a claim about code, and this file already records (E5) what happens when a guard reads a
 proxy for the thing rather than the thing.
 
+### E10 · Twenty-eight measurements of a canvas nobody could see — 2026-09-13 (mine, a near-miss, caught in-session three hours late)
+
+**Filed here on E4's and E8's precedent**, both of which are near-misses rather than escapes: it
+reached nobody. It is in the register because **it changed the list** — step 0 exists because of it.
+
+**What happened.** Measuring the claim mark in the town, I read 28 rows of pixels out of the world
+canvas and reported them as passes. The town boots to its creator panel; `#world` carries `hidden`,
+`#vp` lives inside it, and `[hidden]{display:none!important}` — so `#vp` was `0 × 0`. `sizeCanvas`
+derives only `cv.style.height` from that width; the buffer is sized from constants and `draw()` fills
+it regardless. **Every number was true and about nothing.**
+**Which row would have caught it:** none. **No viewport catches this** — that is the point. It would
+have passed at all five.
+**What caught it:** a screenshot, three hours later.
+**What the list is now:** step 0 — prove you are in the game before you measure it.
+**The general lesson:** E2 says a test can pin a bug. This is one turn worse — **a measurement can be
+perfectly accurate about an element that is not on the screen, and nothing in the number says so.**
+
+### E11 · A one-in-twenty-five red that was a game bug, not a flaky test — 2026-09-13 (found by the suite and by Lupe; **not yet reached the owner, not fixed on this branch**)
+
+**What escaped the list, not the owner:** `test/smoke.js` goes red roughly **one run in twenty-five**
+on reachability, and had been doing so for longer than the branch that found it. Nobody wrote it down;
+before 2026-09-13 it appears in no register here. It was read as the suite being moody.
+**What it actually is:** a person occupies the grid as `"N"` — stamped at boot, by `addChill`, and
+re-stamped on every wander step. Both `isSolid` and `auditReach`'s own `walk` refuse an `"N"` tile, and
+the wander filter checks solidity, doors and tram danger and never asks whether the step walls anybody
+off. A neighbour in the one-tile gap by the barbería at `ex` (19,1) puts 35 tiles and Doña Meche out of
+reach **of the player as well as the audit**. Repro: occupy (19,1).
+**Which row would have caught it:** none — it is not a viewport problem, it is a **sample-size**
+problem. Against a 1-in-25 fault a single run prints green 96% of the time.
+**What the list is now:** step 2 — say how many runs your green is, and treat an intermittent red as a
+bug about the game until you have shown it is a bug about the test.
+**State:** open. `docs/REGRESSION.md` R11 carries the assertion; `docs/BACKLOG.md` §8 row 10 carries
+the fix. **Nothing about it is fixed on the branch that found it.**
+**The general lesson:** a suite result is a sample, not a state. And `docs/POSTMORTEM.md` §7's *"a flake
+is a state leak until proved otherwise"* now has a second candidate: **a world with a random mover is
+its own fuzzer.**
+
+### E12 · A phone held sideways has no controls, in both games — 2026-09-13 (found by Lupe, by opening a window; **not yet reached the owner, not fixed on this branch**)
+
+**What escaped the list:** the landscape row has been on the matrix above since 2026-09-09 and **no
+script in this repository has ever run either game in a landscape viewport** — every suite is 480×900,
+390×560 or 390×844. Four days of "tested at both sizes", said in good faith, meant two portrait widths.
+**What is actually there:** `.wrap{max-width:560px}` holds the viewport at ~528 px in any window wider
+than 560; the world's height is its width × 8/10 ≈ 422 px; and the joystick, the d-pad and the Talk
+button are `position:absolute` against the **viewport's** bottom, not the window's. In an 844 × 390
+window the controls sit **100–120 px below the fold** in both games until you scroll or go fullscreen.
+**Which row would have caught it:** *Phone landscape* — the row existed and nothing could run it.
+**What the list is now:** the matrix carries a **who runs it** column, so an unrunnable row reads as a
+gap in the table itself rather than in a footnote.
+**State:** open, on `main`, in both games. The owner has not reported it; it is written here so it is
+counted rather than re-discovered.
+**The general lesson:** **a row of a checklist that no script can run is a row that gets skipped** —
+and it silently vouches for coverage the list does not have.
+
 ## Known gaps in the list
 
 Written down so they are counted rather than re-discovered:
@@ -242,7 +317,11 @@ Written down so they are counted rather than re-discovered:
   reproduced headlessly by giving the element a shape the buffer did not expect — read `t3Resize`
   in `engine/engine3d.js` and the `.viewport.fs` rule in the shells first. **Until this is a script,
   E1 can happen again.**
-- **Landscape is not covered by any suite.** The engine smoke runs at 480×900 and 390×844.
+- **Landscape is not covered by any suite** — and the gap has a live fault in it, so it is E12 now, not
+  a footnote. Every suite is portrait (480×900, 390×560, 390×844). Measured 2026-09-13 at 844×390 in
+  **both** games: the joystick and the Talk button sit **100–120 px below the fold** until you scroll
+  or go fullscreen. Not an escape (the owner has not reported it); counted here so nobody re-discovers
+  it a fourth time.
 - **No suite checks the town at phone size**, only Meridian.
 - `test/smoke.js`'s portability scan is still Meridian's proper nouns, so it cannot catch a second
   world leaking its own names.
