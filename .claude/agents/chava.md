@@ -128,3 +128,16 @@ of her life on the rail row, 4 run-overs — **of which only 1 was within five t
 *"Once every two minutes"* and *"once every nine minutes on screen"* are both true and argue for
 different things. The FIRST attempt at that trace was worthless: the hero was parked on row 2, so the
 tram held for the entire nine minutes and never moved. Two words of printed position caught it.
+
+## When you conclude a thing is absent
+
+**When you conclude a thing is ABSENT, crop it at 3× before you say so.**
+*Applied 2026-09-14 from the mural run.* You walked the street four times, in four
+cameras, at night and at noon, and wrote down "there is no mural on this wall." The
+paint was there every pass — limewash, a red band, three white windows for the tram.
+It only resolved when you stopped walking and cropped the facade row at
+deviceScaleFactor 3 (`chava-zoom-top.png`). A play-scale glance is evidence about
+NOTICEABILITY and nothing else. "I did not notice it in four passes" is a true and
+useful finding. "It is not drawn" is a claim about the code, and a claim about the
+code is cheap to check and expensive to get wrong — one grep of the pack's art file
+would have caught it in ten seconds.

@@ -920,3 +920,26 @@ Settled: **both surfaces, no timer anywhere.** Cookingdom's *+30s* is not carrie
 **What is still owed, all of it small:** confirm the merge board goes first; say where the
 household's sync should live (a token on AJ's phone, or the laptop); the pantry photos when ready;
 AJ's eight.
+
+### 12.7 · His third reply — 2026-09-14, late — and what it started
+
+- **"I don't know what you meant by merge board."** It is the play surface in AJ's first recording:
+  a grid of small items, and when you drag two of the same onto each other they become the next
+  thing in a chain (dough → pizza → slice → whole pie); the Collection screen lists every chain with
+  the unmade steps greyed. 12.2 has the frame-by-frame read. The other surface, from Cookingdom, is
+  making one dish by hand, one gesture per step. AJ's questionnaire asks which she would miss more.
+- **"Probably my laptop."** The household's pantry lives on his laptop, like the town: a pack that
+  writes with a token from there, read on the phones, and the Trolley Pass carrying a snapshot while
+  testing (G1). Nothing new leaves the town's own pattern; Zeni's row on run 8 says so.
+- **"Can you not access any general veggies, pantry items for testing purposes?"** Yes, for names:
+  the pack can carry a testing pantry of common staples authored from public-domain sources (USDA
+  FoodData Central is CC0) with no fetch at all — beans, rice, masa, onions, garlic, limes, chiles,
+  tomatoes, eggs, oil, salt, the Italian seven, the four Japanese and five Korean jars of §2. Pictures
+  are the separate question (12.3c): drawn, or licensed at build time, never fetched while playing.
+  Beto's return on run 8 gives the file's shape.
+- **The rest of the message is a crew run — run 8** — the questionnaire as a night-mode app page with
+  a comment on every choice, full mock-ups of the journey and the app feel, a UI review process
+  (engineers, agents, UI, story, QA) written down and run on the mock-ups, the map revamped so a person
+  can find the next quest or the open ones, the murals creative and completed, and the backlog put
+  together while AJ takes her time. Its returns are `docs/meetings/2026-09-14-la-cuadrilla-run-8.md`,
+  its consolidation is §13 and `docs/UI-REVIEW.md` and `docs/meetings/2026-09-14-el-mapa.md`.

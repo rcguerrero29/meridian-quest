@@ -66,7 +66,7 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 43 | `beto` | A document need not be registered (`docDef` takes the object) and a pack's state does not ride the save (`sanitizeSave` rebuilds a whitelist; the pass carries only `loadSave()`) | **APPLIED 2026-09-14** — a fifth engine fact; the heading now says five |
 | 44 | `paty` | There is no `chatSay` — her own file cited a function that does not exist; `toast(msg,ms,crit)` takes its ms from the caller, the chat line passes 2800; write the Spanish first for anything that toasts | **APPLIED 2026-09-14** — the paragraph replaced; every claim in it re-grepped by the session first |
 | 45 | `tono` | The town can give three answers, not two: works / had to copy / never declares it — say `untested`, never `travels` | **APPLIED 2026-09-14** — step 4 of "Before you say anything" replaced |
-| 46 | `chava` | When you conclude a thing is ABSENT, crop it at 3× before you say so — four passes said "there is no mural" and the paint was there every pass | **DEFERRED, not refused** — exact text in `docs/meetings/2026-09-14-chava-en-el-muro.md`; apply with his panel (*El pie cortado*) in the next sitting |
+| 46 | `chava` | When you conclude a thing is ABSENT, crop it at 3× before you say so — four passes said "there is no mural" and the paint was there every pass | **APPLIED 2026-09-14** — a new section at the end of his file; his panel *El pie cortado* is on the wall (iteration 6, late) |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
