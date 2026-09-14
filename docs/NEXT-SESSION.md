@@ -39,8 +39,8 @@ the backlog put together while AJ takes her time.
   sideways), comments on #154 and #156, `docs/BACKLOG.md` §0 re-ranked onto the ledger.
 - **The wall** — iterations 8 and 9: fifteen and then eight panels, each in its own material
   (`docs/crew/MURALS.md`); fifty-six panels, twenty-one bays, `ch-v105`. Run 8's twelve persona edits
-  applied (`docs/crew/FLIGHT-NOTES.md` rows 47–61); run 9's are the last thing this sitting did — check
-  the ledger rows 62–69 landed.
+  applied (`docs/crew/FLIGHT-NOTES.md` rows 47–61) and run 9's seven (rows 62–69; Remedios: none, and
+  why) — both suites and the leaves guard green on the result.
 - **Registers**: `docs/la-sobremesa.md` §13 (run 8 consolidated; §10's palette superseded by Pili's
   night palette and re-cut kitchens, machine-checked), `docs/GENRE-RULES.md` R18, the research sweeps in
   `docs/research/2026-09-14-map-and-questionnaires.md`, QA-PASS E13, three stale citations corrected.

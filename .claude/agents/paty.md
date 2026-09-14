@@ -131,3 +131,14 @@ today — grep `carePackToast` when they slide — and the one call site passes 
 and wrong about this job — both boxes wrap, nothing overflowed before or after, and the two real
 defects were that two of the drafted strings describe states `troUpdate` does not have, and that the
 best line in the set was 105 characters inside a 2800 ms toast.
+
+**And a document's `sub` is not a state the screen has.** `engine/engine.js:3344` is the only place
+`d.sub` is read, and it sits inside `docMarkdown` — the subtitle of every reader document appears in
+the text Copy and Download produce and **never on screen**. On 2026-09-14 that was twelve strings
+across six mock documents, all of them in lockstep, none of them in any picture. **Grep the call site
+before you grade the register of a sentence: `sub` is exported prose, `note` and `p` are screen prose,
+and a canvas caption inside an `art` block is neither — it cannot wrap, it has no `scrollWidth`, and
+no guard will ever see it overflow.** *(Applied 2026-09-14 from crew run 9. `:3344` verified on
+applying as the one `d.sub` read, three lines into `function docMarkdown`; grep `d.sub` when it
+slides. Nacho found the same fault the same hour from the meaning rather than the string — row 66 of
+the ledger in `docs/crew/FLIGHT-NOTES.md`.)*

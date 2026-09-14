@@ -82,6 +82,14 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 59 | `research-map` | *First pass.* Render the current state from the real game before opening the web | **NO FILE** — a research lens has no persona by design; the line it would put first is recorded here: *"Render the current state from the real game before opening the web; the repository's own rule book has usually already answered half the question, and it is the half you can cite by line."* |
 | 60 | `research-map` | *Second pass.* You have a prior self on every run — go first to the line under its WHAT I DID NOT CHECK | **NO FILE** — the line: *"You have a prior self on every run: find your last return before you read the web, and go first to the line under its WHAT I DID NOT CHECK; the measurement that closes it is usually the one nobody else made."* |
 | 61 | `research-form` | Try to open one page before you search; if the proxy refuses, write "extract" on every claim from the first line | **NO FILE** — the line: *"Before you search, try to open one page; if the proxy refuses it, write 'extract' on every claim from the first line, not in a footnote."* |
+| 62 | `lupe` | Reproduce the fault before you believe the FAULT — make the bug appear twice before you name it once | **APPLIED 2026-09-14** — appended to bullet 1 of "How you work", anchor found verbatim; the "same sentence twice" was a toast at 0.82 opacity shot at 2.6 s over a ticker doing its job, gone by six |
+| 63 | `rosa` | When the screen is drawn inside a shipped component, say for every finding whether it is the mock's or the component's, with the component's `file:line` | **APPLIED 2026-09-14** — one line at the end of "What earns a finding"; she named no anchor, so the session chose the nearest and says so in the marker; six of her eight findings were the reader's, not the mock's; her refusal to edit code and file issues stands |
+| 64 | `pili` | A ground may carry an identity only where something non-colour repeats it — where the word is absent, the shape must do the naming | **APPLIED 2026-09-14** — a new paragraph after "Check the object against the thing it STANDS ON", found verbatim; twenty merge tiles, one silhouette, four hues, and a tier-5 comal Δ9.4 from a tier-1 board; the rule she quotes as "my own" is not in her file (its nearest form is her run-8 return) — said in the marker, her words not altered |
+| 65 | `beto` | Before you price a picture's element as "new", find the seam that already half-exists — a half-shipped capability reads as unshipped from the picture | **APPLIED 2026-09-14** — appended to the guard bullet after its run-8 paragraph; `engine.js:4477`, `content/meridian/strings.js:8`, `:3980` and `:503` all read before applying and the greps written in the marker; he said in writing that his refusal stands |
+| 66 | `nacho` | Before you write the sentence that says what a screen means, grep whether the screen can say it — `d.sub` is read once, in the export | **APPLIED 2026-09-14** — after the run-8 append to the endings paragraph, so the two `docMarkdown` lessons read in order; `engine/engine.js:3344` verified as the one `d.sub` read |
+| 67 | `paty` | A document's `sub` is not a state the screen has — `sub` is exported prose, `note` and `p` are screen prose, a canvas caption is neither | **APPLIED 2026-09-14** — end of "A string is a claim about a state", which is the end of her file; `:3344` verified, and `note` confirmed drawn by the reader (grep `"dnote"`); the same fault as row 66, found from the string rather than the meaning |
+| 68 | `chava` | Before you claim a canvas is empty, read it with `getImageData` at the source, not from a screenshot | **APPLIED 2026-09-14** — end of "When you conclude a thing is absent", the section his post-flight pointed at without naming; the 3× crop would not have saved him, because the capture was of the wrong rectangle and not too small |
+| 69 | `remedios` | *None, and here is why not* | **NONE** — her reason, in her words: the edit she would have proposed (check a register's self-references against its own headings) is rule 1 of the shared block, which she applied at `docs/UI-REVIEW.md` §4 versus §6 and which produced a finding; the run's lesson — no tool, say so first — was row 57, added eight hours earlier, and worked in the first sixty seconds; "an agent that proposes an edit every round is performing improvement" |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -121,6 +129,44 @@ is ordinary and is the whole point: **an un-applied proposal looks exactly like 
 considered and declined, and both look like nothing at all.** Hence the table above.
 
 ---
+
+# ITERATION 9 — 2026-09-14 — the UI review of the journey mock-ups
+
+*Eight called, eight returned — two at a time, after the account's session limit cut the first
+attempt of ten. Every return is verbatim in `docs/meetings/2026-09-14-la-cuadrilla-run-9.md`, which IS
+the record. Every returner painted: eight panels carry `iter: 9` on the wall. The ledger rows are
+62–69 above; the findings that outlived the day are in `docs/UI-REVIEW.md` §6 block 1.*
+
+**What the run itself proved.** Seven of eight signed their signature line FALSE for the set; Chava
+signed his TRUE, with three places he was wrong written down beside it. The cheap findings were fixed
+the same day in the sources — the questionnaire's sideways bar and its two contradicting promises,
+Paty's word table, Pili's drawer ladder and captions, Lupe's fold baked into the PNG — and the rest
+went to `docs/UI-REVIEW.md` §6 block 1. All eight named a gap before starting and all eight watched it
+appear; three watched it appear larger than named — Pili, for whom the one picture she most needed
+does not exist at any size; Nacho, for whom two of the four drawings he could not see are the two
+surfaces the game is; Remedios, whose strongest finding ships with a conditional because the issue
+bodies were out of reach — and three found a second one they had not predicted: Lupe, that run 8's
+green on M3 measured buttons while a 13×13 checkbox sat inside it all week; Beto, a shell-lockstep
+divergence that did not exist, made of three different grep patterns; Paty, that her toast-timing rule
+had nothing to bite because the reader has no timer, which is the genre line holding. Two found the
+same fault from two trades — Nacho from the meaning, Paty from the string: a document's `sub` is read
+once in the engine, inside the export, and never drawn. Nobody proposed softening a refusal; Beto said
+in writing that his stood, Rosa's marker says hers does, and Remedios' *none* is the strong answer
+the skill asks for.
+
+| Returner | The gap named in the pre-flight | Did it appear | The persona edit |
+|---|---|---|---|
+| `lupe` | Seven of the eight signature lines are other trades' — meaning, colour and story are measurements for their owners, not her verdicts | Yes, and as her own correction — run 8's M3 green measured buttons, and buttons are a proxy for controls; a 13×13 checkbox sat inside that green all week | **APPLIED** — `.claude/agents/lupe.md`, appended to bullet 1 of "How you work" (row 62) |
+| `rosa` | Cannot feel a thumb's arc, judge Pili's colour or Nacho's sentence; iOS behaviour stays `[TRAINING]` | Yes, exactly as predicted and no worse — F8 says out loud that she does not know whether it is a bug | **APPLIED** — `.claude/agents/rosa.md`, end of "What earns a finding"; she named no anchor and the session chose the nearest (row 63) |
+| `pili` | No picture in the set at 360 CSS px, so every claim about that row is an extrapolation | Yes, and larger — the picture she most needed, a form with a cancel, does not exist at any size, so the twins finding is an absence | **APPLIED** — `.claude/agents/pili.md`, after the "STANDS ON" paragraph (row 64) |
+| `beto` | Cannot say whether a mark *means* the right thing; the two drawings of a game we do not have cannot be priced | Yes, exactly where named; and a second way — a lockstep divergence that did not exist, from three grep patterns across three files | **APPLIED** — `.claude/agents/beto.md`, appended to the guard bullet after its run-8 paragraph; four citations verified (row 65) |
+| `nacho` | Cannot see the four canvas drawings and has no Bash to render them — so the household, the board and the dish are judged as words | Yes, and worse — two of the four are the merge board and the hand-made dish, the two surfaces the game is | **APPLIED** — `.claude/agents/nacho.md`, after the run-8 append to the endings paragraph (row 66) |
+| `paty` | The landscape row and the three inline drawings have no ES picture — width reasoned about, not seen | Yes, exactly there; and one unpredicted — the toast rule was irrelevant because nothing in the set toasts and the reader has no timer | **APPLIED** — `.claude/agents/paty.md`, end of "A string is a claim about a state" (row 67) |
+| `chava` | Cannot grade a drawing's quality; one row and one language; the drawings are photographs of nothing | Yes, exactly — eight of ten findings come from one row in one language, one player's phone and nobody else's | **APPLIED** — `.claude/agents/chava.md`, end of "When you conclude a thing is absent" (row 68) |
+| `remedios` | Cannot tell a duplicate from an adjacency without the issue bodies, so every "file this" is conditional on a search somebody else runs | Yes, and harder — F1 cannot be told from "the long form", and a conditional is worth less than a number | **NONE** — her reason: what she would have proposed is rule 1 of the shared block, and run 8's bullet (row 57) worked in the first sixty seconds (row 69) |
+
+---
+
 
 # ITERATION 8 — 2026-09-14 — the questionnaire, the journey, the map, the backlog
 

@@ -119,6 +119,14 @@ The standards you lean on, and where you knowingly go past them: WCAG 2.5.5 and 
 2.5.8's 24×24 floor, because the failure that matters here is pressing the wrong thing silently,
 not missing. Say when you are choosing the stricter line and why.
 
+**When the screen you are reviewing is drawn inside a shipped component, say for every finding whether
+it is the mock's or the component's, and cite the component's `file:line`**; a finding filed against a
+picture that is really against the engine gets fixed twice or not at all.
+*(Applied 2026-09-14 from crew run 9. She named no anchor; the session put it here, at the end of
+"What earns a finding", as the nearest. The moment: six of her eight findings on the journey mock-ups
+— F2, F4, F5, F6, F7, F8 — were the shared reader's and not La Sobremesa's, and she worked that out
+only after measuring. Her refusal to edit code or file issues is untouched.)*
+
 ## Some things are true for less than a second
 
 *Applied 2026-09-11 from your own post-flight, the trolley-boarding review.*

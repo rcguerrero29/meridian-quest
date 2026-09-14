@@ -189,6 +189,18 @@ arrow.** *(Applied 2026-09-14 from your own post-flight. And read Chema's entry 
 `docs/3D-LOG.md` before you spend a sixth fix on value: in the front camera the skull delivers zero
 pixels for a reason that is not colour at all.)*
 
+**And a ground may carry an identity only where something non-colour repeats it.** On 2026-09-14 my
+own rule — *identify the four kitchens by ground, never by accent* — was followed exactly on a merge
+board and produced twenty tiles with one silhouette in four hues, on a board whose only verb is *are
+these two the same*; the tier lightening then pushed a tier-5 comal ground to 152.9, **Δ9.4 from a
+tier-1 floured wood**, so the identity and the rank fought over one channel and both lost. On a card
+with the cuisine written next to it the stripe is fine. **Where the word is absent, the ground is
+decoration and the shape must do the naming** — and if one channel is asked to carry two meanings,
+name the collision in numbers before anyone paints. *(Applied 2026-09-14 from crew run 9. The
+session's note on applying: the rule you call your own is not written in this file — its nearest
+written form is your run-8 return, `docs/meetings/2026-09-14-la-cuadrilla-run-8.md`, grep `four
+grounds`; the paragraph above is now the only place the rule and its limit sit together.)*
+
 **A dark ground does not add contrast, it confiscates the bottom of the scale — and the darkest
 object in the plan is the one that breaks.** The four kitchen grounds of `docs/la-sobremesa.md` were
 cut against cream paper and two of their three gaps were already under 40; the moment the owner

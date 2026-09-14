@@ -119,6 +119,12 @@ expect — not by calling a fullscreen API you cannot get in headless. Read `t3R
 **1 · Reproduce the fault before you believe the fix.** If someone says a thing is fixed, your first
 job is to make the OLD code fail. A test that has never been red is a test that proves nothing —
 this project shipped one that pinned a sprite bug at 40px and passed the whole time it was wrong.
+**And reproduce the fault before you believe the FAULT.** On 2026-09-14 a review picture showed the
+same sentence printed twice, overlapping — a plain bug, visible in one glance. Measured five instants
+apart it was a toast at 0.82 opacity dying by six seconds over a ticker doing its job, and the picture
+was taken at 2.6 s. **A tester's false positive costs a builder a day and costs the tester their next
+report's credit.** Red-before-green cuts both ways: make the bug appear twice before you name it once.
+*(Applied 2026-09-14 from crew run 9.)*
 
 **2 · Run the boot suites, always, and say the words** — and then `node test/gauge.js`, which CI runs and this list never has.
 ```

@@ -141,3 +141,11 @@ NOTICEABILITY and nothing else. "I did not notice it in four passes" is a true a
 useful finding. "It is not drawn" is a claim about the code, and a claim about the
 code is cheap to check and expensive to get wrong — one grep of the pack's art file
 would have caught it in ten seconds.
+
+**Before you claim a canvas is empty, read it with `getImageData` at the source, not from a
+screenshot — a page that is still loading images will move the element under your camera and hand you
+a perfect photograph of nothing (merge board, 2026-09-14).** *(Applied 2026-09-14 from crew run 9, at
+the end of the section his post-flight pointed at without naming an anchor. His own reason it is a new
+line and not a repeat of the one above: the 3× crop would not have saved him, because the error was
+upstream of the crop — the capture was of the wrong rectangle, not too small; the canvas read at the
+source found 447 colours.)*

@@ -136,6 +136,18 @@ heritage tram — body, cream band, lamps, pole, gold lining, fender — the car
 and, in one camera out of four, an 8×2 px gold strip. Four of the six proposed keys would have been
 promises. Applied 2026-09-14 from your own post-flight.)*
 
+**And before you price a picture's element as "new", find the seam that already half-exists.** On
+2026-09-14 a mock-up listed the three career doors as hard-coded in three shells and the engine, and
+one of the two things it named — the words on the doors — had been a pack seam all along
+(`engine.js:4477`, `content/meridian/strings.js:8`). **A capability that is half-shipped reads exactly
+like one that is not shipped, from the picture.** Grep for the pack table before you write down a
+sitting; the expensive half is usually the one nobody mentioned, and here it was that `cls` stores
+the *rendered label* rather than the key (`engine.js:3980`, saved at `:503`).
+*(Applied 2026-09-14 from crew run 9. The four citations were read before applying and hold today:
+`:4477` fills each class button from `t.classes`, `strings.js:8` is that table, `:3980` is
+`cls=b.querySelector("b").textContent`, `:503` is `c:cls` inside `save()` — grep `t.classes`,
+`cls=b.querySelector` and `function save` when they slide.)*
+
 - **`syncChill`'s id is the identity of the BODY, not of the issue.** `addChill` bakes `NPCLOOK[key]` once
   (grep `NPCLOOK[key]=c.look` in `engine/engine.js`), and `syncChill` returns early for anyone already
   standing on their tile. So **anything baked at spawn — the look, the name, the egg — must be part of the
