@@ -5,7 +5,55 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-13, end of the crew-mode sitting)
 
-### ⇢ 2026-09-14, late — START HERE. Everything below this block is history.
+### ⇢ 2026-09-14, night — START HERE. Everything below this block is history.
+
+**`main` is still at `mq-v159` / `ch-v104`; the branch `claude/happy-ritchie-84qbbc` carries this
+sitting (documents, the wall at `ch-v105`, no engine change) and is pushed, not merged.** Merge is
+the owner's word.
+
+**What the owner asked (third reply, then "Try again" after the session limit cut the crew twice —
+`docs/ASKS.md`):** the questionnaire for AJ as a night-mode app with a comment on every choice; full
+mock-ups of the journey and the app feel; a UI review process (engineers, agents, UI, story, QA) run on
+the mock-ups; the map revamped so a person can find the next quest; the murals creative and completed;
+the backlog put together while AJ takes her time.
+
+**What shipped this sitting, and where:**
+- **AJ's questionnaire, v3** — the artifact he forwards (source: the session's scratchpad
+  `aj-questionnaire.html`; script `docs/for-aj/LA-SOBREMESA.md`). Thirteen questions, a comment box
+  under every choice, night; her answers stay with him (Zeni) and are never copied into this repo. v3
+  fixed Rosa's run-9 finding: held sideways, the bottom bar sat on the third answer. **He still owes one
+  check before forwarding: open the link logged out once (Zeni's "private by link").**
+- **The journey** — the artifact *La Sobremesa, the journey*
+  (https://claude.ai/code/artifact/5a2858ba-51ca-49c6-ba7e-3e10170aab0c): thirteen screens on a phone at
+  night, each labelled real game / real reader / drawing, every picture with Lupe's admission ticket.
+  Documents `docs/mocks/2026-09-14-la-sobremesa/journey/mockdocs2.js`, camera `render2.js`, tickets
+  `manifest.json`. Two of five matrix rows (390×844, 844×390); ES at 390×844 only — said on the page.
+- **The UI review process** — `docs/UI-REVIEW.md` (Lupe's, run 8), first ledger block opened for the
+  journey; **crew run 9 signed it** (`docs/meetings/2026-09-14-la-cuadrilla-run-9.md`, returns
+  verbatim; §6 block 1 carries the verdicts).
+- **The map plan** — `docs/meetings/2026-09-14-el-mapa.md`; #160 raised to high with the recommendation
+  (presence marks on the plan, a `TOWNPLAN` seam so Calle Dos exists, no list, no done tick; **the ring
+  on "next" is his call**). Built after his look at screen 12 of the journey page.
+- **The backlog** — issues #173–#201 filed from Remedios's run-8 triage (her pick: #173, the phone held
+  sideways), comments on #154 and #156, `docs/BACKLOG.md` §0 re-ranked onto the ledger.
+- **The wall** — iteration 8, fifteen panels in fifteen materials (`docs/crew/MURALS.md` iteration 8);
+  run 8's twelve persona edits applied (`docs/crew/FLIGHT-NOTES.md` rows 47–61, iteration 8).
+- **Registers**: `docs/la-sobremesa.md` §13 (run 8 consolidated; §10's palette superseded by Pili's
+  night palette and re-cut kitchens, machine-checked), `docs/GENRE-RULES.md` R18, the research sweeps in
+  `docs/research/2026-09-14-map-and-questionnaires.md`, QA-PASS E13, three stale citations corrected.
+
+**What is owed, in order:**
+1. The owner: the seven decisions on the journey page (Tuesday's first screen · restaurants as people or
+   a board · one house or two halves · grades switch on the card or in the gear · merge board or by hand,
+   and which first · names · the ring on "next"); his look at the map pictures; the logged-out check.
+2. Chava's two cold plays (the mocked map, the journey) — cut by the limit twice; run 9's Chava return
+   covers the journey if it landed (see the run-9 file).
+3. Run 9's panels on the wall (iteration 9) and its persona edits — see the flight-notes ledger.
+4. Nothing on the second world is built, and nothing should be until AJ answers (#200).
+
+---
+
+### 2026-09-14, late — the morning and afternoon (history from here down)
 
 **`main` is at `mq-v159` / `ch-v104`: [PR #172](https://github.com/rcguerrero29/meridian-quest/pull/172)
 merged the whole of 2026-09-13/14 at the owner's word ("merge please"). The branch

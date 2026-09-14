@@ -61,21 +61,23 @@
     const es=L();
     const col=Math.floor(W/3),s=2;
     const spec=[
-      {h:10,name:es?"1 · el bajo":"1 · shallow",what:es?"tortillas · especias":"tortillas · spices"},
-      {h:16,name:es?"2 · el mediano":"2 · medium",what:es?"arroz · frijol · masa":"rice · beans · masa",cur:true},
-      {h:24,name:es?"3 · el hondo":"3 · deep",what:es?"frascos · latas":"jars · tins · bottles"}];
+      {h:10,name:es?"1 · el bajo":"1 · shallow",what:es?["tortillas","especias · papel"]:["tortillas","spices · foil"]},
+      {h:16,name:es?"2 · el mediano":"2 · medium",what:es?["arroz · frijol","masa"]:["rice · beans","masa"],cur:true},
+      {h:24,name:es?"3 · el hondo":"3 · deep",what:es?["frascos · latas","botellas"]:["jars · tins","bottles"]}];
     g.textBaseline="alphabetic";
     spec.forEach((d,i)=>{const cx=i*col+Math.round(col/2),base=H*0.60,w=32*s,h=d.h*s,x=cx-w/2,y=base-h;
-      if(d.cur){g.fillStyle=N.accent;g.fillRect(x-8,y-8-(i===1?14:0),w+16,h+16+(i===1?14:0));} /* the one you are in: the accent FILLS its plinth */
-      g.fillStyle="#6B5A48";g.fillRect(x,y,w,h);g.fillStyle="#8A7660";g.fillRect(x,y,w,2);g.fillStyle="#4A3E32";g.fillRect(x,y+h-2,w,2);
+      /* the one you are in is OPEN, not painted (Pili, run 9): its front is pulled 6 px proud and down, and the dark of the box shows above it */
+      const pull=d.cur?6:0;
+      if(d.cur){g.fillStyle="#1C1A22";g.fillRect(x,y,w,h);}
+      g.fillStyle="#6B5A48";g.fillRect(x,y+pull,w,h);g.fillStyle="#8A7660";g.fillRect(x,y+pull,w,2);g.fillStyle="#4A3E32";g.fillRect(x,y+pull+h-2,w,2);
       if(i===0){g.fillStyle="#2E261E";g.fillRect(cx-14,y+h/2-1,28,4);}                                   /* a recessed slot */
-      if(i===1){g.fillStyle="#2E261E";g.fillRect(cx-16,y+h/2-3,6,6);g.fillRect(cx+10,y+h/2-3,6,6);         /* two knobs */
-        g.fillStyle="#D9C9A3";g.fillRect(x+6,y-6,14,6);g.fillRect(x+24,y-10,16,10);g.fillRect(x+44,y-4,12,4);}  /* bags slump over the edge */
+      if(i===1){g.fillStyle="#2E261E";g.fillRect(cx-16,y+pull+h/2-3,6,6);g.fillRect(cx+10,y+pull+h/2-3,6,6);  /* two knobs */
+        g.fillStyle="#D9C9A3";g.fillRect(x+6,y+pull-6,14,6);g.fillRect(x+24,y+pull-10,16,10);g.fillRect(x+44,y+pull-4,12,4);}  /* bags slump over the open edge */
       if(i===2){g.fillStyle="#2E261E";g.fillRect(cx-20,y+h/2-1,40,6);                                    /* one long bar */
         g.fillStyle="#3B3546";g.fillRect(x+6,y-14,10,14);g.fillRect(x+22,y-8,8,8);g.fillRect(x+40,y-18,12,18);   /* hard lids at different heights */
         g.fillStyle="#9C96AB";g.fillRect(x+6,y-14,10,3);g.fillRect(x+22,y-8,8,3);g.fillRect(x+40,y-18,12,3);}
       g.fillStyle=N.ink;g.font="600 12px ui-monospace,monospace";g.textAlign="center";g.fillText(d.name,cx,base+22);
-      g.fillStyle=N.muted;g.font="10px ui-monospace,monospace";g.fillText(d.what,cx,base+36);g.textAlign="left";});
+      g.fillStyle=N.muted;g.font="9px ui-monospace,monospace";g.fillText(d.what[0],cx,base+34);g.fillText(d.what[1],cx,base+45);g.textAlign="left";});
   }
 
   /* ================= THE DOCUMENTS ================= */
