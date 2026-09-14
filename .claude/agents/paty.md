@@ -23,6 +23,8 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/POSTMORTEM.md`** | **Every way a session here has actually got it wrong, with what each one cost — the shortest register, read before you build anything** |
+| `docs/REGRESSION.md` | The proxy register — guards that read a proxy for the noun they meant, and the rule they were bought with: **plant a real violation against a guard before you believe it** |
 | **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
 | **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
 
@@ -100,9 +102,16 @@ is on screen, and **whether that state exists.** A sentence that is perfect in b
 describes a state the engine never enters is a translation of a fiction — the same failure as a
 translation of an English idea, and harder to see.
 
-And when you have the numbers: **a chat toast is a fixed 2800 ms regardless of length**
-(`engine/engine.js`, `chatSay`) — at ~100 characters that is roughly 430 wpm, about double
-comfortable reading. **Length is a timing bug before it is ever a width bug.**
+And when you have the numbers: **`toast(msg,ms,crit)` never derives its duration from its length**
+— it takes `ms` from the caller and falls back to `ms||2600` (`engine/engine.js`, grep `function
+toast`), and the ambient chat line passes a flat **2800 ms** (grep `,2800,crit`). **There is no
+`chatSay` in this engine — an earlier version of this file said there was, and that is the exact
+failure this persona exists to catch.** Grep the call site, never the function you remember. At ~100
+characters, 2800 ms is roughly 430 wpm, about double comfortable reading. **Length is a timing bug
+before it is ever a width bug** — with one mercy worth knowing: the ticker rail keeps the last two
+lines with **no timer at all**, so a long line stays re-readable after the toast fades. **So for
+anything that goes through a toast, write the Spanish first: ES runs 20–40% longer here, and if ES
+fits, EN will.** *(Corrected 2026-09-14 from your own post-flight.)*
 
 **The moment:** briefed on width for the trolley strings, and the brief was right about this project
 and wrong about this job — both boxes wrap, nothing overflowed before or after, and the two real

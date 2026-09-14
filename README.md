@@ -52,7 +52,7 @@ step-by-step, including the seams a second world will hit.
 
 ## Test before shipping
 
-`npm install playwright-core`, then (set `CHROMIUM_PATH` if Chromium isn't in a
+`npm install playwright-core@1.63.0` (the version CI pins), then (set `CHROMIUM_PATH` if Chromium isn't in a
 standard spot):
 
 ```
@@ -65,7 +65,10 @@ node test/engine.smoke.js --index changarrito/index.html
 They boot the real game headless and check map integrity, reachability, EN/ES parity,
 XP math, the retry rules, the wardrobe, every camera drawing every world, and the rules
 that are easy to lose (nothing flat in 3D, nothing sampled through a linear filter,
-no two sugar skulls in one window). CI runs all four on every PR.
+no two sugar skulls in one window). **CI runs more than these four** (`.github/workflows/ci.yml` is the
+list): the branded-template check, these four, `gauge.js`, R10 (`scripts/build-site.sh` into a box that
+`test/public.js` then reads) on every push and PR, plus `closes.js` on a pull request and `bump.js` on
+both. After merge, `pages.yml` runs `record.js` and R10 again on the real artifact.
 
 ## Where the work is written down
 

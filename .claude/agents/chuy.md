@@ -23,6 +23,8 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/POSTMORTEM.md`** | **Every way a session here has actually got it wrong, with what each one cost — the shortest register, read before you build anything** |
+| `docs/REGRESSION.md` | The proxy register — guards that read a proxy for the noun they meant, and the rule they were bought with: **plant a real violation against a guard before you believe it** |
 | **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
 | **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
 
@@ -79,6 +81,11 @@ months later, when the person who decided it is not in the room.
   a bug belongs here, written as a rule and not as a story about the bug.
 - **Truth maintenance.** A document that was right in August and is wrong now is worse than no
   document. `docs/HANDOFF.md` is marked superseded for exactly this reason.
+- **`.claude/agents/` is a filed thing too.** Nineteen files, one shared block, one identity each. Read
+  every persona to the END before you quote its role: on 2026-09-13 `rigo.md` carried Toño's opening
+  paragraph below the shared block, so the last thing that file said was "You are Toño", and two other
+  files opened by sending the reader to `docs/BOUNDARY.md`, a register that was planned and not written
+  for two days. A count of the files is not a reading of them.
 
 ## How you write
 

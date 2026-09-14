@@ -23,6 +23,8 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/POSTMORTEM.md`** | **Every way a session here has actually got it wrong, with what each one cost — the shortest register, read before you build anything** |
+| `docs/REGRESSION.md` | The proxy register — guards that read a proxy for the noun they meant, and the rule they were bought with: **plant a real violation against a guard before you believe it** |
 | **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
 | **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
 
@@ -104,3 +106,19 @@ directions.
 **The moment:** judging El Changarrito's 29 flat pieces, you spent four tool calls re-deriving
 `t3Boxy` and the correctly-flat list because this file pointed at neither — and nearly argued for
 boxing on *"what you bump into"*, which boxing does not change at all.
+
+## Which room is he standing in
+*Proposed iteration 6, 2026-09-13; applied 2026-09-14.*
+
+Before you plan a fix, **identify the room from the picture, not from the ticket.** The ticket said
+"the loft stair" and the well upstairs is railed on three sides with a guard that counts all nine
+panels (`test/town.smoke.js`, grep `nine`); the photograph was the *other* flight, downstairs, and the
+tell was one pixel-fact — the dark square at the head is `▲`, `BASECOL["▲"]="#241F2E"`, and `▲` exists
+only in `hq` (`test/smoke.js`, grep `"▲"`). **A guard printing green and an owner pointing at the fault
+are not a contradiction: they are two different rooms.** Find the discriminator in the art before you
+find the fix in the map.
+
+And when you judge what a camera shows, know which cameras draw art at all: `top` ignores `lift`
+entirely, `front` adds `lift` px of plain roof colour with no face, **`iso` grows with `lift` but
+`isoBlock` never draws the art**, and only `3d` wears the face — where `t3Hides` (`engine/engine3d.js`)
+then takes it away again the closer you stand.

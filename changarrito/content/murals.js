@@ -78,10 +78,17 @@ function murDim(g,x1,x2,y,col,lab,g2){g.strokeStyle=col;g.fillStyle=col;g.lineWi
   if(lab){g.font="bold 11px ui-monospace,monospace";g.textAlign="center";g.fillText(lab,(x1+x2)/2,y-9);g.textAlign="left";}}
 /* a little person, five pixels wide, the way the game draws one */
 function murBody(g,x,y,shirt,h){const P=MURPAL;h=h||9;
-  g.fillStyle=shirt;g.fillRect(x,y,5,h);
-  g.fillStyle="#C08A5E";g.fillRect(x,y-6,5,6);
-  g.fillStyle=P.ink;g.fillRect(x-1,y-8,7,2);
-  g.fillRect(x+1,y+h,1,3);g.fillRect(x+3,y+h,1,3);}
+  /* Width follows height (Pili, 2026-09-13). This helper was 5 px wide whatever height it was handed,
+     so a body asked to be 49 tall was a pencil and one asked to be 9 tall was an ant beside 12 px
+     type — type is absolute on this wall and geometry is proportional, so a small panel drifts toward
+     a caption with a diagram under it. At h=9 every number below is what it always was: 5 wide, a
+     6-high head, a 2-high hat, legs at +1 and +3 — the nineteen panels painted before are untouched. */
+  const w=Math.max(5,Math.round(h*0.55)),hd=Math.max(6,Math.round(h*0.66)),cap=Math.max(2,Math.round(h*0.22)),
+        lw=Math.max(1,Math.round(w*0.2)),lh=Math.round(h/3);
+  g.fillStyle=shirt;g.fillRect(x,y,w,h);
+  g.fillStyle="#C08A5E";g.fillRect(x,y-hd,w,hd);
+  g.fillStyle=P.ink;g.fillRect(x-1,y-hd-cap,w+2,cap);
+  g.fillRect(x+Math.round(w*0.2),y+h,lw,lh);g.fillRect(x+Math.round(w*0.6),y+h,lw,lh);}
 
 /* ================= THE PANELS — append only, newest LAST so the wall reads left to right ========= */
 const MURALS=[
@@ -1020,8 +1027,8 @@ MURALS.push(
   aspect:0.46,
   art:(g,W,H)=>{const P=MURPAL;
     /* LUPE'S HAND: the carbon copy of a bay slip - pale green paper, a perforated stub, and a form
-       whose rows are the five sizes. Nobody else on this wall paints a FORM, and nobody else leaves a
-       row blank on purpose. */
+       whose rows are the five sizes. Nobody else on this wall paints a CHECKLIST with tick boxes, and nobody else
+       leaves a row unticked on purpose. */
     murPaper(g,W,H,"#DCE2CE",null);
     g.fillStyle="#CBD3BB";g.fillRect(0,0,W*0.055,H-3);
     g.fillStyle="#AEB89C";for(let y=6;y<H-8;y+=9)g.fillRect(W*0.055-2,y,2,4);
@@ -1073,6 +1080,699 @@ MURALS.push(
     g.beginPath();g.moveTo(x0,H*0.825);g.lineTo(x1,H*0.825);g.stroke();
     g.fillStyle=P.rust;g.font="bold 9px ui-monospace,monospace";
     g.fillText("pantalla completa: nadie corrió esta fila — 0.885 contra 2.24",x0,H*0.975);}
+}
+);
+
+/* ---- ITERATION 5 — 2026-09-13: the run that gave crew mode its lock ---- */
+MURALS.push(
+{
+  id:"beto-la-pieza-en-la-mano", iter:5, date:"2026-09-13", by:"beto",
+  title:{en:"The part that never got fitted", es:"La pieza que nunca se puso"},
+  state:{en:"At the bench with the part in my hand. It is cut, it fits, and I am not fitting it until the id changes — because a mark you only see after a reload is a mark that lies all session.",
+         es:"En el banco con la pieza en la mano. Está cortada, entra, y no la pongo hasta que cambie el id — porque una marca que sólo se ve al recargar miente toda la sesión."},
+  said:{en:"The label changed and the man did not. His shirt was welded on the day he was born, and nothing in this town gets born twice.",
+        es:"Cambió la etiqueta y el hombre no. La camisa se le soldó el día que nació, y aquí nadie nace dos veces."},
+  who:{en:"Beto, who placed the same man twice to see whether anything moved", es:"Beto, que puso al mismo hombre dos veces para ver si algo se movía"},
+  cap:{en:"The diff was four lines and it was finished. Then the same issue was placed twice, the second time claimed, and the shirt came back exactly as it was: same key, same body, no mark. A look is bolted on at birth by the one function nobody rereads, and the design would have shipped a claim that appears only after a reload — visible to whoever tests it, invisible to whoever plays it.",
+       es:"El cambio eran cuatro líneas y ya estaba. Luego se colocó el mismo asunto dos veces, la segunda ya tomado, y la camisa volvió igualita: misma llave, mismo cuerpo, sin marca. El aspecto se atornilla al nacer, en la función que nadie relee, y el diseño habría entregado una seña que sólo aparece al recargar — visible para quien prueba, invisible para quien juega."},
+  aspect:0.44,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+    /* BETO'S HAND: not the blueprint this time — the bench itself. One slab, two legs, the job. The
+       stamped tag over BOTH men is the id that did not change; that is the whole story. Repainted the
+       same day at Pili's word: the bench was at 70% and the men were ants under 12 px type. */
+    const bx=W*0.06,bw=W*0.88,by=H*0.50,bh=H*0.075;
+    g.fillStyle=P.ink;g.globalAlpha=.10;g.fillRect(0,0,W,H*0.09);g.globalAlpha=1;   /* the shop's rail */
+    for(let i=0;i<7;i++){g.fillStyle=P.shade;g.fillRect(W*0.08+i*W*0.13,H*0.03,W*0.05,H*0.045);}
+    g.fillStyle=P.shade;g.fillRect(bx,by,bw,bh);
+    g.fillStyle=P.ink;g.globalAlpha=.55;g.fillRect(bx+12,by+bh,7,H-(by+bh));g.fillRect(bx+bw-19,by+bh,7,H-(by+bh));g.globalAlpha=1;
+    const tx=W*0.5,ty=H*0.20;
+    g.fillStyle=P.bone;g.fillRect(tx-34,ty-15,68,24);
+    g.strokeStyle=P.ink;g.lineWidth=1.5;g.strokeRect(tx-34,ty-15,68,24);
+    g.fillStyle=P.ink;g.font="bold 13px ui-monospace,monospace";g.textAlign="center";g.fillText("~c0",tx,ty+3);g.textAlign="left";
+    const bhh=26,ax=W*0.27,cx2=W*0.63,fy=by-1;
+    g.strokeStyle=P.ink;g.lineWidth=1;g.globalAlpha=.5;
+    g.beginPath();g.moveTo(tx-22,ty+9);g.lineTo(ax+7,fy-bhh-20);g.stroke();
+    g.beginPath();g.moveTo(tx+22,ty+9);g.lineTo(cx2+7,fy-bhh-20);g.stroke();g.globalAlpha=1;
+    /* left: the man wearing it. right: the same man, and the part lying on the bench by his hand */
+    murBody(g,ax,fy-bhh,P.sky,bhh);
+    g.save();g.beginPath();g.rect(ax,fy-bhh,14,bhh);g.clip();
+    g.strokeStyle=P.bone;g.lineWidth=4;g.beginPath();g.moveTo(ax-3,fy-3);g.lineTo(ax+17,fy-bhh+3);g.stroke();g.restore();
+    murBody(g,cx2,fy-bhh,P.sky,bhh);
+    g.strokeStyle=P.bone;g.lineWidth=4;g.lineCap="butt";
+    g.beginPath();g.moveTo(cx2+22,by+bh-5);g.lineTo(cx2+44,by+3);g.stroke();
+    g.strokeStyle=P.ink;g.globalAlpha=.35;g.lineWidth=1;g.stroke();g.globalAlpha=1;
+    g.fillStyle=P.rust;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("puesta",ax-10,H*0.90);g.fillText("en el banco",cx2-14,H*0.90);}
+},
+{
+  id:"zeni-el-sello-sobre-el-renglon-vacio", iter:5, date:"2026-09-13", by:"zeni",
+  title:{en:"The stamp over the empty line", es:"El sello sobre el renglón vacío"},
+  state:{en:"Fourteen rows open at the counter; three say nobody, and I did not run a single one of the guards I wrote up.",
+         es:"Catorce renglones abiertos en el mostrador; tres dicen nadie, y no corrí ni una sola de las guardias que registré."},
+  said:{en:"It passed because nobody sent anything through that line.", es:"Pasó porque nadie mandó nada por ese renglón."},
+  who:{en:"the customs clerk, who asks what leaves and who signed for it, and writes both down", es:"la aduanera, que pregunta qué se va y quién firmó, y apunta las dos cosas"},
+  cap:{en:"The hostile package the suite has been opening for a week is checked in four places and stamped in a fifth. The fifth stamp certifies a line the package never had anything written on — the declaration asks about the prototype and the parcel arrives with that field blank, so the answer is always clean. Eleven honest checks and one that has been green since the day it was written, for nothing.",
+       es:"El paquete hostil que la suite abre desde hace una semana se revisa en cuatro casillas y se sella en una quinta. Ese quinto sello certifica un renglón que el paquete nunca trajo escrito — la declaración pregunta por el prototipo y el bulto llega con ese campo en blanco, así que la respuesta siempre sale limpia. Once revisiones honradas y una verde desde el día que se escribió, por nada."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;
+    /* ZENI'S HAND: a customs DECLARATION on the counter — three fields filled in somebody's hand, the
+       fourth left blank, the signature line nobody signed, and the OK stamp landed square over the
+       blank. Lupe's is a checklist with tick boxes; this is what a package carries. Repainted the same
+       day at Pili's word: the first draft had ticks like Lupe's, a dimension bar where a blank line
+       should be, and a clerk five pixels wide. */
+    murPaper(g,W,H,P.wash,P.lime);
+    const cy=H*0.74;
+    g.fillStyle=P.shade;g.fillRect(0,cy,W,H-cy);
+    g.fillStyle=P.ink;g.fillRect(0,cy,W,2);
+    const sx=W*0.07,sy=H*0.10,sw=W*0.56,sh=H*0.58;
+    g.fillStyle=P.bone;g.fillRect(sx,sy,sw,sh);
+    g.strokeStyle=P.ink;g.lineWidth=1;g.strokeRect(sx+0.5,sy+0.5,sw,sh);
+    g.fillStyle=P.ink;g.fillRect(sx,sy,sw,3);
+    g.fillStyle=P.ink;g.font="bold 9px ui-monospace,monospace";g.fillText("DECLARACIÓN",sx+8,sy+15);
+    const rows=["n","xp","qa","bl"],n=rows.length;
+    g.font="9px ui-monospace,monospace";g.textAlign="left";
+    const hand=(x0,x1,y,seed)=>{g.strokeStyle=P.ink;g.lineWidth=1.2;g.beginPath();g.moveTo(x0,y);
+      for(let x=x0;x<=x1;x+=4){g.lineTo(x,y+((x*7+seed*13)%5)-2);}g.stroke();};
+    for(let i=0;i<n;i++){const ry=sy+sh*(0.26+i*0.15);
+      g.strokeStyle=P.shade;g.lineWidth=1;
+      g.beginPath();g.moveTo(sx+30.5,ry+0.5);g.lineTo(sx+sw-10.5,ry+0.5);g.stroke();
+      g.fillStyle=P.ink;g.fillText(rows[i],sx+8,ry+3);
+      if(i<n-1)hand(sx+36,sx+sw*(0.55+0.1*i),ry-3,i+1);}          /* three written; the fourth is empty */
+    const fy=sy+sh*0.90;
+    g.strokeStyle=P.ink;g.lineWidth=1;g.beginPath();g.moveTo(sx+30.5,fy+0.5);g.lineTo(sx+sw-10.5,fy+0.5);g.stroke();
+    g.fillStyle=P.ink;g.font="8px ui-monospace,monospace";g.fillText("firma",sx+8,fy+3);   /* and nobody signed */
+    g.save();g.translate(sx+sw*0.62,sy+sh*0.80);g.rotate(-0.18);g.globalAlpha=0.9;
+    g.strokeStyle=P.rust;g.lineWidth=3.5;
+    g.beginPath();g.arc(0,0,Math.min(sw,sh)*0.30,0,Math.PI*2);g.stroke();
+    g.fillStyle=P.rust;g.font="bold 13px ui-monospace,monospace";g.textAlign="center";
+    g.fillText("OK",0,5);
+    g.restore();g.globalAlpha=1;g.textAlign="left";
+    /* me, behind the counter, on the far side of the sheet — a person, not a pencil */
+    const bh=26;murBody(g,W*0.80,cy-bh-2,P.moss,bh);
+    g.fillStyle=P.lime;g.fillRect(W*0.68,cy+5,W*0.26,H*0.14);
+    g.strokeStyle=P.ink;g.lineWidth=1;g.strokeRect(W*0.68+0.5,cy+5.5,W*0.26,H*0.14);
+    g.beginPath();g.moveTo(W*0.81+0.5,cy+5);g.lineTo(W*0.81+0.5,cy+5+H*0.14);g.stroke();
+    g.strokeStyle=P.shade;
+    for(let i=1;i<4;i++){const ly=cy+5+H*0.14*i/4;
+      g.beginPath();g.moveTo(W*0.695,ly+0.5);g.lineTo(W*0.795,ly+0.5);g.stroke();
+      g.beginPath();g.moveTo(W*0.825,ly+0.5);g.lineTo(W*0.925,ly+0.5);g.stroke();}}
+},
+{
+  id:"chuy-la-ficha-de-otro", iter:5, date:"2026-09-13", by:"chuy",
+  title:{en:"Another man's card", es:"La ficha de otro"},
+  state:{en:"at the counter, pulling every card before I believe the drawer", es:"en el mostrador, sacando ficha por ficha antes de creerle al cajón"},
+  said:{en:"Half of Rigo's file is Toño. Nobody caught it because nobody reads a persona — they obey it.",
+        es:"La mitad del expediente de Rigo es Toño. Nadie lo vio porque a una ficha nadie la lee: la obedecen."},
+  who:{en:"Chuy, who files, and who trusts no index he has not opened", es:"Chuy, que archiva, y que no le cree a un índice que no ha abierto"},
+  cap:{en:"I was sent to fix five wrong numbers and I fixed them; the numbers took an hour and taught nobody anything. What cost the afternoon was a card whose bottom half introduces a different man — read to the end and an agent is told he is somebody else, and the last instruction is the one that wins. Two other cards send you to a drawer that was named twice and never built. A count of the cards is not a reading of them.",
+       es:"Me mandaron a corregir cinco números mal puestos y los corregí; los números tomaron una hora y no le enseñaron nada a nadie. Lo que costó la tarde fue una ficha cuya mitad de abajo presenta a otro hombre — si la lees hasta el final, a un agente le dicen que es alguien más, y la última instrucción es la que manda. Otras dos fichas te mandan a un cajón que se nombró dos veces y nunca se construyó. Contar las fichas no es leerlas."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;
+    /* CHUY'S HAND: manila card stock from a filing drawer — a ruled index card, typed in monospace,
+       with a guide-card tab, a red cross-reference stamped SIN EXPEDIENTE, and a second card sliding
+       out from underneath in somebody else's hand. Nobody else on this wall paints STATIONERY. */
+    murPaper(g,W,H,"#E4D8B8",null);
+    g.fillStyle="#CDBE99";g.fillRect(W*0.030,H*0.085,W*0.945,H*0.845);
+    g.fillRect(W*0.780,H*0.040,W*0.120,H*0.060);
+    g.fillStyle=P.ink;g.font="bold 12px ui-monospace,monospace";g.textAlign="center";
+    g.fillText("R",W*0.840,H*0.092);g.textAlign="left";
+    const cx=W*0.055,cy=H*0.115,cw=W*0.860,ch=H*0.700;
+    g.fillStyle="rgba(20,16,10,.22)";g.fillRect(cx+3,cy+4,cw,ch);
+    g.fillStyle="#F3ECD9";g.fillRect(cx,cy,cw,ch);
+    g.strokeStyle="#B0563A";g.lineWidth=1.5;
+    g.beginPath();g.moveTo(cx,cy+ch*0.185);g.lineTo(cx+cw,cy+ch*0.185);g.stroke();
+    g.strokeStyle="#9FB6D4";g.lineWidth=1;g.globalAlpha=.75;
+    for(let i=2;i<9;i++){const y=cy+ch*0.185+i*ch*0.098;
+      if(y<cy+ch-4){g.beginPath();g.moveTo(cx+cw*0.045,y);g.lineTo(cx+cw*0.965,y);g.stroke();}}
+    g.globalAlpha=1;
+    g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("EXPEDIENTE · RIGO",cx+cw*0.045,cy+ch*0.125);
+    g.fillStyle="#6B6458";g.font="9px ui-monospace,monospace";g.textAlign="right";
+    g.fillText("19 fichas · un bloque · una identidad",cx+cw*0.965,cy+ch*0.125);g.textAlign="left";
+    const rows=[["OFICIO","tranviario, 41 años"],["LEE","CLAUDE.md · QA · el registro"],
+                ["VÉASE","BOUNDARY — cajón inexistente"],["VÉASE","leaves — cajón inexistente"],
+                ["AL PIE","«usted es Toño»"]];
+    g.font="9.5px ui-monospace,monospace";
+    rows.forEach((r,i)=>{const y=cy+ch*0.185+(i+1)*ch*0.098-3,miss=i===2||i===3,last=i===4;
+      g.fillStyle=miss?"#B0563A":(last?"#8E4230":P.ink);
+      g.fillText(r[0]+":",cx+cw*0.055,y);
+      g.fillStyle=miss?"#8E4230":"#3B3547";
+      g.fillText(r[1],cx+cw*0.300,y);
+      if(miss){g.strokeStyle="#B0563A";g.lineWidth=1.2;
+        g.beginPath();g.moveTo(cx+cw*0.295,y-3);g.lineTo(cx+cw*0.930,y-3);g.stroke();}});
+    g.save();g.translate(cx+cw*0.690,cy+ch*0.470);g.rotate(-0.19);
+    g.strokeStyle="rgba(176,86,58,.80)";g.lineWidth=2.5;
+    g.strokeRect(-W*0.150,-H*0.050,W*0.300,H*0.100);
+    g.strokeRect(-W*0.150+3,-H*0.050+3,W*0.300-6,H*0.100-6);
+    g.fillStyle="rgba(176,86,58,.85)";g.font="bold 11px ui-monospace,monospace";g.textAlign="center";
+    g.fillText("SIN EXPEDIENTE",0,-H*0.004);
+    g.font="8px ui-monospace,monospace";g.fillText("NUNCA EXISTIÓ",0,H*0.028);
+    g.textAlign="left";g.restore();
+    const sx=cx+cw*0.300,sy=cy+ch*0.845,sw=cw*0.660,sh=H*0.150;
+    g.fillStyle="rgba(20,16,10,.18)";g.fillRect(sx+3,sy+4,sw,sh);
+    g.fillStyle="#E8DCC0";g.fillRect(sx,sy,sw,sh);
+    g.strokeStyle="#C4BBA6";g.lineWidth=1;g.strokeRect(sx+.5,sy+.5,sw-1,sh-1);
+    g.fillStyle="#5F7A52";g.font="italic bold 11px ui-monospace,monospace";
+    g.fillText("You are Toño,",sx+sw*0.045,sy+sh*0.42);
+    g.fillStyle="#6B6458";g.font="italic 9px ui-monospace,monospace";
+    g.fillText("who keeps the ferretería…",sx+sw*0.045,sy+sh*0.78);
+    g.fillStyle="#6B6458";g.font="9px ui-monospace,monospace";
+    g.fillText("ch. · 13-IX",W*0.045,H*0.965);}
+},
+{
+  id:"yaz-el-fantasma-que-invente", iter:5, date:"2026-09-13", by:"yaz",
+  title:{en:"The ghost my own guard invented", es:"El fantasma que inventó mi propia guardia"},
+  state:{en:"I no longer believe a new guard's green OR its red until it has been pointed at the real thing. Last time I only distrusted the green. That is where I have moved.",
+         es:"Ya no le creo a una guardia nueva ni el verde NI el rojo hasta apuntarla a la cosa real. La vez pasada sólo desconfiaba del verde. Ahí es donde me moví."},
+  said:{en:"I wrote a check for files nobody wrote, and its first red was a file it made up out of a dot and two letters.",
+        es:"Escribí una guardia para archivos que nadie escribió, y su primer rojo fue un archivo que ella misma inventó con un punto y dos letras."},
+  who:{en:"Yaz, who takes the three a.m. call and now checks her own checks first", es:"Yaz, a quien le llaman a las tres de la mañana y ahora revisa primero sus propias revisiones"},
+  cap:{en:"The check exists to find one thing: a persona sending its reader to a file nobody ever wrote. First run, it named five. Two were not real. The pattern listed the endings it would accept and put the short one before the long one, so a data file that exists was read as a script file that never did — the last two letters simply fell off the end and nobody was there to catch them. A fixture would have passed. Only aiming it at nineteen real files with real names in them made the ghost stand up. She fixed it by reordering seven words, which is the whole cost, and that is the part worth painting: the cheapest possible bug, inside the most self-righteous possible guard, and it took less than a minute to fix and would have taken weeks to notice if she had trusted the red.",
+       es:"La guardia existe para encontrar una sola cosa: un personaje que manda a su lector a un archivo que nadie escribió jamás. En la primera corrida nombró cinco. Dos no eran reales. El patrón enumeraba las terminaciones que aceptaba y puso la corta antes que la larga, así que un archivo de datos que sí existe se leyó como un archivo de código que nunca existió — las últimas dos letras se cayeron del final y no había nadie ahí para atraparlas. Una prueba de laboratorio habría pasado. Sólo apuntarla a diecinueve archivos de verdad, con nombres de verdad adentro, hizo que el fantasma se parara. Lo arregló reordenando siete palabras, y ése es todo el costo, y ésa es la parte que vale pintar: el error más barato posible, dentro de la guardia más santurrona posible, un minuto para corregirlo y semanas para notarlo si le hubiera creído al rojo."},
+  aspect:0.44,
+  art:(g,W,H)=>{const P=MURPAL;
+    /* YAZ'S HAND AGAIN — depot enamel, a brushed rail, engraved strips, monospace. Different object
+       from her lamps: a failure list. Five lines; the three real failures are engraved strips struck
+       through in red, the two ghosts are dashed hollow plates with nothing behind them. On the right,
+       the filename under glass with its last two letters lying on the shelf beneath it, where they
+       fell. Repainted the same day at Pili's word: the first draft's red squares were her lamps with
+       corners, and the fallen letters were a rotation nobody could read. */
+    g.fillStyle="#1E2228";g.fillRect(0,0,W,H);
+    for(let x=0;x<W;x+=3){g.fillStyle=(x/3|0)%2?"#434A53":"#383E46";g.fillRect(x,0,Math.min(3,W-x),H*0.13);}
+    g.fillStyle="#2A2F36";g.fillRect(0,H*0.13,W,2);
+    g.fillStyle=P.bone;g.font="bold 11px ui-monospace,monospace";g.fillText("MISSING",8,H*0.09);
+    g.fillStyle=P.gold;g.font="bold 9px ui-monospace,monospace";g.fillText("5 rojos / 3 reales",W-104,H*0.09);
+    const lx=W*0.05,lw=W*0.52,rh=H*0.10,gap=H*0.05;
+    for(let i=0;i<5;i++){const y=H*0.22+i*(rh+gap),ghost=(i===2||i===4);
+      g.fillStyle="#14171B";g.fillRect(lx-4,y-3,lw+8,rh+6);
+      if(ghost){g.strokeStyle="#C0392B";g.lineWidth=1.5;g.setLineDash([4,3]);
+        g.strokeRect(lx+0.5,y+0.5,lw-1,rh-1);g.setLineDash([]);
+        g.fillStyle=P.gold;g.font="bold 10px ui-monospace,monospace";g.fillText("?",lx+lw*0.5-3,y+rh*0.75);}
+      else{g.fillStyle="#4A525C";g.fillRect(lx,y,lw,rh);                       /* the engraved strip */
+        g.fillStyle=P.bone;const n=[7,5,4][i>2?2:i];for(let k=0;k<n;k++)g.fillRect(lx+8+k*(lw*0.11),y+rh*0.30,lw*0.085,rh*0.36);
+        g.strokeStyle="#C0392B";g.lineWidth=3;g.beginPath();g.moveTo(lx+4,y+rh*0.5);g.lineTo(lx+lw-4,y+rh*0.5);g.stroke();}}
+    const px=W*0.64,pw=W*0.32,py=H*0.26,ph=H*0.30;
+    g.fillStyle="#14171B";g.fillRect(px-5,py-5,pw+10,ph+10);
+    g.fillStyle="#2A2F36";g.fillRect(px,py,pw,ph);
+    g.fillStyle=P.bone;g.font="bold 16px ui-monospace,monospace";g.fillText("spots.j",px+10,py+ph*0.62);
+    g.fillStyle=P.gold;g.fillText("s",px+80,py+ph*0.62);
+    /* the shelf under the glass, and the two letters lying on it */
+    const shy=py+ph+14;g.fillStyle="#4A525C";g.fillRect(px-5,shy,pw+10,5);
+    g.fillStyle="#8E949C";g.font="bold 13px ui-monospace,monospace";g.fillText("o",px+pw*0.55,shy-2);g.fillText("n",px+pw*0.72,shy-2);
+    g.strokeStyle=P.gold;g.lineWidth=1.5;g.setLineDash([2,3]);g.beginPath();g.moveTo(px+94,py+ph*0.66);g.quadraticCurveTo(px+pw*0.75,py+ph*0.9,px+pw*0.62,shy-10);g.stroke();g.setLineDash([]);
+    g.fillStyle=P.bone;g.font="8px ui-monospace,monospace";
+    g.fillText("el guardia inventó el fantasma",W*0.05,H*0.955);
+    g.fillStyle=P.gold;g.fillRect(W*0.05,H*0.905,W*0.20,2);}
+});
+
+MURALS.push(
+{
+  id:"melo-el-conteo-de-uno", iter:5, date:"2026-09-13", by:"melo",
+  title:{en:"A count of one", es:"Un conteo de uno"},
+  state:{en:"slower than the list, and it cost me two plants", es:"más lento que la lista, y me costó dos intentos"},
+  said:{en:"It counted the names and got one. It never asked whose.", es:"Contó los nombres y le salió uno. Nunca preguntó de quién."},
+  who:{en:"Melo Garduño, the locksmith, who works off a bicycle and is inside in three minutes", es:"Melo Garduño, el cerrajero, que trabaja desde una bicicleta y entra en tres minutos"},
+  cap:{en:"Nineteen plants against four locks fitted that same morning. Fourteen held, and held well — one of them told me the shirt on the street was wrong from three files away. Five opened, and every one of them opened because the lock counted something instead of looking at it. I did not see the shape until the second time I was already through.",
+       es:"Diecinueve intentos contra cuatro cerraduras puestas esa misma mañana. Catorce aguantaron, y bien — una me dijo que la camisa en la calle estaba mal desde tres archivos de distancia. Cinco abrieron, y todas abrieron porque la cerradura contaba algo en vez de mirarlo. No vi la forma hasta la segunda vez que ya iba pasando."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+    /* MELO'S HAND, SECOND VISIT: not the wire of padlocks — a tally on a scrap of paper. Nineteen
+       strokes; the fourteenth is in a different hand and a different ink, and the count under the
+       line still says nineteen. A key laid across the paper, teeth up, unused: the one he did not
+       need. (His own draft called helpers by the wrong signatures; the calling session drew what he
+       described.) */
+    const px=W*0.08,py=H*0.14,pw=W*0.84,ph=H*0.56;
+    g.fillStyle=P.bone;g.fillRect(px,py,pw,ph);
+    g.strokeStyle=P.shade;g.lineWidth=1;g.strokeRect(px+0.5,py+0.5,pw,ph);
+    g.lineCap="round";
+    for(let i=0;i<19;i++){const x=px+pw*0.07+i*(pw*0.86/19),odd=(i===13);
+      g.strokeStyle=odd?P.rust:P.ink;g.lineWidth=odd?4.5:2.6;
+      g.beginPath();g.moveTo(x,py+ph*0.18);g.lineTo(x+(odd?pw*0.02:0),py+ph*0.66);g.stroke();}
+    g.strokeStyle=P.ink;g.lineWidth=1.5;g.beginPath();g.moveTo(px+pw*0.05,py+ph*0.74);g.lineTo(px+pw*0.95,py+ph*0.74);g.stroke();
+    g.fillStyle=P.ink;g.font="bold 12px ui-monospace,monospace";g.textAlign="right";g.fillText("19",px+pw*0.95,py+ph*0.94);g.textAlign="left";
+    g.fillStyle=P.rust;g.font="bold 16px serif";g.textAlign="center";
+    g.fillText("?",px+pw*0.07+13*(pw*0.86/19)+pw*0.01,py+ph*0.96);g.textAlign="left";
+    /* the key, across the paper's foot, teeth up */
+    const ky=H*0.84;
+    g.strokeStyle=P.ink;g.lineWidth=3;g.lineCap="butt";
+    g.beginPath();g.moveTo(W*0.24,ky);g.lineTo(W*0.66,ky);g.stroke();
+    g.beginPath();g.arc(W*0.21,ky,H*0.05,0,Math.PI*2);g.stroke();
+    for(let t=0;t<3;t++){const x=W*0.58+t*W*0.03;g.beginPath();g.moveTo(x,ky);g.lineTo(x,ky-H*0.04-t*H*0.012);g.stroke();}
+    murBody(g,W*0.84,H*0.66,P.sky,26);}
+},
+{
+  id:"lupe-sin-carro-en-los-rodillos", iter:5, date:"2026-09-13", by:"lupe",
+  title:{en:"No car on the rollers", es:"Sin carro en los rodillos"},
+  state:{en:"in the room now, and checking that first", es:"ya dentro, y eso lo reviso primero"},
+  said:{en:"The trace was perfect. The bay was empty.", es:"La gráfica salió perfecta. La bahía estaba vacía."},
+  who:{en:"Lupe, who spent an afternoon measuring an empty bay", es:"Lupe, que se pasó una tarde midiendo una bahía vacía"},
+  cap:{en:"Twenty-eight readings, four cameras, seven sizes, every one of them real and every one of them worthless. The town opens on its front door and she never walked through it, so the world's container was nothing wide and nothing tall — but the canvas fills its buffer whether or not anybody can see the element, and the pixels came back correct. Nothing failed. Nothing could have. The picture caught it, at the end, three hours later.",
+       es:"Veintiocho lecturas, cuatro cámaras, siete tamaños, todas reales y todas inservibles. El pueblo abre en su puerta y ella nunca la cruzó, así que el contenedor del mundo medía nada de ancho y nada de alto — pero el lienzo llena su búfer aunque nadie pueda ver el elemento, y los píxeles salieron correctos. Nada falló. Nada podía fallar. La foto lo cachó, al final, tres horas después."},
+  aspect:0.44,
+  art:(g,W,H)=>{const P=MURPAL;
+    /* LUPE'S HAND, SECOND VISIT: not the tick-box slip this time — the rolling-road TRACE.
+       Tractor-feed printout, sprocket holes down both edges, one beautiful clean power curve
+       plotted over a grid, and the stamp that voids it laid across the whole sheet. */
+    murPaper(g,W,H,"#ECE7DA","#D3CBB6");
+    g.fillStyle="#DCD5C2";g.fillRect(0,0,W*0.05,H);g.fillRect(W*0.95,0,W*0.05,H);
+    g.fillStyle="#B9B09A";for(let y=7;y<H-6;y+=10){g.beginPath();g.arc(W*0.025,y,2.4,0,7);g.fill();
+      g.beginPath();g.arc(W*0.975,y,2.4,0,7);g.fill();}
+    const x0=W*0.115,x1=W*0.885,y0=H*0.22,y1=H*0.80;
+    g.fillStyle=P.ink;g.font="bold 10px ui-monospace,monospace";
+    g.fillText("BANCO DE RODILLOS · CALLE DOS",x0,H*0.115);
+    g.fillStyle="#6B6458";g.font="8px ui-monospace,monospace";
+    g.fillText("28 lecturas · 4 cámaras · 7 tamaños",x0,H*0.165);
+    g.strokeStyle="#CFC6B0";g.lineWidth=1;
+    for(let i=0;i<=8;i++){const x=x0+(x1-x0)*i/8;g.beginPath();g.moveTo(x,y0);g.lineTo(x,y1);g.stroke();}
+    for(let i=0;i<=5;i++){const y=y0+(y1-y0)*i/5;g.beginPath();g.moveTo(x0,y);g.lineTo(x1,y);g.stroke();}
+    g.strokeStyle="#8E8570";g.lineWidth=1.6;
+    g.beginPath();g.moveTo(x0,y0);g.lineTo(x0,y1);g.lineTo(x1,y1);g.stroke();
+    g.strokeStyle=P.rust;g.lineWidth=2.6;g.beginPath();
+    for(let i=0;i<=64;i++){const t=i/64,x=x0+(x1-x0)*t;const v=Math.pow(Math.sin(t*Math.PI*0.86),1.35);g.lineTo(x,y1-(y1-y0)*v*0.92);}
+    g.stroke();
+    g.fillStyle=P.rust;g.globalAlpha=.10;g.beginPath();g.moveTo(x0,y1);
+    for(let i=0;i<=64;i++){const t=i/64,x=x0+(x1-x0)*t;const v=Math.pow(Math.sin(t*Math.PI*0.86),1.35);g.lineTo(x,y1-(y1-y0)*v*0.92);}
+    g.lineTo(x1,y1);g.closePath();g.fill();g.globalAlpha=1;
+    g.fillStyle=P.moss;
+    for(let i=0;i<28;i++){const x=x0+(x1-x0)*(i+0.5)/28;g.fillRect(x-1.2,y1+5,2.4,5);}
+    g.fillStyle="#6B6458";g.font="7px ui-monospace,monospace";g.fillText("28/28 OK",x0,y1+22);
+    g.save();g.translate(W*0.50,H*0.53);g.rotate(-0.20);
+    const sw=W*0.66,sh=H*0.21;
+    g.strokeStyle=P.deep;g.lineWidth=3;g.globalAlpha=.88;
+    g.strokeRect(-sw/2,-sh/2,sw,sh);g.lineWidth=1;g.strokeRect(-sw/2+5,-sh/2+5,sw-10,sh-10);
+    g.fillStyle=P.deep;g.textAlign="center";g.font="bold 13px ui-monospace,monospace";
+    g.fillText("SIN CARRO EN LOS RODILLOS",0,-1);
+    g.font="8px ui-monospace,monospace";g.fillText("NO CAR ON THE ROLLERS",0,12);
+    g.textAlign="left";g.restore();g.globalAlpha=1;
+    const bx=W*0.80,by=H*0.90;
+    g.strokeStyle="#8E8570";g.lineWidth=1.5;
+    g.beginPath();g.arc(bx,by,7,0,7);g.stroke();g.beginPath();g.arc(bx+19,by,7,0,7);g.stroke();
+    g.strokeStyle="#B9B09A";g.lineWidth=1;g.beginPath();g.moveTo(bx-12,by+9);g.lineTo(bx+31,by+9);g.stroke();
+    g.fillStyle="#6B6458";g.font="7px ui-monospace,monospace";g.fillText("0×0",bx-13,by-12);}
+});
+
+/* ---- ITERATION 6 — 2026-09-13/14: the design run (the tram livery, two storeys, the skulls, the rail) ----
+   Seven return visits, none a first: Beto, Rigo, Pili, Tavo, Doña Cuca, Don Güero, Chema. Their words are
+   verbatim from docs/meetings/2026-09-13-la-cuadrilla-disena.md; the drawings are their own hands. ---- */
+MURALS.push(
+{
+  id:"beto-seis-en-la-foto", iter:6, date:"2026-09-13", by:"beto",
+  title:{en:"Six in the photograph, two on the car", es:"Seis en la foto, dos en el carro"},
+  state:{en:"Chart pinned, nine chips cut, seven struck out. I will not hang a paint card over a part nobody draws — the option would exist, the word would save, and the car would come back the same colour.", es:"Carta pegada, nueve muestras cortadas, siete tachadas. No cuelgo una tarjeta de color sobre una pieza que nadie pinta — la opción existiría, la palabra se guardaría, y el carro volvería del mismo color."},
+  said:{en:"He handed us a photograph of seven parts. The car has the colour of one of them, and a gold line eight pixels wide that only one camera out of four has ever drawn.", es:"Nos dio una foto de siete piezas. El carro tiene el color de una, y una línea dorada de ocho píxeles que sólo una cámara de cuatro ha pintado jamás."},
+  who:{en:"Beto, who counted the parts before he chose the paint", es:"Beto, que contó las piezas antes de escoger la pintura"},
+  cap:{en:"He was sent to design the customisation and spent the first half of it counting. The band, the lamps, the pole and the fender are not in the code in any camera, and this engine already keeps a list of the words it can read on this exact seam — written the day somebody learned that a key with no reader is the quietest fault there is, because the line looks right and nothing happens. A menu of four such keys would have passed every suite, saved every choice, and repainted nothing.", es:"Lo mandaron a diseñar la personalización y la primera mitad se le fue contando. La franja, los faroles, el trole y la defensa no están en el código en ninguna cámara, y este motor ya guarda una lista de las palabras que sabe leer en esta misma costura — escrita el día que alguien aprendió que una llave sin lector es la falla más callada que hay, porque la línea se ve bien y no pasa nada. Un menú de cuatro llaves así habría pasado todas las pruebas, guardado cada elección, y no habría repintado nada."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;
+  murGround(g,W,H);                                   /* the shop wall, not paper: this one happened at the wall with the chart on it */
+  /* THE PINNED PHOTOGRAPH, top-left: a heritage car, warm, with all seven parts on it */
+  const px=W*0.06,py=H*0.10,pw=W*0.38,ph=H*0.42;
+  g.fillStyle="#EFE7D6";g.fillRect(px-4,py-4,pw+8,ph+10);              /* the white border of a print */
+  g.fillStyle="#3A3040";g.fillRect(px,py,pw,ph);
+  murTram(g,px+pw*0.08,py+ph*0.34,pw*0.84,ph*0.42,{cabs:true,driverAt:1});
+  g.fillStyle=P.gold;                                                   /* the parts the photo has and the car does not */
+  g.fillRect(px+pw*0.08,py+ph*0.74,pw*0.84,2);                          /* the lining */
+  [0.18,0.30,0.42,0.58,0.70,0.82].forEach(t=>{g.beginPath();g.arc(px+pw*t,py+ph*0.68,2.2,0,7);g.fill();});  /* the lamps */
+  g.strokeStyle=P.ink;g.lineWidth=2;g.beginPath();                      /* the pole */
+  g.moveTo(px+pw*0.60,py+ph*0.34);g.lineTo(px+pw*0.86,py+ph*0.12);g.stroke();
+  g.fillStyle=P.bone;g.fillRect(px+pw*0.08,py+ph*0.40,pw*0.84,3);       /* the cream band */
+  [0,1].forEach(i=>{g.fillStyle=P.ink;g.beginPath();g.arc(px+(i?pw-6:6),py+6,3,0,7);g.fill();});  /* two pins */
+  /* THE PAINT CHART, right: nine chips, seven struck through */
+  const cx=W*0.52,cy=H*0.08,cw=W*0.40,rows=3,cols=3,sw=cw/cols;
+  g.fillStyle=P.wash;g.fillRect(cx-6,cy-6,cw+12,sw*rows*0.86+22);
+  const chips=[["body",P.rust,1],["trim",P.deep,1],["glass",P.bone,0],
+               ["band",P.shade,0],["lamp",P.gold,0],["pole",P.ink,0],
+               ["fender",P.moss,0],["doors",P.sky,0],["badge",P.lime,0]];
+  chips.forEach((c,i)=>{const x=cx+(i%cols)*sw,y=cy+((i/cols)|0)*sw*0.86;
+    g.fillStyle=c[1];g.fillRect(x,y,sw-10,sw*0.52);
+    g.strokeStyle=P.ink;g.lineWidth=1;g.strokeRect(x+.5,y+.5,sw-10,sw*0.52);
+    g.fillStyle=P.ink;g.font="10px ui-monospace,monospace";g.fillText(c[0],x,y+sw*0.70);
+    if(!c[2]){g.strokeStyle=P.rust;g.lineWidth=2;g.beginPath();       /* struck out: no reader */
+      g.moveTo(x,y);g.lineTo(x+sw-10,y+sw*0.52);g.moveTo(x+sw-10,y);g.lineTo(x,y+sw*0.52);g.stroke();}});
+  /* THE CAR AS IT IS, bottom: ghosted, and only the two live chips carry any colour */
+  const tx=W*0.06,ty=H*0.74,tw=W*0.42,th=H*0.18;   /* moved 2026-09-14: as painted it lay under the chart's third row */
+  murTram(g,tx,ty,tw,th,{ghost:true});
+  g.fillStyle=P.rust;g.fillRect(tx,ty,tw,th*0.10);                     /* body: the one colour it really has */
+  g.fillStyle=P.gold;g.fillRect(tx+tw*0.46,ty-2,8,2);                  /* the eight pixels, at true width */
+  murDim(g,tx+tw*0.46,tx+tw*0.46+8,ty-12,P.gold,"8px");
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("2 / 7",W*0.52,H*0.96);}
+},
+{
+  id:"rigo-un-solo-color", iter:6, date:"2026-09-13", by:"rigo",
+  title:{en:"One colour, and they called it two", es:"Un solo color, y le decían dos"},
+  state:{en:"Holding that the paint menu must refuse things — starting with the lamp, because it is the only sentence this car can say.", es:"Sostengo que el menú de pintura tiene que negar cosas — empezando por el farol, porque es la única frase que este carro sabe decir."},
+  said:{en:"Nine per cent apart is not a livery. It is a brown car that somebody wrote two names on.", es:"Nueve por ciento de diferencia no es librea. Es un carro café al que alguien le puso dos nombres."},
+  who:{en:"Rigo, who went to add a colour and found there was only ever one", es:"Rigo, que fue a agregar un color y descubrió que nunca hubo más que uno"},
+  cap:{en:"The owner sent a photograph of a real car — maroon below, cream around the windows — and asked what a person could repaint. Before answering I put our two colours side by side and they are nine per cent apart in brightness, the same hue, one of them three pixels tall and called the trim. His car is forty-four per cent apart. The band was never missing from the menu. It was missing from the tram.", es:"El dueño mandó la foto de un carro de verdad — guinda abajo, crema alrededor de las ventanas — y preguntó qué podía repintar uno. Antes de contestar puse nuestros dos colores juntos: nueve por ciento de diferencia en brillo, el mismo tono, y uno de ellos mide tres pixeles y le dicen el filete. El de él anda en cuarenta y cuatro. La banda nunca faltó en el menú. Faltaba en el tranvía."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* Rigo's hand again: a signwriter's board. Heavy bands, a gold rule, nothing cute.
+     Two cars, one over the other. The top one is ours as it is painted today — the body
+     and the "trim" are laid as two bars that plainly do not part company. The bottom one
+     is his photograph: the same body, a real band, and a pole going up off the panel. */
+  g.fillStyle=P.ink;g.fillRect(0,0,W,H*0.14);
+  g.fillStyle=P.gold;g.fillRect(0,H*0.14,W,3);
+  
+  /* --- the swatch pair, top left: two bars butted together, no gap, so the eye is
+         forced to find the edge and cannot --- */
+  const sx=W*0.06,sy=H*0.22,sw=W*0.26,sh=H*0.11;
+  g.fillStyle=P.rust;g.fillRect(sx,sy,sw,sh);
+  g.fillStyle=P.deep;g.fillRect(sx,sy+sh,sw,sh*0.5);
+  g.fillStyle=P.ink;g.font="bold 10px ui-monospace,monospace";
+  g.fillText("9%",sx+sw+8,sy+sh);
+  
+  /* --- the same pair as it should be: body, then the band, a clear step --- */
+  const tx=W*0.58;
+  g.fillStyle=P.rust;g.fillRect(tx,sy,sw,sh);
+  g.fillStyle=P.wash;g.fillRect(tx,sy+sh,sw,sh*0.5);
+  g.fillStyle=P.ink;g.fillText("44%",tx+sw+8,sy+sh);
+  
+  /* --- our car, as painted: murTram gives the rust body and the deep strip, which is
+         exactly the thing being complained about, so it is drawn with no help --- */
+  const cw=W*0.34,ch=H*0.20,cy=H*0.44;
+  murTram(g,W*0.06,cy,cw,ch,{driverAt:1});
+  
+  /* --- his car: the same silhouette with a cream band laid across the window course,
+         a fender, and the pole leaning back against the way it is going --- */
+  const bx=W*0.55,by=H*0.44;
+  murTram(g,bx,by,cw,ch,{driverAt:1});
+  g.fillStyle=P.wash;g.fillRect(bx+2,by+ch*0.22,cw-4,ch*0.10);   /* the band */
+  g.fillStyle=P.bone;                                            /* re-cut the glass over it */
+  {const n=3,gw=(cw-10)/n;for(let i=0;i<n;i++)g.fillRect(bx+5+i*gw,by+ch*0.32,gw-4,ch*0.30);}
+  g.fillStyle=P.ink;g.fillRect(bx,by+ch-1,cw,2);                 /* the fender */
+  g.strokeStyle=P.ink;g.lineWidth=2;                             /* the pole, trailing */
+  g.beginPath();g.moveTo(bx+cw*0.55,by);g.lineTo(bx+cw*0.16,by-H*0.17);g.stroke();
+  g.fillStyle=P.gold;g.fillRect(bx+cw*0.52,by-3,7,3);            /* the shoe that is already drawn */
+  g.strokeStyle=P.shade;g.lineWidth=1;                           /* the wire it needs, edge to edge */
+  g.beginPath();g.moveTo(0,by-H*0.17);g.lineTo(W,by-H*0.17);g.stroke();
+  
+  /* --- the one thing the menu may not touch: the lamp, ringed --- */
+  g.fillStyle="#D9342B";g.beginPath();g.arc(bx+cw-6,by+ch*0.30,3,0,7);g.fill();
+  g.strokeStyle="#D9342B";g.lineWidth=1;
+  g.beginPath();g.arc(bx+cw-6,by+ch*0.30,7,0,7);g.stroke();
+  
+  g.fillStyle=P.gold;g.fillRect(0,H*0.88,W,3);}
+},
+{
+  id:"pili-el-muestrario-de-cremas", iter:6, date:"2026-09-13", by:"pili",
+  title:{en:"The cream sample card", es:"El muestrario de cremas"},
+  state:{en:"holding that at five pixels a face is holes, not paint", es:"sosteniendo que a cinco píxeles una cara son huecos, no pintura"},
+  said:{en:"The sweet and the shelf are the same white. That is not a small skull — it is no skull.", es:"El dulce y la repisa son el mismo blanco. No es una calaverita chica — no es calaverita."},
+  who:{en:"Pili, la piñatera, who is asked whether anyone can tell what they are looking at", es:"Pili, la piñatera, a quien le preguntan si alguien sabe qué está viendo"},
+  cap:{en:"Five fixes in five days: four were a size and the fifth was a shelf. Nobody ever laid the two creams side by side — they were chosen days apart by different hands and they differ by less than half a point of grey out of two hundred and fifty-five, so the sweet and the ledge it stands on are one pale lump on a wall, and a lump reads as masonry. The sixth is not more light. It is taking marks out, because twelve marks in six inks inside twelve pixels is mush, and a face at that size is two holes.", es:"Cinco arreglos en cinco días: cuatro fueron un tamaño y el quinto fue una repisa. Nadie puso los dos cremas juntos — se escogieron con días de diferencia, por manos distintas, y se llevan menos de medio punto de gris de doscientos cincuenta y cinco, así que el dulce y la repisa son un solo bulto pálido en el muro, y un bulto se lee como albañilería. El sexto no es más luz. Es quitar marcas, porque doce marcas en seis tintas dentro de doce píxeles son atole, y una cara de ese tamaño son dos huecos."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* PILI'S HAND, second visit: not the rope this time — EL MUESTRARIO, the strip of newsprint a
+     piñatera pins her crepe samples to before she cuts anything. Periódico y papel de china, the
+     same materials as my first panel, a different object entirely. Newsprint: tiny grey type lines,
+     never letters. The tabs hang and curl; two of them are the two creams of this report and they
+     are pinned edge to edge on purpose, because the whole finding is that you cannot see the seam. */
+  const px=W*0.05,py=H*0.12,pw=W*0.62,ph=H*0.20;
+  g.fillStyle="#CFC6B0";g.fillRect(px,py,pw,ph);                                   /* el periódico */
+  g.globalAlpha=.35;g.fillStyle=P.ink;
+  for(let i=0;i<7;i++)g.fillRect(px+7,py+6+i*((ph-12)/7),pw-14-((i*37)%23),1.2);    /* type, never letters */
+  g.globalAlpha=1;
+  g.fillStyle=P.shade;g.fillRect(px,py+ph,pw,3);
+  /* six tabs of papel de china hanging off the card. The first two are the report. */
+  const tabs=["#F6F2E8","#F7F2E2","#E8478F","#2FA5A0","#F2B705","#7B4BA8"];
+  const tw=pw/8,ty=py+ph+3;
+  tabs.forEach((c,i)=>{const tx=px+8+i*(tw*1.12);
+    g.fillStyle=c;g.fillRect(tx,ty,tw,H*0.17);
+    g.globalAlpha=.22;g.fillStyle=P.ink;g.fillRect(tx,ty+H*0.17-3,tw,3);g.globalAlpha=1;   /* the curl */
+    g.fillStyle=P.ink;g.fillRect(tx+tw*0.45,ty-4,2,5);});                                   /* the pin */
+  /* the seam that is not there: one hairline where the two creams meet, and it does not show */
+  g.fillStyle=P.ink;g.globalAlpha=.10;g.fillRect(px+8+tw*1.12-1,ty,1,H*0.17);g.globalAlpha=1;
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("242.0",px+6,ty+H*0.17+14);g.fillText("241.6",px+6+tw*1.12,ty+H*0.17+14);
+  g.font="bold 12px ui-monospace,monospace";g.fillStyle=P.rust;
+  g.fillText("\u0394 0.4",px+6,ty+H*0.17+30);
+  /* the history, in pencil, struck through — four sizes and a shelf */
+  g.font="10px ui-monospace,monospace";g.globalAlpha=.6;g.fillStyle=P.ink;
+  const hx=px+W*0.20,hy=ty+H*0.17+30;
+  g.fillText("8 \u00b7 5 \u00b7 7 \u00b7 luz \u00b7 repisa",hx,hy);   /* single-spaced 2026-09-14: it ran into her own label */
+  g.strokeStyle=P.ink;g.lineWidth=1;g.beginPath();g.moveTo(hx-2,hy-3);g.lineTo(hx+W*0.36,hy-3);g.stroke();
+  g.globalAlpha=1;
+  /* THE OBJECT, at the right, at the size it is actually delivered: gold pane, and one pale lump
+     that is a sweet and a ledge and reads as neither. Then his three arrows, in marker, over it. */
+  const ox=W*0.74,oy=H*0.22,ow=W*0.16,oh=H*0.30;
+  g.fillStyle="#5C4A50";g.fillRect(ox-8,oy-8,ow+16,oh+22);                          /* el muro morado */
+  const gr=g.createLinearGradient(0,oy,0,oy+oh);
+  gr.addColorStop(0,"#F2B705");gr.addColorStop(.55,"#E8873A");gr.addColorStop(1,"#8A3F1E");
+  g.fillStyle=gr;g.fillRect(ox,oy,ow,oh);                                           /* el vidrio */
+  g.fillStyle="#F6F2E8";g.fillRect(ox+ow*0.19,oy+oh*0.22,ow*0.62,oh*0.78);          /* el dulce */
+  g.fillStyle="#F7F2E2";g.fillRect(ox-4,oy+oh,ow+8,H*0.045);                        /* la repisa */
+  g.fillStyle="#8A7F66";g.fillRect(ox-4,oy+oh+H*0.045,ow+8,2);
+  g.globalAlpha=.42;g.fillStyle="#100C16";g.fillRect(ox-3,oy+oh+H*0.045+2,ow+6,4);g.globalAlpha=1;
+  /* sus tres flechas rojas — when the customer has to point, the pi\u00f1ata failed */
+  g.strokeStyle="#D9342B";g.fillStyle="#D9342B";g.lineWidth=3;
+  [[-0.9,-0.55],[-0.55,-0.95],[0.55,-0.75]].forEach(a=>{
+    const tx=ox+ow*0.5,ty2=oy+oh*0.55,sx=tx+a[0]*W*0.16,sy=ty2+a[1]*H*0.30;
+    g.beginPath();g.moveTo(sx,sy);g.lineTo(tx+a[0]*18,ty2+a[1]*18);g.stroke();
+    g.beginPath();g.moveTo(tx+a[0]*10,ty2+a[1]*10);
+    g.lineTo(tx+a[0]*24-a[1]*7,ty2+a[1]*24+a[0]*7);
+    g.lineTo(tx+a[0]*24+a[1]*7,ty2+a[1]*24-a[0]*7);g.closePath();g.fill();});
+  g.fillStyle=P.ink;g.font="bold 10px ui-monospace,monospace";
+  g.fillText("el cliente se\u00f1ala",ox-14,oy+oh+H*0.20);}
+},
+{
+  id:"tavo-encima-de-mis-palabras", iter:6, date:"2026-09-13", by:"tavo",
+  title:{en:"Over my own words", es:"Encima de mis propias palabras"},
+  state:{en:"Painting the car he photographed before building the picker he asked for — a colour is not worth choosing until the thing wearing it is worth looking at.", es:"Pintando el carro que fotografió antes de construir el selector que pidió — un color no vale la pena elegirlo hasta que la cosa que lo lleva valga la pena mirarla."},
+  said:{en:"I painted “18% slower than walking” on this wall. By that evening the constant was 6.0. The tram can be repainted. A panel cannot.", es:"Pinté «18% más lento que caminar» en esta pared. Esa misma tarde la constante ya era 6.0. Al tranvía se le puede dar otra mano. A un panel no."},
+  who:{en:"Tavo, who found his own panel out of date and left it up", es:"Tavo, que halló su propio panel caducado y lo dejó puesto"},
+  cap:{en:"He came back to the trolley with a number he was proud of and checked it anyway, out of habit. It had been overtaken hours after he wrote it, by the owner, who simply wanted the thing to go faster. So the first card on the rail is the one he can still paint, and the scrap underneath is the one he cannot — which is the whole argument for grepping the constant instead of quoting yourself.", es:"Volvió al trolley con un número del que estaba orgulloso y aun así lo verificó, por costumbre. Lo habían rebasado a las pocas horas de escribirlo, el dueño, que nada más quería que la cosa fuera más rápida. Por eso la primera tarjeta del riel es la que todavía puede pintar, y el recorte de abajo es la que ya no — que es todo el argumento para buscar la constante en vez de citarse a uno mismo."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* TAVO'S PAPER IS A SAMPLE CARD. Not a blueprint, not a signwriter's board \u2014 the chip you hold
+     up against the real thing and squint at. Four cards on a rail: one painted, three left for
+     the person whose job it is. And pinned under them, the scrap he is not allowed to correct. */
+  const car=(x,y,w,h,body,band,trim,blank)=>{
+    g.fillStyle=P.shade;g.fillRect(x+2,y+h*0.96,w-4,2);
+    if(blank){ g.strokeStyle=P.shade;g.lineWidth=1;g.setLineDash([3,3]);
+      g.strokeRect(x+.5,y+h*0.10+.5,w-1,h*0.78);g.setLineDash([]); return; }
+    g.fillStyle=body;g.fillRect(x,y+h*0.28,w,h*0.60);          /* the lower body */
+    g.fillStyle=band;g.fillRect(x,y+h*0.10,w,h*0.18);          /* the clerestory band \u2014 his photograph's cream */
+    g.fillStyle=trim;g.fillRect(x,y+h*0.06,w,h*0.05);          /* roof edge */
+    g.fillStyle=trim;g.fillRect(x,y+h*0.845,w,h*0.045);        /* the gold lining under the glass */
+    g.fillStyle=P.bone;
+    for(let i=0;i<3;i++)g.fillRect(x+4+i*((w-8)/3),y+h*0.36,(w-8)/3-3,h*0.24);
+    g.fillStyle=P.ink;[0.24,0.76].forEach(t=>g.fillRect(x+w*t-2,y+h*0.89,5,4));
+    g.fillStyle=P.ink;g.fillRect(x+w*0.52-1,y-h*0.20,2,h*0.26); /* the pole on the roof */
+    g.fillStyle=trim;g.fillRect(x+w*0.52-4,y-h*0.23,8,2);};
+  /* the rail the cards hang from */
+  const rail=H*0.15;
+  g.globalAlpha=.35;g.fillStyle=P.ink;g.fillRect(W*0.05,rail,W*0.90,2);g.globalAlpha=1;
+  const n=4,gp=W*0.022,cw=(W*0.90-gp*(n-1))/n,ct=rail+H*0.11,ch=H*0.34;
+  for(let i=0;i<n;i++){const x=W*0.05+i*(cw+gp);
+    g.fillStyle=P.ink;g.globalAlpha=.45;g.fillRect(x+cw/2-1,rail,2,ct-rail);g.globalAlpha=1;
+    g.fillStyle=P.bone;g.fillRect(x,ct,cw,ch);
+    g.fillStyle=P.shade;g.fillRect(x,ct+ch,cw,2);
+    car(x+cw*0.10,ct+ch*0.26,cw*0.80,ch*0.52,P.rust,P.wash,P.gold,i>0);
+    g.font="bold 9px ui-monospace,monospace";g.textAlign="center";
+    g.fillStyle=i?P.shade:P.ink;
+    g.fillText(i?"PILI":"LA FOTO",x+cw/2,ct+ch-6);g.textAlign="left";}
+  /* THE SCRAP \u2014 his own last panel, torn out, getting a coat that does not cover it */
+  const sx=W*0.05,sy=H*0.66,sw=W*0.56,sh=H*0.26;
+  g.fillStyle=P.wash;g.fillRect(sx,sy,sw,sh);
+  g.strokeStyle=P.shade;g.lineWidth=1;g.strokeRect(sx+.5,sy+.5,sw-1,sh-1);
+  for(let i=0;i<9;i++){g.fillStyle=P.wash;                    /* the torn top edge */
+    g.fillRect(sx+i*(sw/9),sy-3,sw/9-2,4);}
+  /* the old race, in miniature */
+  g.fillStyle=P.moss;g.fillRect(sx+sw*0.60,sy+sh*0.30,5,10);
+  g.fillStyle="#C08A5E";g.fillRect(sx+sw*0.60,sy+sh*0.30-6,5,6);
+  g.fillStyle=P.rust;g.fillRect(sx+sw*0.16,sy+sh*0.40,sw*0.16,9);
+  g.fillStyle=P.ink;g.font="bold 12px ui-monospace,monospace";
+  g.fillText("18% SLOWER",sx+8,sy+sh-8);
+  /* the coat of fresh maroon, brushed on, three-quarters opaque \u2014 it shows through. It always shows through */
+  g.globalAlpha=.72;g.fillStyle=P.rust;
+  for(let i=0;i<5;i++)g.fillRect(sx+4,sy+sh-24+i*4,sw*0.66-i*6,4);
+  g.globalAlpha=1;
+  /* the number that replaced it, stencilled clean, off the scrap where nothing can cover it */
+  g.fillStyle=P.gold;g.font="bold 26px ui-monospace,monospace";
+  g.fillText("6.0",W*0.68,sy+sh*0.62);
+  g.fillStyle=P.ink;g.font="bold 10px ui-monospace,monospace";
+  g.fillText("grep it. every time.",W*0.68,sy+sh*0.62+15);
+  /* the brush, laid across the rail, because somebody has to hold it */
+  g.fillStyle=P.deep;g.fillRect(W*0.80,H*0.70,W*0.15,4);
+  g.fillStyle=P.ink;g.fillRect(W*0.93,H*0.685,W*0.04,7);}
+},
+{
+  id:"cuca-la-escalera-de-un-lado", iter:6, date:"2026-09-13", by:"cuca",
+  title:{en:"The stair with one side", es:"La escalera de un solo lado"},
+  state:{en:"Certain the guard is honest and pointed at the wrong staircase", es:"Segura de que la prueba es honrada y está apuntando a la escalera equivocada"},
+  said:{en:"The check stood upstairs counting nine rails and printed green. He was downstairs, on the flight nobody ever drew a rail for.", es:"La prueba se quedó arriba contando nueve barandales y dio verde. Él estaba abajo, en la escalera para la que nadie dibujó nunca un barandal."},
+  who:{en:"Doña Cuca, who keeps the rooms and the stairs", es:"Doña Cuca, la de los cuartos y las escaleras"},
+  cap:{en:"The report named the loft and the loft is fine — nine panels, three sides, a check that counts every one of them. The picture he sent was the other flight, the one you climb out of the lobby: a wall along its north side because the map happens to put a wall there, and nothing at all along its south because nobody ever wrote the glyph. The tell was one pixel: the dark square at the head only exists downstairs. Thirty years letting rooms and I have never once been shown a stair railed on one side by a builder who meant it.", es:"El reporte nombró el desván y el desván está bien — nueve tramos, tres lados, y una prueba que los cuenta todos. La foto que mandó era la otra escalera, la que se sube desde el zaguán: un muro a su lado norte porque el mapa puso un muro ahí, y nada, absolutamente nada, a su lado sur, porque nadie escribió nunca el signo. La pista era un solo pixel: el cuadro oscuro de la cabecera sólo existe abajo. Treinta años rentando cuartos y ni una sola vez me enseñó un albañil una escalera con barandal de un solo lado a propósito."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  const chalk="#F4F1E8",mass="#8E8574",tread="#B9A98E";
+  g.fillStyle=chalk;g.globalAlpha=.95;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("arriba",W*0.10,H*0.13);g.fillText("abajo",W*0.60,H*0.13);g.globalAlpha=1;
+  /* ---- LEFT: the loft's well. Sunken, railed both visible sides, ticked. ---- */
+  const lx=W*0.08,lw=W*0.34,gy=H*0.60,st=H*0.052;
+  g.fillStyle=P.ink;g.globalAlpha=.14;g.fillRect(lx,gy,lw,H*0.055);g.globalAlpha=1;
+  g.fillStyle=tread;g.fillRect(lx,gy-5,lw,5);                       /* the floor line */
+  g.fillStyle=P.deep;g.fillRect(lx+lw*0.16,gy,lw*0.68,st*4.1);      /* the hole */
+  for(let i=0;i<4;i++){g.fillStyle=i%2?"#6E6858":"#7C7566";
+    g.fillRect(lx+lw*0.16+i*lw*0.17,gy+i*st,lw*0.17,st*(4-i)+2);}
+  [[lx+lw*0.13,1],[lx+lw*0.84,1]].forEach(q=>{                      /* rail, BOTH sides */
+    g.fillStyle="#8A6A3E";g.fillRect(q[0]-1,gy-H*0.085,3,H*0.085);
+    g.fillStyle="#6E5334";g.fillRect(q[0]-5,gy-H*0.088,11,3);});
+  g.strokeStyle=P.moss;g.lineWidth=2.4;g.beginPath();
+  g.moveTo(lx+lw*0.40,H*0.20);g.lineTo(lx+lw*0.48,H*0.26);g.lineTo(lx+lw*0.64,H*0.155);g.stroke();
+  g.fillStyle=P.moss;g.font="bold 8px ui-monospace,monospace";g.fillText("9",lx+lw*0.68,H*0.26);
+  /* ---- RIGHT: the stall's flight. Mass north, open south. ---- */
+  const rx=W*0.56,rw=W*0.34;
+  g.fillStyle=P.ink;g.globalAlpha=.14;g.fillRect(rx,gy,rw,H*0.055);g.globalAlpha=1;
+  g.fillStyle=mass;g.fillRect(rx,gy-H*0.30,rw*0.94,H*0.30);         /* the wall that is not a rail */
+  g.fillStyle="#A29881";g.fillRect(rx,gy-H*0.30,rw*0.94,3);
+  for(let i=0;i<4;i++){const bw=rw*0.20,bh=st*(i+1);                /* four treads, rising */
+    g.fillStyle=i===3?"#2B2536":tread;g.fillRect(rx+rw*0.06+i*bw,gy-bh,bw-2,bh);
+    g.fillStyle="rgba(255,255,255,.18)";g.fillRect(rx+rw*0.06+i*bw,gy-bh,bw-2,1.5);}
+  g.save();g.strokeStyle=P.rust;g.lineWidth=2;g.globalAlpha=.9;g.setLineDash([5,4]);
+  g.beginPath();g.moveTo(rx+rw*0.04,gy+H*0.072);g.lineTo(rx+rw*0.90,gy+H*0.072);g.stroke();
+  g.setLineDash([]);g.restore();g.globalAlpha=1;
+  g.fillStyle=P.rust;g.font="bold 9px ui-monospace,monospace";
+  g.fillText("nada",rx+rw*0.34,gy+H*0.125);
+  murBody(g,rx+rw*0.52,gy-st*2-2,P.bone,9);                          /* somebody on the open side */
+  /* ---- the tick hangs over the wrong stair: chalk string and an arrow ---- */
+  g.strokeStyle=P.rust;g.lineWidth=2;g.beginPath();
+  g.moveTo(rx+rw*0.10,H*0.215);g.lineTo(lx+lw*0.80,H*0.215);g.stroke();
+  g.fillStyle=P.rust;g.beginPath();g.moveTo(lx+lw*0.70,H*0.215);
+  g.lineTo(lx+lw*0.80,H*0.175);g.lineTo(lx+lw*0.80,H*0.255);g.closePath();g.fill();
+  g.strokeStyle=chalk;g.lineWidth=1.2;g.globalAlpha=.7;
+  g.beginPath();g.moveTo(W*0.50,H*0.10);g.lineTo(W*0.50,gy+H*0.10);g.stroke();g.globalAlpha=1;}
+},
+{
+  id:"guero-la-banqueta-manda", iter:6, date:"2026-09-13", by:"don-guero",
+  title:{en:"The pavement decides the height", es:"La banqueta manda la altura"},
+  state:{en:"I hold that the town has no good wall for an upper floor today, and Meridian has exactly one: five tiles with no door in them and the map's edge at their back.", es:"Sostengo que hoy el pueblo no tiene una buena pared para una planta alta, y Meridian tiene exactamente una: cinco losas sin puerta y la orilla del mapa a su espalda."},
+  said:{en:"A building is never taller than the ground in front of it. Three clear rows buys you a second floor; two buys you a canyon.", es:"Un edificio nunca es más alto que el suelo que tiene enfrente. Tres filas libres te compran un segundo piso; dos te compran un cañón."},
+  who:{en:"Don Güero, who was sent to the town's mural wall and came back saying not there", es:"Don Güero, a quien mandaron al muro del mural del pueblo y volvió diciendo ahí no"},
+  cap:{en:"Asked where a second storey could stand, he measured the cutaway instead of trusting the note, and found the rule is arithmetic: a wall hides you out to (its height minus three tenths) divided by sixty-five hundredths. The wall everyone wanted — the one with the mural on it — has a door in the middle, and the strip above a door takes its height from the wall beside it and wears no picture at all. He also found that the sugar skull's lit pane is placed by the wall's height and sized without it, so the two things the owner asked for on the same day were one line of code apart.", es:"Le preguntaron dónde cabía un segundo piso, midió el recorte en vez de fiarse de la nota, y halló que la regla es aritmética: una pared te tapa hasta (su altura menos tres décimas) entre sesenta y cinco centésimas. La pared que todos querían — la del mural — tiene una puerta en medio, y la franja sobre una puerta toma su altura de la pared de al lado y no lleva dibujo ninguno. También halló que el vidrio encendido de la calaverita se coloca con la altura del muro y se dimensiona sin ella."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;
+  murPaper(g,W,H,"#EDE7D8",null);                        /* an elevation, not a plan: this wall has had a plan */
+  const gy=H*0.80,u=H*0.30,x0=W*0.07,x1=W*0.93;
+  g.fillStyle=P.shade;g.fillRect(x0,gy,x1-x0,3);         /* the ground line */
+  g.fillStyle="#D9D2BE";g.fillRect(x0,gy+3,x1-x0,H*0.06);/* the banqueta itself */
+  /* LEFT: the wall we have — 1.10 units, whole from anywhere */
+  const wA=W*0.20,hA=1.096*u;
+  g.fillStyle="#5C4A50";g.fillRect(x0,gy-hA,wA,hA);
+  g.fillStyle="#8E8AA0";g.fillRect(x0+wA*0.18,gy-hA*0.62,wA*0.22,hA*0.30);
+  g.fillStyle="#8E8AA0";g.fillRect(x0+wA*0.60,gy-hA*0.62,wA*0.22,hA*0.30);
+  g.fillStyle=P.ink;g.font="bold 10px ui-monospace,monospace";g.fillText("1.10",x0+2,gy-hA-5);
+  /* RIGHT: the wall we want — 1.81 units, and the stub it becomes up close */
+  const xB=W*0.46,wB=W*0.34,hB=1.81*u;
+  g.fillStyle="#5C4A50";g.fillRect(xB,gy-hB,wB,hB);
+  g.fillStyle="#7A6470";g.fillRect(xB,gy-hB*0.52,wB,2);  /* the floor band: the whole trick */
+  [0.12,0.40,0.68].forEach(f=>{g.fillStyle="#8E8AA0";
+    g.fillRect(xB+wB*f,gy-hB*0.90,wB*0.16,hB*0.22);      /* the upper storey, the new windows */
+    g.fillRect(xB+wB*f,gy-hB*0.40,wB*0.16,hB*0.22);});
+  g.fillStyle=P.gold;g.fillRect(xB+wB*0.40+1,gy-hB*0.90+1,wB*0.16-2,hB*0.22-2); /* one pane lit: the sill */
+  g.fillStyle=P.bone;g.fillRect(xB+wB*0.38,gy-hB*0.68,wB*0.20,2);
+  g.fillStyle=P.ink;g.fillText("1.81",xB+2,gy-hB-5);
+  /* the cutaway: where it stops existing because you walked up to it */
+  const sy=gy-0.28*u;
+  g.strokeStyle=P.rust;g.lineWidth=2;g.setLineDash([5,4]);
+  g.beginPath();g.moveTo(xB-8,sy);g.lineTo(xB+wB+8,sy);g.stroke();g.setLineDash([]);
+  g.fillStyle=P.rust;g.font="bold 9px ui-monospace,monospace";g.fillText("stub 0.28",xB+wB+10,sy+3);
+  /* the camera, and the ray that decides everything */
+  g.fillStyle=P.ink;g.beginPath();g.arc(x1-10,H*0.10,5,0,7);g.fill();
+  g.strokeStyle=P.ink;g.globalAlpha=.45;g.lineWidth=1;
+  g.beginPath();g.moveTo(x1-10,H*0.10);g.lineTo(W*0.30,gy-6);g.stroke();g.globalAlpha=1;
+  murBody(g,W*0.30,gy-14,P.moss,11);                     /* him, on the far pavement, seeing it whole */
+  murBody(g,xB+wB*0.50,gy-14,P.rust,11);                 /* him, up close, seeing a stub */
+  /* the dimension that is the rule: three clear rows */
+  murDim(g,W*0.32,xB-4,H*0.93,P.moss,"W = 3 filas");
+  g.fillStyle=P.deep;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("h \u2264 0.65\u00B7W + 0.3",x0,H*0.10);}
+},
+{
+  id:"chema-la-copia-en-blanco", iter:6, date:"2026-09-14", by:"chema",
+  title:{en:"The blank print", es:"La copia en blanco"},
+  state:{en:"Holding that the front camera is a zero and not a contrast — and refusing to grade the print until somebody tells me which camera he was standing in.", es:"Sostengo que la cámara frontal es un cero y no un asunto de contraste — y me niego a corregir la copia hasta que alguien me diga en qué cámara estaba parado él."},
+  said:{en:"The negative had the skull on it. The print came out empty. Nobody had asked the print.", es:"El negativo tenía la calavera. La copia salió vacía. Nadie le había preguntado a la copia."},
+  who:{en:"Chema, who developed it before he graded it", es:"Chema, que la reveló antes de corregirla"},
+  cap:{en:"Five reports in, and every answer had been a number about the sweet: eight pixels, then five, then a lit pane, then a ledge. He was sent to measure its contrast and instead he blanked the one hand that paints it and counted what moved. In the camera the owner photographs, the game draws the window eight times a frame and delivers nothing at all — the wall it hangs on is painted afterwards, over the top, every frame since it shipped. Contrast was the wrong question for a thing that is not on the paper. The negative was perfect. It always had been.", es:"Cinco reportes después, y cada respuesta había sido un número sobre el dulce: ocho píxeles, luego cinco, luego un vidrio encendido, luego una repisa. Lo mandaron a medir su contraste y en vez de eso tapó la única mano que lo pinta y contó lo que se movió. En la cámara que el dueño fotografía, el juego dibuja la ventana ocho veces por cuadro y no entrega absolutamente nada — la pared donde cuelga se pinta después, encima, cada cuadro desde el día que se entregó. El contraste era la pregunta equivocada para algo que no está en el papel. El negativo estaba perfecto. Siempre lo estuvo."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;murGround(g,W,H);
+  /* CHEMA'S HAND, and NOT the contact sheet again: a darkroom bench. On the left a lightbox with the
+     negative on it — the skull is plainly there, in reversed tones. On the right the finished print,
+     pinned up, wet, and blank where the skull should be. Between them the grease pencil. */
+  g.fillStyle=P.ink;g.font="bold 13px ui-monospace,monospace";
+  g.fillText("CALLE DOS \u00b7 REPISAS \u00b7 C\u00c1MARA FRONTAL",W*0.035,H*0.06);
+  g.font="10px ui-monospace,monospace";g.fillStyle=P.deep;g.textAlign="right";
+  g.fillText("22:00 \u00b7 control 0 px",W*0.965,H*0.06);g.textAlign="left";   /* pulled up 2026-09-14: the readings row was below the panel's edge */
+  
+  /* --- the lightbox, left --- */
+  const lx=W*0.035, ly=H*0.15, lw=W*0.42, lh=H*0.47;
+  g.fillStyle=P.ink;g.globalAlpha=.18;g.fillRect(lx+5,ly+6,lw,lh);g.globalAlpha=1;
+  g.fillStyle="#F4EFD9";g.fillRect(lx,ly,lw,lh);
+  g.fillStyle="#FFFBEA";g.fillRect(lx+3,ly+3,lw-6,lh-6);
+  g.strokeStyle=P.shade;g.lineWidth=2;g.strokeRect(lx+0.5,ly+0.5,lw-1,lh-1);
+  /* the negative strip laid across it, sprocket edges top and bottom */
+  const nx=lx+lw*0.10, ny=ly+lh*0.22, nw=lw*0.80, nh=lh*0.52;
+  g.fillStyle="#3A3320";g.fillRect(nx,ny-4,nw,nh+8);
+  g.fillStyle="#FFFBEA";
+  for(let x=nx+3;x<nx+nw-4;x+=nw/7){g.fillRect(x,ny-3,4,3);g.fillRect(x,ny+nh,4,3);}
+  /* the frame itself: reversed tones, so the cream sweet reads DARK on a light wall */
+  g.fillStyle="#C9BE9A";g.fillRect(nx+4,ny,nw-8,nh);                    /* wall, inverted */
+  const wx=nx+nw*0.34, wy=ny+nh*0.16, ww=nw*0.32, wh=nh*0.60;
+  g.fillStyle="#5B5230";g.fillRect(wx,wy,ww,wh);                        /* the lit pane, inverted */
+  g.fillStyle="#2B2618";                                                /* the sweet, inverted */
+  g.beginPath();g.ellipse(wx+ww*0.5,wy+wh*0.52,ww*0.32,wh*0.30,0,0,7);g.fill();
+  g.fillRect(wx+ww*0.34,wy+wh*0.66,ww*0.32,wh*0.20);
+  g.fillStyle="#C9BE9A";                                                /* its sockets, inverted */
+  g.fillRect(wx+ww*0.36,wy+wh*0.42,ww*0.10,wh*0.12);
+  g.fillRect(wx+ww*0.56,wy+wh*0.42,ww*0.10,wh*0.12);
+  g.fillStyle="#8C8256";g.fillRect(wx-ww*0.10,wy+wh*0.88,ww*1.20,wh*0.14); /* the ledge, inverted */
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("EL NEGATIVO",lx,ly-4);
+  g.font="10px ui-monospace,monospace";g.fillStyle=P.deep;
+  g.fillText("est\u00e1 ah\u00ed \u00b7 8 veces por cuadro",lx,ly+lh+12);
+  
+  /* --- the print, right: pinned, wet, and empty --- */
+  const px2=W*0.545, py2=H*0.15, pw=W*0.42, ph=H*0.47;
+  g.fillStyle=P.ink;g.globalAlpha=.18;g.fillRect(px2+5,py2+6,pw,ph);g.globalAlpha=1;
+  g.fillStyle="#8A4A34";g.fillRect(px2,py2,pw,ph);                      /* the facade, as printed */
+  g.fillStyle="#7A4030";g.fillRect(px2,py2+ph*0.62,pw,ph*0.06);
+  /* the awning window the facade paints OVER the sill, every frame */
+  const ax=px2+pw*0.30, ay=py2+ph*0.24, aw=pw*0.40, ah=ph*0.30;
+  g.fillStyle="#E8DCB4";g.fillRect(ax,ay,aw,ah);
+  g.fillStyle="#D8C89A";g.fillRect(ax+2,ay+2,aw-4,ah-4);
+  g.fillStyle="#C87A55";g.beginPath();g.ellipse(ax+aw*0.5,ay+ah*0.72,aw*0.28,ah*0.20,0,0,Math.PI);g.fill();
+  g.strokeStyle="#6B3A28";g.lineWidth=1;g.strokeRect(ax+0.5,ay+0.5,aw-1,ah-1);
+  /* two drawing pins and a drip, so it reads as a wet print and not a window */
+  g.fillStyle=P.gold;[[px2+6,py2+6],[px2+pw-8,py2+6]].forEach(p=>{g.beginPath();g.arc(p[0],p[1],3,0,7);g.fill();});
+  g.fillStyle="#6B3A28";g.globalAlpha=.5;g.fillRect(px2+pw*0.5,py2+ph,2,H*0.03);g.globalAlpha=1;
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("LA COPIA",px2,py2-4);
+  
+  /* --- the grease pencil, straight across the print --- */
+  g.strokeStyle="#D9342B";g.lineWidth=4;g.lineCap="round";
+  g.beginPath();g.moveTo(px2+pw*0.10,py2+ph*0.14);g.lineTo(px2+pw*0.92,py2+ph*0.86);g.stroke();
+  g.fillStyle="#D9342B";g.font="bold 15px ui-monospace,monospace";
+  g.fillText("0 px",px2+pw*0.60,py2+ph*0.22);
+  
+  /* --- the arrow from negative to print, and the readings along the bottom --- */
+  g.strokeStyle=P.ink;g.lineWidth=2;
+  const my=py2+ph*0.50;
+  g.beginPath();g.moveTo(lx+lw+W*0.012,my);g.lineTo(px2-W*0.012,my);g.stroke();
+  g.beginPath();g.moveTo(px2-W*0.012,my);g.lineTo(px2-W*0.030,my-5);g.lineTo(px2-W*0.030,my+5);g.closePath();g.fill();
+  
+  const by=H*0.74;
+  g.fillStyle=P.bone;g.fillRect(W*0.035,by,W*0.93,H*0.26);
+  g.fillStyle=P.shade;g.fillRect(W*0.035,by,W*0.93,2);
+  g.fillStyle=P.ink;g.font="bold 11px ui-monospace,monospace";
+  g.fillText("P\u00cdXELES DE DULCE QUE LLEGAN, POR CALAVERA",W*0.05,by+13);
+  g.font="12px ui-monospace,monospace";
+  const cols=[["frontal","0",true],["superior","241",false],["iso","239",false],["3D","68",false],["3D +0.09","1743",false]];
+  cols.forEach((c,i)=>{const cx=W*0.05+i*(W*0.185);
+    g.fillStyle=c[2]?"#D9342B":P.deep;g.font="10px ui-monospace,monospace";g.fillText(c[0],cx,by+27);
+    g.fillStyle=c[2]?"#D9342B":P.ink;g.font="bold 14px ui-monospace,monospace";g.fillText(c[1],cx,by+43);});
+  }
 }
 );
 
@@ -1177,13 +1877,35 @@ function murMemoryText(who){const M=murMemory(who);
    the nineteen painted before bays existed land in their own without anybody editing them.
    "Rigo again" is Rigo \u2014 a painter who came back is the same painter, and the first build of this
    gave him two bays, which is precisely the opposite of what the owner asked for. */
-function murPainter(m){
-  if(m&&m.by)return m.by;
-  return String((m&&m.who&&m.who.en)||"").split(/[,\u2014(]/)[0]
-    .replace(/\s+(again|otra vez|de nuevo)$/i,"").trim()||"?";}
-function murBays(list){const L=list||(typeof MURALS!=="undefined"?MURALS:[]),order=[],by={};
-  L.forEach(m=>{const k=murPainter(m);if(!by[k]){by[k]=[];order.push(k);}by[k].push(m);});
-  return order.map(k=>({who:k,panels:by[k]}));}
+/* the words a name is made of, so "Doña Cuca", "cuca", "Don Güero" and "don-guero" can be compared */
+function murFold(t){return String(t||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase()
+  .replace(/[-_]+/g," ").replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim();}
+function murWho(m){return String((m&&m.who&&m.who.en)||"").split(/[,\u2014(]/)[0]
+  .replace(/\s+(again|otra vez|de nuevo)$/i,"").trim();}
+/* A PERSON'S KEY ON THIS WALL IS THEIR FIRST NAME. Doña, Don and "the" are not names.
+   Found 2026-09-14 by planting, twice in one sitting: by:"cuca" on a panel signed "Doña Cuca" opened a
+   bay called "Cuca" beside hers and by:"don-guero" opened "Don-guero" beside Don Güero's — the first
+   fix compared `by` with the whole of `who` and said "the same person" only when they were equal. The
+   second fix asked whether `by` was a WORD of `who`, and that filed Melo's "Melo Garduño" visit in a
+   new bay beside "Melo", because it then handed back the longer name. An agent's file name never
+   carries the honorific, the accent or the surname; the wall's signature sometimes does. So the
+   identity is one word, and the bay's NAME is whatever the person's first visit signed. */
+function murKey(m){const raw=(m&&m.by)?String(m.by):murWho(m);
+  const w=murFold(raw).replace(/^(dona|don|the)\s+/,"").split(" ")[0];return w||"?";}
+function murOwnName(m){const who=murWho(m);
+  if(m&&m.by){const b=String(m.by).trim(),w=murFold(who),bb=murFold(b);
+    if(w&&(w===bb||(" "+w+" ").indexOf(" "+bb+" ")>=0))return who;
+    return b.charAt(0).toUpperCase()+b.slice(1);}
+  return who||"?";}
+/* who painted it — the name of the bay it belongs in, which is the name the person's FIRST visit
+   signed: "Melo" for melo-el-conteo-de-uno (signed "Melo Garduño"), "Doña Cuca" for a by:"cuca". A
+   painter who came back is the same painter; the first build of this gave Rigo two bays, the second
+   gave Beto two, the third gave Cuca, Güero and Melo two each. */
+function murPainter(m,list){const L=list||(typeof MURALS!=="undefined"?MURALS:[]),k=murKey(m);
+  const first=L.find(x=>murKey(x)===k)||m;return murOwnName(first);}
+function murBays(list){const L=list||(typeof MURALS!=="undefined"?MURALS:[]),order=[],by={},disp={};
+  L.forEach(m=>{const k0=murPainter(m,L),k=k0.toLowerCase();if(!by[k]){by[k]=[];order.push(k);disp[k]=k0;}by[k].push(m);});
+  return order.map(k=>({who:disp[k],panels:by[k]}));}
 
 /* the wall's natural size, in the same tile-pixels a panel is painted in. A bay is one panel wide;
    a bay with three panels is three panels tall. The wall is as tall as its busiest painter. */

@@ -23,6 +23,8 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/POSTMORTEM.md`** | **Every way a session here has actually got it wrong, with what each one cost — the shortest register, read before you build anything** |
+| `docs/REGRESSION.md` | The proxy register — guards that read a proxy for the noun they meant, and the rule they were bought with: **plant a real violation against a guard before you believe it** |
 | **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
 | **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
 
@@ -87,6 +89,17 @@ lands inside a story beat with characters who want things. A chapter is a week; 
 week has a Monday, an escalation, and a Saturday that pays something off. Endings
 key off hearts, never off perfection. Retry-until-correct means failure is a scene,
 not a wall.
+
+**And before you write three endings, find out what picks between them.** `[CODE]` `gradeOf`
+(`engine/engine.js`, grep `function gradeOf`; `:374` on 2026-09-14) grades a district by the fraction
+of its answered quests that landed **first try**, and returns 3 when nothing has been answered at all
+— so a pack whose quests have no wrong answers grades 3 forever and ships with only its warmest ending
+reachable, silently, with no test failing. **Grep the thing that chooses the variant before you write
+the variants**, and if the answer is "nothing can choose", say so to the owner rather than writing
+three endings two of which no player will ever meet. *(The moment, 2026-09-14: planning a self-help
+eating game where marking what somebody ate is the one thing the evidence forbids — the three-variant
+ending the bible promises had no key, and the fix was a story rule about where the marks live, not a
+build. Applied the same day.)*
 
 Your output (final message, markdown):
 

@@ -23,6 +23,8 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/POSTMORTEM.md`** | **Every way a session here has actually got it wrong, with what each one cost — the shortest register, read before you build anything** |
+| `docs/REGRESSION.md` | The proxy register — guards that read a proxy for the noun they meant, and the rule they were bought with: **plant a real violation against a guard before you believe it** |
 | **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
 | **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
 
@@ -195,3 +197,29 @@ filmstrip rig that answered exactly that question and was irrelevant — the whe
 about its axle at all. One call reading `getWorldQuaternion` against (0,1,0) returned `(-1,0,0)` at 0°
 and `(0,-1,0)` at 90° and settled the whole job. Every method in your file is screen-space; this is
 the one that is not, and it is the one that found the fault.
+
+## Blank one painter, and crop the picture
+
+*Applied 2026-09-14 from the skulls, all four cameras.*
+
+**When a thing is hard to see, do not measure its contrast first — find out whether it is there.**
+Replace the ONE function that paints it with a no-op, render, and diff: the pixels that changed are
+that object's, wherever they landed, and you never had to project anything. It answered the sugar
+skulls in one pass — **the front camera calls `drawSillBox` eight times a frame and delivers zero
+pixels** (`engine/engine.js`: `fiestaDraw2D` in the ground pass, the facade's `TILEDRAW` painting over
+it in the depth pass) — and no contrast number in any register could have said that, because there was
+nothing to take the contrast of. Freeze `Date.now` and `performance.now` first, and prove the control
+diff is 0 before you believe a single row.
+
+**And the screenshot at the end is the wrong screenshot.** A whole viewport is HUD, a dialogue
+bubble and a busy street; the fault lives in forty pixels. **Crop the one object and blow it up 8×,
+twice — as shipped and with the one change.** Two crops decided this job in a second. The full frame
+decided nothing.
+
+**One fact about billboards, because the register has the symptom and not the cause:** a three.js
+`Sprite` does not tilt into a wall. It is a quad at a **single** view-space depth — its anchor's — so
+every pixel above the anchor is drawn at the anchor's depth and a nearer wall wins there. That is why
+the window pane anchored at its bottom (`engine/engine3d.js`, grep `center.set(0.5,0.02)`) loses
+three-quarters of itself and its own ledge, sitting 0.05 further out, does not. **The offset a
+wall-hung billboard needs is its own height times the camera's pitch — a formula, not a constant
+somebody tuned for one sprite.**

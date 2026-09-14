@@ -23,6 +23,8 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/POSTMORTEM.md`** | **Every way a session here has actually got it wrong, with what each one cost — the shortest register, read before you build anything** |
+| `docs/REGRESSION.md` | The proxy register — guards that read a proxy for the noun they meant, and the rule they were bought with: **plant a real violation against a guard before you believe it** |
 | **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
 | **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
 
@@ -100,6 +102,11 @@ sitting three feet away that could not see it.
   will regret on a day nobody chose.
 - **You never say a thing is safe.** You say what has a guard, what does not, and when each was
   last tested.
+- **When you cannot verify a date, write the date's source instead of the date.** You have `Read`, `Grep`
+  and `Glob` and no shell: `git log -S` is not available to you, so a plant date you did not watch is a
+  *claim by a document*, and the ledger says which document. A date laundered into fact is the same fault
+  as a guard that reads a proxy, committed against your own register. *(Applied 2026-09-13 from your own
+  post-flight, the first edition of `docs/BOUNDARY.md`.)*
 
 ## Where you stop
 

@@ -478,6 +478,35 @@ amount of asking a second pack would ever have surfaced, because the town declar
 at all**, and *silence is not a pass.* A tag the town never declares has not been tested by the town;
 it has been skipped by it. Say **untested**, not *travels*.
 
+### L23 · A pack may hand `syncChill` the whole cast, and cannot change anybody already standing
+
+*Added 2026-09-13 from Beto's run; the mechanism re-verified against the code 2026-09-14.*
+
+`syncChill` takes the entire desired set as data (`engine/engine.js`, grep `function syncChill`) and
+reads like a declarative API: hand it the cast, it makes the world match. **It does not.** `addChill`
+bakes `NPCLOOK[key]=c.look` **once** (grep `NPCLOOK[key]=c.look`), along with the name (`CHILLN[key]`)
+and the egg (`CHILLEGG[key]`), and `syncChill` returns early for any body already standing on its tile
+(grep `if(here&&c&&c.world===at.world`). So **`look`, `name` and `egg` are write-once per id.** Only
+the fields a pack decorates itself afterwards are live: El Changarrito re-writes `doc`, `tier` and
+`issue` on every `place()` (`changarrito/content/record.js`, grep `n.doc=this.doc(i)`), which is
+exactly why a document change lands on a person already standing and a shirt change does not.
+
+**What a second pack hits.** Any state it wants to *show* on a person — claimed, sick, on shift,
+holding something — must be **part of the id**, or the world is right after a reload and wrong for the
+whole session. El Changarrito pays this in `bodyId` (`changarrito/content/record.js`, grep
+`bodyId(i,slot)`), which concatenates the claim into the id so `syncChill` sends the old body home and
+spawns a new one on the same tile.
+
+**Untested by Meridian, but not for the reason first written.** Meridian *does* declare a chill cast —
+`const CHILL=[…]` in `content/meridian/npcs.js` (Yola la paletera) — and the engine places it once at
+boot (grep `.forEach(c=>addChill(c))`). What Meridian never does is call `syncChill`: it never asks a
+person already standing to become different. **Silence here is still not a pass**, and the first draft
+of this entry said "Meridian declares no chill cast at all", which is false — corrected here rather
+than quietly, per `docs/SOURCES.md` rule 5.
+
+**Measured, not inferred, 2026-09-13:** place the same issue twice, the second time with
+`taken: beto` — `{"pattern":null,"sameKey":true}`.
+
 
 ---
 
@@ -504,3 +533,106 @@ register that cries wolf stops being read.
 > **Check before you call one a leak:** `grep -rnw "<Name>" content/ engine/` — word-boundary and
 > case-sensitive. `grep -i` on a short name matches inside other words; the first run of this very
 > check was finding **"marigold"**. See `docs/POSTMORTEM.md` §11½.
+
+### L24 · The exporter is one dog's care sheet, and the engine's export schema says "meridian"
+**Registered 2026-09-14 by Toño, verifying the brief for the eating-habits game (filed by the
+session from his return, `docs/meetings/2026-09-14-la-sobremesa-disena.md`). Extends L17 — same
+shape, two more instances, and this one reaches the player's files.**
+
+`[CODE]` `treats` and `fredQ` are **engine globals** (`engine/engine.js:437`), persisted as save keys
+`tr` and `fq` (`:503`), clamped in `sanitizeSave` (`:553`). `exportData()` emits
+`schema:"meridian-export-v1"` (`:4684`) and a top-level key
+`frederick:{name:"Frederick",treats,bandana:fredQ>=2,carePackUnlocked:fredQ>=1}` (`:4688`).
+`icsData()` (`:4706`) emits **exactly five events** on fixed RRULEs, stamps every one
+`UID:mq-care-<i>@meridian-quest` (`:4716`), and the download is named `…-care-reminders.ics`
+(`:4753`). The tab is gated `$("exTabCare").hidden=fredQ<1` (`:4735`) — a Meridian quest counter
+deciding whether an engine UI exists.
+
+**What a second game hits.** A pack that wants reminders — *"Sunday, soak the beans"*, seven
+dinners, a kimjang date — gets one pet's five-row schedule it cannot change, gated behind a quest it
+does not have, and every calendar entry it hands the player is stamped with another game's name. Its
+JSON export claims to be a Meridian export.
+
+**Why the guard does not see it.** `test/smoke.js:2228-2232` is the 39-name portability blocklist.
+It contains `chelo`, `frijol`, `pelusa`, `bolillo` — and **neither `frederick` nor `meridian`**, the
+pack's own folder name, which appears in engine code eleven times. L17 found the list missing
+`sonny`; this is the same list missing the game. **A blocklist is a list of yesterday's mistakes** —
+`docs/NEW-WORLD.md` §3's generic scan is the fix, and this is the second piece of evidence for it.
+
+### L25 · A pack cannot put anything in the save, and the pass carries nothing a pack wrote
+**Registered 2026-09-14. Extends L18, which found the 99-quest clamp in the same function and
+stopped there. This is the larger half.**
+
+`[CODE]` `save()` writes a **fixed twenty-key blob** (`engine/engine.js:503`). `sanitizeSave()` does
+not filter a save — it **rebuilds one**, returning an object literal with exactly those twenty named
+keys (`:553-563`), and `loadSave()` (`:565`) runs *every* local load through it. So a key a pack adds
+is not merely unvalidated: **it is dropped on the next load, silently.** Two of the twenty (`wr`,
+`wc`) are the dog's three cosmetic slots.
+
+`passURL()` (`:4881`) serialises `{v:1,l:lang,s:loadSave()}` — **the engine's save and nothing
+else.** Everything a pack persists goes through `SK()` (`:13`) into its own key, as the town does
+(`changarrito/content/record.js:113`, `:494`, `SK("filter")`), and therefore **never crosses the
+Trolley Pass, never appears in the export, and is never sanitised on arrival.** `SK("room")` — the
+INTERVIEW answers, which `docs/OWNER.md` calls the design conversation with AJ — is in that category
+today.
+
+**What a second game hits.** A pantry, a week's meal plan and a cookbook *are* an eating game's
+save. All three land outside the save, outside the pass and outside the export, and the player who
+scans the QR onto their second phone arrives with their character and without their kitchen. **The
+gap is one seam: a pack-declared slot, sanitised by a schema the pack supplies** — G1 in
+`docs/la-sobremesa.md` §5.
+
+### L26 · The engine does not only name Meridian's alphabet — it draws Meridian's kitchen
+**Registered 2026-09-14. L1 registered the metadata table; nobody registered the pictures.**
+
+`[CODE]` `TILESIDE` (`engine/engine.js:1650`) holds engine-side profile drawings for Meridian's
+glyphs, and four of them are the four objects a kitchen is made of: `TILESIDE["T"]` a restaurant
+table with gingham and plates (`:1651`), `TILESIDE["S"]` shelving (`:1672`), `TILESIDE["K"]` a
+counter *with a coffee machine on every third tile* (`:1683`), `TILESIDE["V"]` **a stove — burners,
+knobs, an oven window** (`:1802`). `sideArt=g=>TILESIDE[g]||TILEDRAW[g]` (`:1836`) prefers the
+engine's drawing; a pack reaches it only by overriding the same letter, which then trips L2 (the
+merge is a spread, so `V` keeps `lift:8, kind:"appliance"`).
+
+**What a second game hits.** A cooking pack inherits somebody else's stove, counter, shelf and table
+before it draws anything — and they are drawn well enough that nobody notices they were never
+chosen. **This is the most expensive instance of L1 precisely because it is the most useful one.**
+
+### L27 · The index and the search are the town's, not the engine's
+**Registered 2026-09-14, against a brief that called them an engine capability.**
+
+`[CODE]` The engine supplies **widgets**: a dropdown with option groups (`s2.sel`,
+`engine/engine.js:3475`), a form (`s2.form`, `:3485`), a table (`s2.t`, `:3457`). The **index** —
+categories, tag search, sort, persistence, plain-language hits — is ~500 lines of *pack* code in
+`changarrito/content/record.js` (`search` `:96`, `indexDoc()` `:248`, `setFilter/setSort`
+`:492-497`). `tlFindNext` (`engine/engine.js:4592`) is find-in-a-textarea in the admin text lab, not
+a search over content.
+
+**What a second game hits.** "Find my recipe with beans" is not a seam it turns on; it is a thing it
+writes again from scratch. Say **"a dropdown and one town's implementation"**, never "we have
+search".
+
+### L28 · `concept` is the rule-2 failure that lives in ENGINE code — and an eating game would entrench it
+**Registered 2026-09-14, pre-emptively, which is the only time this entry is worth anything.**
+
+`[CODE]` this file's own rule-2 table lists `concept` as failing. It is read in engine code at
+`:3356`, `:3390`, `:3469`, `:3841`, `:4610`, `:4613`, and the decision report's *Concepts* section is
+built out of it (`:4674`, `:4677`). It is not a pack field the engine ignores; it is load-bearing.
+
+**The trap, and it is specific.** A nutrition game *has* concepts — nixtamalization,
+*ichijū-sansai*, the *sa-shi-su-se-so* order. It would be **the first pack to make the word look
+correct**, and that is exactly how a curriculum word becomes a template word with nobody deciding it.
+The reusable field under it is *"the named thing this moment taught"*, which is blank in a game with
+no lesson. **Register the entrenchment before it happens, because after it happens there are two
+packs' worth of content behind it.**
+
+### Amendment to L3 — it is SEVEN closed enums, not six
+`[CODE]` `WEAR={bandana:[…],collar:[…],cape:[…]}` (`engine/engine.js:448`) — three fixed cosmetic
+slots with **literal colour arrays in engine code**, read by the swatch builder (`:4858`), mirrored by
+engine globals `wear`/`wearCat` (`:451`, `:452`), and written into the save contract by `wearIn`
+inside `sanitizeSave`. It is not an owned-things seam and it must not be described as one: a pack
+cannot add a slot, rename one, or change a colour. *(Toño, 2026-09-14.)*
+
+**And one row for the Gaps list, filed here because that list is a table of its own date:** *a
+clickable source on a document.* `docRender` has no `<a>`; the reader can show a note saying where a
+claim came from and cannot let the player open it. Directly the owner's *"places to check about this
+facts so we know where you get the info."*

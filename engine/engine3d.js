@@ -547,6 +547,7 @@ function t3Build(key){T3.pinatas=[];
           const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.02);const sc=up?0.8:1;sp.scale.set(sc,sc,1);
           sp.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);sp.userData={prop:true,ofrenda:true,x:p.x,y:p.y};grp.add(sp);return;}
         if(p.kind!=="calaverita")return;
+        const SILL_PROUD=0.09;
         const win=typeof propSill==="function"?propSill(world,p):null;
         /* on a sill the candy is cut to the window it stands in (#131) — 7 tile-pixels of sweet in a
            7-pixel pane was the overlap. Off a sill it keeps its full 8. */
@@ -569,7 +570,14 @@ function t3Build(key){T3.pinatas=[];
           const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));
           sp.center.set(0.5,0.02);sp.scale.set(win.w/32,win.h/32,1);
           const H=wallH(g),paneBottom=H*(1-win.sill/32)+0.005;
-          sp.position.set(p.x+win.cx/32,paneBottom,p.y+1.03);
+          /* SILL_PROUD: a three.js Sprite is one quad at its ANCHOR's depth, and this one is anchored at its
+             bottom — so every pixel above the anchor is drawn at the bottom's depth, where the wall above is
+             nearer, and the wall wins. Three-quarters of the pane never reached the screen. Measured 2026-09-14
+             (Chema, docs/3D-LOG.md): pane and ledge pushed out together, sweet pixels per skull
+             +0.00 → 396 · +0.03 → 832 · +0.06 → 1301 · +0.09 → 1743 · +0.12 → 2066 · +0.18 → 2112 (and by then it
+             hangs proud of its recess). The honest shape is the sprite's own height times the camera's pitch; the
+             pane here is one fixed height, so it is one number, and the ledge keeps its 0.05 in front of it. */
+          sp.position.set(p.x+win.cx/32,paneBottom,p.y+1.03+SILL_PROUD);
           /* ---- AND THE SILL ITSELF, hung under it as a SECOND sprite (mq-v154) ----
              The owner, four times now, most recently 2026-09-12: "another attempt at showing the
              window sills." Read literally, which the three previous attempts did not: there was never
@@ -602,7 +610,7 @@ function t3Build(key){T3.pinatas=[];
             le.center.set(0.5,0.02);le.scale.set(LW/32,LH/32,1);
             /* hung from the pane's own bottom, in WORLD units and not in fractions of the wall — the
                two are different lengths and mixing them is how a ledge ends up a third of a tile out */
-            le.position.set(p.x+win.cx/32,paneBottom-LH/32,p.y+1.08);
+            le.position.set(p.x+win.cx/32,paneBottom-LH/32,p.y+1.08+SILL_PROUD);
             le.userData={prop:true,sill:true,ledge:true,x:p.x,y:p.y,win:win.i}; /* NOT calaverita: a ledge is not a sweet, and the guard that counts sweets in 3D said so the moment this landed */grp.add(le);}
           sp.userData={prop:true,calaverita:true,sill:true,x:p.x,y:p.y,win:win.i};grp.add(sp);return;}
         const c=document.createElement("canvas");c.width=z*K;c.height=z*K;const g2=c.getContext("2d");g2.scale(K,K);drawCalaverita(g2,0,0,p.foil,z);

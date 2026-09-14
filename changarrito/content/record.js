@@ -68,6 +68,14 @@ const RECORDSRC={
   houseBoardDoc(id){const es=lang==="es",a=this.area(id),s=[];if(!a)return [{p:"—"}];
     const mine=this.sortPeople(this.ofHouse(id)),pinned=mine.filter(i=>!(this.placed[i.n]&&this.placed[i.n].in));
     s.push({p:(es?a.plain.es:a.plain.en)});
+    /* who has what (docs/CITY-AS-MEMORY.md Gap 2). Standing people included, not just the pinned — a
+       claim is most interesting on someone who is on the street. A label carries no date, so this
+       says when the ISSUE was last touched and never calls a claim stale: updated_at is the newest
+       event on the issue, and a claim made Monday on an issue commented Friday would read "fresh". */
+    const held=mine.filter(i=>this.takenBy(i));
+    s.push({h:(es?"Tomados · ":"Taken · ")+held.length});
+    if(!held.length)s.push({p:es?"Nadie ha tomado nada de esta casa.":"Nobody has taken anything in this house."});
+    held.forEach(i=>s.push({kv:[["#"+i.n,i.title],[es?"lo trae":"taken by",this.takenBy(i)],[es?"último movimiento":"last touched",this.days(i.updated||i.at)]]}));
     s.push({h:(es?"Prendidos · ":"Pinned · ")+pinned.length});
     if(!pinned.length)s.push({p:mine.length?(es?"Todos los de esta casa están de pie adentro.":"Everyone with this address is standing inside."):(es?"Nada archivado con esta dirección ahora mismo.":"Nothing filed with this address right now.")});
     pinned.forEach(i=>s.push({kv:[["#"+i.n,i.title],[es?"archivado":"filed",this.days(i.at)],[es?"estado":"state",this.state(i)],[es?"en palabras llanas":"in plain words",this.plain(i)]]}));
@@ -92,6 +100,13 @@ const RECORDSRC={
   mainVersion:null, /* GAMEV as main has it, read from the repo — "run line 2" when it differs */
   prev:{seen:"",known:[]}, /* the last visit: when, and which people were on file — for the news */
   boot(){
+    /* the claim, worn. Content is parsed before the engine (changarrito/index.html script order), so
+       the pattern is registered here, where SHIRT_PATTERNS exists. Every camera draws it — 2D and 3D
+       both go through drawPerson. A CHOICE the pack answers, not a RULE: what a claimed person wears
+       is one town's vocabulary, and SHIRT_PATTERNS is the seam the engine put there for it. */
+    try{SHIRT_PATTERNS.taken=(g,x,y,w,h)=>{g.strokeStyle="#F2F1EA";g.lineWidth=3;
+      g.beginPath();g.moveTo(x-1,y+h-3);g.lineTo(x+w+1,y+2);g.stroke();
+      g.strokeStyle="rgba(15,12,20,.35)";g.lineWidth=.8;g.stroke();};}catch(e){}
     try{this.prev={seen:localStorage.getItem(SK("seen"))||"",known:JSON.parse(localStorage.getItem(SK("known"))||"[]")||[]};}catch(e){}
     try{this.titles=JSON.parse(localStorage.getItem(SK("titles"))||"{}")||{};}catch(e){this.titles={};}
     try{this.cycle=JSON.parse(localStorage.getItem(SK("cycle"))||"{}")||{};}catch(e){this.cycle={};}
@@ -401,14 +416,14 @@ const RECORDSRC={
   async file(f){const title=this.clean(f.title,120);if(!title){this.say("A request needs a title.","Una petición necesita título.");return null;}
     const work=this.workLabels().includes(f.work)?[f.work]:[]; /* #69: the address, one work label in plain words */
     const labels=["tier: "+(["high","normal","low"].includes(f.tier)?f.tier:"normal"),["ask","decision","bug"].includes(f.kind)?f.kind:"ask"]
-      .concat(work).concat((f.tags||[]).map(l=>this.clean(l,40)).filter(l=>l&&!/^tier: /.test(l)&&!["ask","decision","bug"].includes(l)&&!work.includes(l)).slice(0,5));
+      .concat(work).concat((f.tags||[]).map(l=>this.clean(l,40)).filter(l=>l&&!/^tier: /.test(l)&&!/^taken:/i.test(l)&&!["ask","decision","bug"].includes(l)&&!work.includes(l)).slice(0,5)); /* never born locked to a person who has not seen it */
     const d=await this.write("POST","/issues",{title,body:this.requestBody(f),labels});
     if(d&&d.number)this.say("Filed as #"+d.number+". They will be on the street shortly.","Archivado como #"+d.number+". Pronto estarán en la calle.");return d;},
   /* ---------- ch-v14: every popup is a form in the reader (owner: "show me what you mean for #2") ----------
      One screen each, every field visible beside the paperwork, cancel costs nothing. The reader
      renders the fields (engine mq-v76); the record acts on the values. */
   formTags:[],   /* tags pre-picked for the next request — where you filed it from (the index, PR 3) */
-  tagOpts(){const seen=this.labelsSeen().filter(o=>!/^tier: /.test(o.v)&&!["ask","decision","bug"].includes(o.v)).map(o=>o.v);
+  tagOpts(){const seen=this.labelsSeen().filter(o=>!/^tier: /.test(o.v)&&!/^taken:/i.test(o.v)&&!["ask","decision","bug"].includes(o.v)).map(o=>o.v);
     const own=[];this.things().forEach(t=>t.tags.forEach(l=>{if(!/^tier: /.test(l)&&!["ask","decision","bug","people"].includes(l))own.push(l);}));
     return [...new Set(["changarrito","ventanilla",...seen,...this.formTags,...own])].map(v=>({v,t:v}));},
   requestDoc(){const es=lang==="es",self=this;return [{form:{fields:[
@@ -481,10 +496,30 @@ const RECORDSRC={
   matches(i){if(this.filter.length&&!this.filter.every(l=>(i.labels||[]).includes(l)))return false;
     if(this.search&&!((i.title||"")+" "+(i.body||"")).toLowerCase().includes(this.search))return false;return true;},
   tier(i){const L=i.labels||[];return L.includes("tier: high")?"high":L.includes("tier: normal")?"normal":"low";},
+  /* crew mode's lock, rendered (docs/CREW-MODE.md rule 2, docs/CITY-AS-MEMORY.md Gap 2): the first
+     `taken: <name>` label, the NAME only. Anchored at the start so "mistaken: no" and a title
+     containing the word are not a claim. Labels are already cleaned to 40 chars by trim(). */
+  takenBy(i){const l=(i.labels||[]).find(l2=>/^taken:\s*\S/i.test(l2));return l?l.slice(l.indexOf(":")+1).trim().slice(0,24):"";},
+  /* the id syncChill knows a BODY by — it carries the claim on purpose. A look is baked once, by
+     addChill (engine.js, NPCLOOK[key]=c.look), and syncChill returns early for a body already on
+     its tile, so a person claimed while standing keeps the shirt he spawned in and the mark never
+     lands until a reload. Measured 2026-09-13: place the same issue twice, the second time with
+     `taken: beto`, and NPCLOOK[key].pattern is still undefined. In the id, syncChill does the only
+     thing that can work — sends the old body home, spawns the new one on the same tile. */
+  bodyId(i,slot){const t=this.takenBy(i);return i.n+":"+slot+(t?":"+t:"");},
   kind(i){const L=i.labels||[];return L.includes("bug")?"bug":L.includes("decision")?"decision":L.includes("ask")?"ask":"other";},
   name(i){return sanName(String(i.title||"").replace(/^[^\p{L}\p{N}]+/u,""))||("#"+i.n);},
   look(i){const c={bug:"#C0392B",ask:"#2F6DB5",decision:"#D4A017",ventanilla:"#1F8A8A",changarrito:"#7A4FBF"};
-    const k=Object.keys(c).find(k2=>(i.labels||[]).includes(k2));const lk=randLook();if(k)lk.shirt=c[k];return lk;},
+    const k=Object.keys(c).find(k2=>(i.labels||[]).includes(k2));const lk=randLook();if(k)lk.shirt=c[k];
+    /* somebody is on it. The sash (registered in boot()) is VISIBLE at the town's camera and reads as
+       honour — a band of office, a seatbelt — before it reads as "taken" (Pili, 2026-09-13). The shirt
+       is 14 px wide and full; the only thing that carries a meaning at this size is the OUTLINE. So
+       the hard hat, which the town never otherwise uses: a wider brim, and "somebody is working on
+       this" — and it re-reads the sash as harness webbing. Cost: the hair is covered while claimed, so
+       two claimed people are less distinguishable from each other; the owner's question is "which are
+       taken", not "which is #41", so the trade is right for this town. */
+    if(this.takenBy(i)){lk.pattern="taken";lk.hat="hard";}
+    return lk;},
   paras(body){return String(body||"").split(/\n{2,}/).map(p=>p.replace(/\s*\n\s*/g," ").trim()).filter(Boolean);},
   /* the plain-words paragraph first (§9.2): the one under "In plain words:", else the first */
   plain(i){const ps=this.paras(i.body);
@@ -493,11 +528,12 @@ const RECORDSRC={
     return p.replace(/[`*_#>]/g,"")||("Issue #"+i.n+".");},
   days(at){const d=Math.round((Date.now()-new Date(at||Date.now()).getTime())/864e5);return d<=0?"today":d===1?"yesterday":d+" days ago";},
   /* the three lines (§9.3): plain words → the paperwork → what's next */
-  lines(i){const es=lang==="es";const c=this.comments[i.n],last=c&&c.last;
+  lines(i){const es=lang==="es";const c=this.comments[i.n],last=c&&c.last,tk=this.takenBy(i);
     return [
       {k:es?"En palabras llanas":"In plain words",t:this.plain(i)},
       {k:es?"El papeleo":"The paperwork",t:"#"+i.n+" · "+((i.labels||[]).join(", ")||"—")+" · "+(es?"archivado ":"filed ")+this.days(i.at)+(i.comments?(es?" · "+i.comments+" comentario(s)":" · "+i.comments+" comment(s)"):"")},
-      {k:es?"Lo que sigue":"What's next",t:last?((es?"Última respuesta, ":"Last answer, ")+last.at+": "+last.body.replace(/[`*_#>]/g,"")):(es?"Nadie ha contestado todavía — pídeme más contexto.":"Nobody has answered yet — ask me for more context.")}];},
+      {k:es?"Lo que sigue":"What's next",t:(tk?(es?tk+" trae ésta ahorita — una sola persona por trabajo. ":tk+" has this one right now — one person to a job. "):"")
+        +(last?((es?"Última respuesta, ":"Last answer, ")+last.at+": "+last.body.replace(/[`*_#>]/g,"")):(es?"Nadie ha contestado todavía — pídeme más contexto.":"Nobody has answered yet — ask me for more context."))}];},
   /* the document a person hands you: the line you hear this time, then the paperwork. Built
      fresh on every open; the cycle advances per open and lives under the town's prefix */
   doc(i){const self=this;return {title:{en:i.title,es:i.title},
@@ -622,14 +658,15 @@ const RECORDSRC={
        and not per-issue. */
     const want=[],meta={};
     bodies.forEach(b=>{const nm={en:this.name(b.i),es:this.name(b.i)},lk=this.look(b.i);
-      if(b.step){want.push({id:b.i.n+":st",name:nm,look:lk,world:this.world,x:b.step[0],y:b.step[1]});meta[b.i.n+":st"]=b.i;}
-      if(b.in){want.push({id:b.i.n+":in",name:nm,look:lk,world:b.in.wid,x:b.in.x,y:b.in.y});meta[b.i.n+":in"]=b.i;}});
+      const ist=this.bodyId(b.i,"st"),iin=this.bodyId(b.i,"in");
+      if(b.step){want.push({id:ist,name:nm,look:lk,world:this.world,x:b.step[0],y:b.step[1]});meta[ist]=b.i;}
+      if(b.in){want.push({id:iin,name:nm,look:lk,world:b.in.wid,x:b.in.x,y:b.in.y});meta[iin]=b.i;}});
     const keys=syncChill(want);
     Object.keys(keys).forEach(id=>{const i=meta[id];if(!i)return; /* the paper each body carries */
       for(const wid of Object.keys(WORLDS)){const n=WORLDS[wid].npcs.find(m=>m.key===keys[id]);
         if(n){n.doc=this.doc(i);n.tier=this.tier(i);n.issue=i.n;break;}}});
     this.placed={};
-    bodies.forEach(b=>{const st=keys[b.i.n+":st"]||null,inside=keys[b.i.n+":in"]||null;
+    bodies.forEach(b=>{const st=keys[this.bodyId(b.i,"st")]||null,inside=keys[this.bodyId(b.i,"in")]||null;
       if(st||inside)this.placed[b.i.n]={st,in:inside,house:b.house};});
     auditReach().forEach(p=>console.warn("REACH "+p)); /* a placed person may never wall the hero */
     this.signs();

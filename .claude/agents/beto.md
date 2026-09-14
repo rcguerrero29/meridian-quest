@@ -23,6 +23,8 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/POSTMORTEM.md`** | **Every way a session here has actually got it wrong, with what each one cost — the shortest register, read before you build anything** |
+| `docs/REGRESSION.md` | The proxy register — guards that read a proxy for the noun they meant, and the rule they were bought with: **plant a real violation against a guard before you believe it** |
 | **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
 | **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
 
@@ -93,7 +95,7 @@ Known hazards here: the two `index.html` shells are kept in lockstep **by hand**
 enforcing it; `git add -A` has twice swept files it should not have; and a test that pins current
 behaviour can pin a bug — one did, at 40px, and passed the whole time.
 
-## Three engine facts you keep re-deriving
+## Five engine facts you keep re-deriving
 
 *Applied 2026-09-11 from your own post-flight, the trolley-boarding ground.*
 
@@ -125,6 +127,36 @@ from the trolley code.
 calls designing where it should live — when `engine.js:239` had been validating two of those exact
 coordinates on every boot since the districts shipped, and passing them, because it asks *"is this
 tile SOLID"* when it means *"is it safe to appear here."*
+
+**And a seam is only as real as its readers.** `troAudit`/`TROKEYS` (`engine/engine.js`, grep `TROKEYS`)
+exists because a pack key nobody reads is *"the one where somebody wrote a line, saw nothing happen, and
+had no way to find out why."* Before you design a table of options, **count which of its keys something
+already draws.** *(The moment, 2026-09-13: asked to design a tram livery from a photograph of a real
+heritage tram — body, cream band, lamps, pole, gold lining, fender — the car in the code had the body
+and, in one camera out of four, an 8×2 px gold strip. Four of the six proposed keys would have been
+promises. Applied 2026-09-14 from your own post-flight.)*
+
+- **`syncChill`'s id is the identity of the BODY, not of the issue.** `addChill` bakes `NPCLOOK[key]` once
+  (grep `NPCLOOK[key]=c.look` in `engine/engine.js`), and `syncChill` returns early for anyone already
+  standing on their tile. So **anything baked at spawn — the look, the name, the egg — must be part of the
+  id or it never changes on a person who is already standing**, and the town will look right after a
+  reload and wrong all session. `record.js` re-decorates `doc`, `tier` and `issue` on every `place()`,
+  which is exactly why a doc change lands and a shirt change does not.
+  *The moment (2026-09-13):* asked to make a claimed issue "stand differently", the diff was four lines and
+  finished. Placing the same issue twice — the second time with `taken: beto` — returned
+  `pattern: null, sameKey: true`, and the four-line diff had been a mark nobody would see until they reloaded.
+
+- **A document does not have to be registered anywhere, and a pack's state does not ride the save.**
+  `docDef` (`engine/engine.js`, grep `function docDef`) takes *either* a `DOCS` id *or* the document
+  object itself, so a thing the player made ten seconds ago can be handed straight to `docOpen` and
+  rendered — every block prints through `textContent`, and a function cannot survive `JSON.parse`, so
+  pasted data can never reach `art` or a `run`. But `save()` is a closed struct and `sanitizeSave`
+  **rebuilds a whitelist and drops every unknown key**, and `passURL()` carries only `loadSave()` — so
+  anything a pack persists through `SK()` survives a reload and dies silently on the Trolley Pass.
+  *The moment (2026-09-14):* asked which seams carry a cooking game, the answer to "can a person paste
+  a recipe in" turned out to be *yes, today* — and the answer to "will it still be there on his
+  tablet" turned out to be *no, with no message* — and neither is visible from any document about
+  cooking. *(Applied 2026-09-14.)*
 
 ## A distinction your RULE/CHOICE cut does not give you
 

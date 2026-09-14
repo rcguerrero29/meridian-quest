@@ -24,7 +24,7 @@ NOT on it are badly wrong. This file is the corrected version.
 ```js
 const t3Boxy=(g,m)=>!!(m.box||m.kind==="furniture"||m.kind==="appliance") && !!TILESIDE[g];
 ```
-`engine/engine3d.js:241`
+`engine/engine3d.js:259` (2026-09-14; this line said `:241`)
 
 **A glyph becomes a real box the moment a side drawing exists.** Six of the twelve real offenders
 are already tagged correctly and are missing exactly one drawing each in `content/meridian/art.js`.
@@ -64,6 +64,25 @@ canopy, freestanding box, floor paint — and everything else falls through to a
 shadow), **J**'s canopy (foliage on a real trunk), **7** the car lift (two thin posts), **3** and
 **5** (a bar between posts; five thin poles). Boxing any of these gives you a cardboard cube with
 leaves printed on it. **Their presence on the #39 list is the list being wrong, not the art.**
+
+### Marks that mean something — and the one shape that is already spoken for
+
+*Pili, 2026-09-13; re-verified against the code 2026-09-14.*
+
+**A diagonal bar across a coloured field reads as "crossed out" in this project specifically.** The
+owner said it of the first striped alebrije and it cost that pass a re-cut (`engine/engine.js`, grep
+`owner called it "crossed out"`). The town's claim sash is exactly that shape — a white diagonal
+stroked corner to corner across the shirt (`changarrito/content/record.js`, grep `SHIRT_PATTERNS.taken`)
+— and it survives only because the hard hat beside it changes the **outline** (grep `lk.hat="hard"`,
+drawn at `engine/engine.js`, grep `lk.hat==="hard"`). **That rescue is a claim about meaning and it has
+never been cold-read by anybody who had not already been told what it means.**
+
+At the size these games are played, a body is about fourteen pixels across and **the outline is the
+only thing that can carry a new meaning**. A new mark goes to the head, the hands or the height —
+never to the shirt. And the price of this one is written into the code that sets it: the hard hat
+covers the hair, so two claimed people are harder to tell apart from **each other**, which is the
+owner's own 2026-09-03 complaint accepted on purpose, because his question is *which are taken*, not
+*which is #41*.
 
 ### The reverse failure — boxes that should not be
 

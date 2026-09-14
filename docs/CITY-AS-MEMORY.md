@@ -225,15 +225,15 @@ has its own worktree, and expect the merge queue, not the agents, to become the 
 
 ## 5½ · The crew, as it now stands
 
-**Thirteen agents, all recallable by name — see `docs/CREW.md` for who to call and how they hand
+**Nineteen agents, all recallable by name — see `docs/CREW.md` for who to call and how they hand
 off.** The naming follows a discovery: El Changarrito's six house clerks *already are* the
 work-kinds (records and forms, docs and templates, how it looks, the engine, rooms and stairs, the
 words), which the owner built long before anyone thought about a crew. So the crew is named for the
 street it works on, and the `CREW` seam below is nearly free: a crew member's home is the house
 whose work it owns.
 
-Seven have a house — Remedios, Chuy, Pili, Beto, Cuca, Nacho, Don Güero. Six do not yet — Rosa,
-Tavo, Yaz, Chava, Paty, Mari.
+Seven have a house — Remedios, Chuy, Pili, Beto, Cuca, Nacho, Don Güero. Twelve do not yet — Rosa,
+Tavo, Yaz, Chava, Paty, Mari, Chema, Toño, Lupe, Melo, Rigo, Zeni.
 
 **Only one may hold the pen at a time** until worktree isolation is in place — see §5.
 

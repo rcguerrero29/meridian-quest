@@ -114,6 +114,14 @@ pixel art over precise rhythm-and-timing minigames and a day that wears on; revi
 down in front of you — it just makes every action cost something scarce.** This is our most likely
 way to fail, because we can produce the warm half convincingly.
 `[WEB]` https://game8.co/articles/reviews/chef-rpg-review-early-access
+**The planner's version of the same trap, and its tell** *(added 2026-09-14 from the healthy-eating
+sweep)*: a week sheet where you write what you mean to cook is an implementation intention, the
+best-evidenced behaviour-change technique in that whole sweep (d = 0.65 on getting started, 94
+studies). **The same sheet with a red X on Thursday is a day budget.** **Tell: any surface where
+YESTERDAY can change colour.** Plan forward, never mark backward — and an unfilled slot is not
+"empty", it is a slot nobody put anything in. Three lines is a full week.
+`[WEB]` Gollwitzer & Sheeran 2006 — https://cancercontrol.cancer.gov/sites/default/files/2020-06/goal_intent_attain.pdf ·
+`[TRAINING]` for the tell.
 
 **R11 · No punishment for stepping away mid-session** is the sharpest line in the cozy literature and
 the one a cooking game violates by default — a pot on the stove is a session-length commitment by
@@ -143,6 +151,58 @@ not a global transparency — run on a delay, ground separated from walls, faded
 today's engine by this file's author: treat it as an outside design rule, not as a claim about our
 current sort order.**
 
+**R15 · Count up, never to zero.** A streak that resets is loss aversion pointed at the player, and
+the lapse is the moment most people quit. The primary study everyone cites *for* streaks says the
+opposite: across 96 people repeating one eating or activity behaviour daily for twelve weeks,
+*"missing one opportunity to perform the behaviour did not materially affect the habit formation
+process."* The vendors who sell streaks ship "streak freezes" because they know what a reset does.
+So if anything is counted, count **upward and cumulative** — *42 dinners cooked* — and never reset
+it.
+**Trap:** the reset does not have to be a number. A progress ring that empties overnight, a plant
+that wilts, a pet that looks sad, an "on track / off track" badge — all the same mechanic wearing
+softer clothes. **Tell: any surface that can show a smaller number, or a sadder picture, tomorrow
+than it shows today.** The shipped counter-example is Finch, whose bird *"never dies if you skip a
+day"* and which *"sends only encouragement"* after an absence.
+`[WEB]` Lally et al. 2010 https://onlinelibrary.wiley.com/doi/10.1002/ejsp.674 · self-compassion
+after a lapse https://pubmed.ncbi.nlm.nih.gov/37619622/ · app abandonment
+https://www.jmir.org/2024/1/e56897 · vendor: https://trophy.so/blog/streaks-feature-gamification-examples ·
+https://www.aviewfromthecave.com/what-is-finch-app/ · `[TRAINING]` for the wording.
+*(One number that circulates for this and must NOT be cited: a "78% of users who reach a 14-day
+streak quit within 72 hours of a miss (UCSF)" figure on a product-marketing page with no traceable
+study.)*
+
+**R16 · In a game about a person's own habits, the marks go on the LOGISTICS, never on the person.**
+A judgement call about the kitchen — how much chard one person eats before it turns, whether a plan
+survives a Tuesday, which shelf the lentils live on — can be wrong, retried and marked. A judgement
+call about what somebody ate can be none of those things without becoming a score on a body.
+**Trap: the marks have to live somewhere, and the engine will not tell you they don't.** `[CODE]`
+`gradeOf` (`engine/engine.js:374`, verified 2026-09-14) grades a district by the fraction of its
+answered quests that landed first try and returns 3 when nothing has been answered (`:376`) — **so a
+pack with no wrong answers anywhere grades 3 forever and ships with only its warmest ending
+reachable, silently, with no test failing.** **Tell: if a wrong answer would make the player feel
+they ate wrong, the mark is in the wrong place.**
+`[WEB]` for the harm — Levinson 2017: of 105 people with an eating disorder, ~75% used MyFitnessPal
+and 73% of those felt it contributed, https://pmc.ncbi.nlm.nih.gov/articles/PMC5700836/ (search
+extract, not a page read). `[TRAINING]` for the wording.
+
+**R17 · A model the player has to maintain decays, and the cost is not the typing.** R9's busywork
+test has a second axis: it asks whether the *action* is still worth doing on day ten, and not whether
+the *data* is still true on day ten. A pantry ledger passes the effort test — one tap, forever — and
+fails anyway. `[WEB]` Three competing pantry vendors describe the same curve about each other: forty
+items on day one, five on day two, forgotten by week two, and by week three *"every recipe suggestion
+is based on food you no longer have… the app becomes worse than useless: it is actively giving you
+wrong information."* **A model that is 80% right is worse than no model, because it lies with
+confidence.**
+**Trap:** the fix looks like better intake — barcodes, receipts, loyalty cards — and every one of
+those has its own complaint list, needs a server we do not have, and still drifts. **The fix is to
+need less of it:** log **by exception** (only when reality differed), or do not log. **Tell: any
+feature whose value depends on the player having told the truth about something the game cannot
+check.**
+`[WEB]` vendor, and they are competitors describing each other:
+https://www.pantrypersona.com/blog/best-pantry-inventory-apps-2026 ·
+https://fango.fi/en/blog/best-pantry-inventory-app/ · https://recipyapp.com/blog/best-pantry-tracking-apps-2026 ·
+`[TRAINING]` for the rule's wording and for the generalisation past food.
+
 ---
 
 ## ❗ About the `file:line` in the sweeps — they drift, and they have already drifted
@@ -162,6 +222,13 @@ filed; two held and five were stale**, by 27 to 122 lines:
 
 **So: grep the identifier, never paste the number.** The identifiers are stable and are the durable
 part; the numbers were true for about a day. This is the repo's rule 1 applied to its own research.
+
+**And they drifted again.** `[CODE]` 2026-09-14: `STK` is `engine/engine.js:359` (the table above
+says `:330`), `stakesCfg` `:362`, `petalMomentTick` `:1558` (`docs/ARCH-LOG.md` A11 says `:1224` —
+**334 lines**), `SHIRTS` `:431` (`docs/GAUGE.md` says `:341`), `docSections` `:3370`, `docOpen`
+`:3513`, `drawPerson` `:2955`, `gradeOf` `:374`. The healthy-eating sweep tripped this three separate
+times in one run, once inside an agent's own persona file. **The table above is a record of a
+spot-check on 2026-09-11, not a current index.**
 
 ---
 
@@ -205,10 +272,11 @@ invisible in review and obvious in play — which is the entire argument for pla
 
 ## What we already have, and it is the surprising half
 
-`[CODE]` verified 2026-09-11 where marked. **The chill spec is already law in this engine, not a
-setting.** `engine/engine.js:328` carries the comment that stakes *"may not take progress, the city
-or the save, and neither may harm a character"*, `STK()` (`:330`) defaults to `{mode:"none"}`, and
-`stakesCfg()` (`:333`) reads stakes **per chapter** — so *"a calm town with exactly one scored thing
+`[CODE]` **re-verified 2026-09-14 — the three numbers in this paragraph were stale by 29 lines and
+are corrected here.** **The chill spec is already law in this engine, not a setting.**
+`engine/engine.js:354-358` carries the comment that stakes *"may not take progress, the city
+or the save, and neither may harm a character"*, `STK()` (`:359`) defaults to `{mode:"none"}`, and
+`stakesCfg()` (`:362`) reads stakes **per chapter** — so *"a calm town with exactly one scored thing
 inside it"* is already a seam and not a rule change. **A pack that declares nothing inherits
 no-stakes**, which means here the chill version is the cheap version. There is **no inventory
 anywhere** (grep: 0 hits) and that is the one real gap; it is the same gap `docs/GIFTED-GAMES.md` §4
@@ -223,6 +291,7 @@ See `docs/GIFTED-GAMES.md` §3 for that inventory, and re-grep every identifier 
 | Sweep | Question it answered | Where |
 |---|---|---|
 | **Cooking games, 2026-09-11** | What is left to do when you remove the timer? And what does a mistake mean with no fail state? | `docs/research/2026-09-11-cooking-games.md` |
+| **The healthy-eating game, 2026-09-13** | What does the evidence actually support in a self-help game about eating — habit science, gamification psychology, the pantry/meal-app landscape, and four cuisines? What may such a game legally say, and where may its nutrition numbers come from? | `docs/research/2026-09-13-healthy-eating-game.md` — rules out: **R10's planner tell, R15, R16, R17**. The plan built on it is `docs/la-sobremesa.md` |
 | **Gifted games, 2026-09-10** | What genre survives being a gift played five times for eight minutes? | `docs/GIFTED-GAMES.md` |
 | **Transit & occlusion, 2026-09-11** | How do shipped games handle "the vehicle is not here yet", and what is best practice for standing behind things? | `docs/meetings/2026-09-11-la-parada.md` §1–§2 |
 | **Critters and vehicles, 2026-09-11** | Somebody must have a better answer for critters in gameplay — has this been solved, and what is the shape of the answer? | `docs/research/2026-09-11-critters-in-play.md` |

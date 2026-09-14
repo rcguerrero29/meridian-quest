@@ -23,6 +23,8 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/POSTMORTEM.md`** | **Every way a session here has actually got it wrong, with what each one cost — the shortest register, read before you build anything** |
+| `docs/REGRESSION.md` | The proxy register — guards that read a proxy for the noun they meant, and the rule they were bought with: **plant a real violation against a guard before you believe it** |
 | **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
 | **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
 
@@ -118,7 +120,7 @@ expect — not by calling a fullscreen API you cannot get in headless. Read `t3R
 job is to make the OLD code fail. A test that has never been red is a test that proves nothing —
 this project shipped one that pinned a sprite bug at 40px and passed the whole time it was wrong.
 
-**2 · Run the four suites, always, and say the words.**
+**2 · Run the boot suites, always, and say the words** — and then `node test/gauge.js`, which CI runs and this list never has.
 ```
 node test/smoke.js
 node test/town.smoke.js
@@ -130,7 +132,7 @@ engine, two games: a pass on one is half a pass.
 
 **3 · Then the size matrix**, on whatever the change touched.
 
-**4 · Look at a screenshot at the end.** A prototype here once passed every pixel test while putting
+**4 · Look at a screenshot FIRST, then at the end.** A prototype here once passed every pixel test while putting teeth along every wall in HQ. Numbers do not see that; a person does. And on 2026-09-13 you measured twenty-eight rows of a canvas nobody could see: the town boots to its class picker, `#vp` was `0×0`, and `draw()` fills the backing buffer whether or not the element has a layout box, so `getImageData` returned real, correct, meaningless pixels and every row passed. **Before the first number, one screenshot that shows the thing you are about to measure is on a screen.** No car on the rollers, no reading.
 teeth along every wall in HQ. Numbers do not see that; a person does.
 
 **5 · Report pass or fail, in plain words.** Not "the assertion at line 412 failed" — *"on a phone in

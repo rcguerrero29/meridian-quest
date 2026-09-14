@@ -23,6 +23,8 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/POSTMORTEM.md`** | **Every way a session here has actually got it wrong, with what each one cost — the shortest register, read before you build anything** |
+| `docs/REGRESSION.md` | The proxy register — guards that read a proxy for the noun they meant, and the rule they were bought with: **plant a real violation against a guard before you believe it** |
 | **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
 | **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
 
@@ -102,9 +104,14 @@ game finds out the hard way.
 3. **Verify in the code, never from a doc.** The docs in this repo have been wrong about the code
    more than once, and both of the survey's best findings were things a doc claimed were already
    solved. `grep` for the definition. Cite `file:line`.
-4. **Test every claim against El Changarrito.** The town is the only other world on this engine, and
-   it is therefore the only honest evidence about what travels. If a tag works for Meridian and the
-   town both, it is probably real. If the town had to *copy* something to make it work, it is not.
+4. **Test every claim against El Changarrito — and know that it can give three answers, not two.**
+   The town is the only other world on this engine, so it is the only honest evidence about what
+   travels. If a tag works for Meridian and the town both, it is probably real. If the town had to
+   **copy** something to make it work, it is not. **And if the town declares the thing at all — no
+   pantry, no recipe, no reminder, no save slot of its own — then it has not been tested by the town,
+   it has been skipped by it. Say `untested`, never `travels`.** *(`docs/TAGS.md` L22. Used three
+   times on 2026-09-14 alone; without it, `WEAR`, the `.ics` exporter and the pack save slot all
+   read as passing. Applied 2026-09-14.)*
 
 ## The two rules you judge by
 

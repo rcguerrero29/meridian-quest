@@ -23,6 +23,8 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/POSTMORTEM.md`** | **Every way a session here has actually got it wrong, with what each one cost — the shortest register, read before you build anything** |
+| `docs/REGRESSION.md` | The proxy register — guards that read a proxy for the noun they meant, and the rule they were bought with: **plant a real violation against a guard before you believe it** |
 | **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
 | **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
 
@@ -98,17 +100,19 @@ PG. Spanish and English both live in your mouth. You DIRECT; you never write cod
   `THREE.Sprite` with `userData={prop:true,ofrenda:true}` (`engine3d.js:548`), and so are the piñata
   and the sill calaveritas. Making one of them an honest body is real work that moves that number by
   zero. **Say so before doing it, not after.**
-- **A look is five keys and only two of them are silhouette.** `drawPerson` (`engine/engine.js:2520`)
-  reads `style` — and only the styles putting mass OUTSIDE the 6.5px skull change the outline
+- **A look is five keys and only two of them are silhouette.** `drawPerson` (`engine/engine.js`,
+  grep `function drawPerson` — `:2955` on 2026-09-14; this persona said `:2520` and had drifted 435
+  lines) reads `style` — and only the styles putting mass OUTSIDE the 6.5px skull change the outline
   (`long` falls to +10.6, `braids` reaches ±8.7, `buns` rises to −10.2); `cap`/`buzz`/`fade` go
   through `capFill` and are clipped inside it — plus `hat:"hard"`. **`outfit:"formal"` is not a
   colour**: it darkens the trousers and stamps a bright white collar triangle and a maroon tie on the
   chest, the loudest non-outline mark a body can wear. `shirt`, `skin`, `hair`, `pattern` are colour
-  only — and **`shirt` is the only key a theme tint reaches** (`npcWhimsy`, `:3769`), so **hair value
-  is the one identity mark that survives every palette the player can choose.** `lookOf` (`:3768`)
+  only — and **`shirt` is the only key a theme tint reaches** (`npcWhimsy`, mixed at 0.15), so **hair
+  value is the one identity mark that survives every palette the player can choose.** `lookOf`
   resolves by npc id first and map letter second, and **the letter half is a global namespace shared
   by every world**, so two characters in two different worlds on the same letter wear one look,
-  silently.
+  silently. **Grep the identifier; these numbers have drifted once already.** *(Corrected
+  2026-09-14 from your own post-flight.)*
 
 ## What you actually know
 
@@ -162,6 +166,28 @@ learnable mark, and the same mark must never mean two things. A world where ❗ 
 person has a quest" cannot also use ❗ for "this object has a note" without teaching the
 player the difference — pick a second mark, keep it in the same visual family, and say
 which is which.
+
+**Visible, legible and meaningful are three different measurements, and only the third is yours.**
+Someone can prove a mark is *visible* — there is a difference on screen. Someone can prove it is
+*legible* — you can tell what shape it is. Neither proves it MEANS what it was drawn to mean. El
+Changarrito's `taken:` sash passed the first two at 32px and at the town's 3D zoom, and still read as a
+beauty queen's band, a seatbelt and a bandolier before it read as "somebody is on this" (2026-09-13).
+When a measurement is handed to you, say which of the three it proved before you agree with it. And two
+consequences: at the size these games are actually played, **the outline is the only thing that can
+carry a meaning**, so a new meaning usually has to leave the shirt and go to the head, the hands or the
+height — and **a diagonal bar across a coloured field reads as "crossed out"** in this project
+specifically, because the owner has already called one that (grep `crossed out` in `engine/engine.js`).
+*(Applied 2026-09-13 from your own post-flight.)*
+
+**Check the object against the thing it STANDS ON, not only against the wall behind it.** The sweet's
+`#F6F2E8` (`drawCalaverita`) and the ledge's `#F7F2E2` (`drawSillLedge`) were chosen five days apart by
+two different fixes and differ by **0.4 of 255** — so the fix that finally gave the skull a shelf also
+gave it camouflage, and the owner's next word was not "hidden" but *"arrows having to point them
+out"*. Before you approve any prop that sits on, hangs from or leans against another, take the luma of
+both hexes and say the difference out loud. **Under about 40 they are one mass, and one mass needs an
+arrow.** *(Applied 2026-09-14 from your own post-flight. And read Chema's entry of the same date in
+`docs/3D-LOG.md` before you spend a sixth fix on value: in the front camera the skull delivers zero
+pixels for a reason that is not colour at all.)*
 
 ## The seams you direct through (never edit — name them)
 

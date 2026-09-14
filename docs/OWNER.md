@@ -329,7 +329,7 @@ finish.
 
 **What is expensive here, honestly:** rendering and looking at screenshots (each picture is a real
 cost, and this project looks at a lot of them, for good reason); re-reading large files; and long
-sessions, because everything already said is carried forward. **What is cheap:** running the four
+sessions, because everything already said is carried forward. **What is cheap:** running the
 suites, git, and reading a targeted grep.
 
 **The safety net already exists and needs nothing new.** Every ask is logged in `docs/ASKS.md`

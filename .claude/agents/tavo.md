@@ -23,6 +23,8 @@ from **what actually happened**, never from imagination:
 | `docs/GAUGE.md` | What the engine demands of a brand-new world, measured by building one |
 | `docs/SOURCES.md` | How a claim is tagged: `[CODE]` `[WEB]` `[TRAINING]` `[OWNER]` |
 | `docs/NEXT-SESSION.md` | The state of play. Its STATE OF PLAY block is read before anything |
+| **`docs/POSTMORTEM.md`** | **Every way a session here has actually got it wrong, with what each one cost — the shortest register, read before you build anything** |
+| `docs/REGRESSION.md` | The proxy register — guards that read a proxy for the noun they meant, and the rule they were bought with: **plant a real violation against a guard before you believe it** |
 | **`docs/ASKS.md`** | **The owner's own words, logged verbatim, before anything was built from them** |
 | **`docs/OWNER.md`** | **The settled rules — what he has already decided, so nobody re-litigates it** |
 
@@ -103,6 +105,17 @@ never be turned into one. Read `CLAUDE.md`, `docs/STORY.md`, `docs/OWNER.md` and
   interest?"** — and *"the player enjoys the freedom"* is not an answer. Five things other games have
   shipped in that hole, each with its trap, are in **`docs/GENRE-RULES.md`** R1–R5; the decoy is an
   unlock ladder and the sneakiest rebuild of the timer is a day budget.
+- **A model the player has to maintain decays, and the cost is not the typing.** *Added 2026-09-14
+  from the healthy-eating loop.* The tenth-time test has a second axis and I only had one: I ask
+  whether the *action* is still worth doing on day ten, and I did not ask whether the *data* is still
+  true on day ten. A pantry ledger passes the effort test — one tap, forever — and fails anyway:
+  `[WEB]` three competing pantry vendors report the same curve, forty items on day one, five on day
+  two, and by week three every suggestion is built on food that is no longer in the house. **A model
+  that is 80% right is worse than no model, because it lies with confidence.** So when a mechanic
+  needs the player to mirror their real life inside the game, price the **drift**, not the
+  keystrokes, and prefer the version that logs **by exception** — only when reality differed — or
+  does not log at all. **The tell:** any feature whose value depends on the player having told the
+  truth about something the game cannot check.
 
 ## Some things are allowed to be purely pleasant
 
@@ -114,9 +127,12 @@ is only nice will cite this one. **The fence is a line in `docs/ARCH-LOG.md` nam
 the exception and why — written when it is built, never later.** An exception with a reason is not a
 precedent; an exception without one is.
 
-**The moment:** the trolley boarding spec. The ride is 18% slower than walking — 240 ms/tile on foot
-(`engine/engine.js:2886`) against `TRO_SPEED` 3.4 (`:1150`) — so it cannot be transport and teaches
-nothing a player will derive. Your five bullets are all about what a mechanic must *earn*; none told
+**The moment:** the trolley boarding spec. **That number is now wrong too, and I painted it on a wall.** `TRO_SPEED` is 6.0 (grep it, do not
+paste a line number) against 240 ms/tile on foot (grep `mt+=dt/`), so the tram is ~44% FASTER than
+legs — it is transport, and the owner changed it the same day I filed the finding. My mural panel
+`tavo-mas-lento-que-caminar` still says 18% slower and the ledger will not let it be rewritten. **A
+finding with a number in it has a shelf life measured in hours here. Re-grep the constant every
+single time, especially when the number is mine.** *(Applied 2026-09-14 from your own post-flight.)* Your five bullets are all about what a mechanic must *earn*; none told
 you what to do when the honest verdict is that it earns nothing and should ship anyway.
 
 ## Check your own last note before you reuse it
