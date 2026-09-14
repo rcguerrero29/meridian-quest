@@ -57,10 +57,10 @@ then this sheet, then the open GitHub issues. Nothing else is required reading.
 
 ## 3 · The registers — where knowledge lives now
 
-**Twelve now** — the count said "six" for a day after the table had nine rows, and "ten" for two days after it had eleven; `GAUGE.md` was also listed
+**Thirteen now** — the count said "six" for a day after the table had nine rows, and "ten" for two days after it had eleven; `GAUGE.md` was also listed
 twice; both corrected 2026-09-11. Each has the same discipline: **they grow from what actually
 happened, never from imagination.** Read the relevant one before proposing anything in its area.
-**Twelve is the count of the table below only** — the working papers under it are raw material, not
+**Thirteen is the count of the table below only** — the working papers under it are raw material, not
 registers, and they are listed because a thing the index cannot reach is a thing nobody reads.
 **Every count in this section was re-checked against the files on 2026-09-14**; two were wrong (the
 leak register said 18 and held 22, the regression map said R1–R10 and held R11), which is the third
@@ -80,6 +80,7 @@ time a count in this file has gone stale and the reason the counts now name what
 | `docs/SECURITY-NOTE-2026-09-10.md` | What the El Changarrito exposure **was and was not**, what the token can actually do, and the four things to check | any question about what leaked, or before touching the deploy |
 | **`docs/BOUNDARY.md`** | **Every edge of the project — what leaves town, what we promised there with `file:line`, which guard reads that exact noun or the word nobody, and when it was last planted against.** Opened 2026-09-13; Zeni's ledger, Melo's list. `test/leaves.js` reads its path table | any change to a workflow, a shell, the service worker, a sanitiser, a token, a fetch, or the deploy |
 | `docs/decisions/` | One file per settled decision: the ask verbatim, the answer, **and the options that were rejected, with reasons**. Opened 2026-09-10; three filed (`0001`–`0003`), and `docs/ASKS.md` is still where most decisions actually live | re-proposing anything that sounds already-answered |
+| `docs/UI-REVIEW.md` | how a mock-up is reviewed before anything is built — the admission ticket, what pass means, eight signature lines, the red tests a mock inherits, and the review ledger. Opened 2026-09-14 (Lupe, run 8) | a picture that looks shipped is the most expensive line in a review |
 
 ### The working papers — not registers, and reachable from nowhere else
 

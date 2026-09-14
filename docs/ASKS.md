@@ -250,3 +250,5 @@ that is a decision file waiting to be written.
 | 2026-09-14 (late, third reply) | additionally, i want to revamp the map... right now it is not dynamic.. this needs best practices so i can find the next quest or open quests when its games like my learning -meridian- path. | Meridian's map: researched, designed and mocked in this run; built after his look |
 | 2026-09-14 (late, third reply) | ok cool and make sure the murals get creative, completed. | every agent on the run paints, in its own material; the session paints them all, plus Chava's deferred panel |
 | 2026-09-14 (late, third reply) | also put together my backlog while aj takes her time. | Remedios triages; `docs/BACKLOG.md` re-ranked and issues filed in the ledger's shape |
+| 2026-09-14 (later) | I hit my usage limit while you were working, but it has reset now. Please continue from where you left off. | resumed: questionnaire v2 republished, the journey mocks rendered and published, the backlog filed |
+| 2026-09-14 (later) | Try again | the review crew and the painter were cut by the limit a second time; relaunched in two waves |

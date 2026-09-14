@@ -16,6 +16,47 @@ prices in. "Blocks" means the thing cannot start until that is done.
 
 ---
 
+## 0 · The ranked index — 2026-09-14 (Remedios, crew run 8; the issues are the ledger)
+
+*Re-ranked after the owner's "put together my backlog while aj takes her time." Every row is an open
+issue; the number is the ledger. Ready means nobody owes a decision and nothing blocks it. Cost is
+relayed from the engineers' registers, in sittings. §3 and §7 below are mostly history now (#195).*
+
+| Rank | Item | Issue | State | Cost |
+|---|---|---|---|---|
+| 1 | The helper's note says five pixels wide | #194 | ready | minutes |
+| 2 | The backlog index has a stray mark and three dead tables | #195 | ready | minutes |
+| 3 | Two panels with writing over writing | #188 | ready | minutes |
+| 4 | Reopening the wall loses your place sideways | #189 | ready | minutes |
+| 5 | The Read prompt blinks off twice | #191 | ready | minutes |
+| 6 | **A phone held sideways has no controls** | #173 | ready | one sitting — Remedios's pick |
+| 7 | Nothing runs the game sideways | #174 | ready | half a sitting, bought with #173 |
+| 8 | The beautify top four | #198 | ready | one sitting, art only |
+| 9 | The four kitchen colours | #199 | his look | re-cut and measured 2026-09-14 |
+| 10 | The wall's feet: cut captions, the swipe hint, the gutter, the blank | #183 #185 #186 #187 | ready | one sitting; #183 red first |
+| 11 | The tram depth pass | #177 | ready | one sitting |
+| 12 | Print a recipe | #196 | ready | one sitting, an engine rule |
+| 13 | A testing pantry of staples | #197 | ready | part of a sitting, content |
+| 14 | A neighbour walls off a third of a street | #175 | ready | one sitting |
+| 15 | The one-sided rail, and the class of it | #182 | ready | one sitting, guard red first |
+| 16 | A name on the wall leads nowhere | #184 | ready | one sitting |
+| 17 | The city ledger describes a city we do not have | #158 | ready | one sitting, docs |
+| 18 | Lit windows never light in 3D | #21 | ready | one sitting |
+| 19 | A long form opens at the top | #176 | ready | minutes, reproduce first |
+| 20 | The grid loses the glyph under a wanderer | #192 | ready | minutes |
+| 21 | Pasting into the text lab | #193 | ready | minutes, plant as text |
+| 22 | Comfort and crowding at fullscreen | #161 | ready | a harness, then a person |
+| 23 | The isometric facade | #190 | ready | scope first |
+| 24 | The `ENDLESS` split and its landmine | #155 #156 | ready | one sitting each; the second world waits on it |
+| 25 | Quests get names | #153 | ready | engine + both packs |
+| 26 | The car's near side · the passenger seam · the driver | #179 #180 #181 | after #177 | one sitting together |
+| 27 | The aperture rule as one number | #178 | ready | part of a sitting |
+| 28 | The map says what is next | #160 | after his look | one sitting; `docs/meetings/2026-09-14-el-mapa.md` |
+| 29–31 | The publishing setting · two storeys · the livery · seven smaller calls | `docs/OPEN.md` §1 | wait on the owner | — |
+| 32–36 | The merge board · the making surface · the pantry, shifts and allergy list · the pantry photos · AJ's answers | #200 | wait on AJ | the largest builds in the plan |
+
+---
+
 ## The shape of the rollout (Don Güero + Nacho, summit 2026-09-01)
 
 Eight sittings, not the four the ledger used to promise. The old estimate priced the
@@ -59,7 +100,7 @@ engine, all landing in **S1**, none of them naming a business.
 | the uppercase tile alphabet is spent | `engine.js:10` | new glyphs must be digits and symbols from here — the first, `\|` the window, lives in `content/meridian/art.js` (2026-09-02) |
 | ~~a delivery is one tile~~ | **answered by the architecture** (Don Güero, later the same day) | a storefront's `tiles` has always been a list, and a furniture delivery IS a storefront aimed at `f2` — a group costs nothing extra. What remains is ART for a piece wider than one tile (the couch) |
 | **the engine hardcodes 35 world ids** (`world===\"st\"` ×11, `\"pk\"` ×11, `\"lc\"` ×5, `\"hq\"` ×5, `\"lo\"` ×3, `f2`, `ex`) plus the dog/cat/pigeon pinned to `hq`/`lc`/`st` | `engine/engine.js` throughout | AJ's pack inherits Meridian's world ids. The portability guard (`test/smoke.js:1664`) is a 39-proper-noun blocklist: it catches \"chelo\" and misses \"hq\", so every pack-safety claim to date is unaudited. Found by the completeness critic, la junta 2026-09-03 |
-\1 | **shipped 2026-09-02** | each storefront carries an `id` and the town plan reads `f.up.<id>`; the four parcels label themselves |
+| **the four parcels label themselves** | **shipped 2026-09-02** | each storefront carries an `id` and the town plan reads `f.up.<id>`; the four parcels label themselves |
 
 ---
 

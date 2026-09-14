@@ -310,3 +310,14 @@ line in this file, and that this file is cited by `docs/OPEN.md` — that reads 
 cannot be anonymised away. **It would catch "filed but unreachable". It cannot catch "never filed",**
 because a sweep that lives only in a task output is invisible to every test in this repo. That half
 has no guard and this sentence is the only thing standing in for one. See `docs/ARCH-LOG.md` A11.
+
+**R18 · A plan marks the present: presence, never a count, a colour, an age or a rank.** The map is the
+one screen that tempts every game into a to-do list. `[WEB]` (`docs/research/2026-09-14-map-and-questionnaires.md`)
+The measured studies say a modal plan opened from a button costs the player nothing in memory and
+keeps the eyes on the world; the eye-tracking extract says a corner minimap takes them off it; WCAG
+2.5.8 says a target is a place at 24×24 CSS px, not a 9-px tile; and Duolingo's single lit "next"
+removed *"not sure what to do next"* on its own test. One mark, one meaning — the same ❗ the street
+draws — on every place where somebody has something to say. **Trap:** colour-by-state arrives as a
+one-line improvement; a "next" that pulses is a to-do list with a heartbeat; a "3 places" line under
+the plan is a list with the names removed. **Tell: any mark whose meaning changes when the world
+has not.** (`docs/ARCH-LOG.md` A3 is the law this is the practice of.)
