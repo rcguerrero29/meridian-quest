@@ -1,7 +1,8 @@
 # For AJ — a cooking and pantry game, and eight questions
 
-*Plain words, no code. The owner can read this to you, or you can read it yourself and answer what
-you like. Blanks are fine. Everything here is changeable.*
+*Plain words, no code. He can read this to you, or you can read it yourself and answer what you
+like. Blanks are fine. Everything here is changeable. The live version is the night-mode page he
+forwards; this file is its script.*
 
 ## What we're planning
 
@@ -43,4 +44,4 @@ you are away. What it is:
 8. **What should happen when you planned to cook and didn't?** Nothing, somebody says something kind,
    or it quietly offers again?
 
-*Answers go to the owner; he logs them in the game's ask ledger word for word.*
+*Your answers go to him and stay with him. They are never copied into the game's public files — not your plate, not the people you name. What gets written down there is only what we decided because of them.*
