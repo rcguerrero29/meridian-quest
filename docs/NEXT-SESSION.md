@@ -46,7 +46,21 @@ substance of each brief is in `docs/ASKS.md` (the seven rows of 2026-09-13, late
    `docs/crew/POSTMORTEM-2026-09-13-lessons-raw.md`, and **a fresh Chuy pass (`a1b75e1abe909fe95`) was
    applying them, `docs/` only.** When it lands: `git status`, read the diff, run `node test/town.smoke.js`,
    commit with explicit paths.
-2. **Chava at the wall, cold** (`a258b45ddfc859a74`, third attempt — two were cut off by the limit).
+2. **Chava at the wall, cold — landed.** `docs/meetings/2026-09-14-chava-en-el-muro.md`, verbatim.
+   **Eight findings, worst first, none fixed yet:** (1) twelve of nineteen signed captions on the dado
+   are cut mid-word at the bay's edge with no ellipsis — Melo's reads *"two plan"* for *"two plants"*
+   on a wall that forbids plans; `murWall` must fit the foot to the bay (wrap, or three words and a
+   mark), and a guard that measures every caption against its bay is the red; (2) a name on the dado
+   cannot be followed to its panels — the reader lists panels by date, and Zeni is only ever "the
+   customs clerk" below; (3) 7.5% of the wall on a phone, sixteen swipes, no arrow, no fade, and the
+   "walk along it" sentence is below the fold; (4) the gutter between two painters (~14 px) is ten
+   times narrower than the gap between one painter's visits (~150 px), so proximity says the wrong
+   thing, and a caption floats nearer the next panel than its own; (5) 79.9% of the wall above the
+   dado is blank because every bay is as tall as the busiest; (6) text over text on Chema's iteration-3
+   panel (two labels on one baseline) and Chuy's stamp over the line it stamps; (7) reopening keeps
+   the vertical scroll and resets the horizontal one to 0; (8) in the isometric camera the facade row
+   is featureless. **Rows 8¾ in the queue.** His persona edit and panel are row 46, deferred to the
+   next sitting.
 3. **Chema, the skulls measured — landed.** His entry is in `docs/3D-LOG.md` (2026-09-14) and queue
    row 7 is rewritten from it: the front camera renders zero skull pixels (draw order), the 3D pane is
    swallowed at its anchor's depth (+0.09), light and value rejected by measurement, and

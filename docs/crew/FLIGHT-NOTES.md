@@ -66,6 +66,7 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 43 | `beto` | A document need not be registered (`docDef` takes the object) and a pack's state does not ride the save (`sanitizeSave` rebuilds a whitelist; the pass carries only `loadSave()`) | **APPLIED 2026-09-14** — a fifth engine fact; the heading now says five |
 | 44 | `paty` | There is no `chatSay` — her own file cited a function that does not exist; `toast(msg,ms,crit)` takes its ms from the caller, the chat line passes 2800; write the Spanish first for anything that toasts | **APPLIED 2026-09-14** — the paragraph replaced; every claim in it re-grepped by the session first |
 | 45 | `tono` | The town can give three answers, not two: works / had to copy / never declares it — say `untested`, never `travels` | **APPLIED 2026-09-14** — step 4 of "Before you say anything" replaced |
+| 46 | `chava` | When you conclude a thing is ABSENT, crop it at 3× before you say so — four passes said "there is no mural" and the paint was there every pass | **DEFERRED, not refused** — exact text in `docs/meetings/2026-09-14-chava-en-el-muro.md`; apply with his panel (*El pie cortado*) in the next sitting |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -103,6 +104,21 @@ mechanism has a leak. Either way it should be written down next to the proposal.
 writing, here*. The session that wrote that sentence then closed the run without doing it. The reason
 is ordinary and is the whole point: **an un-applied proposal looks exactly like a proposal that was
 considered and declined, and both look like nothing at all.** Hence the table above.
+
+---
+
+# ITERATION 7½ — 2026-09-14 — Chava at the wall, cold
+
+*One run, one person, after the wall's iteration 6 was painted (it changed under him mid-session and
+he says so). His return is verbatim in `docs/meetings/2026-09-14-chava-en-el-muro.md`; row 46 above.
+What he found, worst first: twelve of nineteen signed captions are cut at the edge of their bay,
+mid-word, with no ellipsis, on a wall whose one law is never remove; a name on the dado cannot be
+followed to its panels (Zeni is only ever "the customs clerk" in the reader); 7.5% of the wall
+shows on a phone with sixteen swipes to the end and nothing that says swipe; the gutter between two
+painters is ten times narrower than the gap between one painter's two visits; 79.9% of the wall is
+blank limewash; text over text on Chema's and Chuy's panels; reopening keeps the vertical place and
+loses the horizontal one. The concept holds where it is hardest — one person's four visits read as
+one person — and he named the three unlabelled panels from their subject, not their hand.*
 
 ---
 
