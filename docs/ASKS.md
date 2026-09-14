@@ -199,3 +199,6 @@ that is a decision file waiting to be written.
 | *"dont we have some 3d model and capabilities from fitcheck?"* | **That answer is now wrong and is corrected here (2026-09-04).** It was true when checked — the account had eight artifacts and none was FitCheck. Since then another session published two: **FitCheck Salvage Manifest** (10 subsystems read at source level, 22 agents, 121 Swift files) and **Bones to Meshes** (a working SDF→Surface Nets prop forge). There IS something to inherit. Read 2026-09-04 |
 | *"i want both nacho and don guero at my beck and call"* (as a trolley shortcut) | Built, then **reversed the same day** at the owner's word. The realistic version is the one that stands |
 | An in-game live AI assistant | Needs a network call. The owner's actual ambition turned out to be different and buildable — a template Don Güero builds from — and that is what got made |
+| 2026-09-14 | coming up on a limit, how much is left? | answered in the session: everything pushed, one report unfiled (filed the same minute) |
+| 2026-09-14 | you may want to document or wrap things up as the limit is here | this handoff; the skull fix committed with its record |
+| 2026-09-14 | merge please | PR opened from `claude/happy-ritchie-84qbbc` and merged by the session, at his word |

@@ -253,3 +253,20 @@ against it is measured against the wrong thing. — *Chema, 2026-09-09*
 - **Watch out — the guard bought for the word "hidden" reads one camera and the wrong object.**
   `test/smoke.js` (grep `camSet('3d')` near the sill block, and `stone < 3`) counts the LEDGE's
   stone pixels in 3D only. In the front camera the ledge is at zero too and nothing asks.
+
+### 2026-09-14 · the skulls, shipped: the front camera draws them after the wall, and the 3D pane stands proud
+
+- **Shipped (mq-v159), the same day as the measurement above.** (a) **Front:** `fiestaDraw2D` takes a
+  `defer` and hands every prop standing on a SOLID tile to the caller's depth queue at `y+0.05` — the
+  slot decor already used — instead of painting it in the ground pass; the sill box, the ofrenda on a
+  table and a free calaverita on a solid tile all go through it, a prop on the floor paints exactly as
+  before. (b) **3D:** `SILL_PROUD=0.09` on the pane and the ledge together, the ledge keeping its 0.05.
+  (c) The dead first copies of `drawOfrenda`/`fiestaProps`/`drawPapelRow`/`drawSillLit` are deleted.
+- **Measured, front camera, hero at st (5,2), clocks frozen, control 0 px:** blanking `drawSillBox`
+  changes **0 px before → 3,864 px after** (640×512 buffer). The suite asks the same question now
+  (`test/smoke.js`, grep `frontSill`): the first draft of that check did not freeze the clocks, read
+  703 px of tram-and-petal noise, and would have passed on a frame with no sill in it.
+- **Not measured today:** the 3D count after +0.09 in the suite (Chema's 1743 stands as his number);
+  whether the proud pane collides with a person on the pavement (it sits 0.12 into the pavement tile
+  at window height; nobody has stood there and looked). **Not done:** Pili's socket redraw (the flat
+  cameras' legibility) — the next fix, if the owner still wants one after this.

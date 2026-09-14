@@ -1036,21 +1036,29 @@ function drawPinata(g,sx,sy,sway){ /* a seven-point star on a rope: a gold body,
     g.fillStyle="#F6F2E8";[-0.25,0,0.25].forEach(t=>{g.fillRect(ex+Math.cos(a+t)*1.2-0.5,ey+Math.sin(a+t)*1.2-0.5,1,1.6);});}
   g.fillStyle="#F2B705";g.beginPath();for(let k=0;k<6;k++){const a=k*Math.PI/3;g.lineTo(cx+Math.cos(a)*6,cy+Math.sin(a)*6);}g.closePath();g.fill();
   g.fillStyle="rgba(255,255,255,.3)";g.fillRect(cx-3,cy-4,3,1.4);g.restore();}
-function fiestaDraw2D(wid,toScreen,front){ /* toScreen(x,y) → the tile's top-left; front: the flags hang from the top of the row */
+function fiestaDraw2D(wid,toScreen,front,defer){ /* toScreen(x,y) → the tile's top-left; front: the flags hang from the top of the row.
+   defer(y,fn), front only: a prop standing on a SOLID tile is handed to the caller's depth queue for that row instead of
+   being painted here, because here is the ground pass and the facade's own face is painted AFTER it. Measured 2026-09-14
+   (Chema, docs/3D-LOG.md): drawSillBox was called eight times a frame in the front camera and delivered ZERO pixels —
+   the window, the sweet and the ledge were drawn and then covered by the wall they hang on, every frame since they
+   shipped, which is why four fixes about size and one about light changed nothing anyone could see. The papel picado
+   never had this because it hangs over open rows. A prop on the floor still paints here, exactly as before. */
+  let cur=null;const put=(solid,fn)=>{if(front&&defer&&solid){fn.y=cur;defer(fn);}else fn();};
   const pal=art("papel",null);if(!pal)return;
   fiestaSwags(wid).forEach(sw=>{const y=sw.from[1],x0=Math.min(sw.from[0],sw.to[0]),x1=Math.max(sw.from[0],sw.to[0]);
     const[sx0,sy0]=toScreen(x0,y),[sx1]=toScreen(x1+1,y),ly=sy0+(front?3:5);
     drawPapelRow(ctx,sx0,sx1,ly,pal,x0+y);});
   fiestaHangs(wid).forEach(h=>{const[sx,sy]=toScreen(h.x,h.y);if(h.kind==="pinata")drawPinata(ctx,sx,sy,Math.sin(Date.now()/700+h.x)*0.06);});
-  fiestaProps(wid).forEach(p=>{const[sx,sy]=toScreen(p.x,p.y);const ox=(p.ox===undefined?0.5:p.ox)*TS,oy=(p.oy===undefined?0.5:p.oy)*TS;
-    if(p.kind==="ofrenda"){drawOfrenda(ctx,sx,sy-(front&&isSolidAt(wid,p.x,p.y)?10:0));return;}
+  fiestaProps(wid).forEach(p=>{cur=p.y;const[sx,sy]=toScreen(p.x,p.y);const ox=(p.ox===undefined?0.5:p.ox)*TS,oy=(p.oy===undefined?0.5:p.oy)*TS;
+    if(p.kind==="ofrenda"){const solid=isSolidAt(wid,p.x,p.y);put(solid,()=>drawOfrenda(ctx,sx,sy-(front&&solid?10:0)));return;}
     if(p.kind!=="calaverita")return;
     const win=propSill(wid,p); /* on a window sill (owner: "as in human reality"): the facade's own window says where */
     if(win){const z=win.size; /* centred on its own window, standing on the sill, small enough to leave glass around it */
-      if(front)drawSillBox(ctx,sx+win.cx-sillBoxW(win.w)/2,sy+win.sill-win.h,win.w,win.h,p.foil,z);
+      if(front)put(true,()=>drawSillBox(ctx,sx+win.cx-sillBoxW(win.w)/2,sy+win.sill-win.h,win.w,win.h,p.foil,z)); /* a sill is always in a facade */
       else drawCalaverita(ctx,sx+win.cx-z/2,sy+TS-1-z,p.foil,z);
       return;}
-    drawCalaverita(ctx,sx+ox-4,front?(isSolidAt(wid,p.x,p.y)||p.h?sy+2:sy+TS-9):sy+oy-4,p.foil);});}
+    const solid=isSolidAt(wid,p.x,p.y);
+    put(solid,()=>drawCalaverita(ctx,sx+ox-4,front?(solid||p.h?sy+2:sy+TS-9):sy+oy-4,p.foil));});}
 /* Which window a sill prop stands in, and how big it may be there (#131, owner: "sugar skull on
    sills are overlapping"). Two faults lived in the one line this replaces.
    The candy is drawn 8px wide. Meridian's shopfront window is SEVEN, and the engine's is eight —
@@ -1078,48 +1086,6 @@ function propSill(wid,p){
      0.85 leaves a pixel of glass each side — a sweet ON a sill, not a sweet AVOIDING one. */
   const size=Math.max(4,Math.min(8,Math.round(win[2]*0.85),Math.round(win[3]*0.9)));
   return {cx:win[0]+win[2]/2,sill:win[1]+win[3],size,i,w:win[2],h:win[3],g};}
-function drawOfrenda(g,x,y){ /* la ofrenda (Nacho, 2026-09-07; the owner: "sounds like a good idea"): a tiered table under a marigold arch —
-  the cloth, three candles, pan de muerto, a calaverita, and at the top an EMPTY frame, nobody named: "that one's for whoever needs it".
-  The owner's own document with the basics refines this when it arrives. */
-  const P=petalPal();
-  g.fillStyle="#5A2E7A";g.fillRect(x+2,y+20,28,10);g.fillStyle="#7B4BA8";g.fillRect(x+2,y+20,28,2);      /* the lower cloth */
-  g.fillStyle="#E2620F";g.fillRect(x+6,y+13,20,7);g.fillStyle="#F2870F";g.fillRect(x+6,y+13,20,1.5);        /* the upper tier */
-  g.strokeStyle="#7A2E12";g.lineWidth=2.4;g.beginPath();g.arc(x+16,y+14,13,Math.PI*1.05,Math.PI*1.95);g.stroke(); /* the arch */
-  for(let i=0;i<11;i++){const t=Math.PI*(1.08+0.84*i/10);petalShape(g,x+16+Math.cos(t)*13,y+14+Math.sin(t)*13,t+Math.PI/2,0.9,P[2+(i%4)]);}
-  [[8,21],[16,14],[24,21]].forEach(([cx,cy],i)=>{g.fillStyle="#F6F2E8";g.fillRect(x+cx-1.2,y+cy-6,2.4,6);g.fillStyle="#FFC300";g.beginPath();g.ellipse(x+cx,y+cy-7,1,1.8,0,0,7);g.fill();}); /* candles */
-  g.fillStyle="#3A2E26";g.fillRect(x+12,y+3,8,7);g.fillStyle="#F6F2E8";g.fillRect(x+13,y+4,6,5);         /* the empty frame */
-  g.fillStyle="#B8722E";g.beginPath();g.arc(x+11,y+18,3,0,7);g.fill();g.fillStyle="#E8B86A";g.fillRect(x+10.5,y+15.5,1,5);g.fillRect(x+8.5,y+17.5,5,1); /* pan de muerto */
-  drawCalaverita(g,x+18,y+12.5,"#E8478F");
-  g.fillStyle="#F6F2E8";g.beginPath();g.arc(x+4,y+24,1.4,0,7);g.arc(x+28,y+24,1.4,0,7);g.fill();          /* two cups of water */
-  drawPapelRow(g,x+2,x+30,y+25,art("papel",["#E8478F","#2FA5A0","#F2B705"]),3);}
-function fiestaProps(wid){return (art("props",[])||[]).filter(p=>p.world===wid);} /* small things set down by place: {world,x,y,kind,ox,oy,h,foil} */
-function drawPapelRow(g,x0,x1,ly,pal,seed){ /* a string of cut paper (Pili, 2026-09-07): little squares with a scalloped hem and a punched
-  hole — paper, not bunting — in TWO rows, the second half a flag over; two rows is what makes a street look dressed */
-  g.strokeStyle="#3A2E26";g.lineWidth=1;g.beginPath();g.moveTo(x0+2,ly);g.lineTo(x1-2,ly);g.moveTo(x0+4,ly+5.5);g.lineTo(x1-4,ly+5.5);g.stroke();
-  [0,1].forEach(row=>{let k=row*3;for(let px=x0+3+row*2.3;px<x1-3;px+=4.6,k++){const col=pal[(k+seed)%pal.length],fy=ly+row*5.5;
-    g.fillStyle=col;g.fillRect(px-1.8,fy,3.6,3.6);
-    g.beginPath();g.moveTo(px-1.8,fy+3.6);g.lineTo(px-0.9,fy+4.8);g.lineTo(px,fy+3.6);g.lineTo(px+0.9,fy+4.8);g.lineTo(px+1.8,fy+3.6);g.closePath();g.fill();
-    g.fillStyle="rgba(40,30,20,.55)";g.fillRect(px-0.4,fy+1.2,0.8,0.8);}});}
-/* A LIT WINDOW behind a sill candy (#131 again, owner 2026-09-10: "skulls are still hidden").
-   Twice now this was answered by changing the sweet's SIZE — 8px to 5px, then back up to 0.85 of
-   the pane — and twice the owner came back saying he still could not see them. He was right both
-   times, and the size was never the fault. A calaverita is eight pixels on a forty-pixel tile, on a
-   wall about a unit high, seen from a dozen tiles back: at that distance it is three or four screen
-   pixels of cream against a dark recess, and NO ratio makes three pixels read. Look at what does
-   read in the same shot — the papel picado. Bright, saturated, repeated.
-   So light the window instead of growing the candy. A warm pane among dark ones is a big saturated
-   shape that carries all the way to the back of the street, and it is the true picture besides: a
-   veladora is lit on the sill and the sugar skull sits in front of it. The candy stops being the
-   thing you must see and becomes the thing you find when you walk up to it, which is the right job
-   for an eight-pixel sweet. */
-function drawSillLit(g,x,y,w,h){
-  if(!(w>0&&h>0))return;
-  g.save();
-  const gr=g.createLinearGradient(0,y,0,y+h);
-  gr.addColorStop(0,"#F2B705");gr.addColorStop(0.55,"#E8873A");gr.addColorStop(1,"#8A3F1E");
-  g.fillStyle=gr;g.fillRect(x,y,w,h);
-  g.fillStyle="rgba(255,241,200,.85)";g.fillRect(x+w/2-0.6,y+h*0.28,1.2,h*0.42); /* the veladora's flame */
-  g.restore();}
 /* ---------- THE SILL ITSELF — the fourth attempt, and the first one that is not about size ----------
    The owner has asked four times. 2026-09-08: the skulls share a sill. 2026-09-09 and 2026-09-10:
    "the skulls are still hidden on the sills." 2026-09-12: "another attempt at showing the WINDOW
@@ -1943,10 +1909,12 @@ function drawFront(){
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
       ctx.fillStyle="rgba(15,12,20,.16)";ctx.fillRect(sx,sy,TS,8);}
   }
-  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);troDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],true);fiestaDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],true);
-  drawDecals(camX,camY);
-  /* depth pass: facades, decor and actors interleaved by row, back to front */
+  /* depth pass: facades, decor and actors interleaved by row, back to front. Declared before the
+     fiesta is drawn because a prop on a solid tile is queued into it (fiestaDraw2D's `defer`) */
   const R=[];
+  petalTrail(world,(x,y)=>[x*TS-camX,y*TS-camY]);troDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],true);
+  fiestaDraw2D(world,(x,y)=>[x*TS-camX,y*TS-camY],true,fn=>R.push({d:fn.y+0.05,f:fn})); /* after its row's facade, before actors — the same slot decor uses */
+  drawDecals(camX,camY);
   DECOS.forEach(d=>{if(d.world!==world)return;const f=DECODRAW[d.deco];if(!f)return;
     const sx=d.x*TS-camX,sy=d.y*TS-camY;
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;

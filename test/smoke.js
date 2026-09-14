@@ -4216,6 +4216,46 @@ const CANDIDATES = [
   });
   fails.push(...sills);
 
+  /* ---- and in the FRONT camera the sill box has to REACH THE CANVAS at all ----
+     Chema, 2026-09-14 (docs/3D-LOG.md): blank the one painter and diff the frame. In the front camera
+     `drawSillBox` was called eight times a frame and delivered ZERO pixels — the fiesta was drawn in
+     the ground pass and the facade's own tile art painted over it in the depth pass, every frame since
+     the sills shipped. No contrast number could have said that, because there was nothing to take the
+     contrast of; five fixes about size and light went past it. So this asks the only question that
+     catches the whole class: with `drawSillBox` a no-op, does the front frame CHANGE? A prop the
+     ground pass draws and the depth pass covers changes nothing. The 3D check above reads the ledge's
+     stone in one camera; this reads the sweet, the pane and the ledge together in the other. */
+  const frontSill = await page.evaluate(() => {
+    const P = [];
+    if (typeof SEASONS === 'undefined' || typeof seasonSet !== 'function' || typeof drawSillBox !== 'function' || typeof draw !== 'function') return P;
+    const keep = { w: world, px: px, py: py, cam: camMode, season: (typeof seasonNow === 'function' ? seasonNow() : null) };
+    let prop = null;
+    for (const k of Object.keys(SEASONS)) { seasonSet(k);
+      for (const wid of Object.keys(WORLDS)) {
+        const q = (typeof fiestaProps === 'function' ? fiestaProps(wid) : []).find(r => r.sill && r.kind === 'calaverita');
+        if (q) { prop = { ...q, world: wid }; break; } }
+      if (prop) break; }
+    if (!prop) { seasonSet(keep.season); return P; }
+    world = prop.world; px = fx = prop.x + 3; py = fy = prop.y + 2; moving = false; held = null;
+    camSet('front');
+    const c = document.getElementById('cv'), g = c.getContext('2d');
+    /* the frame has to be STILL or the diff measures the tram and the petals: freeze both clocks,
+       as the measurement that found this did. The first draft of this probe did not, read 703 pixels
+       of noise between two identical frames, and would have passed on a frame that draws no sill */
+    const D = Date.now, PN = performance.now, t0 = D(); Date.now = () => t0; performance.now = () => t0;
+    const frame = () => { draw(); return g.getImageData(0, 0, c.width, c.height).data; };
+    const a = frame(), a2 = frame();                     /* the control: two frames, nothing changed */
+    let noise = 0; for (let i = 0; i < a.length; i += 4) if (a[i] !== a2[i] || a[i + 1] !== a2[i + 1] || a[i + 2] !== a2[i + 2]) noise++;
+    const real = drawSillBox; drawSillBox = function () {}; /* the one painter, blanked */
+    const b = frame(); drawSillBox = real; Date.now = D; performance.now = PN;
+    let changed = 0; for (let i = 0; i < a.length; i += 4) if (a[i] !== b[i] || a[i + 1] !== b[i + 1] || a[i + 2] !== b[i + 2]) changed++;
+    if (noise > 50) P.push('the front-camera sill probe has ' + noise + ' pixels of noise between two identical frames — it cannot measure anything until the frame is still');
+    else if (changed < 100) P.push('the front camera calls drawSillBox for every dressed window and ' + changed + ' pixels of it reach the canvas (control noise ' + noise + '): the sill box is painted in the ground pass and the facade\'s own art is painted over it afterwards. The window, the sweet and the ledge are drawn and then covered, every frame. A prop standing on a SOLID tile belongs in that tile\'s row of the depth queue, after its facade');
+    seasonSet(keep.season); world = keep.w; px = fx = keep.px; py = fy = keep.py; camSet(keep.cam);
+    return P;
+  });
+  fails.push(...frontSill);
+
 
 
   await browser.close();
