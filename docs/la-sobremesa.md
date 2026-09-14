@@ -743,8 +743,28 @@ the **Collection is a document per chain** (`kv` rows with the unmade tiers blan
 are the cast** in §3. **The merge board is the one thing this engine does not have** — a grid of
 draggable items with a chain table is a new surface, not a document; it is a CHOICE and it is the
 biggest single build in this whole plan. It is also the part AJ plays. **Do not decide it without
-her** (the script asks). The second game he named, *Cookingdom*, is *"the next video"* and has not
-arrived; nothing is written about it until it does.
+her** (the script asks). The second game he named, **Cookingdom**, arrived as a 28-second recording (read frame by frame,
+2026-09-14). What it is, as seen: **one dish made by hand, one gesture per step.** A capybara cook
+in the corner with three stars; a three-segment progress bar; three trays across the top (sauce,
+cheese, pepperoni); a wooden board with a lump of dough. You **drag the rolling pin** across the
+dough until it is a round; you **spread the sauce with a finger**, and the red follows your stroke;
+you **sprinkle the cheese** the same way; you **place each slice of pepperoni** one at a time. A
+small heart pops when a step lands; a tray empties when its ingredient is used; a *+30s* bubble
+appears at the end (a bonus of some kind — whether the game runs a clock underneath is not visible in
+28 seconds, and is a question). **No money, no words, no menu on screen while you cook.** This is
+`docs/GENRE-RULES.md` R3 — *tactility* — in its purest shipped form, and it is the row Tavo said to
+*"spend last"* in §2 because it is authored content per dish.
+
+**So AJ likes two kinds of play and they are two different surfaces:** the **merge board** (chains,
+a Collection) and the **making surface** (a canvas you roll, spread, sprinkle and place on). This
+engine has neither: the reader's `art` block is a canvas that draws and does not listen. Both are
+CHOICEs, both are the largest builds in the plan, and **the making surface is the more natural fit
+for the shifts** (12.3b): a shift's recipe is a list of steps, and each step becomes one gesture on
+the board — roll, spread, sprinkle, place, stir, pour — with **no clock**, the heart when it lands,
+and the pantry's ingredients in the trays. Cost, honestly: a gesture canvas with touch and mouse,
+a per-step "done" rule (how much of the round is covered), and art per ingredient — one sitting for
+the surface, then content per dish. **Ask AJ which of the two she would miss more** (her script's
+question 2 now names both); build that one first.
 
 ### 12.3 · The new requests, each with a sketch and its open questions
 
@@ -836,7 +856,7 @@ stays on the list. He and AJ pick; nobody here does.
    never design; a pack may also declare what a season makes available.*
 6. **(q7) The merge board:** it is AJ's favourite part and the biggest build. Before or after the
    pantry and the recipe book?
-7. **(q8) The second video** (Cookingdom) — send it when you can; nothing is written until it is seen.
+7. **(q8) Cookingdom:** does it run a clock underneath (the *+30s* at the end suggests one)? If AJ likes it *because* nothing hurries, that decides the making surface's rule; if she likes the timer, that is a conversation with R11.
 8. **For AJ**, in her own script: `docs/for-aj/LA-SOBREMESA.md`.
 
 ### 12.5 · What this pass overrules, said plainly

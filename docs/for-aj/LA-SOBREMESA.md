@@ -15,17 +15,21 @@ you are away. What it is:
   can tell you what you already have and what's missing, and the shopping list writes itself.
 - **Shifts.** Restaurant kitchens post shifts. You pick one up — one dish, one kitchen — and it waits
   for you. **There is no time limit.** Cooking it uses what's in your pantry.
-- **A play part.** We watched the game you like — the one where you merge two foods into the next
-  thing and the Collection shows every chain. We can build that kind of board. It is the biggest
-  piece, so we want to know how much you want it before we start.
+- **A play part.** We watched both games you like — the one where you merge two foods into the next
+  thing and the Collection shows every chain, and Cookingdom, where you roll, spread, sprinkle and
+  place a dish by hand. We can build either kind. Each is the biggest piece, so we want to know which
+  you would miss more before we start.
 - **Seasons.** What's in the market changes with the season, San Diego style.
 
 ## The eight questions
 
 1. **What is the nicest part of cooking for you?** The chopping, the smell, the waiting, the face
    somebody makes, the tasting? (The owner said "the flavor". What's yours?)
-2. **From the merge game you play — what do you love most?** Merging things, the recipe pages, the
-   Collection filling in, the characters talking, unlocking restaurants? Rank them if you can.
+2. **From the two games you play — what do you love most?** In the merge game: merging things, the
+   recipe pages, the Collection filling in, the characters talking, unlocking restaurants. In
+   Cookingdom: rolling, spreading, sprinkling and placing the dish by hand. **If you could only have
+   one of the two — the merge board or making the dish by hand — which?** That decides what we
+   build first. And does Cookingdom's clock bother you, or is it part of the fun?
 3. **Your allergies.** Which foods, and is it raw only or cooked too? The game will carry a note on any
    recipe that has them ("cook the tomato first", or "not this one"), nothing more.
 4. **A name.** Some ideas: Second Helping · The Long Table · Low Heat · Warm Plate · Slow Sunday ·
