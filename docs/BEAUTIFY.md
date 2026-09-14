@@ -24,7 +24,7 @@ NOT on it are badly wrong. This file is the corrected version.
 ```js
 const t3Boxy=(g,m)=>!!(m.box||m.kind==="furniture"||m.kind==="appliance") && !!TILESIDE[g];
 ```
-`engine/engine3d.js:241`
+`engine/engine3d.js:259` (2026-09-14; this line said `:241`)
 
 **A glyph becomes a real box the moment a side drawing exists.** Six of the twelve real offenders
 are already tagged correctly and are missing exactly one drawing each in `content/meridian/art.js`.

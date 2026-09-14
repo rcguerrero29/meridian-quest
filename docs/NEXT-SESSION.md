@@ -23,6 +23,7 @@ touched `engine/`, so `mq-v158` and `sw.js` did not move (`test/bump.js` confirm
 | **The wall, iteration 5** | Six panels (Beto, Zeni, Chuy, Yaz, Melo, Lupe); `by:"beto"` used on a real panel for the first time, which opened a second bay — fixed; `murBody` width follows height (was 5px at any height); three panels repainted at Pili's word, words untouched |
 | **The wall, iteration 6** | Seven return visits painted from the design run's raw file (Beto, Rigo, Pili, Tavo, Doña Cuca, Don Güero, Chema), words verbatim, thirty-two panels in eighteen bays. `by:"cuca"` and `by:"don-guero"` each opened a second bay beside the person's own — the stretch guard groups by `murPainter` on both sides and could not see it. A person's key on the wall is their first name now (`murKey`), and a second guard folds every bay's *name* the same way (`docs/REGRESSION.md` row 24; three plants in a lab copy, all printed). Three drawings adjusted by the session, words untouched (Chema's readings were below the wall's course height; Beto's ghost car lay under his chart; Pili's label ran into her struck line). **Pili has not seen these seven** |
 | **Seven persona edits** | Flight-notes rows 32–38 applied (Tavo's wrong constant replaced, Rigo's paint rule, Pili's stands-on check, Cuca's "which room", Beto's readers-of-a-seam, Don Güero's third thing to check, Chema's blank-one-painter). Line numbers replaced by greps where the proposals carried them |
+| **The healthy-eating game** | Research consolidated, plan filed, three genre rules, seven persona edits, five tag-register leaks, one town copy fix. Two agents found their own persona lying to them (Pili's `drawPerson` line 435 lines stale; Paty's `chatSay` does not exist). **Nobody was asked for a mural panel** — a fault of the brief, recorded in flight-notes iteration 7 |
 | **Docs** | roster of nineteen; counts agree with the files; `OPEN.md` merged and pointing at `BOUNDARY.md`; this file is one block, history in `docs/NEXT-SESSION-ARCHIVE.md`; `CREW-MODE.md` has "Where the switch stands" and "What running many agents teaches" |
 
 ### What the design run settled (2026-09-14, 03:00 UTC) — read these before the queue
@@ -50,11 +51,16 @@ substance of each brief is in `docs/ASKS.md` (the seven rows of 2026-09-13, late
    swallowed at its anchor's depth (+0.09), light and value rejected by measurement, and
    `engine/engine.js:1081–1122` is a dead duplicate. His persona edit is flight-notes row 38; his panel
    (*La copia en blanco*) is in the raw file with the other six — seven to paint.
-4. **The healthy-eating game** (resumed as `w720r0ok9`): the four research sweeps are filed raw in
-   `docs/research/2026-09-13-healthy-eating-game.md`; the seven designers and Chuy's consolidation
-   (a plan file named from Mari's title, a rule in `docs/GENRE-RULES.md`, a row in `docs/OPEN.md` §1)
-   were re-running. **Then the mocks**: the `design` skill for the surfaces Pili names, and the real
-   engine for whatever the reader can already show. No build.
+4. **The healthy-eating game — landed.** Twelve agents, none cut off. `docs/la-sobremesa.md` is the
+   plan (Mari's title; eleven sections, each signed; **§9 is the fifteen decisions the owner owes**);
+   `docs/research/2026-09-13-healthy-eating-game.md` is the consolidated sweep (the raw four-lens dump
+   is in git history at that path); `docs/GENRE-RULES.md` gained R15 (count up, never to zero), R16
+   (the marks go on the logistics, never on the person — `gradeOf` returns 3 when nothing was ever
+   answered) and R17 (a maintained model decays); `docs/OPEN.md` §1 has the row. The seven designers'
+   returns are verbatim in `docs/meetings/2026-09-14-la-sobremesa-disena.md`; their seven persona
+   edits are applied (flight-notes rows 39–45); Toño's five leaks are `docs/TAGS.md` L24–L28. Paty's
+   live finding is fixed (three English strings inside the town's Spanish block: `hq`, `arrive.hq`,
+   `vmHQ` → *El changarro*). **Then the mocks** — see the queue.
 
 **The owner also asked** (all in `docs/ASKS.md`): a security triple-check — done, in the reply of that
 hour: R10 clean, the town bound to `127.0.0.1`, CSPs pinned, workflows read-only, no lockfile so
@@ -82,6 +88,9 @@ register had slid within the hour because the session inserted a test above them
 
 ### Found, not fixed — older than the branch (Lupe, 2026-09-13)
 
+- **`applyText()` copies pasted JSON with `Object.assign`** (`engine/engine.js`, grep `function applyText`): a `__proto__` key in the admin text lab's paste reaches the prototype setter of `NPCN[lang]`. Local-only and self-inflicted (the owner pasting into his own lab), so low tier; the fix is a key copier that skips `__proto__`, and it is an engine change, so it bumps. Beto, 2026-09-14, `docs/la-sobremesa.md` §5.
+- **`docOpen` scrolls every document to the top on open** (G4 in `docs/la-sobremesa.md` §5) — reasoned from the code, not reproduced; a forty-item pantry with a button halfway down would be bitten on the first press. Four lines, red first, when a pack needs it.
+- **`docs/BEAUTIFY.md`'s `t3Boxy` quote** drops the `TILESIDE` clause the shipped line carries (`engine/engine3d.js:259`); the advice is still true. `docs/GAUGE.md`'s `SHIRTS` row said `:341`; corrected to `:431`.
 - **`test/smoke.js` goes red about one run in twenty-five**: a wandering neighbour in the one-tile
   gap by the barbería (`ex` (19,1)) walls off 35 tiles from Doña Meche; `auditReach` and `isSolid`
   both treat a standing person as a wall, so it blocks the player too. Repro: occupy `(19,1)`.

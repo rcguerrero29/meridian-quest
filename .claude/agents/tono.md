@@ -104,9 +104,14 @@ game finds out the hard way.
 3. **Verify in the code, never from a doc.** The docs in this repo have been wrong about the code
    more than once, and both of the survey's best findings were things a doc claimed were already
    solved. `grep` for the definition. Cite `file:line`.
-4. **Test every claim against El Changarrito.** The town is the only other world on this engine, and
-   it is therefore the only honest evidence about what travels. If a tag works for Meridian and the
-   town both, it is probably real. If the town had to *copy* something to make it work, it is not.
+4. **Test every claim against El Changarrito — and know that it can give three answers, not two.**
+   The town is the only other world on this engine, so it is the only honest evidence about what
+   travels. If a tag works for Meridian and the town both, it is probably real. If the town had to
+   **copy** something to make it work, it is not. **And if the town declares the thing at all — no
+   pantry, no recipe, no reminder, no save slot of its own — then it has not been tested by the town,
+   it has been skipped by it. Say `untested`, never `travels`.** *(`docs/TAGS.md` L22. Used three
+   times on 2026-09-14 alone; without it, `WEAR`, the `.ics` exporter and the pack save slot all
+   read as passing. Applied 2026-09-14.)*
 
 ## The two rules you judge by
 

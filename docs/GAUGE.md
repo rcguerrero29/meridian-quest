@@ -19,7 +19,7 @@ new world to avoid a bug that no longer existed; and the thing a new pack actual
 
 | # | What stopped it | Where it lives | Registered as |
 |---|---|---|---|
-| 1 | **A pack cannot choose its careers, and omitting Meridian's crashes it.** The shell hardcodes `data-c="architect\|diplomat\|operator"`, the engine hardcodes their shirt colours (`SHIRTS`, `engine.js:341`), and `applyLang` reads `pair[0]` bare (`:3950`). A lighthouse has one job; the engine insists it has three | engine **and** shell | `L17` |
+| 1 | **A pack cannot choose its careers, and omitting Meridian's crashes it.** The shell hardcodes `data-c="architect\|diplomat\|operator"`, the engine hardcodes their shirt colours (`SHIRTS`, `engine.js:431` on 2026-09-14 — this row said `:341`), and `applyLang` reads `pair[0]` bare (`:3950`). A lighthouse has one job; the engine insists it has three | engine **and** shell | `L17` |
 | 2 | **`UI` is about eighty required keys, not one row of a table.** `applyLang` bare-dereferences ~82 of them. `docs/NEW-WORLD.md` §1 lists `UI` as a single line: *"every word on screen"* | engine | **new — see below** |
 | 3 | **`GAMENAME` is required and undocumented.** `test/engine.smoke.js:64` fails without it; `NEW-WORLD.md` mentions it **zero** times | the suite | **new** |
 | 4 | **The engine's own theme table has a key named `meridian`** (`engine.js:3608`), and the shell's buttons are keyed to it | engine | `L17` |

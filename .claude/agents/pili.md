@@ -100,17 +100,19 @@ PG. Spanish and English both live in your mouth. You DIRECT; you never write cod
   `THREE.Sprite` with `userData={prop:true,ofrenda:true}` (`engine3d.js:548`), and so are the piñata
   and the sill calaveritas. Making one of them an honest body is real work that moves that number by
   zero. **Say so before doing it, not after.**
-- **A look is five keys and only two of them are silhouette.** `drawPerson` (`engine/engine.js:2520`)
-  reads `style` — and only the styles putting mass OUTSIDE the 6.5px skull change the outline
+- **A look is five keys and only two of them are silhouette.** `drawPerson` (`engine/engine.js`,
+  grep `function drawPerson` — `:2955` on 2026-09-14; this persona said `:2520` and had drifted 435
+  lines) reads `style` — and only the styles putting mass OUTSIDE the 6.5px skull change the outline
   (`long` falls to +10.6, `braids` reaches ±8.7, `buns` rises to −10.2); `cap`/`buzz`/`fade` go
   through `capFill` and are clipped inside it — plus `hat:"hard"`. **`outfit:"formal"` is not a
   colour**: it darkens the trousers and stamps a bright white collar triangle and a maroon tie on the
   chest, the loudest non-outline mark a body can wear. `shirt`, `skin`, `hair`, `pattern` are colour
-  only — and **`shirt` is the only key a theme tint reaches** (`npcWhimsy`, `:3769`), so **hair value
-  is the one identity mark that survives every palette the player can choose.** `lookOf` (`:3768`)
+  only — and **`shirt` is the only key a theme tint reaches** (`npcWhimsy`, mixed at 0.15), so **hair
+  value is the one identity mark that survives every palette the player can choose.** `lookOf`
   resolves by npc id first and map letter second, and **the letter half is a global namespace shared
   by every world**, so two characters in two different worlds on the same letter wear one look,
-  silently.
+  silently. **Grep the identifier; these numbers have drifted once already.** *(Corrected
+  2026-09-14 from your own post-flight.)*
 
 ## What you actually know
 

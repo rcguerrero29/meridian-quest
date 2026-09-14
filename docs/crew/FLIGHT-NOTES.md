@@ -59,6 +59,13 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 36 | `beto` | A seam is only as real as its readers — before designing a table of options, count which of its keys something already draws (`TROKEYS` exists for exactly this) | **APPLIED 2026-09-14** — appended to the guard bullet it extends |
 | 37 | `don-guero` | Before you site a building's HEIGHT, read the door's neighbours: the lintel takes its height west-first and wears no face; the sill sprite is positioned by the wall's height and sized without it | **APPLIED 2026-09-14** — a third bullet, and the heading now says three |
 | 38 | `chema` | Blank one painter and diff the frame before measuring contrast — it turned "hard to see" into "the front camera delivers zero"; crop one object 8× twice, the whole viewport decided nothing; a Sprite is one quad at its anchor's depth, so a wall-hung billboard's offset is height × pitch, a formula not a constant | **APPLIED 2026-09-14** — a new section after "Ask the scene graph"; line numbers replaced by greps |
+| 39 | `mari` | Two blockers every new world hits (careers are hardcoded in three shells; `ENDLESS` may not have `CHAPTERS`) — re-grep them before promising a date; and the day-budget tell for any planner | **APPLIED 2026-09-14** — her final bullet replaced by two, stale `:330/:333` → grep + dated numbers |
+| 40 | `tavo` | A model the player has to maintain decays, and the cost is not the typing — price the drift, log by exception | **APPLIED 2026-09-14** — appended under "What you hold to"; it is R17 in his words |
+| 41 | `pili` | A look is five keys and only two of them are silhouette; `drawPerson` had drifted 435 lines in her own file; hair value is the one identity mark a theme cannot move | **APPLIED 2026-09-14** — the second bullet of "Two engine facts about looks and counts" replaced |
+| 42 | `nacho` | Before you write three endings, find out what picks between them — `gradeOf` returns 3 when nothing was ever answered | **APPLIED 2026-09-14** — appended to the endings paragraph; it is R16's code fact |
+| 43 | `beto` | A document need not be registered (`docDef` takes the object) and a pack's state does not ride the save (`sanitizeSave` rebuilds a whitelist; the pass carries only `loadSave()`) | **APPLIED 2026-09-14** — a fifth engine fact; the heading now says five |
+| 44 | `paty` | There is no `chatSay` — her own file cited a function that does not exist; `toast(msg,ms,crit)` takes its ms from the caller, the chat line passes 2800; write the Spanish first for anything that toasts | **APPLIED 2026-09-14** — the paragraph replaced; every claim in it re-grepped by the session first |
+| 45 | `tono` | The town can give three answers, not two: works / had to copy / never declares it — say `untested`, never `travels` | **APPLIED 2026-09-14** — step 4 of "Before you say anything" replaced |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -96,6 +103,23 @@ mechanism has a leak. Either way it should be written down next to the proposal.
 writing, here*. The session that wrote that sentence then closed the run without doing it. The reason
 is ordinary and is the whole point: **an un-applied proposal looks exactly like a proposal that was
 considered and declined, and both look like nothing at all.** Hence the table above.
+
+---
+
+# ITERATION 7 — 2026-09-13/14 — the healthy-eating game (four research sweeps, seven designers, Chuy)
+
+*Run as advisers in parallel, one pen, mode off. The four research lenses were general agents with
+no persona and no flight notes — their returns are consolidated in
+`docs/research/2026-09-13-healthy-eating-game.md`. The seven designers' full returns are verbatim in
+`docs/meetings/2026-09-14-la-sobremesa-disena.md`; the plan they add up to is `docs/la-sobremesa.md`.
+The ledger rows are 39–45 above. Chuy proposed no persona edit and painted no panel.*
+
+**A fault of the brief, recorded so it is not repeated: nobody was asked for a mural panel**, so the
+wall has nothing from this run — the first run since the wall opened with no paint on it. The
+crew-fix skill says one panel per agent per run; the workflow's brief carried the flight-notes
+instruction and dropped the panel one. **Two of seven found their own persona lying to them** (Pili's
+`drawPerson` line had drifted 435 lines; Paty's file named a `chatSay` that does not exist), which is
+the file's rule 1 catching its own instructions, and both corrections are applied.
 
 ---
 

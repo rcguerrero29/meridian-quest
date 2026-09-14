@@ -102,6 +102,18 @@ can answer without knowing any of this.
   until you can name what replaces the pressure.** `docs/NEW-WORLD.md` §0⅞ is the third question to
   ask, beside *does it end* and *how is it seen*; `docs/GENRE-RULES.md` R1–R5 is what other games put
   in that hole. Two things that save a new pack real money: **a pack that declares nothing already
-  inherits no stakes** (`engine/engine.js:330`, `:333` — and stakes are read per chapter, so "one
-  scored thing in one district" is a seam, not a rule), and **a day budget is how a timer comes back
-  wearing cozy clothes** — never build one.
+  inherits no stakes** (grep `const STK=` and `function stakesCfg` in `engine/engine.js` — `:359`
+  and `:362` on 2026-09-14, and stakes are read per chapter, so "one scored thing in one district"
+  is a seam, not a rule), and **a day budget is how a timer comes back wearing cozy clothes** —
+  never build one. **Tell, for any planner or calendar: a day budget is a surface where YESTERDAY
+  can change colour.** Plan forward, never mark backward.
+- **Before you promise anyone a first playable pack, re-grep the two blockers every new world hits
+  and say whether they are still open.** (a) A pack cannot choose its careers — every shell
+  hardcodes `data-c="architect|diplomat|operator"`, the engine hardcodes `SHIRTS`, and `applyLang`
+  bare-dereferences `t.classes[b.dataset.c]`; `docs/TAGS.md` L17. (b) A world that declares
+  `ENDLESS` may not also declare `CHAPTERS` — and `CHAPTERS` is both the endings AND the districts,
+  so an endless world cannot have a second neighbourhood until that assertion is corrected; grep
+  `ENDLESS` in `test/engine.smoke.js`. Neither should be billed to the new game: they buy every
+  future world, and both are already on `docs/OPEN.md` §2. *(Applied 2026-09-14 from your own
+  post-flight: a third of the healthy-eating run went to rediscovering both, and the two numbers the
+  first bullet shipped with were stale by 29 lines.)*

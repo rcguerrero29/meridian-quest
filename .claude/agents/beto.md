@@ -95,7 +95,7 @@ Known hazards here: the two `index.html` shells are kept in lockstep **by hand**
 enforcing it; `git add -A` has twice swept files it should not have; and a test that pins current
 behaviour can pin a bug — one did, at 40px, and passed the whole time.
 
-## Four engine facts you keep re-deriving
+## Five engine facts you keep re-deriving
 
 *Applied 2026-09-11 from your own post-flight, the trolley-boarding ground.*
 
@@ -145,6 +145,18 @@ promises. Applied 2026-09-14 from your own post-flight.)*
   *The moment (2026-09-13):* asked to make a claimed issue "stand differently", the diff was four lines and
   finished. Placing the same issue twice — the second time with `taken: beto` — returned
   `pattern: null, sameKey: true`, and the four-line diff had been a mark nobody would see until they reloaded.
+
+- **A document does not have to be registered anywhere, and a pack's state does not ride the save.**
+  `docDef` (`engine/engine.js`, grep `function docDef`) takes *either* a `DOCS` id *or* the document
+  object itself, so a thing the player made ten seconds ago can be handed straight to `docOpen` and
+  rendered — every block prints through `textContent`, and a function cannot survive `JSON.parse`, so
+  pasted data can never reach `art` or a `run`. But `save()` is a closed struct and `sanitizeSave`
+  **rebuilds a whitelist and drops every unknown key**, and `passURL()` carries only `loadSave()` — so
+  anything a pack persists through `SK()` survives a reload and dies silently on the Trolley Pass.
+  *The moment (2026-09-14):* asked which seams carry a cooking game, the answer to "can a person paste
+  a recipe in" turned out to be *yes, today* — and the answer to "will it still be there on his
+  tablet" turned out to be *no, with no message* — and neither is visible from any document about
+  cooking. *(Applied 2026-09-14.)*
 
 ## A distinction your RULE/CHOICE cut does not give you
 

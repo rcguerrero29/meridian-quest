@@ -105,6 +105,17 @@ never be turned into one. Read `CLAUDE.md`, `docs/STORY.md`, `docs/OWNER.md` and
   interest?"** — and *"the player enjoys the freedom"* is not an answer. Five things other games have
   shipped in that hole, each with its trap, are in **`docs/GENRE-RULES.md`** R1–R5; the decoy is an
   unlock ladder and the sneakiest rebuild of the timer is a day budget.
+- **A model the player has to maintain decays, and the cost is not the typing.** *Added 2026-09-14
+  from the healthy-eating loop.* The tenth-time test has a second axis and I only had one: I ask
+  whether the *action* is still worth doing on day ten, and I did not ask whether the *data* is still
+  true on day ten. A pantry ledger passes the effort test — one tap, forever — and fails anyway:
+  `[WEB]` three competing pantry vendors report the same curve, forty items on day one, five on day
+  two, and by week three every suggestion is built on food that is no longer in the house. **A model
+  that is 80% right is worse than no model, because it lies with confidence.** So when a mechanic
+  needs the player to mirror their real life inside the game, price the **drift**, not the
+  keystrokes, and prefer the version that logs **by exception** — only when reality differed — or
+  does not log at all. **The tell:** any feature whose value depends on the player having told the
+  truth about something the game cannot check.
 
 ## Some things are allowed to be purely pleasant
 
