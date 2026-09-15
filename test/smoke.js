@@ -4257,6 +4257,98 @@ const CANDIDATES = [
   fails.push(...frontSill);
 
 
+  /* ---- the plan says where somebody is waiting, and it says it in PIXELS ----
+     #160, and the owner's word of 2026-09-15: "i like the marking of people with quests in
+     different colors but its hard to tell unless you have a legend." docs/meetings/2026-09-14-el-mapa.md
+     §7 is the plan. This guard is written the way REGRESSION.md §3 says to write it: not
+     "drawPlanMarks was called N times" — a call count where the noun is a mark on a tile is the
+     commonest wrong guard in this repo — but blank the one painter and read what the plan lost,
+     and plant a world with NOBODY waiting, which must lose nothing. Every plant is on real state
+     (a quest id taken out of `done` and put back), never on a stub. */
+  const plan = await page.evaluate(() => {
+    const P = [];
+    if (typeof planMarks !== 'function' || typeof drawPlanMarks !== 'function')
+      { P.push('the plan carries nothing about who is waiting: planMarks()/drawPlanMarks() do not exist (#160)'); return P; }
+    if (typeof drawTown !== 'function' || typeof MAPDOT === 'undefined') return P;
+    const c = document.getElementById('mapcv'), g = c.getContext('2d'), s = 10;
+    const shot = () => { drawTown(); return g.getImageData(0, 0, c.width, c.height).data; };
+    const box = (buf, tx, ty) => { /* the pixels of ONE tile, by tile coords */
+      const out = []; const x0 = tx * s, y0 = ty * s;
+      for (let y = y0 - s; y < y0 + s * 2; y++) for (let x = x0 - s; x < x0 + s * 2; x++) {
+        if (x < 0 || y < 0 || x >= c.width || y >= c.height) continue;
+        const i = (y * c.width + x) * 4; out.push(buf[i], buf[i + 1], buf[i + 2]); }
+      return out; };
+    const diff = (a, b) => { let n = 0; for (let i = 0; i < a.length; i += 3) if (a[i] !== b[i] || a[i+1] !== b[i+1] || a[i+2] !== b[i+2]) n++; return n; };
+
+    /* the plant: one quest-giver on the drawn street, made pending by real state */
+    const st = PL.street, people = ((WORLDS[st] || {}).npcs || []);
+    let who = null, qid = -1;
+    for (const n of people) { const q = (n.q || []).find(i => qOpen(i)); if (q !== undefined) { who = n; qid = q; break; } }
+    if (!who) { P.push('no quest-giver stands on the street world, so the plan cannot be tested'); return P; }
+    const had = done.has(qid); done.delete(qid);
+    /* a world nobody is waiting in — the plant that must draw NOTHING */
+    let quiet = null;
+    for (const id of Object.keys(MAPDOT)) if (id !== st && WORLDS[id] && !worldPending(id)) { quiet = id; break; }
+
+    const real = drawPlanMarks;
+    const on = shot();
+    drawPlanMarks = function () {}; const off = shot(); drawPlanMarks = real;
+
+    const lost = diff(box(on, who.x, who.y), box(off, who.x, who.y));
+    if (lost < 12) P.push('a quest-giver is standing on the street with an open question and blanking the plan\'s mark painter changes ' + lost + ' pixels at his tile: the plan does not say he is there');
+    if (quiet) { const q = MAPDOT[quiet], same = diff(box(on, q[0], q[1]), box(off, q[0], q[1]));
+      if (same > 0) P.push('the world "' + quiet + '" has nobody waiting in it and the plan draws ' + same + ' pixels of mark at its anchor anyway: the mark is not reading who is waiting'); }
+
+    /* two clauses true at once — work AND something to read. The kind the pack declared first wins,
+       and the plan must say ONE thing about one person, not two marks on one tile */
+    const kinds = (typeof MAPMARK !== 'undefined' && Array.isArray(MAPMARK)) ? MAPMARK : [];
+    {
+      const keepDoc = who.doc; who.doc = 'any';                 /* two clauses true at once */
+      const marks = planMarks().filter(m => m.w === st && m.x === who.x && m.y === who.y);
+      who.doc = keepDoc;
+      if (marks.length !== 1) P.push('a person with work for you AND something to read gets ' + marks.length + ' marks on one tile');
+      else if (marks[0].k !== kinds.find(k => k === 'work' || k === 'read'))
+        P.push('a person who is two kinds at once is marked "' + marks[0].k + '": the kind the pack declared FIRST must win');
+    }
+    { /* the opt-in, planted the only way that proves it: a kind the pack did NOT declare draws
+         nothing at all. In Meridian nobody hands you a document, so "read" is undeclared.
+         The plant is MADE, never found: the first draft waited for a neighbour who happened to have
+         no work, there was no such neighbour at this point in the suite, and the check sat there
+         passing without ever running — the failure this repo keeps writing down. */
+      if (!kinds.includes('read')) {
+        const man = people.find(n => !roomPending(n)) || people[0];
+        const keepQ = man.q, keepDoc = man.doc;
+        man.q = []; man.doc = 'any';                     /* nothing but a document to hand you */
+        const drew = planMarks().some(m => m.w === st && m.x === man.x && m.y === man.y);
+        man.q = keepQ; man.doc = keepDoc;
+        if (drew) P.push('a neighbour with nothing but a document is marked on the plan, and this pack never declared the kind "read": an undeclared kind must draw nothing');
+      }
+    }
+
+    /* the legend: real text, one row per kind actually drawn, in the language the game is in */
+    const rows = document.querySelectorAll('#mapLeg [data-kind]');
+    const drawn = [...new Set(planMarks().map(m => m.k))];
+    if (rows.length !== drawn.length) P.push('the plan draws ' + drawn.length + ' kinds of mark and the legend has ' + rows.length + ' rows: the owner said "its hard to tell unless you have a legend"');
+    rows.forEach(r => { if (!r.textContent.trim()) P.push('a legend row for "' + r.getAttribute('data-kind') + '" has no word beside its colour'); });
+
+    /* the destination he chooses — and the ring that says he chose it */
+    if (typeof mapPick === 'function') {
+      const before = shot();
+      mapPick(who.x + 0.5, who.y + 0.5);
+      const after = shot();
+      if (diff(box(before, who.x, who.y), box(after, who.x, who.y)) < 8) P.push('choosing a destination on the plan draws nothing at the place chosen');
+      const tag = document.getElementById('worldTag').textContent;
+      if (!/→|↑|↗|→|↘|↓|↙|←|↖|🚋/.test(tag)) P.push('a destination is chosen and the world tag does not point at it: "' + tag + '"');
+      mapPick(who.x + 0.5, who.y + 0.5); /* the same mark again clears it */
+      if (mapDest) P.push('tapping the chosen destination again does not clear it');
+    } else P.push('there is no way to choose a destination on the plan (mapPick), which is the half of #160 the owner asked for by name');
+
+    if (!had) done.delete(qid); else done.add(qid);
+    drawTown();
+    return P;
+  });
+  fails.push(...plan);
+
 
   await browser.close();
 
