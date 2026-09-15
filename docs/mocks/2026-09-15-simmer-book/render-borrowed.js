@@ -14,6 +14,12 @@ const svg=n=>{const i=SET.icons[n];if(!i)throw new Error('no icon '+n);
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SET.width} ${SET.height}" width="512" height="512">${i.body}</svg>`).toString('base64');};
 const ICONS={};['pot-of-food','cooked-rice','sushi','hot-pepper','leafy-green','shallow-pan-of-food',
   'chopsticks','steaming-bowl','green-salad'].forEach(n=>ICONS[n.replace(/-/g,'_')]=svg(n));
+/* WHERE EACH ICON'S OPENING IS, measured per icon and never assumed. icon-openings.json is written
+   by a probe that renders the icon to a buffer and finds its contents by pixel; the predicate used
+   for each is recorded in the file. The pass before this one measured the POT and then used those
+   same numbers on the PAN — whose opening is 3.5% lower and 10% smaller — and the picture came out
+   visibly broken. One measurement, one object. */
+const OPEN=JSON.parse(fs.readFileSync(path.join(__dirname,'icon-openings.json'),'utf8'));
 
 (async()=>{
  const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
@@ -26,6 +32,7 @@ const ICONS={};['pot-of-food','cooked-rice','sushi','hot-pepper','leafy-green','
  await p.evaluate(async(IC)=>{window.__IMG={};
    await Promise.all(Object.entries(IC).map(([k,src])=>new Promise(res=>{
      const im=new Image();im.onload=()=>{window.__IMG[k]=im;res();};im.onerror=()=>res();im.src=src;})));},ICONS);
+ await p.evaluate(o=>{window.__OPEN=o;},OPEN);
 
  const made=[];
  for(const key of ['jjigae','kimbap','namul']){
@@ -127,6 +134,7 @@ const ICONS={};['pot-of-food','cooked-rice','sushi','hot-pepper','leafy-green','
      const folds=(g,W,H,n)=>{const s=26;for(let i=0;i<n;i++){const x=W-12-i*(s+6),y=12;
        g.fillStyle="#E9E0C8";g.beginPath();g.moveTo(x,y);g.lineTo(x-s,y);g.lineTo(x,y+s);g.closePath();g.fill();
        g.strokeStyle="#B44A21";g.lineWidth=2;g.beginPath();g.moveTo(x-s,y);g.lineTo(x,y+s);g.stroke();}};
+     const O=window.__OPEN;
      const P={
        jjigae:{t:"Doenjang jjigae",folds:2,
          art:(g,W,H)=>{const cy=stage(g,W,H);
@@ -144,7 +152,8 @@ const ICONS={};['pot-of-food','cooked-rice','sushi','hot-pepper','leafy-green','
               ry 0.246 is the arithmetic of the owner's own observation: the contents really are a
               circle. Guessing put it 4% too high and 10% too small, which is what left a crescent
               of the original showing. */
-           potFace(g, PX+S*(0.498-0.5), PY-S+S*0.453, S*0.262, {top:(g,cx,ly,lrx,lry)=>{
+           const OP=O["pot-of-food"];
+           potFace(g, PX+S*(OP.cx-0.5), PY-S+S*OP.cy, S*OP.rx*1.03, {top:(g,cx,ly,lrx,lry)=>{
              const cube=(x,y,w,h)=>{g.fillStyle="rgba(24,12,6,0.30)";
                g.beginPath();g.ellipse(x+w/2,y+h*0.95,w*0.55,h*0.28,0,0,7);g.fill();
                g.fillStyle="#FBF7EA";g.fillRect(x,y,w,h*0.55);
@@ -203,7 +212,8 @@ const ICONS={};['pot-of-food','cooked-rice','sushi','hot-pepper','leafy-green','
            put(g,"shallow_pan_of_food",PX,PY,S);
            /* the borrowed pan is full of yellow rice. Same repaint, green: the technique transfers,
               which is the point of having built it once. */
-           potFace(g, PX+S*(0.498-0.5), PY-S+S*0.455, S*0.250, {
+           const OQ=O["shallow-pan-of-food"];
+           potFace(g, PX+S*(OQ.cx-0.5), PY-S+S*OQ.cy, S*OQ.rx*1.03, {
              wallTop:"#6E5741",wallMid:"#A98A68",wallLow:"#D8C2A2",
              high:"#6B8A5C",base:"#4E6B45",core:"#374E36",
              top:(g,cx,ly,lrx,lry)=>{
