@@ -1022,3 +1022,68 @@ Chava's two cold plays (the mocked map, the journey) · the eight signatures of 
 thirteen persona proposals answered · Paty's two findings from her run-8 return (stale §6 drift lines
 here; the ES timing of the care-package toast) · Mari's three stale citations in `docs/NEW-WORLD.md` ·
 the one privacy check on the questionnaire (open it logged out once before it is forwarded).
+
+---
+
+## 14 · The third pass — 2026-09-15 — the kitchen pivots to Korean
+
+*His words are in `docs/ASKS.md`, the rows of 2026-09-15 (second window): **"true, you are right with
+AJ, i wasjust trying to help since you have spanish but no problem pivot to korean now - aj doesnt
+mind sweet but i prefer savory"**. This section is the session reading them into the plan. Nothing is
+built. Where this overrules an answer he gave yesterday, the overruling is written as one.*
+
+### 14.1 · What it settles
+
+| | |
+|---|---|
+| **The first kitchen is Korean** | This replaces §12.1 **#5** (*"mix, lean Mexican to start"*) and with it Mari's ✅ in §9 **#4**. **His stated reason for Mexican was our reason, not his** — the repo already draws the comal and speaks the Spanish — and §12.1 **#1** says the game is *"mostly for AJ"*. A convenience for the builder was deciding whose kitchen it is; he cut it |
+| **Savoury leads, sweet is allowed** | *"aj doesnt mind sweet but i prefer savory."* A dish rule, joining §12.1 **#6**'s *simple, available, popular*: **his half of the pack is savoury-first**; sweet dishes are AJ's to ask for and are never the pack's default. It is also his §12.1 **#2** answer (*"the flavor lol"*) wearing clothes — the one thing he says he likes about cooking now has a direction |
+| **The Hispanic-owned rule was already clear of this** | §12.1 **#6** — that rule is Meridian's, and a pack scopes its own. A Korean-first kitchen costs nothing there. No new question |
+
+### 14.2 · What it costs, and this is the real one
+
+**Decision 14 was "AJ's half has no native voice and nobody here can supply one." That half is now the
+first kitchen.** Paty's refusal stands unchanged — no agent here invents a halmeoni — and option (b)
+of §9 #14 (*write the Japanese/Korean cook as a Mexican character who learned it*) was sized for a
+**second** kitchen behind a Mexican first one. It does not carry a pack whose first voice is Korean.
+
+Three ways through, none of them ours to pick:
+
+1. **AJ names a real person she learned it from** — the answer §9 #14 (a) was waiting for, and the
+   questionnaire already asks it (`docs/for-aj/LA-SOBREMESA.md`). Cheapest, best, and it is one
+   message to her.
+2. **Published cooks, credited on the card.** The sources are already in the sweep
+   (`docs/research/2026-09-13-healthy-eating-game.md` 6.25–6.26: Maangchi, Sohui Kim, Hooni Kim; the
+   Korean Food Promotion Institution) and the game's shape for this exists — §2's *facts are cards
+   with the source printed underneath*. A credited cook is not a voice we invented; it is a citation.
+3. **The two cooks who disagree**, already written in §2: the Korean cook who says kimchi is about a
+   fifth of her country's sodium **and makes it every year anyway**. That line came out of 6.20 and it
+   is the most Korean thing in the plan — it teaches judgement instead of deference, and it needs no
+   grandmother.
+
+**The nutrition data does not move with the cuisine, and that is a saving:** Korea's RDA National
+Standard Food Composition DB is KOGL Type 1 — attribution, commercial and derivative use allowed —
+embedded from the database and never transcribed from the printed 10th edition, which is Type 2
+(`docs/research/2026-09-13-healthy-eating-game.md`, the licence table). Open Food Facts' Korean
+coverage (2,709 products) stays too thin to lean on, exactly as written.
+
+### 14.3 · What it does NOT change, checked
+
+- **The look.** §4 already carries the Korean row — onggi brown `#6B4A33` with a stainless band
+  `#B9BCC0`, stainless bowl and white porcelain, gochugaru `#B44A21` as the one accent, and Pili's
+  note that stainless is the un-clichéd Korean note no other kitchen has. Pivoting costs nothing here;
+  it promotes a palette that was already drawn.
+- **The two languages.** §6's rule survives word for word: *Mexican Spanish takes Japanese and Korean
+  dish names as loans, never translations* — it was written for this case.
+- **AJ's reference game.** §12.2 read it off the recording as **a Korean restaurant first**, then a
+  Japanese one, then a beach one. The pivot moves the plan *toward* the game she actually plays.
+- **Everything the merge board waits on.** §12.2 and #200 stand: her answer decides it, not this.
+
+### 14.4 · The one confirming question
+
+**Does the 1-for-1 pairing flip with the lean, or stay as he wrote it?** §12.1 #5 asked for every
+initial recipe to be paired with a researched recipe from another cuisine, with a *"mix in"* note.
+Read literally, the pivot makes **Korean the initial column and Mexican the mixed-in partner** — which
+is the reading this section is written on, and the one that keeps his sentence intact. The other
+reading is that the pairing was Mexican-specific and dies with it. **One word either way**; nothing
+downstream of it is drawn yet.
