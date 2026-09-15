@@ -2,8 +2,17 @@ name: Pages
 # The city record (#14 ❗El expediente — owner, 2026-09-07: "ok go for your recommendations"):
 # the site is deployed from this job's artifact with status.json written beside the game from the
 # GitHub API — version and permits, nothing more. CI still never pushes a commit (contents: read).
-# Until the owner switches Settings → Pages → Source to "GitHub Actions", the deploy step cannot
-# take and is allowed to fail; the branch deploy stands and the record is only checked, not served.
+# THE SWITCH HAS BEEN MADE. Checked 2026-09-15 against the API rather than asked again: GitHub's own
+# `pages-build-deployment` last ran 2026-09-10 (run #158) and has been silent through every merge
+# since, while THIS workflow's `actions/deploy-pages@v4` step ran and SUCCEEDED on the #202 merge at
+# 08:09:43Z. deploy-pages only takes when Source is "GitHub Actions". So the allowlist below is what
+# serves the site, and /changarrito/, /docs/ and /test/ are no longer published.
+# The two `continue-on-error: true` that used to sit under configure-pages and deploy-pages came off
+# with that comment, and they are the more interesting half. They existed so the job could stay green
+# while the switch was still unmade — but once it was made they became a SILENT ZERO (docs/GAUGE.md):
+# a failed deploy would have left CI green and the site stale, and a Source switched back to a branch
+# would have skipped upload and deploy through the `if:` and said nothing at all. A deploy that does
+# not happen has to be a red, not a quiet one.
 permissions:
   contents: read
   pull-requests: read
@@ -56,11 +65,7 @@ jobs:
         run: node test/public.js _site
       - uses: actions/configure-pages@v5
         id: pages
-        continue-on-error: true
       - uses: actions/upload-pages-artifact@v3
-        if: steps.pages.outcome == 'success'
         with:
           path: _site
       - uses: actions/deploy-pages@v4
-        if: steps.pages.outcome == 'success'
-        continue-on-error: true
