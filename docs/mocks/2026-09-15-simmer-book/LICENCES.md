@@ -50,3 +50,33 @@ win, and on the kimbap page the trade is clearly bad.
 **Which is exactly what a placeholder is for.** Three pages that say "a kitchen, some dishes, a book
 that fills up" are enough to ask *"do you want a fourth page?"*. They are not enough to ask *"does
 this look right?"* — and nobody should be asked the second question with these on screen.
+
+## The improvement pass — 2026-09-15, later
+
+The owner: *"can you improve the first one?"* and then, looking at it, **"the stew looks circular but
+we are looking at the pot from an angle."** He was right, and it is the same fault Pili named in our
+own drawings: **two cameras in one object.** The borrowed pot is drawn front-on and its contents from
+straight above.
+
+**So the opening is repainted.** `potFace()` clips to the icon's own opening, paints the inner wall of
+the pot as seen from OUR angle, and sits the liquid below the rim as an ellipse. Three passes, each
+fixing something the previous one showed:
+
+1. **Guessed geometry left a crescent.** Fixed by MEASURING: the icon was rendered to a buffer and
+   its warm region found by pixel — centre (0.498, 0.453), radius 0.256 of its box. Guessing had put
+   it 4% too high and 10% too small. *And the measurement contains the owner's own observation as
+   arithmetic: rx 0.256 against ry 0.246. The contents really are a circle.*
+2. **The repaint read as a dome** — a ball sitting in the pot — because the wall ran light downward.
+   A hollow is **dark at the top**, where the near rim shadows the far wall. Inverted, plus the rim's
+   own cast shadow onto the wall, and it reads as inside.
+3. **A tan crescent showed under the liquid.** The ellipse now reaches the near rim.
+
+**The other two, and what each one demonstrates:**
+- **Namul** — the same repaint in green, because the borrowed pan is full of yellow rice. The
+  technique transferred at the cost of one colour table, which is the reason for building it once.
+- **Kimbap** — **no borrowed dish at all.** The nearest icon is nigiri and nigiri is not kimbap, so
+  the room is borrowed and the dish is ours. That is the hybrid demonstrated rather than argued.
+
+**Also added and ours, not borrowed:** wood grain on the counter, steam rising from the pot (the
+layering idea standing still), one warm key across the whole scene so borrowed objects and our room
+share a light, seeded grain, and a frame.
