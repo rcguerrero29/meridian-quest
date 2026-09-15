@@ -31,6 +31,57 @@
     egg:"#E8C15A",
     nori:"#23301F"
   };
+  /* ---------------- THE LIGHT MODEL ----------------
+     The first pass of these pictures was flat canvas primitives: two values an object, no contact
+     shadow, no specular, no texture, no light direction. That is not a talent gap, it is a MISSING
+     MODEL — so this is the model, written once and applied by every object, the way the 3D view was
+     fixed (docs/3D-LOG.md): one warm key from the upper left, one cool bounce off the counter, a
+     contact shadow where any form meets its surface, one specular per glossy material, and grain
+     over the whole frame at the end so nothing is a vector shape sitting on paper. */
+  const KEY={x:-0.62,y:-0.78};                       /* upper-left, and every highlight obeys it */
+  const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const rgb=c=>"#"+c.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,"0")).join("");
+  /* warm on the way up, cool on the way down — a single colour lightened neutrally is what makes
+     plastic. Light adds red first; shadow keeps blue longest. */
+  const lit =(h,t)=>{const c=hex(h);return rgb([c[0]+255*t*0.92, c[1]+255*t*0.80, c[2]+255*t*0.58]);};
+  const shade=(h,t)=>{const c=hex(h);return rgb([c[0]*(1-t*1.05), c[1]*(1-t*0.98), c[2]*(1-t*0.80)]);};
+  /* a material is a RAMP, not a colour: five stops from bounce to specular */
+  const MAT=b=>({deep:shade(b,.55),core:shade(b,.28),base:b,high:lit(b,.16),spec:lit(b,.42)});
+
+  /* a contact shadow — the single cheapest thing that makes an object SIT rather than float */
+  function contact(g,cx,cy,rx,ry,strength){
+    const gr=g.createRadialGradient(cx,cy,0,cx,cy,rx);
+    gr.addColorStop(0,"rgba(30,18,10,"+(strength||0.55)+")");
+    gr.addColorStop(0.55,"rgba(30,18,10,"+(strength||0.55)*0.45+")");
+    gr.addColorStop(1,"rgba(30,18,10,0)");
+    g.save();g.translate(cx,cy);g.scale(1,ry/rx);g.translate(-cx,-cy);
+    g.fillStyle=gr;g.beginPath();g.arc(cx,cy,rx,0,7);g.fill();g.restore();
+  }
+  /* a cast shadow, thrown away from the key */
+  function cast(g,cx,cy,rx,ry){
+    g.save();g.globalAlpha=0.34;
+    contact(g,cx-KEY.x*rx*0.55,cy-KEY.y*ry*0.28,rx*1.25,ry*1.05,0.7);
+    g.restore();
+  }
+  /* one specular sliver, on the side the key is on, never a symmetric shine */
+  function spec(g,cx,cy,rx,ry,a){
+    g.save();g.globalAlpha=a==null?0.75:a;g.fillStyle="#FFFFFF";
+    g.beginPath();g.ellipse(cx+KEY.x*rx*0.52,cy+KEY.y*ry*0.55,rx*0.30,ry*0.34,-0.5,0,7);g.fill();
+    g.restore();
+  }
+  /* grain, over the FRAME, so no surface is a flat fill. Cheap and it is most of the difference
+     between "a shape" and "a thing". */
+  let NOISE=null;
+  function grain(g,W,H,amt){
+    if(!NOISE){const n=document.createElement("canvas");n.width=n.height=96;const q=n.getContext("2d");
+      const d=q.createImageData(96,96);
+      for(let i=0;i<d.data.length;i+=4){const v=200+Math.random()*55;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}
+      q.putImageData(d,0,0);NOISE=n;}
+    g.save();g.globalAlpha=amt==null?0.085:amt;g.globalCompositeOperation="multiply";
+    for(let y=0;y<H;y+=96)for(let x=0;x<W;x+=96)g.drawImage(NOISE,x,y);
+    g.restore();
+  }
+
   const px=(g,u)=>(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(x*u),Math.round(y*u),Math.max(1,Math.round(w*u)),Math.max(1,Math.round(h*u)));};
 
   /* A VESSEL, in the one camera Pili settled: where your eyes are at a counter — you see the MOUTH
@@ -38,29 +89,73 @@
      narrows to its foot, and a rim where the two meet. Not a rectangle — the first render of these
      drew boxes and they read as toasters. */
   function vessel(g,cx,baseY,w,h,o){
-    const ry=w*0.17, topY=baseY-h;
+    const ry=w*0.17, topY=baseY-h, M=MAT(o.body);
     g.save();
-    /* the body, narrowing toward the foot */
-    g.fillStyle=o.body;
+    /* 1 · the cast shadow, thrown away from the key, BEFORE anything else */
+    cast(g,cx,baseY+ry*0.30,w*0.50,ry*0.85);
+    /* 2 · the body, across the key axis: highlight, base, core shadow, and a bounce at the very edge */
+    const bg=g.createLinearGradient(cx-w*0.55,topY-h*0.2,cx+w*0.55,baseY+h*0.1);
+    bg.addColorStop(0,M.high);bg.addColorStop(0.34,M.base);bg.addColorStop(0.78,M.core);bg.addColorStop(1,M.deep);
+    g.fillStyle=bg;
     g.beginPath();
     g.moveTo(cx-w/2,topY);
-    g.lineTo(cx+w/2,topY);
+    g.bezierCurveTo(cx-w*0.52,topY+h*0.55, cx-w*0.46,baseY-h*0.12, cx-w*0.40,baseY);
     g.lineTo(cx+w*0.40,baseY);
-    g.lineTo(cx-w*0.40,baseY);
+    g.bezierCurveTo(cx+w*0.46,baseY-h*0.12, cx+w*0.52,topY+h*0.55, cx+w/2,topY);
     g.closePath();g.fill();
-    /* the foot it stands on */
-    g.beginPath();g.ellipse(cx,baseY,w*0.40,ry*0.55,0,0,7);g.fill();
-    /* the mouth: the dark inside first, so the contents sit IN something */
-    g.fillStyle=o.inside||"#1A1512";
-    g.beginPath();g.ellipse(cx,topY,w/2,ry,0,0,7);g.fill();
-    if(o.fill){g.fillStyle=o.fill;g.beginPath();g.ellipse(cx,topY+ry*0.18,w*0.42,ry*0.78,0,0,7);g.fill();}
+    g.beginPath();g.ellipse(cx,baseY,w*0.40,ry*0.52,0,0,7);g.fill();
+    /* 3 · the bounce off the counter — a cool edge on the shadow side, which is what stops a
+       gradient reading as plastic */
+    g.strokeStyle="rgba(196,208,214,0.45)";g.lineWidth=2;
+    g.beginPath();g.moveTo(cx+w*0.495,topY+h*0.12);
+    g.bezierCurveTo(cx+w*0.50,topY+h*0.6, cx+w*0.45,baseY-h*0.12, cx+w*0.40,baseY-2);g.stroke();
+    /* 4 · the contact shadow where it meets the counter */
+    contact(g,cx,baseY+ry*0.12,w*0.50,ry*0.62,0.5);
+    /* 5 · the mouth: dark interior, deepest at the far side, so you look INTO it */
+    const ig=g.createRadialGradient(cx+KEY.x*w*0.18,topY+KEY.y*ry*0.5,ry*0.2,cx,topY,w*0.52);
+    ig.addColorStop(0,shade(o.inside||"#1A1512",0.10));ig.addColorStop(1,shade(o.inside||"#1A1512",0.62));
+    g.fillStyle=ig;g.beginPath();g.ellipse(cx,topY,w/2,ry,0,0,7);g.fill();
+    /* 6 · what is in it, with its own light and a wet specular */
+    if(o.fill){
+      const F=MAT(o.fill);
+      const fg=g.createLinearGradient(cx-w*0.4,topY-ry,cx+w*0.4,topY+ry);
+      fg.addColorStop(0,F.high);fg.addColorStop(0.5,F.base);fg.addColorStop(1,F.core);
+      g.fillStyle=fg;g.beginPath();g.ellipse(cx,topY+ry*0.16,w*0.43,ry*0.80,0,0,7);g.fill();
+      if(o.wet!==false)spec(g,cx,topY+ry*0.16,w*0.43,ry*0.80,0.22);
+    }
     if(o.top)o.top(g,cx,topY,w,ry);
-    /* THE RIM — what makes it a bowl and not a lump. Stainless, and thick enough to survive 322px. */
-    g.strokeStyle=o.rim||P.steel;g.lineWidth=Math.max(3,w*0.045);
+    /* 7 · THE RIM, and it is not one colour: bright where the key hits, dark where it does not */
+    const rg=g.createLinearGradient(cx-w/2,topY-ry,cx+w/2,topY+ry);
+    const R=MAT(o.rim||P.steel);
+    rg.addColorStop(0,R.spec);rg.addColorStop(0.42,R.base);rg.addColorStop(1,R.core);
+    g.strokeStyle=rg;g.lineWidth=Math.max(3.5,w*0.052);
     g.beginPath();g.ellipse(cx,topY,w/2,ry,0,0,7);g.stroke();
-    /* and an outline on the body, or a white bowl on cream paper is Δ0.8 and disappears */
-    g.strokeStyle=o.edge||P.soft;g.lineWidth=1.5;
-    g.beginPath();g.moveTo(cx-w/2,topY);g.lineTo(cx-w*0.40,baseY);g.moveTo(cx+w/2,topY);g.lineTo(cx+w*0.40,baseY);g.stroke();
+    /* 8 · one specular sliver on the body, on the key side only */
+    g.save();g.globalAlpha=0.17;g.fillStyle="#FFFFFF";
+    g.beginPath();g.ellipse(cx-w*0.31,topY+h*0.30,w*0.035,h*0.19,0.20,0,7);g.fill();g.restore();
+    g.restore();
+  }
+  /* A PIECE OF FOOD IS A FORM TOO. Once the pot had a light model and the tofu did not, the tofu
+     looked WORSE than it had before — flat rectangles floating on a lit surface. Same six steps,
+     smaller: a shadow in the liquid, a lit top plane, a shaded side, one specular. */
+  function cube(g,x,y,w,h,base,o){
+    o=o||{};const M=MAT(base);
+    g.save();
+    g.fillStyle="rgba(24,12,6,0.38)";                      /* it sits IN something */
+    g.beginPath();g.ellipse(x+w*0.5,y+h*0.92,w*0.58,h*0.30,0,0,7);g.fill();
+    const tg=g.createLinearGradient(x,y,x+w,y+h*0.55);
+    tg.addColorStop(0,M.spec);tg.addColorStop(1,M.high);
+    g.fillStyle=tg;g.fillRect(x,y,w,h*0.55);               /* the top plane, facing the key */
+    g.fillStyle=M.core;g.fillRect(x,y+h*0.55,w,h*0.45);    /* the side, turned away */
+    g.fillStyle="rgba(255,255,255,0.55)";g.fillRect(x+w*0.12,y+h*0.10,w*0.34,h*0.14);
+    if(o.edge){g.strokeStyle=shade(base,0.45);g.lineWidth=1;g.strokeRect(x+0.5,y+0.5,w-1,h-1);}
+    g.restore();
+  }
+  function sliver(g,x,y,w,h,base){ /* a scallion round, a sesame seed — small, but lit the same way */
+    const M=MAT(base);g.save();
+    g.fillStyle="rgba(24,12,6,0.30)";g.beginPath();g.ellipse(x+w/2,y+h*0.85,w*0.55,h*0.34,0,0,7);g.fill();
+    const gr=g.createLinearGradient(x,y,x+w,y+h);gr.addColorStop(0,M.high);gr.addColorStop(1,M.core);
+    g.fillStyle=gr;g.beginPath();g.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,7);g.fill();
     g.restore();
   }
   /* her private mark: the page's own corner, turned over. One, two or three. Never a star, and big
@@ -78,11 +173,26 @@
   /* the frame: the kitchen's ACCENT, never its ground — an edge on either paper (§19.4) */
   function plate(draw){
     return function(g,W,H){
-      g.fillStyle=P.paper;g.fillRect(0,0,W,H);
       const cy=H*0.46;
-      g.fillStyle=P.onggi;g.fillRect(0,cy,W,H-cy);                 /* the counter, and things STAND on it */
-      g.fillStyle="#7E5A40";g.fillRect(0,cy,W,3);                  /* its lit front edge */
+      /* the wall behind: not a flat fill — light falls off toward the bottom of it */
+      const wall=g.createLinearGradient(0,0,0,cy);
+      wall.addColorStop(0,lit(P.paper,0.05));wall.addColorStop(1,shade(P.paper,0.10));
+      g.fillStyle=wall;g.fillRect(0,0,W,cy);
+      /* the counter, running away from you: lit at the back edge, darker at the front */
+      const top=g.createLinearGradient(0,cy,0,H);
+      top.addColorStop(0,lit(P.onggi,0.16));top.addColorStop(0.35,P.onggi);top.addColorStop(1,shade(P.onggi,0.34));
+      g.fillStyle=top;g.fillRect(0,cy,W,H-cy);
+      g.fillStyle="rgba(255,236,200,0.5)";g.fillRect(0,cy,W,2);     /* the lit front edge of the wall join */
+      /* the wall's own shadow where it meets the counter — the seam that makes two planes */
+      const seam=g.createLinearGradient(0,cy,0,cy+26);
+      seam.addColorStop(0,"rgba(26,16,10,0.42)");seam.addColorStop(1,"rgba(26,16,10,0)");
+      g.fillStyle=seam;g.fillRect(0,cy,W,26);
       draw(g,W,H,cy);
+      /* a vignette, so the eye goes to the middle */
+      const vg=g.createRadialGradient(W/2,H*0.55,Math.min(W,H)*0.28,W/2,H*0.55,Math.max(W,H)*0.78);
+      vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(28,18,10,0.30)");
+      g.fillStyle=vg;g.fillRect(0,0,W,H);
+      grain(g,W,H,0.09);
       g.fillStyle=P.steel;g.fillRect(0,0,W,6);g.fillRect(0,H-6,W,6);g.fillRect(0,0,6,H);g.fillRect(W-6,0,6,H);
     };
   }
@@ -92,20 +202,22 @@
     const base=cy+48;
     const rice=(g,cx,ty,w,ry)=>{ /* a mound, not a flat disc: white rice in a white bowl needs its own
         shadow or it is the bowl (the porcelain/paper Δ0.8 problem one layer further in) */
-      g.fillStyle="#FFFDF6";g.beginPath();g.ellipse(cx,ty-3,w*0.34,ry*0.72,0,0,7);g.fill();
-      g.fillStyle="#E4DCC8";g.beginPath();g.ellipse(cx,ty+2,w*0.34,ry*0.5,0,0,7);g.fill();};
+      const R=MAT("#F6F1E2");
+      const gr=g.createLinearGradient(cx-w*0.3,ty-ry,cx+w*0.3,ty+ry);
+      gr.addColorStop(0,R.spec);gr.addColorStop(0.55,R.base);gr.addColorStop(1,R.core);
+      g.fillStyle=gr;g.beginPath();g.ellipse(cx,ty-2,w*0.35,ry*0.78,0,0,7);g.fill();
+      g.fillStyle="rgba(255,255,255,0.5)";g.beginPath();g.ellipse(cx-w*0.10,ty-5,w*0.12,ry*0.26,-0.4,0,7);g.fill();};
     vessel(g, W*0.28, base, 78, 54, {body:P.porcelain, fill:P.porcelain, inside:"#DED8C8", edge:"#9A9382", top:rice});
     vessel(g, W*0.72, base, 78, 54, {body:P.porcelain, fill:P.porcelain, inside:"#DED8C8", edge:"#9A9382", top:rice});
     /* the pot: the biggest mass, a 2:1 ladder over the bowls, and the black ttukbaegi that was a hole
        in the page now carries a steel rim — the un-clichéd Korean note doing structural work */
     vessel(g, W*0.5, base+16, 132, 84, {body:"#33281F", fill:P.broth, inside:"#241C16", edge:"#15100C", top:(g,cx,ty,w,ry)=>{
-      /* two cubes of tofu, each with a lit top and a shaded side, because a flat white rectangle in
-         brown broth reads as confetti — it did, in the first render */
-      [[-30,-6],[8,0]].forEach(([a,b])=>{
-        g.fillStyle="#FBF7EA";g.fillRect(cx+a,ty+b-8,20,7);
-        g.fillStyle="#D9D0BA";g.fillRect(cx+a,ty+b-1,20,5);});
-      g.fillStyle=P.scallion;g.fillRect(cx-4,ty-11,7,5);g.fillRect(cx+30,ty-4,7,5);
-      g.fillStyle=P.gochu;g.fillRect(cx-16,ty+7,26,4);                                   /* chilli on pale broth, never on the brown */
+      cube(g,cx-32,ty-11,22,14,"#F2ECDA",{edge:true});      /* tofu, breaking the rim line */
+      cube(g,cx+6,ty-3,19,12,"#F2ECDA",{edge:true});
+      sliver(g,cx-6,ty-14,9,6,P.scallion);
+      sliver(g,cx+30,ty-6,9,6,P.scallion);
+      g.save();g.globalAlpha=0.8;g.fillStyle=P.gochu;                                    /* chilli oil ON the broth, never on the brown */
+      g.beginPath();g.ellipse(cx-8,ty+9,15,4,0.1,0,7);g.fill();g.restore();
     }});
     folds(g,W,H,2);
   });
