@@ -526,6 +526,67 @@ words untouched. Two blocks came unfenced (Beto's, Chava's) and one carried a st
 paint script learned to read them. The return-visit check passed on all eight; the two-bays check folded
 twenty-one names to twenty-one people; the ledger gained eight lines by the guard's own recipe.
 
+## Iteration 10 — 2026-09-15, "i hope they finally arent just banners"
+
+The owner looked at fifty-six panels and said they were banners. **He was measurable and he was
+right:** 43 of the 56 declared `aspect:0.46` and the palette was near-universally `MURPAL`, so the
+wall was a row of the same rectangle in the same five pigments, however hard anyone had worked
+inside one. Two rules went out with the brief, and a third came back from the painters.
+
+1. **Your own material, named at the top of `art` as a `MATERIAL:` comment.** Not the limewash.
+2. **A shape that is not the wall's.** Not 0.46.
+3. **Shorter, never taller** — Pili read `murWall` and found the brief's rule 1 was wrong.
+
+### The clip is exactly 0.46, and it is a hard edge — Chema's table
+
+`murWall` gives each panel a box `MURBAY` wide by `MURBAY*0.46` tall and clips to it, then draws the
+panel at `MURREF × MURREF*aspect` scaled by `MURBAY/MURREF`. So anything over `aspect 0.46` loses
+**`(a−0.46)/a`** of its own height, from the feet up. Measured with a probe panel (whole canvas
+magenta, bottom fifth cyan) pushed onto the real `MURALS` and rendered through the real `murWall`:
+
+| aspect | bottom fifth arrives | lost |
+|---|---|---|
+| 0.34 | whole | — |
+| 0.46 | whole | — |
+| **0.52** | **partly cut** | 11.5% |
+| 0.58 | **0 px** | 20.7% |
+| 0.95 | **0 px** | 51.6% |
+| 1.20 | **0 px** | 61.7% |
+
+**0.52 is not safe either** — it is quietly clipped, just not enough for a bottom-fifth probe to
+return zero, which is the shape of every proxy in `docs/REGRESSION.md`. And **0.95 and 1.20 render
+byte-identically on the wall** (magenta 29,835 px both): past the cut, asking for a taller panel
+changes nothing at all. `bleed:0.28` does extend the box to 0.5888 and a 0.58 panel then lands
+whole — but it is bought, not free: the panel paints into the `MURSTATE` strip and the state line is
+drawn *on top of it*, and it eats ~18 units off the top of the painter's own previous visit. Nobody
+this round took it. **A taller panel is not a panel, it is a change to `murWall`.**
+
+### What landed
+
+Each panel was **rendered and looked at** before it was committed — at reading width and in its own
+255-pixel bay — and each was painted twice and diffed: `drift 0` on all of them, so no panel on this
+wall is drawing itself differently each time.
+
+- **Pili (5th), `pili-tres-sombras-sin-cuerpo`** — cut paper under an inspection lamp pulled down
+  until the beam grazes the board, 0.34, every object in the hex it was actually measured at. Three
+  things the Simmer plan put on a page that were not on the page: a jjigae at Δ0.7 of 255 from its
+  own night paper, white rice in a white bowl at Δ0.8, gochugaru at Δ19.8 in a document whose own
+  rule four sections earlier asks for 90. Her point is that she had already written that check down
+  and it stopped none of them: **the lamp is the instrument, the sentence in the file is not.**
+- **Beto (7th), `beto-el-anillo-en-los-palillos`** — lampblack on an indicator card scratched
+  through with a steel stylus, 0.38. The probe he shipped measured the chopsticks and the noodles
+  and called them the bowl's mouth, and printed the row as confidently as the two it got right. The
+  false ring is the cleanest curve on the card and it is 1.35 wide to one tall, which was the tell
+  nothing was reading. A signalman stands on the rim it never touched and waves it through.
+- **Chema (3rd), `chema-la-calca-en-la-mesa`** — a tungsten studio sweep, 0.34, painted in the light
+  model's own palette instead of the wall's: warm on the way up, cool on the way down, shadows
+  brown-violet and never black. Two vessels that obey the light and one die-cut vinyl decal that
+  does not, with one corner lifted. His measurement of the mocks that started it: two rice bowls
+  whose front walls read −5.8 and +6.0 left-to-right — **exact mirrors of each other** — and a pot
+  at 0.0 across its whole width, with not one pixel of contact or cast shadow in the frame. That is
+  not light from somewhere, it is an outline, and an outline is identical down both sides because
+  an outline always is.
+
 ## Coming back — how a return visit works, and the rule against stamps
 
 *Owner, 2026-09-12: "just to understand when an agent goes back to the mural, they'll add space for
