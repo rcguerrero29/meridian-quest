@@ -1571,3 +1571,45 @@ at pictures of things we promised not to build while telling us the art is off.
 
 **No cold read has been done on any of this art, by anyone.** Somebody with no context has to be shown
 the four dishes and asked to name them. **Pili expects three failures.**
+
+---
+
+## 20 · Two things measured on 2026-09-15, after AJ saw the mocks
+
+### 20.1 · The reader animates, from pack code, with no engine change — CONFIRMED
+
+Tavo's F1 (§17.7) reasoned it and did not reproduce it. **Reproduced now: 73 frames in 900 ms — about
+80 fps — inside a document's `art` block, with a `pointerdown` handler firing on the same canvas.**
+Nothing in `engine/` was touched. So the making surface, the steam, the lid that lifts and the
+merge-style pop are all **pack code**, and none of them costs an engine PR or a version bump.
+
+**And the gotcha, which cost a run to find and would have cost a sitting later:** at the moment `art()`
+is called, **the canvas is not in the document yet** — the engine builds it, draws into it, and appends
+it afterwards. So a loop that starts with `loop()` and guards on `document.body.contains(cv)` exits
+immediately and never re-arms. **Start it with `requestAnimationFrame(loop)`, never with a direct
+call.** The same applies to anything that measures the canvas's layout at draw time — which is the
+root of the resolution fault in 20.2.
+
+**A pack that animates must also:** set `cv.style.touchAction="none"` itself (the canvas lives inside
+the scrolling paper, so a vertical drag scrolls the page instead of stirring the pot), and stop its own
+loop when the canvas leaves the document, because the reader rebuilds the element on every render.
+
+### 20.2 · The first document of a session is drawn at the wrong size — an ENGINE fault, and Meridian has it too
+
+`engine/engine.js` (grep `const room=`) measures the column to decide how wide to draw a picture — and
+`docOpen` renders **while the reader is still hidden**, where a hidden element's width is 0. The
+fallback chain then lands on the window: **382 instead of 322**, so the first picture anyone opens in a
+session is drawn into a 764-px buffer and the browser resamples it down by 0.843 into the 322-px box.
+
+Measured cost, in detail actually delivered (mean absolute Laplacian at the displayed size):
+
+| | drawn at 322 | drawn at 382, resampled | cost |
+|---|---|---|---|
+| the flat pictures | 4.324 | 3.598 | **−16.8%** |
+| with the light model | 7.166 | 4.780 | **−33.3%** |
+
+**The grain added specifically to stop surfaces reading as flat is its first casualty — a third of it
+is filtered away before anybody sees it.** It is `#134` wearing new clothes: a linear resample of art
+drawn with smoothing off. It is an engine RULE (measure after layout, or draw at the size you will be
+shown), it is behaviour-identical for both games, and **it affects every `art` block in every pack,
+Meridian's own documents included.**
