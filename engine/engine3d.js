@@ -769,7 +769,7 @@ function t3Actors(){
     /* the SAME painter the flat cameras use, smaller and closer because this sprite has six pixels
        of headroom — see drawSayMark. It was its own copy of the fillText until 2026-09-15, which is
        how "three engine sites" turned out to be four. */
-    if(hasSay(n))drawSayMark(g,2,6,11.5,0.70);
+    if(hasSay(n))drawSayMark(g,2,6,"bake");
     drawEmote(n,2,6); /* the trade is drawn BESIDE the mark here too, never instead of it */
   }}));
   PEERS.forEach(p=>{if(p.w===world)list.push({x:p.x,y:p.y,f:g=>drawPerson(g,2,6,p.look||look,{dir:t3ScreenDir(p.dir||"down"),who:p.id||p.name||"peer"})});});
