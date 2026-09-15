@@ -826,3 +826,57 @@ Yes — but not the version asked for, and not yet. **Three named cars, not swat
 ### The owner's, before anything is built
 1. **Whose car is it?** (a) **A commission** — you did the work for Don Tacho and the line, the repaint is the payment, chosen once and kept; the shop is the fiction and the picker is in the gear menu (Tavo and Rigo both recommend this). (b) **A settings screen with swatches** — cheaper, re-picked eleven times in the first minute and never again. (c) **Seeing the tram in the shop** — a bay, a new room, and it fights *never nonsense*: the car cannot leave its rails.
 2. **Does the season repaint the tram?** Día de Muertos may *dress* the world; a car in marigold is dressing or rebuilding depending on who you ask (Beto's question; both sides in the raw file).
+
+---
+
+## A15 · A pack cannot design its own paper — the gap that made every mock look like a form · 2026-09-15
+
+**How it was found.** A day was spent improving the *art* in a mock of Simmer's recipe-book page. The
+owner's verdicts, in order: *"fairly slop shloppy"* · *"the stew looks circular but we are looking at
+the pot from an angle"* · *"the latest look broken now"* · and then, on a render that three agents had
+measured, cold-read and corrected: **"it still looks like a bad attempt at UI."**
+
+He was right, and the fault was never the illustration. **Every one of those pictures was the game's
+document reader with a drawing dropped into it** — the reader's monospace field labels, its key/value
+table, its dashed rules, its three grey buttons. A form. The same content, laid out as a designed
+page, stopped being a form immediately: `https://claude.ai/artifact/DAenYKRcrwbL6fvGFrrpmD`.
+
+**The architectural fact underneath it, checked rather than assumed.**
+
+| | |
+|---|---|
+| What a pack ships | **nine JavaScript files and no CSS** (`index.html`, the pack script tags) |
+| Who owns type, size, colour, spacing | **the shell**, for every document in every world, in one `<style>` block |
+| What the reader's blocks are | fixed classes — `dp` `dnote` `dkv` `dblank` `dform` `dq` `ddocs` `dsel` `dred` |
+| What a pack may therefore choose | **which blocks to use, and nothing about how they look** |
+
+**So Meridian's paperwork look is hardcoded into the engine for every world that will ever run on
+it.** A pack whose documents are a recipe book, a ship's log, a child's sticker album or a court
+filing gets Meridian's civic-form typography, and the only lever it has is which blocks to stack.
+
+**Why this is a RULE question and not a CHOICE somebody can make today.** `docs/TAGS.md`'s standing
+test is *name the geometry, not the noun*. The reader's blocks pass that test — a key/value pair is a
+shape, not a subject. **Their styling does not**: "IBM Plex Mono, uppercase, letter-spaced, grey" is
+Meridian's voice wearing the engine's clothes, and a second world inherits it with no way to decline.
+
+**The seam, costed, not built.** A pack declares one stylesheet — `content/<pack>/paper.css`, loaded
+by the shell after its own block and scoped to the reader — or a small token set (two faces, a scale,
+four colours) the reader's classes read from. The stylesheet is simpler, honest about what it is, and
+carries the whole of what was missing. **What it must not become:** a hole a pack can reach through to
+restyle the game's chrome, the HUD or the world. Scope it to the reader's own subtree and say so in
+the register, or it is a new edge for `docs/BOUNDARY.md`.
+
+**What it would have prevented, and this is the measure of it:** an entire day of improving food
+drawings inside a surface that could not be designed, while the thing making the page look cheap was
+never the food. **Three specialist agents measured, cold-read and corrected that art and not one of
+them said the surface was a form — because they were all pointed at the picture.**
+
+**Two questions were being conflated, and the register should keep them apart forever:**
+- *"Can the engine's reader draw this?"* — answer it by rendering in the reader. It was answered, and
+  the answer was genuinely useful to the build.
+- *"Would the person this is for want to open it?"* — **never answer this one with the reader.** Design
+  the surface, then judge.
+
+**Open for the owner.** Whether the paper seam gets built at all, and whether it is a stylesheet or a
+token set. Nothing in Simmer is blocked on it — a mock can be designed outside the game, as this one
+was — but **the first pack that ships documents of its own will meet this wall on its first afternoon.**

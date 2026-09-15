@@ -1710,3 +1710,36 @@ Simmer over-delivers safety. §19 is all softness. **Abundance — "nothing is l
 the one nobody in this document has argued about**, and it is what makes a readable shelf and a fridge
 with six things in it read as *warmth* rather than as *sparseness*. The literature has it as
 load-bearing, not decorative.
+
+---
+
+## 22 · The page was the problem — 2026-09-15
+
+Three agents measured, cold-read and corrected the art on the mock book pages, and every one of them
+was right and useful. The owner's verdict on the corrected render was still: **"it still looks like a
+bad attempt at UI."**
+
+He was right, and the fault was never the food. **Every mock that day was the game's document reader
+with a drawing dropped into it** — monospace field labels, a key/value table, dashed rules, three grey
+buttons. A form. The same content, designed as a page, is here:
+**https://claude.ai/artifact/DAenYKRcrwbL6fvGFrrpmD**
+
+What made the difference, in order of how much each was worth: **two real typefaces and a scale**,
+which beat every fix to the food combined · **a recipe set the way a recipe card is set** — dot
+leaders, tabular quantities — rather than as a key/value table · **the night paper, which he chose in
+§12.1 #12 and which not one mock had honoured** · and **the two cooks as a control you press instead
+of a paragraph describing them**, which is the moment the page stops being a document about a game.
+The drawing was the same drawing.
+
+**What this changes for Simmer:** nothing about §16, §17 or §21 — the world, the loop and the outside
+evidence all stand. It changes **how the next thing is shown to AJ.** She was never going to answer
+"do you want a fourth page?" honestly while the art was loud and the page looked like a permit
+office; now the question can be asked cleanly. And it retires a convention that was quietly costing
+us: the mocks were rendered through the shipped reader because this repo's practice says to, which is
+right for proving the engine can draw something and **wrong for showing somebody what a game feels
+like.**
+
+**And the gap it exposed, which belongs to every world and not to this one:** a pack ships nine
+JavaScript files and no CSS, so **it cannot design its own paper at all.** `docs/ARCH-LOG.md` **A15**
+costs the seam and leaves it open for the owner; `docs/BEAUTIFY.md` and `docs/NEW-WORLD.md` carry the
+working half of the lesson so the next world meets it as a warning rather than as an afternoon.
