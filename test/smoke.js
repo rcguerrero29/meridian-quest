@@ -4350,6 +4350,57 @@ const CANDIDATES = [
   fails.push(...plan);
 
 
+  /* ---- two one-line faults, planted rather than reasoned (#192, #193) ----
+     Both plants are MADE, never found. The first draft of this block looked for a wanderer in
+     whatever world the suite happened to be standing in, found none, and passed twice without
+     running a line of either check. */
+  const twoSmall = await page.evaluate(() => {
+    const P = [];
+    /* #193 · a "__proto__" key in the text lab's paste reaches a prototype SETTER. JSON.parse keeps
+       the key as an ordinary own property; Object.assign then SETS it, and the target — NPCN[lang],
+       the cast's names — gets a new prototype it never asked for, so every unknown name lookup can
+       be answered by whatever was pasted. Local-only and self-inflicted (his own paste, his own
+       lab), which is why it is low tier and not why it may stand. */
+    try {
+      const before = Object.getPrototypeOf(NPCN[lang]);
+      localStorage.setItem(SK('text_') + lang, '{"npcNames":{"__proto__":{"mqPwned":1}}}');
+      applyText();
+      if (NPCN[lang].mqPwned !== undefined || Object.getPrototypeOf(NPCN[lang]) !== before)
+        P.push('pasting {"__proto__":…} into the text lab replaces the prototype of the cast\'s own name table (#193): a name nobody wrote now answers');
+      Object.setPrototypeOf(NPCN[lang], before);
+    } catch (e) { P.push('the text-lab prototype probe threw: ' + e.message); }
+    localStorage.removeItem(SK('text_') + lang);
+
+    /* #192 · when a neighbour steps OFF a tile, the engine writes plain floor over whatever the map
+       had there. Nothing visible today — no decorated tile sits inside a wander pen — so the plant
+       makes one: put a jacaranda on the tile under a wanderer, walk him off it, and read what is
+       left. The same file already knows the answer seventy lines earlier: "the glyph the map had,
+       not '.'". `rows` are strings and `grid` rows are arrays; the first draft of this plant wrote
+       a string into grid, which no assignment in the engine can change, and proved nothing. */
+    let wid = null, n = null;
+    for (const id of Object.keys(WORLDS)) {
+      const cand = (WORLDS[id].npcs || []).find(p => wanders(p) && p.x + 1 < WORLDS[id].W);
+      if (cand) { wid = id; n = cand; break; }
+    }
+    if (!n) P.push('no wanderer anywhere in this pack, so the step-off cannot be tested');
+    else {
+      const keepW = world, w = WORLDS[wid], gx = n.x, gy = n.y;
+      const keepRow = w.rows[gy], keepCell = w.grid[gy][gx], keepNext = w.grid[gy][gx + 1];
+      world = wid;                                         /* wanderUpdate only walks CW() */
+      w.rows[gy] = keepRow.substring(0, gx) + 'J' + keepRow.substring(gx + 1);
+      w.grid[gy][gx] = 'N'; w.grid[gy][gx + 1] = '.';
+      n.mv = [gx + 1, gy]; n.mt = 1; n.wnext = 0;
+      wanderUpdate(16);
+      const left = w.grid[gy][gx];
+      w.rows[gy] = keepRow; w.grid[gy][gx] = keepCell; w.grid[gy][gx + 1] = keepNext;
+      n.mv = null; n.mt = 0; n.x = gx; n.y = gy; n.fx = gx; n.fy = gy; world = keepW;
+      if (left !== 'J') P.push('a neighbour steps off a decorated tile and the engine writes "' + left + '" over the map\'s own glyph (#192): the map says "J"');
+    }
+    return P;
+  });
+  fails.push(...twoSmall);
+
+
   await browser.close();
 
 

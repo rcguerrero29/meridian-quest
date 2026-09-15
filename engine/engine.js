@@ -99,7 +99,10 @@ function wanderUpdate(dt){
       n.mt=Math.min(1,(n.mt||0)+dt/WANDER_MS);
       n.fx=n.x+(n.mv[0]-n.x)*n.mt;n.fy=n.y+(n.mv[1]-n.y)*n.mt;
       if(n.mt>=1){
-        if(w.grid[n.y])w.grid[n.y][n.x]=".";
+        if(w.grid[n.y])w.grid[n.y][n.x]=w.rows[n.y][n.x]; /* #192: the glyph the map had, not "." —
+          the same answer removeChill() gives seventy lines below. Nothing in Meridian is decorated
+          inside a wander pen today, so this was invisible; it bites the first pack whose neighbour
+          walks past a tree. */
         n.x=n.mv[0];n.y=n.mv[1];n.fx=n.x;n.fy=n.y;petalDrop(world,n.x,n.y,n);
         if(w.grid[n.y])w.grid[n.y][n.x]="N";
         n.mv=null;n.wnext=now+1600+Math.random()*3200;}
@@ -4541,11 +4544,17 @@ $("optEs").addEventListener("click",()=>{lang="es";applyLang();});
 $("langQuick").addEventListener("click",()=>{lang=(lang==="en"?"es":"en");applyLang();});
 /* ---------- text lab (edit names, titles, bump lines) ---------- */
 function labData(){return {npcNames:{...NPCN[lang]},titles:AQ().map(q=>q.title),flavor:JSON.parse(JSON.stringify(T().flavor))};}
+/* JSON.parse keeps a "__proto__" key as an ordinary own property, and Object.assign then SETS it
+   — which reaches the prototype setter and hands the target an object it never asked for. The lab
+   is the owner pasting into his own machine (#193, low tier), and the cure is one copier both
+   sites use rather than a rule everyone has to remember. */
+function putAll(dst,src){if(!src||typeof src!=="object")return dst;
+  Object.keys(src).forEach(k=>{if(k==="__proto__")return;dst[k]=src[k];});return dst;}
 function applyText(){
   try{const o=JSON.parse(localStorage.getItem(SK("text_")+lang)||"null");if(!o)return;
-    if(o.npcNames)Object.assign(NPCN[lang],o.npcNames);
+    if(o.npcNames)putAll(NPCN[lang],o.npcNames);
     if(o.titles)AQ().forEach((q,i)=>{if(o.titles[i])q.title=o.titles[i];});
-    if(o.flavor)Object.assign(UI[lang].flavor,o.flavor);
+    if(o.flavor)putAll(UI[lang].flavor,o.flavor);
   }catch(e){}
 }
 $("openLab").addEventListener("click",()=>{
