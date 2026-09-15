@@ -252,7 +252,11 @@ Four things they had in common, worth checking your own guard against before it 
 **The question, and it is not optional:** *if I break the thing this is for, in the smallest and most
 plausible way, does it print a sentence a person would say?* **If you have not run that, the guard is
 untested however green the suite is** — which is what `melo` is for, and what step 5½ asks of every
-change.
+change. **Load the `guard` skill before writing the assertion** (2026-09-15): it carries the four
+ways a guard fools its author while asking the right question — it supplies its own inputs, it has
+nothing to measure and passes anyway, it reads the clock, or it measures the container instead of
+the thing. All four were written in one day by a session that had just finished writing up the
+register warning about them.
 
 **And the second question, which is cheaper: what does this guard print when it cannot read the file
 at all?** If the answer is its pass sentence, it is not a guard, it is a claim. A quoted `"on":` key
