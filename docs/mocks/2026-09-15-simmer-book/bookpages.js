@@ -72,10 +72,15 @@
   /* grain, over the FRAME, so no surface is a flat fill. Cheap and it is most of the difference
      between "a shape" and "a thing". */
   let NOISE=null;
+  /* SEEDED. The first version used Math.random(), so two loads of the same code produced two
+     different pictures — measured, hash 3963922671 vs 695642613 — which breaks every pixel-diff
+     test on these mocks and breaks the owner's own rule that a thing should be recreatable. */
+  let SEED=0x9E3779B9;
+  const rnd=()=>{SEED=(SEED*1664525+1013904223)>>>0;return SEED/4294967296;};
   function grain(g,W,H,amt){
-    if(!NOISE){const n=document.createElement("canvas");n.width=n.height=96;const q=n.getContext("2d");
+    if(!NOISE){SEED=0x9E3779B9;const n=document.createElement("canvas");n.width=n.height=96;const q=n.getContext("2d");
       const d=q.createImageData(96,96);
-      for(let i=0;i<d.data.length;i+=4){const v=200+Math.random()*55;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}
+      for(let i=0;i<d.data.length;i+=4){const v=200+rnd()*55;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255;}
       q.putImageData(d,0,0);NOISE=n;}
     g.save();g.globalAlpha=amt==null?0.085:amt;g.globalCompositeOperation="multiply";
     for(let y=0;y<H;y+=96)for(let x=0;x<W;x+=96)g.drawImage(NOISE,x,y);
