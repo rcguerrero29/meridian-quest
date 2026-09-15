@@ -768,8 +768,7 @@ function drawIso(){
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
   w.npcs.forEach(n=>bill(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(bx,by)=>{
     drawPerson(ctx,bx,by,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
-    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
-      ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
+    if(hasSay(n))drawSayMark(ctx,bx,by);
     drawEmote(n,bx,by);}));
   if(world===AW("dog"))bill(DOG.fx,DOG.fy,(bx,by)=>drawDog(ctx,bx,by));
   if(world===AW("cat"))bill(CAT.fx,CAT.fy,(bx,by)=>drawCat(ctx,bx,by));
@@ -1959,8 +1958,7 @@ function drawFront(){
     if(sx<-TS||sy<-TS-16||sx>VW||sy>VH)return;R.push({d:gy+0.55,f:()=>fn(sx,sy)});};
   w.npcs.forEach(n=>act(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(sx,sy)=>{
     drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
-    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
-      ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
+    if(hasSay(n))drawSayMark(ctx,sx,sy);
     drawEmote(n,sx,sy);}));
   PEERS.forEach(p=>{if(p.w!==world)return;
     act(p.x,p.y,(sx,sy)=>{drawPerson(ctx,sx,sy,p.look||look,{dir:p.dir||"down",who:p.id||p.name||"peer"});
@@ -2051,8 +2049,7 @@ function draw(){
     const sx=(n.fx===undefined?n.x:n.fx)*TS-camX,sy=(n.fy===undefined?n.y:n.fy)*TS-camY;
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
     drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
-    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
-      ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
+    if(hasSay(n))drawSayMark(ctx,sx,sy);
     drawEmote(n,sx,sy);
   });
   PEERS.forEach(p=>{
@@ -3516,6 +3513,52 @@ const readAt=(x,y)=>RD().find(r=>r.world===world&&r.x===x&&r.y===y&&DC()[r.doc])
 function readMarks(){const out=[];
   RD().forEach(r=>{if(r.world===world&&DC()[r.doc])out.push(r);});
   return out;}
+/* ---- THE QUEST MARKER. ONE PAINTER, THREE CAMERAS. ----
+   It was `ctx.fillText("❗",x+16,y+2+bob)` written out three times (the iso bill pass, the front
+   pass and the top pass), and docs/BEAUTIFY.md's audit called what it drew "a solid red bar through
+   the top of the skull". Both halves of that sentence were a bug and the second one is the
+   interesting one:
+
+   · THROUGH THE SKULL, because the baseline was `y+2` — the head's own row. drawReadMark, written
+     later for the same job, sits at `y-6`. The marker was eight pixels lower than the mark the
+     engine already knew how to place.
+   · RED, although the line above it says `fillStyle="#E0B45C"`. "❗" is a COLOUR EMOJI: the font
+     paints its own palette and fillStyle is ignored entirely, so the amber this engine has asked
+     for since the day the marker was written has never once reached a screen. It also means the
+     marker is a different picture on every platform — Apple's, Google's, Microsoft's and this
+     Linux build's are four different drawings — and the one object docs/STORY.md records as
+     meaning one thing forever was being drawn by whatever font the device happened to have.
+
+   So it is geometry now, in this engine's own hand: a balloon over the head with a tail pointing
+   down at the person, and the "!" built out of two rectangles rather than a glyph. Same meaning,
+   same amber the code always named, same bob — and the same picture on every device.
+   BOTH GAMES GET IT and neither changes what it MEANS: hasSay() is untouched, the world tag's
+   "· ❗" is untouched, and every guard that reads those still reads them. */
+/* `lift` and `k` exist for ONE caller: the 3D bake draws its people into a 36x48 sprite with six
+   pixels of headroom (engine3d.js:741, "#57"), so the balloon the flat cameras hang nine pixels
+   above a head would be cut off at the top of the sprite and arrive on the wall of the scene as a
+   clipped rectangle. Same drawing, smaller and closer, rather than a second drawing — the mural's
+   own lesson from the same day: one painter, two surfaces. */
+function drawSayMark(g,bx,by,lift,k){
+  k=k||1;
+  const bob=Math.sin(Date.now()/250)*1.6*k, cx=bx+16, w=13*k, h=11*k, x=cx-w/2,
+        y=by-(lift===undefined?12.5:lift)+bob;
+  g.save();
+  const B=1.5*k;
+  g.fillStyle="rgba(20,16,28,.22)";                       /* it sits over the head, so it shades it */
+  g.beginPath();g.ellipse(cx,by+3*k,5.5*k,1.8*k,0,0,7);g.fill();
+  g.fillStyle="#2B2536";                                  /* the keyline, so it reads on any wall */
+  g.beginPath();g.moveTo(x-B,y-B);g.lineTo(x+w+B,y-B);g.lineTo(x+w+B,y+h+B);
+  g.lineTo(cx+3.5*k,y+h+B);g.lineTo(cx-0.5*k,y+h+6*k);g.lineTo(cx-2.5*k,y+h+B);
+  g.lineTo(x-B,y+h+B);g.closePath();g.fill();
+  g.fillStyle="#E0B45C";                                  /* the amber the code has always named */
+  g.beginPath();g.moveTo(x,y);g.lineTo(x+w,y);g.lineTo(x+w,y+h);
+  g.lineTo(cx+2.5*k,y+h);g.lineTo(cx-0.5*k,y+h+3.6*k);g.lineTo(cx-1.5*k,y+h);
+  g.lineTo(x,y+h);g.closePath();g.fill();
+  g.fillStyle="rgba(255,246,220,.42)";g.fillRect(x,y,w,1.6*k);      /* key light, upper-left */
+  g.fillStyle="#2B2536";                                  /* the mark itself: a bar and a dot */
+  g.fillRect(cx-1.2*k,y+2.2*k,2.4*k,5.2*k);g.fillRect(cx-1.2*k,y+8.4*k,2.4*k,2.2*k);
+  g.restore();}
 function drawReadMark(g,bx,by,up){ /* a cream card that BREATHES — never the bouncing ❗ */
   const b=0.85+Math.sin(Date.now()/620)*0.15,w=13,h=10,x=bx+16-w/2,y=by-6-(up|0);
   g.save();g.globalAlpha=b;

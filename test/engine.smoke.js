@@ -496,6 +496,67 @@ const { chromium } = require('playwright-core');
   const r = r0.P; r.stillFlat = r0.stillFlat;
   fails.push(...r);
 
+  /* ---- THE QUEST MARKER STANDS OVER A PERSON, IT DOES NOT PAINT ON ONE ----
+     docs/BEAUTIFY.md's audit: "a solid red bar through the top of the skull", on ~20 people, on the
+     one object docs/STORY.md records as meaning one thing forever. Two faults in one line of code
+     (`ctx.fillText("❗",x+16,y+2+bob)`, written out at four sites):
+       · the baseline was the HEAD'S OWN ROW, so the mark was painted onto the person;
+       · "❗" is a colour emoji, so the font paints its own palette, `fillStyle="#E0B45C"` was
+         ignored, and the marker was a different drawing on every platform.
+     Asked of the PICTURE, three ways, because neither fault is visible in the code:
+       1. the mark adds paint ABOVE the person's own topmost row — that is what "over their head"
+          means, and it is precisely what the old one did not do;
+       2. the only thing it may do to the person's own pixels is DARKEN them. A thing above a head
+          shades it; a bar through a skull replaces it.
+     AND CHECK 2 IS THE ONE THAT WORKS, which is worth writing down rather than implying. The real
+     bug was planted back in a copy outside the repo — the original fillText line, restored exactly —
+     and check 1 stayed SILENT: a 13px glyph on a baseline at the head's row has an ascent that
+     reaches five pixels above the person, so "does it start above them" was true of the bug. It
+     went through the skull on the way DOWN. Check 2 named it: `32 of the person's own pixels are
+     made lighter by the quest marker`. Check 1 is kept because it catches the other half — a mark
+     drawn entirely at or below the head — but it is not the one that earned its place;
+       3. in the 3D bake it is not clipped by the top of the 36×48 sprite, which is a real failure
+          mode and not a hypothetical — the first version of the replacement was cut off there and
+          arrived in the scene as a chopped rectangle. */
+  const saymark = await page.evaluate(() => {
+    const P = [];
+    if (typeof drawSayMark !== 'function') {
+      P.push('the engine has no drawSayMark — the quest marker is a font glyph again, which paints its own colours (so the amber the code asks for never arrives) and is a different picture on every device');
+      return P; }
+    const W = 36, H = 48;
+    const mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 8); g.clearRect(0, -8, W, H);
+      return { c, g }; };                    /* exactly engine3d.js:807's own surface and transform */
+    const look = (typeof NPCLOOK !== 'undefined' && NPCLOOK[Object.keys(NPCLOOK)[0]]) || undefined;
+    const a = mk(), b = mk();
+    drawPerson(a.g, 2, 6, look, { dir: 'down' });
+    drawPerson(b.g, 2, 6, look, { dir: 'down' });
+    drawSayMark(b.g, 2, 6, 11.5, 0.70);
+    const da = a.g.getImageData(0, 0, W, H).data, db = b.g.getImageData(0, 0, W, H).data;
+    let personTop = H, markTop = H, added = 0, lightened = 0, onPerson = 0, row0 = 0;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4, wasPerson = da[i + 3] > 40;
+      if (wasPerson && y < personTop) personTop = y;
+      const moved = Math.abs(da[i] - db[i]) > 10 || Math.abs(da[i + 1] - db[i + 1]) > 10
+                 || Math.abs(da[i + 2] - db[i + 2]) > 10 || Math.abs(da[i + 3] - db[i + 3]) > 40;
+      if (!moved) continue;
+      added++; if (y < markTop) markTop = y; if (y === 0) row0++;
+      if (wasPerson) { onPerson++;
+        /* a shadow only ever takes light away. Anything that ADDS it is covering them. */
+        if (db[i] > da[i] + 10 || db[i + 1] > da[i + 1] + 10 || db[i + 2] > da[i + 2] + 10) lightened++; } }
+    if (!added) P.push('a person with something to say is not marked at all — drawSayMark drew nothing');
+    else {
+      if (markTop >= personTop) P.push('the quest marker starts at row ' + markTop + ' and the person starts at row ' +
+        personTop + ' — it is drawn ON them, not over them. That is the red bar through the skull (docs/BEAUTIFY.md)');
+      if (lightened) P.push(lightened + ' of the person’s own pixels are made LIGHTER by the quest marker, so it is covering them rather than shading them. A thing above a head casts a shadow on it; it does not replace it');
+      if (row0) P.push('the quest marker touches row 0 of the 36×48 actor sprite (' + row0 +
+        ' pixels), so the 3D bake cuts its top off and it arrives in the scene as a chopped rectangle');
+      if (onPerson > 90) P.push('the quest marker changes ' + onPerson + ' of the person’s pixels — its shadow has grown into a hat');
+    }
+    return P;
+  });
+  fails.push(...saymark);
+
   /* ---- a button you can see does what it says (Rosa, finding 1) ----
      This one needs a SHORT screen: the fault only exists where the sheet is taller than the
      window, which is why a laptop never saw it. So it runs at a phone's size, outside the main
