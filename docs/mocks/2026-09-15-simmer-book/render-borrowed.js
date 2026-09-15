@@ -14,12 +14,13 @@ const svg=n=>{const i=SET.icons[n];if(!i)throw new Error('no icon '+n);
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SET.width} ${SET.height}" width="512" height="512">${i.body}</svg>`).toString('base64');};
 const ICONS={};['pot-of-food','cooked-rice','sushi','hot-pepper','leafy-green','shallow-pan-of-food',
   'chopsticks','steaming-bowl','green-salad'].forEach(n=>ICONS[n.replace(/-/g,'_')]=svg(n));
-/* WHERE EACH ICON'S OPENING IS, measured per icon and never assumed. icon-openings.json is written
-   by a probe that renders the icon to a buffer and finds its contents by pixel; the predicate used
-   for each is recorded in the file. The pass before this one measured the POT and then used those
-   same numbers on the PAN — whose opening is 3.5% lower and 10% smaller — and the picture came out
-   visibly broken. One measurement, one object. */
-const OPEN=JSON.parse(fs.readFileSync(path.join(__dirname,'icon-openings.json'),'utf8'));
+/* WHERE EACH ICON'S OPENING IS. Written by measure-openings.js IN THIS FOLDER — which ships, so the
+   table can be re-derived rather than believed. The pass before this measured the POT and used those
+   numbers on the PAN, whose opening is 3.5% lower and 10% smaller, and the picture came out visibly
+   broken. One measurement, one object; and every row is drawn on its own icon in
+   openings-contact-sheet.png, because a probe can produce a stable, confident, WRONG number — it did,
+   for `steaming-bowl`, catching the chopsticks above the bowl. */
+const OPEN=JSON.parse(fs.readFileSync(path.join(__dirname,'icon-openings.json'),'utf8'))._rows;
 
 (async()=>{
  const b=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
@@ -147,11 +148,10 @@ const OPEN=JSON.parse(fs.readFileSync(path.join(__dirname,'icon-openings.json'),
            steam(g,W*0.48,cy-36,120);
            const S=132, PX=W*0.48, PY=cy+60;
            put(g,"pot_of_food",PX,PY,S);
-           /* MEASURED, not eyeballed: the icon was rendered to a buffer and the warm region found by
-              pixel, giving centre (0.498, 0.453) and radius 0.256 of its box — and rx 0.256 against
-              ry 0.246 is the arithmetic of the owner's own observation: the contents really are a
-              circle. Guessing put it 4% too high and 10% too small, which is what left a crescent
-              of the original showing. */
+           /* MEASURED, not eyeballed — and read from the table rather than repeated here, because a
+              comment that names live numbers goes stale the first time they move. The table also
+              contains the owner's own observation as arithmetic: this icon's opening has an aspect
+              of 1.04, i.e. the contents really are a circle. */
            const OP=O["pot-of-food"];
            potFace(g, PX+S*(OP.cx-0.5), PY-S+S*OP.cy, S*OP.rx*1.03, {top:(g,cx,ly,lrx,lry)=>{
              const cube=(x,y,w,h)=>{g.fillStyle="rgba(24,12,6,0.30)";
@@ -210,8 +210,12 @@ const OPEN=JSON.parse(fs.readFileSync(path.join(__dirname,'icon-openings.json'),
            put(g,"leafy_green",W*0.17,cy+40,52);
            const S=124, PX=W*0.52, PY=cy+58;
            put(g,"shallow_pan_of_food",PX,PY,S);
-           /* the borrowed pan is full of yellow rice. Same repaint, green: the technique transfers,
-              which is the point of having built it once. */
+           /* The borrowed pan is full of yellow rice, so its contents are repainted green. It is
+              honest to say what this does NOT do: the pan is drawn in PLAN VIEW — you are looking
+              straight down on it, both handles splayed in the picture plane — so a correctly aligned
+              angled interior now fights the object around it. Repainting fixes contents, never the
+              vessel's camera. The claim elsewhere that "the technique transferred" was wrong and is
+              corrected in LICENCES.md. */
            const OQ=O["shallow-pan-of-food"];
            potFace(g, PX+S*(OQ.cx-0.5), PY-S+S*OQ.cy, S*OQ.rx*1.03, {
              wallTop:"#6E5741",wallMid:"#A98A68",wallLow:"#D8C2A2",

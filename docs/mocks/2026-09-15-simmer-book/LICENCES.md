@@ -72,11 +72,54 @@ fixing something the previous one showed:
 3. **A tan crescent showed under the liquid.** The ellipse now reaches the near rim.
 
 **The other two, and what each one demonstrates:**
-- **Namul** — the same repaint in green, because the borrowed pan is full of yellow rice. The
-  technique transferred at the cost of one colour table, which is the reason for building it once.
+- **Namul** — the same repaint in green, because the borrowed pan is full of yellow rice.
+  **This sentence used to say "the technique transferred at the cost of one colour table" and that
+  was wrong, in the same hour it was written.** It transferred the *alignment* and nothing else: the
+  pan is drawn in **plan view**, looking straight down with both handles splayed in the picture
+  plane, so a correctly aligned angled interior fights the object around it. And `potFace()` carries
+  the pot's own DEPTH as a hardcoded constant, so even a perfectly placed opening puts a pot's inner
+  wall inside a shallow pan. **Repainting can fix a dish's contents. It cannot fix a vessel's camera.**
 - **Kimbap** — **no borrowed dish at all.** The nearest icon is nigiri and nigiri is not kimbap, so
   the room is borrowed and the dish is ours. That is the hybrid demonstrated rather than argued.
 
 **Also added and ours, not borrowed:** wood grain on the counter, steam rising from the pot (the
 layering idea standing still), one warm key across the whole scene so borrowed objects and our room
 share a light, seeded grain, and a frame.
+
+## What the engineering review found, 2026-09-15 — and what it means for this folder
+
+A design review of the approach (not the pictures) returned five things worth recording, because
+three of them are about this repository's own habits rather than about art:
+
+1. **A commit message described a probe that was not in the repository.** It said the opening table
+   "is written by a probe… nobody types a constant" — the probe was in a scratch directory and only
+   the table shipped, so adding a dish meant hand-typing a row, which is typing a constant one
+   indirection further from the thing it measures. **`measure-openings.js` now ships**, its predicates
+   are code rather than prose, and it stamps the icon-set version it measured against.
+2. **A probe can produce a stable, confident, WRONG number.** The first run measured `steaming-bowl`
+   at centre (0.6465, 0.2754) — which is the chopsticks and the noodle tangle *above* the bowl, not
+   the bowl's opening. It sat in the table looking exactly as trustworthy as the two correct rows.
+   **Automating a measurement without looking at it does not remove the guess; it launders it.**
+   The probe now draws every row onto its own icon (`openings-contact-sheet.png`) and flags any row
+   whose aspect ratio says it found the wrong thing — that row's aspect was 1.35 against 1.04 and
+   1.03 for the good ones, and nothing was reading it.
+3. **The obvious machine check passes the broken picture.** A coverage test — "how much of the icon's
+   own contents does the repaint cover" — scores the picture the owner called broken at **99.5%**.
+   Any sane threshold passes it. There is no honest automatic check for "does this look broken"; the
+   instrument is a person looking, and the contact sheet is built for a person, which is why it is
+   named as one and not called a test.
+4. **`potFace()` is the pot's portrait wearing a colour table.** Its liquid sits at 0.30 of the radius
+   below centre — that number *is* how deep the pot is — and its clip is circular. Keep it and it
+   must take the icon rather than its numbers, so the bug cannot be written; or rename it for the one
+   object it actually draws.
+5. **Three icons, three cameras.** Fluent Emoji has no house camera: the pot is three-quarter, the pan
+   is plan view, the bowl is near front-on. So "does this icon's camera match our stage" is a coin
+   flip per icon, and the one page that works won its coin. **There is no fix for that inside the
+   repaint, and none in the icon set.**
+
+**The recommendation, taken:** stop investing in repainting borrowed art. Choose icons whose camera
+is already ours, and where none is, draw the dish ourselves — which is what the kimbap page already
+does, and the kimbap page is the only one whose dish *is* the dish on its label. Measured against
+`bookpages.js`, the shared light model is ~190 lines already written and **a dish is about twenty**.
+A dozen dishes is ~240 more lines on a model that holds one camera by construction, against a fresh
+negotiation with a stranger's drawing for every object, renegotiated on every set update.
