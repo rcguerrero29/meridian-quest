@@ -1069,7 +1069,10 @@ coverage (2,709 products) stays too thin to lean on, exactly as written.
 
 ### 14.3 · What it does NOT change, checked
 
-- **The look.** §4 already carries the Korean row — onggi brown `#6B4A33` with a stainless band
+- **The look.** *(Corrected 2026-09-15 by Pili, and the correction is on this section: it cited §4's
+  palette approvingly on the day the Korean kitchen became the first kitchen, and **§13.2 had already
+  superseded §4's numbers** — two different browns are both called onggi, 39.4 luma apart. §19 settles
+  it: both, with their jobs written beside them.)* §4 carries the Korean row — onggi brown `#6B4A33` with a stainless band
   `#B9BCC0`, stainless bowl and white porcelain, gochugaru `#B44A21` as the one accent, and Pili's
   note that stainless is the un-clichéd Korean note no other kitchen has. Pivoting costs nothing here;
   it promotes a palette that was already drawn.
@@ -1446,3 +1449,125 @@ expensive to guess. None of them blocks the one thing §17.4 says to do first.*
 her.** Three plates, three lines in her voice, no engine and no pack. It is the cheapest real gate in
 this document and it tests the one thing nothing else can: whether a book that fills up is enough to
 keep her opening it, now that the merge board is not what she asked for.
+
+---
+
+## 19 · Pili on why the art does not read — 2026-09-15
+
+*The owner: "the art was still off", and before that "aj cant tell what those things are, we need more
+details please." This is the answer to that sentence. Her return had no shell, so **every luma below
+was hand-computed and then re-run by the session in a script — all of them correct to a tenth**, and
+one of them turned out to be about code shipped this same day (16½ below).*
+
+### 19.1 · The ranked three, if there is only time for three
+
+1. **The making surface — it does not exist.** AJ chose it; it is the centre of the game; and the pack
+   has **thirteen pictures of paperwork and none of the thing she said she wants to do.**
+2. **The four dish thumbnails.** This is literally *"AJ can't tell what those things are"*: they are
+   **16×16 pixels** drawn at ×4. Sixteen rows to say *doenjang-jjigae*.
+3. **The plate** — the flagship picture, and it has **three cameras in one frame**. Fixing it sets the
+   one camera the making surface and the book page both inherit, so it is three pictures' worth of
+   decision in one. **And the book page is not a fourth job: the plate picture IS the photo in the book.**
+
+### 19.2 · What is actually wrong, in numbers
+
+| | Measured | Verified |
+|---|---|---|
+| The **first kitchen's own dish** is a hole in the page: the jjigae vessel `#1E1A17` on the night paper `#1C1A22` | **Δ0.7 of 255** | ✅ |
+| **White rice in a white bowl on cream paper** — porcelain `#F4F1EA` vs the cream reader `#F7F2E4` | **Δ0.8** | ✅ — *this is the sugar-skull fault repeating: `#F6F2E8` on `#F7F2E2` cost five fixes and ended with him drawing arrows on a screenshot* |
+| **Gochugaru, named in §4 as "the one accent", against either onggi** — while §12.3f's own rule asks for ≥90 | **Δ19.8 and Δ19.6** — it misses by about seventy | ✅ |
+| The night **accent** `#A97FFF` against the night **muted** `#9C96AB` — *press this* vs *never mind* | **Δ0.0** | ✅ |
+| The map mock's **next** `#E0662B` against its **done** `#8A8474` | **Δ0.2** | ✅ |
+| **And the one that was about today's code:** the shipped map marks, work `#E0662B` vs host `#E0A430` | **Δ37, under the floor of 40** | ✅ — **re-cut the same hour to `#E8B94A` (186.4): Δ54.6 from work, Δ46.7 from the paper** |
+
+**The rule underneath all of it: subtract the surface first, every time.** On cream you have 241.9 to
+work downward from; on night, 27.5 upward. That is not one palette, and the pack has been treating it
+as one — the four kitchen grounds were laddered ≥40 apart against **night** and that same ladder puts
+Japanese hinoki **Δ34.8 from the cream paper**.
+
+### 19.3 · The floors that answer "she can't tell what things are"
+
+- **A mass must be ≥48 CSS px to be seen and ≥64 to be named cold.** The drawers' tallest is 48.
+- **A 16-px source grid buys you a vessel and nothing inside it. Go to 24×24 at ×4 = 96 CSS px**, which
+  is where a rim, a lid, a handle and one garnish can all exist at once.
+- **Never more than four masses in one picture at 390** — three is the number you want, with a 2:1 size
+  ladder between neighbours. The plate currently carries six objects and a ground.
+- **In landscape, one row, always.** Portrait is a width problem; landscape is a height problem — the
+  art canvas is ~322 px wide at 390, and at 844×390 you can see **207 px of height**, which is how
+  *See the board* ended up rendered as **a decorative violet horizontal rule**.
+- **A drawer is never a rectangle** — it reads when it is *pulled out*, and then the only place a jar
+  may sit is **inside** it. Nothing on top of a closed drawer, ever.
+- **A dish is a vessel plus a rim plus one thing breaking the rim.** The rim (≥60 from the body) is
+  what makes it a bowl and not a lump; the thing breaking it is what makes it food and not a pot.
+- **Steam does not draw at any size here** — use a lid, tilted, resting half-off.
+- **A single named ingredient does not draw at 390.** A carrot, a pepper and an apple at 24 px are
+  three coloured lumps: draw the container and put the word in type.
+- **No word is ever painted into a drawing** — and there is a code reason on top of the craft one:
+  `docMarkdown` has no `art` branch at all, so **every "Drawing:" caption in all thirteen pictures
+  vanishes from Copy and Download.** Anything a picture is the only carrier of must also exist as a
+  `kv` row or a `p`.
+- **A placeholder is a box in the right material at the right size with nothing on it.** Never a
+  photograph, never a *finished* drawing of the wrong thing — *which is what the current plate is, and
+  why he said the art was off rather than unfinished* — and never an emoji, because a borrowed emoji
+  out-draws every real thing beside it. **Never more than one placeholder per picture:** one unfinished
+  object among three reads as unfinished; three read as broken.
+
+### 19.4 · The Korean palette in practice, and the collision resolved
+
+**The contradiction, reported not absorbed:** §4 says onggi `#6B4A33` (81.2) with gochugaru as the one
+accent; §13.2's re-cut says onggi `#977150` (120.6) with stainless as the accent and gochugaru demoted;
+the drawn code follows §13.2; **and §14.3 — written yesterday, the newest section in the file — cites
+§4 approvingly.** Two browns 39.4 apart are both called onggi.
+
+**Settled here: both, with their jobs written beside them.** `#977150` is the **rung** — the 6-px
+stripe on a card, where it has to sit in a four-way ladder. `#6B4A33` is the **room** — the kitchen's
+own ground. And:
+
+> **Gochugaru may never touch the onggi.** It is a mark on **metal** (Δ86.6 against stainless) or a
+> mark on **the page** (Δ140.9 on cream), never a mark on the pot. The Korean kitchen's real structure
+> is **onggi 81.2 against stainless 187.6 — Δ106.4** — which is the un-clichéd note doing structural
+> work instead of decoration, and it fixes the black-brick problem in one stroke.
+
+**One rule that solves the lightbox and the sunken slab together:** the food picture's frame comes not
+from the kitchen's ground but from its **accent** — a 6-px stainless border. On night that is an edge
+at Δ160 from the paper; on cream, Δ54. One rule, both papers, every kitchen.
+
+**And a chrome rule that is not negotiable:** since the night accent and the night muted are Δ0.0
+apart, *press this* and *never mind* can only ever be told apart by **kind** — the accent is a **fill**,
+the muted is **letters**, and there is **one violet fill on screen at a time**. The drawer screen has
+two; the recipe screen has two side by side, one of which is a bare ✕.
+
+### 19.5 · The screens that must exist, and two to delete
+
+**The making surface**, and it settles the camera for everything: *where your own eyes are when you
+stand at a counter* — you see the top of the board **and** the front of the pot. Not overhead (every
+vessel becomes an identical circle), not three-quarter (you lose what is inside, which is the only
+thing you care about). **One camera for the making surface, the plate and the book's photo.** Trays
+across the top, board in the middle 60%, **nothing at the bottom, where her thumb rests** — and that
+layout never changes between gestures or dishes, which is what lets a thumb learn one place.
+The gesture mark is **one vocabulary with seven paths**, a dotted path with an open circle at the
+start and an arrowhead at the end, animating once and then sitting at 40% — never blinking, never
+pulsing, never red. **The acknowledgement is the tray emptying**: physical, non-evaluative, readable
+at thumbnail size. It must never show a timer, a ring that fills, a bar, *Perfect/Good/Miss*, a score,
+a star, a heart, a streak, a customer, a red flash, or an undo that implies she did it wrong.
+
+**The book page**, in this order: the plate she actually made · the dish name · **the private mark as
+a corner fold, not stars** — one, two or three folds, physical, hers, with a silhouette you could see
+from the edge of a stack and **which nobody could read as a score** · her line about how it went · the
+recipe as handed to her · Copy and Download. **Which means killing the turned corner on the shifts
+card** (invisible anyway at Δ17.6) — one mark, one meaning, a rule that has already cost this project
+once. The book must never show a count, a percentage, a grid of empty slots, a lock, **or a date** —
+*a date on a book page is a streak with better manners*.
+
+**The one person you feed: you never see a face, you see the second plate.** When the dish is done the
+board's right-hand end holds **two vessels instead of one**. That is the entire cast of this world, it
+costs one drawing, and it says the warmest thing in the game without a word.
+
+**Two screens to delete rather than improve:** the week strip (retired by §12.3b) and the badge mock
+(drawn to be refused, and §15.3 has refused it). Leaving them on the review page means he is looking
+at pictures of things we promised not to build while telling us the art is off.
+
+### 19.6 · What nobody has done yet
+
+**No cold read has been done on any of this art, by anyone.** Somebody with no context has to be shown
+the four dishes and asked to name them. **Pili expects three failures.**

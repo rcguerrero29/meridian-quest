@@ -4772,7 +4772,10 @@ function worldFlags(){
    would not be the same game for both packs. */
 const MARKS={
   work:{c:"#E0662B",sh:"disc"},    /* somebody here has work for you — the street's own ❗, on the plan */
-  host:{c:"#E0A430",sh:"diamond"}, /* the host of this room still has a question for you */
+  host:{c:"#E8B94A",sh:"diamond"}, /* the host of this room still has a question for you.
+    #E0A430 shipped first and was wrong by this project's own floor: luma 168.7 against work's 131.8
+    is Δ37, under 40, so in greyscale the two marks leaned on their shapes alone. #E8B94A is 186.4 —
+    Δ54.6 from work and Δ46.7 from the plan's own paper, clear both ways (Pili's rule, measured). */
   read:{c:"#F2E6C6",sh:"card"}     /* something to read — the cream card the rooms already draw */
 };
 const markKinds=()=>((typeof MAPMARK!=="undefined"&&Array.isArray(MAPMARK))?MAPMARK:[]).filter(k=>MARKS[k]);
