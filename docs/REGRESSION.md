@@ -80,6 +80,26 @@ trying to close a real hole, and every one looked correct on the page.*
 | 22 | **`test/leaves.js`'s ledger check, first draft** (2026-09-13) | are the rows it has **sound** — paths real, reviewers real, dated | **does every edge have a row** — delete the row for the file that holds the owner's key and it printed OK; add a script that POSTs to `api.github.com` with a bearer and it printed OK. `docs/BOUNDARY.md` called what it read *completeness*. `completeness()` derives three sets now (grep `function completeness`) | Melo; written up by Zeni, `docs/POSTMORTEM.md` §13b |
 | 23 | **the claim-mark pixel probe** (Lupe, 2026-09-13; a measurement, not a committed guard) | what pixels are in the canvas's **backing buffer** | **what a person sees on a screen** — the town boots to its creator with `#world` hidden, so `#vp` was `0 × 0`; the buffer is sized from constants and `draw()` fills it with no layout box, so twenty-eight rows returned real, correct, meaningless pixels and every one "passed" | a screenshot, three hours in |
 | 24 | **the wall's "one painter, one stretch" check** (`test/town.smoke.js`, 2026-09-13) | do the panels `murPainter` groups together sit in one bay | **is each person one bay** — both sides of its comparison are `murPainter`, so when that function named Doña Cuca "Cuca" and Don Güero "Don-guero" (an agent's `by` has no honorific, accent or hyphen) each got a second bay and the check was green; the first repair compared `by` to the whole of `who` and split "Melo Garduño" from "Melo" instead, and the first draft of the new guard compared whole names and missed that too. The key is a first name now (`murKey`), and a second guard folds every bay's *name* to one and insists no two agree | the calling session, three plants in a lab copy, 2026-09-14 |
+| 25 | **the icon probe's `suspect` flag** (`docs/mocks/2026-09-15-simmer-book/measure-openings.js`; a prompt, never a committed guard) | is the measured box **roughly circular** (`aspect>1.15 \|\| aspect<0.85`) | **is it an opening** — it fired on the one wrong row for the right reason by accident, and it will fire on every correct one too: that icon's camera is near front-on, so the bowl's TRUE mouth measures rx 0.371 against ry 0.086, an aspect near **4.3**. A flag that cannot tell a front-on vessel from a mismeasurement is a reason to *go and look*, which is exactly what it was written to be, and it is not a test — nothing may ever promote it to one. The machine check drafted beside it (how much of the opening the repaint covers) scores the picture the owner called **broken** at **99.5%**, so no threshold a sane person would pick rejects it | Beto, measuring the same icon in order to paint it |
+
+### The other half: four ways a guard fools its author without reading a proxy
+
+*Added 2026-09-15. Every row in the table above is a guard that asked one thing and meant another.
+These four asked the RIGHT question and still could not answer it, and all four were written in a
+single day by the session writing that day's entries — which is the register's own standing joke and
+also its point. They live as a pre-flight in `.claude/skills/guard/SKILL.md`, because this file is
+where a lesson goes to be true and a skill is where it goes to be READ.*
+
+| | It looked like | It actually was | Found by |
+|---|---|---|---|
+| **A** | a guard on the 3D marker's geometry | it baked the sprite with a lift and a scale **it had typed out itself**, so changing the numbers `engine3d.js` ships walked past it silently. Fixed by giving the call site a name (`"bake"`) instead of numbers, so there is one place the geometry exists | planting the shipped constant |
+| **B** | a guard on where the street bearing lands | `Infinity%` for three directions and **silence** on the fourth: the viewport was `0×0` behind the character panel, and `0/0` is `NaN`, and every comparison against `NaN` is false. The direction that looked fine was the one dividing nothing by nothing | its own first run |
+| **C** | a guard on the quest marker | it read `Date.now()` through a bobbing mark, so it tested one phase of an animation and called it the drawing — green, then red with "3 pixels" on the next run. Stubbed across eight phases now | running it twice |
+| **D** | a clip test | it asked *"does the mark touch row 0 of the sprite"*, and the top row is there to be used: it failed good art and would have passed a mark wanting to paint five rows higher. Draw onto a surface with forty rows of extra sky and count what lands above the real top | a plant it should have caught |
+
+**B is the one to keep.** It is `#11½`'s shape in a single expression: the check did not fail, it
+**evaporated**, and the one case that looked healthiest was the emptiest. Nothing to measure is not
+a pass.
 
 **#11 is the one to read twice.** It is the guard for the rule `CLAUDE.md` states in its own words —
 *bump `GAMEV` and `CACHE` together whenever `engine/` changes* — and it could not see an unbumped
@@ -90,8 +110,8 @@ has shipped since it was written.
 **#12 was written by the session writing the entry for #11, one hour later. #13 and #13½ were written
 by the same session, in the same hour, in the guard FOR the bug it was fixing — and #13½ happened
 TWICE, two different clever checks, both correct about the scene graph and both green against the
-real fault.** That is now five times in one session — **and twenty-three rows in the table above**, a
-number the prose is kept level with on purpose (Lupe, 2026-09-13) — and the count is the point:
+real fault.** That is now five times in one session — **and twenty-five rows in the table above**, a
+number the prose is kept level with on purpose (Lupe, 2026-09-13; #24 on 2026-09-14, #25 on 2026-09-15) — and the count is the point:
 knowing about the mistake, writing the register entry for the mistake, and making the mistake are not
 mutually exclusive activities.
 

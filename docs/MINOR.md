@@ -76,7 +76,16 @@ fixes the spawn half for free, and a second pack inherits it. **Red-first is alr
    the crate and the counter and **wrong for the fourth**: the ❗ is `ctx.fillText` at three engine
    sites behind no seam, it bumps, it changes what both games draw over every person's head, and it is
    the one object this repo records as meaning one thing forever. **Split the ticket; the ❗ needs his word.**
-4. **Pages → Settings → Source** — still thirty seconds, still the most expensive unread line in the project.
+4. ~~**Pages → Settings → Source**~~ — **done, and it was done five days ago.** Closed 2026-09-15 by
+   asking the API instead of asking him again: GitHub's own `pages-build-deployment` last ran
+   **2026-09-10** (run #158) and has been silent through every merge since, while `pages.yml`'s own
+   `actions/deploy-pages@v4` step **ran and succeeded** on the #202 merge at 08:09:43Z — and that step
+   only takes when Source is "GitHub Actions". The allowlist is what serves the site; `/changarrito/`,
+   `/docs/` and `/test/` are no longer published. **The line was unread, not undone.** What the round
+   then found is the more interesting half: the two `continue-on-error: true` that let the job stay
+   green while the switch was unmade had quietly become a silent zero, so a failed deploy would have
+   left CI green and a stale site, and a Source switched back to a branch would have skipped the
+   deploy through an `if:` without a word. Both came off.
 
 ## 6 · What the lanes did not check
 

@@ -526,6 +526,107 @@ words untouched. Two blocks came unfenced (Beto's, Chava's) and one carried a st
 paint script learned to read them. The return-visit check passed on all eight; the two-bays check folded
 twenty-one names to twenty-one people; the ledger gained eight lines by the guard's own recipe.
 
+## Iteration 10 — 2026-09-15, "i hope they finally arent just banners"
+
+The owner looked at fifty-six panels and said they were banners. **He was measurable and he was
+right:** 43 of the 56 declared `aspect:0.46` and the palette was near-universally `MURPAL`, so the
+wall was a row of the same rectangle in the same five pigments, however hard anyone had worked
+inside one. Two rules went out with the brief, and a third came back from the painters.
+
+1. **Your own material, named at the top of `art` as a `MATERIAL:` comment.** Not the limewash.
+2. **A shape that is not the wall's.** Not 0.46.
+3. **Shorter, never taller** — Pili read `murWall` and found the brief's rule 1 was wrong.
+
+### The clip is exactly 0.46, and it is a hard edge — Chema's table
+
+`murWall` gives each panel a box `MURBAY` wide by `MURBAY*0.46` tall and clips to it, then draws the
+panel at `MURREF × MURREF*aspect` scaled by `MURBAY/MURREF`. So anything over `aspect 0.46` loses
+**`(a−0.46)/a`** of its own height, from the feet up. Measured with a probe panel (whole canvas
+magenta, bottom fifth cyan) pushed onto the real `MURALS` and rendered through the real `murWall`:
+
+| aspect | bottom fifth arrives | lost |
+|---|---|---|
+| 0.34 | whole | — |
+| 0.46 | whole | — |
+| **0.52** | **partly cut** | 11.5% |
+| 0.58 | **0 px** | 20.7% |
+| 0.95 | **0 px** | 51.6% |
+| 1.20 | **0 px** | 61.7% |
+
+**0.52 is not safe either** — it is quietly clipped, just not enough for a bottom-fifth probe to
+return zero, which is the shape of every proxy in `docs/REGRESSION.md`. And **0.95 and 1.20 render
+byte-identically on the wall** (magenta 29,835 px both): past the cut, asking for a taller panel
+changes nothing at all. `bleed:0.28` does extend the box to 0.5888 and a 0.58 panel then lands
+whole — but it is bought, not free: the panel paints into the `MURSTATE` strip and the state line is
+drawn *on top of it*, and it eats ~18 units off the top of the painter's own previous visit. Nobody
+this round took it. **A taller panel is not a panel, it is a change to `murWall`.**
+
+### What landed
+
+Each panel was **rendered and looked at** before it was committed — at reading width and in its own
+255-pixel bay — and each was painted twice and diffed: `drift 0` on all of them, so no panel on this
+wall is drawing itself differently each time.
+
+- **Pili (5th), `pili-tres-sombras-sin-cuerpo`** — cut paper under an inspection lamp pulled down
+  until the beam grazes the board, 0.34, every object in the hex it was actually measured at. Three
+  things the Simmer plan put on a page that were not on the page: a jjigae at Δ0.7 of 255 from its
+  own night paper, white rice in a white bowl at Δ0.8, gochugaru at Δ19.8 in a document whose own
+  rule four sections earlier asks for 90. Her point is that she had already written that check down
+  and it stopped none of them: **the lamp is the instrument, the sentence in the file is not.**
+- **Beto (7th), `beto-el-anillo-en-los-palillos`** — lampblack on an indicator card scratched
+  through with a steel stylus, 0.38. The probe he shipped measured the chopsticks and the noodles
+  and called them the bowl's mouth, and printed the row as confidently as the two it got right. The
+  false ring is the cleanest curve on the card and it is 1.35 wide to one tall, which was the tell
+  nothing was reading. A signalman stands on the rim it never touched and waves it through.
+- **Chema (3rd), `chema-la-calca-en-la-mesa`** — a tungsten studio sweep, 0.34, painted in the light
+  model's own palette instead of the wall's: warm on the way up, cool on the way down, shadows
+  brown-violet and never black. Two vessels that obey the light and one die-cut vinyl decal that
+  does not, with one corner lifted. His measurement of the mocks that started it: two rice bowls
+  whose front walls read −5.8 and +6.0 left-to-right — **exact mirrors of each other** — and a pot
+  at 0.0 across its whole width, with not one pixel of contact or cast shadow in the frame. That is
+  not light from somewhere, it is an outline, and an outline is identical down both sides because
+  an outline always is.
+- **Chava (4th), `chava-la-cena-vino-sellada`** — a shoebox diorama, 0.33, two palettes on purpose:
+  the room is corrugated kraft, pencil, PVA and masking tape under one lamp, and the food arrives in
+  vacuum-formed blisters heat-sealed to printed card and hung on steel hooks driven through the back
+  wall. All three packs cast **the same shadow at the same offset**, and the shadow inside each pack
+  came *printed on*. He built the room by hand — ruled tiles, a taped seam, glue squeezed out of the
+  joint, a bowl cut from the same box and empty, his pencil put down with the shavings — and the
+  person is not in it: the only part of him that gets in is his own shadow, reaching in from where
+  the lamp is for the first pack, across tiles he ruled himself. It is his cold read of her three
+  book pages drawn instead of written: *"every fault I found was an object somebody put in the room.
+  Nobody put a foot wrong on the room."*
+
+### Two things the round found in the wall itself, and both are fixed
+
+Painters kept measuring the wall instead of only painting on it, and it turned out to be cutting
+things nobody had noticed.
+
+**1. `aspect` was a promise the wall did not keep.** A panel was drawn at `MURBAY*aspect` inside a box
+`MURBAY*0.46` tall, so anything taller lost `(a−0.46)/a` of itself **from the feet up, on the wall
+only** — whole in the reader, so the painter never saw it. Two panels already on the wall were losing
+**4.2%** (`guero-tres-carriles`, 0.48) and **8.0%** (`yaz-diez-focos-verdes`, 0.50) and nothing said
+so. `murWall` now fits a panel to its bay and centres the slack (`sc = min(MURBAY/MURREF,
+ph/(MURREF*a))`), which costs a 0.46 panel exactly nothing — the `min` picks the number it always
+picked — and costs a tall panel a little width instead of its feet.
+
+**2. Three quarters of the state strip was being eaten.** The state is the thing the owner asked for
+by name on 2026-09-12 (*"more about the persona 'state'"*), and on 2026-09-15 somebody measured it
+for the first time: at `italic 9px` in the 244 points a bay leaves, **76 of the 94 lines ran off the
+end**, and only **9 panels fitted in both languages**. It stopped mid-word with no mark, so the wall
+was quietly finishing other people's sentences. Wrapping all of it is not the answer — the longest
+needs seven lines, and seven lines of 9px type under every picture is a wall of text, which is the
+opposite of a mural. **The whole sentence already lives in the reader** (`docs.js` builds a `State`
+row from the same string), so the strip is a caption that now admits it is one: two lines, and an
+ellipsis when it had to stop. **48 whole, 46 shortened, 46 of 46 marked, 0 running off the end.**
+
+**Both are guarded, and both guards were red before the fix.** The first asks with a probe rather
+than arithmetic — push a real panel of `aspect:1.20` whose bottom fifth is a colour nothing else uses,
+render the real wall, count that colour; recomputing what `murWall` computes would be a copy of the
+code and would go green the day both copies are wrong (`docs/REGRESSION.md` #3). Planted three ways
+in a copy outside the repository — the fit reverted, the ellipsis suppressed, a third line asked of a
+26-point strip — and each printed the sentence a person would actually say.
+
 ## Coming back — how a return visit works, and the rule against stamps
 
 *Owner, 2026-09-12: "just to understand when an agent goes back to the mural, they'll add space for

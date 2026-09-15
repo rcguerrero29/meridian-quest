@@ -768,8 +768,7 @@ function drawIso(){
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
   w.npcs.forEach(n=>bill(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(bx,by)=>{
     drawPerson(ctx,bx,by,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
-    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
-      ctx.fillText("❗",bx+16,by+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
+    if(hasSay(n))drawSayMark(ctx,bx,by);
     drawEmote(n,bx,by);}));
   if(world===AW("dog"))bill(DOG.fx,DOG.fy,(bx,by)=>drawDog(ctx,bx,by));
   if(world===AW("cat"))bill(CAT.fx,CAT.fy,(bx,by)=>drawCat(ctx,bx,by));
@@ -1959,8 +1958,7 @@ function drawFront(){
     if(sx<-TS||sy<-TS-16||sx>VW||sy>VH)return;R.push({d:gy+0.55,f:()=>fn(sx,sy)});};
   w.npcs.forEach(n=>act(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(sx,sy)=>{
     drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
-    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
-      ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
+    if(hasSay(n))drawSayMark(ctx,sx,sy);
     drawEmote(n,sx,sy);}));
   PEERS.forEach(p=>{if(p.w!==world)return;
     act(p.x,p.y,(sx,sy)=>{drawPerson(ctx,sx,sy,p.look||look,{dir:p.dir||"down",who:p.id||p.name||"peer"});
@@ -2051,8 +2049,7 @@ function draw(){
     const sx=(n.fx===undefined?n.x:n.fx)*TS-camX,sy=(n.fy===undefined?n.y:n.fy)*TS-camY;
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)return;
     drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
-    if(hasSay(n)){ctx.font="700 13px sans-serif";ctx.fillStyle="#E0B45C";ctx.textAlign="center";
-      ctx.fillText("❗",sx+16,sy+2+Math.sin(Date.now()/250)*2);ctx.textAlign="start";}
+    if(hasSay(n))drawSayMark(ctx,sx,sy);
     drawEmote(n,sx,sy);
   });
   PEERS.forEach(p=>{
@@ -3288,6 +3285,9 @@ function loop(ts){
      double-schedule and nothing reorders. Measured identical frame rates before and after. */
   requestAnimationFrame(loop);
   const dt=Math.min(50,ts-last);last=ts;
+  /* the street bearing follows the camera's own swing, so it is a frame job, not an event job.
+     It writes to the DOM only when the pill actually moved — see bearingUI. */
+  if(typeof bearingUI==="function")bearingUI();
   if(moving){
     mt+=dt/240;bob+=dt/70;
     if(mt>=1){moving=false;fx=px;fy=py;petalDrop(world,px,py,HEROFEET);
@@ -3516,6 +3516,65 @@ const readAt=(x,y)=>RD().find(r=>r.world===world&&r.x===x&&r.y===y&&DC()[r.doc])
 function readMarks(){const out=[];
   RD().forEach(r=>{if(r.world===world&&DC()[r.doc])out.push(r);});
   return out;}
+/* ---- THE QUEST MARKER. ONE PAINTER, THREE CAMERAS. ----
+   It was `ctx.fillText("❗",x+16,y+2+bob)` written out three times (the iso bill pass, the front
+   pass and the top pass), and docs/BEAUTIFY.md's audit called what it drew "a solid red bar through
+   the top of the skull". Both halves of that sentence were a bug and the second one is the
+   interesting one:
+
+   · THROUGH THE SKULL, because the baseline was `y+2` — the head's own row. drawReadMark, written
+     later for the same job, sits at `y-6`. The marker was eight pixels lower than the mark the
+     engine already knew how to place.
+   · RED, although the line above it says `fillStyle="#E0B45C"`. "❗" is a COLOUR EMOJI: the font
+     paints its own palette and fillStyle is ignored entirely, so the amber this engine has asked
+     for since the day the marker was written has never once reached a screen. It also means the
+     marker is a different picture on every platform — Apple's, Google's, Microsoft's and this
+     Linux build's are four different drawings — and the one object docs/STORY.md records as
+     meaning one thing forever was being drawn by whatever font the device happened to have.
+
+   So it is geometry now, in this engine's own hand: a balloon over the head with a tail pointing
+   down at the person, and the "!" built out of two rectangles rather than a glyph. Same meaning,
+   same amber the code always named, same bob — and the same picture on every device.
+   BOTH GAMES GET IT and neither changes what it MEANS: hasSay() is untouched, the world tag's
+   "· ❗" is untouched, and every guard that reads those still reads them. */
+/* `lift` and `k` exist for ONE caller: the 3D bake draws its people into a 36x48 sprite with six
+   pixels of headroom (engine3d.js:741, "#57"), so the balloon the flat cameras hang nine pixels
+   above a head would be cut off at the top of the sprite and arrive on the wall of the scene as a
+   clipped rectangle. Same drawing, smaller and closer, rather than a second drawing — the mural's
+   own lesson from the same day: one painter, two surfaces. */
+/* THE GEOMETRY IS NOT FREE-HAND. The tail must stop AT the crown and never reach into a face (that
+   is the whole complaint), and in the 3D bake the top must stay inside six pixels of headroom. Both
+   are true at the ends of the bob, not just at rest, which is what the first numbers got wrong:
+     top of the keyline, highest bob:  by - lift - 1.6k - 1.5k  >=  by - 14   (3D headroom)
+     tip of the tail,   lowest  bob:   by - lift + 1.6k + 17k   <=  by        (clear of the person)
+   which is lift >= 18.6k and lift <= 14 - 3.1k, so k <= 0.645 in the bake. 0.60 with lift 11.7 sits
+   inside both with room; the flat cameras have no ceiling, so they take k 1 and lift 19.
+   Guarded in test/engine.smoke.js against BOTH settings, at eight phases of the bob.
+   THE TWO NUMBERS LIVE HERE, not at the call site, and that is a guard decision. The first version
+   took `lift` and `k` as arguments and engine3d.js passed literals — so the check in the suite was
+   testing a pair of numbers it had typed out itself, and a plant that changed the ones the engine
+   actually ships went straight past it, silently. The bake asks for "bake" and the painter looks up
+   what that means, so there is exactly one place the geometry exists and the guard reads it. */
+const SAYBAKE={lift:11.7,k:0.60};   /* what fits the 36×48 actor sprite, derived above */
+function drawSayMark(g,bx,by,mode){
+  const bake=mode==="bake",k=bake?SAYBAKE.k:1,lift=bake?SAYBAKE.lift:19;
+  const bob=Math.sin(Date.now()/250)*1.6*k, cx=bx+16, w=13*k, h=11*k, x=cx-w/2, y=by-lift+bob;
+  g.save();
+  const B=1.5*k;
+  g.fillStyle="rgba(20,16,28,.22)";                       /* it sits over the head, so it shades it */
+  g.beginPath();g.ellipse(cx,by+3*k,5.5*k,1.8*k,0,0,7);g.fill();
+  g.fillStyle="#2B2536";                                  /* the keyline, so it reads on any wall */
+  g.beginPath();g.moveTo(x-B,y-B);g.lineTo(x+w+B,y-B);g.lineTo(x+w+B,y+h+B);
+  g.lineTo(cx+3.5*k,y+h+B);g.lineTo(cx-0.5*k,y+h+6*k);g.lineTo(cx-2.5*k,y+h+B);
+  g.lineTo(x-B,y+h+B);g.closePath();g.fill();
+  g.fillStyle="#E0B45C";                                  /* the amber the code has always named */
+  g.beginPath();g.moveTo(x,y);g.lineTo(x+w,y);g.lineTo(x+w,y+h);
+  g.lineTo(cx+2.5*k,y+h);g.lineTo(cx-0.5*k,y+h+3.6*k);g.lineTo(cx-1.5*k,y+h);
+  g.lineTo(x,y+h);g.closePath();g.fill();
+  g.fillStyle="rgba(255,246,220,.42)";g.fillRect(x,y,w,1.6*k);      /* key light, upper-left */
+  g.fillStyle="#2B2536";                                  /* the mark itself: a bar and a dot */
+  g.fillRect(cx-1.2*k,y+2.2*k,2.4*k,5.2*k);g.fillRect(cx-1.2*k,y+8.4*k,2.4*k,2.2*k);
+  g.restore();}
 function drawReadMark(g,bx,by,up){ /* a cream card that BREATHES — never the bouncing ❗ */
   const b=0.85+Math.sin(Date.now()/620)*0.15,w=13,h=10,x=bx+16-w/2,y=by-6-(up|0);
   g.save();g.globalAlpha=b;
@@ -4804,6 +4863,11 @@ function planMarks(){
 function drawMark(g,cx,cy,k,r){ /* ONE painter, two surfaces: the plan and its own legend, so a
                                    swatch can never drift from the mark it explains */
   const m=MARKS[k];if(!m)return;
+  /* IT SITS ON THE PAPER. A shape with no shadow at this size is a stain on the map; one soft
+     ellipse under it and it is a pin somebody put there — the cheapest thing in the whole light
+     model and the one that does the most (docs/BEAUTIFY.md, 2026-09-15). */
+  g.save();g.fillStyle="rgba(58,44,20,.26)";
+  g.beginPath();g.ellipse(cx+r*0.16,cy+r*0.62,r*0.92,r*0.38,0,0,7);g.fill();g.restore();
   g.save();g.strokeStyle="#2B2536";g.lineWidth=1.5;g.fillStyle=m.c;
   if(m.sh==="disc"){g.beginPath();g.arc(cx,cy,r,0,7);g.fill();g.stroke();
     g.fillStyle="#FFFFFF";g.fillRect(cx-r*0.17,cy-r*0.58,r*0.34,r*0.72);g.fillRect(cx-r*0.17,cy+r*0.34,r*0.34,r*0.3);}
@@ -4828,6 +4892,20 @@ function drawPlanMarks(g2,s){
 /* The legend is REAL TEXT under the plan, built here rather than in the shell so a pack gets it
    without touching its own index.html. The line it stands beside is drawn at 8 canvas pixels —
    about 7.5 CSS px on a phone — which is what "its hard to tell" measures like. */
+/* ---- THE LEGEND OPENS ITSELF ONCE, THEN GETS OUT OF THE WAY ----
+   Owner, 2026-09-15, choosing between three: the key is open the FIRST time you see the plan and
+   collapses to an `i` after that, and what you leave it as is what you get next time.
+   The reason that shape and not "always open" is the phone: the plan is already the tightest thing
+   in the game at 390px, and a key that is permanently three rows tall is three rows the map does
+   not have. The reason it is not "behind an `i` from the start" is his own sentence — "its hard to
+   tell unless you have a legend" — which is about the FIRST time, and a key you have to discover
+   is no key at all on the one occasion it was needed. */
+let legOpen=null;
+function legSeen(){
+  if(legOpen===null){let v=null;try{v=localStorage.getItem(SK("leg"));}catch(e){}
+    legOpen=(v===null)?true:(v==="1");}                 /* never seen it → it opens itself */
+  return legOpen;}
+function legSet(v){legOpen=!!v;try{localStorage.setItem(SK("leg"),v?"1":"0");}catch(e){}}
 function mapLegend(){
   const host=$("mapNote");if(!host||!markKinds().length)return; /* a pack that declares no kinds
     gets no legend and no element: the town's plan is the same object it was yesterday */
@@ -4835,10 +4913,30 @@ function mapLegend(){
   if(!box){box=document.createElement("div");box.id="mapLeg";
     box.style.cssText="display:flex;flex-wrap:wrap;gap:8px 14px;margin:8px 0 0;align-items:center;font-size:.8rem;";
     host.parentNode.insertBefore(box,host);}
-  const drawn=[],seen={};
-  planMarks().forEach(m=>{if(!seen[m.k]){seen[m.k]=1;drawn.push(m.k);}});
+  /* IN THE ORDER THE PACK DECLARED THEM, not the order they happen to stand on the street. The
+     first render read "has a question about this room" above "has work for you" because a host
+     happened to be nearer the top of the map that minute — so the key re-ordered itself between
+     openings, which is the one thing a key may never do. */
+  const seen={},K=markKinds();
+  planMarks().forEach(m=>{seen[m.k]=1;});
+  const drawn=K.filter(k=>seen[k]);
   const t=(T().plan||{});
   box.innerHTML="";box.hidden=!drawn.length;
+  if(!drawn.length)return;
+  const open=legSeen();
+  const tog=document.createElement("button");tog.id="mapLegTog";tog.type="button";
+  tog.textContent=open?"i\u00A0\u2715":"i";
+  tog.setAttribute("aria-expanded",open?"true":"false");
+  tog.setAttribute("aria-label",t.key||"key");
+  tog.style.cssText="flex:0 0 auto;min-width:26px;height:26px;border-radius:999px;cursor:pointer;"+
+    "border:1.5px solid var(--line,#C9C3B4);background:var(--bg,#F2F1EA);color:inherit;"+
+    "font:600 12px/1 ui-monospace,monospace;padding:0 7px;";
+  tog.addEventListener("click",()=>{legSet(!legSeen());mapLegend();});
+  box.appendChild(tog);
+  if(!open){                                            /* collapsed: the key is one button */
+    const hint=document.createElement("span");
+    hint.style.cssText="opacity:.62;font-size:.75rem;";
+    hint.textContent=t.key||"";box.appendChild(hint);return;}
   drawn.forEach(k=>{
     const row=document.createElement("span");row.setAttribute("data-kind",k);
     row.style.cssText="display:inline-flex;align-items:center;gap:6px;";
@@ -4866,28 +4964,136 @@ const BEARS=["↑","↗","→","↘","↓","↙","←","↖"];
 function destName(){
   if(!mapDest)return "";
   return (mapDest.who&&npcName(mapDest.who))||(T().locs||{})[mapDest.w]||"";}
+/* WHERE TO POINT, computed ONCE and read by both surfaces — the tag under the plan and the arrow
+   in the street. Two copies of this arithmetic is how one of them ends up pointing somewhere the
+   other does not, and the whole value of a bearing is that it does not lie. */
+function destAim(){
+  if(!mapDest)return null;
+  if(mapDest.w===world){
+    if(Math.abs(mapDest.x-px)<=1&&Math.abs(mapDest.y-py)<=1)return {mode:"here"};
+    return {mode:"go",tx:mapDest.x,ty:mapDest.y};}
+  let bd=1e9,tx=null,ty=null;
+  portalsOf(world).forEach(p=>{if(!p.p||p.p.to!==mapDest.w)return;
+    const dx=p.x-px,dy=p.y-py,d=dx*dx+dy*dy;if(d<bd){bd=d;tx=p.x;ty=p.y;}});
+  if(tx!==null)return {mode:"door",tx,ty};
+  /* no door on this world leads there, so it is a tram ride — and the tram STOP is a place you can
+     be pointed at. Pointing at nothing and saying "take the tram" is the answer that leaves you
+     standing where you were. */
+  const w=CW();let sd=1e9,sx2=null,sy2=null;
+  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
+    if(((TILES[w.rows[y][x]]||{}).kind)!=="transit")continue;
+    const dx=x-px,dy=y-py,d=dx*dx+dy*dy;if(d<sd){sd=d;sx2=x;sy2=y;}}
+  return sx2===null?{mode:"ride"}:{mode:"tram",tx:sx2,ty:sy2};}
+const aimAngle=a=>Math.atan2(a.tx-px,-(a.ty-py));   /* radians clockwise from world north */
 function destBearing(){
   if(!mapDest)return "";
-  const name=destName();
-  let tx=null,ty=null;
-  if(mapDest.w===world){tx=mapDest.x;ty=mapDest.y;}
-  else{let bd=1e9;portalsOf(world).forEach(p=>{if(!p.p||p.p.to!==mapDest.w)return;
-    const dx=p.x-px,dy=p.y-py,d=dx*dx+dy*dy;if(d<bd){bd=d;tx=p.x;ty=p.y;}});}
-  if(tx===null)return "  ·  🚋 "+name;
-  const dx=tx-px,dy=ty-py;
-  if(Math.abs(dx)<=1&&Math.abs(dy)<=1)return "  ·  ◉ "+name;
-  const i=((Math.round(Math.atan2(dx,-dy)/(Math.PI/4))%8)+8)%8;
+  const name=destName(),a=destAim();
+  if(!a)return "";
+  if(a.mode==="ride")return "  ·  🚋 "+name;
+  if(a.mode==="here")return "  ·  ◉ "+name;
+  const i=((Math.round(aimAngle(a)/(Math.PI/4))%8)+8)%8;
   return "  ·  "+BEARS[i]+" "+name;}
+/* ---- AND THE SAME BEARING IN THE STREET (owner, 2026-09-15: "bearing lets try 2") ----
+   He chose the option the crew advised against, and the crew's objection was about CORNER MINIMAPS
+   — a second screen you read instead of the place. This is one arrow on a destination YOU picked,
+   it exists only while you have picked one, and it is gone the moment you arrive.
+   IT IS DOM, NOT CANVAS, and that is the whole reason it works in all four cameras: the 3D view
+   renders to its own WebGL canvas, so anything painted into the 2D context is simply not there in
+   3D. A pill inside .viewport (which is already position:relative) sits over whichever canvas is
+   showing. The engine builds it, like mapLegend, so no pack edits its own index.html.
+   The arrowhead is a CSS triangle and not a glyph — today's lesson from the quest marker, which
+   spent its whole life being painted by the device's emoji font in a colour nobody chose. */
+let bearLast="",bearPos="";
+function bearingUI(){
+  const vp=$("vp");if(!vp)return;
+  let el=document.getElementById("bearNav");
+  const a=mapDest?destAim():null;
+  const show=!!a&&a.mode!=="here";
+  if(!show){if(el)el.hidden=true;bearLast="";return;}
+  if(!el){
+    el=document.createElement("div");el.id="bearNav";
+    el.style.cssText="position:absolute;z-index:4;display:flex;align-items:center;gap:6px;"+
+      "padding:4px 10px 4px 7px;border-radius:999px;background:rgba(20,16,28,.74);color:#F2F1EA;"+
+      "font:600 11px/1 ui-monospace,ui-monospace,monospace;pointer-events:none;white-space:nowrap;"+
+      "transform:translate(-50%,-50%);box-shadow:0 0 0 1.5px rgba(242,241,234,.22);";
+    const tip=document.createElement("i");tip.id="bearTip";
+    tip.style.cssText="display:block;width:0;height:0;border-left:5px solid transparent;"+
+      "border-right:5px solid transparent;border-bottom:9px solid #E0B45C;";
+    const lbl=document.createElement("span");lbl.id="bearLbl";
+    lbl.style.cssText="max-width:38vw;overflow:hidden;text-overflow:ellipsis;";
+    el.appendChild(tip);el.appendChild(lbl);vp.appendChild(el);}
+  el.hidden=false;
+  const name=destName();
+  if(a.mode==="ride"){                                  /* nowhere to point: say so and stop */
+    const key="ride|"+name;
+    if(key!==bearLast){bearLast=key;
+      document.getElementById("bearTip").style.display="none";
+      document.getElementById("bearLbl").textContent=((T().plan||{}).ride||"tram")+" · "+name;
+      el.style.left="50%";el.style.top="8%";}
+    return;}
+  document.getElementById("bearTip").style.display="block";
+  /* the world angle, turned into a SCREEN angle. In 3D the camera swings around the hero, so world
+     north is only screen-up at yaw 0 — an arrow that ignored that would point confidently at the
+     wrong wall three turns out of four. */
+  let th=aimAngle(a);
+  if(camMode==="3d"&&typeof T3!=="undefined"&&T3&&typeof T3.yaw==="number")th-=T3.yaw;
+  const sn=Math.sin(th),cs=-Math.cos(th);
+  const deg=Math.round(th*180/Math.PI);
+  const key=name+"|"+deg;
+  const VWp=vp.clientWidth||1,VHp=vp.clientHeight||1;
+  if(key!==bearLast){                                    /* the words only change when the place does */
+    document.getElementById("bearTip").style.transform="rotate("+deg+"deg)";
+    document.getElementById("bearLbl").textContent=name;}
+  /* PUT IT ON THE EDGE THE ARROW POINTS AT — then keep the whole pill inside the frame.
+     The first version placed the CENTRE on the edge with a flat percentage inset, and the first
+     look at it had "Floor 2 · Your office" hanging 66 px off the right of a 372 px viewport: a
+     pill's inset is its own half-width, which is not a constant, because the name is not. Measured
+     from the element, clamped in pixels, and the label is capped so a long name can never take the
+     screen: a bearing that covers the street is not a bearing. */
+  const halfW=(el.offsetWidth||90)/2+6,halfH=(el.offsetHeight||20)/2+6;
+  const tX=Math.abs(sn)<1e-6?1e9:(VWp/2-halfW)/Math.abs(sn),
+        tY=Math.abs(cs)<1e-6?1e9:(VHp/2-halfH)/Math.abs(cs);
+  const t=Math.max(0,Math.min(tX,tY));
+  const Lp=Math.max(halfW,Math.min(VWp-halfW,VWp/2+sn*t)),
+        Tq=Math.max(halfH,Math.min(VHp-halfH,VHp/2+cs*t));
+  const pos=Math.round(Lp)+"|"+Math.round(Tq);
+  if(key===bearLast&&pos===bearPos)return;               /* only touch the DOM when it moved */
+  bearLast=key;bearPos=pos;
+  el.style.left=Lp.toFixed(1)+"px";el.style.top=Tq.toFixed(1)+"px";}
 function destCheck(){ /* you arrived: the destination is spent, and nothing remembers it */
   if(mapDest&&mapDest.w===world&&Math.abs(px-mapDest.x)<=1&&Math.abs(py-mapDest.y)<=1)mapDest=null;
-  setWorldTag();}
+  setWorldTag();bearingUI();}
 function drawTown(){
   const mc=$("mapcv"),g2=mc.getContext("2d"),w=WORLDS[PL.street],s=10;
-  mc.width=w.W*s;mc.height=w.H*s+14;
-  g2.fillStyle="#EFE9DA";g2.fillRect(0,0,mc.width,mc.height);
+  mc.width=w.W*s;mc.height=w.H*s+18;
+  /* ---- THE PLAN IS A PIECE OF PAPER (2026-09-15) ----
+     It was one flat #EFE9DA fill with flat squares on it, which is a data visualisation of a
+     street and not a map of one — the same fault as every mock that day: the drawing was fine and
+     the SURFACE was never designed (docs/BEAUTIFY.md, "the surface carries the screen").
+     So: warm stock with a grain, two folds where a pocket map is folded, and a vignette, drawn
+     UNDER the tiles so the paper shows through the streets rather than sitting on top of them.
+     Every pixel of it is seeded, so the plan is the same plan every time it is opened. */
+  const PG=g2.createLinearGradient(0,0,mc.width*0.4,mc.height);
+  PG.addColorStop(0,"#F4EEDF");PG.addColorStop(0.55,"#EFE9DA");PG.addColorStop(1,"#E4DCC8");
+  g2.fillStyle=PG;g2.fillRect(0,0,mc.width,mc.height);
+  let ps=0x1F0A15;const prnd=()=>((ps=(ps*1103515245+12345)&0x7fffffff)/0x7fffffff);
+  for(let i=0;i<Math.round(mc.width*mc.height*0.02);i++){
+    g2.globalAlpha=0.03+prnd()*0.05;g2.fillStyle=prnd()<0.5?"#B6A883":"#FFFBF0";
+    g2.fillRect(Math.floor(prnd()*mc.width),Math.floor(prnd()*mc.height),1,1);}
+  g2.globalAlpha=1;
   const col={...BASECOL,...(typeof MAPCOL!=="undefined"?MAPCOL:{})};
   for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
     g2.fillStyle=col[w.rows[y][x]]||"#D5D2C6";g2.fillRect(x*s,y*s,s,s);}
+  /* the folds: a shade on one side of the crease and a highlight on the other, because a fold is
+     a ridge and a ridge has two sides. Over the tiles, since the paper is folded with the map on
+     it — this is the one mark on the plan that is not a thing in the city. */
+  [Math.round(mc.width/3),Math.round(mc.width*2/3)].forEach(fx2=>{
+    g2.fillStyle="rgba(96,80,46,.13)";g2.fillRect(fx2,0,1,w.H*s);
+    g2.fillStyle="rgba(255,250,235,.30)";g2.fillRect(fx2+1,0,1,w.H*s);});
+  const vg=g2.createRadialGradient(mc.width/2,w.H*s/2,Math.min(mc.width,w.H*s)*0.32,
+                                   mc.width/2,w.H*s/2,Math.max(mc.width,w.H*s)*0.62);
+  vg.addColorStop(0,"rgba(58,44,20,0)");vg.addColorStop(1,"rgba(58,44,20,.16)");
+  g2.fillStyle=vg;g2.fillRect(0,0,mc.width,w.H*s);
   const es=lang==="es";
   const flags=worldFlags();   /* the same facts the mural reads */
   g2.textAlign="center";
@@ -4895,13 +5101,26 @@ function drawTown(){
     if(l.when&&!l.when(flags))return;
     g2.font="700 "+(l.s||10)+"px sans-serif";g2.fillStyle=l.c||"#3A2F17";
     g2.fillText(es?l.es:l.en,l.x*s+(l.dx||0),l.y*s);});
-  g2.fillStyle="#8A8474";g2.font="600 8px sans-serif";
-  g2.fillText(es?"puertas y escaleras en dorado · ◉ estás aquí":"doors & stairs in gold · ◉ you are here",mc.width/2,w.H*s+10);
+  /* the caption had 8px and no room. 9px, a letter of tracking and four more pixels of paper: it
+     is the line that explains the two colours, and it was the smallest type in the game. */
+  g2.fillStyle="rgba(58,44,20,.10)";g2.fillRect(0,w.H*s,mc.width,18);
+  g2.fillStyle="#7B7361";g2.font="600 9px ui-monospace,monospace";
+  if(g2.letterSpacing!==undefined)g2.letterSpacing="0.4px";
+  g2.fillText(es?"puertas y escaleras en dorado · ◉ estás aquí":"doors & stairs in gold · ◉ you are here",mc.width/2,w.H*s+12);
+  if(g2.letterSpacing!==undefined)g2.letterSpacing="0px";
   const M=typeof MAPDOT!=="undefined"?MAPDOT:{};
   drawPlanMarks(g2,s); /* the marks go UNDER the dot: you can always see yourself */
   const dot=world===PL.street?[fx,fy]:M[world]||null;
-  if(dot){g2.fillStyle="#7A3FE0";g2.beginPath();g2.arc(dot[0]*s+s/2,dot[1]*s+s/2,5,0,7);g2.fill();
-    g2.strokeStyle="#F2F1EA";g2.lineWidth=2;g2.stroke();}
+  if(dot){const dx2=dot[0]*s+s/2,dy2=dot[1]*s+s/2;
+    const hal=g2.createRadialGradient(dx2,dy2,1,dx2,dy2,13);     /* you are a light on the paper */
+    hal.addColorStop(0,"rgba(122,63,224,.34)");hal.addColorStop(1,"rgba(122,63,224,0)");
+    g2.fillStyle=hal;g2.beginPath();g2.arc(dx2,dy2,13,0,7);g2.fill();
+    g2.fillStyle="rgba(58,44,20,.30)";
+    g2.beginPath();g2.ellipse(dx2+1,dy2+4,5.4,2.2,0,0,7);g2.fill();
+    g2.fillStyle="#7A3FE0";g2.beginPath();g2.arc(dx2,dy2,5,0,7);g2.fill();
+    g2.strokeStyle="#F2F1EA";g2.lineWidth=2;g2.stroke();
+    g2.fillStyle="rgba(255,255,255,.40)";
+    g2.beginPath();g2.arc(dx2-1.6,dy2-1.8,1.7,0,7);g2.fill();}
   mapLegend();
 }
 function openMap(){

@@ -27,6 +27,34 @@ bare noun — and a brief that fans out says so. This has nothing to do with cre
 with the mode **off**, in an ordinary parallel run, which is what this project actually does. See
 `docs/crew/MURALS.md`, iteration 4.
 
+**It happened again on 2026-09-15, iteration 10, to the same filename.** Four painters, mode off, and
+`scratchpad/panel.js` was overwritten under one of them mid-job; he lost a revision and said so in
+his hand-back. The rule above was already written, three days old, and correct. What was missing was
+that **the brief did not carry it** — the calling session wrote the fan-out prompt and never put the
+prefix in it, so four agents each reached for the obvious noun. A rule that lives only in a document
+the agent was not asked to read is not in force. **The brief carries the prefix, or the prefix does
+not exist**: give each builder its own subdirectory (`scratchpad/<agent>/`) in the prompt itself.
+
+
+## ⚠ And a second one, found 2026-09-15: a background job that never returns never reports
+
+Two jobs in one day ran for **five hours and nine hours** having finished their actual work in
+seconds. Both looked, from the outside, exactly like work still in progress.
+
+The cause is the same both times and it is not the job: **a multi-line command was flattened to one
+line**, so a heredoc (`<<'PY' … PY`) never terminated, and `python3` and later `node -c` sat reading
+standard input forever. The files they were supposed to write had been written correctly before the
+process hung.
+
+**Write the script to a file, then run the file.** Never put a heredoc — or any command whose meaning
+depends on its newlines — into a background shell. And when a background job has been running far
+longer than its work could possibly take, run `ps -eo pid,etime,cmd` before assuming it is busy: the
+answer is usually that it is waiting for input nobody is going to give it.
+
+This matters more in parallel work than anywhere else, because a stuck job in a fan-out is invisible:
+the other lanes come back, their results get acted on, and nobody notices that one lane never
+answered. **A lane that has not reported is not a lane that found nothing.**
+
 ---
 
 ## How to switch it

@@ -77,7 +77,9 @@ const { chromium } = require('playwright-core');
   warns.filter(w => /^(?:CRIT )?(reach|portal|world|room|wander|arrival):/i.test(w))
        .forEach(w => fails.push('the engine warned at boot and nobody was listening: ' + w));
 
-  const r0 = await page.evaluate(() => {
+  /* IDXNAME is passed IN because the flat list below is per game and the page cannot know which
+     index it is — see the #39 block. Nothing else in here reads it. */
+  const r0 = await page.evaluate((IDXNAME) => {
     const P = [];
     const walk = (w, x, y) => x >= 0 && y >= 0 && x < w.W && y < w.H && !SOLID.has(w.grid[y][x]) && w.grid[y][x] !== 'N';
     const firstWalkable = w => { for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (walk(w, x, y)) return [x, y]; return null; };
@@ -464,21 +466,199 @@ const { chromium } = require('playwright-core');
     // ship as a picture), and a glyph on it that is laid in this pack yet no longer flat fails too,
     // so the list is kept honest as things get sides (TILESIDE) or become boxes.
     // 2026-09-07: 17 kinds were flat; the desk (D) and the shelving (S) got sides the same day.
-    const FLAT_KNOWN = ['3', '4', '5', '7', '9', 'A', 'C', 'H', 'I', 'J', 'P', 'W', 'X', 'Y']; /* the old stair '1' left the city with #7 */
+    /* ---- WHAT IS STILL FLAT, PER GAME, AND WHY IT HAD TO BECOME PER GAME ----
+       'H' and 'I' came off Meridian's list on 2026-09-15: the produce crate and the shop counter
+       now carry a pack side view and box:true, so both stand as boxes. THE LIST ONLY EVER SHRINKS,
+       and it shrank because the guard said so — it went red naming both the moment the art landed,
+       which is exactly what an is-it-still-true check is for.
+       AND THEN IT WENT RED ON THE TOWN, which is the more useful half. One list was shared by two
+       games that lay DIFFERENT glyphs: Meridian's H is a produce crate and the town's H is a piece
+       of furniture, so a letter shrinking out of one game's list silently claimed something about
+       the other game's letter of the same name. That is `docs/REGRESSION.md`'s recurring shape —
+       the list read the GLYPH and meant `this glyph, in this game`. It is keyed by index now, and a
+       game with no row of its own gets the shared baseline. Two games diverge again tomorrow; this
+       stops that from being a surprise. (docs/BEAUTIFY.md build order, item 2.) */
+    const FLAT_BASE = ['3', '4', '5', '7', '9', 'A', 'C', 'H', 'I', 'J', 'P', 'W', 'X', 'Y']; /* the old stair '1' left the city with #7 */
+    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', '7', '9', 'A', 'C', 'J', 'P', 'W', 'X', 'Y'] };
+    const FLAT_KNOWN = FLAT_BY_GAME[IDXNAME] || FLAT_BASE;
     const laid = new Set(); Object.values(WORLDS).forEach(w => w.rows.forEach(r => r.split('').forEach(ch => laid.add(ch))));
     Object.keys(flat).forEach(g => { if (!FLAT_KNOWN.includes(g)) P.push('"' + g + '" (' + ((TILES[g] || {}).kind || '?') + ') stands in 3D as a flat picture in ' + [...flatIn[g]].join(',') + ' — give it a side view (TILESIDE) so it becomes a box; nothing new may ship flat (#39)'); });
     // a pack may give a letter another meaning (the town's I is a facade): only a glyph laid here
     // as a kind the builder could make flat counts as "no longer flat"
     const couldBeFlat = g => ['furniture', 'appliance', 'prop', 'nature', 'gear', 'marker', 'site', 'transit', 'stair', 'tree'].includes((TILES[g] || {}).kind);
-    FLAT_KNOWN.forEach(g => { if (laid.has(g) && couldBeFlat(g) && !flat[g]) P.push('"' + g + '" is no longer flat in 3D — take it off FLAT_KNOWN in test/engine.smoke.js so the list keeps shrinking (#39)'); });
+    FLAT_KNOWN.forEach(g => { if (laid.has(g) && couldBeFlat(g) && !flat[g]) P.push('"' + g + '" is no longer flat in 3D — take it off this game\'s row of FLAT_BY_GAME in test/engine.smoke.js (the key is "' + IDXNAME + '") so the list keeps shrinking (#39)'); });
     // ---- nothing is stored outside the pack's prefix ----
     const pfx = SK(''); const stray = [];
     for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!k.startsWith(pfx)) stray.push(k); }
     if (stray.length) P.push('storage keys outside the prefix "' + pfx + '": ' + stray.join(', '));
     return { P, stillFlat: Object.keys(flat).sort().map(g => g + '×' + flat[g]) };
-  });
+  }, idx);
   const r = r0.P; r.stillFlat = r0.stillFlat;
   fails.push(...r);
+
+  /* ---- THE BEARING POINTS AT THE PLACE, AND STAYS ON THE SCREEN ----
+     The owner picked the street arrow over the crew's advice on 2026-09-15 ("bearing lets try 2"),
+     so it has to be right: an arrow that points confidently at the wrong wall is worse than no
+     arrow, and it is exactly what happens if the 3D camera's yaw is forgotten, or if the sign of
+     one term is flipped, neither of which any reading of the code would catch.
+     Asked of the thing on the screen: put a destination due north, south, east and west of the
+     hero and read back where the pill actually landed and how far the arrowhead is turned.
+     The second half is from the FIRST LOOK at it, not from theory: "Floor 2 · Your office" hung
+     66 px off the right of a 372 px viewport, because the first version inset the pill's CENTRE by
+     a flat percentage and a pill's real inset is its own half-width, which the name decides. */
+  const bearings = await page.evaluate(() => {
+    const P = [];
+    if (typeof bearingUI !== 'function' || typeof mapDest === 'undefined') return P;
+    /* ---- DOES THIS PACK HAVE A DESTINATION TO BE POINTED AT? ----
+       A pack that declares no MAPMARK kinds has no marks on its plan, so nothing can be chosen and
+       the arrow can never appear: there is no bearing here to be wrong. That is an ANSWER, not an
+       absence, and it is the same seam mapLegend() already reads.
+       This line exists because `node test/gauge.js` went red the moment the check was written: the
+       gauge is a five-tile world built to fail in the places a new game would fail, and it reported
+       "the viewport measures 422×0" — my own precondition, correctly refusing to pass, on a world
+       that was never going to draw a bearing. A check that asks every future pack for a screen it
+       has no use for is a NEW DEMAND ON EVERY FUTURE GAME (docs/GAUGE.md), which is exactly what
+       that world is there to catch. It caught it before a person did. */
+    if (typeof markKinds === 'function' && !markKinds().length) return P;
+    const vp = document.getElementById('vp');
+    if (!vp) { P.push('there is no #vp to hang the street bearing on, so where it lands cannot be asked here'); return P; }
+    /* the suite loads the page with the create-your-character panel still up, so #world is hidden
+       and the viewport measures nothing. Shown for the length of this one check and put back
+       exactly as it was — the same move the #130 block above makes with #creator. */
+    const wld = document.getElementById('world'), wasHidden = wld && wld.hidden;
+    if (wld) wld.hidden = false;
+    try {
+    /* NOTHING TO MEASURE IS NOT A PASS (docs/GAUGE.md). The first run of this check reported
+       "Infinity%" for three directions and said nothing at all about north — because the viewport
+       was 0 wide, and 0/0 is NaN, and every comparison against NaN is false. The one direction that
+       looked fine was the one that silently divided nothing by nothing. */
+    if (!vp.clientWidth || !vp.clientHeight) {
+      P.push('the viewport measures ' + vp.clientWidth + '\u00D7' + vp.clientHeight +
+        ', so where the street bearing lands cannot be asked — a check with no screen to read is not a pass');
+      return P; }
+    const want = { north: [50, 0], south: [50, 100], east: [100, 50], west: [0, 50] };
+    const deg = { north: 0, south: 180, east: 90, west: -90 };
+    [['north', 0, -6], ['south', 0, 6], ['east', 6, 0], ['west', -6, 0]].forEach(([nm, dx, dy]) => {
+      mapDest = { w: world, x: px + dx, y: py + dy, who: null };
+      bearLast = ''; bearPos = ''; bearingUI();
+      const el = document.getElementById('bearNav');
+      if (!el || el.hidden) { P.push('the street bearing draws nothing with a destination ' + nm + ' of the hero'); return; }
+      const L = parseFloat(el.style.left) / vp.clientWidth * 100, T = parseFloat(el.style.top) / vp.clientHeight * 100;
+      const [wx, wy] = want[nm];
+      if (Math.abs(L - wx) > 22 || Math.abs(T - wy) > 22)
+        P.push('a destination ' + nm + ' of the hero puts the bearing at ' + Math.round(L) + '%,' + Math.round(T) +
+          '% of the screen and it belongs at ' + wx + '%,' + wy + '% — the arrow is pointing somewhere the place is not');
+      const rot = /rotate\(([-\d.]+)deg\)/.exec(document.getElementById('bearTip').style.transform || '');
+      if (rot) { const rr = ((+rot[1] % 360) + 360) % 360, ee = ((deg[nm] % 360) + 360) % 360;
+        if (Math.min(Math.abs(rr - ee), 360 - Math.abs(rr - ee)) > 12)
+          P.push('the arrowhead is turned ' + Math.round(rr) + '° for a destination due ' + nm + ', and due ' + nm + ' is ' + ee + '°'); }
+      const a = el.getBoundingClientRect(), v = vp.getBoundingClientRect();
+      if (a.left < v.left - 1 || a.right > v.right + 1 || a.top < v.top - 1 || a.bottom > v.bottom + 1)
+        P.push('the bearing pill hangs outside the viewport for a destination ' + nm +
+          ' (' + Math.round(Math.max(v.left - a.left, a.right - v.right, v.top - a.top, a.bottom - v.bottom)) +
+          ' px over the edge) — a pill is inset by its own half-width, and the name decides that');
+    });
+    } finally { mapDest = null; bearLast = ''; bearPos = ''; bearingUI();
+                if (wld) wld.hidden = wasHidden; }
+    return P;
+  });
+  fails.push(...bearings);
+
+  /* ---- THE QUEST MARKER STANDS OVER A PERSON, IT DOES NOT PAINT ON ONE ----
+     docs/BEAUTIFY.md's audit: "a solid red bar through the top of the skull", on ~20 people, on the
+     one object docs/STORY.md records as meaning one thing forever. Two faults in one line of code
+     (`ctx.fillText("❗",x+16,y+2+bob)`, written out at four sites):
+       · the baseline was the HEAD'S OWN ROW, so the mark was painted onto the person;
+       · "❗" is a colour emoji, so the font paints its own palette, `fillStyle="#E0B45C"` was
+         ignored, and the marker was a different drawing on every platform.
+     Asked of the PICTURE, three ways, because neither fault is visible in the code:
+       1. the mark adds paint ABOVE the person's own topmost row — that is what "over their head"
+          means, and it is precisely what the old one did not do;
+       2. the only thing it may do to the person's own pixels is DARKEN them. A thing above a head
+          shades it; a bar through a skull replaces it.
+     AND CHECK 2 IS THE ONE THAT WORKS, which is worth writing down rather than implying. The real
+     bug was planted back in a copy outside the repo — the original fillText line, restored exactly —
+     and check 1 stayed SILENT: a 13px glyph on a baseline at the head's row has an ascent that
+     reaches five pixels above the person, so "does it start above them" was true of the bug. It
+     went through the skull on the way DOWN. Check 2 named it: `32 of the person's own pixels are
+     made lighter by the quest marker`. Check 1 is kept because it catches the other half — a mark
+     drawn entirely at or below the head — but it is not the one that earned its place;
+       3. in the 3D bake it is not clipped by the top of the 36×48 sprite, which is a real failure
+          mode and not a hypothetical — the first version of the replacement was cut off there and
+          arrived in the scene as a chopped rectangle. */
+  const saymark = await page.evaluate(() => {
+    const P = [];
+    if (typeof drawSayMark !== 'function') {
+      P.push('the engine has no drawSayMark — the quest marker is a font glyph again, which paints its own colours (so the amber the code asks for never arrives) and is a different picture on every device');
+      return P; }
+    const W = 36, H = 48;
+    const mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 8); g.clearRect(0, -8, W, H);
+      return { c, g }; };                    /* exactly engine3d.js:807's own surface and transform */
+    const look = (typeof NPCLOOK !== 'undefined' && NPCLOOK[Object.keys(NPCLOOK)[0]]) || undefined;
+    /* IT BOBS, SO TIME IS AN INPUT. The first version of this check drew once and went green, then
+       red on the next run with "3 pixels" — the marker rides a sine of Date.now(), so a single
+       sample tests one phase of an animation and calls it the drawing. Date.now is stubbed across
+       eight phases of the full period (2π×250 ms) and every phase has to hold. A guard that passes
+       or fails by the clock is worth less than no guard, because it teaches people to re-run it. */
+    const real = Date.now, PHASES = 8, PERIOD = Math.PI * 500;
+    /* the bake's geometry is NOT typed out here — it asks for "bake" exactly as engine3d.js does,
+       and the engine looks up what that means. The first version passed the two numbers itself, so
+       a plant that changed the ones the engine ships was invisible to it: a guard that supplies its
+       own inputs is testing its own arithmetic (docs/REGRESSION.md). */
+    const both = [{ nm: 'the flat cameras', args: [] }, { nm: 'the 3D bake', args: ['bake'] }];
+    let personTop = H, personBot = -1;
+    try {
+      Date.now = () => 0;
+      const a0 = mk(); drawPerson(a0.g, 2, 6, look, { dir: 'down' });
+      const d0 = a0.g.getImageData(0, 0, W, H).data;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++)
+        if (d0[(y * W + x) * 4 + 3] > 40) { if (y < personTop) personTop = y; if (y > personBot) personBot = y; }
+      both.forEach(cfg => {
+        let worstLit = 0, worstRow0 = 0, everAbove = false, everDrew = false;
+        for (let ph = 0; ph < PHASES; ph++) {
+          const t = ph * PERIOD / PHASES; Date.now = () => t;
+          const a = mk(), b = mk();
+          drawPerson(a.g, 2, 6, look, { dir: 'down' });
+          drawPerson(b.g, 2, 6, look, { dir: 'down' });
+          drawSayMark.apply(null, [b.g, 2, 6].concat(cfg.args));
+          const da = a.g.getImageData(0, 0, W, H).data, db = b.g.getImageData(0, 0, W, H).data;
+          let lit = 0, row0 = 0, markTop = H, added = 0;
+          for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+            const i2 = (y * W + x) * 4, wasPerson = da[i2 + 3] > 40;
+            const moved = Math.abs(da[i2] - db[i2]) > 10 || Math.abs(da[i2 + 1] - db[i2 + 1]) > 10
+                       || Math.abs(da[i2 + 2] - db[i2 + 2]) > 10 || Math.abs(da[i2 + 3] - db[i2 + 3]) > 40;
+            if (!moved) continue;
+            added++; if (y < markTop) markTop = y;
+            /* a shadow only ever takes light away. Anything that ADDS it is covering them. */
+            if (wasPerson && (db[i2] > da[i2] + 10 || db[i2 + 1] > da[i2 + 1] + 10 || db[i2 + 2] > da[i2 + 2] + 10)) lit++; }
+          if (added) { everDrew = true; if (markTop < personTop) everAbove = true; }
+          if (lit > worstLit) worstLit = lit;
+          /* IS IT CLIPPED? Not "does it use the top row" — the top row is there to be used, and the
+             first version of this failed a mark that merely reached it. Draw the same mark onto a
+             surface with 40 extra rows of sky and count what lands ABOVE where the real sprite ends.
+             Anything up there is paint the 3D bake throws away. */
+          if (cfg.args.length) {
+            const EX = 40, cc = document.createElement('canvas'); cc.width = W; cc.height = H + EX;
+            const gg = cc.getContext('2d'); gg.setTransform(1, 0, 0, 1, 0, 8 + EX); gg.clearRect(0, -8 - EX, W, H + EX);
+            drawSayMark.apply(null, [gg, 2, 6].concat(cfg.args));
+            const dd = gg.getImageData(0, 0, W, H + EX).data;
+            let lost = 0;
+            for (let y = 0; y < EX; y++) for (let x = 0; x < W; x++) if (dd[(y * W + x) * 4 + 3] > 40) lost++;
+            if (lost > worstRow0) worstRow0 = lost; }
+        }
+        if (!everDrew) { P.push('a person with something to say is not marked at all in ' + cfg.nm + ' — drawSayMark drew nothing'); return; }
+        if (!everAbove) P.push('the quest marker never gets above the person in ' + cfg.nm +
+          ' — it is drawn ON them, not over them. That is the red bar through the skull (docs/BEAUTIFY.md)');
+        if (worstLit) P.push('in ' + cfg.nm + ' the quest marker makes ' + worstLit +
+          ' of the person\u2019s own pixels LIGHTER at some phase of its bob, so it is covering them rather than shading them. A thing above a head casts a shadow on it; it does not replace it');
+        if (cfg.args.length && worstRow0) P.push('the quest marker paints ' + worstRow0 +
+          ' pixels above the top of the 36\u00D748 actor sprite at some phase of its bob, so the 3D bake throws them away and it arrives in the scene as a chopped rectangle');
+      });
+    } finally { Date.now = real; }
+    return P;
+  });
+  fails.push(...saymark);
 
   /* ---- a button you can see does what it says (Rosa, finding 1) ----
      This one needs a SHORT screen: the fault only exists where the sheet is taller than the

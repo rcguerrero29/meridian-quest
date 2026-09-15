@@ -76,3 +76,7 @@ nacho-la-unica-que-cabe|e6b2905aff13|a9503d9cc2e6
 paty-carta-dos-columnas|cd416327bb77|3b7277107892
 chava-la-mancha-en-el-vidrio|fb5fad297a11|88aeb1f0ed81
 remedios-tres-sin-talon|a879fb0aad3e|86a24536492c
+pili-tres-sombras-sin-cuerpo|22ae73da1a4a|4211a4b3b134
+beto-el-anillo-en-los-palillos|5a4d5505c118|5a9bf76e46ad
+chema-la-calca-en-la-mesa|f3fc86e39367|ba78f1e2735d
+chava-la-cena-vino-sellada|c30f6841a960|a9dddeca2183
