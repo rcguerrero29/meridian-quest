@@ -1067,6 +1067,86 @@ const { chromium } = require('playwright-core');
       });
       fails.push(...overpaint);
 
+      /* ---- THE WALL MAY NOT CUT A PANEL'S FEET OFF ----
+         Found 2026-09-15 by three painters independently, in iteration 10, and it had been true for
+         days: `murWall` clipped every panel to a box MURBAY*0.46 tall and drew it at MURBAY*aspect,
+         so a panel that declared a taller shape lost `(a-0.46)/a` of itself from the feet up — on the
+         WALL only, whole in the reader, so nobody reading the panel could see it. Two panels already
+         on the wall were losing 4% and 8% of their height and nothing said so. `aspect` was a promise
+         the wall did not keep.
+         ASKED WITH A PROBE, NOT WITH ARITHMETIC. Recomputing what murWall computes is a copy of the
+         code and would go green the day the code is wrong in both places (docs/REGRESSION.md #3).
+         So: push a real panel onto the real MURALS whose bottom fifth is a colour nothing else on
+         this wall uses, render the real wall through the real murWall, and count that colour. Zero
+         means the foot did not arrive. Chema's own probe, kept. */
+      const feet = await page.evaluate(() => {
+        const P = [];
+        if (typeof murWall !== 'function' || typeof MURALS === 'undefined' ||
+            typeof murWallNatural !== 'function' || typeof murWallAspect !== 'function') return P;
+        const probe = { id: '__probe_feet__', iter: 99, date: '1970-01-01', by: '__probe_feet__',
+          title: { en: 'probe', es: 'probe' }, said: { en: 'probe', es: 'probe' },
+          who: { en: '__probe_feet__', es: '__probe_feet__' }, cap: { en: 'probe', es: 'probe' },
+          aspect: 1.20,                       /* far over the clip, so a cut is unmissable */
+          art: (g, W, H) => { g.fillStyle = '#FF00FF'; g.fillRect(0, 0, W, H);
+                              g.fillStyle = '#00FFFF'; g.fillRect(0, H * 0.80, W, H * 0.20); } };
+        MURALS.push(probe);
+        let cyan = 0, magenta = 0;
+        try {
+          const W = murWallNatural(), H = Math.round(W * murWallAspect(W));
+          const c = document.createElement('canvas'); c.width = W; c.height = H;
+          const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+          murWall(g, W, H);
+          const d = g.getImageData(0, 0, W, H).data;
+          for (let i = 0; i < d.length; i += 4) {
+            if (d[i] < 60 && d[i + 1] > 190 && d[i + 2] > 190) cyan++;
+            else if (d[i] > 190 && d[i + 1] < 60 && d[i + 2] > 190) magenta++; }
+        } finally { MURALS.splice(MURALS.indexOf(probe), 1); }
+        if (!magenta) P.push('the wall did not paint the probe panel at all, so whether it cuts a tall panel cannot be asked here — say so rather than passing');
+        else if (!cyan) P.push('the wall cuts a tall panel off at the feet: a panel declaring aspect 1.20 was painted with its bottom fifth gone, and nothing anywhere says so. `aspect` has to be a promise the wall keeps — fit the panel inside its bay, do not crop it');
+        return P;
+      });
+      fails.push(...feet);
+
+      /* ---- AND IT MAY NOT CUT A PAINTER'S STATE WITHOUT SAYING SO ----
+         The state strip is the thing the owner asked for by name on 2026-09-12 ("more about the
+         persona 'state'"), and on 2026-09-15 it was measured for the first time: at `italic 9px` in
+         the 244 points the bay leaves, 76 of the 94 state lines on this wall ran off the end, and
+         only 9 panels fitted in BOTH languages. It stopped mid-word with no mark, so the wall was
+         quietly finishing other people's sentences for them.
+         The whole sentence lives in the reader (changarrito/content/docs.js builds a `State` row from
+         the same string), so the wall's job is a legible caption that ADMITS it is one. Asked of the
+         function that decides the lines, with the real font and the real room — not of a second copy
+         of its arithmetic here. */
+      const strip = await page.evaluate(() => {
+        const P = [];
+        if (typeof MURALS === 'undefined' || typeof MURBAY !== 'number') return P;
+        if (typeof murStateLines !== 'function') {
+          P.push('the wall has no wrapper for a painter’s state, so the strip draws one line and lets it run off the end of the bay — a wall that stops a sentence mid-word with no mark is finishing it for them');
+          return P; }
+        const c = document.createElement('canvas'), g = c.getContext('2d');
+        g.font = MURSTATEFONT; const room = MURBAY - 11;
+        let cut = 0, marked = 0;
+        MURALS.forEach(m => {
+          if (!(m.state && m.state.en)) return;
+          [m.state.en, m.state.es || ''].filter(Boolean).forEach(s => {
+            const L = murStateLines(g, s, room, MURSTATELINES);
+            L.forEach((ln, i) => { if (g.measureText(ln).width > room + 0.5)
+              P.push('"' + m.id + '" has a state line the bay cannot hold: line ' + (i + 1) + ' measures ' +
+                Math.round(g.measureText(ln).width) + ' in ' + Math.round(room) + ' points, so it runs off the end of the wall'); });
+            if (L.length > MURSTATELINES)
+              P.push('"' + m.id + '" wraps to ' + L.length + ' state lines and the strip draws ' + MURSTATELINES +
+                ' — the rest is painted outside the clip, which is to say nowhere');
+            const whole = L.join(' ') === s;
+            if (!whole) { cut++; if (/…$/.test(L[L.length - 1])) marked++; } }); });
+        if (cut && marked < cut)
+          P.push((cut - marked) + ' of the ' + cut + ' states the wall has to shorten end mid-word with no mark, so a reader cannot tell they were shortened. Shortening is fine — the whole sentence is in the reader — but the wall has to say it did');
+        if (MURSTATELINES * MURSTATELEAD > MURSTATE)
+          P.push('the state strip draws ' + MURSTATELINES + ' lines at ' + MURSTATELEAD + ' apart inside ' + MURSTATE +
+            ' points of strip, so the last line is clipped away by the wall’s own box');
+        return P;
+      });
+      fails.push(...strip);
+
       if (!fs.existsSync(ledgerPath))
         fails.push('the crew wall has no ledger — docs/crew/MURAL-LEDGER.txt is gone, and without it any panel can be rewritten and nothing would say so');
       const ledger = fs.existsSync(ledgerPath)

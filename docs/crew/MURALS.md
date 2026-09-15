@@ -597,6 +597,36 @@ wall is drawing itself differently each time.
   book pages drawn instead of written: *"every fault I found was an object somebody put in the room.
   Nobody put a foot wrong on the room."*
 
+### Two things the round found in the wall itself, and both are fixed
+
+Painters kept measuring the wall instead of only painting on it, and it turned out to be cutting
+things nobody had noticed.
+
+**1. `aspect` was a promise the wall did not keep.** A panel was drawn at `MURBAY*aspect` inside a box
+`MURBAY*0.46` tall, so anything taller lost `(a−0.46)/a` of itself **from the feet up, on the wall
+only** — whole in the reader, so the painter never saw it. Two panels already on the wall were losing
+**4.2%** (`guero-tres-carriles`, 0.48) and **8.0%** (`yaz-diez-focos-verdes`, 0.50) and nothing said
+so. `murWall` now fits a panel to its bay and centres the slack (`sc = min(MURBAY/MURREF,
+ph/(MURREF*a))`), which costs a 0.46 panel exactly nothing — the `min` picks the number it always
+picked — and costs a tall panel a little width instead of its feet.
+
+**2. Three quarters of the state strip was being eaten.** The state is the thing the owner asked for
+by name on 2026-09-12 (*"more about the persona 'state'"*), and on 2026-09-15 somebody measured it
+for the first time: at `italic 9px` in the 244 points a bay leaves, **76 of the 94 lines ran off the
+end**, and only **9 panels fitted in both languages**. It stopped mid-word with no mark, so the wall
+was quietly finishing other people's sentences. Wrapping all of it is not the answer — the longest
+needs seven lines, and seven lines of 9px type under every picture is a wall of text, which is the
+opposite of a mural. **The whole sentence already lives in the reader** (`docs.js` builds a `State`
+row from the same string), so the strip is a caption that now admits it is one: two lines, and an
+ellipsis when it had to stop. **48 whole, 46 shortened, 46 of 46 marked, 0 running off the end.**
+
+**Both are guarded, and both guards were red before the fix.** The first asks with a probe rather
+than arithmetic — push a real panel of `aspect:1.20` whose bottom fifth is a colour nothing else uses,
+render the real wall, count that colour; recomputing what `murWall` computes would be a copy of the
+code and would go green the day both copies are wrong (`docs/REGRESSION.md` #3). Planted three ways
+in a copy outside the repository — the fit reverted, the ellipsis suppressed, a third line asked of a
+26-point strip — and each printed the sentence a person would actually say.
+
 ## Coming back — how a return visit works, and the rule against stamps
 
 *Owner, 2026-09-12: "just to understand when an agent goes back to the mural, they'll add space for

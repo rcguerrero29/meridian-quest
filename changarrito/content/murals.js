@@ -4676,7 +4676,36 @@ const MURSKY=26, MURDADO=22;                   /* above the work, and the painte
    That is the expression, and it is not a feeling — it is a POSITION, held on a date, in public,
    next to the last position the same person held. A wall is very good at that and prose is not. */
 const MURBLEED=0.28;                           /* the most of your own past a visit may reach into */
-const MURSTATE=15;                             /* the strip under each visit where the state is written */
+const MURSTATE=26;                             /* the strip under each visit where the state is written */
+const MURSTATEFONT="italic 9px ui-monospace,monospace";
+const MURSTATELINES=2, MURSTATELEAD=10;        /* how many lines that strip holds, and how far apart */
+/* ---- WHAT THE STRIP CAN ACTUALLY SAY ----
+   Measured for the first time on 2026-09-15, after Chava counted them: at this font, in the 244
+   points a bay leaves, **76 of the 94 state lines on this wall ran off the end**, and only 9 panels
+   fitted in BOTH languages. The wall was stopping other people's sentences mid-word with no mark —
+   the one thing the owner asked for by name ("more about the persona 'state'"), quietly cut in three
+   cases out of four.
+   Wrapping ALL of it is not the answer: the longest state needs seven lines, and seven lines of 9px
+   type under every picture is a wall of text, which is the opposite of a mural. THE WHOLE SENTENCE
+   ALREADY LIVES IN THE READER — changarrito/content/docs.js builds a `State` row from the same
+   string — so the strip's job is a caption that ADMITS it is one. Two lines, and an ellipsis when it
+   had to stop. Shortening is fine. Shortening in silence is not. */
+function murStateLines(g,s,room,maxLines){
+  const words=String(s||"").split(" ");const L=[];let cur="";
+  for(const w of words){const t=cur?cur+" "+w:w;
+    if(g.measureText(t).width<=room)cur=t;
+    else{ if(cur)L.push(cur); cur=w;
+          if(L.length===maxLines)break; }}
+  if(L.length<maxLines&&cur)L.push(cur);
+  if(L.length>maxLines)L.length=maxLines;
+  /* did we run out of strip before we ran out of sentence? then say so, and make room for the mark
+     by giving back as many characters as the mark costs — an ellipsis that itself overflows is the
+     same bug wearing a hat. */
+  if(L.join(" ")!==String(s||"")){
+    let last=(L[L.length-1]||"")+"\u2026";
+    while(last.length>1&&g.measureText(last).width>room)last=last.slice(0,-2)+"\u2026";
+    L[L.length-1]=last;}
+  return L;}
 const murCourse=()=>MURBAY*0.46+MURSTATE;
 function murWallSize(list){const bays=murBays(list);
   const deep=bays.reduce((m,b)=>Math.max(m,b.panels.length),1);
@@ -4727,7 +4756,17 @@ function murWall(g,W,H){const P=MURPAL,S=murWallSize();
       g.rect(bx,Math.max(MURSKY*0.5,py),MURBAY,Math.min(ph+bleed,foot-py));g.clip();
       g.translate(bx,py);
       /* the panel is drawn at the size it was painted for and scaled — its type scales with it */
-      const sc=MURBAY/MURREF, a=m.aspect||0.46;
+      /* ---- FIT IT, DO NOT CROP IT ----
+         Until 2026-09-15 this was `sc=MURBAY/MURREF` alone, so a panel was drawn at MURBAY*aspect
+         inside a box MURBAY*0.46 tall and anything taller lost (a-0.46)/a of itself from the feet
+         up — on the wall only, whole in the reader, so the painter never saw it. Two panels already
+         on this wall were losing 4% and 8% and nothing said so; three painters found it the same
+         afternoon, independently, in the code. A panel that declares a shape gets that shape: the
+         bay fits it and centres what is left over, which costs a tall panel a little width and costs
+         a 0.46 panel nothing at all (the min picks the same number it always did). Guarded by a
+         probe in test/town.smoke.js, not by this arithmetic repeated. */
+      const a=m.aspect||0.46, sc=Math.min(MURBAY/MURREF,ph/(MURREF*a));
+      g.translate((MURBAY-MURREF*sc)/2,0);
       g.scale(sc,sc);
       const draw=(typeof m.patch==="function")?m.patch:m.art;
       MURONWALL=true;
@@ -4748,8 +4787,10 @@ function murWall(g,W,H){const P=MURPAL,S=murWallSize();
       const st=m.state&&(m.state[LA]||m.state.en);
       if(st){g.save();g.beginPath();g.rect(bx,py+ph,MURBAY,MURSTATE);g.clip();
         g.fillStyle=murThread(m.iter);g.fillRect(bx+5,py+ph+5,2,7);
-        g.fillStyle=P.ink;g.globalAlpha=.62;g.font="italic 9px ui-monospace,monospace";
-        g.fillText(st,bx+11,py+ph+12);g.globalAlpha=1;g.restore();}
+        g.fillStyle=P.ink;g.globalAlpha=.62;g.font=MURSTATEFONT;
+        murStateLines(g,st,MURBAY-11,MURSTATELINES)
+          .forEach((ln,i)=>g.fillText(ln,bx+11,py+ph+11+i*MURSTATELEAD));
+        g.globalAlpha=1;g.restore();}
     });
     /* the signature, painted ON the dado at the foot of the painter's own stretch */
     g.fillStyle=P.ink;g.globalAlpha=.72;g.font="bold 11px ui-monospace,monospace";
