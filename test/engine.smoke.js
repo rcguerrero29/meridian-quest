@@ -509,6 +509,17 @@ const { chromium } = require('playwright-core');
   const bearings = await page.evaluate(() => {
     const P = [];
     if (typeof bearingUI !== 'function' || typeof mapDest === 'undefined') return P;
+    /* ---- DOES THIS PACK HAVE A DESTINATION TO BE POINTED AT? ----
+       A pack that declares no MAPMARK kinds has no marks on its plan, so nothing can be chosen and
+       the arrow can never appear: there is no bearing here to be wrong. That is an ANSWER, not an
+       absence, and it is the same seam mapLegend() already reads.
+       This line exists because `node test/gauge.js` went red the moment the check was written: the
+       gauge is a five-tile world built to fail in the places a new game would fail, and it reported
+       "the viewport measures 422×0" — my own precondition, correctly refusing to pass, on a world
+       that was never going to draw a bearing. A check that asks every future pack for a screen it
+       has no use for is a NEW DEMAND ON EVERY FUTURE GAME (docs/GAUGE.md), which is exactly what
+       that world is there to catch. It caught it before a person did. */
+    if (typeof markKinds === 'function' && !markKinds().length) return P;
     const vp = document.getElementById('vp');
     if (!vp) { P.push('there is no #vp to hang the street bearing on, so where it lands cannot be asked here'); return P; }
     /* the suite loads the page with the create-your-character panel still up, so #world is hidden
