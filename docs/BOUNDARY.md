@@ -306,6 +306,28 @@ the strength of the guard having been built; **both guards were walked past with
 somebody trying to, and both had to be widened. Until something has been made false on purpose and has
 printed a sentence a person would say, the honest mark is ***guard written, not yet planted***.
 
+### 15 · What the owner's own laptop keeps running
+**Line: the owner's machine, pulling from `main`.**
+**Promise.** The town tells him there is something to pull exactly one way: `behind()` fetches main's
+`changarrito/content/config.js`, reads its `GAMEV`, and compares **the whole string** against its own
+(`changarrito/content/record.js`, grep `behind()`). Nothing else on his laptop knows a version exists.
+**Guard.** `test/bump.js` — the town half: a change to a file under `changarrito/` that the town
+actually **serves** (by extension, so a `.md` there is not one) must move that string. The noun is the
+one `behind()` reads — *did the string move* — and not `ch-v` as a number: the town's version carries
+the engine it was built on (`"ch-v105 · engine mq-v160"`), so a legitimate engine bump moves the string
+without moving the town's own count, and a number guard would red it. Written 2026-09-15 at the owner's
+word, on Yaz's measurement.
+**Last planted against: 2026-09-15**, and not with a synthetic edit — **against this repository's own
+history**. Of 71 commits touching `changarrito/`, ten left `GAMEV` standing still and **every one of
+the ten changed code the town runs; none was documentation-only**, which is what killed the standing
+objection that a guard would demand a bump on comment-only commits. Run over the last 25 town commits
+the new guard goes red on six and green on nineteen; `cdcf4ee` — *"The claim moves to the outline"*,
+a real change to how a claimed person is drawn, shipped at `ch-v102` with `record.js` edited and the
+version standing still — prints the sentence a person would say.
+**Not guarded.** That the signal *arrives*: `behind()` returns false whenever `mainVersion` is null,
+so a laptop with no network, or a failed fetch, is silently never behind. The guard proves the string
+moved, which is all it claims.
+
 ### G1 · Nobody reads what a stranger is actually served *(row 1)*
 **Smallest guard.** A scheduled workflow, or one step in `pages.yml` after the deploy, that fetches
 `https://rcguerrero29.github.io/meridian-quest/changarrito/` and `…/docs/OWNER.md` and **fails unless

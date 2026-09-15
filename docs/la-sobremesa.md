@@ -1112,7 +1112,12 @@ answers are about her own body and stay with him entirely — they are not summa
 | **When she meant to cook and didn't** | **Nothing at all happens.** The smaller question at the end of §9 is answered: no kind word, no quiet re-offer. Nothing |
 | **How the first recipe arrives** | Researched and drafted for her, from traditional sources — **and she does not want to edit a recipe inside the game.** Editing belongs to the exported copy, on paper, in a real kitchen. That kills a whole editor surface nobody had costed yet |
 
-### 15.2 · Three places where her answers and his do not agree — his to settle, not ours
+### 15.2 · Three places where her answers and his do not agree — **ALL THREE ANSWERED, same day**
+
+> **2026-09-15, fourth window: *"aj is queen here."* Where her answers and his differ, hers win —
+> and he answered the other two in the same breath. The three rows below stand as the record of what
+> was in tension; §15.5 is what was decided. Nobody needs to re-open these.**
+
 
 1. **Customers.** He read §9 #4 as *"different kitchens in restaurants"* (§12.1 #8) and the reference
    game's chapters are restaurants with dish-set counters. **She does not want customers in it at
@@ -1144,3 +1149,16 @@ the person the game is for, and **anything in §2, §3 or §12 that fails it los
 - **`docs/for-aj/LA-SOBREMESA.md`** is now the script of a form that has been answered twice; it should
   say so, and the template in `docs/templates/questionnaire/` should carry what these two rounds taught
   (a comment box under every choice earned its keep — her longest and most useful answer came through one).
+
+### 15.5 · Settled — 2026-09-15, fourth window
+
+| | What was decided | In his words |
+|---|---|---|
+| **Customers** | **None.** A restaurant in Simmer is a kitchen you cook in and never a service loop. He did not answer this one separately, and did not need to: *"aj is queen here"* decides it, and she said no customers | *"aj is queen here"* |
+| **People** | **No cast to meet; one person to feed.** §3's barrio does not survive into this world — and this is **Simmer's answer, not a rule**: it is a special case, it may veer off again for mini-games, and the pack stays custom and keeps being updated for her | *"lets keep it custom as we may veer off with mini games and this is going to be a special case, as for AJ we can keep updating a game"* |
+| **Grading** | **The only mark is the cook's own, private, never shown.** The game does not score a dish. In a template, grading stays a pack's own declaration and inherits nothing from here | *"ok then we know the answer here but again obviously in template it stays custom"* |
+
+**And the line that is bigger than this world**, recorded in `docs/NEW-WORLD.md`: *"we will learn from
+these for templates but we want templates to one day be made off of one prompt or from one
+questionaire."* **What these two rounds of questions TEACH goes into the template. What AJ CHOSE does
+not.** Every decision in §15 is Simmer's own until somebody proves it is everyone's.

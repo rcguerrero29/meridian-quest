@@ -649,3 +649,31 @@ Named rather than smoothed over, per the rule at the top of `docs/OPEN.md`:
   enumerates fixed fields (`engine.js:413`) and the QR pass carries `loadSave()` only (`:4341`). The
   *test* for it exists but is the town's own (`test/town.smoke.js:329`, *"the token leaked into the
   save"*). Nothing in the engine or the shared suite would stop a third world getting it wrong.
+
+---
+
+## The north star for this document — the owner, 2026-09-15
+
+> *"we will learn from these for templates but we want templates to one day be made off of one prompt
+> or from one questionaire."*
+
+**Where this document is going.** Today a new world is built by a person reading this file and making
+a few hundred decisions in the right order. The destination is that a world is built from **one
+prompt, or one answered questionnaire** — the questions carrying the decisions this file currently
+explains.
+
+Two rules follow from it, and they are what a session should check itself against:
+
+1. **What a round of questions TEACHES belongs here. What the person ANSWERED does not.** AJ chose no
+   cast and one person to feed (`docs/la-sobremesa.md` §15); that is Simmer's answer and this document
+   must never inherit it. What belongs here is the *shape* that produced it — that "do you want people
+   in it?" is a question worth asking early, because the answer reorganises a whole chapter.
+2. **Every decision this file explains in prose is a question somebody could be asked instead.** When a
+   section is written or repaired, the useful question is not only "is this still true" but "what would
+   we have to ASK to stop needing this paragraph." The questionnaire template
+   (`docs/templates/questionnaire/`) is where those questions accumulate; the two rounds AJ answered
+   are its first evidence, and the comment box under every choice earned its keep in both rounds.
+
+**A world will stay special-cased for a long time, and that is fine** — *"we may veer off with mini
+games and this is going to be a special case"*. The template is not a cage; it is what is left after a
+special case is built and somebody asks which half of it was general.
