@@ -1,0 +1,270 @@
+<!-- docs/templates/questionnaire/questionnaire.html — THE TEMPLATE, housed 2026-09-15 at the owner's word:
+     "keep this as a template or starting point for future questionaires ... house it some where."
+     This is the page that was forwarded to AJ (v4, after the crew's two reviews). Read the README beside it.
+     THE SHELL is everything from <style> to the end of the script's helpers — the frame that never scrolls
+     under its own bar (Rosa, run 9), the progress row that counts up (R15), the saved/not-saved banner, the
+     review-before-send screen, the Send-or-Copy fallback, the shared store. THE CONTENT is the Q array
+     (the questions), the NAMES grid, the cover text and the promise line; a new questionnaire changes only
+     those and the store key (KEY) and document path (answers/<who>). Nothing a person types is ever in this
+     file: answers live in the page's store or on the phone, never in the repository. -->
+<title>La Sobremesa for AJ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  /* the town's own night paper (changarrito/index.html), painted explicitly — one theme, on purpose */
+  --bg:#14121B; --surface:#1E1B29; --raise:#262235; --ink:#EAE7F0; --muted:#9C96AB; --line:#322D42;
+  --accent:#A97FFF; --accent-ink:#160F26; --gold:#E0B45C; --gold-bg:#3A2F17; --ok:#7FD1A3;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.5;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden} /* the page is the frame; only main scrolls, so the bar can never sit on an answer (Rosa, run 9, F1) */
+header{position:sticky;top:0;z-index:2;background:var(--bg);padding:calc(10px + env(safe-area-inset-top)) 16px 8px}
+.hin{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.78rem;color:var(--muted);letter-spacing:.04em}
+.top b{color:var(--gold);font-weight:600}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:3px;transition:width .3s}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+.saved{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.72rem;color:var(--muted);min-height:1.1em}
+.saved.ok{color:var(--ok)}.saved.warn{color:var(--gold)}
+main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px 24px}
+.card{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin:0}
+h1,h2{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:1.9rem;font-weight:700}
+h2{font-size:1.5rem;font-weight:700}
+.help{margin:0;color:var(--muted);font-size:.95rem}
+.help b{color:var(--ink);font-weight:600}
+.stake{margin:0;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.76rem;color:var(--gold)}
+.opts{display:flex;flex-direction:column;gap:9px;margin-top:2px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:12px 14px;border-radius:11px;border:1.5px solid var(--line);background:var(--raise);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.opt:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.opt .dot{flex:0 0 20px;height:20px;border-radius:50%;border:2px solid var(--muted)}
+.opt.multi .dot{border-radius:5px}
+.opt[aria-checked="true"]{border-color:var(--accent);background:rgba(169,127,255,.14)}
+.opt[aria-checked="true"] .dot{border-color:var(--accent);background:var(--accent);box-shadow:inset 0 0 0 4px #251E38}
+.opt span{flex:1}
+.opt small{color:var(--muted);display:block;font-size:.86rem}
+.opt .chip{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.68rem;color:var(--gold);border:1px solid var(--gold);border-radius:4px;padding:1px 6px}
+textarea,input[type=text]{width:100%;font:inherit;font-size:1rem;color:var(--ink);background:#15121D;border:1px solid var(--line);border-radius:10px;padding:12px 14px;resize:vertical;min-height:104px}
+input[type=text]{min-height:52px}
+textarea:focus,input:focus{outline:3px solid var(--gold);outline-offset:1px;border-color:var(--accent)}
+.comment{display:flex;flex-direction:column;gap:8px}
+.comment[hidden]{display:none}
+.comment label{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.76rem;color:var(--gold)}
+.linkbtn{background:none;border:1.5px dashed var(--line);border-radius:10px;color:var(--accent);font:inherit;font-size:.95rem;padding:10px 14px;text-align:left;cursor:pointer;min-height:48px}
+.linkbtn.gold{border-color:var(--gold);border-style:solid;color:var(--gold)}
+.linkbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.reveal{margin:0;color:var(--muted);font-size:.9rem;font-style:italic}
+footer{position:sticky;bottom:0;z-index:2;background:var(--bg);border-top:1px solid var(--line);padding:10px 16px calc(12px + env(safe-area-inset-bottom))}
+.fin{max-width:560px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.btn{min-height:52px;border-radius:12px;border:0;font:600 1.05rem "IBM Plex Sans",sans-serif;cursor:pointer;padding:0 18px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);flex:1}
+.btn.ghost{background:transparent;color:var(--muted);border:1.5px solid var(--line);min-width:96px}
+.btn.skip{background:transparent;color:var(--muted);border:0;font-weight:400;font-size:.92rem;padding:0 8px}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn[disabled]{opacity:.45;cursor:default}
+.names{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.names .opt{min-height:52px;padding:10px 12px}
+.two{display:grid;grid-template-columns:1fr;gap:8px}
+.two label{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.74rem;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.review{display:flex;flex-direction:column;gap:10px}
+.review .row{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:4px}
+.review .q{font-size:.82rem;color:var(--muted);margin:0}
+.review .a{margin:0;font-weight:600}
+.review .a.blank{font-weight:400;font-style:italic;color:var(--muted)}
+.review .c{margin:0;color:var(--gold);font-style:italic;font-size:.95rem;border-left:2px solid var(--gold);padding-left:8px}
+.review .chg{align-self:flex-start;background:none;border:0;color:var(--accent);font:inherit;font-size:.9rem;padding:8px 0;min-height:44px;cursor:pointer}
+.done{padding:6px 0;display:flex;flex-direction:column;gap:12px}
+.done .big{font-size:3rem;line-height:1}
+.box{background:rgba(127,209,163,.12);border:1px solid var(--ok);border-radius:10px;padding:12px 14px;color:var(--ink)}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+</style>
+<header><div class="hin">
+  <div class="top"><span id="stepLabel">Before we start</span><b id="pct"></b></div>
+  <div class="bar"><i id="barfill"></i></div>
+  <div class="saved" id="saved">Saved on this phone. You can close this and come back.</div>
+</div></header>
+<main><div class="card" id="card" aria-live="polite"></div></main>
+<footer><div class="fin" id="nav"></div></footer>
+<script>
+(function(){
+  /* ---------- the questions — every card names what it changes; only two say it out loud ---------- */
+  const NAMES=["Second Helping","The Long Table","Low Heat","Warm Plate","Slow Sunday","Little Pantry","The Good Pot","Soft Boil","Kitchen Lights","Leftovers","Simmer","Home Plate","Sobremesa","A fuego lento","El recalentado"];
+  const Q=[
+    {id:"best",kind:"multi",eyebrow:"Cooking",text:"What's the best part of cooking?",help:"Pick any. Then say it however you'd say it out loud.",
+      opts:["Chopping","The smell","The waiting","The first taste","The face they make","Feeding someone","Honestly, eating it"],
+      after:"He said: the flavour.",commentPh:"Say it however you'd say it out loud."},
+    {id:"who",kind:"choice",eyebrow:"People",text:"When you cook, who's it usually for?",help:"This is where the people at the table come from.",
+      opts:["Just me","The two of us","A house full of people","Whoever turns up","I mostly bake, and that's different"],commentPh:"Who's the person you most like feeding?"},
+    {id:"fork",kind:"choice",eyebrow:"Two kinds of play",text:"Which would you miss more?",help:"No game names — just the two things your hands do.",stake:"This one decides what we build first.",
+      opts:[["Dragging two of the same together","until they turn into the next thing — dough, then a pizza, then a slice. A page fills in with every chain you've found."],
+            ["Making one dish by hand","rolling the dough out, spreading the sauce with a finger, sprinkling the cheese, laying each slice down."],
+            ["Both the same","and I'd rather start with the recipes and the pantry"],
+            ["Honestly neither","I'm here for the recipes"]],commentPh:"What's the bit you'd be sad to lose?"},
+    {id:"people",kind:"choice",eyebrow:"Company",text:"Do you want people in it?",help:"Characters who talk to you about the food, or just you and the kitchen.",stake:"This decides how much of it is talking.",
+      opts:["People who talk","One companion, always there","Just the food, alone"],commentPh:"Or something else?"},
+    {id:"hurry",kind:"choice",eyebrow:"Pace",text:"When a game hurries you, what happens?",help:"We're shipping no clock either way. This tells us what to put in its place.",
+      opts:["I like it — that's the fun","I ignore it","It stresses me out","I put the phone down"],commentPh:"Or something else?"},
+    {id:"plate",kind:"textchoice",eyebrow:"Your plate",text:"What should never land on your plate?",help:"Allergies, or just no thanks — both count. If raw is the problem and cooked is fine, say that too.",
+      opts:["Raw only — cooked is fine","Cooked too","Depends — I'll explain"],placeholder:"Which foods? In your own words.",
+      note:"All the game does is put one line on the recipe — “cook the tomato first”, or “not this one”. It never says anything about you, and it is not a safety check. What you write here stays on this page and with him; it never goes anywhere public."},
+    {id:"dish",kind:"pair",eyebrow:"A dish",text:"One dish you love — and who taught you.",help:"A first name or “my grandmother” is plenty. That person becomes the first character.",
+      fields:[["The dish","dish"],["Who taught you","teacher"]],commentPh:"Anything about how they made it that nobody else does."},
+    {id:"wrong",kind:"choice",eyebrow:"The pantry",text:"The game thinks you have something and you don't. What would you rather do?",help:"Be honest — the third one is a real answer and it's the cheapest to build.",
+      opts:["Take a photo of the drawer again","Tap the one thing that ran out","Honestly, I'd just ignore it"],commentPh:"Or something else?"},
+    {id:"second",kind:"choice",eyebrow:"The kitchens",text:"What should the second kitchen be?",help:"The first one leans Mexican and every recipe comes with a partner from somewhere else.",
+      opts:["Italian","Japanese","Korean","Something else"],commentPh:"A dish you've always meant to learn and haven't?"},
+    {id:"done",kind:"choice",eyebrow:"When it's cooked",text:"Besides the leftovers in the fridge, what do you want when a dish is done?",help:"“Nothing, it's done” is a real answer.",
+      opts:["A picture of the plate I made","The recipe saved into my book, with my notes","Somebody's reaction","Nothing, it's done"],commentPh:"Or something else?"},
+    {id:"missed",kind:"choice",eyebrow:"The habit",text:"You meant to cook and didn't. Then what?",help:"This writes the most important line in the game.",
+      opts:["Nothing at all","Someone mentions the food, not the plan","It just offers again later","Never bring it up","I'd like to be able to say why"],commentPh:"What would you want to hear — or not hear?"},
+    {id:"name",kind:"choice",eyebrow:"The name",text:"What's it called?",help:"Pick one, or say what they're all missing.",grid:true,
+      opts:NAMES.concat(["Mix two of them","None of these"]),commentPh:"Or mix two, or say what none of them has."},
+    {id:"else",kind:"text",eyebrow:"Last one",text:"Anything you want that isn't on this list — or anything you'd hate?",help:"Say it even if it sounds hard. This is the most useful question on here.",placeholder:"…",optional:true}
+  ];
+  const KEY="sobremesa-aj-v2";
+  let state={step:-1,answers:{},comments:{},sent:false,updated:null};
+  let storeOK=true;
+  try{const s=localStorage.getItem(KEY);if(s)state=Object.assign(state,JSON.parse(s));}catch(e){storeOK=false;}
+  const $=id=>document.getElementById(id);
+  const card=$("card"),nav=$("nav"),savedEl=$("saved"),stepLabel=$("stepLabel"),pct=$("pct"),bar=$("barfill");
+  /* ---------- saving: this phone on every input; the shared record when the viewer grants it.
+     What is stored: the answers and comments, a DATE (never a finer time), and nothing else. ---------- */
+  let db=null,pending=null;
+  const today=()=>new Date().toISOString().slice(0,10);
+  function sayStore(){
+    if(db){savedEl.textContent="Saved as you go. He can read it once you send.";savedEl.className="saved ok";}
+    else if(storeOK){savedEl.textContent="Saved on this phone. You can close this and come back.";savedEl.className="saved";}
+    else{savedEl.textContent="This browser is not remembering. Copy your answers before you close.";savedEl.className="saved warn";}
+  }
+  function persist(){
+    state.updated=today();
+    try{localStorage.setItem(KEY,JSON.stringify(state));storeOK=true;}catch(e){storeOK=false;}
+    sayStore();
+    if(!db)return;
+    clearTimeout(pending);
+    pending=setTimeout(async()=>{
+      try{await db.doc("answers/aj").set({answers:state.answers,comments:state.comments,step:state.step,sent:state.sent,updated:state.updated,questions:Q.map(q=>({id:q.id,text:q.text}))});}
+      catch(e){savedEl.textContent="Saved on this phone. The shared copy didn't reach — keep going, nothing is lost.";savedEl.className="saved warn";}
+    },700);
+  }
+  (async()=>{
+    try{ if(window.claude&&window.claude.use){ db=await window.claude.use("db"); } }catch(e){db=null;}
+    sayStore();
+    if(db){ try{const snap=await db.doc("answers/aj").get(); if(snap&&snap.exists){const d=snap.data()||{};
+        const mine=Object.keys(state.answers).length;
+        if(!mine&&d.answers){state.answers=d.answers||{};state.comments=d.comments||{};state.sent=!!d.sent;if(typeof d.step==="number")state.step=d.step;render();}}}catch(e){} }
+  })();
+  /* ---------- render ---------- */
+  const el=(tag,cls,html)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(html!==undefined)n.innerHTML=html;return n;};
+  const txt=(tag,cls,t)=>{const n=document.createElement(tag);if(cls)n.className=cls;n.textContent=t;return n;};
+  const answered=q=>{const a=state.answers[q.id];
+    if(q.kind==="multi")return Array.isArray(a)&&a.length>0;
+    if(q.kind==="text")return !!(a&&String(a).trim());
+    if(q.kind==="textchoice")return !!(a&&(a.choice||String(a.text||"").trim()));
+    if(q.kind==="pair")return !!(a&&Object.values(a).some(v=>String(v||"").trim()));
+    return !!a;};
+  function progress(){
+    const n=Q.length,done=Q.filter(answered).length;
+    const f=state.step<0?0:state.step>=n?1:(state.step+0.5)/n;      /* a sliver on the first card, never an empty bar */
+    bar.style.width=Math.round(f*100)+"%";
+    stepLabel.textContent=state.step<0?"Before we start":state.step>=n?"Everything you said":("Question "+(state.step+1)+" of "+n);
+    pct.textContent=done+" of "+n+" answered";
+  }
+  function go(step){state.step=step;persist();render();window.scrollTo(0,0);try{document.querySelector("main").scrollTop=0;}catch(e){}}
+  function render(){
+    card.innerHTML="";nav.innerHTML="";progress();
+    if(state.step<0)return intro();
+    if(state.step>=Q.length)return review();
+    const q=Q[state.step],a=state.answers[q.id];
+    card.appendChild(txt("p","eyebrow",q.eyebrow));
+    card.appendChild(txt("h2","",q.text));
+    if(q.help)card.appendChild(txt("p","help",q.help));
+    if(q.stake)card.appendChild(txt("p","stake","→ "+q.stake));
+    if(q.kind==="choice"||q.kind==="multi"||q.kind==="textchoice"){
+      const box=el("div",q.grid?"opts names":"opts");box.setAttribute("role",q.kind==="multi"?"group":"radiogroup");
+      const chosen=q.kind==="multi"?(Array.isArray(a)?a:[]):(q.kind==="textchoice"?(a&&a.choice):a);
+      q.opts.forEach(o=>{const label=Array.isArray(o)?o[0]:o,sub=Array.isArray(o)?o[1]:null;
+        const b=el("button","opt"+(q.kind==="multi"?" multi":""));b.type="button";b.setAttribute("role",q.kind==="multi"?"checkbox":"radio");
+        const on=q.kind==="multi"?chosen.includes(label):chosen===label;b.setAttribute("aria-checked",on?"true":"false");
+        b.appendChild(el("i","dot"));const s=txt("span","",label);if(sub){s.appendChild(txt("small","",sub));}b.appendChild(s);
+        if(on&&state.comments[q.id]){b.appendChild(txt("i","chip","note"));}
+        b.addEventListener("click",()=>{
+          if(q.kind==="multi"){const cur=Array.isArray(state.answers[q.id])?state.answers[q.id].slice():[];const k=cur.indexOf(label);if(k>=0)cur.splice(k,1);else cur.push(label);state.answers[q.id]=cur;}
+          else if(q.kind==="textchoice"){state.answers[q.id]=Object.assign({},state.answers[q.id]||{},{choice:label});}
+          else state.answers[q.id]=label;
+          persist();render();});
+        box.appendChild(b);});
+      card.appendChild(box);
+      if(q.after&&answered(q))card.appendChild(txt("p","reveal",q.after));
+      if(q.kind==="textchoice"){const t=el("textarea");t.id="t-"+q.id;t.placeholder=q.placeholder||"";t.value=(a&&a.text)||"";t.setAttribute("aria-label",q.text);
+        t.addEventListener("input",()=>{state.answers[q.id]=Object.assign({},state.answers[q.id]||{},{text:t.value});persist();});card.appendChild(t);}
+      if(q.note)card.appendChild(txt("p","help",q.note));
+      comment(q);
+    } else if(q.kind==="pair"){
+      const two=el("div","two");
+      q.fields.forEach(([lab,k])=>{const L=txt("label","",lab);const i=el("input");i.type="text";i.id="f-"+q.id+"-"+k;i.value=(a&&a[k])||"";
+        i.addEventListener("input",()=>{state.answers[q.id]=Object.assign({},state.answers[q.id]||{},{[k]:i.value});persist();});L.appendChild(i);two.appendChild(L);});
+      card.appendChild(two);comment(q);
+    } else {
+      const t=el("textarea");t.id="t-"+q.id;t.placeholder=q.placeholder||"";t.value=a||"";t.setAttribute("aria-label",q.text);
+      t.addEventListener("input",()=>{state.answers[q.id]=t.value;persist();});card.appendChild(t);
+    }
+    /* the sticky bar: Back never discards; Next; and a real Skip — a blank is an answer too */
+    const back=txt("button","btn ghost","Back");back.type="button";back.addEventListener("click",()=>go(state.step-1));
+    const next=txt("button","btn primary",state.step===Q.length-1?"See everything":"Next");next.type="button";
+    next.disabled=!q.optional&&!answered(q);
+    next.addEventListener("click",()=>go(state.step+1));
+    nav.appendChild(back);nav.appendChild(next);
+    if(!q.optional&&!answered(q)){const skip=txt("button","btn skip","Skip");skip.type="button";skip.title="Skip — that's an answer too";skip.addEventListener("click",()=>go(state.step+1));nav.appendChild(skip);}
+  }
+  function comment(q){
+    const has=!!state.comments[q.id];
+    const wrap=el("div","comment");wrap.hidden=!has;
+    const lab=txt("label","","Say more (optional)");lab.htmlFor="c-"+q.id;
+    const ta=el("textarea");ta.id="c-"+q.id;ta.placeholder=q.commentPh||"Or something else?";ta.value=state.comments[q.id]||"";ta.style.minHeight="72px";
+    ta.addEventListener("input",()=>{state.comments[q.id]=ta.value;persist();});
+    wrap.appendChild(lab);wrap.appendChild(ta);
+    const lb=txt("button","linkbtn"+(has?" gold":""),has?"":"+ Add a note");lb.type="button";lb.hidden=has;
+    lb.addEventListener("click",()=>{wrap.hidden=false;lb.hidden=true;ta.focus();});
+    card.appendChild(lb);card.appendChild(wrap);
+  }
+  function intro(){
+    card.appendChild(txt("p","eyebrow","For AJ"));
+    card.appendChild(txt("h1","","A kitchen, for you"));
+    card.appendChild(el("p","help","He asked for a game about cooking and it turned into a game about you. Thirteen questions — pick, or type, or skip. <b>Blanks are fine and nothing here is final.</b> There are no right answers; two of these decide what gets built first, and those two say so."));
+    card.appendChild(el("p","help",(storeOK?"Your answers are kept as you go, so you can close this and come back. ":"This phone is not keeping your answers between visits, so finish in one sitting or copy them at the end. ")+"When you send, he reads them. <b>They never go anywhere public</b> — not your plate, not the people you name."));
+    const has=Object.keys(state.answers).length>0;
+    const go1=txt("button","btn primary",has?"Continue where you left off":"Start");go1.type="button";go1.addEventListener("click",()=>go(has?Math.max(0,state.step):0));
+    nav.appendChild(go1);
+  }
+  function fmt(q){const a=state.answers[q.id];if(a==null||a==="")return null;
+    if(q.kind==="multi")return (a||[]).join(" · ")||null;
+    if(q.kind==="textchoice")return [a.choice,a.text].filter(Boolean).join(" — ")||null;
+    if(q.kind==="pair")return [a.dish,a.teacher].filter(Boolean).join(" — ")||null;
+    return String(a)||null;}
+  function sheet(){return Q.map((q,i)=>(i+1)+". "+q.text+"\n   "+(fmt(q)||"(left blank)")+(state.comments[q.id]?"\n   note: "+state.comments[q.id]:"")).join("\n");}
+  function review(){
+    card.appendChild(txt("p","eyebrow","Review"));card.appendChild(txt("h2","","Everything you said"));
+    card.appendChild(txt("p","help",state.sent?"Sent. You can still change any of them — just send again.":"Nothing is sent yet. Change anything you like."));
+    const box=el("div","review");
+    Q.forEach((q,i)=>{const r=el("div","row");r.appendChild(txt("p","q",(i+1)+". "+q.text));
+      const v=fmt(q);r.appendChild(txt("p","a"+(v?"":" blank"),v||"left blank"));
+      if(state.comments[q.id])r.appendChild(txt("p","c","“"+state.comments[q.id]+"”"));
+      const e=txt("button","chg","Change this");e.type="button";e.addEventListener("click",()=>go(i));r.appendChild(e);box.appendChild(r);});
+    card.appendChild(box);
+    if(state.sent){const d=el("div","done");d.appendChild(txt("div","big","🍲"));
+      d.appendChild(el("div","box",db?"<b>Sent.</b> Your answers are still here — nothing was erased.":"<b>Copied.</b> Paste it into your message to him. Your answers are still here — nothing was erased."));
+      if(!db){const t=el("textarea");t.value=sheet();t.readOnly=true;t.style.minHeight="220px";t.setAttribute("aria-label","Your answers, as text");d.appendChild(t);}
+      card.appendChild(d);}
+    const back=txt("button","btn ghost","Back");back.type="button";back.addEventListener("click",()=>go(Q.length-1));
+    const send=txt("button","btn primary",db?(state.sent?"Send again":"Send"):"Copy my answers");send.type="button";
+    send.addEventListener("click",async()=>{state.sent=true;persist();
+      if(!db){try{await navigator.clipboard.writeText(sheet());}catch(e){}}
+      render();});
+    nav.appendChild(back);nav.appendChild(send);
+  }
+  render();
+})();
+</script>
