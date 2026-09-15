@@ -42,6 +42,12 @@ Three pages rendered. What arrived:
 | **Namul** | a cabbage, a pan of yellow rice, chopsticks | **reads as a kitchen, not as this dish.** The pan is paella; the green is a cabbage, not blanched spinach |
 | **Kimbap** | four pink-and-cream stacks | **fails.** The nearest icon is nigiri, and nigiri is not kimbap; after the palette tint it reads as small sandwiches |
 
+> **This table described the 2026-09-15 midday render and was left standing after two rebuilds.** A
+> cold reader caught it: the pictures had six green-ringed rolls and a purple pan with green contents
+> while the register still said pink stacks and paella. **A verdict table has to name the render it
+> judged.** The current state is §"The cold read" below; the rows above are kept as the record of
+> what the borrowed set looked like before the repaint, and nothing more.
+
 **The pattern, and it is the finding:** borrowed art buys **craft** immediately and buys **accuracy**
 not at all. Every object is well drawn and approximately food. None of them is the dish named above
 it. The tint that pulls the palette into the room also costs recognition — it is a trade, not a free
@@ -123,3 +129,44 @@ does, and the kimbap page is the only one whose dish *is* the dish on its label.
 `bookpages.js`, the shared light model is ~190 lines already written and **a dish is about twenty**.
 A dozen dishes is ~240 more lines on a model that holds one camera by construction, against a fresh
 negotiation with a stranger's drawing for every object, renegotiated on every set update.
+
+## The cold read — 2026-09-15, and what it changed
+
+Somebody was shown the three pictures with the text masked and asked to name each dish before reading
+a word. **This had been owed since §19.6 and had never been done.** Results:
+
+| | cold name | |
+|---|---|---|
+| **Jjigae** | *"a pot of stew, laid for two"* | **hit, first time** |
+| **Kimbap** | *"sushi rolls, and one of them has a creature on it"* | hit, with a monster on it |
+| **Namul** | *"I can't tell."* Best guess under pressure: spinach cooking in a purple pan. The five white dots read as **a face with eyes** | **miss** |
+
+**The sentence that summarises all three, and it is the most useful thing said about this art today:**
+
+> **"A person made the room, and a machine put the food in it."**
+
+Every fault found was an *object placed in* the room. The room — wood grain, the wall-to-counter line,
+one warm key across borrowed and drawn objects, the vignette, the paper grain — was the one thing the
+cold reader said not to touch.
+
+### What was fixed because of it
+
+| | what was on screen | what it is now |
+|---|---|---|
+| **The chilli** | 30×34 px — *under* the "can be seen" floor and still the loudest object in the frame. Read as *"a fat magenta banana in a hat with a pin through its back and two pink legs"*; the legs were the chopsticks drawn behind the last roll. **Not in that page's recipe.** | deleted, and the chopsticks moved onto the counter, whole |
+| **The private mark** | 2 / 3 / 1 red slashes in the same corner of three pages. Read cold as *"tally marks"*. Its crease measured **Δ126 from the wall — the highest contrast anywhere on the page, louder than any food**. That is a star rating with the stars replaced by slashes: the one thing §19.5 forbids | **deleted from the art.** The mark already exists in words on the page, and nobody misread those |
+| **The tan crescent** | still there, in both pots, at 3.5 CSS px and Δ117 — *"a lily pad levitating with a gap all round"* — **while this very file claimed it had been fixed.** The arithmetic said so too: liquid reached 0.90r inside a 1.02r clip | fixed by arithmetic rather than by eye: the liquid now exceeds the clip |
+| **The tofu** | two pure-white **axis-aligned rectangles**, 9×4 CSS px at **Δ196** — the highest-contrast mark inside the vessel. Read as *"two blank white labels floating in the soup"* | cubes with a foreshortened top, a turned side and their own shadow, off-axis, and no longer the brightest thing in the picture |
+| **The rolls** | six, **every one under the 48 px floor**, and their sizes alternated big-small-big at 1.2:1 — *"not uneven, a sawtooth; I assumed it was a rendering bug"* — in a picture captioned *cut by hand*. Their shadows were drawn **on top of** them, and they stood behind the board like a kerb | five, all above the floor, sizes as a walk; a board with a top face and a front edge; each roll seated on its own shadow; **and every filling jittered, because a hand does not pack six rolls identically** |
+
+### What is still true and was not fixed
+
+- **The namul pan is drawn in plan view.** No repaint fixes a vessel's camera.
+- **The three pictures are 322 / 314 / 314 CSS px wide** — the cold reader measured it and could not
+  explain it. **It is §20.2's engine fault showing up in our own mocks:** the first document opened in
+  a session is drawn at the wrong width. The jjigae renders first.
+- **Nothing breaks the rim** in any of the three, which §19.3 says is what makes a dish a dish.
+- The cold reader used the filenames, which contain the dish names, so the read was not perfectly
+  blind — and the research sweep adds a sharper requirement: **the cold read must use somebody who
+  does not know the cuisine**, because "stick to foods people know" does not apply to a Korean-first
+  pack and a Western reader has no silhouette for doenjang jjigae.

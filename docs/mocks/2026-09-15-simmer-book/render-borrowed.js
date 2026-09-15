@@ -107,7 +107,12 @@ const OPEN=JSON.parse(fs.readFileSync(path.join(__dirname,'icon-openings.json'),
        const sh=g.createLinearGradient(0,cy-r,0,cy-r*0.15);
        sh.addColorStop(0,"rgba(30,18,10,0.55)");sh.addColorStop(1,"rgba(30,18,10,0)");
        g.fillStyle=sh;g.fillRect(cx-r*1.1,cy-r*1.1,r*2.2,r*1.1);
-       const ly=cy+r*0.30, lrx=r*0.99, lry=r*0.60;                    /* the liquid, an ELLIPSE, reaching the near rim */
+       /* THE CRESCENT, for the second time, and this time by arithmetic rather than by eye. The clip
+          is r*1.02; the liquid was at ly=0.30r with lry=0.60r, so its near edge reached 0.90r and left
+          0.12r of bare inner wall — 3.5 CSS px at Δ117, which a cold reader called "a lily pad
+          levitating with a gap all round". A register in this folder claimed this was fixed; the
+          pixels disagreed and the pixels win. ly+lry must EXCEED the clip. */
+       const ly=cy+r*0.36, lrx=r*0.99, lry=r*0.70;
        const br=g.createLinearGradient(cx-lrx,ly-lry,cx+lrx,ly+lry);
        br.addColorStop(0,o.high||"#9A6540");br.addColorStop(0.45,o.base||"#7C4A2A");br.addColorStop(1,o.core||"#583621");
        g.fillStyle=br;g.beginPath();g.ellipse(cx,ly,lrx,lry,0,0,7);g.fill();
@@ -132,9 +137,13 @@ const OPEN=JSON.parse(fs.readFileSync(path.join(__dirname,'icon-openings.json'),
        g.drawImage(im,cx-size/2,baseY-size,size,size);g.restore();};
      const vign=(g,W,H)=>{const vg=g.createRadialGradient(W/2,H*0.55,Math.min(W,H)*0.28,W/2,H*0.55,Math.max(W,H)*0.8);
        vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(28,18,10,0.28)");g.fillStyle=vg;g.fillRect(0,0,W,H);};
-     const folds=(g,W,H,n)=>{const s=26;for(let i=0;i<n;i++){const x=W-12-i*(s+6),y=12;
-       g.fillStyle="#E9E0C8";g.beginPath();g.moveTo(x,y);g.lineTo(x-s,y);g.lineTo(x,y+s);g.closePath();g.fill();
-       g.strokeStyle="#B44A21";g.lineWidth=2;g.beginPath();g.moveTo(x-s,y);g.lineTo(x,y+s);g.stroke();}};
+     /* THE FOLDS ARE GONE. A cold reader wrote down "two set-squares", "tally marks", "a placeholder
+        for an image that failed to load" — and the counts really were 2 / 3 / 1 in the same corner of
+        three pages, which is a star rating with the stars replaced by slashes: the one thing §19.5
+        says the mark must never be. The crease line also measured Δ126 from the wall, the highest
+        contrast anywhere on the page, louder than any food. The mark already exists in words on the
+        page ("How it went — again"), which nobody misread. */
+     const folds=()=>{};
      const O=window.__OPEN;
      const P={
        jjigae:{t:"Doenjang jjigae",folds:2,
@@ -154,12 +163,23 @@ const OPEN=JSON.parse(fs.readFileSync(path.join(__dirname,'icon-openings.json'),
               of 1.04, i.e. the contents really are a circle. */
            const OP=O["pot-of-food"];
            potFace(g, PX+S*(OP.cx-0.5), PY-S+S*OP.cy, S*OP.rx*1.03, {top:(g,cx,ly,lrx,lry)=>{
-             const cube=(x,y,w,h)=>{g.fillStyle="rgba(24,12,6,0.30)";
-               g.beginPath();g.ellipse(x+w/2,y+h*0.95,w*0.55,h*0.28,0,0,7);g.fill();
-               g.fillStyle="#FBF7EA";g.fillRect(x,y,w,h*0.55);
-               g.fillStyle="#D9D0BA";g.fillRect(x,y+h*0.55,w,h*0.45);};
-             cube(cx-lrx*0.52,ly-lry*0.30,11,8);
-             cube(cx+lrx*0.12,ly-lry*0.02,10,7);
+             /* the tofu was two pure-white axis-aligned rectangles, 9x4 CSS px at Δ196 against the
+                broth — the highest-contrast mark in the whole vessel, and a cold reader saw "two
+                blank white labels floating in the soup". A cube lying on a foreshortened surface
+                needs a foreshortened TOP, a dark side, and to be off-axis. And it must not be the
+                brightest thing in the picture. */
+             const cube=(x,y,w,rot)=>{const h=w*0.62;
+               g.save();g.translate(x,y);g.rotate(rot);
+               g.fillStyle="rgba(24,12,6,0.34)";
+               g.beginPath();g.ellipse(0,h*0.50,w*0.60,h*0.26,0,0,7);g.fill();
+               g.fillStyle="#C9BCA2";                                   /* the side, turned away */
+               g.beginPath();g.moveTo(-w/2,0);g.lineTo(w/2,0);g.lineTo(w/2,h*0.42);g.lineTo(-w/2,h*0.42);
+               g.closePath();g.fill();
+               g.fillStyle="#EFE7D3";                                   /* the top, foreshortened */
+               g.beginPath();g.ellipse(0,0,w/2,h*0.30,0,0,7);g.fill();
+               g.restore();};
+             cube(cx-lrx*0.46,ly-lry*0.26,17,-0.22);
+             cube(cx+lrx*0.16,ly+lry*0.04,15,0.14);
              g.fillStyle="#5F7A52";
              [[-0.12,-0.52],[0.46,-0.36],[0.08,0.42]].forEach(([a,b])=>{
                g.beginPath();g.ellipse(cx+lrx*a,ly+lry*b,4,2.4,0,0,7);g.fill();});
@@ -176,28 +196,52 @@ const OPEN=JSON.parse(fs.readFileSync(path.join(__dirname,'icon-openings.json'),
          art:(g,W,H)=>{const cy=stage(g,W,H);
            /* NO borrowed dish here: the nearest icon is nigiri and nigiri is not kimbap. So the room
               is borrowed and the dish is ours — which is the mix, demonstrated rather than argued. */
-           put(g,"chopsticks",W*0.88,cy+46,50);
-           g.fillStyle="#D4D8DC";g.fillRect(W*0.07,cy+34,W*0.72,9);        /* a steel board */
-           g.fillStyle="#9EA3A8";g.fillRect(W*0.07,cy+43,W*0.72,4);
-           const d=[44,37,47,39,45,35], gap=3;                              /* uneven: her cuts */
-           let x=W*0.085;
+           g.save();g.translate(W*0.90,cy+80);g.rotate(-0.30);   /* on the counter, in front, whole */
+           put(g,"chopsticks",0,0,52);g.restore();
+           /* A BOARD IS A SLAB, NOT A DISC. The pass before drew an ellipse and put the shadows 6px
+              below the rolls on top of it, and it read as a paint palette with holes in it. A board
+              has a top face you see foreshortened and a front edge with thickness, and the thing
+              standing on it touches its own shadow. */
+           const BX=W*0.05, BW=W*0.86, BY=cy+46;
+           g.fillStyle="#7E858B";g.fillRect(BX,BY+8,BW,6);                    /* the front edge */
+           g.fillStyle="rgba(26,16,10,0.35)";g.fillRect(BX,BY+14,BW,3);       /* its shadow on the counter */
+           const face=g.createLinearGradient(0,BY-6,0,BY+9);
+           face.addColorStop(0,"#C9D0D6");face.addColorStop(1,"#9FA7AE");     /* steel, not white */
+           g.fillStyle=face;g.fillRect(BX,BY-6,BW,14);
+           g.fillStyle="rgba(255,255,255,0.35)";g.fillRect(BX,BY-6,BW,1.5);
+           /* FIVE, not six, and sized as a random walk. 44/36/46/38/44/34 alternated big-small-big
+              at 1.2:1, which a cold reader called a rendering bug before reading the caption that
+              claims they were cut by hand. A hand gives a walk, not a sawtooth. And every one was
+              under §19.3's 48px "can be seen" floor. */
+           const d=[54,49,58,51,47], gap=2;
+           let x=W*0.10;
            d.forEach(sz=>{
-             const ccx=x+sz/2, ccy=cy+34-sz*0.30;
+             const ccx=x+sz/2, ccy=BY+5-sz*0.41;              /* its BOTTOM lands ON the board's face */
              g.fillStyle="rgba(26,16,10,0.34)";
-             g.beginPath();g.ellipse(ccx+2,cy+36,sz*0.42,sz*0.12,0,0,7);g.fill();
+             g.beginPath();g.ellipse(ccx+2,ccy+sz*0.40,sz*0.38,sz*0.09,0,0,7);g.fill();
              const nori=g.createLinearGradient(ccx-sz/2,ccy-sz/2,ccx+sz/2,ccy+sz/2);
              nori.addColorStop(0,"#31402A");nori.addColorStop(1,"#141B12");
              g.fillStyle=nori;g.beginPath();g.ellipse(ccx,ccy,sz/2,sz/2*0.82,0,0,7);g.fill();
              const rice=g.createLinearGradient(ccx-sz/2,ccy-sz/2,ccx+sz/2,ccy+sz/2);
              rice.addColorStop(0,"#FFFDF4");rice.addColorStop(1,"#DCD3BE");
              g.fillStyle=rice;g.beginPath();g.ellipse(ccx,ccy,sz/2-5,(sz/2-5)*0.82,0,0,7);g.fill();
-             g.fillStyle="#E8C15A";g.fillRect(ccx-5,ccy-4,10,7);
-             g.fillStyle="#5F7A52";g.fillRect(ccx-9,ccy+1,6,4);
-             g.fillStyle="#B44A21";g.fillRect(ccx+3,ccy+2,5,3);
+             /* A HAND DOES NOT PACK SIX ROLLS IDENTICALLY. The pass before drew the same three
+                rectangles in the same arrangement in every roll, in a picture whose caption is about
+                cutting by hand — a cold reader spotted the contradiction inside one frame. Each roll
+                now gets its own jitter, and no filling is axis-aligned. */
+             const j=(k)=>((Math.sin(ccx*12.9898+k*78.233)*43758.5453)%1+1)%1-0.5;
+             g.save();g.translate(ccx,ccy);g.rotate(j(1)*0.5);
+             g.fillStyle="#E8C15A";g.fillRect(-5+j(2)*4,-4+j(3)*3,9+j(4)*3,7);
+             g.fillStyle="#5F7A52";g.fillRect(-9+j(5)*3,1+j(6)*3,6,4);
+             g.fillStyle="#B44A21";g.fillRect(3+j(7)*3,2+j(8)*2,5,3);
+             g.restore();
              g.save();g.globalAlpha=0.35;g.fillStyle="#FFFFFF";
              g.beginPath();g.ellipse(ccx-sz*0.16,ccy-sz*0.18,sz*0.10,sz*0.07,-0.4,0,7);g.fill();g.restore();
              x+=sz+gap;});
-           put(g,"hot_pepper",W*0.90,cy+30,34);
+           /* NO CHILLI. At 30x34 it is under §19.3's "seen" floor and was still the loudest object in
+              the frame — a cold reader saw "a fat magenta banana in a hat with a pin through its back
+              and two pink legs", the legs being the chopsticks drawn behind the last roll. It is also
+              not in this page's recipe. Both removed. */
            relight(g,W,H);vign(g,W,H);grain(g,W,H);folds(g,W,H,3);frame(g,W,H);},
          drew:"rounds cut by hand — uneven, and nothing in the game says so",
          said:"“The cutting is the good part. Mine are all different sizes and I don’t care.”",
