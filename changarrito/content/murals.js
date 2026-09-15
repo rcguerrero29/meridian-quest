@@ -4163,6 +4163,375 @@ MURALS.push(
 }
 );
 
+MURALS.push(
+{
+  id:"chava-la-cena-vino-sellada", iter:10, date:"2026-09-15", by:"chava",
+  title:{en:"The supper came sealed", es:"La cena vino sellada"},
+  state:{en:"The first three words are the whole test.", es:"Las tres primeras palabras son la prueba."},
+  said:{en:"A person made the room, and a machine put the food in it.",
+        es:"Una persona hizo el cuarto, y una máquina le puso la comida adentro."},
+  who:{en:"Chava, who names what he sees before anyone lets him read the label",
+       es:"Chava, que nombra lo que ve antes de que lo dejen leer la etiqueta"},
+  cap:{en:"Three pages of her book, shown to me with every word masked, and I had to name the dish before I read one. A pot of stew, laid for two — right. Sushi rolls, and one of them has a creature on it — right, and there was no creature in that recipe: a chilli thirty pixels across, below the size anything on that page is allowed to be, wearing a hat, pinned through the back, with two pink legs that were the chopsticks behind it. The third I could not name at all; five sesame seeds in a green dish looked back at me like a face. Every fault I found was an object somebody put in the room. Nobody put a foot wrong on the room.",
+       es:"Tres páginas de su libro, con todas las palabras tapadas, y tenía que nombrar el platillo antes de leer una sola. Una olla de guisado, puesta para dos — bien. Rollos de sushi, y uno trae un bicho encima — bien, y en esa receta no había ningún bicho: un chile de treinta píxeles, por debajo del tamaño que esa página permite, con sombrero, atravesado por un alfiler y con dos patas rosas que eran los palillos de atrás. Al tercero no supe ponerle nombre; cinco ajonjolíes en un plato verde me miraron como una cara. Cada falla que encontré era un objeto que alguien metió al cuarto. Al cuarto nadie le puso mal un clavo."},
+  aspect:0.33,
+  art:(g,W,H)=>{
+  /* MATERIAL: a shoebox diorama. Corrugated kraft, pencil, PVA glue and masking tape --
+     a room somebody built by hand out of one box -- and the food arriving in vacuum-formed
+     plastic blisters, heat-sealed to printed card, hung on steel shop hooks driven through
+     the back wall. Two palettes on purpose and neither is the wall's: the room is kraft,
+     graphite and warm glue, lit by one lamp; the food is candy, printed shadow and the flat
+     cold light of a shop. Nothing in the packs can be got at, and nothing in them has ever
+     been in this room. */
+  const KRAFT="#C08F55", KRAFTL="#DDB27C", KRAFTM="#A87A41", KRAFTD="#855A31", KRAFTX="#5E3C1C",
+        FLUTE="#EACB9C", GRAPH="#4B463E", TAPE="#EADEBE", GLUE="#F7F1DF",
+        PLAS="#DDEEF7", PLASD="#8FB6C8", PLASH="#FFFFFF", CARDW="#F3F2ED", PRINT="#B9B9B4",
+        STEEL="#A6AFB5", STEELD="#59646B", SKINL="#D29C6C", SHADE="#3A2409",
+        CANDY="#E85A9B", CANDYD="#AE1866", ACID="#79D24B", ACIDD="#347F2C",
+        YOLK="#F5C23A", RUSTP="#C9481F", RUSTD="#8E2F13", CREAM="#FCF5E2";
+  murGround(g,W,H);
+
+  /* one seeded hand, so every fibre and every shaving lands in the same place each render */
+  let _s=20260915; const rnd=()=>((_s=(_s*1103515245+12345)&0x7fffffff)/0x7fffffff);
+
+  /* the whole room in one column of numbers, because a short wide frame has no slack */
+  const by=H*0.085,            /* the top edge of the box */
+        cy=H*0.600, cd=H*0.120,/* the counter: its top face, and how deep it looks */
+        fl=H*0.100,            /* the cut edge under the counter */
+        inx=W*0.075;           /* how far the side walls of the box come in */
+
+  /* ---------- THE BOX: full bleed, so nothing frames it on the wall ---------- */
+  const wg=g.createLinearGradient(0,by,W*0.85,H);
+  wg.addColorStop(0,KRAFTL); wg.addColorStop(0.5,KRAFT); wg.addColorStop(1,KRAFTM);
+  g.fillStyle=wg; g.fillRect(0,by,W,H-by);
+  const kg=g.createRadialGradient(W*0.17,H*0.20,W*0.02,W*0.17,H*0.20,W*0.55);
+  kg.addColorStop(0,"rgba(255,226,170,0.52)"); kg.addColorStop(1,"rgba(255,226,170,0)");
+  g.fillStyle=kg; g.fillRect(0,by,W,H-by);                 /* the one lamp this room has */
+  for(let i=0;i<300;i++){                                  /* kraft fibre */
+    const fx=rnd()*W, fy=by+rnd()*(H-by), fw2=W*(0.004+rnd()*0.020);
+    g.globalAlpha=0.05+rnd()*0.07; g.fillStyle=rnd()>0.5?KRAFTD:FLUTE;
+    g.fillRect(fx,fy,fw2,Math.max(1,W*0.002));
+  }
+  g.globalAlpha=1;
+  /* the two returns of the box, turning away from the lamp */
+  g.fillStyle=KRAFTX; g.globalAlpha=0.38;
+  g.beginPath(); g.moveTo(0,by); g.lineTo(inx,by+H*0.075); g.lineTo(inx,H); g.lineTo(0,H);
+  g.closePath(); g.fill();
+  g.globalAlpha=0.56;
+  g.beginPath(); g.moveTo(W,by); g.lineTo(W-inx*0.8,by+H*0.075); g.lineTo(W-inx*0.8,H); g.lineTo(W,H);
+  g.closePath(); g.fill();
+  g.globalAlpha=1;
+  const cg=g.createLinearGradient(0,by,0,by+H*0.26);       /* the lid's shadow down the wall */
+  cg.addColorStop(0,"rgba(50,28,10,0.52)"); cg.addColorStop(1,"rgba(50,28,10,0)");
+  g.fillStyle=cg; g.fillRect(0,by,W,H*0.26);
+  /* the top edge, cut by hand with a knife, so it is not straight */
+  g.fillStyle=KRAFTX;
+  g.beginPath(); g.moveTo(0,by+H*0.030);
+  for(let x=0;x<=W;x+=W*0.045) g.lineTo(x,by-H*0.004+(rnd()-0.5)*H*0.020);
+  g.lineTo(W,by+H*0.030); g.closePath(); g.fill();
+  g.fillStyle=FLUTE; g.globalAlpha=0.40;
+  g.fillRect(0,by+H*0.018,W,Math.max(1,H*0.012)); g.globalAlpha=1;
+
+  /* the cut edge of a sheet of board: dark, with the flutes just readable inside it */
+  const flute=(y0,th,per,dark)=>{
+    g.fillStyle=dark||KRAFTX; g.fillRect(0,y0,W,th);
+    g.strokeStyle=FLUTE; g.globalAlpha=0.32; g.lineWidth=Math.max(1.1,W*0.0035); g.lineCap="butt";
+    for(let x=-per;x<W+per;x+=per){
+      g.beginPath(); g.moveTo(x,y0+th*0.95);
+      g.bezierCurveTo(x+per*0.18,y0+th*0.10,x+per*0.82,y0+th*0.10,x+per,y0+th*0.95);
+      g.stroke();
+    }
+    g.globalAlpha=1;
+    g.fillStyle="rgba(40,24,8,0.40)"; g.fillRect(0,y0,W,Math.max(1,th*0.16));
+    g.fillStyle="rgba(255,240,214,0.20)"; g.fillRect(0,y0+th-Math.max(1,th*0.13),W,Math.max(1,th*0.13));
+  };
+
+  /* ---------- WHAT THE PERSON DID: pencil, tape, glue ---------- */
+  /* a kitchen's tiles, ruled on the back wall by somebody with no ruler */
+  g.strokeStyle=GRAPH; g.lineWidth=Math.max(1,W*0.0028);
+  const t0=by+H*0.100, tH=H*0.125, tW=W*0.092;
+  for(let r=0;r<4;r++){
+    g.globalAlpha=0.28-r*0.035;
+    const ly=t0+r*tH;
+    g.beginPath(); g.moveTo(inx,ly);
+    for(let x=inx;x<W-inx*0.8;x+=W*0.045) g.lineTo(x,ly+(rnd()-0.5)*H*0.010);
+    g.stroke();
+  }
+  for(let c=0;c<9;c++){
+    g.globalAlpha=0.24;
+    const lx=inx+c*tW+(c%2)*W*0.004;
+    g.beginPath(); g.moveTo(lx,t0);
+    for(let y=t0;y<t0+tH*2.6;y+=H*0.06) g.lineTo(lx+(rnd()-0.5)*W*0.005,y);
+    g.stroke();
+  }
+  g.globalAlpha=1;
+  /* the seam where two bits of the same box were butted up to make one wall */
+  g.strokeStyle=KRAFTX; g.globalAlpha=0.5; g.lineWidth=Math.max(1.2,W*0.0035);
+  g.beginPath(); g.moveTo(W*0.672,by);
+  for(let y=by;y<cy;y+=H*0.08) g.lineTo(W*0.672+(rnd()-0.5)*W*0.005,y);
+  g.stroke(); g.globalAlpha=1;
+  /* masking tape, torn off by hand, holding that seam together */
+  const tape=(x,y,w,h,rot,al)=>{
+    g.save(); g.translate(x,y); g.rotate(rot);
+    g.globalAlpha=al; g.fillStyle=TAPE; g.fillRect(0,0,w,h);
+    g.globalAlpha=al*0.45; g.fillStyle=KRAFTD;
+    for(let i=0;i<8;i++){ g.fillRect(w-W*0.010+rnd()*W*0.010,i*h/8,W*0.008,h/9);
+                          g.fillRect(rnd()*W*0.007-W*0.005,i*h/8,W*0.007,h/9); }
+    g.globalAlpha=al*0.30; g.strokeStyle="#B99C6A"; g.lineWidth=1; g.strokeRect(0.5,0.5,w-1,h-1);
+    g.restore(); g.globalAlpha=1;
+  };
+  tape(W*0.658,by+H*0.020,W*0.030,H*0.430,0.014,0.78);
+
+  /* ---------- THE COUNTER: another piece of the same box, laid flat ---------- */
+  g.beginPath();
+  g.moveTo(inx,cy); g.lineTo(W-inx*0.8,cy); g.lineTo(W,cy+cd); g.lineTo(0,cy+cd); g.closePath();
+  const tg=g.createLinearGradient(0,cy,0,cy+cd);
+  tg.addColorStop(0,"#E9C18D"); tg.addColorStop(1,"#C79A62");
+  g.fillStyle=tg; g.fill();
+  g.globalAlpha=0.85; g.fillStyle=GLUE;                     /* glue squeezed out of the joint */
+  g.beginPath(); g.moveTo(inx,cy+H*0.008);
+  for(let x=inx;x<W-inx*0.8;x+=W*0.035) g.lineTo(x,cy-H*0.010+(rnd()-0.5)*H*0.010);
+  g.lineTo(W-inx*0.8,cy+H*0.010); g.lineTo(inx,cy+H*0.010); g.closePath(); g.fill();
+  g.fillStyle="#FFFFFF"; g.globalAlpha=0.8;
+  g.fillRect(W*0.19,cy-H*0.008,W*0.12,Math.max(1,H*0.006)); g.globalAlpha=1;
+  g.strokeStyle=GRAPH; g.lineWidth=Math.max(1,W*0.003);     /* wood grain, drawn on by hand */
+  for(let i=0;i<5;i++){
+    const gy0=cy+cd*(0.22+i*0.165), stop=(i===4)?0.50:1.0;
+    g.globalAlpha=(i===4)?0.34:0.50;
+    g.beginPath(); g.moveTo(0,gy0);
+    for(let t=0;t<=stop+0.0001;t+=0.08) g.lineTo(W*t,gy0+Math.sin(t*7+i*1.7)*H*0.007+(rnd()-0.5)*H*0.004);
+    g.stroke();                                             /* and the last one stops halfway */
+  }
+  g.globalAlpha=1;
+  flute(cy+cd,fl,W*0.055);
+
+  /* ---------- WHAT THE MACHINE BROUGHT: three sealed packs on shop hooks ---------- */
+  const packs=[{x:0.392,y:0.150,rot:-0.075,k:"pot"},
+               {x:0.590,y:0.186,rot: 0.050,k:"rolls"},
+               {x:0.800,y:0.138,rot:-0.032,k:"disc"}];
+  const pw=W*0.150, ph=H*0.520;
+
+  packs.forEach(p=>{
+    const cxp=W*p.x, cyp=H*p.y;
+    const hx=cxp, hy=cyp-H*0.072;                           /* the hook, and the wound it made */
+    g.globalAlpha=0.42; g.fillStyle=KRAFTX;
+    for(let k=0;k<5;k++){
+      g.save(); g.translate(hx,hy+H*0.050); g.rotate(k/5*Math.PI*2+0.3);
+      g.fillRect(W*0.003,-W*0.003,W*0.012+rnd()*W*0.007,W*0.005); g.restore();
+    }
+    g.globalAlpha=1;
+    g.strokeStyle=STEELD; g.lineWidth=Math.max(2.4,W*0.0075); g.lineCap="round";
+    g.beginPath(); g.moveTo(hx,hy); g.lineTo(hx,hy+H*0.072); g.stroke();
+    g.strokeStyle=STEEL; g.lineWidth=Math.max(1.2,W*0.003);
+    g.beginPath(); g.moveTo(hx-W*0.0018,hy+H*0.004); g.lineTo(hx-W*0.0018,hy+H*0.064); g.stroke();
+    g.fillStyle=STEELD; g.beginPath(); g.ellipse(hx,hy,W*0.011,H*0.012,0,0,7); g.fill();
+    g.fillStyle=STEEL;  g.beginPath(); g.ellipse(hx-W*0.003,hy-H*0.003,W*0.006,H*0.006,0,0,7); g.fill();
+
+    g.save(); g.translate(cxp,cyp); g.rotate(p.rot); g.translate(-pw/2,0);
+    /* THE SAME SHADOW, three times, from three different objects. It is the tell. */
+    g.globalAlpha=0.24; g.fillStyle="#3E2A10"; g.fillRect(W*0.016,H*0.040,pw,ph); g.globalAlpha=1;
+    g.fillStyle=CARDW; g.fillRect(0,0,pw,ph);               /* the printed backing card */
+    g.strokeStyle=PRINT; g.lineWidth=1; g.strokeRect(0.5,0.5,pw-1,ph-1);
+    g.fillStyle="#E2E6E4"; g.fillRect(0,0,pw,H*0.082);      /* the header, and its euro-slot */
+    g.fillStyle=KRAFT;
+    g.beginPath(); g.ellipse(pw/2,H*0.050,W*0.015,H*0.020,0,0,7); g.fill();
+    g.fillRect(pw/2-W*0.005,H*0.018,W*0.010,H*0.034);
+    g.globalAlpha=0.6; g.fillStyle=PRINT;                   /* the shadow that came printed on */
+    g.beginPath(); g.ellipse(pw*0.57,ph*0.775,pw*0.32,ph*0.048,0,0,7); g.fill(); g.globalAlpha=1;
+    g.strokeStyle=PLASD; g.globalAlpha=0.85; g.lineWidth=Math.max(1,W*0.0028);
+    g.setLineDash([Math.max(2,W*0.005),Math.max(2,W*0.004)]);
+    g.strokeRect(W*0.008,H*0.095,pw-W*0.016,ph-H*0.125);    /* the heat seal, crimped round */
+    g.setLineDash([]); g.globalAlpha=1;
+
+    /* ---- the food, in the machine's own palette, one camera each and none of them ours ---- */
+    const fx=pw/2, fy=ph*0.505, fs=pw*0.84;
+    if(p.k==="pot"){
+      const rw=fs*0.38, ry0=fy+fs*0.02;
+      g.fillStyle=RUSTD;
+      g.beginPath(); g.moveTo(fx-rw,ry0); g.lineTo(fx+rw,ry0);
+      g.lineTo(fx+rw*0.80,fy+fs*0.36);
+      g.quadraticCurveTo(fx,fy+fs*0.45,fx-rw*0.80,fy+fs*0.36); g.closePath(); g.fill();
+      g.fillStyle=RUSTP;
+      g.beginPath(); g.moveTo(fx-rw,ry0); g.lineTo(fx-rw*0.10,ry0);
+      g.lineTo(fx-rw*0.22,fy+fs*0.41);
+      g.quadraticCurveTo(fx-rw*0.55,fy+fs*0.415,fx-rw*0.80,fy+fs*0.36); g.closePath(); g.fill();
+      g.fillStyle=STEEL;                                    /* two ears */
+      g.fillRect(fx-rw-fs*0.105,ry0+fs*0.050,fs*0.11,fs*0.070);
+      g.fillRect(fx+rw-fs*0.005,ry0+fs*0.050,fs*0.11,fs*0.070);
+      g.fillStyle=RUSTD;                                    /* the rim, an ellipse, at an angle */
+      g.beginPath(); g.ellipse(fx,ry0,rw,rw*0.28,0,0,7); g.fill();
+      g.fillStyle="#6E1F0B";
+      g.beginPath(); g.ellipse(fx,ry0,rw*0.90,rw*0.22,0,0,7); g.fill();
+      /* the contents, drawn from straight above: a perfect circle in an elliptical hole,
+         standing proud of the rim at both ends. Two cameras in one object. */
+      g.fillStyle=YOLK;
+      g.beginPath(); g.arc(fx,ry0-rw*0.06,rw*0.62,0,7); g.fill();
+      g.fillStyle=CANDY; g.globalAlpha=0.85;                 /* one lump in it, off to one side */
+      g.beginPath(); g.arc(fx-rw*0.26,ry0-rw*0.22,rw*0.16,0,7); g.fill();
+      g.globalAlpha=1;
+      g.strokeStyle="#6E1F0B"; g.globalAlpha=0.6; g.lineWidth=Math.max(1.1,W*0.003);
+      g.beginPath(); g.ellipse(fx,ry0,rw,rw*0.28,0,0.18,Math.PI-0.18); g.stroke();
+      g.globalAlpha=1;
+    }
+    if(p.k==="rolls"){
+      for(let r=0;r<3;r++){
+        const rx=fx+(r-1)*fs*0.33, ry=fy+fs*0.16;
+        g.fillStyle=ACIDD; g.beginPath(); g.arc(rx,ry,fs*0.175,0,7); g.fill();
+        g.fillStyle=CREAM; g.beginPath(); g.arc(rx,ry,fs*0.137,0,7); g.fill();
+        g.fillStyle=CANDY; g.beginPath(); g.arc(rx,ry,fs*0.056,0,7); g.fill();
+      }
+      /* THE CREATURE: a fat magenta banana in a hat, pinned through the back, standing on
+         the middle round on two pink legs that were somebody else's chopsticks */
+      const kx=fx+fs*0.02, ky=fy-fs*0.21, ks=fs*1.16;
+      g.strokeStyle=CANDY; g.lineWidth=Math.max(1.8,W*0.005); g.lineCap="round";
+      g.beginPath(); g.moveTo(kx-ks*0.055,ky+ks*0.085); g.lineTo(kx-ks*0.075,ky+ks*0.235); g.stroke();
+      g.beginPath(); g.moveTo(kx+ks*0.045,ky+ks*0.085); g.lineTo(kx+ks*0.065,ky+ks*0.235); g.stroke();
+      g.fillStyle=CANDYD;
+      g.beginPath();
+      g.moveTo(kx-ks*0.085,ky+ks*0.115);
+      g.quadraticCurveTo(kx-ks*0.155,ky-ks*0.055,kx-ks*0.045,ky-ks*0.145);
+      g.quadraticCurveTo(kx+ks*0.065,ky-ks*0.185,kx+ks*0.095,ky-ks*0.060);
+      g.quadraticCurveTo(kx+ks*0.115,ky+ks*0.075,kx+ks*0.020,ky+ks*0.125);
+      g.closePath(); g.fill();
+      g.fillStyle=CANDY;
+      g.beginPath();
+      g.moveTo(kx-ks*0.060,ky+ks*0.085);
+      g.quadraticCurveTo(kx-ks*0.115,ky-ks*0.045,kx-ks*0.030,ky-ks*0.120);
+      g.quadraticCurveTo(kx+ks*0.020,ky-ks*0.140,kx+ks*0.020,ky-ks*0.040);
+      g.quadraticCurveTo(kx+ks*0.020,ky+ks*0.055,kx-ks*0.010,ky+ks*0.095);
+      g.closePath(); g.fill();
+      g.fillStyle=ACIDD;                                    /* the hat */
+      g.beginPath(); g.moveTo(kx-ks*0.095,ky-ks*0.135);
+      g.lineTo(kx+ks*0.075,ky-ks*0.165); g.lineTo(kx-ks*0.020,ky-ks*0.295); g.closePath(); g.fill();
+      g.fillStyle=ACID; g.fillRect(kx-ks*0.100,ky-ks*0.155,ks*0.180,Math.max(1.4,W*0.0035));
+      g.strokeStyle=STEEL; g.lineWidth=Math.max(1.6,W*0.004); /* the pin, through its back */
+      g.beginPath(); g.moveTo(kx-ks*0.240,ky+ks*0.140); g.lineTo(kx+ks*0.230,ky-ks*0.090); g.stroke();
+      g.fillStyle=STEELD;
+      g.beginPath(); g.arc(kx-ks*0.255,ky+ks*0.150,Math.max(1.8,W*0.006),0,7); g.fill();
+    }
+    if(p.k==="disc"){
+      g.fillStyle=ACIDD; g.beginPath(); g.arc(fx,fy,fs*0.375,0,7); g.fill();
+      g.fillStyle=ACID;  g.beginPath(); g.arc(fx,fy,fs*0.310,0,7); g.fill();
+      g.fillStyle=CREAM;                                    /* five seeds, and they look back */
+      [[-0.140,-0.120,0.068],[0.140,-0.120,0.068],
+       [-0.110,0.150,0.036],[0.005,0.190,0.036],[0.120,0.150,0.036]].forEach(s=>{
+        g.beginPath(); g.ellipse(fx+fs*s[0],fy+fs*s[1],fs*s[2],fs*s[2]*0.74,0,0,7); g.fill(); });
+    }
+
+    /* ---- the blister: a bubble of plastic, bulging, with its own shadow on the card ---- */
+    const dx=pw*0.080, dy=H*0.112, dw=pw*0.84, dh=ph*0.700, r=Math.min(dw,dh)*0.26;
+    const bub=(ox,oy)=>{
+      g.beginPath();
+      g.moveTo(dx+ox+r,dy+oy); g.lineTo(dx+ox+dw-r,dy+oy);
+      g.quadraticCurveTo(dx+ox+dw,dy+oy,dx+ox+dw,dy+oy+r);
+      g.lineTo(dx+ox+dw,dy+oy+dh-r);
+      g.quadraticCurveTo(dx+ox+dw,dy+oy+dh,dx+ox+dw-r,dy+oy+dh);
+      g.lineTo(dx+ox+r,dy+oy+dh);
+      g.quadraticCurveTo(dx+ox,dy+oy+dh,dx+ox,dy+oy+dh-r);
+      g.lineTo(dx+ox,dy+oy+r); g.quadraticCurveTo(dx+ox,dy+oy,dx+ox+r,dy+oy); g.closePath();
+    };
+    g.globalAlpha=0.32; g.fillStyle="#7E8A90"; bub(W*0.009,H*0.016); g.fill(); g.globalAlpha=1;
+    bub(0,0);
+    const dg=g.createLinearGradient(dx,dy,dx+dw,dy+dh);
+    dg.addColorStop(0,"rgba(255,255,255,0.48)");
+    dg.addColorStop(0.42,"rgba(221,238,247,0.10)");
+    dg.addColorStop(1,"rgba(143,182,200,0.44)");
+    g.fillStyle=dg; g.fill();
+    g.strokeStyle=PLAS; g.globalAlpha=0.95; g.lineWidth=Math.max(1.6,W*0.005); g.stroke();
+    g.globalAlpha=1;
+    g.save(); bub(0,0); g.clip();
+    g.globalAlpha=0.62; g.fillStyle=PLASH;                  /* one shop light, three times */
+    g.beginPath(); g.moveTo(dx+dw*0.08,dy+dh); g.lineTo(dx+dw*0.32,dy);
+    g.lineTo(dx+dw*0.45,dy); g.lineTo(dx+dw*0.21,dy+dh); g.closePath(); g.fill();
+    g.globalAlpha=0.34;
+    g.beginPath(); g.moveTo(dx+dw*0.56,dy+dh); g.lineTo(dx+dw*0.71,dy);
+    g.lineTo(dx+dw*0.77,dy); g.lineTo(dx+dw*0.62,dy+dh); g.closePath(); g.fill();
+    g.globalAlpha=1; g.restore();
+    g.strokeStyle="rgba(255,255,255,0.75)"; g.lineWidth=Math.max(1.1,W*0.003);
+    g.beginPath(); g.moveTo(dx+dw*0.10,dy+dh*0.965); g.lineTo(dx+dw*0.90,dy+dh*0.965); g.stroke();
+    g.restore();
+  });
+
+  /* ---------- THE PERSON: he is not in the room. He is outside it, where the lamp is,
+     and the only part of him that gets in is his shadow, reaching for the first pack and
+     falling across tiles he ruled himself. The packs' shadows came printed; this one is
+     thrown. ---------- */
+  const shadow=(ox,oy,sc,al)=>{
+    g.save(); g.translate(W*0.115+ox,H*0.300+oy); g.rotate(0.26); g.scale(sc,sc);
+    const L=W*0.150, T=H*0.086;                           /* one finger's length and thickness */
+    const cap=(bx2,by2,len,th,rot)=>{                     /* a finger, as its own subpath */
+      const c=Math.cos(rot), s=Math.sin(rot);
+      const px2=(x,y)=>[bx2+x*c-y*s, by2+x*s+y*c];
+      let p=px2(0,-th/2); g.moveTo(p[0],p[1]);
+      p=px2(len-th/2,-th/2); g.lineTo(p[0],p[1]);
+      const cc=px2(len-th/2,0);
+      g.arc(cc[0],cc[1],th/2,rot-Math.PI/2,rot+Math.PI/2);
+      p=px2(0,th/2); g.lineTo(p[0],p[1]);
+      g.closePath();
+    };
+    g.beginPath();
+    /* the palm and the forearm, out through the left wall of the box */
+    g.moveTo(-W*0.30,-T*0.95); g.lineTo(-W*0.02,-T*1.05);
+    g.quadraticCurveTo(W*0.055,-T*1.02,W*0.050,-T*0.35);
+    g.lineTo(W*0.050,T*1.35);
+    g.quadraticCurveTo(W*0.040,T*1.95,-W*0.030,T*1.75);
+    g.lineTo(-W*0.30,T*1.15);
+    g.closePath();
+    cap(W*0.020,-T*0.72,L*0.94,T*0.86,-0.30);            /* index */
+    cap(W*0.035,-T*0.04,L*1.00,T*0.88,-0.10);            /* middle */
+    cap(W*0.035,T*0.66,L*0.90,T*0.84, 0.06);             /* ring */
+    cap(W*0.015,T*1.32,L*0.66,T*0.78, 0.24);             /* little */
+    cap(-W*0.055,T*1.55,L*0.62,T*0.82, 1.15);            /* thumb, down and out */
+    g.globalAlpha=al; g.fillStyle=SHADE; g.fill();   /* one fill: no double darkening */
+    g.restore(); g.globalAlpha=1;
+  };
+  shadow(W*0.014,H*0.024,1.07,0.15);                      /* the soft edge of it */
+  shadow(0,0,1.0,0.34);
+
+  /* the room's own bowl, cut and glued out of the same box, and empty */
+  const bwx=W*0.205, bwy=cy+cd*0.42, bwr=W*0.052;
+  g.fillStyle="rgba(70,42,14,0.30)";
+  g.beginPath(); g.ellipse(bwx+W*0.010,bwy+H*0.088,bwr*1.00,bwr*0.26,0,0,7); g.fill();
+  g.fillStyle=KRAFTM;                                     /* the body, tapering to a small foot */
+  g.beginPath(); g.moveTo(bwx-bwr,bwy);
+  g.quadraticCurveTo(bwx-bwr*0.72,bwy+H*0.088,bwx-bwr*0.34,bwy+H*0.092);
+  g.lineTo(bwx+bwr*0.34,bwy+H*0.092);
+  g.quadraticCurveTo(bwx+bwr*0.72,bwy+H*0.088,bwx+bwr,bwy); g.closePath(); g.fill();
+  g.fillStyle=KRAFTD; g.globalAlpha=0.55;                 /* the side turning away from the lamp */
+  g.beginPath(); g.moveTo(bwx+bwr*0.20,bwy);
+  g.quadraticCurveTo(bwx+bwr*0.72,bwy+H*0.088,bwx+bwr*0.34,bwy+H*0.092);
+  g.lineTo(bwx+bwr*0.10,bwy+H*0.092); g.closePath(); g.fill(); g.globalAlpha=1;
+  g.fillStyle="#A97A44";                                  /* inside it, lit, and empty */
+  g.beginPath(); g.ellipse(bwx,bwy,bwr,bwr*0.34,0,0,7); g.fill();
+  g.fillStyle=KRAFTL;                                     /* the cut rim, catching the lamp */
+  g.beginPath(); g.ellipse(bwx,bwy,bwr,bwr*0.34,0,Math.PI,0); g.fill();
+  g.strokeStyle=KRAFTL; g.lineWidth=Math.max(1.4,W*0.004);
+  g.beginPath(); g.ellipse(bwx,bwy,bwr,bwr*0.34,0,0,7); g.stroke();
+  g.strokeStyle=GRAPH; g.globalAlpha=0.30; g.lineWidth=Math.max(1,W*0.0025);
+  g.beginPath(); g.ellipse(bwx,bwy,bwr*0.80,bwr*0.26,0,0,7); g.stroke(); g.globalAlpha=1;
+
+  /* ---------- the front edge of the box, and that is the bottom of the picture ---------- */
+  flute(H*0.862,H*0.095,W*0.055,"#4E3116");
+  g.fillStyle="rgba(24,14,4,0.55)"; g.fillRect(0,H*0.957,W,H*0.043);
+  g.save(); g.translate(W*0.700,cy+cd*0.30); g.rotate(-0.045);   /* his pencil, put down */
+  g.fillStyle="rgba(30,18,6,0.28)"; g.fillRect(W*0.008,H*0.034,W*0.215,H*0.016);
+  g.fillStyle=YOLK; g.fillRect(0,0,W*0.195,H*0.030);
+  g.fillStyle="#CE9C24"; g.fillRect(0,H*0.021,W*0.195,H*0.009);
+  g.fillStyle=SKINL; g.beginPath(); g.moveTo(W*0.195,0); g.lineTo(W*0.232,H*0.015);
+  g.lineTo(W*0.195,H*0.030); g.closePath(); g.fill();
+  g.fillStyle=GRAPH; g.beginPath(); g.moveTo(W*0.226,H*0.0115); g.lineTo(W*0.243,H*0.015);
+  g.lineTo(W*0.226,H*0.0185); g.closePath(); g.fill();
+  g.restore();
+  g.strokeStyle=FLUTE; g.globalAlpha=0.65; g.lineWidth=Math.max(1.1,W*0.0028); /* shavings */
+  for(let i=0;i<3;i++){
+    const sx=W*(0.905+i*0.028), sy=cy+cd*(0.42+(i%2)*0.34);
+    g.beginPath(); g.arc(sx,sy,W*0.009,0.6,5.2); g.stroke();
+  }
+  g.globalAlpha=1;
+}
+}
+);
+
 /* ================================================================================================
    LA COLCHA — the quilt. (Owner, 2026-09-12: "you have to help the agents with this mural my friend,
    i see little drawings. they should be able to append images and attach them like a quilt.")

@@ -586,6 +586,16 @@ wall is drawing itself differently each time.
   at 0.0 across its whole width, with not one pixel of contact or cast shadow in the frame. That is
   not light from somewhere, it is an outline, and an outline is identical down both sides because
   an outline always is.
+- **Chava (4th), `chava-la-cena-vino-sellada`** — a shoebox diorama, 0.33, two palettes on purpose:
+  the room is corrugated kraft, pencil, PVA and masking tape under one lamp, and the food arrives in
+  vacuum-formed blisters heat-sealed to printed card and hung on steel hooks driven through the back
+  wall. All three packs cast **the same shadow at the same offset**, and the shadow inside each pack
+  came *printed on*. He built the room by hand — ruled tiles, a taped seam, glue squeezed out of the
+  joint, a bowl cut from the same box and empty, his pencil put down with the shavings — and the
+  person is not in it: the only part of him that gets in is his own shadow, reaching in from where
+  the lamp is for the first pack, across tiles he ruled himself. It is his cold read of her three
+  book pages drawn instead of written: *"every fault I found was an object somebody put in the room.
+  Nobody put a foot wrong on the room."*
 
 ## Coming back — how a return visit works, and the rule against stamps
 
