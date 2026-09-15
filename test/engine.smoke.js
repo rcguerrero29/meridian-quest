@@ -77,7 +77,9 @@ const { chromium } = require('playwright-core');
   warns.filter(w => /^(?:CRIT )?(reach|portal|world|room|wander|arrival):/i.test(w))
        .forEach(w => fails.push('the engine warned at boot and nobody was listening: ' + w));
 
-  const r0 = await page.evaluate(() => {
+  /* IDXNAME is passed IN because the flat list below is per game and the page cannot know which
+     index it is — see the #39 block. Nothing else in here reads it. */
+  const r0 = await page.evaluate((IDXNAME) => {
     const P = [];
     const walk = (w, x, y) => x >= 0 && y >= 0 && x < w.W && y < w.H && !SOLID.has(w.grid[y][x]) && w.grid[y][x] !== 'N';
     const firstWalkable = w => { for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (walk(w, x, y)) return [x, y]; return null; };
@@ -464,19 +466,33 @@ const { chromium } = require('playwright-core');
     // ship as a picture), and a glyph on it that is laid in this pack yet no longer flat fails too,
     // so the list is kept honest as things get sides (TILESIDE) or become boxes.
     // 2026-09-07: 17 kinds were flat; the desk (D) and the shelving (S) got sides the same day.
-    const FLAT_KNOWN = ['3', '4', '5', '7', '9', 'A', 'C', 'H', 'I', 'J', 'P', 'W', 'X', 'Y']; /* the old stair '1' left the city with #7 */
+    /* ---- WHAT IS STILL FLAT, PER GAME, AND WHY IT HAD TO BECOME PER GAME ----
+       'H' and 'I' came off Meridian's list on 2026-09-15: the produce crate and the shop counter
+       now carry a pack side view and box:true, so both stand as boxes. THE LIST ONLY EVER SHRINKS,
+       and it shrank because the guard said so — it went red naming both the moment the art landed,
+       which is exactly what an is-it-still-true check is for.
+       AND THEN IT WENT RED ON THE TOWN, which is the more useful half. One list was shared by two
+       games that lay DIFFERENT glyphs: Meridian's H is a produce crate and the town's H is a piece
+       of furniture, so a letter shrinking out of one game's list silently claimed something about
+       the other game's letter of the same name. That is `docs/REGRESSION.md`'s recurring shape —
+       the list read the GLYPH and meant `this glyph, in this game`. It is keyed by index now, and a
+       game with no row of its own gets the shared baseline. Two games diverge again tomorrow; this
+       stops that from being a surprise. (docs/BEAUTIFY.md build order, item 2.) */
+    const FLAT_BASE = ['3', '4', '5', '7', '9', 'A', 'C', 'H', 'I', 'J', 'P', 'W', 'X', 'Y']; /* the old stair '1' left the city with #7 */
+    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', '7', '9', 'A', 'C', 'J', 'P', 'W', 'X', 'Y'] };
+    const FLAT_KNOWN = FLAT_BY_GAME[IDXNAME] || FLAT_BASE;
     const laid = new Set(); Object.values(WORLDS).forEach(w => w.rows.forEach(r => r.split('').forEach(ch => laid.add(ch))));
     Object.keys(flat).forEach(g => { if (!FLAT_KNOWN.includes(g)) P.push('"' + g + '" (' + ((TILES[g] || {}).kind || '?') + ') stands in 3D as a flat picture in ' + [...flatIn[g]].join(',') + ' — give it a side view (TILESIDE) so it becomes a box; nothing new may ship flat (#39)'); });
     // a pack may give a letter another meaning (the town's I is a facade): only a glyph laid here
     // as a kind the builder could make flat counts as "no longer flat"
     const couldBeFlat = g => ['furniture', 'appliance', 'prop', 'nature', 'gear', 'marker', 'site', 'transit', 'stair', 'tree'].includes((TILES[g] || {}).kind);
-    FLAT_KNOWN.forEach(g => { if (laid.has(g) && couldBeFlat(g) && !flat[g]) P.push('"' + g + '" is no longer flat in 3D — take it off FLAT_KNOWN in test/engine.smoke.js so the list keeps shrinking (#39)'); });
+    FLAT_KNOWN.forEach(g => { if (laid.has(g) && couldBeFlat(g) && !flat[g]) P.push('"' + g + '" is no longer flat in 3D — take it off this game\'s row of FLAT_BY_GAME in test/engine.smoke.js (the key is "' + IDXNAME + '") so the list keeps shrinking (#39)'); });
     // ---- nothing is stored outside the pack's prefix ----
     const pfx = SK(''); const stray = [];
     for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!k.startsWith(pfx)) stray.push(k); }
     if (stray.length) P.push('storage keys outside the prefix "' + pfx + '": ' + stray.join(', '));
     return { P, stillFlat: Object.keys(flat).sort().map(g => g + '×' + flat[g]) };
-  });
+  }, idx);
   const r = r0.P; r.stillFlat = r0.stillFlat;
   fails.push(...r);
 

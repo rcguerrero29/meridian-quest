@@ -162,6 +162,134 @@ TILEART["▤"]=rc=>{const{sx,sy}=rc;
   ctx.fillStyle="#C0392B";ctx.fillRect(sx+16,sy+19,5,3);             /* the stamp */
   ctx.fillStyle="#9AA1A8";ctx.fillRect(sx+9,sy+5,4,1.6);};           /* the staple */
 
+/* ================================================================================================
+   THE RUG, THE CRATE AND THE COUNTER — docs/BEAUTIFY.md's build order, items 1 and 2.
+
+   All three are PACK art. The engine's own drawings for R, H and I stay where they are and every
+   world that is not Meridian keeps them; this file overrides them for this pack only, which is why
+   none of this bumps GAMEV and none of it can change what another world draws.
+
+   What was wrong with each, in the words of the audit:
+   · R — "four blank lavender squares, no thickness, no border, visible seam". The seam was literal:
+     the engine drew `fillRect(sx+2,sy+2,TS-4,TS-4)`, so two rug tiles side by side left four pixels
+     of floor showing between them and the rug read as a texture that failed to load.
+   · H — "cutout, no side drawing" on the most box-shaped object in the game.
+   · I — "cutout, four identical pictures in a row", so a counter run read as four counters.
+   ============================================================================================== */
+
+/* ---- THE RUG. ONE RUG, NOT FOUR SQUARES. ----
+   A rug is one object that happens to cover several tiles, so the drawing asks its neighbours what
+   they are and only puts a border where the rug actually ENDS. The weave is keyed on the tile's
+   absolute position, never on sx/sy, so the pattern runs straight through the joins instead of
+   restarting in every square — that restart is what makes tiled art read as tiles.
+   Colour is derived from C.rug and passed through tc(), so a theme still repaints it exactly as it
+   repainted the flat square. */
+TILEART["R"]=rc=>{const{sx,sy,x,y}=rc;
+  const w=CW(),rug=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="R";};
+  const N=!rug(x,y-1),S=!rug(x,y+1),E=!rug(x+1,y),Wt=!rug(x-1,y);
+  const field=tc(C.rug),
+        deep =tc(mixHex(C.rug,"#2B2536",0.38)),      /* the border band */
+        mid  =tc(mixHex(C.rug,"#2B2536",0.16)),      /* the weave, one step down */
+        pale =tc(mixHex(C.rug,"#FFF6E4",0.34)),      /* the keyline, and the lit side of the pile */
+        warm =tc(mixHex(C.rug,"#B0563A",0.34));      /* the motif — a wool rug is dyed, not printed */
+  ctx.fillStyle=field;ctx.fillRect(sx,sy,TS,TS);     /* EDGE TO EDGE. The inset WAS the seam. */
+
+  /* THE WEAVE, AND WHY IT IS NOT A GRID. The first pass ruled a tick every second pixel in both
+     directions and the rug came back reading as graph paper: a regular lattice is what a TEXTURE
+     looks like, and the fault being fixed was the rug reading as a texture. Wool is a warp you can
+     see and a weft you can only half see, so the warp runs as broken pile in one direction only and
+     the weft is a short dash that skips — which at 32 px is the difference between cloth and paper.
+     Keyed on the tile's absolute position, never on sx/sy, so it runs straight through the joins. */
+  const gx0=x*TS,gy0=y*TS;
+  ctx.fillStyle=mid;
+  for(let j=0;j<TS;j++){const ay=gy0+j;if(ay%3===0)for(let i=((ay>>1)+gx0)%3;i<TS;i+=6)
+    ctx.fillRect(sx+i,sy+j,3,1);}                                   /* the weft, skipping */
+  ctx.fillStyle="rgba(255,255,255,.07)";
+  for(let i=0;i<TS;i++){if((gx0+i)%4===1)ctx.fillRect(sx+i,sy,1,TS);} /* the warp, only just there */
+  /* the motif: a dyed diamond on every second tile of the run, on the absolute grid, so a run
+     carries a repeat and one lone rug tile still carries one diamond. Wool takes dye — the audit's
+     complaint was that the rug had no pattern, and a pattern you have to hunt for is no pattern. */
+  if(((x+y)&1)===0){
+    ctx.fillStyle=warm;
+    ctx.beginPath();ctx.moveTo(sx+16,sy+6);ctx.lineTo(sx+26,sy+16);
+    ctx.lineTo(sx+16,sy+26);ctx.lineTo(sx+6,sy+16);ctx.closePath();ctx.fill();
+    ctx.fillStyle=deep;
+    ctx.beginPath();ctx.moveTo(sx+16,sy+10);ctx.lineTo(sx+22,sy+16);
+    ctx.lineTo(sx+16,sy+22);ctx.lineTo(sx+10,sy+16);ctx.closePath();ctx.fill();
+    ctx.fillStyle=pale;
+    ctx.beginPath();ctx.moveTo(sx+16,sy+13);ctx.lineTo(sx+19,sy+16);
+    ctx.lineTo(sx+16,sy+19);ctx.lineTo(sx+13,sy+16);ctx.closePath();ctx.fill();}
+
+  /* ---- the edge. Border band, keyline inside it, and a fringe on the two ends that are open. ---- */
+  const B=3.5;
+  ctx.fillStyle=deep;
+  if(N)ctx.fillRect(sx,sy,TS,B);             if(S)ctx.fillRect(sx,sy+TS-B,TS,B);
+  if(Wt)ctx.fillRect(sx,sy,B,TS);            if(E)ctx.fillRect(sx+TS-B,sy,B,TS);
+  ctx.fillStyle=pale;
+  if(N)ctx.fillRect(sx,sy+B,TS,1);           if(S)ctx.fillRect(sx,sy+TS-B-1,TS,1);
+  if(Wt)ctx.fillRect(sx+B,sy,1,TS);          if(E)ctx.fillRect(sx+TS-B-1,sy,1,TS);
+  /* THICKNESS. A rug is a few millimetres thick and the audit's word was "no thickness": the key is
+     upper-left, so the lit edge goes on the north and west and the shade on the south and east. */
+  ctx.fillStyle="rgba(255,255,255,.20)";
+  if(N)ctx.fillRect(sx,sy,TS,1);             if(Wt)ctx.fillRect(sx,sy,1,TS);
+  ctx.fillStyle="rgba(20,16,28,.26)";
+  if(S)ctx.fillRect(sx,sy+TS-1,TS,1);        if(E)ctx.fillRect(sx+TS-1,sy,1,TS);
+  /* fringe, on the open north and south ends only — the thing that says wool and not lino */
+  ctx.fillStyle=pale;
+  if(N)for(let i=2;i<TS-1;i+=3)ctx.fillRect(sx+i,sy,1,2);
+  if(S)for(let i=2;i<TS-1;i+=3)ctx.fillRect(sx+i,sy+TS-2,1,2);
+};
+
+/* ---- THE PRODUCE CRATE. It is a box, so it stands as one. ----
+   TILEMETA below marks it box:true and TILEART_SIDE gives it the front the box wears on all four
+   faces; engine3d.js:259 needs BOTH or it stays a cutout. Top-down it keeps the engine's fruit — the
+   quarrel was never with the tomato — and gains the rim, the slats and the inside wall that make the
+   fruit sit IN something. Two silhouettes by tile parity, the engine's own idiom, so eight crates in
+   a row are not one crate stamped eight times. */
+TILEART["H"]=rc=>{const{sx,sy,x,y}=rc;const alt=(((x*3+y*5)%7)+7)%7;
+  ctx.fillStyle="#7A5B36";ctx.fillRect(sx+2,sy+8,TS-4,TS-11);            /* the crate, from above */
+  ctx.fillStyle="#9A7548";ctx.fillRect(sx+3,sy+9,TS-6,TS-13);            /* the inside wall, lit */
+  ctx.fillStyle="#5E4527";ctx.fillRect(sx+4,sy+13,TS-8,TS-18);           /* the shadowed well */
+  ctx.fillStyle="#B0895B";ctx.fillRect(sx+2,sy+8,TS-4,2.6);              /* the near rim, catching the key */
+  ctx.fillStyle="rgba(255,255,255,.22)";ctx.fillRect(sx+2,sy+8,TS-4,1);
+  ctx.fillStyle="#8B6A42";ctx.fillRect(sx+2,sy+TS-5,TS-4,2.2);           /* the far rim, in its own shade */
+  ctx.fillStyle="#6B4F2E";ctx.fillRect(sx+2,sy+8,1.6,TS-11);ctx.fillRect(sx+TS-3.6,sy+8,1.6,TS-11);
+  const F=alt<3?[[10,13,"tomato"],[17,11,"chile"],[23,14,"banana"]]
+         :alt<5?[[11,12,"chile"],[18,14,"tomato"],[24,12,"tomato"]]
+               :[[10,14,"banana"],[16,11,"tomato"],[22,13,"chile"]];
+  F.forEach(f=>produce(sx+f[0],sy+f[1],f[2],1.3));
+  ctx.fillStyle="rgba(20,14,8,.22)";ctx.fillRect(sx+4,sy+13,TS-8,1.4);   /* the rim's shadow on the fruit */
+};
+
+/* ---- THE SHOP COUNTER. Four tiles, ONE counter. ----
+   The audit's words were "four identical pictures in a row", and the fix is the same as the rug's:
+   ask the neighbours. The top is continuous across the run and only the two ENDS get a cap, the
+   plank joins fall on the absolute grid so they do not restart in each tile, and the scale — the one
+   object that must not appear four times — stands on the leftmost tile of the run and nowhere else. */
+TILEART["I"]=rc=>{const{sx,sy,x,y}=rc;
+  const w=CW(),cnt=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="I";};
+  const Wt=!cnt(x-1,y),E=!cnt(x+1,y),head=Wt;                  /* the scale stands at the run's head */
+  ctx.fillStyle="#8B6A42";ctx.fillRect(sx,sy+6,TS,TS-10);                /* the carcase */
+  ctx.fillStyle="#A8825A";ctx.fillRect(sx,sy+6,TS,TS-13);                /* the top, lit */
+  ctx.fillStyle="rgba(255,255,255,.16)";ctx.fillRect(sx,sy+6,TS,1.2);    /* the worn front edge */
+  ctx.fillStyle="rgba(28,18,8,.30)";ctx.fillRect(sx,sy+TS-5,TS,1.4);     /* and the shade under the back */
+  ctx.fillStyle="rgba(94,69,39,.55)";                                    /* plank joins, on the world grid */
+  for(let gx=x*TS;gx<x*TS+TS;gx++)if(gx%11===0)ctx.fillRect(sx+(gx-x*TS),sy+6,1,TS-13);
+  ctx.fillStyle="#6B4F2E";                                               /* END CAPS, and only there */
+  if(Wt)ctx.fillRect(sx,sy+6,1.8,TS-10);
+  if(E)ctx.fillRect(sx+TS-1.8,sy+6,1.8,TS-10);
+  if(head){                                                              /* the scale — ONCE per run */
+    ctx.fillStyle="rgba(20,16,10,.26)";ctx.beginPath();
+    ctx.ellipse(sx+16,sy+21,8,2.4,0,0,7);ctx.fill();                     /* it sits ON the counter */
+    ctx.fillStyle="#5F676F";ctx.fillRect(sx+15,sy+13,2,7);               /* post */
+    ctx.fillStyle="#C9CDD2";ctx.fillRect(sx+9,sy+19,14,2.5);             /* tray */
+    ctx.fillStyle="rgba(255,255,255,.35)";ctx.fillRect(sx+9,sy+19,14,1);
+    ctx.fillStyle="#EEF0F2";ctx.beginPath();ctx.arc(sx+16,sy+10,4.4,0,7);ctx.fill();   /* dial */
+    ctx.strokeStyle="#5F676F";ctx.lineWidth=1;ctx.beginPath();ctx.arc(sx+16,sy+10,4.4,0,7);ctx.stroke();
+    ctx.fillStyle="#C0392B";ctx.fillRect(sx+16,sy+7.4,1,3);              /* the needle, reading something */
+    produce(sx+16,sy+17,"tomato",1.15);}
+};
+
 const TILEART_SIDE=Object.assign({},TILE_PROPS);
 TILEART_SIDE["Y"]=rc=>{const{sx,sy}=rc; /* THE TROLLEY STOP, STANDING. It was walkable with no TILES
       row and no profile, so the front camera and the 3D ground bake painted its top-down art flat
@@ -186,7 +314,60 @@ TILEART_SIDE["Y"]=rc=>{const{sx,sy}=rc; /* THE TROLLEY STOP, STANDING. It was wa
   ctx.fillStyle="#F2E8D8";ctx.font="700 7px monospace";ctx.fillText("MQT",sx+5,sy+10);
 };
 TILEART_SIDE["□"]=TILEART["□"]; /* cardboard and tape read the same from the side — it stands as a real box in 3D */ /* the props stand up wearing the same drawing */
+
+/* ---- THE CRATE AND THE COUNTER, STANDING. ----
+   engine3d.js:259 makes a tile a BOX only if it is marked box:true AND the pack drew it a side; with
+   one and not the other it stays a cutout, which is the state both of these were in. Drawn to the
+   same light as everything else on this street: key upper-left, one contact shadow, the lit edge on
+   the north and west and the shade on the south and east. */
+TILEART_SIDE["H"]=rc=>{const{sx,sy,x,y}=rc;const alt=(((x*3+y*5)%7)+7)%7;
+  ctx.fillStyle="rgba(15,12,20,.20)";ctx.beginPath();
+  ctx.ellipse(sx+16,sy+30.4,12,2,0,0,7);ctx.fill();                      /* it stands on the floor */
+  ctx.fillStyle="#8B6A42";ctx.fillRect(sx+3,sy+12,TS-6,18);              /* the body */
+  ctx.fillStyle="#6B4F2E";ctx.fillRect(sx+3,sy+12,2.6,18);ctx.fillRect(sx+TS-5.6,sy+12,2.6,18); /* corner posts */
+  ctx.fillStyle="#A87F4F";                                               /* three slats, gaps between */
+  [14.5,20,25.5].forEach(t=>ctx.fillRect(sx+5.6,sy+t,TS-11.2,3.6));
+  ctx.fillStyle="rgba(255,255,255,.18)";
+  [14.5,20,25.5].forEach(t=>ctx.fillRect(sx+5.6,sy+t,TS-11.2,1));        /* each slat's lit top edge */
+  ctx.fillStyle="rgba(20,14,8,.34)";
+  [14.5,20,25.5].forEach(t=>ctx.fillRect(sx+5.6,sy+t+3.6,TS-11.2,0.9));  /* and the shade under it */
+  ctx.fillStyle="#B0895B";ctx.fillRect(sx+2,sy+10,TS-4,2.6);             /* the top rim, in front */
+  ctx.fillStyle="rgba(255,255,255,.24)";ctx.fillRect(sx+2,sy+10,TS-4,1);
+  const F=alt<3?[[10,8,"tomato"],[17,6,"chile"],[23,9,"banana"]]         /* produce over the rim */
+         :alt<5?[[11,7,"chile"],[18,9,"tomato"],[24,7,"tomato"]]
+               :[[10,9,"banana"],[16,6,"tomato"],[22,8,"chile"]];
+  F.forEach(f=>produce(sx+f[0],sy+f[1],f[2],1.3));
+};
+TILEART_SIDE["I"]=rc=>{const{sx,sy,x,y}=rc;
+  const w=CW(),cnt=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="I";};
+  const Wt=!cnt(x-1,y),E=!cnt(x+1,y),head=Wt;
+  ctx.fillStyle="rgba(15,12,20,.20)";ctx.fillRect(sx,sy+29.6,TS,2);      /* it meets the floor in a line,
+                                                                            not an ellipse — it is a run */
+  ctx.fillStyle="#8B6A42";ctx.fillRect(sx,sy+13,TS,17);                  /* the front */
+  ctx.fillStyle="#7A5B36";ctx.fillRect(sx,sy+26,TS,4);                   /* the kick, set back in shade */
+  ctx.fillStyle="#A8825A";ctx.fillRect(sx,sy+11,TS,2.4);                 /* the worked top, seen edge-on */
+  ctx.fillStyle="rgba(255,255,255,.22)";ctx.fillRect(sx,sy+11,TS,1);
+  ctx.fillStyle="rgba(28,18,8,.32)";ctx.fillRect(sx,sy+13.4,TS,1);       /* the line under the top */
+  ctx.fillStyle="rgba(94,69,39,.55)";                                    /* one panel line per tile, on
+                                                                            the world grid so it runs */
+  for(let gx=x*TS;gx<x*TS+TS;gx++)if(gx%11===0)ctx.fillRect(sx+(gx-x*TS),sy+15,1,10);
+  ctx.fillStyle="#6B4F2E";
+  if(Wt)ctx.fillRect(sx,sy+11,1.8,19);
+  if(E)ctx.fillRect(sx+TS-1.8,sy+11,1.8,19);
+  if(head){                                                              /* the scale, standing, once */
+    ctx.fillStyle="#5F676F";ctx.fillRect(sx+15,sy+5,2,6);
+    ctx.fillStyle="#C9CDD2";ctx.fillRect(sx+10,sy+9.4,12,2);
+    ctx.fillStyle="#EEF0F2";ctx.beginPath();ctx.arc(sx+16,sy+3.4,3.6,0,7);ctx.fill();
+    ctx.strokeStyle="#5F676F";ctx.lineWidth=1;ctx.beginPath();ctx.arc(sx+16,sy+3.4,3.6,0,7);ctx.stroke();
+    ctx.fillStyle="#C0392B";ctx.fillRect(sx+16,sy+1.4,1,2.4);
+    produce(sx+16,sy+8,"tomato",1.1);}
+};
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
+  /* H and I were cutouts in 3D (docs/BEAUTIFY.md: "the most box-shaped object in the game"). These
+     two rows and the two TILEART_SIDE drawings above are the whole fix, and neither reaches the
+     engine's own H and I — a world with no art.js still gets those. lift and kind are left exactly
+     as the engine set them; only `box` is added. */
+  "H":{box:true},"I":{box:true},
   
   "|":{lift:13,kind:"wall"},
   "□":{lift:5,kind:"prop",box:true},
