@@ -1162,3 +1162,287 @@ the person the game is for, and **anything in §2, §3 or §12 that fails it los
 these for templates but we want templates to one day be made off of one prompt or from one
 questionaire."* **What these two rounds of questions TEACH goes into the template. What AJ CHOSE does
 not.** Every decision in §15 is Simmer's own until somebody proves it is everyone's.
+
+---
+
+## 16 · Nacho's second chapter — 2026-09-15 — the world with no cast
+
+*§3 was a cast. AJ chose the food alone, so §3 is **superseded, not trimmed**. Written against §15.3
+(no timer, no rating, no customers, nothing stressful, playable absent-mindedly) and the owner's
+"aj is queen here". **Simmer's answer, never a rule a future world inherits.** Nacho's return had no
+Write tool; this section is the session transcribing it, and the three forks in §17 are still open —
+nothing here is signed.*
+
+**The shape.** One kitchen, Korean, at night, entered with no arrival — you are not moving in, you are
+already standing at the counter. Four surfaces: **the counter** (made by hand, her seven gestures, no
+clock), **the stores** (three drawers, the shelf, the fridge, the freezer — things you *read*, never
+people you ask), **the table** (laid for two, always), **the book on the sill** (the payoff). The
+Japanese kitchen is a **second room through a door** — not a district, not an unlock.
+
+**The one person to feed, in three registers, none of them a body in the room:**
+- **Now** — the second setting. A dish is done, both bowls are filled, nobody arrives and nobody
+  speaks; next time she opens the game the second bowl is stacked in the sink and the dish is gone.
+  That is Meridian's own *morning after* doing a whole character's work with no dialogue.
+- **Tomorrow** — the fridge. *El recalentado*, which was the owner's own answer, where the person
+  she feeds is future her, and that is the least stressful care there is.
+- **Out of the game** — the page. **In a world with no people, feeding someone is the export**: Copy,
+  Print (#196) or the pass hands her page, with her own notes on it, to a real person holding a real
+  phone. He is not modelled because he does not need to be.
+
+**The law that keeps the second bowl safe:** *the table changes because she cooked, never because a
+day passed.* If she does not cook, the room is pixel-identical tomorrow. A clean bowl laid for two is
+not a wilting plant — provided nothing ever empties it.
+
+**What pulls, with no clock, no score, no customers and no cast: her own half of the book.** The
+credited card says *a spoonful*; her line underneath says *two, and start the rice first next time*.
+The book fills with her corrections to a stranger's recipe — which is exactly what she actually did
+when she taught herself.
+
+**Judgement, with no grandmother: two cards for one dish.** Both credited, both correct, differing in
+one thing that matters and that a beginner would not think to ask — stock or water; rinsed three
+times or rinsed till it runs clear. She picks one and cooks it. **Neither is the answer**; the book
+records which she cooked, and that is the only reason the book is worth reading a year later. Nobody
+is invented, so Paty's refusal is untouched: a credited cook is a citation, not a voice we wrote.
+**A card is silent after she picks** — the moment either one knows what she did, it is a grandmother.
+
+**Where the words live, since there are no characters and a narrator is a character wearing a coat:**
+*every sentence in Simmer is a recipe, a noun, or hers — and the game itself only ever names what
+changed.* The card speaks like a cookbook, credited. The room's paper speaks in **lists of specific
+nouns** (*doenjang · gochugaru · soup soy · the coarse salt · a bag of dried anchovies*) — a list is
+warm when its things are specific, and a list can never patronise. She is the only voice allowed to
+say "I". A toast may name a thing that changed and never a feeling about it.
+
+**What §3 loses, named so nobody rebuilds it:** the vecindad and its courtyard (a courtyard with
+nobody in it is not intimate, it is abandoned) · all four households · Ofelia and her chard line,
+which is the one most worth keeping and most clearly impossible — a drawer cannot notice what you
+waste without becoming a narrator that judges · the cat's joke · moving day as chapter 0 (a game you
+put a day down in must not open by asking you to move house) · all five chapters · *"four neighbours
+taste it and each says a different thing"*, which was the best beat in §3 and is precisely the
+mechanism she refused · the sobremesa close · the tile of scratched dates · the three reasons as a
+greeting · **and the week as a shape. Simmer has no chapters. It has dishes.**
+
+**What survives by changing what it is:** R12 — *a dish belongs to a person, never a nation* — moves
+from four households to **the credit line on the card**, which is where it was always most honest ·
+*q.b.*, the best object in §3, becomes **the blank in her own book** (`[CODE]` the reader already
+draws it and exports it as `**label:** ___`) · *"you are the one who writes it down"* becomes the
+whole premise, with one correction: it is what she found out herself, not what somebody told her ·
+and the cast's two refusals — nobody is a coach, nobody ever comments on her body — stay **written
+down precisely because there is nobody left to break them**.
+
+**The engine fact that makes a cast-less world legal, and it is already shipped:** `READS` + `DOCS`
+is described in the engine's own words as *"a thing you can read without talking to anybody"*, its
+mark is the breathing cream card, and the mark never clears, because *"a thing you can read is a
+place"*. **A world with no people is not a workaround here. It is a mode this engine already has.**
+
+### 16½ · Three code facts this chapter turned up, checked by the session
+
+1. **The export drops everything she types, and the export IS the payoff — CONFIRMED.** `docMarkdown`
+   branches on `h · p · note · blank · kv · t · q · docs` and **has no branch for `form`**. So Copy
+   and Download would hand her a stranger's recipe with none of her notes. **It is not an engine hole:**
+   the reader's own comment says *"the reader collects the values; content acts"* — the pack is handed
+   the values and decides. **The pack rule, and it is binding for Simmer: whatever she writes is stored
+   by the pack and re-printed on the same page as `p` / `kv` / `blank`. The form is only the pen.**
+2. **A second kitchen may be a second ROOM with no engine change, and the plan's blocker B may be
+   stale.** Rooms come from `WORLD_DEFS`, which is independent of chapters, and a pack that declares
+   no districts gets one synthesised — which is how the town already ships endless. Only a second
+   *district* is blocked. **Not verified by booting; stand up a two-room endless pack before banking it.**
+3. **No ending variants may be written for this world, and the grading toggle governs nothing here.**
+   Quests are found on people; with no cast there are no quests, therefore no marks, therefore one
+   grade for ever. §3's endings, §12.1 #7's toggle and §12.6's "the grade pays recipe offers" all
+   spend a grade this world does not have. **The only mark in Simmer is hers, private, on her own page.**
+
+---
+
+## 17 · Tavo's loop — 2026-09-15 — by hand, absent-mindedly, and what that costs
+
+*Written against §15.3, which outranks it. His return had no Write tool; this is the session
+transcribing it. **This supersedes the daily half of §2 and retires §2's weekly spine** — both were
+built on a cast she has said she does not want.*
+
+### 17.1 · The pair of her answers that only looks contradictory
+
+She wants the recipe in her book **with her own notes beside it**, and she does **not** want to edit a
+recipe inside the game. Those cancel if you read them fast. The resolution has to be structural:
+
+> **Editing is changing the instructions. Annotating is adding your own layer beside them.** The
+> recipe is pack data with **no writer anywhere in the game**; her note is a separate record keyed to
+> the recipe, and it renders **beside** the steps, never inside them.
+
+**This is the easiest thing here to break, in the most sympathetic way possible** — *"just let her fix
+the quantity"* — and one writable quantity field makes the recipe editable. The guard, when the book
+is built: if a session ever renders her note inline with the steps, or ships any field whose value
+lands in the recipe object, her instruction is broken and nothing will fail.
+
+### 17.2 · The loop
+
+**The spec that decides whether "absent-mindedly" is true: one button press from open to first
+stroke. Count the taps, do not feel them.** `[CODE]` free — `checkRead()` tests the tile you stand on
+*first* and `readMarks()` has no distance limit, so **spawn is the counter's own read tile** and Read
+is live the instant the world draws. The walk exists for the fridge and the shelf and is never
+required to cook.
+
+- **Beat 0 · the door, ~2s.** The kitchen exactly as she left it. No ❗, no welcome back, no day
+  count, no streak, no menu. One thing on the counter, not a list. **What the game does back: nothing.
+  That is the beat.**
+- **Beat 1 · pick it up, one tap.** No confirm, no difficulty, no ingredient check.
+- **Beat 2 · the steps, one gesture each.** One line above the board, always visible, never a prompt
+  and never a bar. **Every "done" rule is coverage or count, never seconds:** stirring ≈ three turns
+  swept (more changes nothing) · rolling out ≥90% of the round (self-limiting — you cannot over-roll)
+  · spreading ≥85% (so the awkward corner is never a chase) · sprinkling, where **more is never
+  wrong** and there is no "too much salt" state, ever · laying pieces one by one until the tray is
+  empty (**the absent-minded champion** — pure rhythm, interruptible at any single piece) · cutting,
+  **the one gesture that begs to be graded, and is not**: uneven is a fact about her kimbap, drawn
+  faithfully and never marked.
+  **Six of the seven are performance and one is a decision — and she named both piles herself.**
+- **Beat 3 · the interruption, a designed beat and not an accident.** State is written the moment the
+  pointer lifts. She can close the tab mid-stroke and come back to the coverage she left. Nothing
+  continues while she is away, nothing browns, and **there is no "resume?" dialog** — the board is
+  simply as she left it. It is the cheapest thing in this section, because the board's whole state is
+  a coverage number and a list of placed pieces.
+- **Beat 4 · plating up — the only decision in the sitting.** What she cooked, plus rice, **plus
+  whatever is in the fridge from earlier sittings**. **There are no slots**: a slot implies a missing
+  thing. A surface has no such thing as empty. By sitting ten the fridge has six things in it, so the
+  decision has six inputs instead of one — **the only surface in the design whose interest grows on
+  its own with no new art.** The tray as she left it is the picture in the book.
+- **Beat 5 · the book.** Her plate at the top, the recipe under it read-only for ever, and three
+  optional additions: a line about how it went (the placeholder is a question in her register —
+  *"how did it go?"*, not *"Notes:"*), her notes beside the steps, and her private mark. **On the
+  mark, his position: not stars.** A five-point widget pointed at her own food is still a scoreboard
+  and the first session that wants to sort the book by it will. Make it a cook's word — *again ·
+  fine · not again · needs something*. **Tell: if two marks can be combined into a third number, you
+  built a rating.**
+- **The exit.** The page *is* the end of the sitting. No "next dish?", no count remaining, no bounce
+  to a menu with an offer glowing.
+
+**Dish one ≈ 5 minutes; dish ten ≈ 90 seconds**, because strokes become muscle memory. That is not a
+bug — 90 seconds is a better way to put a day down than twenty minutes — but **the content burn rate
+roughly doubles by dish ten**, so any estimate built on "five minutes a dish" is wrong by half.
+
+**The day she meant to cook and didn't: nothing.** And the part a session will get wrong is not the
+kind word — it is **the half-rolled dough**. If it sits on the counter eleven days it sits there
+exactly as it was: no dust, no age, no colour, no line about it.
+
+### 17.3 · "Absent-mindedly", priced — his position, not an average
+
+**The real tension, in one sentence:** *a gesture that can be performed with half your attention is a
+gesture that could have been a button.* Every satisfying by-hand cooking game is satisfying because it
+**demands**. That is the trade she has asked us to refuse.
+
+**Given up deliberately:** precision (no tolerances, no accuracy readout, no "you missed a spot", and
+passing a threshold is **silent**) · sequence memory (which costs *sa-shi-su-se-so* as a mechanic — it
+survives as a note on a card, never a step she can fail) · **multi-tasking, cut outright** — never a
+pot wanting stirring while she cuts; not a tuning question, and it must not come back as "just a
+gentle one" · any fail, retry or undo-that-implies-a-mistake · scarcity, because if you delete the
+clock and then ration the ingredients you have rebuilt the tension with extra steps.
+
+**Refused, because the game stops being worth playing:** the stroke must change the screen
+continuously, 1:1 — **the only thing making these five minutes worth more than one tap is that the
+picture was literally drawn by her hand; that is the product and everything else is packaging** · the
+output must differ every time and the difference must be visible in the book, which costs one line:
+**draw the plate from what she actually did, never from a finished-dish sprite** (it will be proposed,
+because a sprite mocks up better, and it collapses the whole design into a clicker) · one decision per
+sitting · and **the residue**, because without something left behind an absent-minded sitting is
+indistinguishable from not having played — and then "nothing happens when you don't cook" quietly
+becomes "nothing happens either way". **The book is the only asymmetry in the game and is therefore
+load-bearing.**
+
+### 17.4 · What replaces the merge board — and the cheapest gate in this document
+
+The board did three jobs. **(a) Manufacturing progress: nothing replaces it and nothing should** — a
+merge chain works by making the previous tier obsolete, which is an unlock ladder, and the substitute
+for a treadmill is almost always a treadmill. **(b) The Collection: already in the plan and free —**
+
+> **The book is the Collection, read from the other end.** A merge Collection lists what you have
+> *not* made, greyed out, which is a list with the names removed. **The book lists what she HAS made
+> and has no grey tiers at all**, because the unmade recipes live on a shelf she walks to. A page
+> appears when a dish is made and no page ever says "not yet". It is the mural's own shipped idiom —
+> paint only ever goes on — applied to paper, and it is not even a number. It is a thickness.
+
+**(c) Habit, and this is the real cost, stated as a bet:** she plays a merge game today and Simmer
+will not feel like it. What would make her keep opening it is that the book accumulates and it is
+hers — **and that is a bet, not a guarantee. It is also testable for less than any surface in this
+plan:**
+
+> ### **Make three pages of the book by hand. Show her. Ask if she wants a fourth.**
+> Three drawn pages, three different plates, three lines in her own voice. No engine, no pack, no
+> sitting spent on a listening canvas. *"Yes, what's next"* means everything above is worth building;
+> a shrug costs an afternoon instead of nine sittings. **This goes BEFORE the making surface, not
+> after.**
+
+### 17.5 · The tenth sitting, and what must exist by then
+
+Ninety seconds, ten pages, ten different plates — **that part holds.** What goes flat is the
+gestures. Four things, by buy-per-build: **(1)** ten dishes whose gesture *sequences* differ — the
+deck is not seven gestures, it is seven gestures in ordered subsets of four to six, and the lazy
+failure is that everything becomes roll/spread/sprinkle/place because those are easiest to draw; the
+guard is a column in the recipe ledger plus a rule that no gesture appears in more than six of the
+first ten dishes, **decided now or not at all**. **(2)** Leftovers actually reaching the tray — a
+small array and a document, and the only thing that makes sitting ten structurally different with no
+new art. **Move it earlier than §13.2 has it.** **(3)** A way to walk back through the book, which
+puts G4 (the reader scrolling to the top on every open) **on the path, not optional**. **(4)** One
+gesture she has not met, arriving around dish eight — so **do not spend all seven in the first three
+dishes.**
+
+### 17.6 · What NOT to build, ranked
+
+1. **The merge board.** And the scoping fix that matters: "the listening canvas, one sitting" must be
+   scoped to **the making surface**, not to a grid of draggable items with a chain table. Two
+   different builds; only one was chosen.
+2. **Customers in every disguise — and the disguises are what will actually get built.** A dish-set
+   counter, a shift *posted by* somebody, a cook who *asks* for a dish, hearts from a cook. Every one
+   is a person waiting for food with the till filed off. ⚠️ **Biggest casualty: the shifts board.**
+   Picking up a shift as a contractor is service work with the clock removed. **His to overrule, not
+   ours to quietly keep.**
+3. **The grades toggle and everything behind it** — a toggle for a thing that should not exist is two
+   builds, not one. Her private word **must never be stored beside a logistics mark**, or somebody
+   will average them.
+4. ⚠️ **Every plan-of-the-future surface, including the shifts board that replaced the week strip.
+   This collides with his own answer** (*"a meal plan would be ok"*) and with the best-evidenced
+   mechanic in the whole sweep. **That is his call and it lives in HIS half. Do not resolve it by
+   smuggling a small one into hers.**
+5. **A recipe editor, and every field that can write to a recipe** — again, the sympathetic version.
+6. **Any expiry, age or "getting low" — and leftovers must not spoil.** `[CODE]` nothing in this
+   engine spends a day, and that is a property to preserve, not an omission to fix.
+7. **The pantry as a maintained ledger, on the first playable's path** — his half, not hers; leftovers
+   feed the tray by play, which beats decay with no ledger.
+8. **The cast as a barrio you walk through** — §16 is what replaces it.
+9. **Nutrition numbers, `foods.js`, citation cards, official diagrams** — all real, all his, none
+   inside her five minutes.
+10. **Steam and every ambient animation.** The making surface already moves. Spend it after ten dishes
+    exist.
+
+### 17.7 · Two cost findings, both checked by the session
+
+- **F1 · The making surface may need NO engine change at all — CONFIRMED by reading.** §13.2 costs it
+  as an engine RULE, an engine PR and a merge into shared code. In fact `docRender` builds the canvas,
+  hands the pack `art(g,W,H)` — and `g.canvas` is the element — and **the engine attaches no listeners
+  to it; `.dart` has no CSS rule in either shell.** So a pack can attach its own pointer handlers
+  today, with no engine change, no `GAMEV`/`CACHE` bump and nothing touching Meridian. Two things it
+  must do itself: set `touchAction="none"` (the canvas lives inside the scrolling paper, so a vertical
+  drag would scroll instead of stir) and cope with starting **hidden**, because `art` runs before the
+  reader is shown. **Not reproduced in a browser — that is the next thing to prove, and Beto decides
+  whether it should be a declared seam anyway.**
+- **F2 · Blocker B is off Simmer's critical path.** The cap is on declared districts, not on rooms;
+  a pack with no chapters gets one synthesised, which is how the town already ships endless. If "a
+  second kitchen" means "a second room you walk into", the blocker may not touch it. **One fewer
+  engine PR between here and showing her three pages of a book.** Read, not run.
+
+---
+
+## 18 · The forks Simmer owes the owner — 2026-09-15
+
+*Five, from §16 and §17. Each has a recommendation marked ✅ and each is cheap to answer and
+expensive to guess. None of them blocks the one thing §17.4 says to do first.*
+
+| ❗ | The fork | ✅ Recommended | What it costs to guess wrong |
+|---|---|---|---|
+| **El 2o plato** | Is the one person she cooks for ever **named**? | **She names it once, in her own hand, on the book's first page, and the game never repeats it** — one blank, zero engine, and the only naming a world with no cast can do without inventing a person | Never named is purest and lets her mean whoever she means on the night, but an unnamed second bowl can read as a ghost. **The pack naming him** writes a real person into a public repository, which is the thing Zeni's rule exists to stop |
+| **La foto** | She asked for a photo of the plate. The reader has **no file field**, and `art` draws but never listens | **The game draws the plate from what she actually assembled** — and the **exported and printed page carries a slot for a real photograph**, since print is already asked for (#196) | A real photograph in the game is the one part of her payoff this engine cannot store: ~80–120 KB a dish into the same origin as the save, **whose write is a swallowed `try/catch`** — so once it is full, every later save fails **without a word**. Twenty dishes is survivable and it is a ticking clock. **Not a thing to settle by quietly building the cheap one** |
+| **El libro** | Does the book hold pages for dishes she has **not** cooked? | **Two objects: the shelf is the library (every card, readable now, nothing owed); the book holds only pages she cooked** | One book with every dish as a blank page is closest to the Collection she likes today and is **a to-do list with nice typography** — the only surface in the game implying she owes it something. **Left alone, whoever builds it will pick the blank pages, because they look better** |
+| **El turno** ⚠️ | The **shifts board**. His own answer put the kitchens in restaurants; Tavo's read is that a shift posted by somebody is service work with the clock removed | **For the first build: one kitchen, it is hers, and the shifts board is not built at all** | It is the biggest single casualty of her answers and **his to overrule, not ours to quietly keep** |
+| **El plan** ⚠️ | The **meal plan**. He allowed it; she wants nothing that looks like a plan | **It lives in HIS half of the pack and never in hers** | It is the best-evidenced mechanic in the entire research sweep, so it should not simply die — but it must not be resolved **by smuggling a small one into her half** |
+
+**And the thing to do before any of it** (§17.4): **three pages of the book, drawn by hand, shown to
+her.** Three plates, three lines in her voice, no engine and no pack. It is the cheapest real gate in
+this document and it tests the one thing nothing else can: whether a book that fills up is enough to
+keep her opening it, now that the merge board is not what she asked for.
