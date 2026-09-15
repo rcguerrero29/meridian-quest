@@ -1087,3 +1087,60 @@ Read literally, the pivot makes **Korean the initial column and Mexican the mixe
 is the reading this section is written on, and the one that keeps his sentence intact. The other
 reading is that the pairing was Mexican-specific and dies with it. **One word either way**; nothing
 downstream of it is drawn yet.
+
+---
+
+## 15 · AJ answered — 2026-09-15 — and the world has a name
+
+*Both forms are answered and sent: the thirteen of 2026-09-14, and the five of the follow-up at
+**02:32 UTC on 2026-09-15**, which is thirty minutes after the session that built it stopped, which
+is why nothing has read them until now. **Her answers are not in this repository and will not be**
+(Zeni, #200): what follows is only the decisions they settle and the questions they open. Two of her
+answers are about her own body and stay with him entirely — they are not summarised here either.*
+
+### 15.1 · Settled by her, and no longer anyone's to choose
+
+| | |
+|---|---|
+| **The name** | **Simmer.** §9 #15 is closed; she named it herself. "La Sobremesa" becomes the working title this plan was written under, and the file keeps its name until somebody renames it deliberately |
+| **The first kitchen** | **Korean, confirmed from her side too** — the dish she named is Korean, which is the same answer his pivot gave on 2026-09-15 from the other direction. §14 stands, now on two witnesses |
+| **The second kitchen** | **Japanese.** §9 #4's ordering is fully answered: Korean, then Japanese |
+| **The voice** | **Option (a) of §9 #14 is closed and it failed honestly: she taught herself.** There is no person she learned it from, so nobody here is waiting for a name any more. What is left is what §14.2 already listed — cooks credited on a source card, and §2's two cooks who disagree. **Paty's refusal is now the whole answer: an invented halmeoni would be a lie about a real person's actual history** |
+| **The payoff** | **The book.** What she wants when a dish is done is the recipe in her book with her own notes beside it — plus a line about how it went, a picture of the plate, and **a mark she keeps to herself**. That last one is R16 wearing its best clothes: the only rating in the game is the cook's own, kept private, never the game's |
+| **The gate question — by hand or the merge board** | **By hand.** Asked which she would miss more, she chose making one dish by hand. The merge board does not die (it is what she plays today), but it is no longer the thing the first build must have, and **§12.2's "biggest single build in this plan" is not on the critical path** |
+| **The gestures** | She named **seven** she actually likes doing. That is the making surface's content, handed over without anyone having to guess it, and it is more than the one-gesture-per-step sketch assumed |
+| **When she meant to cook and didn't** | **Nothing at all happens.** The smaller question at the end of §9 is answered: no kind word, no quiet re-offer. Nothing |
+| **How the first recipe arrives** | Researched and drafted for her, from traditional sources — **and she does not want to edit a recipe inside the game.** Editing belongs to the exported copy, on paper, in a real kitchen. That kills a whole editor surface nobody had costed yet |
+
+### 15.2 · Three places where her answers and his do not agree — his to settle, not ours
+
+1. **Customers.** He read §9 #4 as *"different kitchens in restaurants"* (§12.1 #8) and the reference
+   game's chapters are restaurants with dish-set counters. **She does not want customers in it at
+   all.** A restaurant can still be a *place* — a kitchen with a name and a cuisine — but the moment
+   it has somebody to serve, it is the thing she said she does not want. **Recommendation: restaurants
+   are kitchens you cook in, never a service loop.** One word from him and §12.3b is rewritten.
+2. **People.** §3 is a cast — Nacho's whole chapter. Asked whether she wants people in it, **she chose
+   the food alone.** These are not as opposed as they look: *"feeding someone"* is one of the two best
+   parts of cooking for her, so the person can be **the one you cook for** rather than a barrio you
+   walk through. **Recommendation: no cast to meet, one person to feed — which is also the household
+   of two he asked for.** This is the largest single change to the plan as written, and it is his and
+   hers, not ours.
+3. **Grading.** He allowed grading with a toggle (§12.1 #7). She named being rated as a thing she would
+   hate, in the same breath as timers and customers. **Her own private mark (15.1) is the shape that
+   satisfies both** — the game never scores the dish; the cook does, for herself, and it is not shown
+   to anybody. **Recommendation: build that, and let the toggle govern the logistics marks only.**
+
+### 15.3 · The standing instruction her last answer gives the whole pack
+
+**No timer. No rating of the dish. No customers. Nothing stressful. It should be playable
+absent-mindedly, as a way to put a day down.** That is one sentence and it decides more than any
+mechanic in this file: it is a rule of the same kind as `docs/GENRE-RULES.md` R15–R18, it comes from
+the person the game is for, and **anything in §2, §3 or §12 that fails it loses.**
+
+### 15.4 · What is still open after this
+
+- **Her one skipped answer** on the first form, and the "anything else" box: both blank. Neither blocks.
+- **The three in 15.2**, which are his.
+- **`docs/for-aj/LA-SOBREMESA.md`** is now the script of a form that has been answered twice; it should
+  say so, and the template in `docs/templates/questionnaire/` should carry what these two rounds taught
+  (a comment box under every choice earned its keep — her longest and most useful answer came through one).
