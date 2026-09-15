@@ -27,6 +27,14 @@ bare noun — and a brief that fans out says so. This has nothing to do with cre
 with the mode **off**, in an ordinary parallel run, which is what this project actually does. See
 `docs/crew/MURALS.md`, iteration 4.
 
+**It happened again on 2026-09-15, iteration 10, to the same filename.** Four painters, mode off, and
+`scratchpad/panel.js` was overwritten under one of them mid-job; he lost a revision and said so in
+his hand-back. The rule above was already written, three days old, and correct. What was missing was
+that **the brief did not carry it** — the calling session wrote the fan-out prompt and never put the
+prefix in it, so four agents each reached for the obvious noun. A rule that lives only in a document
+the agent was not asked to read is not in force. **The brief carries the prefix, or the prefix does
+not exist**: give each builder its own subdirectory (`scratchpad/<agent>/`) in the prompt itself.
+
 ---
 
 ## How to switch it
