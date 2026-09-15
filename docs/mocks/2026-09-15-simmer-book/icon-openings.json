@@ -1,0 +1,28 @@
+{
+ "_measuredAgainst": {
+  "set": "@iconify-json/fluent-emoji",
+  "version": "1.2.7"
+ },
+ "_rows": {
+  "pot-of-food": {
+   "n": 10759,
+   "cx": 0.498,
+   "cy": 0.4531,
+   "rx": 0.2559,
+   "ry": 0.2461,
+   "pred": "a>200 && r>170 && r-b>60 && g>70 && g<190",
+   "aspect": 1.04,
+   "suspect": false
+  },
+  "shallow-pan-of-food": {
+   "n": 8822,
+   "cx": 0.498,
+   "cy": 0.4883,
+   "rx": 0.2285,
+   "ry": 0.2227,
+   "pred": "a>200 && r>190 && g>150 && b<150 && r-b>60",
+   "aspect": 1.026,
+   "suspect": false
+  }
+ }
+}

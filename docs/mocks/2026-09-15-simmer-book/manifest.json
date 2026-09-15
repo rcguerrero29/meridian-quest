@@ -1,0 +1,44 @@
+[
+ {
+  "file": "simmerBook1-390x844-cream.png",
+  "row": "390x844",
+  "doc": 691,
+  "visible": 661,
+  "belowFold": 30
+ },
+ {
+  "file": "simmerBook2-390x844-cream.png",
+  "row": "390x844",
+  "doc": 667,
+  "visible": 661,
+  "belowFold": 6
+ },
+ {
+  "file": "simmerBook3-390x844-cream.png",
+  "row": "390x844",
+  "doc": 647,
+  "visible": 647,
+  "belowFold": 0
+ },
+ {
+  "file": "simmerBook1-844x390-cream.png",
+  "row": "844x390",
+  "doc": 757,
+  "visible": 207,
+  "belowFold": 550
+ },
+ {
+  "file": "simmerBook2-844x390-cream.png",
+  "row": "844x390",
+  "doc": 737,
+  "visible": 207,
+  "belowFold": 530
+ },
+ {
+  "file": "simmerBook3-844x390-cream.png",
+  "row": "844x390",
+  "doc": 718,
+  "visible": 207,
+  "belowFold": 511
+ }
+]

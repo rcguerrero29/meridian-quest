@@ -397,6 +397,16 @@ in the rewrite, and Rigo had two bays.
    nine** — nine repaints to even out a wall is nine people's hands erased. The distribution is the
    lever.
 4. **A panel's signature should be its top band** — the one strip nothing crops.
+5. **Every run paints — the owner, 2026-09-14: *"ensure any crew mode creates a mural entry."*** Iteration 7
+   (the healthy-eating design) is the first run since the wall opened with nothing on it; its brief was
+   written by hand and dropped the section. The suite refuses that from iteration 8 on.
+6. **The hand, not the subject — the owner, the same day: *"agents need to be more creative."*** Chava
+   named three unlabelled panels from what they were about and none from how they were painted; one
+   palette, one stroke, one lettering, one ground across thirty-two panels. The material is the lever:
+   a painter's panel is *made of* something the others' are not, in a palette that is not `MURPAL`'s.
+7. **Chava's eight** — the cut feet, the name nobody can follow, the sixteen swipes, the gutter that says
+   the wrong thing, the blank four-fifths, text over text, the sideways place lost on reopen, the
+   isometric wall — are queue row 8¾ in `docs/NEXT-SESSION.md`.
 
 
 ---
@@ -455,6 +465,66 @@ in what they said, the state they held, and the pixels they drew. **Nobody has l
 before they shipped** — the run was advisers in parallel with one pen and Pili was one of the seven,
 not the reviewer; the next crew-fix run's step 4 is where she sees them, and what she says goes in
 this file.
+
+## Iteration 8 — 2026-09-14, thirteen came back and three came for the first time — then two more
+
+Fifteen painted, in the `moss` thread (the eighth iteration cycles round to the third colour): ten return
+visits and three first visits — **Mari**, **Doña Remedios** and the **research-map** sweep, a lens with no
+persona file, filed under `by:"research"` because iteration 7 painted nothing and left no precedent for a
+research panel (the wall keys it to the first word either way, so `research-map` and `research` are one bay,
+signed *research-map* by its first visit). Their words are verbatim from
+`docs/meetings/2026-09-14-la-cuadrilla-run-8.md`; nobody's were edited on the way to the wall. Twenty-one
+bays now, forty-eight panels. **Every one of the fifteen is painted in a material of its own** — the owner's
+"a material per hand" — and `MURPAL` appears in them only as the wall's ground, a shirt, or a line of ink;
+no panel on this iteration is painted from the house palette alone.
+
+| id | painter | what it is made of, in the painter's words | what the art was adjusted for |
+|---|---|---|---|
+| `nacho-lo-que-ella-escribio` | Nacho (2nd) | *"a duplicate order pad, the kind a kitchen keeps by the pass. Top sheet filled in by her in biro; the carbon slid out and never used; the yellow copy — the one that travels — printed, ruled, and empty where she answered. My own palette: biro blue, carbon violet, pad yellow, a pink third leaf."* | nothing |
+| `tavo-hoja-uno-de-dos` | Tavo (3rd) | *"a cheap folded town plan off a hotel desk. Printed one colour too warm, creased once, and the fold turns the bottom panel under… Palette is a map printer's, not the wall's."* | nothing — the crease arrow clips the foot of the S in CALLE DOS by two pixels; text over a mark, not text over text, so left as returned |
+| `rosa-el-punto-sobre-el-nombre` | Rosa (2nd) | *"vitreous enamel on a brass-framed park notice board, screwed to the wall, taking the light in one glass band — a signwriter's object, not a draughtsman's sheet."* Her art came from `scratchpad/rosa-panel-art.txt`, where her return pointed | nothing — the pin over "HQ" is the finding |
+| `paty-la-comanda-sin-destino` | Paty (2nd) | *"a fonda's CARBON COMANDA: the pink-and-manila duplicate pad, written in grease pencil, spiked on the check spindle, with the pass window behind it. My own palette — carbon pink, pencil brown, steel, and the hot red of a stamp."* | **text on text**: the red stamp `NO HAY A DÓNDE` at the foot landed on `MANDAR ▸`, because her eighth row hangs 15 px below the sheet's edge. The stamp moved to the dangling end of the wire (`W*0.68, H*0.41`), one line; the button still hangs where she put it |
+| `mari-nueve-cortadas-dos-en-blanco` | Mari (1st) | *"a film production STRIP BOARD — a wooden frame, coloured card strips slotted in, one strip per screen. Nobody on this wall has drawn on card. My palette is the board's, not the game's: manila, board-green, blank white, and the wood."* | **words cut at the edge**: the count line's last phrase ran off the panel (`— y son las que se jue`). The second and third phrases moved left (`bx+W*0.34→0.27`, `bx+W*0.60→0.51`) so all three fit; two numbers |
+| `pili-el-vidrio-ahumado` | Pili (3rd) | *"EL VIDRIO AHUMADO, the scrap of smoked glass you hold over a colour to take the hue out and see what is left underneath. The palette is NOT MURPAL: every chip above the glass is a real hex out of the report, and every bar under it is that same hex at its measured luma."* | nothing |
+| `cuca-el-norte-cobra-primero` | Doña Cuca (3rd) | *"A landlady also owns a talonario: the pink carbon receipt book, the yellow duplicate under it, aniline-purple carbon, a red rubber stamp and a pencil word on the stub. This palette is hers and it is nowhere else on this wall."* | **text on text**: the pencil `duplicado` ran into the `S` label and the freezer bar. It dropped to the foot of the flimsy (`T+PH-H*0.035→0.006`), one number |
+| `beto-el-boleto-tiene-orilla` | Beto (5th) | *"THERMAL LABEL — my own palette: receipt paper, burnt print, one alarm red."* A QR, the `#save=` base64, the cut line at 2 904 and the print disintegrating past it | nothing — the two dark base64 lines run past the cut line into the dust; text over marks, left as returned |
+| `guero-el-directorio` | Don Güero (3rd) | *"a MUNICIPAL DIRECTORY BOARD — vitreous enamel on steel in a brass frame, bolted to two posts at the corner. Its palette is mine, not MURPAL's: council green, brass, enamel white, one red pin."* | nothing |
+| `lupe-la-desenrollaron` | Lupe (3rd) | *"a LIGHT BOX under a matte black mask card. The review picture is a transparency of the whole document; the two apertures cut in the card are the two screens a person actually has. Cool light, warm paper, one grease-pencil mark on the glass."* | nothing — her tester is three lines of type tall on purpose, and says so |
+| `remedios-cuatro-copias-sin-folio` | Doña Remedios (1st) | *"the ANNEX'S OWN PAPER: a carbon set, three copies, torn off the pad across the perforation. My palette is the set's: white top copy, canary second, pink third, typewriter-ribbon violet for the type, and the dull red the annex keeps for a folio box. Nobody is in this panel. The annex is paper."* | **the box's frame ran through a word**: the top copy was too short for its own three states plus the folio box, so the box's red frame cut through `ABIERTO`. The sheets are a tenth taller (`sh=H*0.600→0.700`), one number; the box clears the third state by 16 px and the set's foot stays above the dado |
+| `zeni-la-caja-afuera` | Zeni (2nd) | *"Not paper this time — TIMBER. A bonded yard: two crates on the same pavement, the fence between them, the ticket rail that stops at the last post."* Pine, slat, vermilion, twine, brass | nothing — she could not render it (no shell); rendered here for the first time, and her three worries (the pen against the fence, `SIN BOLETA` fitting, the lid against the tickets) all hold |
+| `research-map-la-ficha-sin-color` | research-map (1st) | *"a catalogue card. My trade's paper is the 3x5 index card in a library drawer: a red rule at the head, blue feint below, one hole at the foot for the rod… The provenance is a rubber stamp."* | nothing |
+
+**Two returns arrived after the thirteen were briefed** — the meeting file grew by 285 lines while the
+first thirteen were being painted — and the session painted them the same afternoon, both under
+`by:"research"`: `research-map-una-sola-puerta` (the sweep's second pass, a measurement where the first
+carried a filing — a return visit in the same iteration, which the return-visit guard allows because it
+says a different thing) and `research-form-se-fue-en-la-nota` (the questionnaire sweep's first panel, an
+answer sheet with the pencil leaving at the note line). **The decision taken:** the research lenses share
+one bay. The wall keys a painter to the first word of the name, so `research-map` and `research-form`
+were one painter to it whatever we wrote; a second word for the wall is a rule nobody has needed yet, and
+each panel's `who` line says which lens held the pen.
+
+**The return-visit check ran on all eleven returns and passed**: each differs from the painter's earlier
+visits in what they said, the state they held, and the pixels they drew. The two-bays check folded
+twenty-one names to twenty-one people. Nobody has looked at these fifteen before they shipped except the
+hand that painted them and the session that reviewed the words (every string verbatim against the meeting file, by script) and looked at three of them; the next crew-fix run's step 4 is where Pili sees them.
+
+## Iteration 9 — 2026-09-14, the UI review: eight came back the same night
+
+Eight painted, all return visits — Lupe (4th), Rosa (3rd), Pili (4th), Beto (6th), Nacho (3rd), Paty
+(3rd), Chava (3rd), Doña Remedios (2nd) — every one about the journey mock-ups they had just signed
+against (`docs/UI-REVIEW.md` block 1), words verbatim from `docs/meetings/2026-09-14-la-cuadrilla-run-9.md`
+(checked by script against the source after decoding its escapes). Twenty-one bays, fifty-six panels.
+**Every one in a material of its own:** Lupe a light box with a second aperture that never came; Rosa a
+registration acetate over the real sideways screen, marked in grease pencil; Pili the same donkey under
+two saddles; Beto a spares catalogue page off the bench with a red stamp on the part from the wrong bin;
+Nacho the one sentence that fits, on the paper it was never printed on; Paty a two-column letter; Chava
+the smudge on the glass; Doña Remedios the annex's admission ticket with three stubs missing. **One
+art-only adjustment:** Remedios's value column moved right of her longest label (`fx+W*0.218 → 0.29`)
+so `caja de scroll`, `real o dibujado` and `idioma · cascarón` no longer run into their values; her
+words untouched. Two blocks came unfenced (Beto's, Chava's) and one carried a stray closing fence; the
+paint script learned to read them. The return-visit check passed on all eight; the two-bays check folded
+twenty-one names to twenty-one people; the ledger gained eight lines by the guard's own recipe.
 
 ## Coming back — how a return visit works, and the rule against stamps
 

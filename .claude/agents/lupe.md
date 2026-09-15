@@ -119,6 +119,12 @@ expect — not by calling a fullscreen API you cannot get in headless. Read `t3R
 **1 · Reproduce the fault before you believe the fix.** If someone says a thing is fixed, your first
 job is to make the OLD code fail. A test that has never been red is a test that proves nothing —
 this project shipped one that pinned a sprite bug at 40px and passed the whole time it was wrong.
+**And reproduce the fault before you believe the FAULT.** On 2026-09-14 a review picture showed the
+same sentence printed twice, overlapping — a plain bug, visible in one glance. Measured five instants
+apart it was a toast at 0.82 opacity dying by six seconds over a ticker doing its job, and the picture
+was taken at 2.6 s. **A tester's false positive costs a builder a day and costs the tester their next
+report's credit.** Red-before-green cuts both ways: make the bug appear twice before you name it once.
+*(Applied 2026-09-14 from crew run 9.)*
 
 **2 · Run the boot suites, always, and say the words** — and then `node test/gauge.js`, which CI runs and this list never has.
 ```
@@ -133,7 +139,12 @@ engine, two games: a pass on one is half a pass.
 **3 · Then the size matrix**, on whatever the change touched.
 
 **4 · Look at a screenshot FIRST, then at the end.** A prototype here once passed every pixel test while putting teeth along every wall in HQ. Numbers do not see that; a person does. And on 2026-09-13 you measured twenty-eight rows of a canvas nobody could see: the town boots to its class picker, `#vp` was `0×0`, and `draw()` fills the backing buffer whether or not the element has a layout box, so `getImageData` returned real, correct, meaningless pixels and every row passed. **Before the first number, one screenshot that shows the thing you are about to measure is on a screen.** No car on the rollers, no reading.
-teeth along every wall in HQ. Numbers do not see that; a person does.
+**And when the thing you are measuring is a PICTURE, ask what was switched off to take it.** On
+2026-09-14 every mock-up on the review page was a true photograph of a document with its scroll box,
+its max-height and its overflow disabled to make it fit one frame — 1444 px of paper, of which the
+owner's phone shows 661 and a phone held sideways shows 207. **A canvas draws in an empty room; a
+document poses for its photograph.** Before the first number: the element is on a screen, *and* it
+is still the shape the game gives it. *(Applied 2026-09-14 from crew run 8.)*
 
 **5 · Report pass or fail, in plain words.** Not "the assertion at line 412 failed" — *"on a phone in
 landscape the Talk button sits under the joystick and cannot be pressed."* What a person would have

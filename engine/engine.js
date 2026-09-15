@@ -99,7 +99,10 @@ function wanderUpdate(dt){
       n.mt=Math.min(1,(n.mt||0)+dt/WANDER_MS);
       n.fx=n.x+(n.mv[0]-n.x)*n.mt;n.fy=n.y+(n.mv[1]-n.y)*n.mt;
       if(n.mt>=1){
-        if(w.grid[n.y])w.grid[n.y][n.x]=".";
+        if(w.grid[n.y])w.grid[n.y][n.x]=w.rows[n.y][n.x]; /* #192: the glyph the map had, not "." —
+          the same answer removeChill() gives seventy lines below. Nothing in Meridian is decorated
+          inside a wander pen today, so this was invisible; it bites the first pack whose neighbour
+          walks past a tree. */
         n.x=n.mv[0];n.y=n.mv[1];n.fx=n.x;n.fy=n.y;petalDrop(world,n.x,n.y,n);
         if(w.grid[n.y])w.grid[n.y][n.x]="N";
         n.mv=null;n.wnext=now+1600+Math.random()*3200;}
@@ -508,7 +511,7 @@ function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,p
    missed, and a badge with a number on it is a backlog). It was hardcoded to hq, so
    the office kept promising a quest long after its last one was answered. */
 const worldPending=id=>(WORLDS[id]?WORLDS[id].npcs:[]).some(n=>hasSay(n));
-function setWorldTag(){$("worldTag").textContent=T().locs[world]+(worldPending(world)?" · ❗":"");}
+function setWorldTag(){$("worldTag").textContent=T().locs[world]+(worldPending(world)?" · ❗":"")+(typeof destBearing==="function"?destBearing():"");}
 /* Boundary sanitizer: every save that crosses a trust boundary — Trolley Pass links
    today, NET payloads tomorrow — is coerced to known-good shapes here. Numbers clamp,
    strings trim, colors must be hex, unknown keys drop, non-numeric qa keys (e.g.
@@ -3255,7 +3258,7 @@ function tryStep(){
    you had been walking with was still standing at the stop, still set to follow. */
 function worldArrived(fromW,fromX,fromY){
   warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
-  save();setWorldTag();{const ar=T().arrive[world];toast(typeof ar==="function"?ar():ar,2200);} /* a line may ask the season (Nacho, 2026-09-07) */
+  save();destCheck();{const ar=T().arrive[world];toast(typeof ar==="function"?ar():ar,2200);} /* a line may ask the season (Nacho, 2026-09-07) */
   propsReset();                    /* "they'll just reappear when i leave the screen" — the owner's scope */
   dogsFollow(fromW,fromX,fromY);   /* a dog at your heels comes with you */
   dogsRoam(world);                 /* unseen pups drift toward their favorite townsperson */
@@ -3290,7 +3293,7 @@ function loop(ts){
     if(mt>=1){moving=false;fx=px;fy=py;petalDrop(world,px,py,HEROFEET);
       if(tryPortal(ts)){}
       else if(troIsStop(world,px,py)&&ts>portalT){portalT=performance.now()+900;held=null;openTravel();}
-      else{save();checkTalk();tryStep();}
+      else{save();checkTalk();destCheck();tryStep();}
     }
     else{const[dx,dy]=DIRS[dir];fx=px-dx*(1-mt);fy=py-dy*(1-mt);}
   }else if(!tryPortal(ts))tryStep(); /* standing on a door whose cooldown just ran out: go through */
@@ -4541,11 +4544,17 @@ $("optEs").addEventListener("click",()=>{lang="es";applyLang();});
 $("langQuick").addEventListener("click",()=>{lang=(lang==="en"?"es":"en");applyLang();});
 /* ---------- text lab (edit names, titles, bump lines) ---------- */
 function labData(){return {npcNames:{...NPCN[lang]},titles:AQ().map(q=>q.title),flavor:JSON.parse(JSON.stringify(T().flavor))};}
+/* JSON.parse keeps a "__proto__" key as an ordinary own property, and Object.assign then SETS it
+   — which reaches the prototype setter and hands the target an object it never asked for. The lab
+   is the owner pasting into his own machine (#193, low tier), and the cure is one copier both
+   sites use rather than a rule everyone has to remember. */
+function putAll(dst,src){if(!src||typeof src!=="object")return dst;
+  Object.keys(src).forEach(k=>{if(k==="__proto__")return;dst[k]=src[k];});return dst;}
 function applyText(){
   try{const o=JSON.parse(localStorage.getItem(SK("text_")+lang)||"null");if(!o)return;
-    if(o.npcNames)Object.assign(NPCN[lang],o.npcNames);
+    if(o.npcNames)putAll(NPCN[lang],o.npcNames);
     if(o.titles)AQ().forEach((q,i)=>{if(o.titles[i])q.title=o.titles[i];});
-    if(o.flavor)Object.assign(UI[lang].flavor,o.flavor);
+    if(o.flavor)putAll(UI[lang].flavor,o.flavor);
   }catch(e){}
 }
 $("openLab").addEventListener("click",()=>{
@@ -4748,6 +4757,130 @@ function worldFlags(){
     f.closed[c.id]=chSeen>i;});
   return f;
 }
+/* ---------- who is waiting, on the plan — and a destination you choose ----------
+   #160, and the owner on 2026-09-15: "i like a hybrid approach, wehre i can choose my destination,
+   and i like the marking of people with quests in different colors but its hard to tell unless you
+   have a legend." The plan is docs/meetings/2026-09-14-el-mapa.md §7, and it says what a colour is
+   allowed to mean here: WHICH KIND of person is waiting — never how many, how old, or how far
+   through. A colour that counts is a list with the names removed (ARCH-LOG A3), and the mark that
+   means one thing forever (OWNER.md) is the one the street already draws.
+   Colour never travels alone: about one man in twelve cannot separate these hues, so every kind
+   also carries its own SHAPE and the legend names both (WCAG 1.4.1 — and his own sentence).
+   A pack OPTS IN with MAPMARK, whose ORDER is which kind wins when a person is more than one at
+   once. No declaration, no marks: `hasSay`'s third clause — a document to hand you — never fires
+   in Meridian and fires on every neighbour the town places, so a rule that lit every district
+   would not be the same game for both packs. */
+const MARKS={
+  work:{c:"#E0662B",sh:"disc"},    /* somebody here has work for you — the street's own ❗, on the plan */
+  host:{c:"#E8B94A",sh:"diamond"}, /* the host of this room still has a question for you.
+    #E0A430 shipped first and was wrong by this project's own floor: luma 168.7 against work's 131.8
+    is Δ37, under 40, so in greyscale the two marks leaned on their shapes alone. #E8B94A is 186.4 —
+    Δ54.6 from work and Δ46.7 from the plan's own paper, clear both ways (Pili's rule, measured). */
+  read:{c:"#F2E6C6",sh:"card"}     /* something to read — the cream card the rooms already draw */
+};
+const markKinds=()=>((typeof MAPMARK!=="undefined"&&Array.isArray(MAPMARK))?MAPMARK:[]).filter(k=>MARKS[k]);
+function markOf(n){ /* one person, one kind, in the order the pack declared */
+  const K=markKinds();if(!K.length||!n)return null;
+  const has={work:pendingAt(n)!==undefined,host:roomPending(n),read:!!n.doc};
+  return K.find(k=>has[k])||null;}
+/* Every mark the plan can carry: the people standing on the world it draws, and the anchor of
+   every other world somebody is waiting in. Several worlds share an anchor — pa, li and ex all
+   stand at 29,1 — so an anchor carries ONE mark and remembers every world folded into it. */
+function planMarks(){
+  const K=markKinds();if(!K.length)return[];
+  const st=PL.street,M=(typeof MAPDOT!=="undefined"?MAPDOT:{}),out=[],at={};
+  ((WORLDS[st]||{}).npcs||[]).forEach(n=>{const k=markOf(n);
+    if(k)out.push({x:n.x,y:n.y,k:k,w:st,ws:[st],who:n.npc});});
+  Object.keys(WORLDS).forEach(id=>{
+    if(id===st||!M[id]||!WORLDS[id])return;
+    let best=null;
+    (WORLDS[id].npcs||[]).forEach(n=>{const k=markOf(n);
+      if(k&&(!best||K.indexOf(k)<K.indexOf(best)))best=k;});
+    if(!best)return;
+    const key=M[id][0]+","+M[id][1],e=at[key];
+    if(e){e.ws.push(id);if(K.indexOf(best)<K.indexOf(e.k))e.k=best;return;}
+    at[key]={x:M[id][0],y:M[id][1],k:best,w:id,ws:[id]};out.push(at[key]);});
+  return out;}
+function drawMark(g,cx,cy,k,r){ /* ONE painter, two surfaces: the plan and its own legend, so a
+                                   swatch can never drift from the mark it explains */
+  const m=MARKS[k];if(!m)return;
+  g.save();g.strokeStyle="#2B2536";g.lineWidth=1.5;g.fillStyle=m.c;
+  if(m.sh==="disc"){g.beginPath();g.arc(cx,cy,r,0,7);g.fill();g.stroke();
+    g.fillStyle="#FFFFFF";g.fillRect(cx-r*0.17,cy-r*0.58,r*0.34,r*0.72);g.fillRect(cx-r*0.17,cy+r*0.34,r*0.34,r*0.3);}
+  else if(m.sh==="diamond"){g.beginPath();g.moveTo(cx,cy-r*1.2);g.lineTo(cx+r*1.2,cy);g.lineTo(cx,cy+r*1.2);g.lineTo(cx-r*1.2,cy);
+    g.closePath();g.fill();g.stroke();
+    g.fillStyle="#6B4A16";g.fillRect(cx-r*0.14,cy-r*0.5,r*0.28,r*0.6);g.fillRect(cx-r*0.14,cy+r*0.3,r*0.28,r*0.26);}
+  else{const w=r*2.2,h=r*1.7;g.fillRect(cx-w/2,cy-h/2,w,h);g.strokeRect(cx-w/2,cy-h/2,w,h);
+    g.fillStyle="#B9AE95";g.fillRect(cx-w/2+2,cy-h/2+3,Math.max(2,w-6),1);g.fillRect(cx-w/2+2,cy+h/2-4,Math.max(2,w-5),1);}
+  g.restore();}
+let mapDest=null; /* {w,x,y} — ONE at a time, and never saved. A destination is what you are doing
+                     right now; a saved one is the list A3 bans, wearing a compass. */
+function drawPlanMarks(g2,s){
+  planMarks().forEach(m=>drawMark(g2,m.x*s+s/2,m.y*s+s/2,m.k,s*0.45));
+  if(!mapDest)return;
+  /* the ring is the destination HE chose. Nothing here nominates a "next" — that was the one call
+     the plan left open and his hybrid answered it (el-mapa §7.3). */
+  const cx=mapDest.x*s+s/2,cy=mapDest.y*s+s/2;
+  g2.save();g2.lineWidth=2;g2.strokeStyle="#7A3FE0";
+  g2.beginPath();g2.arc(cx,cy,s*0.9,0,7);g2.stroke();
+  g2.lineWidth=1;g2.strokeStyle="#F2F1EA";
+  g2.beginPath();g2.arc(cx,cy,s*0.9+1.5,0,7);g2.stroke();g2.restore();}
+/* The legend is REAL TEXT under the plan, built here rather than in the shell so a pack gets it
+   without touching its own index.html. The line it stands beside is drawn at 8 canvas pixels —
+   about 7.5 CSS px on a phone — which is what "its hard to tell" measures like. */
+function mapLegend(){
+  const host=$("mapNote");if(!host||!markKinds().length)return; /* a pack that declares no kinds
+    gets no legend and no element: the town's plan is the same object it was yesterday */
+  let box=$("mapLeg");
+  if(!box){box=document.createElement("div");box.id="mapLeg";
+    box.style.cssText="display:flex;flex-wrap:wrap;gap:8px 14px;margin:8px 0 0;align-items:center;font-size:.8rem;";
+    host.parentNode.insertBefore(box,host);}
+  const drawn=[],seen={};
+  planMarks().forEach(m=>{if(!seen[m.k]){seen[m.k]=1;drawn.push(m.k);}});
+  const t=(T().plan||{});
+  box.innerHTML="";box.hidden=!drawn.length;
+  drawn.forEach(k=>{
+    const row=document.createElement("span");row.setAttribute("data-kind",k);
+    row.style.cssText="display:inline-flex;align-items:center;gap:6px;";
+    const cv=document.createElement("canvas");cv.width=20;cv.height=20;cv.style.cssText="width:20px;height:20px;";
+    drawMark(cv.getContext("2d"),10,10,k,6);
+    row.appendChild(cv);row.appendChild(document.createTextNode(t[k]||k));
+    box.appendChild(row);});}
+function mapPick(tx,ty){ /* tile coords, fractional — it is a finger, not a cursor */
+  let best=null,bd=1e9;
+  planMarks().forEach(m=>{const dx=m.x+0.5-tx,dy=m.y+0.5-ty,d=dx*dx+dy*dy;if(d<bd){bd=d;best=m;}});
+  if(!best||bd>9)return false;  /* three tiles ≈ 30 canvas px ≈ a fingertip; a miss changes nothing */
+  mapDest=(mapDest&&mapDest.x===best.x&&mapDest.y===best.y)?null:{w:best.w,x:best.x,y:best.y,who:best.who||null};
+  drawTown();setWorldTag();
+  const t=(T().plan||{});
+  if(mapDest)$("mapNote").textContent="🎯 "+destName()+(t.chosen?"  ·  "+t.chosen:"");
+  else $("mapNote").textContent="📍 "+T().locs[world]+(world===PL.upstairs?"  ·  ⇧":"")+(t.tap?"  ·  "+t.tap:"");
+  return true;}
+/* The bearing: a DIRECTION, never a lit path — Elden Ring's Guidance of Grace is the shape of it
+   (el-mapa §7.3, and the sweep's sources). If the place is on this world, point at it; if it is
+   behind a door on this world, point at the door; otherwise it is a tram ride and the tag says so. */
+const BEARS=["↑","↗","→","↘","↓","↙","←","↖"];
+/* What to call the place you are heading for. A mark standing on the world you can SEE is a
+   person, and "Meridian Street" is not what you would call him when you are already standing on
+   Meridian Street — the first render of this said exactly that, and looked ridiculous. */
+function destName(){
+  if(!mapDest)return "";
+  return (mapDest.who&&npcName(mapDest.who))||(T().locs||{})[mapDest.w]||"";}
+function destBearing(){
+  if(!mapDest)return "";
+  const name=destName();
+  let tx=null,ty=null;
+  if(mapDest.w===world){tx=mapDest.x;ty=mapDest.y;}
+  else{let bd=1e9;portalsOf(world).forEach(p=>{if(!p.p||p.p.to!==mapDest.w)return;
+    const dx=p.x-px,dy=p.y-py,d=dx*dx+dy*dy;if(d<bd){bd=d;tx=p.x;ty=p.y;}});}
+  if(tx===null)return "  ·  🚋 "+name;
+  const dx=tx-px,dy=ty-py;
+  if(Math.abs(dx)<=1&&Math.abs(dy)<=1)return "  ·  ◉ "+name;
+  const i=((Math.round(Math.atan2(dx,-dy)/(Math.PI/4))%8)+8)%8;
+  return "  ·  "+BEARS[i]+" "+name;}
+function destCheck(){ /* you arrived: the destination is spent, and nothing remembers it */
+  if(mapDest&&mapDest.w===world&&Math.abs(px-mapDest.x)<=1&&Math.abs(py-mapDest.y)<=1)mapDest=null;
+  setWorldTag();}
 function drawTown(){
   const mc=$("mapcv"),g2=mc.getContext("2d"),w=WORLDS[PL.street],s=10;
   mc.width=w.W*s;mc.height=w.H*s+14;
@@ -4765,17 +4898,28 @@ function drawTown(){
   g2.fillStyle="#8A8474";g2.font="600 8px sans-serif";
   g2.fillText(es?"puertas y escaleras en dorado · ◉ estás aquí":"doors & stairs in gold · ◉ you are here",mc.width/2,w.H*s+10);
   const M=typeof MAPDOT!=="undefined"?MAPDOT:{};
+  drawPlanMarks(g2,s); /* the marks go UNDER the dot: you can always see yourself */
   const dot=world===PL.street?[fx,fy]:M[world]||null;
   if(dot){g2.fillStyle="#7A3FE0";g2.beginPath();g2.arc(dot[0]*s+s/2,dot[1]*s+s/2,5,0,7);g2.fill();
     g2.strokeStyle="#F2F1EA";g2.lineWidth=2;g2.stroke();}
+  mapLegend();
 }
 function openMap(){
   drawTown();
-  const t=T();
-  $("mapNote").textContent="📍 "+t.locs[world]+(world===PL.upstairs?"  ·  ⇧":"");
+  const t=T(),pl=t.plan||{};
+  $("mapNote").textContent=mapDest
+    ?"🎯 "+destName()+(pl.chosen?"  ·  "+pl.chosen:"")
+    :"📍 "+t.locs[world]+(world===PL.upstairs?"  ·  ⇧":"")+(pl.tap?"  ·  "+pl.tap:"");
   $("mapov").hidden=false;held=null;
 }
 $("mapbtn").addEventListener("click",openMap);
+/* tapping a mark is how a destination is chosen — the plan is the only place it can be, because
+   the plan is the only place you can see them all at once (owner, 2026-09-15: "i can choose my
+   destination"). A tap in open ground changes nothing: a miss must never clear what you picked. */
+$("mapcv").addEventListener("click",e=>{
+  const c=$("mapcv"),r=c.getBoundingClientRect();if(!r.width||!c.width)return;
+  const sc=c.width/r.width,s=10;
+  mapPick((e.clientX-r.left)*sc/s,(e.clientY-r.top)*sc/s);});
 $("mapClose").addEventListener("click",()=>{$("mapov").hidden=true;});
 function openTravel(){
   const t=T().pass,list=$("tvList");

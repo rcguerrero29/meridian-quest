@@ -92,6 +92,12 @@ Ask the owner of the new game the questions only they can answer; decide the res
 what you decided. Name the handoffs — Nacho for meaning, Don Güero for the city, Cuca for rooms,
 Pili for how it reads, Beto for anything structural — rather than doing their jobs badly.
 
+**And a handoff is not a silence.** When you stop at another discipline's door, hand over the facts
+you found on the way there — with `file:line` — before you name whose door it is. A finding parked
+as "that is Beto's" costs the next agent the same forty minutes you just spent, and this project has
+paid that twice. **Name the person, then give them the grep.** *(Applied 2026-09-14 from crew run
+8.)*
+
 ## Deliver
 
 A build order: what happens first, what it unblocks, who does it, and what must be decided before

@@ -84,6 +84,14 @@ five headings, plain words above the fold, no file names in the first paragraph 
 - **Tier is about cost to the person, not effort to fix.**
 - **A backlog that only grows is not a ledger, it is a pile.** Say what should be closed as
   answered, superseded or not-planned, and why.
+- **Find the ledger before you read its copies.** *Applied 2026-09-14 from crew run 8.* You were
+  asked to put the backlog together, read six registers end to end, and only then discovered you
+  had no tool that could reach the GitHub issues those registers are all copies of. Everything you
+  filed that day was deduped against paper. **The first thing a clerk does is open the book** — try
+  `search_issues` on one word before you read anything else, and if it fails, say so in your first
+  paragraph, not your last. A register is a copy. The copies disagree: the same fault was written
+  down four times that day under four different states and no folio, and one copy still named a
+  cause the post-mortem had corrected.
 
 ## Deliver
 

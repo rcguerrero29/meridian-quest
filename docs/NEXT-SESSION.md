@@ -5,7 +5,92 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-13, end of the crew-mode sitting)
 
-### ⇢ 2026-09-14 — START HERE. Everything below this block is history.
+### ⇢ 2026-09-14, night — START HERE. Everything below this block is history.
+
+**`main` is still at `mq-v159` / `ch-v104`; the branch `claude/happy-ritchie-84qbbc` carries this
+sitting (documents, the wall at `ch-v105`, no engine change) and is pushed, not merged.** Merge is
+the owner's word.
+
+**What the owner asked (third reply, then "Try again" after the session limit cut the crew twice —
+`docs/ASKS.md`):** the questionnaire for AJ as a night-mode app with a comment on every choice; full
+mock-ups of the journey and the app feel; a UI review process (engineers, agents, UI, story, QA) run on
+the mock-ups; the map revamped so a person can find the next quest; the murals creative and completed;
+the backlog put together while AJ takes her time.
+
+**What shipped this sitting, and where:**
+- **AJ's questionnaire, v4** — the artifact he forwards (source: the session's scratchpad
+  `aj-questionnaire.html`; script `docs/for-aj/LA-SOBREMESA.md`). Thirteen questions, a comment box
+  under every choice, night; her answers stay with him (Zeni) and are never copied into this repo. v3
+  fixed Rosa's run-9 finding (held sideways, the bottom bar sat on the third answer); v4 Nacho's (two
+  opposite promises on one screen). **He still owes one
+  check before forwarding: open the link logged out once (Zeni's "private by link").**
+- **The journey** — the artifact *La Sobremesa, the journey*
+  (https://claude.ai/code/artifact/5a2858ba-51ca-49c6-ba7e-3e10170aab0c): thirteen screens on a phone at
+  night, each labelled real game / real reader / drawing, every picture with Lupe's admission ticket.
+  Documents `docs/mocks/2026-09-14-la-sobremesa/journey/mockdocs2.js`, camera `render2.js`, tickets
+  `manifest.json`. Two of five matrix rows (390×844, 844×390); ES at 390×844 only — said on the page.
+- **The UI review process** — `docs/UI-REVIEW.md` (Lupe's, run 8), first ledger block opened for the
+  journey; **crew run 9 signed it** (`docs/meetings/2026-09-14-la-cuadrilla-run-9.md`, returns
+  verbatim; §6 block 1 carries the verdicts).
+- **The map plan** — `docs/meetings/2026-09-14-el-mapa.md`; #160 raised to high with the recommendation
+  (presence marks on the plan, a `TOWNPLAN` seam so Calle Dos exists, no list, no done tick; **the ring
+  on "next" is his call**). Built after his look at screen 12 of the journey page.
+- **The backlog** — issues #173–#201 filed from Remedios's run-8 triage (her pick: #173, the phone held
+  sideways), comments on #154 and #156, `docs/BACKLOG.md` §0 re-ranked onto the ledger.
+- **The wall** — iterations 8 and 9: fifteen and then eight panels, each in its own material
+  (`docs/crew/MURALS.md`); fifty-six panels, twenty-one bays, `ch-v105`. Run 8's twelve persona edits
+  applied (`docs/crew/FLIGHT-NOTES.md` rows 47–61) and run 9's seven (rows 62–69; Remedios: none, and
+  why) — both suites and the leaves guard green on the result.
+- **Registers**: `docs/la-sobremesa.md` §13 (run 8 consolidated; §10's palette superseded by Pili's
+  night palette and re-cut kitchens, machine-checked), `docs/GENRE-RULES.md` R18, the research sweeps in
+  `docs/research/2026-09-14-map-and-questionnaires.md`, QA-PASS E13, three stale citations corrected.
+
+**What is owed, in order:**
+1. The owner: the seven decisions on the journey page (Tuesday's first screen · restaurants as people or
+   a board · one house or two halves · grades switch on the card or in the gear · merge board or by hand,
+   and which first · names · the ring on "next"); his look at the map pictures; the logged-out check.
+2. Chava's two cold plays (the mocked map, the journey) — cut by the limit twice; run 9's Chava return
+   covers the journey if it landed (see the run-9 file).
+3. The review's open notes: the reader's own faults (19-px select, 13-px checkboxes, blue ticks, violet
+   labels, submit/cancel twins, no end-of-document affordance, scroll reset) are engine work with a red
+   first, all listed in `docs/UI-REVIEW.md` block 1; the three missing matrix rows (480×900, 1280×800,
+   fullscreen) for the next camera pass.
+4. Nothing on the second world is built, and nothing should be until AJ answers (#200).
+
+---
+
+### 2026-09-14, late — the morning and afternoon (history from here down)
+
+**`main` is at `mq-v159` / `ch-v104`: [PR #172](https://github.com/rcguerrero29/meridian-quest/pull/172)
+merged the whole of 2026-09-13/14 at the owner's word ("merge please"). The branch
+`claude/happy-ritchie-84qbbc` was restarted from that `main`; this pass on it is documents only.**
+
+**The owner's morning message, in `docs/ASKS.md` (thirty-two rows, "2026-09-14 (late)"):** he sees
+the skulls; the mural looks better but *agents need to be more creative* and *any crew mode creates
+a mural entry* (rules written: crew-fix skill, `docs/CREW-MODE.md` row 6, `docs/crew/MURALS.md` 5–7,
+and a guard in `test/town.smoke.js` from iteration 8 on); he answered **all fifteen** food-game
+decisions and added six requests — a home level with **his pantry rebuilt as an object (three
+drawers, from photos he will send)** that marks *have/missing* on every recipe; **shifts at
+restaurants' kitchens instead of the week, no time limit**; product images (answered: licensed or our
+own, never scraped, never fetched at play); print recipes; AJ's raw-vegetable allergies; more
+contrast in the kitchens, then animations. **All of it is `docs/la-sobremesa.md` §12**, his answers
+in 12.1, the new requests with sketches in 12.3, the questions back to him in 12.4, and what his
+answers overrule in 12.5. He sent recordings of both games AJ plays, the merge game and Cookingdom; both are read frame by frame in
+12.2 — two kinds of play, two surfaces this engine does not have; her script asks which she would miss more. The brief for AJ is `docs/for-aj/LA-SOBREMESA.md`. Lessons of the sitting are
+`docs/POSTMORTEM.md` §13p–13t.
+
+**Nothing on the second world is built, and nothing should be until:** AJ answers her eight (1, 2 and
+6 gate the merge board, the making surface and the pantry); the pantry photos arrive; he confirms the merge board
+goes first and says where the household's sync lives (§12.6 — his seven follow-ups are answered:
+a shift pays leftovers, grading pays recipe offers, no timer anywhere, sync by itself later and the
+pass while testing). **Then** a crew run turns §12 into a build order —
+and every agent on it paints.
+
+**The queue below is unchanged:** row 8 (the rail), 8½, 8¾ (the wall's feet), Pili's socket redraw and
+a cold read of the skulls in the flat cameras, Chava's deferred panel and edit (flight-notes row 46).
+
+---
+
 
 **`main` is at `mq-v158` / `ch-v101`. Branch `claude/happy-ritchie-84qbbc` carries the whole of
 2026-09-13 and takes the town to `ch-v102`; it is pushed, all seven suites and `test/leaves.js` were

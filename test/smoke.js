@@ -4257,6 +4257,149 @@ const CANDIDATES = [
   fails.push(...frontSill);
 
 
+  /* ---- the plan says where somebody is waiting, and it says it in PIXELS ----
+     #160, and the owner's word of 2026-09-15: "i like the marking of people with quests in
+     different colors but its hard to tell unless you have a legend." docs/meetings/2026-09-14-el-mapa.md
+     §7 is the plan. This guard is written the way REGRESSION.md §3 says to write it: not
+     "drawPlanMarks was called N times" — a call count where the noun is a mark on a tile is the
+     commonest wrong guard in this repo — but blank the one painter and read what the plan lost,
+     and plant a world with NOBODY waiting, which must lose nothing. Every plant is on real state
+     (a quest id taken out of `done` and put back), never on a stub. */
+  const plan = await page.evaluate(() => {
+    const P = [];
+    if (typeof planMarks !== 'function' || typeof drawPlanMarks !== 'function')
+      { P.push('the plan carries nothing about who is waiting: planMarks()/drawPlanMarks() do not exist (#160)'); return P; }
+    if (typeof drawTown !== 'function' || typeof MAPDOT === 'undefined') return P;
+    const c = document.getElementById('mapcv'), g = c.getContext('2d'), s = 10;
+    const shot = () => { drawTown(); return g.getImageData(0, 0, c.width, c.height).data; };
+    const box = (buf, tx, ty) => { /* the pixels of ONE tile, by tile coords */
+      const out = []; const x0 = tx * s, y0 = ty * s;
+      for (let y = y0 - s; y < y0 + s * 2; y++) for (let x = x0 - s; x < x0 + s * 2; x++) {
+        if (x < 0 || y < 0 || x >= c.width || y >= c.height) continue;
+        const i = (y * c.width + x) * 4; out.push(buf[i], buf[i + 1], buf[i + 2]); }
+      return out; };
+    const diff = (a, b) => { let n = 0; for (let i = 0; i < a.length; i += 3) if (a[i] !== b[i] || a[i+1] !== b[i+1] || a[i+2] !== b[i+2]) n++; return n; };
+
+    /* the plant: one quest-giver on the drawn street, made pending by real state */
+    const st = PL.street, people = ((WORLDS[st] || {}).npcs || []);
+    let who = null, qid = -1;
+    for (const n of people) { const q = (n.q || []).find(i => qOpen(i)); if (q !== undefined) { who = n; qid = q; break; } }
+    if (!who) { P.push('no quest-giver stands on the street world, so the plan cannot be tested'); return P; }
+    const had = done.has(qid); done.delete(qid);
+    /* a world nobody is waiting in — the plant that must draw NOTHING */
+    let quiet = null;
+    for (const id of Object.keys(MAPDOT)) if (id !== st && WORLDS[id] && !worldPending(id)) { quiet = id; break; }
+
+    const real = drawPlanMarks;
+    const on = shot();
+    drawPlanMarks = function () {}; const off = shot(); drawPlanMarks = real;
+
+    const lost = diff(box(on, who.x, who.y), box(off, who.x, who.y));
+    if (lost < 12) P.push('a quest-giver is standing on the street with an open question and blanking the plan\'s mark painter changes ' + lost + ' pixels at his tile: the plan does not say he is there');
+    if (quiet) { const q = MAPDOT[quiet], same = diff(box(on, q[0], q[1]), box(off, q[0], q[1]));
+      if (same > 0) P.push('the world "' + quiet + '" has nobody waiting in it and the plan draws ' + same + ' pixels of mark at its anchor anyway: the mark is not reading who is waiting'); }
+
+    /* two clauses true at once — work AND something to read. The kind the pack declared first wins,
+       and the plan must say ONE thing about one person, not two marks on one tile */
+    const kinds = (typeof MAPMARK !== 'undefined' && Array.isArray(MAPMARK)) ? MAPMARK : [];
+    {
+      const keepDoc = who.doc; who.doc = 'any';                 /* two clauses true at once */
+      const marks = planMarks().filter(m => m.w === st && m.x === who.x && m.y === who.y);
+      who.doc = keepDoc;
+      if (marks.length !== 1) P.push('a person with work for you AND something to read gets ' + marks.length + ' marks on one tile');
+      else if (marks[0].k !== kinds.find(k => k === 'work' || k === 'read'))
+        P.push('a person who is two kinds at once is marked "' + marks[0].k + '": the kind the pack declared FIRST must win');
+    }
+    { /* the opt-in, planted the only way that proves it: a kind the pack did NOT declare draws
+         nothing at all. In Meridian nobody hands you a document, so "read" is undeclared.
+         The plant is MADE, never found: the first draft waited for a neighbour who happened to have
+         no work, there was no such neighbour at this point in the suite, and the check sat there
+         passing without ever running — the failure this repo keeps writing down. */
+      if (!kinds.includes('read')) {
+        const man = people.find(n => !roomPending(n)) || people[0];
+        const keepQ = man.q, keepDoc = man.doc;
+        man.q = []; man.doc = 'any';                     /* nothing but a document to hand you */
+        const drew = planMarks().some(m => m.w === st && m.x === man.x && m.y === man.y);
+        man.q = keepQ; man.doc = keepDoc;
+        if (drew) P.push('a neighbour with nothing but a document is marked on the plan, and this pack never declared the kind "read": an undeclared kind must draw nothing');
+      }
+    }
+
+    /* the legend: real text, one row per kind actually drawn, in the language the game is in */
+    const rows = document.querySelectorAll('#mapLeg [data-kind]');
+    const drawn = [...new Set(planMarks().map(m => m.k))];
+    if (rows.length !== drawn.length) P.push('the plan draws ' + drawn.length + ' kinds of mark and the legend has ' + rows.length + ' rows: the owner said "its hard to tell unless you have a legend"');
+    rows.forEach(r => { if (!r.textContent.trim()) P.push('a legend row for "' + r.getAttribute('data-kind') + '" has no word beside its colour'); });
+
+    /* the destination he chooses — and the ring that says he chose it */
+    if (typeof mapPick === 'function') {
+      const before = shot();
+      mapPick(who.x + 0.5, who.y + 0.5);
+      const after = shot();
+      if (diff(box(before, who.x, who.y), box(after, who.x, who.y)) < 8) P.push('choosing a destination on the plan draws nothing at the place chosen');
+      const tag = document.getElementById('worldTag').textContent;
+      if (!/→|↑|↗|→|↘|↓|↙|←|↖|🚋/.test(tag)) P.push('a destination is chosen and the world tag does not point at it: "' + tag + '"');
+      mapPick(who.x + 0.5, who.y + 0.5); /* the same mark again clears it */
+      if (mapDest) P.push('tapping the chosen destination again does not clear it');
+    } else P.push('there is no way to choose a destination on the plan (mapPick), which is the half of #160 the owner asked for by name');
+
+    if (!had) done.delete(qid); else done.add(qid);
+    drawTown();
+    return P;
+  });
+  fails.push(...plan);
+
+
+  /* ---- two one-line faults, planted rather than reasoned (#192, #193) ----
+     Both plants are MADE, never found. The first draft of this block looked for a wanderer in
+     whatever world the suite happened to be standing in, found none, and passed twice without
+     running a line of either check. */
+  const twoSmall = await page.evaluate(() => {
+    const P = [];
+    /* #193 · a "__proto__" key in the text lab's paste reaches a prototype SETTER. JSON.parse keeps
+       the key as an ordinary own property; Object.assign then SETS it, and the target — NPCN[lang],
+       the cast's names — gets a new prototype it never asked for, so every unknown name lookup can
+       be answered by whatever was pasted. Local-only and self-inflicted (his own paste, his own
+       lab), which is why it is low tier and not why it may stand. */
+    try {
+      const before = Object.getPrototypeOf(NPCN[lang]);
+      localStorage.setItem(SK('text_') + lang, '{"npcNames":{"__proto__":{"mqPwned":1}}}');
+      applyText();
+      if (NPCN[lang].mqPwned !== undefined || Object.getPrototypeOf(NPCN[lang]) !== before)
+        P.push('pasting {"__proto__":…} into the text lab replaces the prototype of the cast\'s own name table (#193): a name nobody wrote now answers');
+      Object.setPrototypeOf(NPCN[lang], before);
+    } catch (e) { P.push('the text-lab prototype probe threw: ' + e.message); }
+    localStorage.removeItem(SK('text_') + lang);
+
+    /* #192 · when a neighbour steps OFF a tile, the engine writes plain floor over whatever the map
+       had there. Nothing visible today — no decorated tile sits inside a wander pen — so the plant
+       makes one: put a jacaranda on the tile under a wanderer, walk him off it, and read what is
+       left. The same file already knows the answer seventy lines earlier: "the glyph the map had,
+       not '.'". `rows` are strings and `grid` rows are arrays; the first draft of this plant wrote
+       a string into grid, which no assignment in the engine can change, and proved nothing. */
+    let wid = null, n = null;
+    for (const id of Object.keys(WORLDS)) {
+      const cand = (WORLDS[id].npcs || []).find(p => wanders(p) && p.x + 1 < WORLDS[id].W);
+      if (cand) { wid = id; n = cand; break; }
+    }
+    if (!n) P.push('no wanderer anywhere in this pack, so the step-off cannot be tested');
+    else {
+      const keepW = world, w = WORLDS[wid], gx = n.x, gy = n.y;
+      const keepRow = w.rows[gy], keepCell = w.grid[gy][gx], keepNext = w.grid[gy][gx + 1];
+      world = wid;                                         /* wanderUpdate only walks CW() */
+      w.rows[gy] = keepRow.substring(0, gx) + 'J' + keepRow.substring(gx + 1);
+      w.grid[gy][gx] = 'N'; w.grid[gy][gx + 1] = '.';
+      n.mv = [gx + 1, gy]; n.mt = 1; n.wnext = 0;
+      wanderUpdate(16);
+      const left = w.grid[gy][gx];
+      w.rows[gy] = keepRow; w.grid[gy][gx] = keepCell; w.grid[gy][gx + 1] = keepNext;
+      n.mv = null; n.mt = 0; n.x = gx; n.y = gy; n.fx = gx; n.fy = gy; world = keepW;
+      if (left !== 'J') P.push('a neighbour steps off a decorated tile and the engine writes "' + left + '" over the map\'s own glyph (#192): the map says "J"');
+    }
+    return P;
+  });
+  fails.push(...twoSmall);
+
 
   await browser.close();
 

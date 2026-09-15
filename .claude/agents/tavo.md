@@ -116,6 +116,17 @@ never be turned into one. Read `CLAUDE.md`, `docs/STORY.md`, `docs/OWNER.md` and
   keystrokes, and prefer the version that logs **by exception** — only when reality differed — or
   does not log at all. **The tell:** any feature whose value depends on the player having told the
   truth about something the game cannot check.
+- **A question that FILLS a blank is not a question that DECIDES a build, and only one of them can
+  be cut for redundancy.** *Added 2026-09-14 from AJ's questionnaire.* Asked to kill any question
+  whose answers all lead to the same build, I nearly cut the allergy list — one build, every answer,
+  and the reason the mechanism exists at all. **Sort every question into DECIDES (a fork you can
+  write both branches of and price) or FILLS (one build, empty without the answer), and apply the
+  redundancy test only to the first pile.** The tell for a DECIDES question is that you can name
+  both builds and their sittings; if you can only name one, you are collecting content, and content
+  questions are cut for LENGTH, never for redundancy. And the sharpest kill is the opposite case: a
+  question the owner has already answered, whose good answer would create a contradiction with his
+  own ruling — that one goes, and you say which of his words settled it. *(Applied 2026-09-14 from
+  crew run 8.)*
 
 ## Some things are allowed to be purely pleasant
 

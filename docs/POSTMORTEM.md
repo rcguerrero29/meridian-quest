@@ -706,6 +706,53 @@ nothing to obtain and was worth nothing.
 > candidate ahead of it: **a world with a random mover in it is its own fuzzer, and it is finding real
 > faults.**
 
+### 13p · The brief was written by hand, and the step it dropped was the one nobody would miss until the owner did (the calling session)
+
+**Believed:** a workflow brief that names the flight notes and the return shape carries the whole
+crew-fix loop. **True:** it carried everything except the mural, because the mural section was not
+copied and nobody re-read the skill while writing the brief; seven designers returned with no panel
+and the wall got its first empty run. **Cost:** the owner's first line the next morning was *"ensure
+any crew mode creates a mural entry"* — the one thing he has asked for on every run since 2026-09-11.
+**Rule:** a brief is a file copied whole, never a paragraph typed; and a guard now refuses an
+iteration with no paint.
+
+### 13q · Both sides of the comparison were the same function, so the function could not be wrong (the calling session)
+
+**Believed:** the wall's stretch guard proved each painter kept one bay. **True:** it grouped panels by
+`murPainter` and asked whether the wall kept those groups together — and the wall keys its bays by
+`murPainter`. When that function named Doña Cuca "Cuca" and Don Güero "Don-guero", each got a second
+bay and the guard was green; the first repair split "Melo Garduño" from "Melo" and the first draft of
+the *new* guard, comparing whole names, was green again. **Cost:** three plants in a lab copy before
+one guard read the noun. **Rule:** a guard that compares X with f(X) proves f is a function.
+`docs/REGRESSION.md` row 24.
+
+### 13r · The probe measured the tram (the calling session)
+
+**Believed:** blanking the sill painter and diffing two front-camera frames measures the sill.
+**True:** the first draft did not freeze the clocks, read 703 pixels of difference between two frames
+with *nothing* changed, and would therefore have passed on a frame that draws no sill at all — the
+check that was written to end five fixes of one kind would have been the sixth. **Cost:** ten minutes,
+because the control was run first. **Rule:** a pixel probe's first number is the control; if it is
+not zero the probe measures nothing, and Chema's file says so — read it before writing one.
+
+### 13s · "It is not drawn" is a claim about the code; "I did not notice it" is a claim about play (Chava)
+
+**Believed:** after four passes along the street in four cameras, "there is no mural on this wall."
+**True:** the paint was there every pass, at `changarrito/content/art.js:25`; one crop at 3× settled
+it. **Cost:** a wrong sentence in a report, caught by the reporter. **Rule:** when you conclude a thing
+is *absent*, crop it before you say so; the play-scale finding — *not noticed in four passes* — was the
+true and useful one, and it survives.
+
+### 13t · Five fixes about size and light, and nobody asked whether the thing was on the paper (Chema)
+
+**Believed:** the skulls were small, or dim, or the colour of their shelf. **True:** in the camera the
+owner photographs, the front camera, the window was drawn eight times a frame and delivered zero
+pixels — painted in the ground pass, covered by the wall's own face in the depth pass, since the day
+it shipped. **Cost:** five owner reports and five fixes that changed nothing he could see. **Rule:**
+before measuring how well a thing reads, blank its one painter and diff the frame; presence before
+contrast. The instrument is in `.claude/agents/chema.md` now, and the suite asks the question in the
+front camera.
+
 ## How to add to this file
 
 Same discipline as every register here: **it grows from what happened, never from imagination.** An

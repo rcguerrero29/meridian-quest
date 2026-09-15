@@ -25,6 +25,8 @@ can run is a row that gets skipped, and it reads as covered every time somebody 
 | Desktop | 1280 × 800 | **nobody — by hand** | Where the world is widest and the camera shows most |
 | **Fullscreen** | the element gets the screen's shape | **nobody — by hand** | **The one that has actually escaped** |
 
+Mock-ups are reviewed under `docs/UI-REVIEW.md`; only what reaches the owner is written here.
+
 A change to layout, camera, text or anything a person touches runs every row. A change to logic
 alone may run the first and the last.
 
@@ -307,6 +309,17 @@ gap in the table itself rather than in a footnote.
 counted rather than re-discovered.
 **The general lesson:** **a row of a checklist that no script can run is a row that gets skipped** —
 and it silently vouches for coverage the list does not have.
+
+### E13 · The review pictures were photographs of a document with its scroll box switched off — 2026-09-14 (Lupe, caught before the review, not an escape)
+
+`docs/mocks/2026-09-14-la-sobremesa/render.js` sets `height:auto; maxHeight:none; overflow:visible` on the
+reader so the whole document fits one picture. Every picture on the first review page was therefore a
+true photograph of a thing no screen shows. **Which row would have caught it: none — it would have
+passed at all five**, exactly like E10. **What the list is now:** step 0 gains a second clause —
+*prove you are in the game, AND prove the screen is still the shape the game gives it.* Every picture
+a mock-up carries now says `unmodified` or `unrolled` on its ticket (`docs/UI-REVIEW.md` §1, A2).
+**The general lesson:** E10 was a canvas drawing in an empty room; this is a document photographed
+with the room's walls taken down.
 
 ## Known gaps in the list
 

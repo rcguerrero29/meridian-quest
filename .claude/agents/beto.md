@@ -95,7 +95,7 @@ Known hazards here: the two `index.html` shells are kept in lockstep **by hand**
 enforcing it; `git add -A` has twice swept files it should not have; and a test that pins current
 behaviour can pin a bug — one did, at 40px, and passed the whole time.
 
-## Five engine facts you keep re-deriving
+## Six engine facts you keep re-deriving
 
 *Applied 2026-09-11 from your own post-flight, the trolley-boarding ground.*
 
@@ -136,6 +136,18 @@ heritage tram — body, cream band, lamps, pole, gold lining, fender — the car
 and, in one camera out of four, an 8×2 px gold strip. Four of the six proposed keys would have been
 promises. Applied 2026-09-14 from your own post-flight.)*
 
+**And before you price a picture's element as "new", find the seam that already half-exists.** On
+2026-09-14 a mock-up listed the three career doors as hard-coded in three shells and the engine, and
+one of the two things it named — the words on the doors — had been a pack seam all along
+(`engine.js:4477`, `content/meridian/strings.js:8`). **A capability that is half-shipped reads exactly
+like one that is not shipped, from the picture.** Grep for the pack table before you write down a
+sitting; the expensive half is usually the one nobody mentioned, and here it was that `cls` stores
+the *rendered label* rather than the key (`engine.js:3980`, saved at `:503`).
+*(Applied 2026-09-14 from crew run 9. The four citations were read before applying and hold today:
+`:4477` fills each class button from `t.classes`, `strings.js:8` is that table, `:3980` is
+`cls=b.querySelector("b").textContent`, `:503` is `c:cls` inside `save()` — grep `t.classes`,
+`cls=b.querySelector` and `function save` when they slide.)*
+
 - **`syncChill`'s id is the identity of the BODY, not of the issue.** `addChill` bakes `NPCLOOK[key]` once
   (grep `NPCLOOK[key]=c.look` in `engine/engine.js`), and `syncChill` returns early for anyone already
   standing on their tile. So **anything baked at spawn — the look, the name, the egg — must be part of the
@@ -157,6 +169,20 @@ promises. Applied 2026-09-14 from your own post-flight.)*
   a recipe in" turned out to be *yes, today* — and the answer to "will it still be there on his
   tablet" turned out to be *no, with no message* — and neither is visible from any document about
   cooking. *(Applied 2026-09-14.)*
+
+- **The reader's `art` block hands the pack the ELEMENT, not just the paint.** `docRender`'s art branch
+  (`engine/engine.js`, grep `s2.art&&typeof s2.art`) builds a fresh `<canvas>` per `docOpen`, and a 2D
+  context carries `g.canvas` — so a surface that LISTENS (drag, spread, place) is pack code with no
+  engine change, and the listeners die with the element because `docOpen` clears the body first. One
+  CSS pixel is one art unit (`cv.style.width=W+"px"` against `cv.width=W*K`), but only while the column
+  is wider than the canvas — so map a pointer with `getBoundingClientRect`, never `offsetX`.
+  **And the same function is where the reader forgets where you were:** `docOpen` resets `scrollTop` and
+  `paperScroll` unconditionally, so any document that redraws by re-opening itself throws the player
+  back to the top — measured at 1853 → 0 on a forty-row list.
+  *The moment (2026-09-14):* a plan written by seven designers said "the `art` block draws and does not
+  listen" and priced a merge board as the biggest build in the game. Two real mouse drags in the shipped
+  engine merged masa → tortilla → taco with nothing in `engine/` touched. *(Applied 2026-09-14 from
+  crew run 8.)*
 
 ## A distinction your RULE/CHOICE cut does not give you
 

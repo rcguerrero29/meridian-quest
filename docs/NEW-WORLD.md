@@ -63,7 +63,7 @@ exists to prevent, and it is recorded rather than quietly corrected: a doc that 
 do not have has now cost this project time three times.
 
 **❗ What IS still true, and it is a different fault.** The *engine* now handles endless-with-districts;
-the **shared suite still forbids shipping it.** `test/engine.smoke.js:741` fails any pack that
+the **shared suite still forbids shipping it.** `test/engine.smoke.js:794` (`if (endless && chapters)`) fails any pack that
 declares `ENDLESS` and `CHAPTERS` together — *"a world that does not end cannot also have a last
 day"* — which was right before the split and is wrong after it, because `CHAPTERS` does double duty:
 it is both **the endings** and **the districts**. A world that never ends may still have a second
@@ -136,7 +136,7 @@ one, it needs an inventory this engine does not have), **unrushable duration wit
 Three rules that travel with this, and each is cheap to honour and expensive to retrofit:
 
 - **`[CODE]` A pack that declares nothing inherits no stakes.** `STK()` defaults to `{mode:"none"}`
-  (`engine/engine.js:330`) and `stakesCfg()` reads stakes **per chapter** (`:333`), so *"a calm world
+  (`engine/engine.js:359`) and `stakesCfg()` reads stakes **per chapter** (`:362`), so *"a calm world
   with exactly one scored thing in one district"* is already a seam. **The calm version is the cheap
   version here, which is unusual — do not spend engine work buying it.**
 - **Never build a day budget.** `[WEB]` It is how a timer comes back wearing cozy clothes: it never
@@ -576,8 +576,8 @@ somebody looked (GitHub #154).
 ### 9.3 · The reader is an application surface, not a sheet of paper
 
 §1 gives `DOCS READS DOCUI` one line — *"the paper the world produces (optional)"*. That is true of
-Meridian and badly incomplete. The reader renders **twelve** block kinds
-(`h p note red blank kv t q btn sel form docs`, `engine.js:2919-2979`), and four of them are live:
+Meridian and badly incomplete. The reader renders **thirteen** block kinds
+(`h p note red blank kv t q btn sel form docs art`, `engine.js`, grep `function docRender`; `art` is a real canvas the pack draws on), and four of them are live:
 
 | block | what it is | engine |
 |---|---|---|
@@ -649,3 +649,67 @@ Named rather than smoothed over, per the rule at the top of `docs/OPEN.md`:
   enumerates fixed fields (`engine.js:413`) and the QR pass carries `loadSave()` only (`:4341`). The
   *test* for it exists but is the town's own (`test/town.smoke.js:329`, *"the token leaked into the
   save"*). Nothing in the engine or the shared suite would stop a third world getting it wrong.
+
+---
+
+## The north star for this document — the owner, 2026-09-15
+
+> *"we will learn from these for templates but we want templates to one day be made off of one prompt
+> or from one questionaire."*
+
+**Where this document is going.** Today a new world is built by a person reading this file and making
+a few hundred decisions in the right order. The destination is that a world is built from **one
+prompt, or one answered questionnaire** — the questions carrying the decisions this file currently
+explains.
+
+Two rules follow from it, and they are what a session should check itself against:
+
+1. **What a round of questions TEACHES belongs here. What the person ANSWERED does not.** AJ chose no
+   cast and one person to feed (`docs/la-sobremesa.md` §15); that is Simmer's answer and this document
+   must never inherit it. What belongs here is the *shape* that produced it — that "do you want people
+   in it?" is a question worth asking early, because the answer reorganises a whole chapter.
+2. **Every decision this file explains in prose is a question somebody could be asked instead.** When a
+   section is written or repaired, the useful question is not only "is this still true" but "what would
+   we have to ASK to stop needing this paragraph." The questionnaire template
+   (`docs/templates/questionnaire/`) is where those questions accumulate; the two rounds AJ answered
+   are its first evidence, and the comment box under every choice earned its keep in both rounds.
+
+**A world will stay special-cased for a long time, and that is fine** — *"we may veer off with mini
+games and this is going to be a special case"*. The template is not a cage; it is what is left after a
+special case is built and somebody asks which half of it was general.
+
+---
+
+## Before you fill the reader: your world gets a surface, not just content
+
+*Added 2026-09-15, from a day that cost one. The full account is `docs/ARCH-LOG.md` A15 and
+`docs/BEAUTIFY.md`, "The surface carries the screen".*
+
+A new world arrives here and starts declaring content — quests, people, maps, documents. That is the
+right order for everything **except how your documents look**, and this file has never said so.
+
+**What you inherit whether you want it or not.** A pack ships **nine JavaScript files and no CSS**.
+The shell owns every typeface, size, colour and margin in the reader. The blocks (`h · p · note ·
+blank · kv · t · q · form · art · docs`) are shapes and they transfer honestly — a key/value pair is a
+key/value pair in any world. **Their styling does not transfer: it is Meridian's civic-form voice**,
+uppercase monospace labels and all, and today a second world has no way to decline it.
+
+**So the first thing to know about your documents is this:** if your world's paperwork is a recipe
+book, a ship's log, a sticker album or a court filing, **the reader will make it look like a permit
+office**, and no amount of work on the *content* of a page will change that. Plan for it:
+
+1. **Design your surface somewhere you control** — a page, a mock, anything — *before* deciding your
+   documents are wrong. The same content laid out properly usually is not wrong.
+2. **Judge the two questions separately.** *"Can the engine's reader draw this?"* is answered by
+   rendering in the reader and is genuinely worth knowing. *"Would the person this is for want to open
+   it?"* is **never** answered there.
+3. **Set your content the way its own world sets it.** Dot leaders and tabular quantities for a recipe;
+   a case number and a date stamp for a filing. The blocks allow far more than the default styling
+   suggests, and the specific convention is what makes a surface belong to your world rather than to
+   Meridian's.
+4. **Read the decisions already taken before you draw.** A day was lost drawing on cream paper for a
+   world whose owner had chosen night three days earlier. The register is faster than the argument.
+
+**If your world needs its own paper**, say so early and loudly: the seam does not exist yet, it is
+costed in A15 as one stylesheet scoped to the reader, and **you will be the first pack to meet this
+wall on your first afternoon.**

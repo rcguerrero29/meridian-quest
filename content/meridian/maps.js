@@ -271,6 +271,11 @@ const TOWNLBL=[
  {x:0.5,y:1.8,s:8,c:"#6B5210",dx:3,en:"🚋",es:"🚋"}
 ];
 /* "you are here" on the town plan, for worlds that are interiors of the street */
+/* Which kinds of "somebody is waiting" this plan carries, strongest first — the order is also
+   which one wins when a person is two at once (engine: MAPMARK). Meridian declares work and host
+   because those are the two that happen here; no neighbour in this city hands you a document, so
+   "read" is not declared and a person who only had one would carry no mark at all. */
+const MAPMARK=["work","host"];
 const MAPDOT={ta:[23,13],pa:[29,1],li:[29,1],no:[25,0],hq:[14,0],f2:[14,0],lc:[6,5],lo:[21,5],ex:[29,1],me:[6,13]};
 /* ---------- trolley fast travel: the streets never dead-end, they connect ---------- */
 /* Where the Trolley Pass can put you: STREET STOPS ONLY. A trolley does not stop on the

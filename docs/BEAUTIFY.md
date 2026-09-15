@@ -190,3 +190,44 @@ the pale slabs are one bug wearing five hats.
 3. **`docs/TAGS.md` L7/L14** says `site`, `nature`, `gear`, `transit`, `prop` are inert labels;
    `test/engine.smoke.js:415` treats them as shape classes. That test is the only place those seven
    dead kinds still mean anything.
+
+---
+
+## The surface carries the screen — 2026-09-15
+
+*Added after a day spent making a drawing better inside a page that was never designed. The owner's
+last word on it was **"it still looks like a bad attempt at UI"**, and he was right about every
+render before that one too.*
+
+**The lesson, in one line:** *when the page is designed, the illustration stops having to be excellent
+— and when the page is not designed, no illustration can rescue it.*
+
+What actually changed between "a bad attempt at UI" and a page worth showing, in order of how much
+each was worth:
+
+1. **Typography, not art.** The old pages used the reader's monospace field labels — `Drawn`,
+   `How it went` — which makes any content read as a settings panel no matter what is above it. Two
+   real faces and a type scale did more for the page than every fix to the food put together.
+2. **Set the content the way its own world sets it.** A recipe gets dot leaders and right-aligned
+   quantities in tabular figures, because that is how a recipe card is set. A key/value table is how a
+   *form* is set. Same data, different claim about what the thing is.
+3. **Honour the mode the pack chose.** Every mock that day was on cream paper; the owner had chosen
+   **night** three days earlier and nobody had noticed. **Check the pack's own settled decisions before
+   drawing anything — the register is faster than the argument.**
+4. **Put the mechanic on the page.** The designed version made the game's one decision a control you
+   press instead of a paragraph describing it. That single change is most of the difference between a
+   document about a game and a piece of a game.
+5. **Only then, the art.** It was the same drawing.
+
+**The trap, named so it is not walked into again:** rendering a mock through the game's own document
+reader is the right way to answer *"can the engine draw this?"* and **the wrong way to answer
+*"would anybody want to open this?"*** The reader is a paperwork surface; it will make anything look
+like paperwork, which is exactly its job in Meridian and exactly the wrong frame for judging a design.
+The architectural half of this is `docs/ARCH-LOG.md` **A15**: a pack ships nine JavaScript files and no
+CSS, so today it *cannot* design its own paper even if it wants to.
+
+**And the part that is about how we work.** Three specialist agents measured that art, cold-read it and
+corrected it — all correctly, all usefully — and **not one said the surface was a form, because every
+brief pointed at the picture.** More eyes on the wrong question return more answers to the wrong
+question. When something "looks off" and successive fixes do not fix it, **stop improving the thing
+inside the frame and ask what the frame is claiming to be.**

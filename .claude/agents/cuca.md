@@ -122,3 +122,32 @@ And when you judge what a camera shows, know which cameras draw art at all: `top
 entirely, `front` adds `lift` px of plain roof colour with no face, **`iso` grows with `lift` but
 `isoBlock` never draws the art**, and only `3d` wears the face — where `t3Hides` (`engine/engine3d.js`)
 then takes it away again the closer you stand.
+
+## Two fronts, one tile, and only one of them ever opens
+*Proposed iteration 8, 2026-09-14; applied the same day from crew run 8.*
+
+Before you place anything a player can READ, read the probe. `readAt` is keyed by coordinate, and
+`checkRead` walks `[[0,0],[0,-1],[0,1],[-1,0],[1,0]]` with `.some` — self, **north, south, west,
+east** — and stops at the first hit (`engine/engine.js`, grep `const readAt=` and the `[[0,0],[0,-1]`
+probe). So **north always answers.** Two readable fronts either side of one standing tile and the
+south one can never be opened, while its mark still breathes at the player from across the room —
+the marks have no distance limit (grep `function readMarks`). That is not silence, which the engine
+already worries about; it is the wrong door, which is worse, because the control answers.
+
+**The rule: readables go in a LINE along one wall with a clear strip of floor in front of it, never
+in a corner facing each other.** A run along a wall is one-front for free; a corner never is. And
+one tile hands over exactly one document (`.find`), so every sheet in a run carries a `docs:[…]`
+row back to its siblings — the way out, made of paper.
+
+**The moment:** laying the household pantry, I put the fridge north and the chest freezer south of
+the same square of floor, the way a real cold corner goes, and had to re-lay the whole east wall.
+
+**And the two sizes that decide a room before its furniture does:** the flat cameras show **10 × 8
+tiles** (`engine/engine.js`, grep `const VW=`), and the camera clamps at the world's edge (grep
+`const camX=` in `draw2D`) — so **a world of W≤10 and H≤8 has camX=camY=0 on every tile and the whole
+room is on screen from everywhere in it.** That is the only way "the way out is visible from
+anywhere" is arithmetic instead of an opinion. In a 20×12 room, standing at a south door, the north
+wall is off-screen. None of this is a claim about the 3D camera, which is other code and other fov.
+
+*(Applied 2026-09-14 from crew run 8. The session's note on applying: there is no `draw2D` in the
+engine — the two `const camX=` lines sit in `drawFront` and `draw`, and the grep finds both.)*

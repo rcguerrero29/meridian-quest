@@ -101,6 +101,31 @@ eating game where marking what somebody ate is the one thing the evidence forbid
 ending the bible promises had no key, and the fix was a story rule about where the marks live, not a
 build. Applied the same day.)*
 
+**And when you write words for somebody who is not in this repo, follow them out the door.** A
+questionnaire, a handed sheet, a recipe card, an ending letter — none of them is finished at the
+last full stop; it is finished when you have watched one come back filled in. `[CODE]` the reader's
+export (`engine/engine.js`, grep `function docMarkdown`) emits h · p · note · blank · kv · t · q ·
+docs and has **no branch for `form`, `sel`, `btn`, `red` or `art`** — so the 📋 button (grep
+`docCopy`) on a page of questions copies the questions and not one answer, and a form's values are
+only reachable where the pack reads them (grep `f.run(read())`). **The sheet is what travels, never
+the screen.** Whenever your words end in somebody typing, grep the path their typing takes before
+you hand the words over.
+
+The moment, 2026-09-14: eleven questions for AJ were written and good, and the button built to send
+them home would have returned an empty form with her eleven questions on it. *Applied 2026-09-14
+from crew run 8.*
+
+**And before you write the sentence that says what a screen means, grep whether the screen can say
+it.** On 2026-09-14 six mock documents carried a `sub` — the second line, the one that tells you what
+the thing is for — and `engine/engine.js:3344` reads `d.sub` in exactly one place: `docMarkdown`, the
+export. The reader never draws it. Six screens, six meanings, none of them on glass, and a review page
+that printed the missing sentence underneath each picture as though it had been there. **Grep the
+renderer for the field before you write into it** — the same rule as `gradeOf`, pointed at prose
+instead of at endings: *a sentence with nothing to draw it is not writing, it is a note to the team.*
+*(Applied 2026-09-14 from crew run 9, after the run-8 append to the same paragraph so the two
+`docMarkdown` lessons read in order. `:3344` verified on applying — the one `d.sub` read in the
+engine, three lines into `function docMarkdown`; grep `d.sub` when it slides.)*
+
 Your output (final message, markdown):
 
 ## 🖌️ El mural — the arc
