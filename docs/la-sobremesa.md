@@ -1613,3 +1613,100 @@ is filtered away before anybody sees it.** It is `#134` wearing new clothes: a l
 drawn with smoothing off. It is an engine RULE (measure after layout, or draw at the size you will be
 shown), it is behaviour-identical for both games, and **it affects every `art` block in every pack,
 Meridian's own documents included.**
+
+---
+
+## 21 · Outside evidence — 2026-09-15
+
+*The owner: "can you do some research and check with agents who know best practices". We had been
+reasoning from first principles all day. **Caveat first, and it is large: every page fetch was
+refused by this session's proxy** — Project Horseshoe, Lost Garden, Lospec, Game Developer, GDC
+Vault, Godot's docs, Steam, YouTube, and even the Wayback Machine. So everything below is a **search
+extract, not a read of the page**, and carries the same standing as the `[WEB]` lines in the 2026-09-13
+sweep: **not settled until a person opens the link.***
+
+### 21.1 · The five things that contradict or sharpen what we decided
+
+1. **The flagship no-fail game kept a correctness rule.** *Unpacking* — the proof text for this whole
+   premise, and the source of "subtractive design" — **flashes items red when they are in the wrong
+   place, and you cannot finish until you fix it.** "Put anything anywhere" was added later as an
+   accessibility option, described as removing the puzzle. **The line to hold, and it is a better
+   line than the one we had: Simmer is not rule-free, it is VERDICT-free.** §17.2's coverage and count
+   *are* rules. Unpacking's rule is about the world; a grade is about you.
+2. **⚠️ No shipped game in the sweep does what this plan does.** Cast-less cozy successes keep a
+   score (Dorfromantik — reviewers name the climbing score as the reason to replay), or a solution
+   (*A Little to the Left*), or a story told through a thousand objects (*Unpacking*). **The pattern
+   is that a cast-less game substitutes a score, a puzzle or a story for the social layer. Simmer
+   removes the cast, the score, the correctness AND the chapters, and asks the book to carry all of
+   it alone.** That does not refute §17.4's bet — it means **nobody found has won it this way**, and
+   it turns "three pages of the book, shown to her" from a good idea into the only responsible next step.
+3. **⚠️ The exact game exists, and its review complaint is instructive.** *Cozy Cooking: Tiny Tastes*
+   — "no timers, no angry customers, and no way to lose" — is reviewed as having no depth, and the
+   specific sentence is that **the people say the same things even when you serve a dish that is not
+   what they asked for**. Read carefully that is **not** an argument for customers: the fault is that
+   *nothing downstream changed because of what you cooked*. It is direct outside evidence for §17.3's
+   refusal — **draw the plate from what she actually did, never a finished-dish sprite** — and it
+   names the price of not shipping it.
+4. **⚠️ Cooking Mama is the case file for gesture staleness.** Reviews: "there aren't many ways to cut
+   an onion"; "shallow and kind of boring after a couple of hours". **It got about two hours of
+   tolerance with more gesture variety than our seven, plus a character, a score and a grade to lean
+   on.** So §17.5's gesture-per-dish ledger stops being a nice-to-have and becomes the single thing
+   most likely to kill sitting ten. The counter-lesson is ours to keep: the same series
+   "emphasises responsiveness over precision", which is §17.2's coverage-not-seconds rule arriving
+   from the game that invented the surface.
+5. **⚠️ The book-only-grows rule runs against the collection literature, and the fix is not to fold.**
+   Empty slots demand closure; that is exactly why §18 calls blank pages "a to-do list with nice
+   typography". The evidence does not settle the fork — **it sharpens it into one question: is the
+   shelf visible enough to do the job the book refuses?** If the shelf is a drawer she never sees, the
+   design has deleted its only "there is more, and you have some of it" signal. **A shelf legible from
+   the counter is the whole collection mechanic with no empty page in her book.**
+
+### 21.2 · The largest finding is an OMISSION, and it is not in this document anywhere
+
+> **There is no sound plan in this plan.**
+
+*Venba* is the one shipped game found that is tactile **and** cozy **and** has no timer **and** has no
+fail state — and its reviewers single out the audio: every cut of a herb, the sizzle of oil, each
+ingredient making a different noise as it lands. The standing reference for feel (*Juice it or lose
+it*) says immediate sensory response is the cornerstone, independent of any score.
+
+**"No rating" is safe. "No acknowledgement" is not.** And audio is the one channel that costs no
+pixels, no contrast budget, no engine change and no Δ-luma argument. **It belongs beside the §18
+forks, and it was never on the list.**
+
+### 21.3 · What the outside says about the art, where it agrees and where it does not
+
+- **The acceptance test has a name: the silhouette fill.** Black on white — if it is not recognisable
+  as a black shape, the shape language has failed. Written about characters; the transfer to a bowl is
+  ours, but it is the same claim §19.3 makes independently.
+- **"One idea per picture" is the most repeated rule found.** §19.3's "three masses, 2:1 ladder" is a
+  *stricter* version of a real but vaguer consensus — not contradicted, but nobody outside states it
+  numerically.
+- **The only artist found who actually draws food as sprites works at ~32×32** — above the packs' 16
+  and above our proposed 24. **Outside support for going bigger.** And he **uses outlines on purpose**,
+  because without them food "looks like downscaled photos" — his reason is separation from the ground,
+  which is our Δ0.7-on-night problem, and an outline is cheaper than re-cutting a ground.
+- **"Stick with foods people know" is a real risk for a Korean-first pack**, and it changes §19.6: the
+  cold read must use somebody who does **not** know the cuisine, or it proves nothing.
+- **"Draw the parts and move them in code" is not our invention — it is cut-out animation**, and it is
+  in engine documentation rather than folklore. §17.7 F1 and §20.1 are textbook; the only unusual part
+  is doing it inside the reader's own canvas.
+- **Nobody outside says steam fails at small size.** §19.3's "steam does not draw at any size here" is
+  a local call, not an industry rule, and should say so.
+- **The consistency artefact is an art bible, and its standard contents include two lists we do not
+  have and both are cheap**: a master list of every picture needed, and a master list of every
+  animation needed. §17.5 already wants a gesture-per-dish column — **convention says that same table
+  carries the picture list, and that table IS the consistency mechanism.**
+- **Value first, hue second, saturation third** — a strong greyscale composition survives any palette.
+  §19.2 is that test, run with a script. The finding is that nobody had run it, not that it is wrong.
+- And the practical answer to "twelve dishes, one kitchen" is **a limited set of colours reused across
+  every item**, not twelve individually correct palettes. §19.4 does this for the grounds; **a shared
+  food ramp is the missing piece.**
+
+### 21.4 · The pillar we are thinnest on, and nobody had said it
+
+The definition everyone works from (Project Horseshoe 2017) is **safety, softness, and abundance**.
+Simmer over-delivers safety. §19 is all softness. **Abundance — "nothing is lacking or pressing" — is
+the one nobody in this document has argued about**, and it is what makes a readable shelf and a fridge
+with six things in it read as *warmth* rather than as *sparseness*. The literature has it as
+load-bearing, not decorative.
