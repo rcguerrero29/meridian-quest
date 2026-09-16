@@ -114,3 +114,37 @@ the fault.
 about looking: the first version fanned its labels at angles and three of four ran off the sheet;
 the fix moved the text column left and walked it straight over the row of six. **Measuring one edge
 and not the pair** is its own small family of mistake.
+
+
+---
+
+## 2026-09-16, later — the reference was the fix, and that is the finding
+
+The owner, after the third attempt: *"it still doesnt look right. how can you make something you
+dont know what it looks like? that doesnt make sense to me"* — and then he pasted **eight
+photographs of gimbap**.
+
+**The honest answer to his question, first**, because it is the part worth keeping: knowing what a
+dish looks like was never the problem. Judging my own drawing of it was. Three versions went out
+described as "better" while he said "off" three times, and I could not see the gap. **A drawing I
+cannot judge is a drawing I cannot finish, no matter how many passes I take.**
+
+**What the photographs corrected, in one pass, that three passes of reasoning had not:**
+
+| | before | from the photographs |
+|---|---|---|
+| **the middle** | half the radius, spaced out, rice showing between every pair | **74% of the radius, in tight rows, pressed together, almost no rice between** — it CROWDS the round |
+| **how many things** | five | seven or eight, and crowded |
+| **their shape** | dots, then capsules | squeezed rectangles — a small radius on a long edge, never a rounded end |
+| **the rice** | shaded to `#CFC3A6` at the rim, which is good lighting | near-white to the edge, because **the nori line only reads at page size against bright rice.** Good lighting had erased the one thing that says gimbap |
+| **the colours** | polite | danmuji, carrot and spinach are the brightest things in the picture |
+| **the spinach** | dropped in the rice, where it read as peas | inside the bundle, tucked in the gaps the rows leave |
+
+**The rule, and it generalises past food:** when a drawing comes back *"better, but still off"* twice,
+the next move is not a fourth pass. It is **to go and look at the thing** — and if the session cannot
+reach a reference, to say so and ask for one, which is what should have happened two attempts
+earlier. Reasoning from the NAME of an object produces a diagram of the name.
+
+`gimbap-study.png` is regenerated to match, and its right-hand column was rewritten because it had
+become a verdict describing a render that no longer exists — the exact fault `LICENCES.md` records
+against itself further up this folder. **A verdict table has to name the render it judged.**

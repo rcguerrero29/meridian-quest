@@ -18,9 +18,13 @@ function shade(h,t){var x=hex(h);return rgb([x[0]*(1-t*1.05),x[1]*(1-t*.98),x[2]
                egg, and that is exactly what six of them looked like.
      2. RICE   the widest thing in the picture, roughly 30% of the radius, warm white, with grain —
                it should DOMINATE. In the current drawing the rice is a thin annulus.
-     3. BUNDLE the middle, about half the diameter, and it is NOT a ring of dots. It is a handful of
-               long strips seen end-on, so they are BARS AND RECTANGLES, packed tight and touching,
-               with the odd dark gap where they did not quite meet.
+     3. BUNDLE the middle, about 74% of the RADIUS — it CROWDS the round. It is not a ring of dots
+               and it is not a badge in a field: a handful of long strips seen end-on, so bars and
+               rectangles, in three or four nearly-parallel rows, pressed against each other with
+               almost no rice showing between them.
+               (This line said "about half the diameter" until 2026-09-16, when the owner sent
+               photographs. It was the biggest of the six things reasoning from the word "gimbap"
+               had got wrong.)
      4. OIL    a sheen off the rice on the key side only, and the cut face catching the light.
 
    The fillings are named things with named colours, and the two yellows are different yellows:
@@ -45,12 +49,14 @@ function round(cx,cy,d,turn,detail){
   ng.addColorStop(0,'#2E4029'); ng.addColorStop(.45,'#1B2617'); ng.addColorStop(1,'#0C1109');
   g.fillStyle=ng; g.beginPath(); g.ellipse(cx,cy,r,ry,0,0,7); g.fill();
 
-  /* 2 · RICE — the widest thing here */
-  var RR=r*0.955, RRy=ry*0.955;               /* nori is the 4.5% that is left */
-  var rg=g.createRadialGradient(cx-RR*.34,cy-RRy*.36,RR*.08,cx,cy,RR*1.02);
-  rg.addColorStop(0,'#FDFAF1'); rg.addColorStop(.55,'#F1E9D6'); rg.addColorStop(1,'#CFC3A6');
-  g.fillStyle=rg; g.beginPath(); g.ellipse(cx,cy,RR,RRy,0,0,7); g.fill();
-  /* grain: short strokes, seeded, so rice is rice and not a fill */
+  /* 2 · THE RICE, AND IT STAYS BRIGHT ALL THE WAY OUT. The previous version shaded the outer
+     edge to #CFC3A6, which is a perfectly good piece of lighting and it made the nori disappear:
+     at page size the dark ring only reads because the rice next to it is nearly white. What makes
+     a thumbnail say "gimbap" is that contrast, not the shading. */
+  var RR=r*0.935, RRy=ry*0.935;
+  var rgd=g.createRadialGradient(cx-RR*.34,cy-RRy*.36,RR*.08,cx,cy,RR*1.02);
+  rgd.addColorStop(0,'#FFFDF6'); rgd.addColorStop(.62,'#F6F0E2'); rgd.addColorStop(1,'#E6DDC8');
+  g.fillStyle=rgd; g.beginPath(); g.ellipse(cx,cy,RR,RRy,0,0,7); g.fill();
   var sd=1013904223^Math.round(d*7+turn*100), rnd=function(){sd=(sd*1664525+1013904223)>>>0;return sd/4294967296;};
   g.save(); g.beginPath(); g.ellipse(cx,cy,RR,RRy,0,0,7); g.clip();
   for(var i=0;i<Math.round(d*1.5);i++){
@@ -64,39 +70,70 @@ function round(cx,cy,d,turn,detail){
   }
   g.restore();
 
-  /* 3 · THE BUNDLE — bars and rectangles, packed, touching, slightly off-square */
-  var B=r*0.50;                                /* half the radius: the middle is a real object */
-  g.save(); g.translate(cx,cy); g.rotate(turn);
-  var dark='rgba(26,18,10,.30)';
-  function bar(x,y,w,h,col,rot,pink){
+  /* 3 · THE BUNDLE — redrawn 2026-09-16 from photographs the owner supplied, and six things were
+     wrong that no amount of reasoning from the word "gimbap" had fixed:
+     · it was TOO SMALL. The filling is about 62% of the diameter, not 50: in a real slice the
+       rice is a ring around a crowded middle, not a field with a badge on it.
+     · there were FIVE things in it. There are seven or eight, and they are crowded.
+     · they were SQUARE. They are long strips lying across the middle, most of them spanning
+       half the width or more, stacked in rough horizontal bands.
+     · the edges were CRISP. This is food that has been rolled and squeezed: every edge is
+       soft and slightly bowed.
+     · the colours were POLITE. Danmuji is a strong yellow, carrot is orange, spinach is a
+       dark green — they are the brightest things in the picture and they should be.
+     · there was RICE SHOWING between every pair. There is almost none: the strips touch. */
+  var B=r*0.74, dark='rgba(26,18,10,.26)';
+  g.save(); g.translate(cx,cy); g.rotate(turn*0.7);
+  function strip(x,y,w,h,col,rot,edge){
     g.save(); g.translate(x,y); g.rotate(rot||0);
-    /* A BAR IS SET INTO THE RICE, NOT LAID ON IT. The first version drew an offset dark rectangle
-       behind each one and they read as a stack of cards: an object pressed into a soft surface has
-       a dark seam along its lower edges and nothing anywhere else. */
-    var bg=g.createLinearGradient(-w/2,-h/2,w/2,h/2);
-    bg.addColorStop(0,lit(col,.16)); bg.addColorStop(.55,col); bg.addColorStop(1,shade(col,.24));
-    g.fillStyle=bg; g.fillRect(-w/2,-h/2,w,h);
-    g.fillStyle='rgba(255,255,255,.22)'; g.fillRect(-w/2,-h/2,w,Math.max(1,h*.13));
-    g.fillStyle=dark; g.fillRect(-w/2,h/2-Math.max(1,h*.10),w,Math.max(1,h*.10));
-    g.fillRect(w/2-Math.max(1,h*.07),-h/2,Math.max(1,h*.07),h);
-    if(pink){ g.fillStyle='#D8657A'; g.fillRect(-w/2,-h/2,w,Math.max(1.4,h*.16)); }
+    /* SOFT CORNERS, NOT CAPSULES. At 0.42 of the height every strip came back reading as a
+     medicine capsule; the photographs show rectangles that have been squeezed, which is a
+     small radius on a long edge, not a rounded end. */
+    var rr=Math.min(h*0.26,w*0.16);
+    var bg=g.createLinearGradient(0,-h/2,0,h/2);
+    bg.addColorStop(0,lit(col,.20)); bg.addColorStop(.42,col); bg.addColorStop(1,shade(col,.26));
+    g.fillStyle=bg;
+    g.beginPath();
+    if(g.roundRect) g.roundRect(-w/2,-h/2,w,h,rr);
+    else { g.moveTo(-w/2+rr,-h/2); g.lineTo(w/2-rr,-h/2);
+       g.quadraticCurveTo(w/2,-h/2,w/2,-h/2+rr); g.lineTo(w/2,h/2-rr);
+       g.quadraticCurveTo(w/2,h/2,w/2-rr,h/2); g.lineTo(-w/2+rr,h/2);
+       g.quadraticCurveTo(-w/2,h/2,-w/2,h/2-rr); g.lineTo(-w/2,-h/2+rr);
+       g.quadraticCurveTo(-w/2,-h/2,-w/2+rr,-h/2); }
+    g.fill();
+    g.fillStyle='rgba(255,255,255,.26)';
+    g.fillRect(-w/2+rr*.6,-h/2,w-rr*1.2,Math.max(.8,h*.12));
+    g.fillStyle=dark;
+    g.fillRect(-w/2+rr*.6,h/2-Math.max(.8,h*.11),w-rr*1.2,Math.max(.8,h*.11));
+    if(edge){ g.fillStyle=edge; g.fillRect(-w/2+rr*.5,-h/2,w-rr,Math.max(1,h*.20)); }
     g.restore();
   }
-  /* THE ARRANGEMENT — packed, touching, and off-square, the way a hand actually lays them. The
-     first version spaced them out and left rice showing between every pair, which is a diagram of
-     a gimbap rather than one. These overlap on purpose. */
-  bar(-B*0.40,-B*0.42, B*0.96, B*0.56, '#F2C93B', -0.05);          /* danmuji, the bright yellow */
-  bar( B*0.42,-B*0.40, B*0.90, B*0.54, '#EBD489',  0.04);          /* egg, the pale one */
-  bar(-B*0.46, B*0.30, B*0.84, B*0.50, '#7A4A28', -0.03);          /* burdock */
-  bar( B*0.16, B*0.40, B*0.90, B*0.48, '#F2EEE4',  0.02, true);    /* crab stick, one pink edge */
-  bar( B*0.66, B*0.20, B*0.50, B*0.62, '#D9662B',  0.07);          /* carrot */
-  /* spinach is a CLUMP, never a bar — it is the one thing in there with no edges */
-  g.fillStyle='#3E6B37';
-  [[-0.04,-0.06,0.34,0.26],[0.16,-0.18,0.24,0.20],[-0.20,0.06,0.22,0.18]].forEach(function(p,i){
-    g.beginPath(); g.ellipse(B*p[0],B*p[1],B*p[2],B*p[3],i*1.1,0,7); g.fill();
-  });
-  g.fillStyle='rgba(255,255,255,.14)';
-  g.beginPath(); g.ellipse(-B*0.10,-B*0.14,B*0.16,B*0.10,-0.3,0,7); g.fill();
+  /* three crowded bands, the way a rolled mat actually stacks them. Widths are fractions of B,
+     so the whole bundle scales with the round and the arrangement turns with the turn. */
+  /* THEY STACK IN BANDS, THEY DO NOT SCATTER. The first pass from the photographs spread them
+     across the middle at seven different angles and it came back as confetti on a disc. In the
+     photographs the strips lie nearly parallel, in three or four rough rows, and the rows are
+     what you read at thumbnail size — so the rotations are tiny and the rows are tight. */
+  /* FOUR TIGHT ROWS THAT FILL THE MIDDLE. Against the photographs the last pass left a wide
+     white margin and gaps between every strip: in a real slice the filling CROWDS the round and
+     the strips press against each other, so the rice is a band around a full middle and not a
+     field with a few things on it. Rows at -0.47, -0.16, 0.16, 0.47 of B, strips 0.30 tall. */
+  strip(-B*0.08,-B*0.47, B*1.20, B*0.30, '#F2C51F', -0.015);       /* danmuji — the big one */
+  strip( B*0.62,-B*0.46, B*0.46, B*0.28, '#6E9E4A',  0.02);      /* cucumber */
+  strip(-B*0.30,-B*0.16, B*0.94, B*0.30, '#E2661F', -0.01);      /* carrot */
+  strip( B*0.52,-B*0.15, B*0.62, B*0.30, '#F0DC7A',  0.015);       /* egg */
+  strip(-B*0.38, B*0.16, B*0.82, B*0.30, '#8A6236',  0.01);      /* burdock */
+  strip( B*0.46, B*0.16, B*0.66, B*0.28, '#F5EFE4', -0.015,'#E86B84'); /* crab stick */
+  strip(-B*0.04, B*0.47, B*1.04, B*0.28, '#7A4325',  0.01);      /* beef */
+  /* spinach is the one thing in there with no edges — a squeezed clump, and it belongs INSIDE
+     the bundle. The last pass put it out in the rice, where it read as peas on a plate. */
+  g.fillStyle='#2F5B2A';
+  [[-0.46,-0.47,.17,.14],[0.56,0.47,.17,.13],[-0.54,0.16,.15,.14],[0.34,-0.16,.16,.14]]
+    .forEach(function(p,i){
+    g.beginPath(); g.ellipse(B*p[0],B*p[1],B*p[2],B*p[3],i*0.3,0,7); g.fill();
+    });
+  g.fillStyle='rgba(255,255,255,.12)';
+  g.beginPath(); g.ellipse(-B*0.50,-B*0.24,B*0.09,B*0.05,-0.3,0,7); g.fill();
   g.restore();
 
   /* 4 · the cut face catches the light, on the key side only */
@@ -164,21 +201,26 @@ ds.forEach(function(d,i){
 /* THE MEASURE IS THE CANVAS MINUS THE MARGIN, and it is not a guess: 14px monospace is ~8.4px a
    character, the column starts at 790 and the sheet ends at 1240, so 44 characters is the line and
    anything longer walks off the edge — which is what the first two versions of this did. */
+/* THIS COLUMN NAMES THE RENDER IT JUDGED. It described the version before the photographs
+   arrived; leaving it would be exactly the stale verdict table LICENCES.md warns about. */
 var lines=[
-  'WHERE MY LAST ONE WAS OFF',
-  'the nori was a BAND, not a line — and that',
-  'alone made six of them read as eggs',
-  'the fillings were round dots in a RING;',
-  'they are bars, in a bundle, overlapping',
-  'the bundle was too small — it is half the',
-  'diameter, and it touches itself',
-  'both yellows were the same yellow. Danmuji',
-  'is brighter than egg, and it is the tell'
+  'WHAT THE PHOTOGRAPHS CORRECTED',
+  'the nori was a BAND. It is a thin line, and',
+  'the rice beside it has to stay near white or',
+  'the line disappears at page size',
+  'the middle was HALF the radius and spaced',
+  'out. It is 74%, in tight rows, pressed',
+  'together, with almost no rice between',
+  'the strips were dots, then capsules. They',
+  'are squeezed rectangles — small radius on a',
+  'long edge, not a rounded end',
+  'the colours were polite. Danmuji, carrot and',
+  'spinach are the brightest things in there'
 ];
 lines.forEach(function(t,i){
   g.fillStyle = i===0 ? '#E0703F' : (i%2===1 ? '#9C8F7E' : '#77695C');
   g.font = i===0 ? '700 15px ui-monospace,monospace' : '400 14px ui-monospace,monospace';
-  g.fillText(t, 790, 552 + (i===0?0:18) + i*25);
+  g.fillText(t, 790, 540 + (i===0?0:18) + i*22);
 });
 })();
 </script>
