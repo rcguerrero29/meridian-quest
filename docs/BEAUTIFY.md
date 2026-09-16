@@ -231,3 +231,28 @@ corrected it — all correctly, all usefully — and **not one said the surface 
 brief pointed at the picture.** More eyes on the wrong question return more answers to the wrong
 question. When something "looks off" and successive fixes do not fix it, **stop improving the thing
 inside the frame and ask what the frame is claiming to be.**
+
+## The process is the shape — 2026-09-16
+
+*Added after four attempts at a slice of gimbap, three of which corrected the object and none of
+which was the problem. The owner: "think about how it is made too right? ... thats why rarely are
+they displayed like you did or if it close it is in a pile and they have more congruence."*
+
+**Six slices of one roll are siblings, not strangers.** The fillings were laid in a line on a flat
+sheet of nori, rolled once, and cut — so the cross-section is identical the whole length of the
+cylinder. Six slices differ only in where the knife fell and how they landed. The drawing had six
+independently randomised arrangements, which is a picture of six different rolls with one slice
+each, and no correction to the filling was ever going to fix it.
+
+**The rule, which is general:** *variation enters at the step it actually entered, and nowhere
+earlier.* Anything decided before the copies were separated is shared by all of them; anything after
+is what differs. Backwards, and the result reads as **generated** — and nobody can say why, because
+every individual object is correct.
+
+**And things come to rest against each other.** A cut cylinder standing on its face topples into its
+neighbour: slices shingle, lean, pile and touch. Evenly spaced, upright, not touching, is the
+signature of a loop that ran `n` times. If nothing is holding an arrangement in place, it is a
+diagram.
+
+Written up as the `how-its-made` skill, and carried by `pili` and `chema` — it is step **0** of
+Chema's four, ahead of measuring, because measuring the object cannot find this class of fault.
