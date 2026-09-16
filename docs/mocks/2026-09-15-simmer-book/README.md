@@ -214,3 +214,28 @@ shape is not permission to lose mass.* Four ingredients fill a roll as completel
 each one is bigger. A handful of spinach is a handful, not a garnish.
 
 `gimbap-one-roll.png` is the current state. The `how-its-made` skill carries both rules now.
+
+
+---
+
+## 2026-09-16 — a puck, not a coin, and a pile the cylinder rounded
+
+> *"the pile cant be that big…its more of a pile that gets rounded together inside a cilinder… even
+> if they are bein seen from above, they have depth, maybe not in this exact view but its hard to get
+> that view especially when they are dominoed together"*
+
+Two corrections, both about the **cylinder** rather than the section:
+
+**1 · A slice has thickness.** Roughly 2 cm on a 4 cm face. Lying face-up with the camera above, you
+see the cut face **and a band of the nori-wrapped side** below it — and dominoed, you see the side of
+each one in front of the face of the next. Every version before this drew a flat disc, which is why
+they never sat on the board: a coin lies on a surface like a sticker, a puck stands on it.
+
+**2 · The roll rounds the pile.** The filling had been built as a rectangular grid of four long rows,
+which is what a pile looks like **before** it is wrapped. Wrapping squeezes it into a roughly
+circular cluster, so each row is now a **chord of a circle** — `2·C·√(1−t²)`, computed rather than
+chosen — narrow at the top and bottom, widest across the middle, and the whole pile is smaller.
+
+**The general form, which is why this went into the skill and not just this folder:** *a soft thing
+takes the shape of what encloses it.* Dough in a tin, filling in a roll, wool in a sack, cargo in a
+hull. **Square corners inside a round container is a drawing of the moment before it was closed.**

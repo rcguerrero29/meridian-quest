@@ -77,6 +77,26 @@ filling went straight back to being a badge in a field of rice — the fault fro
 **Fixing shape is not permission to lose mass.** Four ingredients fill a roll as completely as eight,
 because each one is bigger. A handful of spinach is a handful, not a garnish.
 
+## And two more, which are about the CONTAINER
+
+**A cut piece of a long thing is a PUCK, not a coin.**
+A gimbap slice is about 2 cm thick on a 4 cm face. Lying face-up with the camera above it you see the
+cut face **and a band of the side** — and when several are dominoed together you see the side of each
+one in front of the face of the next. Four versions drew flat discs. A disc never sits on the board;
+it lies on it like a sticker. **Whenever you cut a length off something, ask how thick the cut was,
+and draw that.**
+
+**A container ROUNDS what it holds.**
+The owner: *"its more of a pile that gets rounded together inside a cilinder."* The filling was built
+as a rectangular grid of long rows, which is what a pile looks like **before** it is wrapped. Rolling
+squeezes it into a roughly circular cluster, so each row is a **chord of a circle** — narrow at the
+top and bottom, widest across the middle — and the whole pile is smaller and tighter than a grid
+wants to be. The widths are computed (`2·C·√(1−t²)`), not chosen.
+
+The general form: **a soft thing takes the shape of what encloses it.** Dough in a tin, filling in a
+roll, wool in a sack, cargo in a hull, grain in a silo. If your contents have square corners and the
+container is round, the drawing is of the moment before it was closed.
+
 ## The five questions, before you draw anything
 
 **1 · How was it made? Say the steps out loud.**
