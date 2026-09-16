@@ -160,6 +160,46 @@ function wanders(n){return !!n&&!n.still&&(!n.doc||n.roams)&&(!n.q||!n.q.length)
   !(typeof roomHosts!=="undefined"&&roomHosts&&roomHosts[n.npc]);}
 function wanderInit(){Object.values(WORLDS).forEach(w=>w.npcs.forEach(n=>{
   n.fx=n.x;n.fy=n.y;n.hx=n.x;n.hy=n.y;n.wnext=0;n.mv=null;n.mt=0;n.face=1;}));}
+/* ═══════════ NOBODY STANDS IN THE DOORWAY (R11, owner 2026-09-16) ═══════════
+   He asked the right question: "why doesnt r11 walk around?" — and the answer is that there is
+   nothing to walk around. A person is stamped into the grid as the literal character `"N"`, and
+   three readers treat `"N"` exactly as they treat a wall: `isSolid`, `isSolidAt`, and
+   `auditReach`'s own `walk`. None of them knows it is a person. So when a wanderer steps into a
+   corridor ONE TILE WIDE, the map is genuinely cut in two — it is not a pathfinding failure, it is
+   a gap with somebody in it, and there is no way round because there is no round.
+
+   MEASURED, world by world, rather than argued about. Every tile whose occupant would cut the
+   walkable graph, against the number of people who wander there:
+
+       ex (Calle Dos)  176 walkable   32 chokepoints   4 wanderers   ← every red
+       no               107            16              0
+       hq               208            17              0
+       st               356            14              0
+       …every other world has chokepoints and NOBODY who moves.
+
+   So the whole of R11 lives on one street, and the fix is manners: a person does not stand in the
+   only way through. `wanderCuts` is the set of tiles that would cut the world; the wander filter
+   refuses them, the same way it already refuses a tram's path. It is computed the first time a
+   wanderer in that world wants to move — only four worlds ever have one — and thrown away when the
+   city grows, because growth changes what a corridor is. */
+function wanderCuts(id){
+  const w=WORLDS[id];if(!w)return null;
+  if(w._cuts)return w._cuts;
+  const ok=(x,y)=>x>=0&&y>=0&&x<w.W&&y<w.H&&!SOLID.has(w.grid[y][x]);
+  const all=[];for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++)if(ok(x,y))all.push([x,y]);
+  const reach=(bx,by)=>{const st=all.find(([x,y])=>!(x===bx&&y===by));
+    if(!st)return 0;const seen=new Set([st[0]+","+st[1]]),q=[st];
+    while(q.length){const[x,y]=q.pop();
+      [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{const nx=x+dx,ny=y+dy,k=nx+","+ny;
+        if(seen.has(k)||!ok(nx,ny)||(nx===bx&&ny===by))return;seen.add(k);q.push([nx,ny]);});}
+    return seen.size;};
+  const base=reach(-1,-1),out=new Set();
+  all.forEach(([x,y])=>{if(reach(x,y)<base-1)out.add(x+","+y);});
+  w._cuts=out;return out;}
+/* a person who wanders is a temporary obstacle; a person who never moves is furniture. The
+   auditor needs to know the difference, and the grid only says "N", so ask the pack who is there. */
+function whoAt(id,x,y){const w=WORLDS[id];if(!w)return null;
+  return (w.npcs||[]).find(n=>n.x===x&&n.y===y)||null;}
 function wanderUpdate(dt){
   const w=CW();if(!w||!$("card").hidden||!$("reader").hidden)return;
   const now=performance.now();
@@ -187,6 +227,10 @@ function wanderUpdate(dt){
          does not step in FRONT of one. Same question every animal in this engine now asks, and the
          last mover in the game that was not asking it. */
       &&!troDanger(world,x,y)
+      /* ...and not into the only way through. R11: this filter asked four questions — solid?
+         door? tram? in range? — and never asked whether the step CUTS THE MAP IN TWO, which is
+         the one that strands a player behind somebody's back. */
+      &&!(wanderCuts(world)||new Set()).has(x+","+y)
       &&Math.abs(x-n.hx)+Math.abs(y-n.hy)<=WANDER_R
       &&!(x===px&&y===py));
     if(!opts.length){n.wnext=now+2500;return;}
@@ -381,7 +425,16 @@ function troAudit(){const out=[],lines=(typeof TROLLEYAT!=="undefined"&&TROLLEYA
    wouldn't register.") */
 function auditReach(grown){
   const probs=[],seen={};Object.keys(WORLDS).forEach(k=>seen[k]=new Set());
-  const walk=(id,x,y)=>{const w=WORLDS[id];return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N");};
+  /* A PERSON WHO MOVES IS NOT A WALL. Reachability is a property of the ground, and `"N"` was
+     being read as masonry by an auditor that has never looked at a person in its life — so one
+     neighbour standing in a gap reported thirty-five tiles and a named woman as permanently
+     unreachable, about one run in twenty-five. A wanderer is passable here because they will not
+     be there in four seconds; somebody `still` is not, because they never move and the map really
+     does have to work around them. */
+  const walk=(id,x,y)=>{const w=WORLDS[id];
+    if(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x]))return false;
+    if(w.grid[y][x]!=="N")return true;
+    const n=whoAt(id,x,y);return !!n&&wanders(n);};
   /* seed EVERY declared arrival, not just the spawn. The park has no portal — the leash carries you
      there — so it had zero reached tiles at every boot and was therefore never audited at all. An
      arrival a pack declares is a way in, whether or not it is a door. */
@@ -797,7 +850,11 @@ function drawIso(){
     if(petalsOn()&&(!SOLID.has(w.grid[y][x])||(TILES[w.grid[y][x]]||{}).kind==="water")&&bridgeDist(w,x,y)<=3){ctx.save();ctx.translate(cx-ISW/4,cy-ISH/4);ctx.scale(0.5,0.5);petalSpill(w,x,y,0,0,1);ctx.restore();}
     else if(ch==="-"){isoDiamond(cx,cy,tc("#8F9096"));}
     else if(ch==="R"){ctx.save();ctx.translate(cx,cy);ctx.scale(0.75,0.75);ctx.translate(-cx,-cy);isoDiamond(cx,cy,tc(C.rug));ctx.restore();}
-    else if(ch==="b"){[[ -7,0,"#D77FA8"],[3,-3,"#E7C25A"],[6,3,"#C9699E"]].forEach(f=>{
+    /* the isometric camera had its OWN hardcoded flower bed — three pink dots, three literal
+       hexes, not a call to the tile's painter — so a pack overriding `b` got the new bed in three
+       cameras and the old one here. Found by Pili, 2026-09-16, while costing the marigolds; it is
+       the shape docs/ARCH-LOG A7 warned about, a renderer that never asks the question. It asks. */
+    else if(ch==="b"){petalPal().slice(1,4).map((c,i)=>[[-7,0],[3,-3],[6,3]][i].concat(c)).forEach(f=>{
       ctx.fillStyle=f[2];ctx.beginPath();ctx.arc(cx+f[0],cy+f[1],2,0,7);ctx.fill();});}
     else if(ch==="g"){ctx.strokeStyle=tc("#5FA86A");ctx.lineWidth=1.4;ctx.lineCap="round";
       [[-6,0],[0,-2],[6,1]].forEach(q=>{ctx.beginPath();ctx.moveTo(cx+q[0],cy+q[1]+3);ctx.lineTo(cx+q[0]+1.5,cy+q[1]-5);ctx.stroke();});}
@@ -918,11 +975,60 @@ TILEDRAW["J"]=rc=>{const{sx,sy,x,y}=rc; /* jacaranda: trunk here, canopy in a la
       ctx.fillStyle="#6E4A2C";ctx.fillRect(sx+13,sy+12,6,17);
       ctx.fillStyle="#59391F";ctx.fillRect(sx+13,sy+12,2,17);
       rc.canopy(sx,sy);};
-TILEDRAW["b"]=rc=>{const{sx,sy,x,y}=rc; /* flower bed: soil + blooms, walkable — you may smell them */
-      ctx.fillStyle=tc("#7A5A3C");ctx.beginPath();ctx.roundRect(sx+3,sy+6,TS-6,TS-10,6);ctx.fill();
-      [[9,12,"#D77FA8"],[16,10,"#E7C25A"],[23,13,"#C9699E"],[12,19,"#E08A5A"],[20,20,"#D77FA8"]].forEach(p=>{
-        ctx.fillStyle=p[2];ctx.beginPath();ctx.arc(sx+p[0],sy+p[1],2.4,0,7);ctx.fill();
-        ctx.fillStyle="#F5EAD2";ctx.beginPath();ctx.arc(sx+p[0],sy+p[1],0.9,0,7);ctx.fill();});};
+/* ═══════════ THE FLOWER BED IS CEMPASÚCHIL (owner, 2026-09-16: "add some marigolds please") ═══════
+   Measured before drawing, and the measurements are the argument:
+     · There is not one marigold FLOWER anywhere in this game. Everything named marigold is a
+       PETAL — the bridge deck's heap, the trail, the ofrenda's arch, the garland — or a colour
+       swap. A deck under tens of thousands of petals and no plant they came off. That is the
+       `how-its-made` fault exactly: variation entering at a step that never happened. A petal is
+       what is left after somebody pulled a head apart; drawing only the aftermath is why the
+       season reads as confetti.
+     · The one tile whose entire job is flowers could not see the season at all. Five hardcoded
+       circles, pink, so six beds stayed pink ON THE DAY OF THE DEAD.
+     · And two of its four hues were the same colour in greyscale: #D77FA8 is luma 158.0 and
+       #E08A5A is 158.2. Δ0.2 of 255. The bed was one texture wearing four names.
+   THE FLOWER, at 32px, is three marks and no more survive: WIDER THAN TALL (a circle reads as a
+   ball or a fruit; the flattening is what says flower), a RAGGED RIM of six lobes (at 8px across
+   the rim is ~25px of arc, so a lobe gets 4px — eight lobes becomes a stipple), and A GREEN CUP
+   UNDER IT, which is the cheapest separator from every other orange thing in this city: an orange
+   mass with green under it is a flower, an orange mass alone is a traffic cone.
+   Three open heads and two buds, not five heads — same plant, different age, one sheet of soil, and
+   that is what makes a bed read as GROWN rather than stamped. It costs nothing.
+   The colours come from `petalPal()`, which returns the marigold gradient WITH NO SEASON ON and the
+   identical array in season — so the flower and its own fallen petals are the same six colours, the
+   bed looks the same in March as in October, and a season still changes only colour. */
+function drawBed(g,sx,sy,seed){
+  const P=petalPal();                                   /* [deep, undercut, body, lit, crown, pale] */
+  const DEEP=P[0],UNDER=P[1],BODY=P[3]||P[2],CROWN=P[5]||P[4];
+  g.fillStyle=tc("#7A5A3C");g.beginPath();g.roundRect(sx+3,sy+6,TS-6,TS-10,6);g.fill();
+  g.fillStyle="rgba(24,16,8,.16)";g.beginPath();g.roundRect(sx+3,sy+6,TS-6,4,3);g.fill();  /* the soil has a lip */
+  const head=(hx,hy,r)=>{
+    g.fillStyle="rgba(30,18,8,.30)";                    /* it sits IN the soil */
+    g.beginPath();g.ellipse(hx+0.5,hy+r*0.72,r*0.95,r*0.38,0,0,7);g.fill();
+    g.strokeStyle=tc("#3E7C4F");g.lineWidth=1;          /* stem */
+    g.beginPath();g.moveTo(hx,hy+r*0.5);g.lineTo(hx,hy+r*1.25);g.stroke();
+    g.fillStyle=tc("#3E7C4F");                          /* the calyx cup — the separator */
+    g.beginPath();g.ellipse(hx,hy+r*0.52,r*0.72,r*0.34,0,0,7);g.fill();
+    g.fillStyle=UNDER;                                  /* the rim, six lobes, ragged by construction */
+    for(let i=0;i<6;i++){const a=i*Math.PI/3+seed*0.7;
+      g.beginPath();g.ellipse(hx+Math.cos(a)*r*0.62,hy+Math.sin(a)*r*0.46,r*0.42,r*0.34,a,0,7);g.fill();}
+    g.fillStyle=BODY;                                   /* the head: WIDER THAN TALL */
+    g.beginPath();g.ellipse(hx,hy,r,r*0.86,0,0,7);g.fill();
+    g.fillStyle=CROWN;                                  /* the key is upper-left, so only those lobes lift */
+    [[-0.42,-0.40],[0.06,-0.52],[-0.60,-0.02]].forEach(([dx,dy])=>{
+      g.beginPath();g.ellipse(hx+dx*r,hy+dy*r,r*0.30,r*0.24,0,0,7);g.fill();});
+    g.strokeStyle=DEEP;g.lineWidth=0.9;                 /* two notches, never a starburst */
+    [-0.5,0.55].forEach(a=>{g.beginPath();g.moveTo(hx+Math.cos(a)*r*0.15,hy+Math.sin(a)*r*0.15);
+      g.lineTo(hx+Math.cos(a)*r*0.8,hy+Math.sin(a)*r*0.7);g.stroke();});};
+  const bud=(hx,hy,r)=>{                                /* same plant, younger: body only, no crown */
+    g.strokeStyle=tc("#3E7C4F");g.lineWidth=1;
+    g.beginPath();g.moveTo(hx,hy+r*0.4);g.lineTo(hx,hy+r*1.5);g.stroke();
+    g.fillStyle=tc("#3E7C4F");g.beginPath();g.ellipse(hx,hy+r*0.5,r*0.7,r*0.42,0,0,7);g.fill();
+    g.fillStyle=UNDER;g.beginPath();g.ellipse(hx,hy,r,r*0.92,0,0,7);g.fill();};
+  head(sx+10,sy+14,4.2); head(sx+21,sy+12,3.8); head(sx+15,sy+21,4.0);
+  bud(sx+25,sy+19,2.1);  bud(sx+6,sy+21,1.9);
+}
+TILEDRAW["b"]=rc=>{const{sx,sy,x,y}=rc;drawBed(ctx,sx,sy,((x*7+y*13)%5)/5);};
 TILEDRAW["g"]=rc=>{const{sx,sy,x,y}=rc; /* grass tuft on the floor tile */
       ctx.strokeStyle=tc("#5FA86A");ctx.lineWidth=1.6;ctx.lineCap="round";
       [[8,0],[13,-2],[18,1],[23,-1]].forEach(p=>{ctx.beginPath();
@@ -5284,8 +5390,7 @@ function mapPick(tx,ty){ /* tile coords, fractional — it is a finger, not a cu
     ?null:{w:best.w,x:best.x,y:best.y,gx:best.gx,gy:best.gy,who:best.who||null};
   drawTown();setWorldTag();
   const t=(T().plan||{});
-  if(mapDest)$("mapNote").textContent="🎯 "+destName()+(t.chosen?"  ·  "+t.chosen:"");
-  else $("mapNote").textContent="📍 "+T().locs[world]+(world===PL.upstairs?"  ·  ⇧":"")+(t.tap?"  ·  "+t.tap:"");
+  mapNoteSet();
   return true;}
 /* The bearing: a DIRECTION, never a lit path — Elden Ring's Guidance of Grace is the shape of it
    (el-mapa §7.3, and the sweep's sources). If the place is on this world, point at it; if it is
@@ -5583,13 +5688,58 @@ function drawTown(){
     g2.beginPath();g2.arc(dx2-1.6,dy2-1.8,1.7,0,7);g2.fill();}
   mapLegend();
 }
+/* ---- WHAT THE PLAN SAYS UNDER ITSELF, AND IT MAY NOT SAY A FALSE THING ----
+   Owner, 2026-09-16: "i guess there just arent quests left over, but can we remove the applicable
+   legend if for example all quests are done then we dont mark." The legend already hid itself; the
+   CAPTION did not. With every quest done and not one mark on the paper, the line under the map
+   still read "tap a mark to make it your destination" — an instruction to do something that is not
+   possible, which is the same fault as a save that fails quietly and a map that draws another
+   street: a surface saying a thing that is not true. It says what is actually there now. */
+function mapNoteSet(){
+  const t=T(),pl=t.plan||{},n=$("mapNote");if(!n)return;
+  if(mapDest){n.textContent="🎯 "+destName()+(pl.chosen?"  ·  "+pl.chosen:"");return;}
+  const here="📍 "+t.locs[world]+(world===PL.upstairs?"  ·  ⇧":"");
+  const any=planMarks().length;
+  n.textContent=here+(any&&pl.tap?"  ·  "+pl.tap:(pl.none?"  ·  "+pl.none:""));
+}
+/* ---- AND SOMEWHERE TO GO WHEN NOBODY WANTS ANYTHING ----
+   "we should also be able to point to a random destnation." Everything the plan could do was tied
+   to a quest, so the moment the city had nothing left to ask of you the map became a picture. This
+   is the first thing on it that is not about quests at all: pick a person, anywhere in the city,
+   and the arrow in the street will take you to them. Chosen from the people the pack declared —
+   never the one you are already standing next to, because being sent where you are is not an
+   answer. */
+function mapRandomDest(){
+  const pool=[];
+  Object.keys(WORLDS).forEach(id=>{(WORLDS[id].npcs||[]).forEach(n=>{
+    if(id===world&&Math.abs(n.x-px)+Math.abs(n.y-py)<=2)return;   /* not where you already are */
+    if(!npcName(n.npc))return;                                    /* it has to be nameable */
+    pool.push({w:id,x:n.x,y:n.y,who:n.npc});});});
+  if(!pool.length)return false;
+  const p2=pool[(Math.random()*pool.length)|0];
+  const pn=planPanelOf(p2.w);
+  mapDest={w:p2.w,x:p2.x,y:p2.y,gx:pn?p2.x+pn.ox:undefined,gy:pn?p2.y+pn.oy:undefined,who:p2.who};
+  drawTown();setWorldTag();mapNoteSet();
+  return true;
+}
 function openMap(){
   drawTown();
-  const t=T(),pl=t.plan||{};
-  $("mapNote").textContent=mapDest
-    ?"🎯 "+destName()+(pl.chosen?"  ·  "+pl.chosen:"")
-    :"📍 "+t.locs[world]+(world===PL.upstairs?"  ·  ⇧":"")+(pl.tap?"  ·  "+pl.tap:"");
+  mapNoteSet();
+  mapAnyBtn();
   $("mapov").hidden=false;held=null;
+}
+/* the button lives here rather than in the shell, so a pack gets it without touching its index */
+function mapAnyBtn(){
+  const host=$("mapNote");if(!host)return;
+  let b=$("mapAny");
+  if(!b){b=document.createElement("button");b.id="mapAny";b.type="button";
+    b.style.cssText="display:block;width:100%;margin:2px 0 10px;padding:9px 12px;border-radius:10px;"+
+      "border:1.5px solid var(--line,#C9C3B4);background:var(--bg,#F2F1EA);color:inherit;"+
+      "font:600 .8rem/1.2 inherit;cursor:pointer;";
+    b.addEventListener("click",()=>{mapRandomDest();mapAnyBtn();});
+    host.parentNode.insertBefore(b,host.nextSibling);}
+  const t=(T().plan||{});
+  b.textContent=t.any||"Somewhere to go";
 }
 $("mapbtn").addEventListener("click",openMap);
 /* tapping a mark is how a destination is chosen — the plan is the only place it can be, because
@@ -6206,6 +6356,7 @@ function applyGrowth(){
   new Set([g.staged&&g.staged.world,...ribbons().map(r=>r.world)].filter(Boolean))
     .forEach(id=>{if(WORLDS[id])rebuildWorld(id);});
   applyStaged();applyRibbon();applyBuilds();
+  Object.values(WORLDS).forEach(w=>{w._cuts=null;});   /* growth changes what a corridor is (R11) */
   if(typeof t3Invalidate==="function")t3Invalidate();} /* the 3D camera rebuilds its meshes */
 function applyStaged(){
   const g=GRW().staged;if(!g||!g.tiles)return;

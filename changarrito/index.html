@@ -345,6 +345,15 @@
      over a panel. */
   .settings{position:fixed; inset:0; background:rgba(15,12,22,.78); display:flex; align-items:center; justify-content:center; z-index:55;}
   .settings .box{background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:12px; padding:18px; width:82%; max-width:320px; max-height:88svh; overflow-y:auto; box-sizing:border-box;}
+  /* THE PLAN IS NOT A SETTINGS DIALOG (owner, 2026-09-16: "check out how tiny the map is, it
+     should at least be half the screen on the left if it wont let us move while using it").
+     It was borrowing `.settings .box`, which is capped at 320px because that is a sensible width
+     for a column of toggles — so on a 1440px screen the whole city was drawn inside a postage
+     stamp. His conditional is the argument and it is right: the map STOPS THE GAME, and a thing
+     that stops the game has to be worth stopping for. It gets its own width now — nearly the whole
+     phone, and a real panel on a desktop. */
+  #mapov .box{width:min(94vw,860px); max-width:none; padding:16px;}
+  #mapov #mapcv{max-height:70svh; object-fit:contain;}
   .settings .box>.close{position:sticky; bottom:-18px; z-index:2; margin-bottom:0;
     box-shadow:0 -14px 16px -8px var(--surface);}
   .settings h3{font-family:'Unbounded',sans-serif; font-size:.9rem; margin:0 0 12px;}

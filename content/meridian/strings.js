@@ -66,6 +66,7 @@ const UI={
   pass:{title:"🚋 Barrio Pass",note:"Good on the whole MQT line. Where to, consultant?",here:"you are here",soon:"Barrio Norte — coming soon",close:"Stay here"},
   plan:{work:"has work for you",host:"has a question about this room",read:"something to read",
         tap:"tap a mark to make it your destination",chosen:"tap it again to clear it",
+        none:"nobody is waiting on you right now",any:"Somewhere to go →",
         key:"what the marks mean",ride:"take the tram"},
   /* what a person is told when the device stops keeping things. Plain, and never the word
      "quota" — the sentence has to say what it costs THEM (2026-09-16). */
@@ -295,6 +296,7 @@ One source of truth for one very good pet.
   pass:{title:"🚋 Pase del Barrio",note:"Válido en toda la línea MQT. ¿A dónde vamos, inge?",here:"estás aquí",soon:"Barrio Norte — próximamente",close:"Quedarme aquí"},
   plan:{work:"tiene chamba para ti",host:"tiene una pregunta de este cuarto",read:"algo que leer",
         tap:"toca una marca para poner tu destino",chosen:"tócala otra vez para quitarlo",
+        none:"ahorita nadie te está esperando",any:"Un lugar a dónde ir →",
         key:"qué quieren decir las marcas",ride:"toma el tranvía"},
   save:{full:"⚠ Este aparato ya no tiene espacio — lo que hagas ahora no se está guardando. Liberar espacio lo arregla.",
         blocked:"⚠ Este navegador no deja guardar. Una ventana privada hace eso; una normal sí guarda tu avance.",

@@ -431,3 +431,44 @@ forgotten. *"This one" is only visible against "not those."*
 **And the threshold is measured, not picked.** The confirmation *as it shipped* moves 18% of the
 pixels around a mark, and 18% is precisely what the owner described as not being able to tell. The
 flag, disc and dimming move 36%. The floor sits at 28 — between them, nearer the thing that failed.
+
+## A person is weather, not masonry — 2026-09-16
+
+*The owner, on R11: "why doesnt r11 walk around?"*
+
+**The answer is that there is nothing to walk around.** A person is stamped into the grid as the
+literal character `"N"`, and every reader that matters treats `"N"` exactly as it treats a wall —
+`isSolid`, `isSolidAt`, the reachability auditor, and (found on the way) the trolley-seam check.
+None of them has ever looked at a person. So when somebody wanders into a corridor **one tile
+wide**, the map is genuinely cut in two: it is not a pathfinding failure, it is a gap with somebody
+in it.
+
+**Measured before anything was written**, which is what made the fix small:
+
+| world | walkable | tiles that cut it | people who wander there |
+|---|---|---|---|
+| **`ex` Calle Dos** | 176 | **35** | **4** |
+| `hq` | 208 | 17 | 0 |
+| `st` | 356 | 14 | 0 |
+| every other world | — | some | **0** |
+
+**The whole of R11 lives on one street.** Every other world with a chokepoint has nobody walking in
+it. That turned "an engine decision about whether people block" into "a wander filter that asks one
+more question", which is what shipped: *a person does not stand in the only way through* — the same
+manners that already stop them stepping in front of a tram.
+
+**And the auditor now tells the difference between the two kinds of person.** A wanderer is passable,
+because they will not be there in four seconds. Somebody `still` is not, because they never move and
+the map really does have to work around them. The grid only says `"N"`, so it asks the pack who is
+standing there.
+
+**The rule, and it generalises past people:** *when a check means terrain, read the terrain.* The
+flake that survived the fix was the trolley-seam check asking "does this world have somewhere a tram
+could run" — a question about the map — off `grid`, which is the map **plus whoever is on it**. One
+neighbour in a five-tile world's only four-in-a-row, and the check reported it could not run at all.
+`rows` is what was authored; `grid` is what is authored plus weather. The check reads `rows` now and
+the flake is gone.
+
+**What it cost to leave it:** three days in the register, a suite reddening about one run in
+twenty-five, and — the part nobody was counting — a player occasionally walled out of thirty-five
+tiles of Calle Dos by somebody standing in a doorway with their back to them.

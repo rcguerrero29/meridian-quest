@@ -175,7 +175,10 @@ const WORLD_DEFS={
      "F..~~....g....b........F",
      "F..~~....3.4.5.g...J...F",
      "F..~~..J...............F",
-     "F..~~......g.....b.....F",
+     "F..~~......g.....bbb...F"   /* (18,10) (19,10): cempasúchil laid from the bed at 17 to the
+     ofrenda at 20. Marigolds are how the souls are shown the way — the flower IS the arrow, which
+     is the one the owner said the altar in the corner needed, and it is the historically correct
+     one. Walkable, so it cannot cork the park (R11). Pili, 2026-09-16. */,
      "FFF~~FFFFFFFFFFFFFFFFFFF"]
 };
 /* la caja de escalera (#4, Don Güero's candidate B, walked in the town first, 2026-09-06): HQ grew

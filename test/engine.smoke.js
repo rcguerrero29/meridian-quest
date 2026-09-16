@@ -854,6 +854,74 @@ const { chromium } = require('playwright-core');
   });
   fails.push(...roof);
 
+  /* ---- NOBODY MAY BE WALLED OUT BY SOMEBODY STANDING (R11) ----
+     Open in `docs/REGRESSION.md` since 2026-09-13 and reddening a suite about one run in
+     twenty-five, which is the most expensive shape a bug has. The owner asked the question that
+     settles it: "why doesnt r11 walk around?" — and the answer is that there is nothing to walk
+     around. A person is stamped into the grid as `"N"`, three readers treat `"N"` as masonry, and
+     when a wanderer steps into a corridor one tile wide the map really is cut in two.
+     MEASURED before anything was written: of the fifteen worlds, only `ex` has chokepoints AND
+     people who move — 35 tiles that cut it, four wanderers. Every other world with a chokepoint
+     has nobody walking in it. So the whole of R11 lives on one street.
+     Asked the only honest way: put the wanderer on EVERY tile that would cut the world, in turn,
+     and ask the auditor each time. Not one sampled tile, and not a tile this test chose — the set
+     is derived from the map. Red first at 35 of 35; the plant that restores the old reader still
+     names "rigo in ex", which is the person the register predicted three days before the fix. */
+  const walled = await page.evaluate(() => {
+    const P = [];
+    if (typeof auditReach !== 'function' || typeof wanders !== 'function') {
+      P.push('R11 cannot be checked: the engine no longer has auditReach() or wanders(), so nothing is asking whether a person standing somewhere walls the map');
+      return P; }
+    const base = (auditReach(true) || []).length;
+    let tested = 0, strand = 0, first = null;
+    Object.keys(WORLDS).forEach(id => {
+      const w = WORLDS[id];
+      const n = (w.npcs || []).find(p2 => wanders(p2));
+      if (!n) return;                                   /* nobody moves here: nobody can cork it */
+      const ok = (x, y) => x >= 0 && y >= 0 && x < w.W && y < w.H && !SOLID.has(w.grid[y][x]);
+      const all = []; for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (ok(x, y)) all.push([x, y]);
+      const reach = (bx, by) => { const st = all.find(([x, y]) => !(x === bx && y === by));
+        if (!st) return 0; const seen = new Set([st[0] + ',' + st[1]]), q = [st];
+        while (q.length) { const [x, y] = q.pop();
+          [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx, dy]) => { const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+            if (seen.has(k) || !ok(nx, ny) || (nx === bx && ny === by)) return; seen.add(k); q.push([nx, ny]); }); }
+        return seen.size; };
+      const full = reach(-1, -1);
+      const cuts = all.filter(([x, y]) => reach(x, y) < full - 1);
+      const ox = n.x, oy = n.y;
+      try {
+        cuts.forEach(([x, y]) => {
+          tested++;
+          if (w.grid[oy]) w.grid[oy][ox] = w.rows[oy][ox];
+          n.x = x; n.y = y; if (w.grid[y]) w.grid[y][x] = 'N';
+          const now = (auditReach(true) || []);
+          if (now.length > base) { strand++; if (!first) first = id + ' (' + x + ',' + y + '): ' + String(now[0]).slice(0, 90); }
+          if (w.grid[y]) w.grid[y][x] = w.rows[y][x];
+          n.x = ox; n.y = oy; if (w.grid[oy]) w.grid[oy][ox] = 'N';
+        });
+      } finally { n.x = ox; n.y = oy; if (w.grid[oy]) w.grid[oy][ox] = 'N'; }
+      /* and the wanderer must never CHOOSE one, which is the half that fixes the player rather
+         than the audit — an auditor that forgives a corked gap still leaves somebody standing in it */
+      if (typeof wanderCuts === 'function') {
+        const known = wanderCuts(id);
+        const missed = cuts.filter(([x, y]) => !known.has(x + ',' + y));
+        if (missed.length)
+          P.push(id + ': the wander filter does not know about ' + missed.length + ' of its ' + cuts.length +
+                 ' chokepoints, so a person can still step into the only way through');
+      } else P.push('there is no wanderCuts(), so nothing stops a person standing in the only way through a world');
+    });
+    /* NO "UNTESTED" LINE HERE, and the gauge is why. A pack whose worlds have no chokepoint
+       cannot have this bug at all — five tiles and one open room is exactly that — so reporting
+       "measured nothing" at it would invent a demand on every future world, which is the one thing
+       that fixture exists to catch me doing. The silent zero worth fearing is the engine losing
+       the pieces this check reads, and that is caught at the top of the block, loudly, rather than
+       here where the honest answer is "this world is too simple to break". */
+    if (strand) P.push('somebody standing still walls the map: ' + strand + ' of ' + tested +
+                            ' chokepoints strand a person when a wanderer stops on them — e.g. ' + first);
+    return P;
+  });
+  fails.push(...walled);
+
   /* ---- EVERY THING ON THE PLAN IS DRAWN AS A THING, AND A TAP ANSWERS ON THE MAP ----
      Owner, 2026-09-16: "the map says tap a mark, but cannot tell if a mark is tapped. also... the
      squares/dots for people are garbage, we really cant improve this so i can tell what things
@@ -1798,7 +1866,12 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
      It is non-vacuous in a pack with no trolley at all: the line is planted, not borrowed. */
   const troSeam = await page.evaluate(() => {
     const P = [];
-    const walk = (w, x, y) => { const g = w.grid[y] && w.grid[y][x]; return g !== undefined && !SOLID.has(g) && g !== 'N'; };
+    /* `rows`, NOT `grid`, and this is R11 wearing a different hat. The question here is "does this
+       world have somewhere a tram could run" — a question about TERRAIN. `grid` is the map plus
+       whoever is standing on it, so a neighbour who happened to wander into the only four-in-a-row
+       made a five-tile world report that the trolley seam could not be tested at all, about one run
+       in twenty. The map is what was authored; a person is weather. Read the map. */
+    const walk = (w, x, y) => { const g = w.rows[y] && w.rows[y][x]; return g !== undefined && !SOLID.has(g); };
     let pick = null;
     Object.keys(WORLDS).some(id => { const w = WORLDS[id];
       for (let y = 1; y < w.H - 1 && !pick; y++) for (let x = 1; x < w.W - 4; x++) {
