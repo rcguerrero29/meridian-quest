@@ -43,6 +43,40 @@ Six arrangements is a picture of something that cannot exist.
 
 ---
 
+## Two more, learned the same afternoon and both one level DOWN
+
+**A made thing is made of made things. Recurse.**
+Getting the roll right is not getting the slice right. Every piece inside it was also cut by
+somebody, and **the section of each piece is decided by how THAT piece was cut** — they were not all
+cut the same way, so they cannot all be the same shape:
+
+| piece | how it was cut | so its section is |
+|---|---|---|
+| pickled radish | a baton sawn from something big | a rounded rectangle — **the only honest bar in there** |
+| omelette | cooked as a SHEET, then sliced | wide and thin, with the fold showing as a paler line |
+| carrot | **julienned** | four or five thin slivers with gaps — *never one fat orange block* |
+| spinach | blanched and **wrung out** | a dense band with no straight edge anywhere |
+
+The owner's words, and they are the test: *"a carrot isnt square like that — at best square-ish."*
+**When every part of an object is the same primitive in a different colour, the recursion has not
+been done.** That is the second most common way a drawing reads as generated.
+
+**Commit to a KIND. Do not average a family.**
+*"…but depends on the type of gimbap."* A tuna roll, a cheese roll and a vegetable roll have
+different things inside and they are different shapes. Averaging the family gives you a filling that
+no actual roll contains. Pick one and be right about that one.
+
+**And the cheapest check of all: what does the thing's own paperwork say is in it?** The page the
+drawing sits on listed rice, gim, egg, spinach and sesame oil. The drawing had burdock, beef, crab
+stick and cucumber — none of them on the list, three inches away. **An ingredient list, a bill of
+materials, a parts diagram: that is the process input, written down, and it is usually already in
+the file you are working in.**
+
+**One warning from doing it:** getting each section's shape right made every piece smaller, and the
+filling went straight back to being a badge in a field of rice — the fault from two passes earlier.
+**Fixing shape is not permission to lose mass.** Four ingredients fill a roll as completely as eight,
+because each one is bigger. A handful of spinach is a handful, not a garnish.
+
 ## The five questions, before you draw anything
 
 **1 · How was it made? Say the steps out loud.**

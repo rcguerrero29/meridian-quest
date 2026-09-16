@@ -180,3 +180,37 @@ A slice that lands on a board turns a few degrees. The fix was not the arrangeme
 `gimbap-one-roll.png` is the result at 3×. Written up as the **`how-its-made`** skill, carried by
 `pili` (ahead of silhouette) and `chema` (as step **0**, ahead of measuring, because measuring the
 object cannot find this class of fault), and recorded in `docs/BEAUTIFY.md`.
+
+
+---
+
+## 2026-09-16, and this is the one that finished it — recurse
+
+> *"ok but the squares are not being correctly beautified that the process informs the shape…. a
+> carrot isnt square like that - at best square-ish - so that or meat would not be square at all but
+> depends on the type of gimbap"*
+
+The last pass applied *how was it made* to the **roll** and stopped there, so the filling was seven
+identical rounded rectangles in different colours. **A made thing is made of made things**, and each
+piece inside was cut by somebody too:
+
+| piece | how it was cut | its section |
+|---|---|---|
+| **danmuji** | a baton sawn from a big pickled radish | a rounded rectangle — the only honest bar in there |
+| **egg** | cooked as a flat sheet, then sliced | wide and thin, with the fold as a paler line |
+| **carrot** | **julienned** | five thin slivers with gaps — *never one fat orange block* |
+| **spinach** | blanched and **wrung out** | a dense band, no straight edge anywhere |
+
+**And commit to a kind.** "Gimbap" is a family; averaging it gives a filling no actual roll contains.
+
+**The cheapest check was three inches away and nobody ran it.** This page's own recipe lists rice,
+gim, egg, spinach and sesame oil. The drawing had burdock, beef, crab stick and cucumber in it —
+**none of them on the list printed directly below the picture.** An ingredient list is the process
+input, already written down, in the file being worked in.
+
+**One trap, met on the way:** fixing each section's shape made every piece smaller and the filling
+went straight back to being a badge in a field of rice — the fault from two passes before. *Fixing
+shape is not permission to lose mass.* Four ingredients fill a roll as completely as eight, because
+each one is bigger. A handful of spinach is a handful, not a garnish.
+
+`gimbap-one-roll.png` is the current state. The `how-its-made` skill carries both rules now.
