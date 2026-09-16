@@ -67,6 +67,11 @@ const UI={
   plan:{work:"has work for you",host:"has a question about this room",read:"something to read",
         tap:"tap a mark to make it your destination",chosen:"tap it again to clear it",
         key:"what the marks mean",ride:"take the tram"},
+  /* what a person is told when the device stops keeping things. Plain, and never the word
+     "quota" — the sentence has to say what it costs THEM (2026-09-16). */
+  save:{full:"⚠ This device is out of room — what you do now is not being saved. Freeing some space will fix it.",
+        blocked:"⚠ This browser is not letting the game save. A private window does that; a normal one will keep your progress.",
+        back:"Saving again — your progress is being kept."},
   cat:["Mrrp.","Canela blinks slowly. You are accepted.","The health inspector doesn't know about Canela. Keep it that way."],
   endGo:"▶ Out to the street",
   waitingAt:p=>"Somebody in "+p+" has something to say.",
@@ -291,6 +296,9 @@ One source of truth for one very good pet.
   plan:{work:"tiene chamba para ti",host:"tiene una pregunta de este cuarto",read:"algo que leer",
         tap:"toca una marca para poner tu destino",chosen:"tócala otra vez para quitarlo",
         key:"qué quieren decir las marcas",ride:"toma el tranvía"},
+  save:{full:"⚠ Este aparato ya no tiene espacio — lo que hagas ahora no se está guardando. Liberar espacio lo arregla.",
+        blocked:"⚠ Este navegador no deja guardar. Una ventana privada hace eso; una normal sí guarda tu avance.",
+        back:"Ya está guardando otra vez — tu avance se queda."},
   cat:["Mrrp.","Canela parpadea despacio. Estás aceptado.","La inspectora de salubridad no sabe de Canela. Que siga así."],
   endGo:"▶ Salir a la calle",
   waitingAt:p=>"Alguien en "+p+" tiene algo que decirte.",

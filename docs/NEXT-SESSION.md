@@ -3,6 +3,50 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
+## STATE OF PLAY — read this first (2026-09-16, end of the fourth-page sitting)
+
+### ⇢ 2026-09-16 — START HERE. Everything below this line is history.
+
+**`main` is at `mq-v162` / `ch-v112`** after PR #204. This branch (`claude/upbeat-planck-0718c6`)
+carries the sitting below and is pushed, not merged. **Merge is the owner's word.**
+
+**Run the suites like this.** The container's Chromium is a version behind what `playwright-core`
+resolves, so every browser suite dies at launch unless you say where the binary is:
+
+    export CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome
+
+`ls /opt/pw-browsers/` if that path is stale. Without it `smoke`, `engine.smoke`, `town.smoke` and
+`gauge` all fail for a reason that has nothing to do with the code. **The gauge used to report this
+as good news** — see below.
+
+**What shipped this sitting:**
+- **The silent save fixed.** Nineteen `try{localStorage.setItem()}catch(e){}` in `engine/engine.js`
+  are now one writer, `mqStore(k,v,critical)`: it tells *out of room* from *not allowed to write*,
+  drops the debug log and retries once before it bothers anybody, and throttles the message to once
+  per 180s. `SAVE_FALLBACK` lives in the engine, so a pack with no `save:` strings still warns — the
+  gauge forced that. Four assertions in `test/engine.smoke.js`, red first against the original
+  swallowed catch planted in a copy outside the repo. Write-up: `docs/REGRESSION.md`, "The empty catch".
+- **The quest marker reads against the storefront line.** Measured first: the occlusion was already
+  correct and the fault was contrast, so it got a pale halo outside its dark keyline, not a layering
+  change. `SAYBAKE.lift` 11.7 → 11.0. The guard's "may only darken" rule was designing the art, so it
+  is a budget of 12 lightened pixels now; the original bug still fires at 32.
+- **The broken stairs are a glass divider.** Pack art only (`content/meridian/art.js`, `◺`) — the
+  engine's rail is deliberately see-through, so glass is the material for which that is correct.
+  Lesson in `docs/BEAUTIFY.md`.
+- **The gauge no longer calls a broken run good news.** When the shared suite produces zero findings
+  that is a run that did not happen, not a template that got easier; it now fails differently and
+  prints what the inner run actually said. Red first by unsetting `CHROMIUM_PATH`.
+- **A fourth book page** — 떡볶이, in the Simmer book artifact (version 8). The tteok were redrawn
+  against `how-its-made`: one extruder die so diameter is shared and only length varies, stirred into
+  a loose alignment instead of a starburst, half-sunk with the sauce climbing them, drawn back to
+  front so the cast shadows land on something already painted. A `__SWAP__` token was reaching the
+  page as literal text; the renderer now refuses to print plumbing when a page has no two-cooks row.
+
+**Open, and the owner's to call:** the paper seam (`docs/ARCH-LOG.md` **A15** — he said fix it, not
+started; needs a `docs/BOUNDARY.md` row and a guard first, because an unscoped pack stylesheet could
+restyle the chrome and the HUD). La foto (re-asked in plain words, unanswered). How to ask AJ about
+music. `docs/la-sobremesa.md` §16/§17 want a re-read now that the book is not Simmer's spine.
+
 ## STATE OF PLAY — read this first (2026-09-13, end of the crew-mode sitting)
 
 ### ⇢ 2026-09-14, night — START HERE. Everything below this block is history.

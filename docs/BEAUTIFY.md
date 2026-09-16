@@ -256,3 +256,40 @@ diagram.
 
 Written up as the `how-its-made` skill, and carried by `pili` and `chema` — it is step **0** of
 Chema's four, ahead of measuring, because measuring the object cannot find this class of fault.
+
+## When a thing can't be fixed, the material is the thing that's wrong — 2026-09-16
+
+*Added after the owner looked at the stairs through the office divider and said: "looks abstract
+artish but clearly fucked up stairs — want to spicy it up and make it a glass divider."*
+
+The stairs were not broken. The engine's rail is **deliberately see-through** — it draws a rail and
+not a wall so a player can see the floor beyond and understand there is a way up there. What reached
+the screen was a solid balustrade with the flight showing through it, which is not a rendering bug,
+it is **a solid material drawn with a transparent rule**. Every fix available inside "make the
+stairs read correctly" was a fight with the engine: close the rail and the far floor disappears, keep
+it open and the timber looks broken.
+
+**The rule: when the drawing contradicts itself, check whether the material is claiming something
+the code is not doing.** Then change the material rather than the code. Glass is the material whose
+real-world behaviour *is* the engine's rule — you are supposed to see through a glass divider, so the
+transparency stops being a fault and becomes the point, and the same pixels now read as an office
+that has one. Nothing in `engine/` moved; `◺` is redrawn in `content/meridian/art.js`, so the
+engine's timber rail and every other world are exactly as they were.
+
+**Why it belongs in this file and not in a bug list:** it is the cheapest beautify there is. No new
+system, no engine seam, no risk to a second world — one pack tile, and a fault becomes a feature. Ask
+it before costing the fix: *is there a material for which this behaviour is correct?*
+
+## Occlusion can be right and the drawing still wrong — 2026-09-16
+
+*Same round. The owner: "i see building line overlapping with the exclamation mark animation."*
+
+**Measured before touching anything**, which is the only reason the fix was one line instead of a
+layering rewrite: the person spans y=4..36 of the sprite, the mark spans y=−7..8, so the mark
+overlaps the head by four pixels and is drawn over it — **correct**. The storefront line behind it is
+at the same luma as the mark's fill. The fault was never depth; it was **contrast**, and every
+plausible fix aimed at draw order would have been wrong and expensive.
+
+So the mark got a pale halo outside its dark keyline — it now separates from whatever is behind it
+without moving in z at all. **When something "overlaps", measure the overlap before you believe the
+word.** Half the time the geometry is right and what failed is separation.

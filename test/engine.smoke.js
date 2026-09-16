@@ -496,6 +496,54 @@ const { chromium } = require('playwright-core');
   const r = r0.P; r.stillFlat = r0.stillFlat;
   fails.push(...r);
 
+  /* ---- A SAVE THAT DID NOT HAPPEN HAS TO SAY SO ----
+     Owner, 2026-09-16: "how do we fix the save failing silently?" It was nineteen copies of
+     `try{localStorage.setItem(...)}catch(e){}`, so a device out of room let the game go on playing
+     and simply stop remembering — no error, no warning, nothing in the log, and an afternoon gone
+     when the tab closed. docs/GAUGE.md's silent zero, in the one place where the thing lost belongs
+     to a person.
+     Asked by making the device refuse, which is the only way to ask it: a real player hits this
+     when their disk is full and never when the suite is run normally. */
+  const silentsave = await page.evaluate(() => {
+    const P = [];
+    if (typeof mqStore !== 'function') {
+      P.push('the engine has no single door for storage writes, so a device out of room stops the game saving and tells nobody — that is the silent save');
+      return P; }
+    const real = localStorage.setItem.bind(localStorage);
+    const tick = () => { const t = document.getElementById('ticker'); return t ? t.textContent : ''; };
+    const full = () => { const e = new Error('full'); e.name = 'QuotaExceededError'; throw e; };
+    try {
+      /* 1 · THE DEVICE IS FULL AND THERE IS NOTHING TO SACRIFICE. The player must be told. */
+      mqLog.length = 0; storeBad = false; storeToldAt = 0;
+      const before = tick();
+      localStorage.setItem = full;
+      const ok = save();
+      const after = tick();
+      if (ok !== false) P.push('save() reports success when the device refused the write — a caller cannot tell a kept afternoon from a lost one');
+      if (after === before) P.push('a save that did not happen says nothing to the player: no line on screen, nothing to read back. That is the silent save (docs/GAUGE.md)');
+      else if (!/\S/.test(after)) P.push('the save failure put an empty line on screen');
+      if (!mqLog.some(e => e.kind === 'store')) P.push('a failed save leaves nothing in the log either, so nobody can find out afterwards what happened');
+
+      /* 2 · AND IT RECOVERS BEFORE IT COMPLAINS. Sixteen kilobytes of our own diagnostics are
+             never worth somebody's progress: the log goes first, and the write is retried. */
+      localStorage.setItem = real;
+      mqLog.length = 0; mqwarn('probe', 'something to sacrifice'); storeBad = false; storeToldAt = 0;
+      let once = 1;
+      localStorage.setItem = function (k, v) {
+        if (once > 0 && k !== SK('log')) { once--; full(); }
+        return real(k, v); };
+      const ok2 = save();
+      if (ok2 !== true) P.push('a full device with a throwaway log still loses the save — the engine’s own notes should be dropped and the write retried before anybody loses anything');
+      /* the log is not EMPTY afterwards, and should not be: dropping it is itself worth one line,
+         so what proves the sacrifice is that the entry which was there before is gone. Asserting
+         `mqLog.length === 0` failed here on correct code — the guard was reading the wrong noun. */
+      else if (mqLog.some(e => e.kind === 'probe')) P.push('the save was retried but the log was not the thing given up for it');
+      else if (!mqLog.some(e => /dropped the log/.test(e.msg || ''))) P.push('the log was dropped to save the game and nothing recorded that it happened');
+    } finally { localStorage.setItem = real; storeBad = false; storeToldAt = 0; }
+    return P;
+  });
+  fails.push(...silentsave);
+
   /* ---- THE BEARING POINTS AT THE PLACE, AND STAYS ON THE SCREEN ----
      The owner picked the street arrow over the crew's advice on 2026-09-15 ("bearing lets try 2"),
      so it has to be right: an arrow that points confidently at the wrong wall is worse than no
@@ -650,8 +698,19 @@ const { chromium } = require('playwright-core');
         if (!everDrew) { P.push('a person with something to say is not marked at all in ' + cfg.nm + ' — drawSayMark drew nothing'); return; }
         if (!everAbove) P.push('the quest marker never gets above the person in ' + cfg.nm +
           ' — it is drawn ON them, not over them. That is the red bar through the skull (docs/BEAUTIFY.md)');
-        if (worstLit) P.push('in ' + cfg.nm + ' the quest marker makes ' + worstLit +
-          ' of the person\u2019s own pixels LIGHTER at some phase of its bob, so it is covering them rather than shading them. A thing above a head casts a shadow on it; it does not replace it');
+        /* ---- A BUDGET, NOT ZERO, AND THE SCREENSHOT IS WHY ----
+           This said "no lightened pixel at all" until 2026-09-16, and that was MY rule rather than
+           the audit's: the fault was a bar through a FACE, and I implemented "must not touch".
+           Then the owner sent a photograph of the market where the marker's dark keyline landed on
+           a storefront of almost the same value and the building's line appeared to run through it.
+           The fix is a pale ring outside the dark one — which is light, and which kisses the crown.
+           Under the old rule the only ways to keep it were a marker small enough to be unreadable
+           in 3D, or no halo. **A guard can be too strict, and then it is designing.**
+           So: a budget that still fails the thing it was written for. The original fillText marker
+           lightened 32 of this person's pixels — it covered the head. A halo touching the crown
+           lightens about five. Twelve separates them and says which is which. */
+        if (worstLit > 12) P.push('in ' + cfg.nm + ' the quest marker makes ' + worstLit +
+          ' of the person\u2019s own pixels LIGHTER at some phase of its bob — it may kiss the crown, it may not cover a face (docs/BEAUTIFY.md)');
         if (cfg.args.length && worstRow0) P.push('the quest marker paints ' + worstRow0 +
           ' pixels above the top of the 36\u00D748 actor sprite at some phase of its bob, so the 3D bake throws them away and it arrives in the scene as a chopped rectangle');
       });
