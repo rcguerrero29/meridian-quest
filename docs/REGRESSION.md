@@ -174,6 +174,42 @@ subject at all?* #21 answered that with its pass sentence — a positive claim a
 file it had just failed to parse. **Not finding the thing is a RED. Silence about a file you failed to
 parse is a claim you did not check.**
 
+### The empty catch: a guard the code writes against itself — 2026-09-16
+
+*Added when the owner asked "how do we fix the save failing silently?" — which is the same question
+this file asks of tests, asked of the shipping code instead.*
+
+`try{localStorage.setItem(k,v)}catch(e){}` appeared **nineteen times** in `engine/engine.js`. Every
+one of them is a promise the code makes and then quietly declines to keep: the player's progress is
+written, the write fails, and the game carries on drawing as though it had worked. A phone with a
+full disk, a private window, a browser with site data blocked — the save is gone and the only thing
+that ever knows is the `catch`.
+
+**This is the register's fault in the other direction.** A guard that reads a proxy *answers a
+question nobody asked*; an empty catch *refuses to answer the question the code itself asked*. Both
+end the same way: a green screen and an untrue one.
+
+**The fix is a shape, not a patch.** One writer, `mqStore(k,v,critical)`, is now the only thing in
+the engine that touches `localStorage`, so there is exactly one place the failure can be handled and
+exactly one place a future session can get it wrong. It separates the two failures that need
+different answers — *out of room* (drop the debug log, retry once, and tell the player only if the
+retry also fails) from *not allowed to write at all* (tell them straight away, there is nothing to
+free). The message is throttled to once every 180 seconds, because a save that fails fails every few
+seconds and a toast per attempt is its own bug.
+
+**And the fallback lives in the engine, which the gauge forced.** The first version read the warning
+out of the pack's strings, so a world that had not written a `save:` block would fail silently
+exactly as before — the guard would have been green for Meridian and meaningless for the next world.
+`SAVE_FALLBACK` is in `engine/engine.js`; a pack may say it better, but no pack can make it say
+nothing.
+
+**Red first**, in a copy outside the repository: the original swallowed `catch` planted back in
+`lab8`, all four assertions fired.
+
+**The standing rule this leaves:** *an empty catch is a decision to lie, and it needs a reason in
+writing beside it or it does not ship.* `test/engine.smoke.js` holds the four assertions; the next
+one added anywhere in the engine has to get past them.
+
 ### The five guards added after the register was opened, and the eight violations planted at them
 
 *2026-09-11, `mq-v149` — the critters-keep-off-the-rails rule and the tram that waits at its stop.

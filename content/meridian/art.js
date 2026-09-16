@@ -290,6 +290,52 @@ TILEART["I"]=rc=>{const{sx,sy,x,y}=rc;
     produce(sx+16,sy+17,"tomato",1.15);}
 };
 
+/* ---- THE STAIRWELL DIVIDER IS GLASS (owner, 2026-09-16) ----
+   "the stairs appear on the other side of this wall... looks abstract artish but clearly
+   fucked up stairs - want to spicy it up and make it a glass divider."
+
+   THE INTERESTING PART IS THAT SEEING THE STAIRS THROUGH IT IS NOT A BUG. The engine's own rail
+   is knee-high and see-through on purpose, so a flight below stays visible — that is correct, and
+   it is why the stairs read "on the other side". What was wrong is that a timber rail with four
+   balusters gives the eye a picket fence and then a stepped grey mass behind it, and at this size
+   those two readings fight: the stairs come out as abstract slabs because nothing frames them.
+
+   Glass does the same job and admits it. A full-height pane says LOOK THROUGH ME, the steel cap
+   says WHERE THE EDGE IS, and the flight behind stops being an accident of transparency and
+   becomes the thing on show. Same tile, same solidity, same lift — this is PACK ART, so the
+   engine's own rail is untouched and every other world keeps the timber one.
+
+   The pane is drawn with the light model this project already uses: one warm key upper-left, so a
+   glass sheet takes a bright streak across the top corner and a cool sky tone down the shadow
+   side, and the steel cap is the same stainless the kitchen uses (#B9BCC0, Δ106 from the room's
+   own browns, which is why it reads at a glance). */
+const GLASSCAP="#B9BCC0", GLASSCAPL="#D4D8DC", GLASSPOST="#5F676F";
+TILEART["◺"]=rc=>{const{sx,sy}=rc;      /* from above: the cap rail, and the pane's own thin line */
+  ctx.fillStyle="rgba(150,190,205,.22)";ctx.fillRect(sx,sy+10,TS,7);   /* the pane, edge on */
+  ctx.fillStyle=GLASSPOST;[2,15,28].forEach(px=>ctx.fillRect(sx+px,sy+10,2.5,7));
+  ctx.fillStyle=GLASSCAP;ctx.fillRect(sx,sy+12,TS,3.2);
+  ctx.fillStyle=GLASSCAPL;ctx.fillRect(sx,sy+12,TS,1.2);
+  ctx.fillStyle="rgba(20,16,28,.26)";ctx.fillRect(sx,sy+15.2,TS,1);};  /* its shade on the floor */
+TILEART_SIDE_GLASS=rc=>{const{sx,sy}=rc; /* in elevation: a pane you see the flight through */
+  const top=sy+6, bot=sy+30;
+  ctx.fillStyle="rgba(10,8,14,.20)";ctx.fillRect(sx,bot-1,TS,2);        /* it meets the floor */
+  ctx.fillStyle="rgba(158,196,210,.15)";ctx.fillRect(sx,top+3,TS,bot-top-3);
+  /* the key catches the sheet: one broad streak across the upper corner, one thin one under it */
+  ctx.save();ctx.beginPath();ctx.rect(sx,top+3,TS,bot-top-3);ctx.clip();
+  ctx.fillStyle="rgba(255,252,240,.20)";
+  ctx.beginPath();ctx.moveTo(sx-6,bot);ctx.lineTo(sx+13,top);ctx.lineTo(sx+20,top);
+  ctx.lineTo(sx+1,bot);ctx.closePath();ctx.fill();
+  ctx.fillStyle="rgba(255,252,240,.12)";
+  ctx.beginPath();ctx.moveTo(sx+16,bot);ctx.lineTo(sx+27,top);ctx.lineTo(sx+30,top);
+  ctx.lineTo(sx+19,bot);ctx.closePath();ctx.fill();
+  ctx.restore();
+  ctx.fillStyle=GLASSPOST;[1.5,15,28].forEach(px=>ctx.fillRect(sx+px,top+2,2.4,bot-top-2));
+  ctx.fillStyle="rgba(255,255,255,.22)";[1.5,15,28].forEach(px=>ctx.fillRect(sx+px,top+2,.9,bot-top-2));
+  ctx.fillStyle=GLASSCAP;ctx.fillRect(sx,top,TS,4);                     /* the steel cap rail */
+  ctx.fillStyle=GLASSCAPL;ctx.fillRect(sx,top,TS,1.4);
+  ctx.fillStyle="rgba(20,16,28,.34)";ctx.fillRect(sx,top+4,TS,1.2);     /* its own shadow on the pane */
+};
+
 const TILEART_SIDE=Object.assign({},TILE_PROPS);
 TILEART_SIDE["Y"]=rc=>{const{sx,sy}=rc; /* THE TROLLEY STOP, STANDING. It was walkable with no TILES
       row and no profile, so the front camera and the 3D ground bake painted its top-down art flat
@@ -313,6 +359,7 @@ TILEART_SIDE["Y"]=rc=>{const{sx,sy}=rc; /* THE TROLLEY STOP, STANDING. It was wa
   ctx.fillStyle="rgba(255,255,255,.14)";ctx.fillRect(sx+2.6,sy+2.6,17.8,1.2);
   ctx.fillStyle="#F2E8D8";ctx.font="700 7px monospace";ctx.fillText("MQT",sx+5,sy+10);
 };
+TILEART_SIDE["◺"]=TILEART_SIDE_GLASS;   /* the divider stands as glass in every camera that sees it stand */
 TILEART_SIDE["□"]=TILEART["□"]; /* cardboard and tape read the same from the side — it stands as a real box in 3D */ /* the props stand up wearing the same drawing */
 
 /* ---- THE CRATE AND THE COUNTER, STANDING. ----

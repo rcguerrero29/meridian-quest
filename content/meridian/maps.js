@@ -268,7 +268,16 @@ const TOWNLBL=[
  {x:23,y:13.75,s:9,c:"#F2E8D8",en:"TALLER HERRERA",es:"TALLER HERRERA",when:f=>f.up&&f.up.ta},
  {x:25.5,y:0.75,s:8,c:"#F2E8D8",en:"NOTARIO ⇧",es:"NOTARIO ⇧",when:f=>f.up&&f.up.no},
  {x:27,y:1.7,s:8,c:"#6B5210",en:"CALLE DOS →",es:"CALLE DOS →"},
- {x:0.5,y:1.8,s:8,c:"#6B5210",dx:3,en:"🚋",es:"🚋"}
+ {x:0.5,y:1.8,s:8,c:"#6B5210",dx:3,en:"🚋",es:"🚋"},
+ /* ---- CALLE DOS, now that the plan draws it (TOWNPLAN above). A row carries `world` and the
+    engine offsets it; a row without one belongs to the first panel, as every row did before. ---- */
+ /* the street's own name goes ON the carriageway in the light ink, because the carriageway is
+    the dark shape — the first draft used the dark ink and it was unreadable on its own road */
+ {world:"ex",x:12,y:1.85,s:10,c:"#F2E8D8",en:"CALLE DOS",es:"CALLE DOS"},
+ {world:"ex",x:5.5,y:0.8,s:8,c:"#F2E8D8",en:"LA ESPIGA",es:"LA ESPIGA",when:f=>f.up&&f.up.pa},
+ {world:"ex",x:14,y:0.8,s:8,c:"#F2E8D8",en:"VELÁZQUEZ",es:"VELÁZQUEZ",when:f=>f.up&&f.up.li},
+ {world:"ex",x:11.5,y:6.4,s:9,c:"#6B5210",en:"THE CREW PEN",es:"EL PATIO"},
+ {world:"ex",x:2,y:1.85,s:8,c:"#F2E8D8",dx:-4,en:"🚋",es:"🚋"}
 ];
 /* "you are here" on the town plan, for worlds that are interiors of the street */
 /* Which kinds of "somebody is waiting" this plan carries, strongest first — the order is also
@@ -276,7 +285,19 @@ const TOWNLBL=[
    because those are the two that happen here; no neighbour in this city hands you a document, so
    "read" is not declared and a person who only had one would carry no mark at all. */
 const MAPMARK=["work","host"];
-const MAPDOT={ta:[23,13],pa:[29,1],li:[29,1],no:[25,0],hq:[14,0],f2:[14,0],lc:[6,5],lo:[21,5],ex:[29,1],me:[6,13]};
+/* THE PLAN DRAWS TWO STREETS (engine TOWNPLAN, 2026-09-16). The owner, from play: "im shown the
+   other street map on calle 2" — he was standing on Calle Dos and the plan drew Calle Principal
+   with a pin in the corner. Calle Principal is 30x16 and Calle Dos is 24x11, so Dos sits at oy 17
+   and the row of paper between them reads as the block between two streets. */
+const TOWNPLAN=[{world:"st",ox:0,oy:0},{world:"ex",ox:0,oy:17}];
+/* MAPDOT is where a world that the plan does NOT draw gets its mark, in PAPER coordinates.
+   Three names left this table when Calle Dos became a panel of its own:
+     · `ex` — it is drawn now, so a pin pointing at it from Calle Principal is a pin at itself.
+     · `pa` and `li` — La Espiga and Velázquez open off Calle Dos, and both were anchored at
+       [29,1], a doorway on Calle PRINCIPAL. Their marks are found from the doors that actually
+       lead to them (ESPIGA stamps `@` at ex 6,0 and VELAZQUEZ stamps `*` at ex 12,0), so the
+       offset is written down once, in TOWNPLAN, instead of twice here and kept in agreement. */
+const MAPDOT={ta:[23,13],no:[25,0],hq:[14,0],f2:[14,0],lc:[6,5],lo:[21,5],me:[6,13]};
 /* ---------- trolley fast travel: the streets never dead-end, they connect ---------- */
 /* Where the Trolley Pass can put you: STREET STOPS ONLY. A trolley does not stop on the
    second floor of a building — the office came off this list on 2026-09-03 ("i dont like that

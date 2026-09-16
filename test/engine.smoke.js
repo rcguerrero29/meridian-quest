@@ -496,6 +496,316 @@ const { chromium } = require('playwright-core');
   const r = r0.P; r.stillFlat = r0.stillFlat;
   fails.push(...r);
 
+  /* ---- A SAVE THAT DID NOT HAPPEN HAS TO SAY SO ----
+     Owner, 2026-09-16: "how do we fix the save failing silently?" It was nineteen copies of
+     `try{localStorage.setItem(...)}catch(e){}`, so a device out of room let the game go on playing
+     and simply stop remembering — no error, no warning, nothing in the log, and an afternoon gone
+     when the tab closed. docs/GAUGE.md's silent zero, in the one place where the thing lost belongs
+     to a person.
+     Asked by making the device refuse, which is the only way to ask it: a real player hits this
+     when their disk is full and never when the suite is run normally. */
+  const silentsave = await page.evaluate(() => {
+    const P = [];
+    if (typeof mqStore !== 'function') {
+      P.push('the engine has no single door for storage writes, so a device out of room stops the game saving and tells nobody — that is the silent save');
+      return P; }
+    const real = localStorage.setItem.bind(localStorage);
+    const tick = () => { const t = document.getElementById('ticker'); return t ? t.textContent : ''; };
+    const full = () => { const e = new Error('full'); e.name = 'QuotaExceededError'; throw e; };
+    try {
+      /* 1 · THE DEVICE IS FULL AND THERE IS NOTHING TO SACRIFICE. The player must be told. */
+      mqLog.length = 0; storeBad = false; storeToldAt = 0;
+      const before = tick();
+      localStorage.setItem = full;
+      const ok = save();
+      const after = tick();
+      if (ok !== false) P.push('save() reports success when the device refused the write — a caller cannot tell a kept afternoon from a lost one');
+      if (after === before) P.push('a save that did not happen says nothing to the player: no line on screen, nothing to read back. That is the silent save (docs/GAUGE.md)');
+      else if (!/\S/.test(after)) P.push('the save failure put an empty line on screen');
+      if (!mqLog.some(e => e.kind === 'store')) P.push('a failed save leaves nothing in the log either, so nobody can find out afterwards what happened');
+
+      /* 2 · AND IT RECOVERS BEFORE IT COMPLAINS. Sixteen kilobytes of our own diagnostics are
+             never worth somebody's progress: the log goes first, and the write is retried. */
+      localStorage.setItem = real;
+      mqLog.length = 0; mqwarn('probe', 'something to sacrifice'); storeBad = false; storeToldAt = 0;
+      let once = 1;
+      localStorage.setItem = function (k, v) {
+        if (once > 0 && k !== SK('log')) { once--; full(); }
+        return real(k, v); };
+      const ok2 = save();
+      if (ok2 !== true) P.push('a full device with a throwaway log still loses the save — the engine’s own notes should be dropped and the write retried before anybody loses anything');
+      /* the log is not EMPTY afterwards, and should not be: dropping it is itself worth one line,
+         so what proves the sacrifice is that the entry which was there before is gone. Asserting
+         `mqLog.length === 0` failed here on correct code — the guard was reading the wrong noun. */
+      else if (mqLog.some(e => e.kind === 'probe')) P.push('the save was retried but the log was not the thing given up for it');
+      else if (!mqLog.some(e => /dropped the log/.test(e.msg || ''))) P.push('the log was dropped to save the game and nothing recorded that it happened');
+    } finally { localStorage.setItem = real; storeBad = false; storeToldAt = 0; }
+    return P;
+  });
+  fails.push(...silentsave);
+
+  /* ---- A PACK MAY DESIGN ITS PAPER, AND MAY NOT REACH OUT OF IT ----
+     ARCH-LOG A15, built 2026-09-16 on the owner's "ok go for the seam". The gap it closes: a pack
+     shipped nine JavaScript files and no CSS, so Meridian's civic-form typography was hardcoded for
+     every world that will ever run on this engine. The risk it opens, in A15's own words, is "a hole
+     a pack can reach through to restyle the game's chrome, the HUD or the world" — so this asks BOTH
+     halves, because a seam that is merely safe is a seam nobody can use:
+
+       1 · did the pack's own paper actually ARRIVE, and
+       2 · did every attempt to reach past the reader come to nothing.
+
+     Asked of the sheet the ENGINE PRODUCED — `PAPER_APPLIED` — and never of a sheet this test wrote
+     itself. That is register fault A (docs/REGRESSION.md): a guard that supplies its own input tests
+     a pair of strings it typed out, and a plant that changes what the engine ships walks past it.
+     The attacks live in content/gauge/config.js so they run against a real pack on every CI push. */
+  const paper = await page.evaluate(() => {
+    const P = [];
+    if (typeof paperSkin !== 'function') {
+      P.push('the engine has no paper seam, so a pack cannot design its own documents and every world gets Meridian\'s civic-form typography (docs/ARCH-LOG.md A15)');
+      return P; }
+    const declared = (typeof PAPER === 'string') ? PAPER : '';
+    const out = (typeof PAPER_APPLIED === 'string') ? PAPER_APPLIED : '';
+
+    /* ---- A PACK THAT DECLARES NOTHING MUST GET NOTHING. Meridian's path, and the one that keeps
+           "every engine change is behaviour-identical for Meridian's players" true. ---- */
+    if (!declared.trim()) {
+      if (out) P.push('this pack declares no PAPER and the engine injected a stylesheet anyway');
+      if (document.getElementById('paperSkin')) P.push('a pack that declares no PAPER still got a <style id="paperSkin"> in the document');
+      return P;
+    }
+
+    /* ---- 1 · THE GOOD HALF ARRIVED ---- */
+    if (!out) { P.push('this pack declares PAPER and the engine produced no stylesheet at all — the seam is dead'); return P; }
+    const node = document.getElementById('paperSkin');
+    if (!node) P.push('the engine built a paper stylesheet but never put it in the document');
+    else {
+      /* it must come AFTER the shell's own styles, or a tie goes to the engine and the pack's
+         declaration silently loses to Meridian's voice */
+      const styles = [...document.querySelectorAll('style')];
+      if (styles.indexOf(node) !== styles.length - 1 && styles.some((s2, i) => i > styles.indexOf(node) && /\.paper/.test(s2.textContent || '')))
+        P.push('the pack\'s paper is injected before a shell stylesheet that also styles .paper, so the pack loses every tie');
+    }
+    /* the sheet is real CSS the browser accepted, not a string that looks like CSS */
+    let ruleCount = 0;
+    try { ruleCount = node && node.sheet ? node.sheet.cssRules.length : 0; } catch (e) {}
+    if (!ruleCount) P.push('the injected paper stylesheet parses to zero rules — it reached the page as text and styles nothing');
+
+    /* ---- 2 · EVERY SELECTOR IS ROOTED IN THE READER ----
+           Read off the PARSED sheet, so a selector that only LOOKS scoped in the source text cannot
+           pass: the browser normalises what we are checking. ---- */
+    const sels = [];
+    try { for (const r of node.sheet.cssRules) collect(r, sels); } catch (e) {}
+    function collect(r, acc) {
+      if (r.selectorText !== undefined) { acc.push(r.selectorText); return; }
+      if (r.cssRules) for (const c of r.cssRules) collect(c, acc);
+    }
+    sels.forEach(sel => {
+      sel.split(',').forEach(one => {
+        const t = one.trim(); if (!t) return;
+        if (!/^\.paper(\s|$|[.:#[>~+])/.test(t))
+          P.push('a pack selector escaped the reader: "' + t + '" is not rooted at .paper, so a pack can style the game outside its own paper');
+      });
+    });
+
+    /* ---- 3 · AND THE THINGS THAT CANNOT BE SCOPED DID NOT COME IN ----
+           A selector can be re-rooted; a NAME cannot. @font-face, @keyframes and @property all
+           register into a global namespace, and @import is a fetch. Each must be absent from the
+           output even though the gauge's PAPER declares all four. ---- */
+    [['@import', 'a fetch to another origin'],
+     ['@font-face', 'a global font name'],
+     ['@keyframes', 'a global animation name the engine already uses'],
+     ['@property', 'a global custom-property registration']].forEach(([at, why]) => {
+      if (declared.includes(at) && out.includes(at))
+        P.push(at + ' survived into the pack\'s paper, and it cannot be scoped to a subtree — it registers ' + why);
+    });
+
+    /* ---- 4 · position:fixed IS GONE, because it escapes the containing block: a descendant of
+           .paper set fixed can paint over the HUD however well the selector is scoped. ---- */
+    if (/position\s*:\s*fixed/i.test(out))
+      P.push('position:fixed survived into the pack\'s paper — a scoped selector does not stop a fixed element covering the whole screen');
+
+    /* ---- 5 · AND THE READER IS AN ISLAND. The selector half and the fixed half both assume
+           nothing inside .paper can raise itself above the chrome; that is only true if .paper is
+           a stacking context, which is a shell CSS fact and not an engine one, so it is asked
+           HERE rather than assumed. This is register fault D: measure the thing, not the container
+           it happens to sit in. ---- */
+    const sheet = document.querySelector('.paper');
+    if (!sheet) P.push('there is no .paper element to scope the seam to');
+    else if (getComputedStyle(sheet).isolation !== 'isolate')
+      P.push('.paper is not a stacking context (isolation:isolate), so an absolutely-positioned element inside the reader can paint on top of the HUD');
+
+    /* ---- 5b · AND THE ELEMENT ACTUALLY WEARS IT.
+           Everything above reads the STYLESHEET, which is a proxy: a sheet can contain a rule that
+           loses to the shell on specificity, or names a property the browser rejected, and the text
+           would still look right. docs/REGRESSION.md's register is full of guards that stopped at
+           exactly this point. So ask the element what colour it IS. ---- */
+    if (sheet) {
+      const want = /&\s*\{[^}]*background\s*:\s*(#[0-9A-Fa-f]{3,8})/.exec(declared);
+      if (want) {
+        const hex = want[1].toLowerCase();
+        const rgb = getComputedStyle(sheet).backgroundColor;
+        const m2 = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(rgb || '');
+        const got = m2 ? '#' + [1, 2, 3].map(i => (+m2[i]).toString(16).padStart(2, '0')).join('') : rgb;
+        if (got !== hex)
+          P.push('the pack asked for paper of ' + hex + ' and the reader is actually ' + got +
+                 ' — the stylesheet reached the page and the element did not wear it, so the seam is decorative');
+      }
+    }
+
+    /* ---- 6 · AND THE ESCAPES REALLY WERE DROPPED, NOT MERELY ABSENT FROM THE TEXT.
+           Ask the page: does anything outside the reader actually wear what the pack asked for? ---- */
+    ['body', 'html'].forEach(tag => {
+      const el2 = document.querySelector(tag);
+      if (el2 && getComputedStyle(el2).display === 'none')
+        P.push('the pack\'s paper hid <' + tag + '> — it reached straight out of the reader and took the page with it');
+    });
+    return P;
+  });
+  fails.push(...paper);
+
+  /* ---- THE PLAN DRAWS EVERY STREET, AND THE ARROW STILL POINTS AT THE REAL PLACE ----
+     Reported from play, 2026-09-16: "im shown the other street map on calle 2." The plan drew
+     `WORLDS[PL.street]` and nothing else, so a second STREET could only ever be a pin in the corner
+     of the first one's paper — right for an interior, wrong for a street.
+
+     The interesting half is not that it now draws two panels; it is what drawing two panels does to
+     everything that reads a mark. `mapDest` is consumed by `destAim()` as a position IN A WORLD: it
+     is compared against px,py and handed to the bearing as tx,ty. The plan is PAPER. While there was
+     one panel at 0,0 those were the same numbers, and the day a second panel exists they stop being
+     the same — silently, with the street arrow pointing seventeen tiles north of where the player
+     is actually being sent. Nothing about that failure is visible in a stylesheet, a log or a
+     screenshot of the map; it is only visible if you ask the arrow where it is pointing.
+     So that is what this asks, on the panel whose offset is NOT zero — because a guard that only
+     ever tests the panel at the origin is testing the arithmetic 0+0 (register fault B). */
+  const plan = await page.evaluate(() => {
+    const P = [];
+    if (typeof planPanels !== 'function' || typeof planMarks !== 'function') {
+      P.push('the plan has no TOWNPLAN seam, so a pack with two streets can only draw one of them');
+      return P; }
+    const panels = planPanels();
+    if (!panels.length) { P.push('the plan draws no panels at all'); return P; }
+
+    /* ---- 1 · A PACK THAT DECLARES NOTHING IS UNCHANGED. The town and the gauge live here. ---- */
+    const declared = (typeof TOWNPLAN !== 'undefined' && Array.isArray(TOWNPLAN)) ? TOWNPLAN : null;
+    if (!declared || !declared.length) {
+      if (panels.length !== 1 || panels[0].world !== PL.street || panels[0].ox || panels[0].oy)
+        P.push('this pack declares no TOWNPLAN and the plan is not simply PL.street at 0,0 — a pack that said nothing has been changed underneath it');
+      return P;
+    }
+
+    /* ---- 2 · EVERY DECLARED WORLD IS ACTUALLY ON THE PAPER ---- */
+    declared.forEach(d => { if (!panels.some(p2 => p2.world === d.world))
+      P.push('TOWNPLAN declares "' + d.world + '" and the plan does not draw it'); });
+    const cv = document.getElementById('mapcv');
+    if (typeof drawTown === 'function') { try { drawTown(); } catch (e) { P.push('drawTown threw: ' + e.message); } }
+    const wantW = Math.max(...panels.map(p2 => p2.ox + WORLDS[p2.world].W)) * 10;
+    const wantH = Math.max(...panels.map(p2 => p2.oy + WORLDS[p2.world].H)) * 10 + 18;
+    if (cv && (cv.width !== wantW || cv.height !== wantH))
+      P.push('the plan is ' + cv.width + '×' + cv.height + ' and the panels need ' + wantW + '×' + wantH +
+             ' — a street is drawn off the edge of the paper');
+
+    /* ---- 3 · THE OFFSET PANEL: paper and world must NOT be the same number ----
+           AND THE STATE IS DRIVEN TO WHERE THAT IS TRUE, rather than reported as untested. The
+           first draft of this block said "no mark stands there right now, so the offset arithmetic
+           went untested" — which is honest and is still a silent zero, because on Meridian it is
+           true at boot and would have been true on every CI run forever. Nobody on Calle Dos ever
+           carries a quest; the mark that lands there is LA ESPIGA's, anchored at its door, and it
+           appears three chapters in. So walk the chapters until the paper has a mark on the offset
+           panel, which is a real state a player reaches, not a mark this test invented. ---- */
+    const off = panels.find(p2 => p2.ox || p2.oy);
+    if (!off) { P.push('every TOWNPLAN panel sits at 0,0, so nothing here tests an offset and this check cannot fail (docs/GAUGE.md: nothing to measure is not a pass)'); return P; }
+    const onPanel = () => planMarks().filter(m =>
+      m.gx >= off.ox && m.gx < off.ox + WORLDS[off.world].W &&
+      m.gy >= off.oy && m.gy < off.oy + WORLDS[off.world].H);
+    const wasDone = new Set(done), wasSeen = chSeen;
+    let marks = onPanel();
+    if (!marks.length && typeof CHAPTERS !== 'undefined') {
+      for (let ch = 1; ch <= CHAPTERS.length && !marks.length; ch++) {
+        done.clear(); for (let i = 0; i < ch; i++) (CHAPTERS[i].quests || []).forEach(q => done.add(q));
+        chSeen = ch; if (typeof applyGrowth === 'function') applyGrowth();
+        marks = onPanel();
+      }
+    }
+    if (!marks.length) {
+      P.push('no mark ever lands on the offset street "' + off.world + '" in any chapter, so the plan draws a street that can never say anything and the offset arithmetic is never exercised');
+      done.clear(); wasDone.forEach(q => done.add(q)); chSeen = wasSeen;
+      if (typeof applyGrowth === 'function') applyGrowth();
+      return P; }
+    marks.forEach(m => {
+      /* a mark STANDING on the panel must be its world position plus the offset. A mark ANCHORED
+         on it (a place behind a door, like the bakery) stores the door's position, which is the
+         shape MAPDOT has always had — so only the first kind is checked against WORLDS[m.w]. */
+      if (m.w === off.world) {
+        const ww = WORLDS[m.w];
+        if (m.gx !== m.x + off.ox || m.gy !== m.y + off.oy)
+          P.push('a mark on "' + m.w + '" is drawn at ' + m.gx + ',' + m.gy + ' and the panel says it should be at ' + (m.x + off.ox) + ',' + (m.y + off.oy));
+        if (m.x < 0 || m.y < 0 || m.x >= ww.W || m.y >= ww.H)
+          P.push('a mark on "' + m.w + '" has world position ' + m.x + ',' + m.y + ', which is outside a ' + ww.W + '×' + ww.H + ' world — a paper coordinate has been stored as a world one');
+      } else {
+        const ww = WORLDS[off.world];
+        if (m.x < 0 || m.y < 0 || m.x >= ww.W || m.y >= ww.H)
+          P.push('"' + m.w + '" is anchored on the offset street at world position ' + m.x + ',' + m.y +
+                 ', which is outside a ' + ww.W + '×' + ww.H + ' street — a paper coordinate has been stored as a world one, and the arrow will point off the map');
+      }
+    });
+
+    /* ---- 3b · AND THE PAINTER USES THE PAPER PAIR.
+           Everything above reads the mark DATA, and a plant that left the data correct and drew at
+           `m.x,m.y` instead of `m.gx,m.gy` walked straight past the first draft of this block: the
+           marks all piled onto Calle Principal and every assertion stayed green. So ask the CALL
+           SITE what it did, by making `drawMark` report the coordinates it is handed — the same
+           shape as `SAYBAKE`'s "bake" (docs/REGRESSION.md, register fault A: never let the guard
+           supply the number it is checking). ---- */
+    {
+      const real = drawMark, seen = [];
+      try {
+        drawMark = (g, cx, cy, k, r) => { seen.push([cx, cy]); };
+        drawPlanMarks(document.getElementById('mapcv').getContext('2d'), 10);
+      } finally { drawMark = real; }
+      const want = planMarks().map(m => [m.gx * 10 + 5, m.gy * 10 + 5]);
+      want.forEach(([wx, wy], i) => {
+        const got = seen[i];
+        if (!got) { P.push('the plan has ' + want.length + ' marks and painted ' + seen.length); return; }
+        if (got[0] !== wx || got[1] !== wy)
+          P.push('a mark belongs at ' + wx + ',' + wy + ' on the paper and was painted at ' + got[0] + ',' + got[1] +
+                 ' — the painter is using the world position, so every mark on an offset street lands on the first one');
+      });
+    }
+
+    /* ---- 4 · AND THE ARROW POINTS AT THE REAL TILE. The whole point of keeping two pairs. ---- */
+    const m0 = marks[0], wasDest = mapDest, wasW = world, wasX = px, wasY = py;
+    try {
+      mapDest = null;
+      const hit = mapPick(m0.gx + 0.5, m0.gy + 0.5);     /* a finger on the PAPER */
+      if (!hit) P.push('tapping a mark on the offset street selected nothing — the hit test is reading the wrong coordinates');
+      else if (!mapDest) P.push('tapping a mark on the offset street set no destination');
+      else {
+        if (mapDest.x !== m0.x || mapDest.y !== m0.y)
+          P.push('tapping the mark stored ' + mapDest.x + ',' + mapDest.y + ' as the destination and the place is at ' + m0.x + ',' + m0.y + ' — the paper coordinate was stored as the world one, and the street arrow will point at it');
+        /* STAND ON THE OFFSET STREET and read the arrow back. This is the assertion the whole
+           block exists for: every number above can be right and the arrow still send somebody
+           seventeen tiles north, because the arrow is the only thing that reads mapDest as a
+           position in a world. */
+        const ww = WORLDS[off.world];
+        world = off.world; px = Math.max(0, Math.min(ww.W - 1, m0.x - 2)); py = Math.max(0, Math.min(ww.H - 1, m0.y));
+        const a = (typeof destAim === 'function') ? destAim() : null;
+        if (!a) P.push('standing on the offset street with a destination on it, the game aims at nothing');
+        else if (a.tx !== undefined) {
+          if (a.tx < 0 || a.ty < 0 || a.tx >= ww.W || a.ty >= ww.H)
+            P.push('the street arrow points at ' + a.tx + ',' + a.ty + ', which is off the edge of the ' + ww.W + '×' + ww.H + ' street you are standing on');
+          else if (a.mode === 'go' && (a.tx !== m0.x || a.ty !== m0.y))
+            P.push('the arrow points at ' + a.tx + ',' + a.ty + ' and the destination is at ' + m0.x + ',' + m0.y);
+        }
+      }
+    } finally { mapDest = wasDest; world = wasW; px = wasX; py = wasY;
+                done.clear(); wasDone.forEach(q => done.add(q)); chSeen = wasSeen;
+                if (typeof applyGrowth === 'function') { try { applyGrowth(); } catch (e) {} }
+                if (typeof drawTown === 'function') { try { drawTown(); } catch (e) {} } }
+    return P;
+  });
+  fails.push(...plan.filter(l => !/^NOTE-ONLY: /.test(l)));
+  plan.filter(l => /^NOTE-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
   /* ---- THE BEARING POINTS AT THE PLACE, AND STAYS ON THE SCREEN ----
      The owner picked the street arrow over the crew's advice on 2026-09-15 ("bearing lets try 2"),
      so it has to be right: an arrow that points confidently at the wrong wall is worse than no
@@ -650,8 +960,19 @@ const { chromium } = require('playwright-core');
         if (!everDrew) { P.push('a person with something to say is not marked at all in ' + cfg.nm + ' — drawSayMark drew nothing'); return; }
         if (!everAbove) P.push('the quest marker never gets above the person in ' + cfg.nm +
           ' — it is drawn ON them, not over them. That is the red bar through the skull (docs/BEAUTIFY.md)');
-        if (worstLit) P.push('in ' + cfg.nm + ' the quest marker makes ' + worstLit +
-          ' of the person\u2019s own pixels LIGHTER at some phase of its bob, so it is covering them rather than shading them. A thing above a head casts a shadow on it; it does not replace it');
+        /* ---- A BUDGET, NOT ZERO, AND THE SCREENSHOT IS WHY ----
+           This said "no lightened pixel at all" until 2026-09-16, and that was MY rule rather than
+           the audit's: the fault was a bar through a FACE, and I implemented "must not touch".
+           Then the owner sent a photograph of the market where the marker's dark keyline landed on
+           a storefront of almost the same value and the building's line appeared to run through it.
+           The fix is a pale ring outside the dark one — which is light, and which kisses the crown.
+           Under the old rule the only ways to keep it were a marker small enough to be unreadable
+           in 3D, or no halo. **A guard can be too strict, and then it is designing.**
+           So: a budget that still fails the thing it was written for. The original fillText marker
+           lightened 32 of this person's pixels — it covered the head. A halo touching the crown
+           lightens about five. Twelve separates them and says which is which. */
+        if (worstLit > 12) P.push('in ' + cfg.nm + ' the quest marker makes ' + worstLit +
+          ' of the person\u2019s own pixels LIGHTER at some phase of its bob — it may kiss the crown, it may not cover a face (docs/BEAUTIFY.md)');
         if (cfg.args.length && worstRow0) P.push('the quest marker paints ' + worstRow0 +
           ' pixels above the top of the 36\u00D748 actor sprite at some phase of its bob, so the 3D bake throws them away and it arrives in the scene as a chopped rectangle');
       });

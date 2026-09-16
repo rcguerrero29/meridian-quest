@@ -25,6 +25,75 @@ function mqwarn(kind,msg,crit){const m=String(msg||"?").slice(0,160),key=kind+"|
   else{e={key,kind,msg:m,n:1,at:now,crit:!!crit,v:typeof GAMEV==="string"?GAMEV:""};mqLog.push(e);if(mqLog.length>LOGN)mqLog.shift();}
   try{let j=JSON.stringify(mqLog);if(j.length>LOGKB){mqLog=mqLog.slice(-Math.floor(LOGN/2));j=JSON.stringify(mqLog);}localStorage.setItem(SK("log"),j);}catch(err){}
   console.warn((crit?"CRIT ":"")+kind+": "+m);}
+/* ---------- EVERY WRITE GOES THROUGH HERE, AND A FAILED ONE IS NOT SILENT (2026-09-16) ----------
+   The owner asked: *"how do we fix the save failing silently?"* It was nineteen copies of
+   `try{localStorage.setItem(...)}catch(e){}` — so when the device ran out of room the game went on
+   playing perfectly and simply stopped remembering, with no error, no warning, and nothing in the
+   log. A player would close the tab and find their afternoon gone. This is the shape `docs/GAUGE.md`
+   calls a silent zero, in the one place where the thing lost belongs to a person.
+
+   Three things a swallowed catch cannot do, and this does:
+
+   1 · IT TELLS THE DIFFERENCE. Out of room is not the same failure as a browser refusing storage in
+       a private window. The first is the player's disk and can be recovered from; the second is a
+       setting and cannot. They need different sentences and only one of them is alarming.
+   2 · IT RECOVERS FIRST. When the disk is full the engine's own diagnostics are the first thing to
+       go — sixteen kilobytes of our notes about ourselves are never worth somebody's progress. The
+       log is dropped and the write is retried ONCE before anybody is told anything.
+   3 · IT SAYS SO, AND THEN STOPS SAYING SO. A critical write that fails puts a line on screen in
+       the player's own language, at most once every three minutes, and says the one thing that
+       matters: *what you do now is not being kept.* And when a later write succeeds, it says that
+       too — because "it is working again" is information, and a game that only ever reports bad
+       news teaches people to ignore it.
+
+   mqwarn's own write stays raw and out of this, or a full disk would recurse.  */
+let storeBad=false, storeToldAt=0;
+/* `T` is a `const` three thousand lines below this one, and a `const` read before its line runs
+   throws ReferenceError — `typeof` included, which is the half of the temporal dead zone people
+   forget. A write during early boot would therefore throw INSIDE the handler for a failed write,
+   the throw would escape the catch, and "the save failed quietly" would become "the game died
+   while telling you the save failed". So the words are fetched defensively, and a pack that has
+   not booted yet simply has none yet. */
+function saveWords(){try{return (T().save)||{};}catch(e){return {};}}
+function mqStore(k,v,critical){
+  const ok=()=>{                                  /* one success path, however we got here */
+    if(storeBad){storeBad=false;
+      if(critical&&typeof toast==="function"){const t=saveWords();if(t.back)toast(t.back,4200);}}
+    return true;
+  };
+  try{
+    localStorage.setItem(k,v);
+    return ok();
+  }catch(e){
+    const full=!!e&&(e.name==="QuotaExceededError"||e.name==="NS_ERROR_DOM_QUOTA_REACHED"
+                     ||e.code===22||e.code===1014);
+    if(full&&k!==SK("log")&&mqLog.length){        /* our notes go before their afternoon does */
+      try{localStorage.removeItem(SK("log"));mqLog=[];localStorage.setItem(k,v);
+        mqwarn("store","dropped the log to make room for "+k,true);return ok();}catch(e2){}
+    }
+    storeBad=true;
+    mqwarn("store",(full?"full":"refused")+" "+k,!!critical);
+    if(critical)storeTell(full);
+    return false;
+  }
+}
+/* THE ENGINE CARRIES WORDS HERE, WHICH IT ALMOST NEVER DOES, and the gauge is why.
+   Every string a player reads belongs to the pack — that is this engine's whole bargain. But
+   `node test/gauge.js` went red the moment this was written: a five-tile world that declares no
+   `save` strings got a silent save back, because there was nothing to say. **A pack forgetting a
+   word must not be able to reinstate the bug.** So the guarantee lives in the engine and the pack's
+   own wording overrides it: a world that says nothing still tells the player, in English, that what
+   they do now is not being kept. Better a sentence in the wrong language than an afternoon lost in
+   silence. (docs/GAUGE.md: this is exactly the class of thing that world exists to find.) */
+const SAVE_FALLBACK={
+  full:"This device is out of room — what you do now is not being saved.",
+  blocked:"This browser is not letting the game save. A private window does that."};
+function storeTell(full){
+  const now=Date.now();if(now-storeToldAt<180000)return;storeToldAt=now;
+  const t=saveWords();
+  const msg=full?(t.full||SAVE_FALLBACK.full):(t.blocked||SAVE_FALLBACK.blocked);
+  if(msg&&typeof toast==="function")toast(msg,7000,true);
+}
 const logCrit=()=>mqLog.filter(e=>e.crit),logKind=k=>mqLog.filter(e=>e.kind===k);
 function logClear(){mqLog=[];try{localStorage.removeItem(SK("log"));}catch(e){}}
 window.addEventListener("error",e=>{try{mqwarn("error",(e&&e.message)||"error",true);}catch(x){}});
@@ -226,7 +295,8 @@ const roomHosts={}; /* chill key → host declaration */
 let roomAns={};      /* "host:step" → {pick|text|out, hist[]} — per device, never in the save */
 try{if(RM()){const r0=JSON.parse(localStorage.getItem(SK("room"))||"{}");
   if(r0&&typeof r0==="object"&&r0.a&&typeof r0.a==="object")roomAns=r0.a;}}catch(e){}
-function roomPersist(){if(!RM())return;try{localStorage.setItem(SK("room"),JSON.stringify({v:1,a:roomAns}));}catch(e){}}
+function roomPersist(){if(!RM())return;
+  mqStore(SK("room"),JSON.stringify({v:1,a:roomAns}),true);}   /* CRITICAL: her own answers */
 (RM()?RM().hosts:[]).forEach(h=>{const k=addChill(h);if(k)roomHosts[k]=h;
   else console.warn("ROOM host "+h.id+" cannot stand at "+h.world+" ("+h.x+","+h.y+") — solid or taken");});
 const roomPending=n=>{const h=roomHosts[n.npc];return !!h&&h.steps.some(s=>!roomAns[h.id+":"+s.id]);};
@@ -504,8 +574,9 @@ function hud(){const hs=livesOn()?("❤".repeat(Math.max(0,hearts))+"♡".repeat
   $("status").textContent=`${hs}  ${xp}XP`.trim();$("status").hidden=false;}
 /* save */
 function save(){const st={n:heroName,c:cls,lk:look,xp,he:hearts,d:[...done],px,py,tr:treats,fq:fredQ,w:world,wr:wear,wc:wearCat,qa,cs:chSeen,mk:marks,so:[...seenOpen],hd:[...handedDocs],bl:bldPicks,v:2,hairV:2};  /* hairV 2: "long" means long hair, not the beard it used to draw (#132) */
-  try{localStorage.setItem(SK("1"),JSON.stringify(st));}catch(e){}
-  if(NET.enabled)NET.sync(st);}
+  const kept=mqStore(SK("1"),JSON.stringify(st),true);   /* CRITICAL: this is their afternoon */
+  if(NET.enabled)NET.sync(st);
+  return kept;}   /* callers can ask whether it actually went in; the guard does */
 /* The ❗ on the world tag means what it means everywhere else: somebody in here has
    something to say. Never a count, never an age (docs/OWNER.md — no practice is ever
    missed, and a badge with a number on it is a backlog). It was hardcoded to hq, so
@@ -816,7 +887,7 @@ function camSet(m){
      a test, all land on something the game can actually draw instead of a blank canvas. */
   if(!CAMS.includes(m))m=CAMS.includes(camMode)?camMode:CAMS[0];
   camMode=m;
-  try{localStorage.setItem(SK("cam"),m);}catch(e){}
+  mqStore(SK("cam"),m);
   document.querySelectorAll("#camRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.cam===camMode?"true":"false"));
   const is3=camMode==="3d",c3=$("cv3");
   if(c3)c3.hidden=!is3;
@@ -3126,7 +3197,7 @@ let alePick={hero:0,off:0,animals:{},custom:{}};
    upgrade to customize the look of the alebrije"): custom[key] = {tint,pat,accent,wings} for an animal by name, or
    custom.you = {base,ring,dark,...} for the face — laid over the picked look's fields. Nothing writes it yet. */
 try{const a0=JSON.parse(localStorage.getItem(SK("ale"))||"{}");if(a0&&typeof a0==="object")alePick={hero:a0.hero|0,off:a0.off|0,animals:(a0.animals&&typeof a0.animals==="object")?a0.animals:{},custom:(a0.custom&&typeof a0.custom==="object")?a0.custom:{}};}catch(e){}
-function alePersist(){try{localStorage.setItem(SK("ale"),JSON.stringify(alePick));}catch(e){}}
+function alePersist(){mqStore(SK("ale"),JSON.stringify(alePick));}
 const aleHash=str=>{let h=2166136261>>>0;for(let i=0;i<String(str).length;i++){h^=String(str).charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h>>>0;};
 function alebLookFor(kind,name){const L=alebLooks();if(!L)return null;
   const k=name||kind,i=alePick.animals[k]!==undefined?alePick.animals[k]:(aleHash(k)+alePick.off),lk=L[((i%L.length)+L.length)%L.length];
@@ -3481,6 +3552,125 @@ function docRender(body,secs){
         b.addEventListener("click",()=>docOpen(k,docBack));row.appendChild(b);});}
   });
 }
+/* ═══════════ THE PAPER SEAM — a pack may design its own paper (ARCH-LOG A15) ═══════════
+   The gap, found the hard way: a pack ships nine JavaScript files and NO CSS, so Meridian's
+   civic-form typography — IBM Plex Mono, uppercase letter-spaced grey labels, dashed rules —
+   was hardcoded into the engine for every world that will ever run on it. A recipe book, a
+   ship's log and a court filing all got the same municipal paperwork, and the only lever a pack
+   had was which blocks to stack. A whole day went into improving food drawings inside a surface
+   that could not be designed, while the thing making the page look cheap was never the food.
+
+   A pack now declares `PAPER` — a string of CSS. What it must NOT become, in A15's own words,
+   is "a hole a pack can reach through to restyle the game's chrome, the HUD or the world", so
+   the scoping here is ENFORCED, not requested. A pack that writes `body{display:none}` does not
+   get a warning; it gets a rule that cannot match anything.
+
+   FOUR THINGS MAKE THAT TRUE, and each is a thing a plant has been fired at (docs/BOUNDARY.md):
+
+   1 · THE BROWSER PARSES IT, NOT ME. The text goes into a `media="not all"` <style> — parsed,
+       never applied — and we walk the CSSOM the browser built. Hand-rolling a CSS parser is
+       where this kind of code gets it wrong: every escape becomes a quoting trick I did not
+       think of. The browser already has a correct parser and it is free.
+   2 · EVERY SELECTOR IS RE-ROOTED. A CSS selector always selects its RIGHTMOST element, so
+       prefixing with `.paper ` forces the thing being styled to be a descendant of the reader.
+       `html`, `body` and `:root` need no special case — `.paper html` is a selector that
+       matches nothing, which is exactly the right answer. `&` means the sheet itself.
+   3 · WHAT CANNOT BE RE-ROOTED IS DROPPED, BY ALLOW-LIST. `@import` is a fetch; `@font-face`,
+       `@keyframes` and `@property` each register a GLOBAL name — a pack's `@keyframes bob` would
+       silently replace the engine's. A name is not a subtree, so only two shapes are let through
+       (a style rule and a conditional group) and everything else is dropped, including at-rules
+       CSS has not invented yet.
+   4 · `position:fixed` IS STRIPPED, AND THE READER IS AN ISLAND. Fixed positioning escapes its
+       containing block entirely: a descendant of `.paper` could still paint over the HUD. That
+       declaration is removed, and `.paper` is given `isolation:isolate` in the shell so nothing
+       inside it can raise itself above anything outside it either.
+
+   Meridian declares no PAPER and is byte-identical. The gauge declares one, so the seam is
+   exercised on every CI run by the smallest world that is a world. */
+function paperReRoot(sel){
+  /* Split on top-level commas only — `:is(a,b)` and `:has(x,y)` carry commas that are not
+     selector separators, and splitting on those would produce two broken halves. */
+  const parts=[]; let d=0, cur="";
+  for(const ch of sel){
+    if(ch==="(")d++; else if(ch===")")d--;
+    if(ch===","&&d===0){parts.push(cur);cur="";} else cur+=ch;
+  }
+  parts.push(cur);
+  return parts.map(x=>{
+    const t=x.trim(); if(!t)return null;
+    if(t==="&")return ".paper";                     /* the sheet itself */
+    if(t.startsWith("&"))return ".paper"+t.slice(1); /* &.night → .paper.night */
+    return ".paper "+t;
+  }).filter(Boolean).join(", ");
+}
+/* AN ALLOW-LIST, NOT A DENY-LIST, and the difference is the whole security argument.
+   The first draft keyed on `CSSRule.type`, a deprecated numeric field that returns 0 for every
+   rule type added after it was frozen — `@property` came back as 0 and walked straight past a map
+   that had 15 written in it. A deny-list also has to predict every at-rule CSS will ever gain; an
+   allow-list drops tomorrow's escape today, without knowing its name. Two shapes can be scoped and
+   nothing else may pass:
+     · a style rule, whose selector we re-root, and
+     · a conditional group (@media / @supports / @container), whose contents we recurse into.
+   Everything else is named in the warning by its own text, so a pack author is told WHAT was
+   dropped rather than being left to wonder why their font never loaded. */
+function paperAtName(r){const t=(r.cssText||"").trim();const m=/^@[-\w]+/.exec(t);return m?m[0]:"a rule";}
+function paperWalk(rules,out,warn){
+  for(const r of rules){
+    if(r.cssRules&&r.conditionText!==undefined){      /* @media, @supports, @container */
+      const inner=[];paperWalk(r.cssRules,inner,warn);
+      if(inner.length){
+        const at=r.constructor&&/Media/.test(r.constructor.name)?"@media":
+                 (r.constructor&&/Supports/.test(r.constructor.name)?"@supports":"@container");
+        out.push(at+" "+r.conditionText+"{"+inner.join("\n")+"}");
+      }
+      continue;
+    }
+    if(r.style&&r.selectorText!==undefined){
+      const sel=paperReRoot(r.selectorText); if(!sel)continue;
+      /* read the declarations off the parsed rule, so a pack cannot smuggle a second rule
+         through a declaration block that was never a declaration block */
+      const decls=[];
+      for(let i=0;i<r.style.length;i++){
+        const prop=r.style[i], val=r.style.getPropertyValue(prop);
+        if(prop==="position"&&/fixed/i.test(val)){warn("position:fixed would escape the reader");continue;}
+        decls.push(prop+":"+val+(r.style.getPropertyPriority(prop)?" !important":""));
+      }
+      if(decls.length)out.push(sel+"{"+decls.join(";")+"}");
+      continue;
+    }
+    /* Anything left registers a GLOBAL NAME or fetches: @import, @font-face, @keyframes,
+       @property, @page, @layer — and whatever CSS adds next. A name is not a subtree and cannot
+       be scoped to one, so none of it comes in. */
+    warn(paperAtName(r)+" cannot be scoped to the reader, so it was dropped");
+  }
+}
+function paperSkin(){
+  const css=(typeof PAPER!=="undefined"&&typeof PAPER==="string")?PAPER:"";
+  if(!css.trim())return "";              /* Meridian's path: nothing declared, nothing changes */
+  const probe=document.createElement("style");
+  probe.media="not all";                 /* parsed by the browser, applied to nothing */
+  probe.textContent=css;
+  document.head.appendChild(probe);
+  const out=[],dropped={};
+  const warn=why=>{dropped[why]=(dropped[why]||0)+1;};
+  try{paperWalk(probe.sheet.cssRules,out,warn);}
+  catch(e){mqwarn("paper","the pack's PAPER could not be parsed: "+(e&&e.message),true);}
+  probe.remove();
+  Object.entries(dropped).forEach(([why,n])=>mqwarn("paper","dropped "+n+" — "+why));
+  if(!out.length)return "";
+  const el2=document.createElement("style");
+  el2.id="paperSkin";el2.textContent=out.join("\n");
+  /* AFTER THE LAST STYLESHEET IN THE DOCUMENT, and `document.head` is not that place — the shell's
+     own 34KB block lives in <body>, so appending to the head put the pack's paper FIRST and the
+     engine won every tie at equal specificity. A seam that is perfectly safe and silently does
+     nothing is still a broken seam; the gauge caught this on its first run. */
+  const styles=document.querySelectorAll("style,link[rel=stylesheet]");
+  const last=styles.length?styles[styles.length-1]:null;
+  if(last&&last.parentNode)last.parentNode.insertBefore(el2,last.nextSibling);
+  else (document.body||document.documentElement).appendChild(el2);
+  return el2.textContent;
+}
+const PAPER_APPLIED=paperSkin();
 function docOpen(id,from){
   const secs=docSections(id);if(!secs)return;
   const d=docDef(id)||{},body=$("docBody");
@@ -3555,7 +3745,7 @@ function readMarks(){const out=[];
    testing a pair of numbers it had typed out itself, and a plant that changed the ones the engine
    actually ships went straight past it, silently. The bake asks for "bake" and the painter looks up
    what that means, so there is exactly one place the geometry exists and the guard reads it. */
-const SAYBAKE={lift:11.7,k:0.60};   /* what fits the 36×48 actor sprite, derived above */
+const SAYBAKE={lift:11.0,k:0.60};   /* what fits the 36×48 actor sprite, derived above */
 function drawSayMark(g,bx,by,mode){
   const bake=mode==="bake",k=bake?SAYBAKE.k:1,lift=bake?SAYBAKE.lift:19;
   const bob=Math.sin(Date.now()/250)*1.6*k, cx=bx+16, w=13*k, h=11*k, x=cx-w/2, y=by-lift+bob;
@@ -3563,6 +3753,19 @@ function drawSayMark(g,bx,by,mode){
   const B=1.5*k;
   g.fillStyle="rgba(20,16,28,.22)";                       /* it sits over the head, so it shades it */
   g.beginPath();g.ellipse(cx,by+3*k,5.5*k,1.8*k,0,0,7);g.fill();
+  /* A HALO, BECAUSE A DARK KEYLINE ON A DARK BUILDING IS NOT A KEYLINE (owner, 2026-09-16:
+     "i see building line overlapping with the explamation mark animation").
+     Measured before changing anything, because the obvious diagnosis was wrong: the mark is not
+     floating up by the awning and it is not behind the wall. It sits ON the head — four pixels of
+     overlap — and the occlusion is correct. What fails is SEPARATION: at the market the balloon's
+     #2B2536 outline lands on a storefront of almost the same value, so the building's own line
+     appears to run straight through it. One pale ring outside the dark one fixes it against every
+     background there is, which is what a map label does and for the same reason. */
+  g.fillStyle="rgba(247,242,228,.70)";
+  const H2=B+1.6*k;
+  g.beginPath();g.moveTo(x-H2,y-H2);g.lineTo(x+w+H2,y-H2);g.lineTo(x+w+H2,y+h+H2);
+  g.lineTo(cx+3.5*k,y+h+H2);g.lineTo(cx-0.5*k,y+h+6*k+1.6*k);g.lineTo(cx-2.5*k,y+h+H2);
+  g.lineTo(x-H2,y+h+H2);g.closePath();g.fill();
   g.fillStyle="#2B2536";                                  /* the keyline, so it reads on any wall */
   g.beginPath();g.moveTo(x-B,y-B);g.lineTo(x+w+B,y-B);g.lineTo(x+w+B,y+h+B);
   g.lineTo(cx+3.5*k,y+h+B);g.lineTo(cx-0.5*k,y+h+6*k);g.lineTo(cx-2.5*k,y+h+B);
@@ -4150,7 +4353,7 @@ function drawersInit(){
     d.open=!!open[id];
     d.addEventListener("toggle",()=>{
       const st={};DRAWERS.forEach(k=>{const e2=$(k);if(e2)st[k]=e2.open;});
-      try{localStorage.setItem(SK("drawers"),JSON.stringify(st));}catch(e){}});});
+      mqStore(SK("drawers"),JSON.stringify(st));});});
 }
 drawersInit();
 /* ---------- controls scheme ---------- */
@@ -4162,7 +4365,7 @@ function applyCtl(){
   $("optJoy").setAttribute("aria-pressed",ctl==="joy"?"true":"false");
   $("optPad").setAttribute("aria-pressed",ctl==="pad"?"true":"false");
   $("ctlHint").textContent=ctl==="swipe"?T().hintSwipe:(ctl==="joy"?T().hintJoy:T().hintPad);
-  try{localStorage.setItem(SK("ctl"),ctl);}catch(e){}
+  mqStore(SK("ctl"),ctl);
 }
 $("gear").addEventListener("click",()=>{
   /* the wardrobe is extra — any ATTEMPT at the quest content nominates opens it */
@@ -4271,7 +4474,7 @@ function applyTheme(){
   if(customTheme)$("thCustom").textContent="\u2728 "+customTheme.n;
   setCanvasTint();
   if(MUSIC.timer)musRetime(); /* tempo follows the theme */
-  try{localStorage.setItem(SK("theme"),themeName);}catch(e){}
+  mqStore(SK("theme"),themeName);
 }
 try{darkMq.addEventListener("change",applyTheme);}catch(e){}
 /* ---------- SEASONS: a second palette layer, for WORLD ART, kept apart from THEMES ----------
@@ -4302,7 +4505,7 @@ function seasonNow(now){ /* the current season id, or null. `now` is for tests. 
 function art(key,fb){const id=seasonNow(),v=id&&SEAS()[id].art;return v&&v[key]!==undefined?v[key]:fb;}
 function seasonSet(pick){
   seasonPick=pick;seasonMemo.day="";
-  try{localStorage.setItem(SK("season"),pick);}catch(e){}
+  mqStore(SK("season"),pick);
   if(typeof t3Invalidate==="function")t3Invalidate();
   if(typeof T3!=="undefined"&&T3&&T3.canopyTex){T3.canopyTex.dispose();T3.canopyTex=null;} /* the canopy is baked once; the season dresses it */
   seasonRowBuild();if(typeof aleRowBuild==="function")aleRowBuild();
@@ -4345,8 +4548,8 @@ function autoFixTheme(){ /* backgrounds are the designer's; text adjusts to stay
 /* open the editor on the variant the player is actually SEEING — editing the light
    palette while the phone displays dark reads as "my colors don't change" */
 let teMode=darkMq.matches?"dark":"light";
-function saveCustom(){try{localStorage.setItem(SK("pals"),JSON.stringify(PALS));
-  localStorage.setItem(SK("pal"),String(palIdx));}catch(e){}}
+function saveCustom(){mqStore(SK("pals"),JSON.stringify(PALS));
+  mqStore(SK("pal"),String(palIdx));}
 function meridianVars(mode){ /* read the built-in palette out of the stylesheet */
   const root=document.documentElement,prev=root.dataset.theme;
   THEME_KEYS.forEach(k2=>root.style.removeProperty("--"+k2));
@@ -4439,7 +4642,7 @@ let musTune="default";try{musTune=localStorage.getItem(SK("tune"))||"default";}c
 if(!MUSDEF[musTune]&&musTune!=="default")musTune="default";
 const musDef=()=>MUSDEF[musTune]||MUSDEF[themeName]||MUSDEF.meridian;
 function musTuneSet(tn){musTune=tn;
-  try{localStorage.setItem(SK("tune"),tn);}catch(e){}
+  mqStore(SK("tune"),tn);
   document.querySelectorAll("#tuneRow button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tn===musTune?"true":"false"));
   if(MUSIC.timer)musRetime();
   if(musOn)setTimeout(musChirp,120);}
@@ -4493,7 +4696,7 @@ function musApply(){
   $("musMute").textContent=musOn?T().musOn:T().musOff;
   $("musMute").setAttribute("aria-pressed",musOn?"true":"false");
   $("musVol").value=Math.round(musVol*100);
-  try{localStorage.setItem(SK("mus"),musOn?"1":"0");localStorage.setItem(SK("vol"),String(musVol));}catch(e){}
+  mqStore(SK("mus"),musOn?"1":"0");mqStore(SK("vol"),String(musVol));
   if(musOn)musStart();else musStop();
 }
 function musChirp(){ /* instant audible proof the audio path works (owner: "no tune") */
@@ -4596,7 +4799,7 @@ function applyLang(){
   if(!$("creator").hidden){buildOpts("rowStyle",t.styles,"style");buildOpts("rowOutfit",t.outfits,"outfit");if(t.patterns)buildOpts("rowPattern",t.patterns,"pattern");}
   if($("lbPattern")){$("lbPattern").textContent=t.lbPattern||"Pattern";$("lbPattern").hidden=!t.patterns;$("rowPattern").hidden=!t.patterns;}
   if(!$("hud").hidden)hud();
-  try{localStorage.setItem(SK("lang"),lang);}catch(e){}
+  mqStore(SK("lang"),lang);
 }
 $("optEn").addEventListener("click",()=>{lang="en";applyLang();});
 $("optEs").addEventListener("click",()=>{lang="es";applyLang();});
@@ -4651,8 +4854,11 @@ function logDecision(o,c){const n=(curQ&&curQ.nodes[node])||{};
      dropped a player's first districts from the portfolio without a word (owner,
      2026-09-02: "I thought we fixed this 200 entries thing"). If the phone refuses the
      write, the in-memory record stands and the failure is said once, not hidden. */
-  try{localStorage.setItem(SK("dlog"),JSON.stringify(dlog));}
-  catch(e){if(!dlogWarned){dlogWarned=true;console.warn("RECORD: the phone refused to store the play log ("+dlog.length+" entries) — it stays in memory this session");}}}
+  /* the play log is the one write that was ALREADY honest about failing — it just told the
+     console, which nobody reads. It goes through the same door as everything else now, and it is
+     not critical: losing the log costs a record, not an afternoon. */
+  if(!mqStore(SK("dlog"),JSON.stringify(dlog))&&!dlogWarned){dlogWarned=true;
+    console.warn("RECORD: the phone refused to store the play log ("+dlog.length+" entries) — it stays in memory this session");}}
 let dlogWarned=false;
 /* Which job a quest was practice for. Chapters declare their role in content;
    entries logged before roles existed are matched back by title. */
@@ -4729,7 +4935,7 @@ function exportData(){return JSON.stringify({schema:"meridian-export-v1",exporte
 let exMode="json";
 let petCfg={n:"Frederick",am:"07:30",pm:"18:00"};
 try{const p=JSON.parse(localStorage.getItem(SK("pet"))||"null");if(p&&p.n)petCfg=p;}catch(e){}
-function petSave(){try{localStorage.setItem(SK("pet"),JSON.stringify(petCfg));}catch(e){}}
+function petSave(){mqStore(SK("pet"),JSON.stringify(petCfg));}
 let petEggSeen=null;
 ["petName","petAm","petPm"].forEach((id,i)=>$(id).addEventListener("input",()=>{
   const v=$(id).value.trim();
@@ -4845,20 +5051,39 @@ function markOf(n){ /* one person, one kind, in the order the pack declared */
 /* Every mark the plan can carry: the people standing on the world it draws, and the anchor of
    every other world somebody is waiting in. Several worlds share an anchor — pa, li and ex all
    stand at 29,1 — so an anchor carries ONE mark and remembers every world folded into it. */
+/* A MARK CARRIES TWO PLACES AND THEY ARE NOT THE SAME NUMBER.
+     · `x,y,w` — where the thing actually IS, in its own world. `destAim()` reads these and the
+       street arrow points at them, so they must never be paper coordinates.
+     · `gx,gy` — where it is DRAWN on the plan. The plan is paper and the paper has panels on it.
+   They were identical while the plan drew one world at 0,0, which is why one field did both jobs
+   and why the day a second panel appeared was the day the arrow would have started lying. */
 function planMarks(){
   const K=markKinds();if(!K.length)return[];
-  const st=PL.street,M=(typeof MAPDOT!=="undefined"?MAPDOT:{}),out=[],at={};
-  ((WORLDS[st]||{}).npcs||[]).forEach(n=>{const k=markOf(n);
-    if(k)out.push({x:n.x,y:n.y,k:k,w:st,ws:[st],who:n.npc});});
+  const M=(typeof MAPDOT!=="undefined"?MAPDOT:{}),out=[],at={},panels=planPanels();
+  const drawn={};panels.forEach(p2=>{drawn[p2.world]=p2;});
+  /* 1 · anybody standing on a world the plan actually draws is drawn where they stand */
+  panels.forEach(p2=>{((WORLDS[p2.world]||{}).npcs||[]).forEach(n=>{const k=markOf(n);
+    if(k)out.push({x:n.x,y:n.y,gx:n.x+p2.ox,gy:n.y+p2.oy,k:k,w:p2.world,ws:[p2.world],who:n.npc});});});
+  /* 2 · every other world is an ANCHOR on somebody else's paper: the pack's MAPDOT if it names
+         one, else the door that leads there from a world the plan draws — which is how La Espiga
+         and Velázquez find their place on Calle Dos without a pack having to write the offset
+         down twice and keep the two copies agreeing. */
   Object.keys(WORLDS).forEach(id=>{
-    if(id===st||!M[id]||!WORLDS[id])return;
+    if(drawn[id]||!WORLDS[id])return;
     let best=null;
     (WORLDS[id].npcs||[]).forEach(n=>{const k=markOf(n);
       if(k&&(!best||K.indexOf(k)<K.indexOf(best)))best=k;});
     if(!best)return;
-    const key=M[id][0]+","+M[id][1],e=at[key];
+    let gx=null,gy=null,wx=null,wy=null;
+    if(M[id]){gx=M[id][0];gy=M[id][1];wx=gx;wy=gy;}   /* unchanged: MAPDOT has always been paper */
+    else{let bd=1e9;
+      panels.forEach(p2=>portalsOf(p2.world).forEach(d=>{
+        if(!d.p||d.p.to!==id)return;
+        if(bd<=0)return;bd=0;gx=d.x+p2.ox;gy=d.y+p2.oy;wx=d.x;wy=d.y;}));}
+    if(gx===null)return;
+    const key=gx+","+gy,e=at[key];
     if(e){e.ws.push(id);if(K.indexOf(best)<K.indexOf(e.k))e.k=best;return;}
-    at[key]={x:M[id][0],y:M[id][1],k:best,w:id,ws:[id]};out.push(at[key]);});
+    at[key]={x:wx,y:wy,gx,gy,k:best,w:id,ws:[id]};out.push(at[key]);});
   return out;}
 function drawMark(g,cx,cy,k,r){ /* ONE painter, two surfaces: the plan and its own legend, so a
                                    swatch can never drift from the mark it explains */
@@ -4880,11 +5105,12 @@ function drawMark(g,cx,cy,k,r){ /* ONE painter, two surfaces: the plan and its o
 let mapDest=null; /* {w,x,y} — ONE at a time, and never saved. A destination is what you are doing
                      right now; a saved one is the list A3 bans, wearing a compass. */
 function drawPlanMarks(g2,s){
-  planMarks().forEach(m=>drawMark(g2,m.x*s+s/2,m.y*s+s/2,m.k,s*0.45));
+  planMarks().forEach(m=>drawMark(g2,m.gx*s+s/2,m.gy*s+s/2,m.k,s*0.45));   /* gx,gy: this is paper */
   if(!mapDest)return;
   /* the ring is the destination HE chose. Nothing here nominates a "next" — that was the one call
      the plan left open and his hybrid answered it (el-mapa §7.3). */
-  const cx=mapDest.x*s+s/2,cy=mapDest.y*s+s/2;
+  const cx=(mapDest.gx===undefined?mapDest.x:mapDest.gx)*s+s/2,
+        cy=(mapDest.gy===undefined?mapDest.y:mapDest.gy)*s+s/2;
   g2.save();g2.lineWidth=2;g2.strokeStyle="#7A3FE0";
   g2.beginPath();g2.arc(cx,cy,s*0.9,0,7);g2.stroke();
   g2.lineWidth=1;g2.strokeStyle="#F2F1EA";
@@ -4905,7 +5131,7 @@ function legSeen(){
   if(legOpen===null){let v=null;try{v=localStorage.getItem(SK("leg"));}catch(e){}
     legOpen=(v===null)?true:(v==="1");}                 /* never seen it → it opens itself */
   return legOpen;}
-function legSet(v){legOpen=!!v;try{localStorage.setItem(SK("leg"),v?"1":"0");}catch(e){}}
+function legSet(v){legOpen=!!v;mqStore(SK("leg"),v?"1":"0");}
 function mapLegend(){
   const host=$("mapNote");if(!host||!markKinds().length)return; /* a pack that declares no kinds
     gets no legend and no element: the town's plan is the same object it was yesterday */
@@ -4946,9 +5172,12 @@ function mapLegend(){
     box.appendChild(row);});}
 function mapPick(tx,ty){ /* tile coords, fractional — it is a finger, not a cursor */
   let best=null,bd=1e9;
-  planMarks().forEach(m=>{const dx=m.x+0.5-tx,dy=m.y+0.5-ty,d=dx*dx+dy*dy;if(d<bd){bd=d;best=m;}});
+  /* the finger is on PAPER, so the hit test is against gx,gy — and what gets STORED is the
+     world position, because that is what the street arrow will be pointed at */
+  planMarks().forEach(m=>{const dx=m.gx+0.5-tx,dy=m.gy+0.5-ty,d=dx*dx+dy*dy;if(d<bd){bd=d;best=m;}});
   if(!best||bd>9)return false;  /* three tiles ≈ 30 canvas px ≈ a fingertip; a miss changes nothing */
-  mapDest=(mapDest&&mapDest.x===best.x&&mapDest.y===best.y)?null:{w:best.w,x:best.x,y:best.y,who:best.who||null};
+  mapDest=(mapDest&&mapDest.w===best.w&&mapDest.x===best.x&&mapDest.y===best.y)
+    ?null:{w:best.w,x:best.x,y:best.y,gx:best.gx,gy:best.gy,who:best.who||null};
   drawTown();setWorldTag();
   const t=(T().plan||{});
   if(mapDest)$("mapNote").textContent="🎯 "+destName()+(t.chosen?"  ·  "+t.chosen:"");
@@ -5063,9 +5292,42 @@ function bearingUI(){
 function destCheck(){ /* you arrived: the destination is spent, and nothing remembers it */
   if(mapDest&&mapDest.w===world&&Math.abs(px-mapDest.x)<=1&&Math.abs(py-mapDest.y)<=1)mapDest=null;
   setWorldTag();bearingUI();}
+/* ═══════════ TOWNPLAN — the plan draws every street, not one (el-mapa §3, run-8 §2.5) ═══════════
+   Reported from play, 2026-09-16: *"im shown the other street map on calle 2."* He was standing on
+   Calle Dos and the plan drew Calle Principal, with a pin in the corner saying CALLE DOS — the
+   caption knew where he was while the picture showed somewhere else.
+
+   The cause was one word: `WORLDS[PL.street]`. A pack could declare exactly ONE world as "the map",
+   and every other outdoor world in the city had to be represented by a dot on it. That is right for
+   an interior — you are inside the market, so the pin sits on the market's door — and wrong for a
+   second STREET, which is not a room off the first one.
+
+   `TOWNPLAN=[{world,ox,oy},…]` is the pack saying which worlds the plan draws and where they sit on
+   the paper, in tiles. The LOOP is the engine's and the LAYOUT is the pack's, which is the split
+   docs/TAGS.md asks of every seam. **A pack that declares no TOWNPLAN draws PL.street at 0,0 and is
+   byte-identical** — the town and the gauge never notice this happened.
+
+   THE ONE TRAP, and it is the reason marks carry two coordinate pairs. `mapDest` is read by
+   `destAim()` as a position IN A WORLD: it compares against `px,py` and hands `tx,ty` to the
+   bearing. The plan draws in PAPER coordinates. Today those are the same numbers because there is
+   one panel at 0,0, and the day a second panel exists they stop being the same — silently, with
+   the arrow in the street pointing at a place seventeen tiles north of the real one. So a mark now
+   carries `x,y,w` (where the thing IS, unchanged) and `gx,gy` (where it is DRAWN), and nothing is
+   allowed to use one for the other. */
+function planPanels(){
+  const one=[{world:PL.street,ox:0,oy:0}];
+  const T2=(typeof TOWNPLAN!=="undefined"&&Array.isArray(TOWNPLAN))?TOWNPLAN:null;
+  if(!T2||!T2.length)return one;
+  const ok=T2.filter(p2=>p2&&WORLDS[p2.world]).map(p2=>({world:p2.world,ox:p2.ox|0,oy:p2.oy|0}));
+  return ok.length?ok:one;
+}
+const planPanelOf=id=>planPanels().find(p2=>p2.world===id)||null;
 function drawTown(){
-  const mc=$("mapcv"),g2=mc.getContext("2d"),w=WORLDS[PL.street],s=10;
-  mc.width=w.W*s;mc.height=w.H*s+18;
+  const mc=$("mapcv"),g2=mc.getContext("2d"),s=10,panels=planPanels();
+  const PW=Math.max(...panels.map(p2=>p2.ox+WORLDS[p2.world].W));
+  const PH=Math.max(...panels.map(p2=>p2.oy+WORLDS[p2.world].H));
+  const w={W:PW,H:PH};
+  mc.width=PW*s;mc.height=PH*s+18;
   /* ---- THE PLAN IS A PIECE OF PAPER (2026-09-15) ----
      It was one flat #EFE9DA fill with flat squares on it, which is a data visualisation of a
      street and not a map of one — the same fault as every mock that day: the drawing was fine and
@@ -5082,8 +5344,9 @@ function drawTown(){
     g2.fillRect(Math.floor(prnd()*mc.width),Math.floor(prnd()*mc.height),1,1);}
   g2.globalAlpha=1;
   const col={...BASECOL,...(typeof MAPCOL!=="undefined"?MAPCOL:{})};
-  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
-    g2.fillStyle=col[w.rows[y][x]]||"#D5D2C6";g2.fillRect(x*s,y*s,s,s);}
+  panels.forEach(p2=>{const ww=WORLDS[p2.world];
+    for(let y=0;y<ww.H;y++)for(let x=0;x<ww.W;x++){
+      g2.fillStyle=col[ww.rows[y][x]]||"#D5D2C6";g2.fillRect((x+p2.ox)*s,(y+p2.oy)*s,s,s);}});
   /* the folds: a shade on one side of the crease and a highlight on the other, because a fold is
      a ridge and a ridge has two sides. Over the tiles, since the paper is folded with the map on
      it — this is the one mark on the plan that is not a thing in the city. */
@@ -5099,8 +5362,11 @@ function drawTown(){
   g2.textAlign="center";
   (typeof TOWNLBL!=="undefined"?TOWNLBL:[]).forEach(l=>{
     if(l.when&&!l.when(flags))return;
+    /* a label with no `world` belongs to the first panel, which is what every row meant before
+       there was more than one — so an existing pack's labels do not move */
+    const pn=l.world?planPanelOf(l.world):panels[0];if(!pn)return;
     g2.font="700 "+(l.s||10)+"px sans-serif";g2.fillStyle=l.c||"#3A2F17";
-    g2.fillText(es?l.es:l.en,l.x*s+(l.dx||0),l.y*s);});
+    g2.fillText(es?l.es:l.en,(l.x+pn.ox)*s+(l.dx||0),(l.y+pn.oy)*s);});
   /* the caption had 8px and no room. 9px, a letter of tracking and four more pixels of paper: it
      is the line that explains the two colours, and it was the smallest type in the game. */
   g2.fillStyle="rgba(58,44,20,.10)";g2.fillRect(0,w.H*s,mc.width,18);
@@ -5110,7 +5376,8 @@ function drawTown(){
   if(g2.letterSpacing!==undefined)g2.letterSpacing="0px";
   const M=typeof MAPDOT!=="undefined"?MAPDOT:{};
   drawPlanMarks(g2,s); /* the marks go UNDER the dot: you can always see yourself */
-  const dot=world===PL.street?[fx,fy]:M[world]||null;
+  const mine=planPanelOf(world);
+  const dot=mine?[fx+mine.ox,fy+mine.oy]:(M[world]||null);
   if(dot){const dx2=dot[0]*s+s/2,dy2=dot[1]*s+s/2;
     const hal=g2.createRadialGradient(dx2,dy2,1,dx2,dy2,13);     /* you are a light on the paper */
     hal.addColorStop(0,"rgba(122,63,224,.34)");hal.addColorStop(1,"rgba(122,63,224,0)");
@@ -5268,7 +5535,7 @@ function applyAdmin(){
   $("stkRow").hidden=!admin;$("lbStakes").hidden=!admin;
   $("admOn").setAttribute("aria-pressed",admin?"true":"false");
   $("admOff").setAttribute("aria-pressed",admin?"false":"true");
-  try{localStorage.setItem(SK("admin"),admin?"1":"0");}catch(e){}
+  mqStore(SK("admin"),admin?"1":"0");
 }
 $("admOn").addEventListener("click",()=>{admin=true;applyAdmin();toast(T().admToast,3400);});
 /* Stakes toggle — admin tooling. Hearts are off by default in an open world, but they
@@ -5282,7 +5549,7 @@ function applyStakes(){
 }
 function setStakes(m){
   stakesAdmin={mode:m};
-  try{localStorage.setItem(SK("stakes"),m);}catch(e){}
+  mqStore(SK("stakes"),m);
   if(m==="hearts"&&hearts<=0)hearts=startHearts();
   applyStakes();save();toast(T().stkToast(m),3000);
 }
@@ -5313,7 +5580,7 @@ $("undoBtn").addEventListener("click",()=>{
   const back=(e2.prev!==undefined&&e2.prev!==null)?e2.prev:w.rows0[e2.y][e2.x];
   w.rows[e2.y]=w.rows[e2.y].slice(0,e2.x)+back+w.rows[e2.y].slice(e2.x+1);
   if(w.grid[e2.y][e2.x]!=="N")w.grid[e2.y][e2.x]=back;
-  try{localStorage.setItem(SK("edits"),JSON.stringify(ed));}catch(e){}
+  mqStore(SK("edits"),JSON.stringify(ed));
   toast(T().undoToast,1200);
 });
 function paintAt(clientX,clientY){
@@ -5373,7 +5640,7 @@ function randLook(){const pick=a=>a[Math.floor(Math.random()*a.length)];
   return {shirt:pick(SWATCH.shirt),skin:pick(SWATCH.skin),hair:pick(SWATCH.hair),style:pick(NPCSTYLES)};}
 let myNpcs=[];
 try{myNpcs=(JSON.parse(localStorage.getItem(SK("npcs"))||"[]")||[]).slice(0,12);}catch(e){}
-function npcPersist(){try{localStorage.setItem(SK("npcs"),JSON.stringify(myNpcs.slice(0,12)));}catch(e){}}
+function npcPersist(){mqStore(SK("npcs"),JSON.stringify(myNpcs.slice(0,12)));}
 function spawnCustom(rec){
   const name=sanName(rec.n);if(!name)return false;
   const w=WORLDS[rec.w];if(!w)return false;
@@ -5402,7 +5669,7 @@ try{const p0=JSON.parse(localStorage.getItem(SK("park"))||"{}");
   if(p0&&typeof p0==="object"){parkPrefs.band=(p0.band&&typeof p0.band==="object")?p0.band:{};
     parkPrefs.dogs=Array.isArray(p0.dogs)?p0.dogs.slice(0,24):[]; /* no adoption limit (owner) — just a sanity ceiling */
     parkPrefs.train=(p0.train&&typeof p0.train==="object")?p0.train:{};}}catch(e){}
-function parkPersist(){try{localStorage.setItem(SK("park"),JSON.stringify(parkPrefs));}catch(e){}}
+function parkPersist(){mqStore(SK("park"),JSON.stringify(parkPrefs));}
 /* every adopted dog befriends one particular townsperson (owner ask) — and some
    dogs roam the city to hang out at their friend's side */
 const FRIENDW=PL.friends.filter(w=>WORLDS[w]); /* a role the pack has no world for is simply skipped */
@@ -5988,8 +6255,10 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
   $("tpBoard").textContent=t.tpBoard;$("tpSkip").textContent=t.tpSkip;
   $("tpFound").hidden=false;
   $("tpBoard").addEventListener("click",()=>{
-    try{localStorage.setItem(SK("1"),JSON.stringify(pass.s));
-      if(pass.l)localStorage.setItem(SK("lang"),pass.l);}catch(e){}
+    /* CRITICAL: taking a pass onto this device IS the save. If this one fails silently the
+       reload lands you back where you were with no idea why the pass did nothing. */
+    if(!mqStore(SK("1"),JSON.stringify(pass.s),true))return;
+    if(pass.l)mqStore(SK("lang"),pass.l);
     stripPassHash();location.reload();
   });
   $("tpSkip").addEventListener("click",()=>{stripPassHash();$("tpFound").hidden=true;});

@@ -61,6 +61,23 @@ const got = out.split('\n').filter(l => l.startsWith('- ')).map(l => l.slice(2).
   // one line carries a live frame count; the number is noise, the fact is not
   .map(l => l.replace(/drawn \d+ time\(s\)/, 'drawn N time(s)')).sort();
 
+/* A gauge that cannot RUN must never report that the template got easier.
+   2026-09-16: the shared suite could not launch a browser (the container's chromium was a
+   version behind what playwright-core resolves), so the inner run died before a single check
+   fired. `got` came back empty, every expected line looked "no longer demanded", and this file
+   printed six lines of GOOD NEWS about an engine it had never asked a question of. That is the
+   silent zero this whole fixture exists to catch, happening inside the fixture — so it is now
+   the first thing checked, and it fails differently, because "nothing to measure" is not a
+   measurement (docs/GAUGE.md). */
+if (!got.length) {
+  console.log('FAIL — the gauge never ran. The shared suite produced no findings at all, which is');
+  console.log('not the same as finding nothing. This is a broken run, not an easier template.');
+  console.log('Most often: no usable Chromium. Set CHROMIUM_PATH to a real binary and try again.');
+  console.log('--- what the inner run actually said ---');
+  console.log(out.trim().split('\n').slice(-20).join('\n') || '(it said nothing at all)');
+  process.exit(1);
+}
+
 if (!fs.existsSync(expectedPath)) {
   fs.writeFileSync(expectedPath, got.join('\n') + '\n');
   console.log('gauge: first run — recorded ' + got.length + ' standing demands in content/gauge/expected.txt');

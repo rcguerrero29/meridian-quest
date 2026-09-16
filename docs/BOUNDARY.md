@@ -32,6 +32,52 @@ re-runs it** beside it, or with the word **unrepeated**. The freshest date on th
 
 ---
 
+## The paper seam — a pack's CSS in a player's browser · added 2026-09-16
+
+**Line: a person's browser.**
+
+**What is new.** Until today a pack shipped nine JavaScript files and no CSS, and that was, by
+accident, a security property: **a pack could not write a single line of style.** `ARCH-LOG.md` A15
+is the cost of that accident — Meridian's civic-form typography was hardcoded for every world that
+will ever run on this engine, and a whole day went into improving drawings inside a surface that
+could not be designed. Closing it means a pack's own text now becomes CSS in a player's browser,
+which is a new edge and belongs here.
+
+**Promise.** A pack's `PAPER` may restyle the inside of the reader's sheet and **nothing else** —
+not the chrome, not the HUD, not the world canvas, not the page. A pack may not fetch, and may not
+register a global name.
+
+**How it is kept — enforced, not requested.** Four mechanisms, because any one of them alone leaks:
+
+| | Mechanism | What it stops |
+|---|---|---|
+| 1 | the **browser** parses the pack's text in a `media="not all"` style; we walk the CSSOM it built | a quoting trick that fools a hand-written parser. There is no hand-written parser |
+| 2 | every selector is **re-rooted** at `.paper` | selecting anything outside the reader. A CSS selector always selects its *rightmost* element, so `html`, `body` and `:root` need no special case — `.paper html` matches nothing, which is the right answer |
+| 3 | an **allow-list**: only a style rule and a conditional group (`@media`/`@supports`/`@container`) pass | `@import` (a fetch) and `@font-face`/`@keyframes`/`@property` (global names). A name is not a subtree. An allow-list also drops at-rules CSS has not invented yet — the first draft was a deny-list keyed on `CSSRule.type`, and `@property` returns `0` from that deprecated field and walked straight past it |
+| 4 | `position:fixed` is stripped, and `.paper` carries `isolation:isolate` | painting over the HUD from *inside* the reader. Fixed positioning escapes the containing block; a stacking context stops a legitimately-styled descendant raising itself out. Scoping the selector stops neither |
+
+**Guard: `test/engine.smoke.js`, the paper block — and it asks both halves.** A seam that is merely
+safe is a seam nobody can use, so it asserts that the pack's paper *arrived* (the sheet exists, parses
+to real rules, sits after the shell's block, and **the `.paper` element actually wears the colour the
+pack asked for**) as well as that every escape came to nothing. The last of those is the one that
+matters: everything else reads the stylesheet, which is a proxy, and `docs/REGRESSION.md` is a
+register of guards that stopped at exactly that point.
+
+**Planted at: 2026-09-16, six violations, in a copy outside the repository.** Re-rooting removed
+(`.dkv b`, `html`, `body` all escaped) · the allow-list removed (`@import`, `@font-face`,
+`@keyframes`, `@property` all survived) · `position:fixed` kept · `isolation:isolate` removed from
+the shell · the sheet injected into `<head>`, where it loses every tie. All six printed. **Re-run
+by:** `test/engine.smoke.js` against `content/gauge/index.html`, on every push, via `test/gauge.js`.
+
+**And the attack is a fixture, not a memory.** Half of `content/gauge/config.js`'s `PAPER` is a real
+attempt to reach the page, the HUD and the world canvas, so the scoping is exercised by a live pack
+on every CI run rather than by a test that writes its own input — register fault **A**. Do not tidy
+those lines away: they are the test. The sixth plant above was not a plant at all — the gauge caught
+it for real, on the seam's first run, because `document.head` is not where the shell's stylesheet
+lives.
+
+---
+
 ## The ledger, most costly first
 
 ### 1 · What a stranger actually receives from GitHub Pages
@@ -449,6 +495,7 @@ has no date.*
 | `vendor/three.min.js` | zeni | the public build — third-party code in every player's browser | 2026-09-13 |
 | `engine/` | zeni, beto | a person's browser — both games' shared code; every trust boundary | 2026-09-13 |
 | `content/meridian/` | zeni | the public build — the public game's own words and data | 2026-09-13 |
+| `content/gauge/` | zeni, melo | a person's browser — the paper seam's live attack: a pack that tries to reach out of the reader, run on every push | 2026-09-16 |
 | `changarrito/index.html` | zeni | a key — the CSP that lets a token-bearing page reach GitHub | 2026-09-13 |
 | `changarrito/content/record.js` | zeni | a key — where the token is kept, what carries it, what it writes | 2026-09-13 |
 | `changarrito/README.md` | zeni | a key — the origin the key is allowed to exist on | 2026-09-13 |

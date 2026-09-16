@@ -351,6 +351,12 @@ helper, and the person who hits it will be reading their content files, not `san
   quest node. A second world needs the graph as data.
 - **Ambient lines with a `when`.** `docs/STORY.md` open item 4 is filed as Meridian-only; with a
   second world it is a template blocker.
+- ~~**A pack cannot design its own paper.**~~ **CLOSED 2026-09-16** — `PAPER`, a string of CSS the
+  engine re-roots at `.paper` and injects. It passes this file's standing test (*name the geometry,
+  not the noun*) the only way a style seam can: **the pack names its own geometry and the engine
+  names none of it.** The tag is registered here because a second world will look for it: it is
+  optional, a pack that omits it gets today's behaviour exactly, and what it may touch is
+  `docs/BOUNDARY.md`, "The paper seam", not prose. `ARCH-LOG.md` A15.
 - **A named `tmpl`.** `"01"`–`"07"` are bare numbers with no registry.
 - `STAKES.mode:"budget"` is a declared tag with **no implementation** (`config.js:45`).
 

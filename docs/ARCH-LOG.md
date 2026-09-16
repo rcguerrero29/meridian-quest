@@ -829,7 +829,7 @@ Yes — but not the version asked for, and not yet. **Three named cars, not swat
 
 ---
 
-## A15 · A pack cannot design its own paper — the gap that made every mock look like a form · 2026-09-15
+## A15 · ~~A pack cannot design its own paper~~ — **BUILT 2026-09-16** · the gap that made every mock look like a form · 2026-09-15
 
 **How it was found.** A day was spent improving the *art* in a mock of Simmer's recipe-book page. The
 owner's verdicts, in order: *"fairly slop shloppy"* · *"the stew looks circular but we are looking at
@@ -877,6 +877,30 @@ them said the surface was a form — because they were all pointed at the pictur
 - *"Would the person this is for want to open it?"* — **never answer this one with the reader.** Design
   the surface, then judge.
 
-**Open for the owner.** Whether the paper seam gets built at all, and whether it is a stylesheet or a
-token set. Nothing in Simmer is blocked on it — a mock can be designed outside the game, as this one
-was — but **the first pack that ships documents of its own will meet this wall on its first afternoon.**
+**~~Open for the owner.~~ CLOSED 2026-09-16 — the owner: "ok go for the seam."**
+
+**What was built, and the one place it differs from the costing above.** A pack declares `PAPER`, a
+string of CSS. The costing offered a stylesheet *or* a token set; it is the stylesheet, because a
+token set can only answer questions somebody anticipated — two faces and four colours would not have
+let the Simmer book set an ingredient list as a dotted-leader table, which is the actual thing that
+was missing. **But it is not a `.css` file.** A pack still ships JavaScript and only JavaScript:
+`content/<pack>/paper.css` would have meant a fetch, a new origin question, a `sw.js` asset, a CSP
+line and a gauge script list — five edges bought for a file extension. A string in the pack's own
+config is the same expressive power and no new edge at all.
+
+**The scoping is enforced, not requested**, which is the half A15 warned about ("what it must not
+become"). Four mechanisms — the browser parses it, every selector is re-rooted at `.paper`, an
+allow-list drops everything that registers a global name or fetches, and `position:fixed` is stripped
+while `.paper` becomes a stacking context. Written up in full in `docs/BOUNDARY.md`, "The paper seam",
+with six violations planted at it.
+
+**Meridian declares no `PAPER` and is byte-identical**, which is what the repo's rule requires of any
+engine change. The gauge declares one, and half of that declaration is a live attack, so the seam is
+exercised on every CI push by the smallest world that is a world rather than by a test that writes
+its own input.
+
+**And the seam's own first run found a bug this entry could not have predicted:** the shell's 34KB
+stylesheet lives in `<body>`, not `<head>`, so appending the pack's paper to `document.head` put it
+*first* and the engine won every tie at equal specificity. A seam that is perfectly safe and silently
+does nothing is still broken. The gauge caught it; the guard now asks the `.paper` element what
+colour it actually is, rather than asking the stylesheet what it says.

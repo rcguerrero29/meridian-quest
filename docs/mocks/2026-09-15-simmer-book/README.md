@@ -282,6 +282,22 @@ structure, the process, the recursion, the container and the light — six of th
 `.claude/skills/how-its-made`, `docs/BEAUTIFY.md`, `pili` and `chema`. **The rules outlived the
 drawing, and they were the point.**
 
+### AJ has now seen it, and her verdict is the one that counts — 2026-09-16
+
+The owner, after showing her: **"i think she was ok with the tteoboki or whatever that was."**
+
+**So the fourth page cleared the bar the first three did not, and it is worth knowing why**, because
+the reason is reusable and the drawing is not. 떡볶이 is the page where the tteok were drawn from how
+they are MADE rather than from how they look in a photograph — one extruder die, so every piece shares
+a diameter and only length varies; stirred into a loose alignment rather than a starburst; half-sunk
+with the sauce climbing them; drawn back to front so a cast shadow lands on something already painted.
+That is `.claude/skills/how-its-made` applied from the first stroke instead of retrofitted over four
+corrections, and it is the first plate in this book that nobody had to correct.
+
+**This does not promote the other three.** Her "ok" is about the page she was shown. The status above
+stands for the book as a whole: good enough to ask her the question, not the reference for how food
+looks in this pack.
+
 **Who finishes it:** `docs/for-aj/DRAWING.md` exists and is written to her. Simmer is her game and
 this is her book; the plates were always meant to be hers. The page already has the well, the
 caption, the light and the palette waiting for them.
