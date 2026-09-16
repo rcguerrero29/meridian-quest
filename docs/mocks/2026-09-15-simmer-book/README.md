@@ -264,3 +264,24 @@ upper-left the shadow falls to the lower *right* — so the slice on the right h
 Drawn the other way, every shadow was painted onto board that the next puck immediately covered, and
 the result looked exactly like no shadows at all. **In 2D, the order you draw in is part of the
 lighting model.**
+
+
+---
+
+## THE STATUS OF THIS ART, said plainly — 2026-09-16
+
+The owner's last word on it: **"still not there but may work for the game."**
+
+**That is not "done" and it must not be read as "done."** Seven versions in, the drawing is good
+enough to put in front of AJ for the one question the pages exist to ask her — *does a book that
+fills up make you want a fourth page?* — and it is **not** settled art. Nobody should point at it
+later as the reference for how food looks in this pack.
+
+**What the seven versions bought, which is the real deliverable:** the surface, the reference, the
+structure, the process, the recursion, the container and the light — six of them now written into
+`.claude/skills/how-its-made`, `docs/BEAUTIFY.md`, `pili` and `chema`. **The rules outlived the
+drawing, and they were the point.**
+
+**Who finishes it:** `docs/for-aj/DRAWING.md` exists and is written to her. Simmer is her game and
+this is her book; the plates were always meant to be hers. The page already has the well, the
+caption, the light and the palette waiting for them.
