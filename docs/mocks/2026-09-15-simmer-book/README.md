@@ -83,3 +83,34 @@ of anything, and nothing adds them up.
 gimbap drawn with the rice ring at 0.80 of the radius read as **eggs on a plate** (a cross-section is
 a dark band you can see, a ring of rice, and a middle you can name — it is 0.72 with a stroke now);
 and the "In your kitchen:" rule hung off the end of the first line when its label wrapped.
+
+---
+
+## 2026-09-16 — the gimbap study, and why it exists
+
+*"can i have an image of the gimbap you are trying to achieve its better, but still quite off"*
+
+`gimbap-study.html` / `gimbap-study.png` — one slice drawn at four times page size with its parts
+named, and the row of six underneath at the size they actually appear on her page.
+
+**It is here because it is art direction, not a one-off render.** The drawing was wrong twice and
+both times it was wrong the same way: it was drawn as *a picture of a round thing with stuff in the
+middle* rather than as **a cylinder seen end-on**. Stating the structure fixed it in one pass where
+two rounds of nudging colours had not:
+
+| | |
+|---|---|
+| **NORI** | a thin LINE, about 4% of the radius. **Not a band** — this was the whole fault. A fat dark ring around a pale disc is a fried egg, and six of them are six fried eggs, which is exactly what came back |
+| **RICE** | the widest thing in the picture, with grain, so it is rice and not a fill |
+| **THE BUNDLE** | about half the diameter, and **not a ring of dots**: long strips seen end-on, so bars and rectangles, packed tight and **overlapping**. Spaced out with rice between every pair it is a diagram of a gimbap rather than one |
+| **THE TWO YELLOWS** | danmuji `#F2C93B` is brighter than egg `#EBD489`, and that difference is what makes a slice read as gimbap rather than as sushi. Both were the same yellow |
+
+**The general lesson, and it is the day's lesson again from the other side:** when a drawing is
+*"better, but still quite off"* twice running, stop adjusting it and go and state what the thing IS.
+The study took one pass. Two rounds of tuning the old shape had not moved it, because the shape was
+the fault.
+
+**And the study itself was wrong twice before it was right**, which is worth recording in a folder
+about looking: the first version fanned its labels at angles and three of four ran off the sheet;
+the fix moved the text column left and walked it straight over the row of six. **Measuring one edge
+and not the pair** is its own small family of mistake.

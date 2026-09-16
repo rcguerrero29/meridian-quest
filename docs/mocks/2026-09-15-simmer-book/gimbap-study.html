@@ -1,0 +1,184 @@
+<title>Gimbap study</title>
+<style>html,body{margin:0;background:#151210}canvas{display:block}</style>
+<canvas id="c" width="1240" height="820"></canvas>
+<script>
+(function(){
+var c=document.getElementById('c'),g=c.getContext('2d'),W=c.width,H=c.height;
+
+function hex(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function rgb(a){return '#'+a.map(function(v){v=Math.max(0,Math.min(255,Math.round(v)));return (v<16?'0':'')+v.toString(16);}).join('');}
+function lit(h,t){var x=hex(h);return rgb([x[0]+255*t*.92,x[1]+255*t*.80,x[2]+255*t*.58]);}
+function shade(h,t){var x=hex(h);return rgb([x[0]*(1-t*1.05),x[1]*(1-t*.98),x[2]*(1-t*.80)]);}
+
+/* ── THE TARGET, and it is a structure before it is a picture ──────────────────────────────────
+   A slice of gimbap is a CYLINDER SEEN END-ON, and its cross-section has four rings and a bundle:
+
+     1. NORI   a THIN dark line, about 3% of the radius. Not a band. This is the single thing the
+               current drawing gets most wrong: a fat ring of seaweed reads as the edge of a fried
+               egg, and that is exactly what six of them looked like.
+     2. RICE   the widest thing in the picture, roughly 30% of the radius, warm white, with grain —
+               it should DOMINATE. In the current drawing the rice is a thin annulus.
+     3. BUNDLE the middle, about half the diameter, and it is NOT a ring of dots. It is a handful of
+               long strips seen end-on, so they are BARS AND RECTANGLES, packed tight and touching,
+               with the odd dark gap where they did not quite meet.
+     4. OIL    a sheen off the rice on the key side only, and the cut face catching the light.
+
+   The fillings are named things with named colours, and the two yellows are different yellows:
+     danmuji (pickled radish)  #F2C93B   the bright one — this is what makes a slice read as gimbap
+     egg                       #EBD489   paler, softer edge
+     carrot                    #D9662B
+     spinach                   #3E6B37   a clump, never a bar
+     burdock or beef           #7A4A28
+     crab stick                #F2EEE4   white, with one pink edge
+────────────────────────────────────────────────────────────────────────────────────────────────*/
+
+function round(cx,cy,d,turn,detail){
+  var r=d/2, ry=r*0.94;                       /* barely an ellipse: you are almost over it */
+  /* it sits on something */
+  var sh=g.createRadialGradient(cx+r*.10,cy+ry*.92,0,cx+r*.10,cy+ry*.92,r*1.05);
+  sh.addColorStop(0,'rgba(8,5,3,.55)'); sh.addColorStop(1,'rgba(8,5,3,0)');
+  g.save(); g.translate(cx+r*.10,cy+ry*.92); g.scale(1,.30); g.translate(-(cx+r*.10),-(cy+ry*.92));
+  g.fillStyle=sh; g.beginPath(); g.arc(cx+r*.10,cy+ry*.92,r*1.05,0,7); g.fill(); g.restore();
+
+  /* 1 · NORI — thin, and darkest on the shadow side */
+  var ng=g.createLinearGradient(cx-r,cy-ry,cx+r,cy+ry);
+  ng.addColorStop(0,'#2E4029'); ng.addColorStop(.45,'#1B2617'); ng.addColorStop(1,'#0C1109');
+  g.fillStyle=ng; g.beginPath(); g.ellipse(cx,cy,r,ry,0,0,7); g.fill();
+
+  /* 2 · RICE — the widest thing here */
+  var RR=r*0.955, RRy=ry*0.955;               /* nori is the 4.5% that is left */
+  var rg=g.createRadialGradient(cx-RR*.34,cy-RRy*.36,RR*.08,cx,cy,RR*1.02);
+  rg.addColorStop(0,'#FDFAF1'); rg.addColorStop(.55,'#F1E9D6'); rg.addColorStop(1,'#CFC3A6');
+  g.fillStyle=rg; g.beginPath(); g.ellipse(cx,cy,RR,RRy,0,0,7); g.fill();
+  /* grain: short strokes, seeded, so rice is rice and not a fill */
+  var sd=1013904223^Math.round(d*7+turn*100), rnd=function(){sd=(sd*1664525+1013904223)>>>0;return sd/4294967296;};
+  g.save(); g.beginPath(); g.ellipse(cx,cy,RR,RRy,0,0,7); g.clip();
+  for(var i=0;i<Math.round(d*1.5);i++){
+    var a=rnd()*Math.PI*2, rr=RR*(0.52+rnd()*0.46);
+    var x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr*(RRy/RR);
+    g.save(); g.translate(x,y); g.rotate(a+Math.PI/2);
+    g.globalAlpha=.10+rnd()*.16;
+    g.fillStyle=rnd()<.5?'#FFFFFF':'#B9AB8C';
+    g.fillRect(-r*.020,-r*.008,r*.040,r*.016);
+    g.restore();
+  }
+  g.restore();
+
+  /* 3 · THE BUNDLE — bars and rectangles, packed, touching, slightly off-square */
+  var B=r*0.50;                                /* half the radius: the middle is a real object */
+  g.save(); g.translate(cx,cy); g.rotate(turn);
+  var dark='rgba(26,18,10,.30)';
+  function bar(x,y,w,h,col,rot,pink){
+    g.save(); g.translate(x,y); g.rotate(rot||0);
+    /* A BAR IS SET INTO THE RICE, NOT LAID ON IT. The first version drew an offset dark rectangle
+       behind each one and they read as a stack of cards: an object pressed into a soft surface has
+       a dark seam along its lower edges and nothing anywhere else. */
+    var bg=g.createLinearGradient(-w/2,-h/2,w/2,h/2);
+    bg.addColorStop(0,lit(col,.16)); bg.addColorStop(.55,col); bg.addColorStop(1,shade(col,.24));
+    g.fillStyle=bg; g.fillRect(-w/2,-h/2,w,h);
+    g.fillStyle='rgba(255,255,255,.22)'; g.fillRect(-w/2,-h/2,w,Math.max(1,h*.13));
+    g.fillStyle=dark; g.fillRect(-w/2,h/2-Math.max(1,h*.10),w,Math.max(1,h*.10));
+    g.fillRect(w/2-Math.max(1,h*.07),-h/2,Math.max(1,h*.07),h);
+    if(pink){ g.fillStyle='#D8657A'; g.fillRect(-w/2,-h/2,w,Math.max(1.4,h*.16)); }
+    g.restore();
+  }
+  /* THE ARRANGEMENT — packed, touching, and off-square, the way a hand actually lays them. The
+     first version spaced them out and left rice showing between every pair, which is a diagram of
+     a gimbap rather than one. These overlap on purpose. */
+  bar(-B*0.40,-B*0.42, B*0.96, B*0.56, '#F2C93B', -0.05);          /* danmuji, the bright yellow */
+  bar( B*0.42,-B*0.40, B*0.90, B*0.54, '#EBD489',  0.04);          /* egg, the pale one */
+  bar(-B*0.46, B*0.30, B*0.84, B*0.50, '#7A4A28', -0.03);          /* burdock */
+  bar( B*0.16, B*0.40, B*0.90, B*0.48, '#F2EEE4',  0.02, true);    /* crab stick, one pink edge */
+  bar( B*0.66, B*0.20, B*0.50, B*0.62, '#D9662B',  0.07);          /* carrot */
+  /* spinach is a CLUMP, never a bar — it is the one thing in there with no edges */
+  g.fillStyle='#3E6B37';
+  [[-0.04,-0.06,0.34,0.26],[0.16,-0.18,0.24,0.20],[-0.20,0.06,0.22,0.18]].forEach(function(p,i){
+    g.beginPath(); g.ellipse(B*p[0],B*p[1],B*p[2],B*p[3],i*1.1,0,7); g.fill();
+  });
+  g.fillStyle='rgba(255,255,255,.14)';
+  g.beginPath(); g.ellipse(-B*0.10,-B*0.14,B*0.16,B*0.10,-0.3,0,7); g.fill();
+  g.restore();
+
+  /* 4 · the cut face catches the light, on the key side only */
+  g.save(); g.beginPath(); g.ellipse(cx,cy,RR,RRy,0,0,7); g.clip();
+  g.globalAlpha=.16; g.fillStyle='#fff';
+  g.beginPath(); g.ellipse(cx-RR*.34,cy-RRy*.34,RR*.40,RRy*.26,-0.5,0,7); g.fill();
+  g.restore();
+  /* and the nori's own lit edge, upper left */
+  g.strokeStyle='rgba(190,205,185,.34)'; g.lineWidth=Math.max(1,r*.022);
+  g.beginPath(); g.ellipse(cx,cy,r*0.985,ry*0.985,0,Math.PI*1.04,Math.PI*1.86); g.stroke();
+
+  if(detail) label(cx,cy,r);
+}
+
+/* EVERY LABEL GOES TO THE RIGHT OF THE ROUND AND NOWHERE ELSE. The first version fanned them at
+   angles and three of the four ran off the edge of the sheet — the leader line is what says which
+   part is meant, so the text does not need to sit next to it. */
+function label(cx,cy,r){
+  g.save();
+  g.lineWidth=1.4; g.textAlign='left';
+  var COL=cx+r+118;
+  var rows=[
+    ['NORI',   'a thin line, about 4% of the radius', -0.76, -0.62, -0.96],
+    ['RICE',   'the widest thing in the picture',     -0.16, -0.90, -0.42],
+    ['BUNDLE', 'bars, packed and touching',            0.06,  0.10,  0.16],
+    ['DANMUJI','the bright yellow, and the tell',     -0.38, -0.30,  0.66]
+  ];
+  rows.forEach(function(rw){
+    var x=cx+r*rw[2], y=cy+r*rw[3], ty=cy+r*rw[4];
+    g.strokeStyle='rgba(142,131,117,.75)';
+    g.beginPath(); g.moveTo(x,y); g.lineTo(COL-14,ty-5); g.stroke();
+    g.fillStyle='#E0703F'; g.beginPath(); g.arc(x,y,4,0,7); g.fill();
+    g.fillStyle='#EFE7D6'; g.font='700 16px ui-monospace,monospace';
+    g.fillText(rw[0],COL,ty);
+    g.fillStyle='#A4927D'; g.font='400 15px ui-monospace,monospace';
+    g.fillText(rw[1],COL,ty+21);
+  });
+  g.restore();
+}
+
+/* ── the sheet ── */
+var bg=g.createLinearGradient(0,0,W*0.4,H);
+bg.addColorStop(0,'#201A16'); bg.addColorStop(1,'#12100E');
+g.fillStyle=bg; g.fillRect(0,0,W,H);
+
+g.fillStyle='#EFE7D6'; g.font='700 27px ui-serif,Georgia,serif';
+g.fillText('What a slice of gimbap actually is',44,56);
+g.fillStyle='#A4927D'; g.font='400 16px ui-monospace,monospace';
+g.fillText('a cylinder seen end-on: a thin nori line, a wide ring of rice, and a packed bundle in the middle',44,84);
+
+round(262,330,330,-0.22,true);
+
+/* the row, at the size it appears on the page — six, cut by hand, no two the same */
+g.fillStyle='#A4927D'; g.font='600 14px ui-monospace,monospace';
+g.fillText('AT PAGE SIZE — six cut by hand, and no two the same',72,552);
+/* AND THE LEFT EDGE OF THE TEXT IS THE RIGHT EDGE OF THIS ROW. The fix for the overflow moved the
+   column to 790 and walked it straight over the sixth round — the same mistake in the other
+   direction, which is what happens when you measure one edge and not the pair. The row ends at
+   660 + its radius; the column starts at 790. */
+var ds=[104,90,112,96,108,86], ys=[0,-7,3,-10,5,-3];
+ds.forEach(function(d,i){
+  round(120+i*108, 630+ys[i], d, i*0.9, false);
+});
+
+/* THE MEASURE IS THE CANVAS MINUS THE MARGIN, and it is not a guess: 14px monospace is ~8.4px a
+   character, the column starts at 790 and the sheet ends at 1240, so 44 characters is the line and
+   anything longer walks off the edge — which is what the first two versions of this did. */
+var lines=[
+  'WHERE MY LAST ONE WAS OFF',
+  'the nori was a BAND, not a line — and that',
+  'alone made six of them read as eggs',
+  'the fillings were round dots in a RING;',
+  'they are bars, in a bundle, overlapping',
+  'the bundle was too small — it is half the',
+  'diameter, and it touches itself',
+  'both yellows were the same yellow. Danmuji',
+  'is brighter than egg, and it is the tell'
+];
+lines.forEach(function(t,i){
+  g.fillStyle = i===0 ? '#E0703F' : (i%2===1 ? '#9C8F7E' : '#77695C');
+  g.font = i===0 ? '700 15px ui-monospace,monospace' : '400 14px ui-monospace,monospace';
+  g.fillText(t, 790, 552 + (i===0?0:18) + i*25);
+});
+})();
+</script>
