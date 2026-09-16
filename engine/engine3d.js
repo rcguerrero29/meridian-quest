@@ -47,6 +47,9 @@ function t3Fell(){if(T3.said)return;T3.said=true;const last=T3.errors[T3.errors.
    with his butt", owner 2026-09-03). Facing is a screen-space fact; derive it from the
    camera stop and the actor's velocity, not from the map. */
 const t3Q=()=>((Math.round(T3.yaw/(Math.PI/2))%4)+4)%4;
+/* one hex→hex mix, so a value ramp can be written where it is read instead of as six constants */
+function t3Mix(a,b,t){const h=c=>parseInt(c,16),A=[1,3,5].map(i=>h(a.slice(i,i+2))),B=[1,3,5].map(i=>h(b.slice(i,i+2)));
+  return "rgb("+A.map((v,k)=>Math.round(v+(B[k]-v)*Math.max(0,Math.min(1,t)))).join(",")+")";}
 const T3RIGHT=[[1,0],[0,-1],[-1,0],[0,1]]; /* screen-right in world units at stops 0..3: +x, north, -x, south */
 function t3ScreenFace(a){
   const q=t3Q(),[rx,rz]=T3RIGHT[q],v=(a.dx||0)*rx+(a.dy||0)*rz;
@@ -244,10 +247,29 @@ function t3Build(key){T3.pinatas=[];
      hole for the player to find. A dim plane in this world's own floor colour, a hair below the
      ground and well outside it: the city carries on into the dark instead of stopping. Nothing
      stands on it, nothing walks on it — it is scenery for the corner of your eye. */
-  const apron=new THREE.Mesh(new THREE.PlaneGeometry(w.W*3+60,w.H*3+60),
-    new THREE.MeshBasicMaterial({color:new THREE.Color(tc(C.floor)).multiplyScalar(0.20)}));
-  apron.rotation.x=-Math.PI/2;apron.position.set(w.W/2,-0.05,w.H/2);apron.userData={apron:true};
-  grp.add(apron);
+  /* ---- AND IT IS A FRAME, NOT A SHEET (owner, 2026-09-16, after asking twice) ----
+     This plane was `w.W*3+60` by `w.H*3+60`, centred on the world, at y=-0.05 — so as well as
+     carrying the city off into the dark it laid a dark lid across THE WHOLE MAP, five hundredths
+     of a tile under the floor. Every sunken thing in either game was underneath it: the loft's
+     stairwell treads sit at -0.16 to -0.64 and had been invisible since the apron was added, so a
+     player looking into the well saw the apron and nothing else. That is the "clearly fucked up
+     stairs" — a black rectangle where the stairs are, and no amount of lighting or geometry below
+     it could ever have shown, which is what two rounds of re-colouring proved by changing the
+     render by zero bytes.
+     The comment above always said "well outside it" and the geometry never was. Four strips now,
+     one on each side of the world's own footprint, so the apron is a frame with the city in the
+     middle of it and nothing of the world is roofed over. */
+  {
+    const aw=w.W*3+60, ah=w.H*3+60, ox=w.W/2, oz=w.H/2;
+    const am=new THREE.MeshBasicMaterial({color:new THREE.Color(tc(C.floor)).multiplyScalar(0.20)});
+    const strip=(cw,ch,cx2,cz2)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(cw,ch),am);
+      m.rotation.x=-Math.PI/2;m.position.set(cx2,-0.05,cz2);m.userData={apron:true};grp.add(m);};
+    const pad=(ah-w.H)/2, padx=(aw-w.W)/2;
+    strip(aw, pad, ox, -pad/2);                    /* north of the map */
+    strip(aw, pad, ox, w.H+pad/2);                 /* south */
+    strip(padx, w.H, -padx/2, oz);                 /* west */
+    strip(padx, w.H, w.W+padx/2, oz);              /* east */
+  }
   /* the standing world: boxes wear the facade art, everything else is a cutout */
   const faceTex={},flatTex={},wallMat={},boxMat={};
   /* Furniture, appliances and anything content marks `box:true` stand as a BOX when the
@@ -343,10 +365,81 @@ function t3Build(key){T3.pinatas=[];
       const sr=stairRun(w,x,y),dep=wellDepth(w,x,y),g=w.rows[y][x];
       if((sr&&sr.up)||dep>0){const hh=dep>0?1.2:STAIRH*(sr.i+1); /* a sunken step is a tall box whose lid is below the floor; its sides are the risers you see */
         const tk=g+"|"+x+"|"+y,lid=wallMat[tk]||(wallMat[tk]=new THREE.MeshLambertMaterial({map:t3Tex(t3BakeGlyph(g,true,baseOf(g),false,false,null,x,y))}));
-        const rk=dep>0?"≡well":"≡side",rs=wallMat[rk]||(wallMat[rk]=new THREE.MeshLambertMaterial({color:new THREE.Color(dep>0?"#5E5852":"#9F9783")}));
+        /* THE WELL HAS TO READ AS STEPS GOING DOWN, NOT AS A BLACK TRENCH (owner, 2026-09-16:
+           "i still think the stair railing screenshot i sent is wrong"). The geometry was already
+           right — the treads really are sunk, -0.16 to -0.48 — and the LIGHT was the whole fault.
+           A riser at #5E5852, in a hole, under a lambert light that is above it, returns almost no
+           luma; against a cream floor at ~#E8DFC6 the entire opening came back as one black
+           rectangle, and a black rectangle with a fence round it is a wall, which is exactly what
+           he said he was seeing. The risers are raised to a value that still reads as "in shadow"
+           next to the floor and no longer collapses to nothing, and — because the only light in a
+           stairwell comes from the floor you are standing on — EACH STEP IS DARKER THAN THE ONE
+           ABOVE IT, so the descent is legible as a descent instead of a uniform slab. */
+        const rk=dep>0?("≡well"+dep.toFixed(2)):"≡side";
+        const sink=dep>0?Math.min(1,dep/0.8):0;                 /* 0 at the lip, 1 at the bottom */
+        const lit=dep>0?t3Mix("#B4AC9C","#4E4A46",sink):"#9F9783";
+        /* a sunken riser is a vertical face in a hole: Lambert leaves it at almost nothing for the
+           same reason as the shaft, so a well's risers are painted too. A climbing flight's sides
+           stay Lambert — they are out in the room, where the light model is doing real work. */
+        const rs=wallMat[rk]||(wallMat[rk]=dep>0
+          ?new THREE.MeshBasicMaterial({color:new THREE.Color(lit)})
+          :new THREE.MeshLambertMaterial({color:new THREE.Color(lit)}));
         const bx=new THREE.Mesh(new THREE.BoxGeometry(1,hh,1),[rs,rs,lid,rs,rs,rs]);
         const top=dep>0?-dep:hh;
         bx.position.set(cx,top-hh/2,cz);bx.userData={tread:true,well:dep>0,g,x,y,h:top};grp.add(bx);
+        /* ---- AND THE HOLE NEEDS SIDES (owner, 2026-09-16, twice) ----
+           The floor is cleared where a well is (`ctx.clearRect` above), and NOTHING was ever built
+           to close the cut. So the opening was a hole onto the void: from the game's own camera the
+           steps sit below the lip and are not visible at all, and what a player sees is a black
+           rectangle in the floor with a rail round it — which is a walled-off pit, which is exactly
+           what he reported and what I twice explained away.
+           MEASURED, not guessed: re-colouring the risers changed the render by ZERO bytes, which is
+           what proved the steps were never on screen and the fault was the missing shaft.
+           So every edge of the cut that does not meet another well tile gets a wall, from the floor
+           down to that step. The shaft is lighter at the lip and darker as it goes, because the only
+           light in a stairwell falls in from the floor you are standing on. */
+        if(dep>0){
+          const wellAt=(ax,ay)=>ay>=0&&ay<w.H&&ax>=0&&ax<w.W&&wellDepth(w,ax,ay)>0;
+          /* THE SHAFT GOES TO THE BOTTOM, NOT TO THIS STEP.
+             MEASURED, after two wrong fixes: a ray fired from the game's own camera through the
+             opening hit the fence, then the cleared ground, then the world's black APRON — it
+             never touched a shaft wall or a tread. Both were below the sight line. A wall only as
+             deep as its own step (0.16 at the shallow end) is a kerb, and the eye goes straight
+             over it and out the far side into the void, which is why two rounds of re-colouring
+             changed the render by zero bytes.
+             A stairwell shaft is ONE box: its walls run from the floor to the deepest point of the
+             well, and the steps sit inside it. Then the far wall is what you see when you look in,
+             which is what you see looking into a real stairwell from across a room. */
+          const deepest=(()=>{let m=dep,seen={},q=[[x,y]];
+            while(q.length&&Object.keys(seen).length<64){const[ax,ay]=q.pop(),k=ax+","+ay;
+              if(seen[k]||!wellAt(ax,ay))continue;seen[k]=1;
+              m=Math.max(m,wellDepth(w,ax,ay));
+              q.push([ax+1,ay],[ax-1,ay],[ax,ay+1],[ax,ay-1]);}
+            return m;})();
+          const sk=("shaft"+deepest.toFixed(2));
+          /* UNLIT, and that is the whole point. MEASURED: as a Lambert material the shaft came back
+             at luma 45 against a floor at 208 — a vertical plane under a light that is overhead
+             receives almost nothing, so every value chosen here was being multiplied away and the
+             opening rendered as the same black rectangle it was before the shaft existed. This
+             engine paints its light rather than simulating it (every tile's art is already drawn
+             lit), so the shaft says what value it is and means it. The ramp IS the lighting: bright
+             at the lip where the floor's light falls in, dark at the bottom. */
+          const sm=wallMat[sk]||(wallMat[sk]=new THREE.MeshBasicMaterial({
+            color:new THREE.Color(t3Mix("#B9AF9B","#4A443D",Math.min(1,deepest/0.9)))}));
+          [[0,-1,0,-0.5,0],[0,1,0,0.5,0],[-1,0,-0.5,0,Math.PI/2],[1,0,0.5,0,Math.PI/2]]
+            .forEach(([dx,dy,ox,oz,rot])=>{
+              if(wellAt(x+dx,y+dy))return;                      /* it opens onto more well: no wall */
+              const q=new THREE.Mesh(new THREE.PlaneGeometry(1,deepest),sm);
+              q.position.set(cx+ox,-deepest/2,cz+oz);q.rotation.y=rot;
+              q.material.side=THREE.DoubleSide;
+              q.userData={shaft:true,x,y};grp.add(q);});
+          /* and a bottom, or it is still a box with no floor and the apron shows through it */
+          if(dep>=deepest-0.001){
+            const fm2=wallMat["shaftfloor"]||(wallMat["shaftfloor"]=new THREE.MeshBasicMaterial({color:new THREE.Color("#413C36")}));
+            const fl=new THREE.Mesh(new THREE.PlaneGeometry(1,1),fm2);
+            fl.rotation.x=-Math.PI/2;fl.position.set(cx,-deepest-0.001,cz);
+            fl.userData={shaft:true,x,y};grp.add(fl);}
+        }
         continue;} /* the head ▲ is the top step; its portal mark still floats above it */
     }
     if((TILES[gch]||{}).kind==="bridge"){ /* the rainbow bridge (IDEAS §15.4, owner 2026-09-07: "upgrade rainbow

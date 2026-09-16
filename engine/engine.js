@@ -1730,22 +1730,58 @@ TILESIDE["K"]=rc=>{const{sx,sy,x,y}=rc; /* a counter from the front. A coffee ma
         ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+14,sy+10,5,4);ctx.fillRect(sx+19,sy+11,1.5,2);}
       else{ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+7,sy+10,5,4);ctx.fillRect(sx+12,sy+11,1.5,2);   /* a cup */
         ctx.fillStyle="#C9B7A0";ctx.fillRect(sx+19,sy+9,6,5);ctx.fillStyle="#F4F1EA";ctx.fillRect(sx+20,sy+7,4,3);}};
-/* ---------- the flight that runs EAST (#4) ----------
-   ⊓ is drawn for the SOUTH face of the mass: the flight in profile, rising left to right. A run
-   of ⊓ tiles is one flight — each tile finds where it sits in its run (the tiles west of it on
-   the same row) and draws its two steps at the right height, so four tiles read as one flight of
-   eight steps, not four little staircases. */
-TILEDRAW["⊓"]=rc=>{const{sx,sy,x,y}=rc;const w=CW(),row=(w&&w.rows&&w.rows[y])||"";
-  let i=0;while(x-i-1>=0&&row[x-i-1]==="⊓")i++;let L=i+1;while(x-i+L<row.length&&row[x-i+L]==="⊓")L++;
-  const n=L*2,k0=i*2,rise=22/n,top=k=>sy+28-(k+1)*rise;                  /* two steps per tile; total rise 22px over the run */
-  ctx.fillStyle="#6B6470";ctx.fillRect(sx,sy,TS,TS);                       /* the wall of the stair hall */
-  ctx.fillStyle="#4E4854";ctx.beginPath();ctx.moveTo(sx,sy+TS);ctx.lineTo(sx,top(k0)+rise);ctx.lineTo(sx+TS,top(k0+1));ctx.lineTo(sx+TS,sy+TS);ctx.closePath();ctx.fill(); /* the stringer under the flight */
-  for(let st=0;st<2;st++){const k=k0+st,x0=sx+st*16,ty=top(k);
-    ctx.fillStyle="#9F9783";ctx.fillRect(x0,ty,2.5,rise);                  /* the riser up to this tread */
-    ctx.fillStyle="#C6BEAA";ctx.fillRect(x0,ty,16,2.4);                    /* the tread's edge */
-    ctx.fillStyle="rgba(15,12,20,.28)";ctx.fillRect(x0+2.5,ty+2.4,13.5,1.3);} /* the nosing shadow */
-  ctx.strokeStyle="#3A3140";ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(sx,top(k0)-7);ctx.lineTo(sx+TS,top(k0+2)-7);ctx.stroke(); /* the handrail */
-  ctx.fillStyle="#3A3140";ctx.fillRect(sx+7,top(k0)-7,1.5,7);ctx.fillRect(sx+23,top(k0+1)-7,1.5,7);};   /* two balusters */
+/* ---------- THE STAIR MASS IS A WALL, NOT A SECOND STAIRCASE (#4, owner 2026-09-16) ----------
+   The owner, twice: "clearly fucked up stairs", and then — after I explained why they were fine —
+   "i still think the stair railing screenshot i sent is wrong, even if it were a seethrough wall
+   thats not right." He was right both times and the first answer was me defending the engine.
+
+   WHAT WAS ACTUALLY WRONG, read off the map rather than argued about. Both games have this row:
+       13  ##########+⊓⊓⊓⊓#####     the stair MASS
+       14  #..........≡≡≡▲#####     the TREADS you actually walk on
+   The treads are the staircase. The mass is the wall beside it. And the mass was drawing **a
+   second full flight of steps** — its own treads, risers and nosings — one tile north of the real
+   one, so the screen showed the same staircase twice, a tile apart. Worse, the two climbed at
+   different rates: the mass invented `22/n` while the flight rises by `STAIRH` per tread, so the
+   duplicate was not even parallel to the original. That is the whole of "abstract artish".
+
+   And a third thing, which is why it looked wrong from every angle: with no `TILESIDE` entry, this
+   one painter was used for the block's TOP face as well as its sides — a flight drawn in profile,
+   lying flat on the roof of the mass.
+
+   SO: the top is the top of a wall, and the side is the side of a wall — plaster, a skirting that
+   RAKES WITH THE REAL FLIGHT, and the handrail mounted on it. Nothing here draws a tread, because
+   the treads are one tile south and they are the actual stairs. The rake is read from the flight
+   itself (`stairRun` on the tread row), so the line on the wall can no longer disagree with the
+   steps it is beside. */
+function stairMassRake(x,y){       /* where the flight beside this tile is, as a fraction 0..1 up */
+  const w=CW();if(!w)return null;
+  const r=(typeof stairRun==="function")?stairRun(w,x,y+1):null;   /* the treads are the row SOUTH */
+  if(!r||!r.L)return null;
+  return {a:r.i/r.L, b:(r.i+1)/r.L, up:r.up!==false};
+}
+TILEDRAW["⊓"]=rc=>{const{sx,sy}=rc;         /* the TOP of the mass: it is a wall, so it caps like one */
+  ctx.fillStyle="#6B6470";ctx.fillRect(sx,sy,TS,TS);
+  ctx.fillStyle="rgba(255,252,245,.05)";ctx.fillRect(sx,sy,TS,2);          /* the key catches the cap */
+  ctx.fillStyle="rgba(15,12,20,.16)";ctx.fillRect(sx,sy+TS-2.5,TS,2.5);};  /* and the south edge falls away */
+TILESIDE["⊓"]=rc=>{const{sx,sy,x,y}=rc;
+  ctx.fillStyle="#6B6470";ctx.fillRect(sx,sy,TS,TS);                       /* the stairwell wall */
+  const rk=stairMassRake(x,y);
+  if(!rk){ctx.fillStyle="rgba(15,12,20,.12)";ctx.fillRect(sx,sy+TS-3,TS,3);return;}  /* no flight found: a plain wall, and no invented one */
+  /* the flight climbs `rise` pixels over its whole run; this tile carries its own share of it */
+  const RISE=21,FOOT=sy+TS-2;
+  const yA=FOOT-RISE*(rk.up?rk.a:1-rk.a), yB=FOOT-RISE*(rk.up?rk.b:1-rk.b);
+  ctx.fillStyle="#4E4854";ctx.beginPath();                                 /* SKIRTING: the raking board at the foot of the wall, parallel to the nosings */
+  ctx.moveTo(sx,sy+TS);ctx.lineTo(sx,yA);ctx.lineTo(sx+TS,yB);ctx.lineTo(sx+TS,sy+TS);ctx.closePath();ctx.fill();
+  ctx.strokeStyle="rgba(255,252,245,.10)";ctx.lineWidth=1;                 /* its top edge takes the key */
+  ctx.beginPath();ctx.moveTo(sx,yA);ctx.lineTo(sx+TS,yB);ctx.stroke();
+  const RH=11;                                                             /* HANDRAIL: mounted ON the wall, parallel to the flight, on brackets */
+  ctx.fillStyle="#3A3140";
+  [[8,yA+(yB-yA)*0.25],[24,yA+(yB-yA)*0.75]].forEach(([bx,by])=>ctx.fillRect(sx+bx,by-RH,2,RH*0.55));
+  ctx.strokeStyle="#A88650";ctx.lineWidth=2.2;ctx.lineCap="round";
+  ctx.beginPath();ctx.moveTo(sx,yA-RH);ctx.lineTo(sx+TS,yB-RH);ctx.stroke();
+  ctx.strokeStyle="rgba(15,12,20,.22)";ctx.lineWidth=1.2;                  /* the rail's own shadow on the plaster, just under it */
+  ctx.beginPath();ctx.moveTo(sx,yA-RH+2.6);ctx.lineTo(sx+TS,yB-RH+2.6);ctx.stroke();
+  ctx.lineCap="butt";ctx.lineWidth=1;};
 /* the run a tread belongs to: its index from the west, the run's length, and whether it CLIMBS
    (a ▲ head at the east end — the hall side) or is the WELL (a ▼ at the west end — the loft
    side, where you look down into it). Every camera and the 3D lift read this one function. */
@@ -1784,7 +1820,12 @@ function stairLift(w,x,y){const r=stairRun(w,x,y);if(r&&r.up)return STAIRH*(r.i+
 TILEDRAW["≡"]=rc=>{const{sx,sy,x,y}=rc; /* a tread from above on a flight that runs east: two risers a tile,
   the nosing shadow on the east edge; a climbing flight lightens step by step, a well darkens */
   const r=stairRun(CW(),x,y)||{i:0,L:1,up:true,well:false};const t=r.L>1?r.i/(r.L-1):0;
-  const base=r.well?["#8A8476","#7A7468"]:["#B9B19D","#CEC6B2"];
+  /* a well's treads were #8A8476→#7A7468: two dark greys a tenth apart, in a hole, which is how
+     the whole opening came back as one black shape (owner, 2026-09-16). The lid of a sunken tread
+     is the ONE surface in a well that faces the light coming down from the floor above, so it is
+     the brightest thing in there — and it ramps DOWN as it descends, which is what tells you which
+     way the flight goes without a single arrow. */
+  const base=r.well?["#C2BAA6","#8C8578"]:["#B9B19D","#CEC6B2"];
   const mix=(a,b,t)=>{const h=c=>parseInt(c,16);const A=[1,3,5].map(i=>h(a.slice(i,i+2))),B=[1,3,5].map(i=>h(b.slice(i,i+2)));return "rgb("+A.map((v,k)=>Math.round(v+(B[k]-v)*t)).join(",")+")";};
   ctx.fillStyle=mix(base[0],base[1],t);ctx.fillRect(sx+1,sy+3,14,26);ctx.fillRect(sx+17,sy+3,14,26);
   ctx.fillStyle="rgba(255,255,255,.25)";ctx.fillRect(sx+1,sy+3,1.5,26);ctx.fillRect(sx+17,sy+3,1.5,26);

@@ -803,6 +803,57 @@ const { chromium } = require('playwright-core');
                 if (typeof drawTown === 'function') { try { drawTown(); } catch (e) {} } }
     return P;
   });
+  /* ---- NOTHING MAY ROOF OVER THE WORLD ----
+     The owner, about the loft's stairwell, twice — and the second time because the first answer
+     was me explaining why it was fine: "i still think the stair railing screenshot i sent is wrong,
+     even if it were a seethrough wall thats not right."
+     What it actually was: the APRON. A plane added so the city carries on into the dark past the
+     edge of the map, `w.W*3+60` by `w.H*3+60`, centred on the world, at y=-0.05. Its own comment
+     said "well outside it" and its geometry was a sheet over everything — so every sunken thing in
+     either game sat under a dark lid five hundredths of a tile below the floor. The stairwell's
+     treads are at -0.16 to -0.64 and had not been visible since the day the apron was added.
+     Nothing caught it because nothing looks DOWN. Two rounds of re-lighting the steps changed the
+     render by zero bytes, and that is what finally proved where the fault was.
+     So: anything the engine lays under the floor must be outside the world's own footprint, and a
+     well must be a hole you can see into. Both are asked of the built scene, not of the source. */
+  const roof = await page.evaluate(() => {
+    const P = [];
+    if (typeof T3 === 'undefined' || !T3 || !T3.scene) return P;   /* a pack with no 3D: nothing to ask */
+    const w = WORLDS[world]; if (!w) return P;
+    let aprons = 0;
+    T3.scene.traverse(o => {
+      const u = o.userData || {};
+      if (!u.apron) return;
+      aprons++;
+      const g = o.geometry && o.geometry.parameters; if (!g) return;
+      /* a horizontal plane's world footprint, from its own size and position */
+      const hw = g.width / 2, hh = g.height / 2;
+      const x0 = o.position.x - hw, x1 = o.position.x + hw;
+      const z0 = o.position.z - hh, z1 = o.position.z + hh;
+      const overlapX = Math.min(x1, w.W) - Math.max(x0, 0);
+      const overlapZ = Math.min(z1, w.H) - Math.max(z0, 0);
+      if (overlapX > 0.01 && overlapZ > 0.01 && o.position.y < 0)
+        P.push('a piece of scenery lies under ' + Math.round(overlapX) + '×' + Math.round(overlapZ) +
+               ' tiles of the world at y=' + o.position.y.toFixed(2) +
+               ' — anything sunk below the floor there is roofed over and can never be seen');
+    });
+    if (!aprons) return P;   /* no apron in this pack: nothing to be roofed by */
+
+    /* ---- AND A WELL IS A HOLE YOU CAN SEE INTO ---- */
+    let well = null;
+    for (let y = 0; y < w.H && !well; y++) for (let x = 0; x < w.W; x++)
+      if (typeof wellDepth === 'function' && wellDepth(w, x, y) > 0) { well = { x, y, d: wellDepth(w, x, y) }; break; }
+    if (!well) return P;     /* this world has no well — say nothing rather than pass for free */
+    /* is anything at all built inside the hole? */
+    let inside = 0;
+    T3.scene.traverse(o => { const u = o.userData || {};
+      if ((u.tread || u.shaft) && u.x === well.x && u.y === well.y) inside++; });
+    if (!inside)
+      P.push('the well at ' + well.x + ',' + well.y + ' is a hole in the floor with nothing built inside it — a player looking down the stairs sees whatever lies beyond the world');
+    return P;
+  });
+  fails.push(...roof);
+
   fails.push(...plan.filter(l => !/^NOTE-ONLY: /.test(l)));
   plan.filter(l => /^NOTE-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
