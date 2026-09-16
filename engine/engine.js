@@ -3552,6 +3552,125 @@ function docRender(body,secs){
         b.addEventListener("click",()=>docOpen(k,docBack));row.appendChild(b);});}
   });
 }
+/* ═══════════ THE PAPER SEAM — a pack may design its own paper (ARCH-LOG A15) ═══════════
+   The gap, found the hard way: a pack ships nine JavaScript files and NO CSS, so Meridian's
+   civic-form typography — IBM Plex Mono, uppercase letter-spaced grey labels, dashed rules —
+   was hardcoded into the engine for every world that will ever run on it. A recipe book, a
+   ship's log and a court filing all got the same municipal paperwork, and the only lever a pack
+   had was which blocks to stack. A whole day went into improving food drawings inside a surface
+   that could not be designed, while the thing making the page look cheap was never the food.
+
+   A pack now declares `PAPER` — a string of CSS. What it must NOT become, in A15's own words,
+   is "a hole a pack can reach through to restyle the game's chrome, the HUD or the world", so
+   the scoping here is ENFORCED, not requested. A pack that writes `body{display:none}` does not
+   get a warning; it gets a rule that cannot match anything.
+
+   FOUR THINGS MAKE THAT TRUE, and each is a thing a plant has been fired at (docs/BOUNDARY.md):
+
+   1 · THE BROWSER PARSES IT, NOT ME. The text goes into a `media="not all"` <style> — parsed,
+       never applied — and we walk the CSSOM the browser built. Hand-rolling a CSS parser is
+       where this kind of code gets it wrong: every escape becomes a quoting trick I did not
+       think of. The browser already has a correct parser and it is free.
+   2 · EVERY SELECTOR IS RE-ROOTED. A CSS selector always selects its RIGHTMOST element, so
+       prefixing with `.paper ` forces the thing being styled to be a descendant of the reader.
+       `html`, `body` and `:root` need no special case — `.paper html` is a selector that
+       matches nothing, which is exactly the right answer. `&` means the sheet itself.
+   3 · WHAT CANNOT BE RE-ROOTED IS DROPPED, BY ALLOW-LIST. `@import` is a fetch; `@font-face`,
+       `@keyframes` and `@property` each register a GLOBAL name — a pack's `@keyframes bob` would
+       silently replace the engine's. A name is not a subtree, so only two shapes are let through
+       (a style rule and a conditional group) and everything else is dropped, including at-rules
+       CSS has not invented yet.
+   4 · `position:fixed` IS STRIPPED, AND THE READER IS AN ISLAND. Fixed positioning escapes its
+       containing block entirely: a descendant of `.paper` could still paint over the HUD. That
+       declaration is removed, and `.paper` is given `isolation:isolate` in the shell so nothing
+       inside it can raise itself above anything outside it either.
+
+   Meridian declares no PAPER and is byte-identical. The gauge declares one, so the seam is
+   exercised on every CI run by the smallest world that is a world. */
+function paperReRoot(sel){
+  /* Split on top-level commas only — `:is(a,b)` and `:has(x,y)` carry commas that are not
+     selector separators, and splitting on those would produce two broken halves. */
+  const parts=[]; let d=0, cur="";
+  for(const ch of sel){
+    if(ch==="(")d++; else if(ch===")")d--;
+    if(ch===","&&d===0){parts.push(cur);cur="";} else cur+=ch;
+  }
+  parts.push(cur);
+  return parts.map(x=>{
+    const t=x.trim(); if(!t)return null;
+    if(t==="&")return ".paper";                     /* the sheet itself */
+    if(t.startsWith("&"))return ".paper"+t.slice(1); /* &.night → .paper.night */
+    return ".paper "+t;
+  }).filter(Boolean).join(", ");
+}
+/* AN ALLOW-LIST, NOT A DENY-LIST, and the difference is the whole security argument.
+   The first draft keyed on `CSSRule.type`, a deprecated numeric field that returns 0 for every
+   rule type added after it was frozen — `@property` came back as 0 and walked straight past a map
+   that had 15 written in it. A deny-list also has to predict every at-rule CSS will ever gain; an
+   allow-list drops tomorrow's escape today, without knowing its name. Two shapes can be scoped and
+   nothing else may pass:
+     · a style rule, whose selector we re-root, and
+     · a conditional group (@media / @supports / @container), whose contents we recurse into.
+   Everything else is named in the warning by its own text, so a pack author is told WHAT was
+   dropped rather than being left to wonder why their font never loaded. */
+function paperAtName(r){const t=(r.cssText||"").trim();const m=/^@[-\w]+/.exec(t);return m?m[0]:"a rule";}
+function paperWalk(rules,out,warn){
+  for(const r of rules){
+    if(r.cssRules&&r.conditionText!==undefined){      /* @media, @supports, @container */
+      const inner=[];paperWalk(r.cssRules,inner,warn);
+      if(inner.length){
+        const at=r.constructor&&/Media/.test(r.constructor.name)?"@media":
+                 (r.constructor&&/Supports/.test(r.constructor.name)?"@supports":"@container");
+        out.push(at+" "+r.conditionText+"{"+inner.join("\n")+"}");
+      }
+      continue;
+    }
+    if(r.style&&r.selectorText!==undefined){
+      const sel=paperReRoot(r.selectorText); if(!sel)continue;
+      /* read the declarations off the parsed rule, so a pack cannot smuggle a second rule
+         through a declaration block that was never a declaration block */
+      const decls=[];
+      for(let i=0;i<r.style.length;i++){
+        const prop=r.style[i], val=r.style.getPropertyValue(prop);
+        if(prop==="position"&&/fixed/i.test(val)){warn("position:fixed would escape the reader");continue;}
+        decls.push(prop+":"+val+(r.style.getPropertyPriority(prop)?" !important":""));
+      }
+      if(decls.length)out.push(sel+"{"+decls.join(";")+"}");
+      continue;
+    }
+    /* Anything left registers a GLOBAL NAME or fetches: @import, @font-face, @keyframes,
+       @property, @page, @layer — and whatever CSS adds next. A name is not a subtree and cannot
+       be scoped to one, so none of it comes in. */
+    warn(paperAtName(r)+" cannot be scoped to the reader, so it was dropped");
+  }
+}
+function paperSkin(){
+  const css=(typeof PAPER!=="undefined"&&typeof PAPER==="string")?PAPER:"";
+  if(!css.trim())return "";              /* Meridian's path: nothing declared, nothing changes */
+  const probe=document.createElement("style");
+  probe.media="not all";                 /* parsed by the browser, applied to nothing */
+  probe.textContent=css;
+  document.head.appendChild(probe);
+  const out=[],dropped={};
+  const warn=why=>{dropped[why]=(dropped[why]||0)+1;};
+  try{paperWalk(probe.sheet.cssRules,out,warn);}
+  catch(e){mqwarn("paper","the pack's PAPER could not be parsed: "+(e&&e.message),true);}
+  probe.remove();
+  Object.entries(dropped).forEach(([why,n])=>mqwarn("paper","dropped "+n+" — "+why));
+  if(!out.length)return "";
+  const el2=document.createElement("style");
+  el2.id="paperSkin";el2.textContent=out.join("\n");
+  /* AFTER THE LAST STYLESHEET IN THE DOCUMENT, and `document.head` is not that place — the shell's
+     own 34KB block lives in <body>, so appending to the head put the pack's paper FIRST and the
+     engine won every tie at equal specificity. A seam that is perfectly safe and silently does
+     nothing is still a broken seam; the gauge caught this on its first run. */
+  const styles=document.querySelectorAll("style,link[rel=stylesheet]");
+  const last=styles.length?styles[styles.length-1]:null;
+  if(last&&last.parentNode)last.parentNode.insertBefore(el2,last.nextSibling);
+  else (document.body||document.documentElement).appendChild(el2);
+  return el2.textContent;
+}
+const PAPER_APPLIED=paperSkin();
 function docOpen(id,from){
   const secs=docSections(id);if(!secs)return;
   const d=docDef(id)||{},body=$("docBody");

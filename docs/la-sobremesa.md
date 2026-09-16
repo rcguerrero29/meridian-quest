@@ -1483,6 +1483,22 @@ put on while you cook) or **the kitchen's own noises** (Venba's knife, oil, each
 are different builds and different budgets. §21.2's evidence is about the second. **She has not been
 asked yet.**
 
+**ASKED, 2026-09-16 — `docs/for-aj/SOUND.md`.** The owner: *"give her options to choose from."* That
+is a correction to how this was going to be asked, and it is the right one: **"you pick the music" is
+a harder thing to answer than "which of these four"**, because it makes her invent the categories
+before she can have an opinion about them. So she gets three questions with lettered answers — is
+there sound at all and of what kind (music · only the kitchen's own noises · both with a switch ·
+silence), whose music and how much if there is any, and separately whether a thing going RIGHT should
+make a sound. That last one is split out on purpose: it is the only sound that is about the *game*
+rather than about the *kitchen*, and it is the first one that would make this feel like a game instead
+of like cooking. Some people want that and some very much do not, and it is not fair to bundle it
+inside a question about music.
+
+The fork §18.2 opened — **music or the kitchen's own noises** — is question 1, and it is asked as a
+choice rather than as an assumption, which is the thing §21.2's evidence could not settle for her.
+Every answer is marked changeable, and the file says so twice, because "based on vibes" is the
+owner's own word for an answer that is expected to move.
+
 **And the thing to do before any of it** (§17.4): **three pages of the book, drawn by hand, shown to
 her.** Three plates, three lines in her voice, no engine and no pack. It is the cheapest real gate in
 this document and it tests the one thing nothing else can: whether a book that fills up is enough to

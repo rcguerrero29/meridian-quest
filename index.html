@@ -140,7 +140,13 @@
   .settings.reader{position:fixed; inset:0; z-index:60; display:flex; justify-content:center;
     align-items:flex-start; overflow:hidden;
     padding:14px 10px 28px; background:rgba(16,13,24,.88);}
-  .paper{position:relative; width:100%; max-width:640px; margin:0 auto; background:#F7F2E4; color:#2A2620;
+  /* isolation:isolate makes the reader a stacking context, which is the STRUCTURAL half of the
+     paper seam (ARCH-LOG A15, engine.js paperSkin): a pack may restyle what is inside this sheet,
+     and nothing it writes may paint on top of the HUD, the chrome or the world. Re-rooting every
+     selector stops a pack SELECTING anything outside; this stops a descendant it legitimately
+     styles from raising itself out. `position:fixed` is stripped in the engine for the same
+     reason — it escapes the containing block, which a stacking context alone would not stop. */
+  .paper{position:relative; isolation:isolate; width:100%; max-width:640px; margin:0 auto; background:#F7F2E4; color:#2A2620;
     border-radius:3px; padding:30px 24px 20px; box-shadow:0 10px 34px rgba(0,0,0,.5);
     font-family:'IBM Plex Mono',monospace; font-size:.78rem; line-height:1.55;
     box-sizing:border-box; display:flex; flex-direction:column; max-height:100%;}

@@ -222,6 +222,42 @@ refuses a line that declares a word no reader exists for, so a `dwell:` key with
 would be a promise the engine does not keep. If your game needs its own numbers, that is one seam,
 added once, with an audit entry each.
 
+## 1½ · Your world's PAPER — the tenth thing, and it is optional (2026-09-16)
+
+*Added the day `ARCH-LOG.md` A15 was closed. Read this before you design a single document, because
+the day it was written cost somebody an afternoon of drawing food inside a surface that could not be
+changed.*
+
+**A pack ships nine JavaScript files. The tenth thing it may declare is `PAPER` — a string of CSS —
+and it is what stops your documents looking like Meridian's municipal paperwork.**
+
+```js
+const PAPER = `
+  & { background:#0E1A24; color:#D9E6EF; font-family:Georgia,serif; }
+  .dkv b { color:#7FB2CE; text-transform:none; letter-spacing:0; }
+  .dnote { background:#14242F; border-left-color:#3E7FA6; font-style:normal; }
+`;
+```
+
+- **`&` means the sheet itself.** Everything else is a selector inside it.
+- **Omit it entirely and nothing changes.** Meridian declares none. This is not a thing you must
+  answer at the start; it is a thing you will want on the afternoon your first document looks wrong.
+- **The engine re-roots every selector at the reader.** You cannot style the HUD, the chrome, the
+  world canvas or the page — not because we ask you not to, but because a selector that tries comes
+  out the other side matching nothing. `docs/BOUNDARY.md`, "The paper seam", says exactly how.
+- **`@import`, `@font-face`, `@keyframes` and `@property` are dropped**, and the log says so. They
+  register a *global name* or fetch, and a name cannot be scoped to a subtree. Use faces the system
+  already has (`Georgia`, `ui-serif`, `ui-monospace`) — that is enough to stop looking like a form.
+- **`position:fixed` is stripped**, for the same reason: it escapes the reader and can cover the HUD.
+
+**The two questions A15 says to keep apart forever, and this is the template's copy of them:**
+
+- *"Can the engine's reader draw this?"* — answer it by rendering in the reader.
+- *"Would the person this is for want to open it?"* — **never answer this one with the reader.**
+  Design the surface first, then judge. Three specialist reviewers measured, cold-read and corrected
+  a drawing for a whole day and not one said the surface was a form, because every brief pointed at
+  the picture.
+
 ## 2 · The switch — honest state: there is no pack selector
 
 The pack is hardcoded in **three places**, and a new world means touching all three:

@@ -544,6 +544,125 @@ const { chromium } = require('playwright-core');
   });
   fails.push(...silentsave);
 
+  /* ---- A PACK MAY DESIGN ITS PAPER, AND MAY NOT REACH OUT OF IT ----
+     ARCH-LOG A15, built 2026-09-16 on the owner's "ok go for the seam". The gap it closes: a pack
+     shipped nine JavaScript files and no CSS, so Meridian's civic-form typography was hardcoded for
+     every world that will ever run on this engine. The risk it opens, in A15's own words, is "a hole
+     a pack can reach through to restyle the game's chrome, the HUD or the world" — so this asks BOTH
+     halves, because a seam that is merely safe is a seam nobody can use:
+
+       1 · did the pack's own paper actually ARRIVE, and
+       2 · did every attempt to reach past the reader come to nothing.
+
+     Asked of the sheet the ENGINE PRODUCED — `PAPER_APPLIED` — and never of a sheet this test wrote
+     itself. That is register fault A (docs/REGRESSION.md): a guard that supplies its own input tests
+     a pair of strings it typed out, and a plant that changes what the engine ships walks past it.
+     The attacks live in content/gauge/config.js so they run against a real pack on every CI push. */
+  const paper = await page.evaluate(() => {
+    const P = [];
+    if (typeof paperSkin !== 'function') {
+      P.push('the engine has no paper seam, so a pack cannot design its own documents and every world gets Meridian\'s civic-form typography (docs/ARCH-LOG.md A15)');
+      return P; }
+    const declared = (typeof PAPER === 'string') ? PAPER : '';
+    const out = (typeof PAPER_APPLIED === 'string') ? PAPER_APPLIED : '';
+
+    /* ---- A PACK THAT DECLARES NOTHING MUST GET NOTHING. Meridian's path, and the one that keeps
+           "every engine change is behaviour-identical for Meridian's players" true. ---- */
+    if (!declared.trim()) {
+      if (out) P.push('this pack declares no PAPER and the engine injected a stylesheet anyway');
+      if (document.getElementById('paperSkin')) P.push('a pack that declares no PAPER still got a <style id="paperSkin"> in the document');
+      return P;
+    }
+
+    /* ---- 1 · THE GOOD HALF ARRIVED ---- */
+    if (!out) { P.push('this pack declares PAPER and the engine produced no stylesheet at all — the seam is dead'); return P; }
+    const node = document.getElementById('paperSkin');
+    if (!node) P.push('the engine built a paper stylesheet but never put it in the document');
+    else {
+      /* it must come AFTER the shell's own styles, or a tie goes to the engine and the pack's
+         declaration silently loses to Meridian's voice */
+      const styles = [...document.querySelectorAll('style')];
+      if (styles.indexOf(node) !== styles.length - 1 && styles.some((s2, i) => i > styles.indexOf(node) && /\.paper/.test(s2.textContent || '')))
+        P.push('the pack\'s paper is injected before a shell stylesheet that also styles .paper, so the pack loses every tie');
+    }
+    /* the sheet is real CSS the browser accepted, not a string that looks like CSS */
+    let ruleCount = 0;
+    try { ruleCount = node && node.sheet ? node.sheet.cssRules.length : 0; } catch (e) {}
+    if (!ruleCount) P.push('the injected paper stylesheet parses to zero rules — it reached the page as text and styles nothing');
+
+    /* ---- 2 · EVERY SELECTOR IS ROOTED IN THE READER ----
+           Read off the PARSED sheet, so a selector that only LOOKS scoped in the source text cannot
+           pass: the browser normalises what we are checking. ---- */
+    const sels = [];
+    try { for (const r of node.sheet.cssRules) collect(r, sels); } catch (e) {}
+    function collect(r, acc) {
+      if (r.selectorText !== undefined) { acc.push(r.selectorText); return; }
+      if (r.cssRules) for (const c of r.cssRules) collect(c, acc);
+    }
+    sels.forEach(sel => {
+      sel.split(',').forEach(one => {
+        const t = one.trim(); if (!t) return;
+        if (!/^\.paper(\s|$|[.:#[>~+])/.test(t))
+          P.push('a pack selector escaped the reader: "' + t + '" is not rooted at .paper, so a pack can style the game outside its own paper');
+      });
+    });
+
+    /* ---- 3 · AND THE THINGS THAT CANNOT BE SCOPED DID NOT COME IN ----
+           A selector can be re-rooted; a NAME cannot. @font-face, @keyframes and @property all
+           register into a global namespace, and @import is a fetch. Each must be absent from the
+           output even though the gauge's PAPER declares all four. ---- */
+    [['@import', 'a fetch to another origin'],
+     ['@font-face', 'a global font name'],
+     ['@keyframes', 'a global animation name the engine already uses'],
+     ['@property', 'a global custom-property registration']].forEach(([at, why]) => {
+      if (declared.includes(at) && out.includes(at))
+        P.push(at + ' survived into the pack\'s paper, and it cannot be scoped to a subtree — it registers ' + why);
+    });
+
+    /* ---- 4 · position:fixed IS GONE, because it escapes the containing block: a descendant of
+           .paper set fixed can paint over the HUD however well the selector is scoped. ---- */
+    if (/position\s*:\s*fixed/i.test(out))
+      P.push('position:fixed survived into the pack\'s paper — a scoped selector does not stop a fixed element covering the whole screen');
+
+    /* ---- 5 · AND THE READER IS AN ISLAND. The selector half and the fixed half both assume
+           nothing inside .paper can raise itself above the chrome; that is only true if .paper is
+           a stacking context, which is a shell CSS fact and not an engine one, so it is asked
+           HERE rather than assumed. This is register fault D: measure the thing, not the container
+           it happens to sit in. ---- */
+    const sheet = document.querySelector('.paper');
+    if (!sheet) P.push('there is no .paper element to scope the seam to');
+    else if (getComputedStyle(sheet).isolation !== 'isolate')
+      P.push('.paper is not a stacking context (isolation:isolate), so an absolutely-positioned element inside the reader can paint on top of the HUD');
+
+    /* ---- 5b · AND THE ELEMENT ACTUALLY WEARS IT.
+           Everything above reads the STYLESHEET, which is a proxy: a sheet can contain a rule that
+           loses to the shell on specificity, or names a property the browser rejected, and the text
+           would still look right. docs/REGRESSION.md's register is full of guards that stopped at
+           exactly this point. So ask the element what colour it IS. ---- */
+    if (sheet) {
+      const want = /&\s*\{[^}]*background\s*:\s*(#[0-9A-Fa-f]{3,8})/.exec(declared);
+      if (want) {
+        const hex = want[1].toLowerCase();
+        const rgb = getComputedStyle(sheet).backgroundColor;
+        const m2 = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(rgb || '');
+        const got = m2 ? '#' + [1, 2, 3].map(i => (+m2[i]).toString(16).padStart(2, '0')).join('') : rgb;
+        if (got !== hex)
+          P.push('the pack asked for paper of ' + hex + ' and the reader is actually ' + got +
+                 ' — the stylesheet reached the page and the element did not wear it, so the seam is decorative');
+      }
+    }
+
+    /* ---- 6 · AND THE ESCAPES REALLY WERE DROPPED, NOT MERELY ABSENT FROM THE TEXT.
+           Ask the page: does anything outside the reader actually wear what the pack asked for? ---- */
+    ['body', 'html'].forEach(tag => {
+      const el2 = document.querySelector(tag);
+      if (el2 && getComputedStyle(el2).display === 'none')
+        P.push('the pack\'s paper hid <' + tag + '> — it reached straight out of the reader and took the page with it');
+    });
+    return P;
+  });
+  fails.push(...paper);
+
   /* ---- THE BEARING POINTS AT THE PLACE, AND STAYS ON THE SCREEN ----
      The owner picked the street arrow over the crew's advice on 2026-09-15 ("bearing lets try 2"),
      so it has to be right: an arrow that points confidently at the wrong wall is worse than no
