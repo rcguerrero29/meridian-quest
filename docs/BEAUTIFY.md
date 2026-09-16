@@ -373,3 +373,61 @@ apron exactly as it shipped: fires on both games.
   wall now, with a skirting that rakes with the real flight and a handrail mounted on it.
 - **And that drawing was painted on the block's TOP face too**, because `⊓` had no `TILESIDE` entry
   and one painter served both. A flight in profile, lying flat on the roof of the mass.
+
+## A map is symbols, not a heat map — 2026-09-16
+
+*The owner, on the plan: "the map says tap a mark, but cannot tell if a mark is tapped. also... the
+squares/dots for people are garbage, we really cant improve this so i can tell what things are?"*
+
+**Both halves were true, and counting the tiles said why.** Of 29 glyphs on Meridian's plan:
+
+| | |
+|---|---|
+| 133 tiles | `F` — each a solid `#B0895B` square, so the crew pen and every hoarding came out as a **mass** with no shape to it |
+| 9 tiles | `J` — trees, as green squares, indistinguishable from any other green square |
+| **7 glyphs** | a desk, a chair, a stove, a counter — **no map colour at all**, falling through to the open-ground fill. **Painted as floor. Invisible, silently, for as long as the plan has existed.** |
+
+A tile was one flat fill and nothing else, which is a data visualisation of a city and not a map of
+one — the same fault this file records about the paper, one layer in.
+
+**The rule that fixed it is a distinction, not a symbol set.** An **area** the pack has already
+decided how to show — water, road, pavement, a building — keeps its fill. A **thing** gets a shape:
+a tree is a canopy and a trunk, a fence is **a line, not a block** (that one change is what turned a
+yard back into a yard), a site is hazard stripes, an appliance is a small object. Symbols are read
+off `TILES[g].kind`, never off the glyph, so a second world gets them free.
+
+**And the first draft of that got it backwards**, which is worth recording: everything without a
+handled kind drew an object, and Meridian's canal is 75 tiles of `≈` with no kind at all, so a river
+came out as **seventy-five little grey boxes**. Worse than the squares it replaced. *Having a colour
+is what makes a glyph an area* — the pack already answered the question.
+
+**The marks: at nine pixels, silhouette is the only thing that survives.** `r` is `s*0.45` on a
+ten-pixel tile, so the "somebody has work for you" mark was a nine-pixel disc carrying an exclamation
+mark **one and a half pixels wide**. Two of the three were the same idea — a coloured blob with a
+tiny tick. The interior detail is gone and the outline carries the meaning: **a person**, **a speech
+bubble**, **a card**. Three shapes you could tell apart in greyscale, which is the repo's own rule
+(colour never alone) finally being worth something. The colours are untouched; they were measured.
+
+**And a tap now answers on the map.** It was a two-pixel ring in the *same purple as the you-are-here
+dot*, plus a caption under the canvas he was not looking at. Now: a flag on a pole, a filled disc, and
+**every other mark dimmed** — the last one being the cheap half of legibility and the half always
+forgotten. *"This one" is only visible against "not those."*
+
+### Three faults in the guard for it, and they are the register's own greatest hits
+
+1. **It exited early.** `return` inside a `for` loop nested in a `forEach` walks out of the whole
+   panel — at Meridian's tile (0,0), which is open ground. It compared four glyphs instead of
+   twenty-nine and passed the plant it was written for.
+2. **It supplied its own input.** It called `planTile` directly, so a plant that changed the *call
+   site* and left the painter alone sailed through. It renders the plan twice now — once as it is,
+   once with every tile replaced by open ground — so paper, grain, folds, vignette and labels are
+   identical in both and whatever differs is exactly the tile's own contribution.
+3. **It measured something standing in front of the thing.** A mark is ~11px across on a 10px tile,
+   so it covers its tile completely, and Meridian's `e` has one instance with a person standing on
+   it. The guard called the tile invisible for a reason that had nothing to do with the tile. The
+   mark painter is stubbed for the measurement — take out what you are not measuring rather than
+   subtract it afterwards.
+
+**And the threshold is measured, not picked.** The confirmation *as it shipped* moves 18% of the
+pixels around a mark, and 18% is precisely what the owner described as not being able to tell. The
+flag, disc and dimming move 36%. The floor sits at 28 — between them, nearer the thing that failed.
