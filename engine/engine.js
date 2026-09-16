@@ -5134,28 +5134,91 @@ function drawMark(g,cx,cy,k,r){ /* ONE painter, two surfaces: the plan and its o
      model and the one that does the most (docs/BEAUTIFY.md, 2026-09-15). */
   g.save();g.fillStyle="rgba(58,44,20,.26)";
   g.beginPath();g.ellipse(cx+r*0.16,cy+r*0.62,r*0.92,r*0.38,0,0,7);g.fill();g.restore();
-  g.save();g.strokeStyle="#2B2536";g.lineWidth=1.5;g.fillStyle=m.c;
-  if(m.sh==="disc"){g.beginPath();g.arc(cx,cy,r,0,7);g.fill();g.stroke();
-    g.fillStyle="#FFFFFF";g.fillRect(cx-r*0.17,cy-r*0.58,r*0.34,r*0.72);g.fillRect(cx-r*0.17,cy+r*0.34,r*0.34,r*0.3);}
-  else if(m.sh==="diamond"){g.beginPath();g.moveTo(cx,cy-r*1.2);g.lineTo(cx+r*1.2,cy);g.lineTo(cx,cy+r*1.2);g.lineTo(cx-r*1.2,cy);
-    g.closePath();g.fill();g.stroke();
-    g.fillStyle="#6B4A16";g.fillRect(cx-r*0.14,cy-r*0.5,r*0.28,r*0.6);g.fillRect(cx-r*0.14,cy+r*0.3,r*0.28,r*0.26);}
-  else{const w=r*2.2,h=r*1.7;g.fillRect(cx-w/2,cy-h/2,w,h);g.strokeRect(cx-w/2,cy-h/2,w,h);
-    g.fillStyle="#B9AE95";g.fillRect(cx-w/2+2,cy-h/2+3,Math.max(2,w-6),1);g.fillRect(cx-w/2+2,cy+h/2-4,Math.max(2,w-5),1);}
+  /* ---- A MARK SAYS WHAT IT IS, AND AT NINE PIXELS THAT MEANS SILHOUETTE ----
+     Owner, 2026-09-16: "the squares/dots for people are garbage, we really cant improve this so i
+     can tell what things are?" He is right, and the arithmetic says why: `r` is `s*0.45` on a ten
+     pixel tile, so `work` was a nine-pixel disc carrying an exclamation mark ONE AND A HALF PIXELS
+     wide. Nothing was ever going to be legible inside it. Two of the three were the same idea —
+     a coloured blob with a tiny tick — separated by a shape nobody could name.
+     So the interior detail is gone and the OUTLINE carries the meaning, which is the only thing
+     that survives at this size: somebody to see is a PERSON, somebody with a question is a SPEECH
+     BUBBLE, something to read is a CARD. Three silhouettes you could tell apart in a thumbnail, in
+     greyscale, or with the colour knocked out — which is the repo's own rule (`el-mapa` §7: colour
+     never alone, every colour also differs in shape) finally being worth something.
+     The colours are untouched: they were measured to Δ40 luma and that work still holds. */
+  g.save();g.lineWidth=Math.max(1.2,r*0.30);g.strokeStyle="#FFF9EC";  /* a pale keyline, so it reads on paper OR on a dark building */
+  g.fillStyle=m.c;
+  const path=()=>{
+    g.beginPath();
+    if(m.sh==="disc"){                                  /* A PERSON: head and shoulders */
+      g.arc(cx,cy-r*0.42,r*0.46,0,7);g.closePath();
+      g.moveTo(cx-r*0.82,cy+r*1.02);
+      g.quadraticCurveTo(cx-r*0.78,cy+r*0.1,cx,cy+r*0.1);
+      g.quadraticCurveTo(cx+r*0.78,cy+r*0.1,cx+r*0.82,cy+r*1.02);
+      g.closePath();
+    }else if(m.sh==="diamond"){                         /* A SPEECH BUBBLE: somebody is asking you something */
+      const w=r*1.9,h=r*1.45,x0=cx-w/2,y0=cy-h/2-r*0.16,rr=r*0.42;
+      if(g.roundRect)g.roundRect(x0,y0,w,h,rr);else g.rect(x0,y0,w,h);
+      g.moveTo(cx-r*0.46,y0+h);g.lineTo(cx-r*0.1,y0+h+r*0.78);g.lineTo(cx+r*0.28,y0+h);g.closePath();
+    }else{                                              /* A CARD: a page with a folded corner */
+      const w=r*1.7,h=r*2.0,x0=cx-w/2,y0=cy-h/2,f=r*0.55;
+      g.moveTo(x0,y0);g.lineTo(x0+w-f,y0);g.lineTo(x0+w,y0+f);g.lineTo(x0+w,y0+h);
+      g.lineTo(x0,y0+h);g.closePath();
+    }
+  };
+  path();g.stroke();                                    /* the pale outline goes UNDER the fill, so it is a halo */
+  path();g.fill();
+  g.lineWidth=Math.max(0.8,r*0.16);g.strokeStyle="rgba(43,37,54,.75)";
+  path();g.stroke();                                    /* and a dark keyline inside it: legible on cream paper too */
+  if(m.sh==="card"){                                    /* two ruled lines, which is what makes a card a PAGE */
+    g.strokeStyle="rgba(43,37,54,.45)";g.lineWidth=Math.max(0.7,r*0.14);
+    [-0.18,0.28].forEach(f=>{g.beginPath();g.moveTo(cx-r*0.5,cy+r*f);g.lineTo(cx+r*0.5,cy+r*f);g.stroke();});}
   g.restore();}
 let mapDest=null; /* {w,x,y} — ONE at a time, and never saved. A destination is what you are doing
                      right now; a saved one is the list A3 bans, wearing a compass. */
 function drawPlanMarks(g2,s){
-  planMarks().forEach(m=>drawMark(g2,m.gx*s+s/2,m.gy*s+s/2,m.k,s*0.45));   /* gx,gy: this is paper */
+  /* while one mark is chosen the others step back, because "this one" is only visible against
+     "not those" — the half of legibility that is always left out (owner, 2026-09-16) */
+  const chosen=mapDest?(mapDest.gx+","+mapDest.gy):null;
+  planMarks().forEach(m=>{const here=chosen===(m.gx+","+m.gy);
+    if(here)return;                                     /* the chosen one is drawn last, on its flag */
+    g2.save();if(chosen)g2.globalAlpha=0.38;
+    drawMark(g2,m.gx*s+s/2,m.gy*s+s/2,m.k,s*0.56);      /* gx,gy: this is paper */
+    g2.restore();});
   if(!mapDest)return;
   /* the ring is the destination HE chose. Nothing here nominates a "next" — that was the one call
      the plan left open and his hybrid answered it (el-mapa §7.3). */
+  /* ---- AND YOU CAN SEE THAT YOU TAPPED IT (owner, 2026-09-16) ----
+     "the map says tap a mark, but cannot tell if a mark is tapped." He was right twice over. The
+     confirmation was a TWO-PIXEL RING in #7A3FE0 — which is the same purple as the you-are-here
+     dot, so on the one occasion it did catch the eye it said "here" rather than "going there", and
+     the only other feedback was a caption under the canvas he was not looking at.
+     A tap now answers on the map itself, in three ways that survive a small screen: the chosen mark
+     stands on a FLAG whose pole reaches the ground, it sits in a filled disc so it separates from
+     the paper whatever is behind it, and every other mark on the plan is dimmed. The last one is
+     the cheap half of legibility and the half that is always forgotten — "this one" is only ever
+     visible against "not those". */
   const cx=(mapDest.gx===undefined?mapDest.x:mapDest.gx)*s+s/2,
         cy=(mapDest.gy===undefined?mapDest.y:mapDest.gy)*s+s/2;
-  g2.save();g2.lineWidth=2;g2.strokeStyle="#7A3FE0";
-  g2.beginPath();g2.arc(cx,cy,s*0.9,0,7);g2.stroke();
-  g2.lineWidth=1;g2.strokeStyle="#F2F1EA";
-  g2.beginPath();g2.arc(cx,cy,s*0.9+1.5,0,7);g2.stroke();g2.restore();}
+  g2.save();
+  const R=s*0.86;
+  g2.fillStyle="rgba(122,63,224,.16)";                       /* a soft field, so the eye lands here first */
+  g2.beginPath();g2.arc(cx,cy,R*1.5,0,7);g2.fill();
+  g2.strokeStyle="rgba(58,44,20,.30)";g2.lineWidth=Math.max(2,s*0.22);  /* the pole, and its shadow */
+  g2.beginPath();g2.moveTo(cx+1,cy+1);g2.lineTo(cx+1,cy-R*2.1+1);g2.stroke();
+  g2.strokeStyle="#4A2A8E";g2.lineWidth=Math.max(1.4,s*0.16);
+  g2.beginPath();g2.moveTo(cx,cy);g2.lineTo(cx,cy-R*2.1);g2.stroke();
+  g2.fillStyle="#7A3FE0";                                     /* the flag itself */
+  g2.beginPath();g2.moveTo(cx,cy-R*2.1);g2.lineTo(cx+R*1.5,cy-R*1.72);
+  g2.lineTo(cx,cy-R*1.34);g2.closePath();g2.fill();
+  g2.fillStyle="rgba(255,255,255,.34)";
+  g2.beginPath();g2.moveTo(cx,cy-R*2.1);g2.lineTo(cx+R*1.5,cy-R*1.72);g2.lineTo(cx,cy-R*1.9);g2.closePath();g2.fill();
+  g2.fillStyle="#F4F1EA";                                     /* the disc the mark stands in */
+  g2.beginPath();g2.arc(cx,cy,R,0,7);g2.fill();
+  g2.lineWidth=Math.max(2,s*0.22);g2.strokeStyle="#7A3FE0";
+  g2.beginPath();g2.arc(cx,cy,R,0,7);g2.stroke();
+  g2.restore();
+  drawMark(g2,cx,cy,mapDest.k||((planMarks().find(m=>m.gx===mapDest.gx&&m.gy===mapDest.gy)||{}).k),s*0.56);}
 /* The legend is REAL TEXT under the plan, built here rather than in the shell so a pack gets it
    without touching its own index.html. The line it stands beside is drawn at 8 canvas pixels —
    about 7.5 CSS px on a phone — which is what "its hard to tell" measures like. */
@@ -5355,6 +5418,95 @@ function destCheck(){ /* you arrived: the destination is spent, and nothing reme
    the arrow in the street pointing at a place seventeen tiles north of the real one. So a mark now
    carries `x,y,w` (where the thing IS, unchanged) and `gx,gy` (where it is DRAWN), and nothing is
    allowed to use one for the other. */
+/* ═══════════ THE PLAN IS A MAP, NOT A HEAT MAP (owner, 2026-09-16) ═══════════
+   "the squares/dots for people are garbage, we really cant improve this so i can tell what things
+   are?" — and the inventory says exactly why. Of the 29 glyphs on Meridian's plan:
+     · 133 tiles of `F` were one solid #B0895B square each, so the crew pen and every hoarding came
+       out as a brown MASS with no shape to it;
+     ·   9 trees were green squares, indistinguishable from any other green square;
+     ·   8 glyphs — a desk, a chair, a stove, a counter — had no colour at all and fell through to
+       the OPEN-GROUND fill, so they were drawn as floor. Invisible, silently, for as long as the
+       plan has existed.
+   A tile was one flat fill and nothing else, which is a data visualisation of a city and not a map
+   of one — the same fault `docs/BEAUTIFY.md` records about the paper, one layer in.
+
+   So a tile is now drawn by WHAT IT IS. The engine already knows: `TILES[g].kind`. Symbols are read
+   off the kind, never off the glyph, so a second world gets them for free and Meridian's letters
+   stay Meridian's. A pack's MAPCOL still chooses every colour; this chooses the SHAPE.
+   Two rules that do most of the work:
+     · a FENCE is a line, not a block — it is a thing you cannot cross, not a thing that fills a
+       square, and drawing it as a block is what turned a yard into a slab;
+     · nothing falls through to the ground colour. A tile the pack never coloured is still a THING,
+       and it gets the unknown-object mark rather than being painted as floor. */
+const PLANINK="#3A2F17";
+function planTile(g2,ww,x,y,sx,sy,s,col){
+  const g=ww.rows[y][x], t=TILES[g]||{}, kind=t.kind||null;
+  const named=col[g], ground=col["."]||"#D5D2C6";
+  const at=(ax,ay)=>((ww.rows[ay]||"")[ax])||"";
+  const sameKind=(ax,ay)=>{const k=(TILES[at(ax,ay)]||{}).kind;return !!k&&k===kind;};
+  const ink=(a)=>{g2.fillStyle="rgba(58,47,23,"+a+")";};
+  /* WHICH TILES GET A SYMBOL, and it is not "all of them" — the first draft drew an object on every
+     tile that had no handled kind, and Meridian's canal is 75 tiles of `≈` with no kind at all, so
+     a river came out as seventy-five little grey boxes. Worse than the squares it replaced.
+     The rule that works: a glyph the pack gave a COLOUR is an AREA the pack has already decided how
+     to show — water, road, pavement, a building — and it keeps its fill. A glyph with NO colour is
+     a thing nobody ever thought about on this map, and those are the eight that were being painted
+     as open floor. Symbols go to the kinds named below, which are things, not areas. */
+  const SYMBOLIC={tree:1,nature:1,fence:1,transit:1,site:1,marker:1,furniture:1,appliance:1};
+  if(!SYMBOLIC[kind]){                                  /* an area: exactly what the plan drew before */
+    g2.fillStyle=named||(kind==="water"?"#4A4B52":ground);g2.fillRect(sx,sy,s,s);
+    if(kind==="water"||g==="≈"){                        /* two ripples, so a canal is not a slab */
+      g2.strokeStyle="rgba(255,255,255,.16)";g2.lineWidth=Math.max(0.7,s*0.07);
+      [0.38,0.7].forEach(f=>{g2.beginPath();g2.moveTo(sx,sy+s*f);
+        g2.quadraticCurveTo(sx+s*0.5,sy+s*(f-0.14),sx+s,sy+s*f);g2.stroke();});}
+    if(!named&&g!=="."){                                /* no colour and no kind: a thing, drawn as one */
+      g2.fillStyle="#A79B86";g2.fillRect(sx+s*0.26,sy+s*0.3,s*0.48,s*0.42);
+      g2.fillStyle="rgba(255,255,255,.26)";g2.fillRect(sx+s*0.26,sy+s*0.3,s*0.48,Math.max(0.8,s*0.1));
+      ink(.40);g2.fillRect(sx+s*0.26,sy+s*0.7,s*0.48,Math.max(0.8,s*0.09));}
+    return;}
+  g2.fillStyle=ground;g2.fillRect(sx,sy,s,s);           /* a thing stands ON the street, not in a tile of its own */
+
+  if(kind==="fence"){                                   /* A LINE, NOT A BLOCK — the one that fixes 133 tiles */
+    const ew=sameKind(x-1,y)||sameKind(x+1,y), ns=sameKind(x,y-1)||sameKind(x,y+1);
+    g2.strokeStyle=named||"#8A6A3E";g2.lineWidth=Math.max(1.3,s*0.17);g2.lineCap="round";
+    g2.beginPath();
+    if(ew&&!ns){g2.moveTo(sx,sy+s/2);g2.lineTo(sx+s,sy+s/2);}
+    else if(ns&&!ew){g2.moveTo(sx+s/2,sy);g2.lineTo(sx+s/2,sy+s);}
+    else if(ew&&ns){g2.moveTo(sx,sy+s/2);g2.lineTo(sx+s/2,sy+s/2);g2.lineTo(sx+s/2,sy+s);}
+    else{g2.moveTo(sx+s*0.2,sy+s/2);g2.lineTo(sx+s*0.8,sy+s/2);}
+    g2.stroke();g2.lineCap="butt";g2.lineWidth=1;return;}
+
+  if(kind==="tree"||kind==="nature"){                   /* a canopy and a trunk: it reads at ten pixels */
+    ink(.30);g2.fillRect(sx+s*0.45,sy+s*0.52,Math.max(1,s*0.12),s*0.34);
+    g2.fillStyle=named||"#639C6C";
+    g2.beginPath();g2.arc(sx+s*0.5,sy+s*0.42,s*0.30,0,7);g2.fill();
+    g2.fillStyle="rgba(255,255,255,.22)";
+    g2.beginPath();g2.arc(sx+s*0.42,sy+s*0.34,s*0.12,0,7);g2.fill();return;}
+
+  if(kind==="transit"){                                 /* a rail: two sleepers across the lane */
+    g2.strokeStyle=named||"#C0392B";g2.lineWidth=Math.max(1,s*0.13);
+    g2.beginPath();g2.moveTo(sx+s*0.5,sy);g2.lineTo(sx+s*0.5,sy+s);g2.stroke();
+    ink(.45);[0.3,0.7].forEach(f=>g2.fillRect(sx+s*0.2,sy+s*f,s*0.6,Math.max(0.8,s*0.09)));return;}
+
+  if(kind==="site"){                                    /* hazard: two bars on the diagonal */
+    g2.fillStyle=named||"#E7C25A";g2.fillRect(sx+s*0.1,sy+s*0.1,s*0.8,s*0.8);
+    ink(.55);g2.save();g2.beginPath();g2.rect(sx+s*0.1,sy+s*0.1,s*0.8,s*0.8);g2.clip();
+    [-0.3,0.3].forEach(o=>{g2.beginPath();g2.moveTo(sx+s*(0.1+o),sy+s*0.9);
+      g2.lineTo(sx+s*(0.6+o),sy+s*0.1);g2.lineTo(sx+s*(0.78+o),sy+s*0.1);
+      g2.lineTo(sx+s*(0.28+o),sy+s*0.9);g2.closePath();g2.fill();});g2.restore();return;}
+
+  if(kind==="marker"){                                  /* a pin */
+    g2.fillStyle=named||"#E0662B";
+    g2.beginPath();g2.arc(sx+s*0.5,sy+s*0.38,s*0.24,0,7);g2.fill();
+    g2.beginPath();g2.moveTo(sx+s*0.5,sy+s*0.88);g2.lineTo(sx+s*0.32,sy+s*0.46);
+    g2.lineTo(sx+s*0.68,sy+s*0.46);g2.closePath();g2.fill();return;}
+
+  /* furniture and appliances: a small object, drawn as an object */
+  const c=named||"#A79B86";
+  g2.fillStyle=c;g2.fillRect(sx+s*0.24,sy+s*0.28,s*0.52,s*0.46);
+  g2.fillStyle="rgba(255,255,255,.26)";g2.fillRect(sx+s*0.24,sy+s*0.28,s*0.52,Math.max(0.8,s*0.1));
+  ink(.40);g2.fillRect(sx+s*0.24,sy+s*0.72,s*0.52,Math.max(0.8,s*0.09));
+}
 function planPanels(){
   const one=[{world:PL.street,ox:0,oy:0}];
   const T2=(typeof TOWNPLAN!=="undefined"&&Array.isArray(TOWNPLAN))?TOWNPLAN:null;
@@ -5386,8 +5538,8 @@ function drawTown(){
   g2.globalAlpha=1;
   const col={...BASECOL,...(typeof MAPCOL!=="undefined"?MAPCOL:{})};
   panels.forEach(p2=>{const ww=WORLDS[p2.world];
-    for(let y=0;y<ww.H;y++)for(let x=0;x<ww.W;x++){
-      g2.fillStyle=col[ww.rows[y][x]]||"#D5D2C6";g2.fillRect((x+p2.ox)*s,(y+p2.oy)*s,s,s);}});
+    for(let y=0;y<ww.H;y++)for(let x=0;x<ww.W;x++)
+      planTile(g2,ww,x,y,(x+p2.ox)*s,(y+p2.oy)*s,s,col);});
   /* the folds: a shade on one side of the crease and a highlight on the other, because a fold is
      a ridge and a ridge has two sides. Over the tiles, since the paper is folded with the map on
      it — this is the one mark on the plan that is not a thing in the city. */

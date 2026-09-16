@@ -854,6 +854,118 @@ const { chromium } = require('playwright-core');
   });
   fails.push(...roof);
 
+  /* ---- EVERY THING ON THE PLAN IS DRAWN AS A THING, AND A TAP ANSWERS ON THE MAP ----
+     Owner, 2026-09-16: "the map says tap a mark, but cannot tell if a mark is tapped. also... the
+     squares/dots for people are garbage, we really cant improve this so i can tell what things
+     are?" Both were true and the inventory said why: of 29 glyphs on Meridian's plan, EIGHT had no
+     map colour at all and fell through to the open-ground fill, so a desk, a chair and a stove were
+     painted as floor — invisible, silently, for as long as the plan has existed. Nothing caught it
+     because nothing ever compared a tile against the ground it was standing on.
+     So both halves are asked of the PIXELS the plan actually produced, which is the only place
+     either fault was ever visible. */
+  const planread = await page.evaluate(() => {
+    const P = [];
+    if (typeof drawTown !== 'function' || typeof planPanels !== 'function') return P;
+    const cv = document.getElementById('mapcv'); if (!cv) return P;
+    const s = 10;
+    const wasDest = mapDest;
+    const px = (g2, X, Y) => { const d = g2.getImageData(X, Y, 1, 1).data; return d[0] + ',' + d[1] + ',' + d[2]; };
+    try {
+      mapDest = null; drawTown();
+
+      /* ---- 1 · NOTHING IS PAINTED AS FLOOR THAT IS NOT FLOOR ----
+             TWO RENDERS OF THE WHOLE PLAN, and the difference between them is the answer. The first
+             draft called `planTile` directly and compared its output to a ground tile — which is
+             register fault A twice over: it read a function the plan is not obliged to use (a plant
+             that changed the CALL SITE and left the painter alone walked straight past it), and it
+             sampled the composited canvas, where marks, labels, folds and the vignette are painted
+             over the tiles, so it was reading a person's head and calling it a desk.
+             Instead: draw the plan as it is, then draw it again with every tile replaced by open
+             ground, and compare the two tile by tile. Everything that is not the tile — paper,
+             grain, folds, vignette, labels, marks — is identical in both, so whatever differs is
+             exactly the tile's own contribution. A glyph that contributes nothing is being painted
+             as floor. */
+      const panels = planPanels();
+      const box = (g2, X, Y) => g2.getImageData(X, Y, s, s).data;
+      const eq = (a, b) => { for (let i = 0; i < a.length; i += 4)
+        if (Math.abs(a[i] - b[i]) + Math.abs(a[i+1] - b[i+1]) + Math.abs(a[i+2] - b[i+2]) > 10) return false;
+        return true; };
+      const g2 = cv.getContext('2d', { willReadFrequently: true });
+      /* THE MARKS COME OFF FOR THE MEASUREMENT. A mark is ~11px across on a 10px tile, so it covers
+         its tile completely — and Meridian's `e` has exactly one instance, with a person standing
+         on it. The tile then looks identical in both renders for a reason that has nothing to do
+         with the tile, and the guard reports a glyph as invisible when what is actually happening
+         is that somebody is standing in front of it. Stubbing the painter for both renders is the
+         same move as `drawMark` in the plan guard: take the thing you are not measuring OUT, rather
+         than trying to subtract it afterwards. */
+      const realMarks = drawPlanMarks;
+      drawPlanMarks = () => {};
+      const one = {};
+      panels.forEach(p2 => { const ww = WORLDS[p2.world];
+        for (let y = 0; y < ww.H; y++) for (let x = 0; x < ww.W; x++) {
+          const g = ww.rows[y][x]; if (g === '.') continue;
+          if ((y + p2.oy) * s + s >= cv.height - 18) continue;   /* the caption band is not the map */
+          if (!one[g]) one[g] = { X: (x + p2.ox) * s, Y: (y + p2.oy) * s, n: 0 };
+          one[g].n++; } });
+      const kinds = Object.keys(one);
+      drawTown();                                       /* redraw with the marks off */
+      const real = {}; kinds.forEach(g => { real[g] = box(g2, one[g].X, one[g].Y); });
+      /* now the same plan with nothing but ground on it */
+      const saved = {};
+      panels.forEach(p2 => { saved[p2.world] = WORLDS[p2.world].rows.slice();
+        WORLDS[p2.world].rows = WORLDS[p2.world].rows.map(r => '.'.repeat(r.length)); });
+      let blank = {};
+      try { drawTown(); kinds.forEach(g => { blank[g] = box(g2, one[g].X, one[g].Y); }); }
+      finally { panels.forEach(p2 => { WORLDS[p2.world].rows = saved[p2.world]; });
+                drawPlanMarks = realMarks; drawTown(); }
+      /* AND IT PUT BACK WHAT IT BORROWED. This block blanks every row of every drawn world to
+         measure what a tile contributes, and everything after it in this file reads those rows —
+         the trolley seam, reachability, the cameras. A restore that silently half-worked would
+         surface as somebody else's check failing, in another world, one run in twenty, which is the
+         most expensive shape a bug can have. So it is asserted here, where it is cheap, rather than
+         diagnosed there, where it is not. */
+      panels.forEach(p2 => { const ww = WORLDS[p2.world];
+        if (!ww.rows.length || ww.rows.every(r => /^\.*$/.test(r)))
+          P.push('the plan readability check blanked "' + p2.world + '" to measure it and did not put it back — every check after this one is now reading an empty world'); });
+      const same = kinds.filter(g => eq(real[g], blank[g]));
+      if (kinds.length < 6)
+        P.push('the plan readability check found only ' + kinds.length + ' kind(s) of tile to look at, which is too few to be measuring anything — it is not passing, it is not looking');
+      if (same.length)
+        P.push('the plan draws ' + same.length + ' kind(s) of tile exactly as it draws open ground, so they are on the map and invisible: ' +
+               same.map(g => g + ' ×' + one[g].n).join(', '));
+
+      /* ---- 2 · A TAP ANSWERS ON THE MAP, NOT ONLY IN THE CAPTION ----
+             The whole complaint was that the confirmation lived under the canvas. So: photograph
+             the neighbourhood of a mark, tap it, photograph again, and require the picture to have
+             changed. A caption is not an answer. */
+      const marks = planMarks();
+      if (!marks.length) return P;                            /* no marks today: say nothing, claim nothing */
+      const m0 = marks[0];
+      const bx = Math.max(0, Math.round(m0.gx * s - s)), by = Math.max(0, Math.round(m0.gy * s - s * 2.6));
+      const bw = Math.min(cv.width - bx, s * 3), bh = Math.min(cv.height - by, s * 4.6);
+      const grab = () => { const d = g2.getImageData(bx, by, bw, bh).data; let n = 0, acc = 0;
+        for (let i = 0; i < d.length; i += 4) { acc += d[i] + d[i + 1] + d[i + 2]; n++; } return { d, n, acc }; };
+      const before = grab();
+      const hit = mapPick(m0.gx + 0.5, m0.gy + 0.5);
+      if (!hit) { P.push('tapping the first mark on the plan selected nothing'); return P; }
+      drawTown();
+      const after = grab();
+      let diff = 0;
+      for (let i = 0; i < before.d.length; i += 4)
+        if (Math.abs(before.d[i] - after.d[i]) + Math.abs(before.d[i + 1] - after.d[i + 1]) +
+            Math.abs(before.d[i + 2] - after.d[i + 2]) > 24) diff++;
+      const pct = Math.round(100 * diff / before.n);
+      /* 28, and the number is measured rather than picked: the confirmation as it SHIPPED — a
+         two-pixel ring, nothing dimmed — moves 18% of the pixels around a mark, and 18% is
+         precisely what the owner described as not being able to tell. The flag, the disc and the
+         dimming together move 36%. The floor goes between them, nearer the thing that failed. */
+      if (pct < 28)
+        P.push('tapping a mark changed ' + pct + '% of the pixels around it — the plan says "tap a mark" and then does not show you that you did (the caption under the canvas is not an answer)');
+    } finally { mapDest = wasDest; try { drawTown(); } catch (e) {} }
+    return P;
+  });
+  fails.push(...planread);
+
   fails.push(...plan.filter(l => !/^NOTE-ONLY: /.test(l)));
   plan.filter(l => /^NOTE-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
