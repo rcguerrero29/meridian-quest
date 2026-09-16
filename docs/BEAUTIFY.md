@@ -322,3 +322,54 @@ chapters to a real state now. Its second draft checked the mark data and never a
 PAINTER did with it, so a plant that drew at the world position instead of the paper position piled
 every mark onto the first street with every assertion still green. It stubs `drawMark` and reads
 back the coordinates the call site actually used.
+
+## Nothing looks down — 2026-09-16
+
+*The owner, about the loft's stairwell, twice. The second time was a correction to me, not to the
+code: "i still think the stair railing screenshot i sent is wrong, even if it were a seethrough wall
+thats not right. i dont like when you are so dismissive."*
+
+**He was right, and the first answer was me defending the engine.** I had told him the see-through
+rail was deliberate and the stairs were fine. They were not fine, and the reason took three wrong
+fixes to find.
+
+**What it actually was.** The 3D scene carries an *apron*: a dark plane laid past the edge of the map
+so the city carries on into the dark instead of ending at a cliff. Its comment says it sits "a hair
+below the ground and **well outside it**". Its geometry was `w.W*3+60` by `w.H*3+60`, **centred on the
+world**, at `y = -0.05` — a sheet, not a frame. So it was five hundredths of a tile under the floor
+of the entire map, and **every sunken thing in either game had been under a dark lid since the day it
+was added.** The loft's stairwell treads sit at −0.16 to −0.64. A player looking down the stairs saw a
+black rectangle, which is exactly the phrase he used: *clearly fucked up stairs.*
+
+**Three fixes that were not the fix, and what each one cost:**
+
+1. *Re-colour the risers.* They were `#5E5852` in a hole, which is genuinely too dark. Changed, and
+   the render came back **byte-identical**.
+2. *Re-light the tread tops, and switch them off Lambert*, since a vertical face under an overhead
+   light keeps almost nothing. Also true, also correct, **byte-identical again**.
+3. *Build the shaft* — the floor is cleared for a well and nothing ever closed the cut, so the
+   opening really did open onto the void. Real bug, real fix, and the picture still did not change.
+
+**Two byte-identical renders are the finding.** A change that is obviously right and provably
+invisible means you are not looking at the thing you think you are looking at. Firing one ray from
+the game's own camera through the opening ended it in a second: fence → cleared ground → **apron**.
+Never a tread, never a step, never a shaft.
+
+**The rule: when a fix that must work does nothing, stop fixing and find out what is actually on
+screen.** A hash of the render is a cheaper oracle than another opinion about the art, and a ray
+through the pixel you are arguing about will name the object in one call.
+
+**And the rule the apron itself leaves:** *nothing may roof over the world.* Scenery that exists to
+be seen past the edge of the map must be a frame with the map in the hole, because anything laid
+under the floor is a ceiling for everything below it, and **nothing in this engine ever looks down**.
+`test/engine.smoke.js` now asks, of the built scene, whether any piece of scenery overlaps the
+world's own footprint below `y=0`, and whether a well has anything inside it at all. Planted with the
+apron exactly as it shipped: fires on both games.
+
+**The other two faults found on the way, both real:**
+- **The stair mass was a second staircase.** `⊓` drew a complete flight — treads, risers, nosings —
+  one tile north of the real one, at a rake it invented (`22/n`) rather than the flight's own
+  (`STAIRH`), so the screen showed the same stairs twice, a tile apart and not even parallel. It is a
+  wall now, with a skirting that rakes with the real flight and a handrail mounted on it.
+- **And that drawing was painted on the block's TOP face too**, because `⊓` had no `TILESIDE` entry
+  and one painter served both. A flight in profile, lying flat on the roof of the mass.
