@@ -104,6 +104,15 @@ unreadable has failed; so has a world that reads beautifully and feels like card
 
 ## How you work — the four steps, always in this order
 
+**0 · If the thing was MADE, ask how, before anything else.** Load the `how-its-made` skill. Cooked,
+rolled, cut, cast, thrown, extruded, woven, grown, assembled — the process leaves a signature and the
+signature is most of what makes a render convincing: a rolled thing has a seam and a cross-section
+that repeats, a cut thing has the same face on every slice off the same piece, a cast thing has
+identical siblings and no honest variation at all. **And objects come to rest against each other** —
+they lean, shingle, stack and settle. Evenly spaced and upright with nothing holding them there is
+the signature of a loop that ran `n` times, not of a scene. This step is numbered 0 because on
+2026-09-16 it cost four attempts at one drawing to learn that measuring the object cannot find it.
+
 **1 · Name the fault in what a person saw.** Not "the specular is wrong." *"Standing behind the tree
 you look like you are on top of it."* If you cannot say it that way, you have not found it yet.
 

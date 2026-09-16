@@ -148,3 +148,35 @@ earlier. Reasoning from the NAME of an object produces a diagram of the name.
 `gimbap-study.png` is regenerated to match, and its right-hand column was rewritten because it had
 become a verdict describing a render that no longer exists — the exact fault `LICENCES.md` records
 against itself further up this folder. **A verdict table has to name the render it judged.**
+
+
+---
+
+## 2026-09-16, last — six slices of ONE roll
+
+The owner again, and this was the deepest of the four corrections:
+
+> *"think about how it is made too right? so the roll should make sense in terms of how it is rolled
+> up and the sliced into round slices — thats why rarely are they displayed like you did or if it
+> close it is in a pile and they have more congruence"*
+
+**All six slices came off one roll.** The fillings were laid in a line on a flat sheet of nori,
+rolled once, and cut — so the cross-section is identical the whole length of the cylinder. Six
+slices are **siblings**. What differs between them is only where the knife fell and how each one
+landed.
+
+**What was actually wrong in the code is worth writing down**, because it is not what it looked like.
+The filling arrangement was ALREADY fixed — the same seven strips at the same fractions of the bundle
+for every round. What made six siblings read as six strangers was **rotating each one by up to 230°**.
+A slice that lands on a board turns a few degrees. The fix was not the arrangement; it was the
+`tilt` range, and a loop that spaced them evenly and never let them touch.
+
+- one arrangement, six times, at tilts between −0.26 and +0.30 radians
+- **shingled** — they overlap by about a third, because you cut a cylinder and the rounds fall
+  against each other. Evenly spaced, upright and not touching is the signature of a loop that ran
+  six times, not of a plate somebody carried to a table
+- the grain on the rice stays per-slice, because grain is surface and each cut face is its own
+
+`gimbap-one-roll.png` is the result at 3×. Written up as the **`how-its-made`** skill, carried by
+`pili` (ahead of silhouette) and `chema` (as step **0**, ahead of measuring, because measuring the
+object cannot find this class of fault), and recorded in `docs/BEAUTIFY.md`.
