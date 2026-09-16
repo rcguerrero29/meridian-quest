@@ -52,3 +52,34 @@ Four faults, each found by looking at the picture and fixing it:
 much sits below the fold at each size.
 
 Re-render: `node docs/mocks/2026-09-15-simmer-book/render-book.js`
+
+---
+
+## 2026-09-16 — the three pages exist in the DESIGNED surface now
+
+The renders in this folder (`simmerBook1/2/3-*.png`) are the three pages drawn through **the game's
+document reader**, which is the surface the owner called *"a bad attempt at UI"* (`docs/ARCH-LOG.md`
+A15, `docs/la-sobremesa.md` §22). They are kept because they are what proved the ENGINE can draw
+these pages, which was a real question and got a real answer.
+
+**They are not what to show AJ.** Only page 1 had ever existed as a designed page —
+`https://claude.ai/artifact/DAenYKRcrwbL6fvGFrrpmD` — so the set was three pages in the wrong surface
+and one page in the right one. All three are now here:
+
+**`https://claude.ai/artifact/EXqXAbhZqaLiNtyBR2A4xx`** — doenjang jjigae, gimbap, sigeumchi namul.
+
+Two things in it are decisions and not styling, and both are the owner's of 2026-09-16
+(`docs/la-sobremesa.md` §18.1):
+
+- **Nobody is named.** The table is laid for two because she cooked. The game never asks who.
+- **The namul page carries no decision at all.** Pages 1 and 2 have a two-cooks control; a
+  five-minute dish does not get one. **The difference between the pages is the point** — a book where
+  every page has the same furniture is a form again, which is the fault A15 is about.
+
+And the fold marks in the corner of each plate are hers: one, two or three. Not a score, not a count
+of anything, and nothing adds them up.
+
+**The two faults the first look caught**, recorded because looking is the instrument: six rounds of
+gimbap drawn with the rice ring at 0.80 of the radius read as **eggs on a plate** (a cross-section is
+a dark band you can see, a ring of rice, and a middle you can name — it is 0.72 with a stroke now);
+and the "In your kitchen:" rule hung off the end of the first line when its label wrapped.

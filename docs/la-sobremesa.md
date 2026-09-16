@@ -1445,6 +1445,44 @@ expensive to guess. None of them blocks the one thing §17.4 says to do first.*
 | **El turno** ⚠️ | The **shifts board**. His own answer put the kitchens in restaurants; Tavo's read is that a shift posted by somebody is service work with the clock removed | **For the first build: one kitchen, it is hers, and the shifts board is not built at all** | It is the biggest single casualty of her answers and **his to overrule, not ours to quietly keep** |
 | **El plan** ⚠️ | The **meal plan**. He allowed it; she wants nothing that looks like a plan | **It lives in HIS half of the pack and never in hers** | It is the best-evidenced mechanic in the entire research sweep, so it should not simply die — but it must not be resolved **by smuggling a small one into her half** |
 
+### 18.1 · Four of the five are answered — 2026-09-16
+
+*The table above stays as it was posed. This is what he said, in his own words, with what each one
+costs now that it is settled rather than what it cost to guess.*
+
+| The fork | His word | What it means in the build |
+|---|---|---|
+| **El 2o plato** | *"lets make it customizeable in case someone wants to but no person for me for now"* | **Nobody is named, and naming is a per-pack SETTING.** He gets the customisable version and no real person is written into a public repository — which is the whole of Zeni's rule (#200), kept without costing a feature. The table is laid for two because she cooked; who the second bowl is for is hers to mean, and the game never asks |
+| **El libro** | *"i say just make the pages, since this is a game for aJ she has recognized the ability to one day break out of cooking to learn things or roam around the city"* | **Make the pages.** And his reason is bigger than the fork: **the book is not the spine of Simmer.** If she can leave the kitchen to learn something or walk the city, the book does not have to carry the whole collection, and the blank-page problem stops being a problem instead of being solved — there is somewhere else to go. **§16 and §17 were written assuming the book was the spine and should be re-read against this** |
+| **El turno** ⚠️ | answered 2026-09-15 by the split | the shifts board lives in HIS half of the pack; her half never sees it |
+| **El plan** ⚠️ | answered 2026-09-15 by the split | the meal plan likewise, and it is not smuggled into her half in miniature |
+
+**Still open: La foto**, and it was open because it was badly asked. In plain words: the game cannot
+hold a real photograph. Photos would go into the same browser storage as her save, at roughly
+80–120 KB a dish; that storage is small, it fills, and **when it fills the write that saves her book
+fails silently** — no error, no warning, it simply stops saving and she never sees a message.
+Twenty dishes is survivable and it is a clock. The recommendation is unchanged and now stated the way
+a person would ask it: **the game draws the plate she assembled, and the printed page carries a slot
+for a real photograph** (print is already asked for, #196). She gets the real photo, on paper, and
+her save never dies quietly.
+
+### 18.2 · Music — a sixth fork, opened and answered in the same breath
+
+*The omission §21.2 found had no owner. It has one now.*
+
+> *"music, aj has to tell you and make it customizeable in case she wants to change or update based
+> on vibes etc"*
+
+**Two rules, and they are the same rule twice:** nobody picks a track for her, and **changing it
+later is a setting, not a rebuild.** That second half is the load-bearing one — "based on vibes"
+means the answer is expected to move, so whatever is built must assume it moves. A track chosen once
+and compiled in is the version of this that fails.
+
+What it does NOT settle, and what asking her has to cover: whether sound here is **music** (a bed you
+put on while you cook) or **the kitchen's own noises** (Venba's knife, oil, each thing landing), which
+are different builds and different budgets. §21.2's evidence is about the second. **She has not been
+asked yet.**
+
 **And the thing to do before any of it** (§17.4): **three pages of the book, drawn by hand, shown to
 her.** Three plates, three lines in her voice, no engine and no pack. It is the cheapest real gate in
 this document and it tests the one thing nothing else can: whether a book that fills up is enough to
