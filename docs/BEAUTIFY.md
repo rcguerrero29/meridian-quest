@@ -293,3 +293,32 @@ plausible fix aimed at draw order would have been wrong and expensive.
 So the mark got a pale halo outside its dark keyline — it now separates from whatever is behind it
 without moving in z at all. **When something "overlaps", measure the overlap before you believe the
 word.** Half the time the geometry is right and what failed is separation.
+
+## Two coordinate systems, one field — 2026-09-16
+
+*The owner, from play: "im shown the other street map on calle 2." He was standing on Calle Dos and
+the plan drew Calle Principal, with a pin in the corner captioned CALLE DOS — **the caption knew
+where he was while the picture showed somewhere else.***
+
+The cause was one word — `WORLDS[PL.street]` — and the fix is a seam, `TOWNPLAN`. That part is
+ordinary. **The part worth writing down is what the fix nearly broke.**
+
+A mark on the plan had one pair of numbers doing two unrelated jobs: *where the thing is in its
+world* (which `destAim()` compares against the player's position and hands to the street arrow) and
+*where it is drawn on the paper*. Those were the same numbers **only because there was one panel at
+0,0** — an accident of there being one street. Add a second panel at `oy:17` and they silently
+diverge: the plan looks perfect, every mark is in the right place, and the arrow in the street sends
+you seventeen tiles north of where you asked to go.
+
+**The rule: when two meanings share a field because their values happen to be equal, they are one
+bug away from being two meanings sharing a wrong field.** Split them *before* the day they differ,
+not after — the day they differ, nothing is red and nothing looks wrong.
+
+**And the guard for it had the same fault in miniature, twice.** Its first draft found no mark on
+Calle Dos and reported the offset arithmetic as *"untested this run"* — honest, and still a silent
+zero, because on Meridian that would have been true on every CI run forever (nobody on Calle Dos
+ever carries a quest; the mark that lands there is the bakery's, three chapters in). It walks the
+chapters to a real state now. Its second draft checked the mark data and never asked what the
+PAINTER did with it, so a plant that drew at the world position instead of the paper position piled
+every mark onto the first street with every assertion still green. It stubs `drawMark` and reads
+back the coordinates the call site actually used.

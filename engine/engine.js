@@ -5051,20 +5051,39 @@ function markOf(n){ /* one person, one kind, in the order the pack declared */
 /* Every mark the plan can carry: the people standing on the world it draws, and the anchor of
    every other world somebody is waiting in. Several worlds share an anchor — pa, li and ex all
    stand at 29,1 — so an anchor carries ONE mark and remembers every world folded into it. */
+/* A MARK CARRIES TWO PLACES AND THEY ARE NOT THE SAME NUMBER.
+     · `x,y,w` — where the thing actually IS, in its own world. `destAim()` reads these and the
+       street arrow points at them, so they must never be paper coordinates.
+     · `gx,gy` — where it is DRAWN on the plan. The plan is paper and the paper has panels on it.
+   They were identical while the plan drew one world at 0,0, which is why one field did both jobs
+   and why the day a second panel appeared was the day the arrow would have started lying. */
 function planMarks(){
   const K=markKinds();if(!K.length)return[];
-  const st=PL.street,M=(typeof MAPDOT!=="undefined"?MAPDOT:{}),out=[],at={};
-  ((WORLDS[st]||{}).npcs||[]).forEach(n=>{const k=markOf(n);
-    if(k)out.push({x:n.x,y:n.y,k:k,w:st,ws:[st],who:n.npc});});
+  const M=(typeof MAPDOT!=="undefined"?MAPDOT:{}),out=[],at={},panels=planPanels();
+  const drawn={};panels.forEach(p2=>{drawn[p2.world]=p2;});
+  /* 1 · anybody standing on a world the plan actually draws is drawn where they stand */
+  panels.forEach(p2=>{((WORLDS[p2.world]||{}).npcs||[]).forEach(n=>{const k=markOf(n);
+    if(k)out.push({x:n.x,y:n.y,gx:n.x+p2.ox,gy:n.y+p2.oy,k:k,w:p2.world,ws:[p2.world],who:n.npc});});});
+  /* 2 · every other world is an ANCHOR on somebody else's paper: the pack's MAPDOT if it names
+         one, else the door that leads there from a world the plan draws — which is how La Espiga
+         and Velázquez find their place on Calle Dos without a pack having to write the offset
+         down twice and keep the two copies agreeing. */
   Object.keys(WORLDS).forEach(id=>{
-    if(id===st||!M[id]||!WORLDS[id])return;
+    if(drawn[id]||!WORLDS[id])return;
     let best=null;
     (WORLDS[id].npcs||[]).forEach(n=>{const k=markOf(n);
       if(k&&(!best||K.indexOf(k)<K.indexOf(best)))best=k;});
     if(!best)return;
-    const key=M[id][0]+","+M[id][1],e=at[key];
+    let gx=null,gy=null,wx=null,wy=null;
+    if(M[id]){gx=M[id][0];gy=M[id][1];wx=gx;wy=gy;}   /* unchanged: MAPDOT has always been paper */
+    else{let bd=1e9;
+      panels.forEach(p2=>portalsOf(p2.world).forEach(d=>{
+        if(!d.p||d.p.to!==id)return;
+        if(bd<=0)return;bd=0;gx=d.x+p2.ox;gy=d.y+p2.oy;wx=d.x;wy=d.y;}));}
+    if(gx===null)return;
+    const key=gx+","+gy,e=at[key];
     if(e){e.ws.push(id);if(K.indexOf(best)<K.indexOf(e.k))e.k=best;return;}
-    at[key]={x:M[id][0],y:M[id][1],k:best,w:id,ws:[id]};out.push(at[key]);});
+    at[key]={x:wx,y:wy,gx,gy,k:best,w:id,ws:[id]};out.push(at[key]);});
   return out;}
 function drawMark(g,cx,cy,k,r){ /* ONE painter, two surfaces: the plan and its own legend, so a
                                    swatch can never drift from the mark it explains */
@@ -5086,11 +5105,12 @@ function drawMark(g,cx,cy,k,r){ /* ONE painter, two surfaces: the plan and its o
 let mapDest=null; /* {w,x,y} — ONE at a time, and never saved. A destination is what you are doing
                      right now; a saved one is the list A3 bans, wearing a compass. */
 function drawPlanMarks(g2,s){
-  planMarks().forEach(m=>drawMark(g2,m.x*s+s/2,m.y*s+s/2,m.k,s*0.45));
+  planMarks().forEach(m=>drawMark(g2,m.gx*s+s/2,m.gy*s+s/2,m.k,s*0.45));   /* gx,gy: this is paper */
   if(!mapDest)return;
   /* the ring is the destination HE chose. Nothing here nominates a "next" — that was the one call
      the plan left open and his hybrid answered it (el-mapa §7.3). */
-  const cx=mapDest.x*s+s/2,cy=mapDest.y*s+s/2;
+  const cx=(mapDest.gx===undefined?mapDest.x:mapDest.gx)*s+s/2,
+        cy=(mapDest.gy===undefined?mapDest.y:mapDest.gy)*s+s/2;
   g2.save();g2.lineWidth=2;g2.strokeStyle="#7A3FE0";
   g2.beginPath();g2.arc(cx,cy,s*0.9,0,7);g2.stroke();
   g2.lineWidth=1;g2.strokeStyle="#F2F1EA";
@@ -5152,9 +5172,12 @@ function mapLegend(){
     box.appendChild(row);});}
 function mapPick(tx,ty){ /* tile coords, fractional — it is a finger, not a cursor */
   let best=null,bd=1e9;
-  planMarks().forEach(m=>{const dx=m.x+0.5-tx,dy=m.y+0.5-ty,d=dx*dx+dy*dy;if(d<bd){bd=d;best=m;}});
+  /* the finger is on PAPER, so the hit test is against gx,gy — and what gets STORED is the
+     world position, because that is what the street arrow will be pointed at */
+  planMarks().forEach(m=>{const dx=m.gx+0.5-tx,dy=m.gy+0.5-ty,d=dx*dx+dy*dy;if(d<bd){bd=d;best=m;}});
   if(!best||bd>9)return false;  /* three tiles ≈ 30 canvas px ≈ a fingertip; a miss changes nothing */
-  mapDest=(mapDest&&mapDest.x===best.x&&mapDest.y===best.y)?null:{w:best.w,x:best.x,y:best.y,who:best.who||null};
+  mapDest=(mapDest&&mapDest.w===best.w&&mapDest.x===best.x&&mapDest.y===best.y)
+    ?null:{w:best.w,x:best.x,y:best.y,gx:best.gx,gy:best.gy,who:best.who||null};
   drawTown();setWorldTag();
   const t=(T().plan||{});
   if(mapDest)$("mapNote").textContent="🎯 "+destName()+(t.chosen?"  ·  "+t.chosen:"");
@@ -5269,9 +5292,42 @@ function bearingUI(){
 function destCheck(){ /* you arrived: the destination is spent, and nothing remembers it */
   if(mapDest&&mapDest.w===world&&Math.abs(px-mapDest.x)<=1&&Math.abs(py-mapDest.y)<=1)mapDest=null;
   setWorldTag();bearingUI();}
+/* ═══════════ TOWNPLAN — the plan draws every street, not one (el-mapa §3, run-8 §2.5) ═══════════
+   Reported from play, 2026-09-16: *"im shown the other street map on calle 2."* He was standing on
+   Calle Dos and the plan drew Calle Principal, with a pin in the corner saying CALLE DOS — the
+   caption knew where he was while the picture showed somewhere else.
+
+   The cause was one word: `WORLDS[PL.street]`. A pack could declare exactly ONE world as "the map",
+   and every other outdoor world in the city had to be represented by a dot on it. That is right for
+   an interior — you are inside the market, so the pin sits on the market's door — and wrong for a
+   second STREET, which is not a room off the first one.
+
+   `TOWNPLAN=[{world,ox,oy},…]` is the pack saying which worlds the plan draws and where they sit on
+   the paper, in tiles. The LOOP is the engine's and the LAYOUT is the pack's, which is the split
+   docs/TAGS.md asks of every seam. **A pack that declares no TOWNPLAN draws PL.street at 0,0 and is
+   byte-identical** — the town and the gauge never notice this happened.
+
+   THE ONE TRAP, and it is the reason marks carry two coordinate pairs. `mapDest` is read by
+   `destAim()` as a position IN A WORLD: it compares against `px,py` and hands `tx,ty` to the
+   bearing. The plan draws in PAPER coordinates. Today those are the same numbers because there is
+   one panel at 0,0, and the day a second panel exists they stop being the same — silently, with
+   the arrow in the street pointing at a place seventeen tiles north of the real one. So a mark now
+   carries `x,y,w` (where the thing IS, unchanged) and `gx,gy` (where it is DRAWN), and nothing is
+   allowed to use one for the other. */
+function planPanels(){
+  const one=[{world:PL.street,ox:0,oy:0}];
+  const T2=(typeof TOWNPLAN!=="undefined"&&Array.isArray(TOWNPLAN))?TOWNPLAN:null;
+  if(!T2||!T2.length)return one;
+  const ok=T2.filter(p2=>p2&&WORLDS[p2.world]).map(p2=>({world:p2.world,ox:p2.ox|0,oy:p2.oy|0}));
+  return ok.length?ok:one;
+}
+const planPanelOf=id=>planPanels().find(p2=>p2.world===id)||null;
 function drawTown(){
-  const mc=$("mapcv"),g2=mc.getContext("2d"),w=WORLDS[PL.street],s=10;
-  mc.width=w.W*s;mc.height=w.H*s+18;
+  const mc=$("mapcv"),g2=mc.getContext("2d"),s=10,panels=planPanels();
+  const PW=Math.max(...panels.map(p2=>p2.ox+WORLDS[p2.world].W));
+  const PH=Math.max(...panels.map(p2=>p2.oy+WORLDS[p2.world].H));
+  const w={W:PW,H:PH};
+  mc.width=PW*s;mc.height=PH*s+18;
   /* ---- THE PLAN IS A PIECE OF PAPER (2026-09-15) ----
      It was one flat #EFE9DA fill with flat squares on it, which is a data visualisation of a
      street and not a map of one — the same fault as every mock that day: the drawing was fine and
@@ -5288,8 +5344,9 @@ function drawTown(){
     g2.fillRect(Math.floor(prnd()*mc.width),Math.floor(prnd()*mc.height),1,1);}
   g2.globalAlpha=1;
   const col={...BASECOL,...(typeof MAPCOL!=="undefined"?MAPCOL:{})};
-  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
-    g2.fillStyle=col[w.rows[y][x]]||"#D5D2C6";g2.fillRect(x*s,y*s,s,s);}
+  panels.forEach(p2=>{const ww=WORLDS[p2.world];
+    for(let y=0;y<ww.H;y++)for(let x=0;x<ww.W;x++){
+      g2.fillStyle=col[ww.rows[y][x]]||"#D5D2C6";g2.fillRect((x+p2.ox)*s,(y+p2.oy)*s,s,s);}});
   /* the folds: a shade on one side of the crease and a highlight on the other, because a fold is
      a ridge and a ridge has two sides. Over the tiles, since the paper is folded with the map on
      it — this is the one mark on the plan that is not a thing in the city. */
@@ -5305,8 +5362,11 @@ function drawTown(){
   g2.textAlign="center";
   (typeof TOWNLBL!=="undefined"?TOWNLBL:[]).forEach(l=>{
     if(l.when&&!l.when(flags))return;
+    /* a label with no `world` belongs to the first panel, which is what every row meant before
+       there was more than one — so an existing pack's labels do not move */
+    const pn=l.world?planPanelOf(l.world):panels[0];if(!pn)return;
     g2.font="700 "+(l.s||10)+"px sans-serif";g2.fillStyle=l.c||"#3A2F17";
-    g2.fillText(es?l.es:l.en,l.x*s+(l.dx||0),l.y*s);});
+    g2.fillText(es?l.es:l.en,(l.x+pn.ox)*s+(l.dx||0),(l.y+pn.oy)*s);});
   /* the caption had 8px and no room. 9px, a letter of tracking and four more pixels of paper: it
      is the line that explains the two colours, and it was the smallest type in the game. */
   g2.fillStyle="rgba(58,44,20,.10)";g2.fillRect(0,w.H*s,mc.width,18);
@@ -5316,7 +5376,8 @@ function drawTown(){
   if(g2.letterSpacing!==undefined)g2.letterSpacing="0px";
   const M=typeof MAPDOT!=="undefined"?MAPDOT:{};
   drawPlanMarks(g2,s); /* the marks go UNDER the dot: you can always see yourself */
-  const dot=world===PL.street?[fx,fy]:M[world]||null;
+  const mine=planPanelOf(world);
+  const dot=mine?[fx+mine.ox,fy+mine.oy]:(M[world]||null);
   if(dot){const dx2=dot[0]*s+s/2,dy2=dot[1]*s+s/2;
     const hal=g2.createRadialGradient(dx2,dy2,1,dx2,dy2,13);     /* you are a light on the paper */
     hal.addColorStop(0,"rgba(122,63,224,.34)");hal.addColorStop(1,"rgba(122,63,224,0)");

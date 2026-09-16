@@ -51,7 +51,7 @@ relayed from the engineers' registers, in sittings. §3 and §7 below are mostly
 | 25 | Quests get names | #153 | ready | engine + both packs |
 | 26 | The car's near side · the passenger seam · the driver | #179 #180 #181 | after #177 | one sitting together |
 | 27 | The aperture rule as one number | #178 | ready | part of a sitting |
-| 28 | The map says what is next | #160 | **STARTED 2026-09-15** — he said "yes start please"; marks, the legend and the chosen destination shipped at `mq-v160`; `TOWNPLAN` and the anchors are what is left | one sitting; `docs/meetings/2026-09-14-el-mapa.md` |
+| 28 | The map says what is next | #160 | ~~**STARTED 2026-09-15**~~ **DONE 2026-09-16 (`mq-v164`)** — marks, the legend and the chosen destination shipped at `mq-v160`; `TOWNPLAN` and the anchors landed today after the owner hit the gap in play (*"im shown the other street map on calle 2"*). The plan draws Calle Principal AND Calle Dos; La Espiga and Velázquez are anchored at their own doors instead of at a doorway on the wrong street | `docs/meetings/2026-09-14-el-mapa.md` |
 | 29–31 | The publishing setting · two storeys · the livery · seven smaller calls | `docs/OPEN.md` §1 | wait on the owner | — |
 | 32–36 | The merge board · the making surface · the pantry, shifts and allergy list · the pantry photos · AJ's answers | #200 | wait on AJ | the largest builds in the plan |
 

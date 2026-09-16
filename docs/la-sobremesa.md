@@ -1457,14 +1457,35 @@ costs now that it is settled rather than what it cost to guess.*
 | **El turno** ⚠️ | answered 2026-09-15 by the split | the shifts board lives in HIS half of the pack; her half never sees it |
 | **El plan** ⚠️ | answered 2026-09-15 by the split | the meal plan likewise, and it is not smuggled into her half in miniature |
 
-**Still open: La foto**, and it was open because it was badly asked. In plain words: the game cannot
-hold a real photograph. Photos would go into the same browser storage as her save, at roughly
-80–120 KB a dish; that storage is small, it fills, and **when it fills the write that saves her book
-fails silently** — no error, no warning, it simply stops saving and she never sees a message.
-Twenty dishes is survivable and it is a clock. The recommendation is unchanged and now stated the way
-a person would ask it: **the game draws the plate she assembled, and the printed page carries a slot
-for a real photograph** (print is already asked for, #196). She gets the real photo, on paper, and
-her save never dies quietly.
+**~~Still open:~~ LA FOTO — SETTLED 2026-09-16, and the owner's answer dissolved the question rather
+than picking one of its four options.**
+
+> *"maybe we can add some of our cute art as stickers … essentially we are saving full size in the
+> persons phone, so that way the shirnking can be an option one day for other reasons but not here"*
+
+**The photo never enters browser storage at all.** She takes it, the game lays the recipe's own
+drawings over it as **stickers**, and the finished image is saved **full size to her phone's camera
+roll** — the place a photograph already belongs, with a gigabyte of room and a backup she already
+has. Nothing is written to the origin the save lives in, so the quota clock that made this a hard
+question never starts.
+
+**Why this is better than any of the four options that were put to him**, which is worth recording
+because the four were mine: every one of them was an answer to *"how do we fit a photograph next to
+her save"*, and all four paid something for it — no photos, or a shrunk photo, or a storage chore, or
+a book full of holes. **The question was wrong.** A phone already has a camera roll; the game does not
+need to be a photo album, it needs to be the thing that *makes* the picture worth keeping. Shrinking
+stays in the toolbox — it is genuinely useful the day something must be stored in-game for a different
+reason — and it is not the answer here.
+
+**What it becomes, concretely:** one canvas, three layers — her photograph underneath, the pack's own
+art over it, and whatever caption the page already carries — composited and handed to the browser as
+a download. The stickers are drawings the pack has already made for that recipe, so **a dish she has
+cooked brings its own stickers**, which ties the decoration to the play instead of being a sheet of
+generic ornaments. He called the ceiling too: *"maybe just small edits for images if possible"* —
+place, scale, rotate, delete. Not an editor.
+
+**And it keeps the printed page** (#196): the same composited image is what prints, so the slot for
+a real photograph is now filled by a real photograph rather than left blank for glue.
 
 ### 18.2 · Music — a sixth fork, opened and answered in the same breath
 

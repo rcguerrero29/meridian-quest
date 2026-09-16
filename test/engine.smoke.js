@@ -663,6 +663,149 @@ const { chromium } = require('playwright-core');
   });
   fails.push(...paper);
 
+  /* ---- THE PLAN DRAWS EVERY STREET, AND THE ARROW STILL POINTS AT THE REAL PLACE ----
+     Reported from play, 2026-09-16: "im shown the other street map on calle 2." The plan drew
+     `WORLDS[PL.street]` and nothing else, so a second STREET could only ever be a pin in the corner
+     of the first one's paper — right for an interior, wrong for a street.
+
+     The interesting half is not that it now draws two panels; it is what drawing two panels does to
+     everything that reads a mark. `mapDest` is consumed by `destAim()` as a position IN A WORLD: it
+     is compared against px,py and handed to the bearing as tx,ty. The plan is PAPER. While there was
+     one panel at 0,0 those were the same numbers, and the day a second panel exists they stop being
+     the same — silently, with the street arrow pointing seventeen tiles north of where the player
+     is actually being sent. Nothing about that failure is visible in a stylesheet, a log or a
+     screenshot of the map; it is only visible if you ask the arrow where it is pointing.
+     So that is what this asks, on the panel whose offset is NOT zero — because a guard that only
+     ever tests the panel at the origin is testing the arithmetic 0+0 (register fault B). */
+  const plan = await page.evaluate(() => {
+    const P = [];
+    if (typeof planPanels !== 'function' || typeof planMarks !== 'function') {
+      P.push('the plan has no TOWNPLAN seam, so a pack with two streets can only draw one of them');
+      return P; }
+    const panels = planPanels();
+    if (!panels.length) { P.push('the plan draws no panels at all'); return P; }
+
+    /* ---- 1 · A PACK THAT DECLARES NOTHING IS UNCHANGED. The town and the gauge live here. ---- */
+    const declared = (typeof TOWNPLAN !== 'undefined' && Array.isArray(TOWNPLAN)) ? TOWNPLAN : null;
+    if (!declared || !declared.length) {
+      if (panels.length !== 1 || panels[0].world !== PL.street || panels[0].ox || panels[0].oy)
+        P.push('this pack declares no TOWNPLAN and the plan is not simply PL.street at 0,0 — a pack that said nothing has been changed underneath it');
+      return P;
+    }
+
+    /* ---- 2 · EVERY DECLARED WORLD IS ACTUALLY ON THE PAPER ---- */
+    declared.forEach(d => { if (!panels.some(p2 => p2.world === d.world))
+      P.push('TOWNPLAN declares "' + d.world + '" and the plan does not draw it'); });
+    const cv = document.getElementById('mapcv');
+    if (typeof drawTown === 'function') { try { drawTown(); } catch (e) { P.push('drawTown threw: ' + e.message); } }
+    const wantW = Math.max(...panels.map(p2 => p2.ox + WORLDS[p2.world].W)) * 10;
+    const wantH = Math.max(...panels.map(p2 => p2.oy + WORLDS[p2.world].H)) * 10 + 18;
+    if (cv && (cv.width !== wantW || cv.height !== wantH))
+      P.push('the plan is ' + cv.width + '×' + cv.height + ' and the panels need ' + wantW + '×' + wantH +
+             ' — a street is drawn off the edge of the paper');
+
+    /* ---- 3 · THE OFFSET PANEL: paper and world must NOT be the same number ----
+           AND THE STATE IS DRIVEN TO WHERE THAT IS TRUE, rather than reported as untested. The
+           first draft of this block said "no mark stands there right now, so the offset arithmetic
+           went untested" — which is honest and is still a silent zero, because on Meridian it is
+           true at boot and would have been true on every CI run forever. Nobody on Calle Dos ever
+           carries a quest; the mark that lands there is LA ESPIGA's, anchored at its door, and it
+           appears three chapters in. So walk the chapters until the paper has a mark on the offset
+           panel, which is a real state a player reaches, not a mark this test invented. ---- */
+    const off = panels.find(p2 => p2.ox || p2.oy);
+    if (!off) { P.push('every TOWNPLAN panel sits at 0,0, so nothing here tests an offset and this check cannot fail (docs/GAUGE.md: nothing to measure is not a pass)'); return P; }
+    const onPanel = () => planMarks().filter(m =>
+      m.gx >= off.ox && m.gx < off.ox + WORLDS[off.world].W &&
+      m.gy >= off.oy && m.gy < off.oy + WORLDS[off.world].H);
+    const wasDone = new Set(done), wasSeen = chSeen;
+    let marks = onPanel();
+    if (!marks.length && typeof CHAPTERS !== 'undefined') {
+      for (let ch = 1; ch <= CHAPTERS.length && !marks.length; ch++) {
+        done.clear(); for (let i = 0; i < ch; i++) (CHAPTERS[i].quests || []).forEach(q => done.add(q));
+        chSeen = ch; if (typeof applyGrowth === 'function') applyGrowth();
+        marks = onPanel();
+      }
+    }
+    if (!marks.length) {
+      P.push('no mark ever lands on the offset street "' + off.world + '" in any chapter, so the plan draws a street that can never say anything and the offset arithmetic is never exercised');
+      done.clear(); wasDone.forEach(q => done.add(q)); chSeen = wasSeen;
+      if (typeof applyGrowth === 'function') applyGrowth();
+      return P; }
+    marks.forEach(m => {
+      /* a mark STANDING on the panel must be its world position plus the offset. A mark ANCHORED
+         on it (a place behind a door, like the bakery) stores the door's position, which is the
+         shape MAPDOT has always had — so only the first kind is checked against WORLDS[m.w]. */
+      if (m.w === off.world) {
+        const ww = WORLDS[m.w];
+        if (m.gx !== m.x + off.ox || m.gy !== m.y + off.oy)
+          P.push('a mark on "' + m.w + '" is drawn at ' + m.gx + ',' + m.gy + ' and the panel says it should be at ' + (m.x + off.ox) + ',' + (m.y + off.oy));
+        if (m.x < 0 || m.y < 0 || m.x >= ww.W || m.y >= ww.H)
+          P.push('a mark on "' + m.w + '" has world position ' + m.x + ',' + m.y + ', which is outside a ' + ww.W + '×' + ww.H + ' world — a paper coordinate has been stored as a world one');
+      } else {
+        const ww = WORLDS[off.world];
+        if (m.x < 0 || m.y < 0 || m.x >= ww.W || m.y >= ww.H)
+          P.push('"' + m.w + '" is anchored on the offset street at world position ' + m.x + ',' + m.y +
+                 ', which is outside a ' + ww.W + '×' + ww.H + ' street — a paper coordinate has been stored as a world one, and the arrow will point off the map');
+      }
+    });
+
+    /* ---- 3b · AND THE PAINTER USES THE PAPER PAIR.
+           Everything above reads the mark DATA, and a plant that left the data correct and drew at
+           `m.x,m.y` instead of `m.gx,m.gy` walked straight past the first draft of this block: the
+           marks all piled onto Calle Principal and every assertion stayed green. So ask the CALL
+           SITE what it did, by making `drawMark` report the coordinates it is handed — the same
+           shape as `SAYBAKE`'s "bake" (docs/REGRESSION.md, register fault A: never let the guard
+           supply the number it is checking). ---- */
+    {
+      const real = drawMark, seen = [];
+      try {
+        drawMark = (g, cx, cy, k, r) => { seen.push([cx, cy]); };
+        drawPlanMarks(document.getElementById('mapcv').getContext('2d'), 10);
+      } finally { drawMark = real; }
+      const want = planMarks().map(m => [m.gx * 10 + 5, m.gy * 10 + 5]);
+      want.forEach(([wx, wy], i) => {
+        const got = seen[i];
+        if (!got) { P.push('the plan has ' + want.length + ' marks and painted ' + seen.length); return; }
+        if (got[0] !== wx || got[1] !== wy)
+          P.push('a mark belongs at ' + wx + ',' + wy + ' on the paper and was painted at ' + got[0] + ',' + got[1] +
+                 ' — the painter is using the world position, so every mark on an offset street lands on the first one');
+      });
+    }
+
+    /* ---- 4 · AND THE ARROW POINTS AT THE REAL TILE. The whole point of keeping two pairs. ---- */
+    const m0 = marks[0], wasDest = mapDest, wasW = world, wasX = px, wasY = py;
+    try {
+      mapDest = null;
+      const hit = mapPick(m0.gx + 0.5, m0.gy + 0.5);     /* a finger on the PAPER */
+      if (!hit) P.push('tapping a mark on the offset street selected nothing — the hit test is reading the wrong coordinates');
+      else if (!mapDest) P.push('tapping a mark on the offset street set no destination');
+      else {
+        if (mapDest.x !== m0.x || mapDest.y !== m0.y)
+          P.push('tapping the mark stored ' + mapDest.x + ',' + mapDest.y + ' as the destination and the place is at ' + m0.x + ',' + m0.y + ' — the paper coordinate was stored as the world one, and the street arrow will point at it');
+        /* STAND ON THE OFFSET STREET and read the arrow back. This is the assertion the whole
+           block exists for: every number above can be right and the arrow still send somebody
+           seventeen tiles north, because the arrow is the only thing that reads mapDest as a
+           position in a world. */
+        const ww = WORLDS[off.world];
+        world = off.world; px = Math.max(0, Math.min(ww.W - 1, m0.x - 2)); py = Math.max(0, Math.min(ww.H - 1, m0.y));
+        const a = (typeof destAim === 'function') ? destAim() : null;
+        if (!a) P.push('standing on the offset street with a destination on it, the game aims at nothing');
+        else if (a.tx !== undefined) {
+          if (a.tx < 0 || a.ty < 0 || a.tx >= ww.W || a.ty >= ww.H)
+            P.push('the street arrow points at ' + a.tx + ',' + a.ty + ', which is off the edge of the ' + ww.W + '×' + ww.H + ' street you are standing on');
+          else if (a.mode === 'go' && (a.tx !== m0.x || a.ty !== m0.y))
+            P.push('the arrow points at ' + a.tx + ',' + a.ty + ' and the destination is at ' + m0.x + ',' + m0.y);
+        }
+      }
+    } finally { mapDest = wasDest; world = wasW; px = wasX; py = wasY;
+                done.clear(); wasDone.forEach(q => done.add(q)); chSeen = wasSeen;
+                if (typeof applyGrowth === 'function') { try { applyGrowth(); } catch (e) {} }
+                if (typeof drawTown === 'function') { try { drawTown(); } catch (e) {} } }
+    return P;
+  });
+  fails.push(...plan.filter(l => !/^NOTE-ONLY: /.test(l)));
+  plan.filter(l => /^NOTE-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
   /* ---- THE BEARING POINTS AT THE PLACE, AND STAYS ON THE SCREEN ----
      The owner picked the street arrow over the crew's advice on 2026-09-15 ("bearing lets try 2"),
      so it has to be right: an arrow that points confidently at the wrong wall is worse than no

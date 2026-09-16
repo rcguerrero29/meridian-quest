@@ -3,6 +3,45 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
+## STATE OF PLAY — read this first (2026-09-16, end of the seam-and-map sitting)
+
+### ⇢ 2026-09-16, later — START HERE. Everything below this line is history.
+
+**`main` is at `mq-v161`.** This branch (`claude/upbeat-planck-0718c6`) carries three commits and is
+at **`mq-v164` / `ch-v114`**, pushed, not merged. **Merge is the owner's word** — and note that the
+quest-marker halo, the glass divider and the silent-save fix are all sitting here unmerged, so the
+live site does not have them and the owner reporting them as "still happening" is expected.
+
+**Run the suites with `export CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`** —
+see the block below for why.
+
+**What this sitting added on top of the previous block:**
+- **The paper seam (`ARCH-LOG` A15, closed).** A pack declares `PAPER`, a string of CSS; the engine
+  re-roots every selector at `.paper`, allow-lists what can be scoped, strips `position:fixed` and
+  makes the reader a stacking context. Meridian declares none and is byte-identical; the gauge
+  declares one and **half of it is a live attack**. Six plants. `docs/BOUNDARY.md` has the row.
+- **`TOWNPLAN` — the plan draws every street.** He hit this in play: standing on Calle Dos, shown
+  Calle Principal. The trap it opened is the thing to read: a mark had one coordinate pair doing two
+  jobs, and they were only ever the same number because there was one panel at 0,0. Marks now carry
+  `x,y,w` (where it is) and `gx,gy` (where it is drawn), and **nothing may use one for the other**.
+  Four plants. `docs/BEAUTIFY.md`, "Two coordinate systems, one field".
+- **La foto settled** — and the owner's answer dissolved the question instead of picking one of the
+  four options I put to him. The photo never touches browser storage: it is composed with the
+  recipe's own art as **stickers** and saved **full size to her phone**. `la-sobremesa.md` §18.1.
+- **Music asked** — `docs/for-aj/SOUND.md`, three questions with lettered answers, on his correction
+  that she should be given options rather than an open question.
+
+**Open, and the owner's to call:**
+- **The quest marker collides with a neighbouring prop.** The halo fixed the contrast; the shot in
+  that session shows the mark also sharing space with a prop painted after it. A draw-order fault,
+  reported, not fixed.
+- **Nobody on Calle Dos ever carries a quest mark, in any chapter.** Found while building the guard:
+  `ex` has six people (rigo, meche, beto, kike, mari, ~c0) and not one of them ever has anything to
+  say. The street is walkable, dressed and now on the map, and it never needs you. Not a bug — a
+  design hole, and his to decide.
+- **The photo/sticker build itself** is specified and not built.
+- `la-sobremesa.md` §16/§17 want a re-read now that the book is not Simmer's spine.
+
 ## STATE OF PLAY — read this first (2026-09-16, end of the fourth-page sitting)
 
 ### ⇢ 2026-09-16 — START HERE. Everything below this line is history.
