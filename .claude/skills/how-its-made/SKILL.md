@@ -97,6 +97,24 @@ The general form: **a soft thing takes the shape of what encloses it.** Dough in
 roll, wool in a sack, cargo in a hull, grain in a silo. If your contents have square corners and the
 container is round, the drawing is of the moment before it was closed.
 
+## When they are together, they are lit together
+
+Shape is not the end of it. Several correct objects in one frame will still read as **stickers laid
+on top of one another** until they are lit as one scene:
+
+- **They cast on each other.** Not just onto the ground — onto the neighbour they lean against. This
+  is the single change that turns an overlap into a stack.
+- **Each has a terminator.** A face is a plane, and the far side of a plane is darker. One exposure
+  edge to edge is the flat look, whatever the shading inside the object.
+- **Every inside corner is dark.** Where a face meets a wall, where an object meets the ground,
+  light does not reach. It is the cheapest depth in the box.
+
+**And in 2D, the order you draw in is part of the lighting model.** A cast shadow can only land on
+something already painted. With a key from the upper left, shadows fall to the lower right, so the
+objects on the right must be drawn FIRST. Painted the other way round, every shadow lands on
+background that the next object covers up — and the result looks precisely like no shadows at all,
+with nothing in the code to show for it.
+
 ## The five questions, before you draw anything
 
 **1 · How was it made? Say the steps out loud.**

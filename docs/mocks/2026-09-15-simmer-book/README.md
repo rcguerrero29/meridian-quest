@@ -239,3 +239,28 @@ chosen — narrow at the top and bottom, widest across the middle, and the whole
 **The general form, which is why this went into the skill and not just this folder:** *a soft thing
 takes the shape of what encloses it.* Dough in a tin, filling in a roll, wool in a sack, cargo in a
 hull. **Square corners inside a round container is a drawing of the moment before it was closed.**
+
+
+---
+
+## 2026-09-16 — *"maybe throw some shading on those"*
+
+The pucks had shape and no light. Everything was drawn at its own local brightness and then left
+flat, so six solid objects overlapped with nothing between them and still read as **stickers laid on
+top of one another**. Three things, in the order light actually works:
+
+1. **They cast on each other.** The key is upper-left, so each puck throws a shadow down and to the
+   right onto the slice it is leaning against. Painted by filling the silhouette once with canvas's
+   own shadow on, then drawing the real thing over it with the shadow off, so the seam between the
+   ellipse and the wall never doubles.
+2. **A terminator across each face.** A cut face is a plane; the far side of a plane is darker. It
+   had one exposure edge to edge.
+3. **A contact seam where the face meets the wall** — the corner light cannot reach — plus the wall
+   turning away at both ends and sinking into its own shade where it meets the board.
+
+**And a draw-order fact worth keeping, because it is not obvious:** the row is now painted **right to
+left**. A cast shadow can only land on something that is already on the board, and with the key
+upper-left the shadow falls to the lower *right* — so the slice on the right has to exist first.
+Drawn the other way, every shadow was painted onto board that the next puck immediately covered, and
+the result looked exactly like no shadows at all. **In 2D, the order you draw in is part of the
+lighting model.**
