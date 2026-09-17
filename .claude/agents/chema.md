@@ -232,3 +232,18 @@ the window pane anchored at its bottom (`engine/engine3d.js`, grep `center.set(0
 three-quarters of itself and its own ledge, sitting 0.05 further out, does not. **The offset a
 wall-hung billboard needs is its own height times the camera's pitch — a formula, not a constant
 somebody tuned for one sprite.**
+
+**AND BEFORE YOU TUNE A NUMBER, FIND OUT WHETHER ANYTHING DRAWS IT.** *(2026-09-17, the fifth report
+of one bug.)* A rectangle in the data is not a thing on the screen. When several drawings position
+themselves off one number and nobody paints the number itself, **every one of them is correct and the
+picture is wrong** — and it is invisible in the code, because each drawing reads right on its own.
+Meridian declared two windows per facade, painted two flat rectangles, and hung a lit pane, a sugar
+skull and a stone ledge off the rect: all three in exactly the right place, and no window. Four
+fixes argued about the size of the skull.
+
+The same rule with a number instead of a rect: **grep every camera for a function's name before you
+believe the world has that fact.** `wellDepth` and `stairLift` gave the right heights for two
+versions and only the 3D camera ever called them, so a stairwell was a flat floor with a chevron on
+it and a bridge was paint on the water.
+
+And the cheapest of the three: **render it at 8× and look, before the second attempt.** Two minutes.

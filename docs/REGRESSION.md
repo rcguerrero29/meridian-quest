@@ -261,3 +261,28 @@ R3 and R5 and R8 first (minutes each, and R3 would have caught a mistake made to
 R1 with the engine change it needs. Then R4, which is the template's promise finally kept.
 R2, R6, R7 as the town's next parts land. Each red first — a test that was never red proves
 nothing (`OWNER.md`).
+
+## The proxy register — 2026-09-17, five more, and they all went red on a working game
+
+A heavy day for this register, and the pattern in every one of them is the same: **the guard asked
+about the thing that happens to be near the noun, and the noun moved.**
+
+| the guard | the proxy it read | the noun it meant | how it surfaced |
+|---|---|---|---|
+| "an unbegun panel is plain plaster" (`test/smoke.js`) | **every colour in the whole 32×32 tile** | the EMBLEM has not been painted yet | went red the moment a mural kept the wall's own window — glass, a lintel and a stone ledge counted as "the panel painted something". Now measures the emblem's own field |
+| "the town loads the shared engine" (`test/town.smoke.js`) | **the literal string `../engine/engine.js` in the shell's text** | the town runs the shared engine, not a copy | went red the day the path moved into `engine/boot.js`, while the town was running the shared engine perfectly. Now reads what the browser fetched |
+| "this house is on the town plan" (`test/town.smoke.js`) | **`MAPDOT[world][0]`** | the plan can show me where the house is | went red when the hand-typed copies were deleted, while the plan could place every house from its own door. Now asks `planPlace` |
+| "the 3D scene cache has a ceiling" (`test/engine.smoke.js`) | **`T3CACHE_MAX`, the cache's own constant** | you do not end up holding the whole city | **passed a plant that set the constant to 999**, which turns the cache off. A ceiling is a fact about behaviour, not a number to read back |
+| "the door covers the screen when the world changes" (`test/engine.smoke.js`) | **three added-up gaps between the leaves** | the door is shut | reported *296 pixels of daylight* for a door standing wide open at rest — the same number a broken door gives. **A measure that cannot tell shut from open is not a measure.** Now one coverage fraction: 1 when shut, 0 when open |
+
+**And the one that is not a proxy but belongs beside them:** the first version of the doorway guard
+held the door still and measured its geometry, which is stable and catches most of it — and could
+never see **a move that only happens on the way back to rest**. A leaf slid back across the whole
+screen a third of a second after the door had opened, and the plant went straight through. It is
+caught now by reading the cause (the reset's transition duration) rather than the symptom.
+
+**The rule this adds to "a guard has to read the noun it actually means":** *a guard that reads a
+number the code under test owns is reading the code, not the behaviour.* `T3CACHE_MAX`, `MAPDOT[id]`,
+a literal path in a file the change is allowed to edit — all three are the same mistake, and all
+three passed while the thing they guard was broken.
+

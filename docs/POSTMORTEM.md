@@ -758,3 +758,42 @@ front camera.
 Same discipline as every register here: **it grows from what happened, never from imagination.** An
 entry needs what was believed, what was true, and what it cost. If you cannot name the cost, you have
 a rule, not a post-mortem — put it in `docs/OWNER.md` instead.
+
+## 2026-09-17 — four ways to be wrong, and none of them was in the code
+
+A long day, and the four worth keeping are the four that **could not be seen by reading**.
+
+**1 · Four fixes to a thing that was not there.** The owner reported a sugar skull on a window sill
+five times over nine days. Four answers changed the SIZE of the skull — 8px, 5px, 0.85 of the pane,
+then the pane lit behind it. Each was measured. Each was defensible. **Rendering the tile at 8×
+before touching anything took two minutes and showed there was no window at all** — the facade
+painted two flat rectangles and the mural then plastered over even those. *Cost: nine days and four
+attempts. The fix, once looked at: one afternoon.*
+**What to do instead:** on the second attempt at a drawing, stop adjusting and take a picture of it.
+
+**2 · A number three cameras never read.** `wellDepth` and `stairLift` returned the right height for
+two versions and only `engine3d.js` ever called them. A stairwell was a flat floor with a chevron on
+it; the rainbow bridge was paint on the water. **Nothing about this is visible in the code** — each
+camera reads correctly on its own. *Grep every camera for a function's name before you believe the
+world has that fact.*
+
+**3 · A refusal that is not an error.** Moving the engine loader into an inline `<script>` broke El
+Changarrito completely — its shell ships a stricter policy (`script-src 'self'`, no
+`'unsafe-inline'`) than Meridian's. The script **parsed, appeared in `document.scripts`, and never
+ran**. A CSP refusal is not a page error, so nothing threw and nothing was logged; the town's entire
+engine simply did not load. Caught only because the suites run against both shells.
+**What to do instead:** when a change touches how a shell LOADS anything, run both suites before
+believing it, and remember that *the two shells are not the same shell.*
+
+**4 · A guard that read the constant it was guarding.** The 3D scene cache's ceiling check compared
+`T3CACHE.size` against `T3CACHE_MAX`. Raising `T3CACHE_MAX` to 999 turns the cache off — **and the
+guard still passed.** Four more of the same shape went red or silent the same day (`docs/REGRESSION.md`).
+*A ceiling is a fact about behaviour, not a number to read back.*
+
+**And one about the owner rather than the code**, which is the most useful line of the day and is
+his: *"can we make the guards smarter instead of just making them notes?"* Two checks had been made
+to say `NOTE-ONLY: no world has a well` and `no portal in this shell` rather than fail — a shrug
+dressed as diligence. **A guard that says "I measured nothing" is still a guard that measured
+nothing**, and next week nobody reads the note. Both now derive their demand from what the pack
+itself declares and cross-check it with a cruder question that cannot break the same way.
+
