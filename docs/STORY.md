@@ -61,6 +61,18 @@ says *YA MERO* instead of *SE ACABÓ*, because atole does not end, it thins. **V
 stop's cat, belongs to nobody and has decided the pot is the warmest object on Calle Dos; she is in
 all three endings and owns nothing, which is the rule the corner teaches about everything on it.
 
+- **Nobody is introduced by a reference a newcomer cannot follow.** *(Owner, 2026-09-17: "tell the
+  agents to ensure a person just meeting the characters cant be confused as to what they are talking
+  about.")* Not "explain everything" — **the first time a name, a place or a piece of trade
+  vocabulary appears in front of the player, the sentence carrying it must also tell them enough to
+  keep walking.** One clause usually does it: not *"Chayo wants the same"* but *"Doña Chayo works
+  the corner by the clinic on Quinta — forty years, atole where I do tamales — and she wants the
+  same."* Three ways it goes wrong: a name dropped as if already known; a callback to a district the
+  player may have skipped (districts open in order, the quests inside them do not); and **the
+  project's own private words leaking into the fiction**, which is the one that bit us — the internal
+  term for a district's ending was "a Saturday" and it ended up as a title prefix on five quests in
+  two languages. The check: read the scene as somebody whose first five minutes in this city this is.
+
 - **A district needs FOUR quests and a `need` of THREE, minimum — or one of its endings is
   fiction.** *(2026-09-16, found by Nacho while costing la esquina; corrected in `docs/CITY.md`
   on the owner's word 2026-09-17.)* `gradeOf` grades on the fraction of **answered** quests that

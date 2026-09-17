@@ -142,3 +142,27 @@ no guard will ever see it overflow.** *(Applied 2026-09-14 from crew run 9. `:33
 applying as the one `d.sub` read, three lines into `function docMarkdown`; grep `d.sub` when it
 slides. Nacho found the same fault the same hour from the meaning rather than the string — row 66 of
 the ledger in `docs/crew/FLIGHT-NOTES.md`.)*
+
+**NOBODY IS INTRODUCED BY A REFERENCE A NEWCOMER CANNOT FOLLOW.** *(Owner, 2026-09-17: "tell the
+agents to ensure a person just meeting the characters cant be confused as to what they are talking
+about.")* A person meeting Doña Meche for the first time must not need to already know who Chayo is,
+what happened at the mercado, or what a *ficha* is. The rule is not "explain everything" — it is
+that **the first time a name, a place or a piece of trade vocabulary appears in front of the player,
+the sentence carrying it must also tell them enough to keep walking.** One clause is usually all it
+takes: not *"Chayo wants the same"* but *"Doña Chayo works the corner by the clinic on Quinta —
+forty years, atole where I do tamales — and she wants the same."*
+
+Three places this goes wrong, and the third is the one nobody catches:
+1. **A name dropped as if already known.** The writer knows the cast; the player has met four people.
+2. **A callback to a district the player may not have played.** Districts open in order but quests
+   inside them do not, and a player can reach a last visit having skipped half the street.
+3. **The project's own private words leaking into the fiction.** This is the one that bit us: the
+   internal term for a district's ending was "a Saturday", and it ended up as a *title prefix on five
+   quests in two languages* — four unrelated businesses labelled with a word that means nothing to
+   anyone who has not read our documents. The owner spotted it; the argument that "a player never
+   meets it as a term" was false and had not been checked. **If you find yourself writing a word
+   because the team uses it, that is the signal, not the excuse.**
+
+The check, and it is cheap: **read your scene as somebody whose first five minutes in this city this
+is.** Every proper noun, every callback, every bit of jargon — can they keep walking? If they have to
+ask "what chair?", rewrite the sentence, not the glossary.
