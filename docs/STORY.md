@@ -15,7 +15,7 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
 - **Teaching mode IS story mode** (owner, 2026-08-31). Concepts land as beats.
 - **Districts, not weeks** (owner, 2026-08-31). Weeks One and Two stay in the
   fiction as written; nothing new is counted in days. A business is a
-  relationship with a first visit, an escalation, and a Saturday that pays off.
+  relationship with a first visit, an escalation, and a last visit that pays off.
 - **The grade picks the ending, and the grade is always on.** Every ending has a
   3 / 2 / 1 variant — the tone shifts, never the door.
 - **Stakes are an optional layer on top** (`none` by default; `hearts` for a
@@ -33,9 +33,27 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
 - **La inauguración plays in the world, not in a curtain** — the CITY's final ceremony,
   and only that. *(signed 2026-09-01, ❗El listón; SCOPE CORRECTED 2026-09-02 — the
   session, not the owner, generalised it to every ending in the game and then cited it
-  against `finish()`. See docs/OWNER.md.)* A DISTRICT's Saturday is a separate call.
-- **A district's Saturday is a goodbye at the door.** *(2026-09-02, ❗La despedida —
-  the owner deferred the call to /nacho.)* Reaching `need` ends nothing: it puts a ❗
+  against `finish()`. See docs/OWNER.md.)* A DISTRICT's last visit is a separate call.
+- **A district needs FOUR quests and a `need` of THREE, minimum — or one of its endings is
+  fiction.** *(2026-09-16, found by Nacho while costing la esquina; corrected in `docs/CITY.md`
+  on the owner's word 2026-09-17.)* `gradeOf` grades on the fraction of **answered** quests that
+  landed first try, and the last visit fires the *instant* `need` is met — so with `need:2` exactly
+  two are answered, the fraction can only be 0, ½ or 1, and the grades are **1, 1, 3**. The middle
+  ending would be written and never played, and nobody would notice, because a missing ending does
+  not fail: it simply never appears. `need:3` of four gives 0, ⅓, ⅔, 1 → **1, 1, 2, 3**. And
+  `test/smoke.js` separately refuses `need === quests.length`, so three-of-three was never open
+  either. **❗El espejo was signed at three and two and is corrected before anybody writes it** —
+  which is the cheap moment to find this, and the only one.
+
+- **A district's LAST VISIT is a goodbye at the door.** *(2026-09-02, ❗La despedida —
+  the owner deferred the call to /nacho. **Renamed from "a Saturday" on 2026-09-17**, owner:
+  *"this concept of a Saturday is silly, explain it differently"* — and he is right. "Saturday"
+  was a private metaphor about the end of a working week that told a reader nothing and had to be
+  learned before any of these pages made sense. It is the LAST VISIT, because that is literally
+  what it is: you walk up to that person one more time and that walk is the ending.)*
+  **In plain words:** every business in this city is a small job you take. You meet them, you do
+  some work, and then you go and see them one last time — and how that visit goes depends on how
+  the work went. Reaching `need` ends nothing: it puts a ❗
   over that business's owner, and walking up to them IS the ending. Three to five spoken
   beats keyed to the grade, an object in your hands, the role said out loud once, and
   the phone call to the next neighbour placed before you are off the lot. The long
@@ -60,7 +78,7 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
 - **Paint only ever goes on.** A grade can improve after its ending played and the
   mural repaints — but a late answer may never scrape colour off a panel already
   earned. Derived from "nothing is ever taken away"; recorded so nobody freezes the
-  grade at Saturday, and nobody lets a rusty return trip cost the player a wall.
+  grade at the last visit, and nobody lets a rusty return trip cost the player a wall.
 - **A quest may depend on another quest only if the same person gives both.** The
   station queues (`WNPC` / `STATIONS`) serve one NPC's quests in order, so "one more
   thing…" is always safe inside a character. Nothing enforces order between two
@@ -82,7 +100,7 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   de logros; the epilogue promises Week Two.
 - **Week Two, chapter one** (quests 16-23): Monday. Doña Chelo unlocks the gate and
   El Mercado Robles grows onto the southwest lot. You're the de-facto AI PM —
-  scoping, saying no, shipping the small version. Plays its Saturday at 5 of 8
+  scoping, saying no, shipping the small version. Plays its last visit at 5 of 8
   quests **and stays open** — epilogue at the register ("You built me a Tuesday I
   can trust"), and the other three answerable forever.
 - **The open city** (post-mercado, planned 2026-09-01). Weeks end; referrals
@@ -114,14 +132,14 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
 - **The morning after.** The day ends while the player is away. Next launch: chairs
   stacked against the wall, papel picado torn a little by wind and nobody's taken
   it down, a neighbor mentions yesterday, a new sign on a lot. Nothing announced;
-  the street simply remembers. **Reusable for every business's Saturday** — close
+  the street simply remembers. **Reusable for every business's last visit** — close
   the taller at dusk, come back Monday and Tuerca has moved onto the Caprice.
 - **La carpeta abierta** (2026-09-01). The owner's law arrives as story: nothing in
   Meridian closes. Doña Chelo does not ask for the keys back; the work you didn't
   finish is a folder on her counter with your handwriting on it, and the gate opens
   at seven. The first lap is **the referral** — a neighbor vouches for you to the
   next one. The second lap is **the callback** — a neighbor phones *you*, by name.
-  A business's second-order quest only opens after its own Saturday, so the barrio
+  A business's second-order quest only opens after its own last visit, so the barrio
   deepens instead of accumulating and "more training" reads as a promotion.
 - **La línea tardía** (2026-09-01, built). The law grew a voice. Every quest in the
   city can now open with one line from its own NPC that acknowledges only that time
@@ -357,7 +375,7 @@ inside the building.
    does everything and costs more than it saves. *Build vs buy vs don't.* The
    counterweight to the mercado's "build the small thing," rhyming with "The Monday
    number."
-8. **The Saturday** — Yesenia closes the book. Not throws it away: **closes it, and
+8. **The last visit** — Yesenia closes the book. Not throws it away: **closes it, and
    shelves it next to Tacho's old manuals**, the highest honour available in that
    building.
 
@@ -461,7 +479,7 @@ hired you for. Three fixes, now canon:
 - 2026-09-01 · ❗El día · **the morning after** — you play as long as you like and the
   day ends while you are away; next launch the street remembers (chairs stacked,
   papel picado torn, a neighbour mentions yesterday, a new sign on a lot) · the north
-  star said out loud, and reusable for every business's Saturday.
+  star said out loud, and reusable for every business's last visit.
 - 2026-09-01 · The second lap · after the trolley opens, the four businesses call you
   BACK with second-order problems (drift, scale, distribution shift, adoption at
   scale, refusal under new pressure) · "continue with more training" costs no new
@@ -572,7 +590,7 @@ them the engine currently contradicts:
   **Correction 2026-09-02:** an earlier version of this entry called `finish()`'s end
   panel a *contradiction* of a Settled rule. It is not. The owner scoped their answer to
   the city's finale; the session generalised it to every district ending. `finish()` is
-  **unchanged, unjudged, and awaiting a /nacho call** on how a district's Saturday should
+  **unchanged, unjudged, and awaiting a /nacho call** on how a district's last visit should
   present itself — which then ships as content-declared, per district, never hardcoded.
 - **❗El día — "the morning after" is NOT built.** Nothing tracks last-played; there is
   no day-turnover state anywhere in the engine.
@@ -627,8 +645,8 @@ Contradictions found 2026-09-01 that cannot be settled by rewriting a line. Each
 what conflicts, why it is not Nacho's to decide, and the options. Owner's instruction:
 *"make a note so that during customization we clear the goals and this topic."*
 
-1. ~~**Where Week One's Saturday belongs.**~~ **SETTLED 2026-09-01 (❗La puerta):
-   `need` dropped 16 → 12.** Week One's Saturday now plays with four quests still on
+1. ~~**Where Week One's last visit belongs.**~~ **SETTLED 2026-09-01 (❗La puerta):
+   `need` dropped 16 → 12.** Week One's last visit now plays with four quests still on
    the board, they stay answerable forever, and all 24 reframe lines are live in
    default play. Owner's clarification, which was already true of the data: *"doesnt
    have to happen in the office"* — `need` is a count over the whole district, and
@@ -641,7 +659,7 @@ what conflicts, why it is not Nacho's to decide, and the options. Owner's instru
    assume the barrio can vouch for you. A per-district floor does not exist in the
    engine and would be a build. Nacho's preferred fix is the one he already named:
    **split Week One into the office (0-9) and the barrio (10-15) as two districts with
-   two Saturdays and two mural panels** — which makes the floor structural instead of
+   two last visits and two mural panels** — which makes the floor structural instead of
    arithmetic. Queued for the session that builds Taller Herrera, when districts are
    already on the workbench.
 

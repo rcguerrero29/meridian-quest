@@ -1233,7 +1233,7 @@ one display from any direction"* · *"Sonny is picking up the ball with his butt
 370xp there isn't anyone to talk to"*. Every one reproduced in headless Chromium first;
 every fix has a test that was red before it.
 
-1. **The Saturday played again, then the street was blank.** Two bugs under one report.
+1. **The last visit played again, then the street was blank.** Two bugs under one report.
    `sanitizeSave()` — the loader every Continue and every Trolley Pass goes through —
    never carried `cs` (districts claimed) or `mk` (the grades). So every Continue reset
    the district counter to zero: with Week One's twelve done, `chDue()` was true again and
@@ -1244,9 +1244,9 @@ every fix has a test that was red before it.
    through `showWorld()`, which sizes the canvas; the boot-into-ending path applies the
    control scheme. **Saves damaged by the bug are repaired at Continue:** a save with no
    version stamp (`v`) rebuilds the counter from what was played — a district counts as
-   claimed when its need is met AND the next district was started, so a Saturday never
+   claimed when its need is met AND the next district was started, so a last visit never
    seen still plays once and one already seen does not replay. The owner's own save will
-   play the mercado's Saturday once more (its counter was reset), and that Saturday now
+   play the mercado's last visit once more (its counter was reset), and that the last visit now
    ends with Chelo phoning Tacho and the toast that opens the taller. **Grades already lost
    cannot be rebuilt** — the report starts marking again from here.
 2. **Keys on a laptop.** Arrows and WASD already walked; capitals (caps lock, shift) and
@@ -1377,7 +1377,7 @@ thing. Every explanation the city owned was locked inside a person.
   learning is. A field you never answered is left blank, which is the templates' own rule.
 - **Six sheets of blank paper hang on the office wall from day one**, unlabelled (the owner's
   call over an empty frame: a labelled empty frame is a to-do list in your own office). Each
-  district's Saturday pins its own document over one, through the same ribbon machinery that
+  district's last visit pins its own document over one, through the same ribbon machinery that
   delivers the furniture. Labs → 05 Decision Log · El Mercado → 02 Recommendation Memo ·
   Taller Herrera → 06 Process & Exception Map · La Espiga → 01 Discovery Notes · Limpieza
   Velázquez → 04 Pilot Review · Nolasco → 07 Answers/Refuses/Hands to.
@@ -1480,7 +1480,7 @@ that person name them out loud. Deleting the quest is what "nothing is ever take
 *"i still couldnt find my posters and laptop... ive achieved things in the game."*
 
 **Reproduced before touching anything, with a save shaped like his** (Week One and the mercado
-played, two Saturdays claimed). The result: **two posters were correctly pinned to the wall and
+played, two last visits claimed). The result: **two posters were correctly pinned to the wall and
 the whole system worked — and standing on the arrival tile by the stairs, `readMarks()` returned
 ZERO.** Nothing in the room said any of it existed.
 
@@ -1577,7 +1577,7 @@ yet *talk about* what he built.
 I answered with directions. The third time is not a comprehension problem, it is a design bug,
 and here it is:
 
-**Nothing in the city ever announced its own deliveries.** A district's Saturday plays, its
+**Nothing in the city ever announced its own deliveries.** A district's last visit plays, its
 toast says a new lot opened on the street, and meanwhile a page is pinned to a wall on a floor
 the player is not standing on. The pinning was correct, the reading worked, the marker was
 right — and there was **no moment at which the game said it had happened**.
@@ -1585,7 +1585,7 @@ right — and there was **no moment at which the game said it had happened**.
 - **A ribbon may now declare `say:{en,es}`**, one line, spoken once ever (the seen list is
   saved), when it first lands. Deliveries name the room: *"Your memo for El Mercado went up on
   the office wall — second sheet from the left, upstairs."*
-- Spoken after the Saturday's own toast, and also at Continue for anything that arrived while
+- Spoken after the last visit's own toast, and also at Continue for anything that arrived while
   the phone was away.
 - **The test is the rule, generically stated:** a ribbon WITH a `doorstep` walks you to what it
   built, so its district's toast covers it; a ribbon WITHOUT one lands somewhere you are not

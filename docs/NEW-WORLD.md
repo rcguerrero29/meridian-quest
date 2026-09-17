@@ -43,11 +43,11 @@ That already happened to El Changarrito before this flag existed.
 |---|---|---|
 | Declares | `CHAPTERS`, and nothing else | `ENDLESS = true`, and **no** `CHAPTERS` |
 | Has | a last day, an epilogue panel, a grade | none of those |
-| Story shape | an arc with a Saturday | people you keep returning to |
+| Story shape | an arc with a last visit | people you keep returning to |
 | Good for | a course, an engagement, a season | a place you inhabit; a backlog; a comfort world |
 
 **Do not keep the chapter skeleton with the lesson removed.** Nacho's warning, and it is the whole
-trap: *a Saturday with nothing to graduate from is a countdown to nothing.* Pick one shape.
+trap: *a last visit with nothing to graduate from is a countdown to nothing.* Pick one shape.
 
 **✅ The fault this section used to warn about is FIXED — the warning itself had gone stale, which
 is why it is rewritten rather than deleted.** `ENDLESS = true` once froze district progression: the

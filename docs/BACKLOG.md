@@ -67,9 +67,9 @@ quest packs and forgot the engine seam, the office, the ceremony and the second 
 | **S0** | ~~El 3D y el mundo~~ | **shipped 2026-09-02** (merged at `mq-v46`) | doors that stand up, sharp 3D, La Cocina reads as a restaurant, autumn arrives on its own. *Not* the bridge arch — that waits on elevation |
 | **S1** | **La cimentación** | one | **nothing** — and that is said out loud. The whole engine seam, paid once |
 | **S2** | ~~La oficina (`f2`)~~ | **shipped 2026-09-02** (v1 at `mq-v46`; window, mid-move and the tenth question the same day) | the room opens mid-move, Nacho and Don Güero ask ten questions with no wrong answers, the sheet is the player's — `docs/rooms/aj-office.md`. *Not yet:* the furniture arriving (§6 below; the engine part is an eighth of a sitting) |
-| **S3** | ~~Taller Herrera~~ | **written and wired 2026-09-02** (`mq-v51`) | the southeast lot opens on the mercado's Saturday; quests 24-31; template 06 |
-| **S4** | ~~La Espiga + Velázquez~~ | **written and wired 2026-09-02** (`mq-v51`) | Calle Dos opens one door at a time — the bakery on the taller's Saturday, the cleaners on the bakery's; quests 32-47 |
-| **S5** | ~~Nolasco Tax & Notario~~ | **written and wired 2026-09-02** (`mq-v51`) | the walkup opens on the cleaners' Saturday; quests 48-55; template 07. His Saturday opens nothing — S6 is next |
+| **S3** | ~~Taller Herrera~~ | **written and wired 2026-09-02** (`mq-v51`) | the southeast lot opens on the mercado's last visit; quests 24-31; template 06 |
+| **S4** | ~~La Espiga + Velázquez~~ | **written and wired 2026-09-02** (`mq-v51`) | Calle Dos opens one door at a time — the bakery on the taller's last visit, the cleaners on the bakery's; quests 32-47 |
+| **S5** | ~~Nolasco Tax & Notario~~ | **written and wired 2026-09-02** (`mq-v51`) | the walkup opens on the cleaners' last visit; quests 48-55; template 07. His last visit opens nothing — S6 is next |
 | **S6** | La inauguración + la mañana siguiente | one | the street dressed, the mural full, the day turning over while you sleep |
 | **S7** | La segunda vuelta | half | five neighbours phone *you* |
 
@@ -139,7 +139,7 @@ engine, all landing in **S1**, none of them naming a business.
 | 14 | ~~**Construction fences lie sideways in 3D**~~ | **shipped 2026-09-02** | a fence panel stands along its run; corners get two. §15.12 |
 | 12 | ~~**Furniture stood up as cutouts** — the table read as a dartboard, the counter as a grey sign, the barricade as a ladder~~ | **first slice shipped 2026-09-02** | `TILESIDE`: a second drawing per prop for the cameras that see it standing; table, counter, stove done, barricade redrawn. The rest read acceptably in the frames and get a side view the moment the owner reports one. §15.11 |
 | 10 | **A wall between you and the camera hides you** — stand just north of an interior wall in 3D and only your head shows | ~1h | found 2026-09-02 by the eyeball pass, pre-existing. Fade the wall, lower walls, or raise the camera — not chosen. §15.3 |
-| 15 | ~~**The Saturday replays on every open; the street is blank after it**~~ | **shipped 2026-09-03** | the save loader dropped the district counter and the grades; the boot-into-ending path never sized the canvas. Damaged saves repaired at Continue. §15.13 |
+| 15 | ~~**The last visit replays on every open; the street is blank after it**~~ | **shipped 2026-09-03** | the save loader dropped the district counter and the grades; the boot-into-ending path never sized the canvas. Damaged saves repaired at Continue. §15.13 |
 | 16 | ~~**Keys on a laptop** (caps lock, non-QWERTY)~~ | **shipped 2026-09-03** | `keyDir()` reads key then code. §15.13 |
 | 17 | ~~**The building pops in after the permits quest**~~ | **shipped 2026-09-03** | the stage lands behind a short curtain after the card closes. §15.13 |
 | 18 | ~~**Furniture shows one face from every direction in 3D**~~ | **first slice shipped 2026-09-03** | boxes for furniture with a side view; the HQ desk and `A H I S W` still need a side drawing to stand as boxes. §15.13 |
@@ -155,7 +155,7 @@ engine, all landing in **S1**, none of them naming a business.
 | **The four story calls were made with Nacho's picks** (`docs/story/las-cuatro-puertas.md`, top): Tuerca a she; the franchise unnamed; paper 06/01/04/07; Calle Dos one door at a time. Any to flip? | one line each; the packs are written |
 | **Play the taller**, then Calle Dos and Nolasco — written before anyone played them. *(The mercado was played; the `mq-v52` save bug ate the grades, so a graded run of it is still worth one sitting of yours)* | the four new packs, for revision |
 | **The room upstairs — one call left** (`docs/rooms/aj-office.md` §8): Nacho off the street. *(Window: built. Whose room: the interview asks it. Mid-move: chosen and built 2026-09-02.)* Plus Don Güero's four after the build (§10 there): gifts land on the boxes; the couch one tile or two; assign who-sends-what now; Nacho's talk title | shipped with a pick on each; one word flips any |
-| **How does a district's Saturday present itself?** Deferred to /nacho; must be content-declared so a pack can choose differently | blocks S1's ending refactor |
+| **How does a district's last visit present itself?** Deferred to /nacho; must be content-declared so a pack can choose differently | blocks S1's ending refactor |
 | ~~**Industries vs roles**~~ — built 2026-09-02: `industry:` beside `role:`, the report prints *industry · role* | Week One is still one industry (Enterprise IT) until the Week One split is decided |
 | **The city's record to a government NPC** — separating the player's portfolio from the city's memory | new, a story surface |
 | **The Día de Muertos palette** — six bridge colours in `config.js` are a draft; say yes or change them | S0 shipped the seam with them in |

@@ -67,7 +67,7 @@ Answering Don Güero closes it, `finish()` runs, and `epiKeys` falls through to 
 **the first thing the owner does in his backlog town ends with Doña Chelo counting the drawer at
 El Mercado Robles, Frijol asleep on the scale, and a phone call to Don Tacho.**
 
-My recommendation is that the panel never fires — a place you inhabit has no Saturday. That is a
+My recommendation is that the panel never fires — a place you inhabit has no last visit. That is a
 content call, not a copy one. If it stays, these are the words:
 
 | key | new EN | new ES |

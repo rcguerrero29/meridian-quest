@@ -13,6 +13,18 @@ preference that outlives one phase; cite the date and their words.
 
 ## Settled — never re-ask
 
+- **A rename may never touch a verbatim record.** *(2026-09-17, learned by doing it.)* The owner
+  said *"this concept of a Saturday is silly, explain it differently"*, which was right, and the word
+  was retired across eighteen files in one pass. **That pass ran over `docs/ASKS.md` — the file whose
+  entire job is to record what the owner SAID — and turned his own "Saturday" into the new word.**
+  A verbatim record that a later edit can rewrite is not a record; it is a summary that has forgotten
+  it is one, and the damage is invisible because the sentence still reads perfectly. It also ate the
+  note explaining the rename, which quoted the old word by necessity.
+  **The rule:** `docs/ASKS.md`, any block presented as a quotation, and any owner correction in this
+  file are OFF LIMITS to a bulk replace. Rename the vocabulary, not the transcript — and read the
+  diff of a global edit before committing it, because that is where this was caught and it is the
+  only place it could have been.
+
 - **Build the ability, not the thing — unless the thing was asked for.** *(2026-09-03)* Owner,
   after two demo houses appeared on Calle Dos: *"noone asked me to make them i was saying it is
   just an ability."* A capability can ship on its own; placing content in the world is a

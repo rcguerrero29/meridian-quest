@@ -514,7 +514,7 @@ panels. See IDEAS §15.17.
 **NEWEST — 2026-09-03 late, `mq-v55`: the city produces paper you can read.** A new pack file
 `content/meridian/docs.js` (READS + DOCS), a cream breathing marker that never clears, a Read
 button that always answers, and a full-screen stapled-paper reader with Copy and Download as
-markdown. Six blank sheets hang in the office from day one; each district's Saturday pins its
+markdown. Six blank sheets hang in the office from day one; each district's last visit pins its
 real document over one, filled from the player's actual answers. The old lead's desk is the
 machine: the note in the lid, the complete file, and the glossary. **The meeting was wrong that
 the record could not fill a memo** — `logDecision` has always stored the pick. See IDEAS §15.16.
@@ -534,13 +534,13 @@ claim in this project has ever been audited. Nothing was built — the owner see
 
 **NEWEST — 2026-09-03: six playtest reports fixed, `mq-v52` on `main`** (IDEAS §15.13).
 The big one: `sanitizeSave()` dropped the district counter and the grades, so every
-Continue reset `chSeen` to zero — the last Saturday replayed on the next open, and the boot
+Continue reset `chSeen` to zero — the last last visit replayed on the next open, and the boot
 path into an ending never sized the canvas (a blank street under the control hint). Fixed,
 with damaged saves repaired at Continue and a smoke section that plays the whole sequence.
 Also: laptop keys (capitals, key codes), the growth curtain, 3D furniture as boxes when a
 side view exists, animals painted for the camera stop (Sonny's ball), and a one-time toast
 for a lot that opened while the phone was away. **The owner's own save will play the
-mercado's Saturday once more** (its counter was reset by the bug); after "Out to the
+mercado's last visit once more** (its counter was reset by the bug); after "Out to the
 street" the taller's toast points at the southeast lot. Then play the taller.
 
 **NEWEST — 2026-09-02, night: the rest of the story is written and wired, `mq-v51` on
@@ -749,7 +749,7 @@ always-on 🐾 paw menu with the cross-city whistle; WASD-vs-typing fix.
    reusable template (the `week1` ID half is DONE — renamed `principal`; the words in the
    fiction remain open); ambient chat has no
    state; and Nacho's preferred Week One split (office 0-9 / barrio 10-15 as two
-   districts with two Saturdays) which would make the barrio floor structural instead
+   districts with two last visits) which would make the barrio floor structural instead
    of arithmetic — queued for the Taller Herrera session.
 2b-old. **Story canon the shipped game contradicts** (`docs/STORY.md` → "🚩 Bible vs.
    game text — signed, NOT BUILT"). Three, in cost order: `qOpen` at

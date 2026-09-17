@@ -126,7 +126,7 @@ on top of a business that already exists.)*
 - 2026-09-01 — **The open city SHIPPED, and the story caught up with it.** `qOpen`
   had `c>=chSeen`, which closed every district behind the player; it is now `c<=chSeen`
   — districts open and stay open, forever. `need` for the first district dropped 16→12
-  so its Saturday plays with quests still on the board. 24 `late` reframe lines (EN+ES)
+  so its last visit plays with quests still on the board. 24 `late` reframe lines (EN+ES)
   give a neighbour one line when you answer them long after. Nine continuity breaks
   fixed; nine strings rewritten (the three "Roll credits" and the intro card that
   threatened a reset that cannot happen). **`GROWTH` moved Meridian's names OUT of the
@@ -152,14 +152,14 @@ on top of a business that already exists.)*
   mercado's shape, `need` 5 each, 120 XP a pack (`MAXXP` 350 → 830). CHAPTERS declares
   `taller`, `espiga`, `velazquez`, `nolasco` with their own three endings, burnout and
   next-lot toast (`tepi`/`eepi`/`vepi`/`nepi`, `*goEpi`, `espigaToast` …); the mercado's
-  Saturday now announces the taller instead of the placeholder "city is yours" line.
+  last visit now announces the taller instead of the placeholder "city is yours" line.
   Stations: Tacho 24/28/30, Yesenia 27/29/31, Moy 25/26 · Licha 32/36/39, Sol 33/35/38,
   Tito 34/37 · Vero 40/44/45/47, Chente 41/43/46, Karla 42 · Nolasco 48/50/52/55, Bere
   49/51/53/54. ❗El recado (two taller quests played off the lot) is NOT built — every quest
   stands at its own person's station; a second station for a person elsewhere is the seam,
   priced later. `industry:` is built beside `role:`; the report prints *industry · role*.
   The cats took Nacho's names (Bolillo, Pelusa, Timbre). Templates 06 and 07 written,
-  01 and 04 assigned. The smoke test now fails a district whose Saturday is missing a
+  01 and 04 assigned. The smoke test now fails a district whose last visit is missing a
   string in either language.
 
 ### Verified 2026-09-04 — a walkable tile could never be drawn standing
@@ -282,7 +282,18 @@ would have none left unless looks key by npc instead.
   with no gate while the park's only door is one-way out — the 2026-09-03 train-to-a-floor rule wearing a collar.
 
 - ✅ **❗El espejo — ANSWERED B (owner, 2026-09-09: "if nacho recommends ill say yes"). NOT YET BUILT.**
-  Three quests and a small `espejo` district, `need:2`, opening after Nolasco — *La foto* (the brief is not the
+  **CORRECTED 2026-09-17 (owner: "make the correction lol") — FOUR quests, `need:3`, not three and two.**
+  *The shape as signed could never have played its own middle ending, and the arithmetic is the whole
+  argument:* `gradeOf` grades on the fraction of ANSWERED quests that landed first try, and a
+  district's last visit fires the instant `need` is met — so with `need:2` exactly two are answered
+  and the fraction can only be 0, ½ or 1, which grades **1, 1, 3**. Grade 2 is unreachable. Whoever
+  wrote El Espejo would have written three endings and shipped two, and nobody would have noticed
+  because the missing one simply never appears. Four quests at `need:3` gives 0, ⅓, ⅔, 1 → **1, 1,
+  2, 3**, all four reachable. `test/smoke.js` separately forbids `need === quests.length`, so 3-of-3
+  was never an option either. **This is a rule every small district on this engine now inherits: a
+  district needs at least four quests and a `need` of at least three, or one of its endings is
+  fiction.** Found by Nacho while costing la esquina, 2026-09-16.
+  Four quests and a small `espejo` district, `need:3`, opening after Nolasco — *La foto* (the brief is not the
   request), *Nomás tantito* (the confirm before the irreversible step), *La tía* (Chelo Robles). Naye is the only
   person in the city holding a tool that cannot be undone, and the beat she carries is human-in-the-loop with
   scissors. Next: Nacho writes the three quests EN+ES, Don Güero places the district, and the chapter block goes
@@ -417,7 +428,7 @@ would have none left unless looks key by npc instead.
   is what you hand over AFTER) and both should exist, but the README's "Taught by" column
   must be corrected and 06 given a row. **Flagged, not guessed.**
 - ✅ **❗La despedida** — signed 2026-09-02 (owner deferred the call to /nacho): a
-  district's Saturday is a goodbye at the door, declared per district as
+  district's last visit is a goodbye at the door, declared per district as
   `ending:{mode:"doorstep"|"panel"|"quiet"}`. `panel` is kept so nothing regresses.
   **Hard build-order dependency: needs the office. No office, no doorstep.**
 - ✅ **❗El giro** — signed 2026-09-02: **industry leads, role follows.** `industry:` is

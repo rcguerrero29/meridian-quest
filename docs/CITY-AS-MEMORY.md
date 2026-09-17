@@ -58,7 +58,7 @@ message. None of them is addressable from the issue that caused it.
 docs/decisions/0042-the-town-never-ends.md
   asked:    "i dont think it ends" (owner, 2026-09-08)
   decided:  a pack may declare ENDLESS; the town does
-  because:  a place you inhabit has no Saturday (Nacho); the synthesised
+  because:  a place you inhabit has no last visit (Nacho); the synthesised
             chapter was running Meridian's epilogue in a town with no Chelo
   touched:  engine/engine.js chDue, changarrito/content/config.js
   issues:   —          prs: #147          supersedes: —

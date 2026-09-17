@@ -509,7 +509,7 @@ function gradeAll(){
   const clean=ans.filter(i=>marks[i]===1).length/ans.length;
   return clean>=0.9?3:clean>=0.6?2:1;
 }
-/* ENDLESS: a place you inhabit has no Saturday (Nacho; the owner: "i dont think it ends").
+/* ENDLESS: a place you inhabit has no last visit (Nacho; the owner: "i dont think it ends").
    A pack may declare `ENDLESS=true` and the ending panel never fires — no epilogue, no title, no
    "claim your reward". This mattered more than it sounds: a pack that declares no CHAPTERS gets
    the synthesised one above, so El Changarrito — the owner's own backlog as a street, with a
@@ -539,7 +539,7 @@ const qChapter=qi=>{const L=CHS();for(let i=0;i<L.length;i++)if(L[i].quests.inde
    This was `c>=chSeen`, which had it backwards: it closed everything you walked
    past and left unopened districts nominally answerable. */
 const qOpen=qi=>{const c=qChapter(qi);return c<0||c<=chSeen;};
-/* Answering a quest long after its district played its Saturday. Content may give any
+/* Answering a quest long after its district played its last visit. Content may give any
    quest a `late` line for this — one line, in the NPC's voice, acknowledging only that
    time passed and never what happened in it (a reframe that names events goes stale
    itself). Quests belonging to no district (Frederick's) never count as late. */
@@ -4377,7 +4377,7 @@ function pvDraw(){const g=$("pv").getContext("2d");g.setTransform(1.6,0,0,1.6,5,
 $("pvtog").addEventListener("click",()=>{const bx=$("pvbox");bx.classList.toggle("dark");
   $("pvtog").textContent=bx.classList.contains("dark")?"☀️":"🌙";});
 /* Every return to the street goes through here. A save that booted straight into an
-   ending (Continue → the Saturday → "Out to the street") never passed enterWorld, so the
+   ending (Continue → the last visit → "Out to the street") never passed enterWorld, so the
    canvas kept its hidden-time height of 0px and the player stood in front of a blank
    viewport with only the control hint showing (owner, 2026-09-03, Mac browser). */
 function showWorld(){$("world").hidden=false;sizeCanvas();}
@@ -4437,7 +4437,7 @@ function finish(burnout){
                            :t.endGrade(xp,MAXXP,t.grades[g-1]);
   /* a district names its own ending strings (CHAPTERS[i].epi = the prefix of three keys,
      .go = the burnout key); with nothing declared the old two-set rule stands. The engine
-     held exactly two sets, so a third district printed the wrong Saturday. */
+     held exactly two sets, so a third district printed the wrong last visit. */
   const K=epiKeys(i,last),E=[t[K.pre+"1"],t[K.pre+"2"],t[K.pre+"3"]];
   $("epi").textContent = burnout?t[K.go] : g>=3?E[0] : g===2?E[1] : E[2];
   $("endGo").textContent=last?t.endStay:t.endGo;$("endGo").hidden=false;
@@ -4463,7 +4463,7 @@ $("endGo").addEventListener("click",()=>{
   growthPend=false;seenOpen.add(K.open);
   save();$("end").hidden=true;showWorld();applyCtl();setWorldTag();hud();checkTalk();
   toast(T()[K.open]||(last?T().endStayToast:T().weekTwoToast),4000);
-  ribbonSay();   /* and what landed while that Saturday played */
+  ribbonSay();   /* and what landed while that the last visit played */
 });
 /* Wiping a city is never one tap. The story never sends you here — this is a tool. */
 $("replay").addEventListener("click",()=>{
@@ -6570,7 +6570,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
     bldPicks=(SV.bl&&typeof SV.bl==="object")?SV.bl:{};   /* the houses keep the faces they were built with */
     /* a save written before v2 lost cs on every Continue. Rebuild it from what was played:
        a district counts as claimed when its need is met AND the next district has been
-       started — so a Saturday never seen is still played, and one seen is not replayed. */
+       started — so a last visit never seen is still played, and one seen is not replayed. */
     if(SV.v===undefined){const L=CHS();let n=0;
       for(let i=0;i<L.length;i++){const c=L[i],nx=L[i+1];
         if(c.quests.filter(q=>done.has(q)).length<c.need)break;

@@ -176,7 +176,7 @@ neighbours greet you and nothing about what you can do.** A greeting, not a mode
 pre-empt A11.
 
 **The season, not the streak.** A chapter is a week: a Monday want, an escalation that is *a person
-changing what they need* (never a clock), a Saturday that pays something off. Chapter 0 *La puerta
+changing what they need* (never a clock), a last visit that pays something off. Chapter 0 *La puerta
 cinco* (moving day; Nello knocks with a plate; how does the plate go back — washed, or with something
 on it). Chapter 1 *Nello · q.b.* (the ragù is in Piera's hand and unreadable; four neighbours taste
 it and each says a different thing; the missing step was one she never wrote because she did not
@@ -611,7 +611,7 @@ three, he should say now, because everything above is built on their absence.**
 written *first* for this pack** — `docs/OWNER.md` says "in lockstep", not "EN first"? Is there a dog?
 Name one dish and who taught it to you — that person is the first character. When Thursday does not
 happen, what should the game do: nothing, somebody says something kind, or quietly offer it again?
-What does a wrong turn in the kitchen cost — ✅ "they say something"? And what is the Saturday payoff
+What does a wrong turn in the kitchen cost — ✅ "they say something"? And what is the last visit payoff
 — ✅ "the table"?
 
 ---
@@ -787,7 +787,7 @@ he sends her (and she sends back) enough, or does this want a real shared store 
 does not have and `docs/OWNER.md` has kept out)? *(q2)* the photos: three drawers, the shelf, the
 fridge, the freezer — send what exists.
 
-**b · Shifts, not a week.** *"I don't really like this Monday to Saturday plan but it could be like
+**b · Shifts, not a week.** *"I don't really like this Monday to last visit plan but it could be like
 picking up shifts as a cooking contractor, but there is no time limit."* So the week strip (plate 5)
 is retired. In its place: **a shifts board** — each restaurant kitchen (his #8) posts shifts, a shift
 is *one dish at one kitchen*, you pick it up, and it waits for you with **no time limit**. Picking a

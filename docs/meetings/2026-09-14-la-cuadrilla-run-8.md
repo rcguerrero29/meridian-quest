@@ -11,7 +11,7 @@ consolidation is `docs/la-sobremesa.md` §13, `docs/UI-REVIEW.md` and `docs/meet
 
 # nacho
 
-PRE-FLIGHT — I read the post-mortem, the regression register §3, my own bay on the wall and my last flight notes, then the owner's standing rules, the whole of `docs/la-sobremesa.md` (including §12, his answers), the current AJ script, `docs/GENRE-RULES.md` and Meridian's shipped `arrive` strings for voice — and only then wrote a question, because my own persona line says find what picks between the endings before writing them. Being the muralist equips me for exactly this job: a questionnaire is a piece of writing addressed to one person, and the journey is a chapter with a Monday and a Saturday, which is the only thing I actually know how to build. Where I expect to fall short, named in advance: I direct story and never write code, so anything I claim about how her answers travel is a grep, not a run — and the brief tells me I have Bash and a browser, which **I do not have in this session** (my tools this run are Read, Grep, Glob only), so there is no render below and I say so rather than dressing reasoning as a picture.
+PRE-FLIGHT — I read the post-mortem, the regression register §3, my own bay on the wall and my last flight notes, then the owner's standing rules, the whole of `docs/la-sobremesa.md` (including §12, his answers), the current AJ script, `docs/GENRE-RULES.md` and Meridian's shipped `arrive` strings for voice — and only then wrote a question, because my own persona line says find what picks between the endings before writing them. Being the muralist equips me for exactly this job: a questionnaire is a piece of writing addressed to one person, and the journey is a chapter with a Monday and a last visit, which is the only thing I actually know how to build. Where I expect to fall short, named in advance: I direct story and never write code, so anything I claim about how her answers travel is a grep, not a run — and the brief tells me I have Bash and a browser, which **I do not have in this session** (my tools this run are Read, Grep, Glob only), so there is no render below and I say so rather than dressing reasoning as a picture.
 
 ---
 
@@ -155,7 +155,7 @@ Free text. *"Say it even if it sounds hard — this is the most useful question 
 
 - **Monday (the want):** a fonda posts a shift for the one dish she can't do this week. No reason given on the board.
 - **The escalation is a person changing what they need, never a clock:** the dish needs a pot that's been going since four, and she can't stand for four hours any more. So the ask changes shape: *start it and leave it — I'll be there when it's ready.* Duration you cannot shorten, with nothing chasing you (`docs/GENRE-RULES.md` R4).
-- **Saturday (the payoff):** the pot arrives at the long table. Your fridge gets the rest of it with her name on the lid — **the shift paid leftovers** (§12.6 q3), which is the owner's own best idea in this plan and the reason the pantry stops being a chore.
+- **last visit (the payoff):** the pot arrives at the long table. Your fridge gets the rest of it with her name on the lid — **the shift paid leftovers** (§12.6 q3), which is the owner's own best idea in this plan and the reason the pantry stops being a chore.
 - **What carries to the next chapter:** the leftover is the *"mix in"* of the next recipe pair (§12.1 #5). Yesterday's beans, today's dish.
 
 ### The three endings, and the thing that picks between them
@@ -166,7 +166,7 @@ Free text. *"Say it even if it sounds hard — this is the most useful question 
 
 With the marks living there (R16), the three variants differ in **who is at the table**, never in what is on it:
 
-| Grade | The Saturday |
+| Grade | The last visit |
 |---|---|
 | 3 | The table is long and somebody has brought a cousin. Loud, short, everyone talking over the food. |
 | 2 | The four of you, and it runs on a bit. Somebody asks how you did the thing. |
@@ -1286,7 +1286,7 @@ What the journey needs from it, with the code under it so the map brief does not
 | 1 (~6 min) | Language → the three reasons → the creator → **you arrive in an empty household**. One decision that is not about food (which drawer is which). A neighbour knocks with a plate. **The first document you ever see is a recipe card** | 1,2,3,6 | Nothing is asked of you on day one. The empty pantry is *true*, not a contrivance |
 | 2 (60 s) | Somebody is in a doorway. **There is no ❗.** You go because you want to. Four buttons; only *made something else* opens a field | 2 | The "not today" line is the best-written string in the pack. It is the moment people quit |
 | 3 | The shifts board, first time. You take one. You may write *"Thursday, after work"* on it | 5 | That sentence is the implementation intention and it is the highest-yield thing the game asks anyone to type |
-| 4 (Thursday, or Saturday, or never) | You cook it | 9 **or** 10 | **No clock. "Done" is coverage, never seconds.** Settled |
+| 4 (Thursday, or last visit, or never) | You cook it | 9 **or** 10 | **No clock. "Done" is coverage, never seconds.** Settled |
 | 5 | The leftovers are in the fridge. Tomorrow they are a meal that costs nothing, or the *mix in* of the next pair | 3,6 | This is the answer to R17: the pantry is **fed by play**, not by typing |
 | 6 | A cook offers a pair of recipes. **Zero is a legitimate answer and the game says so out loud** | 6 | The grade pays *offers*, never a lock (R6) |
 | 7–10 | The Collection filled in by itself. You never opened it to unlock anything | 8 | If he never pastes a recipe in, this is an authored content pile and it ends when the content ends. Say that now, not in month two |
