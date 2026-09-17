@@ -2181,6 +2181,69 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...scenes);
 
+  /* ---- EVERY PLACE IS ON THE MAP, AND THE MAP AGREES WITH THE DOORS ----
+     Owner, 2026-09-17, asked whether an interior belongs on a street map at all: "yeah i mean a map
+     implies this lol". He is right, and the city was not keeping that promise — six of fifteen
+     worlds were on the plan in NO form, including the park, which is the third-largest world in the
+     game. Seven more had a hand-typed dot, and every one of those seven agreed exactly with the
+     door that leads there: seven copies of a fact the map already had.
+
+     Two claims:
+       1. every world can be LOCATED on the plan — drawn, or reached from somewhere that is, or
+          declared by the pack because nothing leads there (the park, reached on a leash);
+       2. and a DECLARED spot agrees with the doors. This is the one worth having: a copy's failure
+          mode is that the door moves and the copy does not, and nothing on screen looks wrong —
+          the mark simply points at the wrong building, forever, and no camera can tell you.
+     A world that a pack deliberately keeps off the map is a real thing (a memory, a dream, a menu),
+     so being unplaceable is reported with its reason rather than assumed to be a bug — but a pack
+     that DECLARED a spot and got it wrong is always a fault. */
+  const places = await page.evaluate(() => {
+    const P = [];
+    if (typeof planPlace !== 'function') return ['the engine cannot say where a world is on the plan — there is no planPlace'];
+    /* MEASURED ON THE FINISHED CITY. At chapter zero six of these doors are not laid yet — a
+       storefront appears when its district opens — so asking at the title screen reports six worlds
+       "with no door into them" and means only "you have not got there yet". The question is whether
+       the map can place a world the player can REACH, so the city is grown first and put back after. */
+    const keepD = new Set(done), keepC = chSeen;
+    if (typeof CHAPTERS !== 'undefined' && typeof applyGrowth === 'function') {
+      CHAPTERS.forEach(c => (c.quests || []).forEach(i => done.add(i)));
+      chSeen = CHAPTERS.length; applyGrowth();
+    }
+    const M = (typeof MAPDOT !== 'undefined' ? MAPDOT : {});
+    const ids = Object.keys(WORLDS), lost = [];
+    ids.forEach(id => {
+      const at = planPlace(id);
+      if (!at) { lost.push(id); return; }
+    });
+    /* 2 — a DECLARED spot, against what the doors alone say. Asked with every declaration
+       suppressed (`pure`), because the first draft asked with them in place and mis-read a CYCLE:
+       El Changarrito's hq and f2 each reach the other and neither is drawn, so each APPEARED
+       derivable while in fact the other's declaration was the only thing holding either on the
+       map. Delete both and both vanish. So the three answers are kept apart:
+         · the doors find it and agree     → the written-down copy is redundant, and a copy's only
+                                             future is to go stale when the door moves;
+         · the doors find it and disagree  → one of the two points at the wrong building, and
+                                             nothing on any screen can tell you which;
+         · the doors cannot find it at all → the declaration is the only thing there is. Correct,
+                                             and the park is exactly this: you reach it on a leash. */
+    Object.keys(M).forEach(id => {
+      if (!WORLDS[id]) { P.push('the plan names a spot for "' + id + '" and there is no such world'); return; }
+      const byDoor = planPlace(id, null, true);
+      if (!byDoor) return;
+      if (M[id][0] !== byDoor.gx || M[id][1] !== byDoor.gy)
+        P.push('the pack puts "' + id + '" at ' + M[id] + ' on the plan and its own door puts it at ' +
+               byDoor.gx + ',' + byDoor.gy + ' (via ' + byDoor.via + ') — one of the two is pointing at the wrong building and nothing on screen can tell you which');
+      else
+        P.push('"' + id + '" is written down in MAPDOT and its doors alone already say where it is (' + byDoor.via +
+               ') — the copy can only ever go stale');
+    });
+    if (lost.length) P.push('COUNT-ONLY: ' + lost.length + ' world(s) have no place on the plan and no door into them: ' + lost.join(', '));
+    P.push('COUNT-ONLY: ' + (ids.length - lost.length) + ' of ' + ids.length + ' worlds are placed on the plan');
+    done = keepD; chSeen = keepC; if (typeof applyGrowth === 'function') applyGrowth();
+    return P;
+  });
+  fails.push(...places);
+
   /* ---- a document may carry a DRAWING, not only words ----
      The owner, 2026-09-11, on the crew mural: "can we have functionality there wehre you see
      tiles/icons from afar but you get close and can interact to see it full screen- then thats how

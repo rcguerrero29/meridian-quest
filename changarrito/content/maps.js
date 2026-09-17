@@ -166,8 +166,14 @@ const PORTALS={hq:{"E":{to:"st",x:14,y:1,dir:"down"},"▲":{to:"f2",x:14,y:14,di
                an:{"$":{to:"st",x:4,y:1,dir:"down"}},ob:{"O":{to:"st",x:19,y:1,dir:"down"}},mo:{"%":{to:"st",x:25,y:1,dir:"down"}},
                pp:{"@":{to:"st",x:6,y:7,dir:"up"}},es:{"M":{to:"st",x:14,y:7,dir:"up"}},co:{"L":{to:"st",x:22,y:7,dir:"up"}},
                pk:{"2":{to:"st",x:28,y:1,dir:"down"}}};
-/* "you are here" on the town plan, for the rooms off the street */
-const MAPDOT={hq:[14,0],f2:[14,0],pk:[29,0],an:[4,0],ob:[19,0],mo:[25,0],pp:[6,8],es:[14,8],co:[22,8]};
+/* "you are here" on the town plan, for the rooms off the street — and there is nothing left to say.
+   All nine rows left on 2026-09-17: every one of them agreed exactly with the door that leads to
+   that room, so every one was a copy of something the map already knew, and a copy's only future is
+   to go stale the day somebody moves a door. The engine follows the doors now (planPlace), and it
+   follows them through a room that is itself only a dot — which is how `f2` finds its place behind
+   `hq` without either of them being written down. A pack still declares a spot for a place NO DOOR
+   REACHES; the town has none. Meridian has exactly one, its park, which you enter on a leash. */
+const MAPDOT={};
 /* who stands where by map letter: Don Güero at his stall; la ventanilla at her window on the
    street (her document is the city's record — content/record.js hands it to her at boot).
    `win:"B"` says she works INSIDE city hall's wall: the engine draws B's counter in front of

@@ -761,7 +761,12 @@ function findChromium() {
             const w = WORLDS[h.world], c = w.npcs.find(n => n.npc === h.clerk);
             if (!c) problems.push(h.id + ': no clerk ' + h.clerk + ' inside'); else { if (!hasSay(c) || wanders(c)) problems.push(h.id + ': the clerk wears no mark or wanders'); if (c.doc !== 'h_' + h.id) problems.push(h.id + ': the clerk carries the wrong document'); }
             if (!READS.some(r => r.world === h.world && r.doc === 'b_' + h.id)) problems.push(h.id + ': no board to read inside');
-            if (!(MAPDOT[h.world] && MAPDOT[h.world][0] === d.x)) problems.push(h.id + ': the town plan has no dot for it');
+            /* the noun is "the plan can show me where this house is", not "somebody typed a copy of
+               its door into MAPDOT". The copy is gone (every row agreed with its own door and a copy
+               only rots); this asks the engine where the house IS and holds it to the door. */
+            { const at = typeof planPlace === 'function' ? planPlace(h.world) : null;
+              if (!at) problems.push(h.id + ': the town plan cannot say where it is at all');
+              else if (at.gx !== d.x) problems.push(h.id + ': the plan puts it at x=' + at.gx + ' and its door is at x=' + d.x); }
             if (!T().locs[h.world] || !T().arrive[h.world]) problems.push(h.id + ': the world has no name or arrival line');
           });
           // the facades: every glyph in the two ranks is a facade at wall height — the I row was a grocery counter (Don Güero's find)

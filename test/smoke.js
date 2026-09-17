@@ -2788,6 +2788,23 @@ const CANDIDATES = [
     });
     fails.push(...climb);
 
+    /* EVERY PLACE IN THIS CITY IS ON ITS MAP. Owner, 2026-09-17: "yeah i mean a map implies this
+       lol" — and six of fifteen worlds were on the plan in no form at all, the park among them,
+       which is the third-largest world in the game. The engine's suite cannot demand this of every
+       future world (a pack may hide a place on purpose — a memory, a dream, a menu) so it reports
+       the count there; Meridian has no such place, so Meridian is held to all fifteen here. */
+    const onmap = await page.evaluate(() => {
+      const P = [], keepD = new Set(done), keepC = chSeen;
+      CHAPTERS.forEach(c => (c.quests || []).forEach(i => done.add(i)));
+      chSeen = CHAPTERS.length; applyGrowth();
+      const lost = Object.keys(WORLDS).filter(id => !planPlace(id));
+      if (lost.length) P.push('these worlds are nowhere on the plan: ' + lost.join(', ') +
+        ' — every place in this city is somewhere you can be shown, and the park is reached on a leash so only MAPDOT can say where it is');
+      done = keepD; chSeen = keepC; applyGrowth();
+      return P;
+    });
+    fails.push(...onmap);
+
     // townsfolk: people with no quests move, people with quests never do
     const walk = await page.evaluate(async () => {
       const problems = [];

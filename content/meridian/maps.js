@@ -313,7 +313,19 @@ const TOWNPLAN=[{world:"st",ox:0,oy:0},{world:"ex",ox:0,oy:17}];
        [29,1], a doorway on Calle PRINCIPAL. Their marks are found from the doors that actually
        lead to them (ESPIGA stamps `@` at ex 6,0 and VELAZQUEZ stamps `*` at ex 12,0), so the
        offset is written down once, in TOWNPLAN, instead of twice here and kept in agreement. */
-const MAPDOT={ta:[23,13],no:[25,0],hq:[14,0],f2:[14,0],lc:[6,5],lo:[21,5],me:[6,13]};
+/* ALL SEVEN OF THEM LEFT ON 2026-09-17, and the reason is the same one the note above gives for
+   the first three — only this time it was measured rather than argued. Every hand-typed row here
+   agreed EXACTLY with the door that leads to that world: ta 23,13 · no 25,0 · hq 14,0 · f2 14,0 ·
+   lc 6,5 · lo 21,5 · me 6,13. Seven copies of a fact the map already had, and the failure mode of a
+   copy is that the door moves and the copy does not. `planPlace` in the engine follows the doors
+   now, recursively, so `f2` (reachable only from `hq`, which is itself only a dot) shares the
+   office's address instead of needing its own line — which is also true of the building.
+   Five worlds that had no row at all and no dot on the plan are placed for free by the same walk:
+   `pa`, `li`, `casa-w`, `caseta`, `barberia`.
+   WHAT STAYS, and this is what the table is actually for: a place with NO DOOR INTO IT. You reach
+   the park on a leash, not through a portal, so nothing can ever derive it and the pack has to say.
+   A guard holds every other declaration to the doors (test/engine.smoke.js). */
+const MAPDOT={pk:[22,10]};
 /* ---------- trolley fast travel: the streets never dead-end, they connect ---------- */
 /* Where the Trolley Pass can put you: STREET STOPS ONLY. A trolley does not stop on the
    second floor of a building — the office came off this list on 2026-09-03 ("i dont like that

@@ -5369,6 +5369,47 @@ function markOf(n){ /* one person, one kind, in the order the pack declared */
      · `gx,gy` — where it is DRAWN on the plan. The plan is paper and the paper has panels on it.
    They were identical while the plan drew one world at 0,0, which is why one field did both jobs
    and why the day a second panel appeared was the day the arrow would have started lying. */
+/* ---------- WHERE A WORLD IS, ON THE PLAN (owner, 2026-09-17: "5. yeah i mean a map implies this") ----------
+   Asked whether an interior belongs on a street map at all, that was his whole answer, and he is
+   right: a map that cannot say where a place is is a picture of a street.
+
+   A world is somewhere on the plan for one of three reasons, in this order:
+     · the plan DRAWS it (TOWNPLAN gives it a panel and an offset);
+     · a door leads into it from somewhere already placed — so an interior sits at its own address,
+       which is exactly how a real map shows a shop. FOLLOWED RECURSIVELY, which is the part that was
+       missing: `f2` is reachable only from `hq`, and `hq` is not drawn, so one hop found nothing and
+       the pack had to write the answer down by hand;
+     · the pack names a spot itself (MAPDOT) — for a place with no door at all. The park is the only
+       one in this city: you reach it on a leash, not through a door, and no derivation can ever
+       find it.
+   MEASURED when this was written: every single hand-typed MAPDOT — hq, f2, lo, me, lc, ta, no —
+   agreed exactly with what the doors already said, so all seven were copies of a fact the map
+   already had. Five more worlds (pa, li, casa-w, caseta, barberia) were derivable and had no dot at
+   all. A guard now holds a declared dot to the derived one, because the failure mode of a written-
+   down copy is that the door moves and the copy does not. */
+function planPlace(id,seen,pure){ /* pure: the doors ONLY, with the pack's own declarations ignored — how a guard asks whether a written-down spot is a copy or the only thing holding a world on the map */
+  const panels=planPanels(),drawn=panels.find(p2=>p2.world===id);
+  if(drawn)return {gx:drawn.ox,gy:drawn.oy,x:0,y:0,via:"drawn",panel:true};
+  seen=seen||{};if(seen[id])return null;seen[id]=1;
+  let best=null;
+  Object.keys(WORLDS).forEach(from=>{
+    if(best||from===id)return;
+    (typeof portalsOf==="function"?portalsOf(from):[]).forEach(d=>{
+      if(best||!d.p||d.p.to!==id)return;
+      const home=planPlace(from,seen,pure);if(!home)return;
+      /* A DOT HAS NO INSIDE. Adding the door's tile to a host that is DRAWN is right — the host's
+         ox,oy is a panel origin and the door sits at a place on that paper. Adding it to a host
+         that is itself only a dot is nonsense, and the first draft did exactly that: `f2` is
+         reached from hq(14,14), hq is a dot at (14,0), and f2 landed at (28,14) — a spot on the
+         street with no building under it. A world behind a world shares its address, which is also
+         true of the thing being modelled: the second floor of the office IS the office. */
+      best=home.panel?{gx:d.x+home.gx,gy:d.y+home.gy,x:d.x,y:d.y,via:from,panel:false}
+                     :{gx:home.gx,gy:home.gy,x:home.x,y:home.y,via:from+" (behind it)",panel:false};});});
+  if(best)return best;
+  if(pure)return null;
+  const M=(typeof MAPDOT!=="undefined"?MAPDOT:{});
+  if(M[id])return {gx:M[id][0],gy:M[id][1],x:M[id][0],y:M[id][1],via:"declared",panel:false};
+  return null;}
 function planMarks(){
   const K=markKinds();if(!K.length)return[];
   const M=(typeof MAPDOT!=="undefined"?MAPDOT:{}),out=[],at={},panels=planPanels();
@@ -5386,13 +5427,8 @@ function planMarks(){
     (WORLDS[id].npcs||[]).forEach(n=>{const k=markOf(n);
       if(k&&(!best||K.indexOf(k)<K.indexOf(best)))best=k;});
     if(!best)return;
-    let gx=null,gy=null,wx=null,wy=null;
-    if(M[id]){gx=M[id][0];gy=M[id][1];wx=gx;wy=gy;}   /* unchanged: MAPDOT has always been paper */
-    else{let bd=1e9;
-      panels.forEach(p2=>portalsOf(p2.world).forEach(d=>{
-        if(!d.p||d.p.to!==id)return;
-        if(bd<=0)return;bd=0;gx=d.x+p2.ox;gy=d.y+p2.oy;wx=d.x;wy=d.y;}));}
-    if(gx===null)return;
+    const at2=planPlace(id);if(!at2)return;             /* one reader now: doors first, the pack's own spot only where no door can say */
+    const gx=at2.gx,gy=at2.gy,wx=at2.x,wy=at2.y;
     const key=gx+","+gy,e=at[key];
     if(e){e.ws.push(id);if(K.indexOf(best)<K.indexOf(e.k))e.k=best;return;}
     at[key]={x:wx,y:wy,gx,gy,k:best,w:id,ws:[id]};out.push(at[key]);});
