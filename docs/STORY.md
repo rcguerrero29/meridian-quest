@@ -795,3 +795,67 @@ what conflicts, why it is not Nacho's to decide, and the options. Owner's instru
 are referenced nowhere in the engine — `TOWNLBL` in `maps.js` replaced them during the
 Phase 1 seam extraction. Only `vmPlots` is factually wrong now ("Reserved lots — El
 Mercado & more"). Deleting or reviving them is Don Güero's lane.
+
+## An ending reports; it does not stage — 2026-09-17 (#208)
+
+**What was reported**, by a narrative designer and not by a test: La Espiga tells you how its story
+ended, and then Doña Licha is still standing there with a question about the same afternoon. The two
+texts opened with **the same sentence**.
+
+**Measured before writing a word, and it was never only La Espiga.** Twelve ending strings across six
+districts shared a seven-word verbatim run with their own quests, in both languages. In four of them
+the ending re-played the exact outcome beat the quest plays — so a player who DID the quest watched
+it happen twice, and a player who skipped it (which `need` allows) was shown it happening and then
+offered it as still to come.
+
+**One bug with two faces, and both are fixed.**
+
+1. **The writing rule, from now on: an ending may PAY OFF a scene; it may not STAGE one again.** The
+   ending speaks from after the fact and reports the state the beat left behind. *The page is above
+   the oven now* — not *Licha pins the page above the oven.* Fourteen strings rewritten.
+2. **The mechanism: a district closes on its count AND on the visit that ends it.** `chClose` — the
+   last quest a district lists, overridable with `close:`. You may still skip anything else; ❗La
+   puerta holds and a full sweep is never required. This is what let the ending fire first.
+
+**And the day stamp went with it.** Six of those endings opened *"Saturday, …"* — the owner had
+already called the concept silly, and la junta found it was the same beat in all six. Removing the
+staged tableau removed the stamp with it, which is the first of T4's repairs falling out of a
+different fix.
+
+**The guard** (`test/smoke.js`) fails an ending that repeats **seven** words of its own district's
+quest text, and prints the longest run it found either way. Seven is not arbitrary: at six it flags
+an ending for NAMING THE SAME OBJECT as its quest — *"on the wall by the register"* — which an ending
+has to be allowed to do, and which Spanish reaches sooner than English because it takes more words to
+say the same thing. Planted with the original `eepi1` restored: *"repeats 11 words of its own
+district's quest text word for word".*
+
+## No two places end the same way — 2026-09-17 (T4)
+
+La junta measured what the owner had already felt: **every one of the six business districts ran the
+same five beats in the same order** — a day stamp, the artifact named and located, the owner's
+verdict in quotation marks, the handoff to the next name, a named animal — and the first of them was
+literally the same words. **"Saturday." opened nine endings.** He had called the concept silly; what
+he was looking at was a form with the nouns swapped, six times.
+
+**The rules now, and they are guarded (`test/smoke.js`) so they cannot quietly come back:**
+
+1. **No two districts open a tier the same way**, in either language.
+2. **No district opens two of its own tiers the same way.**
+3. **No district's ending opens on the same clause as the quest that closes it** — the #208 shape.
+4. **A day of the week may open at most ONE ending in the game.** One is a place with a calendar;
+   two is a format. Meridian spends its one on Meridian Labs, whose whole character is that it runs
+   on the week.
+
+**What an opener should be instead: the thing that is different now.** The book has moved to the
+shelf. The page is above the oven. The word *kitchen* is on all twelve pages, in pen. The pot comes
+off the flame at 9:25. Every one of those is the district's own object or its own hour, and no two
+businesses share either.
+
+**The burnout endings are held to the same rules**, because they are six more paragraphs in the same
+slot — and five of the six named a different room to learn in while **two of them said "floor"**.
+Tacho's is a shop.
+
+**And one thing that is NOT a rule, because the audit got it wrong and the cross-examination caught
+it:** the handoff to the next district is a fixed *slot*, and that is fine — the *medium* is already
+five different things (a phone call, an envelope, a note, a name said over a counter, a week's
+delay). A proposal to "stop using the phone" would have fixed something that was never broken.
