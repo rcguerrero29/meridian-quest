@@ -3,7 +3,67 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-17, end of the stairs-and-doors sitting)
+## STATE OF PLAY — read this first (2026-09-17, end of the map-planning sitting)
+
+### ⇢ 2026-09-17, last — START HERE. **PLANNING ONLY. Nothing was built.**
+
+> *"we are about to hit a limit so planning only for now"* — and that is exactly what this sitting is.
+> **Not one line of `engine/` or `content/` changed.** Docs only, five suites green, ready to merge.
+
+**He gave six things about the map, and the plan for all six is
+`docs/plans/2026-09-17-the-map.md`.** Areas of the architecture it touches: **`docs/ARCH-LOG.md`
+A18**. The basic research he allowed (no junta — he deferred it):
+`docs/research/2026-09-17-the-map-again.md`.
+
+**The four findings worth knowing before you open anything:**
+
+1. **He is right that the map goes dead.** `markOf` returns a kind only when somebody has work, a
+   room question or a document. Answer the city and `planMarks()` returns `[]` — and `mapPick`
+   iterates `planMarks()`, so **a tap can no longer hit anything anywhere on the paper.** The map is
+   interactive exactly as long as there is homework, which is backwards.
+2. **Floor 2 cannot be chosen at all.** `planPlace`'s rule *a world behind a world shares its
+   address* puts `f2` on **hq's exact pixel**, and `planMarks`' dedupe folds them into one anchor
+   carrying one mark. The `⇧` in `TOWNLBL` is a label doing a structure's job.
+3. **The gold-doors caption is worse than he said, and it was measured.** On the Calle Dos panel the
+   **only** gold tile is the link back to Calle Principal — La Espiga's `@`, Velázquez's `*` and
+   Nolasco's `$` have no colour in `MAPCOL` or `BASECOL` at all, so `planTile` paints them the
+   generic grey box its own comment calls *"a thing nobody ever thought about on this map."* And
+   **"stairs" is wrong on both streets**: `▲` is near-black, `▼` is pale stone, `≡` is another grey
+   box. The caption is also hardcoded with an `es?` ternary, so a second world inherits Meridian's
+   sentence — A15 in a second place.
+4. **A destination is not saved** (`save()` has no field for it), and the comment claiming A3 forbids
+   it **overreached**. A3 bans a list of what you have **not done**; one pin you set yourself is a
+   bookmark. `docs/ARCH-LOG.md` **A3½** now draws the line: *one pin, yours, saved — a second pin is
+   a new decision.*
+
+**Three contradictions reported rather than absorbed**, each with a dated line in the file it
+belongs to: the 09-14 research's *"content faults, not engine ones"* (no longer true), the
+`let mapDest` comment (wrong), and el-mapa **§7.3** *"a direction, never a lit path"* (he has now
+asked for a path; §8 there says what changed and what did not).
+
+**The one call that is genuinely his**, and nothing should be built past it: **`planPlaces` changes
+what the TOWN does.** Every other row in A18 is engine-neutral or pack-local. The town declares no
+`MAPMARK`, so its plan has no marks and a tap does nothing today; the day places exist, its doors
+become pickable. That is a behaviour change in the second game, and this repo's rule is that an
+engine change is behaviour-identical for both. **A pack opt-in (`PLANPICK`, default off) is the
+cheap honest answer — but it is his to take.**
+
+**The build order, smallest first** (plan §10): the caption stops lying *(minutes)* → Calle Dos's
+doors get their colours *(minutes)* → a destination is remembered *(half a sitting)* → every place is
+tappable *(a sitting)* → the level chooser, which also closes the shared-anchor fault from run 8 → the
+route on the paper → the render pass, then the redraw → the caption derives itself.
+
+**Also written down, because he asked for it in those words:** `docs/BEAUTIFY.md` — **The art we can
+reach**. Nobody is being hired, AJ's time is unknown and not waited on, and the art we can make here
+is worth making *"to at least learn and have a backup."* The Simmer mock loop is the standing method,
+and its first job is the plan's own tiles.
+
+**The junta he deferred has its agenda ready to run** — plan §9, seven items, cast named, with the
+question no session should answer alone: *what is the plan FOR, now that it is two streets, fifteen
+worlds and a tram?*
+
+### ⇢ 2026-09-17 — the stairs-and-doors sitting, history from here down.
+
 
 ### ⇢ 2026-09-17, later — START HERE.
 
