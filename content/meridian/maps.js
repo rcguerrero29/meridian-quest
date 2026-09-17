@@ -157,12 +157,25 @@ const WORLD_DEFS={
     unseen and appear at the top, in the stair room east of the office (#7, the owner's plan,
     2026-09-07): a door at (15,2) between the rooms, the engine's railed well at (16–20,4) with
     ▼ at (17,4) the way down. The office itself did not move. */
+ /* THE FLIGHT IS WALKED NOW (owner, 2026-09-17: "then that door right there to the top of a
+    staircase… until you figure out how to teleport in my side of the screen"; ARCH-LOG A16, option
+    B, signed "ok lets do b"). It was ▼ at 16 with three treads and the landing at 21-22, and the
+    avenue door put you on the LANDING — at the top, with the whole climb behind you, having walked
+    none of it. Two things changed and neither is an engine change:
+      · the run is FIVE treads against a wall 1.1 tiles high, so the well is now 0.96 deep
+        (wellDepth: STAIRH×6 at the ▼). Three treads dropped 0.64 and read as a dip in the floor,
+        not as a storey. The rails follow the run for its whole length, which they did not before;
+      · you arrive on the BOTTOM TREAD facing up it (PORTALS.st["$"] below), because that is where
+        a person who has just come in off the avenue is standing.
+    Arriving one tile east of the ▼ rather than on it is deliberate: the engine warns about a spawn
+    on a portal tile and portalHold would have made it safe, but the bottom step is the truer place
+    to put somebody who has just opened a street door, and it costs no argument with a guard. */
  no:["#######|################",
      "#▯▯.D....S.S...#.......#",
      "#...n..........+.......#",
-     "#............P.#.◺◺◺◺..#",
-     "#..............#◺▼≡≡≡..#",
-     "#KK......RR....#.◺◺◺◺..#",
+     "#............P.#◺◺◺◺◺◺.#",
+     "#..............#▼≡≡≡≡≡.#",
+     "#KK......RR....#◺◺◺◺◺◺.#",
      "#Pe......⊔⊔....#.......#",
      "########################"],
  pk:["FFF~~FFFFFFFFFFFFFFFFFFF",
@@ -175,7 +188,10 @@ const WORLD_DEFS={
      "F..~~....g....b........F",
      "F..~~....3.4.5.g...J...F",
      "F..~~..J...............F",
-     "F..~~......g.....b.....F",
+     "F..~~......g.....bbb...F"   /* (18,10) (19,10): cempasúchil laid from the bed at 17 to the
+     ofrenda at 20. Marigolds are how the souls are shown the way — the flower IS the arrow, which
+     is the one the owner said the altar in the corner needed, and it is the historically correct
+     one. Walkable, so it cannot cork the park (R11). Pili, 2026-09-16. */,
      "FFF~~FFFFFFFFFFFFFFFFFFF"]
 };
 /* la caja de escalera (#4, Don Güero's candidate B, walked in the town first, 2026-09-06): HQ grew
@@ -199,7 +215,7 @@ const PORTALS={hq:{"▲":{to:"f2",x:14,y:14,dir:"left",mark:"up"},"E":{to:"st",x
                   a stair room whose railed well goes down to the avenue — the last old `1` left the city */
                no:{"▼":{to:"st",x:25,y:1,dir:"down"}}};
 PORTALS.st["%"]={to:"ta",x:10,y:10,dir:"up"};
-PORTALS.st["$"]={to:"no",x:21,y:4,dir:"left"}; /* the avenue door is the foot of Nolasco's stairs: you appear at the top, in the stair room, facing the well */
+PORTALS.st["$"]={to:"no",x:17,y:4,dir:"right"}; /* the avenue door IS the foot of Nolasco's stairs, so you arrive on the bottom step with the door behind you and five treads in front — and you walk them. It used to land you at 21,4: the top of the flight, reached by opening a door at the bottom of it. */
 PORTALS.ex["@"]={to:"pa",x:10,y:8,dir:"up"};
 PORTALS.ex["*"]={to:"li",x:10,y:8,dir:"up"};
 /* the four storefront ribbons — each rises when its district opens (GROWTH.ribbons) */
@@ -297,7 +313,19 @@ const TOWNPLAN=[{world:"st",ox:0,oy:0},{world:"ex",ox:0,oy:17}];
        [29,1], a doorway on Calle PRINCIPAL. Their marks are found from the doors that actually
        lead to them (ESPIGA stamps `@` at ex 6,0 and VELAZQUEZ stamps `*` at ex 12,0), so the
        offset is written down once, in TOWNPLAN, instead of twice here and kept in agreement. */
-const MAPDOT={ta:[23,13],no:[25,0],hq:[14,0],f2:[14,0],lc:[6,5],lo:[21,5],me:[6,13]};
+/* ALL SEVEN OF THEM LEFT ON 2026-09-17, and the reason is the same one the note above gives for
+   the first three — only this time it was measured rather than argued. Every hand-typed row here
+   agreed EXACTLY with the door that leads to that world: ta 23,13 · no 25,0 · hq 14,0 · f2 14,0 ·
+   lc 6,5 · lo 21,5 · me 6,13. Seven copies of a fact the map already had, and the failure mode of a
+   copy is that the door moves and the copy does not. `planPlace` in the engine follows the doors
+   now, recursively, so `f2` (reachable only from `hq`, which is itself only a dot) shares the
+   office's address instead of needing its own line — which is also true of the building.
+   Five worlds that had no row at all and no dot on the plan are placed for free by the same walk:
+   `pa`, `li`, `casa-w`, `caseta`, `barberia`.
+   WHAT STAYS, and this is what the table is actually for: a place with NO DOOR INTO IT. You reach
+   the park on a leash, not through a portal, so nothing can ever derive it and the pack has to say.
+   A guard holds every other declaration to the doors (test/engine.smoke.js). */
+const MAPDOT={pk:[22,10]};
 /* ---------- trolley fast travel: the streets never dead-end, they connect ---------- */
 /* Where the Trolley Pass can put you: STREET STOPS ONLY. A trolley does not stop on the
    second floor of a building — the office came off this list on 2026-09-03 ("i dont like that
@@ -333,13 +361,25 @@ const CRITTERS=[
    updated again. Re-checked against the code 2026-09-05: all four exist.)
    Packs can add art via DECOART. */
 const DECOR=[
- {world:"st",x:20,y:0,deco:"mural"},   /* Nacho's own piece — the city's name, never earned */
+ {world:"st",x:20,y:0,deco:"mural",wins:[]},   /* Nacho's own piece — the city's name, never earned. wins:[] — his piece takes the whole wall, so the two windows the `B` facade declares are plastered over and stay plastered over, at dusk too. */
  /* one panel per business, east of it along the same wall. Baby blue plaster until you begin
     that district; the colour brightens with the grade (art.js → DECOART.panel). */
- {world:"st",x:21,y:0,deco:"panel",id:"principal",c:"#7A5FE0"},
- {world:"st",x:22,y:0,deco:"panel",id:"mercado",  c:"#C0392B"},
- {world:"st",x:23,y:0,deco:"panel",id:"taller",   c:"#3B4650"},
- {world:"st",x:24,y:0,deco:"panel",id:"espiga",   c:"#C98A2D"},
- {world:"st",x:25,y:0,deco:"panel",id:"velazquez",c:"#2E8AA8"},
- {world:"st",x:26,y:0,deco:"panel",id:"nolasco",  c:"#4E7A4A"}
+ {world:"st",x:21,y:0,deco:"panel",id:"principal",c:"#7A5FE0",wins:[1]},
+ {world:"st",x:22,y:0,deco:"panel",id:"mercado",  c:"#C0392B",wins:[1]},
+ {world:"st",x:23,y:0,deco:"panel",id:"taller",   c:"#3B4650",wins:[1]},
+ {world:"st",x:24,y:0,deco:"panel",id:"espiga",   c:"#A8691A",wins:[1]},  /* was #C98A2D, luma 146 on plaster at 215: 69 apart, under the 90 floor. Found by the same guard that caught la esquina, in the same run — I had gone looking for one fault and there were two. Crust amber, luma 115. */
+ {world:"st",x:25,y:0,deco:"panel",id:"velazquez",c:"#2E8AA8",wins:[1]},
+ {world:"st",x:26,y:0,deco:"panel",id:"nolasco",  c:"#4E7A4A",wins:[1]},
+ /* ❗La esquina. Toasted masa — the colour she actually cooks, and it had to move.
+    IT WAS #E8D5A8, masa cream, chosen "because the other six panels are luma 96–146 and this is
+    213.6, so the newest district reads first on a crowded wall". That reasoning compared her
+    colour to the OTHER PANELS and never to THE WALL IT IS PAINTED ON: PLASTER is #C6DCEA, luma
+    215, so her emblem sat 1.4 luma from its own ground and was invisible at every grade — worse
+    at 1 and 2, where muralInk mixes it further toward the plaster. Rendered at 6x on 2026-09-17
+    beside the other six and it is not subtle; it is not there. #6B4226 is luma 75, a hundred and forty
+    clear of the plaster and inside the band the other six live in. Measured against the right
+    thing this time, and there is a guard on it now (test/smoke.js). Piloncillo rather than a
+    darker masa cream, because La Espiga's amber had to darken in the same pass and two toasted
+    golds three tiles apart is one colour twice — and piloncillo is in the pot anyway. */
+ {world:"st",x:27,y:0,deco:"panel",id:"esquina",  c:"#6B4226",wins:[1]}
 ];

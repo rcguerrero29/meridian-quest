@@ -515,17 +515,17 @@ Meridian is finished as a shape and unplayed as a city: four districts written a
 
 ### The story shape — a season, not a streak
 
-A chapter is a week: a Monday want, an escalation that is **a person changing what they need** (never a clock), and a Saturday that pays something off. The horizon is a **season** — which is what the habit evidence actually says (59–66 day medians, lens 2 F12) and what `SEASONS` (`engine/engine.js:4255`) already does.
+A chapter is a week: a Monday want, an escalation that is **a person changing what they need** (never a clock), and a last visit that pays something off. The horizon is a **season** — which is what the habit evidence actually says (59–66 day medians, lens 2 F12) and what `SEASONS` (`engine/engine.js:4255`) already does.
 
 **Chapter 0 · La puerta cinco.** Moving day. Nello knocks with a plate, because the first night nobody cooks. Your first two decisions: where the kettle goes, and how the plate goes back — washed, or with something on it. The loop stated in one beat.
 
-**Chapter 1 · Nello · *q.b.*** *Want:* Ombretta's birthday, and the ragù is in Piera's hand and unreadable. *Escalation:* he makes it from memory and it is wrong in a way he cannot name; four neighbours taste it and each says a different thing — the wrong dish **adds** dialogue (R2). *Saturday:* the missing step was one Piera never wrote because she did not think it was a step — she rinsed the pan with the wine before the tomatoes. The notebook's first filled blank is in your handwriting, and Nello asks for a copy.
+**Chapter 1 · Nello · *q.b.*** *Want:* Ombretta's birthday, and the ragù is in Piera's hand and unreadable. *Escalation:* he makes it from memory and it is wrong in a way he cannot name; four neighbours taste it and each says a different thing — the wrong dish **adds** dialogue (R2). *last visit:* the missing step was one Piera never wrote because she did not think it was a step — she rinsed the pan with the wine before the tomatoes. The notebook's first filled blank is in your handwriting, and Nello asks for a copy.
 
-**Chapter 2 · Cande · el domingo.** *Want:* Herminia is coming for a week and Cande will not give up her Sunday. *Escalation:* the aunt rearranges the shelves, is right about one thing and wrong about another, and nobody wins. *Saturday:* both versions on the table at once, with chard and without; Chemo says which one his mother made and he is wrong. **There is no *the* recipe.**
+**Chapter 2 · Cande · el domingo.** *Want:* Herminia is coming for a week and Cande will not give up her Sunday. *Escalation:* the aunt rearranges the shelves, is right about one thing and wrong about another, and nobody wins. *last visit:* both versions on the table at once, with chard and without; Chemo says which one his mother made and he is wrong. **There is no *the* recipe.**
 
-**Chapter 3 · Tomo and Haru · una sopa, tres cositas.** *Want:* a bento that comes back empty. *Escalation:* the dashi, and the order rule — you put the loud one in first and the dish is **duller, not burnt**, and a seven-year-old tells you so. *Saturday:* the box comes back empty except the thing he traded away, and Tomo lets it go.
+**Chapter 3 · Tomo and Haru · una sopa, tres cositas.** *Want:* a bento that comes back empty. *Escalation:* the dashi, and the order rule — you put the loud one in first and the dish is **duller, not burnt**, and a seven-year-old tells you so. *last visit:* the box comes back empty except the thing he traded away, and Tomo lets it go.
 
-**Chapter 4 · Seo · el frasco.** *Want:* not to be the only person in the building who eats alone. *Escalation:* kimjang needs more hands than she has and she asks for them the wrong way — she offers to pay. *Saturday:* four households salting cabbage in the courtyard, every hand cold, jars dated and named. **It will not be ready for weeks and the game says so and does not hurry** — R4, and leaving the game is the correct move.
+**Chapter 4 · Seo · el frasco.** *Want:* not to be the only person in the building who eats alone. *Escalation:* kimjang needs more hands than she has and she asks for them the wrong way — she offers to pay. *last visit:* four households salting cabbage in the courtyard, every hand cold, jars dated and named. **It will not be ready for weeks and the game says so and does not hurry** — R4, and leaving the game is the correct move.
 
 **The season's close is a sobremesa, not a ceremony.** The table goes long, the plates stay out, nobody gets up. The record is a strip of tile at the table's edge where the date of a meal is scratched — **a record of the past only**, never a list of the future.
 
@@ -601,7 +601,7 @@ The two asks point at two different players. 2026-09-11: *"aj will want a pseudo
 | **"both — one pack, hers"** ✅ **recommended** | build **Sobremesa** as AJ's comfort game, public, with the cast intact — and the parts you actually want (the notebook, the list, the source cards) are the parts a second person can use without the game becoming software | you get your pantry through a story instead of a form, which is slower to build and the only version that stays calm |
 | *"leave it"* | nothing is designed further; the research stands as research and Meridian's four unplayed districts get the next sitting | the four districts genuinely do want a human first |
 
-### ❗La mesa larga — what IS the Saturday?
+### ❗La mesa larga — what IS the last visit?
 
 | What you type | The payoff shape | Consequence |
 |---|---|---|

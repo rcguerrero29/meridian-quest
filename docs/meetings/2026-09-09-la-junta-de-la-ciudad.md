@@ -172,11 +172,11 @@ game alone).
 **What Meridian is silently providing that a second game will not have:** every exchange is a
 question with a right answer, so a conversation knows when it is over; every judgment call arrives
 with a wrong answer and a joke attached; the grade is always on, so the player behaves because the
-fiction says they have a job; and *an engagement has a Saturday because work ends — a place you
-inhabit has no Saturday.*
+fiction says they have a job; and *an engagement has a last visit because work ends — a place you
+inhabit has no last visit.*
 
 **His one thing not to do:** do not keep the chapter/`need` skeleton with the lesson removed. *A
-Saturday with nothing to graduate from is a countdown to nothing.*
+last visit with nothing to graduate from is a countdown to nothing.*
 
 ---
 
@@ -189,7 +189,7 @@ Saturday with nothing to graduate from is a countdown to nothing.*
 2. **The ledger.** `docs/CITY.md`'s wrong lines, and the two signed-not-built entries. Pure
    documentation, no code, and it is what the owner's instinct said the problem was.
 3. **`ENDLESS` in `docs/NEW-WORLD.md`**, plus Nacho's second template lane — *the world that does
-   not end*. One doc ticket, no engine work, and it stops the next world inheriting a Saturday.
+   not end*. One doc ticket, no engine work, and it stops the next world inheriting a last visit.
 4. **The ungraded station seam.** Tavo's only recommendation: generalise `ROOMS`/`roomHosts` from
    one interview to any pack-declared conversation. A seam, not an engine rule.
 5. **The small map bugs** — `$` under the panel, `PLACES.friends`, the two doorsteps in the tram

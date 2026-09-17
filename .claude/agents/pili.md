@@ -250,3 +250,18 @@ supposed to be.
 4. **What it costs to skip** — so the owner can choose.
 5. **Contradictions, reported not absorbed** — if a doc promises something the code cannot
    do, or two docs disagree, say so in your answer. Never quietly plan around it.
+
+**AND BEFORE YOU TUNE A NUMBER, FIND OUT WHETHER ANYTHING DRAWS IT.** *(2026-09-17, the fifth report
+of one bug.)* A rectangle in the data is not a thing on the screen. When several drawings position
+themselves off one number and nobody paints the number itself, **every one of them is correct and the
+picture is wrong** — and it is invisible in the code, because each drawing reads right on its own.
+Meridian declared two windows per facade, painted two flat rectangles, and hung a lit pane, a sugar
+skull and a stone ledge off the rect: all three in exactly the right place, and no window. Four
+fixes argued about the size of the skull.
+
+The same rule with a number instead of a rect: **grep every camera for a function's name before you
+believe the world has that fact.** `wellDepth` and `stairLift` gave the right heights for two
+versions and only the 3D camera ever called them, so a stairwell was a flat floor with a chevron on
+it and a bridge was paint on the water.
+
+And the cheapest of the three: **render it at 8× and look, before the second attempt.** Two minutes.

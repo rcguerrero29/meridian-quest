@@ -142,6 +142,7 @@ function portalsOf(id){const w=WORLDS[id],out=[];if(!w)return out;const P=PORTAL
 const isSolid=(x,y)=>{const w=CW();return x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N";};
 /* the same question about a world you are not standing in — used by the discoverability audit */
 const isSolidAt=(id,x,y)=>{const w=WORLDS[id];return !w||x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N";};
+const glyphAt=(id,x,y)=>{const w=WORLDS[id];return (w&&w.rows[y]&&w.rows[y][x])||null;}; /* the glyph a tile is made of — what its art and its TILES row are looked up by. Decor that is painted ON a wall needs it (a mural has to know the wall has windows in it). */
 /* ---------- townsfolk on the move ----------
    Anyone with NO quests drifts around their own corner. A quest-giver never moves: a person
    you are looking for has to be where you left them, which is the entire reason the doorstep
@@ -160,6 +161,46 @@ function wanders(n){return !!n&&!n.still&&(!n.doc||n.roams)&&(!n.q||!n.q.length)
   !(typeof roomHosts!=="undefined"&&roomHosts&&roomHosts[n.npc]);}
 function wanderInit(){Object.values(WORLDS).forEach(w=>w.npcs.forEach(n=>{
   n.fx=n.x;n.fy=n.y;n.hx=n.x;n.hy=n.y;n.wnext=0;n.mv=null;n.mt=0;n.face=1;}));}
+/* ═══════════ NOBODY STANDS IN THE DOORWAY (R11, owner 2026-09-16) ═══════════
+   He asked the right question: "why doesnt r11 walk around?" — and the answer is that there is
+   nothing to walk around. A person is stamped into the grid as the literal character `"N"`, and
+   three readers treat `"N"` exactly as they treat a wall: `isSolid`, `isSolidAt`, and
+   `auditReach`'s own `walk`. None of them knows it is a person. So when a wanderer steps into a
+   corridor ONE TILE WIDE, the map is genuinely cut in two — it is not a pathfinding failure, it is
+   a gap with somebody in it, and there is no way round because there is no round.
+
+   MEASURED, world by world, rather than argued about. Every tile whose occupant would cut the
+   walkable graph, against the number of people who wander there:
+
+       ex (Calle Dos)  176 walkable   32 chokepoints   4 wanderers   ← every red
+       no               107            16              0
+       hq               208            17              0
+       st               356            14              0
+       …every other world has chokepoints and NOBODY who moves.
+
+   So the whole of R11 lives on one street, and the fix is manners: a person does not stand in the
+   only way through. `wanderCuts` is the set of tiles that would cut the world; the wander filter
+   refuses them, the same way it already refuses a tram's path. It is computed the first time a
+   wanderer in that world wants to move — only four worlds ever have one — and thrown away when the
+   city grows, because growth changes what a corridor is. */
+function wanderCuts(id){
+  const w=WORLDS[id];if(!w)return null;
+  if(w._cuts)return w._cuts;
+  const ok=(x,y)=>x>=0&&y>=0&&x<w.W&&y<w.H&&!SOLID.has(w.grid[y][x]);
+  const all=[];for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++)if(ok(x,y))all.push([x,y]);
+  const reach=(bx,by)=>{const st=all.find(([x,y])=>!(x===bx&&y===by));
+    if(!st)return 0;const seen=new Set([st[0]+","+st[1]]),q=[st];
+    while(q.length){const[x,y]=q.pop();
+      [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{const nx=x+dx,ny=y+dy,k=nx+","+ny;
+        if(seen.has(k)||!ok(nx,ny)||(nx===bx&&ny===by))return;seen.add(k);q.push([nx,ny]);});}
+    return seen.size;};
+  const base=reach(-1,-1),out=new Set();
+  all.forEach(([x,y])=>{if(reach(x,y)<base-1)out.add(x+","+y);});
+  w._cuts=out;return out;}
+/* a person who wanders is a temporary obstacle; a person who never moves is furniture. The
+   auditor needs to know the difference, and the grid only says "N", so ask the pack who is there. */
+function whoAt(id,x,y){const w=WORLDS[id];if(!w)return null;
+  return (w.npcs||[]).find(n=>n.x===x&&n.y===y)||null;}
 function wanderUpdate(dt){
   const w=CW();if(!w||!$("card").hidden||!$("reader").hidden)return;
   const now=performance.now();
@@ -187,6 +228,10 @@ function wanderUpdate(dt){
          does not step in FRONT of one. Same question every animal in this engine now asks, and the
          last mover in the game that was not asking it. */
       &&!troDanger(world,x,y)
+      /* ...and not into the only way through. R11: this filter asked four questions — solid?
+         door? tram? in range? — and never asked whether the step CUTS THE MAP IN TWO, which is
+         the one that strands a player behind somebody's back. */
+      &&!(wanderCuts(world)||new Set()).has(x+","+y)
       &&Math.abs(x-n.hx)+Math.abs(y-n.hy)<=WANDER_R
       &&!(x===px&&y===py));
     if(!opts.length){n.wnext=now+2500;return;}
@@ -381,7 +426,16 @@ function troAudit(){const out=[],lines=(typeof TROLLEYAT!=="undefined"&&TROLLEYA
    wouldn't register.") */
 function auditReach(grown){
   const probs=[],seen={};Object.keys(WORLDS).forEach(k=>seen[k]=new Set());
-  const walk=(id,x,y)=>{const w=WORLDS[id];return !(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N");};
+  /* A PERSON WHO MOVES IS NOT A WALL. Reachability is a property of the ground, and `"N"` was
+     being read as masonry by an auditor that has never looked at a person in its life — so one
+     neighbour standing in a gap reported thirty-five tiles and a named woman as permanently
+     unreachable, about one run in twenty-five. A wanderer is passable here because they will not
+     be there in four seconds; somebody `still` is not, because they never move and the map really
+     does have to work around them. */
+  const walk=(id,x,y)=>{const w=WORLDS[id];
+    if(x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x]))return false;
+    if(w.grid[y][x]!=="N")return true;
+    const n=whoAt(id,x,y);return !!n&&wanders(n);};
   /* seed EVERY declared arrival, not just the spawn. The park has no portal — the leash carries you
      there — so it had zero reached tiles at every boot and was therefore never audited at all. An
      arrival a pack declares is a way in, whether or not it is a door. */
@@ -456,7 +510,7 @@ function gradeAll(){
   const clean=ans.filter(i=>marks[i]===1).length/ans.length;
   return clean>=0.9?3:clean>=0.6?2:1;
 }
-/* ENDLESS: a place you inhabit has no Saturday (Nacho; the owner: "i dont think it ends").
+/* ENDLESS: a place you inhabit has no last visit (Nacho; the owner: "i dont think it ends").
    A pack may declare `ENDLESS=true` and the ending panel never fires — no epilogue, no title, no
    "claim your reward". This mattered more than it sounds: a pack that declares no CHAPTERS gets
    the synthesised one above, so El Changarrito — the owner's own backlog as a street, with a
@@ -486,7 +540,7 @@ const qChapter=qi=>{const L=CHS();for(let i=0;i<L.length;i++)if(L[i].quests.inde
    This was `c>=chSeen`, which had it backwards: it closed everything you walked
    past and left unopened districts nominally answerable. */
 const qOpen=qi=>{const c=qChapter(qi);return c<0||c<=chSeen;};
-/* Answering a quest long after its district played its Saturday. Content may give any
+/* Answering a quest long after its district played its last visit. Content may give any
    quest a `late` line for this — one line, in the NPC's voice, acknowledging only that
    time passed and never what happened in it (a reframe that names events goes stale
    itself). Quests belonging to no district (Frederick's) never count as late. */
@@ -797,7 +851,11 @@ function drawIso(){
     if(petalsOn()&&(!SOLID.has(w.grid[y][x])||(TILES[w.grid[y][x]]||{}).kind==="water")&&bridgeDist(w,x,y)<=3){ctx.save();ctx.translate(cx-ISW/4,cy-ISH/4);ctx.scale(0.5,0.5);petalSpill(w,x,y,0,0,1);ctx.restore();}
     else if(ch==="-"){isoDiamond(cx,cy,tc("#8F9096"));}
     else if(ch==="R"){ctx.save();ctx.translate(cx,cy);ctx.scale(0.75,0.75);ctx.translate(-cx,-cy);isoDiamond(cx,cy,tc(C.rug));ctx.restore();}
-    else if(ch==="b"){[[ -7,0,"#D77FA8"],[3,-3,"#E7C25A"],[6,3,"#C9699E"]].forEach(f=>{
+    /* the isometric camera had its OWN hardcoded flower bed — three pink dots, three literal
+       hexes, not a call to the tile's painter — so a pack overriding `b` got the new bed in three
+       cameras and the old one here. Found by Pili, 2026-09-16, while costing the marigolds; it is
+       the shape docs/ARCH-LOG A7 warned about, a renderer that never asks the question. It asks. */
+    else if(ch==="b"){petalPal().slice(1,4).map((c,i)=>[[-7,0],[3,-3],[6,3]][i].concat(c)).forEach(f=>{
       ctx.fillStyle=f[2];ctx.beginPath();ctx.arc(cx+f[0],cy+f[1],2,0,7);ctx.fill();});}
     else if(ch==="g"){ctx.strokeStyle=tc("#5FA86A");ctx.lineWidth=1.4;ctx.lineCap="round";
       [[-6,0],[0,-2],[6,1]].forEach(q=>{ctx.beginPath();ctx.moveTo(cx+q[0],cy+q[1]+3);ctx.lineTo(cx+q[0]+1.5,cy+q[1]-5);ctx.stroke();});}
@@ -824,6 +882,26 @@ function drawIso(){
         ctx.beginPath();ctx.arc(cx+q[0]+t2,cy-16+q[1],1.6,0,7);ctx.fill();});canopyDress(ctx,cx+t2,cy-16);}});
     else R.push({d:x+y,f:()=>isoBlock(cx,cy,ISOCOL[gch]||ISOCOL[w.rows[y][x]]||C.wall,IZH[gch]||izh(w.rows[y][x]))});
   }
+  /* THE WELL, LOOKED INTO (owner, 2026-09-17: "lets do b"). This camera drew the hole as ordinary
+     floor with a chevron on it and stood the hero on top — the same fault the front camera had.
+     It is drawn in the DEPTH pass rather than the floor pass on purpose: a sunken lid reaches
+     half a diamond past its own tile, and in the floor pass the next row would paint over it.
+     You see the two FAR walls of the shaft (the diamond's north edges, extruded down) and the
+     tread at the bottom of them. */
+  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
+    const dp=isoWellPx(w,x,y);if(dp<=0)continue;
+    const[cx,cy]=P(x,y);
+    if(cx<-ISW||cx>VW+ISW||cy<-ISH-40||cy>VH+ISH+40)continue;
+    const g=w.rows[y][x];
+    R.push({d:x+y-0.02,f:()=>{
+      ctx.fillStyle=tc("#221C29");ctx.beginPath();
+      ctx.moveTo(cx-ISW/2,cy);ctx.lineTo(cx,cy-ISH/2);ctx.lineTo(cx+ISW/2,cy);
+      ctx.lineTo(cx+ISW/2,cy+dp);ctx.lineTo(cx,cy-ISH/2+dp);ctx.lineTo(cx-ISW/2,cy+dp);
+      ctx.closePath();ctx.fill();
+      isoDiamond(cx,cy+dp,tc(g==="▼"?"#8C8578":"#C2BAA6"));   /* the tread's lid — the one surface down there facing the light from the floor above */
+      ctx.fillStyle="rgba(255,255,255,.16)";ctx.beginPath();  /* its nosing */
+      ctx.moveTo(cx-ISW/2,cy+dp);ctx.lineTo(cx,cy-ISH/2+dp);ctx.lineTo(cx,cy-ISH/2+dp+2);ctx.lineTo(cx-ISW/2,cy+dp+2);ctx.closePath();ctx.fill();}});
+  }
   /* STANDING TILES. A `stand` tile is walkable, so the block pass above skips it — and
      isoBlock paints flat faces and a diamond top, never the art, so routing them THERE turns a
      trolley stop into a coloured slab (tried it, 2026-09-04). They billboard their profile
@@ -835,7 +913,11 @@ function drawIso(){
     const tf=sideArt(g);if(!tf)continue;
     R.push({d:x+y+0.35,f:()=>tf({sx:cx-16,sy:cy-25,x,y,canopy:()=>{}})});
   }
-  const bill=(gx,gy,fn)=>{const[cx,cy]=P(gx,gy);
+  const bill=(gx,gy,fn)=>{const[cx,cy0]=P(gx,gy),cy=cy0+isoLiftPx(w,Math.round(gx),Math.round(gy));
+    /* iso lifts the PERSON for all three heights; the raised TILE art is still flat here, because
+       isoBlock paints faces and a diamond lid and never the art — routing the bridge's planks
+       through it would turn the deck into a coloured slab, which this file already learned once
+       with the trolley stop. Named rather than hidden. */
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
   w.npcs.forEach(n=>bill(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(bx,by)=>{
     drawPerson(ctx,bx,by,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
@@ -906,7 +988,7 @@ document.querySelectorAll("#easeRow button").forEach(b=>b.addEventListener("clic
 const TILEDRAW={};
 TILEDRAW["#"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc(C.wall);ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle=tc(C.wallTop);ctx.fillRect(sx,sy,TS,6);};
 TILEDRAW["B"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc("#5C4A50");ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle=tc("#6E5A60");ctx.fillRect(sx,sy,TS,5);
-      ctx.fillStyle=tc("#8E7A80");ctx.fillRect(sx+5,sy+10,8,9);ctx.fillRect(sx+19,sy+10,8,9);};
+      drawPanes(ctx,"B",sx,sy);}; /* the two windows are TILES.B.win, drawn — see drawPane. They were two flat rectangles a shade off the wall until 2026-09-17, which is why every sill in this game stood on nothing. */
 TILEDRAW["R"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc(C.rug);ctx.fillRect(sx+2,sy+2,TS-4,TS-4);};
 TILEDRAW["≈"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc("#54555B");ctx.fillRect(sx,sy,TS,TS);
       if(y%2===0){ctx.fillStyle=tc("#6A6B72");ctx.fillRect(sx+4,sy+15,10,2);}};
@@ -918,11 +1000,60 @@ TILEDRAW["J"]=rc=>{const{sx,sy,x,y}=rc; /* jacaranda: trunk here, canopy in a la
       ctx.fillStyle="#6E4A2C";ctx.fillRect(sx+13,sy+12,6,17);
       ctx.fillStyle="#59391F";ctx.fillRect(sx+13,sy+12,2,17);
       rc.canopy(sx,sy);};
-TILEDRAW["b"]=rc=>{const{sx,sy,x,y}=rc; /* flower bed: soil + blooms, walkable — you may smell them */
-      ctx.fillStyle=tc("#7A5A3C");ctx.beginPath();ctx.roundRect(sx+3,sy+6,TS-6,TS-10,6);ctx.fill();
-      [[9,12,"#D77FA8"],[16,10,"#E7C25A"],[23,13,"#C9699E"],[12,19,"#E08A5A"],[20,20,"#D77FA8"]].forEach(p=>{
-        ctx.fillStyle=p[2];ctx.beginPath();ctx.arc(sx+p[0],sy+p[1],2.4,0,7);ctx.fill();
-        ctx.fillStyle="#F5EAD2";ctx.beginPath();ctx.arc(sx+p[0],sy+p[1],0.9,0,7);ctx.fill();});};
+/* ═══════════ THE FLOWER BED IS CEMPASÚCHIL (owner, 2026-09-16: "add some marigolds please") ═══════
+   Measured before drawing, and the measurements are the argument:
+     · There is not one marigold FLOWER anywhere in this game. Everything named marigold is a
+       PETAL — the bridge deck's heap, the trail, the ofrenda's arch, the garland — or a colour
+       swap. A deck under tens of thousands of petals and no plant they came off. That is the
+       `how-its-made` fault exactly: variation entering at a step that never happened. A petal is
+       what is left after somebody pulled a head apart; drawing only the aftermath is why the
+       season reads as confetti.
+     · The one tile whose entire job is flowers could not see the season at all. Five hardcoded
+       circles, pink, so six beds stayed pink ON THE DAY OF THE DEAD.
+     · And two of its four hues were the same colour in greyscale: #D77FA8 is luma 158.0 and
+       #E08A5A is 158.2. Δ0.2 of 255. The bed was one texture wearing four names.
+   THE FLOWER, at 32px, is three marks and no more survive: WIDER THAN TALL (a circle reads as a
+   ball or a fruit; the flattening is what says flower), a RAGGED RIM of six lobes (at 8px across
+   the rim is ~25px of arc, so a lobe gets 4px — eight lobes becomes a stipple), and A GREEN CUP
+   UNDER IT, which is the cheapest separator from every other orange thing in this city: an orange
+   mass with green under it is a flower, an orange mass alone is a traffic cone.
+   Three open heads and two buds, not five heads — same plant, different age, one sheet of soil, and
+   that is what makes a bed read as GROWN rather than stamped. It costs nothing.
+   The colours come from `petalPal()`, which returns the marigold gradient WITH NO SEASON ON and the
+   identical array in season — so the flower and its own fallen petals are the same six colours, the
+   bed looks the same in March as in October, and a season still changes only colour. */
+function drawBed(g,sx,sy,seed){
+  const P=petalPal();                                   /* [deep, undercut, body, lit, crown, pale] */
+  const DEEP=P[0],UNDER=P[1],BODY=P[3]||P[2],CROWN=P[5]||P[4];
+  g.fillStyle=tc("#7A5A3C");g.beginPath();g.roundRect(sx+3,sy+6,TS-6,TS-10,6);g.fill();
+  g.fillStyle="rgba(24,16,8,.16)";g.beginPath();g.roundRect(sx+3,sy+6,TS-6,4,3);g.fill();  /* the soil has a lip */
+  const head=(hx,hy,r)=>{
+    g.fillStyle="rgba(30,18,8,.30)";                    /* it sits IN the soil */
+    g.beginPath();g.ellipse(hx+0.5,hy+r*0.72,r*0.95,r*0.38,0,0,7);g.fill();
+    g.strokeStyle=tc("#3E7C4F");g.lineWidth=1;          /* stem */
+    g.beginPath();g.moveTo(hx,hy+r*0.5);g.lineTo(hx,hy+r*1.25);g.stroke();
+    g.fillStyle=tc("#3E7C4F");                          /* the calyx cup — the separator */
+    g.beginPath();g.ellipse(hx,hy+r*0.52,r*0.72,r*0.34,0,0,7);g.fill();
+    g.fillStyle=UNDER;                                  /* the rim, six lobes, ragged by construction */
+    for(let i=0;i<6;i++){const a=i*Math.PI/3+seed*0.7;
+      g.beginPath();g.ellipse(hx+Math.cos(a)*r*0.62,hy+Math.sin(a)*r*0.46,r*0.42,r*0.34,a,0,7);g.fill();}
+    g.fillStyle=BODY;                                   /* the head: WIDER THAN TALL */
+    g.beginPath();g.ellipse(hx,hy,r,r*0.86,0,0,7);g.fill();
+    g.fillStyle=CROWN;                                  /* the key is upper-left, so only those lobes lift */
+    [[-0.42,-0.40],[0.06,-0.52],[-0.60,-0.02]].forEach(([dx,dy])=>{
+      g.beginPath();g.ellipse(hx+dx*r,hy+dy*r,r*0.30,r*0.24,0,0,7);g.fill();});
+    g.strokeStyle=DEEP;g.lineWidth=0.9;                 /* two notches, never a starburst */
+    [-0.5,0.55].forEach(a=>{g.beginPath();g.moveTo(hx+Math.cos(a)*r*0.15,hy+Math.sin(a)*r*0.15);
+      g.lineTo(hx+Math.cos(a)*r*0.8,hy+Math.sin(a)*r*0.7);g.stroke();});};
+  const bud=(hx,hy,r)=>{                                /* same plant, younger: body only, no crown */
+    g.strokeStyle=tc("#3E7C4F");g.lineWidth=1;
+    g.beginPath();g.moveTo(hx,hy+r*0.4);g.lineTo(hx,hy+r*1.5);g.stroke();
+    g.fillStyle=tc("#3E7C4F");g.beginPath();g.ellipse(hx,hy+r*0.5,r*0.7,r*0.42,0,0,7);g.fill();
+    g.fillStyle=UNDER;g.beginPath();g.ellipse(hx,hy,r,r*0.92,0,0,7);g.fill();};
+  head(sx+10,sy+14,4.2); head(sx+21,sy+12,3.8); head(sx+15,sy+21,4.0);
+  bud(sx+25,sy+19,2.1);  bud(sx+6,sy+21,1.9);
+}
+TILEDRAW["b"]=rc=>{const{sx,sy,x,y}=rc;drawBed(ctx,sx,sy,((x*7+y*13)%5)/5);};
 TILEDRAW["g"]=rc=>{const{sx,sy,x,y}=rc; /* grass tuft on the floor tile */
       ctx.strokeStyle=tc("#5FA86A");ctx.lineWidth=1.6;ctx.lineCap="round";
       [[8,0],[13,-2],[18,1],[23,-1]].forEach(p=>{ctx.beginPath();
@@ -980,7 +1111,8 @@ TILEDRAW["Q"]=rc=>{const{sx,sy,x,y}=rc; /* restaurant storefront: terracotta fac
       ctx.fillStyle="#E8A05A";ctx.fillRect(sx+11.5,sy+19,9,1.6); /* what's in it */
       ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+11,sy+19.6,10,1); /* rim */
       ctx.fillStyle="#B9B2A6";[13,16,19].forEach((wx,i)=>ctx.fillRect(sx+wx,sy+13+(i%2)*1.2,1.2,3.6)); /* steam */
-      produce(sx+23,sy+14,"chile",0.75);};
+      produce(sx+23,sy+14,"chile",0.75);
+      drawPanes(ctx,"Q",sx,sy,{glass:false});};   /* the joinery: a reveal, a lintel and the sill two calaveritas stand on */
 TILEDRAW["D"]=rc=>{const{sx,sy,x,y}=rc; /* a desk: top, two legs, a monitor on it, a sheet of paper.
       The cold read saw a cardboard box with a label. */
       ctx.fillStyle=tc(C.desk);ctx.fillRect(sx+5,sy+18,3,10);ctx.fillRect(sx+24,sy+18,3,10); /* legs */
@@ -1050,7 +1182,8 @@ TILEDRAW["Z"]=rc=>{const{sx,sy,x,y}=rc; /* El Mercado facade: green stall front,
          and the carrot on top of each other. One row, bigger, fully spaced — legibility
          beats density at 32px. Verified by rendering the tile at 4x and looking. */
       [[9.5,18.5,"tomato"],[17,18.5,"banana"],[24.5,18.5,"chile"]]
-        .forEach(f=>produce(sx+f[0],sy+f[1],f[2],1.3));};
+        .forEach(f=>produce(sx+f[0],sy+f[1],f[2],1.3));
+      drawPanes(ctx,"Z",sx,sy,{glass:false});};
 TILEDRAW["S"]=rc=>{const{sx,sy,x,y}=rc; /* shelving: three loaded shelves */
       ctx.fillStyle="#8A6F4D";ctx.fillRect(sx+2,sy+2,TS-4,TS-4);
       ctx.fillStyle="#6E5638";[6,14,22].forEach(yy=>ctx.fillRect(sx+2,sy+yy,TS-4,2));
@@ -1148,8 +1281,12 @@ function sillWindow(wid,p,n){
   const mine=fiestaProps(wid).filter(q=>q.sill&&q.x===p.x&&q.y===p.y);
   const k=mine.indexOf(p);return (k<0?0:k)%n;}
 function propSill(wid,p){
-  if(!p.sill)return null;const w=WORLDS[wid],g=w&&w.rows[p.y]&&w.rows[p.y][p.x],m=(TILES[g]||{}),wins=m.win;
-  if(!wins||!wins.length)return null;
+  /* winsKept, not TILES.win: a candy may only stand in a window the wall actually SHOWS. At
+     st(22,0) the mural panel plasters the left one over, and reading the raw list put the sweet
+     where a window used to be — which is the "non existing or visible window sill" the owner
+     reported on 2026-09-17. `w:` in the content indexes what is left, not what was declared. */
+  if(!p.sill)return null;const g=glyphAt(wid,p.x,p.y),wins=winsKept(wid,p.x,p.y);
+  if(!wins.length)return null;
   const i=sillWindow(wid,p,wins.length),win=wins[i]||wins[0];
   /* #131 cut the candy from a flat 8 to two thirds of the pane, because at 8 in an 8-pixel window it
      filled the glass edge to edge and its crown poked over the frame. Two thirds was my number and it
@@ -1159,24 +1296,6 @@ function propSill(wid,p){
      0.85 leaves a pixel of glass each side — a sweet ON a sill, not a sweet AVOIDING one. */
   const size=Math.max(4,Math.min(8,Math.round(win[2]*0.85),Math.round(win[3]*0.9)));
   return {cx:win[0]+win[2]/2,sill:win[1]+win[3],size,i,w:win[2],h:win[3],g};}
-/* ---------- THE SILL ITSELF — the fourth attempt, and the first one that is not about size ----------
-   The owner has asked four times. 2026-09-08: the skulls share a sill. 2026-09-09 and 2026-09-10:
-   "the skulls are still hidden on the sills." 2026-09-12: "another attempt at showing the WINDOW
-   SILLS." Read that last one literally, because it is the clue the three previous fixes all missed:
-   he is not only asking to see the candy. **There was never a sill.** `propSill` computes a y called
-   `sill` and nothing has ever DRAWN one — the candy stood on the bottom edge of a hole in a wall.
-   The three answers so far were all the same answer: 8px of sweet, then 5px, then 0.85 of the pane,
-   then the whole pane lit. Each was measured, each was defensible, and after each one he came back,
-   because the thing missing was not a dimension.
-   What a sill is, and why it reads when a 7-pixel sweet does not: it is a HORIZONTAL EDGE, the full
-   width of the opening and wider, bright on top and dark underneath, with a shadow cast on the wall
-   below it. A hard light/dark horizontal boundary survives being scaled down to three pixels — it is
-   the one shape that does — which is exactly why the papel picado in the same frame never had this
-   problem and the candy did. And it gives the sweet a thing to stand ON and to silhouette against,
-   instead of floating in a dark recess the same colour as itself.
-   One drawing, used by the front camera and by the 3D sprite, so the two cannot drift. Top-down and
-   iso get nothing: you cannot see a ledge from directly above, and pretending otherwise is the
-   "drawn in some cameras" bug this repo already has a register entry for. */
 /* ---------- THE SILL ITSELF — the fourth attempt, and the first one that is not about size ----------
    The owner has asked four times. 2026-09-08: the skulls share a sill. 2026-09-09 and 2026-09-10:
    "the skulls are still hidden on the sills." 2026-09-12: "another attempt at showing the WINDOW
@@ -1212,6 +1331,57 @@ function drawSillLedge(g,x,y,w){
   g.fillStyle="#F7F2E2";g.fillRect(x,y,W,3);                      /* the stone, lit from above: THREE whole pixels */
   g.fillStyle="#8A7F66";g.fillRect(x,y+3,W,1);                    /* its hard underside — the edge that does the work */
   g.fillStyle="rgba(16,12,22,.42)";g.fillRect(x+1,y+4,W-2,2);}    /* and what it throws on the wall */
+/* ---------- AND THE WINDOW UNDER IT (owner, 2026-09-17) ----------
+   "the skull on a non existing or visible window sill overlaps a store front that was initially a
+   placeholder for a mural… if there were a window sill there, it should be drawn and then a skull
+   can be included and then the store front icon or mural can go around it."
+
+   Rendered at 8x before touching anything, which is the only reason this is the right fix: the
+   plain facade `B` painted its two windows as ONE FLAT RECTANGLE each, a shade off the wall — no
+   frame, no glass, no reveal, no ledge — and the mural panel then painted plaster over the whole
+   32x32, erasing even those. What the owner was looking at is a lit pane, a sugar skull and a
+   stone ledge floating in the middle of a blank wall, because every one of them is computed from a
+   `win` rect in TILES that NOTHING HAS EVER DRAWN. Four fixes to this bug argued about the candy's
+   size. The candy was never the fault: it was standing on data.
+
+   So the window becomes a real thing, from the same `win` rect the sill props already read, in one
+   drawing every camera goes through — and `drawSillLedge` here is the SAME function the prop uses,
+   at the same coordinates (proved in drawSillBox: ox=win[0], by=win[1]+win[3]), so the tile's sill
+   and the candy's sill are one ledge and cannot drift apart.
+
+   `glass:false` is for a front that paints its own glass and only wants the joinery — El Mercado's
+   produce window, La Cocina's bowl. They get a reveal, a lintel and a ledge; what is behind the
+   pane stays theirs. */
+const winsOf=ch=>((TILES[ch]||{}).win)||[];
+/* A DECORATION PAINTED ON A WALL MAY PAINT OUT A WINDOW. A muralist does exactly this: the wall is
+   the canvas and you plaster over the pane that is in the way. A DECOS row says which windows it
+   LEAVES with `wins:[i,…]` (indices into the glyph's TILES.win); no `wins` means it leaves them all,
+   `wins:[]` means the wall is now blank. Three readers go through here so a painted-out window
+   cannot come back somewhere else: the decor's own art, the sill props that stand in windows, and
+   the dusk lighting — which would otherwise light a window that is not there any more, at night,
+   on a wall nobody would think to check. */
+const DECOWIN=(()=>{const m={};(typeof DECOR!=="undefined"?DECOR:[]).forEach(d=>{if(d.wins)m[d.world+","+d.x+","+d.y]=d.wins;});return m;})();
+function winsKept(world,x,y){const all=winsOf(glyphAt(world,x,y)),k=DECOWIN[world+","+x+","+y];
+  return k?k.map(i=>all[i]).filter(Boolean):all;}
+function drawPane(g,x,y,w,h,opts){ /* NOT drawWindows(w,camX,camY) two thousand lines down — that one lights rooms at dusk. This one builds the window. Naming them alike is how the first draft of this fix silently drew nothing: a second `function drawWindows` hoisted over mine and every call reached the wrong one, in total silence. */
+  const o=opts||{},dark=tc("#241C24");
+  if(o.glass===false){                                                /* the front paints its own glass — a reveal AROUND it, never over it */
+    g.fillStyle=dark;g.fillRect(x-1,y-1,w+2,1);g.fillRect(x-1,y+h,w+2,1);g.fillRect(x-1,y,1,h);g.fillRect(x+w,y,1,h);
+  }else{
+    g.fillStyle=dark;g.fillRect(x-1,y-1,w+2,h+2);                     /* the reveal: a window is a hole before it is anything else */
+    const gr=g.createLinearGradient(0,y,0,y+h);
+    gr.addColorStop(0,"#7C9AB8");gr.addColorStop(0.42,"#3E4C60");gr.addColorStop(1,"#20293A"); /* sky at the head, the room at the foot */
+    g.fillStyle=gr;g.fillRect(x,y,w,h);
+    g.fillStyle="rgba(236,244,252,.26)";                              /* the one thing that says GLASS: a reflection that is not the sky */
+    g.beginPath();g.moveTo(x,y);g.lineTo(x+w*0.62,y);g.lineTo(x,y+h*0.62);g.closePath();g.fill();
+    g.fillStyle=tc("#2A2228");                                        /* the mullions — four panes, because two is a shape and four is a window */
+    g.fillRect(x+w/2-0.5,y,1,h);g.fillRect(x,y+Math.round(h*0.42),w,1);}
+  g.fillStyle=tc("#8A757C");g.fillRect(x-1.5,y-3,w+3,2);              /* the lintel it hangs from */
+  g.fillStyle="rgba(255,255,255,.16)";g.fillRect(x-1.5,y-3,w+3,0.8);
+  drawSillLedge(g,x-SILL_OUT,y+h,w);}                                 /* and the ledge, the one the candy stands on */                               /* and the ledge, the one the candy stands on */
+/* every window a glyph declares, drawn where the glyph is. One call per facade, so a front that
+   forgets is a front with no windows rather than a front with invisible ones. */
+function drawPanes(g,ch,sx,sy,opts){winsOf(ch).forEach(r=>drawPane(g,sx+r[0],sy+r[1],r[2],r[3],opts));}
 /* pane, candy and ledge together, for the one camera that can draw them in one go */
 function drawSillBox(g,x,y,w,h,foil,z){
   const ox=x+SILL_OUT, by=y+h;
@@ -1796,6 +1966,25 @@ function stairRun(w,x,y){const row=(w&&w.rows&&w.rows[y])||"";if(row[x]!=="≡"&
 function wellDepth(w,x,y){const row=(w&&w.rows&&w.rows[y])||"";
   if(row[x]==="▼"){let L=0;while(row[x+1+L]==="≡")L++;return L?STAIRH*(L+1):0;}
   const r=stairRun(w,x,y);if(!r||!r.well)return 0;return STAIRH*(r.L-r.i);}
+/* THE SAME DROP, IN THE FLAT CAMERAS' OWN UNITS (owner, 2026-09-17: "lets do b").
+   wellDepth is in tile units and only engine3d.js ever read it, so in top, front and iso the well
+   was a flat floor with a chevron painted on it and the hero standing on top of the hole. What a
+   unit of height is worth in pixels is already settled by the facades: a wall is `lift:13` and
+   stands 1.1 units, so a unit is about twelve. One constant, derived rather than picked, and one
+   reader — nothing may convert a height to pixels anywhere else. */
+const UNITPX=12, ISOUNITPX=18;   /* iso is 1.5x the flat cameras, which is not a choice either: `izh` already converts a lift with `Math.round(lift*1.5)` */
+const wellPx=(w,x,y)=>Math.round(wellDepth(w,x,y)*UNITPX);
+const isoWellPx=(w,x,y)=>Math.round(wellDepth(w,x,y)*ISOUNITPX);
+/* AND THE OTHER TWO KINDS OF HEIGHT (owner, 2026-09-17: "6. do it"). The first pass at this did
+   wells only and said so; the owner took the follow-up. `stairLift` is the signed answer for all
+   three — positive up a climbing tread or on the bridge's arched deck, negative down a well — and
+   it was, like `wellDepth`, read by engine3d.js and by nothing else. So in the flat cameras the
+   rainbow bridge was PAINT ON THE WATER: its deck stands 0.22 of a tile up in 3D and lies flat in
+   the other three, and whoever crossed it walked at river level.
+   Screen y grows downward, so the offset is the negation. One reader; a height may not be turned
+   into pixels anywhere else. */
+const liftPx=(w,x,y)=>Math.round(-stairLift(w,x,y)*UNITPX);
+const isoLiftPx=(w,x,y)=>Math.round(-stairLift(w,x,y)*ISOUNITPX);
 /* the height anyone standing on (x,y) stands at: up a climbing tread, DOWN a well tread */
 /* the crossing ARCHES (owner, 2026-09-08: "for water, make the bridge a bit better, some arching and or
    dimesionality"): the deck rises from each bank to a crown over the middle of the water. The height at a
@@ -1924,8 +2113,8 @@ SOLID.forEach(g=>TILES[g]={lift:7,kind:"prop"});
 Object.assign(TILES,{
   "#":{lift:13,kind:"wall"},U:{lift:13,kind:"wall"},
   B:{lift:13,kind:"facade",win:[[5,10,8,9],[19,10,8,9]]},
-  Q:{lift:13,kind:"facade",win:[[8,14,16,10]],awn:9},
-  Z:{lift:13,kind:"facade",win:[[7,13,18,11]],awn:9},
+  Q:{lift:13,kind:"facade",win:[[7,11,18,14]],awn:9},   /* was [8,14,16,10] — the rect the art actually paints is (7,11,18,14), and TWO sill props stand in this front (st 2,5 and 9,5). The declared window and the drawn window have to be the same rectangle or the candy, the ledge and the dusk light all land somewhere the glass is not. */
+  Z:{lift:13,kind:"facade",win:[[4,12,24,13]],awn:9},   /* likewise: the produce window is drawn at (4,12,24,13) */
   D:{lift:6,kind:"furniture"},K:{lift:6,kind:"furniture"},T:{lift:6,kind:"furniture"},
   A:{lift:6,kind:"furniture"},S:{lift:9,kind:"furniture"},H:{lift:5,kind:"furniture"},
   I:{lift:6,kind:"furniture"},W:{lift:8,kind:"appliance"},V:{lift:8,kind:"appliance"},
@@ -2018,7 +2207,22 @@ function drawFront(){
     const hsh=(x*374761393+y*668265263+world.charCodeAt(0)*69069)>>>0;
     if((hsh&7)<2){ctx.globalAlpha=0.05;ctx.fillStyle="#000";ctx.fillRect(sx,sy,TS,TS);ctx.globalAlpha=1;}
     if(hsh%11===3){ctx.globalAlpha=0.08;ctx.fillStyle="#FFF";ctx.fillRect(sx+(hsh>>3)%26+2,sy+(hsh>>5)%26+2,2,2);ctx.globalAlpha=1;}
-    if(!SOLID.has(w.grid[y][x])&&!standsUp(ch)){const tf=TILEDRAW[ch];if(tf)tf({sx,sy,x,y,canopy:queueCanopy});}
+    if(!SOLID.has(w.grid[y][x])&&!standsUp(ch)){const tf=TILEDRAW[ch],dp=liftPx(w,x,y);
+      /* A WELL IN PROFILE. This camera looks along the row, and Nolasco's flight runs ACROSS one —
+         so every tread is at the same screen row and differs only in height, which is exactly a
+         staircase seen from the side. Sink each tread by its own drop and paint the shaft above it
+         and the whole flight steps down the screen. Before this the front camera drew the hole as
+         floor: five pale tiles, a chevron, and the hero standing on top of it at full height. */
+      if(dp>0){ctx.fillStyle=tc("#241E2A");ctx.fillRect(sx,sy-2,TS,dp+4);                     /* the shaft you look into */
+        ctx.fillStyle="rgba(15,12,20,.35)";ctx.fillRect(sx,sy-2,TS,2);                        /* its lip, where the floor ends */
+        ctx.save();ctx.translate(0,dp);if(tf)tf({sx,sy,x,y,canopy:queueCanopy});ctx.restore();
+        ctx.fillStyle="rgba(255,255,255,.14)";ctx.fillRect(sx,sy+dp,TS,1);}                   /* the nosing catching the light from above */
+      else if(dp<0){const h=-dp;                                                              /* a tread that CLIMBS, or the bridge's arched deck: it stands proud and you see what is under it */
+        ctx.save();ctx.translate(0,dp);if(tf)tf({sx,sy,x,y,canopy:queueCanopy});ctx.restore();
+        ctx.fillStyle=tc("#3A3142");ctx.fillRect(sx,sy+TS-h,TS,h);                            /* the riser, or the deck's own shadowed under-edge */
+        ctx.fillStyle="rgba(255,255,255,.16)";ctx.fillRect(sx,sy+TS-h,TS,1);
+        ctx.fillStyle="rgba(15,12,20,.30)";ctx.fillRect(sx,sy+TS-1,TS,1);}
+      else if(tf)tf({sx,sy,x,y,canopy:queueCanopy});}
     if(!SOLID.has(w.grid[y][x])||(TILES[w.grid[y][x]]||{}).kind==="water")petalSpill(w,x,y,sx,sy);
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
       ctx.fillStyle="rgba(15,12,20,.16)";ctx.fillRect(sx,sy,TS,8);}
@@ -2066,7 +2270,10 @@ function drawFront(){
       }
     }});
   }
-  const act=(gx,gy,fn)=>{const sx=gx*TS-camX,sy=gy*TS-camY;
+  const act=(gx,gy,fn)=>{const sx=gx*TS-camX,sy=gy*TS-camY+liftPx(w,Math.round(gx),Math.round(gy));
+    /* +liftPx: you stand ON the tread, not over it — down a well, up a flight, or on the bridge's
+       deck. Everyone goes through `act`, so the hero, the townsfolk and the animals all take the
+       same height by the same number of pixels and cannot drift apart. */
     if(sx<-TS||sy<-TS-16||sx>VW||sy>VH)return;R.push({d:gy+0.55,f:()=>fn(sx,sy)});};
   w.npcs.forEach(n=>act(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(sx,sy)=>{
     drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
@@ -2233,14 +2440,14 @@ function drawWindows(w,camX,camY){
   const a=night?0.5:0.28;
   const x0=Math.floor(camX/TS),y0=Math.floor(camY/TS);
   for(let y=y0;y<=Math.min(w.H-1,y0+9);y++)for(let x=x0;x<=Math.min(w.W-1,x0+11);x++){
-    const m=TILES[w.grid[y][x]]||TILES[w.rows[y][x]];
-    if(!m||!m.win)continue;
+    const wins=winsKept(world,x,y); /* `world` is the current world id and both call sites pass WORLDS[world] as `w` */
+    if(!wins.length)continue;
     const hsh=(x*2654435761+y*40503)>>>0;
     if((hsh&7)<2)continue;
     const sx=x*TS-camX,sy=y*TS-camY;
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)continue;
     ctx.globalAlpha=a*(0.85+0.15*Math.sin(Date.now()/700+hsh%13));
-    m.win.forEach(wn=>{ctx.fillStyle="#FFD98A";ctx.fillRect(sx+wn[0],sy+wn[1],wn[2],wn[3]);
+    wins.forEach(wn=>{ctx.fillStyle="#FFD98A";ctx.fillRect(sx+wn[0],sy+wn[1],wn[2],wn[3]);
       ctx.fillStyle="rgba(255,255,255,.35)";ctx.fillRect(sx+wn[0]+1,sy+wn[1]+1,wn[2]*0.35,2);});
     ctx.globalAlpha=1;
   }
@@ -3365,22 +3572,86 @@ function tryStep(){
    (openTravel). Everything that must happen on arrival lives here, in one place, because when it
    did not, the trolley quietly skipped it — you rode from Meridian Street to Calle Dos and the dog
    you had been walking with was still standing at the stop, still set to follow. */
+/* ---------- THE DOORWAY (owner, 2026-09-17: "i think i want that option A") ----------
+   `tryPortal` changed the world between one frame and the next — four assignments, no transition of
+   any kind — and `worldArrived` then froze input for 450 milliseconds with NOTHING DRAWN in that
+   window. The worst pairing available: an instant cut, and then standing still somewhere you did not
+   walk to. The transition slot was there the whole time and it was empty.
+
+   A cut with a reason reads as a cut; a cut with nothing in it reads as a bug. So the swap happens
+   BEHIND a shut door, and the door opens in the direction you travelled — the movement is what says
+   what happened, and it needs no words in either language.
+
+   It is a DIV over the viewport, not paint on a canvas, for one reason worth writing down: the 3D
+   camera renders to its own WebGL surface, so anything drawn into the 2D context is invisible there.
+   One overlay covers all four cameras and cannot drift between them. `curtain()` above already
+   proved the shape on the growth change (the owner, 2026-09-03: "a building appears ... not a smooth
+   switch") — this is the same idea at a door, and faster, because you are walking.
+
+   130ms to shut, 330 to open. Input is held for exactly as long as the door is moving and not one
+   frame more, which is why worldArrived's 450 became the open: the old number outlasted the (absent)
+   animation by a third of a second of standing still. */
+const DOORMS={shut:110,hold:35,open:330};   /* hold: the swap waits 35ms past the shut, or it lands on a door that is still fifteen pixels open — measured, not guessed */
+function doorSet(cls,ms){const d=$("door");if(!d)return null;
+  d.style.setProperty("--doorT",(ms|0)+"ms");d.className=cls||"";void d.offsetWidth;return d;} /* the reflow is load-bearing: without it the browser coalesces the two writes and nothing moves */
+/* BACK TO THE WINGS WITH THE TRANSITION OFF. Dropping the class re-applies each leaf's resting
+   transform, and the bottom leaf's rest is BELOW the screen — so after a travelling-up door had
+   finished opening, clearing it sent that leaf sliding back down across the whole viewport: a black
+   band sweeping over the new place a third of a second after you arrived. Caught by the guard, on
+   the frame trace, not by reading the rule. 0ms, and they snap back where nobody can see them. */
+function doorRest(){doorSet("",0);}
+function doorShut(){doorRest();doorSet("shut",DOORMS.shut);}
+function doorOpen(kind){doorSet("shut",0);doorSet("open-"+(kind||"flat"),DOORMS.open);
+  setTimeout(()=>{if($("door")&&/^open-/.test($("door").className))doorRest();},DOORMS.open+80);}
+/* WHICH WAY YOU WENT, read off the map rather than off a label somebody typed. The tile you stepped
+   ON says it: `▲` is the head of a climbing flight, `▼` is the foot of a well. Everything else is a
+   door on the flat — including the avenue door into Nolasco's stair room, which is right: you have
+   walked in off the street and not climbed anything yet. The climb is the five treads in front of
+   you, and it is yours to walk. */
+function doorKind(fromW,fromX,fromY){
+  const a=WORLDS[fromW],g=a&&a.rows[fromY]&&a.rows[fromY][fromX];
+  return g==="\u25B2"?"up":g==="\u25BC"?"down":"flat";}
 function worldArrived(fromW,fromX,fromY){
-  warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
+  warpT=performance.now()+DOORMS.open;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
   save();destCheck();{const ar=T().arrive[world];toast(typeof ar==="function"?ar():ar,2200);} /* a line may ask the season (Nacho, 2026-09-07) */
   propsReset();                    /* "they'll just reappear when i leave the screen" — the owner's scope */
   dogsFollow(fromW,fromX,fromY);   /* a dog at your heels comes with you */
   dogsRoam(world);                 /* unseen pups drift toward their favorite townsperson */
 }
+let warpPend=null;   /* a door that is shutting; the world swaps behind it */
 function tryPortal(ts){
   const key=world+":"+px+","+py;
   if(portalHold&&portalHold!==key)portalHold="";
+  if(warpPend){                                  /* the swap waits for the door, and for nothing else */
+    if(ts<warpPend.at)return true;
+    const q=warpPend;warpPend=null;
+    world=q.p.to;px=fx=q.p.x;py=fy=q.p.y;held=null;dir=q.p.dir||"down";
+    worldArrived(q.fromW,q.fromX,q.fromY);roomInvite();
+    if(q.fromW===PL.park&&world!==PL.park)parkExit(); /* crossing back over the rainbow: the recap */
+    /* BUILD THE NEW PLACE WHILE THE DOOR IS STILL SHUT. There is exactly one 3D scene (T3.builtKey)
+       and changing world throws it away and makes another, and the first frame after that has to
+       upload the geometry as well as draw it. Traced on 2026-09-17: in the flat cameras the leaves
+       slide the whole way at frame rate, and in 3D there was a 237ms hole right after the swap
+       during which the top leaf jumped from -5 to -154 — the door did not open, it vanished. The
+       stall is real work and it is not going away; what it must not do is eat the animation. So it
+       happens here, behind a closed door, which is the entire job a closed door has ever had, and
+       the open starts on the next clean frame.
+       ❗ This is also the measurement behind the memory question: cache the built scenes and the
+       stall goes with them (docs/ARCH-LOG.md A16). */
+    let started=false;
+    const go=()=>{if(started)return;started=true;
+      warpT=performance.now()+DOORMS.open;   /* input comes back when the DOOR is open, not when a guess says it should be — the stall above is unpredictable and worldArrived cannot know how long it took */
+      doorOpen(q.kind);};
+    if(camMode==="3d"&&typeof draw3d==="function"&&window.THREE){try{draw3d();}catch(e){}}
+    if(typeof requestAnimationFrame==="function")requestAnimationFrame(go);else go();
+    setTimeout(go,80);                               /* a tab that is not animating still opens its doors */
+    return true;}
   const pp=portalAt(world,px,py);
   if(portalHold||ts<=portalT||!pp)return false;
   const p=pp,fromW=world,fromX=px,fromY=py;
-  world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
-  worldArrived(fromW,fromX,fromY);roomInvite();
-  if(fromW===PL.park&&world!==PL.park)parkExit(); /* crossing back over the rainbow: the recap */
+  warpT=ts+DOORMS.shut+DOORMS.hold;              /* you cannot walk while the door is closing on you */
+  warpPend={p,fromW,fromX,fromY,kind:doorKind(fromW,fromX,fromY),at:ts+DOORMS.shut+DOORMS.hold};
+  doorShut();
   return true;
 }
 let last=0;
@@ -4271,7 +4542,7 @@ function pvDraw(){const g=$("pv").getContext("2d");g.setTransform(1.6,0,0,1.6,5,
 $("pvtog").addEventListener("click",()=>{const bx=$("pvbox");bx.classList.toggle("dark");
   $("pvtog").textContent=bx.classList.contains("dark")?"☀️":"🌙";});
 /* Every return to the street goes through here. A save that booted straight into an
-   ending (Continue → the Saturday → "Out to the street") never passed enterWorld, so the
+   ending (Continue → the last visit → "Out to the street") never passed enterWorld, so the
    canvas kept its hidden-time height of 0px and the player stood in front of a blank
    viewport with only the control hint showing (owner, 2026-09-03, Mac browser). */
 function showWorld(){$("world").hidden=false;sizeCanvas();}
@@ -4331,7 +4602,7 @@ function finish(burnout){
                            :t.endGrade(xp,MAXXP,t.grades[g-1]);
   /* a district names its own ending strings (CHAPTERS[i].epi = the prefix of three keys,
      .go = the burnout key); with nothing declared the old two-set rule stands. The engine
-     held exactly two sets, so a third district printed the wrong Saturday. */
+     held exactly two sets, so a third district printed the wrong last visit. */
   const K=epiKeys(i,last),E=[t[K.pre+"1"],t[K.pre+"2"],t[K.pre+"3"]];
   $("epi").textContent = burnout?t[K.go] : g>=3?E[0] : g===2?E[1] : E[2];
   $("endGo").textContent=last?t.endStay:t.endGo;$("endGo").hidden=false;
@@ -4357,7 +4628,7 @@ $("endGo").addEventListener("click",()=>{
   growthPend=false;seenOpen.add(K.open);
   save();$("end").hidden=true;showWorld();applyCtl();setWorldTag();hud();checkTalk();
   toast(T()[K.open]||(last?T().endStayToast:T().weekTwoToast),4000);
-  ribbonSay();   /* and what landed while that Saturday played */
+  ribbonSay();   /* and what landed while that the last visit played */
 });
 /* Wiping a city is never one tap. The story never sends you here — this is a tool. */
 $("replay").addEventListener("click",()=>{
@@ -5098,6 +5369,47 @@ function markOf(n){ /* one person, one kind, in the order the pack declared */
      · `gx,gy` — where it is DRAWN on the plan. The plan is paper and the paper has panels on it.
    They were identical while the plan drew one world at 0,0, which is why one field did both jobs
    and why the day a second panel appeared was the day the arrow would have started lying. */
+/* ---------- WHERE A WORLD IS, ON THE PLAN (owner, 2026-09-17: "5. yeah i mean a map implies this") ----------
+   Asked whether an interior belongs on a street map at all, that was his whole answer, and he is
+   right: a map that cannot say where a place is is a picture of a street.
+
+   A world is somewhere on the plan for one of three reasons, in this order:
+     · the plan DRAWS it (TOWNPLAN gives it a panel and an offset);
+     · a door leads into it from somewhere already placed — so an interior sits at its own address,
+       which is exactly how a real map shows a shop. FOLLOWED RECURSIVELY, which is the part that was
+       missing: `f2` is reachable only from `hq`, and `hq` is not drawn, so one hop found nothing and
+       the pack had to write the answer down by hand;
+     · the pack names a spot itself (MAPDOT) — for a place with no door at all. The park is the only
+       one in this city: you reach it on a leash, not through a door, and no derivation can ever
+       find it.
+   MEASURED when this was written: every single hand-typed MAPDOT — hq, f2, lo, me, lc, ta, no —
+   agreed exactly with what the doors already said, so all seven were copies of a fact the map
+   already had. Five more worlds (pa, li, casa-w, caseta, barberia) were derivable and had no dot at
+   all. A guard now holds a declared dot to the derived one, because the failure mode of a written-
+   down copy is that the door moves and the copy does not. */
+function planPlace(id,seen,pure){ /* pure: the doors ONLY, with the pack's own declarations ignored — how a guard asks whether a written-down spot is a copy or the only thing holding a world on the map */
+  const panels=planPanels(),drawn=panels.find(p2=>p2.world===id);
+  if(drawn)return {gx:drawn.ox,gy:drawn.oy,x:0,y:0,via:"drawn",panel:true};
+  seen=seen||{};if(seen[id])return null;seen[id]=1;
+  let best=null;
+  Object.keys(WORLDS).forEach(from=>{
+    if(best||from===id)return;
+    (typeof portalsOf==="function"?portalsOf(from):[]).forEach(d=>{
+      if(best||!d.p||d.p.to!==id)return;
+      const home=planPlace(from,seen,pure);if(!home)return;
+      /* A DOT HAS NO INSIDE. Adding the door's tile to a host that is DRAWN is right — the host's
+         ox,oy is a panel origin and the door sits at a place on that paper. Adding it to a host
+         that is itself only a dot is nonsense, and the first draft did exactly that: `f2` is
+         reached from hq(14,14), hq is a dot at (14,0), and f2 landed at (28,14) — a spot on the
+         street with no building under it. A world behind a world shares its address, which is also
+         true of the thing being modelled: the second floor of the office IS the office. */
+      best=home.panel?{gx:d.x+home.gx,gy:d.y+home.gy,x:d.x,y:d.y,via:from,panel:false}
+                     :{gx:home.gx,gy:home.gy,x:home.x,y:home.y,via:from+" (behind it)",panel:false};});});
+  if(best)return best;
+  if(pure)return null;
+  const M=(typeof MAPDOT!=="undefined"?MAPDOT:{});
+  if(M[id])return {gx:M[id][0],gy:M[id][1],x:M[id][0],y:M[id][1],via:"declared",panel:false};
+  return null;}
 function planMarks(){
   const K=markKinds();if(!K.length)return[];
   const M=(typeof MAPDOT!=="undefined"?MAPDOT:{}),out=[],at={},panels=planPanels();
@@ -5115,13 +5427,8 @@ function planMarks(){
     (WORLDS[id].npcs||[]).forEach(n=>{const k=markOf(n);
       if(k&&(!best||K.indexOf(k)<K.indexOf(best)))best=k;});
     if(!best)return;
-    let gx=null,gy=null,wx=null,wy=null;
-    if(M[id]){gx=M[id][0];gy=M[id][1];wx=gx;wy=gy;}   /* unchanged: MAPDOT has always been paper */
-    else{let bd=1e9;
-      panels.forEach(p2=>portalsOf(p2.world).forEach(d=>{
-        if(!d.p||d.p.to!==id)return;
-        if(bd<=0)return;bd=0;gx=d.x+p2.ox;gy=d.y+p2.oy;wx=d.x;wy=d.y;}));}
-    if(gx===null)return;
+    const at2=planPlace(id);if(!at2)return;             /* one reader now: doors first, the pack's own spot only where no door can say */
+    const gx=at2.gx,gy=at2.gy,wx=at2.x,wy=at2.y;
     const key=gx+","+gy,e=at[key];
     if(e){e.ws.push(id);if(K.indexOf(best)<K.indexOf(e.k))e.k=best;return;}
     at[key]={x:wx,y:wy,gx,gy,k:best,w:id,ws:[id]};out.push(at[key]);});
@@ -5284,8 +5591,7 @@ function mapPick(tx,ty){ /* tile coords, fractional — it is a finger, not a cu
     ?null:{w:best.w,x:best.x,y:best.y,gx:best.gx,gy:best.gy,who:best.who||null};
   drawTown();setWorldTag();
   const t=(T().plan||{});
-  if(mapDest)$("mapNote").textContent="🎯 "+destName()+(t.chosen?"  ·  "+t.chosen:"");
-  else $("mapNote").textContent="📍 "+T().locs[world]+(world===PL.upstairs?"  ·  ⇧":"")+(t.tap?"  ·  "+t.tap:"");
+  mapNoteSet();
   return true;}
 /* The bearing: a DIRECTION, never a lit path — Elden Ring's Guidance of Grace is the shape of it
    (el-mapa §7.3, and the sweep's sources). If the place is on this world, point at it; if it is
@@ -5583,13 +5889,58 @@ function drawTown(){
     g2.beginPath();g2.arc(dx2-1.6,dy2-1.8,1.7,0,7);g2.fill();}
   mapLegend();
 }
+/* ---- WHAT THE PLAN SAYS UNDER ITSELF, AND IT MAY NOT SAY A FALSE THING ----
+   Owner, 2026-09-16: "i guess there just arent quests left over, but can we remove the applicable
+   legend if for example all quests are done then we dont mark." The legend already hid itself; the
+   CAPTION did not. With every quest done and not one mark on the paper, the line under the map
+   still read "tap a mark to make it your destination" — an instruction to do something that is not
+   possible, which is the same fault as a save that fails quietly and a map that draws another
+   street: a surface saying a thing that is not true. It says what is actually there now. */
+function mapNoteSet(){
+  const t=T(),pl=t.plan||{},n=$("mapNote");if(!n)return;
+  if(mapDest){n.textContent="🎯 "+destName()+(pl.chosen?"  ·  "+pl.chosen:"");return;}
+  const here="📍 "+t.locs[world]+(world===PL.upstairs?"  ·  ⇧":"");
+  const any=planMarks().length;
+  n.textContent=here+(any&&pl.tap?"  ·  "+pl.tap:(pl.none?"  ·  "+pl.none:""));
+}
+/* ---- AND SOMEWHERE TO GO WHEN NOBODY WANTS ANYTHING ----
+   "we should also be able to point to a random destnation." Everything the plan could do was tied
+   to a quest, so the moment the city had nothing left to ask of you the map became a picture. This
+   is the first thing on it that is not about quests at all: pick a person, anywhere in the city,
+   and the arrow in the street will take you to them. Chosen from the people the pack declared —
+   never the one you are already standing next to, because being sent where you are is not an
+   answer. */
+function mapRandomDest(){
+  const pool=[];
+  Object.keys(WORLDS).forEach(id=>{(WORLDS[id].npcs||[]).forEach(n=>{
+    if(id===world&&Math.abs(n.x-px)+Math.abs(n.y-py)<=2)return;   /* not where you already are */
+    if(!npcName(n.npc))return;                                    /* it has to be nameable */
+    pool.push({w:id,x:n.x,y:n.y,who:n.npc});});});
+  if(!pool.length)return false;
+  const p2=pool[(Math.random()*pool.length)|0];
+  const pn=planPanelOf(p2.w);
+  mapDest={w:p2.w,x:p2.x,y:p2.y,gx:pn?p2.x+pn.ox:undefined,gy:pn?p2.y+pn.oy:undefined,who:p2.who};
+  drawTown();setWorldTag();mapNoteSet();
+  return true;
+}
 function openMap(){
   drawTown();
-  const t=T(),pl=t.plan||{};
-  $("mapNote").textContent=mapDest
-    ?"🎯 "+destName()+(pl.chosen?"  ·  "+pl.chosen:"")
-    :"📍 "+t.locs[world]+(world===PL.upstairs?"  ·  ⇧":"")+(pl.tap?"  ·  "+pl.tap:"");
+  mapNoteSet();
+  mapAnyBtn();
   $("mapov").hidden=false;held=null;
+}
+/* the button lives here rather than in the shell, so a pack gets it without touching its index */
+function mapAnyBtn(){
+  const host=$("mapNote");if(!host)return;
+  let b=$("mapAny");
+  if(!b){b=document.createElement("button");b.id="mapAny";b.type="button";
+    b.style.cssText="display:block;width:100%;margin:2px 0 10px;padding:9px 12px;border-radius:10px;"+
+      "border:1.5px solid var(--line,#C9C3B4);background:var(--bg,#F2F1EA);color:inherit;"+
+      "font:600 .8rem/1.2 inherit;cursor:pointer;";
+    b.addEventListener("click",()=>{mapRandomDest();mapAnyBtn();});
+    host.parentNode.insertBefore(b,host.nextSibling);}
+  const t=(T().plan||{});
+  b.textContent=t.any||"Somewhere to go";
 }
 $("mapbtn").addEventListener("click",openMap);
 /* tapping a mark is how a destination is chosen — the plan is the only place it can be, because
@@ -6206,6 +6557,7 @@ function applyGrowth(){
   new Set([g.staged&&g.staged.world,...ribbons().map(r=>r.world)].filter(Boolean))
     .forEach(id=>{if(WORLDS[id])rebuildWorld(id);});
   applyStaged();applyRibbon();applyBuilds();
+  Object.values(WORLDS).forEach(w=>{w._cuts=null;});   /* growth changes what a corridor is (R11) */
   if(typeof t3Invalidate==="function")t3Invalidate();} /* the 3D camera rebuilds its meshes */
 function applyStaged(){
   const g=GRW().staged;if(!g||!g.tiles)return;
@@ -6419,7 +6771,7 @@ if(SV&&SV.n){$("continueBtn").hidden=false;
     bldPicks=(SV.bl&&typeof SV.bl==="object")?SV.bl:{};   /* the houses keep the faces they were built with */
     /* a save written before v2 lost cs on every Continue. Rebuild it from what was played:
        a district counts as claimed when its need is met AND the next district has been
-       started — so a Saturday never seen is still played, and one seen is not replayed. */
+       started — so a last visit never seen is still played, and one seen is not replayed. */
     if(SV.v===undefined){const L=CHS();let n=0;
       for(let i=0;i<L.length;i++){const c=L[i],nx=L[i+1];
         if(c.quests.filter(q=>done.has(q)).length<c.need)break;

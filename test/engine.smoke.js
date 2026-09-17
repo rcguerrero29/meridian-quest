@@ -9,13 +9,37 @@
          node test/engine.smoke.js --index changarrito/index.html
    (CHROMIUM_PATH if Chromium is not where Playwright looks). */
 const path = require('path');
+const fs = require('fs');   /* module scope: findChromium() below needs it, and it was declared only INSIDE two functions */
 const { chromium } = require('playwright-core');
+
+/* FIND A BROWSER THE WAY test/smoke.js ALREADY DOES (T0.5, la junta 2026-09-17).
+   `chromium.executablePath()` returns the path playwright-core WANTS, not one that exists: this
+   container ships chromium-1194 and the resolver asks for 1243. The old line trusted it, so
+   `node test/town.smoke.js` could not run AT ALL here — which means the town's safety has been
+   REASONED rather than observed, in a repo whose own rule is that an engine change is proven the
+   same day by running the suites. Ten minutes buys back the standard of proof.
+   The resolved path is checked for existence now, and a real file is looked for if it is wrong. */
+const CANDIDATES = [
+  process.env.CHROMIUM_PATH,
+  '/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell',
+  '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  '/opt/pw-browsers/chromium',
+  '/usr/bin/chromium',
+  '/usr/bin/chromium-browser',
+  '/usr/bin/google-chrome',
+].filter(Boolean);
+function findChromium() {
+  let exe;
+  try { const p = chromium.executablePath(); if (p && fs.existsSync(p)) exe = p; } catch (e) {}
+  if (!exe) exe = CANDIDATES.find(p => { try { return fs.existsSync(p) && fs.statSync(p).isFile(); } catch (e) { return false; } });
+  return exe;
+}
 (async () => {
   const args = process.argv.slice(2);
   const idx = args[args.indexOf('--index') + 1];
   if (!args.includes('--index') || !idx) { console.error('usage: node test/engine.smoke.js --index <path to an index.html>'); process.exit(2); }
-  const exe = process.env.CHROMIUM_PATH || chromium.executablePath();
-  if (!exe) { console.error('No Chromium found. Set CHROMIUM_PATH.'); process.exit(1); }
+  const exe = findChromium();
+  if (!exe) { console.error('No Chromium found. Set CHROMIUM_PATH, or install one of: ' + CANDIDATES.join(', ')); process.exit(1); }
   const root = path.resolve(__dirname, '..'), file = path.resolve(root, idx);
   const browser = await chromium.launch({ executablePath: exe });
   const page = await browser.newPage({ viewport: { width: 480, height: 900 } });
@@ -25,7 +49,7 @@ const { chromium } = require('playwright-core');
   await page.route('**', r => r.request().url().startsWith('file://') ? r.continue() : r.abort());
   await page.goto('file://' + file);
   await page.waitForTimeout(1500);
-  const fails = [];
+  let fails = [];
 
   /* ---- in-scene text has a floor (Rosa's 3D note) ----
      Text painted into the world is authored in tile units and the camera decides how big it lands:
@@ -163,10 +187,21 @@ const { chromium } = require('playwright-core');
     const before = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
     moving = false; held = null;
     const flat = {}, flatIn = {};
+    /* A WORLD THAT DECLINED 3D HAS NO 3D TO CHECK, and since mq-v172 it does not even download the
+       library — so `T3` is not merely failed, it does not exist, and a bare mention of it throws.
+       The gauge found that in one run. The gate is the pack's own `CAMERAS`, cross-checked against
+       whether the engine3d globals actually arrived: a pack that ASKED for 3D and did not get it is
+       a broken shell and says so, which is the difference between this and a shrug. */
+    const wants3d = (typeof CAMS !== 'undefined' ? CAMS : ['3d']).indexOf('3d') >= 0;
+    const has3d = typeof T3 !== 'undefined' && typeof draw3d === 'function' && !!window.THREE;
+    if (wants3d && !has3d) P.push('this shell lists a 3D camera and the 3D engine never loaded — engine/boot.js did not bring it');
+    if (!wants3d && has3d) P.push('this shell lists no 3D camera and downloaded the 3D engine anyway — a quarter of the game, for nothing');
+    P.push('COUNT-ONLY: 3D ' + (wants3d ? 'wanted' : 'declined') + ', 3D engine ' + (has3d ? 'loaded' : 'absent'));
     Object.entries(WORLDS).forEach(([id, w]) => {
       const spot = firstWalkable(w); if (!spot) { P.push(id + ' has no walkable tile'); return; }
       world = id; px = fx = spot[0]; py = fy = spot[1];
       ['top', 'front', 'iso'].forEach(c => { camSet(c); try { draw(); } catch (e) { P.push(id + ' in ' + c + ' throws: ' + e.message); } });
+      if (!has3d) return;                       /* the flat cameras above are still held to account */
       camSet('3d');
       let ok = false; try { ok = draw3d(); } catch (e) { P.push(id + ' in 3d throws: ' + e.message); }
       if (!ok || T3.fail) { P.push(id + ' did not render in 3D'); return; }
@@ -181,7 +216,7 @@ const { chromium } = require('playwright-core');
       if (glows < doors) P.push(id + ': ' + (doors - glows) + ' door(s) do not say "this one opens" in 3D');
       T3.group.children.forEach(o => { const u = o.userData || {}; if (u.flat) { flat[u.g] = (flat[u.g] || 0) + 1; (flatIn[u.g] = flatIn[u.g] || new Set()).add(id); } });
     });
-    world = before.world; px = fx = before.px; py = fy = before.py; T3.yaw = before.yaw; camSet(before.cam);
+    world = before.world; px = fx = before.px; py = fy = before.py; if (has3d) T3.yaw = before.yaw; camSet(before.cam);
     // ---- #132 / #133: a hair style has to look like its name ----
     // Owner: "long hair looks like a beard, lets call it that, then create one that looks a bit
     // more like long hair only not bearded" and "fro is also offf". Both are claims about pixels,
@@ -349,8 +384,12 @@ const { chromium } = require('playwright-core');
     /* only if this GAME has a 3D camera. CAMERAS (mq-v133) lets a pack ship without one, and
        camSet refuses a camera the game does not have — so on such a pack the lines below were
        measuring a 3D camera that never ran and failing the build for it. Found by the gauge
-       pack, which declares CAMERAS=["top","front"]: the seam existed and the gate ignored it. */
-    if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
+       pack, which declares CAMERAS=["top","front"]: the seam existed and the gate ignored it.
+       `has3d` as well as `wants3d` since mq-v172: a pack that ASKS for 3D and whose library did not
+       arrive is a broken shell, and it is named by the line above rather than crashing here on a
+       null renderer. Planted (boot.js never loading Three for a pack that wants it) and the crash
+       is what came out until this gate existed — a guard that dies is a guard that reports nothing. */
+    if (has3d && (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0)) {
       const c3 = T3.renderer.domElement, vp = document.getElementById('vp');
       const before = { cam: camMode, w: world, x: px, y: py, hid: document.getElementById('world').hidden };
       document.getElementById('world').hidden = false; /* this suite never enters the world; the box needs to be real */
@@ -427,7 +466,7 @@ const { chromium } = require('playwright-core');
     // crawls as you walk. So: nearest between texels AND between levels, everywhere.
     // The pyramid is asked for only under WebGL2 — on a WebGL1 fallback a non-power-of-two
     // texture with mipmaps renders BLACK, and every texture here is sized to its world.
-    {
+    if (has3d) {   /* a shell that declined 3D has no THREE to ask about a filter — see the gate above */
       const N = THREE.NearestFilter, OKMIN = [N, THREE.NearestMipmapNearestFilter, THREE.NearestMipmapLinearFilter];
       const cap = T3.renderer && T3.renderer.capabilities, gl2 = !!(cap && cap.isWebGL2);
       const seen = [], bad = [], noMip = [], wrongMip = [];
@@ -494,7 +533,8 @@ const { chromium } = require('playwright-core');
     return { P, stillFlat: Object.keys(flat).sort().map(g => g + '×' + flat[g]) };
   }, idx);
   const r = r0.P; r.stillFlat = r0.stillFlat;
-  fails.push(...r);
+  fails.push(...r.filter(l => !/^COUNT-ONLY: /.test(l)));
+  r.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
   /* ---- A SAVE THAT DID NOT HAPPEN HAS TO SAY SO ----
      Owner, 2026-09-16: "how do we fix the save failing silently?" It was nineteen copies of
@@ -818,6 +858,7 @@ const { chromium } = require('playwright-core');
      well must be a hole you can see into. Both are asked of the built scene, not of the source. */
   const roof = await page.evaluate(() => {
     const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D (CAMERAS has no "3d"), so the checks below it, which measure the 3D scene, did not run'];
     if (typeof T3 === 'undefined' || !T3 || !T3.scene) return P;   /* a pack with no 3D: nothing to ask */
     const w = WORLDS[world]; if (!w) return P;
     let aprons = 0;
@@ -853,6 +894,74 @@ const { chromium } = require('playwright-core');
     return P;
   });
   fails.push(...roof);
+
+  /* ---- NOBODY MAY BE WALLED OUT BY SOMEBODY STANDING (R11) ----
+     Open in `docs/REGRESSION.md` since 2026-09-13 and reddening a suite about one run in
+     twenty-five, which is the most expensive shape a bug has. The owner asked the question that
+     settles it: "why doesnt r11 walk around?" — and the answer is that there is nothing to walk
+     around. A person is stamped into the grid as `"N"`, three readers treat `"N"` as masonry, and
+     when a wanderer steps into a corridor one tile wide the map really is cut in two.
+     MEASURED before anything was written: of the fifteen worlds, only `ex` has chokepoints AND
+     people who move — 35 tiles that cut it, four wanderers. Every other world with a chokepoint
+     has nobody walking in it. So the whole of R11 lives on one street.
+     Asked the only honest way: put the wanderer on EVERY tile that would cut the world, in turn,
+     and ask the auditor each time. Not one sampled tile, and not a tile this test chose — the set
+     is derived from the map. Red first at 35 of 35; the plant that restores the old reader still
+     names "rigo in ex", which is the person the register predicted three days before the fix. */
+  const walled = await page.evaluate(() => {
+    const P = [];
+    if (typeof auditReach !== 'function' || typeof wanders !== 'function') {
+      P.push('R11 cannot be checked: the engine no longer has auditReach() or wanders(), so nothing is asking whether a person standing somewhere walls the map');
+      return P; }
+    const base = (auditReach(true) || []).length;
+    let tested = 0, strand = 0, first = null;
+    Object.keys(WORLDS).forEach(id => {
+      const w = WORLDS[id];
+      const n = (w.npcs || []).find(p2 => wanders(p2));
+      if (!n) return;                                   /* nobody moves here: nobody can cork it */
+      const ok = (x, y) => x >= 0 && y >= 0 && x < w.W && y < w.H && !SOLID.has(w.grid[y][x]);
+      const all = []; for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (ok(x, y)) all.push([x, y]);
+      const reach = (bx, by) => { const st = all.find(([x, y]) => !(x === bx && y === by));
+        if (!st) return 0; const seen = new Set([st[0] + ',' + st[1]]), q = [st];
+        while (q.length) { const [x, y] = q.pop();
+          [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx, dy]) => { const nx = x + dx, ny = y + dy, k = nx + ',' + ny;
+            if (seen.has(k) || !ok(nx, ny) || (nx === bx && ny === by)) return; seen.add(k); q.push([nx, ny]); }); }
+        return seen.size; };
+      const full = reach(-1, -1);
+      const cuts = all.filter(([x, y]) => reach(x, y) < full - 1);
+      const ox = n.x, oy = n.y;
+      try {
+        cuts.forEach(([x, y]) => {
+          tested++;
+          if (w.grid[oy]) w.grid[oy][ox] = w.rows[oy][ox];
+          n.x = x; n.y = y; if (w.grid[y]) w.grid[y][x] = 'N';
+          const now = (auditReach(true) || []);
+          if (now.length > base) { strand++; if (!first) first = id + ' (' + x + ',' + y + '): ' + String(now[0]).slice(0, 90); }
+          if (w.grid[y]) w.grid[y][x] = w.rows[y][x];
+          n.x = ox; n.y = oy; if (w.grid[oy]) w.grid[oy][ox] = 'N';
+        });
+      } finally { n.x = ox; n.y = oy; if (w.grid[oy]) w.grid[oy][ox] = 'N'; }
+      /* and the wanderer must never CHOOSE one, which is the half that fixes the player rather
+         than the audit — an auditor that forgives a corked gap still leaves somebody standing in it */
+      if (typeof wanderCuts === 'function') {
+        const known = wanderCuts(id);
+        const missed = cuts.filter(([x, y]) => !known.has(x + ',' + y));
+        if (missed.length)
+          P.push(id + ': the wander filter does not know about ' + missed.length + ' of its ' + cuts.length +
+                 ' chokepoints, so a person can still step into the only way through');
+      } else P.push('there is no wanderCuts(), so nothing stops a person standing in the only way through a world');
+    });
+    /* NO "UNTESTED" LINE HERE, and the gauge is why. A pack whose worlds have no chokepoint
+       cannot have this bug at all — five tiles and one open room is exactly that — so reporting
+       "measured nothing" at it would invent a demand on every future world, which is the one thing
+       that fixture exists to catch me doing. The silent zero worth fearing is the engine losing
+       the pieces this check reads, and that is caught at the top of the block, loudly, rather than
+       here where the honest answer is "this world is too simple to break". */
+    if (strand) P.push('somebody standing still walls the map: ' + strand + ' of ' + tested +
+                            ' chokepoints strand a person when a wanderer stops on them — e.g. ' + first);
+    return P;
+  });
+  fails.push(...walled);
 
   /* ---- EVERY THING ON THE PLAN IS DRAWN AS A THING, AND A TAP ANSWERS ON THE MAP ----
      Owner, 2026-09-16: "the map says tap a mark, but cannot tell if a mark is tapped. also... the
@@ -1327,6 +1436,7 @@ const { chromium } = require('playwright-core');
   await page.setViewportSize({ width: 390, height: 844 });
   const tallw = await page.evaluate(() => {
     const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D (CAMERAS has no "3d"), so the checks below it, which measure the 3D scene, did not run'];
 // ---- the world takes a share of the screen, and the camera holds its width ----
 // The world's height used to be width x 0.8 in every camera — the 2D tile grid's 5:4. Nobody
 // chose 266px on a phone. With the 3D camera running it takes a share of the SCREEN instead,
@@ -1380,6 +1490,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
      stand behind the tree and BOTH the crown and you are in that pixel. Today only you are. */
   const ghost = await page.evaluate(() => {
     const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D (CAMERAS has no "3d"), so the checks below it, which measure the 3D scene, did not run'];
     const wd = document.getElementById('world'), wh = wd.hidden; wd.hidden = false;
     const before = camMode, bw = world, bx = px, by = py;
     camSet('3d'); sizeCanvas();
@@ -1556,6 +1667,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
      This asks for the CONTRACT and never for the picture, so it survives the art being redrawn. */
   const views = await page.evaluate(() => {
     const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D (CAMERAS has no "3d"), so the checks below it, which measure the 3D scene, did not run'];
     if (typeof tileView !== 'function') {
       P.push('a pack has no single place to say what a glyph looks like — the views are still scattered across tables it cannot all reach');
     } else {
@@ -1651,6 +1763,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
      This asks what the PLAYER can see, never which function ran, so it survives a rewrite. */
   const fell = await page.evaluate(async () => {
     const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D (CAMERAS has no "3d"), so the checks below it, which measure the 3D scene, did not run'];
     /* engine3d.js is always loaded, so T3 existing proves nothing about whether this GAME has a
        3D camera — CAMERAS lets a pack drop it (mq-v133). Ask the seam, not the file. A pack that
        never offers 3D cannot fall back from it and must not be failed for that. */
@@ -1733,6 +1846,9 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     }
     const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
     if (!L) return P;
+    if (typeof T3 === 'undefined' || !window.THREE) {   /* the tram is measured in the 3D scene, and this shell has none */
+      P.push('COUNT-ONLY: this shell declined 3D, so the trolley was not measured in the scene');
+      return P; }
     const bw = world, bc = camMode, bs = TRO.state, bx = TRO.x;
     document.getElementById('world').hidden = false;
     world = L.world; camSet('3d'); sizeCanvas(); draw3d();
@@ -1785,7 +1901,8 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     document.getElementById('world').hidden = true;
     return P;
   });
-  fails.push(...tram);
+  fails.push(...tram.filter(l => !/^COUNT-ONLY: /.test(l)));
+  tram.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
   /* ---- a pack must be able to SAY where its trolley serves, in its own alphabet ----
      Until 2026-09-11 it could not: "is there a stop here" was Meridian's letter "Y", read straight
@@ -1798,7 +1915,12 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
      It is non-vacuous in a pack with no trolley at all: the line is planted, not borrowed. */
   const troSeam = await page.evaluate(() => {
     const P = [];
-    const walk = (w, x, y) => { const g = w.grid[y] && w.grid[y][x]; return g !== undefined && !SOLID.has(g) && g !== 'N'; };
+    /* `rows`, NOT `grid`, and this is R11 wearing a different hat. The question here is "does this
+       world have somewhere a tram could run" — a question about TERRAIN. `grid` is the map plus
+       whoever is standing on it, so a neighbour who happened to wander into the only four-in-a-row
+       made a five-tile world report that the trolley seam could not be tested at all, about one run
+       in twenty. The map is what was authored; a person is weather. Read the map. */
+    const walk = (w, x, y) => { const g = w.rows[y] && w.rows[y][x]; return g !== undefined && !SOLID.has(g); };
     let pick = null;
     Object.keys(WORLDS).some(id => { const w = WORLDS[id];
       for (let y = 1; y < w.H - 1 && !pick; y++) for (let x = 1; x < w.W - 4; x++) {
@@ -1889,6 +2011,239 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...troCams);
 
+  /* ---- THE DOOR IS SHUT WHEN THE WORLD CHANGES (owner, 2026-09-17: "i think i want that option A") ----
+     A portal used to swap the world between one frame and the next and then block input for 450ms
+     with nothing drawn in it — an instant cut, then standing still somewhere you did not walk to.
+     The transition slot existed and was empty.
+
+     The noun is "you never see one place become another", and there are exactly two ways to fail it:
+       1. the swap happens while the overlay is not covering the screen — a visible cut;
+       2. the overlay covers and never comes back up — a game that goes black and stays black.
+     Both are asked of the DOM, at the moment it matters, by driving the real portal and watching the
+     leaves' own geometry rather than a class name: a class is a label, a rectangle is the thing the
+     player sees. And the door is taken from the SHELL, so a second world that forgot to put the
+     element in its own index.html fails here rather than teleporting silently.
+     IT SITS HERE, AHEAD OF THE DOCUMENT CHECKS, because those do `body.innerHTML = ''` and never put
+     it back — so every later check that needs a real screen is measuring a page with no viewport in
+     it. This one said so out loud rather than passing quietly, which is how it was found. */
+  const doorway = await page.evaluate(() => new Promise(resolve => {
+    const P = [], d = document.getElementById('door');
+    if (!d) return resolve(['this shell has no #door — a portal in it is still an instant cut']);
+    const a = d.querySelector('.leaf.a'), b = d.querySelector('.leaf.b'), vp = d.parentElement;
+    if (!a || !b) return resolve(['#door has no leaves to close']);
+    /* this suite never enters the world, so the viewport is collapsed to nothing until it is shown —
+       the same line four earlier checks in this file already need. Without it every rectangle is zero
+       and this passes on a page with no screen in it, which is the silent zero exactly. */
+    const wld = document.getElementById('world'), wasHid = wld && wld.hidden;
+    if (wld) { wld.hidden = false; if (typeof sizeCanvas === 'function') sizeCanvas(); }
+    const out = P2 => { if (wld) wld.hidden = wasHid; if (typeof doorRest === 'function') doorRest(); return resolve(P2); };
+    /* HOW MUCH OF THE VIEWPORT THE TWO LEAVES COVER, as a fraction: 1 when shut, 0 when open. The
+       first draft added up three gaps and reported 296 pixels of "daylight" for a door standing wide
+       open at rest — the same number a broken door gives. A measure that cannot tell shut from open
+       is not a measure. */
+    const cover = () => {
+      const v = vp.getBoundingClientRect();
+      if (v.height < 40) return null;
+      const seg = r => [Math.max(v.top, r.top), Math.min(v.bottom, r.bottom)];
+      const [a0, a1] = seg(a.getBoundingClientRect()), [b0, b1] = seg(b.getBoundingClientRect());
+      const la = Math.max(0, a1 - a0), lb = Math.max(0, b1 - b0);
+      const ov = Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
+      return (la + lb - ov) / v.height;
+    };
+    if (cover() === null) return out(['the viewport had no height when the door was tested, so nothing was measured — this check did not run']);
+
+    /* 1 — THE GEOMETRY, held still. Every state the door can be in, with the animation turned off,
+       so what is measured is where the leaves END UP and not a frame caught mid-slide in a headless
+       page whose main thread is busy. This is the half that catches the real bugs: a leaf anchored to
+       the bottom needs to travel more than its own height to leave by the TOP, and -102% only lifted
+       it into the top half — a black band across the new place that never goes away. */
+    if (typeof doorSet !== 'function') P.push('the engine has no doorSet — the door is not the engine\'s to drive');
+    else {
+      doorSet('shut', 0);
+      const shut = cover();
+      if (shut < 0.995) P.push('a SHUT door covers only ' + Math.round(shut * 100) + '% of the viewport — the swap behind it would be there to see');
+      ['up', 'down', 'flat'].forEach(k => {
+        doorSet('open-' + k, 0);
+        const c = cover();
+        if (c > 0.05) P.push('an opened door (' + k + ') still covers ' + Math.round(c * 100) +
+          '% of the viewport — a black band sits over the place you just walked into');
+      });
+      doorSet('', 0);
+      const rest = cover();
+      if (rest > 0.05) P.push('the door at rest covers ' + Math.round(rest * 100) + '% of the viewport — it is in the way when nothing is happening');
+      /* AND GOING BACK TO THE WINGS IS NOT A MOVE ANYBODY SEES. Dropping the class re-applies each
+         leaf's resting transform, and the bottom leaf's rest is BELOW the screen — so if the
+         transition is still armed, a door that has just finished opening sends that leaf sliding
+         back down across the whole viewport: a black band sweeping over the place you arrived in, a
+         third of a second late. The geometry above cannot see it, because the geometry is held
+         still; this reads the cause. Planted (doorRest with the open duration) and it was the one
+         of four plants that went through until this line existed. */
+      if (typeof doorRest === 'function') {
+        doorRest();
+        const dur = getComputedStyle(b).transitionDuration || '';
+        if (!/^0m?s$/.test(dur.split(',')[0].trim()))
+          P.push('the door goes back to its resting place over ' + dur.split(',')[0].trim() +
+            ' — the bottom leaf slides back across the screen after the door has already opened');
+      }
+    }
+
+    /* 2 — THE SEQUENCE, on the real portal. Not the geometry again: only whether the world changes
+       while the door is SHUT. Read off the engine's own state rather than off pixels, because a
+       starved frame in a headless run can hide a transform mid-flight and this must not be flaky. */
+    let from = null, gl = null;
+    Object.keys(PORTALS).forEach(w => { if (from) return;
+      const ks = Object.keys(PORTALS[w] || {}); if (ks.length) { from = w; gl = ks[0]; } });
+    /* A ONE-ROOM WORLD HAS NO DOORS and owes this nothing — and it SAYS so: the gauge's own maps
+       carry `const PORTALS={}` with "one room needs no doors" written next to it. That is a
+       declaration, not an absence, and a guard can read it. What it may not do is shrug: a shell
+       that declares doors and exercised none of them has a broken check, and the two cases are
+       told apart by counting what the pack promised rather than by giving up. */
+    const promised = Object.keys(PORTALS).reduce((n, w) => n + Object.keys(PORTALS[w] || {}).length, 0);
+    if (!from) return out(P.concat([promised
+      ? 'this shell declares ' + promised + ' portals and this guard could not find one to stand on — the check is broken, not the city'
+      : 'COUNT-ONLY: this shell declares no portal at all, so there was no door to shut (and none is owed)']));
+    const W = WORLDS[from]; let sx = -1, sy = -1;
+    for (let y = 0; y < W.H; y++) for (let x = 0; x < W.W; x++) if (W.rows[y][x] === gl) { sx = x; sy = y; }
+    if (sx < 0) return out(P.concat(['the ' + from + ':' + gl + ' portal has no tile in the map']));
+    P.push('COUNT-ONLY: ' + promised + ' portals declared; the door was driven through ' + from + ':' + gl);
+    const keep = { world, px, py, fx, fy };
+    world = from; px = fx = sx; py = fy = sy; moving = false; held = null; portalHold = ''; portalT = 0;
+    const was = from, t0 = performance.now();
+    let sawShut = false, clsAtSwap = null;
+    const tick = () => {
+      if (d.className === 'shut') sawShut = true;
+      if (world !== was && clsAtSwap === null) clsAtSwap = d.className || '(none)';
+      if (clsAtSwap !== null || performance.now() - t0 > 4000) {
+        if (clsAtSwap === null) P.push('standing on the ' + from + ':' + gl + ' portal never changed the world at all in four seconds');
+        else {
+          if (!sawShut) P.push('the world changed and the door was never shut at any point — the swap is still an instant cut');
+          if (clsAtSwap !== 'shut') P.push('the world changed while the door was "' + clsAtSwap +
+            '" and not shut — you can see one place become another');
+        }
+        world = keep.world; px = keep.px; py = keep.py; fx = keep.fx; fy = keep.fy;
+        return out(P);
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }));
+  fails.push(...doorway.filter(l => !/^COUNT-ONLY: /.test(l)));
+  doorway.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
+  /* ---- A ROOM YOU HAVE BEEN IN IS STILL STANDING (owner, 2026-09-17: "3. ok go for it") ----
+     There was one 3D scene, and every door threw it away and built another: 1.4ms for the smallest
+     room, 18.4 for Calle Principal, and a 237ms hole after the swap once the upload is counted —
+     the thing that made the new door POP instead of open. They are kept now.
+
+     Three claims, and the second is the one that matters more than the speed:
+       1. going back into a room does not rebuild it — measured by IDENTITY, not by a stopwatch. The
+          same THREE.Group object, or it was rebuilt;
+       2. a world that has CHANGED is rebuilt — `t3Invalidate` is what growth and a theme edit call,
+          and a cache that ignored it would show a player a city that no longer exists. This is the
+          half a cache gets wrong, and it is the half nobody notices until somebody buys a building
+          and it does not appear;
+       3. and the cache has a ceiling, because a cache without one is a leak with a nicer name. */
+  const scenes = await page.evaluate(() => {
+    const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D, so there are no scenes to keep'];
+    if (typeof T3CACHE === 'undefined') return ['the 3D scenes are not kept — every door rebuilds the world it opens into'];
+    const keep = { world, px, py, cam: camMode };
+    const wd = document.getElementById('world'), wh = wd.hidden; wd.hidden = false;
+    camSet('3d'); sizeCanvas();
+    const ids = Object.keys(WORLDS);
+    const go = w => { world = w; px = fx = 1; py = fy = 1; draw3d(); return T3.group; };
+    const a = ids[0], b = ids[1] || ids[0];
+    const g1 = go(a); go(b); const g2 = go(a);
+    if (g1 !== g2) P.push('walking back into ' + a + ' built it again from nothing — the scene was not kept');
+    /* 2 — and a world that changed is NOT the one you left */
+    if (typeof t3Invalidate === 'function') {
+      t3Invalidate();
+      const g3 = go(a);
+      if (g3 === g2) P.push('the city changed (t3Invalidate) and ' + a + ' was served from the cache anyway — a player would be walking round a city that no longer exists');
+      let stale = 0; T3CACHE.forEach((e, k) => { if (k.slice(k.lastIndexOf('|') + 1) !== String(T3.dirty)) stale++; });
+      if (stale) P.push(stale + ' scene(s) from before the change are still held — they can never be used again and they are holding their textures');
+    }
+    /* 3 — the ceiling */
+    ids.forEach(go);
+    /* the ceiling is asked as a FACT, not as the code's own constant. The first draft compared
+       T3CACHE.size against T3CACHE_MAX — so raising T3CACHE_MAX to 999 turned the cache off and the
+       guard still passed, which is a guard reading the thing it is meant to be checking. Planted
+       exactly that. What "bounded" means here is: after walking the whole city you are not holding
+       the whole city. */
+    const HARD = 16;
+    if (T3CACHE.size > HARD) P.push('after walking every world the cache holds ' + T3CACHE.size + ' scenes — past any ceiling worth having');
+    if (ids.length > 8 && T3CACHE.size >= ids.length)
+      P.push('after walking all ' + ids.length + ' worlds the cache holds ' + T3CACHE.size + ' scenes — it is keeping the entire city and evicting nothing');
+    P.push('COUNT-ONLY: ' + T3CACHE.size + ' 3D scenes kept after walking all ' + ids.length + ' worlds');
+    world = keep.world; px = fx = keep.world === world ? px : 1; py = fy = keep.py; px = keep.px; py = keep.py;
+    camSet(keep.cam); wd.hidden = wh;
+    return P;
+  });
+  fails.push(...scenes);
+
+  /* ---- EVERY PLACE IS ON THE MAP, AND THE MAP AGREES WITH THE DOORS ----
+     Owner, 2026-09-17, asked whether an interior belongs on a street map at all: "yeah i mean a map
+     implies this lol". He is right, and the city was not keeping that promise — six of fifteen
+     worlds were on the plan in NO form, including the park, which is the third-largest world in the
+     game. Seven more had a hand-typed dot, and every one of those seven agreed exactly with the
+     door that leads there: seven copies of a fact the map already had.
+
+     Two claims:
+       1. every world can be LOCATED on the plan — drawn, or reached from somewhere that is, or
+          declared by the pack because nothing leads there (the park, reached on a leash);
+       2. and a DECLARED spot agrees with the doors. This is the one worth having: a copy's failure
+          mode is that the door moves and the copy does not, and nothing on screen looks wrong —
+          the mark simply points at the wrong building, forever, and no camera can tell you.
+     A world that a pack deliberately keeps off the map is a real thing (a memory, a dream, a menu),
+     so being unplaceable is reported with its reason rather than assumed to be a bug — but a pack
+     that DECLARED a spot and got it wrong is always a fault. */
+  const places = await page.evaluate(() => {
+    const P = [];
+    if (typeof planPlace !== 'function') return ['the engine cannot say where a world is on the plan — there is no planPlace'];
+    /* MEASURED ON THE FINISHED CITY. At chapter zero six of these doors are not laid yet — a
+       storefront appears when its district opens — so asking at the title screen reports six worlds
+       "with no door into them" and means only "you have not got there yet". The question is whether
+       the map can place a world the player can REACH, so the city is grown first and put back after. */
+    const keepD = new Set(done), keepC = chSeen;
+    if (typeof CHAPTERS !== 'undefined' && typeof applyGrowth === 'function') {
+      CHAPTERS.forEach(c => (c.quests || []).forEach(i => done.add(i)));
+      chSeen = CHAPTERS.length; applyGrowth();
+    }
+    const M = (typeof MAPDOT !== 'undefined' ? MAPDOT : {});
+    const ids = Object.keys(WORLDS), lost = [];
+    ids.forEach(id => {
+      const at = planPlace(id);
+      if (!at) { lost.push(id); return; }
+    });
+    /* 2 — a DECLARED spot, against what the doors alone say. Asked with every declaration
+       suppressed (`pure`), because the first draft asked with them in place and mis-read a CYCLE:
+       El Changarrito's hq and f2 each reach the other and neither is drawn, so each APPEARED
+       derivable while in fact the other's declaration was the only thing holding either on the
+       map. Delete both and both vanish. So the three answers are kept apart:
+         · the doors find it and agree     → the written-down copy is redundant, and a copy's only
+                                             future is to go stale when the door moves;
+         · the doors find it and disagree  → one of the two points at the wrong building, and
+                                             nothing on any screen can tell you which;
+         · the doors cannot find it at all → the declaration is the only thing there is. Correct,
+                                             and the park is exactly this: you reach it on a leash. */
+    Object.keys(M).forEach(id => {
+      if (!WORLDS[id]) { P.push('the plan names a spot for "' + id + '" and there is no such world'); return; }
+      const byDoor = planPlace(id, null, true);
+      if (!byDoor) return;
+      if (M[id][0] !== byDoor.gx || M[id][1] !== byDoor.gy)
+        P.push('the pack puts "' + id + '" at ' + M[id] + ' on the plan and its own door puts it at ' +
+               byDoor.gx + ',' + byDoor.gy + ' (via ' + byDoor.via + ') — one of the two is pointing at the wrong building and nothing on screen can tell you which');
+      else
+        P.push('"' + id + '" is written down in MAPDOT and its doors alone already say where it is (' + byDoor.via +
+               ') — the copy can only ever go stale');
+    });
+    if (lost.length) P.push('COUNT-ONLY: ' + lost.length + ' world(s) have no place on the plan and no door into them: ' + lost.join(', '));
+    P.push('COUNT-ONLY: ' + (ids.length - lost.length) + ' of ' + ids.length + ' worlds are placed on the plan');
+    done = keepD; chSeen = keepC; if (typeof applyGrowth === 'function') applyGrowth();
+    return P;
+  });
+  fails.push(...places);
+
   /* ---- a document may carry a DRAWING, not only words ----
      The owner, 2026-09-11, on the crew mural: "can we have functionality there wehre you see
      tiles/icons from afar but you get close and can interact to see it full screen- then thats how
@@ -1962,8 +2317,231 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...docArt);
 
+  /* ---- A WINDOW A WALL DECLARES IS A WINDOW YOU CAN SEE, AND IT HAS A LEDGE ----
+     Owner, 2026-09-17: "the skull on a non existing or visible window sill overlaps a store front
+     that was initially a placeholder for a mural… if there were a window sill there, it should be
+     drawn". He was exactly right, and this is the FIFTH time this bug has been answered — the four
+     before it all argued about how big the sugar skull should be. Rendered at 8x before touching
+     anything, the cause was plain: `TILES.win` is a rect the sill props, the dusk lighting and the
+     candy's ledge are ALL positioned from, and nothing had ever drawn it. The plain facade painted
+     two flat rectangles a shade off the wall; the mural panel then painted plaster over the whole
+     tile and erased even those. So a lit pane, a sweet and a stone ledge sat in the middle of a
+     blank wall. Every one of them was in the right place. There was just no window.
+
+     The noun is "a window you can see, with a ledge under it", and it is asked of the PICTURE,
+     because none of this is visible in the code:
+       1. for every window the wall SHOWS (winsKept — a mural may paint one out, and then it must
+          be gone from the picture too), the glass has to separate from the wall beside it by the
+          repo's own floor of 40 luma. A window painted over is a window that fails this;
+       2. under it, a LEDGE: the row at the window's foot is bright and the row under that is dark.
+          A hard light-over-dark horizontal edge is the one shape that survives being scaled to
+          three screen pixels, which is why the four size fixes never worked and this does;
+       3. and every sill prop the season sets down stands in a window that passed 1 and 2.
+     Check 3 is the one that would have caught the owner's tile: the candy at st(22,0) resolved to
+     a window the mural had plastered over, and checks 1 and 2 are run on the tile AS THE GAME
+     PAINTS IT — the facade art and then whatever decor is painted on top of it.
+     PLANTED, both of them, in a copy outside the repo with the real code restored exactly:
+       · the flat-rectangle window back in TILEDRAW["B"] → `the window at 5,10,8,9 is 0 luma from
+         its lightest pixel to its darkest` and `no ledge under the window at 5,10,8,9`;
+       · the panel plastering the whole tile again → the same two, at st 21,0 through 27,0, which
+         is the owner's sentence in numbers.
+     The first draft of check 1 measured something else — the mean of one row through the window
+     against the wall beside it — and EL CHANGARRITO FAILED IT WHILE DRAWING A GOOD WINDOW, because
+     that row crossed the shop's dark sign. It is written up where it happened, in `judge`. */
+  const sills = await page.evaluate(() => {
+    const P = [], L = (r, g, b) => 0.299 * r + 0.587 * g + 0.114 * b;
+    if (typeof winsKept !== 'function' || typeof drawPane !== 'function') return ['the engine has no window seam: winsKept/drawPane'];
+    const c = document.createElement('canvas'); c.width = c.height = 32;
+    const g2 = c.getContext('2d'), old = ctx;
+    /* the tile exactly as a camera paints it: the wall's own face, then any decor on that tile */
+    const paint = (wid, x, y) => {
+      g2.clearRect(0, 0, 32, 32); ctx = g2;
+      const ch = glyphAt(wid, x, y), tf = TILEDRAW[ch];
+      if (tf) tf({ sx: 0, sy: 0, x, y, canopy: () => {} });
+      DECOS.filter(d => d.world === wid && d.x === x && d.y === y)
+        .forEach(d => { const f = DECODRAW[d.deco]; if (f) f(0, 0, d); });
+      ctx = old;
+      return g2.getImageData(0, 0, 32, 32).data;
+    };
+    const lumaAt = (d, x, y) => { const i = ((y | 0) * 32 + (x | 0)) * 4; return L(d[i], d[i + 1], d[i + 2]); };
+    const rowMean = (d, x0, x1, y) => { let t = 0, n = 0; for (let x = Math.max(0, x0); x <= Math.min(31, x1); x++) { t += lumaAt(d, x, y); n++; } return n ? t / n : 0; };
+    /* a window, measured where it is */
+    const judge = (d, r, where) => {
+      const [wx, wy, ww, wh] = r, bad = [];
+      /* DEPTH, not "different from the wall". The first draft compared the mean of one row through
+         the window against the wall beside it, and El Changarrito failed it while drawing a
+         perfectly good window: that row crossed the shop's dark sign and the lit corner, and the
+         mean landed 23 luma from the plaster. The mean of a picture is not the picture. What a
+         window HAS and a patch of wall has not is internal range — glass, bars, a reflection. A
+         window plastered over has the plaster's own range (trowel marks: 20), and so does a flat
+         rectangle of any colour, which is what this facade painted for two years. */
+      let lo = 255, hi = 0;
+      for (let y = wy; y < wy + wh; y++) for (let x = wx; x < wx + ww; x++) { const v = lumaAt(d, x, y); if (v < lo) lo = v; if (v > hi) hi = v; }
+      if (hi - lo < 40)
+        bad.push(where + ': the window at ' + r.join(',') + ' is ' + Math.round(hi - lo) +
+                 ' luma from its lightest pixel to its darkest — under the 40 this repo separates things by, a flat patch. That is what a window painted over, or never drawn, looks like');
+      const foot = rowMean(d, wx, wx + ww - 1, wy + wh + 1), under = rowMean(d, wx, wx + ww - 1, wy + wh + 4);
+      if (!(foot - under > 40))
+        bad.push(where + ': no ledge under the window at ' + r.join(',') + ' — its foot is ' + Math.round(foot) +
+                 ' luma and the row below is ' + Math.round(under) + ', so there is no bright-over-dark edge for anything to stand on');
+      return bad;
+    };
+    /* 1 + 2: every window every wall in every world SHOWS */
+    const seen = new Set();
+    Object.keys(WORLDS).forEach(wid => { const w = WORLDS[wid];
+      for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+        const ch = glyphAt(wid, x, y); if (!ch || !(TILES[ch] || {}).win) continue;
+        const hasDeco = DECOS.some(d => d.world === wid && d.x === x && d.y === y);
+        const k = ch + '|' + (hasDeco ? wid + ',' + x + ',' + y : '');
+        if (seen.has(k)) continue; seen.add(k);
+        const wins = winsKept(wid, x, y); if (!wins.length) continue;
+        const d = paint(wid, x, y);
+        wins.forEach(r => P.push(...judge(d, r, ch + ' at ' + wid + ' ' + x + ',' + y)));
+      }});
+    /* 3: and every sweet the season stands on a sill is standing in one of them */
+    const was = seasonNow();
+    Object.keys(typeof SEASONS !== 'undefined' ? SEASONS : {}).forEach(sid => {
+      seasonSet(sid);
+      (art('props', []) || []).filter(p => p.sill).forEach(p => {
+        const win = propSill(p.world, p);
+        if (!win) { P.push('a sill prop at ' + p.world + ' ' + p.x + ',' + p.y + ' (' + sid + ') resolves to NO window — it is standing on nothing'); return; }
+        const wins = winsKept(p.world, p.x, p.y), r = wins[win.i] || wins[0];
+        P.push(...judge(paint(p.world, p.x, p.y), r, 'the sill prop at ' + p.world + ' ' + p.x + ',' + p.y + ' (' + sid + ')'));
+      });
+    });
+    seasonSet(was || 'auto');
+    return [...new Set(P)];
+  });
+  fails.push(...sills);
+
+  /* ---- A FLIGHT IS WALKED, NOT TELEPORTED (owner, 2026-09-17: "ok lets do b") ----
+     What he reported: "that door right there to the top of a staircase. until you figure out how
+     to teleport in my side of the screen." The code agreed with him in its own comment — the
+     avenue door put you on the LANDING of Nolasco's stairs, at the top, with the whole climb
+     behind you and none of it walked.
+
+     Two nouns, and the second is the one that was quietly broken everywhere:
+       1. NO PORTAL PUTS YOU AT THE SHALLOW END OF A FLIGHT. If a portal's arrival tile sits on a
+          well run, it has to be the deepest tread of that run — the foot. Arriving at the head
+          means the climb happened off-screen, which is the thing he refused.
+       2. WHOEVER STANDS IN A WELL IS DRAWN IN IT. `stairLift`/`wellDepth` existed for two
+          versions and ONLY engine3d.js ever read them, so in top, front and iso the hole was
+          painted as ordinary floor and the hero stood on top of it at full height. Asked of the
+          drawing, not the code: `drawPerson` is stubbed, each camera is rendered with the hero on
+          each tread in turn, and the y it is called with has to descend as the treads do.
+          Both flat cameras centre on the hero, so that y moves for exactly one reason — the drop.
+     Run for every world, so a second game that digs a well gets the same two promises. */
+  const flight = await page.evaluate(() => {
+    const P = [];
+    if (typeof wellDepth !== 'function' || typeof wellPx !== 'function') return ['the engine has no well seam: wellDepth/wellPx'];
+    /* 1 — where a portal drops you, against where it took you from.
+       The first draft of this asked only whether the arrival was the deepest tread of its run, and
+       the plant — the avenue door back on the landing, exactly as it shipped — WENT STRAIGHT
+       THROUGH IT, because the landing is not ON the run, it is the tile past the end of it. The
+       hole was the whole bug.
+       The rule that catches it also has to let hq↔f2 through, and for the right reason rather than
+       by luck: there you leave standing ON a flight (the ▲ head) and arrive at the head of the
+       well on the other side, and the two halves add up to one storey across the landing. What
+       must never happen is leaving FLAT GROUND and arriving at the head of a flight — a climb with
+       nothing on either side of the door to account for it. */
+    const headOfWell = (w, x, y) => { const r = typeof stairRun === 'function' ? stairRun(w, x - 1, y) : null;
+      return !!(r && r.well && r.i === r.L - 1); };
+    const onStairs = (w, x, y) => { const r = typeof stairRun === 'function' ? stairRun(w, x, y) : null;
+      return !!r || wellDepth(w, x, y) > 0; };
+    Object.keys(PORTALS).forEach(from => {
+      const fw = WORLDS[from]; if (!fw) return;
+      Object.keys(PORTALS[from] || {}).forEach(ch => {
+        const p = PORTALS[from][ch], w = p && WORLDS[p.to]; if (!p || !w) return;
+        /* on a run: you must land at its foot, never part-way up */
+        const run = typeof stairRun === 'function' ? stairRun(w, p.x, p.y) : null;
+        if (run && run.well) {
+          const mine = wellDepth(w, p.x, p.y);
+          let deepest = 0; for (let i = 0; i < run.L; i++) deepest = Math.max(deepest, wellDepth(w, p.x - run.i + i, p.y));
+          if (mine < deepest - 0.001)
+            P.push('the ' + from + ':' + ch + ' door drops you at ' + p.to + ' ' + p.x + ',' + p.y +
+                   ', which is ' + mine.toFixed(2) + ' down a well that goes ' + deepest.toFixed(2) +
+                   ' — you arrive part-way UP a flight you never climbed');
+        }
+        /* and off flat ground you may not land at the head of one at all */
+        if (!headOfWell(w, p.x, p.y)) return;
+        let fromStairs = false;
+        for (let y = 0; y < fw.H && !fromStairs; y++) for (let x = 0; x < fw.W; x++)
+          if (fw.rows[y][x] === ch && onStairs(fw, x, y)) { fromStairs = true; break; }
+        if (!fromStairs)
+          P.push('the ' + from + ':' + ch + ' door stands on flat ground and drops you at ' + p.to + ' ' +
+                 p.x + ',' + p.y + ' — the head of a flight, with the whole climb behind you and none of it walked');
+      });
+    });
+    /* 2 — and the drawing agrees with the height */
+    const keep = { world, px, py, fx, fy, cam: camMode, dp: drawPerson };
+    const runs = [];
+    Object.keys(WORLDS).forEach(wid => { const w = WORLDS[wid];
+      for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+        if (wellDepth(w, x, y) <= 0) continue;
+        const r = stairRun(w, x, y); if (!r || !r.well || r.i !== 0) continue;
+        const a = x;                                   /* the deepest tread of this run */
+        const tiles = []; for (let i = 0; i < r.L; i++) tiles.push([a + i, y]);
+        tiles.push([a + r.L, y]);                      /* and the landing at the head, depth 0 */
+        runs.push({ wid, tiles });
+      }});
+    /* ZERO IS AN ANSWER, AND IT HAS TO BE THE RIGHT ONE (owner, 2026-09-17: "can we make the
+       guards smarter instead of just making them notes?"). He is right and the note was a cop-out:
+       a guard that says "I measured nothing" is still a guard that measured nothing, and next week
+       nobody reads the note. A five-tile world that never digs a hole genuinely owes this nothing —
+       but a shell whose maps are FULL of wells and whose detector has stopped seeing them owes it
+       everything, and those two look identical from inside `runs.length === 0`.
+       So ask twice, in two different ways, and make the answers agree. The crude question is "does
+       the glyph appear in anybody's rows at all" — no stairRun, no wellDepth, nothing that can
+       break in the same way. If the crude answer is yes and the careful answer is zero, the careful
+       one is broken and that is a failure, not a note. */
+    let glyphs = 0;
+    Object.keys(WORLDS).forEach(wid => WORLDS[wid].rows.forEach(r => { for (const c of r) if (c === '\u25BC') glyphs++; }));
+    if (!runs.length && glyphs) P.push('the maps contain ' + glyphs + ' well mouths and this guard found NO flight to measure — the detector is broken, not the city');
+    if (!runs.length && !glyphs) P.push('COUNT-ONLY: no world in this shell digs a well, so there was no flight to walk (and none is owed)');
+    if (runs.length) P.push('COUNT-ONLY: ' + runs.length + ' flight' + (runs.length === 1 ? '' : 's') + ' walked in ' + Object.keys(WORLDS).length + ' worlds');
+    ['front', 'iso'].forEach(cam => {
+      runs.forEach(r => {
+        const ys = r.tiles.map(([x, y]) => {
+          let seen = null;
+          drawPerson = (g, bx, by, look, o) => { if (o && o.hero) seen = by; };
+          world = r.wid; px = fx = x; py = fy = y; moving = false; held = null;
+          camSet(cam); draw();
+          return seen;
+        });
+        if (ys.some(v => v === null)) { P.push(cam + ': the hero was not drawn on part of the flight in ' + r.wid); return; }
+        for (let i = 1; i < ys.length; i++)
+          if (!(ys[i] < ys[i - 1]))
+            P.push(cam + ': in ' + r.wid + ', step ' + i + ' of the flight draws the hero at y=' + Math.round(ys[i]) +
+                   ' and the step below at y=' + Math.round(ys[i - 1]) + ' — the flight does not descend on screen, it is a flat floor with a chevron on it');
+        /* and it drops by EXACTLY what the world says, not by a number a guard picked. A minimum
+           of "eight pixels, enough to see" failed f2 honestly: its well is three treads because
+           the other three are hq's CLIMB on the far side of the same landing, so half a storey is
+           the right answer there. The testable claim is not "enough" — it is that the drawing uses
+           the height the data gives it. */
+        const w2 = WORLDS[r.wid], deep = r.tiles[0];
+        const want = cam === 'iso' ? isoWellPx(w2, deep[0], deep[1]) : wellPx(w2, deep[0], deep[1]);
+        const drop = Math.round(ys[0] - ys[ys.length - 1]);
+        if (drop !== want) P.push(cam + ': in ' + r.wid + ' the flight drops the hero ' + drop +
+                   ' pixels from the landing to the bottom step and the world says ' + want +
+                   ' — the drawing is not using the height it was given');
+      });
+    });
+    drawPerson = keep.dp;
+    world = keep.world; px = keep.px; py = keep.py; fx = keep.fx; fy = keep.fy; camSet(keep.cam);
+    return P;
+  });
+  fails.push(...flight.filter(l => !/^COUNT-ONLY: /.test(l)));
+  flight.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
+
   await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();
+  /* COUNT-ONLY lines are what a check SAW, not what it found — "2 flights walked in 15 worlds",
+     "21 portals declared", "3D declined". They exist so a zero is visible instead of silent
+     (owner, 2026-09-17: "can we make the guards smarter instead of just making them notes?"), and
+     they are printed rather than failed. One filter at the end, so a new check cannot forget one. */
+  fails.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+  fails = fails.filter(l => !/^COUNT-ONLY: /.test(l));
   if (fails.length) { console.log('FAIL (' + idx + ')\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log('OK — ' + idx + ': the worlds hang together, every person is reachable and named, every document builds, every camera draws every world, every door stands in 3D, every animal has ground, and storage stays under its prefix. Still flat in 3D (#39): ' + (r.stillFlat && r.stillFlat.length ? r.stillFlat.join(' ') : 'nothing') + '.');
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

@@ -351,6 +351,14 @@ helper, and the person who hits it will be reading their content files, not `san
   quest node. A second world needs the graph as data.
 - **Ambient lines with a `when`.** `docs/STORY.md` open item 4 is filed as Meridian-only; with a
   second world it is a template blocker.
+- ~~**A wall cannot say which of its windows a decoration leaves.**~~ **CLOSED 2026-09-17** — a
+  `DECOS` row may carry `wins:[i,…]`, the indices of its glyph's `TILES.win` that survive whatever is
+  painted on the tile; no `wins` leaves them all, `wins:[]` blanks the wall. One reader, `winsKept`,
+  and three things go through it — the decor's own art, `propSill` (where a sill prop may stand), and
+  the dusk lighting. Registered because it is the first time a *decoration* has been allowed to
+  change what the *tile* is, and that is exactly the kind of power a second world will reach for.
+  Bought by the owner's fifth report of the same bug: a sugar skull on a window a mural had painted
+  over. See `docs/BEAUTIFY.md`, "The data was right for two years and nobody drew it".
 - ~~**A pack cannot design its own paper.**~~ **CLOSED 2026-09-16** — `PAPER`, a string of CSS the
   engine re-roots at `.paper` and injects. It passes this file's standing test (*name the geometry,
   not the noun*) the only way a style seam can: **the pack names its own geometry and the engine

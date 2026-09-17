@@ -220,7 +220,7 @@ const CANDIDATES = [
       assigned.add(qi); if (!QEN[qi]) problems.push('WNPC references missing quest ' + qi);
     })));
     QEN.forEach((_, i) => { if (!assigned.has(i)) problems.push('quest ' + i + ' unassigned'); });
-    // every district's Saturday is written in both languages: three endings, the burnout,
+    // every district's last visit is written in both languages: three endings, the burnout,
     // and the toast that opens the next lot (or says nothing opens). A chapter wired
     // to a missing key would print "undefined" on the one screen the player waited for.
     CHS().forEach((c, i) => { const k = epiKeys(i, i === CHS().length - 1);
@@ -401,7 +401,7 @@ const CANDIDATES = [
       if (!tovar || pendingAt(tovar) === undefined) problems.push('an unanswered quest lost its marker when its district closed'); }
     if (!qOpen(16)) problems.push('the new chapter\'s quests are not on offer');
 
-    // a quest answered after its district's Saturday gets its reframe line, at the
+    // a quest answered after its district's last visit gets its reframe line, at the
     // opening node only. Content's call: no `late` field, no line, nothing breaks.
     if (!qLate(0)) problems.push('a Week One quest does not read as late once the mercado opened');
     if (qLate(16)) problems.push('the district being played reads as late');
@@ -1766,7 +1766,7 @@ const CANDIDATES = [
 
   // ---- a district declares its own ending strings and its own "next lot" toast ----
   // The engine held exactly two ending sets (Week One's and the mercado's), so a third
-  // district would print the wrong Saturday. Now a district may say which strings are
+  // district would print the wrong last visit. Now a district may say which strings are
   // its own; with nothing declared the old two-set behaviour stands.
   const epis = await page.evaluate(() => {
     const problems = [];
@@ -2314,7 +2314,7 @@ const CANDIDATES = [
     else if (b3.glyphs.includes('P')) fails.push('a plant became a box');
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; camSet('3d'); });
 
-    // Continue with a Saturday due: it plays once, the street is not blank, the counter persists
+    // Continue with a last visit due: it plays once, the street is not blank, the counter persists
     // pagehide writes the loaded hero over anything injected, so inject on a page with nobody loaded
     const inject = async sv => { await page.reload(); await page.waitForTimeout(500);
       await page.evaluate(sv => localStorage.setItem('mq1', JSON.stringify(sv)), sv);
@@ -2323,29 +2323,29 @@ const CANDIDATES = [
     await inject({ n: 'Keep', c: '', lk: {}, xp: 230, he: 3, d: [0,1,2,3,4,5,6,7,8,9,10,11,12], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 0, mk: {}, so: [], v: 2 });
     await page.click('#continueBtn'); await page.waitForTimeout(300);
     let st = await page.evaluate(() => ({ end: $('end').hidden }));
-    if (st.end) fails.push('a Saturday due at Continue did not play');
+    if (st.end) fails.push('a last visit due at Continue did not play');
     await page.click('#endGo'); await page.waitForTimeout(400);
     st = await page.evaluate(() => ({ end: $('end').hidden, world: $('world').hidden, h: parseFloat(cv.style.height) || 0, joy: $('joy').hidden, cs: chSeen, saved: (JSON.parse(localStorage.getItem('mq1')) || {}).cs }));
     if (!st.end || st.world) fails.push('after "Out to the street" the world is not showing');
-    if (!(st.h > 0)) fails.push('the street is blank after a Saturday claimed from Continue (canvas height ' + st.h + ')');
-    if (st.joy) fails.push('the joystick is missing after a Saturday claimed from Continue');
+    if (!(st.h > 0)) fails.push('the street is blank after a last visit claimed from Continue (canvas height ' + st.h + ')');
+    if (st.joy) fails.push('the joystick is missing after a last visit claimed from Continue');
     if (st.cs !== 1 || st.saved !== 1) fails.push('the district counter did not persist: memory ' + st.cs + ', saved ' + st.saved);
     await page.reload(); await page.waitForTimeout(900);
     await page.click('#continueBtn'); await page.waitForTimeout(300);
     st = await page.evaluate(() => ({ end: $('end').hidden, cs: chSeen }));
-    if (!st.end) fails.push('the Saturday played again on the next open');
+    if (!st.end) fails.push('the last visit played again on the next open');
     if (st.cs !== 1) fails.push('chSeen after reopening: ' + st.cs);
     // a pre-fix save: played through the mercado, counter reset to 0 by the bug. Week One is
-    // counted as claimed (the mercado was started); the mercado's Saturday is still due
+    // counted as claimed (the mercado was started); the mercado's last visit is still due
     await inject({ n: 'Keep', c: '', lk: {}, xp: 350, he: 3, d: [...Array(24).keys()], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 0, mk: {}, so: [] });
     await page.click('#continueBtn'); await page.waitForTimeout(300);
     st = await page.evaluate(() => ({ end: $('end').hidden, cs: chSeen, epi: $('epi').textContent.slice(0, 40) }));
     if (st.cs !== 1) fails.push('a damaged save was not rebuilt: chSeen ' + st.cs);
-    if (st.end) fails.push('the mercado Saturday, never claimed on the damaged save, did not play');
-    if (!/^Saturday, closing/.test(st.epi)) fails.push('the wrong Saturday played for the damaged save: ' + st.epi);
+    if (st.end) fails.push('the mercado last visit, never claimed on the damaged save, did not play');
+    if (!/^Saturday, closing/.test(st.epi)) fails.push('the wrong last visit played for the damaged save: ' + st.epi);
     await page.click('#endGo'); await page.waitForTimeout(400);
     st = await page.evaluate(() => ({ cs: chSeen, seen: seenOpen.has('tallerToast'), v: (JSON.parse(localStorage.getItem('mq1')) || {}).v }));
-    if (st.cs !== 2 || !st.seen || st.v !== 2) fails.push('after the mercado Saturday: ' + JSON.stringify(st));
+    if (st.cs !== 2 || !st.seen || st.v !== 2) fails.push('after the mercado last visit: ' + JSON.stringify(st));
     // a lot that opened while the phone was away is announced once at Continue
     await inject({ n: 'Keep', c: '', lk: {}, xp: 350, he: 3, d: [...Array(24).keys()], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 2, mk: {}, so: [], v: 2 });
     await page.click('#continueBtn'); await page.waitForTimeout(1900);
@@ -2688,29 +2688,122 @@ const CANDIDATES = [
       });
       if (!DECOS.some(d => d.deco === 'mural')) problems.push('the signature mural is gone');
       if (typeof DECODRAW.panel !== 'function') problems.push('the pack draws no panel');
+      /* A PANEL WITH NO DRAWING IS BLANK PLASTER FOREVER, AND NOTHING SAYS SO.
+         La esquina shipped its DECOR row on the day the district shipped and PANELART.esquina did
+         not exist, so Doña Meche's wall stayed the unbegun blue at every grade — the one visible
+         reward for finishing her four quests, silently withheld. It was found by reading, which is
+         not a method. The pairing is the noun: a panel names a business, a business owns a drawing. */
+      DECOS.filter(d => d.deco === 'panel').forEach(d => {
+        if (!d.id) problems.push('a panel at ' + d.x + ',' + d.y + ' names no business, so nothing can ever be painted on it');
+        else if (typeof PANELART[d.id] !== 'function')
+          problems.push('the panel for "' + d.id + '" has no drawing — that wall is blank plaster at every grade, and finishing the district changes nothing on it');
+      });
+      Object.keys(PANELART).forEach(id => {
+        if (!DECOS.some(d => d.deco === 'panel' && d.id === id))
+          problems.push('PANELART has a drawing for "' + id + '" and no wall to put it on');
+      });
       return problems;
     });
     fails.push(...mural);
 
-    // an unbegun panel is plaster and nothing else; a graded one paints
+    // an unbegun panel is plaster and nothing else; a graded one paints.
+    // MEASURED IN THE MURAL FIELD, not over the whole tile: since 2026-09-17 the panel keeps the
+    // wall's own window (owner: "the store front icon or mural can go around it"), so a whole-tile
+    // colour count reads glass, a lintel and a stone ledge as "the panel painted something" and
+    // this guard failed on a wall that was behaving. The noun it means is the EMBLEM, and the
+    // emblem lives in the field beside the kept window — x2..16, measured: the lintel and the ledge
+    // start bleeding at x17. Counting the window in was the
+    // guard measuring the container instead of the thing.
     const paint = await page.evaluate(() => {
       const c = document.createElement('canvas'); c.width = c.height = 32;
       const g2 = c.getContext('2d'), old = ctx;
-      const shot = () => { const d = g2.getImageData(0, 0, 32, 32).data; const seen = new Set();
+      const shot = () => { const d = g2.getImageData(2, 6, 15, 24).data; const seen = new Set();
         for (let i = 0; i < d.length; i += 4) seen.add(d[i] + ',' + d[i + 1] + ',' + d[i + 2]); return seen; };
       const keepD = new Set(done), keepM = { ...marks };
       const panel = DECOS.find(d => d.deco === 'panel' && d.id === 'taller');
       ctx = g2;
       done = new Set(); marks = {};
+      /* bare plaster, drawn by the same function the panel starts with: the thing an unbegun
+         panel has to be indistinguishable from. A count against a hard number would drift the
+         next time a trowel mark moves; this compares the field against what plaster IS. */
+      g2.clearRect(0, 0, 32, 32); muralGround(0, 0); const bare = [...shot()].sort().join('|');
       g2.clearRect(0, 0, 32, 32); DECODRAW.panel(0, 0, panel); const blank = shot();
       const ta = CHAPTERS.find(c2 => c2.id === 'taller');
       ta.quests.forEach(q => { done.add(q); marks[q] = 1; });
       g2.clearRect(0, 0, 32, 32); DECODRAW.panel(0, 0, panel); const painted = shot();
       ctx = old; done = keepD; marks = keepM;
-      return { blankColours: blank.size, paintedColours: painted.size };
+      return { bare, blank: [...blank].sort().join('|'), blankColours: blank.size, paintedColours: painted.size };
     });
-    if (paint.blankColours > 4) fails.push('an unbegun panel is not plain plaster: ' + paint.blankColours + ' colours');
+    if (paint.blank !== paint.bare) fails.push('an unbegun panel is not plain plaster: ' + paint.blankColours + ' colours in the mural field');
     if (paint.paintedColours <= paint.blankColours) fails.push('a worked district did not paint its panel');
+
+    /* A FINISHED DISTRICT'S EMBLEM HAS TO BE VISIBLE ON ITS OWN WALL.
+       La esquina's was #E8D5A8 and the plaster is #C6DCEA — 1.4 luma apart. The note in maps.js
+       defending the choice compared it to the OTHER SIX PANELS and never to the wall it is painted
+       on, so the one visible reward for finishing Doña Meche's four quests was a wall that still
+       looked blank. Measured on the RENDER at full grade, in the emblem's own field, against this
+       repo's own accent-vs-ground floor of 90. */
+    const legible = await page.evaluate(() => {
+      const P = [], L = (r, g, b) => 0.299 * r + 0.587 * g + 0.114 * b;
+      const c = document.createElement('canvas'); c.width = c.height = 32;
+      const g2 = c.getContext('2d'), old = ctx, keepD = new Set(done), keepM = { ...marks };
+      ctx = g2;
+      g2.clearRect(0, 0, 32, 32); muralGround(0, 0);
+      const ground = L(...[...g2.getImageData(8, 26, 1, 1).data].slice(0, 3));
+      DECOS.filter(d => d.deco === 'panel' && d.id).forEach(d => {
+        const ch = CHAPTERS.find(c2 => c2.id === d.id); if (!ch) return;
+        done = new Set(); marks = {};
+        (ch.quests || []).forEach(q => { done.add(q); marks[q] = 1; });    /* every quest right first try: grade 3 */
+        g2.clearRect(0, 0, 32, 32); DECODRAW.panel(0, 0, d);
+        const px2 = g2.getImageData(2, 6, 15, 24).data;
+        let far = 0;
+        for (let i = 0; i < px2.length; i += 4) far = Math.max(far, Math.abs(L(px2[i], px2[i + 1], px2[i + 2]) - ground));
+        if (far < 90) P.push('the emblem for "' + d.id + '" is ' + Math.round(far) +
+          ' luma from the plaster it is painted on at its furthest pixel — under the 90 this repo separates an accent from its ground by. Finishing that district changes nothing anyone can see');
+      });
+      ctx = old; done = keepD; marks = keepM;
+      return P;
+    });
+    fails.push(...legible);
+
+    /* AND THE CLIMB EXISTS AT ALL. The engine's suite holds any shell to "a flight is walked, not
+       teleported" but cannot require a shell to HAVE a flight — the gauge's five-tile world owes
+       it nothing, and said so on the first run. Meridian has one, so Meridian is held to it here:
+       Nolasco's well is real, it is deep enough to be a storey rather than a dip, and the avenue
+       door lands you at its foot. Owner, 2026-09-17: "ok lets do b." */
+    const climb = await page.evaluate(() => {
+      const P = [], w = WORLDS.no;
+      if (!w) return ['the Nolasco stair room is gone'];
+      let deepest = 0, treads = 0;
+      for (let x = 0; x < w.W; x++) { const d = wellDepth(w, x, 4); if (d > deepest) deepest = d;
+        if (w.rows[4][x] === '\u2261') treads++; }
+      if (treads < 5) P.push('Nolasco\'s flight is ' + treads + ' treads — under five it drops less than two thirds of a wall and reads as a dip in the floor, not as a storey');
+      if (deepest < 0.9) P.push('Nolasco\'s well is ' + deepest.toFixed(2) + ' deep and a wall is about 1.1 — you would arrive on the avenue from half a storey up');
+      const p = PORTALS.st.$;
+      if (!p || p.to !== 'no') P.push('the avenue door no longer opens into the stair room');
+      else if (wellDepth(w, p.x, p.y) < deepest - 0.17)
+        P.push('the avenue door drops you at no ' + p.x + ',' + p.y + ', ' + wellDepth(w, p.x, p.y).toFixed(2) +
+               ' down a well that goes ' + deepest.toFixed(2) + ' — you are meant to arrive at the foot and walk up');
+      return P;
+    });
+    fails.push(...climb);
+
+    /* EVERY PLACE IN THIS CITY IS ON ITS MAP. Owner, 2026-09-17: "yeah i mean a map implies this
+       lol" — and six of fifteen worlds were on the plan in no form at all, the park among them,
+       which is the third-largest world in the game. The engine's suite cannot demand this of every
+       future world (a pack may hide a place on purpose — a memory, a dream, a menu) so it reports
+       the count there; Meridian has no such place, so Meridian is held to all fifteen here. */
+    const onmap = await page.evaluate(() => {
+      const P = [], keepD = new Set(done), keepC = chSeen;
+      CHAPTERS.forEach(c => (c.quests || []).forEach(i => done.add(i)));
+      chSeen = CHAPTERS.length; applyGrowth();
+      const lost = Object.keys(WORLDS).filter(id => !planPlace(id));
+      if (lost.length) P.push('these worlds are nowhere on the plan: ' + lost.join(', ') +
+        ' — every place in this city is somewhere you can be shown, and the park is reached on a leash so only MAPDOT can say where it is');
+      done = keepD; chSeen = keepC; applyGrowth();
+      return P;
+    });
+    fails.push(...onmap);
 
     // townsfolk: people with no quests move, people with quests never do
     const walk = await page.evaluate(async () => {
@@ -3424,8 +3517,17 @@ const CANDIDATES = [
           world = 'hq'; px = fx = sx; py = fy = sy;
           put('hq', sx, sy + 1); sonny.follow = true; sonny.holdT = 0; sonny.stayT = 0; sonny.moving = false;
           portalHold = ''; portalT = 0;
-          const warped = tryPortal(performance.now() + 5000);
-          if (!warped) problems.push('standing on the stairs did not travel — the wiring test proves nothing');
+          /* TWO CALLS, because since mq-v171 the swap happens BEHIND A SHUTTING DOOR (the owner's
+             option A): the first call starts the door and parks the warp, the second completes it
+             once the door has shut. The claim this check makes has not changed — walking through a
+             door brings the dog — only the number of frames the real path takes. Driving it in one
+             call would be testing the old timing rather than the wiring. */
+          const t0 = performance.now() + 5000;
+          const started = tryPortal(t0);
+          const warped = started && tryPortal(t0 + 1000);
+          if (!started) problems.push('standing on the stairs did not travel — the wiring test proves nothing');
+          else if (!warped) problems.push('the door shut on the stairs and never opened — the warp was parked and dropped');
+          else if (world === 'hq') problems.push('the door shut and the world never changed behind it');
           else if (sonny.world === 'hq') problems.push('walking through a door does not bring the dog: dogsFollow is never called from tryPortal');
         }
       }

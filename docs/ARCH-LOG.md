@@ -904,3 +904,180 @@ stylesheet lives in `<body>`, not `<head>`, so appending the pack's paper to `do
 *first* and the engine won every tie at equal specificity. A seam that is perfectly safe and silently
 does nothing is still broken. The gauge caught it; the guard now asks the `.paper` element what
 colour it actually is, rather than asking the stylesheet what it says.
+
+## A16 · A door at the top of a staircase — the climb nobody walks · 2026-09-17
+
+**The owner, and he called it the harshest directive of the day:** *"then that door right there to the
+top of a staircase. until you figure out how to teleport in my side of the screen - then tell me how
+it can be done."*
+
+He is right, and the code says so in its own comment. `content/meridian/maps.js:205`:
+
+```js
+PORTALS.st["$"]={to:"no",x:21,y:4,dir:"left"};
+/* the avenue door is the foot of Nolasco's stairs: you appear at the top, in the stair room */
+```
+
+You walk into a door at street level and you are upstairs. There are two of these in the city — this
+one, and `PORTALS.hq["▲"] → f2`, which the table itself calls *"the only flight in the city that
+CLIMBS"*. Neither is climbed.
+
+**What actually happens, measured.** `tryPortal` (`engine/engine.js:3521`) is four assignments in one
+frame: `world=p.to; px=fx=p.x; py=fy=p.y`. There is no transition of any kind. Then `worldArrived`
+sets `warpT=performance.now()+450` — **input is blocked for 450 milliseconds and nothing is drawn in
+that window.** So today the player gets the worst pairing available: an instant cut, followed by
+standing frozen somewhere they did not walk to. **There is already a transition slot. It is empty.**
+
+And in the stair room the fiction is half-built and reads as broken, which is what he is looking at.
+Screenshotted at `no(18,4)`: you stand on a flat deck with a glass rail around a well and a **down
+arrow** beside you. There is no flight. The rail promises a descent; the arrow is a teleport; nothing
+between them exists. *A railing around a hole that nothing goes down is a stronger lie than no railing
+at all* — the same species as the sugar skull on a sill that was never drawn, one floor up.
+
+### The three ways it can be done, costed
+
+**A · The cut becomes a climb you can read.** Draw into the 450ms that already exists and is already
+blank: the screen closes from the bottom as the door shuts behind you, and opens at the top with the
+landing under your feet. Nothing about the maps, the portals or the 3D builder changes. **Cost: a
+sitting.** Fixes *every* door in both games at once, including the four parcel doors and the park.
+**It does not make the traversal real — it makes the cut legible.** A cut with a reason reads as a
+cut; a cut with nothing in it reads as a bug.
+
+**B · Build the flight, for the one staircase he is pointing at.** The engine can already do this and
+does: `engine3d.js:365` puts a tile's lid at `−STAIRH*(i+1)` and `:413` builds the shaft walls down to
+the deepest point of the well, so a descending run of treads renders today. What is missing is only
+that `▼` sits at the *top* of the run instead of the *bottom*. Extend the stair room south, lay the
+treads as sunken tiles, and put the portal on the last one — so the player walks down the steps they
+can see and opens the avenue door at the bottom. **Cost: a map edit, a portal move, and the two flat
+cameras taught to draw a descent (they draw a stair mass, not a run).** Risk: the flat cameras are
+where this has gone wrong twice already; it needs Chema measuring before and after.
+
+**C · One building, one world.** The real reason the climb cannot be walked is that each floor is a
+separate `WORLDS` entry and the engine draws exactly one world. The two ends of a staircase are never
+on screen together, so no staircase in this city can ever be climbed. Merging `hq`/`f2` into one taller
+world means levels in the grid, a second storey in the 3D builder, and every camera taught about
+height. **Cost: more than a sitting; it is a rewrite of what a world is.**
+
+**Recommended: A now, B for Nolasco's stairs, and C never** — A is what makes every door in the city
+honest for one sitting's work, B makes the one he is pointing at true, and C is a different game from
+the one that is about practising AI roles. **His call; nothing is built until he takes it.**
+
+### A16 — **B SIGNED AND BUILT, 2026-09-17.** *"ok lets do b."*
+
+**What shipped, and none of it is an engine rule change — it is the engine's own numbers finally
+being read by the cameras that draw them.**
+
+- **The flight is five treads, not three.** `wellDepth` at the `▼` is `STAIRH×6 = 0.96` against a wall
+  of 1.1, so the well is now a storey. Three treads dropped 0.64 and read as a dip in the floor. The
+  rails follow the run for its whole length, which they did not before.
+- **You arrive at the foot and walk up.** `PORTALS.st["$"]` lands you on the bottom tread facing the
+  climb, with the avenue door behind you. One tile east of the `▼` rather than on it: `portalHold`
+  would have made a spawn on the portal tile safe, but the bottom step is the truer place to put
+  somebody who has just opened a street door, and it costs no argument with the engine's own warning.
+- **And the three flat cameras stopped lying about height.** This is the part the costing under-sold.
+  `wellDepth` and `stairLift` had existed for two versions and **only `engine3d.js` ever read them**,
+  so in top, front and iso the hole was painted as ordinary floor with a chevron on it and the hero
+  stood on top of it at full height. The front camera looks along the row and Nolasco's flight runs
+  *across* one, so sinking each tread by its own drop gives a genuine staircase in profile for free.
+  Iso gets the two far walls of the shaft and the tread at the bottom, drawn in the depth pass rather
+  than the floor pass because a sunken lid reaches half a diamond past its own tile. Top-down gets
+  nothing on purpose: you cannot see a drop from directly above, and the tread art already ramps its
+  value as it descends.
+
+**What is NOT done, named rather than left to be discovered:** a CLIMBING flight still does not lift
+anyone in the flat cameras (`hq`'s three treads up to `f2`), and neither does the park bridge's deck,
+which has `BRIDGEH` plus an arch and rails that would all have to move together. Both are the same
+one-line hook; both need their own look, and the bridge has its own history.
+
+**Two constants, neither of them picked:** `UNITPX=12`, because a facade is `lift:13` and stands 1.1
+units; `ISOUNITPX=18`, because `izh` already converts a lift with `Math.round(lift*1.5)`.
+
+**Planted three ways** in copies outside the repo: the avenue door back on the landing, the flat
+cameras forgetting the drop, and the three-tread flight restored. All three named. **The first draft
+of the portal check let the landing plant straight through** — it asked whether the arrival was the
+deepest tread of its run, and the landing is not *on* the run, it is the tile past the end of it.
+That hole was the entire bug. It now asks the question that also lets `hq↔f2` through for the right
+reason rather than by luck: there you leave standing *on* a flight and the two halves add up to one
+storey across the landing; what may never happen is leaving flat ground and arriving at a head.
+
+**And the gauge caught the guard inventing a requirement** — *"NEW demand on every future game: no
+world has a well any more"*. A five-tile world that never digs a hole owes this nothing. The demand
+that a flight EXIST moved to Meridian's own suite, where it belongs; the engine's suite says out loud
+that it measured nothing rather than passing quietly.
+
+**A and C are still open and still his.** A (drawing the climb into the 450ms that already exists and
+is already blank) would make every *other* door in both games legible, and is unaffected by B.
+
+### A16 — **A SIGNED AND BUILT, 2026-09-17.** *"i think i want that option A."*
+
+**The world now changes behind a shut door**, and the door opens in the direction you travelled — up
+a flight, down a well, or apart like a door on the flat. Three decisions worth keeping:
+
+- **It is a DIV over the viewport, not paint on a canvas.** The 3D camera renders to its own WebGL
+  surface, so anything drawn into the 2D context is invisible there — one overlay covers all four
+  cameras and cannot drift between them. `curtain()` had already proved the shape on the growth
+  change; this is the same idea at a door, and faster, because you are walking.
+- **Which way you went is read off the map, not off a label.** `▲` is the head of a climbing flight,
+  `▼` is the foot of a well, everything else is flat — including the avenue door into Nolasco's stair
+  room, which is right: you have walked in off the street and not climbed anything. The climb is the
+  five treads in front of you and it is yours to walk.
+- **The new place is built while the door is still shut.** There is one 3D scene (`T3.builtKey`) and
+  changing world throws it away and makes another. Traced: in the flat cameras the leaves slide the
+  whole way at frame rate; in 3D there was a **237ms hole right after the swap** in which the top leaf
+  jumped from −5 to −154 — the door did not open, it vanished. The stall is real work. What it must
+  not do is eat the animation, so it happens behind a closed door, which is the only job a closed door
+  has ever had. **That hole is also the measurement behind the memory question:** cache the built
+  scenes and it goes away. A and "spend some memory" are the same piece of work.
+
+**110ms to shut, 35 to settle, 330 to open**, and input comes back when the door is actually open
+rather than when a guess says it should be — the old `warpT` of 450 outlasted the (absent) animation
+by a third of a second of standing still.
+
+**Two bugs found by the guard and not by reading**, both invisible in the code:
+- `translateY(-102%)` moved the *bottom* leaf into the top half rather than off the screen, because a
+  percentage is of the LEAF and a leaf anchored to the far edge has to cross the whole viewport to
+  leave by the near one. A black band across every new place, forever.
+- Dropping the class re-armed the transition, so a door that had finished opening sent its bottom leaf
+  **sliding back down across the viewport** a third of a second after you arrived.
+
+**Four plants, four catches** — the pre-A `tryPortal` restored exactly, the half-travelling leaf, the
+re-armed reset, and the `#door` element removed from the shell. The third went through the first
+version of the guard, which held the door still and so could never see a move that happens on the way
+back to rest; it is caught now by reading the cause (the reset's transition duration) rather than the
+symptom. **And the gauge objected twice in one day** — no well, then no portal — both correct, both
+turned into notes rather than demands on a one-room world.
+
+**C is the only part still open**, and the recommendation against it stands.
+
+## A17 · The 3D scenes are kept, and what a cache owes the player · 2026-09-17
+
+**Owner: "3. ok go for it."** Costed inside A16's option A, built the same day.
+
+There was exactly **one** built 3D scene (`T3.builtKey`). Walking through a door threw it away and
+made another, and the first frame after that had to upload the new geometry as well as draw it.
+Measured per world: **1.4ms for the smallest room, 18.4 for Calle Principal, 111ms for all fifteen**
+— and, with the upload counted, a **237ms hole** right after a portal swap, which is what made the
+new doorway *pop* instead of open.
+
+**Kept now. Measured, six worlds:** first visit **50.5ms** total, return visit **0.1ms**. A door back
+into a room you have been in is free.
+
+**What a built scene owns is four things**, not one — the group, and the three lists the frame loop
+walks (`tintables` for the time-of-day wash, `glows` for the door lights, `pinatas` for the sway).
+Parking the group without its lists would leave the wash writing colour into a scene nobody is
+looking at.
+
+**Eviction, because a cache with no ceiling is a leak with a nicer name.** The key carries
+`T3.dirty`, which growth and a theme edit bump, so every entry from a previous `dirty` is stale the
+moment one lands and is disposed first; then LRU down to eight. The active group is never evicted.
+
+**The half a cache always gets wrong is the second one**, and it is the half nobody notices until
+somebody buys a building and it does not appear: *a world that has CHANGED must be rebuilt.* It is
+planted — `t3Trim` made blind to `T3.dirty` — and the guard says `37 scene(s) from before the change
+are still held`.
+
+**And one lesson about the guard itself, which is the register's oldest shape.** The ceiling check
+first compared `T3CACHE.size` against `T3CACHE_MAX` — **the code's own constant**. Raising that
+constant to 999 turns the cache off and the guard still passed. A ceiling is a fact about behaviour,
+not a number to read back: what it now asks is *after walking the whole city, are you holding the
+whole city?* Planted, and named: `after walking all 15 worlds the cache holds 15 scenes`.

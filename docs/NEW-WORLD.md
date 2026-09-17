@@ -43,11 +43,11 @@ That already happened to El Changarrito before this flag existed.
 |---|---|---|
 | Declares | `CHAPTERS`, and nothing else | `ENDLESS = true`, and **no** `CHAPTERS` |
 | Has | a last day, an epilogue panel, a grade | none of those |
-| Story shape | an arc with a Saturday | people you keep returning to |
+| Story shape | an arc with a last visit | people you keep returning to |
 | Good for | a course, an engagement, a season | a place you inhabit; a backlog; a comfort world |
 
 **Do not keep the chapter skeleton with the lesson removed.** Nacho's warning, and it is the whole
-trap: *a Saturday with nothing to graduate from is a countdown to nothing.* Pick one shape.
+trap: *a last visit with nothing to graduate from is a countdown to nothing.* Pick one shape.
 
 **✅ The fault this section used to warn about is FIXED — the warning itself had gone stale, which
 is why it is rewritten rather than deleted.** `ENDLESS = true` once froze district progression: the
@@ -748,4 +748,57 @@ office**, and no amount of work on the *content* of a page will change that. Pla
 
 **If your world needs its own paper**, say so early and loudly: the seam does not exist yet, it is
 costed in A15 as one stylesheet scoped to the reader, and **you will be the first pack to meet this
-wall on your first afternoon.**
+wall on your first afternoon.** *(Built 2026-09-16 — §1½ above. This paragraph is kept as written
+because the shape of the problem is the point: a wall you meet on your first afternoon is worth
+saying out loud before you meet it.)*
+
+**And the second half of that method, which took another day to name.** Designing the surface
+somewhere you control is only half a technique. The other half is **porting it back through the
+seam** — the Simmer recipe pages were designed as a page, and then expressed as `PAPER` + reader
+blocks, and *that round trip is why the fifth attempt worked when four attempts at the drawing had
+not*. Neither half works alone: design in the reader and you are designing a form; design outside it
+and never port back and you have a picture nobody can open.
+
+## How a thing gets drawn here
+
+*Added 2026-09-17 on the owner's instruction — "why dont we have beautify everywhere?" Everything
+this project has learned about drawing lived in `docs/BEAUTIFY.md`, which is **Meridian's own**
+register, full of Meridian's file names. A person building a second world reads THIS file and never
+that one. These five are the ones that are true of any world, in the plainest words they fit into.*
+
+**1 · A rectangle in the data is not a thing on the screen.**
+When several drawings position themselves off one number and **nobody paints the number itself**,
+every one of them is correct and the picture is wrong — and the fault is invisible in the code,
+because each drawing reads right on its own. *Meridian declared two windows per facade, painted two
+flat rectangles, and then hung a lit pane, a sugar skull and a stone ledge off the rect. All three
+were in exactly the right place. There was no window. Four fixes argued about the size of the skull.*
+**Grep who DRAWS a field before you tune anything that is placed by it.**
+
+**2 · Grep every camera for a function's name before you believe the world has that fact.**
+A height, a depth, a slope. `wellDepth` and `stairLift` returned the right answers for two versions
+and only the 3D camera ever called them — so a stairwell was a flat floor with a chevron on it, and a
+bridge was paint on the water. **The same rule as 1, with a number instead of a rect**, and it is the
+fourth register entry on that one shape.
+
+**3 · Draw a thing by the process that made it.** `.claude/skills/how-its-made` — load it before
+drawing, modelling or texturing anything that was cooked, rolled, cut, cast, thrown, woven, welded,
+printed, grown or assembled, and **always** when several of the same thing appear together. The rule
+that fixes most of it: *variation enters at the step it actually entered, and nowhere earlier.* Six
+slices of one roll are siblings, not strangers. And a made thing is made of made things — a carrot in
+a roll was julienned, so it is not square.
+
+**4 · Measure an accent against the ground it is painted on, not against the other accents.**
+Doña Meche's shop emblem was 1.4 luma from the plaster it was painted on and was, in practice, not
+there. A note in the map file defended the colour by comparing it to the other six emblems. **The
+ground is what you can see it against.** Meridian's floor is 90 luma for an accent, 40 for two things
+that must read as separate.
+
+**5 · Render it and look, at 8×, before you tune anything.**
+This one is embarrassing and it is the cheapest of the five. Four fixes to a sugar skull argued about
+its size; one render at 8× said there was no window. If you are on the second attempt at a drawing
+and somebody still says "off", **stop adjusting and take a picture of it.**
+
+**And the one about people rather than pixels:** on the second attempt, say you cannot see the gap
+and ask for a reference. *(Owner, 2026-09-16: "it still doesnt look right. how can you make something
+you dont know what it looks like?" Three versions went out called "better". Eight photographs fixed
+in one pass what three passes of reasoning had not.)*

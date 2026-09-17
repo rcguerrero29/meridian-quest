@@ -5,9 +5,32 @@
    node test/town.smoke.js  (CHROMIUM_PATH if Chromium is not where Playwright looks). */
 const path = require('path'), fs = require('fs');
 const { chromium } = require('playwright-core');
+
+/* FIND A BROWSER THE WAY test/smoke.js ALREADY DOES (T0.5, la junta 2026-09-17).
+   `chromium.executablePath()` returns the path playwright-core WANTS, not one that exists: this
+   container ships chromium-1194 and the resolver asks for 1243. The old line trusted it, so
+   `node test/town.smoke.js` could not run AT ALL here — which means the town's safety has been
+   REASONED rather than observed, in a repo whose own rule is that an engine change is proven the
+   same day by running the suites. Ten minutes buys back the standard of proof.
+   The resolved path is checked for existence now, and a real file is looked for if it is wrong. */
+const CANDIDATES = [
+  process.env.CHROMIUM_PATH,
+  '/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell',
+  '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  '/opt/pw-browsers/chromium',
+  '/usr/bin/chromium',
+  '/usr/bin/chromium-browser',
+  '/usr/bin/google-chrome',
+].filter(Boolean);
+function findChromium() {
+  let exe;
+  try { const p = chromium.executablePath(); if (p && fs.existsSync(p)) exe = p; } catch (e) {}
+  if (!exe) exe = CANDIDATES.find(p => { try { return fs.existsSync(p) && fs.statSync(p).isFile(); } catch (e) { return false; } });
+  return exe;
+}
 (async () => {
-  const exe = process.env.CHROMIUM_PATH || chromium.executablePath();
-  if (!exe) { console.error('No Chromium found. Set CHROMIUM_PATH.'); process.exit(1); }
+  const exe = findChromium();
+  if (!exe) { console.error('No Chromium found. Set CHROMIUM_PATH, or install one of: ' + CANDIDATES.join(', ')); process.exit(1); }
   const fails = [];
   const root = path.resolve(__dirname, '..');
   // the town's index is the public one with known differences and nothing else
@@ -19,7 +42,12 @@ const { chromium } = require('playwright-core');
     if (/script-src 'self' 'unsafe-inline'/.test(town)) fails.push("the town keeps 'unsafe-inline' scripts");
     if (/rel="manifest"/.test(town)) fails.push('the town declares a manifest');
     if (/content\/meridian\//.test(town)) fails.push("the town loads Meridian's content");
-    if (!/\.\.\/engine\/engine\.js/.test(town)) fails.push('the town does not load the shared engine by path');
+    /* THE TOWN RUNS THE SHARED ENGINE, NOT A COPY OF IT. This read the shell's TEXT for the literal
+       string "../engine/engine.js" — a proxy, and it broke the day the path moved into
+       engine/boot.js while the town was still, correctly, running the shared engine. What it means
+       is checked on the loaded page below (`sharedEngine`); what stays here is the thing text can
+       actually answer: the town must not ship an engine of its own. */
+    if (/changarrito\/engine\//.test(town)) fails.push('the town loads an engine from inside its own folder — there is one engine and it is shared');
     if (pub.split('\n').length - town.split('\n').length > 20) fails.push('the town index drifted far from the public one');
     // ch-v14: every popup became a form in the reader — no browser prompt survives in the town's content
     const rec = fs.readFileSync(path.join(root, 'changarrito', 'content', 'record.js'), 'utf8');
@@ -33,6 +61,26 @@ const { chromium } = require('playwright-core');
   await page.route('**', r => r.request().url().startsWith('file://') ? r.continue() : r.abort());
   await page.goto('file://' + path.join(root, 'changarrito', 'index.html'));
   await page.waitForTimeout(1500);
+  /* AND IT ACTUALLY LOADED IT. Asked of the page rather than of the file, because the path stopped
+     being in the shell's text the day engine/boot.js started deciding which engine files a world
+     needs — and a text check went red while the town was running the shared engine perfectly. This
+     one cannot: it reads what the browser fetched. */
+  {
+    const srcs = await page.evaluate(() => [...document.scripts].map(s => s.src));
+    const shared = srcs.filter(u => /\/engine\/engine\.js$/.test(u) && !/\/changarrito\//.test(u));
+    const noEngine = !shared.length, noSK = await page.evaluate(() => typeof SK !== 'function');
+    if (noEngine || noSK) {
+      /* AND IT STOPS HERE. Everything after this point asks the town's page questions that need the
+         engine in it, so without one they all throw and the run dies on whichever came first — with
+         this finding still sitting unprinted in `fails`. Planted (an inline loader, which the town's
+         stricter CSP silently refuses) and that is exactly what happened: "SK is not defined", from
+         a line that had nothing to do with the fault. A guard that dies reports nothing. */
+      if (noEngine) fails.push('the town did not load the shared engine at all — ' +
+        (srcs.length ? 'the scripts it did load were: ' + srcs.map(u => u.split('/').slice(-1)[0]).join(', ') : 'it loaded no scripts'));
+      if (noSK) fails.push('the town booted with no engine in it — if the shell uses an inline <script> to load one, its CSP (script-src \'self\', no unsafe-inline) refuses it silently and nothing throws');
+      console.log('FAIL\n- ' + fails.join('\n- ')); await browser.close(); process.exit(1);
+    }
+  }
   if (pageErrors.length) fails.push('page errors: ' + pageErrors.join(' | '));
   /* ...and the ENGINE's own boot warnings, which this suite has never read. /^REACH / matches the
      town CONTENT's own console.warn, not mqwarn — so CRIT portal:, CRIT world:, CRIT arrival: and
@@ -713,7 +761,12 @@ const { chromium } = require('playwright-core');
             const w = WORLDS[h.world], c = w.npcs.find(n => n.npc === h.clerk);
             if (!c) problems.push(h.id + ': no clerk ' + h.clerk + ' inside'); else { if (!hasSay(c) || wanders(c)) problems.push(h.id + ': the clerk wears no mark or wanders'); if (c.doc !== 'h_' + h.id) problems.push(h.id + ': the clerk carries the wrong document'); }
             if (!READS.some(r => r.world === h.world && r.doc === 'b_' + h.id)) problems.push(h.id + ': no board to read inside');
-            if (!(MAPDOT[h.world] && MAPDOT[h.world][0] === d.x)) problems.push(h.id + ': the town plan has no dot for it');
+            /* the noun is "the plan can show me where this house is", not "somebody typed a copy of
+               its door into MAPDOT". The copy is gone (every row agreed with its own door and a copy
+               only rots); this asks the engine where the house IS and holds it to the door. */
+            { const at = typeof planPlace === 'function' ? planPlace(h.world) : null;
+              if (!at) problems.push(h.id + ': the town plan cannot say where it is at all');
+              else if (at.gx !== d.x) problems.push(h.id + ': the plan puts it at x=' + at.gx + ' and its door is at x=' + d.x); }
             if (!T().locs[h.world] || !T().arrive[h.world]) problems.push(h.id + ': the world has no name or arrival line');
           });
           // the facades: every glyph in the two ranks is a facade at wall height — the I row was a grocery counter (Don Güero's find)

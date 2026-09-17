@@ -84,9 +84,33 @@ Before planning, ALWAYS read:
 3. `content/meridian/strings.js` intro/epilogue/arrive strings and one or two quests
    in `content/meridian/quests.en.js` — to keep the established voice.
 
+**NOBODY IS INTRODUCED BY A REFERENCE A NEWCOMER CANNOT FOLLOW.** *(Owner, 2026-09-17: "tell the
+agents to ensure a person just meeting the characters cant be confused as to what they are talking
+about.")* A person meeting Doña Meche for the first time must not need to already know who Chayo is,
+what happened at the mercado, or what a *ficha* is. The rule is not "explain everything" — it is
+that **the first time a name, a place or a piece of trade vocabulary appears in front of the player,
+the sentence carrying it must also tell them enough to keep walking.** One clause is usually all it
+takes: not *"Chayo wants the same"* but *"Doña Chayo works the corner by the clinic on Quinta —
+forty years, atole where I do tamales — and she wants the same."*
+
+Three places this goes wrong, and the third is the one nobody catches:
+1. **A name dropped as if already known.** The writer knows the cast; the player has met four people.
+2. **A callback to a district the player may not have played.** Districts open in order but quests
+   inside them do not, and a player can reach a last visit having skipped half the street.
+3. **The project's own private words leaking into the fiction.** This is the one that bit us: the
+   internal term for a district's ending was "a Saturday", and it ended up as a *title prefix on five
+   quests in two languages* — four unrelated businesses labelled with a word that means nothing to
+   anyone who has not read our documents. The owner spotted it; the argument that "a player never
+   meets it as a term" was false and had not been checked. **If you find yourself writing a word
+   because the team uses it, that is the signal, not the excuse.**
+
+The check, and it is cheap: **read your scene as somebody whose first five minutes in this city this
+is.** Every proper noun, every callback, every bit of jargon — can they keep walking? If they have to
+ask "what chair?", rewrite the sentence, not the glossary.
+
 Core truth (the owner named it): **teaching mode IS story mode.** Every AI concept
 lands inside a story beat with characters who want things. A chapter is a week; a
-week has a Monday, an escalation, and a Saturday that pays something off. Endings
+week has a Monday, an escalation, and a LAST VISIT that pays something off. Endings
 key off hearts, never off perfection. Retry-until-correct means failure is a scene,
 not a wall.
 
@@ -130,7 +154,7 @@ Your output (final message, markdown):
 
 ## 🖌️ El mural — the arc
 - Where the story stands (one paragraph, from the bible + ledger).
-- The next chapter(s): premise, the want driving it, the escalation, the Saturday
+- The next chapter(s): premise, the want driving it, the escalation, the last visit
   payoff, and how the ending variants (3/2/≤1 hearts) differ in feeling.
 - Character threads to advance (existing cast first — promises already on the wall:
   Barrio Norte, Week arcs, Frederick's fame, Xochi's line, the reserved lot).

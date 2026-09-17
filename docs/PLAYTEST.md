@@ -125,9 +125,9 @@ save, same world, just a different camera. Admin tile-painting asks for Top-down
 - **On a laptop:** arrows or WASD walk (capitals and non-QWERTY layouts included since
   `mq-v52`), Enter talks to the person in front of you. The joystick and d-pad are for
   touch; pick *Swipe* in Settings to hide them on a desktop.
-- **A save from before `mq-v52` may play the mercado's Saturday once more** at Continue:
+- **A save from before `mq-v52` may play the mercado's last visit once more** at Continue:
   the old loader reset the district counter on every open, and the repair replays only a
-  Saturday the save never recorded as claimed. After "Out to the street" the toast names
+  last visit the save never recorded as claimed. After "Out to the street" the toast names
   the lot that opened.
 
 - A toast can briefly float over an open settings panel.
