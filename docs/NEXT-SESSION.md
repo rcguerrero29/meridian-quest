@@ -5,7 +5,30 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-17, end of the stairs-and-doors sitting)
 
-### ⇢ 2026-09-17 — START HERE. Everything below this line is history.
+### ⇢ 2026-09-17, later — START HERE.
+
+**PR #209 merged.** `main` is at `mq-v174`. This branch carries three more commits and is at
+**`mq-v176` / `ch-v126`**, pushed, not merged. Five suites green on both games at every commit.
+
+**The four the owner signed off, in the order he took them:**
+- **T3 — the last visit is not a trophy.** It printed `🏆 AI LEGEND` over the closing scene of a
+  bakery. It prints the trade now: *Street food · AI Product Manager*.
+- **#208 — CLOSED.** An ending may pay off a scene; it may not stage one again. It was never only La
+  Espiga: twelve strings across six districts, both languages. Both halves fixed — the prose, and
+  `chClose` (a district closes on its count AND on the visit that ends it).
+- **T2 — the first screen.** Stopped opening on "fine-tuned", names the city as it actually is, and
+  the street finally has ONE name (`locs.st` said Meridian Street while every toast said Calle
+  Principal).
+- **T4 — no two places end the same way.** *"Saturday."* opened nine endings. Fourteen openers
+  rewritten, the burnout endings too, Tacho stops learning on Chelo's floor, and the panel's ranking
+  is inverted so the story is the biggest thing on it.
+
+**Open, and named rather than hidden:** `in3` still advertises the rank ladder on the first screen
+and the top of it arrives at twelve clean answers of eighty-eight — the balance question la junta
+raised and nobody has taken. Raised TILE art in the iso camera still does not lift. **C** from A16
+(one building, one world) is costed and recommended against.
+
+### ⇢ 2026-09-17 — history from here down.
 
 **This branch (`claude/upbeat-planck-0718c6`) is at `mq-v174` / `ch-v124`, pushed, not merged.**
 Merge is the owner's word. Five suites green on both games at every commit.
