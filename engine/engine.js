@@ -473,7 +473,21 @@ auditReach().forEach(p=>mqwarn("reach",p,true));
    stays a template — retune the bar there, never here. */
 const CHS=()=>(typeof CHAPTERS!=="undefined"&&CHAPTERS.length)
   ?CHAPTERS:[{id:"all",quests:QEN.map((_,i)=>i),need:QEN.length}];
-const chClosed=c=>c.quests.filter(i=>done.has(i)).length>=c.need;
+/* A DISTRICT CLOSES ON A COUNT — AND, IF IT NAMES ONE, ON A PARTICULAR QUEST (#208).
+   It was the count alone, so a district's LAST VISIT was optional: with `need:5` of 8, any five
+   answers fired the ending while the closing quest stayed open with a ❗ over the person who asks
+   it. La Espiga told you how its story ended and then Doña Licha was still standing there asking
+   the question the ending had already answered — and the page the ending says is above the oven is
+   pinned there in that quest's own outcome, so on a skip the ending claimed a thing nobody wrote.
+   So a district closes on its count AND on the visit that ENDS it. You may still skip anything
+   else — ❗La puerta's rule holds, a full sweep is never required, and HQ is still a place you can
+   come back to. The quest that ends a district is the LAST ONE IT LISTS, which is a rule and not a
+   guess: the array is the order the district is written in, and its last entry is its last visit in
+   all seven of Meridian's. A pack that orders its quests some other way says `close:<index>`; a
+   pack that wants the old pure count says `close:null`. Nothing is written down twice. */
+const chClose=c=>c.close!==undefined?c.close:((c.quests&&c.quests.length)?c.quests[c.quests.length-1]:null);
+const chClosed=c=>{const k=chClose(c);
+  return c.quests.filter(i=>done.has(i)).length>=c.need&&(k===null||done.has(k));};
 /* `chSeen` is how far the city has GROWN — the newest district that has opened.
    It is not a cursor that closes things behind you. A district reaching its `need`
    plays its ending beat and breaks ground on the next lot; its quests stay open
@@ -4596,7 +4610,17 @@ function finish(burnout){
   $("card").hidden=true;$("world").hidden=true;
   const L=CHS(),i=Math.min(chSeen,L.length-1),last=i>=L.length-1;
   const t=T(),g=gradeOf(L[i]);   /* the grade picks the ending — hearts never did the work */
-  $("endTitle").textContent=burnout?t.goTitle:`🏆 ${lvlName()}`;
+  /* THE LAST VISIT IS NOT A TROPHY (T3, la junta 2026-09-17). This printed `🏆 AI LEGEND` — the
+     global rank — over the closing scene of a bakery, and it contradicted the game's own purpose in
+     the one place a player looks hardest. The rank is the wrong thing twice over: it is not about
+     the district you just finished, and it is reached at TWELVE clean answers of eighty-eight
+     scoring decisions (LEVELS tops out at 120 XP against MAXXP 880), so it is already maximal for
+     most of the game and says nothing at all by the third ending.
+     What belongs there is what you just practised — "Bakery · Operations Analyst" — which is also
+     the line a person would put on a CV, and is already what the decision report prints.
+     A pack that declares no trade for the district falls back to the grade it just earned, which
+     is at least ABOUT this district; nothing new is demanded of a future game. */
+  $("endTitle").textContent=burnout?t.goTitle:(chTrade(i)||(t.grades&&t.grades[g-1])||"");
   $("endScore").textContent=burnout?t.goScore(xp,done.size,AQ().length)
                            :livesOn()?t.endScore(xp,MAXXP,Math.max(0,hearts))
                            :t.endGrade(xp,MAXXP,t.grades[g-1]);
@@ -5172,6 +5196,14 @@ function logDecision(o,c){const n=(curQ&&curQ.nodes[node])||{};
   if(!mqStore(SK("dlog"),JSON.stringify(dlog))&&!dlogWarned){dlogWarned=true;
     console.warn("RECORD: the phone refused to store the play log ("+dlog.length+" entries) — it stays in memory this session");}}
 let dlogWarned=false;
+/* WHAT A DISTRICT WAS PRACTICE FOR — "industry · role", in the player's language (❗El giro:
+   industry leads, role follows, so five engagements read as five trades and not one title).
+   One reader, because it is printed in two places now: the decision report, and the last visit's
+   own title (T3, la junta 2026-09-17). A pack that declares neither gets null, and each caller
+   decides what to do with nothing rather than this function inventing a word. */
+function chTrade(i){const c=CHS()[i];if(!c||!c.role)return null;
+  const ind=c.industry&&(c.industry[lang]||c.industry.en);
+  return (ind?ind+" · ":"")+(c.role[lang]||c.role.en);}
 /* Which job a quest was practice for. Chapters declare their role in content;
    entries logged before roles existed are matched back by title. */
 function roleOf(e){
@@ -5179,9 +5211,7 @@ function roleOf(e){
   let qi=typeof e.qi==="number"?e.qi:-2;
   if(qi===-2){const i=AQ().findIndex(q=>q.title===e.quest);qi=i<0?-2:i;}
   if(qi<0)return null;
-  for(let i=0;i<L.length;i++)
-    if(L[i].quests.indexOf(qi)>=0&&L[i].role){const c=L[i],ind=c.industry&&(c.industry[lang]||c.industry.en);
-      return (ind?ind+" · ":"")+(c.role[lang]||c.role.en);} /* industry leads, role follows (❗El giro) */
+  for(let i=0;i<L.length;i++)if(L[i].quests.indexOf(qi)>=0&&L[i].role)return chTrade(i);
   return null;
 }
 /* The decision report: play data → a portfolio document. One section per quest, one

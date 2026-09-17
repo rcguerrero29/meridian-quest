@@ -330,12 +330,41 @@ const CANDIDATES = [
       if (!lu || lu.x !== 7 || lu.y !== 7) problems.push('Lupe did not move streetside after a rewind + rebuild'); }
     if (auditReach().length) problems.push('post-mercado reachability: ' + auditReach().join(' | '));
 
-    // every district from the mercado on closes at `need`, not at the full pack; every one
-    // but the last hands over to the next lot, and the last returns you to the city
+    // every district from the mercado on closes at `need` AND on the visit that ends it — never on
+    // a full sweep; every one but the last hands over to the next lot, and the last returns you to
+    // the city.
+    //
+    // #208 changed what "closed" means and this block had to follow it. It answered the FIRST
+    // `need` quests, which under the old pure count was enough — and that is exactly the hole the
+    // owner's bug lived in: the closing visit sat outside the count, so a district could tell you
+    // how its story ended while the person who ends it was still standing there with the question.
+    // The claim worth keeping is unchanged and is checked below: you never have to answer them all.
     for (let ci = 1; ci < CHAPTERS.length; ci++) {
-      const c = CHAPTERS[ci], last = ci === CHAPTERS.length - 1;
+      const c = CHAPTERS[ci], last = ci === CHAPTERS.length - 1, k = chClose(c);
       if (!(c.need < c.quests.length)) problems.push(`district ${c.id}: need must be lower than its pack size`);
-      c.quests.slice(0, c.need).forEach(i => done.add(i));
+      if (k !== null && c.quests.indexOf(k) < 0) problems.push(`district ${c.id}: the quest it closes on (${k}) is not one of its own`);
+      // the count alone, WITHOUT the closing visit, must not be enough
+      if (k !== null) {
+        /* a probe, and it must LEAVE NOTHING BEHIND: its answers were still in `done` when the real
+           set was built below, which turned la esquina's three-of-four into a full sweep and failed
+           a rule the game was keeping. A check that dirties the state it shares is a check that
+           breaks the next one. */
+        const before = new Set(done);
+        c.quests.filter(i => i !== k).slice(0, c.need).forEach(i => done.add(i));
+        if (chDue()) problems.push(`district ${c.id} closed on ${c.need} answers that skipped its last visit — the ending can play before the quest that ends it`);
+        /* `done` is cumulative across the districts this loop has already walked, so its SIZE is not
+           this district's tally — the first draft compared a global count against one district's
+           length and failed every district while the game was behaving. Count this district's own. */
+        if (c.quests.every(i => done.has(i))) problems.push(`district ${c.id}: the check needed every quest, so it proved nothing`);
+        done = before;
+      }
+      /* the closing visit AND need-1 others — `need` answers in total, one of which is the closer.
+         Taking the first `need` and then adding the closer answers need+1 and made la esquina
+         (need:3 of 4) look like a full sweep when it is three of four. The guard was building a
+         set the rule does not ask for. */
+      if (k !== null) done.add(k);
+      c.quests.filter(i => i !== k).slice(0, Math.max(0, c.need - (k === null ? 0 : 1))).forEach(i => done.add(i));
+      if (c.quests.every(i => done.has(i))) problems.push(`district ${c.id} only closes on a full sweep — ❗La puerta says a place you cannot come back to is the one thing this city does not have`);
       if (!chDue()) problems.push(`district ${c.id} did not close at its need threshold`);
       finish();
       if (!document.getElementById('epi').textContent) problems.push(`district ${c.id}: no ending text`);
@@ -2320,7 +2349,11 @@ const CANDIDATES = [
       await page.evaluate(sv => localStorage.setItem('mq1', JSON.stringify(sv)), sv);
       await page.reload(); await page.waitForTimeout(900); };
     await page.evaluate(() => localStorage.setItem('mqctl', 'joy'));
-    await inject({ n: 'Keep', c: '', lk: {}, xp: 230, he: 3, d: [0,1,2,3,4,5,6,7,8,9,10,11,12], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 0, mk: {}, so: [], v: 2 });
+    /* 15 is in the list since #208: a district closes on its count AND on the visit that ends it
+       (chClose — the last quest it lists), so thirteen answers that skip the closing quest no longer
+       bring a last visit due. The fixture's job is "a save with a last visit due", and what that
+       means changed; the numbers follow the definition rather than the definition following them. */
+    await inject({ n: 'Keep', c: '', lk: {}, xp: 230, he: 3, d: [0,1,2,3,4,5,6,7,8,9,10,11,12,15], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 0, mk: {}, so: [], v: 2 });
     await page.click('#continueBtn'); await page.waitForTimeout(300);
     let st = await page.evaluate(() => ({ end: $('end').hidden }));
     if (st.end) fails.push('a last visit due at Continue did not play');
@@ -2339,10 +2372,24 @@ const CANDIDATES = [
     // counted as claimed (the mercado was started); the mercado's last visit is still due
     await inject({ n: 'Keep', c: '', lk: {}, xp: 350, he: 3, d: [...Array(24).keys()], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 0, mk: {}, so: [] });
     await page.click('#continueBtn'); await page.waitForTimeout(300);
-    st = await page.evaluate(() => ({ end: $('end').hidden, cs: chSeen, epi: $('epi').textContent.slice(0, 40) }));
+    /* WHICH ending played is asked by its KEY, not by its words. This matched the printed prose
+       against /^Saturday, closing/ — a proxy for the string key, and one that would have gone red
+       the moment anybody rewrote the mercado's last visit, which is exactly what #208 asks for. A
+       guard that pins prose is a guard that forbids editing it. */
+    st = await page.evaluate(() => {
+      const t = UI[lang], c = CHAPTERS[1], pre = c.epi || 'epi';
+      const shown = $('epi').textContent, mine = [t[pre + '1'], t[pre + '2'], t[pre + '3']];
+      return { end: $('end').hidden, cs: chSeen, mine: mine.indexOf(shown), title: $('endTitle').textContent,
+               trade: (typeof chTrade === 'function') ? chTrade(1) : null, rank: lvlName(), head: shown.slice(0, 40) };
+    });
     if (st.cs !== 1) fails.push('a damaged save was not rebuilt: chSeen ' + st.cs);
     if (st.end) fails.push('the mercado last visit, never claimed on the damaged save, did not play');
-    if (!/^Saturday, closing/.test(st.epi)) fails.push('the wrong last visit played for the damaged save: ' + st.epi);
+    if (st.mine < 0) fails.push('the wrong last visit played for the damaged save — the text on screen is not one of the mercado\'s three: ' + st.head);
+    /* T3: the last visit says what you PRACTISED, never what rank you are. It printed
+       "🏆 AI LEGEND" over the closing scene of a grocer's. */
+    if (/🏆/.test(st.title)) fails.push('the last visit is still crowned with a trophy: ' + st.title);
+    if (st.title === st.rank) fails.push('the last visit is titled with the global rank ("' + st.rank + '") instead of the trade the district was practice for');
+    if (st.trade && st.title !== st.trade) fails.push('the last visit is titled "' + st.title + '" and the district was practice for "' + st.trade + '"');
     await page.click('#endGo'); await page.waitForTimeout(400);
     st = await page.evaluate(() => ({ cs: chSeen, seen: seenOpen.has('tallerToast'), v: (JSON.parse(localStorage.getItem('mq1')) || {}).v }));
     if (st.cs !== 2 || !st.seen || st.v !== 2) fails.push('after the mercado last visit: ' + JSON.stringify(st));
@@ -2804,6 +2851,55 @@ const CANDIDATES = [
       return P;
     });
     fails.push(...onmap);
+
+    /* #208 — AN ENDING MAY PAY OFF A SCENE; IT MAY NOT STAGE ONE AGAIN.
+       Reported by a narrative designer, not by a test: La Espiga tells you how its story ended, and
+       then Doña Licha is still standing there with a question about the same afternoon — the two
+       texts opened with the SAME SENTENCE. It happens because a district closes on a COUNT
+       (`need`), so its last-visit quest is optional and the ending can fire first.
+
+       Measured before writing anything, which is the only reason the fix is the right size: it was
+       never only La Espiga. TWELVE ending strings across SIX districts shared a seven-word verbatim
+       run with their own quests, in both languages, and in four cases the ending re-played the exact
+       outcome beat the quest already plays — so a player who DID the quest watched it happen twice,
+       and a player who skipped it was shown it happening and then offered it as pending. One bug,
+       two faces, one fix: the ending reports the state that beat left behind.
+
+       SEVEN WORDS, and the number is not arbitrary. At six it flags an ending for NAMING THE SAME
+       OBJECT as its quest — "on the wall by the register" — which an ending has to be allowed to do,
+       and which Spanish reaches sooner than English because it takes more words to say the same
+       thing. At seven, nothing survives that is not a copied sentence. The longest run is printed
+       either way, so the margin is visible and drift shows up before it becomes a failure. */
+    const echo = await page.evaluate(() => {
+      const P = [], text = n => { const s = []; const walk = v => { if (typeof v === 'string') s.push(v);
+        else if (v && typeof v === 'object') Object.values(v).forEach(walk); }; walk(n); return s.join(' '); };
+      const norm = t => t.toLowerCase().replace(/[^a-z0-9áéíóúñü ]/g, ' ').split(/\s+/).filter(Boolean);
+      const runs = (a, n) => { const S = new Set(); for (let i = 0; i + n <= a.length; i++) S.add(a.slice(i, i + n).join(' ')); return S; };
+      const N = 7;
+      let longest = 0, longestAt = '';
+      [['en', UI.en, QEN], ['es', UI.es, QES]].forEach(([tag, T, Q]) => {
+        CHAPTERS.forEach(c => {
+          const pre = c.epi || 'epi';
+          const qn = norm((c.quests || []).map(i => Q[i] ? text(Q[i]) : '').join(' '));
+          ['1', '2', '3'].forEach(k => {
+            const e = T[pre + k]; if (typeof e !== 'string') return;
+            const en = norm(e);
+            for (let n = 14; n >= 3; n--) {
+              const QR = runs(qn, n), hit = [...runs(en, n)].find(r => QR.has(r));
+              if (!hit) continue;
+              if (n > longest) { longest = n; longestAt = tag + ' ' + pre + k + ' "' + hit + '"'; }
+              if (n >= N) P.push('the ' + tag + ' ending "' + pre + k + '" repeats ' + n + ' words of its own district\'s quest text word for word — "' + hit +
+                '" — so the last visit and a quest that may still be pending describe the same moment');
+              break;
+            }
+          });
+        });
+      });
+      P.push('COUNT-ONLY: the longest run an ending shares with its own quests is ' + longest + ' words (' + longestAt + '); ' + N + ' fails');
+      return P;
+    });
+    fails.push(...echo.filter(l => !/^COUNT-ONLY: /.test(l)));
+    echo.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
     // townsfolk: people with no quests move, people with quests never do
     const walk = await page.evaluate(async () => {

@@ -1628,7 +1628,13 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     const keepSeen = chSeen, keepDone = new Set(done);
     // close the district the city is currently on
     chSeen = 0; done.clear();
-    (L[0].quests || []).slice(0, L[0].need).forEach(i => done.add(i));
+    /* "all the answers it asks for" is the count AND, since #208, the visit that ends the district —
+       a place does not finish while the person who closes it is still standing there with the
+       question. `chClose` is the engine's own answer to which quest that is, so this asks the engine
+       rather than assuming the first `need` will do. */
+    const k0 = (typeof chClose === 'function') ? chClose(L[0]) : null;
+    if (k0 !== null && k0 !== undefined) done.add(k0);
+    (L[0].quests || []).filter(i => i !== k0).slice(0, Math.max(0, L[0].need - (k0 === null || k0 === undefined ? 0 : 1))).forEach(i => done.add(i));
     if (!chOpenDue())
       P.push('#156: the first district has all the answers it asks for and the city does not consider it finished');
     // the ceremony is the ONLY thing ENDLESS may touch
