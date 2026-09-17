@@ -220,7 +220,7 @@ const CANDIDATES = [
       assigned.add(qi); if (!QEN[qi]) problems.push('WNPC references missing quest ' + qi);
     })));
     QEN.forEach((_, i) => { if (!assigned.has(i)) problems.push('quest ' + i + ' unassigned'); });
-    // every district's Saturday is written in both languages: three endings, the burnout,
+    // every district's last visit is written in both languages: three endings, the burnout,
     // and the toast that opens the next lot (or says nothing opens). A chapter wired
     // to a missing key would print "undefined" on the one screen the player waited for.
     CHS().forEach((c, i) => { const k = epiKeys(i, i === CHS().length - 1);
@@ -401,7 +401,7 @@ const CANDIDATES = [
       if (!tovar || pendingAt(tovar) === undefined) problems.push('an unanswered quest lost its marker when its district closed'); }
     if (!qOpen(16)) problems.push('the new chapter\'s quests are not on offer');
 
-    // a quest answered after its district's Saturday gets its reframe line, at the
+    // a quest answered after its district's last visit gets its reframe line, at the
     // opening node only. Content's call: no `late` field, no line, nothing breaks.
     if (!qLate(0)) problems.push('a Week One quest does not read as late once the mercado opened');
     if (qLate(16)) problems.push('the district being played reads as late');
@@ -1766,7 +1766,7 @@ const CANDIDATES = [
 
   // ---- a district declares its own ending strings and its own "next lot" toast ----
   // The engine held exactly two ending sets (Week One's and the mercado's), so a third
-  // district would print the wrong Saturday. Now a district may say which strings are
+  // district would print the wrong last visit. Now a district may say which strings are
   // its own; with nothing declared the old two-set behaviour stands.
   const epis = await page.evaluate(() => {
     const problems = [];
@@ -2314,7 +2314,7 @@ const CANDIDATES = [
     else if (b3.glyphs.includes('P')) fails.push('a plant became a box');
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; camSet('3d'); });
 
-    // Continue with a Saturday due: it plays once, the street is not blank, the counter persists
+    // Continue with a last visit due: it plays once, the street is not blank, the counter persists
     // pagehide writes the loaded hero over anything injected, so inject on a page with nobody loaded
     const inject = async sv => { await page.reload(); await page.waitForTimeout(500);
       await page.evaluate(sv => localStorage.setItem('mq1', JSON.stringify(sv)), sv);
@@ -2323,29 +2323,29 @@ const CANDIDATES = [
     await inject({ n: 'Keep', c: '', lk: {}, xp: 230, he: 3, d: [0,1,2,3,4,5,6,7,8,9,10,11,12], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 0, mk: {}, so: [], v: 2 });
     await page.click('#continueBtn'); await page.waitForTimeout(300);
     let st = await page.evaluate(() => ({ end: $('end').hidden }));
-    if (st.end) fails.push('a Saturday due at Continue did not play');
+    if (st.end) fails.push('a last visit due at Continue did not play');
     await page.click('#endGo'); await page.waitForTimeout(400);
     st = await page.evaluate(() => ({ end: $('end').hidden, world: $('world').hidden, h: parseFloat(cv.style.height) || 0, joy: $('joy').hidden, cs: chSeen, saved: (JSON.parse(localStorage.getItem('mq1')) || {}).cs }));
     if (!st.end || st.world) fails.push('after "Out to the street" the world is not showing');
-    if (!(st.h > 0)) fails.push('the street is blank after a Saturday claimed from Continue (canvas height ' + st.h + ')');
-    if (st.joy) fails.push('the joystick is missing after a Saturday claimed from Continue');
+    if (!(st.h > 0)) fails.push('the street is blank after a last visit claimed from Continue (canvas height ' + st.h + ')');
+    if (st.joy) fails.push('the joystick is missing after a last visit claimed from Continue');
     if (st.cs !== 1 || st.saved !== 1) fails.push('the district counter did not persist: memory ' + st.cs + ', saved ' + st.saved);
     await page.reload(); await page.waitForTimeout(900);
     await page.click('#continueBtn'); await page.waitForTimeout(300);
     st = await page.evaluate(() => ({ end: $('end').hidden, cs: chSeen }));
-    if (!st.end) fails.push('the Saturday played again on the next open');
+    if (!st.end) fails.push('the last visit played again on the next open');
     if (st.cs !== 1) fails.push('chSeen after reopening: ' + st.cs);
     // a pre-fix save: played through the mercado, counter reset to 0 by the bug. Week One is
-    // counted as claimed (the mercado was started); the mercado's Saturday is still due
+    // counted as claimed (the mercado was started); the mercado's last visit is still due
     await inject({ n: 'Keep', c: '', lk: {}, xp: 350, he: 3, d: [...Array(24).keys()], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 0, mk: {}, so: [] });
     await page.click('#continueBtn'); await page.waitForTimeout(300);
     st = await page.evaluate(() => ({ end: $('end').hidden, cs: chSeen, epi: $('epi').textContent.slice(0, 40) }));
     if (st.cs !== 1) fails.push('a damaged save was not rebuilt: chSeen ' + st.cs);
-    if (st.end) fails.push('the mercado Saturday, never claimed on the damaged save, did not play');
-    if (!/^Saturday, closing/.test(st.epi)) fails.push('the wrong Saturday played for the damaged save: ' + st.epi);
+    if (st.end) fails.push('the mercado last visit, never claimed on the damaged save, did not play');
+    if (!/^Saturday, closing/.test(st.epi)) fails.push('the wrong last visit played for the damaged save: ' + st.epi);
     await page.click('#endGo'); await page.waitForTimeout(400);
     st = await page.evaluate(() => ({ cs: chSeen, seen: seenOpen.has('tallerToast'), v: (JSON.parse(localStorage.getItem('mq1')) || {}).v }));
-    if (st.cs !== 2 || !st.seen || st.v !== 2) fails.push('after the mercado Saturday: ' + JSON.stringify(st));
+    if (st.cs !== 2 || !st.seen || st.v !== 2) fails.push('after the mercado last visit: ' + JSON.stringify(st));
     // a lot that opened while the phone was away is announced once at Continue
     await inject({ n: 'Keep', c: '', lk: {}, xp: 350, he: 3, d: [...Array(24).keys()], px: 6, py: 12, tr: 0, fq: 0, w: 'st', wr: {}, wc: {}, qa: {}, cs: 2, mk: {}, so: [], v: 2 });
     await page.click('#continueBtn'); await page.waitForTimeout(1900);

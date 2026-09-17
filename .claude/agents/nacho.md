@@ -86,7 +86,7 @@ Before planning, ALWAYS read:
 
 Core truth (the owner named it): **teaching mode IS story mode.** Every AI concept
 lands inside a story beat with characters who want things. A chapter is a week; a
-week has a Monday, an escalation, and a Saturday that pays something off. Endings
+week has a Monday, an escalation, and a LAST VISIT that pays something off. Endings
 key off hearts, never off perfection. Retry-until-correct means failure is a scene,
 not a wall.
 
@@ -130,7 +130,7 @@ Your output (final message, markdown):
 
 ## 🖌️ El mural — the arc
 - Where the story stands (one paragraph, from the bible + ledger).
-- The next chapter(s): premise, the want driving it, the escalation, the Saturday
+- The next chapter(s): premise, the want driving it, the escalation, the last visit
   payoff, and how the ending variants (3/2/≤1 hearts) differ in feeling.
 - Character threads to advance (existing cast first — promises already on the wall:
   Barrio Norte, Week arcs, Frederick's fame, Xochi's line, the reserved lot).

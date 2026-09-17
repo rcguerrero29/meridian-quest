@@ -34,6 +34,33 @@ livelihood; every quest is a judgment call with a face attached. Bilingual EN/ES
   and only that. *(signed 2026-09-01, ❗El listón; SCOPE CORRECTED 2026-09-02 — the
   session, not the owner, generalised it to every ending in the game and then cited it
   against `finish()`. See docs/OWNER.md.)* A DISTRICT's last visit is a separate call.
+### La esquina (2026-09-17) — Doña Meche's corner
+
+The barrio's smallest business got a page. **Measured, not assumed: nobody on Calle Dos had ever
+carried a ❗ in any chapter state** — six people, six empty quest queues, a street dressed for a
+fiesta that never needed you. Doña Meche carries it: a pot, a folding table, a corner she owns by
+standing on it, and the only business in Meridian with no door, no employee and no register. Four
+quests, `need:3`, appended last so no save's `chSeen` moves.
+
+The craft is the mercado's — **AI product manager** — in the opposite room, which is ❗El giro's own
+proof that a skill transfers: *the user is not the requester* (she asked for an app; the person
+hurting is four blocks up the street), *design for the hand that is busy* (a sign flipped with a wet
+wrist beats a screen at nine in the morning), *a refusal must hand off to somebody who exists* (there
+is no representative; there is Meche at four in the afternoon), *one record, claimed* (a delivery app
+was already answering questions in her name, from a photograph of her own hands), and the last visit
+— **a solution is a template plus somebody else's own record**, which is the sentence this city owes
+a man who intends to sell this skill onward.
+
+**The office sends you** *(owner, 2026-09-17: "ok yeah lets do the office sending me")* — not
+Nolasco. A page you wrote is on your own office wall and there is a name on it you have walked past
+forty times. It costs no canon change (*"Nolasco's door opens nothing"* stands) and it makes the
+office mean something for the first time.
+
+**Doña Chayo of Quinta** is the next offstage name to take a tile — atole, forty years, and her sign
+says *YA MERO* instead of *SE ACABÓ*, because atole does not end, it thins. **Vapor**, the trolley
+stop's cat, belongs to nobody and has decided the pot is the warmest object on Calle Dos; she is in
+all three endings and owns nothing, which is the rule the corner teaches about everything on it.
+
 - **A district needs FOUR quests and a `need` of THREE, minimum — or one of its endings is
   fiction.** *(2026-09-16, found by Nacho while costing la esquina; corrected in `docs/CITY.md`
   on the owner's word 2026-09-17.)* `gradeOf` grades on the fraction of **answered** quests that

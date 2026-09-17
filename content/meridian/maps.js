@@ -344,5 +344,9 @@ const DECOR=[
  {world:"st",x:23,y:0,deco:"panel",id:"taller",   c:"#3B4650"},
  {world:"st",x:24,y:0,deco:"panel",id:"espiga",   c:"#C98A2D"},
  {world:"st",x:25,y:0,deco:"panel",id:"velazquez",c:"#2E8AA8"},
- {world:"st",x:26,y:0,deco:"panel",id:"nolasco",  c:"#4E7A4A"}
+ {world:"st",x:26,y:0,deco:"panel",id:"nolasco",  c:"#4E7A4A"},
+ /* ❗La esquina. Masa cream, and the colour is the one choice here with a reason: the other six
+    panels are all mid-to-dark (luma 96–146) and this is 213.6, so the newest district is the one
+    that reads first on a wall that is getting crowded — and masa is what she actually works with. */
+ {world:"st",x:27,y:0,deco:"panel",id:"esquina",  c:"#E8D5A8"}
 ];

@@ -1,6 +1,6 @@
 /* game version — MUST match sw.js CACHE (the smoke test enforces the lockstep) */
 const GAMENAME="Meridian Quest"; /* the engine prints the name; the pack owns it */
-const GAMEV="mq-v167";
+const GAMEV="mq-v168";
 /* Meridian Quest content pack — game tuning: level thresholds, total XP, chapters. */
 const LEVELS=[0,45,90,120];
 /* default camera for this pack. TRUE 3D as of 2026-09-01 (owner: "please make 3d
@@ -8,7 +8,7 @@ const LEVELS=[0,45,90,120];
    and is still one tap away. A device's own Settings choice always wins, and the
    renderer falls back to front-profile by itself if 3D cannot run on the device. */
 const CAMDEF="3d";
-const MAXXP=830;
+const MAXXP=880;   /* +50 for la esquina: 10 a quest x4, and 10 for the one choice that carries `next` */
 /* Which of this world's rooms play which ROLE for the engine (#25, the PLACES seam). The engine
    never assumes a room name; it asks this table. Meridian's answer is the engine's default table,
    key for key (the smoke fails the build if they drift), written out here so the metadata lives
@@ -80,7 +80,7 @@ const GROWTH={
       (Tacho's, Nolasco's), Vero's crew hauls two boxes away, and Chelo's corner and Licha's
       chair land on open floor (BACKLOG §6; corrected 2026-09-05 — this comment used to say
       each one lands on a box). No doorstep on a gift, so the handover never stands you upstairs. */
- /* the wall: blank paper from day one, and a district's Saturday pins its own page over it.
+ /* the wall: blank paper from day one, and a district's last visit pins its own page over it.
     The document behind it is DOCS[<id>] in content/meridian/docs.js. */
  {id:"poster-labs",world:"f2",district:1,tiles:[[0,2,"▤"]],
   say:{en:"Somebody pinned your Meridian Labs decision log to the office wall upstairs. Go up the stairs in HQ and read it.",es:"Alguien prendió tu bitácora de Meridian Labs en la pared de la oficina de arriba. Sube las escaleras en HQ y léela."}},
@@ -222,7 +222,7 @@ const CHAPTERS=[
     the city whose law is that you always can. */
  /* epi: the prefix of this district's three ending strings in strings.js (epi1..3);
     go: its burnout ending; open: the toast when the next lot opens. Declared here so a
-    third district never prints another one's Saturday. */
+    third district never prints another one's last visit. */
  {id:"principal",quests:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],need:12,
   epi:"epi",go:"goEpi",open:"weekTwoToast",
   industry:{en:"Enterprise IT",es:"TI empresarial"},
@@ -231,7 +231,7 @@ const CHAPTERS=[
   epi:"mepi",go:"mgoEpi",open:"tallerToast",
   industry:{en:"Grocery retail",es:"Abarrotes"},
   role:{en:"AI Product Manager",es:"Product Manager de IA"}},
- /* Las cuatro puertas (2026-09-02): each district's Saturday phones the next lot from
+ /* Las cuatro puertas (2026-09-02): each district's last visit phones the next lot from
     inside its own ending strings (the engine cannot grade a toast), and its `open`
     toast announces the lot. The last door opens nothing — la inauguración is later.
     `industry` is the room the role is practised in (❗El giro): the report prints
@@ -249,7 +249,20 @@ const CHAPTERS=[
   industry:{en:"Commercial cleaning",es:"Limpieza comercial"},
   role:{en:"AI Adoption Lead",es:"Líder de Adopción de IA"}},
  {id:"nolasco",quests:[48,49,50,51,52,53,54,55],need:5,
-  epi:"nepi",go:"ngoEpi",open:"lastToast",
+  epi:"nepi",go:"ngoEpi",open:"esquinaToast",
   industry:{en:"Tax & notary",es:"Impuestos y notaría"},
-  role:{en:"Prompt & Solutions Engineer",es:"Ingeniero de Prompts y Soluciones"}}
+  role:{en:"Prompt & Solutions Engineer",es:"Ingeniero de Prompts y Soluciones"}},
+ /* ❗La esquina (2026-09-17, owner: "ok please with meche then"). APPENDED, and it has to be:
+    `chSeen` is a SAVED INTEGER INDEX into this array, and GROWTH.ribbons compare hardcoded
+    district numbers against it — insert a district anywhere but the end and every existing save
+    points at a different district and every ribbon and poster moves. Same trap as quest indices
+    (docs/OPEN.md §4), one level up.
+    FOUR quests and need:3, never three and two: `gradeOf` grades the first-try fraction of
+    ANSWERED quests and the last visit fires the instant `need` is met, so a two-answer bar can
+    only ever produce grades 1 and 3 — the middle ending would be written and never played.
+    Calle Dos had six people and not one of them ever carried a ❗, in any chapter state. */
+ {id:"esquina",quests:[56,57,58,59],need:3,
+  epi:"esqepi",go:"esqgoEpi",open:"esquinaToast",
+  industry:{en:"Street food",es:"Comida en la calle"},
+  role:{en:"AI Product Manager",es:"Product Manager de IA"}}
 ];
