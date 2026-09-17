@@ -194,9 +194,41 @@ function t3Dispose(obj){
     ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose();});
   });
 }
-function t3Build(key){T3.pinatas=[];
+/* ---------- THE SCENES ARE KEPT (owner, 2026-09-17: "3. ok go for it") ----------
+   There was exactly ONE built scene. Walking through a door threw it away and made another, and
+   the first frame after that had to upload the new geometry as well as draw it — traced on
+   2026-09-17 while building the doorway, a 237ms hole right after the swap, in which the door did
+   not open, it vanished. Measured per world: 1.4ms for the smallest room to 18.4 for Calle
+   Principal, 111ms for all fifteen. So build each one once and keep it.
+
+   What a built scene OWNS is four things — the group, and the three lists the frame loop walks
+   (tintables for the time-of-day wash, glows for the door lights, pinatas for the sway). Parking
+   the group without its lists would leave the wash writing into a scene nobody is looking at.
+
+   EVICTION, because a cache with no ceiling is a leak with a nice name. The key carries `T3.dirty`,
+   which growth and a theme edit bump — so every entry from a previous `dirty` is stale the moment
+   one lands, and those are disposed first. Then LRU down to eight, which is more than the five
+   rooms anyone crosses in a minute and less than every world at once. The active group is never
+   evicted, whatever the order says. */
+const T3CACHE=new Map(), T3CACHE_MAX=8;
+function t3Park(e){if(e.grp===T3.group)return;T3.scene.remove(e.grp);t3Dispose(e.grp);}
+function t3Trim(){
+  const now=String(T3.dirty),stale=[];
+  T3CACHE.forEach((e,k)=>{if(k.slice(k.lastIndexOf("|")+1)!==now)stale.push(k);});
+  stale.forEach(k=>{const e=T3CACHE.get(k);T3CACHE.delete(k);t3Park(e);});
+  while(T3CACHE.size>T3CACHE_MAX){const k=T3CACHE.keys().next().value,e=T3CACHE.get(k);T3CACHE.delete(k);t3Park(e);}}
+function t3Reuse(key){
+  const e=T3CACHE.get(key);if(!e||!e.grp)return false;
+  if(T3.group&&T3.group!==e.grp)T3.scene.remove(T3.group);
+  T3.group=e.grp;T3.tintables=e.tintables;T3.glows=e.glows;T3.pinatas=e.pinatas;
+  if(!e.grp.parent)T3.scene.add(e.grp);
+  T3.builtKey=key;T3CACHE.delete(key);T3CACHE.set(key,e);   /* re-inserting is the LRU touch: a Map keeps insertion order */
+  return true;}
+function t3Build(key){
+  if(t3Reuse(key))return;                       /* already standing; walk back into it */
+  T3.pinatas=[];
   T3.builtKey=key;
-  if(T3.group){T3.scene.remove(T3.group);t3Dispose(T3.group);}
+  if(T3.group)T3.scene.remove(T3.group);        /* parked in T3CACHE, not destroyed — t3Trim disposes it when it goes stale or falls off the end */
   T3.tintables=[];T3.glows=[];
   const grp=T3.group=new THREE.Group();
   const w=CW();
@@ -716,6 +748,8 @@ function t3Build(key){T3.pinatas=[];
         const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.94);sp.scale.set(1,1,1);
         sp.position.set(h.x+0.5,PH+0.02,h.y+0.5);sp.userData={pinata:true,x:h.x,y:h.y};grp.add(sp);T3.pinatas=(T3.pinatas||[]);T3.pinatas.push(sp);});}}
   T3.scene.add(grp);
+  T3CACHE.set(key,{grp,tintables:T3.tintables,glows:T3.glows,pinatas:T3.pinatas});
+  t3Trim();
 }
 function t3Trolley(){ /* the tram on the line; it is never a wall — you may stand where it will pass, and it waits.
   The owner, 2026-09-11: "i mentioned at some point having a driver and stuff as well as wheels, we

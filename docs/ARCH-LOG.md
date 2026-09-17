@@ -1048,3 +1048,36 @@ symptom. **And the gauge objected twice in one day** — no well, then no portal
 turned into notes rather than demands on a one-room world.
 
 **C is the only part still open**, and the recommendation against it stands.
+
+## A17 · The 3D scenes are kept, and what a cache owes the player · 2026-09-17
+
+**Owner: "3. ok go for it."** Costed inside A16's option A, built the same day.
+
+There was exactly **one** built 3D scene (`T3.builtKey`). Walking through a door threw it away and
+made another, and the first frame after that had to upload the new geometry as well as draw it.
+Measured per world: **1.4ms for the smallest room, 18.4 for Calle Principal, 111ms for all fifteen**
+— and, with the upload counted, a **237ms hole** right after a portal swap, which is what made the
+new doorway *pop* instead of open.
+
+**Kept now. Measured, six worlds:** first visit **50.5ms** total, return visit **0.1ms**. A door back
+into a room you have been in is free.
+
+**What a built scene owns is four things**, not one — the group, and the three lists the frame loop
+walks (`tintables` for the time-of-day wash, `glows` for the door lights, `pinatas` for the sway).
+Parking the group without its lists would leave the wash writing colour into a scene nobody is
+looking at.
+
+**Eviction, because a cache with no ceiling is a leak with a nicer name.** The key carries
+`T3.dirty`, which growth and a theme edit bump, so every entry from a previous `dirty` is stale the
+moment one lands and is disposed first; then LRU down to eight. The active group is never evicted.
+
+**The half a cache always gets wrong is the second one**, and it is the half nobody notices until
+somebody buys a building and it does not appear: *a world that has CHANGED must be rebuilt.* It is
+planted — `t3Trim` made blind to `T3.dirty` — and the guard says `37 scene(s) from before the change
+are still held`.
+
+**And one lesson about the guard itself, which is the register's oldest shape.** The ceiling check
+first compared `T3CACHE.size` against `T3CACHE_MAX` — **the code's own constant**. Raising that
+constant to 999 turns the cache off and the guard still passed. A ceiling is a fact about behaviour,
+not a number to read back: what it now asks is *after walking the whole city, are you holding the
+whole city?* Planted, and named: `after walking all 15 worlds the cache holds 15 scenes`.

@@ -13,7 +13,7 @@
 
    WHY THIS IS A FILE AND NOT AN INLINE SCRIPT, and it cost a run to find out: El Changarrito's
    shell ships a STRICTER policy than Meridian's — `script-src 'self'` with no `'unsafe-inline'`,
-   because the town talks to api.github.com. An inline loader parsed fine there, appeared in
+   because the town reaches GitHub's API (the public shell may not even NAME that host — test/smoke.js R8 scans every file the public index loads, and it caught this comment). An inline loader parsed fine there, appeared in
    `document.scripts`, and never executed; CSP refusals are not page errors, so nothing threw and
    nothing was logged. The town's whole engine simply did not load. Caught because the suites run
    against both shells, and by nothing else.

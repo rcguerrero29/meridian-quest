@@ -2130,6 +2130,57 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   fails.push(...doorway.filter(l => !/^COUNT-ONLY: /.test(l)));
   doorway.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
+  /* ---- A ROOM YOU HAVE BEEN IN IS STILL STANDING (owner, 2026-09-17: "3. ok go for it") ----
+     There was one 3D scene, and every door threw it away and built another: 1.4ms for the smallest
+     room, 18.4 for Calle Principal, and a 237ms hole after the swap once the upload is counted —
+     the thing that made the new door POP instead of open. They are kept now.
+
+     Three claims, and the second is the one that matters more than the speed:
+       1. going back into a room does not rebuild it — measured by IDENTITY, not by a stopwatch. The
+          same THREE.Group object, or it was rebuilt;
+       2. a world that has CHANGED is rebuilt — `t3Invalidate` is what growth and a theme edit call,
+          and a cache that ignored it would show a player a city that no longer exists. This is the
+          half a cache gets wrong, and it is the half nobody notices until somebody buys a building
+          and it does not appear;
+       3. and the cache has a ceiling, because a cache without one is a leak with a nicer name. */
+  const scenes = await page.evaluate(() => {
+    const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D, so there are no scenes to keep'];
+    if (typeof T3CACHE === 'undefined') return ['the 3D scenes are not kept — every door rebuilds the world it opens into'];
+    const keep = { world, px, py, cam: camMode };
+    const wd = document.getElementById('world'), wh = wd.hidden; wd.hidden = false;
+    camSet('3d'); sizeCanvas();
+    const ids = Object.keys(WORLDS);
+    const go = w => { world = w; px = fx = 1; py = fy = 1; draw3d(); return T3.group; };
+    const a = ids[0], b = ids[1] || ids[0];
+    const g1 = go(a); go(b); const g2 = go(a);
+    if (g1 !== g2) P.push('walking back into ' + a + ' built it again from nothing — the scene was not kept');
+    /* 2 — and a world that changed is NOT the one you left */
+    if (typeof t3Invalidate === 'function') {
+      t3Invalidate();
+      const g3 = go(a);
+      if (g3 === g2) P.push('the city changed (t3Invalidate) and ' + a + ' was served from the cache anyway — a player would be walking round a city that no longer exists');
+      let stale = 0; T3CACHE.forEach((e, k) => { if (k.slice(k.lastIndexOf('|') + 1) !== String(T3.dirty)) stale++; });
+      if (stale) P.push(stale + ' scene(s) from before the change are still held — they can never be used again and they are holding their textures');
+    }
+    /* 3 — the ceiling */
+    ids.forEach(go);
+    /* the ceiling is asked as a FACT, not as the code's own constant. The first draft compared
+       T3CACHE.size against T3CACHE_MAX — so raising T3CACHE_MAX to 999 turned the cache off and the
+       guard still passed, which is a guard reading the thing it is meant to be checking. Planted
+       exactly that. What "bounded" means here is: after walking the whole city you are not holding
+       the whole city. */
+    const HARD = 16;
+    if (T3CACHE.size > HARD) P.push('after walking every world the cache holds ' + T3CACHE.size + ' scenes — past any ceiling worth having');
+    if (ids.length > 8 && T3CACHE.size >= ids.length)
+      P.push('after walking all ' + ids.length + ' worlds the cache holds ' + T3CACHE.size + ' scenes — it is keeping the entire city and evicting nothing');
+    P.push('COUNT-ONLY: ' + T3CACHE.size + ' 3D scenes kept after walking all ' + ids.length + ' worlds');
+    world = keep.world; px = fx = keep.world === world ? px : 1; py = fy = keep.py; px = keep.px; py = keep.py;
+    camSet(keep.cam); wd.hidden = wh;
+    return P;
+  });
+  fails.push(...scenes);
+
   /* ---- a document may carry a DRAWING, not only words ----
      The owner, 2026-09-11, on the crew mural: "can we have functionality there wehre you see
      tiles/icons from afar but you get close and can interact to see it full screen- then thats how
