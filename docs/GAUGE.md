@@ -66,3 +66,42 @@ thing. The generated shell is gitignored; **never commit one by hand.**
   commit.
 
 That is the whole point: the leak register now has something underneath it that runs.
+
+## 2026-09-17 — a demand disappeared, and this time it was supposed to
+
+**`#140: no tall non-wall piece with room to stand behind it was found in any world — the check never
+ran`** left `content/gauge/expected.txt`, and the gauge did exactly what it exists to do: stopped the
+build and made somebody say why.
+
+**Why it is right.** That line was itself a report of a silent zero — a check that had nothing to
+measure and said so. It only existed because the gauge, a world that declares `CAMERAS=["top",
+"front"]` and wants no 3D camera at all, was **downloading and running the entire 3D engine anyway**
+and being held to 3D demands it had declined. Since `engine/boot.js`, a pack that does not list "3d"
+does not fetch Three.js — a quarter of the download — and the 3D checks now say, once,
+`COUNT-ONLY: this shell declined 3D`, instead of listing a demand nobody owed.
+
+**The template did get easier, for exactly one kind of world, on purpose.** A world that wants a 3D
+camera is held to every one of those checks as before; the gauge proved that in the same run, by
+planting a shell that asks for 3D and does not get it: *"this shell lists a 3D camera and the 3D
+engine never loaded"*.
+
+## COUNT-ONLY — what replaced the note
+
+Owner, 2026-09-17: *"can we make the guards smarter instead of just making them notes?"* He is right,
+and a `NOTE-ONLY` was a shrug: **a guard that says "I measured nothing" is still a guard that measured
+nothing**, and next week nobody reads the note.
+
+The shape that replaced it, and it is the general one:
+
+1. **Derive the demand from what the pack itself declares.** The gauge's maps carry `const
+   PORTALS={}` with *"one room needs no doors"* written beside them. That is a declaration, not an
+   absence, and a guard can read it. A world with no doors owes the door check nothing.
+2. **Cross-check the careful answer with a crude one that cannot break the same way.** "Are there any
+   wells" is asked twice: once through `stairRun`/`wellDepth`, and once by looking for the glyph in
+   the raw rows. **If the crude answer is yes and the careful answer is zero, the detector is broken
+   and that is a failure** — planted by blinding `wellDepth`, and it says so.
+3. **Print the count either way.** `COUNT-ONLY: 2 flights walked in 15 worlds` · `21 portals
+   declared` · `3D declined, 3D engine absent`. A zero is then visible instead of silent, which is
+   the whole of what this register is for, and it is filtered out of the failures in one place at the
+   end so a new check cannot forget to do it.
+

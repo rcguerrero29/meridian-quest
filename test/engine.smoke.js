@@ -49,7 +49,7 @@ function findChromium() {
   await page.route('**', r => r.request().url().startsWith('file://') ? r.continue() : r.abort());
   await page.goto('file://' + file);
   await page.waitForTimeout(1500);
-  const fails = [];
+  let fails = [];
 
   /* ---- in-scene text has a floor (Rosa's 3D note) ----
      Text painted into the world is authored in tile units and the camera decides how big it lands:
@@ -187,10 +187,21 @@ function findChromium() {
     const before = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
     moving = false; held = null;
     const flat = {}, flatIn = {};
+    /* A WORLD THAT DECLINED 3D HAS NO 3D TO CHECK, and since mq-v172 it does not even download the
+       library — so `T3` is not merely failed, it does not exist, and a bare mention of it throws.
+       The gauge found that in one run. The gate is the pack's own `CAMERAS`, cross-checked against
+       whether the engine3d globals actually arrived: a pack that ASKED for 3D and did not get it is
+       a broken shell and says so, which is the difference between this and a shrug. */
+    const wants3d = (typeof CAMS !== 'undefined' ? CAMS : ['3d']).indexOf('3d') >= 0;
+    const has3d = typeof T3 !== 'undefined' && typeof draw3d === 'function' && !!window.THREE;
+    if (wants3d && !has3d) P.push('this shell lists a 3D camera and the 3D engine never loaded — engine/boot.js did not bring it');
+    if (!wants3d && has3d) P.push('this shell lists no 3D camera and downloaded the 3D engine anyway — a quarter of the game, for nothing');
+    P.push('COUNT-ONLY: 3D ' + (wants3d ? 'wanted' : 'declined') + ', 3D engine ' + (has3d ? 'loaded' : 'absent'));
     Object.entries(WORLDS).forEach(([id, w]) => {
       const spot = firstWalkable(w); if (!spot) { P.push(id + ' has no walkable tile'); return; }
       world = id; px = fx = spot[0]; py = fy = spot[1];
       ['top', 'front', 'iso'].forEach(c => { camSet(c); try { draw(); } catch (e) { P.push(id + ' in ' + c + ' throws: ' + e.message); } });
+      if (!has3d) return;                       /* the flat cameras above are still held to account */
       camSet('3d');
       let ok = false; try { ok = draw3d(); } catch (e) { P.push(id + ' in 3d throws: ' + e.message); }
       if (!ok || T3.fail) { P.push(id + ' did not render in 3D'); return; }
@@ -205,7 +216,7 @@ function findChromium() {
       if (glows < doors) P.push(id + ': ' + (doors - glows) + ' door(s) do not say "this one opens" in 3D');
       T3.group.children.forEach(o => { const u = o.userData || {}; if (u.flat) { flat[u.g] = (flat[u.g] || 0) + 1; (flatIn[u.g] = flatIn[u.g] || new Set()).add(id); } });
     });
-    world = before.world; px = fx = before.px; py = fy = before.py; T3.yaw = before.yaw; camSet(before.cam);
+    world = before.world; px = fx = before.px; py = fy = before.py; if (has3d) T3.yaw = before.yaw; camSet(before.cam);
     // ---- #132 / #133: a hair style has to look like its name ----
     // Owner: "long hair looks like a beard, lets call it that, then create one that looks a bit
     // more like long hair only not bearded" and "fro is also offf". Both are claims about pixels,
@@ -373,8 +384,12 @@ function findChromium() {
     /* only if this GAME has a 3D camera. CAMERAS (mq-v133) lets a pack ship without one, and
        camSet refuses a camera the game does not have — so on such a pack the lines below were
        measuring a 3D camera that never ran and failing the build for it. Found by the gauge
-       pack, which declares CAMERAS=["top","front"]: the seam existed and the gate ignored it. */
-    if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
+       pack, which declares CAMERAS=["top","front"]: the seam existed and the gate ignored it.
+       `has3d` as well as `wants3d` since mq-v172: a pack that ASKS for 3D and whose library did not
+       arrive is a broken shell, and it is named by the line above rather than crashing here on a
+       null renderer. Planted (boot.js never loading Three for a pack that wants it) and the crash
+       is what came out until this gate existed — a guard that dies is a guard that reports nothing. */
+    if (has3d && (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0)) {
       const c3 = T3.renderer.domElement, vp = document.getElementById('vp');
       const before = { cam: camMode, w: world, x: px, y: py, hid: document.getElementById('world').hidden };
       document.getElementById('world').hidden = false; /* this suite never enters the world; the box needs to be real */
@@ -451,7 +466,7 @@ function findChromium() {
     // crawls as you walk. So: nearest between texels AND between levels, everywhere.
     // The pyramid is asked for only under WebGL2 — on a WebGL1 fallback a non-power-of-two
     // texture with mipmaps renders BLACK, and every texture here is sized to its world.
-    {
+    if (has3d) {   /* a shell that declined 3D has no THREE to ask about a filter — see the gate above */
       const N = THREE.NearestFilter, OKMIN = [N, THREE.NearestMipmapNearestFilter, THREE.NearestMipmapLinearFilter];
       const cap = T3.renderer && T3.renderer.capabilities, gl2 = !!(cap && cap.isWebGL2);
       const seen = [], bad = [], noMip = [], wrongMip = [];
@@ -518,7 +533,8 @@ function findChromium() {
     return { P, stillFlat: Object.keys(flat).sort().map(g => g + '×' + flat[g]) };
   }, idx);
   const r = r0.P; r.stillFlat = r0.stillFlat;
-  fails.push(...r);
+  fails.push(...r.filter(l => !/^COUNT-ONLY: /.test(l)));
+  r.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
   /* ---- A SAVE THAT DID NOT HAPPEN HAS TO SAY SO ----
      Owner, 2026-09-16: "how do we fix the save failing silently?" It was nineteen copies of
@@ -842,6 +858,7 @@ function findChromium() {
      well must be a hole you can see into. Both are asked of the built scene, not of the source. */
   const roof = await page.evaluate(() => {
     const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D (CAMERAS has no "3d"), so the checks below it, which measure the 3D scene, did not run'];
     if (typeof T3 === 'undefined' || !T3 || !T3.scene) return P;   /* a pack with no 3D: nothing to ask */
     const w = WORLDS[world]; if (!w) return P;
     let aprons = 0;
@@ -1419,6 +1436,7 @@ function findChromium() {
   await page.setViewportSize({ width: 390, height: 844 });
   const tallw = await page.evaluate(() => {
     const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D (CAMERAS has no "3d"), so the checks below it, which measure the 3D scene, did not run'];
 // ---- the world takes a share of the screen, and the camera holds its width ----
 // The world's height used to be width x 0.8 in every camera — the 2D tile grid's 5:4. Nobody
 // chose 266px on a phone. With the 3D camera running it takes a share of the SCREEN instead,
@@ -1472,6 +1490,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
      stand behind the tree and BOTH the crown and you are in that pixel. Today only you are. */
   const ghost = await page.evaluate(() => {
     const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D (CAMERAS has no "3d"), so the checks below it, which measure the 3D scene, did not run'];
     const wd = document.getElementById('world'), wh = wd.hidden; wd.hidden = false;
     const before = camMode, bw = world, bx = px, by = py;
     camSet('3d'); sizeCanvas();
@@ -1648,6 +1667,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
      This asks for the CONTRACT and never for the picture, so it survives the art being redrawn. */
   const views = await page.evaluate(() => {
     const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D (CAMERAS has no "3d"), so the checks below it, which measure the 3D scene, did not run'];
     if (typeof tileView !== 'function') {
       P.push('a pack has no single place to say what a glyph looks like — the views are still scattered across tables it cannot all reach');
     } else {
@@ -1743,6 +1763,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
      This asks what the PLAYER can see, never which function ran, so it survives a rewrite. */
   const fell = await page.evaluate(async () => {
     const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D (CAMERAS has no "3d"), so the checks below it, which measure the 3D scene, did not run'];
     /* engine3d.js is always loaded, so T3 existing proves nothing about whether this GAME has a
        3D camera — CAMERAS lets a pack drop it (mq-v133). Ask the seam, not the file. A pack that
        never offers 3D cannot fall back from it and must not be failed for that. */
@@ -1825,6 +1846,9 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     }
     const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
     if (!L) return P;
+    if (typeof T3 === 'undefined' || !window.THREE) {   /* the tram is measured in the 3D scene, and this shell has none */
+      P.push('COUNT-ONLY: this shell declined 3D, so the trolley was not measured in the scene');
+      return P; }
     const bw = world, bc = camMode, bs = TRO.state, bx = TRO.x;
     document.getElementById('world').hidden = false;
     world = L.world; camSet('3d'); sizeCanvas(); draw3d();
@@ -1877,7 +1901,8 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     document.getElementById('world').hidden = true;
     return P;
   });
-  fails.push(...tram);
+  fails.push(...tram.filter(l => !/^COUNT-ONLY: /.test(l)));
+  tram.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
   /* ---- a pack must be able to SAY where its trolley serves, in its own alphabet ----
      Until 2026-09-11 it could not: "is there a stop here" was Meridian's letter "Y", read straight
@@ -2068,13 +2093,19 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     let from = null, gl = null;
     Object.keys(PORTALS).forEach(w => { if (from) return;
       const ks = Object.keys(PORTALS[w] || {}); if (ks.length) { from = w; gl = ks[0]; } });
-    /* A ONE-ROOM WORLD HAS NO DOORS, and owes this nothing. The gauge said so on the first run —
-       "NEW demand on every future game: no portal in this shell" — for the second time today, which
-       is the gauge doing exactly its job. The geometry above still ran and still held. */
-    if (!from) return out(P.concat(['NOTE-ONLY: this shell declares no portal, so the door sequence was not driven here']));
+    /* A ONE-ROOM WORLD HAS NO DOORS and owes this nothing — and it SAYS so: the gauge's own maps
+       carry `const PORTALS={}` with "one room needs no doors" written next to it. That is a
+       declaration, not an absence, and a guard can read it. What it may not do is shrug: a shell
+       that declares doors and exercised none of them has a broken check, and the two cases are
+       told apart by counting what the pack promised rather than by giving up. */
+    const promised = Object.keys(PORTALS).reduce((n, w) => n + Object.keys(PORTALS[w] || {}).length, 0);
+    if (!from) return out(P.concat([promised
+      ? 'this shell declares ' + promised + ' portals and this guard could not find one to stand on — the check is broken, not the city'
+      : 'COUNT-ONLY: this shell declares no portal at all, so there was no door to shut (and none is owed)']));
     const W = WORLDS[from]; let sx = -1, sy = -1;
     for (let y = 0; y < W.H; y++) for (let x = 0; x < W.W; x++) if (W.rows[y][x] === gl) { sx = x; sy = y; }
     if (sx < 0) return out(P.concat(['the ' + from + ':' + gl + ' portal has no tile in the map']));
+    P.push('COUNT-ONLY: ' + promised + ' portals declared; the door was driven through ' + from + ':' + gl);
     const keep = { world, px, py, fx, fy };
     world = from; px = fx = sx; py = fy = sy; moving = false; held = null; portalHold = ''; portalT = 0;
     const was = from, t0 = performance.now();
@@ -2096,8 +2127,8 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     };
     requestAnimationFrame(tick);
   }));
-  fails.push(...doorway.filter(l => !/^NOTE-ONLY: /.test(l)));
-  doorway.filter(l => /^NOTE-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+  fails.push(...doorway.filter(l => !/^COUNT-ONLY: /.test(l)));
+  doorway.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
   /* ---- a document may carry a DRAWING, not only words ----
      The owner, 2026-09-11, on the crew mural: "can we have functionality there wehre you see
@@ -2339,14 +2370,21 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
         tiles.push([a + r.L, y]);                      /* and the landing at the head, depth 0 */
         runs.push({ wid, tiles });
       }});
-    /* A SHELL WITH NO STAIRS IS NOT A FAILING SHELL, and the gauge said so on the first run:
-       "NEW demand on every future game: no world has a well any more". It was right — a five-tile
-       world that never digs a hole owes this guard nothing, and a guard that demands a staircase
-       of every future game is a guard inventing requirements. But a shell that HAD wells and lost
-       them is measuring nothing, which is the silent zero docs/GAUGE.md exists to stop. So it is
-       said out loud and it does not fail: the pack that has wells (Meridian) is held to them by
-       its own suite, where the demand belongs. */
-    if (!runs.length) P.push('NOTE-ONLY: no world in this shell has a well, so the flight checks measured nothing here');
+    /* ZERO IS AN ANSWER, AND IT HAS TO BE THE RIGHT ONE (owner, 2026-09-17: "can we make the
+       guards smarter instead of just making them notes?"). He is right and the note was a cop-out:
+       a guard that says "I measured nothing" is still a guard that measured nothing, and next week
+       nobody reads the note. A five-tile world that never digs a hole genuinely owes this nothing —
+       but a shell whose maps are FULL of wells and whose detector has stopped seeing them owes it
+       everything, and those two look identical from inside `runs.length === 0`.
+       So ask twice, in two different ways, and make the answers agree. The crude question is "does
+       the glyph appear in anybody's rows at all" — no stairRun, no wellDepth, nothing that can
+       break in the same way. If the crude answer is yes and the careful answer is zero, the careful
+       one is broken and that is a failure, not a note. */
+    let glyphs = 0;
+    Object.keys(WORLDS).forEach(wid => WORLDS[wid].rows.forEach(r => { for (const c of r) if (c === '\u25BC') glyphs++; }));
+    if (!runs.length && glyphs) P.push('the maps contain ' + glyphs + ' well mouths and this guard found NO flight to measure — the detector is broken, not the city');
+    if (!runs.length && !glyphs) P.push('COUNT-ONLY: no world in this shell digs a well, so there was no flight to walk (and none is owed)');
+    if (runs.length) P.push('COUNT-ONLY: ' + runs.length + ' flight' + (runs.length === 1 ? '' : 's') + ' walked in ' + Object.keys(WORLDS).length + ' worlds');
     ['front', 'iso'].forEach(cam => {
       runs.forEach(r => {
         const ys = r.tiles.map(([x, y]) => {
@@ -2378,12 +2416,18 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     world = keep.world; px = keep.px; py = keep.py; fx = keep.fx; fy = keep.fy; camSet(keep.cam);
     return P;
   });
-  fails.push(...flight.filter(l => !/^NOTE-ONLY: /.test(l)));
-  flight.filter(l => /^NOTE-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+  fails.push(...flight.filter(l => !/^COUNT-ONLY: /.test(l)));
+  flight.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
 
   await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();
+  /* COUNT-ONLY lines are what a check SAW, not what it found — "2 flights walked in 15 worlds",
+     "21 portals declared", "3D declined". They exist so a zero is visible instead of silent
+     (owner, 2026-09-17: "can we make the guards smarter instead of just making them notes?"), and
+     they are printed rather than failed. One filter at the end, so a new check cannot forget one. */
+  fails.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+  fails = fails.filter(l => !/^COUNT-ONLY: /.test(l));
   if (fails.length) { console.log('FAIL (' + idx + ')\n- ' + fails.join('\n- ')); process.exit(1); }
   console.log('OK — ' + idx + ': the worlds hang together, every person is reachable and named, every document builds, every camera draws every world, every door stands in 3D, every animal has ground, and storage stays under its prefix. Still flat in 3D (#39): ' + (r.stillFlat && r.stillFlat.length ? r.stillFlat.join(' ') : 'nothing') + '.');
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

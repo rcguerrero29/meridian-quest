@@ -822,9 +822,9 @@
 <script src="content/murals.js"></script>
 <script src="content/docs.js"></script>
 <script src="content/record.js"></script>
-<script src="../vendor/three.min.js"></script>
-<script src="../engine/engine.js"></script>
-<script src="../engine/engine3d.js"></script>
+<!-- which engine files this world needs: see engine/boot.js. A pack that lists no "3d"
+     in CAMERAS never downloads Three.js — a quarter of the game. -->
+<script src="../engine/boot.js"></script>
 <!-- no service worker: the town serves its own shell from localhost and caches nothing (el-changarrito.md §5 R6) -->
 </body>
 </html>

@@ -913,7 +913,11 @@ function drawIso(){
     const tf=sideArt(g);if(!tf)continue;
     R.push({d:x+y+0.35,f:()=>tf({sx:cx-16,sy:cy-25,x,y,canopy:()=>{}})});
   }
-  const bill=(gx,gy,fn)=>{const[cx,cy0]=P(gx,gy),cy=cy0+isoWellPx(w,Math.round(gx),Math.round(gy));
+  const bill=(gx,gy,fn)=>{const[cx,cy0]=P(gx,gy),cy=cy0+isoLiftPx(w,Math.round(gx),Math.round(gy));
+    /* iso lifts the PERSON for all three heights; the raised TILE art is still flat here, because
+       isoBlock paints faces and a diamond lid and never the art — routing the bridge's planks
+       through it would turn the deck into a coloured slab, which this file already learned once
+       with the trolley stop. Named rather than hidden. */
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
   w.npcs.forEach(n=>bill(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(bx,by)=>{
     drawPerson(ctx,bx,by,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
@@ -1971,6 +1975,16 @@ function wellDepth(w,x,y){const row=(w&&w.rows&&w.rows[y])||"";
 const UNITPX=12, ISOUNITPX=18;   /* iso is 1.5x the flat cameras, which is not a choice either: `izh` already converts a lift with `Math.round(lift*1.5)` */
 const wellPx=(w,x,y)=>Math.round(wellDepth(w,x,y)*UNITPX);
 const isoWellPx=(w,x,y)=>Math.round(wellDepth(w,x,y)*ISOUNITPX);
+/* AND THE OTHER TWO KINDS OF HEIGHT (owner, 2026-09-17: "6. do it"). The first pass at this did
+   wells only and said so; the owner took the follow-up. `stairLift` is the signed answer for all
+   three — positive up a climbing tread or on the bridge's arched deck, negative down a well — and
+   it was, like `wellDepth`, read by engine3d.js and by nothing else. So in the flat cameras the
+   rainbow bridge was PAINT ON THE WATER: its deck stands 0.22 of a tile up in 3D and lies flat in
+   the other three, and whoever crossed it walked at river level.
+   Screen y grows downward, so the offset is the negation. One reader; a height may not be turned
+   into pixels anywhere else. */
+const liftPx=(w,x,y)=>Math.round(-stairLift(w,x,y)*UNITPX);
+const isoLiftPx=(w,x,y)=>Math.round(-stairLift(w,x,y)*ISOUNITPX);
 /* the height anyone standing on (x,y) stands at: up a climbing tread, DOWN a well tread */
 /* the crossing ARCHES (owner, 2026-09-08: "for water, make the bridge a bit better, some arching and or
    dimesionality"): the deck rises from each bank to a crown over the middle of the water. The height at a
@@ -2193,7 +2207,7 @@ function drawFront(){
     const hsh=(x*374761393+y*668265263+world.charCodeAt(0)*69069)>>>0;
     if((hsh&7)<2){ctx.globalAlpha=0.05;ctx.fillStyle="#000";ctx.fillRect(sx,sy,TS,TS);ctx.globalAlpha=1;}
     if(hsh%11===3){ctx.globalAlpha=0.08;ctx.fillStyle="#FFF";ctx.fillRect(sx+(hsh>>3)%26+2,sy+(hsh>>5)%26+2,2,2);ctx.globalAlpha=1;}
-    if(!SOLID.has(w.grid[y][x])&&!standsUp(ch)){const tf=TILEDRAW[ch],dp=wellPx(w,x,y);
+    if(!SOLID.has(w.grid[y][x])&&!standsUp(ch)){const tf=TILEDRAW[ch],dp=liftPx(w,x,y);
       /* A WELL IN PROFILE. This camera looks along the row, and Nolasco's flight runs ACROSS one —
          so every tread is at the same screen row and differs only in height, which is exactly a
          staircase seen from the side. Sink each tread by its own drop and paint the shaft above it
@@ -2203,6 +2217,11 @@ function drawFront(){
         ctx.fillStyle="rgba(15,12,20,.35)";ctx.fillRect(sx,sy-2,TS,2);                        /* its lip, where the floor ends */
         ctx.save();ctx.translate(0,dp);if(tf)tf({sx,sy,x,y,canopy:queueCanopy});ctx.restore();
         ctx.fillStyle="rgba(255,255,255,.14)";ctx.fillRect(sx,sy+dp,TS,1);}                   /* the nosing catching the light from above */
+      else if(dp<0){const h=-dp;                                                              /* a tread that CLIMBS, or the bridge's arched deck: it stands proud and you see what is under it */
+        ctx.save();ctx.translate(0,dp);if(tf)tf({sx,sy,x,y,canopy:queueCanopy});ctx.restore();
+        ctx.fillStyle=tc("#3A3142");ctx.fillRect(sx,sy+TS-h,TS,h);                            /* the riser, or the deck's own shadowed under-edge */
+        ctx.fillStyle="rgba(255,255,255,.16)";ctx.fillRect(sx,sy+TS-h,TS,1);
+        ctx.fillStyle="rgba(15,12,20,.30)";ctx.fillRect(sx,sy+TS-1,TS,1);}
       else if(tf)tf({sx,sy,x,y,canopy:queueCanopy});}
     if(!SOLID.has(w.grid[y][x])||(TILES[w.grid[y][x]]||{}).kind==="water")petalSpill(w,x,y,sx,sy);
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
@@ -2251,9 +2270,10 @@ function drawFront(){
       }
     }});
   }
-  const act=(gx,gy,fn)=>{const sx=gx*TS-camX,sy=gy*TS-camY+wellPx(w,Math.round(gx),Math.round(gy));
-    /* +wellPx: you stand ON the tread, not over it. Everyone goes through `act`, so the hero, the
-       townsfolk and the animals all descend the same flight by the same number of pixels. */
+  const act=(gx,gy,fn)=>{const sx=gx*TS-camX,sy=gy*TS-camY+liftPx(w,Math.round(gx),Math.round(gy));
+    /* +liftPx: you stand ON the tread, not over it — down a well, up a flight, or on the bridge's
+       deck. Everyone goes through `act`, so the hero, the townsfolk and the animals all take the
+       same height by the same number of pixels and cannot drift apart. */
     if(sx<-TS||sy<-TS-16||sx>VW||sy>VH)return;R.push({d:gy+0.55,f:()=>fn(sx,sy)});};
   w.npcs.forEach(n=>act(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(sx,sy)=>{
     drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});

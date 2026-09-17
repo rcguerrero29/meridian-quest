@@ -825,9 +825,9 @@
 <script src="content/meridian/config.js"></script>
 <script src="content/meridian/room.js"></script>
 <script src="content/meridian/docs.js"></script>
-<script src="vendor/three.min.js"></script>
-<script src="engine/engine.js"></script>
-<script src="engine/engine3d.js"></script>
+<!-- which engine files this world needs: see engine/boot.js. A pack that lists no "3d"
+     in CAMERAS never downloads Three.js — a quarter of the game. -->
+<script src="engine/boot.js"></script>
 <script>
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("./sw.js").catch(function(){});
