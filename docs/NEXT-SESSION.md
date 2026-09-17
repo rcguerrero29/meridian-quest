@@ -3,9 +3,49 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-16, end of the seam-and-map sitting)
+## STATE OF PLAY — read this first (2026-09-17, end of the stairs-and-doors sitting)
 
-### ⇢ 2026-09-16, later — START HERE. Everything below this line is history.
+### ⇢ 2026-09-17 — START HERE. Everything below this line is history.
+
+**This branch (`claude/upbeat-planck-0718c6`) is at `mq-v174` / `ch-v124`, pushed, not merged.**
+Merge is the owner's word. Five suites green on both games at every commit.
+
+**What this sitting did, in the order he asked for it:**
+
+- **The window the sill was always standing on.** His fifth report of one bug, and the first answer
+  that looked instead of arguing: `TILES.win` is a rect that the sill props, the ledge and the dusk
+  lighting are ALL positioned from, and **nothing had ever drawn it**. Now `drawPane` — reveal,
+  glass, mullions, lintel and the same `drawSillLedge` the candy already used. A mural no longer
+  erases a window (`wins:[1]` on a DECOS row; `winsKept` is the one reader).
+- **Doña Meche's wall**, which had no drawing at all and was blank plaster at every grade. The
+  legibility guard written for it then caught **La Espiga** too: 69 luma from its own plaster.
+- **A16 — the staircase.** Costed as A/B/C, he took B then A. **B:** Nolasco's flight is five treads
+  (0.96 against a wall of 1.1), you arrive at its FOOT and walk up, and the three flat cameras
+  stopped lying about height — `wellDepth`/`stairLift` had existed for two versions and only
+  `engine3d.js` ever read them. **A:** the world changes behind a shut door that opens the way you
+  travelled, and the new place is BUILT while it is still shut.
+- **A17 — the 3D scenes are kept.** 50.5ms of rebuilding over six worlds became 0.1ms. LRU to eight,
+  and stale on `t3Dirty`.
+- **A world that declines 3D stops paying for it** — `engine/boot.js`, `CAMERAS` decides, 149KB
+  gzipped saved for a pack that says no. Meridian and the town are byte-identical.
+- **"A map implies this"** — every one of fifteen worlds is placed on the plan now, six of which had
+  no place in any form, the park among them. `planPlace` follows the doors recursively; `MAPDOT` went
+  from seven hand-typed copies to `{pk}` (Meridian) and `{}` (the town).
+- **The guards got smarter instead of taking notes** — his correction, and the best line of the day.
+  Both `NOTE-ONLY` shrugs became demands derived from what the pack itself declares, cross-checked by
+  a cruder question that cannot break the same way, with `COUNT-ONLY:` printing what was seen.
+- **`.claude/skills/stairs/`** opened, and the drawing lessons copied out of `BEAUTIFY.md` (Meridian's
+  own register) into `docs/NEW-WORLD.md`, which is what a second world actually reads.
+
+**Waiting on him, by his own word — "we will come to those once we have more tokens next week":**
+#208 (La Espiga's ending and its last quest describe the same afternoon out of order), **T2** (the
+intro copy), **T4** (the ending repairs and the `finale:` seam). **T3** — `🏆 AI LEGEND` printed over
+a story about a bakery — is still open and not started.
+
+**Open and named rather than hidden:** raised TILE art in the iso camera (the person lifts, the
+planks stay flat); **C** from A16 (one building, one world) costed and recommended against.
+
+### ⇢ 2026-09-16, later — history from here down.
 
 **`main` is at `mq-v161`.** This branch (`claude/upbeat-planck-0718c6`) carries three commits and is
 at **`mq-v164` / `ch-v114`**, pushed, not merged. **Merge is the owner's word** — and note that the
