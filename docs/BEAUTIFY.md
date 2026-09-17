@@ -548,3 +548,52 @@ world that digs one will find that out; it is written here so it is found before
 art already ramps its value as it goes down — which is the right language in that camera and was
 already there. Adding a vertical offset would have been the "drawn in some cameras" fault wearing
 the costume of a fix.
+
+---
+
+## The art we can reach — the standing approach, in his words — 2026-09-17
+
+> *"please write that you will use your skills and learnings to make the map a better image from what
+> you learned to do with AJ's mocks. we arent going to hire anyone and idk when AJ will have time so
+> we keep moving forward with art we can access to at least learn and have a backup."*
+>
+> — the owner, `docs/ASKS.md`, 2026-09-17. **This is the settled approach, not a workaround.**
+
+He asked for it to be written down, so here it is, and it has three parts he actually said:
+
+- **Nobody is being hired.** No commission is waiting; no budget line is being held open. The art in
+  this game is made here.
+- **AJ's time is unknown and not waited on.** She is queen where her own world is concerned
+  (2026-09-15) and she may never have an afternoon for Meridian's. Work does not stop for that.
+- **The art we can reach is worth making anyway, for two reasons he gave** — *"to at least learn"*
+  and *"have a backup"*. A drawing made here teaches the project how the thing is built even if a
+  better one replaces it, and until one does, it is the drawing that ships.
+
+### The method, which already exists twice and is now the default
+
+`docs/mocks/2026-09-15-simmer-book/README.md` and `docs/la-sobremesa.md` §19. Four steps:
+
+1. **Render at scale before touching anything.** ×4, at the real screen size, looking at the real
+   surface. This is the move that finally solved the sugar skull after five reports — and every one
+   of the five before it was an argument about the code.
+2. **Look at the picture and write down what it shows**, in plain nouns. Not what the code does.
+3. **Fix one fault at a time**, then render again.
+4. **Re-measure the frame after any size change.** The kimbap's sixth round was cut in half for
+   exactly one reason: it was sized up and nobody re-measured.
+
+### Why it is written in THIS register and not in a process doc
+
+Because of what it caught. Four faults on the Simmer pages, **none of which any test could have
+found**: vessels that read as toasters, white rice in a white bowl, tofu that read as confetti, a
+round cut in half. Every one was found by looking at a picture. This register's whole thesis is that
+*the surface carries the screen* — and the loop above is the only known way to see the surface.
+
+**Its first job under this heading is the town plan.** `planTile`'s last branch — a generic
+`#A79B86` box with a highlight and a shadow — is standing in for every glyph nobody gave a colour,
+and as of today that includes **two shop doors on Calle Dos and a staircase tread**
+(`docs/plans/2026-09-17-the-map.md` §4, measured). The paper was designed on 2026-09-15 and the
+things on it never were: the same fault as the baby-blue plaster and Doña Meche's blank wall, a
+third time.
+
+**The order is not negotiable: contact sheet first, list second, redraw third.** A redraw that
+starts before the list is a redraw of whatever was already annoying somebody.

@@ -46,6 +46,7 @@ then this sheet, then the open GitHub issues. Nothing else is required reading.
 | **The beautify list** — rug, crates, counter, quest marker, grass, bushes, tables, shelves | 2026-09-09 | `docs/BEAUTIFY.md` — **the top four are art alone, no engine, no version bump** |
 | **Interactive and liftable objects**, with real dimensions, reusable by other games | 2026-09-09 | this file, §5 |
 | **Find-quest mode on the map** | 2026-09-09 | this file, §5 |
+| **The six map asks** — always interactive (a place is not a mark) · a destination that is remembered · the second floors · the gold-doors caption, which is measurably false on Calle Dos · a small light path, drawn on the paper · the plan redrawn with the mock loop | 2026-09-17, *"once you plan prepare to merge"* | `docs/plans/2026-09-17-the-map.md` · areas affected: `docs/ARCH-LOG.md` **A18** · research: `docs/research/2026-09-17-the-map-again.md` · **one open call: `planPlaces` changes what the TOWN does, so it needs his word or a pack opt-in** |
 | **A comfort-and-crowding pass at fullscreen** | 2026-09-09 | `docs/QA-PASS.md` |
 | The ungraded station seam | 2026-09-09 | GitHub #157 |
 | `ENDLESS` in the template + the world-that-does-not-end lane | 2026-09-09 | GitHub #156 |
