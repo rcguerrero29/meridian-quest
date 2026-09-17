@@ -262,7 +262,7 @@ const CHAPTERS=[
     only ever produce grades 1 and 3 — the middle ending would be written and never played.
     Calle Dos had six people and not one of them ever carried a ❗, in any chapter state. */
  {id:"esquina",quests:[56,57,58,59],need:3,
-  epi:"esqepi",go:"esqgoEpi",open:"esquinaToast",
+  epi:"esqepi",go:"esqgoEpi",open:"endStayToast", /* was "esquinaToast" — finishing la esquina announced la esquina. It is the LAST district, so what opens after it is the city: "whatever's still open stays open." */
   industry:{en:"Street food",es:"Comida en la calle"},
   role:{en:"AI Product Manager",es:"Product Manager de IA"}}
 ];

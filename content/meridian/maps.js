@@ -342,11 +342,19 @@ const DECOR=[
  {world:"st",x:21,y:0,deco:"panel",id:"principal",c:"#7A5FE0",wins:[1]},
  {world:"st",x:22,y:0,deco:"panel",id:"mercado",  c:"#C0392B",wins:[1]},
  {world:"st",x:23,y:0,deco:"panel",id:"taller",   c:"#3B4650",wins:[1]},
- {world:"st",x:24,y:0,deco:"panel",id:"espiga",   c:"#C98A2D",wins:[1]},
+ {world:"st",x:24,y:0,deco:"panel",id:"espiga",   c:"#A8691A",wins:[1]},  /* was #C98A2D, luma 146 on plaster at 215: 69 apart, under the 90 floor. Found by the same guard that caught la esquina, in the same run — I had gone looking for one fault and there were two. Crust amber, luma 115. */
  {world:"st",x:25,y:0,deco:"panel",id:"velazquez",c:"#2E8AA8",wins:[1]},
  {world:"st",x:26,y:0,deco:"panel",id:"nolasco",  c:"#4E7A4A",wins:[1]},
- /* ❗La esquina. Masa cream, and the colour is the one choice here with a reason: the other six
-    panels are all mid-to-dark (luma 96–146) and this is 213.6, so the newest district is the one
-    that reads first on a wall that is getting crowded — and masa is what she actually works with. */
- {world:"st",x:27,y:0,deco:"panel",id:"esquina",  c:"#E8D5A8",wins:[1]}
+ /* ❗La esquina. Toasted masa — the colour she actually cooks, and it had to move.
+    IT WAS #E8D5A8, masa cream, chosen "because the other six panels are luma 96–146 and this is
+    213.6, so the newest district reads first on a crowded wall". That reasoning compared her
+    colour to the OTHER PANELS and never to THE WALL IT IS PAINTED ON: PLASTER is #C6DCEA, luma
+    215, so her emblem sat 1.4 luma from its own ground and was invisible at every grade — worse
+    at 1 and 2, where muralInk mixes it further toward the plaster. Rendered at 6x on 2026-09-17
+    beside the other six and it is not subtle; it is not there. #6B4226 is luma 75, a hundred and forty
+    clear of the plaster and inside the band the other six live in. Measured against the right
+    thing this time, and there is a guard on it now (test/smoke.js). Piloncillo rather than a
+    darker masa cream, because La Espiga's amber had to darken in the same pass and two toasted
+    golds three tiles apart is one colour twice — and piloncillo is in the pot anyway. */
+ {world:"st",x:27,y:0,deco:"panel",id:"esquina",  c:"#6B4226",wins:[1]}
 ];

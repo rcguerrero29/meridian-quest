@@ -2688,6 +2688,20 @@ const CANDIDATES = [
       });
       if (!DECOS.some(d => d.deco === 'mural')) problems.push('the signature mural is gone');
       if (typeof DECODRAW.panel !== 'function') problems.push('the pack draws no panel');
+      /* A PANEL WITH NO DRAWING IS BLANK PLASTER FOREVER, AND NOTHING SAYS SO.
+         La esquina shipped its DECOR row on the day the district shipped and PANELART.esquina did
+         not exist, so Doña Meche's wall stayed the unbegun blue at every grade — the one visible
+         reward for finishing her four quests, silently withheld. It was found by reading, which is
+         not a method. The pairing is the noun: a panel names a business, a business owns a drawing. */
+      DECOS.filter(d => d.deco === 'panel').forEach(d => {
+        if (!d.id) problems.push('a panel at ' + d.x + ',' + d.y + ' names no business, so nothing can ever be painted on it');
+        else if (typeof PANELART[d.id] !== 'function')
+          problems.push('the panel for "' + d.id + '" has no drawing — that wall is blank plaster at every grade, and finishing the district changes nothing on it');
+      });
+      Object.keys(PANELART).forEach(id => {
+        if (!DECOS.some(d => d.deco === 'panel' && d.id === id))
+          problems.push('PANELART has a drawing for "' + id + '" and no wall to put it on');
+      });
       return problems;
     });
     fails.push(...mural);
@@ -2722,6 +2736,35 @@ const CANDIDATES = [
     });
     if (paint.blank !== paint.bare) fails.push('an unbegun panel is not plain plaster: ' + paint.blankColours + ' colours in the mural field');
     if (paint.paintedColours <= paint.blankColours) fails.push('a worked district did not paint its panel');
+
+    /* A FINISHED DISTRICT'S EMBLEM HAS TO BE VISIBLE ON ITS OWN WALL.
+       La esquina's was #E8D5A8 and the plaster is #C6DCEA — 1.4 luma apart. The note in maps.js
+       defending the choice compared it to the OTHER SIX PANELS and never to the wall it is painted
+       on, so the one visible reward for finishing Doña Meche's four quests was a wall that still
+       looked blank. Measured on the RENDER at full grade, in the emblem's own field, against this
+       repo's own accent-vs-ground floor of 90. */
+    const legible = await page.evaluate(() => {
+      const P = [], L = (r, g, b) => 0.299 * r + 0.587 * g + 0.114 * b;
+      const c = document.createElement('canvas'); c.width = c.height = 32;
+      const g2 = c.getContext('2d'), old = ctx, keepD = new Set(done), keepM = { ...marks };
+      ctx = g2;
+      g2.clearRect(0, 0, 32, 32); muralGround(0, 0);
+      const ground = L(...[...g2.getImageData(8, 26, 1, 1).data].slice(0, 3));
+      DECOS.filter(d => d.deco === 'panel' && d.id).forEach(d => {
+        const ch = CHAPTERS.find(c2 => c2.id === d.id); if (!ch) return;
+        done = new Set(); marks = {};
+        (ch.quests || []).forEach(q => { done.add(q); marks[q] = 1; });    /* every quest right first try: grade 3 */
+        g2.clearRect(0, 0, 32, 32); DECODRAW.panel(0, 0, d);
+        const px2 = g2.getImageData(2, 6, 15, 24).data;
+        let far = 0;
+        for (let i = 0; i < px2.length; i += 4) far = Math.max(far, Math.abs(L(px2[i], px2[i + 1], px2[i + 2]) - ground));
+        if (far < 90) P.push('the emblem for "' + d.id + '" is ' + Math.round(far) +
+          ' luma from the plaster it is painted on at its furthest pixel — under the 90 this repo separates an accent from its ground by. Finishing that district changes nothing anyone can see');
+      });
+      ctx = old; done = keepD; marks = keepM;
+      return P;
+    });
+    fails.push(...legible);
 
     // townsfolk: people with no quests move, people with quests never do
     const walk = await page.evaluate(async () => {

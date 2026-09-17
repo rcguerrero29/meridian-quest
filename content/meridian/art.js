@@ -486,6 +486,20 @@ const PANELART={
     ctx.strokeStyle=c;ctx.lineWidth=2;ctx.beginPath();ctx.arc(sx+13,sy+15,6,Math.PI,0);ctx.stroke();
     ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx+24,sy+6);ctx.lineTo(sx+24,sy+22);ctx.stroke();
     ctx.fillStyle=c;ctx.fillRect(sx+21,sy+22,7,5);},
+  esquina:(sx,sy,c)=>{ /* La esquina: Doña Meche's pot on a folding table — what is actually on that
+    corner, not a symbol for it. The other six are a tower, a basket, a wrench, a wheat ear, a bucket
+    and a stamp; hers is the pot, because a woman who has been there since before the rails is known
+    by the thing she carries out every afternoon. Added 2026-09-17: the panel existed in DECOR from
+    the day la esquina shipped and there was no drawing for it, so her wall was blank plaster at
+    every grade, forever, and nothing said so. There is a guard for that now (test/smoke.js). */
+    ctx.fillStyle=c;                                                      /* the pot */
+    ctx.beginPath();ctx.moveTo(sx+9,sy+13);ctx.lineTo(sx+23,sy+13);ctx.lineTo(sx+21,sy+22);ctx.lineTo(sx+11,sy+22);ctx.closePath();ctx.fill();
+    ctx.fillRect(sx+8,sy+10.5,16,2.5);                                    /* the lid */
+    ctx.fillRect(sx+15,sy+7.5,2,3);                                       /* its knob */
+    ctx.fillStyle=PLASTER;ctx.fillRect(sx+12,sy+16,8,1.4);                /* the band round the belly */
+    ctx.fillStyle=c;[11,16,21].forEach((x,i)=>ctx.fillRect(sx+x,sy+1.5+(i%2)*1.8,1.6,4.5)); /* steam */
+    ctx.fillRect(sx+6,sy+23,20,2);                                        /* the folding table */
+    ctx.fillRect(sx+8,sy+25,1.8,4);ctx.fillRect(sx+22,sy+25,1.8,4);},     /* and its legs */
   nolasco:(sx,sy,c)=>{ /* Nolasco: a stamp coming down on a page */
     ctx.fillStyle=c;ctx.fillRect(sx+8,sy+15,14,12);
     ctx.fillStyle=PLASTER;[18,21,24].forEach((y,i)=>ctx.fillRect(sx+10,sy+y-2,10-i*2,1.4));
