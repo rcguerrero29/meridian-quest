@@ -1986,6 +1986,119 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...troCams);
 
+  /* ---- THE DOOR IS SHUT WHEN THE WORLD CHANGES (owner, 2026-09-17: "i think i want that option A") ----
+     A portal used to swap the world between one frame and the next and then block input for 450ms
+     with nothing drawn in it — an instant cut, then standing still somewhere you did not walk to.
+     The transition slot existed and was empty.
+
+     The noun is "you never see one place become another", and there are exactly two ways to fail it:
+       1. the swap happens while the overlay is not covering the screen — a visible cut;
+       2. the overlay covers and never comes back up — a game that goes black and stays black.
+     Both are asked of the DOM, at the moment it matters, by driving the real portal and watching the
+     leaves' own geometry rather than a class name: a class is a label, a rectangle is the thing the
+     player sees. And the door is taken from the SHELL, so a second world that forgot to put the
+     element in its own index.html fails here rather than teleporting silently.
+     IT SITS HERE, AHEAD OF THE DOCUMENT CHECKS, because those do `body.innerHTML = ''` and never put
+     it back — so every later check that needs a real screen is measuring a page with no viewport in
+     it. This one said so out loud rather than passing quietly, which is how it was found. */
+  const doorway = await page.evaluate(() => new Promise(resolve => {
+    const P = [], d = document.getElementById('door');
+    if (!d) return resolve(['this shell has no #door — a portal in it is still an instant cut']);
+    const a = d.querySelector('.leaf.a'), b = d.querySelector('.leaf.b'), vp = d.parentElement;
+    if (!a || !b) return resolve(['#door has no leaves to close']);
+    /* this suite never enters the world, so the viewport is collapsed to nothing until it is shown —
+       the same line four earlier checks in this file already need. Without it every rectangle is zero
+       and this passes on a page with no screen in it, which is the silent zero exactly. */
+    const wld = document.getElementById('world'), wasHid = wld && wld.hidden;
+    if (wld) { wld.hidden = false; if (typeof sizeCanvas === 'function') sizeCanvas(); }
+    const out = P2 => { if (wld) wld.hidden = wasHid; if (typeof doorRest === 'function') doorRest(); return resolve(P2); };
+    /* HOW MUCH OF THE VIEWPORT THE TWO LEAVES COVER, as a fraction: 1 when shut, 0 when open. The
+       first draft added up three gaps and reported 296 pixels of "daylight" for a door standing wide
+       open at rest — the same number a broken door gives. A measure that cannot tell shut from open
+       is not a measure. */
+    const cover = () => {
+      const v = vp.getBoundingClientRect();
+      if (v.height < 40) return null;
+      const seg = r => [Math.max(v.top, r.top), Math.min(v.bottom, r.bottom)];
+      const [a0, a1] = seg(a.getBoundingClientRect()), [b0, b1] = seg(b.getBoundingClientRect());
+      const la = Math.max(0, a1 - a0), lb = Math.max(0, b1 - b0);
+      const ov = Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
+      return (la + lb - ov) / v.height;
+    };
+    if (cover() === null) return out(['the viewport had no height when the door was tested, so nothing was measured — this check did not run']);
+
+    /* 1 — THE GEOMETRY, held still. Every state the door can be in, with the animation turned off,
+       so what is measured is where the leaves END UP and not a frame caught mid-slide in a headless
+       page whose main thread is busy. This is the half that catches the real bugs: a leaf anchored to
+       the bottom needs to travel more than its own height to leave by the TOP, and -102% only lifted
+       it into the top half — a black band across the new place that never goes away. */
+    if (typeof doorSet !== 'function') P.push('the engine has no doorSet — the door is not the engine\'s to drive');
+    else {
+      doorSet('shut', 0);
+      const shut = cover();
+      if (shut < 0.995) P.push('a SHUT door covers only ' + Math.round(shut * 100) + '% of the viewport — the swap behind it would be there to see');
+      ['up', 'down', 'flat'].forEach(k => {
+        doorSet('open-' + k, 0);
+        const c = cover();
+        if (c > 0.05) P.push('an opened door (' + k + ') still covers ' + Math.round(c * 100) +
+          '% of the viewport — a black band sits over the place you just walked into');
+      });
+      doorSet('', 0);
+      const rest = cover();
+      if (rest > 0.05) P.push('the door at rest covers ' + Math.round(rest * 100) + '% of the viewport — it is in the way when nothing is happening');
+      /* AND GOING BACK TO THE WINGS IS NOT A MOVE ANYBODY SEES. Dropping the class re-applies each
+         leaf's resting transform, and the bottom leaf's rest is BELOW the screen — so if the
+         transition is still armed, a door that has just finished opening sends that leaf sliding
+         back down across the whole viewport: a black band sweeping over the place you arrived in, a
+         third of a second late. The geometry above cannot see it, because the geometry is held
+         still; this reads the cause. Planted (doorRest with the open duration) and it was the one
+         of four plants that went through until this line existed. */
+      if (typeof doorRest === 'function') {
+        doorRest();
+        const dur = getComputedStyle(b).transitionDuration || '';
+        if (!/^0m?s$/.test(dur.split(',')[0].trim()))
+          P.push('the door goes back to its resting place over ' + dur.split(',')[0].trim() +
+            ' — the bottom leaf slides back across the screen after the door has already opened');
+      }
+    }
+
+    /* 2 — THE SEQUENCE, on the real portal. Not the geometry again: only whether the world changes
+       while the door is SHUT. Read off the engine's own state rather than off pixels, because a
+       starved frame in a headless run can hide a transform mid-flight and this must not be flaky. */
+    let from = null, gl = null;
+    Object.keys(PORTALS).forEach(w => { if (from) return;
+      const ks = Object.keys(PORTALS[w] || {}); if (ks.length) { from = w; gl = ks[0]; } });
+    /* A ONE-ROOM WORLD HAS NO DOORS, and owes this nothing. The gauge said so on the first run —
+       "NEW demand on every future game: no portal in this shell" — for the second time today, which
+       is the gauge doing exactly its job. The geometry above still ran and still held. */
+    if (!from) return out(P.concat(['NOTE-ONLY: this shell declares no portal, so the door sequence was not driven here']));
+    const W = WORLDS[from]; let sx = -1, sy = -1;
+    for (let y = 0; y < W.H; y++) for (let x = 0; x < W.W; x++) if (W.rows[y][x] === gl) { sx = x; sy = y; }
+    if (sx < 0) return out(P.concat(['the ' + from + ':' + gl + ' portal has no tile in the map']));
+    const keep = { world, px, py, fx, fy };
+    world = from; px = fx = sx; py = fy = sy; moving = false; held = null; portalHold = ''; portalT = 0;
+    const was = from, t0 = performance.now();
+    let sawShut = false, clsAtSwap = null;
+    const tick = () => {
+      if (d.className === 'shut') sawShut = true;
+      if (world !== was && clsAtSwap === null) clsAtSwap = d.className || '(none)';
+      if (clsAtSwap !== null || performance.now() - t0 > 4000) {
+        if (clsAtSwap === null) P.push('standing on the ' + from + ':' + gl + ' portal never changed the world at all in four seconds');
+        else {
+          if (!sawShut) P.push('the world changed and the door was never shut at any point — the swap is still an instant cut');
+          if (clsAtSwap !== 'shut') P.push('the world changed while the door was "' + clsAtSwap +
+            '" and not shut — you can see one place become another');
+        }
+        world = keep.world; px = keep.px; py = keep.py; fx = keep.fx; fy = keep.fy;
+        return out(P);
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }));
+  fails.push(...doorway.filter(l => !/^NOTE-ONLY: /.test(l)));
+  doorway.filter(l => /^NOTE-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
   /* ---- a document may carry a DRAWING, not only words ----
      The owner, 2026-09-11, on the crew mural: "can we have functionality there wehre you see
      tiles/icons from afar but you get close and can interact to see it full screen- then thats how
@@ -2267,6 +2380,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...flight.filter(l => !/^NOTE-ONLY: /.test(l)));
   flight.filter(l => /^NOTE-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
 
   await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();

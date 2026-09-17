@@ -3552,22 +3552,86 @@ function tryStep(){
    (openTravel). Everything that must happen on arrival lives here, in one place, because when it
    did not, the trolley quietly skipped it — you rode from Meridian Street to Calle Dos and the dog
    you had been walking with was still standing at the stop, still set to follow. */
+/* ---------- THE DOORWAY (owner, 2026-09-17: "i think i want that option A") ----------
+   `tryPortal` changed the world between one frame and the next — four assignments, no transition of
+   any kind — and `worldArrived` then froze input for 450 milliseconds with NOTHING DRAWN in that
+   window. The worst pairing available: an instant cut, and then standing still somewhere you did not
+   walk to. The transition slot was there the whole time and it was empty.
+
+   A cut with a reason reads as a cut; a cut with nothing in it reads as a bug. So the swap happens
+   BEHIND a shut door, and the door opens in the direction you travelled — the movement is what says
+   what happened, and it needs no words in either language.
+
+   It is a DIV over the viewport, not paint on a canvas, for one reason worth writing down: the 3D
+   camera renders to its own WebGL surface, so anything drawn into the 2D context is invisible there.
+   One overlay covers all four cameras and cannot drift between them. `curtain()` above already
+   proved the shape on the growth change (the owner, 2026-09-03: "a building appears ... not a smooth
+   switch") — this is the same idea at a door, and faster, because you are walking.
+
+   130ms to shut, 330 to open. Input is held for exactly as long as the door is moving and not one
+   frame more, which is why worldArrived's 450 became the open: the old number outlasted the (absent)
+   animation by a third of a second of standing still. */
+const DOORMS={shut:110,hold:35,open:330};   /* hold: the swap waits 35ms past the shut, or it lands on a door that is still fifteen pixels open — measured, not guessed */
+function doorSet(cls,ms){const d=$("door");if(!d)return null;
+  d.style.setProperty("--doorT",(ms|0)+"ms");d.className=cls||"";void d.offsetWidth;return d;} /* the reflow is load-bearing: without it the browser coalesces the two writes and nothing moves */
+/* BACK TO THE WINGS WITH THE TRANSITION OFF. Dropping the class re-applies each leaf's resting
+   transform, and the bottom leaf's rest is BELOW the screen — so after a travelling-up door had
+   finished opening, clearing it sent that leaf sliding back down across the whole viewport: a black
+   band sweeping over the new place a third of a second after you arrived. Caught by the guard, on
+   the frame trace, not by reading the rule. 0ms, and they snap back where nobody can see them. */
+function doorRest(){doorSet("",0);}
+function doorShut(){doorRest();doorSet("shut",DOORMS.shut);}
+function doorOpen(kind){doorSet("shut",0);doorSet("open-"+(kind||"flat"),DOORMS.open);
+  setTimeout(()=>{if($("door")&&/^open-/.test($("door").className))doorRest();},DOORMS.open+80);}
+/* WHICH WAY YOU WENT, read off the map rather than off a label somebody typed. The tile you stepped
+   ON says it: `▲` is the head of a climbing flight, `▼` is the foot of a well. Everything else is a
+   door on the flat — including the avenue door into Nolasco's stair room, which is right: you have
+   walked in off the street and not climbed anything yet. The climb is the five treads in front of
+   you, and it is yours to walk. */
+function doorKind(fromW,fromX,fromY){
+  const a=WORLDS[fromW],g=a&&a.rows[fromY]&&a.rows[fromY][fromX];
+  return g==="\u25B2"?"up":g==="\u25BC"?"down":"flat";}
 function worldArrived(fromW,fromX,fromY){
-  warpT=performance.now()+450;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
+  warpT=performance.now()+DOORMS.open;portalT=performance.now()+900;portalHold=world+":"+px+","+py;
   save();destCheck();{const ar=T().arrive[world];toast(typeof ar==="function"?ar():ar,2200);} /* a line may ask the season (Nacho, 2026-09-07) */
   propsReset();                    /* "they'll just reappear when i leave the screen" — the owner's scope */
   dogsFollow(fromW,fromX,fromY);   /* a dog at your heels comes with you */
   dogsRoam(world);                 /* unseen pups drift toward their favorite townsperson */
 }
+let warpPend=null;   /* a door that is shutting; the world swaps behind it */
 function tryPortal(ts){
   const key=world+":"+px+","+py;
   if(portalHold&&portalHold!==key)portalHold="";
+  if(warpPend){                                  /* the swap waits for the door, and for nothing else */
+    if(ts<warpPend.at)return true;
+    const q=warpPend;warpPend=null;
+    world=q.p.to;px=fx=q.p.x;py=fy=q.p.y;held=null;dir=q.p.dir||"down";
+    worldArrived(q.fromW,q.fromX,q.fromY);roomInvite();
+    if(q.fromW===PL.park&&world!==PL.park)parkExit(); /* crossing back over the rainbow: the recap */
+    /* BUILD THE NEW PLACE WHILE THE DOOR IS STILL SHUT. There is exactly one 3D scene (T3.builtKey)
+       and changing world throws it away and makes another, and the first frame after that has to
+       upload the geometry as well as draw it. Traced on 2026-09-17: in the flat cameras the leaves
+       slide the whole way at frame rate, and in 3D there was a 237ms hole right after the swap
+       during which the top leaf jumped from -5 to -154 — the door did not open, it vanished. The
+       stall is real work and it is not going away; what it must not do is eat the animation. So it
+       happens here, behind a closed door, which is the entire job a closed door has ever had, and
+       the open starts on the next clean frame.
+       ❗ This is also the measurement behind the memory question: cache the built scenes and the
+       stall goes with them (docs/ARCH-LOG.md A16). */
+    let started=false;
+    const go=()=>{if(started)return;started=true;
+      warpT=performance.now()+DOORMS.open;   /* input comes back when the DOOR is open, not when a guess says it should be — the stall above is unpredictable and worldArrived cannot know how long it took */
+      doorOpen(q.kind);};
+    if(camMode==="3d"&&typeof draw3d==="function"&&window.THREE){try{draw3d();}catch(e){}}
+    if(typeof requestAnimationFrame==="function")requestAnimationFrame(go);else go();
+    setTimeout(go,80);                               /* a tab that is not animating still opens its doors */
+    return true;}
   const pp=portalAt(world,px,py);
   if(portalHold||ts<=portalT||!pp)return false;
   const p=pp,fromW=world,fromX=px,fromY=py;
-  world=p.to;px=fx=p.x;py=fy=p.y;held=null;dir=p.dir||"down";
-  worldArrived(fromW,fromX,fromY);roomInvite();
-  if(fromW===PL.park&&world!==PL.park)parkExit(); /* crossing back over the rainbow: the recap */
+  warpT=ts+DOORMS.shut+DOORMS.hold;              /* you cannot walk while the door is closing on you */
+  warpPend={p,fromW,fromX,fromY,kind:doorKind(fromW,fromX,fromY),at:ts+DOORMS.shut+DOORMS.hold};
+  doorShut();
   return true;
 }
 let last=0;

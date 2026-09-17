@@ -3500,8 +3500,17 @@ const CANDIDATES = [
           world = 'hq'; px = fx = sx; py = fy = sy;
           put('hq', sx, sy + 1); sonny.follow = true; sonny.holdT = 0; sonny.stayT = 0; sonny.moving = false;
           portalHold = ''; portalT = 0;
-          const warped = tryPortal(performance.now() + 5000);
-          if (!warped) problems.push('standing on the stairs did not travel — the wiring test proves nothing');
+          /* TWO CALLS, because since mq-v171 the swap happens BEHIND A SHUTTING DOOR (the owner's
+             option A): the first call starts the door and parks the warp, the second completes it
+             once the door has shut. The claim this check makes has not changed — walking through a
+             door brings the dog — only the number of frames the real path takes. Driving it in one
+             call would be testing the old timing rather than the wiring. */
+          const t0 = performance.now() + 5000;
+          const started = tryPortal(t0);
+          const warped = started && tryPortal(t0 + 1000);
+          if (!started) problems.push('standing on the stairs did not travel — the wiring test proves nothing');
+          else if (!warped) problems.push('the door shut on the stairs and never opened — the warp was parked and dropped');
+          else if (world === 'hq') problems.push('the door shut and the world never changed behind it');
           else if (sonny.world === 'hq') problems.push('walking through a door does not bring the dog: dogsFollow is never called from tryPortal');
         }
       }

@@ -56,6 +56,34 @@
   .viewport{position:relative; border-radius:10px; overflow:hidden; background:#241F2E; touch-action:none;}
   #veil{position:absolute; inset:0; background:#0B0A12; opacity:0; transition:opacity .42s ease; pointer-events:none; z-index:5;}
   #veil.on{opacity:1;}
+  /* THE DOORWAY (owner, 2026-09-17: "i think i want that option A"). A portal changed the world
+     between one frame and the next and then FROZE INPUT FOR 450ms with nothing drawn in that
+     window — an instant cut followed by standing still somewhere you did not walk to. The slot
+     was always there; it was empty. This fills it, in every camera at once, because it is a DIV
+     over the viewport and not something painted into a canvas: the 3D camera renders to its own
+     WebGL surface and would otherwise have needed its own copy of the whole effect.
+     It shuts in the direction you are travelling and opens the same way, so the movement is the
+     thing that says what happened — up a flight, down a well, or through a door on the flat. */
+  #door{position:absolute; inset:0; pointer-events:none; z-index:6; overflow:hidden;}
+  #door .leaf{position:absolute; left:0; right:0; height:52%; background:#0B0A12; transform:translateY(-102%); transition:transform var(--doorT,.32s) cubic-bezier(.4,0,.2,1);}
+  #door .leaf.b{top:auto; bottom:0; transform:translateY(102%);}
+  #door .leaf.a{top:0;}
+  #door.shut .leaf{transform:translateY(0);}
+  /* Travelling UP: BOTH leaves sweep off the top, so the new place rises into view. The percentages
+     are of each LEAF, not of the screen, and the two leaves do not need the same one — a leaf anchored
+     to the far edge has to cross the whole viewport to leave by the near one. -102% clears the top for
+     the leaf that starts there and only lifts the bottom one into the top half, which is a black band
+     across the new place that never goes away. Caught by the guard on its first run, not by reading. */
+  #door.open-up .leaf.a{transform:translateY(-102%);} #door.open-up .leaf.b{transform:translateY(-200%);}
+  #door.open-down .leaf.a{transform:translateY(200%);} #door.open-down .leaf.b{transform:translateY(102%);}
+  #door.open-flat .leaf.a{transform:translateY(-102%);} #door.open-flat .leaf.b{transform:translateY(102%);}
+  @media (prefers-reduced-motion: reduce){
+    /* no sweep for somebody who has asked for none: the leaves simply stop being there */
+    #door .leaf{transition:opacity var(--doorT,.32s) linear; transform:translateY(0); opacity:0;}
+    #door.shut .leaf{opacity:1;}
+    #door.open-up .leaf, #door.open-down .leaf, #door.open-flat .leaf{opacity:0; transform:translateY(0);}
+  }
+
   .settings .box{touch-action:pan-y;}
   .tlsearch{display:flex; gap:8px; margin-bottom:10px;}
   .tlsearch input{flex:1; box-sizing:border-box; font-family:'IBM Plex Mono',monospace; font-size:.8rem; padding:8px 10px; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink);}
@@ -434,6 +462,7 @@
       <canvas id="cv"></canvas>
       <canvas id="cv3" hidden></canvas>
       <div id="veil" aria-hidden="true"></div>
+      <div id="door" aria-hidden="true"><div class="leaf a"></div><div class="leaf b"></div></div>
       <button id="rot3d" hidden aria-label="Rotate camera" style="position:absolute; right:12px; top:58px; width:40px; height:40px; border:none; border-radius:50%; background:rgba(20,16,30,.55); color:#EDE9F5; font-size:1.15rem; cursor:pointer; backdrop-filter:blur(2px);">↻</button>
       <div class="dpad" id="dpad" hidden>
         <button class="blank"></button><button data-d="up" aria-label="Up">▲</button><button class="blank"></button>

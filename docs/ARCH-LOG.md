@@ -1007,3 +1007,44 @@ that it measured nothing rather than passing quietly.
 
 **A and C are still open and still his.** A (drawing the climb into the 450ms that already exists and
 is already blank) would make every *other* door in both games legible, and is unaffected by B.
+
+### A16 — **A SIGNED AND BUILT, 2026-09-17.** *"i think i want that option A."*
+
+**The world now changes behind a shut door**, and the door opens in the direction you travelled — up
+a flight, down a well, or apart like a door on the flat. Three decisions worth keeping:
+
+- **It is a DIV over the viewport, not paint on a canvas.** The 3D camera renders to its own WebGL
+  surface, so anything drawn into the 2D context is invisible there — one overlay covers all four
+  cameras and cannot drift between them. `curtain()` had already proved the shape on the growth
+  change; this is the same idea at a door, and faster, because you are walking.
+- **Which way you went is read off the map, not off a label.** `▲` is the head of a climbing flight,
+  `▼` is the foot of a well, everything else is flat — including the avenue door into Nolasco's stair
+  room, which is right: you have walked in off the street and not climbed anything. The climb is the
+  five treads in front of you and it is yours to walk.
+- **The new place is built while the door is still shut.** There is one 3D scene (`T3.builtKey`) and
+  changing world throws it away and makes another. Traced: in the flat cameras the leaves slide the
+  whole way at frame rate; in 3D there was a **237ms hole right after the swap** in which the top leaf
+  jumped from −5 to −154 — the door did not open, it vanished. The stall is real work. What it must
+  not do is eat the animation, so it happens behind a closed door, which is the only job a closed door
+  has ever had. **That hole is also the measurement behind the memory question:** cache the built
+  scenes and it goes away. A and "spend some memory" are the same piece of work.
+
+**110ms to shut, 35 to settle, 330 to open**, and input comes back when the door is actually open
+rather than when a guess says it should be — the old `warpT` of 450 outlasted the (absent) animation
+by a third of a second of standing still.
+
+**Two bugs found by the guard and not by reading**, both invisible in the code:
+- `translateY(-102%)` moved the *bottom* leaf into the top half rather than off the screen, because a
+  percentage is of the LEAF and a leaf anchored to the far edge has to cross the whole viewport to
+  leave by the near one. A black band across every new place, forever.
+- Dropping the class re-armed the transition, so a door that had finished opening sent its bottom leaf
+  **sliding back down across the viewport** a third of a second after you arrived.
+
+**Four plants, four catches** — the pre-A `tryPortal` restored exactly, the half-travelling leaf, the
+re-armed reset, and the `#door` element removed from the shell. The third went through the first
+version of the guard, which held the door still and so could never see a move that happens on the way
+back to rest; it is caught now by reading the cause (the reset's transition duration) rather than the
+symptom. **And the gauge objected twice in one day** — no well, then no portal — both correct, both
+turned into notes rather than demands on a one-room world.
+
+**C is the only part still open**, and the recommendation against it stands.
