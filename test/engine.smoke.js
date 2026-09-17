@@ -2156,6 +2156,118 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...sills);
 
+  /* ---- A FLIGHT IS WALKED, NOT TELEPORTED (owner, 2026-09-17: "ok lets do b") ----
+     What he reported: "that door right there to the top of a staircase. until you figure out how
+     to teleport in my side of the screen." The code agreed with him in its own comment — the
+     avenue door put you on the LANDING of Nolasco's stairs, at the top, with the whole climb
+     behind you and none of it walked.
+
+     Two nouns, and the second is the one that was quietly broken everywhere:
+       1. NO PORTAL PUTS YOU AT THE SHALLOW END OF A FLIGHT. If a portal's arrival tile sits on a
+          well run, it has to be the deepest tread of that run — the foot. Arriving at the head
+          means the climb happened off-screen, which is the thing he refused.
+       2. WHOEVER STANDS IN A WELL IS DRAWN IN IT. `stairLift`/`wellDepth` existed for two
+          versions and ONLY engine3d.js ever read them, so in top, front and iso the hole was
+          painted as ordinary floor and the hero stood on top of it at full height. Asked of the
+          drawing, not the code: `drawPerson` is stubbed, each camera is rendered with the hero on
+          each tread in turn, and the y it is called with has to descend as the treads do.
+          Both flat cameras centre on the hero, so that y moves for exactly one reason — the drop.
+     Run for every world, so a second game that digs a well gets the same two promises. */
+  const flight = await page.evaluate(() => {
+    const P = [];
+    if (typeof wellDepth !== 'function' || typeof wellPx !== 'function') return ['the engine has no well seam: wellDepth/wellPx'];
+    /* 1 — where a portal drops you, against where it took you from.
+       The first draft of this asked only whether the arrival was the deepest tread of its run, and
+       the plant — the avenue door back on the landing, exactly as it shipped — WENT STRAIGHT
+       THROUGH IT, because the landing is not ON the run, it is the tile past the end of it. The
+       hole was the whole bug.
+       The rule that catches it also has to let hq↔f2 through, and for the right reason rather than
+       by luck: there you leave standing ON a flight (the ▲ head) and arrive at the head of the
+       well on the other side, and the two halves add up to one storey across the landing. What
+       must never happen is leaving FLAT GROUND and arriving at the head of a flight — a climb with
+       nothing on either side of the door to account for it. */
+    const headOfWell = (w, x, y) => { const r = typeof stairRun === 'function' ? stairRun(w, x - 1, y) : null;
+      return !!(r && r.well && r.i === r.L - 1); };
+    const onStairs = (w, x, y) => { const r = typeof stairRun === 'function' ? stairRun(w, x, y) : null;
+      return !!r || wellDepth(w, x, y) > 0; };
+    Object.keys(PORTALS).forEach(from => {
+      const fw = WORLDS[from]; if (!fw) return;
+      Object.keys(PORTALS[from] || {}).forEach(ch => {
+        const p = PORTALS[from][ch], w = p && WORLDS[p.to]; if (!p || !w) return;
+        /* on a run: you must land at its foot, never part-way up */
+        const run = typeof stairRun === 'function' ? stairRun(w, p.x, p.y) : null;
+        if (run && run.well) {
+          const mine = wellDepth(w, p.x, p.y);
+          let deepest = 0; for (let i = 0; i < run.L; i++) deepest = Math.max(deepest, wellDepth(w, p.x - run.i + i, p.y));
+          if (mine < deepest - 0.001)
+            P.push('the ' + from + ':' + ch + ' door drops you at ' + p.to + ' ' + p.x + ',' + p.y +
+                   ', which is ' + mine.toFixed(2) + ' down a well that goes ' + deepest.toFixed(2) +
+                   ' — you arrive part-way UP a flight you never climbed');
+        }
+        /* and off flat ground you may not land at the head of one at all */
+        if (!headOfWell(w, p.x, p.y)) return;
+        let fromStairs = false;
+        for (let y = 0; y < fw.H && !fromStairs; y++) for (let x = 0; x < fw.W; x++)
+          if (fw.rows[y][x] === ch && onStairs(fw, x, y)) { fromStairs = true; break; }
+        if (!fromStairs)
+          P.push('the ' + from + ':' + ch + ' door stands on flat ground and drops you at ' + p.to + ' ' +
+                 p.x + ',' + p.y + ' — the head of a flight, with the whole climb behind you and none of it walked');
+      });
+    });
+    /* 2 — and the drawing agrees with the height */
+    const keep = { world, px, py, fx, fy, cam: camMode, dp: drawPerson };
+    const runs = [];
+    Object.keys(WORLDS).forEach(wid => { const w = WORLDS[wid];
+      for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+        if (wellDepth(w, x, y) <= 0) continue;
+        const r = stairRun(w, x, y); if (!r || !r.well || r.i !== 0) continue;
+        const a = x;                                   /* the deepest tread of this run */
+        const tiles = []; for (let i = 0; i < r.L; i++) tiles.push([a + i, y]);
+        tiles.push([a + r.L, y]);                      /* and the landing at the head, depth 0 */
+        runs.push({ wid, tiles });
+      }});
+    /* A SHELL WITH NO STAIRS IS NOT A FAILING SHELL, and the gauge said so on the first run:
+       "NEW demand on every future game: no world has a well any more". It was right — a five-tile
+       world that never digs a hole owes this guard nothing, and a guard that demands a staircase
+       of every future game is a guard inventing requirements. But a shell that HAD wells and lost
+       them is measuring nothing, which is the silent zero docs/GAUGE.md exists to stop. So it is
+       said out loud and it does not fail: the pack that has wells (Meridian) is held to them by
+       its own suite, where the demand belongs. */
+    if (!runs.length) P.push('NOTE-ONLY: no world in this shell has a well, so the flight checks measured nothing here');
+    ['front', 'iso'].forEach(cam => {
+      runs.forEach(r => {
+        const ys = r.tiles.map(([x, y]) => {
+          let seen = null;
+          drawPerson = (g, bx, by, look, o) => { if (o && o.hero) seen = by; };
+          world = r.wid; px = fx = x; py = fy = y; moving = false; held = null;
+          camSet(cam); draw();
+          return seen;
+        });
+        if (ys.some(v => v === null)) { P.push(cam + ': the hero was not drawn on part of the flight in ' + r.wid); return; }
+        for (let i = 1; i < ys.length; i++)
+          if (!(ys[i] < ys[i - 1]))
+            P.push(cam + ': in ' + r.wid + ', step ' + i + ' of the flight draws the hero at y=' + Math.round(ys[i]) +
+                   ' and the step below at y=' + Math.round(ys[i - 1]) + ' — the flight does not descend on screen, it is a flat floor with a chevron on it');
+        /* and it drops by EXACTLY what the world says, not by a number a guard picked. A minimum
+           of "eight pixels, enough to see" failed f2 honestly: its well is three treads because
+           the other three are hq's CLIMB on the far side of the same landing, so half a storey is
+           the right answer there. The testable claim is not "enough" — it is that the drawing uses
+           the height the data gives it. */
+        const w2 = WORLDS[r.wid], deep = r.tiles[0];
+        const want = cam === 'iso' ? isoWellPx(w2, deep[0], deep[1]) : wellPx(w2, deep[0], deep[1]);
+        const drop = Math.round(ys[0] - ys[ys.length - 1]);
+        if (drop !== want) P.push(cam + ': in ' + r.wid + ' the flight drops the hero ' + drop +
+                   ' pixels from the landing to the bottom step and the world says ' + want +
+                   ' — the drawing is not using the height it was given');
+      });
+    });
+    drawPerson = keep.dp;
+    world = keep.world; px = keep.px; py = keep.py; fx = keep.fx; fy = keep.fy; camSet(keep.cam);
+    return P;
+  });
+  fails.push(...flight.filter(l => !/^NOTE-ONLY: /.test(l)));
+  flight.filter(l => /^NOTE-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
   await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();
   if (fails.length) { console.log('FAIL (' + idx + ')\n- ' + fails.join('\n- ')); process.exit(1); }

@@ -961,3 +961,49 @@ height. **Cost: more than a sitting; it is a rewrite of what a world is.**
 **Recommended: A now, B for Nolasco's stairs, and C never** — A is what makes every door in the city
 honest for one sitting's work, B makes the one he is pointing at true, and C is a different game from
 the one that is about practising AI roles. **His call; nothing is built until he takes it.**
+
+### A16 — **B SIGNED AND BUILT, 2026-09-17.** *"ok lets do b."*
+
+**What shipped, and none of it is an engine rule change — it is the engine's own numbers finally
+being read by the cameras that draw them.**
+
+- **The flight is five treads, not three.** `wellDepth` at the `▼` is `STAIRH×6 = 0.96` against a wall
+  of 1.1, so the well is now a storey. Three treads dropped 0.64 and read as a dip in the floor. The
+  rails follow the run for its whole length, which they did not before.
+- **You arrive at the foot and walk up.** `PORTALS.st["$"]` lands you on the bottom tread facing the
+  climb, with the avenue door behind you. One tile east of the `▼` rather than on it: `portalHold`
+  would have made a spawn on the portal tile safe, but the bottom step is the truer place to put
+  somebody who has just opened a street door, and it costs no argument with the engine's own warning.
+- **And the three flat cameras stopped lying about height.** This is the part the costing under-sold.
+  `wellDepth` and `stairLift` had existed for two versions and **only `engine3d.js` ever read them**,
+  so in top, front and iso the hole was painted as ordinary floor with a chevron on it and the hero
+  stood on top of it at full height. The front camera looks along the row and Nolasco's flight runs
+  *across* one, so sinking each tread by its own drop gives a genuine staircase in profile for free.
+  Iso gets the two far walls of the shaft and the tread at the bottom, drawn in the depth pass rather
+  than the floor pass because a sunken lid reaches half a diamond past its own tile. Top-down gets
+  nothing on purpose: you cannot see a drop from directly above, and the tread art already ramps its
+  value as it descends.
+
+**What is NOT done, named rather than left to be discovered:** a CLIMBING flight still does not lift
+anyone in the flat cameras (`hq`'s three treads up to `f2`), and neither does the park bridge's deck,
+which has `BRIDGEH` plus an arch and rails that would all have to move together. Both are the same
+one-line hook; both need their own look, and the bridge has its own history.
+
+**Two constants, neither of them picked:** `UNITPX=12`, because a facade is `lift:13` and stands 1.1
+units; `ISOUNITPX=18`, because `izh` already converts a lift with `Math.round(lift*1.5)`.
+
+**Planted three ways** in copies outside the repo: the avenue door back on the landing, the flat
+cameras forgetting the drop, and the three-tread flight restored. All three named. **The first draft
+of the portal check let the landing plant straight through** — it asked whether the arrival was the
+deepest tread of its run, and the landing is not *on* the run, it is the tile past the end of it.
+That hole was the entire bug. It now asks the question that also lets `hq↔f2` through for the right
+reason rather than by luck: there you leave standing *on* a flight and the two halves add up to one
+storey across the landing; what may never happen is leaving flat ground and arriving at a head.
+
+**And the gauge caught the guard inventing a requirement** — *"NEW demand on every future game: no
+world has a well any more"*. A five-tile world that never digs a hole owes this nothing. The demand
+that a flight EXIST moved to Meridian's own suite, where it belongs; the engine's suite says out loud
+that it measured nothing rather than passing quietly.
+
+**A and C are still open and still his.** A (drawing the climb into the 450ms that already exists and
+is already blank) would make every *other* door in both games legible, and is unaffected by B.

@@ -2766,6 +2766,28 @@ const CANDIDATES = [
     });
     fails.push(...legible);
 
+    /* AND THE CLIMB EXISTS AT ALL. The engine's suite holds any shell to "a flight is walked, not
+       teleported" but cannot require a shell to HAVE a flight — the gauge's five-tile world owes
+       it nothing, and said so on the first run. Meridian has one, so Meridian is held to it here:
+       Nolasco's well is real, it is deep enough to be a storey rather than a dip, and the avenue
+       door lands you at its foot. Owner, 2026-09-17: "ok lets do b." */
+    const climb = await page.evaluate(() => {
+      const P = [], w = WORLDS.no;
+      if (!w) return ['the Nolasco stair room is gone'];
+      let deepest = 0, treads = 0;
+      for (let x = 0; x < w.W; x++) { const d = wellDepth(w, x, 4); if (d > deepest) deepest = d;
+        if (w.rows[4][x] === '\u2261') treads++; }
+      if (treads < 5) P.push('Nolasco\'s flight is ' + treads + ' treads — under five it drops less than two thirds of a wall and reads as a dip in the floor, not as a storey');
+      if (deepest < 0.9) P.push('Nolasco\'s well is ' + deepest.toFixed(2) + ' deep and a wall is about 1.1 — you would arrive on the avenue from half a storey up');
+      const p = PORTALS.st.$;
+      if (!p || p.to !== 'no') P.push('the avenue door no longer opens into the stair room');
+      else if (wellDepth(w, p.x, p.y) < deepest - 0.17)
+        P.push('the avenue door drops you at no ' + p.x + ',' + p.y + ', ' + wellDepth(w, p.x, p.y).toFixed(2) +
+               ' down a well that goes ' + deepest.toFixed(2) + ' — you are meant to arrive at the foot and walk up');
+      return P;
+    });
+    fails.push(...climb);
+
     // townsfolk: people with no quests move, people with quests never do
     const walk = await page.evaluate(async () => {
       const problems = [];

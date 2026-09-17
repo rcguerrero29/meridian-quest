@@ -157,12 +157,25 @@ const WORLD_DEFS={
     unseen and appear at the top, in the stair room east of the office (#7, the owner's plan,
     2026-09-07): a door at (15,2) between the rooms, the engine's railed well at (16–20,4) with
     ▼ at (17,4) the way down. The office itself did not move. */
+ /* THE FLIGHT IS WALKED NOW (owner, 2026-09-17: "then that door right there to the top of a
+    staircase… until you figure out how to teleport in my side of the screen"; ARCH-LOG A16, option
+    B, signed "ok lets do b"). It was ▼ at 16 with three treads and the landing at 21-22, and the
+    avenue door put you on the LANDING — at the top, with the whole climb behind you, having walked
+    none of it. Two things changed and neither is an engine change:
+      · the run is FIVE treads against a wall 1.1 tiles high, so the well is now 0.96 deep
+        (wellDepth: STAIRH×6 at the ▼). Three treads dropped 0.64 and read as a dip in the floor,
+        not as a storey. The rails follow the run for its whole length, which they did not before;
+      · you arrive on the BOTTOM TREAD facing up it (PORTALS.st["$"] below), because that is where
+        a person who has just come in off the avenue is standing.
+    Arriving one tile east of the ▼ rather than on it is deliberate: the engine warns about a spawn
+    on a portal tile and portalHold would have made it safe, but the bottom step is the truer place
+    to put somebody who has just opened a street door, and it costs no argument with a guard. */
  no:["#######|################",
      "#▯▯.D....S.S...#.......#",
      "#...n..........+.......#",
-     "#............P.#.◺◺◺◺..#",
-     "#..............#◺▼≡≡≡..#",
-     "#KK......RR....#.◺◺◺◺..#",
+     "#............P.#◺◺◺◺◺◺.#",
+     "#..............#▼≡≡≡≡≡.#",
+     "#KK......RR....#◺◺◺◺◺◺.#",
      "#Pe......⊔⊔....#.......#",
      "########################"],
  pk:["FFF~~FFFFFFFFFFFFFFFFFFF",
@@ -202,7 +215,7 @@ const PORTALS={hq:{"▲":{to:"f2",x:14,y:14,dir:"left",mark:"up"},"E":{to:"st",x
                   a stair room whose railed well goes down to the avenue — the last old `1` left the city */
                no:{"▼":{to:"st",x:25,y:1,dir:"down"}}};
 PORTALS.st["%"]={to:"ta",x:10,y:10,dir:"up"};
-PORTALS.st["$"]={to:"no",x:21,y:4,dir:"left"}; /* the avenue door is the foot of Nolasco's stairs: you appear at the top, in the stair room, facing the well */
+PORTALS.st["$"]={to:"no",x:17,y:4,dir:"right"}; /* the avenue door IS the foot of Nolasco's stairs, so you arrive on the bottom step with the door behind you and five treads in front — and you walk them. It used to land you at 21,4: the top of the flight, reached by opening a door at the bottom of it. */
 PORTALS.ex["@"]={to:"pa",x:10,y:8,dir:"up"};
 PORTALS.ex["*"]={to:"li",x:10,y:8,dir:"up"};
 /* the four storefront ribbons — each rises when its district opens (GROWTH.ribbons) */

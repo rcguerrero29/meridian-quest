@@ -882,6 +882,26 @@ function drawIso(){
         ctx.beginPath();ctx.arc(cx+q[0]+t2,cy-16+q[1],1.6,0,7);ctx.fill();});canopyDress(ctx,cx+t2,cy-16);}});
     else R.push({d:x+y,f:()=>isoBlock(cx,cy,ISOCOL[gch]||ISOCOL[w.rows[y][x]]||C.wall,IZH[gch]||izh(w.rows[y][x]))});
   }
+  /* THE WELL, LOOKED INTO (owner, 2026-09-17: "lets do b"). This camera drew the hole as ordinary
+     floor with a chevron on it and stood the hero on top — the same fault the front camera had.
+     It is drawn in the DEPTH pass rather than the floor pass on purpose: a sunken lid reaches
+     half a diamond past its own tile, and in the floor pass the next row would paint over it.
+     You see the two FAR walls of the shaft (the diamond's north edges, extruded down) and the
+     tread at the bottom of them. */
+  for(let y=0;y<w.H;y++)for(let x=0;x<w.W;x++){
+    const dp=isoWellPx(w,x,y);if(dp<=0)continue;
+    const[cx,cy]=P(x,y);
+    if(cx<-ISW||cx>VW+ISW||cy<-ISH-40||cy>VH+ISH+40)continue;
+    const g=w.rows[y][x];
+    R.push({d:x+y-0.02,f:()=>{
+      ctx.fillStyle=tc("#221C29");ctx.beginPath();
+      ctx.moveTo(cx-ISW/2,cy);ctx.lineTo(cx,cy-ISH/2);ctx.lineTo(cx+ISW/2,cy);
+      ctx.lineTo(cx+ISW/2,cy+dp);ctx.lineTo(cx,cy-ISH/2+dp);ctx.lineTo(cx-ISW/2,cy+dp);
+      ctx.closePath();ctx.fill();
+      isoDiamond(cx,cy+dp,tc(g==="▼"?"#8C8578":"#C2BAA6"));   /* the tread's lid — the one surface down there facing the light from the floor above */
+      ctx.fillStyle="rgba(255,255,255,.16)";ctx.beginPath();  /* its nosing */
+      ctx.moveTo(cx-ISW/2,cy+dp);ctx.lineTo(cx,cy-ISH/2+dp);ctx.lineTo(cx,cy-ISH/2+dp+2);ctx.lineTo(cx-ISW/2,cy+dp+2);ctx.closePath();ctx.fill();}});
+  }
   /* STANDING TILES. A `stand` tile is walkable, so the block pass above skips it — and
      isoBlock paints flat faces and a diamond top, never the art, so routing them THERE turns a
      trolley stop into a coloured slab (tried it, 2026-09-04). They billboard their profile
@@ -893,7 +913,7 @@ function drawIso(){
     const tf=sideArt(g);if(!tf)continue;
     R.push({d:x+y+0.35,f:()=>tf({sx:cx-16,sy:cy-25,x,y,canopy:()=>{}})});
   }
-  const bill=(gx,gy,fn)=>{const[cx,cy]=P(gx,gy);
+  const bill=(gx,gy,fn)=>{const[cx,cy0]=P(gx,gy),cy=cy0+isoWellPx(w,Math.round(gx),Math.round(gy));
     if(cx>-ISW&&cx<VW+ISW&&cy>-40&&cy<VH+40)R.push({d:gx+gy+0.51,f:()=>fn(cx-16,cy-25)});};
   w.npcs.forEach(n=>bill(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(bx,by)=>{
     drawPerson(ctx,bx,by,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});
@@ -1942,6 +1962,15 @@ function stairRun(w,x,y){const row=(w&&w.rows&&w.rows[y])||"";if(row[x]!=="≡"&
 function wellDepth(w,x,y){const row=(w&&w.rows&&w.rows[y])||"";
   if(row[x]==="▼"){let L=0;while(row[x+1+L]==="≡")L++;return L?STAIRH*(L+1):0;}
   const r=stairRun(w,x,y);if(!r||!r.well)return 0;return STAIRH*(r.L-r.i);}
+/* THE SAME DROP, IN THE FLAT CAMERAS' OWN UNITS (owner, 2026-09-17: "lets do b").
+   wellDepth is in tile units and only engine3d.js ever read it, so in top, front and iso the well
+   was a flat floor with a chevron painted on it and the hero standing on top of the hole. What a
+   unit of height is worth in pixels is already settled by the facades: a wall is `lift:13` and
+   stands 1.1 units, so a unit is about twelve. One constant, derived rather than picked, and one
+   reader — nothing may convert a height to pixels anywhere else. */
+const UNITPX=12, ISOUNITPX=18;   /* iso is 1.5x the flat cameras, which is not a choice either: `izh` already converts a lift with `Math.round(lift*1.5)` */
+const wellPx=(w,x,y)=>Math.round(wellDepth(w,x,y)*UNITPX);
+const isoWellPx=(w,x,y)=>Math.round(wellDepth(w,x,y)*ISOUNITPX);
 /* the height anyone standing on (x,y) stands at: up a climbing tread, DOWN a well tread */
 /* the crossing ARCHES (owner, 2026-09-08: "for water, make the bridge a bit better, some arching and or
    dimesionality"): the deck rises from each bank to a crown over the middle of the water. The height at a
@@ -2164,7 +2193,17 @@ function drawFront(){
     const hsh=(x*374761393+y*668265263+world.charCodeAt(0)*69069)>>>0;
     if((hsh&7)<2){ctx.globalAlpha=0.05;ctx.fillStyle="#000";ctx.fillRect(sx,sy,TS,TS);ctx.globalAlpha=1;}
     if(hsh%11===3){ctx.globalAlpha=0.08;ctx.fillStyle="#FFF";ctx.fillRect(sx+(hsh>>3)%26+2,sy+(hsh>>5)%26+2,2,2);ctx.globalAlpha=1;}
-    if(!SOLID.has(w.grid[y][x])&&!standsUp(ch)){const tf=TILEDRAW[ch];if(tf)tf({sx,sy,x,y,canopy:queueCanopy});}
+    if(!SOLID.has(w.grid[y][x])&&!standsUp(ch)){const tf=TILEDRAW[ch],dp=wellPx(w,x,y);
+      /* A WELL IN PROFILE. This camera looks along the row, and Nolasco's flight runs ACROSS one —
+         so every tread is at the same screen row and differs only in height, which is exactly a
+         staircase seen from the side. Sink each tread by its own drop and paint the shaft above it
+         and the whole flight steps down the screen. Before this the front camera drew the hole as
+         floor: five pale tiles, a chevron, and the hero standing on top of it at full height. */
+      if(dp>0){ctx.fillStyle=tc("#241E2A");ctx.fillRect(sx,sy-2,TS,dp+4);                     /* the shaft you look into */
+        ctx.fillStyle="rgba(15,12,20,.35)";ctx.fillRect(sx,sy-2,TS,2);                        /* its lip, where the floor ends */
+        ctx.save();ctx.translate(0,dp);if(tf)tf({sx,sy,x,y,canopy:queueCanopy});ctx.restore();
+        ctx.fillStyle="rgba(255,255,255,.14)";ctx.fillRect(sx,sy+dp,TS,1);}                   /* the nosing catching the light from above */
+      else if(tf)tf({sx,sy,x,y,canopy:queueCanopy});}
     if(!SOLID.has(w.grid[y][x])||(TILES[w.grid[y][x]]||{}).kind==="water")petalSpill(w,x,y,sx,sy);
     if(y>0&&SOLID.has(w.grid[y-1][x])&&!SOLID.has(w.grid[y][x])){
       ctx.fillStyle="rgba(15,12,20,.16)";ctx.fillRect(sx,sy,TS,8);}
@@ -2212,7 +2251,9 @@ function drawFront(){
       }
     }});
   }
-  const act=(gx,gy,fn)=>{const sx=gx*TS-camX,sy=gy*TS-camY;
+  const act=(gx,gy,fn)=>{const sx=gx*TS-camX,sy=gy*TS-camY+wellPx(w,Math.round(gx),Math.round(gy));
+    /* +wellPx: you stand ON the tread, not over it. Everyone goes through `act`, so the hero, the
+       townsfolk and the animals all descend the same flight by the same number of pixels. */
     if(sx<-TS||sy<-TS-16||sx>VW||sy>VH)return;R.push({d:gy+0.55,f:()=>fn(sx,sy)});};
   w.npcs.forEach(n=>act(n.fx===undefined?n.x:n.fx,n.fy===undefined?n.y:n.fy,(sx,sy)=>{
     drawPerson(ctx,sx,sy,npcWhimsy(n),{dir:"down",idle:Math.sin(Date.now()/500+n.x)*0.8,who:n.npc||n.key});

@@ -522,3 +522,29 @@ the basket and the wrench came out as **ribbons between the panes** — rendered
 while we figure it out"*): the emblem drawn **around** the window rather than beside it, with the
 skull on the sill as part of the picture. That is six drawings, one per business. It is design, not
 plumbing, and he deferred it himself.
+
+## A number three cameras never read — 2026-09-17
+
+Companion to the entry above it, and the same shape one floor down. `wellDepth` and `stairLift`
+returned the right height for two versions. **Only `engine3d.js` ever called them.** So in top,
+front and iso, Nolasco's stairwell was a flat floor with a chevron painted on it, the hero stood on
+top of the hole at full height, and the rail around it promised a descent that nothing went down.
+
+*A railing around a hole that nothing goes down is a stronger lie than no railing at all.*
+
+**The rule this generalises to, and it is the one worth keeping:** when a function returns a physical
+fact about the world — a height, a depth, a slope — **grep every camera for its name before you
+believe the world has that fact.** Three of the four here had never heard of it. It is the same
+sentence as the entry above (*a rectangle in the data is not a thing on the screen*) with the data
+being a number instead of a rect, and it is the fourth register entry on this one shape.
+
+**What made the fix cheap was a piece of luck worth noticing.** The front camera looks along a row,
+and this flight runs *across* one — so every tread sits at the same screen row and differs only in
+height, which is precisely a staircase seen from the side. Sinking each tread by its own drop gave a
+real stepped profile for nothing. **A flight running north–south would not have been free**, and a
+world that digs one will find that out; it is written here so it is found before it is built.
+
+**Top-down gets no drop, on purpose.** You cannot see a descent from directly above, and the tread
+art already ramps its value as it goes down — which is the right language in that camera and was
+already there. Adding a vertical offset would have been the "drawn in some cameras" fault wearing
+the costume of a fix.
