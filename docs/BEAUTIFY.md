@@ -472,3 +472,53 @@ the flake is gone.
 **What it cost to leave it:** three days in the register, a suite reddening about one run in
 twenty-five, and — the part nobody was counting — a player occasionally walled out of thirty-five
 tiles of Calle Dos by somebody standing in a doorway with their back to them.
+
+## The data was right for two years and nobody drew it — 2026-09-17
+
+**Owner, and this is the fifth time he has raised it:** *"the skull on a non existing or visible
+window sill overlaps a store front that was initially a placeholder for a mural. this isnt about
+whether your work is good or not. you understand that right? its about trying to meet the requirement
+of being realistic… if there were a window sill there, it should be drawn and then a skull can be
+included and then the store front icon or mural can go around it."*
+
+Four previous answers, `2026-09-08` through `2026-09-12`, all changed the **size of the sugar skull**:
+8px, then 5px, then 0.85 of the pane, then the pane lit behind it. Each was measured. Each was
+defensible. He came back every time.
+
+**Rendered the tile at 8× before touching anything, and the cause was plain in one look:**
+
+| what the data says | what was drawn |
+|---|---|
+| `TILES.B.win = [[5,10,8,9],[19,10,8,9]]` — two windows | two flat rectangles, `#8E7A80`, one shade off the wall |
+| a sill at `win[1]+win[3]` — `propSill` computes it, `drawSillLedge` draws it for the candy | nothing under the window, because there was no window |
+| a mural panel painted on that wall | plaster over the whole 32×32, erasing even the rectangles |
+
+So what he was looking at is a lit pane, a sugar skull and a stone ledge **floating in the middle of
+a blank wall**. Every one of them was in exactly the right place. The `win` rect is read by three
+things — the sill props, the ledge, and the dusk lighting — and **not one of them drew it**.
+
+**The rule, and it is the general one:** *a rectangle in the data is not a thing on the screen.* When
+several drawings position themselves off one number and nobody paints the number itself, every one of
+them is correct and the picture is wrong — and the fault is invisible in the code, because each
+drawing reads right on its own. **Grep who draws the field before you tune anything that is placed by
+it.** It is `gradeOf` and `d.sub` again, pointed at geometry: the same shape of mistake, the third
+register to record it.
+
+**What shipped.** One `drawPane` — a reveal, glass with four panes and a reflection, a lintel, and
+`drawSillLedge`, *the same function the candy's ledge already used, at coordinates proved identical*
+— called from the tile art of every front that declares a window: `B`, `Q`, `Z`, `=`, `!`, and the
+town's `I`. Three declared rects were moved to where the art actually paints (`Q`, `Z`, the town's
+`I`): **a window declared where the glass is not is a sill where the wall is.** `&` is deliberately
+left alone and says so in the code — a round *ojo de buey* has no sill.
+
+**And a mural does not erase a window.** A `DECOS` row now says which windows it leaves
+(`wins:[1]`), and three readers go through that one list — the decor's own art, `propSill`, and the
+dusk lighting, *which would otherwise have lit a window that is not there any more, at night, on a
+wall nobody would think to check*. The other window is plastered over, which is what a muralist does
+with a pane that is in the way, and it hands the shop's emblem a clear field: with both windows kept,
+the basket and the wrench came out as **ribbons between the panes** — rendered, looked at, rejected.
+
+**Still open, and it is the owner's own call** (*"whats square? well right now it can be the icon
+while we figure it out"*): the emblem drawn **around** the window rather than beside it, with the
+skull on the sill as part of the picture. That is six drawings, one per business. It is design, not
+plumbing, and he deferred it himself.

@@ -142,6 +142,7 @@ function portalsOf(id){const w=WORLDS[id],out=[];if(!w)return out;const P=PORTAL
 const isSolid=(x,y)=>{const w=CW();return x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N";};
 /* the same question about a world you are not standing in — used by the discoverability audit */
 const isSolidAt=(id,x,y)=>{const w=WORLDS[id];return !w||x<0||y<0||x>=w.W||y>=w.H||SOLID.has(w.grid[y][x])||w.grid[y][x]==="N";};
+const glyphAt=(id,x,y)=>{const w=WORLDS[id];return (w&&w.rows[y]&&w.rows[y][x])||null;}; /* the glyph a tile is made of — what its art and its TILES row are looked up by. Decor that is painted ON a wall needs it (a mural has to know the wall has windows in it). */
 /* ---------- townsfolk on the move ----------
    Anyone with NO quests drifts around their own corner. A quest-giver never moves: a person
    you are looking for has to be where you left them, which is the entire reason the doorstep
@@ -963,7 +964,7 @@ document.querySelectorAll("#easeRow button").forEach(b=>b.addEventListener("clic
 const TILEDRAW={};
 TILEDRAW["#"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc(C.wall);ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle=tc(C.wallTop);ctx.fillRect(sx,sy,TS,6);};
 TILEDRAW["B"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc("#5C4A50");ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle=tc("#6E5A60");ctx.fillRect(sx,sy,TS,5);
-      ctx.fillStyle=tc("#8E7A80");ctx.fillRect(sx+5,sy+10,8,9);ctx.fillRect(sx+19,sy+10,8,9);};
+      drawPanes(ctx,"B",sx,sy);}; /* the two windows are TILES.B.win, drawn — see drawPane. They were two flat rectangles a shade off the wall until 2026-09-17, which is why every sill in this game stood on nothing. */
 TILEDRAW["R"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc(C.rug);ctx.fillRect(sx+2,sy+2,TS-4,TS-4);};
 TILEDRAW["≈"]=rc=>{const{sx,sy,x,y}=rc;ctx.fillStyle=tc("#54555B");ctx.fillRect(sx,sy,TS,TS);
       if(y%2===0){ctx.fillStyle=tc("#6A6B72");ctx.fillRect(sx+4,sy+15,10,2);}};
@@ -1086,7 +1087,8 @@ TILEDRAW["Q"]=rc=>{const{sx,sy,x,y}=rc; /* restaurant storefront: terracotta fac
       ctx.fillStyle="#E8A05A";ctx.fillRect(sx+11.5,sy+19,9,1.6); /* what's in it */
       ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+11,sy+19.6,10,1); /* rim */
       ctx.fillStyle="#B9B2A6";[13,16,19].forEach((wx,i)=>ctx.fillRect(sx+wx,sy+13+(i%2)*1.2,1.2,3.6)); /* steam */
-      produce(sx+23,sy+14,"chile",0.75);};
+      produce(sx+23,sy+14,"chile",0.75);
+      drawPanes(ctx,"Q",sx,sy,{glass:false});};   /* the joinery: a reveal, a lintel and the sill two calaveritas stand on */
 TILEDRAW["D"]=rc=>{const{sx,sy,x,y}=rc; /* a desk: top, two legs, a monitor on it, a sheet of paper.
       The cold read saw a cardboard box with a label. */
       ctx.fillStyle=tc(C.desk);ctx.fillRect(sx+5,sy+18,3,10);ctx.fillRect(sx+24,sy+18,3,10); /* legs */
@@ -1156,7 +1158,8 @@ TILEDRAW["Z"]=rc=>{const{sx,sy,x,y}=rc; /* El Mercado facade: green stall front,
          and the carrot on top of each other. One row, bigger, fully spaced — legibility
          beats density at 32px. Verified by rendering the tile at 4x and looking. */
       [[9.5,18.5,"tomato"],[17,18.5,"banana"],[24.5,18.5,"chile"]]
-        .forEach(f=>produce(sx+f[0],sy+f[1],f[2],1.3));};
+        .forEach(f=>produce(sx+f[0],sy+f[1],f[2],1.3));
+      drawPanes(ctx,"Z",sx,sy,{glass:false});};
 TILEDRAW["S"]=rc=>{const{sx,sy,x,y}=rc; /* shelving: three loaded shelves */
       ctx.fillStyle="#8A6F4D";ctx.fillRect(sx+2,sy+2,TS-4,TS-4);
       ctx.fillStyle="#6E5638";[6,14,22].forEach(yy=>ctx.fillRect(sx+2,sy+yy,TS-4,2));
@@ -1254,8 +1257,12 @@ function sillWindow(wid,p,n){
   const mine=fiestaProps(wid).filter(q=>q.sill&&q.x===p.x&&q.y===p.y);
   const k=mine.indexOf(p);return (k<0?0:k)%n;}
 function propSill(wid,p){
-  if(!p.sill)return null;const w=WORLDS[wid],g=w&&w.rows[p.y]&&w.rows[p.y][p.x],m=(TILES[g]||{}),wins=m.win;
-  if(!wins||!wins.length)return null;
+  /* winsKept, not TILES.win: a candy may only stand in a window the wall actually SHOWS. At
+     st(22,0) the mural panel plasters the left one over, and reading the raw list put the sweet
+     where a window used to be — which is the "non existing or visible window sill" the owner
+     reported on 2026-09-17. `w:` in the content indexes what is left, not what was declared. */
+  if(!p.sill)return null;const g=glyphAt(wid,p.x,p.y),wins=winsKept(wid,p.x,p.y);
+  if(!wins.length)return null;
   const i=sillWindow(wid,p,wins.length),win=wins[i]||wins[0];
   /* #131 cut the candy from a flat 8 to two thirds of the pane, because at 8 in an 8-pixel window it
      filled the glass edge to edge and its crown poked over the frame. Two thirds was my number and it
@@ -1265,24 +1272,6 @@ function propSill(wid,p){
      0.85 leaves a pixel of glass each side — a sweet ON a sill, not a sweet AVOIDING one. */
   const size=Math.max(4,Math.min(8,Math.round(win[2]*0.85),Math.round(win[3]*0.9)));
   return {cx:win[0]+win[2]/2,sill:win[1]+win[3],size,i,w:win[2],h:win[3],g};}
-/* ---------- THE SILL ITSELF — the fourth attempt, and the first one that is not about size ----------
-   The owner has asked four times. 2026-09-08: the skulls share a sill. 2026-09-09 and 2026-09-10:
-   "the skulls are still hidden on the sills." 2026-09-12: "another attempt at showing the WINDOW
-   SILLS." Read that last one literally, because it is the clue the three previous fixes all missed:
-   he is not only asking to see the candy. **There was never a sill.** `propSill` computes a y called
-   `sill` and nothing has ever DRAWN one — the candy stood on the bottom edge of a hole in a wall.
-   The three answers so far were all the same answer: 8px of sweet, then 5px, then 0.85 of the pane,
-   then the whole pane lit. Each was measured, each was defensible, and after each one he came back,
-   because the thing missing was not a dimension.
-   What a sill is, and why it reads when a 7-pixel sweet does not: it is a HORIZONTAL EDGE, the full
-   width of the opening and wider, bright on top and dark underneath, with a shadow cast on the wall
-   below it. A hard light/dark horizontal boundary survives being scaled down to three pixels — it is
-   the one shape that does — which is exactly why the papel picado in the same frame never had this
-   problem and the candy did. And it gives the sweet a thing to stand ON and to silhouette against,
-   instead of floating in a dark recess the same colour as itself.
-   One drawing, used by the front camera and by the 3D sprite, so the two cannot drift. Top-down and
-   iso get nothing: you cannot see a ledge from directly above, and pretending otherwise is the
-   "drawn in some cameras" bug this repo already has a register entry for. */
 /* ---------- THE SILL ITSELF — the fourth attempt, and the first one that is not about size ----------
    The owner has asked four times. 2026-09-08: the skulls share a sill. 2026-09-09 and 2026-09-10:
    "the skulls are still hidden on the sills." 2026-09-12: "another attempt at showing the WINDOW
@@ -1318,6 +1307,57 @@ function drawSillLedge(g,x,y,w){
   g.fillStyle="#F7F2E2";g.fillRect(x,y,W,3);                      /* the stone, lit from above: THREE whole pixels */
   g.fillStyle="#8A7F66";g.fillRect(x,y+3,W,1);                    /* its hard underside — the edge that does the work */
   g.fillStyle="rgba(16,12,22,.42)";g.fillRect(x+1,y+4,W-2,2);}    /* and what it throws on the wall */
+/* ---------- AND THE WINDOW UNDER IT (owner, 2026-09-17) ----------
+   "the skull on a non existing or visible window sill overlaps a store front that was initially a
+   placeholder for a mural… if there were a window sill there, it should be drawn and then a skull
+   can be included and then the store front icon or mural can go around it."
+
+   Rendered at 8x before touching anything, which is the only reason this is the right fix: the
+   plain facade `B` painted its two windows as ONE FLAT RECTANGLE each, a shade off the wall — no
+   frame, no glass, no reveal, no ledge — and the mural panel then painted plaster over the whole
+   32x32, erasing even those. What the owner was looking at is a lit pane, a sugar skull and a
+   stone ledge floating in the middle of a blank wall, because every one of them is computed from a
+   `win` rect in TILES that NOTHING HAS EVER DRAWN. Four fixes to this bug argued about the candy's
+   size. The candy was never the fault: it was standing on data.
+
+   So the window becomes a real thing, from the same `win` rect the sill props already read, in one
+   drawing every camera goes through — and `drawSillLedge` here is the SAME function the prop uses,
+   at the same coordinates (proved in drawSillBox: ox=win[0], by=win[1]+win[3]), so the tile's sill
+   and the candy's sill are one ledge and cannot drift apart.
+
+   `glass:false` is for a front that paints its own glass and only wants the joinery — El Mercado's
+   produce window, La Cocina's bowl. They get a reveal, a lintel and a ledge; what is behind the
+   pane stays theirs. */
+const winsOf=ch=>((TILES[ch]||{}).win)||[];
+/* A DECORATION PAINTED ON A WALL MAY PAINT OUT A WINDOW. A muralist does exactly this: the wall is
+   the canvas and you plaster over the pane that is in the way. A DECOS row says which windows it
+   LEAVES with `wins:[i,…]` (indices into the glyph's TILES.win); no `wins` means it leaves them all,
+   `wins:[]` means the wall is now blank. Three readers go through here so a painted-out window
+   cannot come back somewhere else: the decor's own art, the sill props that stand in windows, and
+   the dusk lighting — which would otherwise light a window that is not there any more, at night,
+   on a wall nobody would think to check. */
+const DECOWIN=(()=>{const m={};(typeof DECOR!=="undefined"?DECOR:[]).forEach(d=>{if(d.wins)m[d.world+","+d.x+","+d.y]=d.wins;});return m;})();
+function winsKept(world,x,y){const all=winsOf(glyphAt(world,x,y)),k=DECOWIN[world+","+x+","+y];
+  return k?k.map(i=>all[i]).filter(Boolean):all;}
+function drawPane(g,x,y,w,h,opts){ /* NOT drawWindows(w,camX,camY) two thousand lines down — that one lights rooms at dusk. This one builds the window. Naming them alike is how the first draft of this fix silently drew nothing: a second `function drawWindows` hoisted over mine and every call reached the wrong one, in total silence. */
+  const o=opts||{},dark=tc("#241C24");
+  if(o.glass===false){                                                /* the front paints its own glass — a reveal AROUND it, never over it */
+    g.fillStyle=dark;g.fillRect(x-1,y-1,w+2,1);g.fillRect(x-1,y+h,w+2,1);g.fillRect(x-1,y,1,h);g.fillRect(x+w,y,1,h);
+  }else{
+    g.fillStyle=dark;g.fillRect(x-1,y-1,w+2,h+2);                     /* the reveal: a window is a hole before it is anything else */
+    const gr=g.createLinearGradient(0,y,0,y+h);
+    gr.addColorStop(0,"#7C9AB8");gr.addColorStop(0.42,"#3E4C60");gr.addColorStop(1,"#20293A"); /* sky at the head, the room at the foot */
+    g.fillStyle=gr;g.fillRect(x,y,w,h);
+    g.fillStyle="rgba(236,244,252,.26)";                              /* the one thing that says GLASS: a reflection that is not the sky */
+    g.beginPath();g.moveTo(x,y);g.lineTo(x+w*0.62,y);g.lineTo(x,y+h*0.62);g.closePath();g.fill();
+    g.fillStyle=tc("#2A2228");                                        /* the mullions — four panes, because two is a shape and four is a window */
+    g.fillRect(x+w/2-0.5,y,1,h);g.fillRect(x,y+Math.round(h*0.42),w,1);}
+  g.fillStyle=tc("#8A757C");g.fillRect(x-1.5,y-3,w+3,2);              /* the lintel it hangs from */
+  g.fillStyle="rgba(255,255,255,.16)";g.fillRect(x-1.5,y-3,w+3,0.8);
+  drawSillLedge(g,x-SILL_OUT,y+h,w);}                                 /* and the ledge, the one the candy stands on */                               /* and the ledge, the one the candy stands on */
+/* every window a glyph declares, drawn where the glyph is. One call per facade, so a front that
+   forgets is a front with no windows rather than a front with invisible ones. */
+function drawPanes(g,ch,sx,sy,opts){winsOf(ch).forEach(r=>drawPane(g,sx+r[0],sy+r[1],r[2],r[3],opts));}
 /* pane, candy and ledge together, for the one camera that can draw them in one go */
 function drawSillBox(g,x,y,w,h,foil,z){
   const ox=x+SILL_OUT, by=y+h;
@@ -2030,8 +2070,8 @@ SOLID.forEach(g=>TILES[g]={lift:7,kind:"prop"});
 Object.assign(TILES,{
   "#":{lift:13,kind:"wall"},U:{lift:13,kind:"wall"},
   B:{lift:13,kind:"facade",win:[[5,10,8,9],[19,10,8,9]]},
-  Q:{lift:13,kind:"facade",win:[[8,14,16,10]],awn:9},
-  Z:{lift:13,kind:"facade",win:[[7,13,18,11]],awn:9},
+  Q:{lift:13,kind:"facade",win:[[7,11,18,14]],awn:9},   /* was [8,14,16,10] — the rect the art actually paints is (7,11,18,14), and TWO sill props stand in this front (st 2,5 and 9,5). The declared window and the drawn window have to be the same rectangle or the candy, the ledge and the dusk light all land somewhere the glass is not. */
+  Z:{lift:13,kind:"facade",win:[[4,12,24,13]],awn:9},   /* likewise: the produce window is drawn at (4,12,24,13) */
   D:{lift:6,kind:"furniture"},K:{lift:6,kind:"furniture"},T:{lift:6,kind:"furniture"},
   A:{lift:6,kind:"furniture"},S:{lift:9,kind:"furniture"},H:{lift:5,kind:"furniture"},
   I:{lift:6,kind:"furniture"},W:{lift:8,kind:"appliance"},V:{lift:8,kind:"appliance"},
@@ -2339,14 +2379,14 @@ function drawWindows(w,camX,camY){
   const a=night?0.5:0.28;
   const x0=Math.floor(camX/TS),y0=Math.floor(camY/TS);
   for(let y=y0;y<=Math.min(w.H-1,y0+9);y++)for(let x=x0;x<=Math.min(w.W-1,x0+11);x++){
-    const m=TILES[w.grid[y][x]]||TILES[w.rows[y][x]];
-    if(!m||!m.win)continue;
+    const wins=winsKept(world,x,y); /* `world` is the current world id and both call sites pass WORLDS[world] as `w` */
+    if(!wins.length)continue;
     const hsh=(x*2654435761+y*40503)>>>0;
     if((hsh&7)<2)continue;
     const sx=x*TS-camX,sy=y*TS-camY;
     if(sx<-TS||sy<-TS||sx>VW||sy>VH)continue;
     ctx.globalAlpha=a*(0.85+0.15*Math.sin(Date.now()/700+hsh%13));
-    m.win.forEach(wn=>{ctx.fillStyle="#FFD98A";ctx.fillRect(sx+wn[0],sy+wn[1],wn[2],wn[3]);
+    wins.forEach(wn=>{ctx.fillStyle="#FFD98A";ctx.fillRect(sx+wn[0],sy+wn[1],wn[2],wn[3]);
       ctx.fillStyle="rgba(255,255,255,.35)";ctx.fillRect(sx+wn[0]+1,sy+wn[1]+1,wn[2]*0.35,2);});
     ctx.globalAlpha=1;
   }

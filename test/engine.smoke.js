@@ -2059,6 +2059,103 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...docArt);
 
+  /* ---- A WINDOW A WALL DECLARES IS A WINDOW YOU CAN SEE, AND IT HAS A LEDGE ----
+     Owner, 2026-09-17: "the skull on a non existing or visible window sill overlaps a store front
+     that was initially a placeholder for a mural… if there were a window sill there, it should be
+     drawn". He was exactly right, and this is the FIFTH time this bug has been answered — the four
+     before it all argued about how big the sugar skull should be. Rendered at 8x before touching
+     anything, the cause was plain: `TILES.win` is a rect the sill props, the dusk lighting and the
+     candy's ledge are ALL positioned from, and nothing had ever drawn it. The plain facade painted
+     two flat rectangles a shade off the wall; the mural panel then painted plaster over the whole
+     tile and erased even those. So a lit pane, a sweet and a stone ledge sat in the middle of a
+     blank wall. Every one of them was in the right place. There was just no window.
+
+     The noun is "a window you can see, with a ledge under it", and it is asked of the PICTURE,
+     because none of this is visible in the code:
+       1. for every window the wall SHOWS (winsKept — a mural may paint one out, and then it must
+          be gone from the picture too), the glass has to separate from the wall beside it by the
+          repo's own floor of 40 luma. A window painted over is a window that fails this;
+       2. under it, a LEDGE: the row at the window's foot is bright and the row under that is dark.
+          A hard light-over-dark horizontal edge is the one shape that survives being scaled to
+          three screen pixels, which is why the four size fixes never worked and this does;
+       3. and every sill prop the season sets down stands in a window that passed 1 and 2.
+     Check 3 is the one that would have caught the owner's tile: the candy at st(22,0) resolved to
+     a window the mural had plastered over, and checks 1 and 2 are run on the tile AS THE GAME
+     PAINTS IT — the facade art and then whatever decor is painted on top of it.
+     PLANTED, both of them, in a copy outside the repo with the real code restored exactly:
+       · the flat-rectangle window back in TILEDRAW["B"] → `the window at 5,10,8,9 is 0 luma from
+         its lightest pixel to its darkest` and `no ledge under the window at 5,10,8,9`;
+       · the panel plastering the whole tile again → the same two, at st 21,0 through 27,0, which
+         is the owner's sentence in numbers.
+     The first draft of check 1 measured something else — the mean of one row through the window
+     against the wall beside it — and EL CHANGARRITO FAILED IT WHILE DRAWING A GOOD WINDOW, because
+     that row crossed the shop's dark sign. It is written up where it happened, in `judge`. */
+  const sills = await page.evaluate(() => {
+    const P = [], L = (r, g, b) => 0.299 * r + 0.587 * g + 0.114 * b;
+    if (typeof winsKept !== 'function' || typeof drawPane !== 'function') return ['the engine has no window seam: winsKept/drawPane'];
+    const c = document.createElement('canvas'); c.width = c.height = 32;
+    const g2 = c.getContext('2d'), old = ctx;
+    /* the tile exactly as a camera paints it: the wall's own face, then any decor on that tile */
+    const paint = (wid, x, y) => {
+      g2.clearRect(0, 0, 32, 32); ctx = g2;
+      const ch = glyphAt(wid, x, y), tf = TILEDRAW[ch];
+      if (tf) tf({ sx: 0, sy: 0, x, y, canopy: () => {} });
+      DECOS.filter(d => d.world === wid && d.x === x && d.y === y)
+        .forEach(d => { const f = DECODRAW[d.deco]; if (f) f(0, 0, d); });
+      ctx = old;
+      return g2.getImageData(0, 0, 32, 32).data;
+    };
+    const lumaAt = (d, x, y) => { const i = ((y | 0) * 32 + (x | 0)) * 4; return L(d[i], d[i + 1], d[i + 2]); };
+    const rowMean = (d, x0, x1, y) => { let t = 0, n = 0; for (let x = Math.max(0, x0); x <= Math.min(31, x1); x++) { t += lumaAt(d, x, y); n++; } return n ? t / n : 0; };
+    /* a window, measured where it is */
+    const judge = (d, r, where) => {
+      const [wx, wy, ww, wh] = r, bad = [];
+      /* DEPTH, not "different from the wall". The first draft compared the mean of one row through
+         the window against the wall beside it, and El Changarrito failed it while drawing a
+         perfectly good window: that row crossed the shop's dark sign and the lit corner, and the
+         mean landed 23 luma from the plaster. The mean of a picture is not the picture. What a
+         window HAS and a patch of wall has not is internal range — glass, bars, a reflection. A
+         window plastered over has the plaster's own range (trowel marks: 20), and so does a flat
+         rectangle of any colour, which is what this facade painted for two years. */
+      let lo = 255, hi = 0;
+      for (let y = wy; y < wy + wh; y++) for (let x = wx; x < wx + ww; x++) { const v = lumaAt(d, x, y); if (v < lo) lo = v; if (v > hi) hi = v; }
+      if (hi - lo < 40)
+        bad.push(where + ': the window at ' + r.join(',') + ' is ' + Math.round(hi - lo) +
+                 ' luma from its lightest pixel to its darkest — under the 40 this repo separates things by, a flat patch. That is what a window painted over, or never drawn, looks like');
+      const foot = rowMean(d, wx, wx + ww - 1, wy + wh + 1), under = rowMean(d, wx, wx + ww - 1, wy + wh + 4);
+      if (!(foot - under > 40))
+        bad.push(where + ': no ledge under the window at ' + r.join(',') + ' — its foot is ' + Math.round(foot) +
+                 ' luma and the row below is ' + Math.round(under) + ', so there is no bright-over-dark edge for anything to stand on');
+      return bad;
+    };
+    /* 1 + 2: every window every wall in every world SHOWS */
+    const seen = new Set();
+    Object.keys(WORLDS).forEach(wid => { const w = WORLDS[wid];
+      for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+        const ch = glyphAt(wid, x, y); if (!ch || !(TILES[ch] || {}).win) continue;
+        const hasDeco = DECOS.some(d => d.world === wid && d.x === x && d.y === y);
+        const k = ch + '|' + (hasDeco ? wid + ',' + x + ',' + y : '');
+        if (seen.has(k)) continue; seen.add(k);
+        const wins = winsKept(wid, x, y); if (!wins.length) continue;
+        const d = paint(wid, x, y);
+        wins.forEach(r => P.push(...judge(d, r, ch + ' at ' + wid + ' ' + x + ',' + y)));
+      }});
+    /* 3: and every sweet the season stands on a sill is standing in one of them */
+    const was = seasonNow();
+    Object.keys(typeof SEASONS !== 'undefined' ? SEASONS : {}).forEach(sid => {
+      seasonSet(sid);
+      (art('props', []) || []).filter(p => p.sill).forEach(p => {
+        const win = propSill(p.world, p);
+        if (!win) { P.push('a sill prop at ' + p.world + ' ' + p.x + ',' + p.y + ' (' + sid + ') resolves to NO window — it is standing on nothing'); return; }
+        const wins = winsKept(p.world, p.x, p.y), r = wins[win.i] || wins[0];
+        P.push(...judge(paint(p.world, p.x, p.y), r, 'the sill prop at ' + p.world + ' ' + p.x + ',' + p.y + ' (' + sid + ')'));
+      });
+    });
+    seasonSet(was || 'auto');
+    return [...new Set(P)];
+  });
+  fails.push(...sills);
+
   await page.setViewportSize({ width: 480, height: 900 });
   await browser.close();
   if (fails.length) { console.log('FAIL (' + idx + ')\n- ' + fails.join('\n- ')); process.exit(1); }

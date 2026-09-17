@@ -336,17 +336,17 @@ const CRITTERS=[
    updated again. Re-checked against the code 2026-09-05: all four exist.)
    Packs can add art via DECOART. */
 const DECOR=[
- {world:"st",x:20,y:0,deco:"mural"},   /* Nacho's own piece — the city's name, never earned */
+ {world:"st",x:20,y:0,deco:"mural",wins:[]},   /* Nacho's own piece — the city's name, never earned. wins:[] — his piece takes the whole wall, so the two windows the `B` facade declares are plastered over and stay plastered over, at dusk too. */
  /* one panel per business, east of it along the same wall. Baby blue plaster until you begin
     that district; the colour brightens with the grade (art.js → DECOART.panel). */
- {world:"st",x:21,y:0,deco:"panel",id:"principal",c:"#7A5FE0"},
- {world:"st",x:22,y:0,deco:"panel",id:"mercado",  c:"#C0392B"},
- {world:"st",x:23,y:0,deco:"panel",id:"taller",   c:"#3B4650"},
- {world:"st",x:24,y:0,deco:"panel",id:"espiga",   c:"#C98A2D"},
- {world:"st",x:25,y:0,deco:"panel",id:"velazquez",c:"#2E8AA8"},
- {world:"st",x:26,y:0,deco:"panel",id:"nolasco",  c:"#4E7A4A"},
+ {world:"st",x:21,y:0,deco:"panel",id:"principal",c:"#7A5FE0",wins:[1]},
+ {world:"st",x:22,y:0,deco:"panel",id:"mercado",  c:"#C0392B",wins:[1]},
+ {world:"st",x:23,y:0,deco:"panel",id:"taller",   c:"#3B4650",wins:[1]},
+ {world:"st",x:24,y:0,deco:"panel",id:"espiga",   c:"#C98A2D",wins:[1]},
+ {world:"st",x:25,y:0,deco:"panel",id:"velazquez",c:"#2E8AA8",wins:[1]},
+ {world:"st",x:26,y:0,deco:"panel",id:"nolasco",  c:"#4E7A4A",wins:[1]},
  /* ❗La esquina. Masa cream, and the colour is the one choice here with a reason: the other six
     panels are all mid-to-dark (luma 96–146) and this is 213.6, so the newest district is the one
     that reads first on a wall that is getting crowded — and masa is what she actually works with. */
- {world:"st",x:27,y:0,deco:"panel",id:"esquina",  c:"#E8D5A8"}
+ {world:"st",x:27,y:0,deco:"panel",id:"esquina",  c:"#E8D5A8",wins:[1]}
 ];

@@ -2692,24 +2692,35 @@ const CANDIDATES = [
     });
     fails.push(...mural);
 
-    // an unbegun panel is plaster and nothing else; a graded one paints
+    // an unbegun panel is plaster and nothing else; a graded one paints.
+    // MEASURED IN THE MURAL FIELD, not over the whole tile: since 2026-09-17 the panel keeps the
+    // wall's own window (owner: "the store front icon or mural can go around it"), so a whole-tile
+    // colour count reads glass, a lintel and a stone ledge as "the panel painted something" and
+    // this guard failed on a wall that was behaving. The noun it means is the EMBLEM, and the
+    // emblem lives in the field beside the kept window — x2..16, measured: the lintel and the ledge
+    // start bleeding at x17. Counting the window in was the
+    // guard measuring the container instead of the thing.
     const paint = await page.evaluate(() => {
       const c = document.createElement('canvas'); c.width = c.height = 32;
       const g2 = c.getContext('2d'), old = ctx;
-      const shot = () => { const d = g2.getImageData(0, 0, 32, 32).data; const seen = new Set();
+      const shot = () => { const d = g2.getImageData(2, 6, 15, 24).data; const seen = new Set();
         for (let i = 0; i < d.length; i += 4) seen.add(d[i] + ',' + d[i + 1] + ',' + d[i + 2]); return seen; };
       const keepD = new Set(done), keepM = { ...marks };
       const panel = DECOS.find(d => d.deco === 'panel' && d.id === 'taller');
       ctx = g2;
       done = new Set(); marks = {};
+      /* bare plaster, drawn by the same function the panel starts with: the thing an unbegun
+         panel has to be indistinguishable from. A count against a hard number would drift the
+         next time a trowel mark moves; this compares the field against what plaster IS. */
+      g2.clearRect(0, 0, 32, 32); muralGround(0, 0); const bare = [...shot()].sort().join('|');
       g2.clearRect(0, 0, 32, 32); DECODRAW.panel(0, 0, panel); const blank = shot();
       const ta = CHAPTERS.find(c2 => c2.id === 'taller');
       ta.quests.forEach(q => { done.add(q); marks[q] = 1; });
       g2.clearRect(0, 0, 32, 32); DECODRAW.panel(0, 0, panel); const painted = shot();
       ctx = old; done = keepD; marks = keepM;
-      return { blankColours: blank.size, paintedColours: painted.size };
+      return { bare, blank: [...blank].sort().join('|'), blankColours: blank.size, paintedColours: painted.size };
     });
-    if (paint.blankColours > 4) fails.push('an unbegun panel is not plain plaster: ' + paint.blankColours + ' colours');
+    if (paint.blank !== paint.bare) fails.push('an unbegun panel is not plain plaster: ' + paint.blankColours + ' colours in the mural field');
     if (paint.paintedColours <= paint.blankColours) fails.push('a worked district did not paint its panel');
 
     // townsfolk: people with no quests move, people with quests never do

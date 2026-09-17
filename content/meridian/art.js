@@ -119,7 +119,7 @@ const TILE_PROPS={
 Object.assign(TILEART,TILE_PROPS,{
   "=":rc=>{const{sx,sy}=rc; /* taller facade: painted block, two slit windows, a red band */
     ctx.fillStyle=tc("#6E6A73");ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle=tc("#5A5762");ctx.fillRect(sx,sy,TS,5);
-    ctx.fillStyle="#2A2E38";ctx.fillRect(sx+6,sy+8,7,6);ctx.fillRect(sx+19,sy+8,7,6);
+    drawPanes(ctx,"=",sx,sy);                     /* two real slit windows, from TILES["="].win — they were two flat dark rectangles */
     ctx.fillStyle="#B3352B";ctx.fillRect(sx,sy+20,TS,4);},
   "%":rc=>{const{sx,sy}=rc; /* the roll-up door, half open */
     ctx.fillStyle="#3A3F46";ctx.fillRect(sx,sy,TS,TS);
@@ -138,7 +138,10 @@ Object.assign(TILEART,TILE_PROPS,{
   "!":rc=>{const{sx,sy}=rc; /* cleaning-company facade: white front, a sign band, a wide window with a mop and bucket */
     ctx.fillStyle=tc("#F4F1EA");ctx.fillRect(sx,sy,TS,TS);ctx.fillStyle=tc("#3FA3A0");ctx.fillRect(sx,sy,TS,5);ctx.fillRect(sx,sy+6,TS,4);
     ctx.fillStyle="#CFE9E8";ctx.fillRect(sx+5,sy+12,22,14);
-    ctx.fillStyle="#3FA3A0";ctx.fillRect(sx+9,sy+19,7,5);ctx.fillRect(sx+20,sy+13,1.5,9);ctx.fillRect(sx+17,sy+21,8,3);}
+    ctx.fillStyle="#3FA3A0";ctx.fillRect(sx+9,sy+19,7,5);ctx.fillRect(sx+20,sy+13,1.5,9);ctx.fillRect(sx+17,sy+21,8,3);
+    drawPanes(ctx,"!",sx,sy,{glass:false});}
+    /* "&" is deliberately NOT here: the bakery's window is a round ojo de buey, and a round window
+       has no sill. Its `win` rect exists so the dusk lighting has something to warm. */
 });
 /* ---- the office wall: blank paper, and the paper that earned its place ----
    Both are WALL tiles like the window, so the 3D camera paints them on the wall face.
@@ -421,7 +424,7 @@ const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   "=":{lift:13,kind:"facade",win:[[6,8,7,6],[19,8,7,6]]},
   "6":{lift:8,kind:"prop"},"7":{lift:12,kind:"prop"},"8":{lift:9,kind:"furniture"},"0":{lift:6,kind:"prop"},
   "&":{lift:13,kind:"facade",win:[[7,12,18,11]],awn:9},
-  "!":{lift:13,kind:"facade",win:[[5,11,22,12]]},
+  "!":{lift:13,kind:"facade",win:[[5,12,22,14]]},  /* was [5,11,22,12]; the art paints (5,12,22,14) and the two have to agree — the joinery, the dusk light and any sill prop all come off this rect */
   "▣":{lift:10,kind:"appliance"},"▯":{lift:9,kind:"furniture"},"⊔":{lift:6,kind:"furniture"},"○":{lift:3,kind:"prop"},
   "Y":{lift:13,kind:"transit",stand:true}   /* walkable, but a real object: nothing reads lift for a stand tile, it is a height class */
 };
@@ -454,6 +457,7 @@ const muralInk=(hex,g)=>{
   const p=[0xC6,0xDC,0xEA];
   return "#"+[1,2,3].map(i=>Math.round(parseInt(m[i],16)*(1-mix)+p[i-1]*mix).toString(16).padStart(2,"0")).join("");
 };
+const MURAL_K=0.72; /* the emblem, into the field the kept window leaves: its own (16,16) lands at (9.5,17.5). A transform, not six redrawings — the composition around the window is the owner's open call above. */
 const muralGrade=id=>{try{const f=worldFlags();return (f.grade&&f.grade[id])|0;}catch(e){return 0;}};
 
 /* the panel pictograms — one per business, drawn inside a 32x32 tile on the plaster */
@@ -502,13 +506,36 @@ const DECOART={
     ctx.fillStyle="#3A2F17";ctx.font="700 7px sans-serif";ctx.textAlign="center";
     ctx.save();ctx.translate(sx+16,sy+7.5);ctx.scale(0.88,1);
     ctx.fillText("MERIDIAN",0,0);ctx.restore();ctx.textAlign="start";},
-  /* one panel per business: plaster until you begin, then colour that brightens with the grade */
+  /* one panel per business: plaster until you begin, then colour that brightens with the grade.
+     THE WALL KEEPS ITS WINDOWS (owner, 2026-09-17: "the store front icon or mural can go around
+     it"). This painted plaster over the whole 32x32 and then the sill props were drawn on top of
+     it, so at st(22,0) a lit pane, a sugar skull and a stone ledge sat in the middle of a blank
+     wall with no window anywhere near them — which is exactly what he was looking at when he wrote
+     "the skull on a non existing or visible window sill". A mural is painted ON a building; the
+     windows are holes and holes do not take paint. So: plaster, the shop's emblem, and then the
+     wall's own windows back through the paint, from the glyph's own TILES.win — never a copy of
+     those numbers here, or the mural and the sill drift apart the first time one of them moves. */
   panel:(sx,sy,d)=>{
     muralGround(sx,sy);
+    /* ONE window kept, the right-hand one, and it is the wall's own — winsOf reads TILES, so the
+       glass, the ledge and the sugar skull are all placed from the same numbers and cannot drift.
+       The other window is plastered over, which is what a muralist does with a window they do not
+       want: the wall is the canvas and you paint out what is in the way. The DECOR row says so
+       (`wins:[1]`) rather than this drawing deciding on its own, so the sill props and the dusk
+       lighting paint out the same window this does. That also hands the emblem
+       a clear field, which is the whole reason the two-window version was unreadable — rendered at
+       8x on 2026-09-17, the basket and the wrench came out as ribbons between the panes.
+       OPEN, and the owner's own call ("while we figure it out"): the emblem drawn AROUND the window
+       instead of beside it — the skull on the sill as part of the picture. That is six drawings,
+       one per business, and it is design, not plumbing. */
+    const wins=winsKept(d.world,d.x,d.y),keep=wins[wins.length-1];  /* what this panel's DECOR row leaves (maps.js: wins:[1]) — the same list propSill and the dusk lighting read */
     const g=muralGrade(d.id),f=PANELART[d.id];
-    if(!g||!f)return;                       /* not begun: comforting blue, and nothing else */
-    f(sx,sy,muralInk(d.c||"#C0392B",g));
-    if(g>=3){ctx.fillStyle="rgba(255,255,255,.5)";ctx.fillRect(sx+4,sy+4,2,2);ctx.fillRect(sx+27,sy+6,2,2);}},
+    if(g&&f){                               /* not begun: comforting blue, and nothing else */
+      const ink=muralInk(d.c||"#C0392B",g);
+      if(keep){ctx.save();ctx.translate(sx+9.5,sy+17.5);ctx.scale(MURAL_K,MURAL_K);ctx.translate(-16,-16);f(0,0,ink);ctx.restore();}
+      else f(sx,sy,ink);                    /* a wall with no windows gets the whole tile, as before */
+      if(g>=3){ctx.fillStyle="rgba(255,255,255,.5)";ctx.fillRect(sx+3,sy+5,2,2);ctx.fillRect(sx+15,sy+7,2,2);}}
+    if(keep)drawPane(ctx,sx+keep[0],sy+keep[1],keep[2],keep[3]);},
 };
 
 /* ---------- the casita vocabulary — what Don Güero builds from ----------
