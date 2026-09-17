@@ -904,3 +904,60 @@ stylesheet lives in `<body>`, not `<head>`, so appending the pack's paper to `do
 *first* and the engine won every tie at equal specificity. A seam that is perfectly safe and silently
 does nothing is still broken. The gauge caught it; the guard now asks the `.paper` element what
 colour it actually is, rather than asking the stylesheet what it says.
+
+## A16 · A door at the top of a staircase — the climb nobody walks · 2026-09-17
+
+**The owner, and he called it the harshest directive of the day:** *"then that door right there to the
+top of a staircase. until you figure out how to teleport in my side of the screen - then tell me how
+it can be done."*
+
+He is right, and the code says so in its own comment. `content/meridian/maps.js:205`:
+
+```js
+PORTALS.st["$"]={to:"no",x:21,y:4,dir:"left"};
+/* the avenue door is the foot of Nolasco's stairs: you appear at the top, in the stair room */
+```
+
+You walk into a door at street level and you are upstairs. There are two of these in the city — this
+one, and `PORTALS.hq["▲"] → f2`, which the table itself calls *"the only flight in the city that
+CLIMBS"*. Neither is climbed.
+
+**What actually happens, measured.** `tryPortal` (`engine/engine.js:3521`) is four assignments in one
+frame: `world=p.to; px=fx=p.x; py=fy=p.y`. There is no transition of any kind. Then `worldArrived`
+sets `warpT=performance.now()+450` — **input is blocked for 450 milliseconds and nothing is drawn in
+that window.** So today the player gets the worst pairing available: an instant cut, followed by
+standing frozen somewhere they did not walk to. **There is already a transition slot. It is empty.**
+
+And in the stair room the fiction is half-built and reads as broken, which is what he is looking at.
+Screenshotted at `no(18,4)`: you stand on a flat deck with a glass rail around a well and a **down
+arrow** beside you. There is no flight. The rail promises a descent; the arrow is a teleport; nothing
+between them exists. *A railing around a hole that nothing goes down is a stronger lie than no railing
+at all* — the same species as the sugar skull on a sill that was never drawn, one floor up.
+
+### The three ways it can be done, costed
+
+**A · The cut becomes a climb you can read.** Draw into the 450ms that already exists and is already
+blank: the screen closes from the bottom as the door shuts behind you, and opens at the top with the
+landing under your feet. Nothing about the maps, the portals or the 3D builder changes. **Cost: a
+sitting.** Fixes *every* door in both games at once, including the four parcel doors and the park.
+**It does not make the traversal real — it makes the cut legible.** A cut with a reason reads as a
+cut; a cut with nothing in it reads as a bug.
+
+**B · Build the flight, for the one staircase he is pointing at.** The engine can already do this and
+does: `engine3d.js:365` puts a tile's lid at `−STAIRH*(i+1)` and `:413` builds the shaft walls down to
+the deepest point of the well, so a descending run of treads renders today. What is missing is only
+that `▼` sits at the *top* of the run instead of the *bottom*. Extend the stair room south, lay the
+treads as sunken tiles, and put the portal on the last one — so the player walks down the steps they
+can see and opens the avenue door at the bottom. **Cost: a map edit, a portal move, and the two flat
+cameras taught to draw a descent (they draw a stair mass, not a run).** Risk: the flat cameras are
+where this has gone wrong twice already; it needs Chema measuring before and after.
+
+**C · One building, one world.** The real reason the climb cannot be walked is that each floor is a
+separate `WORLDS` entry and the engine draws exactly one world. The two ends of a staircase are never
+on screen together, so no staircase in this city can ever be climbed. Merging `hq`/`f2` into one taller
+world means levels in the grid, a second storey in the 3D builder, and every camera taught about
+height. **Cost: more than a sitting; it is a rewrite of what a world is.**
+
+**Recommended: A now, B for Nolasco's stairs, and C never** — A is what makes every door in the city
+honest for one sitting's work, B makes the one he is pointing at true, and C is a different game from
+the one that is about practising AI roles. **His call; nothing is built until he takes it.**
