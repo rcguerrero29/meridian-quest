@@ -828,3 +828,34 @@ an ending for NAMING THE SAME OBJECT as its quest — *"on the wall by the regis
 has to be allowed to do, and which Spanish reaches sooner than English because it takes more words to
 say the same thing. Planted with the original `eepi1` restored: *"repeats 11 words of its own
 district's quest text word for word".*
+
+## No two places end the same way — 2026-09-17 (T4)
+
+La junta measured what the owner had already felt: **every one of the six business districts ran the
+same five beats in the same order** — a day stamp, the artifact named and located, the owner's
+verdict in quotation marks, the handoff to the next name, a named animal — and the first of them was
+literally the same words. **"Saturday." opened nine endings.** He had called the concept silly; what
+he was looking at was a form with the nouns swapped, six times.
+
+**The rules now, and they are guarded (`test/smoke.js`) so they cannot quietly come back:**
+
+1. **No two districts open a tier the same way**, in either language.
+2. **No district opens two of its own tiers the same way.**
+3. **No district's ending opens on the same clause as the quest that closes it** — the #208 shape.
+4. **A day of the week may open at most ONE ending in the game.** One is a place with a calendar;
+   two is a format. Meridian spends its one on Meridian Labs, whose whole character is that it runs
+   on the week.
+
+**What an opener should be instead: the thing that is different now.** The book has moved to the
+shelf. The page is above the oven. The word *kitchen* is on all twelve pages, in pen. The pot comes
+off the flame at 9:25. Every one of those is the district's own object or its own hour, and no two
+businesses share either.
+
+**The burnout endings are held to the same rules**, because they are six more paragraphs in the same
+slot — and five of the six named a different room to learn in while **two of them said "floor"**.
+Tacho's is a shop.
+
+**And one thing that is NOT a rule, because the audit got it wrong and the cross-examination caught
+it:** the handoff to the next district is a fixed *slot*, and that is fine — the *medium* is already
+five different things (a phone call, an envelope, a note, a name said over a counter, a week's
+delay). A proposal to "stop using the phone" would have fixed something that was never broken.

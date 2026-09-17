@@ -403,9 +403,16 @@
   .settings textarea{width:100%; box-sizing:border-box; height:220px; font-family:'IBM Plex Mono',monospace; font-size:.72rem; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); padding:10px; margin-bottom:12px;}
   .settings input[type=range]{flex:1; accent-color:var(--accent); min-height:24px;}
   .settings input[type=text]{width:100%; box-sizing:border-box; font-family:'IBM Plex Sans',sans-serif; font-size:.95rem; border-radius:10px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); padding:10px; margin-bottom:12px;}
-  .end h2{font-family:'Unbounded',sans-serif; font-size:1.05rem; margin:0 0 6px;}
-  .end .final{font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:.88rem; margin:0 0 8px;}
-  .end .epi{font-style:italic; color:var(--muted); font-size:.92rem; margin:0 0 12px;}
+  /* THE STORY IS THE BIGGEST THING ON THIS PANEL (Pili, la junta 2026-09-17, §4.4). It was the
+     other way round: a 1.05rem heading and a .88rem accent score over a .92rem italic paragraph,
+     so the score outranked the ending. The ranking is inverted — and NOT by demoting the score to
+     .78rem, which was the original proposal and which would have made it the same size, register
+     and font as the HUD line two elements above, printing the same XP twice eleven pixels apart.
+     `#endScore` keeps the grade word and loses the XP fraction instead (engine.js, endGrade), so
+     the duplicate never appears and the line can stay legible. */
+  .end h2{font-family:'Unbounded',sans-serif; font-size:.92rem; margin:0 0 4px; color:var(--muted); letter-spacing:.02em;}
+  .end .final{font-family:'IBM Plex Mono',monospace; color:var(--accent); font-size:.82rem; margin:0 0 10px;}
+  .end .epi{font-style:italic; color:var(--ink); font-size:1.02rem; line-height:1.5; margin:0 0 14px;}
 </style>
 <div class="wrap">
   <header><h1>MERIDIAN <span>QUEST</span></h1></header>

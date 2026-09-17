@@ -2901,6 +2901,55 @@ const CANDIDATES = [
     fails.push(...echo.filter(l => !/^COUNT-ONLY: /.test(l)));
     echo.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
+    /* T4b — NO TWO PLACES END THE SAME WAY, AND NO PLACE ENDS THE WAY ITS OWN LAST QUEST BEGINS.
+       La junta measured it: every one of the six business districts ran the same five beats in the
+       same order, and the first of them — a day stamp — was literally the same words. "Saturday."
+       opened nine endings. The owner had already called the concept silly; what he was looking at
+       was a form with the nouns swapped, six times.
+       This is the only thing on that page that stops the template coming back. Without it, a writer
+       in six months with one grey paragraph and five jobs to do writes the same form again and
+       nothing turns red. It holds four claims, all about the OPENING CLAUSE — the first sentence,
+       which is the whole of what a template is:
+         · no two districts open a tier the same way, in either language;
+         · no district opens two of its own tiers the same way;
+         · no district's ending opens on the same clause as the quest that closes it;
+         · and a day of the week may open at most ONE ending in the game, because the moment it
+           opens two it is a format again. (Meridian spends that one on Meridian Labs, whose whole
+           character is that it runs on the calendar.)
+       The burnout endings are held to the same rules: they are six more paragraphs in the same
+       slot, and five of the six named a different room to learn in while two of them said "floor". */
+    const openers = await page.evaluate(() => {
+      const P = [], clause = v => String(v).split(/(?<=[.!?])\s/)[0].trim().toLowerCase();
+      const DAY = /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday|lunes|martes|miércoles|jueves|viernes|sábado|domingo)\b/;
+      [['en', UI.en, QEN], ['es', UI.es, QES]].forEach(([L, T, Q]) => {
+        const seen = {}, days = [];
+        CHAPTERS.forEach(c => {
+          const pre = c.epi || 'epi', mine = {};
+          [['1', T[pre + '1']], ['2', T[pre + '2']], ['3', T[pre + '3']], ['go', T[c.go]]].forEach(([tier, v]) => {
+            if (typeof v !== 'string' || !v) return;
+            const o = clause(v), key = tier + '|' + o;
+            if (seen[key]) P.push(L + ': ' + c.id + ' and ' + seen[key] + ' open their ' + (tier === 'go' ? 'burnout' : 'tier ' + tier) +
+              ' ending with the same words — "' + o + '" — which is a template with the nouns swapped');
+            else seen[key] = c.id;
+            if (mine[o]) P.push(L + ': ' + c.id + ' opens both its ' + mine[o] + ' and its ' + tier + ' ending with "' + o + '"');
+            else mine[o] = tier;
+            if (DAY.test(o)) days.push(L + ' ' + c.id + ' ' + tier + ' "' + o + '"');
+          });
+          /* and not the same clause the quest that CLOSES the district opens with (#208's shape) */
+          const k = (typeof chClose === 'function') ? chClose(c) : null;
+          const q = k === null || k === undefined ? null : Q[k];
+          const qo = q && q.nodes && q.nodes[q.start] ? clause(q.nodes[q.start].say) : null;
+          if (qo) ['1', '2', '3'].forEach(tier => { const v = T[pre + tier];
+            if (typeof v === 'string' && clause(v) === qo)
+              P.push(L + ': ' + c.id + "'s tier " + tier + ' ending opens on the same sentence as the quest that closes the district — "' + qo + '"'); });
+        });
+        if (days.length > 1) P.push(L + ': a day of the week opens ' + days.length + ' endings (' + days.join(', ') +
+          ') — one is a place with a calendar, two is a format');
+      });
+      return P;
+    });
+    fails.push(...openers);
+
     // townsfolk: people with no quests move, people with quests never do
     const walk = await page.evaluate(async () => {
       const problems = [];
