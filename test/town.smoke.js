@@ -5,9 +5,32 @@
    node test/town.smoke.js  (CHROMIUM_PATH if Chromium is not where Playwright looks). */
 const path = require('path'), fs = require('fs');
 const { chromium } = require('playwright-core');
+
+/* FIND A BROWSER THE WAY test/smoke.js ALREADY DOES (T0.5, la junta 2026-09-17).
+   `chromium.executablePath()` returns the path playwright-core WANTS, not one that exists: this
+   container ships chromium-1194 and the resolver asks for 1243. The old line trusted it, so
+   `node test/town.smoke.js` could not run AT ALL here — which means the town's safety has been
+   REASONED rather than observed, in a repo whose own rule is that an engine change is proven the
+   same day by running the suites. Ten minutes buys back the standard of proof.
+   The resolved path is checked for existence now, and a real file is looked for if it is wrong. */
+const CANDIDATES = [
+  process.env.CHROMIUM_PATH,
+  '/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell',
+  '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  '/opt/pw-browsers/chromium',
+  '/usr/bin/chromium',
+  '/usr/bin/chromium-browser',
+  '/usr/bin/google-chrome',
+].filter(Boolean);
+function findChromium() {
+  let exe;
+  try { const p = chromium.executablePath(); if (p && fs.existsSync(p)) exe = p; } catch (e) {}
+  if (!exe) exe = CANDIDATES.find(p => { try { return fs.existsSync(p) && fs.statSync(p).isFile(); } catch (e) { return false; } });
+  return exe;
+}
 (async () => {
-  const exe = process.env.CHROMIUM_PATH || chromium.executablePath();
-  if (!exe) { console.error('No Chromium found. Set CHROMIUM_PATH.'); process.exit(1); }
+  const exe = findChromium();
+  if (!exe) { console.error('No Chromium found. Set CHROMIUM_PATH, or install one of: ' + CANDIDATES.join(', ')); process.exit(1); }
   const fails = [];
   const root = path.resolve(__dirname, '..');
   // the town's index is the public one with known differences and nothing else
