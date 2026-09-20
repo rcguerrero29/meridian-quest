@@ -3,6 +3,11 @@
 *This file is read automatically at the start of every Claude Code session. It says where the
 instructions live. It is not the instructions.*
 
+**[`AGENTS.md`](AGENTS.md) at the root is the contract EVERY agent works under, whoever built it** —
+the cross-vendor convention, so a second AI on this engine obeys the same rules without anyone
+rewriting them in its dialect. Where this file and that one overlap they must say the same thing;
+if they do not, that is a bug to report, not a choice to make.
+
 ## Where a session takes its orders from, in this order
 
 1. **The owner, in the session.** What they type wins. Log it verbatim in `docs/ASKS.md`
@@ -29,6 +34,9 @@ instructions live. It is not the instructions.*
    **`docs/INDEX.md`** — every document in `docs/`, what each is for, and how the owner reads them
    when no session is running. A new document is not written until it is listed there; the guard is
    `indexed()` in `test/leaves.js`, which runs on every CI build.
+   **`docs/RUNS.md`** — the run ledger: every run writes one file under `docs/runs/` with a unique ID
+   naming its agent. **`accepted` and `rejected` are the owner's two words and no agent writes
+   either.** The guard is `test/runs.js`.
    `docs/story/el-changarrito.md` §7½ — what a second world may never do to Meridian.
 
 ## Two games, one engine

@@ -31,6 +31,11 @@ jobs:
           node test/engine.smoke.js --index changarrito/index.html
       - name: The gauge — a brand-new world still boots and meets the engine on the same terms
         run: node test/gauge.js
+      # The run ledger (docs/RUNS.md): every run has a unique ID naming its agent, says what was
+      # asked and what proved it, and no agent has written the owner's two words. The authorship
+      # half cannot run on a shallow checkout and SAYS SO rather than reporting a pass it skipped.
+      - name: The run ledger, and the two words that are the owner's
+        run: node test/runs.js
       # R10 ran only in pages.yml, i.e. only AFTER merge, in a workflow whose deploy steps carry
       # continue-on-error. So a pull request that widened the copy list was green and the failure
       # surfaced on the public internet. Build the same box here and check it before it can merge.

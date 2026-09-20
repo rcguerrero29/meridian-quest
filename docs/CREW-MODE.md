@@ -74,7 +74,7 @@ working in when the answer would differ between the two. A session that is unsur
 | **Who works** | one session, one branch | several agents, each on its own branch |
 | **The working tree** | shared — this is the hazard | one **git worktree per builder**, so nobody edits anybody's files |
 | **Branch name** | one long-lived `claude/...` branch | one per issue, carrying its number: `claude/131-sill-skulls` |
-| **Claiming** | nothing — the session just works | a `taken: <name>` label on the issue **before** the branch exists |
+| **Claiming** | nothing — the session just works | an `in-flight: <agent>` label on the issue **before** the branch exists |
 | **Scope** | whatever the owner asked for that turn | exactly one issue; a second finding becomes a second issue |
 | **PRs to read** | one | one per agent — three is comfortable, ten is not |
 | **`git add`** | explicit paths only | explicit paths only |
@@ -92,6 +92,15 @@ hands are working, never what is safe. Every irreversible step stays exactly whe
 2. **The label is the lock.** An agent claims by labelling *before* it starts; the label clears on
    merge. A claim older than a session is stale and may be taken. The town renders it, so the owner
    can *see* who has what by walking the street.
+
+   **Since 2026-09-20 the label names WHICH AI, not only which persona** — `in-flight: claude`,
+   `in-flight: codex` — because the owner asked to run a second AI on this engine and *"things
+   labeled as in flight on our backlog"* has to answer *whose* flight. `taken: <persona>` may sit
+   beside it inside a run; the `in-flight:` label is the one that stops two vendors taking the same
+   issue. **A label and not a lockfile**, and that is the whole reason it works: two agents editing
+   a shared lockfile *is* the merge conflict the lock exists to prevent. A label is one server-side
+   write, last writer wins, and both can read it without pulling. The contract is
+   [`AGENTS.md`](../AGENTS.md) §2; the run ledger is [`RUNS.md`](RUNS.md).
 3. **One tree per pen.** Worktree isolation is not a nicety — it is the difference between two
    agents working and two agents corrupting each other. Without it the safe number of code-editing
    agents is exactly **one**, which is what `off` is.

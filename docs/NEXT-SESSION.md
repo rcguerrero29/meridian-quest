@@ -3,7 +3,47 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-20, the map plan merged)
+## STATE OF PLAY — read this first (2026-09-20, the two-AI protocol)
+
+### ⇢ 2026-09-20, later — START HERE.
+
+**`main` is at `81fb4cf`** — #212, #213 and #214 all merged. Still **`mq-v176` / `ch-v126`**:
+nothing has been built in the game since the map plan, by his instruction.
+
+**A second AI is coming onto this engine, and the protocol for it is written.** Owner: *"i also
+want to be able to handle another AI to use our engine, how can we make sure that you can work
+together."*
+
+- **[`AGENTS.md`](../AGENTS.md) at the root is now the contract every agent works under**, whoever
+  built it. It is the cross-vendor convention (`agents.md`, Linux Foundation's Agentic AI
+  Foundation; OpenAI Codex, Cursor, Jules, Amp, Factory all read it), so one file governs every
+  agent instead of each vendor reading its own dialect. **`CLAUDE.md` now points at it, and where
+  the two overlap they must say the same thing — a disagreement is a bug to report, not a choice.**
+- **[`RUNS.md`](RUNS.md) is the run ledger.** A run ID carries its agent's name
+  (`2026-09-20-claude-7c41`) so two agents cannot collide on one, and **one file per run** — a
+  shared ledger conflicts every time two agents finish in the same window, which is the exact
+  failure the protocol exists to survive. Same reason the claim is a **label**, not a lockfile.
+- **`accepted` and `rejected` are the owner's two words.** `verified` is the furthest any agent may
+  take anything. `test/runs.js` enforces it by the agent's own `Co-Authored-By` trailer — **and says
+  out loud that this is a tripwire, not a vault**; the binding record is the issue he closes. On a
+  shallow checkout it reports that the check could not run rather than passing silently.
+- **`test/overlap.js`** answers *"review prs for conflicts"* before there are any: which other
+  branch is holding a file this one touches. **Git alone, no token** — `test/leaves.js` forbids any
+  workflow a `write` scope, so nothing in CI can comment on a PR, and that rule is right.
+- **Persona learning goes to `docs/personas/proposed/`**, never into the approved persona.
+
+**First real run in the ledger: `docs/runs/2026-09-20-claude-7c41.md`, status `verified`** — six
+acceptance criteria waiting on him, including the one that actually matters: *would you let a second
+AI near the engine on the strength of `AGENTS.md` alone?*
+
+**Not solved, and said in `RUNS.md` §8 rather than discovered later:** nothing serialises `engine/`.
+Two agents can both change shared engine code in the same window and both be green alone;
+`overlap.js` will say so and nothing forces them apart. The next step if it bites is *one in-flight
+engine PR at a time* — a rule, not a tool.
+
+**The map build order is unchanged and still queued** — see the block below.
+
+### ⇢ 2026-09-20, earlier — the map plan merged.
 
 ### ⇢ 2026-09-20 — START HERE.
 
