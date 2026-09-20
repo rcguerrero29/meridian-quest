@@ -3,7 +3,93 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-20, the map plan merged)
+## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
+
+### ⇢ 2026-09-20, night — START HERE. **The pending list, in the order it should go.**
+
+Owner: *"give me a list of the next or pending steps, next."* Everything below is either his or
+mine, and it says which.
+
+**HIS — nothing below the line moves until these do**
+
+| | What | Why it is first |
+|---|---|---|
+| 1 | **Protect `main`** — Settings → Branches → Add rule for `main` (`docs/SECURITY.md` has the exact clicks) | `main` is **unprotected** ([FACT], read from the API 2026-09-20). Every "the owner merges" rule in this repository is a sentence, not a mechanism: any write credential can push straight to it. Nothing else on this list matters until this is done |
+| 2 | **Merge #215** (the two-AI protocol) and read `docs/SECURITY.md` when it lands | |
+| 3 | **Tick or reject the six acceptance criteria** in `docs/runs/2026-09-20-claude-7c41.md` | the first run in the ledger; the one that matters is *would you let a second AI near the engine on `AGENTS.md` alone?* |
+| 4 | **Pick the second AI's short name** (`gemini`, `codex`, `grok`) | it becomes its branch namespace, its `in-flight:` label and the word inside its run IDs |
+| 5 | **Mint that agent its own fine-grained token**, scoped to this one repo (`docs/SECURITY.md` says exactly which scopes, and which must be absent) | a credential per agent is what makes *"i may change it depending on their performance"* a one-click revoke |
+| 6 | **The `PLANPICK` call** — does every place on the map become tappable in the town too? | step 4 of the map build order cannot start before it (`docs/ARCH-LOG.md` A18, last row) |
+| 7 | Say whether the second AI's first job is docs/content (recommended) or engine | lowest blast radius while you learn how it behaves |
+
+**MINE, ONCE HE SAYS GO — in this order**
+
+| | What | Cost | From |
+|---|---|---|---|
+| 8 | The map caption stops lying — `plan.caption` as a pack string | minutes | `docs/plans/2026-09-17-the-map.md` §10 |
+| 9 | Calle Dos's doors get their colours — `@ * $` into `MAPCOL` | minutes | same |
+| 10 | A destination is remembered — `d:` in `save()`, through `sanitizeSave` | half a sitting | same |
+| 11 | Every place on the map is tappable — `planPlaces()` | a sitting | same — **waits on his #6** |
+| 12 | The level chooser (Floor 2 + the shared-anchor fault) | a sitting | same |
+| 13 | The route on the paper | a sitting | same |
+| 14 | The render pass on the plan, then the redraw | a sitting + | same |
+| 15 | The caption derives itself from what was painted | minutes | same |
+| 16 | #210 — the sugar skull is too big for the small windows (the general test: a thing inside a thing is a fixed share of it) | a sitting | issue #210 |
+| 17 | #175 — a neighbour in a doorway walls off a third of a street | ? | the one `tier: high` issue open |
+
+**PARKED, NAMED SO THEY ARE NOT HIDDEN**
+
+- **The map junta** — agenda written (`docs/plans/2026-09-17-the-map.md` §9), waiting on tokens.
+- **`in3` advertises the rank ladder** and the top arrives at twelve of eighty-eight — la junta's
+  balance question, untaken since 2026-09-17.
+- **Raised TILE art does not lift in the iso camera** — #190 is the same family.
+- **Nothing serialises `engine/`** between two agents (`docs/RUNS.md` §8) — a rule to write the day
+  it bites, not before.
+- **The Simmer world** — waits on AJ's answers (#200), and that wait is hers to end.
+- **His weekly Idea Scout routine failed its last run** (2026-09-18) — not this repo, noticed while
+  cleaning up triggers.
+
+### ⇢ 2026-09-20, later — the two-AI protocol.
+
+### ⇢ 2026-09-20, later — START HERE.
+
+**`main` is at `81fb4cf`** — #212, #213 and #214 all merged. Still **`mq-v176` / `ch-v126`**:
+nothing has been built in the game since the map plan, by his instruction.
+
+**A second AI is coming onto this engine, and the protocol for it is written.** Owner: *"i also
+want to be able to handle another AI to use our engine, how can we make sure that you can work
+together."*
+
+- **[`AGENTS.md`](../AGENTS.md) at the root is now the contract every agent works under**, whoever
+  built it. It is the cross-vendor convention (`agents.md`, Linux Foundation's Agentic AI
+  Foundation; OpenAI Codex, Cursor, Jules, Amp, Factory all read it), so one file governs every
+  agent instead of each vendor reading its own dialect. **`CLAUDE.md` now points at it, and where
+  the two overlap they must say the same thing — a disagreement is a bug to report, not a choice.**
+- **[`RUNS.md`](RUNS.md) is the run ledger.** A run ID carries its agent's name
+  (`2026-09-20-claude-7c41`) so two agents cannot collide on one, and **one file per run** — a
+  shared ledger conflicts every time two agents finish in the same window, which is the exact
+  failure the protocol exists to survive. Same reason the claim is a **label**, not a lockfile.
+- **`accepted` and `rejected` are the owner's two words.** `verified` is the furthest any agent may
+  take anything. `test/runs.js` enforces it by the agent's own `Co-Authored-By` trailer — **and says
+  out loud that this is a tripwire, not a vault**; the binding record is the issue he closes. On a
+  shallow checkout it reports that the check could not run rather than passing silently.
+- **`test/overlap.js`** answers *"review prs for conflicts"* before there are any: which other
+  branch is holding a file this one touches. **Git alone, no token** — `test/leaves.js` forbids any
+  workflow a `write` scope, so nothing in CI can comment on a PR, and that rule is right.
+- **Persona learning goes to `docs/personas/proposed/`**, never into the approved persona.
+
+**First real run in the ledger: `docs/runs/2026-09-20-claude-7c41.md`, status `verified`** — six
+acceptance criteria waiting on him, including the one that actually matters: *would you let a second
+AI near the engine on the strength of `AGENTS.md` alone?*
+
+**Not solved, and said in `RUNS.md` §8 rather than discovered later:** nothing serialises `engine/`.
+Two agents can both change shared engine code in the same window and both be green alone;
+`overlap.js` will say so and nothing forces them apart. The next step if it bites is *one in-flight
+engine PR at a time* — a rule, not a tool.
+
+**The map build order is unchanged and still queued** — see the block below.
+
+### ⇢ 2026-09-20, earlier — the map plan merged.
 
 ### ⇢ 2026-09-20 — START HERE.
 

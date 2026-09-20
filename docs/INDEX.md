@@ -45,6 +45,16 @@ Everything below is detail those three point into.
 
 ---
 
+## Working with another AI on this engine
+
+| File | What it is |
+|---|---|
+| **[../AGENTS.md](../AGENTS.md)** | **The contract every agent works under, whoever built it.** At the repository root, because that is the cross-vendor convention — one file, every agent |
+| [RUNS.md](RUNS.md) | The run ledger: the ID that names its agent, one file per run, the five statuses, and **the two words that are yours alone** |
+| [runs/](runs/) | One file per run. `ls` it and you have the project's history in date order, by who did it |
+| [personas/](personas/) | The approved personas are in `.claude/agents/`; a **suggestion** to change one lives here and never in the approved file |
+| [council/](council/) | More than one AI answering the same question — **a folder of positions written blind, never a chat.** Only you write the decision file |
+
 ## The rules — what has been decided and is not up for re-argument
 
 | File | What it is |
@@ -128,7 +138,8 @@ Everything below is detail those three point into.
 
 `test/leaves.js` (`consistency()`, run on every CI build through `test/town.smoke.js`) **fails the
 build if a document exists in `docs/` and is not linked from this index.** So a session that writes
-a new document and forgets to list it here cannot merge.
+a new document and forgets to list it here cannot merge. *It caught the session that wrote
+`docs/RUNS.md` an hour after the guard shipped, which is the only kind of evidence that counts.*
 
 That is the only promise this page makes. It does not promise the *description* is still right —
 only that nothing is hidden from you.

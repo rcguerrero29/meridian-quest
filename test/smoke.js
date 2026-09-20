@@ -2429,10 +2429,20 @@ const CANDIDATES = [
     await page.waitForTimeout(5200);
     const held = await page.evaluate(() => ({ hidden: document.getElementById('ticker').hidden, lines: tickerLines.length }));
     if (held.hidden || held.lines !== 2) fails.push('the record cleared itself on a timer: ' + JSON.stringify(held));
-    // tapping it is still how it goes away
+    // tapping it is still how it goes away.
+    // THE NOUN IS "WERE THE LINES THAT WERE THERE DISMISSED", not "is the record empty an instant
+    // later". CI on 2026-09-20 read {hidden:false, lines:1} here on a commit that touched no engine
+    // code: the click had cleared the two lines synchronously (engine.js, grep `"ticker").addEventListener`)
+    // and a townsperson spoke in the gap before the read, which re-showed the record with one NEW
+    // line. The game talking is not a failed dismiss. So: remember what was showing, click, and
+    // insist none of THOSE survive — a line that arrived after the click is reported, never failed.
+    const before = await page.evaluate(() => tickerLines.slice());
     await page.evaluate(() => document.getElementById('ticker').click());
-    const tapped = await page.evaluate(() => ({ hidden: document.getElementById('ticker').hidden, lines: tickerLines.length }));
-    if (!tapped.hidden || tapped.lines !== 0) fails.push('tapping the record did not dismiss it: ' + JSON.stringify(tapped));
+    const tapped = await page.evaluate(() => ({ hidden: document.getElementById('ticker').hidden, lines: tickerLines.slice() }));
+    const survived = tapped.lines.filter(l => before.includes(l));
+    if (survived.length) fails.push('tapping the record did not dismiss it: ' + JSON.stringify({ hidden: tapped.hidden, survived }));
+    else if (tapped.lines.length) console.log('  COUNT-ONLY: the record was dismissed and the town spoke ' + tapped.lines.length + ' new line(s) before the read — timing, not a fault');
+    else if (!tapped.hidden) fails.push('tapping the record emptied it but left it showing: ' + JSON.stringify(tapped));
     // a tile's flavour line is NOT signed — the crosswalk is not a person
     const flav = await page.evaluate(() => { tickerLines.length = 0; const f = (UI.en.flavor['-'] || UI.en.flavor['.'] || ['x'])[0]; toast(f, 300); return tickerLines[0]; });
     if (/^💬 [^:]+:/.test(flav || '')) fails.push('a tile flavour line was signed as if a person said it: ' + flav);

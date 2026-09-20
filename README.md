@@ -72,6 +72,10 @@ both. After merge, `pages.yml` runs `record.js` and R10 again on the real artifa
 
 ## Where the work is written down
 
+**[AGENTS.md](AGENTS.md) is the contract every agent works under**, whoever built it — the
+cross-vendor convention, so a second AI on this engine obeys the same rules. The run ledger, the
+five statuses and the owner-only acceptance gate are [docs/RUNS.md](docs/RUNS.md).
+
 **[docs/INDEX.md](docs/INDEX.md) is the map of all of it** — every document in `docs/`, one line
 each on what it is and when you'd open it, plus how to read them offline. Start there; a session
 cannot merge a new document without adding it to that page (`test/leaves.js`, `indexed()`).
