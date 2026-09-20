@@ -141,7 +141,48 @@ function consistency(root) {
       P.push('the row for "' + r.path + '" carries no date — a guard is a promise and a promise has a date on it (.claude/agents/zeni.md)');
   });
   P.push(...completeness(root, R));
+  P.push(...indexed(root));
   return P.concat(workflows(root));
+}
+
+/* ---- AND THE HALF THE OWNER ASKED FOR, 2026-09-20 ----
+   "i was trying to find the project documents on my machine, can we make sure we have access to all
+   these so i can review when you are offline/out of tokens?" The documents were already in his
+   clone; what was missing was any page saying which of thirty-four files answers a given question.
+   docs/INDEX.md is that page, and a hand-kept index is worthless the first time somebody writes a
+   document and forgets it — the reader then believes they have seen everything, which is worse than
+   no index at all.
+
+   SO THE NOUN THIS READS IS THE FOLDER, NOT THE INDEX. Not "the index has N links" — a count whose
+   noun is a line in a file is docs/REGRESSION.md §3's commonest shape, and it passes for ever while
+   the newest document stays invisible. It walks docs/ and asks of each thing found: can he reach
+   this from the index. A directory counts as reached when any link goes into it, because the index
+   may point at one document inside a folder rather than the folder.
+
+   Runs on every CI build: test/town.smoke.js requires consistency() (grep leaves.js').consistency). */
+function indexed(root) {
+  const P = [], D = path.join(root, 'docs'), idx = path.join(D, 'INDEX.md');
+  if (!fs.existsSync(D)) return P;
+  if (!fs.existsSync(idx)) {
+    P.push('docs/INDEX.md does not exist, so nothing tells the owner which of these files answers his ' +
+           'question — he asked for exactly this on 2026-09-20 and a folder listing is not an answer');
+    return P;
+  }
+  const links = [...fs.readFileSync(idx, 'utf8').matchAll(/\]\(([^)\s#]+)/g)]
+    .map(m => m[1]).filter(t => !/^[a-z]+:/i.test(t)).map(t => t.replace(/^\.\//, ''));
+  const want = fs.readdirSync(D, { withFileTypes: true })
+    .filter(e => e.name !== 'INDEX.md' && (e.isDirectory() || e.name.endsWith('.md')))
+    .map(e => e.isDirectory() ? e.name + '/' : e.name);
+  if (!want.length) {
+    P.push('docs/ holds no documents at all — this check measured nothing, which docs/GAUGE.md says is not a pass');
+    return P;
+  }
+  want.forEach(w => {
+    const hit = w.endsWith('/') ? links.some(l => l === w || l.startsWith(w)) : links.includes(w);
+    if (!hit) P.push('docs/' + w + ' exists and docs/INDEX.md does not reach it — the owner reads that index ' +
+                     'when no session is running, so a document it leaves out is a document he will never open');
+  });
+  return P;
 }
 
 /* Melo, 2026-09-13: docs/BOUNDARY.md said the check reads the ledger's COMPLETENESS and it read only
@@ -291,4 +332,4 @@ if (require.main === module) {
   console.log('Not a failure. Nobody can edit their way out of this sentence; it is a routing slip, and the review is the gate. Melo plants against whatever guard you add.');
   process.exit(0);
 }
-module.exports = { consistency, touched, rows, changedFiles, workflows };
+module.exports = { consistency, touched, rows, changedFiles, workflows, indexed };

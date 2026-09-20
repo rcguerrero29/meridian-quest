@@ -26,6 +26,9 @@ instructions live. It is not the instructions.*
    today's behaviour and the default; `on` means one issue per branch, a `taken:` label as the lock,
    and one worktree per builder. A per-session instruction beats the file; a session unsure is `off`.
 4. **`docs/OWNER.md`** — the settled rules. `docs/BACKLOG.md` — the ranked index.
+   **`docs/INDEX.md`** — every document in `docs/`, what each is for, and how the owner reads them
+   when no session is running. A new document is not written until it is listed there; the guard is
+   `indexed()` in `test/leaves.js`, which runs on every CI build.
    `docs/story/el-changarrito.md` §7½ — what a second world may never do to Meridian.
 
 ## Two games, one engine

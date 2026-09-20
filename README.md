@@ -72,6 +72,10 @@ both. After merge, `pages.yml` runs `record.js` and R10 again on the real artifa
 
 ## Where the work is written down
 
+**[docs/INDEX.md](docs/INDEX.md) is the map of all of it** — every document in `docs/`, one line
+each on what it is and when you'd open it, plus how to read them offline. Start there; a session
+cannot merge a new document without adding it to that page (`test/leaves.js`, `indexed()`).
+
 - `docs/NEXT-SESSION.md` — the state of play, rewritten at the end of every session.
 - `docs/ASKS.md` — every owner ask, verbatim, and what happened to it.
 - `docs/OWNER.md` — the settled rules. `docs/BACKLOG.md` — the ranked index.
