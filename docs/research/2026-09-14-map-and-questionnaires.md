@@ -286,3 +286,26 @@ art:    (g,W,H)=>{murGround(g,W,H);
   g.textAlign="left";g.textBaseline="alphabetic";}
 ```
 Mock order for the panel: **canvas drawing**, rendered against the repo's real `murGround`/`MURPAL` at the wall's true course (255×117, `MURBAY=412×0.62`, aspect .46) and at reading size (370×170), no page errors, bottom 6% probed as dado (`[196,187,166]` = `MURPAL.shade`): `/tmp/claude-0/-home-user-meridian-quest/0f70be00-7ff9-5c2f-a84c-7edceebcd89f/scratchpad/research-form-panel-wall-255.png`, `…/research-form-panel-read-370.png`, `…/research-form-panel-both.png`; art source `…/research-form-panel-art.js`, harness `…/research-form-panel-render.js`, storage probe `…/research-form-storage-probe.js`. Material and palette are mine (white stock, salmon ink, graphite) — nothing on the wall is a bubble sheet; the earlier cut-off run of this lens left an unpainted punched-card draft at `…/research-form-panel-560.png`, and this is deliberately a different object.
+
+
+---
+
+## Correction — 2026-09-17: the shared anchors moved from content to engine
+
+**M-finding (b) above says the two shared anchors — `[14,0]` hq/f2 and `[29,1]` pa/li/ex — are
+*"content faults in `MAPDOT`/`TOWNLBL`, not engine ones."* That stopped being true on 2026-09-17**
+and the file is corrected here rather than rewritten, because a register that edits its own past is
+worth nothing.
+
+What changed: `MAPDOT` is now `{pk:[22,10]}` — all seven hand-typed rows left, each having been
+measured to agree exactly with the door that already led there — and `planPlace` derives a world's
+place by following the portals recursively. Its third clause reads: **a world behind a world that is
+itself only a dot shares its address.** That is right about the city (the second floor of the office
+*is* the office) and it means the hq/f2 collision **is now an engine rule and cannot be fixed in
+content at all.**
+
+`[29,1]` pa/li/ex resolved itself separately: Calle Dos became a drawn panel (`TOWNPLAN`), so
+La Espiga and Velázquez are found from the doors on their own street.
+
+The fix M6 asked for — **one target opening a chooser** — is therefore the engine's job now, and it
+is the same control the second floors need (`docs/plans/2026-09-17-the-map.md` §3).
