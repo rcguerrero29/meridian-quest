@@ -3,7 +3,42 @@
 *(Log opened 2026-08-30, end of the music/townsfolk/eggs session. Keep this file
 current: each session rewrites the queue before signing off.)*
 
-## STATE OF PLAY — read this first (2026-09-17, end of the map-planning sitting)
+## STATE OF PLAY — read this first (2026-09-20, the map plan merged)
+
+### ⇢ 2026-09-20 — START HERE.
+
+**PR #212 is merged.** `main` is at **`72a2dd3`** — the map plan, the research, A18, A3½ and
+`docs/BEAUTIFY.md`'s *The art we can reach*. **Still `mq-v176` / `ch-v126`: nothing was built**, by
+his instruction, and the version did not move because no line of `engine/` or `content/` did.
+
+**The next sitting is written and waiting on nothing but his go.**
+`docs/plans/2026-09-17-the-map.md` §10 is the order, smallest first:
+
+1. **The caption stops lying** — `plan.caption` as a pack string, the engine's hardcoded
+   `es?` claim deleted. *(minutes)*
+2. **Calle Dos's doors get their colours** — `@`, `*`, `$` into `MAPCOL`. Content only. *(minutes)*
+3. **A destination is remembered** — `d:{w,x,y,who}` into `save()`, through `sanitizeSave`,
+   `gx,gy` **recomputed** on load, never stored. *(half a sitting)*
+4. **Every place is tappable** — `planPlaces()`, `mapPick` reads places, marks stay an overlay.
+5. **The level chooser** — Floor 2, and the shared-anchor fault from crew run 8, in one control.
+6. **The route on the paper.**  7. **The render pass, then the redraw.**  8. **The caption derives itself.**
+
+**1 and 2 are minutes and fix something he can see.** That is the honest first sitting.
+
+**The one call that is still his, and step 4 must not start before it:** `planPlaces` changes what
+the **town** does — it declares no `MAPMARK`, so a tap does nothing there today, and the day places
+exist its doors become pickable. An engine change must be behaviour-identical for both games.
+**A pack opt-in (`PLANPICK`, default off) is the cheap honest answer — but it is his to take**
+(`docs/ARCH-LOG.md` A18, last row).
+
+**Also still open, named and not hidden:** `in3` advertises the rank ladder on the first screen and
+the top of it arrives at twelve clean answers of eighty-eight — la junta's balance question, nobody
+has taken it. Raised TILE art still does not lift in the iso camera. **C** from A16 (one building,
+one world) is costed and recommended against. And **the junta's agenda is written**
+(`docs/plans/2026-09-17-the-map.md` §9) — seven items, cast named, waiting on tokens.
+
+### ⇢ 2026-09-17, the map-planning sitting — history from here down.
+
 
 ### ⇢ 2026-09-17, last — START HERE. **PLANNING ONLY. Nothing was built.**
 
