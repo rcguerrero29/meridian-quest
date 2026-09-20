@@ -104,6 +104,11 @@ did what without opening anything. **One file per run, never a shared ledger** �
 conflicts every time two agents finish in the same window, which is exactly the failure this protocol
 exists to prevent.
 
+**Every run records the model that ran it, by exact ID, and the tokens each task cost, with how the
+number was measured** (`docs/RUNS.md` §3½). An estimate is written `~N`; a blank is not allowed;
+`unknown:` needs a reason. A Claude Code session snapshots `get_session` before and after a task
+and records the delta. A second AI records what its vendor exposes.
+
 `node test/runs.js` checks it. It runs in CI.
 
 ## 7 · What you may never do
@@ -156,7 +161,36 @@ docs/personas/proposed/<persona>/<RUN-ID>.md
 Never the approved file. The owner folds a suggestion in, or does not, and either way the approved
 persona says only what he has agreed to.
 
-## 10 · If a rule here and a rule in `CLAUDE.md` disagree
+## 10 · Mark what you assumed — `ASSUMED:` — so a person can find it later without reading everything
+
+*Owner, 2026-09-20: "start a request for labeling and organizing code so that a human can if they
+need to only- find any thing that may have been assumed by AI and not commented to show or delineate
+any specific features."*
+
+This repository comments the **why** of nearly everything, usually with the owner's own words and a
+date. The gap he is naming is different: **the decision an agent made without noticing it was one.**
+A default picked because something had to be picked. A threshold that felt right. A behaviour copied
+from the nearest similar thing. Nobody asked for it, nobody signed it, and there is no comment
+because the agent did not know it was assuming.
+
+**When you know you are assuming, say so, in the code, in one greppable word:**
+
+```js
+/* ASSUMED: three tiles is a fingertip. Nobody measured a thumb; it was the first number that
+   worked on one phone. A human may change it. */
+```
+
+- **`ASSUMED:`** is the marker. One grep finds every one: `node test/assumed.js` lists them and
+  prints the count, and never fails the build — an assumption is not a fault, an *unmarked* one is.
+- What follows is **what was assumed, why that value, and that a person may change it.** Not the
+  feature's purpose — that is the ordinary comment above it.
+- **A feature's header comment names the ask it came from** — an owner quote, an issue number, a
+  date. A block of code with no ask behind it is either an assumption (mark it) or scaffolding
+  (say so).
+- **The audit of code written before this rule** — reading every file for assumptions nobody
+  marked — is a crew run with a run ID, not a thing to do in passing. It is issue-tracked.
+
+## 11 · If a rule here and a rule in `CLAUDE.md` disagree
 
 `CLAUDE.md` is Claude Code's entry point and says where the orders live; this file is the shared
 contract. **Where they overlap they must say the same thing, and if they do not, that is a bug in

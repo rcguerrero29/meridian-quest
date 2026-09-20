@@ -35,8 +35,8 @@ const ROOT = path.resolve(__dirname, '..');
 const STATUS = ['proposed', 'implemented', 'verified', 'accepted', 'rejected'];
 const OWNER_ONLY = ['accepted', 'rejected'];
 const ID_RE = /^(\d{4}-\d{2}-\d{2})-([a-z0-9][a-z0-9-]*)-([0-9a-f]{4})$/;
-const FIELDS = ['RUN ID', 'Agent', 'Status', 'Personas', 'Issues', 'Persona learning'];
-const SECTIONS = ['Requested', 'Files', 'Evidence', 'Acceptance criteria'];
+const FIELDS = ['RUN ID', 'Agent', 'Model', 'Status', 'Personas', 'Issues', 'Persona learning'];
+const SECTIONS = ['Requested', 'Tasks', 'Files', 'Evidence', 'Acceptance criteria'];
 /* a trailer naming a machine. Claude Code writes "Co-Authored-By: Claude …"; AGENTS.md §6 asks every
    agent for the same, under its own name. An agent line here means a machine touched this commit. */
 const AGENT_TRAILER = /^Co-Authored-By:.*\b(claude|codex|copilot|cursor|gpt|gemini|jules|aider|devin|amp)\b/im;
@@ -110,6 +110,25 @@ function runs(root) {
     const boxes = (ac.match(/^[ \t]*[-*][ \t]*\[[ xX]\]/gm) || []).length;
     if (!boxes) say('has no checkbox under "## Acceptance criteria" — the owner asked for verification tests he can complete and track, and a paragraph is not a thing he can tick');
 
+    /* ---- tokens and the model, per task (docs/RUNS.md §3½) ----
+       The noun is a table ROW, not the word "tokens" appearing somewhere. Each row must carry a model
+       ID, a tokens cell that is a number, an estimate (~N) or `unknown: <reason>`, and a method. A
+       blank cell is the thing this exists to refuse: a number nobody can check that reads like one
+       somebody did. */
+    const tk = section(src, 'Tasks') || '';
+    const rows = tk.split('\n').filter(l => /^\s*\|/.test(l) && !/^\s*\|\s*-/.test(l) && !/\|\s*task\s*\|/i.test(l))
+      .map(l => l.split('|').slice(1, -1).map(c => c.trim())).filter(r => r.length >= 5 && !/^<.*>$/.test(r[0]));
+    if (!rows.length) say('has no task row under "## Tasks" — the owner asked for tokens and the model per task, and a table with no rows records neither');
+    rows.forEach(r => {
+      const [task, who, model, tokens, how] = r;
+      if (!model || /^<|marketing|opus 5$|sonnet$|gpt$|gemini$/i.test(model) && !/[-\d]/.test(model))
+        say('task "' + task + '" names model "' + model + '" — the exact model ID is required, not a marketing name');
+      if (!/^(~?[\d,]+|unknown:\s*\S.*)$/i.test(tokens || ''))
+        say('task "' + task + '" has tokens "' + (tokens || '') + '" — a number, ~number, or "unknown: <reason>"; never blank');
+      if (!how || /^<|^unknown:?\s*$/i.test(how))
+        say('task "' + task + '" does not say how its token count was measured — a number with no method is a guess wearing digits');
+    });
+
     const learn = field(src, 'Persona learning');
     if (learn && !/^none$/i.test(learn)) {
       const p = learn.replace(/^[`\[]|[`\])]$/g, '').replace(/\]\(.*$/, '').trim();
@@ -166,9 +185,12 @@ function council(root) {
 function selftest() {
   const os = require('os');
   const base = fs.mkdtempSync(path.join(os.tmpdir(), 'runs-selftest-'));
-  const good = ['RUN ID: 2026-09-20-claude-a3f1', 'Agent: claude', 'Status: verified', 'Personas: none',
+  const good = ['RUN ID: 2026-09-20-claude-a3f1', 'Agent: claude', 'Model: claude-fable-5-1', 'Status: verified', 'Personas: none',
                 'Issues: none', 'Persona learning: none', '', '# a run', '',
-                '## Requested', 'do the thing', '', '## Files', '- `a.js`', '', '## Evidence', 'node test/smoke.js → OK',
+                '## Requested', 'do the thing', '',
+                '## Tasks', '| task | who | model | tokens | how measured |', '|---|---|---|---|---|',
+                '| the thing | claude | claude-fable-5-1 | 12,000 | session usage delta |', '',
+                '## Files', '- `a.js`', '', '## Evidence', 'node test/smoke.js → OK',
                 '', '## Acceptance criteria', '- [ ] open the map and look', '', '## Persona learning', 'none', ''].join('\n');
   const mk = (name, body) => { const d = path.join(base, name, 'docs', 'runs');
     fs.mkdirSync(d, { recursive: true }); fs.writeFileSync(path.join(d, 'TEMPLATE.md'), 'template');
@@ -185,6 +207,11 @@ function selftest() {
     ['persona learning aimed at the approved persona', mk('per', { '2026-09-20-claude-a3f1.md': good.replace('Persona learning: none', 'Persona learning: .claude/agents/pili.md') }), 1],
     ['a missing section', mk('sec', { '2026-09-20-claude-a3f1.md': good.replace('## Evidence\nnode test/smoke.js → OK\n', '') }), 1],
     ['no ledger at all', base + '/nothing', 1],
+    ['no Model line', mk('mdl', { '2026-09-20-claude-a3f1.md': good.replace('Model: claude-fable-5-1\n', '') }), 1],
+    ['a Tasks table with no rows', mk('tk0', { '2026-09-20-claude-a3f1.md': good.replace('| the thing | claude | claude-fable-5-1 | 12,000 | session usage delta |\n', '') }), 1],
+    ['a task row with a blank tokens cell', mk('tkb', { '2026-09-20-claude-a3f1.md': good.replace('| 12,000 |', '|  |') }), 1],
+    ['a task row with tokens but no method', mk('tkm', { '2026-09-20-claude-a3f1.md': good.replace('| session usage delta |', '|  |') }), 1],
+    ['a task row with unknown tokens AND a reason is green', mk('tku', { '2026-09-20-claude-a3f1.md': good.replace('| 12,000 | session usage delta |', '| unknown: session ended first | unknown: session ended first |') }), 0],
   ];
   const mkc = (name, files) => { const d = path.join(base, name, 'docs', 'council', '2026-09-20-topic');
     fs.mkdirSync(d, { recursive: true }); Object.entries(files).forEach(([f, s]) => fs.writeFileSync(path.join(d, f), s));

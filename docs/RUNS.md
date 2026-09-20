@@ -62,13 +62,50 @@ field is missing. Every one of these is something the owner asked for by name:
 | `Issues` | the backlog items affected, by number, or `none` |
 | `Files` | every path this run changed |
 | `Evidence` | what was run and what it printed. A claim with no output is not evidence |
+| `Model` | **which model ran this** — the exact ID (`claude-fable-5-1`), not a marketing name. If it changed mid-run, both, in order |
 | `Status` | one of the five (§4) |
 | `Acceptance criteria` | **what the owner checks by hand** (§5) |
 | `Persona learning` | a path under `docs/personas/proposed/`, or `none` (§6) |
+| `## Tasks` | **one row per task: who did it, which model, how many tokens, and how that number was got** (§3½) |
 
 **`Requested` is verbatim on purpose.** A run that paraphrases the ask is a run that has already
 decided what the ask meant, and the whole record then rests on that decision being right. The same
 rule as `docs/ASKS.md`, for the same reason.
+
+## 3½ · Tokens and the model, per task — measured, and honest about how
+
+*Owner, 2026-09-20: "lets log the amount of tokens used per tasks and the model used."*
+
+```
+## Tasks
+
+| task | who | model | tokens | how measured |
+|---|---|---|---|---|
+| the security review | claude (workflow: 5 finders, 2 skeptics each, synthesis, critic) | claude-fable-5-1 | 4,120,000 | session usage delta, get_session before and after |
+| the council protocol | claude | claude-fable-5-1 | ~180,000 | budget counter delta, ±10% |
+```
+
+**The model is exact.** A Claude Code session reads it from `get_session` (`session_context.model`
+and `external_metadata.last_served_model` — the second can differ from the first when the serving
+model falls back, and the ledger records the one that actually served). A second AI records what its
+vendor exposes, by its exact ID. **A marketing name is not a model.**
+
+**The tokens are measured where they can be and estimated where they must be, and the row says
+which.** The `how measured` column is required precisely so that a number nobody can check is never
+mistaken for one somebody did:
+
+- **`session usage delta`** — `get_session` returns cumulative `input_tokens`, `output_tokens`,
+  `cache_read_tokens` and `cache_write_tokens` for the session. Snapshot before the task, snapshot
+  after, subtract. This is a real measurement. Record input + output as the number; cache reads are
+  cheap and huge and would swamp it — note them separately if they matter.
+- **`budget counter delta`** — the remaining-tokens figure a session is shown. Coarse; write it
+  `~N` and say the tolerance.
+- **`vendor dashboard`** — whatever the second AI's platform reports, cited.
+- **`unknown: <reason>`** — allowed, never blank. *"the session ended before the after-snapshot"*
+  is a reason. An empty cell is not.
+
+**A workflow's tokens count against the run that launched it.** The sub-agents are the run's cost;
+the row names how many ran so the number can be read.
 
 ## 4 · The five statuses, and the line through the middle of them
 

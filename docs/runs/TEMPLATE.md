@@ -1,5 +1,6 @@
 RUN ID: YYYY-MM-DD-<agent>-<4 hex>
 Agent: <claude | codex | the name of whichever AI ran this>
+Model: <the exact model ID that ran this, e.g. claude-fable-5-1 — both, in order, if it changed>
 Status: proposed
 Personas: none
 Issues: none
@@ -11,6 +12,15 @@ Persona learning: none
 
 > <the owner's request, VERBATIM. Not a summary — a run that paraphrases the ask has already
 > decided what it meant, and everything below then rests on that decision being right.>
+
+## Tasks
+
+| task | who | model | tokens | how measured |
+|---|---|---|---|---|
+| <what> | <agent, or agent + persona, or "workflow: N agents"> | <exact model ID> | <N, ~N, or unknown: reason> | <session usage delta · budget counter delta · vendor dashboard · unknown: reason> |
+
+**Tokens are measured where they can be and estimated where they must be, and the row says which.**
+A blank cell is not allowed; `unknown:` needs a reason (`docs/RUNS.md` §3½).
 
 ## Files
 
