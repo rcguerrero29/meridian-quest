@@ -132,6 +132,37 @@ function runs(root) {
   return { P, board, notes, n: files.length };
 }
 
+/* ---- THE COUNCIL (docs/council/README.md, 2026-09-20) ----
+   More than one AI answering the same question, as a folder of positions written blind, never a
+   thread — agent A's output as agent B's input is an injection channel by construction. The guard
+   asks only what a folder can prove: the question is there and verbatim, the ground truth was
+   written before the opinions, every file is somebody's, and the decision file was not written by
+   a machine. It cannot prove nobody peeked; that is what separate branches are for. */
+function council(root) {
+  root = root || ROOT;
+  const dir = path.join(root, 'docs', 'council'), P = [];
+  if (!fs.existsSync(dir)) return { P, n: 0 };
+  const folders = fs.readdirSync(dir, { withFileTypes: true }).filter(e => e.isDirectory()).map(e => e.name).sort();
+  folders.forEach(f => {
+    const d = path.join(dir, f), rel = 'docs/council/' + f, say = m => P.push(rel + ' ' + m);
+    if (!/^\d{4}-\d{2}-\d{2}-[a-z0-9][a-z0-9-]*$/.test(f)) say('is not named YYYY-MM-DD-<topic>');
+    const q = path.join(d, '00-question.md');
+    if (!fs.existsSync(q)) say('has no 00-question.md — a council with no question on file is a thread');
+    else if (!meat(fs.readFileSync(q, 'utf8'))) say('has an empty 00-question.md — the owner\'s words go there, verbatim');
+    if (!fs.existsSync(path.join(d, '01-ground-truth.md'))) say('has no 01-ground-truth.md — positions written from memory re-propose what already shipped (the junta\'s rule 1)');
+    fs.readdirSync(d).filter(x => x.endsWith('.md')).forEach(x => {
+      if (x === '00-question.md' || x === '01-ground-truth.md' || x === 'zz-decision.md') return;
+      if (!/^[a-z0-9][a-z0-9-]*\.md$/.test(x)) say('holds "' + x + '", which is not named for an agent — every position is somebody\'s');
+    });
+    const z = path.join(d, 'zz-decision.md');
+    if (fs.existsSync(z)) {
+      const t = lastTouch(rel + '/zz-decision.md');
+      if (t.ran && t.agent) say('has a zz-decision.md whose last commit (' + t.sha + ') carries an agent trailer — the decision is the owner\'s word and no agent writes it');
+    }
+  });
+  return { P, n: folders.length };
+}
+
 function selftest() {
   const os = require('os');
   const base = fs.mkdtempSync(path.join(os.tmpdir(), 'runs-selftest-'));
@@ -155,6 +186,21 @@ function selftest() {
     ['a missing section', mk('sec', { '2026-09-20-claude-a3f1.md': good.replace('## Evidence\nnode test/smoke.js → OK\n', '') }), 1],
     ['no ledger at all', base + '/nothing', 1],
   ];
+  const mkc = (name, files) => { const d = path.join(base, name, 'docs', 'council', '2026-09-20-topic');
+    fs.mkdirSync(d, { recursive: true }); Object.entries(files).forEach(([f, s]) => fs.writeFileSync(path.join(d, f), s));
+    fs.mkdirSync(path.join(base, name, 'docs', 'runs'), { recursive: true }); fs.writeFileSync(path.join(base, name, 'docs', 'runs', 'TEMPLATE.md'), 't');
+    return path.join(base, name); };
+  const ccases = [
+    ['a council with a question, ground truth and two named positions is green', mkc('c-ok', { '00-question.md': 'why', '01-ground-truth.md': 'x', 'claude.md': 'a', 'gemini.md': 'b' }), 0],
+    ['a council with no question', mkc('c-q', { '01-ground-truth.md': 'x', 'claude.md': 'a' }), 1],
+    ['a council with no ground truth', mkc('c-gt', { '00-question.md': 'why', 'claude.md': 'a' }), 1],
+    ['a position file not named for an agent', mkc('c-nm', { '00-question.md': 'why', '01-ground-truth.md': 'x', 'Notes From Meeting.md': 'a' }), 1],
+  ];
+  ccases.forEach(([what, root, want]) => {
+    const got = council(root).P.length ? 1 : 0, ok = got === want;
+    console.log((ok ? '  ok   ' : '  FAIL ') + what + (ok ? '' : '  (wanted ' + (want ? 'red' : 'green') + ', got ' + (got ? 'red' : 'green') + ')'));
+    if (!ok) bad.push(what);
+  });
   const bad = [];
   cases.forEach(([what, root, want]) => {
     const got = runs(root).P.length ? 1 : 0;
@@ -163,23 +209,24 @@ function selftest() {
     if (!ok) bad.push(what);
   });
   fs.rmSync(base, { recursive: true, force: true });
-  if (bad.length) { console.log('FAIL — ' + bad.length + ' of ' + cases.length); process.exit(1); }
-  console.log('OK — ' + cases.length + ' cases, planted on fixtures outside this repository.');
+  if (bad.length) { console.log('FAIL — ' + bad.length + ' of ' + (cases.length + ccases.length)); process.exit(1); }
+  console.log('OK — ' + (cases.length + ccases.length) + ' cases, planted on fixtures outside this repository.');
   process.exit(0);
 }
 
 if (require.main === module) {
   if (process.argv.includes('--selftest')) selftest();
   const { P, board, notes, n } = runs();
+  const C = council(); P.push(...C.P);
   notes.forEach(s => console.log('  NOTE: ' + s));
   /* the standing board, printed every run — "what is waiting on me" is one command and nothing has
      to remember to update it. Printed even when the ledger is empty, because a silent zero and a
      working check look identical otherwise (docs/GAUGE.md). */
-  console.log('  BOARD: ' + n + ' run(s) — ' + STATUS.map(s => board[s] + ' ' + s).join(' · ') +
+  console.log('  BOARD: ' + n + ' run(s), ' + C.n + ' council(s) — ' + STATUS.map(s => board[s] + ' ' + s).join(' · ') +
               (board.verified ? '   ← ' + board.verified + ' waiting on the owner' : ''));
   if (P.length) { console.log('FAIL\n- ' + P.join('\n- ')); process.exit(1); }
   console.log('OK — every run in docs/runs/ has a unique well-formed ID naming its agent, says what was asked and what proved it, ' +
               'carries acceptance criteria the owner can tick, and keeps persona learning out of the approved personas.');
   process.exit(0);
 }
-module.exports = { runs, STATUS, ID_RE };
+module.exports = { runs, council, STATUS, ID_RE };

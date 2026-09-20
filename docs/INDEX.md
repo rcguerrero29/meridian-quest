@@ -53,6 +53,7 @@ Everything below is detail those three point into.
 | [RUNS.md](RUNS.md) | The run ledger: the ID that names its agent, one file per run, the five statuses, and **the two words that are yours alone** |
 | [runs/](runs/) | One file per run. `ls` it and you have the project's history in date order, by who did it |
 | [personas/](personas/) | The approved personas are in `.claude/agents/`; a **suggestion** to change one lives here and never in the approved file |
+| [council/](council/) | More than one AI answering the same question — **a folder of positions written blind, never a chat.** Only you write the decision file |
 
 ## The rules — what has been decided and is not up for re-argument
 
