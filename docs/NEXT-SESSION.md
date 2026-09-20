@@ -37,6 +37,14 @@ has taken it. Raised TILE art still does not lift in the iso camera. **C** from 
 one world) is costed and recommended against. And **the junta's agenda is written**
 (`docs/plans/2026-09-17-the-map.md` §9) — seven items, cast named, waiting on tokens.
 
+**Landed 2026-09-20, after the merge:** **`docs/INDEX.md`** — the owner could not find the project
+documents on his machine. They were always there; what was missing was a page saying which of
+thirty-four files answers a given question. The index maps all of it, says how to read them with no
+session running, and **cannot go stale**: `indexed()` in `test/leaves.js` (run on every CI build
+through `test/town.smoke.js`) fails the build if anything in `docs/` is unreachable from it. It
+reads the FOLDER, not the index's link count — the count is the version that would have passed for
+ever. **Write a new document, list it there, or you cannot merge.**
+
 ### ⇢ 2026-09-17, the map-planning sitting — history from here down.
 
 
