@@ -217,7 +217,7 @@ inert kinds went unnoticed for so long.
 ### L15 · A game cannot choose which cameras it has — **CLOSED 2026-09-10**
 > **Built.** `CAMERAS` is a pack seam: a camera a game does not declare has no button and cannot be
 > reached, even by a stale saved choice. **And the art half closed with it** — `TILEART` now takes
-> `{top, side, crown, iso}`, so a pack can draw its own tree and its own isometric view.
+> `{top, side, crown, iso}` — and `mesh` since 2026-09-21, a list of primitives for the 3D camera — so a pack can draw its own tree, its own isometric view, and its own shapes.
 > **Still open, deliberately:** Meridian's jacaranda is still the engine's *default* crown. The seam
 > exists and nothing is forced through it yet; moving that drawing into the pack is step two, in
 > `docs/ARCH-LOG.md` A5.

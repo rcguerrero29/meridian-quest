@@ -2102,19 +2102,21 @@ if(typeof TILEART_SIDE!=="undefined")Object.assign(TILESIDE,TILEART_SIDE);
 
    A bare function still means `top`, exactly as before, so nothing any pack has written changes.
    docs/TAGS.md L15, docs/ARCH-LOG.md A5+A7. */
-const TILECROWN={},TILEISO={};
-const TILEVIEWS=["top","side","crown","iso"];
+const TILECROWN={},TILEISO={},TILEMESH={}; /* mesh: a list of primitives for the 3D camera (2026-09-21) */
+const TILEVIEWS=["top","side","crown","iso","mesh"];
 if(typeof TILEART!=="undefined")Object.entries(TILEART).forEach(([g,v])=>{
   if(typeof v==="function"||!v||typeof v!=="object")return;   /* a bare function is `top`, merged above */
   if(v.top)TILEDRAW[g]=v.top;
   if(v.side)TILESIDE[g]=v.side;
   if(v.crown)TILECROWN[g]=v.crown;
-  if(v.iso)TILEISO[g]=v.iso;});
+  if(v.iso)TILEISO[g]=v.iso;
+  if(v.mesh)TILEMESH[g]=v.mesh;});
+if(typeof TILEART_MESH!=="undefined")Object.assign(TILEMESH,TILEART_MESH); /* the flat form, like TILEART_SIDE */
 /* the one question every renderer asks: what does this glyph look like from HERE. A view a pack
    never filled in comes back null, and the caller decides what to do about that — which is how a
    game that has no isometric camera pays nothing for isometric art. */
 function tileView(g,view){
-  const T={top:TILEDRAW,side:TILESIDE,crown:TILECROWN,iso:TILEISO}[view];
+  const T={top:TILEDRAW,side:TILESIDE,crown:TILECROWN,iso:TILEISO,mesh:TILEMESH}[view];
   return (T&&T[g])||null;}
 const sideArt=g=>TILESIDE[g]||TILEDRAW[g];
 /* ---------- TILES: glyph-class metadata (IDEAS §10 step ①) ----------

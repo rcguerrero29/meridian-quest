@@ -270,3 +270,58 @@ against it is measured against the wrong thing. — *Chema, 2026-09-09*
   whether the proud pane collides with a person on the pavement (it sits 0.12 into the pavement tile
   at window height; nobody has stood there and looked). **Not done:** Pili's socket redraw (the flat
   cameras' legibility) — the next fix, if the owner still wants one after this.
+
+### 2026-09-21 · the `mesh` view: shapes from parts, and the first three — the bed, the pot, the shelf
+
+- **The ask, in his words:** *"i still see squares and not polygonal shapes, i thought we logged a
+  skill. can we not try this finally?"* The skill existed (how-its-made, which says *model* as well
+  as draw); the seam did not. `engine3d.js` built the whole world from `BoxGeometry`, `PlaneGeometry`
+  and `Sprite` — 24 boxes, 9 planes, 1 cylinder, 1 torus, counted — so a pack had exactly two answers
+  to "what shape is this": a box wearing a picture, or a picture standing up.
+- **Shipped (mq-v178): a SEAM, by the standing goal's own test.** `TILEART[g].mesh` (or the flat
+  `TILEART_MESH[g]`) answers with a LIST OF PRIMITIVES — `box · sph · cyl · cone` — each with a place,
+  a size, a colour and an optional turn or lean, in tile units, y up from the floor. The engine
+  (`t3MeshOf`) merges a tile's parts into ONE mesh with vertex colours and one Lambert material, so a
+  bed of six marigolds is one draw call; the material joins `tintables`, so the time of day reaches
+  it like a texture. `t3MeshTile` is asked before wall, box or billboard, for SOLID tiles and for
+  `stand` tiles both. A pack that says nothing gets what it always got: **the town's suite is green
+  and its known-flat list is byte-for-byte what it was.** Rotation order is YXZ so a part can lean
+  and the whole thing can still be turned to face the room (the shelf faces its first open side).
+- **The three, in the pack** (`content/meridian/art.js`, BEAUTIFY, SECOND SITTING): the raised bed
+  (curb walls only where the run ends, a cylinder lip along each, soil, six pom-pom heads on stems with
+  the crown sphere upper-left, four flattened leaf spheres); the potted plant (a tapered pot, a rim,
+  soil, five leaf masses turned per tile — twenty of them were one picture); the shelf (two uprights,
+  a back, four boards with depth, and on them the same runs of spines, the leaning one, the stack and
+  the carton the side art paints, as boxes you can see between).
+- **Measured, default camera, hero at the sheet's spots, the harness reading `renderer.info` and
+  counting `userData` in the scene.** Draw calls went DOWN everywhere a mesh replaced boxes or
+  sprites, triangles went up by amounts a phone does not notice:
+
+  | world | calls before → after | triangles before → after | mesh / flat / box after |
+  |---|---|---|---|
+  | pk | 76 → 61 | 162 → 5,904 | 7 / 7 / 0 |
+  | me | 183 → 153 | 366 → 2,022 | 9 / 0 / 12 |
+  | no | 292 → 282 | 584 → 1,694 | 4 / 0 / 7 |
+  | hq | 466 → 466 | 932 → 1,490 | 1 / 0 / 5 |
+  | ta | 235 → 215 | 470 → 1,574 | 6 / 3 / 8 |
+  | st | 393 → 383 | 786 → 4,242 | 4 / 9 / 0 |
+
+  **And then the screenshot** (`docs/mocks/2026-09-21-contact-sheet/after-second-sitting/`): the beds
+  are beds with a lip you can see round, the pot is a pot, the shelves have insides.
+- **The audit did its job first.** `test/engine.smoke.js` #39 went red the moment the art landed —
+  *"P" is no longer flat in 3D — take it off this game's row* — and `P` came off Meridian's row. The
+  list shrank because the guard said so, which is what it is for.
+- **A rule in this log just changed, and is reported rather than absorbed:** sentence 2 of the
+  standing goal — *"Billboards are for round, leggy, organic things; boxes are for things with
+  corners (Pili's rule)"* — had two shapes because the engine had two. It has three now: **a mesh
+  from parts for anything with a form** — round things included. Billboards remain right for leggy
+  things (agility poles, a trolley sign) and for the tree's crown, which is the best prop in the game
+  and was not touched. `docs/IDEAS.md`'s 2026-09 note that realism here comes from *"value structure
+  and standing geometry, not from polygon count"* still holds: these are ten-segment primitives with
+  flat colour, standing geometry by construction, and nothing here imports an organic mesh.
+- **Not measured today:** frame time on a phone (the harness is headless); the seam's cost at a
+  hundred meshes in one world — the shelf is 24 parts and the market has seven. **Not done:** the
+  iso camera still draws every one of these as a coloured block (`docs/BEAUTIFY.md` row 5); the
+  tree's trunk is a box and its crown a picture, by choice; the crates and counters stay textured
+  boxes, which is what they are.
+

@@ -26,7 +26,7 @@ const t3Boxy=(g,m)=>!!(m.box||m.kind==="furniture"||m.kind==="appliance") && !!T
 ```
 `engine/engine3d.js:259` (2026-09-14; this line said `:241`)
 
-**A glyph becomes a real box the moment a side drawing exists.** Six of the twelve real offenders
+**A glyph becomes a real box the moment a side drawing exists** — and, since 2026-09-21, **a real shape the moment a `mesh` parts list exists** (`docs/3D-LOG.md`, that date). Six of the twelve real offenders
 are already tagged correctly and are missing exactly one drawing each in `content/meridian/art.js`.
 That is **free art** — no engine change, no `GAMEV` bump, no `sw.js` bump, no risk.
 
@@ -694,4 +694,23 @@ person does not spend an hour finding it.
 the wrong shelf — one glyph per business (Toño's vocabulary) or one glyph dressed per world (a seam
 that does not exist) is the owner's call and was asked in the run file. Row 5 still owns the iso
 camera: the tuft and the bed are drawn there by the engine's own strokes and dots, not by the pack.
+
+### The second sitting, done — 2026-09-21, the same night: shapes, not pictures
+
+Owner, after playing the first sitting: *"i still see squares and not polygonal shapes … can we not
+try this finally?"* He was right: the bed was a box wearing a painted curb, because a box was one of
+the two shapes the 3D camera could make. **The engine has a third now** — `docs/3D-LOG.md`,
+2026-09-21: the `mesh` view, a list of primitives per tile, merged into one mesh. The bed is a
+raised bed with a rounded lip and six pom-pom marigolds; the potted plant (row P ×20 in the
+register above, "all 20 pixel-identical") is a thrown pot with leaf masses turned per tile, and is
+off the known-flat list; the shelf is a carcass with insides. `mq-v178`. Draw calls went down in
+every room measured. The after-frames are in `docs/mocks/2026-09-21-contact-sheet/after-second-sitting/`.
+
+**What this changes in the rows above.** Row 5 (iso) is unchanged and is now the only camera that
+draws these as blocks. Row 6 (whose shelf) is unchanged — the carcass is one carcass in every
+business. The "Correctly flat" list is unchanged: the tree's crown stays a picture on a trunk
+because it is the best prop in the game. **What a next sitting could mesh, in order:** the crate
+and counter (they are boxes and would stay boxes, so only if the produce should stand proud), the
+doghouse (a box with a pitched lid, two parts), the cones (a cone, one part — off the flat list),
+the agility gear (leggy; billboards are still right).
 
