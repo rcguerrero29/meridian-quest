@@ -521,7 +521,10 @@ function findChromium() {
     /* 'P' came off Meridian's row on 2026-09-21: the potted plant is a mesh from parts (the `mesh` view),
        thrown pot and leaf masses, and the guard said so first — red on the run that landed the art. */
     /* '9', 'C' and 'J' came off the same night: the doghouse, the cone and the tree are meshes from parts; red first, each. */
-    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', '7', 'A', 'W', 'X', 'Y'] };
+    /* '7' and 'W' came off on 2026-09-21, crew iteration 11 (el taller): the two-post lift and the fridge are meshes
+       from parts (TILEART_MESH in content/meridian/art.js). Red first — the audit named both the moment the shapes landed:
+       '"7" is no longer flat in 3D — take it off this game's row' and the same for "W". Still flat: 3 4 5 A X Y. */
+    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', 'A', 'X', 'Y'] };
     const FLAT_KNOWN = FLAT_BY_GAME[IDXNAME] || FLAT_BASE;
     const laid = new Set(); Object.values(WORLDS).forEach(w => w.rows.forEach(r => r.split('').forEach(ch => laid.add(ch))));
     Object.keys(flat).forEach(g => { if (!FLAT_KNOWN.includes(g)) P.push('"' + g + '" (' + ((TILES[g] || {}).kind || '?') + ') stands in 3D as a flat picture in ' + [...flatIn[g]].join(',') + ' — give it a side view (TILESIDE) so it becomes a box; nothing new may ship flat (#39)'); });

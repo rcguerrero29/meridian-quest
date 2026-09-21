@@ -777,6 +777,191 @@ TILEART_MESH["T"]=({x,y})=>{const sd=(((x*7+y*13)%4)+4)%4,WOOD="#5E3B20",CLOTH="
     [[-0.09,-0.09],[0.09,-0.09],[-0.09,0.09],[0.09,0.09]].forEach(([lx,lz])=>{const l=at(lx,lz);parts.push({s:"cyl",x:l.x,y:0.13,z:l.z,r:0.014,h:0.26,c:WOOD});});});
   return parts;};
 
+/* ---- BEAUTIFY, CREW ITERATION 11 — el taller ---- 2026-09-21. The interiors and the garage. Owner:
+   "computers, … desks, … coffee machines, fridge, … car lifts, tires, car, and tool boxes." Seven shapes
+   through the same seam, each built from what its own 2D drawing says it is made of (TILEDRAW / TILESIDE
+   in the engine, TILE_PROPS above), in the order a person made it. VALUES ARE PAINTED, NOT LEFT TO THE
+   LIGHT: with the day's ambient and sun a Lambert face gets 1.00 on top, 0.88 east, 0.78 south and 0.66
+   west and north (Pili, from engine3d.js), so a step you want between two parts goes into their colours,
+   and the darkest thing in a room is dark because it was painted dark. WHAT THESE REPLACE: an engine box
+   wore its top-down drawing on its lid and took its height from the tallest ink in its side drawing
+   (engine3d.js, t3BoxMats) — so a cup lay on its back on every counter tile, a second monitor sat on every
+   desk's lid, the tool chest wore its drawers on top, and the counter run stepped up at machine tiles. All
+   of that goes with the box. Two helpers: which way a thing faces (the shelf's rule — the first open
+   side, south, east, west, north) and the turn that puts it there. */
+const meshFacing=(x,y)=>{const w=CW(),solid=(gx,gy)=>{const r=w&&w.grid&&w.grid[gy];return !r||r[gx]===undefined||SOLID.has(r[gx]);};
+  return !solid(x,y+1)?0:!solid(x+1,y)?Math.PI/2:!solid(x-1,y)?-Math.PI/2:Math.PI;};
+const meshTurned=(parts,ry)=>{const cr=Math.cos(ry),sr=Math.sin(ry);return parts.map(p=>({...p,x:p.x*cr+p.z*sr,z:-p.x*sr+p.z*cr,ry:(p.ry||0)+ry}));};
+
+/* THE DESK (owner: "computers", "desks"). What TILEDRAW["D"] and TILESIDE["D"] say it is: a slab on a
+   left leg and a drawer unit on the right, an apron under it, three drawers with pulls, a monitor on a
+   stand, a sheet of paper. Made in that order: the leg panel and the pedestal, the slab over them with
+   AIR under it and the floor showing between, its underside painted dark (the shade under any top), a
+   lit front edge, the three drawer faces and their pulls, then what was set on the slab — the monitor
+   toward the back, a thin panel on a stalk on a foot disc, the screen the lightest thing on the desk; a
+   keyboard under it (a monitor with nothing under it is a television); the paper on the left. Nothing
+   reaches past ±0.46: HQ lays desks side by side. Faces the first open side, like the shelf. */
+TILEART_MESH["D"]=({x,y})=>{
+  const WOOD=C.desk,TOP=C.deskTop,UNDER="#3A2E26",EDGE="#C4A878",INK="#23272C",KEYS="#2F343A",SCREEN="#7FB3D5",PAPER="#F4F1EA",PULL="#D9C9A3";
+  const parts=[{s:"box",x:-0.41,y:0.215,z:0,w:0.05,h:0.43,d:0.54,c:WOOD},                 /* the leg panel, left */
+    {s:"box",x:0.27,y:0.215,z:-0.03,w:0.34,h:0.43,d:0.48,c:WOOD},                         /* the drawer pedestal, right, its faces set back from the slab's edge */
+    {s:"box",x:0,y:0.455,z:0,w:0.9,h:0.04,d:0.6,c:TOP},                                   /* the slab, air under it */
+    {s:"box",x:0,y:0.425,z:0,w:0.86,h:0.02,d:0.56,c:UNDER},                               /* its underside, painted dark */
+    {s:"box",x:0,y:0.47,z:0.297,w:0.9,h:0.012,d:0.012,c:EDGE}];                           /* the lit front edge */
+  [0.08,0.215,0.35].forEach(dy=>{parts.push({s:"box",x:0.27,y:dy,z:0.215,w:0.3,h:0.11,d:0.012,c:WOOD}); /* a drawer face */
+    parts.push({s:"box",x:0.27,y:dy+0.062,z:0.214,w:0.34,h:0.012,d:0.006,c:UNDER});        /* the seam over it, dark */
+    parts.push({s:"box",x:0.27,y:dy,z:0.228,w:0.09,h:0.02,d:0.016,c:PULL});});            /* its pull */
+  parts.push({s:"cyl",x:0,y:0.481,z:-0.12,r:0.07,h:0.012,c:INK},                          /* the monitor's foot, a disc */
+    {s:"box",x:0,y:0.53,z:-0.12,w:0.03,h:0.1,d:0.03,c:INK},                               /* the stalk, daylight either side of it */
+    {s:"box",x:0,y:0.69,z:-0.12,w:0.34,h:0.22,d:0.03,c:INK},                              /* the panel, thin */
+    {s:"box",x:0,y:0.695,z:-0.101,w:0.31,h:0.19,d:0.008,c:SCREEN},                        /* the screen, on its front face: the lightest thing here */
+    {s:"box",x:0,y:0.483,z:0.09,w:0.26,h:0.015,d:0.1,c:KEYS},                             /* the keyboard, lying on the slab */
+    {s:"box",x:-0.27,y:0.478,z:0.06,w:0.16,h:0.005,d:0.2,c:PAPER,ry:0.18});               /* the sheet of paper, not quite square to the edge */
+  return meshTurned(parts,meshFacing(x,y));};
+
+/* THE CAFÉ COUNTER (owner: "coffee machines"). What TILESIDE["K"] says it is: a counter body under a
+   steel top with two dark panels on the front, and on it "a coffee machine on every third tile … the
+   rest carry a cup and a napkin stand". K is laid in RUNS, so the carcass is the full tile wide and a
+   run reads as one counter with no seam and one height; an end panel stands only where the run ends.
+   The top is dead flat with a nosing along the front edge. The front faces the open side ACROSS the run
+   (south, else north; east, else west). The machine, as one is built and as Pili reads it: a bright
+   steel drip tray at its foot, the body, a narrower hopper on top (the wide-to-narrow step is the
+   read), the group head hanging off the front with AIR between it and the cup under it (no air is a
+   microwave), the portafilter locked in with its handle out, one warm light. The machine is the darkest
+   thing in the room; the counter keeps the theme's counter colour. */
+TILEART_MESH["K"]=({x,y})=>{
+  const w=CW(),isK=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="K";};
+  const solid=(gx,gy)=>{const r=w&&w.grid&&w.grid[gy];return !r||r[gx]===undefined||SOLID.has(r[gx]);};
+  const E=isK(x+1,y),Wt=isK(x-1,y),N=isK(x,y-1),S=isK(x,y+1),alongX=E||Wt||!(N||S);
+  /* the whole run agrees on its front: walk the run to both ends and count which side across it has
+     more open floor — one tile with a plant behind it must not turn its panels the other way */
+  const run=[];if(alongX){let a=x;while(isK(a-1,y))a--;for(;isK(a,y);a++)run.push([a,y]);}else{let a=y;while(isK(x,a-1))a--;for(;isK(x,a);a++)run.push([x,a]);}
+  const open=(dx,dy)=>run.filter(([gx,gy])=>!solid(gx+dx,gy+dy)).length;
+  const ry=alongX?(open(0,1)>=open(0,-1)?0:Math.PI):(open(1,0)>=open(-1,0)?Math.PI/2:-Math.PI/2);
+  const endA=ry===0?!Wt:ry===Math.PI?!E:ry===Math.PI/2?!S:!N,endB=ry===0?!E:ry===Math.PI?!Wt:ry===Math.PI/2?!N:!S; /* which local end is the run's end */
+  const BODY=C.counter,TOPC="#AAB4C0",NOSE="#C9CFD6",PANEL="#5E6874",END="#6E7884",MACH="#2F343B",HOP="#23272C",TRAY="#C9CDD2",LIGHT="#E0662B",CUP="#F4F1EA",NAP="#C9B7A0";
+  const parts=[{s:"box",x:0,y:0.265,z:0,w:1.0,h:0.53,d:0.8,c:BODY},                     /* the carcass, the full tile so the run is one counter */
+    {s:"box",x:0,y:0.545,z:0.01,w:1.0,h:0.03,d:0.84,c:TOPC},                             /* the top, dead flat */
+    {s:"cyl",x:0,y:0.545,z:0.43,r:0.02,h:1.0,c:NOSE,rz:Math.PI/2},                        /* the nosing along the front edge */
+    {s:"box",x:-0.24,y:0.25,z:0.405,w:0.26,h:0.2,d:0.014,c:PANEL},{s:"box",x:0.24,y:0.25,z:0.405,w:0.26,h:0.2,d:0.014,c:PANEL}]; /* the two front panels */
+  if(endA)parts.push({s:"box",x:-0.5,y:0.265,z:0,w:0.02,h:0.51,d:0.78,c:END});           /* the end panels, where the run stops */
+  if(endB)parts.push({s:"box",x:0.5,y:0.265,z:0,w:0.02,h:0.51,d:0.78,c:END});
+  const cup=(cx,cy,cz)=>{parts.push({s:"cyl",x:cx,y:cy+0.028,z:cz,r:0.034,h:0.056,c:CUP});parts.push({s:"torus",x:cx+0.042,y:cy+0.03,z:cz,r:0.018,t:0.007,c:CUP,ry:Math.PI/2});}; /* a cup with its handle to the right */
+  if((((x|0)+(y|0))%3+3)%3===2){                                                            /* the espresso machine, on every third tile */
+    parts.push({s:"box",x:0,y:0.57,z:0.1,w:0.34,h:0.02,d:0.16,c:TRAY},                    /* the drip tray at its foot, bright steel */
+      {s:"box",x:0,y:0.71,z:-0.08,w:0.44,h:0.3,d:0.3,c:MACH},                            /* the body, 0.56 to 0.86 */
+      {s:"box",x:0,y:0.91,z:-0.1,w:0.3,h:0.1,d:0.24,c:HOP},                              /* the hopper on top, narrower: the step */
+      {s:"cyl",x:0,y:0.74,z:0.11,r:0.04,h:0.05,c:HOP},                                   /* the group head, hanging off the front */
+      {s:"cyl",x:0,y:0.708,z:0.11,r:0.046,h:0.014,c:TRAY},                               /* the portafilter locked in */
+      {s:"box",x:0,y:0.708,z:0.2,w:0.02,h:0.018,d:0.12,c:HOP},                           /* its handle, out toward the barista's hand */
+      {s:"box",x:-0.15,y:0.8,z:0.077,w:0.05,h:0.04,d:0.014,c:LIGHT});                    /* the one warm light: it is on */
+    cup(0,0.58,0.11);}                                                                     /* a cup under the group, air between: top 0.636, group 0.715 */
+  else{cup(-0.2,0.56,0.1);                                                                 /* a cup, and a napkin stand */
+    parts.push({s:"box",x:0.2,y:0.62,z:0.04,w:0.18,h:0.12,d:0.07,c:NAP},{s:"box",x:0.2,y:0.7,z:0.04,w:0.13,h:0.08,d:0.03,c:CUP});}
+  return meshTurned(parts,ry);};
+
+/* THE FRIDGE (owner: "fridge"). What TILEDRAW["W"] says it is: a light-grey box the height of the tile,
+   a horizontal seam a bit above the middle, two dark vertical handles on the right of each door. Made:
+   a dark plinth at the floor, the carcass on it — the tallest furniture in the room, and the floor
+   showing round it — the two door faces a hair proud and a step lighter than the carcass, the seam
+   between them set back, the two handles proud on the same side, and one warm note under a magnet.
+   Faces its first open side. */
+TILEART_MESH["W"]=({x,y})=>{
+  const CARC="#AEB6BE",DOOR="#BCC4CC",SEAM="#5A6068",HANDLE="#5A6068",PLINTH="#2F343A",MAG="#E0B45C";
+  const parts=[{s:"box",x:0,y:0.025,z:0,w:0.6,h:0.05,d:0.53,c:PLINTH},                    /* the plinth */
+    {s:"box",x:0,y:0.5,z:0,w:0.62,h:0.9,d:0.55,c:CARC},                                   /* the carcass, 0.05 to 0.95 */
+    {s:"box",x:0,y:0.785,z:0.28,w:0.6,h:0.31,d:0.01,c:DOOR},                              /* the freezer door, 0.63 to 0.94 */
+    {s:"box",x:0,y:0.345,z:0.28,w:0.6,h:0.55,d:0.01,c:DOOR},                              /* the fridge door, 0.07 to 0.62 */
+    {s:"box",x:0,y:0.625,z:0.276,w:0.6,h:0.01,d:0.006,c:SEAM},                            /* the seam, set back */
+    {s:"box",x:0.24,y:0.78,z:0.295,w:0.03,h:0.22,d:0.02,c:HANDLE},                        /* the freezer handle, proud */
+    {s:"box",x:0.24,y:0.4,z:0.295,w:0.03,h:0.22,d:0.02,c:HANDLE},                         /* the fridge handle, the same side */
+    {s:"box",x:-0.12,y:0.86,z:0.288,w:0.05,h:0.035,d:0.006,c:MAG}];                        /* a magnet: one warm note */
+  return meshTurned(parts,meshFacing(x,y));};
+
+/* THE RED ROLLING TOOL CHEST (owner: "tool boxes"). What TILE_PROPS["8"] says it is: a red body on
+   black casters, four drawer seams with a chrome pull on each, a chrome bar up at the top. Made: four
+   casters, the carcass floated over them with the floor showing round it, a genuinely dark seam under
+   each drawer face and its pull, the steel top plate, and the push handle — two uprights and a
+   crossbar — up one end. On the plate, a rag and a wrench, where the last hand left them. Faces its
+   first open side. */
+TILEART_MESH["8"]=({x,y})=>{
+  const RED="#B3352B",SEAM="#5E1810",PULL="#C9CDD3",STEEL="#B9BEC4",BLACK="#2A2D33",RAG="#C9553F";
+  const parts=[];
+  [[-0.2,-0.14],[0.2,-0.14],[-0.2,0.14],[0.2,0.14]].forEach(([cx,cz])=>parts.push({s:"cyl",x:cx,y:0.04,z:cz,r:0.04,h:0.04,c:BLACK,rz:Math.PI/2})); /* four casters, axles across */
+  parts.push({s:"box",x:0,y:0.43,z:0,w:0.55,h:0.62,d:0.42,c:RED});                       /* the carcass, 0.12 to 0.74, a gap over the casters */
+  for(let i=0;i<4;i++){const dy=0.2+i*0.125;
+    parts.push({s:"box",x:0,y:dy-0.0675,z:0.213,w:0.55,h:0.012,d:0.01,c:SEAM});           /* the seam under each drawer face, dark */
+    parts.push({s:"box",x:0,y:dy,z:0.22,w:0.16,h:0.022,d:0.018,c:PULL});}                 /* the pull, centred */
+  parts.push({s:"box",x:0,y:0.75,z:0,w:0.57,h:0.02,d:0.44,c:STEEL});                     /* the steel top plate */
+  parts.push({s:"box",x:0.1,y:0.77,z:0.05,w:0.16,h:0.02,d:0.12,c:RAG});                   /* a rag, dropped */
+  parts.push({s:"box",x:-0.1,y:0.768,z:-0.08,w:0.22,h:0.014,d:0.03,c:PULL,ry:0.4});       /* a wrench, where it was put down */
+  parts.push({s:"cyl",x:-0.3,y:0.81,z:-0.13,r:0.012,h:0.12,c:PULL},{s:"cyl",x:-0.3,y:0.81,z:0.13,r:0.012,h:0.12,c:PULL}, /* the push handle's uprights */
+    {s:"cyl",x:-0.3,y:0.87,z:0,r:0.013,h:0.3,c:PULL,rx:Math.PI/2});                       /* and its crossbar */
+  return meshTurned(parts,meshFacing(x,y));};
+
+/* THE TIRE STACK (owner: "tires"). What TILE_PROPS["0"] says it is: THREE tires, one above the other,
+   each with its hub hole — "a zero IS a tire". One mould made all three, so they are the same tire
+   (docs/how-its-made: variation enters at the step it entered, and nowhere earlier); they were thrown
+   on the pile one at a time, so the top one landed a little off, and the ones underneath carry the
+   weight. The top one is painted a step lighter — the two below sit in its shade — and the rim of the
+   top tire shows through its hole, the one light value in the stack. */
+TILEART_MESH["0"]=({x,y})=>{const h=(((x*7+y*13)%5)+5)%5,TYRE="#26262B",TOPT="#3A3A41",RIM="#6B6B72",a=h*0.7+2.4;
+  const parts=[];
+  for(let i=0;i<3;i++){const off=i===2?0.03:0;
+    parts.push({s:"torus",x:Math.cos(a)*off,y:0.06+i*0.11,z:Math.sin(a)*off,r:0.22,t:0.075,c:i===2?TOPT:TYRE,rx:Math.PI/2});}
+  parts.push({s:"cyl",x:Math.cos(a)*0.03,y:0.27,z:Math.sin(a)*0.03,r:0.14,h:0.012,c:RIM}); /* the rim, seen through the top hole */
+  return parts;};
+
+/* TACHO'S CAPRICE (owner: "car"). What TILE_PROPS["6"] says it is: "a long burgundy sedan" — a body
+   the length of the tile and more, a darker cabin set back on it, glass, a chrome strip low along the
+   body, wheels with grey hubs. Made: four wheels on their hubs, touching the ground and proud of the
+   body; the under-body, dark; the long low body over it; the cabin set back with its front edge at
+   the body's midpoint — a long hood is what makes it a Caprice; one continuous band of glass round
+   the cabin, brighter than anything else on it; four pillars; the roof painted a step lighter than the
+   body; the chrome strip along each side. No lamps, no grille, no handles: at 35 px a tile they are
+   noise. A tile and a half long — parts are not clipped and nothing of its kind is laid beside it —
+   parked along x, parallel to the taller's front. */
+TILEART_MESH["6"]=()=>{
+  const BODY="#7A2E2E",ROOF="#8A3636",CABIN="#5E2222",GLASS="#BFD3E0",CHROME="#C9CDD3",TYRE="#1E1E22",HUB="#8E8E96",UNDER="#1A1D22";
+  const parts=[];
+  [[-0.5,-0.3],[0.5,-0.3],[-0.5,0.3],[0.5,0.3]].forEach(([wx,wz])=>{parts.push({s:"cyl",x:wx,y:0.1,z:wz,r:0.1,h:0.08,c:TYRE,rx:Math.PI/2}); /* a wheel */
+    parts.push({s:"cyl",x:wx,y:0.1,z:wz,r:0.045,h:0.086,c:HUB,rx:Math.PI/2});});                                                        /* its hub */
+  parts.push({s:"box",x:0,y:0.135,z:0,w:1.4,h:0.03,d:0.56,c:UNDER},                       /* the under-body, the darkest thing on it */
+    {s:"box",x:0,y:0.225,z:0,w:1.5,h:0.15,d:0.62,c:BODY},                                 /* the body, 0.15 to 0.30 */
+    {s:"box",x:-0.275,y:0.34,z:0,w:0.55,h:0.08,d:0.5,c:GLASS},                            /* the glass band, 0.30 to 0.38, all the way round */
+    {s:"box",x:-0.275,y:0.4,z:0,w:0.55,h:0.04,d:0.52,c:ROOF});                            /* the roof, painted lighter */
+  [[-0.535,-0.235],[-0.015,-0.235],[-0.535,0.235],[-0.015,0.235]].forEach(([px,pz])=>parts.push({s:"box",x:px,y:0.34,z:pz,w:0.03,h:0.08,d:0.03,c:CABIN})); /* the pillars */
+  [-0.316,0.316].forEach(pz=>parts.push({s:"box",x:0,y:0.17,z:pz,w:1.5,h:0.02,d:0.012,c:CHROME}));                                 /* the chrome strip, low along each side */
+  return parts;};
+
+/* THE TWO-POST LIFT WITH A CAR UP (owner: "car lifts"). What TILE_PROPS["7"] says it is: two grey posts
+   with a beam across the top, the arms, and a BLUE car — a customer's, not the Caprice — up on them
+   with its wheels hanging. Made as one is installed: two dark bases bolted to the slab, a post on each
+   with its warning stripe, the overhead beam tying them (that is what makes it a lift), the arms
+   reaching in from each post to the car's lift points, a pad at the end of each, and the car up on
+   the pads at half height, its under-body the darkest thing in the bay. The bay is `i7i`, so the car
+   runs along x and the posts stand north and south of it; the car sits a little east of the posts so
+   they hold it at its lift points and do not cut it in half from the door. */
+TILEART_MESH["7"]=()=>{
+  const POST="#6A7480",BASE="#2F353C",ARM="#9EA8B3",STRIPE="#E0B45C",UNDER="#1A1D22",BODY="#3C5C8A",ROOF="#4C6C9A",CABIN="#2C4468",GLASS="#BFD3E0",TYRE="#1E1E22",HUB="#8E8E96";
+  const parts=[],CX=0.12;                                                                  /* the car's centre, east of the posts */
+  [-0.31,0.31].forEach(pz=>{const sg=Math.sign(pz);
+    parts.push({s:"box",x:0,y:0.1,z:pz,w:0.16,h:0.2,d:0.14,c:BASE});                       /* the base, dark */
+    parts.push({s:"box",x:0,y:0.7,z:pz,w:0.11,h:1.0,d:0.11,c:POST});                       /* the post, 0.2 to 1.2 */
+    parts.push({s:"box",x:0,y:0.33,z:pz,w:0.114,h:0.05,d:0.114,c:STRIPE});                 /* its warning stripe */
+    [CX-0.25,CX+0.25].forEach(qx=>{const z0=pz-sg*0.055,z1=sg*0.16,dx=qx,dz=z1-z0,L=Math.hypot(dx,dz); /* an arm from the post's face to a lift point */
+      parts.push({s:"cyl",x:dx/2,y:0.5,z:(z0+z1)/2,r:0.03,h:L,c:ARM,rx:Math.PI/2,ry:Math.atan2(dx,dz)});
+      parts.push({s:"box",x:qx,y:0.515,z:z1,w:0.07,h:0.02,d:0.07,c:UNDER});});});          /* its pad */
+  parts.push({s:"box",x:0,y:1.16,z:0,w:0.12,h:0.08,d:0.73,c:POST});                        /* the overhead beam, tying the posts */
+  [[CX-0.3,-0.21],[CX+0.3,-0.21],[CX-0.3,0.21],[CX+0.3,0.21]].forEach(([wx,wz])=>{parts.push({s:"cyl",x:wx,y:0.5,z:wz,r:0.08,h:0.06,c:TYRE,rx:Math.PI/2}); /* a wheel, hanging */
+    parts.push({s:"cyl",x:wx,y:0.5,z:wz,r:0.036,h:0.066,c:HUB,rx:Math.PI/2});});
+  parts.push({s:"box",x:CX,y:0.535,z:0,w:0.86,h:0.03,d:0.4,c:UNDER},                       /* the car's under-body, the darkest thing in the bay */
+    {s:"box",x:CX,y:0.62,z:0,w:0.9,h:0.14,d:0.44,c:BODY},                                  /* the body, 0.55 to 0.69 */
+    {s:"box",x:CX-0.17,y:0.73,z:0,w:0.42,h:0.08,d:0.36,c:GLASS},                           /* the glass band */
+    {s:"box",x:CX-0.17,y:0.79,z:0,w:0.42,h:0.04,d:0.38,c:ROOF});                           /* the roof, lighter */
+  [[CX-0.365,-0.17],[CX+0.025,-0.17],[CX-0.365,0.17],[CX+0.025,0.17]].forEach(([px,pz])=>parts.push({s:"box",x:px,y:0.73,z:pz,w:0.03,h:0.08,d:0.03,c:CABIN})); /* the pillars */
+  return parts;};
+
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   /* H and I were cutouts in 3D (docs/BEAUTIFY.md: "the most box-shaped object in the game"). These
      two rows and the two TILEART_SIDE drawings above are the whole fix, and neither reaches the
