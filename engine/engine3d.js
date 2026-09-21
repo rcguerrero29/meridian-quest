@@ -266,6 +266,15 @@ function t3Build(key){
           ctx.fillRect(dx>0?sx+32-D:sx, dy>0?sy+32-D:sy, dx?D:32, dy?D:32);};
         dark(0,-1);dark(0,1);dark(-1,0);dark(1,0);   /* a wall on any side reaches onto this tile */
       }
+      /* THE PAD (Pili, 2026-09-21, crew iteration 11): the gradient above darkened a tile from its solid
+         neighbours and never a solid tile's OWN floor, so an object smaller than its tile — a pot, a cone,
+         a plant, a shelf, a bed — stood on a bright square with darkness all round it. An object darkens
+         the ground it stands on. A soft radial under any tile that carries a `mesh` view, solid or stand:
+         hidden under a full-tile box, visible round anything smaller. A RULE: both games, no seam. */
+      if(!water&&(typeof tileView==="function")&&(tileView(gch,"mesh")||tileView(ch,"mesh"))){
+        const g3=ctx.createRadialGradient(sx+16,sy+16,3,sx+16,sy+16,17);
+        g3.addColorStop(0,"rgba(15,12,20,.34)");g3.addColorStop(1,"rgba(15,12,20,0)");
+        ctx.fillStyle=g3;ctx.fillRect(sx,sy,32,32);}
       if(wellDepth(w,x,y)>0)ctx.clearRect(sx,sy,32,32); /* the well is a HOLE in the floor: the sunken steps stand in it (#62) */
     }
   }finally{ctx=old;}
