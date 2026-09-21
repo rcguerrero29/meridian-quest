@@ -224,6 +224,56 @@ function t3Reuse(key){
   if(!e.grp.parent)T3.scene.add(e.grp);
   T3.builtKey=key;T3CACHE.delete(key);T3CACHE.set(key,e);   /* re-inserting is the LRU touch: a Map keeps insertion order */
   return true;}
+/* ---- A MESH FROM PARTS: the `mesh` view (2026-09-21, owner: "i still see squares and not
+   polygonal shapes … can we not try this finally?"). A pack answers "what shape is this tile"
+   with a LIST OF PRIMITIVES — box, sphere, cylinder, cone — each with a place, a size and a
+   colour, in tile units with y up from the floor and the tile's centre at (0,0). The engine
+   merges them into ONE mesh per tile with vertex colours, so a bed of six marigolds costs one
+   draw call and not fifteen. Nothing here names a glyph or a colour: a pack that says nothing
+   gets the box or the billboard it always got, so the town is untouched. Segment counts are low
+   on purpose — this is a pixel world, and a ten-sided pot reads as made, not as smooth. The
+   rotation order is yaw-first-in-the-world (YXZ), so a part can lean (rz) and the whole thing
+   can still be turned to face a door (ry). The 3D-realism audit (#39) counts nothing here as
+   flat, which is the point. */
+const meshGeo={};
+const t3Prim=p=>{const s=p.s||"box",n=v=>v===undefined?"":+v;
+  const key=s+"|"+[p.w,p.h,p.d,p.r,p.rt,p.rb,p.t,p.arc].map(n).join("|");
+  if(meshGeo[key])return meshGeo[key];
+  let g;
+  if(s==="sph")g=new THREE.SphereGeometry(p.r||0.1,8,6);
+  else if(s==="cyl")g=new THREE.CylinderGeometry(p.rt!==undefined?p.rt:(p.r||0.1),p.rb!==undefined?p.rb:(p.r||0.1),p.h||0.1,10);
+  else if(s==="cone")g=new THREE.ConeGeometry(p.r||0.1,p.h||0.2,8);
+  else if(s==="torus")g=new THREE.TorusGeometry(p.r||0.2,p.t||0.03,6,14,p.arc||Math.PI*2); /* an arch is a torus with an arc, standing in the XY plane */
+  else g=new THREE.BoxGeometry(p.w||0.1,p.h||0.1,p.d||0.1);
+  return meshGeo[key]=g.toNonIndexed();};
+const t3MeshOf=(parts,tag)=>{
+  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),sc=new THREE.Vector3(),tr=new THREE.Vector3(),c=new THREE.Color();
+  const bake=list=>{const pos=[],nor=[],col=[];
+    list.forEach(p=>{
+      e.set(p.rx||0,p.ry||0,p.rz||0,"YXZ");q.setFromEuler(e);sc.set(p.sx||1,p.sy||1,p.sz||1);tr.set(p.x||0,p.y||0,p.z||0);
+      m4.compose(tr,q,sc);
+      const gg=t3Prim(p).clone().applyMatrix4(m4);
+      const pa=gg.attributes.position.array,na=gg.attributes.normal.array;
+      c.set(tc(p.c||"#888888"));
+      for(let i=0;i<pa.length;i+=3){pos.push(pa[i],pa[i+1],pa[i+2]);nor.push(na[i],na[i+1],na[i+2]);col.push(c.r,c.g,c.b);}
+      gg.dispose();});
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+    geo.setAttribute("normal",new THREE.Float32BufferAttribute(nor,3));
+    geo.setAttribute("color",new THREE.Float32BufferAttribute(col,3));
+    return geo;};
+  /* GLASS (crew iteration 11, la calle): a part with `a:` — an alpha under 1 — is a pane you see through.
+     A vertex-coloured Lambert has no per-vertex alpha, so the panes of one tile become a second mesh,
+     transparent, drawn without writing depth, hung as a CHILD of the tile's mesh: still one object per tile
+     to everything that walks the group, one draw call more only where there is glass. */
+  const solid=parts.filter(p=>!(p.a<1)),glass=parts.filter(p=>p.a<1);
+  const mat=new THREE.MeshLambertMaterial({vertexColors:true}); /* white × the vertex colour; the tint multiplies it like a texture */
+  T3.tintables.push(mat);
+  const m=new THREE.Mesh(bake(solid),mat);m.userData=tag;
+  if(glass.length){const byA={};glass.forEach(p=>{(byA[p.a]=byA[p.a]||[]).push(p);});
+    Object.keys(byA).forEach(a=>{const gm=new THREE.MeshLambertMaterial({vertexColors:true,transparent:true,opacity:+a,depthWrite:false});
+      T3.tintables.push(gm);const gmesh=new THREE.Mesh(bake(byA[a]),gm);gmesh.userData={glass:true,a:+a};m.add(gmesh);});}
+  return m;};
 function t3Build(key){
   if(t3Reuse(key))return;                       /* already standing; walk back into it */
   T3.pinatas=[];
@@ -333,45 +383,6 @@ function t3Build(key){
     T3.tintables.push(side,lid);
     return boxMat[vk]={mats:[side,side,lid,side,side,side],h};
   };
-  /* ---- A MESH FROM PARTS: the `mesh` view (2026-09-21, owner: "i still see squares and not
-     polygonal shapes … can we not try this finally?"). A pack answers "what shape is this tile"
-     with a LIST OF PRIMITIVES — box, sphere, cylinder, cone — each with a place, a size and a
-     colour, in tile units with y up from the floor and the tile's centre at (0,0). The engine
-     merges them into ONE mesh per tile with vertex colours, so a bed of six marigolds costs one
-     draw call and not fifteen. Nothing here names a glyph or a colour: a pack that says nothing
-     gets the box or the billboard it always got, so the town is untouched. Segment counts are low
-     on purpose — this is a pixel world, and a ten-sided pot reads as made, not as smooth. The
-     rotation order is yaw-first-in-the-world (YXZ), so a part can lean (rz) and the whole thing
-     can still be turned to face a door (ry). The 3D-realism audit (#39) counts nothing here as
-     flat, which is the point. */
-  const meshGeo={};
-  const t3Prim=p=>{const s=p.s||"box",n=v=>v===undefined?"":+v;
-    const key=s+"|"+[p.w,p.h,p.d,p.r,p.rt,p.rb,p.t,p.arc].map(n).join("|");
-    if(meshGeo[key])return meshGeo[key];
-    let g;
-    if(s==="sph")g=new THREE.SphereGeometry(p.r||0.1,8,6);
-    else if(s==="cyl")g=new THREE.CylinderGeometry(p.rt!==undefined?p.rt:(p.r||0.1),p.rb!==undefined?p.rb:(p.r||0.1),p.h||0.1,10);
-    else if(s==="cone")g=new THREE.ConeGeometry(p.r||0.1,p.h||0.2,8);
-    else if(s==="torus")g=new THREE.TorusGeometry(p.r||0.2,p.t||0.03,6,14,p.arc||Math.PI*2); /* an arch is a torus with an arc, standing in the XY plane */
-    else g=new THREE.BoxGeometry(p.w||0.1,p.h||0.1,p.d||0.1);
-    return meshGeo[key]=g.toNonIndexed();};
-  const t3MeshOf=(parts,tag)=>{
-    const pos=[],nor=[],col=[],m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),sc=new THREE.Vector3(),tr=new THREE.Vector3(),c=new THREE.Color();
-    parts.forEach(p=>{
-      e.set(p.rx||0,p.ry||0,p.rz||0,"YXZ");q.setFromEuler(e);sc.set(p.sx||1,p.sy||1,p.sz||1);tr.set(p.x||0,p.y||0,p.z||0);
-      m4.compose(tr,q,sc);
-      const gg=t3Prim(p).clone().applyMatrix4(m4);
-      const pa=gg.attributes.position.array,na=gg.attributes.normal.array;
-      c.set(tc(p.c||"#888888"));
-      for(let i=0;i<pa.length;i+=3){pos.push(pa[i],pa[i+1],pa[i+2]);nor.push(na[i],na[i+1],na[i+2]);col.push(c.r,c.g,c.b);}
-      gg.dispose();});
-    const geo=new THREE.BufferGeometry();
-    geo.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
-    geo.setAttribute("normal",new THREE.Float32BufferAttribute(nor,3));
-    geo.setAttribute("color",new THREE.Float32BufferAttribute(col,3));
-    const mat=new THREE.MeshLambertMaterial({vertexColors:true}); /* white × the vertex colour; the tint multiplies it like a texture */
-    T3.tintables.push(mat);
-    const m=new THREE.Mesh(geo,mat);m.userData=tag;return m;};
   const t3MeshTile=(gch,x,y,cx,cz)=>{ /* true when the pack answered and the mesh stands; false = draw it the old way */
     const mv=(typeof tileView==="function")&&tileView(gch,"mesh");if(!mv)return false;
     let parts;try{parts=typeof mv==="function"?mv({x,y}):mv;}catch(e){t3Note("mesh "+gch,e);return false;}
@@ -574,6 +585,18 @@ function t3Build(key){
         bar.position.set(cx+(ew?0:sd*off),BRIDGEH+cam+RH,cz+(ew?sd*off:0));
         if(ew)bar.rotation.z=Math.atan2(slp,1);
         bar.userData={bridgeRail:true,bar:true,x,y};grp.add(bar);});
+      /* THE PACK MAY ADD TO THE DECK (crew iteration 11, la calle): what stands ON a bridge — a string beam
+         under each open side, a nosing along the top edge, a heap of petals in season — through the `mesh`
+         view under the key "prop:bridge", asked for by kind the way the ofrenda is. ADD, never replace: the
+         deck and the rails above are the engine's and test/smoke.js reads them (four decks, the rails on the
+         open sides, the camber). The parts are deck-local — x along the crossing, y up from the deck's top,
+         z ±0.5 the two sides — and the mesh is laid at the deck's own height and slope. */
+      const bm=(typeof tileView==="function")&&tileView("prop:bridge","mesh");
+      if(bm){let parts=null;const edges=[-1,1].filter(sd=>!isB(x+(ew?0:sd),y+(ew?sd:0)));
+        try{parts=typeof bm==="function"?bm({x,y,ew,cam,slp,h:BRIDGEH,edges,pet}):bm;}catch(e){t3Note("mesh prop:bridge",e);}
+        if(Array.isArray(parts)&&parts.length){try{const bmm=t3MeshOf(parts,{bridgeMesh:true,mesh:true,x,y});
+          bmm.position.set(cx,BRIDGEH+cam,cz);if(ew)bmm.rotation.z=Math.atan2(slp,1);else{bmm.rotation.y=Math.PI/2;bmm.rotation.z=Math.atan2(slp,1);}
+          grp.add(bmm);}catch(e){t3Note("mesh prop:bridge",e);}}}
       /* papel picado (owner, 2026-09-07: "and papel picado"): when the season hands a palette
          through art("papel"), a string is hung ACROSS the crossing on each deck tile, high over
          the head, between two thin poles at the rails — five little cut-paper flags a string,
@@ -840,12 +863,22 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
        gap the driver was sealed INSIDE a solid box: the suite counted him and nobody could see him,
        which is a test passing for a reason that is not the thing it is about. Verified by looking. */
     const CAB=0.15;   /* an open driver's platform, the way an old tram has one — not a hole */
+    /* THE BODY MAY BE THE PACK'S (crew iteration 11, la calle): the `mesh` view under "prop:tram" answers
+       with the body's parts — skirt, panels, band, glazing, roof and its lip, the pole — in the same tile
+       units, +x the direction of travel, y up from the road. The WHEELS and the DRIVER stay the engine's
+       whatever the pack says: a merged mesh has one userData and cannot spin a part, and the suite counts
+       both nouns. Baked once for travel toward +x; the body flips with the direction each frame (below). */
+    const pm=(typeof tileView==="function")&&tileView("prop:tram","mesh");let mbody=null;
+    if(pm){let parts=null;try{parts=typeof pm==="function"?pm({len:TRO_LEN,h:H,fl:FL,cab:CAB}):pm;}catch(e){t3Note("mesh prop:tram",e);}
+      if(Array.isArray(parts)&&parts.length){try{mbody=t3MeshOf(parts,{tram:true,mesh:true,body:true});}catch(e){t3Note("mesh prop:tram",e);}}}
+    if(mbody){g.add(mbody);T3.tramBody=mbody;}
+    else{T3.tramBody=null;
     const body=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.1-CAB*2,H-FL-0.06,0.72),BD);
     body.position.y=FL+(H-FL-0.06)/2;g.add(body);
     const floor=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.06,FL+0.10,0.74),DK);
     floor.position.y=(FL+0.10)/2;g.add(floor);   /* the skirt over the wheels, full length, so the platform has a deck */
     const roof=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.02,0.06,0.80),DK);
-    roof.position.y=H-0.03;g.add(roof);
+    roof.position.y=H-0.03;g.add(roof);}
     /* WHEELS — four, on the ground, turned to roll along the line rather than across it */
     const wm=new THREE.MeshLambertMaterial({color:new THREE.Color("#2B2B31")});
     [-TRO_LEN/2+0.42,TRO_LEN/2-0.42].forEach(dx=>{[-1,1].forEach(sd=>{
@@ -863,13 +896,13 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
          scaling the visual rotation gave 39.9 against 41.0, no effect, and decouples the wheel from
          the ground it rolls on. docs/3D-LOG.md 2026-09-11. */
       w.position.set(dx,0.115,sd*0.34);w.userData={wheel:true};g.add(w);});});
-    /* GLAZING on all four sides, so a quarter turn still shows a tram and not a brick */
-    const win=new THREE.MeshLambertMaterial({color:new THREE.Color("#D8E6F0")});
+    /* GLAZING on all four sides, so a quarter turn still shows a tram and not a brick (the pack's body carries its own) */
+    if(!mbody){const win=new THREE.MeshLambertMaterial({color:new THREE.Color("#D8E6F0")});
     [-0.55,0,0.55].forEach(dx=>{[-1,1].forEach(sd=>{
       const m=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.26,0.02),win);
       m.position.set(dx,0.62,sd*0.37);m.userData={glazing:true};g.add(m);});});
     [-1,1].forEach(ed=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.30,0.50),win);
-      m.position.set(ed*(TRO_LEN/2-0.05),0.66,0);m.userData={glazing:true};g.add(m);});
+      m.position.set(ed*(TRO_LEN/2-0.05),0.66,0);m.userData={glazing:true};g.add(m);});}
     /* THE DRIVER — a head and shoulders at the front window. Not a passenger: he is at the end the
        tram is travelling toward, and he turns round with it when it reverses (below). */
     const drv=new THREE.Group();
@@ -887,6 +920,7 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
     T3.tram.position.set(TRO.x+TRO_LEN/2,0.0,L.row+0.5);
     /* he drives from the leading end, whichever way it is going */
     if(T3.tramDriver)T3.tramDriver.position.x=(TRO.dir>0?1:-1)*(TRO_LEN/2-0.16); /* on the platform, not behind a wall */
+    if(T3.tramBody)T3.tramBody.scale.x=TRO.dir>0?1:-1;              /* the pack's body was baked for +x: its pole leans back against the travel, so it turns round with the driver */
     /* and the wheels turn with the distance covered, so it rolls instead of sliding */
     T3.tram.traverse(o=>{if(o.userData&&o.userData.wheel)o.rotation.y=-TRO.x/0.115;});
   }}

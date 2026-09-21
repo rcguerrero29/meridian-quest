@@ -1880,7 +1880,10 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
         P.push('the trolley floats ' + box.min.y.toFixed(2) + ' above the road with nothing under it — it has no wheels touching the ground');
       let wheels = 0, driver = 0;
       T3.tram.traverse(o => { const u = o.userData || {}; if (u.wheel) wheels++; if (u.driver) driver++; });
-      if (wheels < 2) P.push('the trolley has ' + wheels + ' wheels — a tram that rolls down a street has wheels you can see');
+      /* four, not two: the noun is four wheels, and the guard fired at two since it was written (la calle, crew
+         iteration 11). Planted in a copy outside the repo with one axle's pair deleted: "the trolley has 2
+         wheels — a tram that rolls down a street has wheels you can see", exit 1. */
+      if (wheels < 4) P.push('the trolley has ' + wheels + ' wheels — a tram that rolls down a street has wheels you can see');
       if (!driver) P.push('nobody is driving the trolley');
       /* ---- and a wheel turns about its axle ----
          The check above asks whether the tram's bounding box reaches the road. Measured: it reads

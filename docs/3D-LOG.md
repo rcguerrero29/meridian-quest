@@ -454,12 +454,28 @@ against it is measured against the wrong thing. — *Chema, 2026-09-09*
   tiles of the bridge (`meshPetalCrest`: a dark under and flat petals standing a hair proud).
 - **`tc()` tints every mesh part with no opt-out** — the persona rule that a tint must not touch
   identity colours is false in the mesh path. Recorded, not changed.
-- **NEEDS ENGINE, with parts lists in `docs/mocks/2026-09-21-contact-sheet/crew-11/calle/`:** the
-  bridge — `^` is neither SOLID nor `stand` and the bridge branch `continue`s before the hook, so the
-  seam is inside the branch after `grp.add(deck)`, ADD never replace (a string beam along the bottom
-  of each open side, a nosing along the top edge, the crest in season); the petal bake's weighting —
-  `petalSpill` counts by distance only, so the spill is a circular stain; ×2 against a SOLID
-  neighbour, ×0.4 in the open; glass — a part with `a:` to a second transparent material in
-  `t3MeshOf`, then the rail gets its pane back; the trolley — `prop:tram` for the BODY only
-  (`t3MeshOf` hoisted to file scope), wheels and driver stay engine, the wheel guard from `< 2` to
-  `< 4`, planted first. About 40,000 on the live meter for the four, on the evidence of the sittings.
+- **The engine half, built the same sitting from the smith's parts lists
+  (`docs/mocks/2026-09-21-contact-sheet/crew-11/calle/`; frames under `…/crew-11/engine/`):**
+  - **The bridge.** `^` is neither SOLID nor `stand` and the bridge branch `continue`s before the
+    hook, so the seam lives inside the branch, after the deck and the rails: `tileView("prop:bridge","mesh")`
+    gets `{x,y,ew,cam,slp,h,edges,pet}` and its parts are laid at the deck's own height and slope —
+    ADD, never replace; `test/smoke.js` still reads four decks, the rails and the camber. The pack
+    answers with a stringer beam along the bottom of each open side, a nosing worn pale along the top
+    edge, and in season the crest inside the rail line.
+  - **A drift banks against what stands beside it — a RULE, in `petalSpill`.** By distance alone the
+    spill was a circular stain round the deck. Twice the count with a SOLID neighbour, four tenths in
+    the open (all four neighbours walkable); the count is in the bake's key so the cache stays honest.
+    Both games; `test/smoke.js`'s spill counts hold (the water beside the deck has the deck as a
+    neighbour and is unchanged).
+  - **Glass.** `t3MeshOf` is at file scope now (it was a closure inside the world builder) and a part
+    with `a:` under 1 goes to a second mesh — transparent, no depth write — hung as a CHILD of the
+    tile's mesh, so everything that walks the group still sees one object per tile. The rail round the
+    well has its pane back at 0.45: the flight shows through it, and the frame says where the edge is.
+  - **The trolley's body is the pack's.** `tileView("prop:tram","mesh")` gets `{len,h,fl,cab}`; the
+    engine keeps the four WHEELS (it spins them) and the DRIVER (he changes ends) and adds the body
+    mesh beside them, flipping its `scale.x` with `TRO.dir` each frame so the pole leans back
+    against the travel whichever way it goes. Rigo's paint rule (a dark skirt and panel to the waist,
+    a light band round the windows), a roof that overhangs with a drip lip, a clerestory, the pole,
+    headlamps, a bell, fenders, grab rails on the open platforms. **The wheel guard fires at four now,
+    not two** — planted first in a copy outside the repo with one axle's pair deleted: *"the trolley
+    has 2 wheels — a tram that rolls down a street has wheels you can see"*, exit 1.

@@ -1031,7 +1031,8 @@ TILEART_MESH["F"]=({x,y})=>{
    is Δ38 after tint and fails). It stands on the LIP of the well and faces it — wellDepth of the four
    neighbours says which lip, the engine's own rule for a rail beside a well — and it is waist-high,
    which is what a guard rail is. A post at the near edge and the centre; the far edge is the next
-   tile's near post, or an end post where the run ends. The pane itself needs alpha: NEEDS ENGINE. */
+   tile's near post, or an end post where the run ends. The pane has its alpha now — `a:` in the mesh view
+   (crew iteration 11): 0.45, so the flight shows through it, and the frame says where the edge is. */
 TILEART_MESH["◺"]=({x,y})=>{
   const w=CW(),wl=(gx,gy)=>typeof wellDepth==="function"&&wellDepth(w,gx,gy)>0;
   const R=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="◺";};
@@ -1042,6 +1043,7 @@ TILEART_MESH["◺"]=({x,y})=>{
   let q=at(0,0);
   parts.push({s:"box",x:q.x,y:H-0.03,z:q.z,w:1,h:0.06,d:0.07,c:CAP,ry});                       /* the cap rail: one line, the whole run */
   parts.push({s:"box",x:q.x,y:H+0.004,z:q.z,w:1,h:0.008,d:0.07,c:CAPL,ry});                    /* its top, where the key lands */
+  parts.push({s:"box",x:q.x,y:(H-0.06)/2,z:q.z,w:1,h:H-0.08,d:0.02,c:"#D6E6EC",a:0.45,ry});      /* the pane: glass at 0.45, the flight shows through it (a: in the mesh view, crew iteration 11) */
   [-0.475,0].concat(ends?[0.475]:[]).forEach(al=>{q=at(al,0);parts.push({s:"box",x:q.x,y:(H-0.06)/2,z:q.z,w:0.05,h:H-0.06,d:0.05,c:POST,ry});});
   return parts;};                                                                              /* no shoe at the floor: with a bottom bar it rendered as a ladder on its side */
 
@@ -1111,6 +1113,49 @@ TILEART_MESH["I"]=({x,y})=>{
     parts.push({s:"cyl",x:0,y:y0+0.34,z:-0.1,r:0.1,h:0.025,c:STEEL,rx:Math.PI/2},{s:"cyl",x:0,y:y0+0.34,z:-0.086,r:0.085,h:0.004,c:FACE,rx:Math.PI/2}); /* the dial, facing the shop */
     parts.push({s:"box",x:0.014,y:y0+0.36,z:-0.082,w:0.007,h:0.06,d:0.004,c:"#D0402F",rz:-0.5});                                  /* the needle, reading something */
     meshTomato(parts,0.01,y0+0.25,0.03,0.075,x+y,"#D4382A");}
+  return parts;};
+
+/* WHAT STANDS ON THE BRIDGE. The deck, the rib and the rails are the engine's (test/smoke.js reads them); the
+   pack answers "prop:bridge" with what a builder adds to a plank bridge once the deck is down: a stringer
+   beam under each open side — the dark line that says the deck has a thickness and is not a rug — a
+   nosing along the top edge where boots wear it pale, and in season the crest where the petal heap meets
+   the rail line, the same recipe as the fence's foot. Deck-local: x along the crossing, y up from the
+   deck's top, z ±0.5 the two sides; `edges` names the open sides (−1, +1), `h` the deck's thickness.
+   (la calle's parts list; Pili's two, the beam and the nosing.) */
+TILEART_MESH["prop:bridge"]=({x,y,h,edges,pet})=>{const parts=[],H=h||0.22;
+  (edges||[]).forEach(sd=>{
+    parts.push({s:"box",x:0,y:-H*0.65,z:sd*0.485,w:1,h:H*0.35,d:0.03,c:"#5A4330"});         /* the stringer, along the bottom of the side */
+    parts.push({s:"box",x:0,y:0.005,z:sd*0.49,w:1,h:0.02,d:0.04,c:"#B08E5E"});              /* the nosing, worn pale along the top edge */
+    if(pet)meshPetalCrest(parts,8+((((x+y)%3)+3)%3),x*31+y*17+sd*5,"x",-0.5,0.5,sd*0.4,0);});/* the heap's edge, inside the rail line */
+  return parts;};
+
+/* THE TROLLEY'S BODY. The engine keeps the wheels (it spins them) and the driver (he changes ends); the pack
+   answers "prop:tram" with the body, built the way a tram is: an underframe skirt full length over the
+   bogies, a dark panel to the waist and a light band round the windows (Rigo's paint rule — never two
+   mid-tones), the glazing in the band, a roof that OVERHANGS the body with a drip lip under it, a raised
+   clerestory, and the trolley pole leaning back against the travel — twelve pixels of line above the roof
+   that say tram and not bus (Pili). Then the tram's own paperwork: a headlamp at each end, a bell under
+   the roof at the platform, a fender leaning out low at each end, a grab rail on each open platform.
+   +x is the direction of travel; the engine flips the body with TRO.dir. `len` is TRO_LEN, `h` the roof
+   height (a door is 1.0), `fl` the floor, `cab` the open platform at each end. (la calle's parts list.) */
+TILEART_MESH["prop:tram"]=({len,h,fl,cab})=>{const L=len||2,H=h||1.02,FL=fl||0.20,CAB=cab||0.15;
+  const SKIRT="#6B2E1E",BAND="#E8D6B0",ROOF="#8E4230",GLASS="#D8E6F0",IRON="#3A3F46",LAMP="#FFE9A8",BELL="#C9A227";
+  const BW=L-0.1-CAB*2,bandY0=FL+0.31,bandH=(H-0.06)-bandY0,parts=[
+    {s:"box",x:0,y:(FL+0.10)/2,z:0,w:L-0.06,h:FL+0.10,d:0.74,c:SKIRT},                        /* the underframe skirt, full length */
+    {s:"box",x:0,y:FL+0.17,z:0,w:BW,h:0.28,d:0.72,c:SKIRT},                                   /* the dark panel, to the waist */
+    {s:"box",x:0,y:bandY0+bandH/2,z:0,w:BW,h:bandH,d:0.72,c:BAND},                             /* the light band the windows sit in */
+    {s:"box",x:0,y:H-0.03,z:0,w:L+0.10,h:0.06,d:0.92,c:ROOF},                                 /* the roof, overhanging by 0.06 all round */
+    {s:"box",x:0,y:H-0.07,z:0,w:L+0.10,h:0.02,d:0.94,c:SKIRT},                                /* the drip lip under the overhang */
+    {s:"box",x:0,y:H+0.05,z:0,w:L-0.5,h:0.10,d:0.5,c:ROOF},                                   /* the clerestory */
+    {s:"cyl",x:0.06,y:H+0.12,z:0,r:0.05,h:0.04,c:IRON},                                       /* the pole's swivel base */
+    {s:"cyl",x:0.06,y:H+0.31,z:0,r:0.02,h:0.35,c:IRON,rz:0.35},                               /* the trolley pole, leaning back against the travel */
+    {s:"sph",x:L/2-0.12,y:H-0.12,z:0.3,r:0.04,c:BELL}];                                       /* the bell, under the roof edge at the platform */
+  [-0.55,0,0.55].forEach(dx=>[-1,1].forEach(sd=>parts.push({s:"box",x:dx*(BW/1.6),y:bandY0+bandH*0.45,z:sd*0.37,w:0.42*(BW/1.6),h:bandH*0.6,d:0.02,c:GLASS}))); /* six lights a side */
+  [-1,1].forEach(ed=>{parts.push({s:"box",x:ed*(BW/2+0.005),y:bandY0+bandH*0.45,z:0,w:0.02,h:bandH*0.6,d:0.50,c:GLASS});   /* the windscreen at each end of the saloon */
+    parts.push({s:"cyl",x:ed*(L/2-0.03),y:0.45,z:0,r:0.05,h:0.03,c:LAMP,rx:Math.PI/2});                                     /* a headlamp at each end, low, on the dash */
+    parts.push({s:"box",x:ed*(L/2-0.01),y:0.14,z:0,w:0.06,h:0.16,d:0.6,c:IRON,rz:-ed*0.35});                                /* the fender, leaning out low */
+    [-1,1].forEach(sd=>{parts.push({s:"box",x:ed*(L/2-0.05-CAB/2),y:0.75,z:sd*0.36,w:CAB,h:0.03,d:0.02,c:IRON});             /* the grab rail on the open platform */
+      parts.push({s:"cyl",x:ed*(L/2-0.06),y:(FL+0.10+0.75)/2,z:sd*0.36,r:0.012,h:0.75-(FL+0.10),c:IRON});});});                /* its stanchion, floor to rail */
   return parts;};
 
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},

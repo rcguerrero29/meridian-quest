@@ -747,8 +747,12 @@ date; run `docs/runs/2026-09-21-claude-d8e4.md`; flight notes iteration 11. `mq-
 fences ✓ (`F`), coffee machines ✓ (`K`), fridge ✓ (`W`), fruit stands ✓ (`H`, `I`), car lifts and the
 car ✓ (`7`, `6`), tires ✓ (`0`), tool boxes ✓ (`8`), the mural ✓ (four panels, four materials),
 **the marigolds ✓ by a botanist** (a stack of whorls, twelve to a bed, and the seed that pressed one
-bed three times fixed). **Not done — NEEDS ENGINE:** the bridge, the trolley, and the petal spill's
-shape (a crest along the fence's foot is content and is in; the ground bake's weighting is engine).
-The parts lists for all three are under `docs/mocks/2026-09-21-contact-sheet/crew-11/calle/`.
+bed three times fixed), **the bridge ✓** (a stringer under each side, a nosing, the crest in season —
+through `prop:bridge`, the engine keeping its deck and rails), **the trolley ✓** (its body through
+`prop:tram`: skirt, band, overhanging roof with its lip, the pole leaning back; the wheels and the
+driver stay the engine's), **petals ✓** (a crest along the fence's foot; the spill banks against a
+fence or a wall and thins in the open). The rail's pane is glass at 0.45 now. All fourteen and the
+mural. The smith's parts lists are under `docs/mocks/2026-09-21-contact-sheet/crew-11/calle/`, the
+engine half's frames under `…/crew-11/engine/`.
 **Found on the way:** every engine box wears its top-down drawing on the lid (row 6's cups were lying
 on the counter); the flat audit never sees the two garage sprites the ribbon lays at district two.

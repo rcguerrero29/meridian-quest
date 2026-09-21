@@ -111,6 +111,13 @@ Fill in the views you care about; the rest come back empty and the renderer deci
 function still means `top`**, so nothing already written changes. `mesh` (2026-09-21) is a list of primitives — `{s:"box"|"sph"|"cyl"|"cone", x,y,z, w,h,d | r,rt,rb, c, rx,ry,rz, sx,sy,sz}` in tile units, y up — that the 3D camera merges into one shape; a glyph with one is never a box or a picture there. `crown` is what stands *above* the
 tile — a tree's canopy, a lamp globe, a market umbrella.
 
+**Three keys in the same table are not glyphs but KINDS** — things the engine builds itself and asks the pack to
+dress: `prop:ofrenda` (the season's altar), `prop:bridge` (what stands on a plank deck — the engine keeps its deck
+and rails and ADDS the pack's parts, laid at the deck's height and slope; the function gets `{x,y,ew,cam,slp,h,edges,pet}`)
+and `prop:tram` (the trolley's body; the function gets `{len,h,fl,cab}`, +x is the direction of travel, and the
+wheels and the driver stay the engine's). A part with `a:` under 1 is glass: a second, transparent mesh hung under
+the tile's. A pack that answers none of them gets the boxes it always got. (Crew iteration 11, 2026-09-21.)
+
 **A layer costs nothing to have.** It costs one drawing wherever you want to differ, and partial is
 normal: El Changarrito runs a whole world on **nine drawings** across 45 glyphs, and Meridian has
 18 solid glyphs with no side drawing at all.

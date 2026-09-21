@@ -167,10 +167,11 @@ picket's point (0.452) for the rail. All four named a gap before starting and al
 appear; two watched it appear larger — Pili had no way to render and no write tool; la calle's
 "soft things" (produce that mounds, petals that heap) went down on a grid first, exactly as predicted.
 
-**Left for the engine (NEEDS ENGINE, in the run file and `docs/3D-LOG.md`):** the bridge (a seam
-after the deck, ADD never replace); the petal bake's weighting by what stands beside the tile; glass
-with alpha in `t3MeshOf` (the rail round the well is its frame without the pane until then); the
-tram's body through `prop:tram`, with the wheel guard raised from 2 to 4 and planted first.
+**The engine half the smith could not reach from content was built the same sitting, by the
+session, from his parts lists:** the bridge seam (`prop:bridge`, after the deck, ADD never replace);
+the petal spill banking against a SOLID neighbour and thinning in the open; glass with alpha in
+`t3MeshOf` (the rail has its pane back at 0.45); the tram's body through `prop:tram`, with the wheel
+guard raised from 2 to 4 and planted first — red in its own sentence. `docs/3D-LOG.md`, the same entry.
 
 **A contradiction in the rules, reported.** The header of this file and `.claude/skills/crew-fix`
 say a proposed persona edit is applied or refused *by the calling session, in writing, here*.
