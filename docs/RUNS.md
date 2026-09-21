@@ -145,9 +145,13 @@ node test/runs.js
 glossed:
 
 - **The tripwire.** `test/runs.js` reads `git log` for the commit that last set `accepted` or
-  `rejected` on each run and fails if its author is not the owner. This catches the realistic case —
-  an agent that reaches for the word without thinking — and it is **not a vault**: `git commit
-  --author=` exists and anything can type his name into it.
+  `rejected` on each run and fails if that commit **carries an agent's `Co-Authored-By` trailer** —
+  not "is the author the owner", which needs his name written somewhere and goes red the day he
+  commits from another machine, and which a token minted on his account would pass anyway
+  (`docs/SECURITY.md` §3). The trailer is a fact about the commit and it is the thing that actually
+  goes wrong: an agent accepting its own work. This catches the realistic case and it is **not a
+  vault**: an agent can omit its trailer. On a shallow checkout it says it could not read history
+  rather than reading HEAD (finding A4, 2026-09-21).
 - **The binding record is the issue he closes.** GitHub records *who* closed an issue and an agent
   cannot forge that without his credentials. So a run that claims `accepted` names the issue, and the
   issue's closer is the fact; the file is the legible copy of it.

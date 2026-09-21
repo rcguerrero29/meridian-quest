@@ -22,7 +22,9 @@ permissions:
 on:
   push:
     branches: [main]
-  workflow_dispatch:
+# workflow_dispatch: dropped 2026-09-21 (docs/SECURITY.md, the critic's finding 15). Never used in
+# 49 of 49 runs, and a classic `repo` token carries Actions: write — enough to dispatch a deploy by
+# hand. One door: a push to main, which the rulesets guard.
 concurrency:
   group: pages
   cancel-in-progress: true

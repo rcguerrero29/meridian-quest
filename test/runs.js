@@ -39,7 +39,7 @@ const FIELDS = ['RUN ID', 'Agent', 'Model', 'Status', 'Personas', 'Issues', 'Per
 const SECTIONS = ['Requested', 'Tasks', 'Files', 'Evidence', 'Acceptance criteria'];
 /* a trailer naming a machine. Claude Code writes "Co-Authored-By: Claude …"; AGENTS.md §6 asks every
    agent for the same, under its own name. An agent line here means a machine touched this commit. */
-const AGENT_TRAILER = /^Co-Authored-By:.*\b(claude|codex|copilot|cursor|gpt|gemini|jules|aider|devin|amp)\b/im;
+const AGENT_TRAILER = /^Co-Authored-By:.*\b(claude|codex|copilot|cursor|gpt|gemini|grok|jules|aider|devin|amp)\b/im;
 
 const field = (src, k) => {
   const m = new RegExp('^' + k.replace(/ /g, '\\s') + ':[ \\t]*(.*)$', 'im').exec(src);

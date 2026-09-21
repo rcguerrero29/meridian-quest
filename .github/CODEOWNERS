@@ -10,10 +10,23 @@
 # is set with the owner as a bypass actor: it stops a second agent's PR merging on green alone, and
 # it does not stop the owner merging his own. test/leaves.js keeps every path here real.
 
+# EVERYTHING, first — so no two non-owner accounts can satisfy the review rule for each other on a
+# path this file forgot (the critic's finding 5, 2026-09-21). The lines below name WHY each path
+# matters; this one line is the lock.
+*                                 @rcguerrero29
+
 # the contract, and Claude's entry point
 AGENTS.md                         @rcguerrero29
 CLAUDE.md                         @rcguerrero29
 .claude/                          @rcguerrero29
+
+# the order channel — the files a session takes its orders from (CLAUDE.md, items 2 to 4).
+# A second agent rewriting STATE OF PLAY, or flipping MODE: off, is a diff he must open (PI-3).
+docs/NEXT-SESSION.md              @rcguerrero29
+docs/CREW-MODE.md                 @rcguerrero29
+docs/BACKLOG.md                   @rcguerrero29
+docs/INDEX.md                     @rcguerrero29
+docs/RUNS.md                      @rcguerrero29
 
 # the record — what he said, what each run did, what he decided
 docs/ASKS.md                      @rcguerrero29
@@ -22,7 +35,8 @@ docs/runs/                        @rcguerrero29
 docs/council/                     @rcguerrero29
 docs/personas/                    @rcguerrero29
 
-# what ships, and how
+# what ships, and how — engine/ is the code every player AND the town runs (boot.js is loaded by both shells)
+engine/                           @rcguerrero29
 .github/                          @rcguerrero29
 scripts/                          @rcguerrero29
 index.html                        @rcguerrero29

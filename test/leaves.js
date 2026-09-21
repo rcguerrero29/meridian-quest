@@ -118,6 +118,12 @@ function workflows(root) {
       const ref = m[1], at = ref.split('@')[1] || '';
       if (!/^[0-9a-f]{40}$/.test(at)) P.push(rel + ' uses "' + ref + '" by a moving tag — pin it to the commit SHA (`git ls-remote --tags https://github.com/<action> <tag>`) and keep the tag in a trailing comment');
     });
+    /* CI-2 (2026-09-21): an environment's required-reviewer rule gates only a job that DECLARES the
+       environment. A workflow holding pages: write with no `environment: github-pages` is a deploy the
+       owner's gate cannot see — and an agent removing the key in the same PR that widens the box would
+       un-gate it silently. */
+    if (/^\s*pages:\s*["']?write/m.test(src) && !/^\s*environment:\s*\n\s+name:\s*github-pages\b|^\s*environment:\s*github-pages\b/m.test(src))
+      P.push(rel + ' holds pages: write and no job declares environment: github-pages — the owner\'s required-reviewer gate (docs/SECURITY.md §3 step 3) gates only a job that names the environment');
     const trig = onBare.match(/(?:^|[\s\[,{])(pull_request_target|issue_comment|issues|label|discussion_comment|workflow_run|repository_dispatch)(?=\s*[:\],}]|$)/m);
     if (trig)
       P.push(rel + ' can be started by "' + trig[1] + '" — a trigger a label, a comment or an issue can pull. ' +
@@ -140,6 +146,16 @@ function consistency(root) {
         .forEach(p => { if (!p.includes('*')) cites.push({ p, f: path.relative(root, f) }); });
     } };
   dirs.forEach(walk);
+  /* PI-6 / A10 (2026-09-21): docs/NEXT-SESSION.md, docs/council/README.md and the pending list sent the
+     owner to docs/SECURITY.md for two days while it existed on no branch. The ORDER CHANNEL — the files
+     CLAUDE.md says a session takes its orders from, plus the contract — must cite real files. Meeting
+     minutes and research are dated records and may honestly name a thing that was planned and never
+     built; a probe on 2026-09-21 found 17 such in docs/meetings and docs/research, and they stay. */
+  const ORDERS = ['CLAUDE.md', 'AGENTS.md', 'docs/NEXT-SESSION.md', 'docs/INDEX.md', 'docs/OPEN.md', 'docs/OWNER.md',
+                  'docs/RUNS.md', 'docs/SECURITY.md', 'docs/BOUNDARY.md', 'docs/CREW-MODE.md', 'docs/council/README.md', 'docs/personas/README.md'];
+  ORDERS.forEach(rel => { const f = path.join(root, rel); if (!fs.existsSync(f)) return;
+    const body = fs.readFileSync(f, 'utf8').replace(/```[\s\S]*?```/g, '');   /* not inside fenced code */
+    (body.match(CITE) || []).forEach(p => { if (!p.includes('*')) cites.push({ p, f: rel }); }); });
   const seen = new Set();
   cites.forEach(({ p, f }) => { const k = p + '<' + f; if (seen.has(k)) return; seen.add(k);
     if (!fs.existsSync(path.join(root, p)))
@@ -341,6 +357,10 @@ if (require.main === module) {
     const cases = [];
     cases.push(['a persona citing a file that was never written', out.some(s => /GHOST\.md/.test(s))]);
     cases.push(['a .json citation is not read as a .js ghost', !out.some(s => /spots\.js\b/.test(s))]);
+    W('docs/NEXT-SESSION.md', 'Read docs/PHANTOM.md before anything.\n');
+    out = consistency(t);
+    cases.push(['the state of play citing a document that was never written', out.some(s => /PHANTOM\.md/.test(s))]);
+    fs.unlinkSync(path.join(t, 'docs/NEXT-SESSION.md'));
     W('docs/GHOST.md', 'x\n');
     W('docs/INDEX.md', '[GHOST.md](GHOST.md) [BOUNDARY.md](BOUNDARY.md)\n');   /* indexed(): a sound fixture lists what it has */
     W('docs/BOUNDARY.md', TABLE('zeni'));
@@ -380,6 +400,9 @@ if (require.main === module) {
     cases.push(['a comment trigger under a quoted on: key', out.some(s => /issue_comment/.test(s))]);
     W('.github/workflows/pages.yml', 'name: Pages\npermissions:\n  contents: read\n  pages: write\n  id-token: write\non:\n  push:\njobs:\n  x:\n    runs-on: ubuntu-latest\n');
     W('.github/workflows/ci.yml', 'name: CI\npermissions:\n  contents: read\non:\n  push:\n  pull_request:\njobs:\n  x:\n    runs-on: ubuntu-latest\n');
+    out = consistency(t);
+    cases.push(['a deploy with pages: write and no environment: is a gate nobody can flip', out.some(s => /environment: github-pages/.test(s))]);
+    W('.github/workflows/pages.yml', 'name: Pages\npermissions:\n  contents: read\n  pages: write\n  id-token: write\non:\n  push:\njobs:\n  x:\n    runs-on: ubuntu-latest\n    environment:\n      name: github-pages\n');
     out = consistency(t);
     cases.push(['the deploy\'s own write scopes are allowed, and only in pages.yml', out.length === 0]);
     /* 2026-09-21 — the shapes finding CI-5 planted and this missed, each now red on a fixture */

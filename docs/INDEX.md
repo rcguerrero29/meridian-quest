@@ -59,6 +59,7 @@ Everything below is detail those three point into.
 
 | File | What it is |
 |---|---|
+| **[SECURITY.md](SECURITY.md)** | **Settings over sentences.** What only you can flip so that no agent — a second AI or a Claude session — can reach `main` or the public game alone. Start with step 1; nothing else on that page matters until it is done |
 | [OWNER.md](OWNER.md) | **Your standing rules.** Read by every planner before it plans, so plans arrive already aligned. Anything marked Settled is a permit, not a question |
 | [ASKS.md](ASKS.md) | **Every request you have made, verbatim, and where it landed.** The record of what you actually said — opened because requirements were falling through |
 | [ARCH-LOG.md](ARCH-LOG.md) | Architecture decisions, **including the ones deferred with their options kept and costed.** A1–A18 |
