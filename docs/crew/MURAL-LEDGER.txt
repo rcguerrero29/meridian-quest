@@ -84,3 +84,7 @@ pili-la-tapa-trae-el-mapa|3a29ea3fcf8f|d48318242bbe
 botanica-hermanas-no-clones|d5d394d99f6f|7937bb181788
 taller-el-sello-de-la-inauguracion|0cef438817a2|015d10a597d7
 calle-la-regla-leyo-la-punta|370c95f83c1f|619822d62a33
+ebanista-la-silla-en-la-tapa|c71df70e3c18|01dd0a355a4f
+panadera-de-cara-no-de-canto|bad775112d41|75c97403dae6
+inspector-paro-fuera-de-via|1b030f1d5eae|edb653e54496
+muebleria-la-ultima-caja|cf67df34a8db|69d1a9626e80

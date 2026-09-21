@@ -1006,14 +1006,20 @@ function findChromium() {
          an identity). Planted 2026-09-14: by:"cuca" on a panel signed "Doña Cuca" opened a bay called
          "Cuca" beside hers, by:"don-guero" opened "Don-guero" beside Don Güero's, and the check above
          was green. So fold every bay's name to a first name — accents off, hyphens to spaces, Don/Doña
-         dropped, surname dropped — and insist no two bays fold to the same person. */
+         dropped, surname dropped — and insist no two bays fold to the same person.
+         THE ARTICLE GOES TOO (crew iteration 12): the fold dropped Don, Doña and "the" and kept "el"
+         and "la", so every Spanish-article painter folded to the article itself — "el ebanista" and
+         "el taller" both became "el", two different people read as one, and the wall was told to
+         merge them. Dropping the article is strictly stricter, not looser: a painter who gets a bay
+         as "El taller" and another as "Taller" now folds to the same person and is still caught,
+         which is the split this check exists for. Planted both ways. */
       const twoBays = await page.evaluate(() => {
         const P = [];
         if (typeof murBays !== 'function') return P;
         /* the FIRST NAME, not the whole name: the second draft of this compared whole names and let
            "Melo Garduño" stand beside "Melo" — the fix it was guarding had just split him. */
         const fold = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-          .replace(/[-_]+/g, ' ').replace(/^(don|dona|the)\s+/, '').trim().split(' ')[0];
+          .replace(/[-_]+/g, ' ').replace(/^(don|dona|the|el|la|los|las)\s+/, '').trim().split(' ')[0];
         const seen = {};
         murBays().forEach(b => { const k = fold(b.who);
           if (seen[k]) P.push('the wall gave "' + b.who + '" a bay of their own next to "' + seen[k] + '" — one person, two stretches; an agent\'s `by` is a file name (no Doña, no accent, a hyphen) and the wall\'s name is the person, and murPainter has to know they are the same');

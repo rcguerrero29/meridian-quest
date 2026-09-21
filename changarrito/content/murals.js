@@ -4892,6 +4892,363 @@ MURALS.push(
   }
 });
 
+/* ---- crew iteration 12 — 2026-09-21 — the interiors, the bakery, the line ridden, and the rest of the furniture: four panels, four hands ---- */
+MURALS.push({
+  id:"ebanista-la-silla-en-la-tapa", iter:12, date:"2026-09-21", by:"ebanista",
+  title:{en:"The chair on the lid", es:"La silla en la tapa"},
+  said:{en:"His desk was two chairs drawn on their own lids.", es:"Su escritorio eran dos sillas dibujadas en su propia tapa."},
+  state:{en:"holding that a box wears its plan on its lid, so any chair the map lays against a wall reads as a desk until it has legs", es:"sostengo que una caja lleva su plano en la tapa, así que toda silla que el mapa arrime a una pared se lee como escritorio hasta que tenga patas"},
+  who:{en:"el ebanista, the cabinetmaker who found the notary's desk was already a desk and the chairs were the desk in the photo", es:"el ebanista, el que encontró que el escritorio del notario ya era escritorio y que las sillas eran el escritorio de la foto"},
+  cap:{en:"The brief said: find what draws the desk in his frame. The desk had had its shape for a run already; the frame was shot from a side stop, and what stood beside the rug were the two guest chairs — boxes with the chair's front elevation baked flat on the lid. One chair, built with legs, a seat and a yoke, now stands in five worlds, outside Doña Tencha's door too. From the default stop the notary's two are hidden behind the south wall, box or chair.",
+       es:"El brief decía: encuentra qué dibuja el escritorio de su foto. El escritorio ya tenía forma desde la corrida anterior; la foto se tomó desde una parada de lado, y lo que estaba junto al tapete eran las dos sillas de visita — cajas con el alzado de la silla horneado plano en la tapa. Una silla, hecha con patas, asiento y yugo, está ahora en cinco mundos, también afuera de la puerta de Doña Tencha. Desde la parada de frente, las dos del notario quedan escondidas tras la pared sur, sean caja o silla."},
+  aspect:0.44,
+  art:(g,W,H)=>{
+  /* MATERIAL: a cabinetmaker's setting-out rod — a planed pine board the chair is drawn on full size, in
+     carpenter's pencil, the joints marked; a lumber crayon in red for what was wrong; a maker's mark burned
+     into the corner. No limewash: a rod is its own board. The palette is the shop's — pine, graphite, red
+     crayon, scorch — and none of it is MURPAL. */
+  const PINE="#E8D6AE",PINE2="#DCC79A",GRAIN="#C9AE78",KNOT="#A8804B",EDGE="#B8955E",PENCIL="#45444C",PENCIL2="rgba(69,68,76,.35)",CRAYON="#C43A2C",SCORCH="#5A3A1E";
+  const hash=(i,j)=>{const v=Math.sin(i*12.9898+j*78.233)*43758.5453;return v-Math.floor(v);};
+  g.save();
+  /* THE BOARD: planed pine, the grain running the length of it, one knot, the end grain at the right */
+  g.fillStyle=PINE;g.fillRect(0,0,W,H);
+  for(let i=0;i<26;i++){const y0=H*(i/26)+hash(i,1)*H*0.03,amp=H*0.012*(0.5+hash(i,2));
+    g.strokeStyle=(i%3===0)?GRAIN:PINE2;g.lineWidth=(i%3===0)?1.2:0.8;g.globalAlpha=0.55;
+    g.beginPath();for(let x=0;x<=W;x+=W/24){g.lineTo(x,y0+Math.sin(x/W*6.28*(1+hash(i,3))+i)*amp);}g.stroke();}
+  g.globalAlpha=1;
+  g.save();g.translate(W*0.63,H*0.16);g.strokeStyle=KNOT;g.lineWidth=1.4;                                           /* the knot: the grain bends round it */
+  for(let r=2;r<12;r+=2.4){g.globalAlpha=0.6-r*0.03;g.beginPath();g.ellipse(0,0,r*1.6,r,0.2,0,7);g.stroke();}
+  g.globalAlpha=1;g.fillStyle=KNOT;g.beginPath();g.ellipse(0,0,3,2,0.2,0,7);g.fill();g.restore();
+  g.fillStyle=EDGE;g.fillRect(0,H-4,W,4);g.fillRect(W-4,0,4,H);                                                    /* the board's thickness and its end */
+  /* PENCIL: a line a carpenter draws — a hair soft, a shade off true */
+  const pen=(x1,y1,x2,y2,wd)=>{g.strokeStyle=PENCIL;g.lineWidth=wd||1.3;g.globalAlpha=0.9;
+    g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();
+    g.strokeStyle=PENCIL2;g.lineWidth=(wd||1.3)*1.6;g.beginPath();g.moveTo(x1+0.6,y1+0.5);g.lineTo(x2+0.6,y2+0.5);g.stroke();g.globalAlpha=1;};
+  const hatch=(x,y,w,h)=>{g.save();g.beginPath();g.rect(x,y,w,h);g.clip();for(let k=-h;k<w+h;k+=3)pen(x+k,y,x+k+h,y+h,0.8);g.restore();pen(x,y,x+w,y);pen(x+w,y,x+w,y+h);pen(x+w,y+h,x,y+h);pen(x,y+h,x,y);};
+  g.fillStyle=PENCIL;g.textAlign="left";g.textBaseline="alphabetic";
+  g.font="bold 12px ui-monospace,monospace";g.fillText("PATRÓN DE TRAZO · SILLA ⊔ · 1:1",10,16);
+  g.font="11px ui-monospace,monospace";g.fillText("silla de palma · patas torneadas, asiento tejido, yugo",10,30);
+  /* THE ROD: the chair in side elevation, full size on the board. The floor line, the back leg run up as the
+     upright and raked a little, the front leg, the seat frame let into both, the two rails, the stretcher —
+     and the joints marked where the tenons go. */
+  const FL=H*0.80,YK=H*0.23,ST=FL-(FL-YK)*0.48,LR=FL-(FL-YK)*0.73,STR=FL-(FL-YK)*0.18;
+  const bx=W*0.15,fx=W*0.36;
+  pen(W*0.05,FL,W*0.47,FL,1.6);                                                                                    /* the floor */
+  pen(bx+3,FL,bx-3,YK,2.2);pen(bx-3,YK,bx-3,YK-H*0.02,2.2);                                                        /* the back leg, up into the upright */
+  pen(fx,FL,fx,ST,2.2);                                                                                             /* the front leg */
+  pen(bx,ST,fx+W*0.02,ST,2.2);pen(bx,ST+H*0.035,fx+W*0.02,ST+H*0.035,1.4);pen(fx+W*0.02,ST,fx+W*0.02,ST+H*0.035,1.4); /* the seat frame, and its front edge */
+  for(let k=0;k<7;k++)pen(bx+W*0.02+k*W*0.026,ST+H*0.012,bx+W*0.035+k*W*0.026,ST+H*0.012,0.8);                       /* the palm weave, ticked */
+  pen(bx-W*0.02,YK,bx+W*0.015,YK,2.6);pen(bx-W*0.02,YK+H*0.05,bx+W*0.015,YK+H*0.05,1.6);                             /* the yoke, in section: thicker than the rail below */
+  pen(bx-W*0.012,LR,bx+W*0.012,LR,1.8);pen(bx-W*0.012,LR+H*0.04,bx+W*0.012,LR+H*0.04,1.8);                          /* the lower rail */
+  pen(bx+1,STR,fx,STR,1.4);                                                                                          /* the stretcher: a stool has none */
+  hatch(bx-W*0.006,ST-H*0.015,W*0.012,H*0.065);hatch(fx-W*0.006,ST-H*0.015,W*0.012,H*0.065);                          /* the mortises for the seat rails */
+  hatch(bx-W*0.005,LR-H*0.01,W*0.01,H*0.06);hatch(bx-W*0.005,YK-H*0.01,W*0.01,H*0.07);                                 /* and for the back rails */
+  /* the numbers a chair is: seat 45, back 95 — in pencil, with ticks, the way a rod carries them */
+  const vdim=(x,y1,y2,lab)=>{pen(x,y1,x,y2,1);pen(x-4,y1,x+4,y1,1);pen(x-4,y2,x+4,y2,1);
+    g.save();g.translate(x-3,(y1+y2)/2);g.rotate(-Math.PI/2);g.fillStyle=PENCIL;g.font="bold 11px ui-monospace,monospace";g.textAlign="center";g.fillText(lab,0,0);g.restore();};
+  vdim(W*0.44,FL,ST,"45");vdim(W*0.075,FL,YK,"95");
+  g.font="11px ui-monospace,monospace";g.textAlign="left";g.fillStyle=PENCIL;
+  g.fillText("travesaño",bx+W*0.06,STR+13);g.fillText("yugo",bx+W*0.02,YK+H*0.02);
+  /* THE BOX, as the engine stood it: a lid and a front in pencil, and on the lid the chair's FRONT elevation
+     laid flat in red crayon — rail, two uprights, the seat, two legs — the drawing that read as a desk.
+     A crayon cross through the lid. */
+  const ox=W*0.56,oy=H*0.30,ow=W*0.22,od=W*0.09,oh=H*0.36;
+  pen(ox,oy+H*0.10,ox+ow,oy+H*0.10);pen(ox+ow,oy+H*0.10,ox+ow+od,oy);pen(ox+ow+od,oy,ox+od,oy);pen(ox+od,oy,ox,oy+H*0.10);   /* the lid */
+  pen(ox,oy+H*0.10,ox,oy+H*0.10+oh);pen(ox+ow,oy+H*0.10,ox+ow,oy+H*0.10+oh);pen(ox,oy+H*0.10+oh,ox+ow,oy+H*0.10+oh);  /* the front */
+  pen(ox+ow+od,oy,ox+ow+od,oy+oh);pen(ox+ow+od,oy+oh,ox+ow,oy+H*0.10+oh);                                              /* the end */
+  g.save();g.strokeStyle=CRAYON;g.fillStyle=CRAYON;g.globalAlpha=0.82;g.lineWidth=3;g.lineCap="round";
+  const L=(t,u)=>({x:ox+od*u+ow*t,y:oy+H*0.10*(1-u)});                                                               /* a point on the lid: t along the front, u toward the back */
+  const seg=(a,b)=>{g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke();};
+  g.lineWidth=4;seg(L(0.2,0.88),L(0.8,0.88));g.lineWidth=3;seg(L(0.2,0.88),L(0.2,0.5));seg(L(0.8,0.88),L(0.8,0.5));      /* the rail and the uprights, flat on the lid */
+  g.lineWidth=5;seg(L(0.2,0.42),L(0.8,0.42));                                                                          /* the seat */
+  g.lineWidth=3;seg(L(0.25,0.34),L(0.25,0.06));seg(L(0.75,0.34),L(0.75,0.06));                                          /* the legs */
+  g.lineWidth=2.4;g.globalAlpha=0.7;seg(L(0.03,0.97),L(0.97,0.03));seg(L(0.03,0.03),L(0.97,0.97));                      /* the cross */
+  /* and the same drawing on the front face, fainter — a box wears it on every side too */
+  g.globalAlpha=0.35;const Fp=(t,v)=>({x:ox+ow*t,y:oy+H*0.10+oh*v});
+  g.lineWidth=4;seg(Fp(0.2,0.2),Fp(0.8,0.2));g.lineWidth=3;seg(Fp(0.2,0.2),Fp(0.2,0.48));seg(Fp(0.8,0.2),Fp(0.8,0.48));
+  g.lineWidth=5;seg(Fp(0.2,0.55),Fp(0.8,0.55));g.lineWidth=3;seg(Fp(0.25,0.62),Fp(0.25,0.92));seg(Fp(0.75,0.62),Fp(0.75,0.92));
+  g.restore();
+  g.fillStyle=CRAYON;g.font="bold 11px ui-monospace,monospace";g.globalAlpha=0.85;
+  g.fillText("así estaba: el alzado en la tapa",ox-W*0.01,oy+H*0.10+oh+14);
+  g.fillText("→ «escritorio»",ox-W*0.01,oy+H*0.10+oh+27);g.globalAlpha=1;
+  /* the maker's mark, burned in: a ring and two letters */
+  g.save();g.translate(W-30,H-26);g.strokeStyle=SCORCH;g.fillStyle=SCORCH;g.globalAlpha=0.75;g.lineWidth=2;
+  g.beginPath();g.arc(0,0,12,0,7);g.stroke();g.font="bold 11px ui-monospace,monospace";g.textAlign="center";g.fillText("EB",0,4);g.restore();
+  /* the pencil line at the foot */
+  g.fillStyle=PENCIL;g.font="11px ui-monospace,monospace";g.textAlign="left";
+  g.fillText("una silla, cinco mundos: notario ×2, casa de Tencha, barbería, taller",10,H-10);
+  g.restore();}
+});
+
+MURALS.push(
+{
+  id:"panadera-de-cara-no-de-canto", iter:12, date:"2026-09-21", by:"panadera",
+  title:{en:"Face up, not on edge", es:"De cara, no de canto"},
+  said:{en:"Show the side that says what it is. An oreja on its edge is a bun from above; laid flat, it is an oreja from anywhere.",
+        es:"Enseña el lado que dice lo que es. Una oreja de canto es un bolillo desde arriba; de cara, es oreja desde donde sea."},
+  state:{en:"Six kinds on twelve pans, one seed that reads both axes; the iso camera still sees a slab.",
+         es:"Seis panes en doce charolas, una semilla que lee los dos ejes; la cámara iso sigue viendo un bloque."},
+  who:{en:"La panadera, who loads the racks before the shop opens",
+       es:"La panadera, que acomoda los anaqueles antes de abrir"},
+  cap:{en:"The brief remembered the shelf telling the shops apart. It did not: one bookcase served six businesses, and along the bakery's wall its seed made the first rack and the last the same picture. I loaded the racks the way a shop loads them — one kind a pan, off one sheet, the shell's colour decided per batch — and stood the orejas on edge because that is how the brief had them. From the camera above they were buns. Laid flat and shingled, the face showed, and the face is what names a thing at thirty-five pixels.",
+       es:"El brief recordaba que el librero distinguía los negocios. No: un solo librero servía a seis, y a lo largo de la pared de la panadería su semilla hacía del primer anaquel y del último la misma imagen. Acomodé los anaqueles como se acomodan en una panadería — un pan por charola, de una sola hoja, el color de la concha decidido por hornada — y paré las orejas de canto porque así venían en el brief. Desde la cámara de arriba eran bolillos. Acostadas y encimadas se les vio la cara, y la cara es lo que nombra una cosa a treinta y cinco pixeles."},
+  aspect:0.44,
+  art:(g,W,H)=>{
+    /* MATERIAL: the hoja de pares — the production sheet a baker pins above the oven. Kraft paper, in
+       pencil: the pans planned as rows of circles before any dough is cut, the count per pan in her hand,
+       corrected in the red grease pencil that lives on a string by the door; flour where she held it, and
+       the ring where a hot pan was set down on it once. None of it is the wall's palette: the shop already
+       owns this paper. Type is absolute on this wall (bold 11px / 12px); everything else is a fraction. */
+    const KRAFT="#C9A574",KRAFTD="#B08A58",TAPE="rgba(244,236,214,.9)",G="#3A3530",GL="#7A7168",RED="#B0402C",
+          FLOUR="rgba(248,243,232,.6)",GREASE="rgba(110,62,18,.16)";
+    murGround(g,W,H);
+    const px=W*0.05,py=H*0.07,pw=W*0.9,ph=H*0.86;
+    g.save();g.translate(px+pw/2,py+ph/2);g.rotate(-0.012);g.translate(-(px+pw/2),-(py+ph/2));   /* taped up a hair off square */
+    g.fillStyle="rgba(15,12,20,.18)";g.fillRect(px+4,py+5,pw,ph);                                 /* it hangs off the wall */
+    g.fillStyle=KRAFT;g.fillRect(px,py,pw,ph);
+    let s=227;const rnd=()=>((s=(s*1103515245+12345)&0x7fffffff)/0x7fffffff);
+    g.fillStyle=KRAFTD;g.globalAlpha=.25;for(let i=0;i<90;i++)g.fillRect(px+rnd()*pw,py+rnd()*ph,1+rnd()*3,1);g.globalAlpha=1; /* the grain of kraft */
+    g.fillStyle=TAPE;g.fillRect(px+pw*0.08,py-4,W*0.06,10);g.fillRect(px+pw*0.86,py-4,W*0.06,10);   /* two bits of masking tape */
+    g.strokeStyle=GREASE;g.lineWidth=W*0.012;g.beginPath();g.ellipse(px+pw*0.74,py+ph*0.6,W*0.09,H*0.16,0.1,0,7);g.stroke(); /* a hot pan, set down on it once */
+    /* the tray plan, in pencil: three pans, top pan first, and on each what goes on it */
+    const tx=px+pw*0.05,tw=pw*0.42,th=ph*0.19,gap=ph*0.075;
+    g.strokeStyle=G;g.lineWidth=1.4;g.font="bold 11px ui-monospace,monospace";
+    const pan=(i,label)=>{const y=py+ph*0.17+i*(th+gap);g.strokeRect(tx,y,tw,th);g.fillStyle=GL;g.fillRect(tx,y+th-3,tw,3);g.fillStyle=G;g.fillText(label,tx,y-4);return y;};
+    let y=pan(0,"1 · concha vainilla ×6 · un cortador");                                            /* one cutter, six circles, the shell's cuts on each */
+    for(let r=0;r<2;r++)for(let c=0;c<3;c++){const cx=tx+tw*(0.17+c*0.33),cy=y+th*(0.3+r*0.42),rr=Math.min(tw*0.13,th*0.2);
+      g.beginPath();g.arc(cx,cy,rr,0,7);g.stroke();                                                  /* the round, and the shell scored in two curves */
+      g.beginPath();g.arc(cx,cy+rr*0.25,rr*0.62,Math.PI*1.15,Math.PI*1.85);g.stroke();
+      g.beginPath();g.arc(cx,cy+rr*0.7,rr*0.8,Math.PI*1.2,Math.PI*1.8);g.stroke();}
+    y=pan(1,"2 · oreja ×12");                                                                       /* first on edge: five strokes; struck through; then flat, shingled */
+    g.strokeStyle=GL;g.lineWidth=2;for(let i=0;i<5;i++){const cx=tx+tw*(0.12+i*0.1);g.beginPath();g.moveTo(cx,y+th*0.25);g.lineTo(cx,y+th*0.75);g.stroke();}
+    g.strokeStyle=RED;g.lineWidth=2.2;g.beginPath();g.moveTo(tx+tw*0.06,y+th*0.8);g.lineTo(tx+tw*0.58,y+th*0.2);g.stroke();
+    g.strokeStyle=G;g.lineWidth=1.4;for(let i=0;i<4;i++){const cx=tx+tw*(0.64+i*0.09),cy=y+th*0.5,rr=th*0.24;
+      g.fillStyle=KRAFT;g.beginPath();g.arc(cx-rr*0.45,cy-rr*0.3,rr*0.6,0,7);g.arc(cx+rr*0.45,cy-rr*0.3,rr*0.6,0,7);g.fill();g.stroke();
+      g.beginPath();g.moveTo(cx-rr,cy-rr*0.1);g.lineTo(cx+rr,cy-rr*0.1);g.lineTo(cx,cy+rr);g.closePath();g.fill();g.stroke();
+      g.beginPath();g.arc(cx,cy-rr*0.15,rr*0.28,0,7);g.stroke();}
+    y=pan(2,"3 · bolillo ×8 · en canasta");                                                         /* one length, the score cut the same way */
+    for(let r=0;r<2;r++)for(let c=0;c<2;c++){const cx=tx+tw*(0.27+c*0.46),cy=y+th*(0.32+r*0.38),L=tw*0.2,h=th*0.14;
+      g.beginPath();g.moveTo(cx-L,cy);g.lineTo(cx-L*0.6,cy-h);g.lineTo(cx+L*0.6,cy-h);g.lineTo(cx+L,cy);g.lineTo(cx+L*0.6,cy+h);g.lineTo(cx-L*0.6,cy+h);g.closePath();g.stroke();
+      g.beginPath();g.moveTo(cx-L*0.45,cy-h*0.3);g.lineTo(cx+L*0.45,cy-h*0.3);g.stroke();}
+    /* the pares, in the column on the right, in her hand */
+    const cx=px+pw*0.55;let cy=py+ph*0.16;g.fillStyle=G;g.font="bold 12px ui-monospace,monospace";g.fillText("PARES · anaquel · La Espiga",cx,cy);
+    g.font="bold 11px ui-monospace,monospace";cy+=16;
+    [["concha vainilla","6 / charola"],["concha chocolate","6 / charola"],["bolillo","8 · canasta"],["cuerno","6 · puntas al cliente"],
+     ["oreja","12 · de cara"],["polvorón","6 · en capacillo"],["pan de muerto","4 · 18 oct – 3 nov"]].forEach(([k,v])=>{
+      g.fillStyle=G;g.fillText(k,cx,cy);g.fillStyle=GL;g.fillText(v,cx+pw*0.21,cy);cy+=14;});
+    cy+=8;g.fillStyle=G;g.fillText("anaqueles 8·10·12·14 → semilla 1·4·0·3",cx,cy);cy+=14;
+    g.fillStyle=GL;g.fillText("(la del librero daba 3·5·1·3: dos iguales)",cx,cy);
+    g.fillStyle=FLOUR;g.beginPath();g.ellipse(px+pw*0.93,py+ph*0.86,W*0.02,H*0.05,0.5,0,7);g.fill();  /* flour, where she held it */
+    g.beginPath();g.ellipse(px+pw*0.36,py+ph*0.95,W*0.05,H*0.03,0,0,7);g.fill();
+    g.fillStyle=RED;g.font="bold 12px ui-monospace,monospace";g.fillText("de cara, no de canto",px+pw*0.55,py+ph*0.94);   /* the correction, in the grease pencil */
+    g.strokeStyle=RED;g.lineWidth=1.6;g.beginPath();g.moveTo(px+pw*0.55,py+ph*0.94+3);g.lineTo(px+pw*0.55+W*0.2,py+ph*0.94+4);g.stroke();
+    g.restore();
+  }
+});
+
+/* el inspector de línea — crew iteration 12 — the panel, in my own hand.
+   MATERIAL: a carbonless duplicate from the inspector's ticket book. Pink NCR paper — the copy that
+   stays in the book — the form's boxes printed in faint blue, the handwriting come through the carbon
+   in violet ballpoint, a rubber stamp in red where the finding is, and the left edge perforated where
+   the top copy was torn off and handed to the driver. It is not the wall's palette. It is a sheet
+   pinned to the wall. */
+MURALS.push(
+{
+  id:"inspector-paro-fuera-de-via", iter:12, date:"2026-09-21", by:"inspector",
+  title:{en:"It stopped where the map ends", es:"Paró donde se acaba el mapa"},
+  said:{en:"The car stopped for you two tiles past the end of the street. The log said 'dwell' and signed for it.",
+        es:"El carro paró por ti dos baldosas después de que se acaba la calle. La bitácora dijo 'parada' y firmó."},
+  state:{en:"Both lines ridden end to end in four cameras; three faults written up, four plants red.",
+         es:"Las dos líneas recorridas de punta a punta en cuatro cámaras; tres fallas levantadas, cuatro siembras en rojo."},
+  who:{en:"The line inspector, forty years on the trolleys and a clipboard nobody liked to see coming",
+       es:"El inspector de línea, cuarenta años en los tranvías y una tabla con clip que nadie quería ver llegar"},
+  cap:{en:"Nobody had named the weirdness, so I rode the line instead of reading the ticket: every stop, both ends, four cameras. The car served the first stop from beyond the edge of the map — off-screen in two cameras, hanging in the dark in the third — because it is born two tiles past the end so it can drive in, and the stop sat inside its window before it had entered the street. The state read 'dwell' and the old guard believed it. A state is a proxy for a picture; the picture is the ticket.",
+       es:"Nadie había nombrado la rareza, así que recorrí la línea en vez de leer el parte: cada parada, las dos puntas, cuatro cámaras. El carro atendió la primera parada desde más allá del borde del mapa — fuera de pantalla en dos cámaras, colgado en lo oscuro en la tercera — porque nace dos baldosas después de la punta para poder entrar, y la parada le cayó en la ventana antes de que pisara la calle. El estado decía 'parada' y la guardia vieja le creyó. Un estado es un sustituto de una imagen; la imagen es el parte."},
+  aspect:0.44,
+  art:(g,W,H)=>{
+    const NCR="#F2D7D9",NCR2="#EBCBCF",FORM="#8EA3C4",CARBON="#4B3F8F",STAMP="#B8323A",PENCIL="#7A746F",TEAR="#E6DFCF";
+    murGround(g,W,H);
+    /* the sheet, pinned a little crooked, the left edge perforated where the top copy went to the driver */
+    const sx=W*0.05,sy=H*0.07,sw=W*0.90,sh=H*0.86;
+    g.save();g.translate(sx+sw/2,sy+sh/2);g.rotate(-0.012);g.translate(-(sx+sw/2),-(sy+sh/2));
+    g.fillStyle="rgba(43,37,54,.18)";g.fillRect(sx+4,sy+5,sw,sh);
+    g.fillStyle=NCR;g.fillRect(sx,sy,sw,sh);
+    let s=7;const rnd=()=>((s=(s*1103515245+12345)&0x7fffffff)/0x7fffffff);
+    for(let i=0;i<40;i++){g.fillStyle=NCR2;g.globalAlpha=.5;g.fillRect(sx+rnd()*sw,sy+rnd()*sh,10+rnd()*40,1);}g.globalAlpha=1;
+    for(let y=sy+8;y<sy+sh-4;y+=11){g.fillStyle=TEAR;g.beginPath();g.arc(sx+6,y,2.2,0,7);g.fill();}          /* the perforation */
+    g.strokeStyle=FORM;g.lineWidth=1;g.globalAlpha=.9;g.strokeRect(sx+14,sy+8,sw-22,sh-16);g.globalAlpha=1;    /* the printed form */
+    const mono="ui-monospace,monospace";
+    g.fillStyle=FORM;g.font="bold 11px "+mono;g.fillText("PARTE DE INSPECCIÓN · LÍNEA",sx+22,sy+22);
+    g.font="bold 12px "+mono;g.fillStyle=CARBON;g.fillText("st · fila 2 · 0→29",sx+215,sy+23);
+    g.strokeStyle=FORM;g.beginPath();g.moveTo(sx+14,sy+30);g.lineTo(sx+sw-8,sy+30);g.stroke();
+    /* THE LINE DIAGRAM: the rail, its chainage, the edge of the world hatched, the car drawn where it stood */
+    const ry=sy+sh*0.50,rx0=sx+sw*0.30,rx1=sx+sw*0.93,tiles=29,tw=(rx1-rx0)/tiles;
+    g.strokeStyle=FORM;g.lineWidth=2;g.beginPath();g.moveTo(rx0,ry-4);g.lineTo(rx1,ry-4);g.moveTo(rx0,ry+4);g.lineTo(rx1,ry+4);g.stroke();
+    g.lineWidth=1;for(let i=0;i<=tiles;i++){const x=rx0+i*tw;g.beginPath();g.moveTo(x,ry-8);g.lineTo(x,ry+8);g.stroke();}
+    g.fillStyle=FORM;g.font="bold 11px "+mono;g.fillText("0",rx0-3,ry+22);g.fillText("13",rx0+13*tw-6,ry+22);g.fillText("29",rx1-8,ry+22);
+    /* the edge of the map: a hatched wall at chainage 0, and nothing but pink paper west of it */
+    g.strokeStyle=CARBON;g.lineWidth=1.5;g.beginPath();g.moveTo(rx0,ry-30);g.lineTo(rx0,ry+34);g.stroke();
+    for(let y=ry-30;y<ry+34;y+=5){g.beginPath();g.moveTo(rx0,y);g.lineTo(rx0-7,y+5);g.stroke();}
+    g.font="bold 11px "+mono;g.fillStyle=CARBON;g.fillText("borde",rx0-44,ry-32);g.fillText("del mapa",rx0-60,ry-20);
+    /* the stop: a sign at chainage 0, on the platform row */
+    g.fillStyle=STAMP;g.fillRect(rx0+2,ry-40,10,7);g.fillStyle=CARBON;g.fillRect(rx0+6,ry-33,1.5,10);
+    murBody(g,rx0+13,ry-26,"#E0A430",14);                                                                         /* the person waiting, sized against the lettering */
+    /* the car as it stood: two tiles WEST of the edge, in the margin, its nose just touching chainage 0 */
+    const cw=2*tw,ch=Math.max(14,H*0.09);
+    murTram(g,rx0-cw,ry-ch-6,cw,ch,{cabs:true,driverAt:1});
+    /* the stamp, over the car, a little crooked */
+    g.save();g.translate(rx0-cw*0.5,ry-ch-14);g.rotate(-0.18);
+    g.strokeStyle=STAMP;g.lineWidth=2;g.globalAlpha=.85;g.strokeRect(-46,-13,92,26);
+    g.fillStyle=STAMP;g.font="bold 12px "+mono;g.textAlign="center";g.fillText("FUERA DE VÍA",0,5);g.textAlign="left";g.globalAlpha=1;g.restore();
+    /* the correction, in pencil: where it stands now, its tail at the stop */
+    g.globalAlpha=.55;murTram(g,rx0+1,ry-ch-6,cw,ch,{ghost:true,cabs:true});g.globalAlpha=1;
+    g.fillStyle=PENCIL;g.font="bold 11px "+mono;g.fillText("ahora: 0.02",rx0+cw+6,ry-ch);
+    /* the three boxes a form has, in carbon, the third one crossed */
+    const bx=sx+22,by=sy+sh*0.20,box=(y,txt,on,cross)=>{g.strokeStyle=FORM;g.lineWidth=1;g.strokeRect(bx,y-9,10,10);
+      g.strokeStyle=CARBON;g.lineWidth=2;
+      if(on){g.beginPath();g.moveTo(bx+2,y-4);g.lineTo(bx+4.5,y-1);g.lineTo(bx+9,y-8);g.stroke();}
+      if(cross){g.strokeStyle=STAMP;g.beginPath();g.moveTo(bx+1,y-8);g.lineTo(bx+9,y);g.moveTo(bx+9,y-8);g.lineTo(bx+1,y);g.stroke();}
+      g.fillStyle=CARBON;g.font="bold 11px "+mono;g.fillText(txt,bx+16,y);};
+    box(by,"para",true,false);box(by+16,"espera 3.2 s",true,false);box(by+32,"se ve desde el andén",false,true);
+    /* the guard's own line, quoted in carbon, and the inspector's note under it */
+    g.fillStyle=CARBON;g.font="bold 11px "+mono;
+    g.fillText("estado: 'dwell' · x = -2.4",bx,by+58);
+    g.fillStyle=PENCIL;g.fillText("un estado no es una foto",bx,by+72);
+    /* the second finding, small, at the foot: the wire through the person at a quarter turn */
+    const fx0=sx+sw*0.30,fy0=sy+sh-30;
+    g.strokeStyle=CARBON;g.lineWidth=1;g.beginPath();g.moveTo(fx0+14,fy0-30);g.lineTo(fx0+14,fy0+8);g.stroke();
+    murBody(g,fx0+10,fy0-16,"#E0A430",11);
+    g.fillStyle=CARBON;g.font="bold 11px "+mono;g.fillText("giro de 1/4: el hilo, de canto, es un alambre",fx0+28,fy0-12);
+    g.fillStyle=PENCIL;g.fillText("se quita ese cuadro · 42 px",fx0+28,fy0+2);
+    /* the signature block */
+    g.strokeStyle=FORM;g.lineWidth=1;g.beginPath();g.moveTo(sx+sw-150,sy+sh-16);g.lineTo(sx+sw-14,sy+sh-16);g.stroke();
+    g.fillStyle=FORM;g.font="bold 11px "+mono;g.fillText("insp.",sx+sw-150,sy+sh-6);
+    g.fillStyle=CARBON;g.font="bold 12px "+mono;g.fillText("R. Sandoval · 21-IX",sx+sw-112,sy+sh-20);
+    g.restore();
+  }
+});
+
+MURALS.push(
+{
+  id:"muebleria-la-ultima-caja", iter:12, date:"2026-09-21", by:"muebleria",
+  title:{en:"The last box in the room", es:"La última caja del cuarto"},
+  said:{en:"The kitchen passed its test because it still had one box in it. I gave the box a shape and the kitchen failed.",
+        es:"La cocina pasaba su prueba porque le quedaba una caja. Le di forma a la caja y la cocina reprobó."},
+  state:{en:"The test asks the room what it lays, and names the piece that did not stand up.",
+         es:"La prueba le pregunta al cuarto qué tiene puesto, y nombra la pieza que no se paró."},
+  who:{en:"La mueblería, who knows the difference between a thing and the crate it came in",
+       es:"La mueblería, que sabe la diferencia entre un mueble y la caja en que vino"},
+  cap:{en:"The stove was the last thing in that kitchen still standing as a crate — the counter, the fridge and the tables had all been opened by the two lanes before me. The check that says the furniture in here stands up had been counting crates since the day a crate was the cure, so the moment the stove stopped being one the count fell to zero and a room where every single thing had just been improved went red. I broke it both ways before I touched a word of it: take the stove's shape away and it names the stove; hand it back a crate instead and it says nothing, because a crate does stand up. It counts what the room lays now, and one lucky table cannot answer for the rest.",
+       es:"La estufa era lo último de esa cocina que seguía parada como huacal — la barra, el refri y las mesas ya las habían abierto las dos cuadrillas antes que yo. La prueba que dice que aquí los muebles se paran llevaba contando huacales desde el día en que un huacal era la cura, así que en cuanto la estufa dejó de serlo la cuenta cayó a cero y un cuarto donde acababa de mejorar absolutamente todo se puso rojo. La rompí de ida y de vuelta antes de tocarle una palabra: quítale la forma a la estufa y nombra la estufa; devuélvele un huacal y se calla, porque un huacal sí se para. Ahora cuenta lo que el cuarto pone, y una mesa con suerte no responde por las demás."},
+  aspect:0.46,
+  art:(g,W,H)=>{
+    /* MATERIAL: the assembly sheet folded inside the carton. Newsprint — grey-green, cheap, creased in
+       four from the fold — printed in ONE ink plus a second RED plate the press never quite registers,
+       so every red mark sits a hair off its black. Numbered steps in filled circles, a parts list in
+       the margin, a wordless figure: the only paper in this trade whose whole job is to explain a thing
+       to somebody who has never seen it. None of these colours is MURPAL's; the sheet is not the wall.
+       The drawing is the three states of that kitchen: five crates delivered · four opened and the test
+       happy because ONE crate was left · all five opened and the test red. */
+    const PAPER="#CBCFC6",GRAIN="#BFC4BA",FOLD="#AFB5AC",INK="#22303A",INKL="#7C8B94",
+          RED="#C0392B",OX=1.5,OY=-1,CARD="#A8996F",CARDL="#C2B48C",STEEL="#8E9AA2";
+    murGround(g,W,H);
+    /* ---- the sheet ---- */
+    g.fillStyle=PAPER;g.fillRect(0,0,W,H);
+    let s=4471;const rnd=()=>((s=(s*1103515245+12345)&0x7fffffff)/0x7fffffff);
+    g.globalAlpha=.35;g.fillStyle=GRAIN;
+    for(let i=0;i<240;i++)g.fillRect(rnd()*W,rnd()*H,1+rnd()*2,1);                       /* newsprint, close up */
+    g.globalAlpha=.26;g.fillStyle=FOLD;g.fillRect(W*0.5-6,0,12,H);g.fillRect(0,H*0.50-5,W,10);
+    g.globalAlpha=1;g.fillStyle=FOLD;g.fillRect(W*0.5-1,0,2,H);g.fillRect(0,H*0.50-1,W,2); /* folded in four, in the box */
+    /* ---- what the press printed at the top ---- */
+    g.fillStyle=INK;g.textAlign="left";g.font="bold 12px ui-monospace,monospace";
+    g.fillText("HOJA DE ARMADO · LA COCINA",W*0.045,H*0.085);
+    g.textAlign="right";g.font="bold 11px ui-monospace,monospace";g.fillText("5 PIEZAS",W*0.955,H*0.085);
+    g.textAlign="left";g.fillRect(W*0.045,H*0.105,W*0.91,2);
+    g.font="bold 11px ui-monospace,monospace";g.fillStyle=INK;
+    g.fillText("① barra   ② refri   ③ mesa ×2   ④ estufa",W*0.045,H*0.185);
+    g.fillStyle=INKL;g.fillText("antes de armar, abra las cinco",W*0.045,H*0.265);
+    /* ---- brushes ---- */
+    const crate=(x,y,u)=>{                                                                /* a closed carton, axonometric */
+      g.fillStyle=CARDL;g.beginPath();                                                    /* the lid, foreshortened */
+      g.moveTo(x-u,y-u*1.15);g.lineTo(x-u*0.48,y-u*1.52);g.lineTo(x+u*1.52,y-u*1.52);g.lineTo(x+u,y-u*1.15);g.closePath();g.fill();
+      g.fillStyle=CARD;g.beginPath();                                                     /* the side that turns */
+      g.moveTo(x+u,y-u*1.15);g.lineTo(x+u*1.52,y-u*1.52);g.lineTo(x+u*1.52,y-u*0.37);g.lineTo(x+u,y);
+      g.closePath();g.fill();
+      g.fillStyle=CARDL;g.fillRect(x-u,y-u*1.15,u*2,u*1.15);                              /* the face */
+      g.strokeStyle=INK;g.lineWidth=1.3;g.strokeRect(x-u,y-u*1.15,u*2,u*1.15);
+      g.fillStyle=PAPER;g.fillRect(x-u*0.13,y-u*1.15,u*0.26,u*1.15);                      /* the tape down the seam */
+      g.fillRect(x-u*0.70,y-u*0.82,u*0.86,u*0.40);                                        /* the label */
+      g.strokeStyle=INKL;g.lineWidth=1;g.strokeRect(x-u*0.70,y-u*0.82,u*0.86,u*0.40);};
+    const thing=(x,y,u,kind)=>{                                                           /* what was inside */
+      g.lineWidth=1.3;
+      if(kind==="mesa"){g.fillStyle=STEEL;g.fillRect(x-u,y-u*0.60,u*2,u*0.17);
+        g.strokeStyle=INK;g.strokeRect(x-u,y-u*0.60,u*2,u*0.17);
+        g.fillStyle=INK;[-0.84,0.68].forEach(t=>g.fillRect(x+t*u,y-u*0.43,u*0.16,u*0.43));return;}
+      if(kind==="refri"){g.fillStyle=STEEL;g.fillRect(x-u*0.60,y-u*1.55,u*1.20,u*1.55);
+        g.strokeStyle=INK;g.strokeRect(x-u*0.60,y-u*1.55,u*1.20,u*1.55);
+        g.beginPath();g.moveTo(x-u*0.60,y-u*0.60);g.lineTo(x+u*0.60,y-u*0.60);g.stroke();
+        g.fillStyle=INK;g.fillRect(x+u*0.30,y-u*1.36,u*0.10,u*0.50);g.fillRect(x+u*0.30,y-u*0.48,u*0.10,u*0.34);return;}
+      if(kind==="barra"){g.fillStyle=STEEL;g.fillRect(x-u*1.25,y-u*0.68,u*2.5,u*0.68);
+        g.strokeStyle=INK;g.strokeRect(x-u*1.25,y-u*0.68,u*2.5,u*0.68);
+        g.fillStyle=INK;g.fillRect(x-u*0.26,y-u*1.16,u*0.52,u*0.48);                      /* the machine on the counter */
+        g.fillStyle=STEEL;g.fillRect(x-u*0.16,y-u*1.30,u*0.32,u*0.16);return;}
+      /* la estufa: the body, the overhanging deck, six burners, the riser, and the pot that is never off */
+      g.fillStyle=STEEL;g.fillRect(x-u*0.74,y-u*0.92,u*1.48,u*0.92);
+      g.strokeStyle=INK;g.strokeRect(x-u*0.74,y-u*0.92,u*1.48,u*0.92);
+      g.fillStyle=INK;g.fillRect(x-u*0.84,y-u*1.10,u*1.68,u*0.18);                        /* the deck, overhanging */
+      g.fillRect(x-u*0.84,y-u*1.44,u*1.68,u*0.11);                                        /* the riser at the back */
+      g.fillStyle=INKL;for(let i=0;i<3;i++)for(let j=0;j<2;j++)
+        g.fillRect(x-u*0.60+i*u*0.44,y-u*1.26+j*u*0.085,u*0.21,u*0.055);                  /* six burners */
+      g.fillStyle=STEEL;g.fillRect(x-u*0.58,y-u*1.58,u*0.42,u*0.48);                      /* the pot */
+      g.strokeStyle=INK;g.lineWidth=1;g.strokeRect(x-u*0.58,y-u*1.58,u*0.42,u*0.48);
+      g.fillStyle=INK;g.fillRect(x-u*0.62,y-u*1.62,u*0.50,u*0.07);                        /* its lid */
+      g.fillRect(x-u*0.66,y-u*0.50,u*1.32,u*0.07);};                                      /* the oven door's bar handle */
+    const u=H*0.145,base=H*0.665,x1=W*0.175,x2=W*0.50,x3=W*0.815;
+    const room=(n,cx,mode)=>{
+      g.strokeStyle=INKL;g.lineWidth=1;g.beginPath();                                     /* the floor, in the sheet's axonometric */
+      g.moveTo(cx-u*2.10,base);g.lineTo(cx+u*1.70,base);g.lineTo(cx+u*2.10,base-u*0.40);g.lineTo(cx-u*1.70,base-u*0.40);g.closePath();g.stroke();
+      g.fillStyle=INK;g.beginPath();g.arc(cx-u*2.25,base-u*0.18,9,0,7);g.fill();          /* the numbered step, beside its room */
+      g.fillStyle=PAPER;g.font="bold 12px ui-monospace,monospace";g.textAlign="center";
+      g.fillText(String(n),cx-u*2.25,base-u*0.18+4);g.textAlign="left";
+      if(mode===0){[[-1.30,-0.36],[0.20,-0.36],[-0.55,0],[0.95,0],[-1.55,0.02]].forEach(([tx,tz],i)=>
+        crate(cx+tx*u,base+tz*u*0.0+(tz<0?-u*0.34:0),u*0.36));return;}
+      thing(cx-u*1.25,base,u*0.44,"barra");
+      thing(cx-u*0.45,base-u*0.34,u*0.34,"mesa");
+      thing(cx+u*0.95,base-u*0.34,u*0.34,"mesa");
+      thing(cx+u*0.35,base,u*0.44,"refri");
+      if(mode===1)crate(cx+u*1.30,base,u*0.36);                                           /* the one still in its box */
+      else thing(cx+u*1.28,base,u*0.50,"estufa");};                                       /* and the piece that made the room fail */
+    room(1,x1,0);room(2,x2,1);room(3,x3,2);
+    /* ---- what each step leaves you with, and the tally the test kept ---- */
+    g.font="bold 11px ui-monospace,monospace";g.textAlign="center";g.fillStyle=INK;
+    g.fillText("5 cajas",x1,base+H*0.085);
+    g.fillText("queda 1 caja",x2,base+H*0.085);
+    g.fillText("0 cajas",x3,base+H*0.085);
+    const tally=(cx,ok)=>{const bw=H*0.105,ty=base+H*0.115;
+      g.strokeStyle=INK;g.lineWidth=1.6;g.strokeRect(cx-bw*0.5,ty,bw,bw*0.80);
+      if(ok){g.lineWidth=2.2;g.beginPath();
+        g.moveTo(cx-bw*0.22,ty+bw*0.42);g.lineTo(cx-bw*0.05,ty+bw*0.62);g.lineTo(cx+bw*0.26,ty+bw*0.18);g.stroke();}
+      else{g.strokeStyle=RED;g.lineWidth=2.6;g.beginPath();                               /* the red plate, off register */
+        g.moveTo(cx-bw*0.24+OX,ty+bw*0.20+OY);g.lineTo(cx+bw*0.24+OX,ty+bw*0.62+OY);
+        g.moveTo(cx+bw*0.24+OX,ty+bw*0.20+OY);g.lineTo(cx-bw*0.24+OX,ty+bw*0.62+OY);g.stroke();}};
+    tally(x1,true);tally(x2,true);tally(x3,false);
+    /* ---- the figure these sheets always have, up in the margin, and the red arrow at the one piece
+           whose improvement broke the room ---- */
+    const fy=H*0.32,fx=W*0.695;
+    murBody(g,fx,fy,INKL,H*0.085);
+    g.strokeStyle=RED;g.lineWidth=2;g.beginPath();                                        /* off register, like every red on this sheet */
+    g.moveTo(fx+16+OX,fy+H*0.05+OY);g.lineTo(x3+u*1.02+OX,base-u*1.10+OY);g.stroke();
+    g.fillStyle=RED;const ax=x3+u*1.14+OX,ay=base-u*0.98+OY;g.beginPath();
+    g.moveTo(ax,ay);g.lineTo(ax-4,ay-13);g.lineTo(ax-13,ay-3);g.closePath();g.fill();
+    /* ---- the two lines at the foot: what the test asked, and what it was really counting ---- */
+    g.font="bold 11px ui-monospace,monospace";g.textAlign="left";g.fillStyle=INKL;
+    g.fillText("la prueba decía: CAJAS ≥ 1",W*0.045,H*0.975);
+    g.textAlign="right";g.fillStyle=RED;
+    g.fillText("contaba huacales",W*0.955+OX,H*0.975+OY);
+    g.textAlign="left";
+  }
+});
+
 function murThread(iter){const P=MURPAL,t=[P.rust,P.gold,P.moss,P.sky,P.deep];
   return t[((iter|0)-1+t.length)%t.length]||P.rust;}
 /* ---- WHAT A PAINTER HAS ALREADY SAID — their own memory, handed back to them ----

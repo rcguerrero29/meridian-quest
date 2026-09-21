@@ -5,6 +5,35 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
+### ⇢ 2026-09-21, latest — crew iteration 12 shipped in three parts: #229, #230 and the furniture sweep. `mq-v185`.
+
+Owner: *"a couple more to beautify and shape - crew mode please … also we should fix the trolley weirdness.
+the skeleton now seems to float in one perspective"*, then *"cool merge and then run a crew mode do update
+the remaining items"*. Four builders, four worktrees, four lanes; everything he named is a shape, both bugs
+are fixed, and **nothing of the furniture/appliance/prop/fence/transit classes is a picture or a box in
+Meridian any more** — the known-flat list is `3 4 5 X` (the park's agility gear and the site marker).
+Run `docs/runs/2026-09-21-claude-e9a5.md`; flight notes iteration 12; four panels on the wall.
+
+**The three findings worth carrying.** (1) **The lid is still the best-hidden fault in this engine:** it
+was found again on the one glyph that was a box ON PURPOSE — the owner's own packing cartons wore their
+front elevation face-up on the lid, and no check in the repository could see it. Crop a box's top at 3×
+before believing it. (2) **A guard can go red because the work was good** — the stove was the last box in
+La Cocina and a 2026-09-07 check asked for one; `box` was a proxy for "stands up as a thing with sides".
+(3) **His frame was never the camera anybody assumed:** the floating skeleton was the 3D camera at a
+quarter turn, where a swag hanging along its row is a bare line through whoever stands on it.
+
+**Three choices the inspector left him,** in #230 and the run file: what should happen when he steps onto
+the rails beside a standing car (refuse the step, glass, or swallow him as it does now); whether the line
+may keep starting two tiles off the map; whether the stop moves a tile so the car stands centred. **Five
+more from the other lanes** are in the run file's acceptance list, the notary's hidden waiting corner
+among them.
+
+**The persona rule is settled and in force:** the proposal is always written, the session decides, the
+owner overrules. Pili's edit applied (row 70), the inspector's refused in writing with its reason (row 76),
+three guests' lines kept in `docs/personas/proposed/README-guests-iteration-12.md` against the day those
+characters are opened. **A worktree is not the branch:** two builders were handed worktrees one to five
+commits behind, and both caught it by reading; the next crew run should re-sync before it starts.
+
 ### ⇢ 2026-09-21 — #225 merged (`8313766`). The plan below is RUNNING as crew iteration 12, by his word ("cool merge and then run a crew mode do update the remaining items").
 
 ### ⇢ The plan, as written before the run (2026-09-21). Crew mode ON, by his word.

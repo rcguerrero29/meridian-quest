@@ -527,7 +527,14 @@ function findChromium() {
     /* 'Y' came off on 2026-09-21, crew iteration 12 (el ebanista, #226): the trolley stop is a shelter from parts —
        posts, a roof, the name-board round it with M·Q·T built of boxes, a bench (TILEART_MESH["Y"]). Red first, the
        audit's own sentence: '"Y" is no longer flat in 3D — take it off this game's row'. Still flat: 3 4 5 A X. */
-    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', 'A', 'X'] };
+    /* 'A' came off on 2026-09-21, crew iteration 12 (la mueblería): the drafting table is a shape from parts —
+       two feet, two columns, a stretcher, and the BOARD raked at 23° with its pencil rail, sheet and parallel
+       rule (TILEART_MESH["A"] in content/meridian/art.js). It was the last piece of FURNITURE on this list, and
+       the owner's ask was furniture: "no i was just trying to make sure all furniture and this type of item".
+       Red first, the audit's own sentence: '"A" is no longer flat in 3D — take it off this game's row of
+       FLAT_BY_GAME in test/engine.smoke.js (the key is "index.html") so the list keeps shrinking (#39)'.
+       Still flat: 3 4 5 (the agility gear, which is machinery) and X (the site marker). */
+    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', 'X'] };
     const FLAT_KNOWN = FLAT_BY_GAME[IDXNAME] || FLAT_BASE;
     const laid = new Set(); Object.values(WORLDS).forEach(w => w.rows.forEach(r => r.split('').forEach(ch => laid.add(ch))));
     Object.keys(flat).forEach(g => { if (!FLAT_KNOWN.includes(g)) P.push('"' + g + '" (' + ((TILES[g] || {}).kind || '?') + ') stands in 3D as a flat picture in ' + [...flatIn[g]].join(',') + ' — give it a side view (TILESIDE) so it becomes a box; nothing new may ship flat (#39)'); });
