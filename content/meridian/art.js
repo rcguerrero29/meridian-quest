@@ -413,7 +413,7 @@ TILEART_SIDE["I"]=rc=>{const{sx,sy,x,y}=rc;
     produce(sx+16,sy+8,"tomato",1.1);}
 };
 /* ---- BEAUTIFY, FIRST SITTING — 2026-09-21. Three drawings, content only. ----
-   docs/BEAUTIFY.md, "The contact sheet — 2026-09-21", rows 1–3. Drawn the way docs/how-its-made says:
+   docs/BEAUTIFY.md, "The contact sheet — 2026-09-21", rows 1–3. Drawn the way .claude/skills/how-its-made says:
    by the process that made the thing, with variation entering at the step it entered and nowhere
    earlier, and lit as everything else on this street — key upper-left, one contact shadow. */
 
@@ -527,7 +527,7 @@ TILEART_SIDE["b"]=rc=>{const{sx,sy,x,y}=rc;
    Owner: "i still see squares and not polygonal shapes … can we not try this finally?" The `mesh`
    view: a list of primitives per tile, in tile units (a tile is 1.0 wide, a person about 1.0 tall),
    y up from the floor, the tile's centre at (0,0). The engine merges them into one mesh with vertex
-   colours. Drawn as docs/how-its-made says: by what the thing is made of. A marigold head is a
+   colours. Drawn as .claude/skills/how-its-made says: by what the thing is made of. A marigold head is a
    pom-pom — a sphere. A pot was thrown — a tapered cylinder with a rim. A bookcase is a carcass of
    boards with what a person put on them. Colours go through tc() in the engine, so the theme and
    the time of day reach these like everything else. */
@@ -901,7 +901,7 @@ TILEART_MESH["8"]=({x,y})=>{
 
 /* THE TIRE STACK (owner: "tires"). What TILE_PROPS["0"] says it is: THREE tires, one above the other,
    each with its hub hole — "a zero IS a tire". One mould made all three, so they are the same tire
-   (docs/how-its-made: variation enters at the step it entered, and nowhere earlier); they were thrown
+   (.claude/skills/how-its-made: variation enters at the step it entered, and nowhere earlier); they were thrown
    on the pile one at a time, so the top one landed a little off, and the ones underneath carry the
    weight. The top one is painted a step lighter — the two below sit in its shade — and the rim of the
    top tire shows through its hole, the one light value in the stack. */
@@ -960,6 +960,157 @@ TILEART_MESH["7"]=()=>{
     {s:"box",x:CX-0.17,y:0.73,z:0,w:0.42,h:0.08,d:0.36,c:GLASS},                           /* the glass band */
     {s:"box",x:CX-0.17,y:0.79,z:0,w:0.42,h:0.04,d:0.38,c:ROOF});                           /* the roof, lighter */
   [[CX-0.365,-0.17],[CX+0.025,-0.17],[CX-0.365,0.17],[CX+0.025,0.17]].forEach(([px,pz])=>parts.push({s:"box",x:px,y:0.73,z:pz,w:0.03,h:0.08,d:0.03,c:CABIN})); /* the pillars */
+  return parts;};
+
+/* ---- BEAUTIFY, CREW ITERATION 11 — la calle ----
+   Owner: "lets do a crew mode to try to fix as many things … rails, fences, … bridge, petals, trolley,
+   … fruit stands". The street and the park, built the way each thing was built (.claude/skills/how-its-made):
+   a picket fence is posts set in the ground, two rails and pickets nailed on; a balustrade is a shoe,
+   panes, posts and a cap; a crate is a slatted box and what a hand set in it; a counter is one carcase
+   the length of its run. Same seam as the sittings above, colours a step paler than the pictures they
+   replace, because a lit mesh shades itself (docs/3D-LOG.md 2026-09-21). The bridge and the tram are
+   the engine's (scratchpad: bridge-parts.md, trolley-parts.md) — the hook never reaches `^`. */
+
+/* A CREST OF PETALS. Content cannot change the ground bake's density (engine.js, petalSpill: a function
+   of distance from the bridge only); what it can add is the line where a drift meets something — a
+   fence's foot, a curb — a dark under and six to ten petals standing a hair proud of it. A petal at
+   this scale is a flattened ellipsoid; the fan and the rib are the picture's job. Colours from
+   petalPal(), the dark end kept for the under. In season only; the caller asks petalsOn(). (Pili) */
+const meshPetalCrest=(parts,n,seed,ax,a,b,off,y0)=>{const P=petalPal();let sd=((seed|0)*7919+13)&0x7fffffff;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+  const at=(al,o)=>ax==="x"?{x:al,z:o}:{x:o,z:al};let q=at((a+b)/2,off);
+  parts.push({s:"box",x:q.x,y:y0+0.006,z:q.z,w:(b-a)*0.92,h:0.012,d:0.11,c:"#5A2E12",ry:ax==="x"?0:Math.PI/2});        /* the dark under the drift */
+  for(let i=0;i<n;i++){q=at(a+0.06+rnd()*(b-a-0.12),off+(rnd()-0.5)*0.07);
+    parts.push({s:"sph",x:q.x,y:y0+0.02,z:q.z,r:0.05,sx:1.2,sy:0.25,c:P[1+((i+(seed|0))%(P.length-1))],ry:rnd()*Math.PI});}};
+
+/* THE PICKET FENCE. One post a tile, at the tile's centre — a rail bay wants a post every six feet, and
+   a tile is about that; two rails on the yard side running post to post THROUGH the tile edges, so each
+   tile's rail spans the whole tile and butts its neighbour's; four pickets a bay on the street side, cut
+   from one stock on one jig — one width, one point — and nailed on by hand, which is where the variation
+   enters: a hair higher or lower, one leaning a degree, three weathered shades. The rails a step darker
+   than the pickets: that behind-value is the depth (Pili). A corner is two runs meeting at the corner
+   post; a run ends at its post and nothing overhangs; the post's cut top is lit. A neighbour is the same
+   GLYPH: the barricade beside the crew pen is kind `fence` too, and reading the kind is what stood the
+   engine's panels at 90° in mid-air there (docs/BEAUTIFY.md, row F). The park's sixty tiles are one
+   fence and the site's are the same fence, because this pack draws one F in every other camera. In
+   season, a crest of petals along its foot on the park side within three tiles of the bridge. */
+TILEART_MESH["F"]=({x,y})=>{
+  const w=CW(),F=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="F";};
+  const open=(gx,gy)=>{const r=w&&w.grid&&w.grid[gy];return !!r&&r[gx]!==undefined&&!SOLID.has(r[gx]);};
+  const N=F(x,y-1),S=F(x,y+1),E=F(x+1,y),Wt=F(x-1,y),h=(((x*7+y*13)%5)+5)%5;
+  const PICK=["#A87F4F","#B08A58","#9E7748"],TIP="#B99464",RAIL="#6B4F2E",POST="#6B4F2E",CAPC="#B08E5E",H=0.72;
+  const parts=[],runs=[],corner=(E||Wt)&&(N||S);
+  /* a run: at a corner each run stops at the corner post in the tile's centre; a straight bay spans the
+     tile; a run's END spans the tile too and gets an end post at the edge of the gap, so a gate opening
+     is the open tile and not the open tile and a half */
+  if(E||Wt)runs.push({ax:"x",a:corner&&!Wt?0:-0.5,b:corner&&!E?0:0.5,end:corner?0:!Wt?-1:!E?1:0,s:open(x,y+1)?1:open(x,y-1)?-1:1}); /* rails face the yard: the open side */
+  if(N||S)runs.push({ax:"z",a:corner&&!N?0:-0.5,b:corner&&!S?0:0.5,end:corner?0:!N?-1:!S?1:0,s:open(x+1,y)?1:open(x-1,y)?-1:1});
+  if(!runs.length)runs.push({ax:"x",a:-0.5,b:0.5,end:2,s:open(x,y+1)?1:-1});                   /* alone, a whole bay east-west, a post at each end */
+  const pet=typeof petalsOn==="function"&&petalsOn()&&typeof bridgeDist==="function"&&bridgeDist(w,x,y)<=3;
+  let px=0,pz=0;
+  const post=(qx,qz)=>{parts.push({s:"box",x:qx,y:0.41,z:qz,w:0.09,h:0.82,d:0.09,c:POST});
+    parts.push({s:"box",x:qx,y:0.83,z:qz,w:0.11,h:0.02,d:0.11,c:CAPC});};                       /* a post, its cut top lit */
+  runs.forEach(({ax,a,b,end,s},ri)=>{const ry=ax==="x"?0:Math.PI/2,at=(al,off)=>ax==="x"?{x:al,z:off}:{x:off,z:al};
+    if(ax==="x")pz=s*0.04;else px=s*0.04;                                                      /* the post stands behind the rails */
+    [0.24,0.56].forEach(yy=>{const q=at((a+b)/2,-s*0.01);parts.push({s:"box",x:q.x,y:yy,z:q.z,w:b-a,h:0.05,d:0.03,c:RAIL,ry});});
+    [-0.38,-0.13,0.13,0.38].forEach((al,i)=>{if(al<a-0.01||al>b+0.01)return;
+      const q=at(al,-s*0.037),k=(i+h+ri)%3,ph=H-0.07-k*0.014,lean=((i*7+h)%3-1)*0.012;
+      parts.push({s:"box",x:q.x,y:0.05+ph/2,z:q.z,w:0.13,h:ph,d:0.025,c:PICK[k],ry,rz:lean});    /* the board, a hair off the ground */
+      parts.push({s:"cone",x:q.x,y:0.05+ph+0.04,z:q.z,r:0.072,h:0.08,c:TIP,sz:0.36,ry});});      /* its point, off the jig */
+    if(end===2||end===-1){const q=at(-0.455,s*0.04);post(q.x,q.z);}                             /* the end post, at the edge of the gap */
+    if(end===2||end===1){const q=at(0.455,s*0.04);post(q.x,q.z);}
+    if(pet)meshPetalCrest(parts,6+(h%4),x*31+y*17+ri,ax,a,b,s*0.13,0);});                       /* the drift, against the foot on the park side */
+  post(px,pz);                                                                                  /* the bay post, one a tile */
+  return parts;};
+
+/* THE RAIL ROUND THE WELL. In this pack it is a glass divider (owner, 2026-09-16: "make it a glass
+   divider"; TILEART_SIDE_GLASS above) — but a vertex-coloured Lambert mesh has no alpha, and a pane drawn
+   as a pale sheet was rendered and looked at: a bathtub wall that hid the flight, which is the one thing
+   the divider exists to show. So the 3D camera builds what a glazier fits round an opening MINUS the
+   glass: the shoe channel bolted along the lip, the posts, and the cap rail — one bar the length of the
+   run, unbroken, dark over the pale floor with a light strip on top (Pili: a light cap over this floor
+   is Δ38 after tint and fails). It stands on the LIP of the well and faces it — wellDepth of the four
+   neighbours says which lip, the engine's own rule for a rail beside a well — and it is waist-high,
+   which is what a guard rail is. A post at the near edge and the centre; the far edge is the next
+   tile's near post, or an end post where the run ends. The pane itself needs alpha: NEEDS ENGINE. */
+TILEART_MESH["◺"]=({x,y})=>{
+  const w=CW(),wl=(gx,gy)=>typeof wellDepth==="function"&&wellDepth(w,gx,gy)>0;
+  const R=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="◺";};
+  const lip=wl(x,y+1)?[0,0.44,0]:wl(x,y-1)?[0,-0.44,0]:wl(x+1,y)?[0.44,0,Math.PI/2]:wl(x-1,y)?[-0.44,0,Math.PI/2]:[0,0,0];
+  const ry=lip[2],ax=ry?"z":"x",ends=ax==="x"?!R(x+1,y):!R(x,y+1);
+  const at=(al,off)=>ax==="x"?{x:lip[0]+al,z:lip[1]+off}:{x:lip[0]+off,z:lip[1]+al};
+  const CAP="#3A3F46",CAPL="#8E98A3",POST="#4A5058",H=0.62,parts=[];
+  let q=at(0,0);
+  parts.push({s:"box",x:q.x,y:H-0.03,z:q.z,w:1,h:0.06,d:0.07,c:CAP,ry});                       /* the cap rail: one line, the whole run */
+  parts.push({s:"box",x:q.x,y:H+0.004,z:q.z,w:1,h:0.008,d:0.07,c:CAPL,ry});                    /* its top, where the key lands */
+  [-0.475,0].concat(ends?[0.475]:[]).forEach(al=>{q=at(al,0);parts.push({s:"box",x:q.x,y:(H-0.06)/2,z:q.z,w:0.05,h:H-0.06,d:0.05,c:POST,ry});});
+  return parts;};                                                                              /* no shoe at the floor: with a bottom bar it rendered as a ladder on its side */
+
+/* THE PRODUCE CRATE. A slatted box nailed from one pattern — four corner posts standing a thumb proud of
+   the slats (that is what says crate and not box), three slats a side with a gap between, a rim — so
+   every crate is the same crate; what differs is what a grocer set in it, ONE KIND to a crate, by hand,
+   so it mounds and touches and spills over the front. The picture mixes a tomato, a chile and a banana
+   in each; that is a diagram of the word "produce". Which crate holds what follows the picture's own
+   parity, so the plan and the shape agree. The crate goes dark and the mouth darkest so the fruit reads
+   against it, and the fruit keeps the picture's saturation (Pili). Tomatoes are siblings off one plant:
+   one radius, a pack on the bottom, a second layer in the hollows, one on the peak, each with its green
+   star where the stem was, tumbled a little. A chile is a thin cone bent at the tip, lying every which
+   way. A hand of bananas is four fingers on one stem, each finger three short cylinders in a curve. */
+const meshTomato=(parts,tx,ty,tz,r,seed,col)=>{const a=seed*1.7,dx=Math.cos(a)*r*0.25,dz=Math.sin(a)*r*0.25;
+  parts.push({s:"sph",x:tx,y:ty,z:tz,r,sy:0.9,c:col});
+  parts.push({s:"sph",x:tx+dx,y:ty+r*0.82,z:tz+dz,r:r*0.34,sy:0.3,c:"#4E9A3E"});                /* the star, where the stem was */
+  parts.push({s:"cyl",x:tx+dx,y:ty+r*0.9,z:tz+dz,r:r*0.07,h:r*0.3,c:"#3E7A34"});};
+TILEART_MESH["H"]=({x,y})=>{const alt=(((x*3+y*5)%7)+7)%7,kind=alt<3?"tomato":alt<5?"chile":"banana";
+  let sd=(x*131+y*71+7)|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+  const POSTC="#6B4F2E",SLAT="#7A5B36",SLATL="#8A6A42",MOUTH="#3A2A18",parts=[],T=0.44,FILL=0.34;
+  [[-0.37,-0.29],[0.37,-0.29],[-0.37,0.29],[0.37,0.29]].forEach(([cx,cz])=>parts.push({s:"box",x:cx,y:(T+0.05)/2,z:cz,w:0.06,h:T+0.05,d:0.06,c:POSTC})); /* four posts, proud by a thumb */
+  [0.08,0.2,0.32].forEach(sy=>{[-0.3,0.3].forEach(z=>parts.push({s:"box",x:0,y:sy,z,w:0.74,h:0.1,d:0.03,c:SLAT}));                   /* three slats a side, a gap between */
+    [-0.385,0.385].forEach(xx=>parts.push({s:"box",x:xx,y:sy,z:0,w:0.03,h:0.1,d:0.58,c:SLAT}));});
+  [[0,-0.3,0.74,0.03],[0,0.3,0.74,0.03],[-0.385,0,0.03,0.58],[0.385,0,0.03,0.58]].forEach(([cx,cz,ww,dd])=>parts.push({s:"box",x:cx,y:T-0.03,z:cz,w:ww,h:0.06,d:dd,c:SLATL})); /* the rim, lit */
+  parts.push({s:"box",x:0,y:FILL-0.05,z:0,w:0.72,h:0.1,d:0.56,c:MOUTH});                                                            /* the mouth: the darkest thing on the street, the fruit against it */
+  if(kind==="tomato"){const r=0.095,RED=["#D4382A","#C9331F","#DE4232"];let i=0;
+    const one=(tx,ty,tz)=>{meshTomato(parts,tx+(rnd()-0.5)*0.016,ty,tz+(rnd()-0.5)*0.016,r,i+alt,RED[(i++ +alt)%3]);};
+    [-0.2,0,0.2].forEach(tx=>{one(tx,FILL+r,-0.19);one(tx,FILL+r,0);one(tx,FILL+r+0.03,0.25);});                                    /* the bottom, packed; the front row tumbled onto the rim, spilling over it */
+    [[-0.1,-0.1],[0.1,-0.1],[-0.1,0.1],[0.1,0.1]].forEach(([tx,tz])=>one(tx,FILL+r+0.15,tz));                                        /* the hollows */
+    one(0,FILL+r+0.29,0);}                                                                                                          /* the peak */
+  else if(kind==="chile"){const GRN="#52A542",DARK="#2F6B27";
+    for(let i=0;i<14;i++){const a=rnd()*Math.PI*2,cx=(rnd()-0.5)*0.5,cz=(rnd()-0.5)*0.38,cy=FILL+0.035+(i>8?0.065:0)+(i>12?0.06:0),ux=Math.sin(a),uz=Math.cos(a),b=a+0.5;
+      parts.push({s:"cone",x:cx,y:cy,z:cz,r:0.035,h:0.2,c:GRN,rx:Math.PI/2,ry:a});                                                 /* the body, lying */
+      parts.push({s:"cone",x:cx+ux*0.1+Math.sin(b)*0.045,y:cy,z:cz+uz*0.1+Math.cos(b)*0.045,r:0.018,h:0.1,c:GRN,rx:Math.PI/2,ry:b}); /* the tip, bent */
+      parts.push({s:"cyl",x:cx-ux*0.11,y:cy,z:cz-uz*0.11,r:0.024,h:0.03,c:DARK,rx:Math.PI/2,ry:a});}}                              /* the cap */
+  else{const YEL=["#E8C33A","#E0BB33"],TIPC="#5C4A1E";
+    [[-0.1,FILL+0.05,-0.08,0.4],[0.14,FILL+0.1,0.1,3.6],[-0.02,FILL+0.2,0.04,1.9]].forEach(([hx,hy,hz,ha],hi)=>{                     /* three hands, laid over each other */
+      const c=Math.cos(ha),s=Math.sin(ha),at=(lx,ly,lz)=>({x:hx+lx*c-lz*s,y:hy+ly,z:hz+lx*s+lz*c});
+      let q=at(-0.12,0.02,0);parts.push({s:"cyl",x:q.x,y:q.y,z:q.z,r:0.035,h:0.06,c:"#8A6B3A",rz:Math.PI/2,ry:-ha});                /* the stem they hang from */
+      for(let f=0;f<4;f++){const fz=(f-1.5)*0.062,fy=Math.abs(f-1.5)*0.014,col=YEL[(f+hi)%2];
+        [[-0.05,0,0.22],[0.04,0.02,0.42],[0.13,0.06,0.62]].forEach(([lx,ly,bend])=>{q=at(lx,fy+ly,fz);
+          parts.push({s:"cyl",x:q.x,y:q.y,z:q.z,r:0.03,h:0.1,c:col,rz:Math.PI/2-bend,ry:-ha});});
+        q=at(0.18,fy+0.085,fz);parts.push({s:"sph",x:q.x,y:q.y,z:q.z,r:0.024,c:TIPC});}});}                                         /* the dark tip */
+  return parts;};
+
+/* THE COUNTER. One carcase the length of the run: a plinth set back at the foot, the body, a worked
+   top a hair proud of the face, plank joins on the WORLD grid so they run through the tiles as the
+   picture's do, end panels only where the run ends — and the scale ONCE, at the head of the run, on the
+   top and not in the texture. (As a box the head tile stood taller than the other three, because the
+   baker measured the scale's dial into the box's height.) A cast base, a column, a pan, a dial face on a
+   stalk behind the pan, a red needle reading something, one tomato on the pan. */
+TILEART_MESH["I"]=({x,y})=>{
+  const w=CW(),cnt=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="I";};
+  const Wt=!cnt(x-1,y),E=!cnt(x+1,y),head=Wt,H=0.6;
+  const BODY="#9C7A4E",TOP="#B8925F",TOPL="#C9A46E",KICK="#7A5B38",CAP="#7A5B38",JOIN="#5E4527";
+  const parts=[{s:"box",x:0,y:0.03,z:0.02,w:1,h:0.06,d:0.58,c:KICK},                            /* the plinth, set back */
+    {s:"box",x:0,y:0.06+(H-0.1)/2,z:0,w:1,h:H-0.1,d:0.66,c:BODY},                                /* the carcase, tile to tile */
+    {s:"box",x:0,y:H-0.02,z:0,w:1,h:0.04,d:0.72,c:TOP},                                          /* the worked top, a hair proud */
+    {s:"box",x:0,y:H+0.001,z:0,w:1,h:0.004,d:0.72,c:TOPL}];                                      /* its lit face */
+  for(let gx=x*32;gx<x*32+32;gx++)if(gx%11===0){const lx=(gx-x*32)/32-0.5+1/64;parts.push({s:"box",x:lx,y:0.06+(H-0.1)/2,z:0.331,w:0.012,h:H-0.12,d:0.008,c:JOIN});}
+  if(Wt)parts.push({s:"box",x:-0.49,y:H/2-0.01,z:0,w:0.03,h:H-0.02,d:0.7,c:CAP});
+  if(E)parts.push({s:"box",x:0.49,y:H/2-0.01,z:0,w:0.03,h:H-0.02,d:0.7,c:CAP});
+  if(head){const y0=H+0.003,STEEL="#6F777F",PAN="#D3D7DC",FACE="#F2F4F5";
+    parts.push({s:"cyl",x:0,y:y0+0.01,z:0.02,r:0.1,h:0.02,c:STEEL},{s:"box",x:0,y:y0+0.09,z:0.02,w:0.05,h:0.14,d:0.05,c:STEEL});  /* the base and the column */
+    parts.push({s:"cyl",x:0,y:y0+0.165,z:0.02,r:0.13,h:0.015,c:PAN},{s:"cyl",x:0,y:y0+0.176,z:0.02,rt:0.135,rb:0.12,h:0.008,c:"#E8EBEE"}); /* the pan and its lip */
+    parts.push({s:"box",x:0,y:y0+0.23,z:-0.1,w:0.03,h:0.22,d:0.03,c:STEEL});                                                        /* the stalk behind the pan */
+    parts.push({s:"cyl",x:0,y:y0+0.34,z:-0.1,r:0.1,h:0.025,c:STEEL,rx:Math.PI/2},{s:"cyl",x:0,y:y0+0.34,z:-0.086,r:0.085,h:0.004,c:FACE,rx:Math.PI/2}); /* the dial, facing the shop */
+    parts.push({s:"box",x:0.014,y:y0+0.36,z:-0.082,w:0.007,h:0.06,d:0.004,c:"#D0402F",rz:-0.5});                                  /* the needle, reading something */
+    meshTomato(parts,0.01,y0+0.25,0.03,0.075,x+y,"#D4382A");}
   return parts;};
 
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},

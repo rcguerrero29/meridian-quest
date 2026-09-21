@@ -1750,13 +1750,36 @@ const CANDIDATES = [
     if (!draw3d() || T3.fail) { problems.push('3D did not render headless — fences could not be checked'); camSet(before.cam); return problems; }
     const w = CW();
     const isF = (x, y) => y >= 0 && y < w.H && x >= 0 && x < w.W && (TILES[w.rows[y][x]] || {}).kind === 'fence';
-    const seen = {};
-    T3.group.children.forEach(o => { const u = o.userData || {}; if (!u.fence) return;
+    const seen = {}, shaped = {};
+    T3.group.children.forEach(o => { const u = o.userData || {};
+      /* A pack that gave the fence a SHAPE (the `mesh` view, 2026-09-21) stands one merged mesh per tile
+         and no panel to turn, so the noun is read off the shape: does it REACH each tile it continues
+         into — per direction, because a run's end and a corner stop at their post and must not be asked
+         for the whole tile (the first cut of this asked for a full span and went red on twelve tiles that
+         were right). Its run is by the same GLYPH, which is how a pack builds it (TILEART_MESH["F"] reads
+         F, not kind) — a barricade beside the crew pen is kind `fence` too, and counting it as more fence
+         is what stood the engine's panels at 90° in mid-air there (docs/BEAUTIFY.md, row F). Planted in
+         a copy outside the repo (the rails cut to 0.6 of the bay; the whole shape turned a quarter): red
+         in the sentences below, both times. */
+      if (u.mesh && u.g !== undefined && (TILES[u.g] || {}).kind === 'fence' && o.geometry) {
+        o.geometry.computeBoundingBox(); const bb = o.geometry.boundingBox;
+        shaped[u.x + ',' + u.y] = { g: u.g, minx: bb.min.x, maxx: bb.max.x, minz: bb.min.z, maxz: bb.max.z }; return; }
+      if (!u.fence) return;
       const k = u.x + ',' + u.y; seen[k] = seen[k] || []; seen[k].push(Math.abs(o.rotation.y)); });
     let checked = 0;
     for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) if (isF(x, y)) {
       const ns = isF(x, y - 1) || isF(x, y + 1), ew = isF(x - 1, y) || isF(x + 1, y);
-      const rots = seen[x + ',' + y] || [];
+      const rots = seen[x + ',' + y] || [], sh = shaped[x + ',' + y];
+      if (!rots.length && sh) { checked++;
+        const same = (ax, ay) => ay >= 0 && ay < w.H && ax >= 0 && ax < w.W && w.rows[ay][ax] === sh.g;
+        /* 0.48, not 0.45: the outermost picket's point reaches 0.452 with the rails cut to 0.6 of the bay, and
+           a threshold under it would have read the picket for the rail — the plant found that */
+        [[1, 0, 'east', sh.maxx >= 0.48], [-1, 0, 'west', sh.minx <= -0.48], [0, 1, 'south', sh.maxz >= 0.48], [0, -1, 'north', sh.minz <= -0.48]].forEach(([dx, dy, name, reaches]) => {
+          if (same(x + dx, y + dy) && !reaches) problems.push(`the fence at (${x},${y}) continues ${name} into the next tile but its shape stops short of the tile line — the rails break there and the run reads as separate panels`); });
+        const runNS = same(x, y - 1) || same(x, y + 1), runEW = same(x - 1, y) || same(x + 1, y);
+        if (runEW && !runNS && sh.maxz - sh.minz > 0.5) problems.push(`the fence at (${x},${y}) runs east-west but its shape is turned across the run`);
+        if (runNS && !runEW && sh.maxx - sh.minx > 0.5) problems.push(`the fence at (${x},${y}) runs north-south but its shape is turned across the run`);
+        continue; }
       if (!rots.length) { problems.push(`fence at (${x},${y}) has no panel in 3D`); continue; }
       checked++;
       const wantNS = ns && !ew, corner = ns && ew;
