@@ -518,7 +518,9 @@ function findChromium() {
        game with no row of its own gets the shared baseline. Two games diverge again tomorrow; this
        stops that from being a surprise. (docs/BEAUTIFY.md build order, item 2.) */
     const FLAT_BASE = ['3', '4', '5', '7', '9', 'A', 'C', 'H', 'I', 'J', 'P', 'W', 'X', 'Y']; /* the old stair '1' left the city with #7 */
-    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', '7', '9', 'A', 'C', 'J', 'P', 'W', 'X', 'Y'] };
+    /* 'P' came off Meridian's row on 2026-09-21: the potted plant is a mesh from parts (the `mesh` view),
+       thrown pot and leaf masses, and the guard said so first — red on the run that landed the art. */
+    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', '7', '9', 'A', 'C', 'J', 'W', 'X', 'Y'] };
     const FLAT_KNOWN = FLAT_BY_GAME[IDXNAME] || FLAT_BASE;
     const laid = new Set(); Object.values(WORLDS).forEach(w => w.rows.forEach(r => r.split('').forEach(ch => laid.add(ch))));
     Object.keys(flat).forEach(g => { if (!FLAT_KNOWN.includes(g)) P.push('"' + g + '" (' + ((TILES[g] || {}).kind || '?') + ') stands in 3D as a flat picture in ' + [...flatIn[g]].join(',') + ' — give it a side view (TILESIDE) so it becomes a box; nothing new may ship flat (#39)'); });

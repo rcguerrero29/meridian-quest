@@ -105,10 +105,10 @@ including by a saved choice from before a pack dropped one.
 A glyph has four views. It used to be describable in two, with two holes: the leafy top of a tree
 was hardcoded in the engine, and there was nowhere at all to describe the isometric view.
 
-    TILEART["J"] = { top: fn, side: fn, crown: fn, iso: fn }
+    TILEART["J"] = { top: fn, side: fn, crown: fn, iso: fn, mesh: fn }
 
 Fill in the views you care about; the rest come back empty and the renderer decides. **A bare
-function still means `top`**, so nothing already written changes. `crown` is what stands *above* the
+function still means `top`**, so nothing already written changes. `mesh` (2026-09-21) is a list of primitives — `{s:"box"|"sph"|"cyl"|"cone", x,y,z, w,h,d | r,rt,rb, c, rx,ry,rz, sx,sy,sz}` in tile units, y up — that the 3D camera merges into one shape; a glyph with one is never a box or a picture there. `crown` is what stands *above* the
 tile — a tree's canopy, a lamp globe, a market umbrella.
 
 **A layer costs nothing to have.** It costs one drawing wherever you want to differ, and partial is

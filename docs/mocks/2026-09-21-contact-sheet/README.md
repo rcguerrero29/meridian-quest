@@ -53,3 +53,11 @@ spot list that reproduces them. Compare each against its strip above:
 |---|---|---|
 | `me-3d.png`, `no-front.png`, `ta-3d.png` | `me.png`, `no.png`, `ta.png` | the shelf is a bookcase — runs of spines, a stack lying flat, a carton — not a Rubik's cube |
 | `pk-top.png`, `pk-front.png`, `pk-3d.png` | `pk.png` | grass is a tuft in a crack; the flower bed is a raised bed with a curb, a box in 3D and in front |
+
+## After the second sitting — `after-second-sitting/`
+
+Four frames, default camera, after the `mesh` view landed (`mq-v178`): the raised bed with a lip and
+pom-pom marigolds (`pk-3d.png`), the shelves as carcasses with insides (`me-3d.png`, `no-3d.png`), the
+potted plant as a thrown pot (`hq-3d.png`, `no-3d.png`). Compare against `after-first-sitting/` for
+the same spots, where the same things were boxes wearing pictures.
+

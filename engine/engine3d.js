@@ -324,6 +324,50 @@ function t3Build(key){
     T3.tintables.push(side,lid);
     return boxMat[vk]={mats:[side,side,lid,side,side,side],h};
   };
+  /* ---- A MESH FROM PARTS: the `mesh` view (2026-09-21, owner: "i still see squares and not
+     polygonal shapes … can we not try this finally?"). A pack answers "what shape is this tile"
+     with a LIST OF PRIMITIVES — box, sphere, cylinder, cone — each with a place, a size and a
+     colour, in tile units with y up from the floor and the tile's centre at (0,0). The engine
+     merges them into ONE mesh per tile with vertex colours, so a bed of six marigolds costs one
+     draw call and not fifteen. Nothing here names a glyph or a colour: a pack that says nothing
+     gets the box or the billboard it always got, so the town is untouched. Segment counts are low
+     on purpose — this is a pixel world, and a ten-sided pot reads as made, not as smooth. The
+     rotation order is yaw-first-in-the-world (YXZ), so a part can lean (rz) and the whole thing
+     can still be turned to face a door (ry). The 3D-realism audit (#39) counts nothing here as
+     flat, which is the point. */
+  const meshGeo={};
+  const t3Prim=p=>{const s=p.s||"box",n=v=>v===undefined?"":+v;
+    const key=s+"|"+[p.w,p.h,p.d,p.r,p.rt,p.rb].map(n).join("|");
+    if(meshGeo[key])return meshGeo[key];
+    let g;
+    if(s==="sph")g=new THREE.SphereGeometry(p.r||0.1,8,6);
+    else if(s==="cyl")g=new THREE.CylinderGeometry(p.rt!==undefined?p.rt:(p.r||0.1),p.rb!==undefined?p.rb:(p.r||0.1),p.h||0.1,10);
+    else if(s==="cone")g=new THREE.ConeGeometry(p.r||0.1,p.h||0.2,8);
+    else g=new THREE.BoxGeometry(p.w||0.1,p.h||0.1,p.d||0.1);
+    return meshGeo[key]=g.toNonIndexed();};
+  const t3MeshOf=(parts,tag)=>{
+    const pos=[],nor=[],col=[],m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),sc=new THREE.Vector3(),tr=new THREE.Vector3(),c=new THREE.Color();
+    parts.forEach(p=>{
+      e.set(p.rx||0,p.ry||0,p.rz||0,"YXZ");q.setFromEuler(e);sc.set(p.sx||1,p.sy||1,p.sz||1);tr.set(p.x||0,p.y||0,p.z||0);
+      m4.compose(tr,q,sc);
+      const gg=t3Prim(p).clone().applyMatrix4(m4);
+      const pa=gg.attributes.position.array,na=gg.attributes.normal.array;
+      c.set(tc(p.c||"#888888"));
+      for(let i=0;i<pa.length;i+=3){pos.push(pa[i],pa[i+1],pa[i+2]);nor.push(na[i],na[i+1],na[i+2]);col.push(c.r,c.g,c.b);}
+      gg.dispose();});
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+    geo.setAttribute("normal",new THREE.Float32BufferAttribute(nor,3));
+    geo.setAttribute("color",new THREE.Float32BufferAttribute(col,3));
+    const mat=new THREE.MeshLambertMaterial({vertexColors:true}); /* white × the vertex colour; the tint multiplies it like a texture */
+    T3.tintables.push(mat);
+    const m=new THREE.Mesh(geo,mat);m.userData=tag;return m;};
+  const t3MeshTile=(gch,x,y,cx,cz)=>{ /* true when the pack answered and the mesh stands; false = draw it the old way */
+    const mv=(typeof tileView==="function")&&tileView(gch,"mesh");if(!mv)return false;
+    let parts;try{parts=typeof mv==="function"?mv({x,y}):mv;}catch(e){t3Note("mesh "+gch,e);return false;}
+    if(!Array.isArray(parts)||!parts.length)return false;
+    try{const m=t3MeshOf(parts,{mesh:true,g:gch,x,y});m.position.set(cx,0,cz);grp.add(m);return true;}
+    catch(e){t3Note("mesh "+gch,e);return false;}};
   const baseOf=g=>BASECOL[g]||(typeof MAPCOL!=="undefined"&&MAPCOL[g])||C.wall;
   const wallH=g=>0.55+((TILES[g]||{}).lift|0)*0.042; /* lift 13 ≈ 1.1 units tall */
   const wallMats=g=>wallMat[g]||(wallMat[g]={ /* one material set per glyph, shared by every box of it */
@@ -364,6 +408,7 @@ function t3Build(key){
     }
     if(stands(w.rows[y][x])&&!SOLID.has(gch)){ /* walkable cutouts: agility gear, and the stairs */
       const g=w.rows[y][x];
+      if(t3MeshTile(g,x,y,cx,cz))continue;      /* a pack that gave it a shape gets the shape, not a picture */
       flatTex[g]=flatTex[g]||t3Tex(t3BakeGlyph(g,false,null,false,true));
       const s=new THREE.Sprite(new THREE.SpriteMaterial({map:flatTex[g],alphaTest:T3ALPHA}));
       s.center.set(0.5,0.06);s.scale.set(1.05,1.05,1);s.position.set(cx,0,cz);
@@ -542,6 +587,7 @@ function t3Build(key){
     if(!SOLID.has(gch))continue;
     const m=TILES[gch]||{lift:7,kind:"prop"},kd=m.kind;
     if(kd==="water")continue; /* painted into the ground */
+    if(t3MeshTile(gch,x,y,cx,cz))continue; /* the `mesh` view beats box, billboard and even wall: the pack said what shape it is */
     if(kd==="wall"||kd==="facade"){
       const h=wallH(gch),wm=wallMats(gch),side=wm.side,top=wm.top;
       /* `vary`: the glyph draws itself differently per tile (the stair mass finds its place in

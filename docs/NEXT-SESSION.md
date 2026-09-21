@@ -5,6 +5,18 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
+### ⇢ 2026-09-21, later that night — the `mesh` view is in: shapes, not pictures.
+
+Owner, after playing: *"i still see squares and not polygonal shapes … can we not try this finally?"*
+Done, `mq-v178`: `TILEART[g].mesh` / `TILEART_MESH[g]` — a list of primitives per tile the 3D camera
+merges into one mesh (`engine/engine3d.js`, `t3MeshOf`; `docs/3D-LOG.md` 2026-09-21 has the seam,
+the numbers and the rule it changed). The bed, the potted plant and the shelf are shapes; `P` is
+off the known-flat list. **Next, if he wants more shapes:** the cone (one part, off the list), the
+doghouse (two parts), then the trees only with Pili beside — the crown is the best prop in the game.
+**Still his:** row 6 of the sheet (whose shelf), `docs/SECURITY.md` §3 step 1, and the acceptance
+boxes in runs `c4a9` and this sitting's file. The measured cost of this sitting lands at the next
+turn's start, as `docs/RUNS.md` §3½ says.
+
 ### ⇢ 2026-09-21, night — the first beautify sitting is DONE; the next one is engine.
 
 Owner: *"start with the ones you mention and let me know how accurate you were."* Rows 1–3 of the

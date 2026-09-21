@@ -523,6 +523,78 @@ TILEART_SIDE["b"]=rc=>{const{sx,sy,x,y}=rc;
   ctx.fillStyle="rgba(15,12,20,.3)";if(Wt)ctx.fillRect(sx,sy+21,1.2,9);if(E)ctx.fillRect(sx+TS-1.2,sy+21,1.2,9); /* the ends of the run */
 };
 
+/* ---- BEAUTIFY, SECOND SITTING — 2026-09-21, the same night. SHAPES, NOT PICTURES. ----
+   Owner: "i still see squares and not polygonal shapes … can we not try this finally?" The `mesh`
+   view: a list of primitives per tile, in tile units (a tile is 1.0 wide, a person about 1.0 tall),
+   y up from the floor, the tile's centre at (0,0). The engine merges them into one mesh with vertex
+   colours. Drawn as docs/how-its-made says: by what the thing is made of. A marigold head is a
+   pom-pom — a sphere. A pot was thrown — a tapered cylinder with a rim. A bookcase is a carcass of
+   boards with what a person put on them. Colours go through tc() in the engine, so the theme and
+   the time of day reach these like everything else. */
+const TILEART_MESH={};
+const MESH_FAM=[["#8C3B2E","#A54A3A","#6E2E24"],["#3E5C86","#4F6E9A","#2F4868"],["#7C8F5A","#93A56A","#5E6E44"],
+                ["#C9B68C","#D9C9A3","#A99570"],["#5C4A6E","#6E5A84","#463756"],["#B8763A","#C98A4C","#8E5A2C"]];
+
+/* THE RAISED BED. A painted-concrete curb with a rounded lip (a cylinder along each top edge — the
+   mason ran a trowel round it), soil behind it, and six cempasúchil on stems mounding to the middle,
+   the lit crown a smaller sphere on the upper-left of each head. A run of beds shares one curb: the
+   walls stand only where the run ends. Colours from petalPal, so a season recolours these too. */
+TILEART_MESH["b"]=({x,y})=>{
+  const P=petalPal(),UNDER=P[1],BODY=P[3]||P[2],CROWN=P[5]||P[4];
+  const h=(((x*7+y*13)%7)+7)%7;
+  const w=CW(),bed=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="b";};
+  const N=!bed(x,y-1),S=!bed(x,y+1),E=!bed(x+1,y),Wt=!bed(x-1,y);
+  const CURB="#B9B0A2",LIP="#CFC7B9",SOIL="#4A3524",LEAF="#3E7C4F",STEM="#4E8A58";
+  const parts=[];
+  const wall=(px,pz,ww,dd)=>{parts.push({s:"box",x:px,y:0.11,z:pz,w:ww,h:0.22,d:dd,c:CURB});
+    parts.push({s:"cyl",x:px,y:0.22,z:pz,r:0.045,h:Math.max(ww,dd),c:LIP,rz:ww>dd?Math.PI/2:0,rx:ww>dd?0:Math.PI/2});}; /* the lip */
+  if(N)wall(0,-0.42,0.92,0.08);if(S)wall(0,0.42,0.92,0.08);if(Wt)wall(-0.42,0,0.08,0.92);if(E)wall(0.42,0,0.08,0.92);
+  parts.push({s:"box",x:0,y:0.16,z:0,w:0.92,h:0.08,d:0.92,c:SOIL});                       /* the soil, a hand below the lip */
+  const heads=[[-0.24,-0.2],[0.1,-0.26],[0.28,0.02],[-0.05,0.08],[-0.3,0.22],[0.2,0.27]];
+  heads.forEach(([hx,hz],i)=>{const k=(h+i)%3,r=0.075+k*0.012;
+    const hy=0.33+((h*3+i)%3)*0.035+(Math.abs(hx)+Math.abs(hz)<0.3?0.05:0);              /* the middle mounds higher */
+    parts.push({s:"cyl",x:hx,y:(0.2+hy)/2,z:hz,r:0.012,h:hy-0.2,c:STEM});                 /* the stem, into the soil */
+    parts.push({s:"sph",x:hx,y:hy,z:hz,r,c:i%4===3?UNDER:BODY});                          /* the head: a pom-pom */
+    parts.push({s:"sph",x:hx-r*0.35,y:hy+r*0.45,z:hz-r*0.3,r:r*0.45,c:CROWN});});          /* the crown, where the key lands */
+  [[-0.15,-0.05],[0.22,-0.1],[0.0,0.28],[-0.3,0.0]].forEach(([lx,lz],i)=>
+    parts.push({s:"sph",x:lx,y:0.24,z:lz,r:0.07,sx:1.3,sy:0.45,c:LEAF,ry:(h+i)*0.8}));     /* leaves between, flattened */
+  return parts;};
+
+/* THE POTTED PLANT. Twenty of them, every one the same picture until tonight (docs/BEAUTIFY.md,
+   P ×20). Thrown on a wheel: a tapered pot, a rim, soil in it, a stem, and a head of five leaf
+   masses turned per tile so a row of them is a row and not one plant repeated. */
+TILEART_MESH["P"]=({x,y})=>{const h=(((x*7+y*13)%5)+5)%5,a=h*1.26,c=Math.cos(a),s=Math.sin(a);
+  const POT="#B4633F",RIM="#C97A52",SOIL="#4A3524",G1="#3E7C4F",G2="#4E9A5E";
+  const parts=[{s:"cyl",x:0,y:0.13,z:0,rt:0.2,rb:0.15,h:0.26,c:POT},{s:"cyl",x:0,y:0.27,z:0,r:0.22,h:0.04,c:RIM},
+               {s:"cyl",x:0,y:0.295,z:0,r:0.17,h:0.02,c:SOIL},{s:"cyl",x:0,y:0.41,z:0,r:0.02,h:0.24,c:G1}];
+  [[0,0.62,0,0.19],[0.13,0.52,0.06,0.15],[-0.12,0.54,-0.05,0.14],[0.02,0.5,-0.14,0.13],[-0.03,0.48,0.14,0.12]].forEach(([px,py,pz,r],i)=>
+    parts.push({s:"sph",x:px*c-pz*s,y:py,z:px*s+pz*c,r,c:i%2?G2:G1}));
+  return parts;};
+
+/* THE SHELF, AS A CARCASS. Two uprights, a back, four boards with real depth, and on them what
+   TILEART_SIDE["S"] paints from the front — runs of spines, one leaning, a stack, a carton — now as
+   boxes you can see between. It faces the first open side (south, then east, west, north), so a
+   shelf against any wall shows its front to the room. */
+TILEART_MESH["S"]=({x,y})=>{
+  const w=CW(),solid=(gx,gy)=>{const r=w&&w.grid&&w.grid[gy];return !r||r[gx]===undefined||SOLID.has(r[gx]);};
+  const ry=!solid(x,y+1)?0:!solid(x+1,y)?Math.PI/2:!solid(x-1,y)?-Math.PI/2:Math.PI;
+  const sd=(((x*7+y*13)%6)+6)%6,WOOD="#8A6F4D",DARK="#5A4530",BACK="#3F2E1E";
+  const parts=[{s:"box",x:0,y:0.5,z:-0.2,w:0.9,h:1.0,d:0.04,c:BACK},
+    {s:"box",x:-0.43,y:0.5,z:0,w:0.05,h:1.0,d:0.42,c:WOOD},{s:"box",x:0.43,y:0.5,z:0,w:0.05,h:1.0,d:0.42,c:WOOD}];
+  [0.03,0.34,0.66,0.98].forEach(by=>parts.push({s:"box",x:0,y:by,z:0,w:0.9,h:0.035,d:0.42,c:by>0.9?WOOD:DARK}));
+  const run=(x0,base,n,fam,lean)=>{let cx=x0;for(let i=0;i<n;i++){const bw=0.05+((i*3+sd)%3)*0.015,bh=0.24-((i*5+sd*3)%3)*0.025;
+      parts.push({s:"box",x:cx+bw/2,y:base+bh/2,z:0.02,w:bw,h:bh,d:0.28,c:fam[(i+sd)%fam.length]});cx+=bw+0.008;}
+    if(lean){const bw=0.055,bh=0.22;parts.push({s:"box",x:cx+bw/2+0.03,y:base+bh/2-0.012,z:0.02,w:bw,h:bh,d:0.28,c:fam[(n+sd)%fam.length],rz:-0.28});cx+=bw+0.06;}
+    return cx;};
+  const stack=(x0,base,fam)=>[0,1].forEach(i=>parts.push({s:"box",x:x0+0.1,y:base+0.025+i*0.05,z:0,w:0.2-i*0.02,h:0.045,d:0.26,c:fam[(i+1)%fam.length]}));
+  const carton=(x0,base)=>parts.push({s:"box",x:x0+0.13,y:base+0.11,z:0,w:0.26,h:0.22,d:0.3,c:"#B0895B"});
+  const fa=MESH_FAM[sd%6],fb=MESH_FAM[(sd+2)%6],fc=MESH_FAM[(sd+4)%6],fd=MESH_FAM[(sd+1)%6];
+  const B1=0.05,B2=0.36,B3=0.68;                                                         /* the top of each board */
+  if(sd%2===0){const cx=run(-0.4,B3,3,fa,true);stack(cx+0.03,B3,fb);run(-0.4,B2,5,fc,true);carton(-0.4,B1);run(-0.1,B1,4,fd,false);}
+  else{run(-0.4,B3,5,fb,true);const cx=run(-0.4,B2,3,fa,true);stack(cx+0.03,B2,fc);run(-0.4,B1,3,fd,true);carton(0.1,B1);}
+  const cr=Math.cos(ry),sr=Math.sin(ry);                                                  /* turn the whole carcass to face the room */
+  return parts.map(p=>({...p,x:p.x*cr+p.z*sr,z:-p.x*sr+p.z*cr,ry:(p.ry||0)+ry}));};
+
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   /* H and I were cutouts in 3D (docs/BEAUTIFY.md: "the most box-shaped object in the game"). These
      two rows and the two TILEART_SIDE drawings above are the whole fix, and neither reaches the
