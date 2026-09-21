@@ -337,12 +337,13 @@ function t3Build(key){
      flat, which is the point. */
   const meshGeo={};
   const t3Prim=p=>{const s=p.s||"box",n=v=>v===undefined?"":+v;
-    const key=s+"|"+[p.w,p.h,p.d,p.r,p.rt,p.rb].map(n).join("|");
+    const key=s+"|"+[p.w,p.h,p.d,p.r,p.rt,p.rb,p.t,p.arc].map(n).join("|");
     if(meshGeo[key])return meshGeo[key];
     let g;
     if(s==="sph")g=new THREE.SphereGeometry(p.r||0.1,8,6);
     else if(s==="cyl")g=new THREE.CylinderGeometry(p.rt!==undefined?p.rt:(p.r||0.1),p.rb!==undefined?p.rb:(p.r||0.1),p.h||0.1,10);
     else if(s==="cone")g=new THREE.ConeGeometry(p.r||0.1,p.h||0.2,8);
+    else if(s==="torus")g=new THREE.TorusGeometry(p.r||0.2,p.t||0.03,6,14,p.arc||Math.PI*2); /* an arch is a torus with an arc, standing in the XY plane */
     else g=new THREE.BoxGeometry(p.w||0.1,p.h||0.1,p.d||0.1);
     return meshGeo[key]=g.toNonIndexed();};
   const t3MeshOf=(parts,tag)=>{
@@ -714,6 +715,13 @@ function t3Build(key){
       (typeof fiestaProps==="function"?fiestaProps(world):[]).forEach(p=>{
         const g=w.grid[p.y]&&w.grid[p.y][p.x],up=g!==undefined&&(SOLID.has(g)||((TILES[g]||{}).lift|0)>=5);
         if(p.kind==="ofrenda"){ /* the ofrenda: a tile-wide picture standing where it was set, on a table's top if the tile is one */
+          /* ...unless the pack gave it a SHAPE: the `mesh` view under the key "prop:ofrenda" — a season prop is not
+             a glyph, so it is asked for by kind, through the same table and the same builder (2026-09-21). */
+          const pm=(typeof tileView==="function")&&tileView("prop:ofrenda","mesh");
+          if(pm){let parts=null;try{parts=typeof pm==="function"?pm({x:p.x,y:p.y}):pm;}catch(e){t3Note("mesh prop:ofrenda",e);}
+            if(Array.isArray(parts)&&parts.length){try{const m=t3MeshOf(parts,{prop:true,ofrenda:true,mesh:true,x:p.x,y:p.y});
+              const sc=up?0.8:1;m.scale.set(sc,sc,sc);m.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);grp.add(m);return;}
+              catch(e){t3Note("mesh prop:ofrenda",e);}}}
           const c=document.createElement("canvas");c.width=32*K;c.height=32*K;const g2=c.getContext("2d");g2.scale(K,K);drawOfrenda(g2,0,0);
           const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.02);const sc=up?0.8:1;sp.scale.set(sc,sc,1);
           sp.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);sp.userData={prop:true,ofrenda:true,x:p.x,y:p.y};grp.add(sp);return;}

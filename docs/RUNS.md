@@ -104,6 +104,12 @@ mistaken for one somebody did:
   inside the turn that did the work; an in-turn after is a floor and must be written as one. A run
   whose sitting is still the current turn writes `unknown: the counter posts at turn boundaries —
   the next turn reads it and writes the delta here`, and the next turn does.
+  **What it counts (2026-09-21, runs `e1f7` and `a3c2`):** two small turns with almost no work moved
+  it by 5,986 out, proportionate; one long working turn moved it by 3,506,400 out against a live
+  meter of ~124,000. The counter is sane and it counts something the live meter does not — most
+  likely the model's reasoning. **The owner is on a plan and plans by tokens: record both meters,
+  name which is which, and estimate in the live meter's unit, which is the one a session can read
+  while it works.**
 - **`budget counter delta`** — the remaining-tokens figure a session is shown. Coarse; write it
   `~N` and say the tolerance. It is the only meter that moves inside a turn, and its unit is what
   the turn consumed, tool output included — not output tokens, so it is not compared one for one

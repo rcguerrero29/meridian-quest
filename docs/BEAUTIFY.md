@@ -714,3 +714,12 @@ and counter (they are boxes and would stay boxes, so only if the produce should 
 doghouse (a box with a pitched lid, two parts), the cones (a cone, one part — off the flat list),
 the agility gear (leggy; billboards are still right).
 
+### The third sitting, done — 2026-09-21, later still: five more shapes, and the marigolds back
+
+Owner: *"lets try the grass and the cones, dog house, and altar. we are now missing the marigold in
+the bushes though. can we also do the tree with its decor?"* All five through the `mesh` view
+(`docs/3D-LOG.md`, the second entry of this date), the bed's marigolds regrown as a mound. `mq-v179`.
+The known-flat list is `3 4 5 7 A W X Y` now — the agility gear (leggy, billboards on purpose), the
+car lift, the drafting table, the fridge, the site sign, the trolley stop. The "Correctly flat" list
+above loses its tree and its cones: they are shapes now, by the owner's word, and they read.
+

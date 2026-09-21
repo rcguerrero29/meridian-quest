@@ -325,3 +325,53 @@ against it is measured against the wrong thing. — *Chema, 2026-09-09*
   tree's trunk is a box and its crown a picture, by choice; the crates and counters stay textured
   boxes, which is what they are.
 
+### 2026-09-21 · five more shapes: grass, the cone, the doghouse, the tree with its dress, the altar — and the marigolds back
+
+- **The ask:** *"lets try the grass and the cones, dog house, and altar. we are now missing the marigold
+  in the bushes though. can we also do the tree with its decor?"* — after playing the `mesh` view for
+  ten minutes. Same seam, same builder; two small additions to the engine: a `torus` primitive (an
+  arch is a torus with an arc) and a hook in the season-prop pass so a prop asked for BY KIND —
+  `"prop:ofrenda"` — goes through the same table as a glyph. `mq-v179`.
+- **What each is made of** (`content/meridian/art.js`, BEAUTIFY, THIRD SITTING): grass is blades from
+  one root, cones leaning outward, the ones toward the light longer and paler, one gone to straw — the
+  tile is `stand` now, so the 3D camera asks for the shape and the front and iso cameras keep their
+  paint; the cone is a moulded base, a cone and a band that is a slice of the same cone in white;
+  the doghouse is a shed — body, two roof slabs meeting at a ridge, an arched door, the bone — facing
+  its first open side; the tree is a tapering trunk with two branches, six leaf masses, blossoms on
+  the outside of the crown in the season's bloom colour, and in season the dress from `canopyDress`'s
+  recipe in parts: a garland across the front, three papel streamers hanging below, one lantern; the
+  ofrenda is the 2D drawing's parts built — cloth, tier, an arch of marigolds, three candles with
+  flames, the empty frame, pan de muerto, a calaverita, two cups, cut paper along the front. The bed's
+  marigolds went from six heads at r 0.075–0.10 to eight at r 0.11–0.15 with buds: **a scatter of dots
+  became a mound**, which is the difference the owner saw from his phone.
+- **Two things the lit shading taught.** A sprite is never shaded; a mesh is. The tree's and the
+  grass's greens copied from the sprites came out a step too dark in daylight and were lifted once,
+  by eye, after the first frame — the rule is *a lit mesh takes paler paint than the picture it
+  replaces*. And the hero standing behind a mesh crown is occluded by it, where the sprite crown was
+  a picture at one depth; nothing hides the player yet — noted, not fixed (the wall stub and the glass
+  are the precedents, `docs/3D-LOG.md` 2026-09-09).
+- **Measured, default camera, `renderer.info` and `userData` counted, eight frames** (in
+  `docs/mocks/2026-09-21-contact-sheet/after-third-sitting/`):
+
+  | frame | calls | triangles | mesh / flat / box |
+  |---|---|---|---|
+  | pk, the sheet's spot | 65 | 11,662 | 17 / 3 / 0 |
+  | pk, beside the doghouse | 75 | 16,508 | 17 / 3 / 0 |
+  | st, beside a tree | 499 | 7,824 | 12 / 3 / 0 |
+  | li, beside the cone | 245 | 2,010 | 6 / 0 / 4 |
+  | pk, the altar, Día de Muertos on | 108 | 20,544 | 18 / 3 / 0 |
+  | st, the dressed tree, season on | 565 | 9,192 | 12 / 3 / 0 |
+
+  Against the previous sitting's park frame (61 calls, 5,904 triangles): four more calls for the
+  grass tufts now standing, twice the triangles for eight meshes more. The three `flat` left in the
+  park are the agility gear, which is leggy and stays a billboard on purpose.
+- **The audit did its job first, three times:** `9`, `C` and `J` named red the moment the shapes
+  landed, and came off Meridian's row. The crown guard (*"a pack declared what its tree looks like
+  and the engine drew its own anyway"*) went red too, because it looks for a crown texture and a
+  mesh tree has none; it accepts a mesh tree now, and the crown path is still walked by the town's
+  run of the same file, where no mesh is declared.
+- **Known-flat in Meridian after tonight:** `3 4 5 7 A W X Y` — the agility gear, the car lift, the
+  drafting table, the fridge, the site sign, the trolley stop. The town's list is untouched.
+- **Not done:** the ofrenda shows only in season (Día de Muertos, 10/18–11/3, or the Settings pick);
+  the hero behind a crown; the iso camera still draws every one of these as a block.
+
