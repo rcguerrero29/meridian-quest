@@ -144,7 +144,7 @@ function runs(root) {
       if (!/^docs\/personas\/proposed\//.test(p))
         say('points its persona learning at "' + p + '" — a suggestion lives under docs/personas/proposed/ and never in the approved persona (AGENTS.md §9)');
       else if (!fs.existsSync(path.join(root, p)))
-        say('names persona learning at "' + p + '" and there is no such file — the suggestion the owner is being asked to fold in does not exist');
+        say('names persona learning at "' + p + '" and there is no such file — the proposal is the RECORD of what was suggested and who decided (docs/RUNS.md §6, settled 2026-09-21), so it has to exist whether the session applied it or refused it');
     }
 
     /* ---- the owner's two words ---- */
