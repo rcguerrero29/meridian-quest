@@ -656,6 +656,155 @@ TILEART_MESH["S"]=({x,y})=>{
   const cr=Math.cos(ry),sr=Math.sin(ry);                                                  /* turn the whole carcass to face the room */
   return parts.map(p=>({...p,x:p.x*cr+p.z*sr,z:-p.x*sr+p.z*cr,ry:(p.ry||0)+ry}));};
 
+/* ---- LA ESPIGA'S GOODS — crew iteration 12, la panadera (#227). Owner: "can we also add more sweeet
+   bread and baked goods please?" ----
+   The four `S` tiles along the bakery's north wall are "bread racks" (maps.js, the `pa:` comment) and
+   were drawing the notary's books — docs/BEAUTIFY.md row 1: one drawing, six businesses. In a Mexican
+   panadería the customer takes a charola and pinzas and walks to the racks; the racks ARE the display.
+   So the goods live on them and nowhere else: the shelf's mesh, side and top are wrapped below with a
+   branch that fires only in `pa`, and every other world keeps the bookcase it had, byte for byte.
+   Built the way .claude/skills/how-its-made says — one dough, one tray, one oven. An exhibidor is a
+   frame with sheet pans slid in at a tilt, the same seasoned pans the goods came out of the oven on;
+   each pan holds ONE kind off one sheet, so its pieces are siblings: one size, one cutter, laid in rows
+   and touching. Variation enters at the step it entered and nowhere earlier — the concha's shell colour
+   per BATCH (a pan is vanilla or it is chocolate), the bake colour per piece where the oven ran hot,
+   the lean of a standing oreja per piece. Which kind sits on which pan is decided per RACK by a seed
+   that reads both axes: the shelf's own (x*7+y*13)%6 is 3,5,1,3 along this row, so the first and last
+   rack were one picture. Pan de muerto takes the top pan of every second rack in season, never out of it.
+   The names are the story's: bolillos ("forty bolillos at five", docs.js; the cat in the flour bin),
+   the concha ("concha, ten weeks"), and the bag of pan de ayer at the door. */
+const PAN={frame:"#5A3E28",frameL:"#7C5A3A",pan:"#3B3836",panL:"#5A5552",
+  crust:"#D19A4C",crustD:"#B0762C",crumb:"#F0D9A8",vanilla:"#F2E7CB",vanillaD:"#D6C49A",choc:"#6B4130",chocD:"#4A2A1E",
+  wicker:"#8F6A3A",wickerD:"#6C4B24",caramel:"#C27C34",caramelL:"#EAC57E",
+  pink:"#EFA3B5",vain:"#F1E3BE",cocoa:"#7E5237",cup:"#F8F6F0",sugar:"#F1DCAF"};
+const PA_KINDS=["concha-v","concha-c","bolillo","cuerno","oreja","polvoron"];
+const paHere=()=>typeof world!=="undefined"&&world==="pa";
+const paMuertos=()=>typeof seasonNow==="function"&&seasonNow()==="muertos"; /* the season by its id: SEASONS.muertos.art has no bread key, and config.js is not this lane's */
+/* one rack, decided ONCE for every camera: its seed, and the kind on each pan, top pan first */
+const paRack=(x,y)=>{const s=(((x*5+y*3)%7)+7)%7;
+  const trays=[PA_KINDS[(s+1)%6],PA_KINDS[(s+3)%6],PA_KINDS[(s+5)%6]];
+  if(paMuertos()&&s%2===0)trays[0]="muerto";
+  return {s,trays};};
+/* THE GOODS, AS PARTS. `put(part,u,v,h)` sets a part on a pan: u across, v toward the room, h above the
+   sheet — the pan is tilted and put() does the trigonometry, so each kind is written flat. */
+const paGoods=(kind,s,ti,put)=>{const R=PAN,hot=(s+ti)%6;                                  /* the one the oven's hot corner caught */
+  if(kind==="concha-v"||kind==="concha-c"){const cap=kind==="concha-v"?R.vanilla:R.choc;let i=0;
+    for(let r=0;r<2;r++)for(let c=0;c<3;c++,i++){const u=-0.29+c*0.29,v=-0.11+r*0.22;
+      put({s:"cyl",r:0.145,h:0.06,c:i===hot?R.crustD:R.crust},u,v,0.03);                    /* the dough: one cutter, six times */
+      put({s:"sph",r:0.14,sy:0.62,c:cap},u,v,0.062);}}                                        /* the shell: one batch, one colour */
+  else if(kind==="bolillo"){                                                                  /* a basket, and in it bolillos laid across: one length, one score */
+    put({s:"box",w:0.78,h:0.02,d:0.4,c:R.wickerD},0,0,0.01);
+    put({s:"box",w:0.78,h:0.09,d:0.025,c:R.wicker},0,-0.19,0.055);put({s:"box",w:0.78,h:0.09,d:0.025,c:R.wicker},0,0.19,0.055);
+    put({s:"box",w:0.025,h:0.09,d:0.4,c:R.wicker},-0.39,0,0.055);put({s:"box",w:0.025,h:0.09,d:0.4,c:R.wicker},0.39,0,0.055);
+    const bol=(u,v,h,i)=>{const c=i===hot?R.crustD:R.crust;
+      put({s:"cyl",r:0.05,h:0.22,rz:Math.PI/2,c},u,v,h);                                     /* the body, along the basket */
+      put({s:"cone",r:0.05,h:0.07,rz:-Math.PI/2,c},u+0.145,v,h);put({s:"cone",r:0.05,h:0.07,rz:Math.PI/2,c},u-0.145,v,h); /* the two points */
+      put({s:"box",w:0.18,h:0.012,d:0.022,c:R.crumb},u,v,h+0.048);};                          /* the score, cut the same way on every one */
+    let i=0;[-0.12,0,0.12].forEach(v=>{bol(-0.19,v,0.07,i++);bol(0.19,v,0.07,i++);});         /* six in the basket, end to end */
+    bol(-0.1,-0.06,0.155,i++);bol(0.1,0.06,0.155,i++);}                                       /* two more on top: a heap, not a diagram */
+  else if(kind==="cuerno"){let i=0;for(let r=0;r<2;r++)for(let c=0;c<3;c++,i++){const u=-0.28+c*0.28,v=-0.11+r*0.22;
+      put({s:"torus",r:0.095,t:0.04,arc:Math.PI*1.2,rx:Math.PI/2,ry:Math.PI+(((s+i)%3)-1)*0.14,c:i===hot?R.crustD:R.crust},u,v,0.04);}} /* a crescent lying flat, horns to the room, each set down by hand */
+  else if(kind==="oreja"){[-0.11,0.11].forEach((v,r)=>{for(let i=0;i<6;i++){                 /* two rows laid flat and shingled, each on the one before; the face is the read */
+      const u=-0.33+i*0.132,rz=0.16+((s+r+i)%3)*0.04;                                        /* the lean of one resting on the last, a hair different each */
+      put({s:"cyl",r:0.07,h:0.025,rz,c:R.caramel},u-0.04,v-0.03,0.03);put({s:"cyl",r:0.07,h:0.025,rz,c:R.caramel},u+0.04,v-0.03,0.03); /* the two lobes of the heart */
+      put({s:"cyl",r:0.04,h:0.03,rz,c:R.caramelL},u,v-0.03,0.036);}});}                      /* the paler spiral, proud of the glaze */
+  else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];let i=0;for(let r=0;r<2;r++)for(let c=0;c<3;c++,i++){const u=-0.29+c*0.29,v=-0.11+r*0.22;
+      put({s:"cyl",rt:0.12,rb:0.095,h:0.045,c:R.cup},u,v,0.0225);                             /* the capacillo */
+      put({s:"cyl",r:0.105,h:0.05,c:col[(i+s)%3]},u,v,0.065);}}                               /* the polvorón: a fat disc; three doughs pressed on one tray, set down in turn */
+  else if(kind==="muerto"){let i=0;for(let r=0;r<2;r++)for(let c=0;c<2;c++,i++){const u=-0.2+c*0.4,v=-0.11+r*0.22;
+      put({s:"cyl",r:0.16,h:0.05,c:i===hot%4?R.crustD:R.crust},u,v,0.025);
+      put({s:"sph",r:0.16,sy:0.7,c:R.crust},u,v,0.05);                                        /* the round */
+      put({s:"torus",r:0.135,t:0.028,arc:Math.PI,c:R.sugar},u,v,0.06);                        /* the bones, two arches crossed over it */
+      put({s:"torus",r:0.135,t:0.028,arc:Math.PI,ry:Math.PI/2,c:R.sugar},u,v,0.06);
+      put({s:"sph",r:0.05,c:R.sugar},u,v,0.2);}}};                                             /* the knob, sugared */
+/* THE RACK: four posts, the rails, three pans slid in at a tilt with a lip at the front, and on each
+   pan what paRack() said. Faces its first open side like the bookcase it replaces. */
+const paRackMesh=({x,y})=>{
+  const {s,trays}=paRack(x,y),parts=[],TILT=0.34,PW=0.9,PD=0.46;                            /* the pans lean a fifth of a turn toward the room, as an exhibidor's do */
+  [[-0.44,-0.2],[0.44,-0.2],[-0.44,0.2],[0.44,0.2]].forEach(([px,pz])=>parts.push({s:"box",x:px,y:0.5,z:pz,w:0.055,h:1.0,d:0.055,c:PAN.frame}));
+  [-0.44,0.44].forEach(px=>parts.push({s:"box",x:px,y:0.985,z:0,w:0.04,h:0.03,d:0.44,c:PAN.frameL}));
+  parts.push({s:"box",x:0,y:0.985,z:-0.2,w:0.92,h:0.03,d:0.04,c:PAN.frame});
+  [0.88,0.55,0.22].forEach((ty,ti)=>{const ca=Math.cos(TILT),sa=Math.sin(TILT);
+    const put=(p,u,v,h)=>parts.push({...p,x:u,y:ty+h*ca-v*sa,z:h*sa+v*ca,rx:(p.rx||0)+TILT});
+    [-0.435,0.435].forEach(u=>put({s:"box",w:0.03,h:0.03,d:PD,c:PAN.frameL},u,0,-0.03));     /* the runners it slides on */
+    put({s:"box",w:PW,h:0.02,d:PD,c:PAN.pan},0,0,-0.01);                                      /* the pan, seasoned steel */
+    put({s:"box",w:PW,h:0.05,d:0.02,c:PAN.panL},0,PD/2,0.015);                                /* the lip, so nothing slides off */
+    paGoods(trays[ti],s,ti,put);});
+  return meshTurned(parts,meshFacing(x,y));};
+/* THE RACK FROM THE FRONT (the camera the owner plays most). The pans read as a dark band of surface
+   under a lit lip; the goods stand on the band. Same kinds, same pans, same seed as the mesh. */
+const paGoods2D=(kind,s,ti,x0,base)=>{const R=PAN,hot=(s+ti)%6,tri=i=>x0+3.9+i*7.8;
+  if(kind==="concha-v"||kind==="concha-c"){const cap=kind==="concha-v"?R.vanilla:R.choc,sc=kind==="concha-v"?R.vanillaD:R.chocD;
+    for(let i=0;i<3;i++){const cx=tri(i);
+      ctx.fillStyle=(i+3)===hot?R.crustD:R.crust;ctx.beginPath();ctx.ellipse(cx,base-1.4,3.5,1.6,0,0,7);ctx.fill();   /* the dough */
+      ctx.fillStyle=cap;ctx.beginPath();ctx.ellipse(cx,base-2.2,3.5,3.4,0,Math.PI,0);ctx.fill();                       /* the shell, a dome */
+      ctx.strokeStyle=sc;ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(cx-2.2,base-2.6);ctx.lineTo(cx+2.2,base-4.6);   /* its score, two cuts */
+      ctx.moveTo(cx-2.2,base-4.6);ctx.lineTo(cx+2.2,base-2.6);ctx.stroke();}}
+  else if(kind==="bolillo"){ctx.fillStyle=R.wickerD;ctx.fillRect(x0+1.4,base-4.2,20.4,4.2);ctx.fillStyle=R.wicker;ctx.fillRect(x0+1.4,base-4.2,20.4,1);  /* the basket */
+    [[x0+6.4,base-4.4,0],[x0+16.8,base-4.4,1],[x0+11.6,base-6.8,6]].forEach(([cx,cy,i])=>{                              /* two in front, one on the heap */
+      ctx.fillStyle=i===hot?R.crustD:R.crust;ctx.beginPath();ctx.ellipse(cx,cy,5,1.9,0,0,7);ctx.fill();
+      ctx.fillStyle=R.crumb;ctx.fillRect(cx-2.6,cy-1.3,5.2,0.9);});}                                                     /* the score */
+  else if(kind==="cuerno"){for(let i=0;i<3;i++){const cx=tri(i);ctx.strokeStyle=(i+3)===hot?R.crustD:R.crust;ctx.lineWidth=2.6;
+      ctx.beginPath();ctx.arc(cx,base-1.2,3,Math.PI*1.08,Math.PI*1.92);ctx.stroke();}}                                    /* a crescent, horns to you */
+  else if(kind==="oreja"){for(let k=0;k<2;k++)for(let i=0;i<5;i++){const cx=x0+3.4+i*3.9+k*1.2,cy=base-1.6-k*2.6;       /* shingled flat, the back row peeking over the front */
+      ctx.fillStyle=R.caramel;ctx.beginPath();ctx.arc(cx-1.5,cy-1.2,1.8,0,7);ctx.arc(cx+1.5,cy-1.2,1.8,0,7);ctx.fill();  /* the face: two lobes and the point */
+      ctx.beginPath();ctx.moveTo(cx-3.1,cy-0.8);ctx.lineTo(cx+3.1,cy-0.8);ctx.lineTo(cx,cy+1.6);ctx.closePath();ctx.fill();
+      ctx.fillStyle=R.caramelL;ctx.beginPath();ctx.arc(cx,cy-0.8,1.1,0,7);ctx.fill();}}                                 /* the paler spiral */
+  else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];for(let i=0;i<3;i++){const cx=tri(i);
+      ctx.fillStyle=R.cup;ctx.beginPath();ctx.moveTo(cx-3.7,base-3);ctx.lineTo(cx+3.7,base-3);ctx.lineTo(cx+2.9,base);ctx.lineTo(cx-2.9,base);ctx.closePath();ctx.fill(); /* the capacillo */
+      ctx.fillStyle=col[(i+3+s)%3];ctx.fillRect(cx-3.3,base-4.4,6.6,1.6);ctx.beginPath();ctx.ellipse(cx,base-4.4,3.3,1.3,0,0,7);ctx.fill();}}  /* the fat disc */
+  else if(kind==="muerto"){[x0+6,x0+17.2].forEach((cx,i)=>{
+      ctx.fillStyle=(i+2)===hot%4?R.crustD:R.crust;ctx.beginPath();ctx.ellipse(cx,base-2.2,5.2,4,0,Math.PI,0);ctx.fill();ctx.fillRect(cx-5.2,base-2.2,10.4,2.2);
+      ctx.strokeStyle=R.sugar;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(cx-4.4,base-3.2);ctx.quadraticCurveTo(cx,base-8,cx+4.4,base-3.2);ctx.stroke(); /* the bones over the round */
+      ctx.beginPath();ctx.moveTo(cx-1.6,base-2.6);ctx.quadraticCurveTo(cx,base-7.4,cx+1.6,base-2.6);ctx.stroke();
+      ctx.fillStyle=R.sugar;ctx.beginPath();ctx.arc(cx,base-6.6,1.4,0,7);ctx.fill();});}};                                /* the knob */
+const paRackSide=rc=>{const{sx,sy,x,y}=rc,{s,trays}=paRack(x,y),R=PAN;
+  ctx.fillStyle="rgba(15,12,20,.20)";ctx.beginPath();ctx.ellipse(sx+16,sy+30.4,13,2,0,0,7);ctx.fill();   /* it stands on the floor */
+  ctx.fillStyle=R.frame;ctx.fillRect(sx+2,sy+1,2.4,29);ctx.fillRect(sx+TS-4.4,sy+1,2.4,29);ctx.fillRect(sx+2,sy+1,TS-4,1.6); /* uprights and the top rail */
+  ctx.fillStyle="rgba(255,255,255,.18)";ctx.fillRect(sx+2,sy+1,1,29);ctx.fillRect(sx+2,sy+1,TS-4,0.7);
+  [8,17,26].forEach((lip,ti)=>{                                                                          /* three pans tilted toward you: a band of surface, then the lip */
+    ctx.fillStyle=R.pan;ctx.fillRect(sx+4.4,sy+lip-3,TS-8.8,3);
+    ctx.fillStyle=R.panL;ctx.fillRect(sx+4.4,sy+lip,TS-8.8,1.4);
+    ctx.fillStyle="rgba(15,12,20,.35)";ctx.fillRect(sx+4.4,sy+lip+1.4,TS-8.8,0.8);                        /* every inside corner is dark */
+    paGoods2D(trays[ti],s,ti,sx+4.4,sy+lip-1);});};
+/* THE RACK FROM ABOVE: the frame, and the top pan with its goods seen from over them. */
+const paRackTop=rc=>{const{sx,sy,x,y}=rc,{s,trays}=paRack(x,y),R=PAN,kind=trays[0],hot=(s+0)%6;
+  ctx.fillStyle=R.frame;ctx.fillRect(sx+2,sy+6,TS-4,2.2);ctx.fillRect(sx+2,sy+24,TS-4,2.2);ctx.fillRect(sx+2,sy+6,2.2,20);ctx.fillRect(sx+TS-4.2,sy+6,2.2,20);
+  ctx.fillStyle=R.pan;ctx.fillRect(sx+3,sy+8,TS-6,16);ctx.fillStyle=R.panL;ctx.fillRect(sx+3,sy+23,TS-6,1);   /* the top pan, its lip toward the room */
+  const gx=(c,n)=>sx+16+(c-(n-1)/2)*8.6,gy=r=>sy+12+r*8;
+  if(kind==="concha-v"||kind==="concha-c"){const cap=kind==="concha-v"?R.vanilla:R.choc,sc=kind==="concha-v"?R.vanillaD:R.chocD;let i=0;
+    for(let r=0;r<2;r++)for(let c=0;c<3;c++,i++){const cx=gx(c,3),cy=gy(r);
+      ctx.fillStyle=i===hot?R.crustD:R.crust;ctx.beginPath();ctx.arc(cx,cy,4.3,0,7);ctx.fill();
+      ctx.fillStyle=cap;ctx.beginPath();ctx.arc(cx,cy,3.7,0,7);ctx.fill();
+      ctx.strokeStyle=sc;ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(cx-2.4,cy-2.4);ctx.lineTo(cx+2.4,cy+2.4);ctx.moveTo(cx-2.4,cy+2.4);ctx.lineTo(cx+2.4,cy-2.4);ctx.stroke();}}
+  else if(kind==="bolillo"){ctx.fillStyle=R.wickerD;ctx.fillRect(sx+4,sy+9,TS-8,14);ctx.strokeStyle=R.wicker;ctx.lineWidth=1;ctx.strokeRect(sx+4.5,sy+9.5,TS-9,13);
+    let i=0;[11.6,15.4,19.2].forEach(yy=>[sx+10.2,sx+21.8].forEach(cx=>{ctx.fillStyle=i++===hot?R.crustD:R.crust;ctx.beginPath();ctx.ellipse(cx,sy+yy,5.2,1.7,0,0,7);ctx.fill();
+      ctx.fillStyle=R.crumb;ctx.fillRect(cx-2.6,sy+yy-0.4,5.2,0.8);}));
+    [[sx+13.2,sy+13.4],[sx+18.8,sy+17.4]].forEach(([cx,cy])=>{ctx.fillStyle=R.crust;ctx.beginPath();ctx.ellipse(cx,cy,5.2,1.7,0,0,7);ctx.fill();ctx.fillStyle=R.crumb;ctx.fillRect(cx-2.6,cy-0.4,5.2,0.8);});}
+  else if(kind==="cuerno"){let i=0;for(let r=0;r<2;r++)for(let c=0;c<3;c++,i++){ctx.strokeStyle=i===hot?R.crustD:R.crust;ctx.lineWidth=2.6;
+      ctx.beginPath();ctx.arc(gx(c,3),gy(r)+1,3,Math.PI*1.08,Math.PI*1.92);ctx.stroke();}}
+  else if(kind==="oreja"){for(let r=0;r<2;r++)for(let i=0;i<6;i++){const cx=sx+6+i*4.1,cy=sy+12.2+r*7.6;                  /* laid flat and shingled: each face half under the next */
+      ctx.fillStyle=R.caramel;ctx.beginPath();ctx.arc(cx-1.5,cy-1.1,2,0,7);ctx.arc(cx+1.5,cy-1.1,2,0,7);ctx.fill();
+      ctx.beginPath();ctx.moveTo(cx-3.4,cy-0.6);ctx.lineTo(cx+3.4,cy-0.6);ctx.lineTo(cx,cy+2.4);ctx.closePath();ctx.fill();
+      ctx.fillStyle=R.caramelL;ctx.beginPath();ctx.arc(cx,cy-0.7,1.1,0,7);ctx.fill();}}
+  else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];let i=0;for(let r=0;r<2;r++)for(let c=0;c<3;c++,i++){const cx=gx(c,3),cy=gy(r);
+      ctx.fillStyle=R.cup;ctx.beginPath();ctx.arc(cx,cy,4.2,0,7);ctx.fill();ctx.fillStyle=col[(i+s)%3];ctx.beginPath();ctx.arc(cx,cy,3.5,0,7);ctx.fill();}}
+  else if(kind==="muerto"){let i=0;for(let r=0;r<2;r++)for(let c=0;c<2;c++,i++){const cx=gx(c,2)+ (c?1:-1)*1.2,cy=gy(r);
+      ctx.fillStyle=i===hot%4?R.crustD:R.crust;ctx.beginPath();ctx.arc(cx,cy,5.4,0,7);ctx.fill();
+      ctx.strokeStyle=R.sugar;ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(cx-4.4,cy);ctx.lineTo(cx+4.4,cy);ctx.moveTo(cx,cy-4.4);ctx.lineTo(cx,cy+4.4);ctx.stroke();
+      ctx.fillStyle=R.sugar;ctx.beginPath();ctx.arc(cx,cy,1.5,0,7);ctx.fill();}}};
+/* the engine's own TILEDRAW["S"], verbatim (engine/engine.js, grep `shelving: three loaded shelves`): a pack's
+   TILEART entry REPLACES the engine's top view for every world (Object.assign(TILEDRAW,TILEART)), so the
+   five other businesses' shelves are drawn here, unchanged, by the pack that displaced them. */
+const shelfTopEngine=rc=>{const{sx,sy}=rc;
+  ctx.fillStyle="#8A6F4D";ctx.fillRect(sx+2,sy+2,TS-4,TS-4);
+  ctx.fillStyle="#6E5638";[6,14,22].forEach(yy=>ctx.fillRect(sx+2,sy+yy,TS-4,2));
+  ctx.fillStyle="#D9C9A3";[[6,3],[13,3],[20,3],[6,11],[15,11],[9,19],[18,19]].forEach(b=>ctx.fillRect(sx+b[0],sy+b[1],5,4));};
+{const SHELF_SIDE=TILEART_SIDE["S"],SHELF_MESH=TILEART_MESH["S"];               /* the bookcase, kept whole for every world but the bakery */
+ TILEART_SIDE["S"]=rc=>paHere()?paRackSide(rc):SHELF_SIDE(rc);
+ TILEART_MESH["S"]=p=>paHere()?paRackMesh(p):SHELF_MESH(p);
+ TILEART["S"]=rc=>paHere()?paRackTop(rc):shelfTopEngine(rc);}
+
 /* ---- BEAUTIFY, THIRD SITTING — 2026-09-21, later still. Owner: "lets try the grass and the cones,
    dog house, and altar … can we also do the tree with its decor?" Five more shapes through the same
    seam, drawn by what each thing is made of. */
