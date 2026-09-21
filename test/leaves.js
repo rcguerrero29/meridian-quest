@@ -151,8 +151,12 @@ function consistency(root) {
      CLAUDE.md says a session takes its orders from, plus the contract — must cite real files. Meeting
      minutes and research are dated records and may honestly name a thing that was planned and never
      built; a probe on 2026-09-21 found 17 such in docs/meetings and docs/research, and they stay. */
+  /* NOT docs/BOUNDARY.md: its rows are held by their own path check below, and its prose describes
+     generated files (content/gauge/index.html, which test/gauge.js builds) — CI went red on exactly
+     that on 2026-09-21 while a stray local build artefact kept the desk green. A generated file is
+     not a ghost, and a register may name one. */
   const ORDERS = ['CLAUDE.md', 'AGENTS.md', 'docs/NEXT-SESSION.md', 'docs/INDEX.md', 'docs/OPEN.md', 'docs/OWNER.md',
-                  'docs/RUNS.md', 'docs/SECURITY.md', 'docs/BOUNDARY.md', 'docs/CREW-MODE.md', 'docs/council/README.md', 'docs/personas/README.md'];
+                  'docs/RUNS.md', 'docs/SECURITY.md', 'docs/CREW-MODE.md', 'docs/council/README.md', 'docs/personas/README.md'];
   ORDERS.forEach(rel => { const f = path.join(root, rel); if (!fs.existsSync(f)) return;
     const body = fs.readFileSync(f, 'utf8').replace(/```[\s\S]*?```/g, '');   /* not inside fenced code */
     (body.match(CITE) || []).forEach(p => { if (!p.includes('*')) cites.push({ p, f: rel }); }); });
