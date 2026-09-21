@@ -80,7 +80,7 @@ function workflows(root) {
        at any indent (job-level too), and the flow form `{contents: write}`. */
     const writes = [];
     if (/^\s*permissions:\s*write-all\b/m.test(src)) writes.push('write-all (every scope)');
-    [...src.matchAll(/^[ \t]+([a-z-]+)\s*:\s*write\b/gm)].forEach(m => writes.push(m[1]));
+    [...src.replace(/["']/g, '').matchAll(/^[ \t]+([a-z-]+)\s*:\s*write\b/gm)].forEach(m => writes.push(m[1]));
     [...src.matchAll(/permissions:\s*\{([^}]*)\}/g)].forEach(m => [...m[1].matchAll(/([a-z-]+)\s*:\s*write\b/g)].forEach(x => writes.push(x[1])));
     writes.forEach(scope => { if (!(WRITE_OK[f] || []).includes(scope))
       P.push(rel + ' asks for "' + scope + ': write" — CI never writes to this repository; the only write scopes ' +
@@ -89,9 +89,36 @@ function workflows(root) {
        first run of this check read that one as a trigger. Read the block the noun lives in. */
     /* Melo, 2026-09-13: yamllint's truthy rule pushes people to write `"on":`, and `/^on:/` then reads
        nothing and prints a sentence claiming the opposite. The key may be quoted. */
-    const on = (src.match(/^["']?on["']?:\n((?:[ \t]+.*\n?|\n)*)/m) || [])[1] || (/^["']?on["']?:\s*\[?([^\n]*)/m.exec(src) || [])[1] || '';
+    const on = (src.match(/^["']?on["']?:\n((?:[ \t]+.*\n?|\n)*)/m) || [])[1] || (/^["']?on["']?:\s*\[?\{?([^\n]*)/m.exec(src) || [])[1] || '';
     if (!/^["']?on["']?:/m.test(src)) P.push(rel + ' has no on: key this check can read — a workflow with no trigger it can see is not a workflow it has checked');
-    const trig = on.match(/(?:^|[\s\[,])(pull_request_target|issue_comment|issues|label|discussion_comment)(?=\s*[:\],]|$)/m);
+    /* Planted 2026-09-21 (finding CI-5), five shapes this missed: `on: {issue_comment: …}` (flow form, a
+       brace before the name), `"pull_request_target":` (a quoted key), `workflow_run:` (runs in the
+       base repo after a stranger's fork CI finishes), `repository_dispatch:`, and `contents: "write"`
+       (a quoted value). Strip quotes before reading, and let a brace count as a word boundary. */
+    const onBare = on.replace(/["']/g, '');
+    /* GH-6 (2026-09-21): `${{ github.ref_name }}` spliced into a `run:` line is expanded BEFORE the
+       shell parses it, and a git refname may carry `;` `$` and backticks. Every workflow value belongs
+       in `env:` and is read as "$NAME". The R3 step already did it right; two others did not. */
+    /* A block scalar (`run: |`) owns every following line indented DEEPER than the `run:` key; the
+       first line at the key's indent or shallower ends it. The first draft ended it only at indent <6
+       and so read the next step's env: lines as part of the previous run — three false reds. */
+    let runIndent = -1;
+    src.split('\n').forEach((line, i) => {
+      const ind = (line.match(/^[ \t]*/) || [''])[0].length, blank = !line.trim();
+      if (runIndent >= 0 && !blank && ind <= runIndent) runIndent = -1;
+      const isRun = /^\s*-?\s*run:/.test(line);   /* `- run:` (a step that is only a run) and `run:` under a name */
+      if ((isRun || runIndent >= 0) && /\$\{\{/.test(line))
+        P.push(rel + ':' + (i + 1) + ' puts a ${{ }} expression inside a run: line — it is expanded before the shell reads it; put it under env: and use "$NAME"');
+      if (isRun && /^\s*-?\s*run:\s*[|>][-+]?\s*$/.test(line)) runIndent = ind + (/^\s*-/.test(line) ? 2 : 0);
+    });
+    /* CI-3 / GH-4 (2026-09-21): an action named by a moving tag (`@v4`) is whatever that tag points at
+       the day the job runs. pages.yml holds pages:write and id-token:write, so a retagged action there
+       deploys whatever it likes. Pin to the 40-hex commit and keep the tag as a comment for humans. */
+    [...src.matchAll(/^\s*-?\s*uses:\s*([^\s#]+)/gm)].forEach(m => {
+      const ref = m[1], at = ref.split('@')[1] || '';
+      if (!/^[0-9a-f]{40}$/.test(at)) P.push(rel + ' uses "' + ref + '" by a moving tag — pin it to the commit SHA (`git ls-remote --tags https://github.com/<action> <tag>`) and keep the tag in a trailing comment');
+    });
+    const trig = onBare.match(/(?:^|[\s\[,{])(pull_request_target|issue_comment|issues|label|discussion_comment|workflow_run|repository_dispatch)(?=\s*[:\],}]|$)/m);
     if (trig)
       P.push(rel + ' can be started by "' + trig[1] + '" — a trigger a label, a comment or an issue can pull. ' +
              'The claim label is a note for people and agents, never a trigger (docs/story/el-changarrito.md R4a)');
@@ -142,7 +169,61 @@ function consistency(root) {
   });
   P.push(...completeness(root, R));
   P.push(...indexed(root));
+  P.push(...secrets(root));
+  P.push(...vendored(root));
   return P.concat(workflows(root));
+}
+
+/* ---- SEC-3 (2026-09-21): a token pasted ANYWHERE in a public repository is world-readable the moment it
+   is pushed, and the run ledger asks every agent to paste "what was run and what it printed" into
+   docs/runs/. test/public.js scans the built box and test/smoke.js R8 scans the public shell; docs/,
+   test/, .github/ and scripts/ were scanned by nothing. This is detection after exposure — GitHub's
+   push protection is the wire-level stop and only the owner can confirm it is on — but a red build is
+   how the owner learns to rotate. Reads every tracked text file from `git ls-files`; reports the path
+   and the shape, NEVER the value. */
+const SECRET_SHAPES = [
+  [/\bgh[pousr]_[A-Za-z0-9]{20,}/, 'a GitHub token'], [/\bgithub_pat_[A-Za-z0-9_]{20,}/, 'a fine-grained GitHub token'],
+  [/\bsk-(?:ant-|proj-)?[A-Za-z0-9_-]{20,}/, 'an API key'], [/\bAKIA[0-9A-Z]{16}\b/, 'an AWS access key'],
+  [/-----BEGIN (?:RSA |EC |OPENSSH |PGP )?PRIVATE KEY-----/, 'a private key'], [/\bxox[baprs]-[A-Za-z0-9-]{10,}/, 'a Slack token'],
+  [/\bAIza[0-9A-Za-z_-]{35}\b/, 'a Google API key'],
+];
+function secrets(root) {
+  root = root || ROOT; const P = [], tracked = [];
+  /* the filesystem, not `git ls-files`: a fixture is not a repository, and a file that is not yet
+     committed is a leak the moment somebody pushes it */
+  const walk = d => { for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+    if (['.git', 'node_modules', 'vendor', 'scratchpad', '_site'].includes(e.name)) continue;
+    const f = path.join(d, e.name); if (e.isDirectory()) walk(f); else tracked.push(path.relative(root, f)); } };
+  try { walk(root); } catch (e) { return P; }
+  tracked.filter(f => /\.(md|js|mjs|json|ya?ml|sh|html|css|txt|svg)$/.test(f) && f !== 'test/leaves.js').forEach(f => {
+    let src; try { src = fs.readFileSync(path.join(root, f), 'utf8'); } catch (e) { return; }
+    SECRET_SHAPES.forEach(([re, what]) => { const m = re.exec(src); if (m) {
+      const line = src.slice(0, m.index).split('\n').length;
+      P.push(f + ':' + line + ' holds what looks like ' + what + ' — this repository is public, so it is already readable: rotate it, then remove it'); } });
+  });
+  return P;
+}
+
+/* ---- CI-4 (2026-09-21): vendor/three.min.js is 608 KB of minified code and qr.js runs in every
+   player's browser; a one-line change in either is invisible in a diff. test/vendor.sha256 is the
+   thing a reviewer can check, and this recomputes it. It lives under test/ and not vendor/ because
+   scripts/build-site.sh copies vendor/ whole into the public box — the first draft shipped a README
+   and a hash file to every player (21 files in the box, not 19).
+   Updating a library: replace the file, `sha256sum vendor/three.min.js qr.js > test/vendor.sha256`,
+   and say in the commit where the new bytes came from. */
+function vendored(root) {
+  root = root || ROOT; const P = [], sums = path.join(root, 'test', 'vendor.sha256');
+  if (!fs.existsSync(path.join(root, 'vendor')) && !fs.existsSync(path.join(root, 'qr.js'))) return P;   /* nothing vendored here (a fixture) */
+  if (!fs.existsSync(sums)) { P.push('test/vendor.sha256 is missing — the two third-party files every player runs have no recorded hash'); return P; }
+  const crypto = require('crypto');
+  fs.readFileSync(sums, 'utf8').split('\n').filter(Boolean).forEach(line => {
+    const [want, rel] = line.trim().split(/\s+/); if (!want || !rel) return;
+    const abs = path.join(root, rel);
+    if (!fs.existsSync(abs)) { P.push('test/vendor.sha256 names ' + rel + ' and there is no such file'); return; }
+    const got = crypto.createHash('sha256').update(fs.readFileSync(abs)).digest('hex');
+    if (got !== want) P.push(rel + ' does not match test/vendor.sha256 — the vendored bytes changed; if that was meant, re-run sha256sum and say in the commit where the new bytes came from');
+  });
+  return P;
 }
 
 /* ---- AND THE HALF THE OWNER ASKED FOR, 2026-09-20 ----
@@ -202,9 +283,18 @@ function completeness(root, R) {
   const bs = path.join(root, 'scripts', 'build-site.sh');
   if (fs.existsSync(bs)) {
     const src = fs.readFileSync(bs, 'utf8');
-    const m = src.match(/^\s*for f in ([^;\n]+);/m);
-    (m ? m[1].trim().split(/\s+/) : []).forEach(p => need(p, 'scripts/build-site.sh copies it into the public build'));
-    [...src.matchAll(/cp -r "\$ROOT\/([A-Za-z0-9_./-]+)"/g)].forEach(x => need(x[1].replace(/\/?$/, '/'), 'scripts/build-site.sh copies it into the public build'));
+    /* Finding SEC-6 (2026-09-21): the two regexes this used to carry — `for f in …;` and
+       `cp -r "$ROOT/…"` — matched NOTHING in the script as written (`cp index.html sw.js … "$OUT/"`,
+       `cp -r engine vendor "$OUT/"`), so zero paths were derived and a new private directory added to
+       both the script and the tree would have needed no row. Read every cp line: every argument but
+       the last is a thing that ships. Planted: adding `changarrito` to the cp -r line goes red. */
+    src.split('\n').forEach(line => {
+      const m = /^\s*cp\s+(?:-[a-zA-Z]+\s+)*(.+)$/.exec(line); if (!m) return;
+      const args = m[1].trim().split(/\s+/).filter(a => !/^-/.test(a)); args.pop();
+      args.forEach(a => { const p = a.replace(/^["']|["']$/g, ''); if (!p || /\$/.test(p)) return;
+        const isDir = fs.existsSync(path.join(root, p)) && fs.statSync(path.join(root, p)).isDirectory();
+        need(isDir ? p.replace(/\/?$/, '/') : p, 'scripts/build-site.sh copies it into the public build'); });
+    });
   }
   let tracked = [];
   try { tracked = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).split('\n').filter(Boolean); } catch (e) { return P; }
@@ -252,6 +342,7 @@ if (require.main === module) {
     cases.push(['a persona citing a file that was never written', out.some(s => /GHOST\.md/.test(s))]);
     cases.push(['a .json citation is not read as a .js ghost', !out.some(s => /spots\.js\b/.test(s))]);
     W('docs/GHOST.md', 'x\n');
+    W('docs/INDEX.md', '[GHOST.md](GHOST.md) [BOUNDARY.md](BOUNDARY.md)\n');   /* indexed(): a sound fixture lists what it has */
     W('docs/BOUNDARY.md', TABLE('zeni'));
     out = consistency(t);
     cases.push(['a row naming a path that is not in the repo', out.some(s => /guards "sw\.js"/.test(s))]);
@@ -291,6 +382,46 @@ if (require.main === module) {
     W('.github/workflows/ci.yml', 'name: CI\npermissions:\n  contents: read\non:\n  push:\n  pull_request:\njobs:\n  x:\n    runs-on: ubuntu-latest\n');
     out = consistency(t);
     cases.push(['the deploy\'s own write scopes are allowed, and only in pages.yml', out.length === 0]);
+    /* 2026-09-21 — the shapes finding CI-5 planted and this missed, each now red on a fixture */
+    const OKWF = 'name: CI\npermissions:\n  contents: read\non:\n  push:\njobs:\n  x:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4\n';
+    W('.github/workflows/ci.yml', OKWF.replace('on:\n  push:\n', 'on: {issue_comment: {types: [created]}}\n'));
+    out = consistency(t); cases.push(['a comment trigger in flow form with braces', out.some(s => /issue_comment/.test(s))]);
+    W('.github/workflows/ci.yml', OKWF.replace('  push:\n', '  "pull_request_target":\n'));
+    out = consistency(t); cases.push(['a quoted pull_request_target key', out.some(s => /pull_request_target/.test(s))]);
+    W('.github/workflows/ci.yml', OKWF.replace('  push:\n', '  workflow_run:\n    workflows: [CI]\n'));
+    out = consistency(t); cases.push(['workflow_run — runs in the base repo after a stranger\'s fork CI', out.some(s => /workflow_run/.test(s))]);
+    W('.github/workflows/ci.yml', OKWF.replace('  push:\n', '  repository_dispatch:\n'));
+    out = consistency(t); cases.push(['repository_dispatch', out.some(s => /repository_dispatch/.test(s))]);
+    W('.github/workflows/ci.yml', OKWF.replace('contents: read', 'contents: "write"'));
+    out = consistency(t); cases.push(['a quoted write value', out.some(s => /contents: write/.test(s))]);
+    /* GH-6: an expression spliced into a run: line, block form and single line; and an env: line is fine */
+    W('.github/workflows/ci.yml', OKWF + '      - run: |\n          git fetch origin "${{ github.base_ref }}"\n');
+    out = consistency(t); cases.push(['${{ }} inside a run: | block', out.some(s => /inside a run: line/.test(s))]);
+    W('.github/workflows/ci.yml', OKWF + '      - run: echo "${{ github.ref_name }}"\n');
+    out = consistency(t); cases.push(['${{ }} on a single run: line', out.some(s => /inside a run: line/.test(s))]);
+    W('.github/workflows/ci.yml', OKWF + '      - env:\n          REF: ${{ github.ref_name }}\n        run: |\n          echo "$REF"\n      - name: next\n        env:\n          X: ${{ github.sha }}\n        run: echo ok\n');
+    out = consistency(t); cases.push(['an expression under env: is not a run: line, even right after a block', !out.some(s => /inside a run: line/.test(s))]);
+    /* CI-3: a moving tag; and a pinned SHA with a trailing comment is fine */
+    W('.github/workflows/ci.yml', OKWF.replace('actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4', 'actions/checkout@v4'));
+    out = consistency(t); cases.push(['an action used by a moving tag', out.some(s => /moving tag/.test(s))]);
+    W('.github/workflows/ci.yml', OKWF);
+    out = consistency(t); cases.push(['a SHA-pinned action with its tag in a comment is green', !out.some(s => /moving tag/.test(s))]);
+    /* SEC-3: a token shape in a file that never ships */
+    W('docs/runs/2026-09-21-x-0000.md', 'Evidence: curl -H "Authorization: Bearer ghp_' + 'a'.repeat(30) + '"\n');
+    W('docs/INDEX.md', '[GHOST.md](GHOST.md) [BOUNDARY.md](BOUNDARY.md) [runs/](runs/)\n');
+    out = consistency(t); cases.push(['a GitHub token pasted into a run ledger', out.some(s => /looks like a GitHub token/.test(s))]);
+    cases.push(['…and the value itself is never printed', !out.some(s => /ghp_a{30}/.test(s))]);
+    fs.unlinkSync(path.join(t, 'docs/runs/2026-09-21-x-0000.md'));
+    /* CI-4: the vendored bytes drift from the recorded hash */
+    W('test/vendor.sha256', 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  qr.js\n');
+    W('qr.js', 'not empty\n');
+    out = consistency(t); cases.push(['a vendored file whose hash moved', out.some(s => /does not match test\/vendor\.sha256/.test(s))]);
+    W('qr.js', ''); out = consistency(t); cases.push(['…and the same file matching is green', !out.some(s => /vendor\.sha256/.test(s))]);
+    /* SEC-6: build-site.sh read as written — a private directory added to the cp line needs a row */
+    W('scripts/build-site.sh', 'cp index.html sw.js "$OUT/"\ncp -r engine changarrito "$OUT/"\n');
+    W('changarrito/index.html', 'x\n'); W('engine/engine.js', 'x\n'); W('index.html', 'x\n');
+    out = consistency(t); cases.push(['a directory added to the copy line with no boundary row', out.some(s => /no row for changarrito\//.test(s))]);
+    fs.unlinkSync(path.join(t, 'scripts/build-site.sh'));
     /* completeness: the three derivable sets must each be covered by a row */
     W('.github/scripts/post-status.js', 'fetch("https://api.github.com/x",{headers:{Authorization:"Bearer x"}})\n');
     out = consistency(t);
@@ -332,4 +463,4 @@ if (require.main === module) {
   console.log('Not a failure. Nobody can edit their way out of this sentence; it is a routing slip, and the review is the gate. Melo plants against whatever guard you add.');
   process.exit(0);
 }
-module.exports = { consistency, touched, rows, changedFiles, workflows, indexed };
+module.exports = { consistency, touched, rows, changedFiles, workflows, indexed, secrets, vendored };

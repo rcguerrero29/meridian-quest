@@ -17,7 +17,7 @@ mine, and it says which.
 | 1 | **Protect `main`** — Settings → Branches → Add rule for `main` (`docs/SECURITY.md` has the exact clicks) | `main` is **unprotected** ([FACT], read from the API 2026-09-20). Every "the owner merges" rule in this repository is a sentence, not a mechanism: any write credential can push straight to it. Nothing else on this list matters until this is done |
 | 2 | **Merge #215** (the two-AI protocol) and read `docs/SECURITY.md` when it lands | |
 | 3 | **Tick or reject the six acceptance criteria** in `docs/runs/2026-09-20-claude-7c41.md` | the first run in the ledger; the one that matters is *would you let a second AI near the engine on `AGENTS.md` alone?* |
-| 4 | **Pick the second AI's short name** (`gemini`, `codex`, `grok`) | it becomes its branch namespace, its `in-flight:` label and the word inside its run IDs |
+| 4 | **Pick the second AI's short name** (`gemini`, `codex`, `grok`) | it becomes its branch namespace, its `taken:` label and the word inside its run IDs |
 | 5 | **Mint that agent its own fine-grained token**, scoped to this one repo (`docs/SECURITY.md` says exactly which scopes, and which must be absent) | a credential per agent is what makes *"i may change it depending on their performance"* a one-click revoke |
 | 6 | **The `PLANPICK` call** — does every place on the map become tappable in the town too? | step 4 of the map build order cannot start before it (`docs/ARCH-LOG.md` A18, last row) |
 | 7 | Say whether the second AI's first job is docs/content (recommended) or engine | lowest blast radius while you learn how it behaves |

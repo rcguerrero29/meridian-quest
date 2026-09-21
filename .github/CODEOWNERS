@@ -1,0 +1,42 @@
+# CODEOWNERS — the files a pull request may not merge without the owner having opened them.
+#
+# Written 2026-09-21, findings A3 / A6 / SEC-4 / A9. Every path here is one where a change that
+# LOOKS harmless in a diff can loosen a rule, take a key, or reach every player: the contract an
+# agent works under, the signed personas, the verbatim record of what the owner said, the deploy
+# recipe, the public shell, and the one page that holds the owner's Issues token.
+#
+# This file does nothing by itself. It takes effect when the owner turns on "Require review from
+# Code Owners" in a ruleset on main (docs/SECURITY.md). With exactly one human on the repo that rule
+# is set with the owner as a bypass actor: it stops a second agent's PR merging on green alone, and
+# it does not stop the owner merging his own. test/leaves.js keeps every path here real.
+
+# the contract, and Claude's entry point
+AGENTS.md                         @rcguerrero29
+CLAUDE.md                         @rcguerrero29
+.claude/                          @rcguerrero29
+
+# the record — what he said, what each run did, what he decided
+docs/ASKS.md                      @rcguerrero29
+docs/OWNER.md                     @rcguerrero29
+docs/runs/                        @rcguerrero29
+docs/council/                     @rcguerrero29
+docs/personas/                    @rcguerrero29
+
+# what ships, and how
+.github/                          @rcguerrero29
+scripts/                          @rcguerrero29
+index.html                        @rcguerrero29
+sw.js                             @rcguerrero29
+manifest.webmanifest              @rcguerrero29
+vendor/                           @rcguerrero29
+qr.js                             @rcguerrero29
+content/meridian/                 @rcguerrero29
+
+# the guards that read the box, the boundary and the ledger
+test/public.js                    @rcguerrero29
+test/leaves.js                    @rcguerrero29
+test/runs.js                      @rcguerrero29
+docs/BOUNDARY.md                  @rcguerrero29
+
+# the town: the owner's own tool, and the token's origin
+changarrito/                      @rcguerrero29

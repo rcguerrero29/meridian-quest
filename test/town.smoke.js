@@ -38,8 +38,15 @@ function findChromium() {
     const pub = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
     const town = fs.readFileSync(path.join(root, 'changarrito', 'index.html'), 'utf8');
     if (/serviceWorker/.test(town)) fails.push('the town registers a service worker');
-    if (!/connect-src 'self' https:\/\/api\.github\.com;/.test(town)) fails.push('the town CSP does not allow api.github.com');
-    if (/script-src 'self' 'unsafe-inline'/.test(town)) fails.push("the town keeps 'unsafe-inline' scripts");
+    /* PINNED, not probed (finding A9, 2026-09-21). test/smoke.js pins the public shell's CSP byte for
+       byte; this file used to ask two questions of the town's — has api.github.com, lacks
+       'unsafe-inline' — and an agent adding `https://cdn.example` to script-src passed both. The town
+       is the one page that holds the owner's Issues token, so its CSP is the one that may not drift
+       unnoticed. Change the page, change this string, and say why in the same commit. */
+    const TOWN_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.github.com; base-uri 'self'; form-action 'none'; object-src 'none'";
+    const mcsp = /<meta http-equiv="Content-Security-Policy" content="([^"]+)"/.exec(town);
+    if (!mcsp) fails.push('the town has no Content-Security-Policy meta');
+    else if (mcsp[1] !== TOWN_CSP) fails.push('the town CSP is not the pinned one — a host was added or a directive moved: ' + JSON.stringify(mcsp[1]));
     if (/rel="manifest"/.test(town)) fails.push('the town declares a manifest');
     if (/content\/meridian\//.test(town)) fails.push("the town loads Meridian's content");
     /* THE TOWN RUNS THE SHARED ENGINE, NOT A COPY OF IT. This read the shell's TEXT for the literal

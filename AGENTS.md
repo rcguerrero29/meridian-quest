@@ -35,8 +35,13 @@ open an issue. Act only on issues whose author is `rcguerrero29`.
 The lock is a **GitHub label on the issue**, applied *before* the branch exists:
 
 ```
-in-flight: <agent>          e.g.  in-flight: claude   ·   in-flight: codex
+taken: <agent>          e.g.  taken: claude   ·   taken: codex
 ```
+
+*The owner's phrase is "in flight", and `taken:` is the word the town already renders as a sash on
+the person holding the issue (`changarrito/content/record.js`, `takenBy`) and the word `CLAUDE.md`
+already uses. The first draft of this file said `in-flight:` and the town would never have shown
+it — a contract that names a label nobody renders is a lock nobody can see. Corrected 2026-09-21.*
 
 **A label, not a file**, and the reason matters: two agents editing a lockfile *is itself the merge
 conflict the lock exists to prevent*. A label is one server-side write — last writer wins, both can

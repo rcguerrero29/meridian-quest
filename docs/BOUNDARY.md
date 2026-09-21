@@ -485,12 +485,15 @@ has no date.*
 | `scripts/build-site.sh` | zeni, yaz | the public build — what goes in the box | 2026-09-13 |
 | `.github/workflows/pages.yml` | zeni, yaz | the public build — whether and what we upload, and when it is checked | 2026-09-13 |
 | `.github/workflows/ci.yml` | zeni, yaz | the public build — the gate that runs before a merge, and CI's own permissions | 2026-09-13 |
+| `.github/CODEOWNERS` | zeni | who must open a diff before it merges — the list of paths a second agent's PR cannot land on green alone, once the owner turns on code-owner review | 2026-09-21 |
 | `.github/scripts/city-record.js` | zeni | the public build — the one file written from the API into the box | 2026-09-13 |
 | `test/public.js` | melo, zeni | the public build — the guard that reads the box | 2026-09-13 |
 | `test/record.js` | melo | the public build — the guard that reads status.json | 2026-09-13 |
 | `index.html` | zeni | a person's browser — where the public page may talk, and what it loads | 2026-09-13 |
 | `sw.js` | zeni, yaz | a person's browser — what is stored on a device and for how long | 2026-09-13 |
 | `manifest.webmanifest` | yaz | a person's browser — the installed app's identity and start url | 2026-09-13 |
+| `icon-192.png` | yaz | a person's home screen — the installed app's face; found 2026-09-21 by the rewritten copy-line reader in `test/leaves.js`, which had derived zero shipped paths until then | 2026-09-21 |
+| `icon-512.png` | yaz | a person's home screen — the same, at the size the splash uses | 2026-09-21 |
 | `qr.js` | zeni | the public build — third-party code in every player's browser | 2026-09-13 |
 | `vendor/three.min.js` | zeni | the public build — third-party code in every player's browser | 2026-09-13 |
 | `engine/` | zeni, beto | a person's browser — both games' shared code; every trust boundary | 2026-09-13 |
