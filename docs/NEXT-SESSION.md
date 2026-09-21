@@ -5,6 +5,73 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
+### ⇢ NEXT SESSION — planned 2026-09-21, not started (he was out of tokens). Crew mode ON, by his word.
+
+Owner, verbatim: *"plan for next sesh for - a couple more to beautify and shape - crew mode please - cabinet in
+my office could be, this nolasco desk, the chair outside dona tenchas, im guessing what the oven is supposed
+to be in the espiga - can we also add more sweeet bread and baked goods please? there are limpeza things i
+dont know what they are and lets fix the mqt station now with beautify as well. also we should fix the
+trolley weirdness. the skeleton now seems to float in one perspective and with the papel picado, looks like
+its buggy or broken."* His two frames: `docs/mocks/2026-09-21-owner-reports/`.
+
+**Start fresh at the top of his five-hour window** (a day-old session spends 15–60× the live meter per
+turn; `docs/RUNS.md` §3½). Load `.claude/skills/shapes/SKILL.md` before any lane is briefed — it is the
+recipe — then `crew-fix` for the run and `playtest` for the two reports. Three issues, a `taken:` label
+each, one branch (every shape lane lands in `content/meridian/art.js`), one PR. Write the estimate in
+the run file BEFORE the briefs go out; the last crew run had none and said so.
+
+**Lane 1 — the interiors and the stop, as shapes** (a builder like el taller; Cuca or Pili to direct the
+rooms). Ground each in `content/meridian/maps.js` and `art.js` first — the glyphs below are where to look,
+not [CODE]:
+- **The cabinet in his office** — HQ floor 2 (`f2`), the player's own room. A filing cabinet is drawers
+  in a carcase with pulls; it reads when the drawer fronts break the box.
+- **Nolasco's desk** — the notary (`no`). His frame shows a dark box wearing its top-down drawing on the
+  lid (the lid finding, `docs/3D-LOG.md` 2026-09-21): a writing desk is a top on two pedestals with a
+  chair pushed in and what sits on it (the ledger, the lamp) standing up. The rug beside it is paint on the
+  floor and may stay so, but its border is what says rug from 7 tiles back.
+- **The chair outside Doña Tencha's** — Calle Dos (`ex`), by her door. A kitchen chair on the pavement:
+  four legs, a seat, a back of two uprights and a rail. One tile.
+- **The oven in La Espiga** — the bakery (grep `Bolillo` in `maps.js` for the world; the ending's page
+  "above the oven" is `engine.js:480`). He cannot tell what it is. A bakery oven is a steel deck oven —
+  a box with two or three doors with handles and a window each, a chimney pipe up, a tray rack beside
+  it — or a brick horno with a dome and a mouth. Build the one the drawing meant; if the drawing does not
+  say, the deck oven, because the trays are what the goods come out on.
+- **The limpieza things** — Limpieza Velázquez (`maps.js:143`: schedule boards, two desks, supply
+  shelves). He does not know what they are, which is the finding: a supply shelf must show mop heads,
+  bottles and a bucket; a mop bucket on wheels with its wringer; a broom leaning. Each thing one shape
+  whose silhouette names it.
+- **The MQT station** — the trolley stop (`art.js:105`, the drawing that spells MQT; billboarded today,
+  `engine.js:921`). A stop is a shelter: two posts, a small roof, the sign with the letters on both
+  faces, a bench under it. The sign's letters stay a texture on a mesh face (a part cannot carry text —
+  the seam needs a `tex:` part or the sign stays a billboard beside the shelter; decide with Beto).
+
+**Lane 2 — more sweet bread and baked goods** (Nacho for what a Meridian panadería sells; a builder for
+the display). One dough, one tray, one oven: conchas (the shell in two colours), cuernos, orejas,
+polvorones, bolillos, and pan de muerto in season — as a display case with trays, each tray one kind,
+built as made (how-its-made: siblings off one tray, not strangers), plus the 2D drawings so every camera
+agrees. The cat is called Bolillo; the bakery's endings mention the concha's ten weeks — the goods have
+story weight, so their names should be the ones the docs already use.
+
+**Lane 3 — the two bugs, triaged before anything is built** (Beto and Chema; Rigo for the tram):
+- **The skeleton floats in one perspective, with the papel picado through him.** His frame is the FRONT
+  camera on Calle Principal: the hero stands over the tram lane with no ground under his feet and a
+  string drawn as a vertical line through his body, a calaverita on the road below. Two suspects, both
+  2D: the front camera's swag-string drawing (a string that runs north–south becomes a vertical line and
+  is drawn after the hero), and the hero's foot line on the rails row in that camera. Reproduce with a
+  scratch shot at `st` on row 2 in all four cameras before touching anything; then the smallest fix,
+  and a guard that reads the draw order, planted.
+- **"The trolley weirdness."** He did not say what; ask him for one sentence at the start of the session.
+  Until then: Chava rides the line end to end in all four cameras and writes what he sees (the body now
+  flips with `TRO.dir` each frame — check the turn-round at both ends, the driver's end, the pole's
+  lean, and the 2D cameras' tram, which is not the mesh). A candidate to rule out first: the front and
+  top cameras draw their own tram, and the season's strings over the crossing are drawn by the bridge
+  branch — the frame above may be the same bug seen twice.
+
+**Estimate, written now:** three lanes at roughly the last run's rate — interiors ~350,000, bakery
+~250,000, bugs ~300,000 on the agents' own meters — and the session ~350,000 on the live meter; on the
+session meter about 700,000 out (the last crew run's 666,017 is the calibration). Say if that is more
+than the window allows and the lanes are cut, in this order: bakery, then the stop.
+
 ### ⇢ 2026-09-21, latest — merged: #224 (`9940005`, `mq-v182`). The method is a skill now; the chiles and bananas are next.
 
 Owner: *"please merge - hm how do we fixe the bananas and chiles? did you log how we can recreate this new
