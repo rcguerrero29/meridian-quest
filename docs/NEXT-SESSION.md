@@ -16,7 +16,9 @@ ran: two small turns moved the session meter by 5,986 out, so the counter is san
 the 3.5M belonged to the long working turn — most likely reasoning tokens the live meter never shows;
 `docs/RUNS.md` §3½ says so now. **Left on purpose:** the hero behind a mesh crown is hidden by it (the
 stub and the glass are the precedents); the iso camera (row 5); row 6, whose shelf. **The flat list
-now:** `3 4 5 7 A W X Y`.
+now:** `3 4 5 7 A W X Y`. **Measured at the next turn's start:** the session meter moved 962,408 out for
+that sitting against a live meter of ~66,000 — a factor of about 15, the mesh sitting's was 30; the
+session meter is what spends his plan, the live meter is what predicts the work (run `a3c2`).
 
 ### ⇢ 2026-09-21, later that night — the `mesh` view is in: shapes, not pictures.
 
