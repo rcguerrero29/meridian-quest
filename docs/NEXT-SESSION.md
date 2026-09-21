@@ -5,6 +5,27 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
+### ⇢ 2026-09-21, latest — crew iteration 11: the marigold by a botanist, fourteen shapes by two builders, Pili directing.
+
+Owner: *"everything looks good except the marigolds. lets do a crew mode … an expert on flora … computers,
+rails, fences, coffee machines, fridge, bridge, petals, trolley, desks, fruit stands, car lifts, tires,
+car,and tool boxes. make sure even mural gets done please."* Crew mode ON by his word — #221/#222/#223
+with `taken:` labels, a worktree per builder, one branch because every lane lands in `art.js`. Done,
+`mq-v181` (`docs/3D-LOG.md`, fourth entry of the date; run `docs/runs/2026-09-21-claude-d8e4.md`):
+eleven of his fourteen as shapes, the marigold as a stack of whorls with the bed's row-constant seed
+fixed, a pad under every mesh (engine rule), four panels on the wall in four materials. **Not done —
+NEEDS ENGINE, parts lists in `docs/mocks/2026-09-21-contact-sheet/crew-11/calle/`:** the bridge (a seam
+inside the bridge branch, ADD never replace), the petal bake's weighting, glass with alpha, the tram's
+body through `prop:tram` with the wheel guard raised to four. ~40,000 on the live meter for the four.
+**Costs:** the four agents 1,210,463 on their own live meters (Pili 209,747 · botánica 257,248 · taller
+342,370 · calle 401,098); the session ~330,000; **the session meter's after-figure is read at the start
+of the next turn** (before: 1,511,704 in · 13,871,532 out) — and that read says whether agents' tokens
+post to it. **Two rule contradictions reported in the flight notes (iteration 11):** `crew-fix` and the
+FLIGHT-NOTES header say the session applies persona edits; `docs/RUNS.md` §6 (his, 2026-09-20) says
+they go to `docs/personas/proposed/` — followed §6, the two older texts need a line. **Known:** the
+Pili brief's camera line was wrong (4 tiles/35° vs 7.4/6.2/40°) — every brief's [CODE] lines are only
+as good as the grep behind them. #221–#223 close when the PR merges; their `taken:` labels come off then.
+
 ### ⇢ 2026-09-21, latest — the second try: ruffled marigolds, a dress of flags, tables, poles, the altar.
 
 Owner: *"the marigolds can use another try and same with the decor … tables too, poles with the paper
