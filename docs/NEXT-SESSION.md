@@ -5,6 +5,22 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
+### ⇢ 2026-09-21, night — the first beautify sitting is DONE; the next one is engine.
+
+Owner: *"start with the ones you mention and let me know how accurate you were."* Rows 1–3 of the
+sheet's list are drawn (`content/meridian/art.js`, BEAUTIFY, FIRST SITTING; `mq-v177`): the shelf is a
+bookcase, grass is a tuft in a crack, the bed is a raised bed and SOLID (`ASSUMED:` in `maps.js`).
+Estimate and measurement are in run `2026-09-21-claude-c4a9`. **Two corrections to the day-old list
+are struck in place in `docs/BEAUTIFY.md`:** standing a walkable thing up makes a sprite, and #39 refuses
+a new sprite; a box needs a SOLID tile. **Next in order:** (a) his answer to row 6 — one shelf glyph
+per business or one glyph dressed per world; (b) the first engine sitting, row 5, `isoBlock` painting
+`sideArt` on its faces — one function, both games, bump; (c) row 4 is Chema's to measure before any
+camera moves. Ultracode was off for all of it; crew mode is for many builders on many issues and was
+not used. **First thing next turn: read `get_session` once and write the delta from
+1,020,270 in · 7,373,311 out into the last Tasks row of run `c4a9`** — the session counter posts at
+turn boundaries, so the sitting's real cost is only readable from the next turn (`docs/RUNS.md` §3½,
+corrected today; run `b7d3`'s number was an in-turn read and is marked a floor).
+
 ### ⇢ 2026-09-21, later — the beautify contact sheet exists; the first sitting is three drawings.
 
 Owner: *"can we consider beautifying across the worlds?"* — considered the register's way: **sheet,

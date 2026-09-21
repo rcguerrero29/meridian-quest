@@ -412,6 +412,117 @@ TILEART_SIDE["I"]=rc=>{const{sx,sy,x,y}=rc;
     ctx.fillStyle="#C0392B";ctx.fillRect(sx+16,sy+1.4,1,2.4);
     produce(sx+16,sy+8,"tomato",1.1);}
 };
+/* ---- BEAUTIFY, FIRST SITTING — 2026-09-21. Three drawings, content only. ----
+   docs/BEAUTIFY.md, "The contact sheet — 2026-09-21", rows 1–3. Drawn the way docs/how-its-made says:
+   by the process that made the thing, with variation entering at the step it entered and nowhere
+   earlier, and lit as everything else on this street — key upper-left, one contact shadow. */
+
+/* THE SHELF, FROM THE FRONT. The engine's own side view stands nine 6×5 blocks in six primaries on a
+   3×3 grid, which is a Rubik's cube in every camera that sees it. A shelf is a carcass a joiner made
+   (two uprights, boards with a front edge that catches the light and a shadow under it) and then
+   what a PERSON put on it: books go on in RUNS — pushed to an upright, spines of one series sharing
+   a palette, the last one leaning on the run — with a gap where something was taken out, a stack
+   lying flat, a carton on the bottom board. Which shelf has the gap and the stack is decided per
+   tile, so a wall of them is a wall of shelves and not one picture repeated. */
+TILEART_SIDE["S"]=rc=>{const{sx,sy,x,y}=rc;
+  const sd=(((x*7+y*13)%6)+6)%6;
+  const FAM=[["#8C3B2E","#A54A3A","#6E2E24"],["#3E5C86","#4F6E9A","#2F4868"],["#7C8F5A","#93A56A","#5E6E44"],
+             ["#C9B68C","#D9C9A3","#A99570"],["#5C4A6E","#6E5A84","#463756"],["#B8763A","#C98A4C","#8E5A2C"]];
+  ctx.fillStyle="rgba(15,12,20,.20)";ctx.beginPath();ctx.ellipse(sx+16,sy+30.4,13,2,0,0,7);ctx.fill(); /* it stands on the floor */
+  ctx.fillStyle="#3F2E1E";ctx.fillRect(sx+2,sy+2,TS-4,28);                                   /* the back panel, in shade */
+  ctx.fillStyle="#8A6F4D";ctx.fillRect(sx+2,sy+2,2.4,28);ctx.fillRect(sx+TS-4.4,sy+2,2.4,28); /* uprights */
+  ctx.fillRect(sx+2,sy+2,TS-4,2.2);                                                           /* the top board */
+  ctx.fillStyle="rgba(255,255,255,.22)";ctx.fillRect(sx+2,sy+2,TS-4,1);ctx.fillRect(sx+2,sy+2,1,28); /* lit north and west edges */
+  const BOARD=[11.5,20.5,28];                                                                 /* three boards; the bottom one is the plinth */
+  BOARD.forEach(b=>{ctx.fillStyle="#7E6446";ctx.fillRect(sx+4.4,sy+b,TS-8.8,2);
+    ctx.fillStyle="rgba(255,255,255,.18)";ctx.fillRect(sx+4.4,sy+b,TS-8.8,0.8);              /* the front edge catches the key */
+    ctx.fillStyle="rgba(15,12,20,.35)";ctx.fillRect(sx+4.4,sy+b+2,TS-8.8,0.9);});             /* every inside corner is dark */
+  const run=(x0,base,h0,fam,n,lean)=>{let cx=x0;                                             /* spines, bottom on the board, pushed together */
+    for(let i=0;i<n;i++){const wd=2+((i*3+sd)%3)*0.6,h=h0-((i*5+sd*3)%3)*0.7;
+      ctx.fillStyle=fam[(i+sd)%fam.length];ctx.fillRect(sx+cx,sy+base-h,wd,h);
+      ctx.fillStyle="rgba(255,255,255,.14)";ctx.fillRect(sx+cx,sy+base-h,0.7,h);cx+=wd+0.35;}
+    if(lean){const h=h0-0.6,wd=2.4;ctx.fillStyle=fam[(n+sd)%fam.length];ctx.beginPath();     /* the last one leans on the run */
+      ctx.moveTo(sx+cx,sy+base);ctx.lineTo(sx+cx+wd,sy+base);ctx.lineTo(sx+cx+wd+2.2,sy+base-h);ctx.lineTo(sx+cx+2.2,sy+base-h);ctx.closePath();ctx.fill();cx+=wd+2.4;}
+    return cx;};
+  const stack=(x0,base,fam,n)=>{for(let i=0;i<n;i++){const wd=7-i*0.8,h=1.6,yy=sy+base-(i+1)*h-i*0.2; /* lying flat: the one underneath is squashed */
+    ctx.fillStyle=fam[(i+1)%fam.length];ctx.fillRect(sx+x0+i*0.4,yy,wd,h);
+    ctx.fillStyle="rgba(255,255,255,.16)";ctx.fillRect(sx+x0+i*0.4,yy,wd,0.5);}};
+  const carton=(x0,base,wd,h)=>{ctx.fillStyle="#B0895B";ctx.fillRect(sx+x0,sy+base-h,wd,h);
+    ctx.fillStyle="rgba(255,255,255,.2)";ctx.fillRect(sx+x0,sy+base-h,wd,0.8);
+    ctx.fillStyle="rgba(60,40,20,.35)";ctx.fillRect(sx+x0+wd*0.45,sy+base-h,0.8,h);           /* the tape */
+    ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+x0+1.2,sy+base-h*0.55,wd*0.4,1.4);};              /* the label */
+  const fa=FAM[sd%6],fb=FAM[(sd+2)%6],fc=FAM[(sd+4)%6],fd=FAM[(sd+1)%6];
+  if(sd%2===0){                                                                              /* layout one */
+    let cx=run(4.8,11.5,6.2,fa,3+(sd%3===0?1:0),true);stack(cx+1.5,11.5,fb,2);
+    run(4.8,20.5,6.0,fc,5,true);
+    carton(4.8,28,9,4.6);run(15.5,28,4.6,fd,4,false);
+  }else{                                                                                     /* layout two: the gap moved */
+    run(4.8,11.5,6.2,fb,5,true);
+    let cx=run(4.8,20.5,6.0,fa,3,true);stack(cx+1.2,20.5,fc,2);
+    run(4.8,28,4.6,fd,3,true);carton(17.6,28,9,4.2);
+  }
+};
+
+/* GRASS, FROM ABOVE. Three strokes on the pavement read as the letter Λ (docs/BEAUTIFY.md, 09-09).
+   A tuft in a plaza is not planted; it GREW, from a seed in a crack, and what a grown thing leaves is
+   asymmetry that follows a direction: the blades fan out from one root as a rosette, the ones toward
+   the light longer and paler, one or two gone to straw. The crack it came from is still there.
+   It stays paint on the floor because that is what a tuft is; standing it up as a sprite would put a
+   new flat picture into the 3D scene, and test/engine.smoke.js #39 forbids that on purpose. */
+TILEART["g"]=rc=>{const{sx,sy,x,y}=rc;
+  const sd=(((x*7+y*13)%8)+8)%8,cx=sx+14+(sd%3)*1.6,cy=sy+16+((sd>>1)%3)*1.4,a0=sd*0.8;
+  ctx.strokeStyle="rgba(40,32,28,.45)";ctx.lineWidth=0.9;ctx.lineCap="round";ctx.beginPath(); /* the crack */
+  ctx.moveTo(cx-Math.cos(a0)*11,cy-Math.sin(a0)*11);ctx.lineTo(cx-Math.cos(a0)*4,cy-Math.sin(a0)*4+1);ctx.lineTo(cx,cy);
+  ctx.lineTo(cx+Math.cos(a0+0.4)*5,cy+Math.sin(a0+0.4)*5);ctx.lineTo(cx+Math.cos(a0+0.2)*10,cy+Math.sin(a0+0.2)*10-1);ctx.stroke();
+  ctx.fillStyle="rgba(90,70,45,.28)";ctx.beginPath();ctx.ellipse(cx,cy+0.5,4.5,3.2,0,0,7);ctx.fill(); /* the soil it holds */
+  const n=8+(sd%3);
+  for(let i=0;i<n;i++){const a=i*(Math.PI*2/n)+sd*0.35+(i%2)*0.18,lit=Math.cos(a+Math.PI*0.75)>0.2;
+    const len=5.5+((i*3+sd)%4)*1.3+(lit?1:0);                                                 /* toward the light: longer */
+    ctx.strokeStyle=tc(lit?"#8FCB72":"#4E8A58");ctx.lineWidth=i%3===0?1.7:1.3;
+    const mx=cx+Math.cos(a)*len*0.5,my=cy+Math.sin(a)*len*0.5;
+    const ex=cx+Math.cos(a)*len+Math.cos(a+1.3)*1.6,ey=cy+Math.sin(a)*len+Math.sin(a+1.3)*1.6;   /* the tip curls */
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.quadraticCurveTo(mx,my,ex,ey);ctx.stroke();}
+  ctx.strokeStyle=tc("#C9B66E");ctx.lineWidth=1;const ad=sd*0.9+2;                            /* one blade gone to straw */
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.quadraticCurveTo(cx+Math.cos(ad)*3,cy+Math.sin(ad)*3,cx+Math.cos(ad+0.5)*7,cy+Math.sin(ad+0.5)*7);ctx.stroke();
+};
+
+/* THE FLOWER BED, AS A RAISED BED. It was paint — a brown square with three dots at 3D distance —
+   because the tile was walkable and a walkable tile is baked into the floor. A marigold bed in a
+   plaza is not something you walk through: it is a low painted-concrete curb with soil behind it and
+   the cempasúchil mounding over the rim. So it is SOLID now (maps.js SOLIDX) and a box (TILEMETA):
+   the lid is the bed seen from above, the sides are the curb with the heads over it. The plants are
+   the engine's own drawBed, so a season that recolours the bridge's petals recolours these too. */
+TILEART["b"]=rc=>{const{sx,sy,x,y}=rc;
+  const w=CW(),bed=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="b";};       /* a run of beds shares one curb */
+  const N=!bed(x,y-1),S=!bed(x,y+1),E=!bed(x+1,y),Wt=!bed(x-1,y);
+  ctx.fillStyle=tc("#5E4630");ctx.fillRect(sx,sy,TS,TS);                                     /* soil, edge to edge: the lid never shows the map colour */
+  drawBed(ctx,sx,sy,(((x*7+y*13)%5)+5)%5/5);
+  ctx.fillStyle=tc("#B9B0A2");
+  if(N)ctx.fillRect(sx,sy,TS,3);if(S)ctx.fillRect(sx,sy+TS-3,TS,3);if(Wt)ctx.fillRect(sx,sy,3,TS);if(E)ctx.fillRect(sx+TS-3,sy,3,TS);
+  ctx.fillStyle="rgba(255,255,255,.22)";if(N)ctx.fillRect(sx,sy,TS,1);if(Wt)ctx.fillRect(sx,sy,1,TS);       /* the curb's lit edges */
+  ctx.fillStyle="rgba(15,12,20,.28)";if(S)ctx.fillRect(sx,sy+TS-1,TS,1);if(E)ctx.fillRect(sx+TS-1,sy,1,TS);   /* and its shade */
+  ctx.fillStyle="rgba(15,12,20,.18)";if(N)ctx.fillRect(sx+3,sy+3,TS-6,1.2);if(Wt)ctx.fillRect(sx+3,sy+3,1.2,TS-6); /* the curb casts onto the soil */
+};
+TILEART_SIDE["b"]=rc=>{const{sx,sy,x,y}=rc;
+  const w=CW(),bed=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="b";};
+  const Wt=!bed(x-1,y),E=!bed(x+1,y),sd=(((x*7+y*13)%5)+5)%5;
+  const P=petalPal(),UNDER=P[1],BODY=P[3]||P[2],CROWN=P[5]||P[4];
+  ctx.fillStyle="rgba(15,12,20,.20)";ctx.fillRect(sx,sy+29.6,TS,2);                          /* it meets the floor in a line — it is a run */
+  ctx.fillStyle=tc("#5E4630");ctx.fillRect(sx,sy+19,TS,3);                                   /* the soil behind the curb */
+  const heads=[[6,15,3.4],[15,13.5,3.9],[25,15.5,3.2],[11,18,2.4],[21,18.5,2.6]];
+  heads.forEach(([hx,hy,r],i)=>{const px=sx+hx+((sd+i)%3-1)*0.8,py=sy+hy+((sd*i)%2)*0.6;
+    ctx.strokeStyle=tc("#3E7C4F");ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(px,py+r*0.4);ctx.lineTo(px,sy+21);ctx.stroke(); /* the stem, into the soil */
+    ctx.fillStyle=UNDER;ctx.beginPath();ctx.ellipse(px,py+r*0.15,r,r*0.8,0,0,7);ctx.fill();                          /* the underside */
+    ctx.fillStyle=BODY;ctx.beginPath();ctx.ellipse(px,py-r*0.1,r*0.95,r*0.78,0,0,7);ctx.fill();                      /* the head, wider than tall */
+    ctx.fillStyle=CROWN;ctx.beginPath();ctx.ellipse(px-r*0.35,py-r*0.45,r*0.38,r*0.28,0,0,7);ctx.fill();});          /* the crown, where the key lands */
+  ctx.fillStyle=tc("#3E7C4F");[[3,19.5],[18,20],[29,19.5]].forEach(([lx,ly])=>{ctx.beginPath();ctx.ellipse(sx+lx,sy+ly,2.2,1.1,-0.4,0,7);ctx.fill();}); /* leaves between */
+  ctx.fillStyle=tc("#B9B0A2");ctx.fillRect(sx,sy+22,TS,8);                                   /* the curb: painted concrete, knee high */
+  ctx.fillStyle=tc("#C9C1B3");ctx.fillRect(sx,sy+21,TS,1.6);                                 /* its top, edge-on, lit */
+  ctx.fillStyle="rgba(15,12,20,.22)";ctx.fillRect(sx,sy+26.5,TS,3.5);                        /* the lower part in the ground's shade */
+  ctx.fillStyle="rgba(60,50,40,.35)";ctx.fillRect(sx+((x*TS)%13)+2,sy+23,0.8,6);              /* one joint, on the world grid, so it runs */
+  ctx.fillStyle="rgba(15,12,20,.3)";if(Wt)ctx.fillRect(sx,sy+21,1.2,9);if(E)ctx.fillRect(sx+TS-1.2,sy+21,1.2,9); /* the ends of the run */
+};
+
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   /* H and I were cutouts in 3D (docs/BEAUTIFY.md: "the most box-shaped object in the game"). These
      two rows and the two TILEART_SIDE drawings above are the whole fix, and neither reaches the
@@ -426,7 +537,8 @@ const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   "&":{lift:13,kind:"facade",win:[[7,12,18,11]],awn:9},
   "!":{lift:13,kind:"facade",win:[[5,12,22,14]]},  /* was [5,11,22,12]; the art paints (5,12,22,14) and the two have to agree — the joinery, the dusk light and any sill prop all come off this rect */
   "▣":{lift:10,kind:"appliance"},"▯":{lift:9,kind:"furniture"},"⊔":{lift:6,kind:"furniture"},"○":{lift:3,kind:"prop"},
-  "Y":{lift:13,kind:"transit",stand:true}   /* walkable, but a real object: nothing reads lift for a stand tile, it is a height class */
+  "Y":{lift:13,kind:"transit",stand:true},   /* walkable, but a real object: nothing reads lift for a stand tile, it is a height class */
+  "b":{lift:3,kind:"nature",box:true}        /* the raised bed (2026-09-21): solid via SOLIDX, a box because TILEART_SIDE draws its curb */
 };
 
 /* ---------- DECOART — the mural on Calle Principal ----------

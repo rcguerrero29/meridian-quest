@@ -43,3 +43,13 @@ relative to `test/`).
 Left to right is the same tile, the same second, through four cameras. What changes between panels is
 the renderer, not the world — so a thing that reads in three panels and not the fourth is a camera
 fault, and a thing that reads in none is a drawing fault. That distinction is the whole list.
+
+## After the first sitting — `after-first-sitting/`
+
+Six frames from the same spots, rendered after rows 1–3 of the list were drawn (`mq-v177`), with the
+spot list that reproduces them. Compare each against its strip above:
+
+| after | against | what changed |
+|---|---|---|
+| `me-3d.png`, `no-front.png`, `ta-3d.png` | `me.png`, `no.png`, `ta.png` | the shelf is a bookcase — runs of spines, a stack lying flat, a carton — not a Rubik's cube |
+| `pk-top.png`, `pk-front.png`, `pk-3d.png` | `pk.png` | grass is a tuft in a crack; the flower bed is a raised bed with a curb, a box in 3D and in front |

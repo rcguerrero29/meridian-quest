@@ -98,8 +98,16 @@ mistaken for one somebody did:
   `cache_read_tokens` and `cache_write_tokens` for the session. Snapshot before the task, snapshot
   after, subtract. This is a real measurement. Record input + output as the number; cache reads are
   cheap and huge and would swamp it — note them separately if they matter.
+  **The counter posts at turn boundaries, not live** (found 2026-09-21, run `c4a9`: the before and
+  after of a whole sitting read identical, and the previous sitting's cost appeared as one jump at
+  the next turn's start). So the "after" snapshot is the FIRST read of the NEXT turn, never a read
+  inside the turn that did the work; an in-turn after is a floor and must be written as one. A run
+  whose sitting is still the current turn writes `unknown: the counter posts at turn boundaries —
+  the next turn reads it and writes the delta here`, and the next turn does.
 - **`budget counter delta`** — the remaining-tokens figure a session is shown. Coarse; write it
-  `~N` and say the tolerance.
+  `~N` and say the tolerance. It is the only meter that moves inside a turn, and its unit is what
+  the turn consumed, tool output included — not output tokens, so it is not compared one for one
+  with an estimate written in output tokens.
 - **`vendor dashboard`** — whatever the second AI's platform reports, cited.
 - **`unknown: <reason>`** — allowed, never blank. *"the session ended before the after-snapshot"*
   is a reason. An empty cell is not.

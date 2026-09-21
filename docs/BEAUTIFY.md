@@ -622,8 +622,8 @@ The rank is that product: how many see it, times how wrong it is.
 | # | what the picture shows | where | cameras | seam | art or engine | cost |
 |---|---|---|---|---|---|---|
 | 1 | **The shelf is a Rubik's cube.** A brown box with a six-colour grid on its face — and the same grid is books in the notary, bread in the bakery, produce in the market and parts in the garage | me · pa · no · ta · li · lo | front, **3d** | `TILESIDE["S"]`; the pack overrides through `TILEART_SIDE` | **art** | one drawing; one per business if Toño gives each its own glyph |
-| 2 | **Grass is three green strokes painted on the pavement, in every camera including 3D.** Chava's "the letter Λ" (09-09), unchanged | pk · st · ex | all four | `TILEDRAW["g"]` is floor paint. `stands(g)` reads `TILES[g].stand` and `standsUp` needs a side drawing — so a `stand:true` row in `TILEMETA` plus `TILEART_SIDE.g` makes it a sprite in front, iso and 3D. **The lever at the top of this file; no engine** | **art + one meta row** | one drawing |
-| 3 | **The flower bed is a brown square with three orange dots**, flat on the floor at 3D distance. In iso the bed is gone and the three dots lie on bare pavement | pk · st | 3d, iso | `drawBed` top-down; iso paints its own three dots (`engine.js`, `ch==="b"`) | **art** — a low planter box (`box:true` + a side) | one drawing |
+| 2 | **Grass is three green strokes painted on the pavement, in every camera including 3D.** Chava's "the letter Λ" (09-09), unchanged | pk · st · ex | all four | ~~a `stand:true` row plus `TILEART_SIDE.g` makes it a sprite in front, iso and 3D — the lever at the top of this file~~ **wrong, found 2026-09-21: a sprite is a new flat picture in 3D and `test/engine.smoke.js` #39 fails the build on one, on purpose.** It stays paint, because a tuft on a plaza IS paint on the floor — drawn as what it is: a rosette of blades grown from a crack, `TILEART["g"]` (done 2026-09-21). Iso still draws its own three strokes (`engine.js`, `ch==="g"`) — that is row 5 | **art** | one drawing |
+| 3 | **The flower bed is a brown square with three orange dots**, flat on the floor at 3D distance. In iso the bed is gone and the three dots lie on bare pavement | pk · st | 3d, iso | ~~a low planter box (`box:true` + a side)~~ **a box needs a SOLID tile (2026-09-21): `b` is in `SOLIDX` now — `ASSUMED:` a marigold bed is not walked through, nobody decided it — with `box:true` in `TILEMETA`, the bed from above as the lid (`TILEART["b"]`, soil edge to edge so the map colour never shows) and the curb with the heads over it as the sides (`TILEART_SIDE["b"]`). Done 2026-09-21; the smoke found nobody unreachable.** Iso paints its own dots under a pink block — row 5 | **art + one meta row + one solid** | one drawing |
 | 4 | **An interior in the default camera is a strip of room between two bands of nothing.** In the notary the room is the middle 30% of the frame, olive above, olive below. HQ, the library, the loft, the bakery, the garage: the same, less | every interior | **3d** | camera distance and pitch for a world 5–8 rows tall, `engine3d.js`; or the apron's colour under a room | **engine — measure first** (Chema) | a sitting |
 | 5 | **The isometric camera draws every prop as a coloured block.** Crates, shelves, counters, desks, tables, signs, the fridge and the stove; the potted plant is a green cube; the rug is two plain lavender diamonds with no pattern. The tree is the one prop that reads, because `J` has its own branch. Chava's "loses about 90% of the art", unchanged | all twelve | iso | `drawIso`'s block pass ends in `isoBlock`, which by its own comment "paints faces and a diamond lid and never the art". `sideArt(g)` exists and front and 3D already draw it; the block's two faces are parallelograms a clip-and-skew can carry it onto, and its lid can take `TILEDRAW[g]` | **engine**, one function, both games, GAMEV + CACHE bump | a sitting |
 | 6 | **The café counter is in the garage.** A coffee machine and a row of cups where a mechanic works; the market shelf in the bakery and the notary | ta; pa · no | all four | `maps.js` rows. Whether a glyph can dress per world is Toño's question: floors have `FLOORC[world]`, tiles have nothing like it | **content + a vocabulary decision** | an hour a room, after the decision |
@@ -666,3 +666,32 @@ of the frame is room; a camera change that is not measured is the sugar skull ag
 
 `test/shots.js` cannot clear the ticker, so the first sheet was a third hidden; and `--spots` resolves
 against `test/`, not the working directory. Both are test changes, neither is built here.
+
+### The first sitting, done — 2026-09-21, the same day
+
+Owner: *"i see the estimate, start with the ones you mention and let me know how accurate you were."*
+Rows 1–3 drawn, content only, in `content/meridian/art.js` under the heading BEAUTIFY, FIRST SITTING;
+the bed's one solid in `content/meridian/maps.js`. `mq-v177`. The after-frames are beside the sheet in
+`docs/mocks/2026-09-21-contact-sheet/after-first-sitting/`; the cost, estimated before and measured
+after, is in run `2026-09-21-claude-c4a9`.
+
+**What the after-frames show, at native size.** The shelf is a bookcase: runs of spines in a shared
+palette, one leaning, a stack lying flat, a carton on the plinth, the gap on a different shelf from
+tile to tile — in the notary from the front and in the market and garage from the default camera.
+Grass is a rosette of blades from a crack with one blade gone to straw; in 3D it reads as a weed in
+the pavement, which is what it is. The bed is a raised bed: a knee-high box with a painted curb and
+the cempasúchil over the rim, from above on the lid and over the edge on the sides.
+
+**Two corrections to my own list, one day old, struck in place above.** Row 2 said standing grass up
+was the lever at the top of this file and free. It is not: `standsUp` makes a sprite, a sprite is a
+flat picture in the 3D scene, and #39 refuses a new one — the guard the owner asked for on
+2026-09-07 doing exactly its job. Row 3 said `box:true` plus a side; a box is only built on a SOLID
+tile, so the bed became solid, which is a walkability change and is marked `ASSUMED:` where it was
+made. **The lever at the top of this file is true for SOLID things only.** Written here so the next
+person does not spend an hour finding it.
+
+**Left open, on purpose.** Row 6: the bookcase now stands in the market and the garage, where it is
+the wrong shelf — one glyph per business (Toño's vocabulary) or one glyph dressed per world (a seam
+that does not exist) is the owner's call and was asked in the run file. Row 5 still owns the iso
+camera: the tuft and the bed are drawn there by the engine's own strokes and dots, not by the pack.
+
