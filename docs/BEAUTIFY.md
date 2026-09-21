@@ -40,10 +40,10 @@ canopy, freestanding box, floor paint — and everything else falls through to a
 
 | glyph | what it is | renders as today | should be | art or engine | cost |
 |---|---|---|---|---|---|
-| **rug** | a floor rug, six rooms | four blank lavender squares, no thickness, no border, visible seam | a rug: border, pattern, one piece | **art** | one drawing |
-| **the ❗** | the quest marker, ~20 people | a solid red bar through the top of the skull | anything that is not a spike | **art** | one drawing |
-| **H ×8** | produce crate, El Mercado | cutout, no side drawing | box — the most box-shaped object in the game | **art** | one drawing |
-| **I ×4** | counter + scale, El Mercado | cutout, four identical pictures in a row | box; the run reads as one counter | **art** | one drawing |
+| **rug** | a floor rug, six rooms | ~~four blank lavender squares, no thickness, no border, visible seam~~ **done 2026-09-15 (#203): one object, border and diamonds, in top, front and 3D — iso still draws it plain, see the 2026-09-21 sheet** | a rug: border, pattern, one piece | **art** | one drawing |
+| **the ❗** | the quest marker, ~20 people | ~~a solid red bar through the top of the skull~~ **done 2026-09-15 (#203): geometry, a yellow label with a "!", reads in all four cameras** | anything that is not a spike | **art** | one drawing |
+| **H ×8** | produce crate, El Mercado | ~~cutout, no side drawing~~ **done 2026-09-15 (#203): a box with produce in top, front and 3D; off the known-flat list** | box — the most box-shaped object in the game | **art** | one drawing |
+| **I ×4** | counter + scale, El Mercado | ~~cutout, four identical pictures in a row~~ **done 2026-09-15 (#203): a box; off the known-flat list** | box; the run reads as one counter | **art** | one drawing |
 | **`g` grass** | grass tufts, every outdoor world | the letter "Λ" printed flat on the pavement | standing tufts with height, or honest ground cover | **art** | one drawing |
 | **bushes** | park, street, Calle Dos, barbershop | a flat brown oval with dots — reads as a cowpat | a shrub with volume | **art** | one drawing |
 | **X ×5** | construction sign | cutout, **drawn with the emoji 🚧** (`engine.js:730`) | a world-fixed panel on a post; and no emoji | **art + retag** (`kind:"fence"` gives the panel path) | data + redraw |
@@ -597,3 +597,72 @@ third time.
 
 **The order is not negotiable: contact sheet first, list second, redraw third.** A redraw that
 starts before the list is a redraw of whatever was already annoying somebody.
+
+---
+
+## The contact sheet — 2026-09-21
+
+*The owner: "alright so we might not do the other AI today - can we consider beautifying across the
+worlds?" The rule above is contact sheet first, list second, redraw third. This is the sheet and the
+list. **Nothing was redrawn.***
+
+**How it was made.** Twelve worlds × four cameras, 48 shots at 844×676 through `test/shots.js`, one
+spot per world, the ticker cleared before each shot so the top third of every room is visible (the
+first pass had the tutorial bubble over it — 12 of 48 frames hidden; a harness gap, noted at the end).
+The strips are in `docs/mocks/2026-09-21-contact-sheet/`, one per world, **top · front · iso · 3d** left
+to right, with the spot list that reproduces them. Every claim below was checked at native size, not
+on the strip.
+
+### What the picture shows, ranked by what it costs the player to look at
+
+The default camera is 3D (`CAMDEF`, `content/meridian/config.js`); front is one tap away; top and iso
+are curiosity. A fault in 3D is seen by everyone, every time. A fault in iso is seen by whoever taps ◆.
+The rank is that product: how many see it, times how wrong it is.
+
+| # | what the picture shows | where | cameras | seam | art or engine | cost |
+|---|---|---|---|---|---|---|
+| 1 | **The shelf is a Rubik's cube.** A brown box with a six-colour grid on its face — and the same grid is books in the notary, bread in the bakery, produce in the market and parts in the garage | me · pa · no · ta · li · lo | front, **3d** | `TILESIDE["S"]`; the pack overrides through `TILEART_SIDE` | **art** | one drawing; one per business if Toño gives each its own glyph |
+| 2 | **Grass is three green strokes painted on the pavement, in every camera including 3D.** Chava's "the letter Λ" (09-09), unchanged | pk · st · ex | all four | `TILEDRAW["g"]` is floor paint. `stands(g)` reads `TILES[g].stand` and `standsUp` needs a side drawing — so a `stand:true` row in `TILEMETA` plus `TILEART_SIDE.g` makes it a sprite in front, iso and 3D. **The lever at the top of this file; no engine** | **art + one meta row** | one drawing |
+| 3 | **The flower bed is a brown square with three orange dots**, flat on the floor at 3D distance. In iso the bed is gone and the three dots lie on bare pavement | pk · st | 3d, iso | `drawBed` top-down; iso paints its own three dots (`engine.js`, `ch==="b"`) | **art** — a low planter box (`box:true` + a side) | one drawing |
+| 4 | **An interior in the default camera is a strip of room between two bands of nothing.** In the notary the room is the middle 30% of the frame, olive above, olive below. HQ, the library, the loft, the bakery, the garage: the same, less | every interior | **3d** | camera distance and pitch for a world 5–8 rows tall, `engine3d.js`; or the apron's colour under a room | **engine — measure first** (Chema) | a sitting |
+| 5 | **The isometric camera draws every prop as a coloured block.** Crates, shelves, counters, desks, tables, signs, the fridge and the stove; the potted plant is a green cube; the rug is two plain lavender diamonds with no pattern. The tree is the one prop that reads, because `J` has its own branch. Chava's "loses about 90% of the art", unchanged | all twelve | iso | `drawIso`'s block pass ends in `isoBlock`, which by its own comment "paints faces and a diamond lid and never the art". `sideArt(g)` exists and front and 3D already draw it; the block's two faces are parallelograms a clip-and-skew can carry it onto, and its lid can take `TILEDRAW[g]` | **engine**, one function, both games, GAMEV + CACHE bump | a sitting |
+| 6 | **The café counter is in the garage.** A coffee machine and a row of cups where a mechanic works; the market shelf in the bakery and the notary | ta; pa · no | all four | `maps.js` rows. Whether a glyph can dress per world is Toño's question: floors have `FLOORC[world]`, tiles have nothing like it | **content + a vocabulary decision** | an hour a room, after the decision |
+| 7 | **Three rooms are mostly floor.** HQ floor 2 is three people and one box on a beige plain; the garage is a counter row with nothing between it and the lift; the bakery's middle is empty | f2 · ta · pa | all four | `maps.js` rows | **content** (Cuca) | an hour a room |
+| 8 | **The table is a pizza in the top camera.** The code names the risk (`TILEDRAW["T"]`: "the gingham disc could pass for a pizza"); the chairs it added to prevent it are two brown sticks | lc · pa · lo | top | `TILEDRAW["T"]` | **art** | one drawing |
+| 9 | **The bakery's round windows are a row of smiling faces** on the street — three conchas in a round frame, six times, at 32 px | st | top, front, 3d | `TILEART["&"]` | **art** | one look, maybe one drawing |
+| 10 | **Held things sit beside the head, unattached** — a chart, a yellow card, a music note, a mug | hq · ta · ex · f2 | all four | the hand offset in `drawPerson` | **engine** | small |
+
+**Correctly flat, do not "fix":** the rug in 3D (a rug is flat; it has its border and diamonds and
+reads as a rug); the cones; the door arrow; the crosswalk.
+
+### What is done, and the register did not say so — a contradiction, reported
+
+**The four rows at the top of the register — rug, ❗, H, I — described the 2026-09-09 state until
+today**, and build order items 1–3 have been shipped since **2026-09-15**: commit `2a8558e` (#203,
+iteration 10, `mq-v161`) — *"the rug is one object that asks its neighbours where it ends; the crate
+and counter stand as boxes; the quest marker is geometry now."* The smoke's known-flat list no longer
+carries H or I (today: `3 4 5 7 9 A C J P W X Y`); the quote of it at the top of this file still does.
+The sheet confirms all three in top, front and 3D. The rows are struck and dated above, in place, and
+the build order restarts at its item 4 — reordered by this sheet: **shelf, grass, bed**, because the
+shelf is in the default camera in six rooms and the other two are on every outdoor tile.
+
+### Where it looks good, so the rest is built to sit next to it
+
+The ❗ label reads at every camera and every size. The crates have produce and stand. The cardboard
+boxes in the library have their tape in 3D. The cones are cones. The tables in front and 3D are tables
+with a gingham cloth. Trees read in iso and 3D. The people, still.
+
+### The first sitting
+
+**Three drawings, content only, no engine, no bump:** the shelf (#1), grass stood up (#2), the bed as
+a planter (#3). All three are the lever at the top of this file — a side drawing exists, the thing is
+real. Render the sheet again after each one, from `spots.json`, and compare the strip.
+
+**The first engine sitting:** the iso block faces (#5) — one function, every world, both games.
+**Before anyone touches #4**, Chema measures a small room at the default camera and says what fraction
+of the frame is room; a camera change that is not measured is the sugar skull again.
+
+### Two gaps in the harness, for the record
+
+`test/shots.js` cannot clear the ticker, so the first sheet was a third hidden; and `--spots` resolves
+against `test/`, not the working directory. Both are test changes, neither is built here.

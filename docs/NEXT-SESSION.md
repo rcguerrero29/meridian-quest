@@ -5,6 +5,17 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
+### ⇢ 2026-09-21, later — the beautify contact sheet exists; the first sitting is three drawings.
+
+Owner: *"can we consider beautifying across the worlds?"* — considered the register's way: **sheet,
+list, then redraw, and nothing was redrawn.** Twelve strips in `docs/mocks/2026-09-21-contact-sheet/`
+(top · front · iso · 3d per world), the ten-row list at the end of `docs/BEAUTIFY.md`, ranked by who
+sees it times how wrong it is. **The first sitting is content only — the shelf, grass stood up, the
+flower bed as a planter — three drawings through `TILEART_SIDE` and `TILEMETA`, no engine, no bump.**
+The first engine sitting after that is the iso camera's faceless blocks (`isoBlock`, one function).
+Row 4 — a 3D interior is a strip between two bands of nothing — is Chema's to measure before anyone
+moves the camera. The register's top four rows were stale since #203 and are struck in place.
+
 ### ⇢ 2026-09-21 — START HERE. **`docs/SECURITY.md` exists; the first thing on it is his.**
 
 **The security review ran** (91 agents across two workflows, one session limit, 42 findings, 22
