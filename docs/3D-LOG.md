@@ -375,3 +375,39 @@ against it is measured against the wrong thing. — *Chema, 2026-09-09*
 - **Not done:** the ofrenda shows only in season (Día de Muertos, 10/18–11/3, or the Settings pick);
   the hero behind a crown; the iso camera still draws every one of these as a block.
 
+### 2026-09-21 · the second try on the marigolds and the dress; tables; poles; the altar in detail; the cone's base
+
+- **The ask:** *"the marigolds can use another try and same with the decor. please update, tables too,
+  poles with the paper picado and please try to add more detail to the altar. the cone looks better
+  but it overwrites/paints tiles."* `mq-v180`.
+- **A marigold is not a ball.** Eight spheres read as eight balls from a phone. A cempasúchil is a
+  pom-pom of ruffled petals: `meshMarigold` builds a core wider than tall, nine lobes round its upper
+  half — the lit side in the crown colour, the shaded side in the undercut — a crown sphere where the
+  key lands, and the green calyx cup it sits in. One helper, so the bed, the tree's garland and the
+  altar's arch grow the same flower. The bed's stems carry leaves in pairs, which is how the plant
+  carries them. **The cost is triangles:** the park went from 11,662 to 33,502 and the frame beside the
+  three beds to 52,908; the altar frame is 81,464. Trivial for WebGL on a phone, and the draw calls did
+  not move (65, 75, 111) — one mesh per tile is still one mesh per tile.
+- **The dress reads as decorated now, not repainted:** `meshPapel` strings a line between two points
+  and hangs paper flags from it, so the tree wears a string of flags across the front of its crown and
+  one down the side (the turn shows it), a chain of seven ruffled marigolds slung under the flags,
+  three streamers hanging well below the crown with a scalloped hem in a second colour, and one
+  calaverita lantern with eyes and a flower on its brow.
+- **A string hangs from something at its own height — a RULE, in the engine.** The swag pass skipped
+  the pole for any SOLID end, so the park's strings hung in the air above a knee-high fence. Tall now
+  means kind wall/facade/tree or lift ≥ 9; anything else gets a pole — a cylinder with a ball cap.
+  The town has swags and gets the same rule; its suites are green.
+- **The tables** are round tables built as made: pedestal on a foot, the top, a check of red squares
+  clipped to the circle for the gingham, two plates, two chairs facing each other with a seat, a back
+  and four legs. La Cocina from the default camera: 203 calls, 6 meshes, 15 boxes (the counters).
+- **The altar** has three tiers as an ofrenda is built, an arch of nine ruffled marigolds with cut
+  paper across it and legs to the ground, seven veladoras in glass, three calaveritas, two pan de
+  muerto, oranges, a glass of water, salt in a dish, copal lit in its burner with smoke, the empty
+  frame at the top, cut paper across each tier's front, and a path of loose petals on the ground —
+  the way is shown.
+- **The cone's base** was dark orange and 0.34 wide: from above it read as paint on the tile. It is
+  black rubber, 0.30, with the moulded step the cone stands on — a thing on the tile.
+- **Not done:** the hero behind a mesh crown is still hidden by it; the iso camera; the marigold
+  helper is nine lobes per head and the park has 64 heads, which is where triangles went — a cheaper
+  head for distant beds is the next optimisation if a phone ever stutters, and none has been measured.
+

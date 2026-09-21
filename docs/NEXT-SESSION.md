@@ -5,6 +5,16 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
+### ⇢ 2026-09-21, latest — the second try: ruffled marigolds, a dress of flags, tables, poles, the altar.
+
+Owner: *"the marigolds can use another try and same with the decor … tables too, poles with the paper
+picado … more detail to the altar … the cone … paints tiles."* Done, `mq-v180` (`docs/3D-LOG.md`, the
+third entry of the date). Two helpers in the pack now — `meshMarigold`, `meshPapel` — and one engine
+rule: a string hangs from something at its own height, or from a pole. **Triangles went up by 3–4×
+where the marigolds are (park 33,502; altar frame 81,464); draw calls did not move; no phone has been
+measured** — if one stutters, a cheaper head for distant beds is the fix. **Still open:** the hero
+behind a mesh crown; the iso camera; row 6, whose shelf; `docs/SECURITY.md` §3 step 1.
+
 ### ⇢ 2026-09-21, latest — five more shapes; the flat list is eight leggy or boxy things.
 
 Owner: *"lets try the grass and the cones, dog house, and altar … the tree with its decor?"* Done,
@@ -16,7 +26,9 @@ ran: two small turns moved the session meter by 5,986 out, so the counter is san
 the 3.5M belonged to the long working turn — most likely reasoning tokens the live meter never shows;
 `docs/RUNS.md` §3½ says so now. **Left on purpose:** the hero behind a mesh crown is hidden by it (the
 stub and the glass are the precedents); the iso camera (row 5); row 6, whose shelf. **The flat list
-now:** `3 4 5 7 A W X Y`.
+now:** `3 4 5 7 A W X Y`. **Measured at the next turn's start:** the session meter moved 962,408 out for
+that sitting against a live meter of ~66,000 — a factor of about 15, the mesh sitting's was 30; the
+session meter is what spends his plan, the live meter is what predicts the work (run `a3c2`).
 
 ### ⇢ 2026-09-21, later that night — the `mesh` view is in: shapes, not pictures.
 
