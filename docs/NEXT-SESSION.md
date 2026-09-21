@@ -13,7 +13,11 @@ third entry of the date). Two helpers in the pack now — `meshMarigold`, `meshP
 rule: a string hangs from something at its own height, or from a pole. **Triangles went up by 3–4×
 where the marigolds are (park 33,502; altar frame 81,464); draw calls did not move; no phone has been
 measured** — if one stutters, a cheaper head for distant beds is the fix. **Still open:** the hero
-behind a mesh crown; the iso camera; row 6, whose shelf; `docs/SECURITY.md` §3 step 1.
+behind a mesh crown; the iso camera; row 6, whose shelf; `docs/SECURITY.md` §3 step 1. **Measured at the next
+turn's start:** 1,958,009 out on the session meter for a sitting the live meter put at ~33,000 — a factor near 60,
+after 30, 15 and 15. The ratio grows with the context the session carries (595k at that read). **For his
+five-hour window: a fresh session at the top of the window does the same work for fewer plan tokens than
+this one, which is a day old and carries everything.** Run `f5b1` has the numbers.
 
 ### ⇢ 2026-09-21, latest — five more shapes; the flat list is eight leggy or boxy things.
 
