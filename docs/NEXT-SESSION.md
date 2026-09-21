@@ -16,10 +16,10 @@ a new sprite; a box needs a SOLID tile. **Next in order:** (a) his answer to row
 per business or one glyph dressed per world; (b) the first engine sitting, row 5, `isoBlock` painting
 `sideArt` on its faces — one function, both games, bump; (c) row 4 is Chema's to measure before any
 camera moves. Ultracode was off for all of it; crew mode is for many builders on many issues and was
-not used. **First thing next turn: read `get_session` once and write the delta from
-1,020,270 in · 7,373,311 out into the last Tasks row of run `c4a9`** — the session counter posts at
-turn boundaries, so the sitting's real cost is only readable from the next turn (`docs/RUNS.md` §3½,
-corrected today; run `b7d3`'s number was an in-turn read and is marked a floor).
+not used. **Measured at the next turn's start, as `docs/RUNS.md` §3½ now says: the sitting cost
+65,418 out, $6.90, against an estimate of 60,000 out, $9** — output within 9%, cost over by 30%;
+the rate is about $0.105 per 1,000 output tokens for a sitting of this shape (three drawings, two
+render passes, seven looks, six suites). Run `b7d3`'s number was an in-turn read and is marked a floor.
 
 ### ⇢ 2026-09-21, later — the beautify contact sheet exists; the first sitting is three drawings.
 
