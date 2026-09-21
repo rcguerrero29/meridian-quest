@@ -1223,19 +1223,39 @@ TILEART_MESH["H"]=({x,y})=>{const alt=(((x*3+y*5)%7)+7)%7,kind=alt<3?"tomato":al
     [-0.2,0,0.2].forEach(tx=>{one(tx,FILL+r,-0.19);one(tx,FILL+r,0);one(tx,FILL+r+0.03,0.25);});                                    /* the bottom, packed; the front row tumbled onto the rim, spilling over it */
     [[-0.1,-0.1],[0.1,-0.1],[-0.1,0.1],[0.1,0.1]].forEach(([tx,tz])=>one(tx,FILL+r+0.15,tz));                                        /* the hollows */
     one(0,FILL+r+0.29,0);}                                                                                                          /* the peak */
-  else if(kind==="chile"){const GRN="#52A542",DARK="#2F6B27";
-    for(let i=0;i<14;i++){const a=rnd()*Math.PI*2,cx=(rnd()-0.5)*0.5,cz=(rnd()-0.5)*0.38,cy=FILL+0.035+(i>8?0.065:0)+(i>12?0.06:0),ux=Math.sin(a),uz=Math.cos(a),b=a+0.5;
-      parts.push({s:"cone",x:cx,y:cy,z:cz,r:0.035,h:0.2,c:GRN,rx:Math.PI/2,ry:a});                                                 /* the body, lying */
-      parts.push({s:"cone",x:cx+ux*0.1+Math.sin(b)*0.045,y:cy,z:cz+uz*0.1+Math.cos(b)*0.045,r:0.018,h:0.1,c:GRN,rx:Math.PI/2,ry:b}); /* the tip, bent */
-      parts.push({s:"cyl",x:cx-ux*0.11,y:cy,z:cz-uz*0.11,r:0.024,h:0.03,c:DARK,rx:Math.PI/2,ry:a});}}                              /* the cap */
-  else{const YEL=["#E8C33A","#E0BB33"],TIPC="#5C4A1E";
-    [[-0.1,FILL+0.05,-0.08,0.4],[0.14,FILL+0.1,0.1,3.6],[-0.02,FILL+0.2,0.04,1.9]].forEach(([hx,hy,hz,ha],hi)=>{                     /* three hands, laid over each other */
-      const c=Math.cos(ha),s=Math.sin(ha),at=(lx,ly,lz)=>({x:hx+lx*c-lz*s,y:hy+ly,z:hz+lx*s+lz*c});
-      let q=at(-0.12,0.02,0);parts.push({s:"cyl",x:q.x,y:q.y,z:q.z,r:0.035,h:0.06,c:"#8A6B3A",rz:Math.PI/2,ry:-ha});                /* the stem they hang from */
-      for(let f=0;f<4;f++){const fz=(f-1.5)*0.062,fy=Math.abs(f-1.5)*0.014,col=YEL[(f+hi)%2];
-        [[-0.05,0,0.22],[0.04,0.02,0.42],[0.13,0.06,0.62]].forEach(([lx,ly,bend])=>{q=at(lx,fy+ly,fz);
-          parts.push({s:"cyl",x:q.x,y:q.y,z:q.z,r:0.03,h:0.1,c:col,rz:Math.PI/2-bend,ry:-ha});});
-        q=at(0.18,fy+0.085,fz);parts.push({s:"sph",x:q.x,y:q.y,z:q.z,r:0.024,c:TIPC});}});}                                         /* the dark tip */
+  else if(kind==="chile"){const GRN="#5FB24A",GRND="#2F6B27",RED="#C8342A",REDD="#7A1E18",CAP="#3E6E2E";
+    /* CREW 12 (el ebanista, #226; owner: "how do we fix the bananas and chiles?"): nine fat chiles heaped ABOVE the
+       rim, the front ones with their tips out over the edge and drooping — fourteen thin ones lay flat in the crate's
+       shadow and read as green stuff; two turned red the way a chile crate does; every one a lit cone over a dark
+       cone a hair lower, the value break the light will not give; a cap and a stem at the fat end. */
+    const LAY=[[-0.18,0.06,0.10,0.15],[0.05,0.06,0.12,-0.25],[0.24,0.06,0.02,0.5],[-0.10,0.06,-0.14,1.9],[0.16,0.06,-0.12,2.5],
+               [-0.06,0.16,0.16,-0.1],[0.12,0.16,0.0,0.35],[-0.16,0.15,-0.02,1.1],[0.02,0.25,0.06,0.05]];                 /* [x, y over the fill, z, turn]: laid by hand, not by a loop */
+    LAY.forEach(([cx,cy,cz,a],i)=>{const red=(i+alt)%4===0,c=red?RED:GRN,cd=red?REDD:GRND,y=FILL+cy+(rnd()-0.5)*0.01,t=a+(rnd()-0.5)*0.2,ux=Math.sin(t),uz=Math.cos(t),tilt=cz>0.08?0.25:0;
+      parts.push({s:"cone",x:cx,y,z:cz,r:0.05,h:0.26,c,rx:Math.PI/2+tilt,ry:t});                                           /* the body, fat, tip out */
+      parts.push({s:"cone",x:cx,y:y-0.016,z:cz,r:0.048,h:0.25,c:cd,rx:Math.PI/2+tilt,ry:t});                                /* its underside, dark */
+      const by=y+Math.sin(tilt)*0.13;
+      parts.push({s:"cyl",x:cx-ux*0.13,y:by,z:cz-uz*0.13,r:0.03,h:0.035,c:CAP,rx:Math.PI/2,ry:t});                          /* the cap */
+      parts.push({s:"cyl",x:cx-ux*0.16,y:by+0.005,z:cz-uz*0.16,r:0.01,h:0.05,c:CAP,rx:Math.PI/2,ry:t});});}                 /* the stem */
+  else{const YEL="#EAC63E",YELD="#B8962A",RIDGE="#A87F22",TIPC="#4A3A16",STEMC="#8A6B3A";
+    /* CREW 12 (el ebanista): two big hands of five, curving UP over the rim — three small hands of four lay in the
+       crate as tiny cylinders of one yellow. A finger is a bent pair: the lower length rising from the crown, the
+       upper steeper, a brown ridge along its back, a dark tip; each length a lit cylinder over a darker one a hair
+       lower. The front hand's tips reach out over the rim; the back hand curves away, higher. Three loose fingers
+       on the floor of the crate, siblings of the same hand, so it is full. */
+    const hand=(hx,hy,hz,ha,n,seed)=>{const c=Math.cos(ha),s=Math.sin(ha),at=(lx,ly,lz)=>({x:hx+lx*c-lz*s,y:hy+ly,z:hz+lx*s+lz*c});
+      let q=at(-0.03,0.03,0);parts.push({s:"cyl",x:q.x,y:q.y,z:q.z,r:0.045,h:0.07,c:STEMC,rz:Math.PI/2,ry:-ha});          /* the crown they hang from */
+      for(let f=0;f<n;f++){const fz=(f-(n-1)/2)*0.074,fy=-Math.abs(f-(n-1)/2)*0.012,b1=0.3+((seed+f)%3)*0.05,b2=0.85+((seed*3+f)%3)*0.06,L1=0.13,L2=0.12;
+        const e1x=L1*Math.cos(b1),e1y=L1*Math.sin(b1);
+        [[L1/2*Math.cos(b1),L1/2*Math.sin(b1),L1,b1],[e1x+L2/2*Math.cos(b2),e1y+L2/2*Math.sin(b2),L2,b2]].forEach(([lx,ly,len,b])=>{q=at(lx,fy+ly,fz);
+          parts.push({s:"cyl",x:q.x,y:q.y,z:q.z,r:0.036,h:len,c:YEL,rz:b-Math.PI/2,ry:-ha});                               /* a length of the finger, lit */
+          parts.push({s:"cyl",x:q.x,y:q.y-0.015,z:q.z,r:0.033,h:len*0.95,c:YELD,rz:b-Math.PI/2,ry:-ha});                   /* its underside, darker */
+          parts.push({s:"cyl",x:q.x,y:q.y+0.03,z:q.z,r:0.009,h:len*0.9,c:RIDGE,rz:b-Math.PI/2,ry:-ha});});                  /* the ridge along its back */
+        q=at(e1x+L2*Math.cos(b2)+0.01,fy+e1y+L2*Math.sin(b2)+0.01,fz);parts.push({s:"sph",x:q.x,y:q.y,z:q.z,r:0.028,c:TIPC});}}; /* the dark tip */
+    [[-0.22,0.02,-0.16,0.3],[0.10,0.02,-0.18,2.9],[0.20,0.02,0.10,1.4]].forEach(([lx,ly,lz,la])=>{                          /* the loose fingers on the floor */
+      parts.push({s:"cyl",x:lx,y:FILL+ly+0.03,z:lz,r:0.036,h:0.16,c:YEL,rz:Math.PI/2,ry:la});
+      parts.push({s:"cyl",x:lx,y:FILL+ly+0.016,z:lz,r:0.033,h:0.15,c:YELD,rz:Math.PI/2,ry:la});});
+    hand(-0.02,FILL+0.06,0.10,Math.PI/2,5,alt);                                                                             /* the front hand, tips out over the rim */
+    hand(0.06,FILL+0.13,-0.14,-2.2,5,alt+1);}                                                                               /* the back hand, curving away, higher */
   return parts;};
 
 /* THE COUNTER. One carcase the length of the run: a plinth set back at the foot, the body, a worked
@@ -1306,6 +1326,200 @@ TILEART_MESH["prop:tram"]=({len,h,fl,cab})=>{const L=len||2,H=h||1.02,FL=fl||0.2
     [-1,1].forEach(sd=>{parts.push({s:"box",x:ed*(L/2-0.05-CAB/2),y:0.75,z:sd*0.36,w:CAB,h:0.03,d:0.02,c:IRON});             /* the grab rail on the open platform */
       parts.push({s:"cyl",x:ed*(L/2-0.06),y:(FL+0.10+0.75)/2,z:sd*0.36,r:0.012,h:0.75-(FL+0.10),c:IRON});});});                /* its stanchion, floor to rail */
   return parts;};
+
+/* ---- CREW ITERATION 12, el ebanista (#226), 2026-09-21. Owner: "a couple more to beautify and shape …
+   cabinet in my office could be, this nolasco desk, the chair outside dona tenchas, im guessing what
+   the oven is supposed to be in the espiga … there are limpeza things i dont know what they are and
+   lets fix the mqt station now with beautify as well." Six shapes through the same seam, each built the
+   way the thing is built (.claude/skills/how-its-made); the 2D drawing is the bill of materials. The
+   "desk" in his frame of the notary was the pair of guest chairs `⊔` beside the rug — boxes wearing the
+   chair's front elevation on their lids — and `D` was already a mesh. Every mesh below is judged by the
+   frame at 35 px a tile: silhouette first, the values painted into the parts, the light only 1.5:1. ---- */
+
+/* WHICH WAY A CHAIR FACES. A chair is pulled up to a table or a desk and faces it; otherwise its BACK goes
+   to the wall — the first solid neighbour, north first, so a chair against a house wall faces the street
+   and the notary's two face the rug — and it faces away; with nothing round it, south. Returns the turn
+   in meshFacing's convention (south 0, east π/2, west −π/2, north π). */
+const meshChairFacing=(x,y)=>{const w=CW(),at=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return r?r[gx]:undefined;},
+    solid=(gx,gy)=>{const r=w&&w.grid&&w.grid[gy];return !r||r[gx]===undefined||SOLID.has(r[gx]);};
+  const SIDES=[[0,-1,Math.PI],[0,1,0],[-1,0,-Math.PI/2],[1,0,Math.PI/2]];                     /* N, S, W, E: [dx,dy, the turn that faces that way] */
+  for(const [dx,dy,ry] of SIDES){const g=at(x+dx,y+dy);if(g==="T"||g==="D")return ry;}
+  for(const [dx,dy,ry] of SIDES)if(solid(x+dx,y+dy))return ry+Math.PI;
+  return 0;};
+
+/* LA SILLA — the chair outside Doña Tencha's door (the casa's yard pick), the notary's two guest chairs,
+   the barbería's, the taller's: one chair, a silla de palma, the chair outside every door on a street like
+   Calle Dos. Made: four turned legs, the back pair running up as the uprights; the seat frame joined to
+   them; the palm seat woven INTO the frame — the one pale thing on it, with the weave's cross a step down;
+   two back rails, the top one the yoke, wider than the uprights; stretchers low between the legs (a stool
+   has none, a chair does). Seat 0.27 (0.45 m), yoke 0.56 (0.95 m): small beside a person, as a chair is.
+   Values painted in: legs and stretchers darkest, the frame, the rails, the straw lightest. */
+TILEART_MESH["⊔"]=({x,y})=>{
+  const LEG="#54321B",FRAME="#6E5334",RAIL="#7E5F38",YOKE="#8A6B3F",STRAW="#DCC47C",STRAWD="#B89A55",SY=0.27;
+  const parts=[];
+  [[-0.17,0.17],[0.17,0.17]].forEach(([lx,lz])=>parts.push({s:"cyl",x:lx,y:SY/2,z:lz,rt:0.022,rb:0.027,h:SY,c:LEG}));        /* the front legs, turned: a hair wider at the foot */
+  [[-0.17,-0.17],[0.17,-0.17]].forEach(([lx,lz])=>parts.push({s:"cyl",x:lx,y:0.29,z:lz,rt:0.022,rb:0.027,h:0.58,c:LEG}));      /* the back legs run up as the uprights */
+  parts.push({s:"box",x:0,y:SY,z:0,w:0.40,h:0.036,d:0.40,c:FRAME});                                                             /* the seat frame */
+  parts.push({s:"box",x:0,y:SY+0.026,z:0,w:0.33,h:0.016,d:0.33,c:STRAW});                                                       /* the palm seat, woven into the frame */
+  parts.push({s:"box",x:0,y:SY+0.035,z:0,w:0.33,h:0.004,d:0.05,c:STRAWD},{s:"box",x:0,y:SY+0.035,z:0,w:0.05,h:0.004,d:0.33,c:STRAWD}); /* the weave's cross, a step down */
+  parts.push({s:"box",x:0,y:0.41,z:-0.17,w:0.36,h:0.045,d:0.026,c:RAIL});                                                       /* the lower back rail */
+  parts.push({s:"box",x:0,y:0.545,z:-0.17,w:0.42,h:0.06,d:0.032,c:YOKE});                                                       /* the yoke: wider than the uprights, the top of the silhouette */
+  parts.push({s:"box",x:0,y:0.11,z:0.17,w:0.32,h:0.02,d:0.02,c:LEG});                                                           /* the front stretcher */
+  [-0.17,0.17].forEach(sx=>parts.push({s:"box",x:sx,y:0.09,z:0,w:0.02,h:0.02,d:0.32,c:LEG}));                                   /* the side stretchers */
+  return meshTurned(parts,meshChairFacing(x,y));};
+
+/* EL ARCHIVERO — the notary's steel filing cabinets, what TILEDRAW["▯"] draws: a grey body, drawer fronts,
+   folders peeking from an open drawer, pulls. Four-drawer units from one factory, siblings: two side by
+   side make a bank, each shifted toward its `▯` neighbour so the pair stands touching. Made: a dark plinth,
+   the carcase, four drawer fronts a step lighter on the open face with a dark reveal between them, a pull
+   and a label holder on each. What the clerk did: ONE drawer left pulled out — which one by the tile — its
+   box proud of the face with hanging folders in it, tabs staggered. Faces the first open side. 0.86 tall:
+   chest height on a person, over the desk's 0.47. The open drawer is what breaks the box. */
+TILEART_MESH["▯"]=({x,y})=>{
+  const w=CW(),cab=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="▯";};
+  const BODY="#6E7883",FRONT="#98A3AE",REVEAL="#2E3339",PULL="#2E3339",LABEL="#EAD9B4",PLINTH="#23272C",TRAY="#5A626C",FOLD=["#E8D6B0","#D9C29A","#EBDDBE"];
+  const H=0.86,W=0.54,D=0.62,open=(((x*5+y*3)%4)+4)%4;
+  let parts=[{s:"box",x:0,y:0.02,z:0,w:W-0.06,h:0.04,d:D-0.06,c:PLINTH},                               /* the plinth, set back, dark */
+    {s:"box",x:0,y:0.04+(H-0.04)/2,z:0,w:W,h:H-0.04,d:D,c:BODY}];                                        /* the carcase */
+  [0,1,2,3].forEach(i=>{const dy=0.13+i*0.19,out=i===open?0.20:0;                                       /* four drawers, the open one out by 0.20 */
+    if(out){parts.push({s:"box",x:0,y:dy,z:D/2+out/2-0.01,w:W-0.08,h:0.15,d:out,c:TRAY});                /* the drawer's box, riding out on its rails */
+      FOLD.forEach((c,f)=>{const fz=D/2+0.03+f*0.055;parts.push({s:"box",x:0,y:dy+0.01,z:fz,w:W-0.14,h:0.13,d:0.012,c});   /* hanging folders */
+        parts.push({s:"box",x:-0.12+f*0.12,y:dy+0.085,z:fz,w:0.09,h:0.025,d:0.012,c});});}                 /* their tabs, staggered */
+    parts.push({s:"box",x:0,y:dy,z:D/2+out+0.012,w:W-0.06,h:0.17,d:0.024,c:FRONT});                       /* the drawer front, a step lighter */
+    parts.push({s:"box",x:0,y:dy+0.098,z:D/2+0.008,w:W,h:0.014,d:0.012,c:REVEAL});                        /* the reveal over it, dark */
+    parts.push({s:"box",x:0,y:dy-0.03,z:D/2+out+0.03,w:0.13,h:0.024,d:0.02,c:PULL});                      /* the pull */
+    parts.push({s:"box",x:0,y:dy+0.035,z:D/2+out+0.026,w:0.09,h:0.032,d:0.006,c:LABEL});});                /* the label holder */
+  parts=meshTurned(parts,meshFacing(x,y));
+  const sh=0.22,dx=cab(x+1,y)?sh:cab(x-1,y)?-sh:0,dz=cab(x,y+1)?sh:cab(x,y-1)?-sh:0;                       /* a bank: shift toward the neighbour so the two touch */
+  return parts.map(p=>({...p,x:p.x+dx,z:p.z+dz}));};
+
+/* EL HORNO DE PISO — La Espiga's oven, what TILEDRAW["▣"] draws: a dark steel box with TWO decks, each an
+   orange slit and a steel bar. The owner could not tell what it was; a deck oven is what bolillo comes out
+   of. Two modular units side by side, a bank, each with its own flue. Made: a plinth, the carcase, two
+   doors on the front hinged at the bottom — a frame, a glass slit glowing from inside, a bar handle on two
+   brackets — a control strip at the right with three knobs and a red pilot, the hood on top and the flue
+   rising out of the back, capped: the flue is the silhouette above the box. One unit (by parity) has its
+   lower door swung DOWN open, the mouth dark and the deck glowing at the back of it — the baker has just
+   pulled a tray (the goods are another builder's). Faces the first open side. */
+TILEART_MESH["▣"]=({x,y})=>{
+  const STEEL="#585E67",DARK="#2A2E35",MOUTH="#17181C",GLOW="#E8A24A",EMBER="#C8601E",BAR="#B4BCC4",PLINTH="#1E2126",PILOT="#D0402F";
+  const W=0.96,H=1.12,D=0.80,F=D/2,ajar=(((x+y)%2)+2)%2===1;
+  const parts=[{s:"box",x:0,y:0.04,z:-0.02,w:W-0.08,h:0.08,d:D-0.08,c:PLINTH},                          /* the plinth */
+    {s:"box",x:0,y:0.08+H/2,z:0,w:W,h:H,d:D,c:STEEL},                                                     /* the carcase */
+    {s:"box",x:0,y:0.08+H+0.05,z:-0.12,w:W,h:0.10,d:D-0.24,c:DARK},                                       /* the hood, set back */
+    {s:"cyl",x:0.24,y:0.08+H+0.10+0.27,z:-0.20,r:0.065,h:0.54,c:DARK},                                    /* the flue */
+    {s:"cyl",x:0.24,y:0.08+H+0.10+0.55,z:-0.20,r:0.10,h:0.03,c:DARK},                                     /* its cap */
+    {s:"box",x:0.40,y:0.08+H/2,z:F+0.008,w:0.11,h:H-0.16,d:0.016,c:DARK}];                                /* the control strip, right */
+  [0.30,0.55,0.80].forEach(ky=>parts.push({s:"cyl",x:0.40,y:ky,z:F+0.024,r:0.02,h:0.016,c:BAR,rx:Math.PI/2}));   /* three knobs */
+  parts.push({s:"box",x:0.40,y:1.02,z:F+0.02,w:0.03,h:0.03,d:0.01,c:PILOT});                                    /* the pilot light: on */
+  [0.40,0.84].forEach((dy,i)=>{const open=ajar&&i===0;
+    if(open){parts.push({s:"box",x:-0.06,y:dy,z:F-0.02,w:0.74,h:0.30,d:0.06,c:MOUTH});                            /* the mouth: the darkest thing in the bakery */
+      parts.push({s:"box",x:-0.06,y:dy-0.10,z:F-0.05,w:0.62,h:0.03,d:0.03,c:EMBER});                              /* the deck glowing at the back of it */
+      parts.push({s:"box",x:-0.06,y:dy-0.16,z:F+0.16,w:0.74,h:0.025,d:0.32,c:DARK});                             /* the door, swung down flat on its hinge */
+      parts.push({s:"cyl",x:-0.06,y:dy-0.16,z:F+0.31,r:0.014,h:0.60,c:BAR,rz:Math.PI/2});}                        /* its bar, now at the front edge */
+    else{parts.push({s:"box",x:-0.06,y:dy,z:F+0.012,w:0.74,h:0.30,d:0.024,c:DARK});                               /* the door, closed, proud of the face */
+      parts.push({s:"box",x:-0.06,y:dy+0.02,z:F+0.026,w:0.54,h:0.07,d:0.006,c:GLOW});                             /* the glass slit, lit from inside */
+      [-0.28,0.16].forEach(bx=>parts.push({s:"box",x:bx,y:dy-0.08,z:F+0.04,w:0.03,h:0.03,d:0.04,c:BAR}));          /* two brackets */
+      parts.push({s:"cyl",x:-0.06,y:dy-0.08,z:F+0.06,r:0.014,h:0.60,c:BAR,rz:Math.PI/2});}});                     /* the bar handle across them */
+  return meshTurned(parts,meshFacing(x,y));};
+
+/* EL PIZARRÓN DE TURNOS — Limpieza Velázquez's `U`. The engine's `U` is its blueprint wall (a plan pinned
+   with four gold pins, engine.js TILEDRAW["U"]) — right in La Obra's studio and unreadable on a cleaning
+   company's wall; it is the "limpieza thing" the owner could not name. In `li` the wall stays a wall — the
+   mesh carries the wall body in C.wall and its top band in C.wallTop, the two colours the `#` beside it
+   bakes — and wears on its open face the crew's schedule board: a dark frame, the white board, a teal
+   header band, rows ruled across and the day-columns ruled THROUGH the run (two `U` side by side are one
+   board; the frame's end stands only where the run ends), magnets in the cells by the tile, a marker
+   tray at the foot with two markers in it. Anywhere else the function answers [] and the blueprint wall
+   stands as it did (engine3d.js t3MeshTile: an empty list is "draw it the old way"). */
+TILEART_MESH["U"]=({x,y})=>{
+  if(typeof world==="undefined"||world!=="li")return [];
+  const w=CW(),isU=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="U";};
+  const WH=0.55+13*0.042,BAND=0.20,ry=meshFacing(x,y);
+  const parts=[{s:"box",x:0,y:WH/2,z:0,w:1,h:WH,d:1,c:C.wall},{s:"box",x:0,y:WH-BAND/2,z:0,w:1.004,h:BAND,d:1.004,c:C.wallTop}]; /* the wall itself, and its top band */
+  const ax=Math.round(-Math.cos(ry)),az=Math.round(Math.sin(ry)),endA=!isU(x+ax,y+az),endB=!isU(x-ax,y-az);       /* does the run end at the board's local −x / +x */
+  const FR="#3A3F46",WHITE="#F2F4F5",LINE="#8A929B",HEAD="#3FA3A0",MAG=["#E0B45C","#D0402F","#3FA3A0","#2E5FA8"];
+  const F=0.5,BY=0.66,BH=0.46,x0=endA?-0.43:-0.5,x1=endB?0.43:0.5,wx0=x0+(endA?0.03:0),wx1=x1-(endB?0.03:0),ww=wx1-wx0,wx=(wx0+wx1)/2,top=BY+BH/2;
+  parts.push({s:"box",x:(x0+x1)/2,y:BY,z:F+0.015,w:x1-x0,h:BH+0.06,d:0.03,c:FR});                                  /* the frame's backing */
+  parts.push({s:"box",x:wx,y:BY,z:F+0.034,w:ww,h:BH,d:0.01,c:WHITE});                                             /* the board */
+  parts.push({s:"box",x:wx,y:top-0.035,z:F+0.042,w:ww,h:0.06,d:0.006,c:HEAD});                                    /* the header band, the company's teal */
+  [0.17,0.27,0.37].forEach(r=>parts.push({s:"box",x:wx,y:top-r,z:F+0.042,w:ww,h:0.007,d:0.006,c:LINE}));           /* three rows ruled across */
+  const cy0=BY-BH/2,cy1=top-0.065;
+  for(let lx=-0.4;lx<=0.41;lx+=0.2)if(lx>wx0+0.01&&lx<wx1-0.01)parts.push({s:"box",x:lx,y:(cy0+cy1)/2,z:F+0.042,w:0.007,h:cy1-cy0,d:0.006,c:LINE}); /* day-columns, on the world grid so they run through the join */
+  const sd=(((x*5+y*3)%7)+7)%7;
+  for(let i=0;i<5;i++){const col=(i*2+sd)%5,row=(i*3+sd+i)%4,mx=-0.4+col*0.2+0.1+((sd+i)%3-1)*0.03,my=top-0.115-0.1*row;            /* magnets in the cells: who is on what */
+    if(mx>wx0+0.04&&mx<wx1-0.04)parts.push({s:"box",x:mx,y:my,z:F+0.046,w:0.05,h:0.04,d:0.008,c:MAG[(i+sd)%4]});}
+  parts.push({s:"box",x:wx,y:cy0-0.02,z:F+0.05,w:Math.min(ww,0.5),h:0.02,d:0.05,c:FR});                            /* the marker tray */
+  parts.push({s:"cyl",x:wx-0.08,y:cy0-0.003,z:F+0.05,r:0.009,h:0.12,c:"#D0402F",rz:Math.PI/2});                     /* two markers lying in it */
+  parts.push({s:"cyl",x:wx+0.06,y:cy0-0.003,z:F+0.058,r:0.009,h:0.12,c:"#2E5FA8",rz:Math.PI/2});
+  return meshTurned(parts,ry);};
+
+/* EL ANAQUEL DE LIMPIEZA — Limpieza Velázquez's `S`. The engine's S is a bookcase and el taller's mesh fills
+   it with books and cartons, right everywhere but here: a cleaning company's shelves hold what the crew
+   takes out in the morning. The carcase as the bookcase has it (back, uprights, four boards, the same turn
+   to the room); on it: spray bottles in a row on the top board — a body, a neck, a trigger head nosing to
+   the room — folded cloths stacked (the ones underneath squashed) and two jugs on the middle, a bucket with
+   its handle up and a big jug at the foot; and a broom and a mop LEANING on the uprights, which is the read
+   from seven tiles back. Wrapped round the bookcase, not edited into it: another builder has the bakery's
+   racks in that function this run. */
+const meshShelfLimpieza=({x,y})=>{
+  const w=CW(),solid=(gx,gy)=>{const r=w&&w.grid&&w.grid[gy];return !r||r[gx]===undefined||SOLID.has(r[gx]);};
+  const ry=!solid(x,y+1)?0:!solid(x+1,y)?Math.PI/2:!solid(x-1,y)?-Math.PI/2:Math.PI;
+  const sd=(((x*5+y*3)%7)+7)%7,WOOD="#8A6F4D",DARK="#5A4530",BACK="#3F2E1E";
+  const parts=[{s:"box",x:0,y:0.5,z:-0.2,w:0.9,h:1.0,d:0.04,c:BACK},
+    {s:"box",x:-0.43,y:0.5,z:0,w:0.05,h:1.0,d:0.42,c:WOOD},{s:"box",x:0.43,y:0.5,z:0,w:0.05,h:1.0,d:0.42,c:WOOD}];
+  [0.03,0.34,0.66,0.98].forEach(by=>parts.push({s:"box",x:0,y:by,z:0,w:0.9,h:0.035,d:0.42,c:by>0.9?WOOD:DARK}));
+  const B1=0.05,B2=0.36,B3=0.68;                                                                        /* the top of each board */
+  const BOT=["#3FA3A0","#E0B45C","#F2F4F5","#2E5FA8","#52B8B4"],HEAD="#2A2E35",CLOTH=["#F2EFE6","#9FC4D8","#F2EFE6","#E8DCC4"],JUG="#E8ECEF",CAP="#3FA3A0",BUCKET="#E0B45C",BUCKETD="#B8902E";
+  for(let i=0;i<5;i++){const bx=-0.32+i*0.14+((i*2+sd)%3-1)*0.01,c=BOT[(i+sd)%5];                        /* the top board: five spray bottles, pushed together the way they come off the van */
+    parts.push({s:"cyl",x:bx,y:B3+0.075,z:0.02,rt:0.036,rb:0.04,h:0.15,c});                               /* the body, a hair wider at the foot */
+    parts.push({s:"cyl",x:bx,y:B3+0.17,z:0.02,rt:0.014,rb:0.02,h:0.04,c});                                 /* the neck */
+    parts.push({s:"box",x:bx,y:B3+0.21,z:0.03,w:0.035,h:0.035,d:0.06,c:HEAD});}                            /* the trigger head, nose to the room */
+  for(let i=0;i<4;i++)parts.push({s:"box",x:-0.25+((i+sd)%3-1)*0.012,y:B2+0.02+i*0.032,z:0.02,w:0.22,h:i<3?0.026:0.03,d:0.2,c:CLOTH[(i+sd)%4]}); /* the middle: cloths folded and stacked */
+  [0.08,0.27].forEach((jx,j)=>{parts.push({s:"box",x:jx,y:B2+0.10,z:0.02,w:0.14,h:0.2,d:0.13,c:JUG});parts.push({s:"cyl",x:jx-0.02,y:B2+0.215,z:0.02,r:0.025,h:0.03,c:CAP});
+    parts.push({s:"box",x:jx,y:B2+0.10,z:0.087,w:0.09,h:0.07,d:0.004,c:BOT[(j+sd)%5]});});                  /* two jugs, a label each */
+  parts.push({s:"cyl",x:-0.22,y:B1+0.12,z:0.02,rt:0.13,rb:0.11,h:0.24,c:BUCKET},{s:"torus",x:-0.22,y:B1+0.24,z:0.02,r:0.125,t:0.012,c:BUCKETD,rx:Math.PI/2}); /* the foot: a bucket, its rim */
+  parts.push({s:"torus",x:-0.22,y:B1+0.24,z:0.02,r:0.11,t:0.008,c:"#6B6F76",arc:Math.PI});                  /* its handle, up */
+  parts.push({s:"box",x:0.14,y:B1+0.13,z:0.0,w:0.2,h:0.26,d:0.18,c:JUG},{s:"cyl",x:0.14,y:B1+0.275,z:0,r:0.03,h:0.03,c:BOT[(sd+2)%5]}); /* and the big jug */
+  parts.push({s:"cyl",x:0.51,y:0.50,z:0.15,r:0.012,h:0.96,c:"#C9A46E",rz:0.105});                           /* the broom, leaning on the upright */
+  parts.push({s:"box",x:0.565,y:0.07,z:0.15,w:0.07,h:0.14,d:0.045,c:"#B8763A",rz:0.105});                  /* its bristles */
+  parts.push({s:"box",x:0.567,y:0.012,z:0.15,w:0.075,h:0.025,d:0.05,c:"#8E5A2C",rz:0.105});                /* worn dark where they meet the floor */
+  parts.push({s:"cyl",x:-0.51,y:0.50,z:0.18,r:0.012,h:0.96,c:"#8E969E",rz:-0.105});                         /* the mop, the other side */
+  parts.push({s:"sph",x:-0.565,y:0.06,z:0.18,r:0.055,sy:0.7,c:"#C9CDD2"});                                 /* its head, the strings bunched */
+  [[-0.03,0.03],[0.03,0.02],[0,-0.04]].forEach(([ox,oz])=>parts.push({s:"cyl",x:-0.565+ox,y:0.025,z:0.18+oz,r:0.008,h:0.05,c:"#AEB6BE",rz:ox*4})); /* three strings loose */
+  return meshTurned(parts,ry);};
+{const base=TILEART_MESH["S"];TILEART_MESH["S"]=a=>(typeof world!=="undefined"&&world==="li")?meshShelfLimpieza(a):base(a);}
+
+/* LA PARADA — the MQT stop, standing. The 2D is a pole, a red sign that spells MQT and a bench, and in the
+   3D camera it stood as a picture (FLAT_BY_GAME, test/engine.smoke.js). A stop is a shelter: two steel
+   posts at the back on base plates, two braces, a roof cantilevered over a bench with a back, and the route's
+   name-board in red round BOTH long edges of the roof — the `ex` stop faces its road to the north, so the
+   default camera sees its back, and a board on one edge only would be blank from the street. M, Q and T
+   are boxes and a torus in cream, thick strokes, on both boards, each reading from its own side: the mesh
+   builder has no text, so letters that ride a face are made of parts. Faces the tram line (`≈` or `-`
+   beside it), else south. */
+TILEART_MESH["Y"]=({x,y})=>{
+  const w=CW(),at=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return r?r[gx]:undefined;},rail=g=>g==="≈"||g==="-";
+  const ry=rail(at(x,y-1))?Math.PI:rail(at(x,y+1))?0:rail(at(x+1,y))?Math.PI/2:rail(at(x-1,y))?-Math.PI/2:0;
+  const POST="#3B3F45",ROOF="#2A2D33",ROOFT="#4A4F57",RED="#C0392B",REDD="#8E2A20",CREAM="#F2E8D8",SEAT="#8A6B3F",SEATL="#A5865A",SEATD="#4A3520",LEG="#6E5334";
+  const RH=1.85,parts=[];
+  [-0.42,0.42].forEach(px=>{parts.push({s:"cyl",x:px,y:RH/2,z:-0.30,r:0.032,h:RH,c:POST});                      /* the posts, at the back */
+    parts.push({s:"box",x:px,y:0.015,z:-0.30,w:0.12,h:0.03,d:0.12,c:ROOF});                                      /* bolted to a base plate */
+    parts.push({s:"box",x:px,y:RH-0.30,z:-0.02,w:0.03,h:0.03,d:0.62,c:POST,rx:-0.55});});                      /* the brace, post to the roof's front edge */
+  parts.push({s:"box",x:0,y:RH,z:0.02,w:1.0,h:0.05,d:0.80,c:ROOF},{s:"box",x:0,y:RH+0.03,z:0.02,w:1.0,h:0.012,d:0.80,c:ROOFT}); /* the roof, its top a step lighter */
+  const letters=(z,dir)=>{const T=0.042,LY=RH-0.145,LH=0.17,put=(lx,ly,bw,bh,rz)=>parts.push({s:"box",x:dir*lx,y:ly,z,w:bw,h:bh,d:0.012,c:CREAM,rz:rz?dir*rz:0});
+    put(-0.36,LY,T,LH);put(-0.22,LY,T,LH);put(-0.325,LY+0.035,T,0.12,0.72);put(-0.255,LY+0.035,T,0.12,-0.72);      /* M: two stems and a V */
+    parts.push({s:"torus",x:0,y:LY,z,r:0.062,t:0.021,c:CREAM});put(0.05,LY-0.065,0.06,T,0.7);                        /* Q: a ring and its tail */
+    put(0.29,LY+LH/2-T/2,0.17,T);put(0.29,LY,T,LH);};                                                               /* T: a bar and a stem */
+  [[0.40,1],[-0.36,-1]].forEach(([bz,dir])=>{parts.push({s:"box",x:0,y:RH-0.145,z:bz,w:1.0,h:0.23,d:0.03,c:RED});    /* the name-board, front and back */
+    parts.push({s:"box",x:0,y:RH-0.26,z:bz,w:1.0,h:0.012,d:0.032,c:REDD});                                           /* its dark lower edge */
+    letters(bz+dir*0.022,dir);});
+  parts.push({s:"box",x:0,y:0.42,z:-0.02,w:0.72,h:0.04,d:0.30,c:SEAT},{s:"box",x:0,y:0.445,z:0.13,w:0.72,h:0.01,d:0.02,c:SEATL}, /* the seat, its front edge catching the light */
+    {s:"box",x:0,y:0.395,z:-0.02,w:0.70,h:0.012,d:0.28,c:SEATD});                                                     /* the shade under it */
+  [-0.32,0.32].forEach(lx=>{parts.push({s:"box",x:lx,y:0.20,z:-0.02,w:0.04,h:0.40,d:0.26,c:LEG});                   /* the leg frames */
+    parts.push({s:"box",x:lx,y:0.56,z:-0.15,w:0.03,h:0.26,d:0.03,c:LEG});});                                          /* the back uprights */
+  parts.push({s:"box",x:0,y:0.66,z:-0.15,w:0.72,h:0.06,d:0.03,c:SEAT});                                               /* the back rail */
+  return meshTurned(parts,ry);};
 
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   /* H and I were cutouts in 3D (docs/BEAUTIFY.md: "the most box-shaped object in the game"). These
