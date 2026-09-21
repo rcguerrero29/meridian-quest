@@ -11,7 +11,7 @@ Owner: *"everything looks good except the marigolds. lets do a crew mode … an 
 rails, fences, coffee machines, fridge, bridge, petals, trolley, desks, fruit stands, car lifts, tires,
 car,and tool boxes. make sure even mural gets done please."* Crew mode ON by his word — #221/#222/#223
 with `taken:` labels, a worktree per builder, one branch because every lane lands in `art.js`. Done,
-`mq-v181` (`docs/3D-LOG.md`, fourth entry of the date; run `docs/runs/2026-09-21-claude-d8e4.md`):
+`mq-v182` (`docs/3D-LOG.md`, fourth entry of the date; run `docs/runs/2026-09-21-claude-d8e4.md`):
 all fourteen as shapes, the marigold as a stack of whorls with the bed's row-constant seed fixed, a
 pad under every mesh (engine rule), four panels on the wall in four materials — **and the engine half
 the crew could not reach from content, built by the session the same sitting:** `prop:bridge` (the

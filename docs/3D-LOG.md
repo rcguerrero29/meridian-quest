@@ -417,7 +417,7 @@ against it is measured against the wrong thing. — *Chema, 2026-09-09*
 - **The ask:** *"everything looks good except the marigolds. lets do a crew mode to try to fix as many
   things but lets have an expert on flora help the design on the marigolds so they are realistic …
   computers, rails, fences, coffee machines, fridge, bridge, petals, trolley, desks, fruit stands, car
-  lifts, tires, car,and tool boxes. make sure even mural gets done please."* `mq-v181`. Run
+  lifts, tires, car,and tool boxes. make sure even mural gets done please."* `mq-v182`. Run
   `docs/runs/2026-09-21-claude-d8e4.md`.
 - **The lid (Pili).** An engine box wears its TOP-DOWN drawing on its lid (`t3BoxMats` → `t3BakeGlyph(g,true,…)`)
   and takes its height from the tallest ink in the side drawing. That is why the café counter's cups
