@@ -14,8 +14,11 @@ the numbers and the rule it changed). The bed, the potted plant and the shelf ar
 off the known-flat list. **Next, if he wants more shapes:** the cone (one part, off the list), the
 doghouse (two parts), then the trees only with Pili beside — the crown is the best prop in the game.
 **Still his:** row 6 of the sheet (whose shelf), `docs/SECURITY.md` §3 step 1, and the acceptance
-boxes in runs `c4a9` and this sitting's file. The measured cost of this sitting lands at the next
-turn's start, as `docs/RUNS.md` §3½ says.
+boxes in runs `c4a9` and this sitting's file. **The measured cost landed and does not reconcile:** the session meter moved 3,506,400 out
+across the six turns that held this sitting, against a live meter of ~124,000 — a factor of 30, where
+the previous sitting's two meters agreed within 1.5. Written into run `e1f7` as read. **A next session
+that reads `get_session` at the start and end of a single short turn with no work in it would settle
+whether the counter is charging reasoning or summarisation; until then, plan with the live meter.**
 
 ### ⇢ 2026-09-21, night — the first beautify sitting is DONE; the next one is engine.
 
