@@ -2352,17 +2352,40 @@ const CANDIDATES = [
       setTimeout(() => res({ timeout: true }), 3000);
     }));
     if (curt.timeout || !curt.applied || !curt.down) fails.push('the growth curtain did not apply the change behind the veil: ' + JSON.stringify(curt));
-    // 3D: furniture with a side view stands as a box (La Cocina's tables), a plant stays a cutout
+    // 3D: every piece of furniture in La Cocina STANDS UP — it is not a picture — and a plant is not a box.
+    /* This asked `boxes >= 1` from 2026-09-07, when the only cure for flat furniture was a side view and a
+       box. The `mesh` view (2026-09-21) is a better cure and it DELETES the box, so by crew iteration 12 the
+       stove `V` was the last box left in the room and the count fell to zero the moment it got a shape —
+       the guard went red on a room where every single thing had just been improved. `box` was a PROXY for
+       "stands up as a thing with sides"; a mesh answers that noun too. So the demand is derived from what
+       the room itself lays (docs/POSTMORTEM.md, the owner: "can we make the guards smarter instead of just
+       making them notes?"): EVERY furniture/appliance glyph on La Cocina's map must come back as a box or
+       as a shape, and none of them as a billboard. That is strictly more than the old count of one — it
+       names the glyph that failed — and it cannot be satisfied by one lucky table. Planted both ways
+       (la mueblería, crew iteration 12): with `V`'s mesh and side view taken away at runtime it prints
+       'La Cocina lays KTVW and V does not stand up in 3D — a picture, not a thing with sides', and with
+       the room as it ships it prints nothing. */
     const b3 = await page.evaluate(async () => {
       if (typeof T3 === 'undefined' || !T3 || T3.fail) return null;
       camSet('3d'); world = 'lc'; px = fx = 2; py = fy = 2; moving = false; held = null;
       await new Promise(r => setTimeout(r, 700));
       if (!T3.group) return { none: true };
-      let boxes = 0, boxG = new Set(); T3.group.traverse(o => { if (o.userData && o.userData.box) { boxes++; boxG.add(o.userData.g); } });
-      return { boxes, glyphs: [...boxG].join('') };
+      let boxes = 0, meshes = 0, boxG = new Set(), stood = new Set(), flatG = new Set();
+      T3.group.traverse(o => { const u = o.userData || {};
+        if (u.box) { boxes++; boxG.add(u.g); stood.add(u.g); }
+        if (u.mesh && u.g !== undefined) { meshes++; stood.add(u.g); }
+        if (u.flat && u.g !== undefined) flatG.add(u.g); });
+      const w = CW(), want = new Set();
+      for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+        const g = w.rows[y][x], k = (TILES[g] || {}).kind;
+        if (k === 'furniture' || k === 'appliance') want.add(g); }
+      return { boxes, meshes, glyphs: [...boxG].join(''), want: [...want].sort().join(''),
+               missing: [...want].filter(g => !stood.has(g)).sort().join(''), flat: [...flatG].join('') };
     });
     if (b3 === null) { /* no WebGL here: the shape rule is still checked by the code path above */ }
-    else if (b3.none || b3.boxes < 1) fails.push('La Cocina\'s tables do not stand as boxes in 3D: ' + JSON.stringify(b3));
+    else if (b3.none) fails.push('La Cocina did not build a 3D scene at all: ' + JSON.stringify(b3));
+    else if (!b3.want) fails.push('La Cocina lays no furniture at all — this guard measured nothing: ' + JSON.stringify(b3));
+    else if (b3.missing) fails.push('La Cocina lays ' + b3.want + ' and ' + b3.missing + ' does not stand up in 3D — a picture, not a thing with sides: ' + JSON.stringify(b3));
     else if (b3.glyphs.includes('P')) fails.push('a plant became a box');
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; camSet('3d'); });
 

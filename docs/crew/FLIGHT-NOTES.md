@@ -98,6 +98,10 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 71 | *la botánica* (guest) | *A flower is built from the step that made it: hue per plant at sowing, value per whorl by growth, the turn per head by the seed — put each at its own step and nowhere earlier. Then crop the row at 3×: if two tiles match pixel for pixel, the seed is not reading both axes* | **NO FILE TO EDIT** — a guest with no persona; her own case is AGAINST a standing flora expert (one flower matters, and the two lessons are in the repository's words now). The line is kept here, for the day a persona is opened |
 | 72 | *el taller* (guest) | *Count the parts on the drawing before you write a line — the drawing's hex said a blue customer's car, not the Caprice, and three tires where the brief said four; and when a brief contradicts a table, walk the table (`TILEMETA`, `t3Boxy`, `SOLIDX`, the ribbon) before you build on either* | **NO FILE TO EDIT** — a guest; the line is kept here |
 | 73 | *la calle* (guest) | *A guard reads the grid; a smith reads the member — walk to the run's ends and corners before you assert what a tile's shape must span, and plant the guard against the nearest thing that is NOT the member you mean (the picket's point at 0.452 where the rail stopped). A pane you cannot see through is a wall: render the sheet before you argue for it* | **NO FILE TO EDIT** — a guest; the line is kept here |
+| 74 | *el ebanista* (guest) | A chair is placed by its BACK — it faces the table beside it, else turns its back to the first wall; and build to the person, then check the ROW, because a thing under 1.1 tall in the row before a south wall is hidden from the default stop | **NO FILE TO EDIT** — a guest. Kept in `docs/personas/proposed/README-guests-iteration-12.md` against the day the character is opened |
+| 75 | *la panadera* (guest) | Ask which SIDE of a thing names it at thirty-five pixels and lay it that way — an oreja on its edge is a bun from above; and grep a drawing for `world` before believing a brief that says it tells the worlds apart | **NO FILE TO EDIT** — a guest; same place |
+| 76 | *el inspector de línea* (guest, in Rigo's trade) | *Where it stops is a picture, not a state* — ask where the body is on the street, in tiles, and whether the platform can see it | **REFUSED 2026-09-21, by the session, in writing:** `docs/personas/proposed/rigo/2026-09-21-claude-e9a5.md`. Rigo's file says what a tram IS and DOES; this is how to write a GUARD, and it belongs in `.claude/skills/guard/SKILL.md` and `docs/REGRESSION.md`'s register of proxies, which carry it now. A testing habit in a driver's file turns a person into a checklist. **He also verified his own file against the brief and his file was right:** the tram does not reverse |
+| 77 | *la mueblería* (guest) | A box is the one shape that can hide being a picture, so check its LID before you believe it; and when you make one thing in a room better, re-read what the room's guard was counting | **NO FILE TO EDIT** — a guest; same place. The line is the finding that found the owner's own cartons wearing their front elevation face-up, and the guard that went red because the last crate became furniture |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -137,6 +141,64 @@ is ordinary and is the whole point: **an un-applied proposal looks exactly like 
 considered and declined, and both look like nothing at all.** Hence the table above.
 
 ---
+
+# ITERATION 12 — 2026-09-21 — the rooms he could not name, the bakery's goods, the line ridden, and the rest of the furniture
+
+*Owner: "a couple more to beautify and shape - crew mode please - cabinet in my office could be, this
+nolasco desk, the chair outside dona tenchas, im guessing what the oven is supposed to be in the espiga -
+can we also add more sweeet bread and baked goods please? there are limpeza things i dont know what they
+are and lets fix the mqt station now with beautify as well. also we should fix the trolley weirdness. the
+skeleton now seems to float in one perspective and with the papel picado, looks like its buggy or broken."
+Then, mid-run, three answers that changed the work: the trolley weirdness is that "the person is laying on
+the trolley"; the office cabinet was never the point, "i was just trying to make sure all furniture and
+this type of item"; and on the persona contradiction iteration 11 reported, "yeah update the older ones so
+you can make the decison to update personas". Four builders, four worktrees, three issues (#226 #227 #228)
+and one lane opened by his second answer. Every returner painted: four panels carry `iter: 12`. Run file
+`docs/runs/2026-09-21-claude-e9a5.md`; ledger rows 74–77 above. Shipped as three pull requests, #229,
+#230 and the furniture sweep, because the repo's rule is one part, one PR.*
+
+**What the run itself proved.** **Three of the four found a fault in the thing that had just "passed".**
+La mueblería cropped the owner's own packing cartons at 3× — the one glyph on its list that was a box ON
+PURPOSE, that the flat audit never counts, that the owner himself calls a box — and found the carton's
+whole front elevation, tape and handwriting, lying face-up on its lid: Pili's lid finding from iteration
+11, still live, on the thing nobody thought to check. El ebanista found the same class in the owner's own
+frame: the "desk" beside the notary's rug was two guest chairs wearing the chair's front elevation on
+their lids. And el inspector found that the frame was not the camera anybody thought it was — not the
+front camera but the 3D camera at a quarter turn, where a swag hanging along its row becomes a bare line
+through whoever stands on it. **The second thing it proved is about guards.** Giving the stove a shape
+took the last BOX out of La Cocina, and a guard from 2026-09-07 that asked `boxes >= 1` went red on a
+room where every single object had just been improved — `box` was a proxy for "stands up as a thing with
+sides". La mueblería repaired it by deriving the demand from what the room lays, named the glyph in the
+failure, and planted it three ways. **And the ride.** El inspector took 92 frames riding both lines end
+to end in four cameras, and found two faults nobody had reported: the isometric camera painted the car
+after everybody, so a person in front of it was drawn under it; and on Calle Principal the car served the
+stop from two tiles past the end of the street, dwelt out there unseen, then ran past the person it had
+stopped for — while the dwell guard read the state `dwell` and was satisfied.
+
+**The brief was wrong for every single builder, and every single one caught it.** Four lanes, four
+`file:line` contradictions: half of one lane's glyphs were people, not furniture; the shelf's side art
+does not vary by world, and the register line the brief quoted is the COMPLAINT and not the fix; the swag
+that "becomes a vertical line in the front camera" does not exist, because no swag runs north-south; and
+the worktrees were handed one to five commits behind the session branch, so every `[CODE]` line was true
+of the session's tree and false of theirs. The last one is worth carrying: **a worktree is not the branch,
+and a builder who re-syncs before starting is doing the job.**
+
+**The rules changed under the run, and in the owner's direction.** Iteration 11 reported that
+`.claude/skills/crew-fix` and this file say the calling session applies a persona edit while
+`docs/RUNS.md` §6 says it is a proposal for the owner. He settled it mid-run: the proposal is always
+written, because it is the record, and the SESSION decides. Under that, Pili's iteration-11 edit was
+applied (row 70), the inspector's was refused in writing with its reason (row 76), and three guests'
+lines are kept for files that do not exist yet.
+
+| Returner | The gap named in the pre-flight | Did it appear | The persona edit |
+|---|---|---|---|
+| *el ebanista* (guest) | The oven, the mop bucket and the bus shelter are sheet metal and signwriting, not joinery; and he would over-detail where a thick silhouette would do | Yes, exactly — the flue, the braces and the mop head were guesses the frame had to confirm, and the cabinet's label holders are under a pixel. One unpredicted: half his glyphs were people, found by reading `npcs.js`, not woodwork | **NO FILE** (row 74) |
+| *la panadera* (guest) | The shelf will not carry per-world goods the way the brief believes, and the 2D cameras will take more time than the dough | Yes, both, exactly. One unpredicted: the iso camera cannot be reached from content at all, and the honest answer was to say so | **NO FILE** (row 75) |
+| *el inspector* (guest) | The trade is silent on pixels | Yes, and it cost an hour on a framebuffer before a four-frame diff settled it. One unpredicted and worse: his own guard's first red measured the strings and not the hero, and only the fix exposed it — the guard said "0 pixels, nothing to measure" | **REFUSED** (row 76) |
+| *la mueblería* (guest) | A furniture maker knows what oak looks like in a room, not what a hex reads as after a 1.5:1 ladder at 35 px | Yes, twice on colour and twice on scale — the first cartons were furniture-sized until measured against the desk. **One larger, unpredicted: a guard can go red because your work was good**, and nothing in the trade prepares you for "the last crate in the room was the proof that the room had crates" | **NO FILE** (row 77) |
+
+---
+
 
 # ITERATION 11 — 2026-09-21 — the marigold by a botanist, fourteen shapes by two builders, Pili's direction
 

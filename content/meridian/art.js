@@ -1521,6 +1521,239 @@ TILEART_MESH["Y"]=({x,y})=>{
   parts.push({s:"box",x:0,y:0.66,z:-0.15,w:0.72,h:0.06,d:0.03,c:SEAT});                                               /* the back rail */
   return meshTurned(parts,ry);};
 
+/* ---- CREW ITERATION 12, la mueblería ---- 2026-09-21. The owner, asked whether he wanted a filing
+   cabinet added to his own office: "no i was just trying to make sure all furniture and this type of
+   item". So the ask is COVERAGE, and these five are what was left when the other lanes had done the
+   ones he named by sight: the drafting table `A`, the stove `V`, the barricade `G`, the dog bed `○`
+   and the moving carton `□`. Each is built the way the thing is built (.claude/skills/how-its-made),
+   from what its own 2D drawing says it is made of, and judged in a frame at 35 px a tile: silhouette
+   first, the value differences PAINTED into the parts because the light only gives 1.00 top / 0.88
+   east / 0.78 south / 0.66 west-north (Pili, from engine3d.js). Every seed reads BOTH axes — the
+   marigold bed's (x*7+y*13)%7 was constant along a row, and x*5%5 is constant everywhere, so it is
+   (x*5+y*3)%7 here; La Obra's three tables come out 3, 0, 4 and the site's seven barricades come out
+   all seven different. ---- */
+
+/* LA MESA DE DIBUJO — La Obra's three drafting tables and the one on the empty lot. What
+   TILEDRAW["A"] (engine.js, grep TILEDRAW\["A"\]) says it is: a pedestal, a board drawn as a
+   parallelogram — a board that TILTS — a blueprint sheet on it and three drawn lines. It had no side
+   view, so it stood as one upright quad wearing its plan: a blue postcard on a brown stick, and the
+   only glyph of the owner's own flat-audit list that is furniture. Made as a drafting table is made:
+   two feet that run front-to-back (what stops a board tipping when you lean on it), a column on each,
+   a stretcher between them, the pivot brackets, and the BOARD across them at 23° — the rake is the
+   whole silhouette, and it is the one thing that tells this from a desk at 35 px. Then what the
+   draughtsman did: the pencil rail along the low edge (a board without one drops its pencils), the
+   sheet taped down, its lines, the parallel rule laid across with its head overhanging the left edge,
+   and a pencil in the rail. THE FRAMES ARE SIBLINGS — three tables from one shop are identical, and
+   variation enters where it entered: at the hand. What the seed changes is the draughtsman's, not the
+   joiner's — whether a sheet is pinned at all, where the rule was pushed to, whether the pencil was
+   put back. Faces the first open side, like the desk. */
+TILEART_MESH["A"]=({x,y})=>{
+  const h=(((x*5+y*3)%7)+7)%7;
+  const T=0.40,ct=Math.cos(T),st=Math.sin(T),CY=0.575;                   /* the rake, and the board's centre: front edge 0.458, back edge 0.692 */
+  const at=(v,n)=>({y:CY-v*st+n*ct,z:v*ct+n*st});                        /* board-local: v runs down the board toward the low edge, n out of its face */
+  const LEG="#7A6040",FOOT="#5E4830",BOARD="#B08B5A",UNDER="#6B5230",RAIL="#C4A06A",
+        SHEET="#2E5FA8",LINE="#DDE8F5",RULE="#E6E0D2",PENCIL="#E0B45C",LEAD="#3A3546";
+  const parts=[];
+  [-0.27,0.27].forEach(lx=>{
+    parts.push({s:"box",x:lx,y:0.022,z:0.02,w:0.075,h:0.044,d:0.46,c:FOOT});         /* the foot, running front to back */
+    parts.push({s:"cyl",x:lx,y:0.27,z:0.06,rt:0.026,rb:0.034,h:0.46,c:LEG});         /* the column, turned: wider at the floor */
+    parts.push({s:"box",x:lx,y:0.525,z:0.05,w:0.055,h:0.07,d:0.06,c:LEG});});        /* the pivot bracket the board rests on */
+  parts.push({s:"cyl",x:0,y:0.17,z:0.06,r:0.018,h:0.52,c:LEG,rz:Math.PI/2});         /* the stretcher */
+  let q=at(0,0);      parts.push({s:"box",x:0,y:q.y,z:q.z,w:0.86,h:0.032,d:0.60,c:BOARD,rx:T});      /* THE BOARD */
+  q=at(0,-0.022);     parts.push({s:"box",x:0,y:q.y,z:q.z,w:0.82,h:0.016,d:0.56,c:UNDER,rx:T});      /* its underside, painted dark — the shade under any top */
+  q=at(0.295,0.034);  parts.push({s:"box",x:0,y:q.y,z:q.z,w:0.86,h:0.030,d:0.036,c:RAIL,rx:T});      /* the pencil rail along the low edge, lit */
+  if(h%3!==2){                                                                        /* h%3===2: the board was cleared — no sheet today */
+    q=at(0.02,0.024); parts.push({s:"box",x:0,y:q.y,z:q.z,w:0.62,h:0.006,d:0.44,c:SHEET,rx:T});      /* the sheet, taped down */
+    [[-0.12,0.44],[-0.04,0.44],[0.04,0.30]].forEach(([v,lw])=>{q=at(v,0.031);
+      parts.push({s:"box",x:0,y:q.y,z:q.z,w:lw,h:0.004,d:0.014,c:LINE,rx:T});});                     /* what is drawn on it: three lines, as the picture has them, up where the drawing is */
+  }
+  const rv=0.12+(h%3)*0.07;                                                           /* where the rule was pushed to — down the board, below the drawing, which is where it is parked */
+  q=at(rv,0.042);     parts.push({s:"box",x:0,y:q.y,z:q.z,w:0.92,h:0.012,d:0.038,c:RULE,rx:T});      /* the parallel rule, its blade wider than the board */
+  q=at(rv,0.042);     parts.push({s:"box",x:-0.445,y:q.y,z:q.z,w:0.045,h:0.012,d:0.10,c:RULE,rx:T}); /* its head, overhanging the left edge — the one thing that is not a rectangle in plan */
+  if(h%4!==1){        q=at(0.295,0.058);
+    parts.push({s:"cyl",x:-0.12+(h%5)*0.07,y:q.y,z:q.z,r:0.014,h:0.20,c:PENCIL,rz:Math.PI/2,rx:T});  /* the pencil, put back in the rail */
+    parts.push({s:"cyl",x:-0.22+(h%5)*0.07,y:q.y,z:q.z,r:0.012,h:0.03,c:LEAD,rz:Math.PI/2,rx:T});}   /* its lead */
+  return meshTurned(parts,meshFacing(x,y));};
+
+/* LA ESTUFA — Chuy's range in La Cocina, beside the walk-in `W` (already a shape). Two drawings, and
+   they are the bill of materials between them: TILEDRAW["V"] in plan is a dark body with burners and
+   an orange strip at the back; TILESIDE["V"] in elevation is "burners over the edge, knobs, the oven
+   window" — a cooktop lip that overhangs the body, four knobs on a fascia, an oven cavity with a steel
+   bar over it. IT STOOD AS A BOX and the box wore the PLAN on its lid, so the burners lay on top the
+   size of dinner plates and the elevation's knobs were painted round all four sides. HOW MANY BURNERS:
+   the plan draws four, the elevation draws three across, and the tile's own describe line — the
+   paperwork the drawing sits on, which .claude/skills/how-its-made says to read first — says "Six
+   burners of consommé diplomacy" (content/meridian/strings.js, grep "Six burners"). Three across by
+   two deep is six, which is the only count that agrees with the elevation AND the words, and it is
+   what a restaurant range is; the plan's 2×2 is what fits in 32 px. Made as one is welded: four feet
+   with the floor showing between them, the body, the oven door proud with its window and its
+   full-width bar handle on two brackets, the control fascia under the lip with four knobs, the cast
+   deck OVERHANGING the body on every side (that lip is what says range and not cupboard), six open
+   burners with their cast grates, and the riser at the back carrying the pilot — the riser and the
+   stock pot are the silhouette above the box. Faces its first open side. */
+TILEART_MESH["V"]=({x,y})=>{
+  const STEEL="#4A5058",DOOR="#5E6874",DECK="#3A3F46",NOSE="#6E7A86",DARK="#23272C",GLASS="#1B1E22",
+        EMBER="#C8601E",KNOB="#AEB6BE",BAR="#B9BEC4",ORANGE="#E0662B",POT="#B9BEC4",POTL="#CCD2D8",FOOT="#2A2D33";
+  const parts=[];
+  [[-0.25,-0.21],[0.25,-0.21],[-0.25,0.21],[0.25,0.21]].forEach(([fx,fz])=>
+    parts.push({s:"cyl",x:fx,y:0.045,z:fz,r:0.024,h:0.09,c:FOOT}));                              /* four feet, the floor showing under it */
+  parts.push({s:"box",x:0,y:0.30,z:0,w:0.62,h:0.42,d:0.54,c:STEEL},                              /* the body, 0.09 to 0.51 */
+    {s:"box",x:0,y:0.27,z:0.275,w:0.56,h:0.28,d:0.016,c:DOOR},                                   /* the oven door, proud and a step lighter */
+    {s:"box",x:0,y:0.29,z:0.286,w:0.38,h:0.15,d:0.006,c:GLASS},                                  /* its window, the darkest thing on it */
+    {s:"box",x:0,y:0.235,z:0.290,w:0.30,h:0.016,d:0.004,c:EMBER},                                /* and what is on in there */
+    {s:"box",x:0,y:0.485,z:0.278,w:0.62,h:0.060,d:0.014,c:DARK});                                /* the control fascia, under the lip */
+  [-0.22,0.22].forEach(bx=>parts.push({s:"box",x:bx,y:0.435,z:0.292,w:0.028,h:0.032,d:0.036,c:BAR})); /* two brackets */
+  parts.push({s:"cyl",x:0,y:0.435,z:0.318,r:0.016,h:0.56,c:BAR,rz:Math.PI/2});                   /* the bar handle across them */
+  [-0.21,-0.07,0.07,0.21].forEach(kx=>parts.push({s:"cyl",x:kx,y:0.485,z:0.298,r:0.022,h:0.020,c:KNOB,rx:Math.PI/2})); /* four knobs, as the elevation has them */
+  parts.push({s:"box",x:0,y:0.528,z:0,w:0.68,h:0.036,d:0.60,c:DECK},                             /* the cast deck, overhanging the body all round */
+    {s:"box",x:0,y:0.545,z:0.298,w:0.68,h:0.008,d:0.012,c:NOSE});                                /* its front edge, catching the light */
+  [-0.21,0,0.21].forEach(bx=>[-0.135,0.135].forEach(bz=>{
+    parts.push({s:"cyl",x:bx,y:0.550,z:bz,r:0.085,h:0.012,c:DARK});                              /* the burner well, open */
+    parts.push({s:"sph",x:bx,y:0.556,z:bz,r:0.030,sy:0.5,c:STEEL});                              /* its cap */
+    parts.push({s:"torus",x:bx,y:0.568,z:bz,r:0.082,t:0.018,rx:Math.PI/2,sz:0.6,c:"#2F343B"});}));/* the cast grate over it */
+  parts.push({s:"box",x:0,y:0.612,z:-0.275,w:0.68,h:0.130,d:0.045,c:STEEL},                      /* the riser at the back */
+    {s:"box",x:0,y:0.680,z:-0.275,w:0.68,h:0.010,d:0.045,c:NOSE},                                /* its lit top */
+    {s:"box",x:0,y:0.612,z:-0.250,w:0.13,h:0.030,d:0.008,c:ORANGE});                             /* the pilot, the one warm note the plan draws */
+  parts.push({s:"cyl",x:-0.21,y:0.662,z:-0.135,r:0.105,h:0.19,c:POT},                            /* the stock pot, on the back-left burner */
+    {s:"cyl",x:-0.21,y:0.764,z:-0.135,r:0.112,h:0.016,c:POTL},                                   /* its lid */
+    {s:"sph",x:-0.21,y:0.780,z:-0.135,r:0.024,c:FOOT});                                          /* and the lid's knob */
+  [-0.118,0.118].forEach(hx=>parts.push({s:"torus",x:-0.21+hx,y:0.700,z:-0.135,r:0.030,t:0.011,c:POTL,ry:Math.PI/2})); /* two handles */
+  return meshTurned(parts,meshFacing(x,y));};
+
+/* LA VALLA — the construction barricade, seven on the empty lot and six on Calle Principal at the
+   street's opening stage. What TILEDRAW["G"] (engine.js, grep "a construction barricade") says it is:
+   an orange BOARD with three white stripes, on two legs, with a lower rail — and its own comment says
+   the version before it "stood up in 3D as a ladder (owner)". It is kind `fence`, and the engine turns
+   a fence panel along its run BY KIND (engine3d.js, the kd==="fence" branch, grep `const fk=`): the
+   barricade at ex (11,7) has a picket fence tile directly south of it, so the engine reads a
+   north-south run and stands the barricade EDGE ON — in the frame it is a thin orange streak, which is
+   docs/BEAUTIFY.md row F happening today. A BARRICADE IS NOT FENCE. It is a free-standing A-frame:
+   two folding frames whose feet splay front-to-back, a brace between them, and one board bolted
+   across the top. The stripes came off one stencil at the factory, so every barricade's are identical
+   and lean the same way, and they are painted on BOTH faces (the default camera sees the back of half
+   of them). What differs between barricades is what happened after: they were carried into the yard
+   and set down — no two of the thirteen touch another one, so none of them is a run and each is
+   turned its own way — one has had a leg kicked out, and the feet are dirty by how long they have
+   stood there. */
+TILEART_MESH["G"]=({x,y})=>{
+  const h=(((x*5+y*3)%7)+7)%7;
+  const ORANGE="#E0662B",LIT="#F08A4B",LEGC="#C25A1E",BRACE="#A8481A",WHITE="#F4F1EA",DIRT="#6B4A2E";
+  const parts=[];
+  [-0.29,0.29].forEach((lx,i)=>[[1,0.085],[-1,-0.085]].forEach(([s,lz])=>{
+    const kick=(h%3===0&&i===0&&s>0)?0.13:0;                                                     /* one frame has had a leg kicked out */
+    parts.push({s:"box",x:lx,y:0.233,z:lz,w:0.050,h:0.470,d:0.042,c:LEGC,rx:-s*(0.26+kick)});    /* the leg: its foot splays, its top meets its pair */
+    parts.push({s:"box",x:lx,y:0.014,z:s*(0.145+kick*0.22),w:0.062,h:0.028+(h%4)*0.006,d:0.056,c:DIRT});}));  /* the foot, and how long it has stood in the dirt */
+  parts.push({s:"box",x:0,y:0.175,z:0,w:0.62,h:0.045,d:0.032,c:BRACE});                          /* the brace between the frames */
+  parts.push({s:"box",x:0,y:0.545,z:0,w:0.86,h:0.200,d:0.038,c:ORANGE});                         /* THE BOARD, 0.445 to 0.645 */
+  parts.push({s:"box",x:0,y:0.648,z:0,w:0.86,h:0.012,d:0.042,c:LIT});                            /* its top edge, where the key lands */
+  [[0.021,1],[-0.021,-1]].forEach(([bz,dir])=>[-0.26,0,0.26].forEach(sx=>
+    parts.push({s:"box",x:sx,y:0.545,z:bz,w:0.076,h:0.215,d:0.008,c:WHITE,rz:dir*0.62})));        /* three stripes off one stencil, on both faces, each reading from its own side */
+  return meshTurned(parts,(h-3)*0.20);};                                                          /* set down by hand: seven barricades, seven angles, none of them square to the world */
+
+/* LA CAMA DEL PERRO — what Tacho sends up to the office when his district is done (a gift, not a map
+   letter: content/meridian/config.js, grep "gift-ta" — it lands in f2 at (14,11), on the floor where a
+   packing box used to be, and it is the only `○` in the game). What TILEART["○"] above draws: a purple
+   ring, a paler middle, and a white bar with a knob at each end lying in it — a bone. It stood as a
+   billboard, so a thing that lies on the floor was standing up in front of the player like a sign.
+   Made as a dog bed is made: a base the cover is sewn over, a flat cushion, and ONE stuffed tube sewn
+   into a ring round it — so the bolster is a torus, squashed, and the inside corner where it meets the
+   cushion is the dark that makes the ring read. Then what the dog did: the front of the ring is
+   crushed where she climbs in, and the bed is dragged, so it lies where it was left and not square to
+   the room. 0.15 tall on purpose — a dog bed is a low ring on the floor, and that is the silhouette. */
+TILEART_MESH["○"]=({x,y})=>{
+  const h=(((x*5+y*3)%7)+7)%7;
+  const BOLST="#7A5C8A",BOLSTL="#8E6E9E",CUSH="#9A7CAA",DARK="#4E3A5C",CRUSH="#6B4E7C",BONE="#F4F1EA";
+  const parts=[
+    {s:"cyl",x:0,y:0.016,z:0,r:0.300,h:0.032,c:DARK},                                     /* the base the cover is sewn over */
+    {s:"cyl",x:0,y:0.044,z:0,r:0.255,h:0.030,c:CUSH},                                     /* the cushion inside the ring */
+    {s:"torus",x:0,y:0.046,z:0,r:0.222,t:0.030,rx:Math.PI/2,sz:0.5,c:DARK},               /* the seam where they meet: every inside corner is dark */
+    {s:"torus",x:0,y:0.062,z:0,r:0.252,t:0.092,rx:Math.PI/2,sz:0.62,c:BOLST},             /* the bolster: one stuffed tube, sewn into a ring — fat across, flat on top, as a stuffed tube sits */
+    {s:"torus",x:0,y:0.098,z:0,r:0.252,t:0.058,rx:Math.PI/2,sz:0.30,c:BOLSTL},            /* its top, where the light lands */
+    {s:"sph", x:0,y:0.052,z:0.235,r:0.130,sx:1.5,sy:0.30,c:CRUSH},                        /* the front, crushed flat where she climbs in */
+    {s:"cyl",x:0.01,y:0.064,z:0.03,r:0.024,h:0.17,c:BONE,rz:Math.PI/2}];                  /* the bone, where she left it */
+  [-0.085,0.085].forEach(bx=>[-0.027,0.027].forEach(bz=>
+    parts.push({s:"sph",x:0.01+bx,y:0.064,z:0.03+bz,r:0.031,c:BONE})));                   /* its four knobs */
+  return meshTurned(parts,(h-3)*0.30);};                                                   /* dragged: it lies where it was left */
+
+/* LAS CAJAS DE LA MUDANZA — the taped boxes of the mid-move office (f2, four of them until the
+   districts clear them) and the two in Limpieza Velázquez. `□` is `box:true` on purpose, and the
+   owner is right that it IS a box — but a carton is not a cube, and the engine's box wore the carton's
+   own FRONT ELEVATION on its LID: at 3× the top of every box in his office is a taped cross with a
+   label lying face-up on it, on a body nearly as tall as a desk. Made the way a carton is made: ONE
+   die-cut sheet, scored and folded into four walls; two inner flaps folded first, two outer flaps over
+   them; tape down the centre seam where the outer two meet and a tab down each side — the H — and the
+   label written on the SIDE, which is the side you can read in a stack. Sizes are a carton's, about
+   half a tile, not a cupboard's. A stack is TWO CARTONS, not one tall one: the one underneath carries
+   the weight, so it is squatter and wider, and the one on top was set down by hand, so it is askew
+   and one of its flaps never quite went flat. Which tile stacks follows the picture's own parity, so
+   the plan and the shape agree. And two cartons on neighbouring tiles were carried in together and
+   dumped together, so they lean toward each other and TOUCH, the way the filing cabinets do. */
+const meshCarton=(W,D,H,sd,openFlap)=>{
+  const CARD="#C8A277",FLAP="#D8B589",SEAM="#8A6A45",TAPE="#EDE4D2",LABEL="#F6F2E8",INK="#6B5B45";
+  const p=[{s:"box",x:0,y:H/2,z:0,w:W,h:H,d:D,c:CARD},                                     /* the four walls: one sheet, scored and folded */
+    {s:"box",x:0,y:H-0.005,z:0,w:W-0.03,h:0.010,d:D-0.03,c:SEAM}];                         /* the two inner flaps, folded first and mostly covered */
+  [-1,1].forEach(s=>{const lift=(openFlap&&s>0)?0.17:0;                                    /* one outer flap never quite went flat */
+    p.push({s:"box",x:0,y:H+0.006+(lift?0.020:0),z:s*(D/4+0.004),w:W,h:0.012,d:D/2-0.010,c:FLAP,rx:-s*lift});});
+  p.push({s:"box",x:0,y:H+0.014,z:0,w:W-0.02,h:0.006,d:0.042,c:TAPE});                     /* the tape down the centre seam */
+  [-1,1].forEach(s=>p.push({s:"box",x:s*(W/2+0.004),y:H-0.038,z:0,w:0.009,h:0.078,d:0.042,c:TAPE})); /* and a tab down each side: the H */
+  p.push({s:"box",x:0,y:H*0.42,z:D/2+0.005,w:W*0.46,h:H*0.34,d:0.006,c:LABEL});            /* the label, on the side you read in a stack */
+  p.push({s:"box",x:-W*0.04,y:H*0.47,z:D/2+0.010,w:W*0.30,h:0.011,d:0.004,c:INK});         /* what somebody wrote on it */
+  p.push({s:"box",x:-W*0.10,y:H*0.36,z:D/2+0.010,w:W*0.18,h:0.011,d:0.004,c:INK});
+  return p;};
+TILEART_MESH["□"]=({x,y})=>{
+  const stacked=((((x|0)+(y|0))%2)+2)%2===1,h=(((x*5+y*3)%7)+7)%7;
+  const w=CW(),bx=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="□";};
+  let parts;
+  if(stacked){
+    parts=meshTurned(meshCarton(0.54,0.50,0.32,h,false),(h-3)*0.05);                       /* the one underneath: squatter and wider, because it carries the weight */
+    parts=parts.concat(meshTurned(meshCarton(0.42,0.38,0.30,h+2,true),(h%3-1)*0.34)
+      .map(p=>({...p,x:p.x+0.05,y:p.y+0.325,z:p.z-0.03})));                                /* the one on top, set down by hand */
+  }else parts=meshTurned(meshCarton(0.50,0.46,0.42,h,h%3===1),0);
+  parts=meshTurned(parts,meshFacing(x,y)+(h-3)*0.09);                                      /* the label toward the room, and nobody ever put a box down square */
+  const sh=0.21,dx=bx(x+1,y)?sh:bx(x-1,y)?-sh:0,dz=bx(x,y+1)?sh:bx(x,y-1)?-sh:0;           /* carried in together, dumped together: the pair touches */
+  return dx||dz?parts.map(p=>({...p,x:p.x+dx,z:p.z+dz})):parts;};
+
+/* EL BOTE DE DOÑA MECHE — the tamale cart at the stop. NOT in the brief for this lane: it came out of
+   sweeping every glyph Meridian lays against its kind and asking which still had no shape, which is
+   what "all furniture and this type of item" actually asks for. It is kind `appliance`, it is one tile
+   on the empty lot, and it stood as a BOX — so a two-wheeled handcart with a steel bote on it was a
+   cupboard wearing its own lid-drawing on its lid. Its own comment says "A box in 3D with a side view,
+   never a cutout", which was the best answer the day it was written and is not the best answer now.
+   What the two drawings say it is made of (TILEART["ʘ"] and TILEART_SIDE["ʘ"] below): a wooden cart
+   body, two wheels with pale hubs, a steel pot with a lighter body and a dark rim, a ladle, steam
+   always, and a marigold on the lid in season. Made the way a handcart is made: an axle with a wheel
+   on each end, the body planked on over it, a prop leg at the front so it stands still when it is
+   parked, two push handles at the back; then the bote set down in the well of the deck, its domed lid
+   with a rim and a knob, two ears to lift it by, and the ladle hooked over the side where the hand
+   goes. The steam is three puffs at `a:` 0.3 — the glass path in t3MeshOf, which is the only way a
+   vertex-coloured Lambert can be see-through. The marigold is la botánica's head (meshMarigold), so
+   the season reaches this the same way it reaches the beds. */
+TILEART_MESH["ʘ"]=({x,y})=>{
+  const BODY="#8A6F4D",BODYD="#6E5638",TYRE="#3A3A44",HUB="#8A8F98",POT="#8A8F98",POTL="#B0B4BC",
+        RIM="#6E7278",DARK="#3A3A44",STEAM="#F4F4F8";
+  const parts=[];
+  parts.push({s:"cyl",x:0,y:0.165,z:0.02,r:0.016,h:0.68,c:DARK,rz:Math.PI/2});                  /* the axle, across the cart */
+  [-0.31,0.31].forEach(wx=>{parts.push({s:"cyl",x:wx,y:0.165,z:0.02,r:0.165,h:0.050,c:TYRE,rz:Math.PI/2});  /* a wheel */
+    parts.push({s:"cyl",x:wx,y:0.165,z:0.02,r:0.055,h:0.056,c:HUB,rz:Math.PI/2});});            /* its pale hub */
+  parts.push({s:"cyl",x:0,y:0.14,z:0.21,r:0.017,h:0.28,c:DARK});                                 /* the prop leg: a parked handcart stands on it */
+  parts.push({s:"box",x:0,y:0.360,z:0,w:0.66,h:0.150,d:0.44,c:BODYD},                            /* the body, planked over the axle */
+    {s:"box",x:0,y:0.368,z:0.225,w:0.62,h:0.120,d:0.014,c:BODY},                                 /* its front board, lit */
+    {s:"box",x:0,y:0.438,z:0,w:0.68,h:0.022,d:0.46,c:BODY});                                     /* the deck */
+  [-0.24,0.24].forEach(hx=>parts.push({s:"cyl",x:hx,y:0.520,z:-0.270,r:0.019,h:0.30,c:BODY,rx:0.45})); /* the two push handles */
+  parts.push({s:"cyl",x:0,y:0.605,z:0,r:0.200,h:0.310,c:POT},                                    /* the bote, standing in the deck's well: 0.45 to 0.76 */
+    {s:"cyl",x:0,y:0.640,z:0,r:0.206,h:0.055,c:POTL},                                            /* the band round it, where the light lands */
+    {s:"torus",x:0,y:0.758,z:0,r:0.199,t:0.020,rx:Math.PI/2,c:RIM},                              /* the rim the lid sits in */
+    {s:"sph",x:0,y:0.770,z:0,r:0.196,sy:0.34,c:POTL},                                            /* the domed lid */
+    {s:"cyl",x:0,y:0.828,z:0,r:0.032,h:0.030,c:RIM});                                            /* its knob */
+  [-0.205,0.205].forEach(ex=>parts.push({s:"torus",x:ex,y:0.660,z:0,r:0.040,t:0.013,c:RIM,ry:Math.PI/2})); /* two ears, to lift it by */
+  parts.push({s:"cyl",x:0.252,y:0.680,z:0.10,r:0.012,h:0.32,c:DARK,rz:0.20},                     /* the ladle, hooked over the rim and leaning on the pot */
+    {s:"sph",x:0.285,y:0.528,z:0.10,r:0.048,sy:0.5,c:DARK});                                     /* its bowl, down where the hand does not go */
+  [[-0.04,0.90,0.075],[0.03,0.99,0.062],[0.09,1.07,0.048]].forEach(([sx2,sy2,r])=>
+    parts.push({s:"sph",x:sx2,y:sy2,z:-0.02,r,sx:1.5,sy:0.8,c:STEAM,a:0.35}));                   /* steam, always — the one thing on this cart that is never off */
+  if(typeof petalsOn==="function"&&petalsOn()&&typeof meshMarigold==="function")
+    meshMarigold(parts,0.095,0.815,-0.06,0.055,petalPal(),3,1,0);                                /* a marigold on the lid in season, the same head the beds grow */
+  return meshTurned(parts,meshFacing(x,y));};
+
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   /* H and I were cutouts in 3D (docs/BEAUTIFY.md: "the most box-shaped object in the game"). These
      two rows and the two TILEART_SIDE drawings above are the whole fix, and neither reaches the
