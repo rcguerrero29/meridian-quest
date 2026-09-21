@@ -195,9 +195,15 @@ A run that thinks one should change writes:
 docs/personas/proposed/<persona>/<RUN-ID>.md
 ```
 
-and names that path in its run file. **It does not edit the approved persona.** The owner folds a
-suggestion in or does not; either way the approved file never quietly acquires an opinion nobody
-signed off.
+and names that path in its run file. **The proposal is written first and always** — it is the record
+of what was proposed, by whom, and why, and it survives whatever happens next.
+
+**Who applies it changed on 2026-09-21, at the owner's word:** *"yeah update the older ones so you can
+make the decison to update personas."* **The calling SESSION now decides** — it applies a proposed edit
+to the approved persona, or refuses it, and says which in writing in the run file and in the flight
+notes' ledger. **No agent edits its own file**, and no agent edits another's; the proposal folder and
+the ledger are what make the decision visible. The owner overrules any of it at any time, and a refusal
+he reverses is one line in the ledger, not a re-run.
 
 `test/runs.js` checks that a `Persona learning` path which is not `none` actually exists, and that
 it sits under `docs/personas/proposed/`. It also flags any commit that changed an approved persona

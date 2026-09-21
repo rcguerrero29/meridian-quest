@@ -281,6 +281,15 @@ and check the element you measured had a non-zero box. A measurement of an unmou
 and true and about nothing (`docs/POSTMORTEM.md`, grep `the pixel instrument measured a canvas in an
 empty room`; `docs/QA-PASS.md` step 0 and E10).
 
+## Persona edits: proposed by the agent, decided by the session
+
+*Settled 2026-09-21, the owner: "yeah update the older ones so you can make the decison to update personas."*
+An agent proposes an edit to its own file in its post-flight; the run writes that proposal to
+`docs/personas/proposed/<persona>/<RUN-ID>.md` — always, because it is the record — and **the calling
+session then applies it to `.claude/agents/` or refuses it, in writing**, in the run file and in the
+ledger at the top of `docs/crew/FLIGHT-NOTES.md`. No agent edits any persona file, its own included.
+The owner overrules any of it at any time.
+
 ## The mural — one panel per agent, in your own hand
 
 *Owner, 2026-09-11: "i want the mural please" → then "can be more creative and if its that way one
