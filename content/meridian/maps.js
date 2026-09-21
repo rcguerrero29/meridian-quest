@@ -265,7 +265,7 @@ const DOORLOOK={E:{wood:"#4F5474",wood2:"#5F6588",frame:"#2E3147",glass:true}, /
                 "*":{wood:"#3FA3A0",wood2:"#52B8B4",frame:"#1F5A58",glass:true}, /* Velázquez: teal */
                 "$":{wood:"#6E2F4A",wood2:"#84405E",frame:"#3A1728",glass:true}, /* Nolasco: burgundy, frosted */
                "⌂":{wood:"#8A5A2B",wood2:"#A26A35",frame:"#4A2E17",glass:false}}; /* a home on Calle Dos: plain pine, no glass */
-const SOLIDX="ZSHI~9|□=6780&!▣▯⊔○▭▤▦▩▨ʘ";        /* solid glyphs this pack adds (~ water, 9 doghouse, | window, □ box, and the four parcels' tiles) */
+const SOLIDX="ZSHI~9|□=6780&!▣▯⊔○▭▤▦▩▨ʘb";  /* ASSUMED: b, the marigold bed, is not walked through (2026-09-21, docs/BEAUTIFY.md row 3) — a raised bed with a curb; nobody decided it, the drawing needed a box and a box needs a solid */        /* solid glyphs this pack adds (~ water, 9 doghouse, | window, □ box, and the four parcels' tiles) */
 const MAPCOL={"1":"#E0B45C","⌂":"#8A5A2B","ʘ":"#8A8F98","▭":"#6E6A80","▤":"#E8DFC4","▦":"#9E5442","▩":"#C9A77C","▨":"#BE9A72",  /* the legend says "doors & stairs in gold" and the plan painted them grey */
   Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D",
               "|":"#6E638A",  /* window: shades to the wall-top colour, so 3D gives it no darker cap */

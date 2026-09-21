@@ -11,8 +11,10 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          fetch-depth: 0   # test/runs.js reads who set accepted/rejected; a depth-1 clone answers HEAD for every file (finding A4)
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: 22
       - name: Install Playwright + Chromium
@@ -41,20 +43,29 @@ jobs:
       # surfaced on the public internet. Build the same box here and check it before it can merge.
       - name: R10 — what we would publish is only the public game
         run: bash scripts/build-site.sh /tmp/_site && node test/public.js /tmp/_site
+      # Finding GH-6 (2026-09-21): a `${{ }}` expression inside a run: line is expanded BEFORE the
+      # shell parses it, and a git refname may carry `;` `$` and backticks. Every workflow value
+      # goes under env: and is read as "$NAME" — the pattern PR_BODY already used. test/leaves.js
+      # now fails the build on a `${{` inside any run: block.
+      - name: The guards' own red cases, so a regex that regressed is caught before it is trusted
+        run: node test/leaves.js --selftest && node test/runs.js --selftest && node test/issue.js --selftest
       - name: The issues this PR closes are the ones it talks about (R3)
         if: github.event_name == 'pull_request'
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-          git diff "origin/${{ github.base_ref }}"...HEAD > /tmp/pr.diff || git diff "origin/${{ github.base_ref }}" HEAD > /tmp/pr.diff
+          git fetch --no-tags --depth=1 origin "$BASE_REF"
+          git diff "origin/$BASE_REF"...HEAD > /tmp/pr.diff || git diff "origin/$BASE_REF" HEAD > /tmp/pr.diff
           node test/closes.js --diff-file /tmp/pr.diff
       - name: An engine change that never reaches a returning player is not shipped
         if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          git fetch --no-tags --depth=50 origin "${{ github.base_ref }}"
-          node test/bump.js "origin/${{ github.base_ref }}"
+          git fetch --no-tags --depth=50 origin "$BASE_REF"
+          node test/bump.js "origin/$BASE_REF"
       # ...AND ON A PUSH. Yaz, 2026-09-12: the step above carried `if: pull_request`, so a push ran
       # the whole suite and skipped this check entirely — and this repository's history is mostly
       # direct commits. Register entry #11 in docs/REGRESSION.md is about the same guard reading two
@@ -65,9 +76,12 @@ jobs:
       # explicitly here.
       - name: ...and the same, on a push, because most of this repo's history never saw a PR
         if: github.event_name == 'push'
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          BEFORE: ${{ github.event.before }}
         run: |
-          git fetch --no-tags --depth=50 origin "${{ github.ref_name }}" || true
-          BASE="${{ github.event.before }}"
+          git fetch --no-tags --depth=50 origin "$REF_NAME" || true
+          BASE="$BEFORE"
           if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
             # a brand-new branch, or a shallow clone that cannot see the previous push
             if git cat-file -e "HEAD~1^{commit}" 2>/dev/null; then BASE="HEAD~1"; else echo "no base to compare against; nothing to check"; exit 0; fi

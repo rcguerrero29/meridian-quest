@@ -5,7 +5,59 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
-### ⇢ 2026-09-20, night — START HERE. **The pending list, in the order it should go.**
+### ⇢ 2026-09-21, night — the first beautify sitting is DONE; the next one is engine.
+
+Owner: *"start with the ones you mention and let me know how accurate you were."* Rows 1–3 of the
+sheet's list are drawn (`content/meridian/art.js`, BEAUTIFY, FIRST SITTING; `mq-v177`): the shelf is a
+bookcase, grass is a tuft in a crack, the bed is a raised bed and SOLID (`ASSUMED:` in `maps.js`).
+Estimate and measurement are in run `2026-09-21-claude-c4a9`. **Two corrections to the day-old list
+are struck in place in `docs/BEAUTIFY.md`:** standing a walkable thing up makes a sprite, and #39 refuses
+a new sprite; a box needs a SOLID tile. **Next in order:** (a) his answer to row 6 — one shelf glyph
+per business or one glyph dressed per world; (b) the first engine sitting, row 5, `isoBlock` painting
+`sideArt` on its faces — one function, both games, bump; (c) row 4 is Chema's to measure before any
+camera moves. Ultracode was off for all of it; crew mode is for many builders on many issues and was
+not used. **Measured at the next turn's start, as `docs/RUNS.md` §3½ now says: the sitting cost
+65,418 out, $6.90, against an estimate of 60,000 out, $9** — output within 9%, cost over by 30%;
+the rate is about $0.105 per 1,000 output tokens for a sitting of this shape (three drawings, two
+render passes, seven looks, six suites). Run `b7d3`'s number was an in-turn read and is marked a floor.
+
+### ⇢ 2026-09-21, later — the beautify contact sheet exists; the first sitting is three drawings.
+
+Owner: *"can we consider beautifying across the worlds?"* — considered the register's way: **sheet,
+list, then redraw, and nothing was redrawn.** Twelve strips in `docs/mocks/2026-09-21-contact-sheet/`
+(top · front · iso · 3d per world), the ten-row list at the end of `docs/BEAUTIFY.md`, ranked by who
+sees it times how wrong it is. **The first sitting is content only — the shelf, grass stood up, the
+flower bed as a planter — three drawings through `TILEART_SIDE` and `TILEMETA`, no engine, no bump.**
+The first engine sitting after that is the iso camera's faceless blocks (`isoBlock`, one function).
+Row 4 — a 3D interior is a strip between two bands of nothing — is Chema's to measure before anyone
+moves the camera. The register's top four rows were stale since #203 and are struck in place.
+
+### ⇢ 2026-09-21 — START HERE. **`docs/SECURITY.md` exists; the first thing on it is his.**
+
+**The security review ran** (91 agents across two workflows, one session limit, 42 findings, 22
+verified by two skeptics each, a critic with eighteen corrections — `docs/runs/2026-09-21-claude-9e2b.md`
+has the cost). **Its one sentence: `main` is unprotected, so every "the owner merges" rule in this
+repository is a sentence, not a mechanism.** The rule has been obeyed — every commit on `main` is his
+merge — and never enforced. `docs/SECURITY.md` §3 step 1 is the five-minute ruleset that enforces it,
+with the one detail that matters: **the `smoke` check must be sourced from GitHub Actions**, or a
+classic token can forge it.
+
+**Twelve guards landed** in this branch, each planted before it was believed — the list is
+`docs/SECURITY.md` §4. Two of them found things on their first honest run: the rewritten copy-line
+reader found two shipped files with no boundary row, and running `--selftest` in CI found that
+`indexed()` had broken the fixture a day earlier and nothing noticed.
+
+**The recommendation for the second AI changed:** **no write credential at first** — it works from a
+fork, its PRs run CI read-only, he merges. A fine-grained token *cannot be minted* for this repo on a
+machine account (user-owned repo; GitHub's own limitation), which is why the earlier row asking for one
+was wrong. When it has earned write: one machine account, classic token, `public_repo` only, no
+`workflow`. `docs/SECURITY.md` §3 step 5.
+
+**Not wired, on purpose:** a docs-wide citation check. 17 dead paths live in dated meeting and
+research records that honestly name things planned and never built. The order channel — the files a
+session takes orders from — is checked; history is left alone.
+
+### ⇢ 2026-09-20, night — the pending list, in the order it should go.
 
 Owner: *"give me a list of the next or pending steps, next."* Everything below is either his or
 mine, and it says which.
@@ -14,11 +66,11 @@ mine, and it says which.
 
 | | What | Why it is first |
 |---|---|---|
-| 1 | **Protect `main`** — Settings → Branches → Add rule for `main` (`docs/SECURITY.md` has the exact clicks) | `main` is **unprotected** ([FACT], read from the API 2026-09-20). Every "the owner merges" rule in this repository is a sentence, not a mechanism: any write credential can push straight to it. Nothing else on this list matters until this is done |
+| 1 | **Protect `main`** — Settings → **Rules → Rulesets** (not the older Branches page: its admin bypass skips status checks silently). `docs/SECURITY.md` §3 step 1 has the exact clicks, including the one that stops a forged `smoke` check | `main` is **unprotected** ([FACT], read from the API 2026-09-20). Every "the owner merges" rule in this repository is a sentence, not a mechanism: any write credential can push straight to it. Nothing else on this list matters until this is done |
 | 2 | **Merge #215** (the two-AI protocol) and read `docs/SECURITY.md` when it lands | |
 | 3 | **Tick or reject the six acceptance criteria** in `docs/runs/2026-09-20-claude-7c41.md` | the first run in the ledger; the one that matters is *would you let a second AI near the engine on `AGENTS.md` alone?* |
-| 4 | **Pick the second AI's short name** (`gemini`, `codex`, `grok`) | it becomes its branch namespace, its `in-flight:` label and the word inside its run IDs |
-| 5 | **Mint that agent its own fine-grained token**, scoped to this one repo (`docs/SECURITY.md` says exactly which scopes, and which must be absent) | a credential per agent is what makes *"i may change it depending on their performance"* a one-click revoke |
+| 4 | **Pick the second AI's short name** (`gemini`, `codex`, `grok`) | it becomes its branch namespace, its `taken:` label and the word inside its run IDs |
+| 5 | **Decide the second AI's credential** — the review's recommendation is **none at first**: it works from a fork, its PRs run CI with the read-only token, you merge. When it earns write, a machine account (not a token on yours — `docs/SECURITY.md` §3 step 5 says why a fine-grained one cannot even be minted for this repo) | a credential per agent is what makes *"i may change it depending on their performance"* a one-click revoke |
 | 6 | **The `PLANPICK` call** — does every place on the map become tappable in the town too? | step 4 of the map build order cannot start before it (`docs/ARCH-LOG.md` A18, last row) |
 | 7 | Say whether the second AI's first job is docs/content (recommended) or engine | lowest blast radius while you learn how it behaves |
 
