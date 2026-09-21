@@ -2,7 +2,10 @@
 
 **The approved personas live in `.claude/agents/`.** Each one says what the owner has agreed that
 character is: what they decide, what they may touch, what they never do. **An agent does not edit
-them** (`AGENTS.md` §9).
+them** (`AGENTS.md` §9) — not its own file, not another's. **The calling session does**, since 2026-09-21
+(the owner: *"yeah update the older ones so you can make the decison to update personas"*): it applies a
+proposal or refuses it, in writing, in the run file and the flight notes' ledger. The proposal below is
+written either way, because it is the record.
 
 **A suggestion goes here instead:**
 

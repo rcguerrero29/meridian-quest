@@ -5,7 +5,9 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
-### ⇢ NEXT SESSION — planned 2026-09-21, not started (he was out of tokens). Crew mode ON, by his word.
+### ⇢ 2026-09-21 — #225 merged (`8313766`). The plan below is RUNNING as crew iteration 12, by his word ("cool merge and then run a crew mode do update the remaining items").
+
+### ⇢ The plan, as written before the run (2026-09-21). Crew mode ON, by his word.
 
 Owner, verbatim: *"plan for next sesh for - a couple more to beautify and shape - crew mode please - cabinet in
 my office could be, this nolasco desk, the chair outside dona tenchas, im guessing what the oven is supposed
