@@ -532,16 +532,38 @@ TILEART_SIDE["b"]=rc=>{const{sx,sy,x,y}=rc;
    boards with what a person put on them. Colours go through tc() in the engine, so the theme and
    the time of day reach these like everything else. */
 const TILEART_MESH={};
-/* A CEMPASÚCHIL HEAD IS NOT A BALL (owner, 2026-09-21: "the marigolds can use another try"). It is a
-   pom-pom of hundreds of ruffled petals: at this scale a core, wider than tall, with lobes set round its
-   upper half — the lit side in the crown colour, the shaded side in the undercut — and the green calyx
-   cup it sits in. One helper, so the bed, the garland and the altar grow the same flower. */
-const meshMarigold=(parts,hx,hy,hz,r,P,seed)=>{const UNDER=P[1],BODY=P[3]||P[2],CROWN=P[5]||P[4];
-  parts.push({s:"sph",x:hx,y:hy-r*0.55,z:hz,r:r*0.55,sy:0.5,c:"#3E7C4F"});                     /* the calyx cup */
-  parts.push({s:"sph",x:hx,y:hy,z:hz,r,sy:0.82,c:BODY});                                       /* the core, wider than tall */
-  for(let i=0;i<9;i++){const a=i*0.7+seed*0.5,el=0.15+(i%3)*0.35,lit=Math.cos(a+Math.PI*0.75)>0.1;
-    parts.push({s:"sph",x:hx+Math.cos(a)*Math.cos(el)*r*0.78,y:hy+Math.sin(el)*r*0.62,z:hz+Math.sin(a)*Math.cos(el)*r*0.78,r:r*0.42,sy:0.75,c:lit?CROWN:UNDER});} /* the ruffle */
-  parts.push({s:"sph",x:hx-r*0.3,y:hy+r*0.6,z:hz-r*0.25,r:r*0.34,c:CROWN});};                  /* the crown, where the key lands */
+/* A CEMPASÚCHIL HEAD IS A STACK OF WHORLS, NOT A BALL (la botánica, crew run 11, 2026-09-21, from the
+   owner's three photographs). Tagetes erecta, the double kind sold for Día de Muertos: hundreds of ray
+   florets on a domed receptacle, in whorls — the outermost the largest, splayed nearly flat with a wavy
+   margin; each whorl inward shorter, steeper and more crinkled, to a crown of upright florets. ONE HUE
+   PER PLANT, deepest at the floret's base and paler at its margin, so the outer whorl reads deeper than
+   the crown. The green cup under it is the involucre: a narrow ribbed vase, not a ball. Built as three
+   whorls of flattened lobes (a squashed sphere, long along the radius, its BASE on the receptacle and its
+   tip lifted — outer 17°, middle 55°, inner 72°), a crown of three, the receptacle showing between them,
+   and a tapered cylinder for the cup. Every head grows by the same rule; what the seed changes is the
+   turn and the crimp of each floret — variation enters where it entered (how-its-made).
+   `hue` picks the plant's colour from P — -1 deep red-brown, 0 rust, 1 orange (default), 2 gold —
+   the whorls take P[hue+1], P[hue+2], P[hue+3] (the crown capped at P[4]); nothing here names an
+   orange, so a season that recolours petals recolours these. Four steps because two touching heads in
+   one family are ~5% apart under this light and merge (Pili, run 11): every value difference between
+   heads is PAINTED. `lod` 0 drops the middle whorl (a garland of small heads). `lean` is [x,z]: the
+   head sheared off its stem that much per unit of height — the outer stems of a bush splay toward
+   the light. The first seven parameters are what the bed, the tree's garland and the altar's arch
+   already pass. 26 parts. */
+const meshMarigold=(parts,hx,hy,hz,r,P,seed,hue,lod,lean)=>{
+  const k=hue===undefined?1:hue,full=lod===undefined||lod>0,lx=lean?lean[0]:0,lz=lean?lean[1]:0;
+  const C0=P[Math.max(k+1,0)]||P[2],C1=P[Math.max(k+2,0)]||P[3],C2=P[Math.min(k+3,4)]||P[4],CUP="#4E8A58"; /* the crown stops at P[4]: a gold head is gold to the centre, not cream */
+  const rnd=(i,j)=>{const v=Math.sin((seed+1)*12.9898+i*78.233+j*37.719)*43758.5453;return v-Math.floor(v);}; /* a hash, not Math.random: the same tile grows the same flower every frame */
+  const put=p=>{p.x+=(p.y-hy)*lx;p.z+=(p.y-hy)*lz;parts.push(p);};
+  put({s:"cyl",x:hx,y:hy-r*0.32,z:hz,rt:r*0.30,rb:r*0.20,h:r*0.5,c:CUP});                            /* the involucre */
+  put({s:"sph",x:hx,y:hy+r*0.22,z:hz,r:r*0.55,sy:0.9,c:C1});                                           /* the receptacle, in the plant's own hue */
+  const whorl=(n,rad,y,pr,sy,sz,tilt,c,j)=>{const off=rnd(j,0)*6.2832,hl=pr*sz;
+    for(let i=0;i<n;i++){const a=off+i*6.2832/n+(rnd(i,j)-0.5)*0.4,t=tilt+(rnd(i,j+5)-0.5)*0.3,rr=rad+Math.cos(t)*hl;
+      put({s:"sph",x:hx+Math.cos(a)*rr,y:y+Math.sin(t)*hl,z:hz+Math.sin(a)*rr,r:pr,sy,sz,rx:-t,ry:Math.PI/2-a,c});}};
+  whorl(8,r*0.30,hy,r*0.34,0.28,1.25,0.3,C0,1);                                                        /* outer: the largest florets, splayed, margins lifted */
+  if(full)whorl(7,r*0.22,hy+r*0.14,r*0.30,0.32,1.1,0.95,C1,2);                                         /* middle: shorter, steeper */
+  whorl(6,r*0.12,hy+r*0.28,r*0.26,0.4,1.0,1.25,C2,3);                                                   /* inner: near upright, crinkled */
+  whorl(3,r*0.06,hy+r*0.55,r*0.2,0.8,1.0,1.4,C2,4);};                                                   /* the crown */
 /* A STRING OF PAPEL PICADO between two points, sagging a little, with flags hung from it in the paper
    palette, alternating. Flags are boxes, thin as paper, a hair below the string. */
 const meshPapel=(parts,x0,y0,z0,x1,y1,z1,pal,n,seed)=>{
@@ -553,33 +575,50 @@ const MESH_FAM=[["#8C3B2E","#A54A3A","#6E2E24"],["#3E5C86","#4F6E9A","#2F4868"],
                 ["#C9B68C","#D9C9A3","#A99570"],["#5C4A6E","#6E5A84","#463756"],["#B8763A","#C98A4C","#8E5A2C"]];
 
 /* THE RAISED BED. A painted-concrete curb with a rounded lip (a cylinder along each top edge — the
-   mason ran a trowel round it), soil behind it, and six cempasúchil on stems mounding to the middle,
-   the lit crown a smaller sphere on the upper-left of each head. A run of beds shares one curb: the
-   walls stand only where the run ends. Colours from petalPal, so a season recolours these too. */
+   mason ran a trowel round it), soil behind it, and a bush of cempasúchil in it. A run of beds shares
+   one curb: the walls stand only where the run ends. Colours from petalPal, so a season recolours these too.
+   THE MARIGOLDS, FOURTH TRY (la botánica, crew run 11, from the owner's photographs of one head, a bunch
+   and a bush). Twelve heads from meshMarigold on a staggered grid, jittered, so they TOUCH — a bunch
+   has no gaps — the middle of the bed standing higher and the edge heads leaning out, as a bush mounds
+   and splays; every head from the same rule, and what differs is what differed in the field: the size
+   (age), the turn (the seed), and the hue (the packet's mix, photo 2: six orange, three gold, two
+   rust, one deep red-brown, laid so no two in a row share a step and turned per tile — two touching
+   heads in one family merge under this light, so the difference between heads is painted, Pili's
+   read). Under them the foliage as photo 3 has it: a near-black green mass UNDER the heads, never
+   beside — fifty small masses on a jittered grid from the soil to knee height, darkest on top where
+   they show between heads, a step greener low on the mound's outside where the sun reaches — and the
+   soil darker than any petal's underside, so what shows between heads is the dark that makes the
+   orange sing; stems only above the foliage, where they show; buds between the heads, the same plant
+   younger. The seed is x AND y: the old (x*7+y*13)%7 was constant along a row, so three beds in a row
+   were one bed three times. */
 TILEART_MESH["b"]=({x,y})=>{
-  const P=petalPal(),UNDER=P[1];
-  const h=(((x*7+y*13)%7)+7)%7;
+  const P=petalPal();
+  const h=(((x*5+y*3)%7)+7)%7;
+  const rnd=(i,j)=>{const v=Math.sin(x*12.9898+y*78.233+i*39.425+j*17.719)*43758.5453;return v-Math.floor(v);};
   const w=CW(),bed=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="b";};
   const N=!bed(x,y-1),S=!bed(x,y+1),E=!bed(x+1,y),Wt=!bed(x-1,y);
-  const CURB="#B9B0A2",LIP="#CFC7B9",SOIL="#4A3524",LEAF="#3E7C4F",STEM="#4E8A58";
+  const CURB="#B9B0A2",LIP="#CFC7B9",SOIL="#2F2216",LEAF="#27492F",LEAF2="#3E7C4F",LEAF3="#2E5A38",STEM="#5A9A62",CUP="#4E8A58";
   const parts=[];
   const wall=(px,pz,ww,dd)=>{parts.push({s:"box",x:px,y:0.11,z:pz,w:ww,h:0.22,d:dd,c:CURB});
     parts.push({s:"cyl",x:px,y:0.22,z:pz,r:0.045,h:Math.max(ww,dd),c:LIP,rz:ww>dd?Math.PI/2:0,rx:ww>dd?0:Math.PI/2});}; /* the lip */
   if(N)wall(0,-0.42,0.92,0.08);if(S)wall(0,0.42,0.92,0.08);if(Wt)wall(-0.42,0,0.08,0.92);if(E)wall(0.42,0,0.08,0.92);
   parts.push({s:"box",x:0,y:0.16,z:0,w:0.92,h:0.08,d:0.92,c:SOIL});                       /* the soil, a hand below the lip */
-  /* THE MARIGOLDS, THIRD TRY (owner: "the marigolds can use another try"). Ruffled heads from meshMarigold
-     — a core wider than tall with lobes round its upper half — on stems that clear the lip, eight of
-     them mounding to the middle, buds between, and leaves in PAIRS along the stems, which is how a
-     marigold carries them. */
-  const heads=[[-0.26,-0.22],[0.08,-0.28],[0.3,-0.02],[-0.04,0.06],[-0.31,0.2],[0.22,0.26],[0.02,0.3],[-0.14,-0.06]];
-  heads.forEach(([hx,hz],i)=>{const k=(h+i)%3,r=0.13+k*0.018;
-    const hy=0.46+((h*3+i)%3)*0.04+(Math.abs(hx)+Math.abs(hz)<0.3?0.08:0);                /* the middle mounds higher */
-    parts.push({s:"cyl",x:hx,y:(0.2+hy)/2,z:hz,r:0.014,h:hy-0.2,c:STEM});                 /* the stem, into the soil */
-    [[0.36,0.7],[0.62,-0.6]].forEach(([t,ang],j)=>{const ly=0.2+(hy-0.2)*t;               /* a pair of leaves per stem */
-      parts.push({s:"sph",x:hx+Math.cos(ang+i)*0.06,y:ly,z:hz+Math.sin(ang+i)*0.06,r:0.06,sx:1.6,sy:0.35,c:LEAF,ry:ang+i});});
-    meshMarigold(parts,hx,hy,hz,r,P,h+i);});
-  [[-0.2,0.2],[0.2,-0.2],[0.28,0.28],[-0.3,-0.3]].forEach(([bx,bz],i)=>                    /* buds: the same plant, younger */
-    parts.push({s:"sph",x:bx,y:0.32+(i%2)*0.03,z:bz,r:0.05,sy:0.85,c:UNDER}));
+  const clamp=v=>Math.max(-0.37,Math.min(0.37,v));                                                  /* the foliage stays inside the curb */
+  for(let i=0;i<40;i++){const gx=clamp(-0.36+(i%5)*0.18+(rnd(i,11)-0.5)*0.14),gz=clamp(-0.36+((i/5|0)%5)*0.18+(rnd(i,12)-0.5)*0.14+(i>=25?0.09:0)),gy=0.2+rnd(i,13)*0.14,lr=0.055+rnd(i,14)*0.04; /* the foliage mound, on a jittered grid so it has no holes */
+    parts.push({s:"sph",x:gx,y:gy,z:gz,r:lr,sx:1.4,sy:0.45,sz:0.7,ry:rnd(i,15)*3.14,c:gy>0.3?LEAF3:(Math.abs(gx)>0.28||Math.abs(gz)>0.28?LEAF2:LEAF)});} /* dark on top; the sunlit green only low on the outside */
+  for(let i=0;i<10;i++){const gx=-0.32+(i%5)*0.16+(rnd(i,16)-0.5)*0.08,gz=(i<5?-0.16:0.16)+(rnd(i,17)-0.5)*0.06;  /* and a top layer between the rows of heads, where the soil showed: the darkest green, under, never beside */
+    parts.push({s:"sph",x:gx,y:0.35,z:gz,r:0.08,sx:1.4,sy:0.4,sz:0.8,ry:rnd(i,18)*3.14,c:i%2?LEAF3:LEAF});}
+  const heads=[[-0.34,-0.3],[-0.11,-0.31],[0.11,-0.3],[0.34,-0.31],[-0.3,0],[-0.08,0.01],[0.14,-0.01],[0.36,0],[-0.34,0.3],[-0.11,0.31],[0.11,0.3],[0.34,0.31]];
+  const HUES=[1,2,1,0, 2,1,-1,1, 1,0,1,2];                                                          /* the packet's mix, row by row: no two beside each other in one family */
+  heads.forEach(([hx,hz],i)=>{const j=(h+i)%12,hue=HUES[j],r=0.12+rnd(i,21)*0.035+(hue===0?0.015:0),
+    px=hx+(rnd(i,23)-0.5)*0.07,pz=hz+(rnd(i,24)-0.5)*0.07,d=Math.hypot(px,pz),
+    hy=0.40+(1-Math.min(1,d/0.5))*0.12+rnd(i,22)*0.05;                                                /* the middle mounds higher */
+    parts.push({s:"cyl",x:px,y:(0.3+hy)/2,z:pz,r:0.012,h:hy-0.3,c:STEM});                          /* the stem, from inside the foliage */
+    meshMarigold(parts,px,hy,pz,r,P,h*3+i,hue,1,[px/0.5*0.22,pz/0.5*0.22]);});                        /* the edge heads lean out toward the light */
+  [[-0.22,-0.15],[0.23,0.15],[-0.2,0.16],[0.22,-0.16]].forEach(([bx,bz],i)=>{const by=0.42+rnd(i,31)*0.05; /* buds: a green egg on a stem, the colour just showing */
+    parts.push({s:"cyl",x:bx,y:(0.3+by)/2,z:bz,r:0.01,h:by-0.3,c:STEM});
+    parts.push({s:"cyl",x:bx,y:by,z:bz,rt:0.03,rb:0.02,h:0.07,c:CUP});
+    parts.push({s:"sph",x:bx,y:by+0.045,z:bz,r:0.028,sy:1.2,c:P[2+i%2]});});
   return parts;};
 
 /* THE POTTED PLANT. Twenty of them, every one the same picture until tonight (docs/BEAUTIFY.md,
