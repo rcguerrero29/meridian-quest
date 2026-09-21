@@ -67,3 +67,8 @@ Six frames, default camera, `mq-v179`: the grass standing, the doghouse, a tree,
 Día de Muertos switched on — the altar in the park's far corner and a tree in its dress. `spots.json`
 carries a `season` field the shipped harness does not read; the scratch copy that took these did.
 
+## After the fourth sitting — `after-fourth-sitting/`
+
+Six frames, default camera, `mq-v180`: the beds as mounds of ruffled marigolds, the altar in detail with
+the season on, a dressed tree, the street's strings on poles, La Cocina's tables, the cone on its base.
+

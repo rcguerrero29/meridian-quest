@@ -723,3 +723,14 @@ The known-flat list is `3 4 5 7 A W X Y` now — the agility gear (leggy, billbo
 car lift, the drafting table, the fridge, the site sign, the trolley stop. The "Correctly flat" list
 above loses its tree and its cones: they are shapes now, by the owner's word, and they read.
 
+### The fourth sitting, done — 2026-09-21: the second try on the marigolds and the dress, tables, poles, the altar
+
+Owner: *"the marigolds can use another try and same with the decor. please update, tables too, poles
+with the paper picado and please try to add more detail to the altar. the cone looks better but it
+overwrites/paints tiles."* `docs/3D-LOG.md`, the third entry of this date. The marigold is a ruffled
+head now, one helper for the bed, the garland and the altar; the tree's dress is strings of flags; the
+tables are round tables with chairs; a string gets a pole where nothing tall holds it; the altar has
+its three tiers and what stands on them; the cone stands on black rubber. `mq-v180`. The register's
+table row for **the tables** ("a pizza in the top camera") is unchanged in the top camera — that row
+is about the 2D drawing and stands.
+

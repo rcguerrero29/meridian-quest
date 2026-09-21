@@ -5,6 +5,16 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
+### ⇢ 2026-09-21, latest — the second try: ruffled marigolds, a dress of flags, tables, poles, the altar.
+
+Owner: *"the marigolds can use another try and same with the decor … tables too, poles with the paper
+picado … more detail to the altar … the cone … paints tiles."* Done, `mq-v180` (`docs/3D-LOG.md`, the
+third entry of the date). Two helpers in the pack now — `meshMarigold`, `meshPapel` — and one engine
+rule: a string hangs from something at its own height, or from a pole. **Triangles went up by 3–4×
+where the marigolds are (park 33,502; altar frame 81,464); draw calls did not move; no phone has been
+measured** — if one stutters, a cheaper head for distant beds is the fix. **Still open:** the hero
+behind a mesh crown; the iso camera; row 6, whose shelf; `docs/SECURITY.md` §3 step 1.
+
 ### ⇢ 2026-09-21, latest — five more shapes; the flat list is eight leggy or boxy things.
 
 Owner: *"lets try the grass and the cones, dog house, and altar … the tree with its decor?"* Done,

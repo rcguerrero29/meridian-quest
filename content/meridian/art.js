@@ -532,6 +532,23 @@ TILEART_SIDE["b"]=rc=>{const{sx,sy,x,y}=rc;
    boards with what a person put on them. Colours go through tc() in the engine, so the theme and
    the time of day reach these like everything else. */
 const TILEART_MESH={};
+/* A CEMPASÚCHIL HEAD IS NOT A BALL (owner, 2026-09-21: "the marigolds can use another try"). It is a
+   pom-pom of hundreds of ruffled petals: at this scale a core, wider than tall, with lobes set round its
+   upper half — the lit side in the crown colour, the shaded side in the undercut — and the green calyx
+   cup it sits in. One helper, so the bed, the garland and the altar grow the same flower. */
+const meshMarigold=(parts,hx,hy,hz,r,P,seed)=>{const UNDER=P[1],BODY=P[3]||P[2],CROWN=P[5]||P[4];
+  parts.push({s:"sph",x:hx,y:hy-r*0.55,z:hz,r:r*0.55,sy:0.5,c:"#3E7C4F"});                     /* the calyx cup */
+  parts.push({s:"sph",x:hx,y:hy,z:hz,r,sy:0.82,c:BODY});                                       /* the core, wider than tall */
+  for(let i=0;i<9;i++){const a=i*0.7+seed*0.5,el=0.15+(i%3)*0.35,lit=Math.cos(a+Math.PI*0.75)>0.1;
+    parts.push({s:"sph",x:hx+Math.cos(a)*Math.cos(el)*r*0.78,y:hy+Math.sin(el)*r*0.62,z:hz+Math.sin(a)*Math.cos(el)*r*0.78,r:r*0.42,sy:0.75,c:lit?CROWN:UNDER});} /* the ruffle */
+  parts.push({s:"sph",x:hx-r*0.3,y:hy+r*0.6,z:hz-r*0.25,r:r*0.34,c:CROWN});};                  /* the crown, where the key lands */
+/* A STRING OF PAPEL PICADO between two points, sagging a little, with flags hung from it in the paper
+   palette, alternating. Flags are boxes, thin as paper, a hair below the string. */
+const meshPapel=(parts,x0,y0,z0,x1,y1,z1,pal,n,seed)=>{
+  const mx=(x0+x1)/2,my=Math.min(y0,y1)-0.05,mz=(z0+z1)/2,ang=Math.atan2(z1-z0,x1-x0),len=Math.hypot(x1-x0,z1-z0);
+  parts.push({s:"cyl",x:mx,y:my,z:mz,r:0.007,h:len,c:"#3A2E26",rz:Math.PI/2,ry:-ang});         /* the string */
+  for(let i=0;i<n;i++){const t=(i+0.5)/n,fx=x0+(x1-x0)*t,fz=z0+(z1-z0)*t,fy=my-0.005-2*t*(1-t)*0.05;
+    parts.push({s:"box",x:fx,y:fy-0.07,z:fz,w:0.11,h:0.13,d:0.006,c:pal[(i+seed)%pal.length],ry:-ang});}};
 const MESH_FAM=[["#8C3B2E","#A54A3A","#6E2E24"],["#3E5C86","#4F6E9A","#2F4868"],["#7C8F5A","#93A56A","#5E6E44"],
                 ["#C9B68C","#D9C9A3","#A99570"],["#5C4A6E","#6E5A84","#463756"],["#B8763A","#C98A4C","#8E5A2C"]];
 
@@ -540,7 +557,7 @@ const MESH_FAM=[["#8C3B2E","#A54A3A","#6E2E24"],["#3E5C86","#4F6E9A","#2F4868"],
    the lit crown a smaller sphere on the upper-left of each head. A run of beds shares one curb: the
    walls stand only where the run ends. Colours from petalPal, so a season recolours these too. */
 TILEART_MESH["b"]=({x,y})=>{
-  const P=petalPal(),UNDER=P[1],BODY=P[3]||P[2],CROWN=P[5]||P[4];
+  const P=petalPal(),UNDER=P[1];
   const h=(((x*7+y*13)%7)+7)%7;
   const w=CW(),bed=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="b";};
   const N=!bed(x,y-1),S=!bed(x,y+1),E=!bed(x+1,y),Wt=!bed(x-1,y);
@@ -550,20 +567,19 @@ TILEART_MESH["b"]=({x,y})=>{
     parts.push({s:"cyl",x:px,y:0.22,z:pz,r:0.045,h:Math.max(ww,dd),c:LIP,rz:ww>dd?Math.PI/2:0,rx:ww>dd?0:Math.PI/2});}; /* the lip */
   if(N)wall(0,-0.42,0.92,0.08);if(S)wall(0,0.42,0.92,0.08);if(Wt)wall(-0.42,0,0.08,0.92);if(E)wall(0.42,0,0.08,0.92);
   parts.push({s:"box",x:0,y:0.16,z:0,w:0.92,h:0.08,d:0.92,c:SOIL});                       /* the soil, a hand below the lip */
-  /* THE MARIGOLDS, BACK (owner, the same night: "we are now missing the marigold in the bushes"). The
-     first cut had six heads at r 0.075–0.10, which is a scatter of dots from the default camera. A
-     cempasúchil bed is a MOUND of blooms wider than the curb: eight heads at r 0.11–0.15, higher over
-     the lip, the middle ones highest, and buds between. */
+  /* THE MARIGOLDS, THIRD TRY (owner: "the marigolds can use another try"). Ruffled heads from meshMarigold
+     — a core wider than tall with lobes round its upper half — on stems that clear the lip, eight of
+     them mounding to the middle, buds between, and leaves in PAIRS along the stems, which is how a
+     marigold carries them. */
   const heads=[[-0.26,-0.22],[0.08,-0.28],[0.3,-0.02],[-0.04,0.06],[-0.31,0.2],[0.22,0.26],[0.02,0.3],[-0.14,-0.06]];
-  heads.forEach(([hx,hz],i)=>{const k=(h+i)%3,r=0.11+k*0.02;
-    const hy=0.4+((h*3+i)%3)*0.04+(Math.abs(hx)+Math.abs(hz)<0.3?0.07:0);                /* the middle mounds higher */
+  heads.forEach(([hx,hz],i)=>{const k=(h+i)%3,r=0.13+k*0.018;
+    const hy=0.46+((h*3+i)%3)*0.04+(Math.abs(hx)+Math.abs(hz)<0.3?0.08:0);                /* the middle mounds higher */
     parts.push({s:"cyl",x:hx,y:(0.2+hy)/2,z:hz,r:0.014,h:hy-0.2,c:STEM});                 /* the stem, into the soil */
-    parts.push({s:"sph",x:hx,y:hy,z:hz,r,c:i%4===3?UNDER:BODY});                          /* the head: a pom-pom */
-    parts.push({s:"sph",x:hx-r*0.35,y:hy+r*0.45,z:hz-r*0.3,r:r*0.5,c:CROWN});});           /* the crown, where the key lands */
+    [[0.36,0.7],[0.62,-0.6]].forEach(([t,ang],j)=>{const ly=0.2+(hy-0.2)*t;               /* a pair of leaves per stem */
+      parts.push({s:"sph",x:hx+Math.cos(ang+i)*0.06,y:ly,z:hz+Math.sin(ang+i)*0.06,r:0.06,sx:1.6,sy:0.35,c:LEAF,ry:ang+i});});
+    meshMarigold(parts,hx,hy,hz,r,P,h+i);});
   [[-0.2,0.2],[0.2,-0.2],[0.28,0.28],[-0.3,-0.3]].forEach(([bx,bz],i)=>                    /* buds: the same plant, younger */
-    parts.push({s:"sph",x:bx,y:0.3+(i%2)*0.03,z:bz,r:0.05,c:UNDER}));
-  [[-0.15,-0.05],[0.22,-0.1],[0.0,0.28],[-0.3,0.0],[0.3,0.12]].forEach(([lx,lz],i)=>
-    parts.push({s:"sph",x:lx,y:0.26,z:lz,r:0.09,sx:1.4,sy:0.4,c:LEAF,ry:(h+i)*0.8}));      /* leaves between, flattened */
+    parts.push({s:"sph",x:bx,y:0.32+(i%2)*0.03,z:bz,r:0.05,sy:0.85,c:UNDER}));
   return parts;};
 
 /* THE POTTED PLANT. Twenty of them, every one the same picture until tonight (docs/BEAUTIFY.md,
@@ -623,7 +639,8 @@ TILEART_MESH["g"]=({x,y})=>{const h=(((x*7+y*13)%8)+8)%8,n=8+(h%3);
    a slightly wider slice of cone, white, where the band is wrapped. A cone is the same from every
    side, which is why it was the one flat thing that never looked flat; it is a cone now anyway. */
 TILEART_MESH["C"]=()=>[
-  {s:"box",x:0,y:0.02,z:0,w:0.34,h:0.04,d:0.34,c:"#C2541F"},                                /* the base, darker than the cone */
+  {s:"box",x:0,y:0.015,z:0,w:0.3,h:0.03,d:0.3,c:"#2A2D33"},                                 /* the base: black rubber, a thing on the tile, not paint on it (owner: "it overwrites/paints tiles") */
+  {s:"box",x:0,y:0.04,z:0,w:0.2,h:0.02,d:0.2,c:"#3A3F46"},                                  /* the step the cone is moulded onto */
   {s:"cone",x:0,y:0.04+0.24,z:0,r:0.15,h:0.48,c:"#E0662B"},                                 /* the cone */
   {s:"cyl",x:0,y:0.24,z:0,rt:0.089,rb:0.108,h:0.06,c:"#F4F1EA"}];                           /* the band, wrapped where the cone is that wide */
 
@@ -656,12 +673,18 @@ TILEART_MESH["J"]=({x,y})=>{const h=(((x*7+y*13)%6)+6)%6,a0=h*1.05;
   for(let i=0;i<10;i++){const t=i*0.63+h,ph=0.5+(i%3)*0.5;                                 /* blossoms sit on the outside of the crown */
     parts.push({s:"sph",x:Math.cos(t)*Math.sin(ph)*0.44,y:1.25+Math.cos(ph)*0.36,z:Math.sin(t)*Math.sin(ph)*0.44,r:0.055,c:BLOOM});}
   const pal=art("papel",null);
-  if(pal){const P=petalPal();
-    for(let i=0;i<9;i++){const t=(i+0.5)/9,gx=-0.36+0.72*t,gy=1.02-2*t*(1-t)*0.16;          /* the garland sags across the front */
-      parts.push({s:"sph",x:gx,y:gy,z:0.42,r:0.045,c:P[3+(i%3)]});}
-    [-0.25,0,0.25].forEach((dx,i)=>{parts.push({s:"cyl",x:dx,y:0.9,z:0.36,r:0.006,h:0.14,c:"#3A2E26"});   /* the thread */
-      parts.push({s:"box",x:dx,y:0.76,z:0.36,w:0.13,h:0.16,d:0.01,c:pal[(i+2)%pal.length]});});         /* the streamer, hanging below */
-    parts.push({s:"cyl",x:0.14,y:0.93,z:0.4,r:0.006,h:0.1,c:"#3A2E26"});parts.push({s:"sph",x:0.14,y:0.85,z:0.4,r:0.055,c:"#F6F2E8"}); /* one lantern */}
+  if(pal){const P=petalPal();                                                               /* THE DRESS, SECOND TRY (owner: "same with the decor") */
+    meshPapel(parts,-0.5,1.02,0.46,0.5,1.02,0.46,pal,6,h);                                   /* a string of flags across the front of the crown */
+    meshPapel(parts,0.46,1.0,-0.5,0.46,1.0,0.5,pal,6,h+3);                                   /* and one down the side, so it reads from the turn */
+    for(let i=0;i<7;i++){const t=(i+0.5)/7,gx=-0.42+0.84*t,gy=0.84-2*t*(1-t)*0.14;            /* a chain of marigolds slung under the flags */
+      meshMarigold(parts,gx,gy,0.44,0.055,P,h+i);}
+    [-0.28,0,0.28].forEach((dx,i)=>{parts.push({s:"cyl",x:dx,y:0.82,z:0.3,r:0.006,h:0.2,c:"#3A2E26"}); /* the thread */
+      parts.push({s:"box",x:dx,y:0.58,z:0.3,w:0.16,h:0.3,d:0.008,c:pal[(i+2)%pal.length]});          /* the streamer, hanging well below the crown */
+      parts.push({s:"box",x:dx,y:0.42,z:0.3,w:0.16,h:0.05,d:0.008,c:pal[(i+5)%pal.length]});});      /* its scalloped hem, a second colour */
+    parts.push({s:"cyl",x:0.2,y:0.95,z:0.44,r:0.006,h:0.14,c:"#3A2E26"});                             /* one lantern: a calaverita on a thread */
+    parts.push({s:"sph",x:0.2,y:0.84,z:0.44,r:0.075,c:"#F6F2E8"});
+    parts.push({s:"sph",x:0.17,y:0.855,z:0.51,r:0.016,c:"#3A2E26"},{s:"sph",x:0.23,y:0.855,z:0.51,r:0.016,c:"#3A2E26"}); /* the eyes */
+    parts.push({s:"sph",x:0.2,y:0.91,z:0.46,r:0.022,c:"#E8478F"});}                                    /* the flower on its brow */
   return parts;};
 
 /* LA OFRENDA, AS A THING ON A TABLE. A season prop, not a tile: the key is "prop:ofrenda" and the
@@ -670,17 +693,49 @@ TILEART_MESH["J"]=({x,y})=>{const h=(((x*7+y*13)%6)+6)%6,a0=h*1.05;
    empty frame at the top, pan de muerto, a calaverita, two cups of water, and cut paper along the
    front. Nothing without a season. */
 TILEART_MESH["prop:ofrenda"]=()=>{const P=petalPal(),pal=art("papel",["#E8478F","#2FA5A0","#F2B705"]);
-  const parts=[{s:"box",x:0,y:0.16,z:0,w:0.9,h:0.32,d:0.5,c:"#5A2E7A"},{s:"box",x:0,y:0.325,z:0,w:0.9,h:0.01,d:0.5,c:"#7B4BA8"}, /* the lower cloth */
-    {s:"box",x:0,y:0.43,z:-0.06,w:0.6,h:0.2,d:0.34,c:"#E2620F"},{s:"box",x:0,y:0.535,z:-0.06,w:0.6,h:0.01,d:0.34,c:"#F2870F"},   /* the upper tier */
-    {s:"torus",x:0,y:0.6,z:-0.2,r:0.42,t:0.03,arc:Math.PI,c:"#7A2E12"}];                                                        /* the arch */
-  for(let i=0;i<11;i++){const t=Math.PI*(0.04+0.92*i/10);parts.push({s:"sph",x:Math.cos(t)*0.42,y:0.6+Math.sin(t)*0.42,z:-0.2,r:0.06,c:P[2+(i%4)]});}
-  [[-0.32,0.33],[0,0.54],[0.32,0.33]].forEach(([cx,cy])=>{parts.push({s:"cyl",x:cx,y:cy+0.08,z:0.12,r:0.025,h:0.16,c:"#F6F2E8"});
-    parts.push({s:"cone",x:cx,y:cy+0.19,z:0.12,r:0.02,h:0.06,c:"#FFC300"});});                                                 /* candles and flames */
-  parts.push({s:"box",x:0,y:0.75,z:-0.2,w:0.24,h:0.2,d:0.03,c:"#3A2E26"},{s:"box",x:0,y:0.75,z:-0.18,w:0.18,h:0.14,d:0.01,c:"#F6F2E8"}); /* the empty frame */
-  parts.push({s:"sph",x:-0.18,y:0.6,z:-0.02,r:0.07,c:"#B8722E"},{s:"box",x:-0.18,y:0.66,z:-0.02,w:0.02,h:0.06,d:0.13,c:"#E8B86A"},{s:"box",x:-0.18,y:0.66,z:-0.02,w:0.13,h:0.06,d:0.02,c:"#E8B86A"}); /* pan de muerto */
-  parts.push({s:"sph",x:0.17,y:0.6,z:0,r:0.06,c:"#F6F2E8"},{s:"sph",x:0.17,y:0.63,z:0.055,r:0.012,c:"#E8478F"},{s:"sph",x:0.15,y:0.62,z:0.05,r:0.012,c:"#3A2E26"},{s:"sph",x:0.19,y:0.62,z:0.05,r:0.012,c:"#3A2E26"}); /* the calaverita */
-  [[-0.4,0.35],[0.4,0.35]].forEach(([cx,cy])=>parts.push({s:"cyl",x:cx,y:cy,z:0.16,r:0.03,h:0.05,c:"#F6F2E8"}));                /* two cups of water */
-  for(let i=0;i<7;i++)parts.push({s:"box",x:-0.36+i*0.12,y:0.27,z:0.26,w:0.07,h:0.07,d:0.01,c:pal[i%pal.length]});                /* cut paper along the front */
+  /* SECOND TRY (owner: "add more detail to the altar"). Three tiers, as an ofrenda is built — earth, the
+     middle, heaven — a cloth over each, an arch of ruffled marigolds, seven candles in glass, sugar
+     skulls, two pan de muerto, oranges, a glass of water and a dish of salt, copal in its burner, the
+     empty frame at the top, cut paper across the front of every tier and across the arch, and a path
+     of loose petals on the ground in front, which is how the way is shown. */
+  const parts=[{s:"box",x:0,y:0.14,z:0.02,w:0.96,h:0.28,d:0.56,c:"#5A2E7A"},{s:"box",x:0,y:0.285,z:0.02,w:0.96,h:0.01,d:0.56,c:"#7B4BA8"},   /* tier one: the cloth */
+    {s:"box",x:0,y:0.39,z:-0.08,w:0.7,h:0.2,d:0.36,c:"#E2620F"},{s:"box",x:0,y:0.495,z:-0.08,w:0.7,h:0.01,d:0.36,c:"#F2870F"},              /* tier two */
+    {s:"box",x:0,y:0.6,z:-0.17,w:0.44,h:0.2,d:0.2,c:"#2FA5A0"},{s:"box",x:0,y:0.705,z:-0.17,w:0.44,h:0.01,d:0.2,c:"#7BD3F7"},                /* tier three: heaven */
+    {s:"torus",x:0,y:0.62,z:-0.24,r:0.46,t:0.028,arc:Math.PI,c:"#7A2E12"},                                                                /* the arch */
+    {s:"cyl",x:-0.46,y:0.31,z:-0.24,r:0.028,h:0.62,c:"#7A2E12"},{s:"cyl",x:0.46,y:0.31,z:-0.24,r:0.028,h:0.62,c:"#7A2E12"}];               /* its legs, to the ground */
+  for(let i=0;i<9;i++){const t=Math.PI*(0.06+0.88*i/8);meshMarigold(parts,Math.cos(t)*0.46,0.62+Math.sin(t)*0.46,-0.24,0.062,P,i);}       /* the arch's marigolds */
+  meshPapel(parts,-0.42,0.62,-0.22,0.42,0.62,-0.22,pal,7,2);                                                                              /* cut paper across the arch */
+  [[-0.4,0.29,0.18],[-0.25,0.29,0.22],[0.25,0.29,0.22],[0.4,0.29,0.18],[-0.2,0.5,0],[0.2,0.5,0],[0,0.71,-0.12]].forEach(([cx,cy,cz],i)=>{ /* seven veladoras */
+    parts.push({s:"cyl",x:cx,y:cy+0.055,z:cz,r:0.03,h:0.11,c:i%2?"#F6F2E8":"#FBB024"});parts.push({s:"cyl",x:cx,y:cy+0.115,z:cz,r:0.032,h:0.01,c:"#FFF3C0"});
+    parts.push({s:"cone",x:cx,y:cy+0.15,z:cz,r:0.014,h:0.05,c:"#FFC300"});});
+  parts.push({s:"box",x:0,y:0.86,z:-0.2,w:0.22,h:0.2,d:0.03,c:"#3A2E26"},{s:"box",x:0,y:0.86,z:-0.18,w:0.16,h:0.14,d:0.01,c:"#F6F2E8"});   /* the empty frame, nobody named */
+  [[-0.14,0.29,0.14],[0.14,0.29,0.14]].forEach(([px,py,pz])=>{parts.push({s:"sph",x:px,y:py+0.06,z:pz,r:0.065,sy:0.8,c:"#B8722E"});       /* two pan de muerto */
+    parts.push({s:"box",x:px,y:py+0.115,z:pz,w:0.02,h:0.02,d:0.12,c:"#E8B86A"},{s:"box",x:px,y:py+0.115,z:pz,w:0.12,h:0.02,d:0.02,c:"#E8B86A"},{s:"sph",x:px,y:py+0.125,z:pz,r:0.02,c:"#E8B86A"});});
+  [[-0.3,0.5,-0.04],[0.3,0.5,-0.04],[0.1,0.71,-0.2]].forEach(([px,py,pz],i)=>{parts.push({s:"sph",x:px,y:py+0.055,z:pz,r:0.055,c:"#F6F2E8"}); /* three calaveritas */
+    parts.push({s:"sph",x:px-0.02,y:py+0.065,z:pz+0.05,r:0.011,c:"#3A2E26"},{s:"sph",x:px+0.02,y:py+0.065,z:pz+0.05,r:0.011,c:"#3A2E26"},{s:"sph",x:px,y:py+0.105,z:pz+0.02,r:0.016,c:i?"#2FA5A0":"#E8478F"});});
+  [[-0.05,0.5,0.06],[0.03,0.5,0.1]].forEach(([px,py,pz])=>parts.push({s:"sph",x:px,y:py+0.045,z:pz,r:0.045,c:"#F2870F"}));                 /* oranges */
+  parts.push({s:"cyl",x:-0.32,y:0.325,z:0.08,r:0.03,h:0.07,c:"#DDEBF2"},{s:"cyl",x:-0.32,y:0.35,z:0.08,r:0.028,h:0.01,c:"#9CC7E0"});      /* a glass of water */
+  parts.push({s:"cyl",x:0.34,y:0.3,z:0.06,r:0.045,h:0.02,c:"#8A6F4D"},{s:"cyl",x:0.34,y:0.315,z:0.06,r:0.03,h:0.012,c:"#F6F2E8"});        /* salt in a dish */
+  parts.push({s:"cyl",x:0,y:0.31,z:0.2,rt:0.04,rb:0.03,h:0.05,c:"#4A3524"},{s:"sph",x:0,y:0.36,z:0.2,r:0.018,c:"#E2620F"});               /* copal in its burner, lit */
+  for(let i=0;i<3;i++)parts.push({s:"sph",x:0.01*i,y:0.42+i*0.06,z:0.2,r:0.02+i*0.01,c:"#C9C1B3"});                                        /* its smoke */
+  meshPapel(parts,-0.46,0.28,0.31,0.46,0.28,0.31,pal,7,0);meshPapel(parts,-0.34,0.49,0.11,0.34,0.49,0.11,pal,5,3);                        /* cut paper across each tier's front */
+  for(let i=0;i<14;i++){const t=i/14;parts.push({s:"sph",x:-0.3+Math.sin(i*2.1)*0.14,y:0.012,z:0.32+t*0.16,r:0.02,sy:0.4,c:P[2+(i%4)]});}   /* the petal path, on the ground in front */
+  return parts;};
+
+/* THE TABLE (owner: "tables too"). What the 2D drawing says it is: a round table with a gingham cloth,
+   two plates, a chair either side. Built as it is made: a pedestal on a foot, the top, the cloth as a
+   check of red squares laid on cream inside the circle, two plates, and two chairs — a seat on four
+   legs with a back — facing each other across it. */
+TILEART_MESH["T"]=({x,y})=>{const sd=(((x*7+y*13)%4)+4)%4,WOOD="#5E3B20",CLOTH="#F2E8D8",CHECK="#C0392B",PLATE="#FFFFFF",RIM="#C9CDD2";
+  const parts=[{s:"cyl",x:0,y:0.015,z:0,r:0.16,h:0.03,c:WOOD},{s:"cyl",x:0,y:0.26,z:0,r:0.04,h:0.46,c:WOOD},                              /* the foot and the pedestal */
+    {s:"cyl",x:0,y:0.505,z:0,r:0.34,h:0.03,c:CLOTH}];                                                                                    /* the top, under the cloth */
+  for(let i=-3;i<3;i++)for(let j=-3;j<3;j++){if((i+j+8)%2)continue;const cx=(i+0.5)*0.1,cz=(j+0.5)*0.1;if(Math.hypot(cx,cz)>0.29)continue;
+    parts.push({s:"box",x:cx,y:0.522,z:cz,w:0.1,h:0.004,d:0.1,c:CHECK});}                                                                 /* the gingham, a check clipped to the circle */
+  [[-0.14,0],[0.14,0]].forEach(([px,pz])=>{parts.push({s:"cyl",x:px,y:0.53,z:pz,r:0.09,h:0.012,c:PLATE},{s:"cyl",x:px,y:0.537,z:pz,r:0.055,h:0.004,c:RIM});}); /* two plates */
+  [[-0.43,0],[0.43,Math.PI]].forEach(([px,ry])=>{const cr=Math.cos(ry),sr=Math.sin(ry),at=(lx,lz)=>({x:px+lx*cr+lz*sr,z:-lx*sr+lz*cr});   /* two chairs, facing the table */
+    let q=at(0,0);parts.push({s:"box",x:q.x,y:0.28,z:q.z,w:0.22,h:0.03,d:0.22,c:WOOD,ry});
+    q=at(-0.1,0);parts.push({s:"box",x:q.x,y:0.42,z:q.z,w:0.03,h:0.26,d:0.22,c:WOOD,ry});                                                /* the back, on the far side */
+    [[-0.09,-0.09],[0.09,-0.09],[-0.09,0.09],[0.09,0.09]].forEach(([lx,lz])=>{const l=at(lx,lz);parts.push({s:"cyl",x:l.x,y:0.13,z:l.z,r:0.014,h:0.26,c:WOOD});});});
   return parts;};
 
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},

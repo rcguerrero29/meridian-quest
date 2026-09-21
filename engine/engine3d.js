@@ -708,8 +708,15 @@ function t3Build(key){
       const strg=wallMat["^string"]||(wallMat["^string"]=new THREE.MeshBasicMaterial({color:new THREE.Color("#3A2E26")}));
       fiestaSwags(world).forEach(sw=>{const y=sw.from[1],x0=Math.min(sw.from[0],sw.to[0]),x1=Math.max(sw.from[0],sw.to[0]),L=x1-x0+1;
         const st=new THREE.Mesh(new THREE.BoxGeometry(L-0.1,0.02,0.02),strg);st.position.set(x0+L/2,PH,y+0.5);st.userData={swag:true,string:true,y};grp.add(st);
-        [x0,x1].forEach(ex=>{const g=w.grid[y]&&w.grid[y][ex];if(g!==undefined&&SOLID.has(g))return; /* tied to what stands there */
-          const pl=new THREE.Mesh(new THREE.BoxGeometry(0.05,PH,0.05),pole);pl.position.set(ex+0.5,PH/2,y+0.5);pl.userData={swag:true,pole:true};grp.add(pl);});
+        [x0,x1].forEach(ex=>{const g=w.grid[y]&&w.grid[y][ex],m=g!==undefined&&TILES[g];
+          /* tied to what stands there — IF it stands that high. A wall, a facade or a tree can hold a string
+             at head height; a knee-high fence or a crate cannot, and the first version skipped the pole for
+             any SOLID end, so the park's strings hung in the air above its fence (owner, 2026-09-21: "poles
+             with the paper picado"). Tall means kind wall/facade/tree or a declared lift of 9 or more. */
+          const tall=!!m&&(m.kind==="wall"||m.kind==="facade"||m.kind==="tree"||(m.lift|0)>=9);
+          if(g!==undefined&&SOLID.has(g)&&tall)return;
+          const pl=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.045,PH+0.12,8),pole);pl.position.set(ex+0.5,(PH+0.12)/2,y+0.5);pl.userData={swag:true,pole:true};grp.add(pl);
+          const cap=new THREE.Mesh(new THREE.SphereGeometry(0.06,8,6),pole);cap.position.set(ex+0.5,PH+0.12,y+0.5);cap.userData={swag:true,pole:true,cap:true};grp.add(cap);});
         [0,1].forEach(row=>{const fl=t3PapelStrip(pal,L,x0+y,row);fl.position.set(x0+L/2+(row?0.07:0),PH-0.11-row*0.22,y+0.5);fl.userData.swag=true;fl.userData.y=y;grp.add(fl);});
         const st2=new THREE.Mesh(new THREE.BoxGeometry(L-0.1,0.02,0.02),strg);st2.position.set(x0+L/2,PH-0.22,y+0.5);st2.userData={swag:true,string:true,y};grp.add(st2);});
       (typeof fiestaProps==="function"?fiestaProps(world):[]).forEach(p=>{
