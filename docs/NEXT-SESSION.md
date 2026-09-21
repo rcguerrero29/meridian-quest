@@ -5,7 +5,19 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
-### ⇢ 2026-09-21, latest — crew iteration 11: the marigold by a botanist, fourteen shapes by two builders, Pili directing.
+### ⇢ 2026-09-21, latest — merged: #224 (`9940005`, `mq-v182`). The method is a skill now; the chiles and bananas are next.
+
+Owner: *"please merge - hm how do we fixe the bananas and chiles? did you log how we can recreate this new
+polygonal update for all these and what we or you learned from marigolds?"* Merged; #221–#223 closed with
+their `taken:` labels off. **`.claude/skills/shapes/SKILL.md`** is the recipe (the seam, ten steps, the
+marigold's lessons, the lid, the pad, how to brief an agent) — load it before the next shape. **Next sitting,
+if he says go:** the chiles and bananas — heap them above the rim with tips over the front edge, fewer and
+fatter, a few red chiles, two big hands of five fingers curving over the rim, the value break painted into
+every cone and finger; content plus a bump, ~15,000 on the live meter, rendered at phone size twice.
+**Measured:** the session meter moved 666,017 out for the whole crew run and its PR; the four agents'
+1,210,463 did not post to it (`docs/RUNS.md` §3½).
+
+### ⇢ 2026-09-21 — crew iteration 11: the marigold by a botanist, fourteen shapes by two builders, Pili directing.
 
 Owner: *"everything looks good except the marigolds. lets do a crew mode … an expert on flora … computers,
 rails, fences, coffee machines, fridge, bridge, petals, trolley, desks, fruit stands, car lifts, tires,

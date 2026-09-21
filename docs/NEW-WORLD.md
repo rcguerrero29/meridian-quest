@@ -111,6 +111,9 @@ Fill in the views you care about; the rest come back empty and the renderer deci
 function still means `top`**, so nothing already written changes. `mesh` (2026-09-21) is a list of primitives — `{s:"box"|"sph"|"cyl"|"cone", x,y,z, w,h,d | r,rt,rb, c, rx,ry,rz, sx,sy,sz}` in tile units, y up — that the 3D camera merges into one shape; a glyph with one is never a box or a picture there. `crown` is what stands *above* the
 tile — a tree's canopy, a lamp globe, a market umbrella.
 
+**The recipe for giving a thing a shape — from the 2D drawing to a frame at phone size, and what the
+marigold taught — is `.claude/skills/shapes/SKILL.md`; load it before drawing any object as parts.**
+
 **Three keys in the same table are not glyphs but KINDS** — things the engine builds itself and asks the pack to
 dress: `prop:ofrenda` (the season's altar), `prop:bridge` (what stands on a plank deck — the engine keeps its deck
 and rails and ADDS the pack's parts, laid at the deck's height and slope; the function gets `{x,y,ew,cam,slp,h,edges,pet}`)

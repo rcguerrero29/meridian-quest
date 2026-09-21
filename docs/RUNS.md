@@ -118,6 +118,11 @@ mistaken for one somebody did:
 - **`unknown: <reason>`** — allowed, never blank. *"the session ended before the after-snapshot"*
   is a reason. An empty cell is not.
 
+**And an agent's tokens do not post to the session meter.** Measured on the crew run of 2026-09-21 (run
+`d8e4`): four agents spent 1,210,463 on their own live meters and the session meter moved 666,017 out for the
+whole run — their work is counted in their task notifications and nowhere else. A crew run's cost is the sum
+of the agents' rows PLUS the session's delta, never one of them alone.
+
 **A workflow's tokens count against the run that launched it.** The sub-agents are the run's cost;
 the row names how many ran so the number can be read.
 
