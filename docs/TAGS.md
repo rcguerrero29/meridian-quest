@@ -218,6 +218,7 @@ inert kinds went unnoticed for so long.
 > **Built.** `CAMERAS` is a pack seam: a camera a game does not declare has no button and cannot be
 > reached, even by a stale saved choice. **And the art half closed with it** — `TILEART` now takes
 > `{top, side, crown, iso}` — and `mesh` since 2026-09-21, a list of primitives for the 3D camera — so a pack can draw its own tree, its own isometric view, and its own shapes.
+> **A thing the engine builds itself is asked for by KIND through the same table** — `prop:ofrenda` (the season's altar; 2026-09-21), `prop:bridge` (what stands on a deck: the engine adds the pack's parts to its own deck and rails and never replaces them) and `prop:tram` (the trolley's body; the wheels and the driver stay the engine's) — crew iteration 11, 2026-09-21. A part with `a:` under 1 is glass, drawn as a second transparent mesh under the tile's.
 > **Still open, deliberately:** Meridian's jacaranda is still the engine's *default* crown. The seam
 > exists and nothing is forced through it yet; moving that drawing into the pack is step two, in
 > `docs/ARCH-LOG.md` A5.

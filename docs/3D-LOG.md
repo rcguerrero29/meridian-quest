@@ -411,3 +411,71 @@ against it is measured against the wrong thing. — *Chema, 2026-09-09*
   helper is nine lobes per head and the park has 64 heads, which is where triangles went — a cheaper
   head for distant beds is the next optimisation if a phone ever stutters, and none has been measured.
 
+
+### 2026-09-21 · crew iteration 11: the marigold by a botanist, fourteen shapes by two builders, Pili's direction — and the lid
+
+- **The ask:** *"everything looks good except the marigolds. lets do a crew mode to try to fix as many
+  things but lets have an expert on flora help the design on the marigolds so they are realistic …
+  computers, rails, fences, coffee machines, fridge, bridge, petals, trolley, desks, fruit stands, car
+  lifts, tires, car,and tool boxes. make sure even mural gets done please."* `mq-v182`. Run
+  `docs/runs/2026-09-21-claude-d8e4.md`.
+- **The lid (Pili).** An engine box wears its TOP-DOWN drawing on its lid (`t3BoxMats` → `t3BakeGlyph(g,true,…)`)
+  and takes its height from the tallest ink in the side drawing. That is why the café counter's cups
+  lay face-up on the counter top the size of chairs, and why four of the owner's fourteen looked wrong
+  at once. A mesh deletes the lid. **The light** is one ambient 0.66 and one sun 0.42: a Lambert face
+  comes out top 1.00 / east 0.88 / south 0.78 / west-north 0.66, so a value difference must be PAINTED
+  into the parts (plan Δ50 to land Δ40 after `tc()`), and a sphere under r 0.12 reads as a hexagon.
+- **A marigold is a stack of whorls, not a ball (la botánica).** Florets with their base on the
+  receptacle and their tips lifted by whorl read as a marigold at the first crop; three tries of "a
+  bigger ball" had not. Hue is decided per plant at sowing, value per whorl by growth, the turn per
+  head by the seed — each at its own step. Twelve heads a bed, packed to touch; foliage near-black
+  UNDER the heads. **And the bed's seed `(x*7+y*13)%7` was constant along a row**: three beds in a
+  row were one bed pressed three times, in every frame the owner had seen. `(x*5+y*3)%7` now. Cost:
+  the park frame 52,908 → ~153,000 triangles, draw calls unchanged.
+- **The pad — a RULE, in the engine.** The ground bake darkens a tile from its solid neighbours and
+  never a solid tile's own floor, so every mesh object stood on a bright square. A mesh tile now
+  darkens the ground under it (a radial pad in the bake). Both games, same rule.
+- **Seven shapes in the garage and the offices (el taller):** a desk with its monitor, keyboard and
+  chair, facing the room the drawing faces (`meshFacing`); the café counter run-aware with the machine
+  once, at the run's `(x+y)%3===2` tile; the fridge with its handle; the tool chest on casters; three
+  tires as tori; the Caprice a tile and a half long; the two-post lift with a blue customer's car up
+  on it (the drawing's hex, not the Caprice — the brief was wrong). `6` and `0` were never boxes but
+  sprites the Taller's ribbon lays at district two, which the flat audit, walking at chapter zero,
+  never counts: measured, the apron at `ch:2` reads `flat:3` without the meshes and `flat:1` with.
+- **Four shapes in the street and the park (la calle):** the picket fence as one post a tile, two rails
+  through the tile edges on the yard side, four pickets off one jig on the street side, a corner at the
+  corner post, a run ending at its post, and the run by the same GLYPH — the barricade beside the crew
+  pen is kind `fence` too, and the kind is what stood the engine's panels at 90° in mid-air there. The
+  crate: four proud corner posts, three slats a side, a rim, and ONE kind of produce a crate (tomatoes
+  mounded and spilling the front row; chiles lying; hands of bananas). The counter: one carcase the
+  length of the run, plank joins on the world grid, end panels only at the ends, the scale once at the
+  head. The rail round the well: a glazier's frame minus the glass — a pane drawn as a pale sheet was
+  a bathtub wall that hid the flight. In season, a crest of petals along the fence's foot within three
+  tiles of the bridge (`meshPetalCrest`: a dark under and flat petals standing a hair proud).
+- **`tc()` tints every mesh part with no opt-out** — the persona rule that a tint must not touch
+  identity colours is false in the mesh path. Recorded, not changed.
+- **The engine half, built the same sitting from the smith's parts lists
+  (`docs/mocks/2026-09-21-contact-sheet/crew-11/calle/`; frames under `…/crew-11/engine/`):**
+  - **The bridge.** `^` is neither SOLID nor `stand` and the bridge branch `continue`s before the
+    hook, so the seam lives inside the branch, after the deck and the rails: `tileView("prop:bridge","mesh")`
+    gets `{x,y,ew,cam,slp,h,edges,pet}` and its parts are laid at the deck's own height and slope —
+    ADD, never replace; `test/smoke.js` still reads four decks, the rails and the camber. The pack
+    answers with a stringer beam along the bottom of each open side, a nosing worn pale along the top
+    edge, and in season the crest inside the rail line.
+  - **A drift banks against what stands beside it — a RULE, in `petalSpill`.** By distance alone the
+    spill was a circular stain round the deck. Twice the count with a SOLID neighbour, four tenths in
+    the open (all four neighbours walkable); the count is in the bake's key so the cache stays honest.
+    Both games; `test/smoke.js`'s spill counts hold (the water beside the deck has the deck as a
+    neighbour and is unchanged).
+  - **Glass.** `t3MeshOf` is at file scope now (it was a closure inside the world builder) and a part
+    with `a:` under 1 goes to a second mesh — transparent, no depth write — hung as a CHILD of the
+    tile's mesh, so everything that walks the group still sees one object per tile. The rail round the
+    well has its pane back at 0.45: the flight shows through it, and the frame says where the edge is.
+  - **The trolley's body is the pack's.** `tileView("prop:tram","mesh")` gets `{len,h,fl,cab}`; the
+    engine keeps the four WHEELS (it spins them) and the DRIVER (he changes ends) and adds the body
+    mesh beside them, flipping its `scale.x` with `TRO.dir` each frame so the pole leans back
+    against the travel whichever way it goes. Rigo's paint rule (a dark skirt and panel to the waist,
+    a light band round the windows), a roof that overhangs with a drip lip, a clerestory, the pole,
+    headlamps, a bell, fenders, grab rails on the open platforms. **The wheel guard fires at four now,
+    not two** — planted first in a copy outside the repo with one axle's pair deleted: *"the trolley
+    has 2 wheels — a tram that rolls down a street has wheels you can see"*, exit 1.

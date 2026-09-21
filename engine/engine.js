@@ -1523,8 +1523,14 @@ function bridgeDist(w,x,y){ /* Chebyshev distance to the nearest deck tile, up t
   const v=w._pd[x+","+y];return v===undefined?9:v;}
 function petalSpill(w,x,y,sx,sy,scale){
   if(!petalsOn())return;const d=bridgeDist(w,x,y);if(d<1||d>3)return;
-  const n=d===1?78:d===2?33:6,sc=scale||1; /* three times the first cut, thickest beside the deck, a few three tiles out */
-  const c=petalBake("spill|"+x+"|"+y+"|"+sc,Math.ceil(TS*sc),Math.ceil(TS*sc),(g,rnd)=>{const P=petalPal();
+  const n0=d===1?78:d===2?33:6,sc=scale||1; /* three times the first cut, thickest beside the deck, a few three tiles out */
+  /* A DRIFT BANKS AGAINST WHAT STANDS BESIDE IT (crew iteration 11, la calle from Pili): by distance alone the
+     spill was a circular stain round the deck. Twice the count where a SOLID neighbour stops the petals —
+     a fence, a curb, a wall — and four tenths of it in the open, where all four neighbours could be walked. */
+  const gr=w.grid||w.rows,nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>{const r=gr[y+dy];return r?r[x+dx]:undefined;}).filter(g=>g!==undefined);
+  const solidN=nb.filter(g=>SOLID.has(g)).length,openN=nb.filter(g=>!SOLID.has(g)&&(TILES[g]||{}).kind!=="water"&&(TILES[g]||{}).kind!=="bridge").length;
+  const n=Math.max(1,Math.round(n0*(solidN?2:openN===4?0.4:1)));
+  const c=petalBake("spill|"+x+"|"+y+"|"+sc+"|"+n,Math.ceil(TS*sc),Math.ceil(TS*sc),(g,rnd)=>{const P=petalPal();
     for(let i=0;i<n;i++){const px=rnd()*TS*sc,py=rnd()*TS*sc,a=rnd()*Math.PI*2;petalShape(g,px,py,a,1.0*sc,P[1+((i+d)%(P.length-1))]);}},((x|0)*911+(y|0)*271+3)|0);
   ctx.drawImage(c,sx,sy);}
 /* ---------- el trolley (owner, 2026-09-08) — it comes on its own, it stops for anyone on the line, and it comes

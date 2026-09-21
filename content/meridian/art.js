@@ -413,7 +413,7 @@ TILEART_SIDE["I"]=rc=>{const{sx,sy,x,y}=rc;
     produce(sx+16,sy+8,"tomato",1.1);}
 };
 /* ---- BEAUTIFY, FIRST SITTING — 2026-09-21. Three drawings, content only. ----
-   docs/BEAUTIFY.md, "The contact sheet — 2026-09-21", rows 1–3. Drawn the way docs/how-its-made says:
+   docs/BEAUTIFY.md, "The contact sheet — 2026-09-21", rows 1–3. Drawn the way .claude/skills/how-its-made says:
    by the process that made the thing, with variation entering at the step it entered and nowhere
    earlier, and lit as everything else on this street — key upper-left, one contact shadow. */
 
@@ -527,21 +527,43 @@ TILEART_SIDE["b"]=rc=>{const{sx,sy,x,y}=rc;
    Owner: "i still see squares and not polygonal shapes … can we not try this finally?" The `mesh`
    view: a list of primitives per tile, in tile units (a tile is 1.0 wide, a person about 1.0 tall),
    y up from the floor, the tile's centre at (0,0). The engine merges them into one mesh with vertex
-   colours. Drawn as docs/how-its-made says: by what the thing is made of. A marigold head is a
+   colours. Drawn as .claude/skills/how-its-made says: by what the thing is made of. A marigold head is a
    pom-pom — a sphere. A pot was thrown — a tapered cylinder with a rim. A bookcase is a carcass of
    boards with what a person put on them. Colours go through tc() in the engine, so the theme and
    the time of day reach these like everything else. */
 const TILEART_MESH={};
-/* A CEMPASÚCHIL HEAD IS NOT A BALL (owner, 2026-09-21: "the marigolds can use another try"). It is a
-   pom-pom of hundreds of ruffled petals: at this scale a core, wider than tall, with lobes set round its
-   upper half — the lit side in the crown colour, the shaded side in the undercut — and the green calyx
-   cup it sits in. One helper, so the bed, the garland and the altar grow the same flower. */
-const meshMarigold=(parts,hx,hy,hz,r,P,seed)=>{const UNDER=P[1],BODY=P[3]||P[2],CROWN=P[5]||P[4];
-  parts.push({s:"sph",x:hx,y:hy-r*0.55,z:hz,r:r*0.55,sy:0.5,c:"#3E7C4F"});                     /* the calyx cup */
-  parts.push({s:"sph",x:hx,y:hy,z:hz,r,sy:0.82,c:BODY});                                       /* the core, wider than tall */
-  for(let i=0;i<9;i++){const a=i*0.7+seed*0.5,el=0.15+(i%3)*0.35,lit=Math.cos(a+Math.PI*0.75)>0.1;
-    parts.push({s:"sph",x:hx+Math.cos(a)*Math.cos(el)*r*0.78,y:hy+Math.sin(el)*r*0.62,z:hz+Math.sin(a)*Math.cos(el)*r*0.78,r:r*0.42,sy:0.75,c:lit?CROWN:UNDER});} /* the ruffle */
-  parts.push({s:"sph",x:hx-r*0.3,y:hy+r*0.6,z:hz-r*0.25,r:r*0.34,c:CROWN});};                  /* the crown, where the key lands */
+/* A CEMPASÚCHIL HEAD IS A STACK OF WHORLS, NOT A BALL (la botánica, crew run 11, 2026-09-21, from the
+   owner's three photographs). Tagetes erecta, the double kind sold for Día de Muertos: hundreds of ray
+   florets on a domed receptacle, in whorls — the outermost the largest, splayed nearly flat with a wavy
+   margin; each whorl inward shorter, steeper and more crinkled, to a crown of upright florets. ONE HUE
+   PER PLANT, deepest at the floret's base and paler at its margin, so the outer whorl reads deeper than
+   the crown. The green cup under it is the involucre: a narrow ribbed vase, not a ball. Built as three
+   whorls of flattened lobes (a squashed sphere, long along the radius, its BASE on the receptacle and its
+   tip lifted — outer 17°, middle 55°, inner 72°), a crown of three, the receptacle showing between them,
+   and a tapered cylinder for the cup. Every head grows by the same rule; what the seed changes is the
+   turn and the crimp of each floret — variation enters where it entered (how-its-made).
+   `hue` picks the plant's colour from P — -1 deep red-brown, 0 rust, 1 orange (default), 2 gold —
+   the whorls take P[hue+1], P[hue+2], P[hue+3] (the crown capped at P[4]); nothing here names an
+   orange, so a season that recolours petals recolours these. Four steps because two touching heads in
+   one family are ~5% apart under this light and merge (Pili, run 11): every value difference between
+   heads is PAINTED. `lod` 0 drops the middle whorl (a garland of small heads). `lean` is [x,z]: the
+   head sheared off its stem that much per unit of height — the outer stems of a bush splay toward
+   the light. The first seven parameters are what the bed, the tree's garland and the altar's arch
+   already pass. 26 parts. */
+const meshMarigold=(parts,hx,hy,hz,r,P,seed,hue,lod,lean)=>{
+  const k=hue===undefined?1:hue,full=lod===undefined||lod>0,lx=lean?lean[0]:0,lz=lean?lean[1]:0;
+  const C0=P[Math.max(k+1,0)]||P[2],C1=P[Math.max(k+2,0)]||P[3],C2=P[Math.min(k+3,4)]||P[4],CUP="#4E8A58"; /* the crown stops at P[4]: a gold head is gold to the centre, not cream */
+  const rnd=(i,j)=>{const v=Math.sin((seed+1)*12.9898+i*78.233+j*37.719)*43758.5453;return v-Math.floor(v);}; /* a hash, not Math.random: the same tile grows the same flower every frame */
+  const put=p=>{p.x+=(p.y-hy)*lx;p.z+=(p.y-hy)*lz;parts.push(p);};
+  put({s:"cyl",x:hx,y:hy-r*0.32,z:hz,rt:r*0.30,rb:r*0.20,h:r*0.5,c:CUP});                            /* the involucre */
+  put({s:"sph",x:hx,y:hy+r*0.22,z:hz,r:r*0.55,sy:0.9,c:C1});                                           /* the receptacle, in the plant's own hue */
+  const whorl=(n,rad,y,pr,sy,sz,tilt,c,j)=>{const off=rnd(j,0)*6.2832,hl=pr*sz;
+    for(let i=0;i<n;i++){const a=off+i*6.2832/n+(rnd(i,j)-0.5)*0.4,t=tilt+(rnd(i,j+5)-0.5)*0.3,rr=rad+Math.cos(t)*hl;
+      put({s:"sph",x:hx+Math.cos(a)*rr,y:y+Math.sin(t)*hl,z:hz+Math.sin(a)*rr,r:pr,sy,sz,rx:-t,ry:Math.PI/2-a,c});}};
+  whorl(8,r*0.30,hy,r*0.34,0.28,1.25,0.3,C0,1);                                                        /* outer: the largest florets, splayed, margins lifted */
+  if(full)whorl(7,r*0.22,hy+r*0.14,r*0.30,0.32,1.1,0.95,C1,2);                                         /* middle: shorter, steeper */
+  whorl(6,r*0.12,hy+r*0.28,r*0.26,0.4,1.0,1.25,C2,3);                                                   /* inner: near upright, crinkled */
+  whorl(3,r*0.06,hy+r*0.55,r*0.2,0.8,1.0,1.4,C2,4);};                                                   /* the crown */
 /* A STRING OF PAPEL PICADO between two points, sagging a little, with flags hung from it in the paper
    palette, alternating. Flags are boxes, thin as paper, a hair below the string. */
 const meshPapel=(parts,x0,y0,z0,x1,y1,z1,pal,n,seed)=>{
@@ -553,33 +575,50 @@ const MESH_FAM=[["#8C3B2E","#A54A3A","#6E2E24"],["#3E5C86","#4F6E9A","#2F4868"],
                 ["#C9B68C","#D9C9A3","#A99570"],["#5C4A6E","#6E5A84","#463756"],["#B8763A","#C98A4C","#8E5A2C"]];
 
 /* THE RAISED BED. A painted-concrete curb with a rounded lip (a cylinder along each top edge — the
-   mason ran a trowel round it), soil behind it, and six cempasúchil on stems mounding to the middle,
-   the lit crown a smaller sphere on the upper-left of each head. A run of beds shares one curb: the
-   walls stand only where the run ends. Colours from petalPal, so a season recolours these too. */
+   mason ran a trowel round it), soil behind it, and a bush of cempasúchil in it. A run of beds shares
+   one curb: the walls stand only where the run ends. Colours from petalPal, so a season recolours these too.
+   THE MARIGOLDS, FOURTH TRY (la botánica, crew run 11, from the owner's photographs of one head, a bunch
+   and a bush). Twelve heads from meshMarigold on a staggered grid, jittered, so they TOUCH — a bunch
+   has no gaps — the middle of the bed standing higher and the edge heads leaning out, as a bush mounds
+   and splays; every head from the same rule, and what differs is what differed in the field: the size
+   (age), the turn (the seed), and the hue (the packet's mix, photo 2: six orange, three gold, two
+   rust, one deep red-brown, laid so no two in a row share a step and turned per tile — two touching
+   heads in one family merge under this light, so the difference between heads is painted, Pili's
+   read). Under them the foliage as photo 3 has it: a near-black green mass UNDER the heads, never
+   beside — fifty small masses on a jittered grid from the soil to knee height, darkest on top where
+   they show between heads, a step greener low on the mound's outside where the sun reaches — and the
+   soil darker than any petal's underside, so what shows between heads is the dark that makes the
+   orange sing; stems only above the foliage, where they show; buds between the heads, the same plant
+   younger. The seed is x AND y: the old (x*7+y*13)%7 was constant along a row, so three beds in a row
+   were one bed three times. */
 TILEART_MESH["b"]=({x,y})=>{
-  const P=petalPal(),UNDER=P[1];
-  const h=(((x*7+y*13)%7)+7)%7;
+  const P=petalPal();
+  const h=(((x*5+y*3)%7)+7)%7;
+  const rnd=(i,j)=>{const v=Math.sin(x*12.9898+y*78.233+i*39.425+j*17.719)*43758.5453;return v-Math.floor(v);};
   const w=CW(),bed=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="b";};
   const N=!bed(x,y-1),S=!bed(x,y+1),E=!bed(x+1,y),Wt=!bed(x-1,y);
-  const CURB="#B9B0A2",LIP="#CFC7B9",SOIL="#4A3524",LEAF="#3E7C4F",STEM="#4E8A58";
+  const CURB="#B9B0A2",LIP="#CFC7B9",SOIL="#2F2216",LEAF="#27492F",LEAF2="#3E7C4F",LEAF3="#2E5A38",STEM="#5A9A62",CUP="#4E8A58";
   const parts=[];
   const wall=(px,pz,ww,dd)=>{parts.push({s:"box",x:px,y:0.11,z:pz,w:ww,h:0.22,d:dd,c:CURB});
     parts.push({s:"cyl",x:px,y:0.22,z:pz,r:0.045,h:Math.max(ww,dd),c:LIP,rz:ww>dd?Math.PI/2:0,rx:ww>dd?0:Math.PI/2});}; /* the lip */
   if(N)wall(0,-0.42,0.92,0.08);if(S)wall(0,0.42,0.92,0.08);if(Wt)wall(-0.42,0,0.08,0.92);if(E)wall(0.42,0,0.08,0.92);
   parts.push({s:"box",x:0,y:0.16,z:0,w:0.92,h:0.08,d:0.92,c:SOIL});                       /* the soil, a hand below the lip */
-  /* THE MARIGOLDS, THIRD TRY (owner: "the marigolds can use another try"). Ruffled heads from meshMarigold
-     — a core wider than tall with lobes round its upper half — on stems that clear the lip, eight of
-     them mounding to the middle, buds between, and leaves in PAIRS along the stems, which is how a
-     marigold carries them. */
-  const heads=[[-0.26,-0.22],[0.08,-0.28],[0.3,-0.02],[-0.04,0.06],[-0.31,0.2],[0.22,0.26],[0.02,0.3],[-0.14,-0.06]];
-  heads.forEach(([hx,hz],i)=>{const k=(h+i)%3,r=0.13+k*0.018;
-    const hy=0.46+((h*3+i)%3)*0.04+(Math.abs(hx)+Math.abs(hz)<0.3?0.08:0);                /* the middle mounds higher */
-    parts.push({s:"cyl",x:hx,y:(0.2+hy)/2,z:hz,r:0.014,h:hy-0.2,c:STEM});                 /* the stem, into the soil */
-    [[0.36,0.7],[0.62,-0.6]].forEach(([t,ang],j)=>{const ly=0.2+(hy-0.2)*t;               /* a pair of leaves per stem */
-      parts.push({s:"sph",x:hx+Math.cos(ang+i)*0.06,y:ly,z:hz+Math.sin(ang+i)*0.06,r:0.06,sx:1.6,sy:0.35,c:LEAF,ry:ang+i});});
-    meshMarigold(parts,hx,hy,hz,r,P,h+i);});
-  [[-0.2,0.2],[0.2,-0.2],[0.28,0.28],[-0.3,-0.3]].forEach(([bx,bz],i)=>                    /* buds: the same plant, younger */
-    parts.push({s:"sph",x:bx,y:0.32+(i%2)*0.03,z:bz,r:0.05,sy:0.85,c:UNDER}));
+  const clamp=v=>Math.max(-0.37,Math.min(0.37,v));                                                  /* the foliage stays inside the curb */
+  for(let i=0;i<40;i++){const gx=clamp(-0.36+(i%5)*0.18+(rnd(i,11)-0.5)*0.14),gz=clamp(-0.36+((i/5|0)%5)*0.18+(rnd(i,12)-0.5)*0.14+(i>=25?0.09:0)),gy=0.2+rnd(i,13)*0.14,lr=0.055+rnd(i,14)*0.04; /* the foliage mound, on a jittered grid so it has no holes */
+    parts.push({s:"sph",x:gx,y:gy,z:gz,r:lr,sx:1.4,sy:0.45,sz:0.7,ry:rnd(i,15)*3.14,c:gy>0.3?LEAF3:(Math.abs(gx)>0.28||Math.abs(gz)>0.28?LEAF2:LEAF)});} /* dark on top; the sunlit green only low on the outside */
+  for(let i=0;i<10;i++){const gx=-0.32+(i%5)*0.16+(rnd(i,16)-0.5)*0.08,gz=(i<5?-0.16:0.16)+(rnd(i,17)-0.5)*0.06;  /* and a top layer between the rows of heads, where the soil showed: the darkest green, under, never beside */
+    parts.push({s:"sph",x:gx,y:0.35,z:gz,r:0.08,sx:1.4,sy:0.4,sz:0.8,ry:rnd(i,18)*3.14,c:i%2?LEAF3:LEAF});}
+  const heads=[[-0.34,-0.3],[-0.11,-0.31],[0.11,-0.3],[0.34,-0.31],[-0.3,0],[-0.08,0.01],[0.14,-0.01],[0.36,0],[-0.34,0.3],[-0.11,0.31],[0.11,0.3],[0.34,0.31]];
+  const HUES=[1,2,1,0, 2,1,-1,1, 1,0,1,2];                                                          /* the packet's mix, row by row: no two beside each other in one family */
+  heads.forEach(([hx,hz],i)=>{const j=(h+i)%12,hue=HUES[j],r=0.12+rnd(i,21)*0.035+(hue===0?0.015:0),
+    px=hx+(rnd(i,23)-0.5)*0.07,pz=hz+(rnd(i,24)-0.5)*0.07,d=Math.hypot(px,pz),
+    hy=0.40+(1-Math.min(1,d/0.5))*0.12+rnd(i,22)*0.05;                                                /* the middle mounds higher */
+    parts.push({s:"cyl",x:px,y:(0.3+hy)/2,z:pz,r:0.012,h:hy-0.3,c:STEM});                          /* the stem, from inside the foliage */
+    meshMarigold(parts,px,hy,pz,r,P,h*3+i,hue,1,[px/0.5*0.22,pz/0.5*0.22]);});                        /* the edge heads lean out toward the light */
+  [[-0.22,-0.15],[0.23,0.15],[-0.2,0.16],[0.22,-0.16]].forEach(([bx,bz],i)=>{const by=0.42+rnd(i,31)*0.05; /* buds: a green egg on a stem, the colour just showing */
+    parts.push({s:"cyl",x:bx,y:(0.3+by)/2,z:bz,r:0.01,h:by-0.3,c:STEM});
+    parts.push({s:"cyl",x:bx,y:by,z:bz,rt:0.03,rb:0.02,h:0.07,c:CUP});
+    parts.push({s:"sph",x:bx,y:by+0.045,z:bz,r:0.028,sy:1.2,c:P[2+i%2]});});
   return parts;};
 
 /* THE POTTED PLANT. Twenty of them, every one the same picture until tonight (docs/BEAUTIFY.md,
@@ -736,6 +775,387 @@ TILEART_MESH["T"]=({x,y})=>{const sd=(((x*7+y*13)%4)+4)%4,WOOD="#5E3B20",CLOTH="
     let q=at(0,0);parts.push({s:"box",x:q.x,y:0.28,z:q.z,w:0.22,h:0.03,d:0.22,c:WOOD,ry});
     q=at(-0.1,0);parts.push({s:"box",x:q.x,y:0.42,z:q.z,w:0.03,h:0.26,d:0.22,c:WOOD,ry});                                                /* the back, on the far side */
     [[-0.09,-0.09],[0.09,-0.09],[-0.09,0.09],[0.09,0.09]].forEach(([lx,lz])=>{const l=at(lx,lz);parts.push({s:"cyl",x:l.x,y:0.13,z:l.z,r:0.014,h:0.26,c:WOOD});});});
+  return parts;};
+
+/* ---- BEAUTIFY, CREW ITERATION 11 — el taller ---- 2026-09-21. The interiors and the garage. Owner:
+   "computers, … desks, … coffee machines, fridge, … car lifts, tires, car, and tool boxes." Seven shapes
+   through the same seam, each built from what its own 2D drawing says it is made of (TILEDRAW / TILESIDE
+   in the engine, TILE_PROPS above), in the order a person made it. VALUES ARE PAINTED, NOT LEFT TO THE
+   LIGHT: with the day's ambient and sun a Lambert face gets 1.00 on top, 0.88 east, 0.78 south and 0.66
+   west and north (Pili, from engine3d.js), so a step you want between two parts goes into their colours,
+   and the darkest thing in a room is dark because it was painted dark. WHAT THESE REPLACE: an engine box
+   wore its top-down drawing on its lid and took its height from the tallest ink in its side drawing
+   (engine3d.js, t3BoxMats) — so a cup lay on its back on every counter tile, a second monitor sat on every
+   desk's lid, the tool chest wore its drawers on top, and the counter run stepped up at machine tiles. All
+   of that goes with the box. Two helpers: which way a thing faces (the shelf's rule — the first open
+   side, south, east, west, north) and the turn that puts it there. */
+const meshFacing=(x,y)=>{const w=CW(),solid=(gx,gy)=>{const r=w&&w.grid&&w.grid[gy];return !r||r[gx]===undefined||SOLID.has(r[gx]);};
+  return !solid(x,y+1)?0:!solid(x+1,y)?Math.PI/2:!solid(x-1,y)?-Math.PI/2:Math.PI;};
+const meshTurned=(parts,ry)=>{const cr=Math.cos(ry),sr=Math.sin(ry);return parts.map(p=>({...p,x:p.x*cr+p.z*sr,z:-p.x*sr+p.z*cr,ry:(p.ry||0)+ry}));};
+
+/* THE DESK (owner: "computers", "desks"). What TILEDRAW["D"] and TILESIDE["D"] say it is: a slab on a
+   left leg and a drawer unit on the right, an apron under it, three drawers with pulls, a monitor on a
+   stand, a sheet of paper. Made in that order: the leg panel and the pedestal, the slab over them with
+   AIR under it and the floor showing between, its underside painted dark (the shade under any top), a
+   lit front edge, the three drawer faces and their pulls, then what was set on the slab — the monitor
+   toward the back, a thin panel on a stalk on a foot disc, the screen the lightest thing on the desk; a
+   keyboard under it (a monitor with nothing under it is a television); the paper on the left. Nothing
+   reaches past ±0.46: HQ lays desks side by side. Faces the first open side, like the shelf. */
+TILEART_MESH["D"]=({x,y})=>{
+  const WOOD=C.desk,TOP=C.deskTop,UNDER="#3A2E26",EDGE="#C4A878",INK="#23272C",KEYS="#2F343A",SCREEN="#7FB3D5",PAPER="#F4F1EA",PULL="#D9C9A3";
+  const parts=[{s:"box",x:-0.41,y:0.215,z:0,w:0.05,h:0.43,d:0.54,c:WOOD},                 /* the leg panel, left */
+    {s:"box",x:0.27,y:0.215,z:-0.03,w:0.34,h:0.43,d:0.48,c:WOOD},                         /* the drawer pedestal, right, its faces set back from the slab's edge */
+    {s:"box",x:0,y:0.455,z:0,w:0.9,h:0.04,d:0.6,c:TOP},                                   /* the slab, air under it */
+    {s:"box",x:0,y:0.425,z:0,w:0.86,h:0.02,d:0.56,c:UNDER},                               /* its underside, painted dark */
+    {s:"box",x:0,y:0.47,z:0.297,w:0.9,h:0.012,d:0.012,c:EDGE}];                           /* the lit front edge */
+  [0.08,0.215,0.35].forEach(dy=>{parts.push({s:"box",x:0.27,y:dy,z:0.215,w:0.3,h:0.11,d:0.012,c:WOOD}); /* a drawer face */
+    parts.push({s:"box",x:0.27,y:dy+0.062,z:0.214,w:0.34,h:0.012,d:0.006,c:UNDER});        /* the seam over it, dark */
+    parts.push({s:"box",x:0.27,y:dy,z:0.228,w:0.09,h:0.02,d:0.016,c:PULL});});            /* its pull */
+  parts.push({s:"cyl",x:0,y:0.481,z:-0.12,r:0.07,h:0.012,c:INK},                          /* the monitor's foot, a disc */
+    {s:"box",x:0,y:0.53,z:-0.12,w:0.03,h:0.1,d:0.03,c:INK},                               /* the stalk, daylight either side of it */
+    {s:"box",x:0,y:0.69,z:-0.12,w:0.34,h:0.22,d:0.03,c:INK},                              /* the panel, thin */
+    {s:"box",x:0,y:0.695,z:-0.101,w:0.31,h:0.19,d:0.008,c:SCREEN},                        /* the screen, on its front face: the lightest thing here */
+    {s:"box",x:0,y:0.483,z:0.09,w:0.26,h:0.015,d:0.1,c:KEYS},                             /* the keyboard, lying on the slab */
+    {s:"box",x:-0.27,y:0.478,z:0.06,w:0.16,h:0.005,d:0.2,c:PAPER,ry:0.18});               /* the sheet of paper, not quite square to the edge */
+  return meshTurned(parts,meshFacing(x,y));};
+
+/* THE CAFÉ COUNTER (owner: "coffee machines"). What TILESIDE["K"] says it is: a counter body under a
+   steel top with two dark panels on the front, and on it "a coffee machine on every third tile … the
+   rest carry a cup and a napkin stand". K is laid in RUNS, so the carcass is the full tile wide and a
+   run reads as one counter with no seam and one height; an end panel stands only where the run ends.
+   The top is dead flat with a nosing along the front edge. The front faces the open side ACROSS the run
+   (south, else north; east, else west). The machine, as one is built and as Pili reads it: a bright
+   steel drip tray at its foot, the body, a narrower hopper on top (the wide-to-narrow step is the
+   read), the group head hanging off the front with AIR between it and the cup under it (no air is a
+   microwave), the portafilter locked in with its handle out, one warm light. The machine is the darkest
+   thing in the room; the counter keeps the theme's counter colour. */
+TILEART_MESH["K"]=({x,y})=>{
+  const w=CW(),isK=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="K";};
+  const solid=(gx,gy)=>{const r=w&&w.grid&&w.grid[gy];return !r||r[gx]===undefined||SOLID.has(r[gx]);};
+  const E=isK(x+1,y),Wt=isK(x-1,y),N=isK(x,y-1),S=isK(x,y+1),alongX=E||Wt||!(N||S);
+  /* the whole run agrees on its front: walk the run to both ends and count which side across it has
+     more open floor — one tile with a plant behind it must not turn its panels the other way */
+  const run=[];if(alongX){let a=x;while(isK(a-1,y))a--;for(;isK(a,y);a++)run.push([a,y]);}else{let a=y;while(isK(x,a-1))a--;for(;isK(x,a);a++)run.push([x,a]);}
+  const open=(dx,dy)=>run.filter(([gx,gy])=>!solid(gx+dx,gy+dy)).length;
+  const ry=alongX?(open(0,1)>=open(0,-1)?0:Math.PI):(open(1,0)>=open(-1,0)?Math.PI/2:-Math.PI/2);
+  const endA=ry===0?!Wt:ry===Math.PI?!E:ry===Math.PI/2?!S:!N,endB=ry===0?!E:ry===Math.PI?!Wt:ry===Math.PI/2?!N:!S; /* which local end is the run's end */
+  const BODY=C.counter,TOPC="#AAB4C0",NOSE="#C9CFD6",PANEL="#5E6874",END="#6E7884",MACH="#2F343B",HOP="#23272C",TRAY="#C9CDD2",LIGHT="#E0662B",CUP="#F4F1EA",NAP="#C9B7A0";
+  const parts=[{s:"box",x:0,y:0.265,z:0,w:1.0,h:0.53,d:0.8,c:BODY},                     /* the carcass, the full tile so the run is one counter */
+    {s:"box",x:0,y:0.545,z:0.01,w:1.0,h:0.03,d:0.84,c:TOPC},                             /* the top, dead flat */
+    {s:"cyl",x:0,y:0.545,z:0.43,r:0.02,h:1.0,c:NOSE,rz:Math.PI/2},                        /* the nosing along the front edge */
+    {s:"box",x:-0.24,y:0.25,z:0.405,w:0.26,h:0.2,d:0.014,c:PANEL},{s:"box",x:0.24,y:0.25,z:0.405,w:0.26,h:0.2,d:0.014,c:PANEL}]; /* the two front panels */
+  if(endA)parts.push({s:"box",x:-0.5,y:0.265,z:0,w:0.02,h:0.51,d:0.78,c:END});           /* the end panels, where the run stops */
+  if(endB)parts.push({s:"box",x:0.5,y:0.265,z:0,w:0.02,h:0.51,d:0.78,c:END});
+  const cup=(cx,cy,cz)=>{parts.push({s:"cyl",x:cx,y:cy+0.028,z:cz,r:0.034,h:0.056,c:CUP});parts.push({s:"torus",x:cx+0.042,y:cy+0.03,z:cz,r:0.018,t:0.007,c:CUP,ry:Math.PI/2});}; /* a cup with its handle to the right */
+  if((((x|0)+(y|0))%3+3)%3===2){                                                            /* the espresso machine, on every third tile */
+    parts.push({s:"box",x:0,y:0.57,z:0.1,w:0.34,h:0.02,d:0.16,c:TRAY},                    /* the drip tray at its foot, bright steel */
+      {s:"box",x:0,y:0.71,z:-0.08,w:0.44,h:0.3,d:0.3,c:MACH},                            /* the body, 0.56 to 0.86 */
+      {s:"box",x:0,y:0.91,z:-0.1,w:0.3,h:0.1,d:0.24,c:HOP},                              /* the hopper on top, narrower: the step */
+      {s:"cyl",x:0,y:0.74,z:0.11,r:0.04,h:0.05,c:HOP},                                   /* the group head, hanging off the front */
+      {s:"cyl",x:0,y:0.708,z:0.11,r:0.046,h:0.014,c:TRAY},                               /* the portafilter locked in */
+      {s:"box",x:0,y:0.708,z:0.2,w:0.02,h:0.018,d:0.12,c:HOP},                           /* its handle, out toward the barista's hand */
+      {s:"box",x:-0.15,y:0.8,z:0.077,w:0.05,h:0.04,d:0.014,c:LIGHT});                    /* the one warm light: it is on */
+    cup(0,0.58,0.11);}                                                                     /* a cup under the group, air between: top 0.636, group 0.715 */
+  else{cup(-0.2,0.56,0.1);                                                                 /* a cup, and a napkin stand */
+    parts.push({s:"box",x:0.2,y:0.62,z:0.04,w:0.18,h:0.12,d:0.07,c:NAP},{s:"box",x:0.2,y:0.7,z:0.04,w:0.13,h:0.08,d:0.03,c:CUP});}
+  return meshTurned(parts,ry);};
+
+/* THE FRIDGE (owner: "fridge"). What TILEDRAW["W"] says it is: a light-grey box the height of the tile,
+   a horizontal seam a bit above the middle, two dark vertical handles on the right of each door. Made:
+   a dark plinth at the floor, the carcass on it — the tallest furniture in the room, and the floor
+   showing round it — the two door faces a hair proud and a step lighter than the carcass, the seam
+   between them set back, the two handles proud on the same side, and one warm note under a magnet.
+   Faces its first open side. */
+TILEART_MESH["W"]=({x,y})=>{
+  const CARC="#AEB6BE",DOOR="#BCC4CC",SEAM="#5A6068",HANDLE="#5A6068",PLINTH="#2F343A",MAG="#E0B45C";
+  const parts=[{s:"box",x:0,y:0.025,z:0,w:0.6,h:0.05,d:0.53,c:PLINTH},                    /* the plinth */
+    {s:"box",x:0,y:0.5,z:0,w:0.62,h:0.9,d:0.55,c:CARC},                                   /* the carcass, 0.05 to 0.95 */
+    {s:"box",x:0,y:0.785,z:0.28,w:0.6,h:0.31,d:0.01,c:DOOR},                              /* the freezer door, 0.63 to 0.94 */
+    {s:"box",x:0,y:0.345,z:0.28,w:0.6,h:0.55,d:0.01,c:DOOR},                              /* the fridge door, 0.07 to 0.62 */
+    {s:"box",x:0,y:0.625,z:0.276,w:0.6,h:0.01,d:0.006,c:SEAM},                            /* the seam, set back */
+    {s:"box",x:0.24,y:0.78,z:0.295,w:0.03,h:0.22,d:0.02,c:HANDLE},                        /* the freezer handle, proud */
+    {s:"box",x:0.24,y:0.4,z:0.295,w:0.03,h:0.22,d:0.02,c:HANDLE},                         /* the fridge handle, the same side */
+    {s:"box",x:-0.12,y:0.86,z:0.288,w:0.05,h:0.035,d:0.006,c:MAG}];                        /* a magnet: one warm note */
+  return meshTurned(parts,meshFacing(x,y));};
+
+/* THE RED ROLLING TOOL CHEST (owner: "tool boxes"). What TILE_PROPS["8"] says it is: a red body on
+   black casters, four drawer seams with a chrome pull on each, a chrome bar up at the top. Made: four
+   casters, the carcass floated over them with the floor showing round it, a genuinely dark seam under
+   each drawer face and its pull, the steel top plate, and the push handle — two uprights and a
+   crossbar — up one end. On the plate, a rag and a wrench, where the last hand left them. Faces its
+   first open side. */
+TILEART_MESH["8"]=({x,y})=>{
+  const RED="#B3352B",SEAM="#5E1810",PULL="#C9CDD3",STEEL="#B9BEC4",BLACK="#2A2D33",RAG="#C9553F";
+  const parts=[];
+  [[-0.2,-0.14],[0.2,-0.14],[-0.2,0.14],[0.2,0.14]].forEach(([cx,cz])=>parts.push({s:"cyl",x:cx,y:0.04,z:cz,r:0.04,h:0.04,c:BLACK,rz:Math.PI/2})); /* four casters, axles across */
+  parts.push({s:"box",x:0,y:0.43,z:0,w:0.55,h:0.62,d:0.42,c:RED});                       /* the carcass, 0.12 to 0.74, a gap over the casters */
+  for(let i=0;i<4;i++){const dy=0.2+i*0.125;
+    parts.push({s:"box",x:0,y:dy-0.0675,z:0.213,w:0.55,h:0.012,d:0.01,c:SEAM});           /* the seam under each drawer face, dark */
+    parts.push({s:"box",x:0,y:dy,z:0.22,w:0.16,h:0.022,d:0.018,c:PULL});}                 /* the pull, centred */
+  parts.push({s:"box",x:0,y:0.75,z:0,w:0.57,h:0.02,d:0.44,c:STEEL});                     /* the steel top plate */
+  parts.push({s:"box",x:0.1,y:0.77,z:0.05,w:0.16,h:0.02,d:0.12,c:RAG});                   /* a rag, dropped */
+  parts.push({s:"box",x:-0.1,y:0.768,z:-0.08,w:0.22,h:0.014,d:0.03,c:PULL,ry:0.4});       /* a wrench, where it was put down */
+  parts.push({s:"cyl",x:-0.3,y:0.81,z:-0.13,r:0.012,h:0.12,c:PULL},{s:"cyl",x:-0.3,y:0.81,z:0.13,r:0.012,h:0.12,c:PULL}, /* the push handle's uprights */
+    {s:"cyl",x:-0.3,y:0.87,z:0,r:0.013,h:0.3,c:PULL,rx:Math.PI/2});                       /* and its crossbar */
+  return meshTurned(parts,meshFacing(x,y));};
+
+/* THE TIRE STACK (owner: "tires"). What TILE_PROPS["0"] says it is: THREE tires, one above the other,
+   each with its hub hole — "a zero IS a tire". One mould made all three, so they are the same tire
+   (.claude/skills/how-its-made: variation enters at the step it entered, and nowhere earlier); they were thrown
+   on the pile one at a time, so the top one landed a little off, and the ones underneath carry the
+   weight. The top one is painted a step lighter — the two below sit in its shade — and the rim of the
+   top tire shows through its hole, the one light value in the stack. */
+TILEART_MESH["0"]=({x,y})=>{const h=(((x*7+y*13)%5)+5)%5,TYRE="#26262B",TOPT="#3A3A41",RIM="#6B6B72",a=h*0.7+2.4;
+  const parts=[];
+  for(let i=0;i<3;i++){const off=i===2?0.03:0;
+    parts.push({s:"torus",x:Math.cos(a)*off,y:0.06+i*0.11,z:Math.sin(a)*off,r:0.22,t:0.075,c:i===2?TOPT:TYRE,rx:Math.PI/2});}
+  parts.push({s:"cyl",x:Math.cos(a)*0.03,y:0.27,z:Math.sin(a)*0.03,r:0.14,h:0.012,c:RIM}); /* the rim, seen through the top hole */
+  return parts;};
+
+/* TACHO'S CAPRICE (owner: "car"). What TILE_PROPS["6"] says it is: "a long burgundy sedan" — a body
+   the length of the tile and more, a darker cabin set back on it, glass, a chrome strip low along the
+   body, wheels with grey hubs. Made: four wheels on their hubs, touching the ground and proud of the
+   body; the under-body, dark; the long low body over it; the cabin set back with its front edge at
+   the body's midpoint — a long hood is what makes it a Caprice; one continuous band of glass round
+   the cabin, brighter than anything else on it; four pillars; the roof painted a step lighter than the
+   body; the chrome strip along each side. No lamps, no grille, no handles: at 35 px a tile they are
+   noise. A tile and a half long — parts are not clipped and nothing of its kind is laid beside it —
+   parked along x, parallel to the taller's front. */
+TILEART_MESH["6"]=()=>{
+  const BODY="#7A2E2E",ROOF="#8A3636",CABIN="#5E2222",GLASS="#BFD3E0",CHROME="#C9CDD3",TYRE="#1E1E22",HUB="#8E8E96",UNDER="#1A1D22";
+  const parts=[];
+  [[-0.5,-0.3],[0.5,-0.3],[-0.5,0.3],[0.5,0.3]].forEach(([wx,wz])=>{parts.push({s:"cyl",x:wx,y:0.1,z:wz,r:0.1,h:0.08,c:TYRE,rx:Math.PI/2}); /* a wheel */
+    parts.push({s:"cyl",x:wx,y:0.1,z:wz,r:0.045,h:0.086,c:HUB,rx:Math.PI/2});});                                                        /* its hub */
+  parts.push({s:"box",x:0,y:0.135,z:0,w:1.4,h:0.03,d:0.56,c:UNDER},                       /* the under-body, the darkest thing on it */
+    {s:"box",x:0,y:0.225,z:0,w:1.5,h:0.15,d:0.62,c:BODY},                                 /* the body, 0.15 to 0.30 */
+    {s:"box",x:-0.275,y:0.34,z:0,w:0.55,h:0.08,d:0.5,c:GLASS},                            /* the glass band, 0.30 to 0.38, all the way round */
+    {s:"box",x:-0.275,y:0.4,z:0,w:0.55,h:0.04,d:0.52,c:ROOF});                            /* the roof, painted lighter */
+  [[-0.535,-0.235],[-0.015,-0.235],[-0.535,0.235],[-0.015,0.235]].forEach(([px,pz])=>parts.push({s:"box",x:px,y:0.34,z:pz,w:0.03,h:0.08,d:0.03,c:CABIN})); /* the pillars */
+  [-0.316,0.316].forEach(pz=>parts.push({s:"box",x:0,y:0.17,z:pz,w:1.5,h:0.02,d:0.012,c:CHROME}));                                 /* the chrome strip, low along each side */
+  return parts;};
+
+/* THE TWO-POST LIFT WITH A CAR UP (owner: "car lifts"). What TILE_PROPS["7"] says it is: two grey posts
+   with a beam across the top, the arms, and a BLUE car — a customer's, not the Caprice — up on them
+   with its wheels hanging. Made as one is installed: two dark bases bolted to the slab, a post on each
+   with its warning stripe, the overhead beam tying them (that is what makes it a lift), the arms
+   reaching in from each post to the car's lift points, a pad at the end of each, and the car up on
+   the pads at half height, its under-body the darkest thing in the bay. The bay is `i7i`, so the car
+   runs along x and the posts stand north and south of it; the car sits a little east of the posts so
+   they hold it at its lift points and do not cut it in half from the door. */
+TILEART_MESH["7"]=()=>{
+  const POST="#6A7480",BASE="#2F353C",ARM="#9EA8B3",STRIPE="#E0B45C",UNDER="#1A1D22",BODY="#3C5C8A",ROOF="#4C6C9A",CABIN="#2C4468",GLASS="#BFD3E0",TYRE="#1E1E22",HUB="#8E8E96";
+  const parts=[],CX=0.12;                                                                  /* the car's centre, east of the posts */
+  [-0.31,0.31].forEach(pz=>{const sg=Math.sign(pz);
+    parts.push({s:"box",x:0,y:0.1,z:pz,w:0.16,h:0.2,d:0.14,c:BASE});                       /* the base, dark */
+    parts.push({s:"box",x:0,y:0.7,z:pz,w:0.11,h:1.0,d:0.11,c:POST});                       /* the post, 0.2 to 1.2 */
+    parts.push({s:"box",x:0,y:0.33,z:pz,w:0.114,h:0.05,d:0.114,c:STRIPE});                 /* its warning stripe */
+    [CX-0.25,CX+0.25].forEach(qx=>{const z0=pz-sg*0.055,z1=sg*0.16,dx=qx,dz=z1-z0,L=Math.hypot(dx,dz); /* an arm from the post's face to a lift point */
+      parts.push({s:"cyl",x:dx/2,y:0.5,z:(z0+z1)/2,r:0.03,h:L,c:ARM,rx:Math.PI/2,ry:Math.atan2(dx,dz)});
+      parts.push({s:"box",x:qx,y:0.515,z:z1,w:0.07,h:0.02,d:0.07,c:UNDER});});});          /* its pad */
+  parts.push({s:"box",x:0,y:1.16,z:0,w:0.12,h:0.08,d:0.73,c:POST});                        /* the overhead beam, tying the posts */
+  [[CX-0.3,-0.21],[CX+0.3,-0.21],[CX-0.3,0.21],[CX+0.3,0.21]].forEach(([wx,wz])=>{parts.push({s:"cyl",x:wx,y:0.5,z:wz,r:0.08,h:0.06,c:TYRE,rx:Math.PI/2}); /* a wheel, hanging */
+    parts.push({s:"cyl",x:wx,y:0.5,z:wz,r:0.036,h:0.066,c:HUB,rx:Math.PI/2});});
+  parts.push({s:"box",x:CX,y:0.535,z:0,w:0.86,h:0.03,d:0.4,c:UNDER},                       /* the car's under-body, the darkest thing in the bay */
+    {s:"box",x:CX,y:0.62,z:0,w:0.9,h:0.14,d:0.44,c:BODY},                                  /* the body, 0.55 to 0.69 */
+    {s:"box",x:CX-0.17,y:0.73,z:0,w:0.42,h:0.08,d:0.36,c:GLASS},                           /* the glass band */
+    {s:"box",x:CX-0.17,y:0.79,z:0,w:0.42,h:0.04,d:0.38,c:ROOF});                           /* the roof, lighter */
+  [[CX-0.365,-0.17],[CX+0.025,-0.17],[CX-0.365,0.17],[CX+0.025,0.17]].forEach(([px,pz])=>parts.push({s:"box",x:px,y:0.73,z:pz,w:0.03,h:0.08,d:0.03,c:CABIN})); /* the pillars */
+  return parts;};
+
+/* ---- BEAUTIFY, CREW ITERATION 11 — la calle ----
+   Owner: "lets do a crew mode to try to fix as many things … rails, fences, … bridge, petals, trolley,
+   … fruit stands". The street and the park, built the way each thing was built (.claude/skills/how-its-made):
+   a picket fence is posts set in the ground, two rails and pickets nailed on; a balustrade is a shoe,
+   panes, posts and a cap; a crate is a slatted box and what a hand set in it; a counter is one carcase
+   the length of its run. Same seam as the sittings above, colours a step paler than the pictures they
+   replace, because a lit mesh shades itself (docs/3D-LOG.md 2026-09-21). The bridge and the tram are
+   the engine's (scratchpad: bridge-parts.md, trolley-parts.md) — the hook never reaches `^`. */
+
+/* A CREST OF PETALS. Content cannot change the ground bake's density (engine.js, petalSpill: a function
+   of distance from the bridge only); what it can add is the line where a drift meets something — a
+   fence's foot, a curb — a dark under and six to ten petals standing a hair proud of it. A petal at
+   this scale is a flattened ellipsoid; the fan and the rib are the picture's job. Colours from
+   petalPal(), the dark end kept for the under. In season only; the caller asks petalsOn(). (Pili) */
+const meshPetalCrest=(parts,n,seed,ax,a,b,off,y0)=>{const P=petalPal();let sd=((seed|0)*7919+13)&0x7fffffff;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+  const at=(al,o)=>ax==="x"?{x:al,z:o}:{x:o,z:al};let q=at((a+b)/2,off);
+  parts.push({s:"box",x:q.x,y:y0+0.006,z:q.z,w:(b-a)*0.92,h:0.012,d:0.11,c:"#5A2E12",ry:ax==="x"?0:Math.PI/2});        /* the dark under the drift */
+  for(let i=0;i<n;i++){q=at(a+0.06+rnd()*(b-a-0.12),off+(rnd()-0.5)*0.07);
+    parts.push({s:"sph",x:q.x,y:y0+0.02,z:q.z,r:0.05,sx:1.2,sy:0.25,c:P[1+((i+(seed|0))%(P.length-1))],ry:rnd()*Math.PI});}};
+
+/* THE PICKET FENCE. One post a tile, at the tile's centre — a rail bay wants a post every six feet, and
+   a tile is about that; two rails on the yard side running post to post THROUGH the tile edges, so each
+   tile's rail spans the whole tile and butts its neighbour's; four pickets a bay on the street side, cut
+   from one stock on one jig — one width, one point — and nailed on by hand, which is where the variation
+   enters: a hair higher or lower, one leaning a degree, three weathered shades. The rails a step darker
+   than the pickets: that behind-value is the depth (Pili). A corner is two runs meeting at the corner
+   post; a run ends at its post and nothing overhangs; the post's cut top is lit. A neighbour is the same
+   GLYPH: the barricade beside the crew pen is kind `fence` too, and reading the kind is what stood the
+   engine's panels at 90° in mid-air there (docs/BEAUTIFY.md, row F). The park's sixty tiles are one
+   fence and the site's are the same fence, because this pack draws one F in every other camera. In
+   season, a crest of petals along its foot on the park side within three tiles of the bridge. */
+TILEART_MESH["F"]=({x,y})=>{
+  const w=CW(),F=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="F";};
+  const open=(gx,gy)=>{const r=w&&w.grid&&w.grid[gy];return !!r&&r[gx]!==undefined&&!SOLID.has(r[gx]);};
+  const N=F(x,y-1),S=F(x,y+1),E=F(x+1,y),Wt=F(x-1,y),h=(((x*7+y*13)%5)+5)%5;
+  const PICK=["#A87F4F","#B08A58","#9E7748"],TIP="#B99464",RAIL="#6B4F2E",POST="#6B4F2E",CAPC="#B08E5E",H=0.72;
+  const parts=[],runs=[],corner=(E||Wt)&&(N||S);
+  /* a run: at a corner each run stops at the corner post in the tile's centre; a straight bay spans the
+     tile; a run's END spans the tile too and gets an end post at the edge of the gap, so a gate opening
+     is the open tile and not the open tile and a half */
+  if(E||Wt)runs.push({ax:"x",a:corner&&!Wt?0:-0.5,b:corner&&!E?0:0.5,end:corner?0:!Wt?-1:!E?1:0,s:open(x,y+1)?1:open(x,y-1)?-1:1}); /* rails face the yard: the open side */
+  if(N||S)runs.push({ax:"z",a:corner&&!N?0:-0.5,b:corner&&!S?0:0.5,end:corner?0:!N?-1:!S?1:0,s:open(x+1,y)?1:open(x-1,y)?-1:1});
+  if(!runs.length)runs.push({ax:"x",a:-0.5,b:0.5,end:2,s:open(x,y+1)?1:-1});                   /* alone, a whole bay east-west, a post at each end */
+  const pet=typeof petalsOn==="function"&&petalsOn()&&typeof bridgeDist==="function"&&bridgeDist(w,x,y)<=3;
+  let px=0,pz=0;
+  const post=(qx,qz)=>{parts.push({s:"box",x:qx,y:0.41,z:qz,w:0.09,h:0.82,d:0.09,c:POST});
+    parts.push({s:"box",x:qx,y:0.83,z:qz,w:0.11,h:0.02,d:0.11,c:CAPC});};                       /* a post, its cut top lit */
+  runs.forEach(({ax,a,b,end,s},ri)=>{const ry=ax==="x"?0:Math.PI/2,at=(al,off)=>ax==="x"?{x:al,z:off}:{x:off,z:al};
+    if(ax==="x")pz=s*0.04;else px=s*0.04;                                                      /* the post stands behind the rails */
+    [0.24,0.56].forEach(yy=>{const q=at((a+b)/2,-s*0.01);parts.push({s:"box",x:q.x,y:yy,z:q.z,w:b-a,h:0.05,d:0.03,c:RAIL,ry});});
+    [-0.38,-0.13,0.13,0.38].forEach((al,i)=>{if(al<a-0.01||al>b+0.01)return;
+      const q=at(al,-s*0.037),k=(i+h+ri)%3,ph=H-0.07-k*0.014,lean=((i*7+h)%3-1)*0.012;
+      parts.push({s:"box",x:q.x,y:0.05+ph/2,z:q.z,w:0.13,h:ph,d:0.025,c:PICK[k],ry,rz:lean});    /* the board, a hair off the ground */
+      parts.push({s:"cone",x:q.x,y:0.05+ph+0.04,z:q.z,r:0.072,h:0.08,c:TIP,sz:0.36,ry});});      /* its point, off the jig */
+    if(end===2||end===-1){const q=at(-0.455,s*0.04);post(q.x,q.z);}                             /* the end post, at the edge of the gap */
+    if(end===2||end===1){const q=at(0.455,s*0.04);post(q.x,q.z);}
+    if(pet)meshPetalCrest(parts,6+(h%4),x*31+y*17+ri,ax,a,b,s*0.13,0);});                       /* the drift, against the foot on the park side */
+  post(px,pz);                                                                                  /* the bay post, one a tile */
+  return parts;};
+
+/* THE RAIL ROUND THE WELL. In this pack it is a glass divider (owner, 2026-09-16: "make it a glass
+   divider"; TILEART_SIDE_GLASS above) — but a vertex-coloured Lambert mesh has no alpha, and a pane drawn
+   as a pale sheet was rendered and looked at: a bathtub wall that hid the flight, which is the one thing
+   the divider exists to show. So the 3D camera builds what a glazier fits round an opening MINUS the
+   glass: the shoe channel bolted along the lip, the posts, and the cap rail — one bar the length of the
+   run, unbroken, dark over the pale floor with a light strip on top (Pili: a light cap over this floor
+   is Δ38 after tint and fails). It stands on the LIP of the well and faces it — wellDepth of the four
+   neighbours says which lip, the engine's own rule for a rail beside a well — and it is waist-high,
+   which is what a guard rail is. A post at the near edge and the centre; the far edge is the next
+   tile's near post, or an end post where the run ends. The pane has its alpha now — `a:` in the mesh view
+   (crew iteration 11): 0.45, so the flight shows through it, and the frame says where the edge is. */
+TILEART_MESH["◺"]=({x,y})=>{
+  const w=CW(),wl=(gx,gy)=>typeof wellDepth==="function"&&wellDepth(w,gx,gy)>0;
+  const R=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="◺";};
+  const lip=wl(x,y+1)?[0,0.44,0]:wl(x,y-1)?[0,-0.44,0]:wl(x+1,y)?[0.44,0,Math.PI/2]:wl(x-1,y)?[-0.44,0,Math.PI/2]:[0,0,0];
+  const ry=lip[2],ax=ry?"z":"x",ends=ax==="x"?!R(x+1,y):!R(x,y+1);
+  const at=(al,off)=>ax==="x"?{x:lip[0]+al,z:lip[1]+off}:{x:lip[0]+off,z:lip[1]+al};
+  const CAP="#3A3F46",CAPL="#8E98A3",POST="#4A5058",H=0.62,parts=[];
+  let q=at(0,0);
+  parts.push({s:"box",x:q.x,y:H-0.03,z:q.z,w:1,h:0.06,d:0.07,c:CAP,ry});                       /* the cap rail: one line, the whole run */
+  parts.push({s:"box",x:q.x,y:H+0.004,z:q.z,w:1,h:0.008,d:0.07,c:CAPL,ry});                    /* its top, where the key lands */
+  parts.push({s:"box",x:q.x,y:(H-0.06)/2,z:q.z,w:1,h:H-0.08,d:0.02,c:"#D6E6EC",a:0.45,ry});      /* the pane: glass at 0.45, the flight shows through it (a: in the mesh view, crew iteration 11) */
+  [-0.475,0].concat(ends?[0.475]:[]).forEach(al=>{q=at(al,0);parts.push({s:"box",x:q.x,y:(H-0.06)/2,z:q.z,w:0.05,h:H-0.06,d:0.05,c:POST,ry});});
+  return parts;};                                                                              /* no shoe at the floor: with a bottom bar it rendered as a ladder on its side */
+
+/* THE PRODUCE CRATE. A slatted box nailed from one pattern — four corner posts standing a thumb proud of
+   the slats (that is what says crate and not box), three slats a side with a gap between, a rim — so
+   every crate is the same crate; what differs is what a grocer set in it, ONE KIND to a crate, by hand,
+   so it mounds and touches and spills over the front. The picture mixes a tomato, a chile and a banana
+   in each; that is a diagram of the word "produce". Which crate holds what follows the picture's own
+   parity, so the plan and the shape agree. The crate goes dark and the mouth darkest so the fruit reads
+   against it, and the fruit keeps the picture's saturation (Pili). Tomatoes are siblings off one plant:
+   one radius, a pack on the bottom, a second layer in the hollows, one on the peak, each with its green
+   star where the stem was, tumbled a little. A chile is a thin cone bent at the tip, lying every which
+   way. A hand of bananas is four fingers on one stem, each finger three short cylinders in a curve. */
+const meshTomato=(parts,tx,ty,tz,r,seed,col)=>{const a=seed*1.7,dx=Math.cos(a)*r*0.25,dz=Math.sin(a)*r*0.25;
+  parts.push({s:"sph",x:tx,y:ty,z:tz,r,sy:0.9,c:col});
+  parts.push({s:"sph",x:tx+dx,y:ty+r*0.82,z:tz+dz,r:r*0.34,sy:0.3,c:"#4E9A3E"});                /* the star, where the stem was */
+  parts.push({s:"cyl",x:tx+dx,y:ty+r*0.9,z:tz+dz,r:r*0.07,h:r*0.3,c:"#3E7A34"});};
+TILEART_MESH["H"]=({x,y})=>{const alt=(((x*3+y*5)%7)+7)%7,kind=alt<3?"tomato":alt<5?"chile":"banana";
+  let sd=(x*131+y*71+7)|0;const rnd=()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};
+  const POSTC="#6B4F2E",SLAT="#7A5B36",SLATL="#8A6A42",MOUTH="#3A2A18",parts=[],T=0.44,FILL=0.34;
+  [[-0.37,-0.29],[0.37,-0.29],[-0.37,0.29],[0.37,0.29]].forEach(([cx,cz])=>parts.push({s:"box",x:cx,y:(T+0.05)/2,z:cz,w:0.06,h:T+0.05,d:0.06,c:POSTC})); /* four posts, proud by a thumb */
+  [0.08,0.2,0.32].forEach(sy=>{[-0.3,0.3].forEach(z=>parts.push({s:"box",x:0,y:sy,z,w:0.74,h:0.1,d:0.03,c:SLAT}));                   /* three slats a side, a gap between */
+    [-0.385,0.385].forEach(xx=>parts.push({s:"box",x:xx,y:sy,z:0,w:0.03,h:0.1,d:0.58,c:SLAT}));});
+  [[0,-0.3,0.74,0.03],[0,0.3,0.74,0.03],[-0.385,0,0.03,0.58],[0.385,0,0.03,0.58]].forEach(([cx,cz,ww,dd])=>parts.push({s:"box",x:cx,y:T-0.03,z:cz,w:ww,h:0.06,d:dd,c:SLATL})); /* the rim, lit */
+  parts.push({s:"box",x:0,y:FILL-0.05,z:0,w:0.72,h:0.1,d:0.56,c:MOUTH});                                                            /* the mouth: the darkest thing on the street, the fruit against it */
+  if(kind==="tomato"){const r=0.095,RED=["#D4382A","#C9331F","#DE4232"];let i=0;
+    const one=(tx,ty,tz)=>{meshTomato(parts,tx+(rnd()-0.5)*0.016,ty,tz+(rnd()-0.5)*0.016,r,i+alt,RED[(i++ +alt)%3]);};
+    [-0.2,0,0.2].forEach(tx=>{one(tx,FILL+r,-0.19);one(tx,FILL+r,0);one(tx,FILL+r+0.03,0.25);});                                    /* the bottom, packed; the front row tumbled onto the rim, spilling over it */
+    [[-0.1,-0.1],[0.1,-0.1],[-0.1,0.1],[0.1,0.1]].forEach(([tx,tz])=>one(tx,FILL+r+0.15,tz));                                        /* the hollows */
+    one(0,FILL+r+0.29,0);}                                                                                                          /* the peak */
+  else if(kind==="chile"){const GRN="#52A542",DARK="#2F6B27";
+    for(let i=0;i<14;i++){const a=rnd()*Math.PI*2,cx=(rnd()-0.5)*0.5,cz=(rnd()-0.5)*0.38,cy=FILL+0.035+(i>8?0.065:0)+(i>12?0.06:0),ux=Math.sin(a),uz=Math.cos(a),b=a+0.5;
+      parts.push({s:"cone",x:cx,y:cy,z:cz,r:0.035,h:0.2,c:GRN,rx:Math.PI/2,ry:a});                                                 /* the body, lying */
+      parts.push({s:"cone",x:cx+ux*0.1+Math.sin(b)*0.045,y:cy,z:cz+uz*0.1+Math.cos(b)*0.045,r:0.018,h:0.1,c:GRN,rx:Math.PI/2,ry:b}); /* the tip, bent */
+      parts.push({s:"cyl",x:cx-ux*0.11,y:cy,z:cz-uz*0.11,r:0.024,h:0.03,c:DARK,rx:Math.PI/2,ry:a});}}                              /* the cap */
+  else{const YEL=["#E8C33A","#E0BB33"],TIPC="#5C4A1E";
+    [[-0.1,FILL+0.05,-0.08,0.4],[0.14,FILL+0.1,0.1,3.6],[-0.02,FILL+0.2,0.04,1.9]].forEach(([hx,hy,hz,ha],hi)=>{                     /* three hands, laid over each other */
+      const c=Math.cos(ha),s=Math.sin(ha),at=(lx,ly,lz)=>({x:hx+lx*c-lz*s,y:hy+ly,z:hz+lx*s+lz*c});
+      let q=at(-0.12,0.02,0);parts.push({s:"cyl",x:q.x,y:q.y,z:q.z,r:0.035,h:0.06,c:"#8A6B3A",rz:Math.PI/2,ry:-ha});                /* the stem they hang from */
+      for(let f=0;f<4;f++){const fz=(f-1.5)*0.062,fy=Math.abs(f-1.5)*0.014,col=YEL[(f+hi)%2];
+        [[-0.05,0,0.22],[0.04,0.02,0.42],[0.13,0.06,0.62]].forEach(([lx,ly,bend])=>{q=at(lx,fy+ly,fz);
+          parts.push({s:"cyl",x:q.x,y:q.y,z:q.z,r:0.03,h:0.1,c:col,rz:Math.PI/2-bend,ry:-ha});});
+        q=at(0.18,fy+0.085,fz);parts.push({s:"sph",x:q.x,y:q.y,z:q.z,r:0.024,c:TIPC});}});}                                         /* the dark tip */
+  return parts;};
+
+/* THE COUNTER. One carcase the length of the run: a plinth set back at the foot, the body, a worked
+   top a hair proud of the face, plank joins on the WORLD grid so they run through the tiles as the
+   picture's do, end panels only where the run ends — and the scale ONCE, at the head of the run, on the
+   top and not in the texture. (As a box the head tile stood taller than the other three, because the
+   baker measured the scale's dial into the box's height.) A cast base, a column, a pan, a dial face on a
+   stalk behind the pan, a red needle reading something, one tomato on the pan. */
+TILEART_MESH["I"]=({x,y})=>{
+  const w=CW(),cnt=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="I";};
+  const Wt=!cnt(x-1,y),E=!cnt(x+1,y),head=Wt,H=0.6;
+  const BODY="#9C7A4E",TOP="#B8925F",TOPL="#C9A46E",KICK="#7A5B38",CAP="#7A5B38",JOIN="#5E4527";
+  const parts=[{s:"box",x:0,y:0.03,z:0.02,w:1,h:0.06,d:0.58,c:KICK},                            /* the plinth, set back */
+    {s:"box",x:0,y:0.06+(H-0.1)/2,z:0,w:1,h:H-0.1,d:0.66,c:BODY},                                /* the carcase, tile to tile */
+    {s:"box",x:0,y:H-0.02,z:0,w:1,h:0.04,d:0.72,c:TOP},                                          /* the worked top, a hair proud */
+    {s:"box",x:0,y:H+0.001,z:0,w:1,h:0.004,d:0.72,c:TOPL}];                                      /* its lit face */
+  for(let gx=x*32;gx<x*32+32;gx++)if(gx%11===0){const lx=(gx-x*32)/32-0.5+1/64;parts.push({s:"box",x:lx,y:0.06+(H-0.1)/2,z:0.331,w:0.012,h:H-0.12,d:0.008,c:JOIN});}
+  if(Wt)parts.push({s:"box",x:-0.49,y:H/2-0.01,z:0,w:0.03,h:H-0.02,d:0.7,c:CAP});
+  if(E)parts.push({s:"box",x:0.49,y:H/2-0.01,z:0,w:0.03,h:H-0.02,d:0.7,c:CAP});
+  if(head){const y0=H+0.003,STEEL="#6F777F",PAN="#D3D7DC",FACE="#F2F4F5";
+    parts.push({s:"cyl",x:0,y:y0+0.01,z:0.02,r:0.1,h:0.02,c:STEEL},{s:"box",x:0,y:y0+0.09,z:0.02,w:0.05,h:0.14,d:0.05,c:STEEL});  /* the base and the column */
+    parts.push({s:"cyl",x:0,y:y0+0.165,z:0.02,r:0.13,h:0.015,c:PAN},{s:"cyl",x:0,y:y0+0.176,z:0.02,rt:0.135,rb:0.12,h:0.008,c:"#E8EBEE"}); /* the pan and its lip */
+    parts.push({s:"box",x:0,y:y0+0.23,z:-0.1,w:0.03,h:0.22,d:0.03,c:STEEL});                                                        /* the stalk behind the pan */
+    parts.push({s:"cyl",x:0,y:y0+0.34,z:-0.1,r:0.1,h:0.025,c:STEEL,rx:Math.PI/2},{s:"cyl",x:0,y:y0+0.34,z:-0.086,r:0.085,h:0.004,c:FACE,rx:Math.PI/2}); /* the dial, facing the shop */
+    parts.push({s:"box",x:0.014,y:y0+0.36,z:-0.082,w:0.007,h:0.06,d:0.004,c:"#D0402F",rz:-0.5});                                  /* the needle, reading something */
+    meshTomato(parts,0.01,y0+0.25,0.03,0.075,x+y,"#D4382A");}
+  return parts;};
+
+/* WHAT STANDS ON THE BRIDGE. The deck, the rib and the rails are the engine's (test/smoke.js reads them); the
+   pack answers "prop:bridge" with what a builder adds to a plank bridge once the deck is down: a stringer
+   beam under each open side — the dark line that says the deck has a thickness and is not a rug — a
+   nosing along the top edge where boots wear it pale, and in season the crest where the petal heap meets
+   the rail line, the same recipe as the fence's foot. Deck-local: x along the crossing, y up from the
+   deck's top, z ±0.5 the two sides; `edges` names the open sides (−1, +1), `h` the deck's thickness.
+   (la calle's parts list; Pili's two, the beam and the nosing.) */
+TILEART_MESH["prop:bridge"]=({x,y,h,edges,pet})=>{const parts=[],H=h||0.22;
+  (edges||[]).forEach(sd=>{
+    parts.push({s:"box",x:0,y:-H*0.65,z:sd*0.485,w:1,h:H*0.35,d:0.03,c:"#5A4330"});         /* the stringer, along the bottom of the side */
+    parts.push({s:"box",x:0,y:0.005,z:sd*0.49,w:1,h:0.02,d:0.04,c:"#B08E5E"});              /* the nosing, worn pale along the top edge */
+    if(pet)meshPetalCrest(parts,8+((((x+y)%3)+3)%3),x*31+y*17+sd*5,"x",-0.5,0.5,sd*0.4,0);});/* the heap's edge, inside the rail line */
+  return parts;};
+
+/* THE TROLLEY'S BODY. The engine keeps the wheels (it spins them) and the driver (he changes ends); the pack
+   answers "prop:tram" with the body, built the way a tram is: an underframe skirt full length over the
+   bogies, a dark panel to the waist and a light band round the windows (Rigo's paint rule — never two
+   mid-tones), the glazing in the band, a roof that OVERHANGS the body with a drip lip under it, a raised
+   clerestory, and the trolley pole leaning back against the travel — twelve pixels of line above the roof
+   that say tram and not bus (Pili). Then the tram's own paperwork: a headlamp at each end, a bell under
+   the roof at the platform, a fender leaning out low at each end, a grab rail on each open platform.
+   +x is the direction of travel; the engine flips the body with TRO.dir. `len` is TRO_LEN, `h` the roof
+   height (a door is 1.0), `fl` the floor, `cab` the open platform at each end. (la calle's parts list.) */
+TILEART_MESH["prop:tram"]=({len,h,fl,cab})=>{const L=len||2,H=h||1.02,FL=fl||0.20,CAB=cab||0.15;
+  const SKIRT="#6B2E1E",BAND="#E8D6B0",ROOF="#8E4230",GLASS="#D8E6F0",IRON="#3A3F46",LAMP="#FFE9A8",BELL="#C9A227";
+  const BW=L-0.1-CAB*2,bandY0=FL+0.31,bandH=(H-0.06)-bandY0,parts=[
+    {s:"box",x:0,y:(FL+0.10)/2,z:0,w:L-0.06,h:FL+0.10,d:0.74,c:SKIRT},                        /* the underframe skirt, full length */
+    {s:"box",x:0,y:FL+0.17,z:0,w:BW,h:0.28,d:0.72,c:SKIRT},                                   /* the dark panel, to the waist */
+    {s:"box",x:0,y:bandY0+bandH/2,z:0,w:BW,h:bandH,d:0.72,c:BAND},                             /* the light band the windows sit in */
+    {s:"box",x:0,y:H-0.03,z:0,w:L+0.10,h:0.06,d:0.92,c:ROOF},                                 /* the roof, overhanging by 0.06 all round */
+    {s:"box",x:0,y:H-0.07,z:0,w:L+0.10,h:0.02,d:0.94,c:SKIRT},                                /* the drip lip under the overhang */
+    {s:"box",x:0,y:H+0.05,z:0,w:L-0.5,h:0.10,d:0.5,c:ROOF},                                   /* the clerestory */
+    {s:"cyl",x:0.06,y:H+0.12,z:0,r:0.05,h:0.04,c:IRON},                                       /* the pole's swivel base */
+    {s:"cyl",x:0.06,y:H+0.31,z:0,r:0.02,h:0.35,c:IRON,rz:0.35},                               /* the trolley pole, leaning back against the travel */
+    {s:"sph",x:L/2-0.12,y:H-0.12,z:0.3,r:0.04,c:BELL}];                                       /* the bell, under the roof edge at the platform */
+  [-0.55,0,0.55].forEach(dx=>[-1,1].forEach(sd=>parts.push({s:"box",x:dx*(BW/1.6),y:bandY0+bandH*0.45,z:sd*0.37,w:0.42*(BW/1.6),h:bandH*0.6,d:0.02,c:GLASS}))); /* six lights a side */
+  [-1,1].forEach(ed=>{parts.push({s:"box",x:ed*(BW/2+0.005),y:bandY0+bandH*0.45,z:0,w:0.02,h:bandH*0.6,d:0.50,c:GLASS});   /* the windscreen at each end of the saloon */
+    parts.push({s:"cyl",x:ed*(L/2-0.03),y:0.45,z:0,r:0.05,h:0.03,c:LAMP,rx:Math.PI/2});                                     /* a headlamp at each end, low, on the dash */
+    parts.push({s:"box",x:ed*(L/2-0.01),y:0.14,z:0,w:0.06,h:0.16,d:0.6,c:IRON,rz:-ed*0.35});                                /* the fender, leaning out low */
+    [-1,1].forEach(sd=>{parts.push({s:"box",x:ed*(L/2-0.05-CAB/2),y:0.75,z:sd*0.36,w:CAB,h:0.03,d:0.02,c:IRON});             /* the grab rail on the open platform */
+      parts.push({s:"cyl",x:ed*(L/2-0.06),y:(FL+0.10+0.75)/2,z:sd*0.36,r:0.012,h:0.75-(FL+0.10),c:IRON});});});                /* its stanchion, floor to rail */
   return parts;};
 
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},

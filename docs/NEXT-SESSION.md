@@ -5,6 +5,31 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
+### ⇢ 2026-09-21, latest — crew iteration 11: the marigold by a botanist, fourteen shapes by two builders, Pili directing.
+
+Owner: *"everything looks good except the marigolds. lets do a crew mode … an expert on flora … computers,
+rails, fences, coffee machines, fridge, bridge, petals, trolley, desks, fruit stands, car lifts, tires,
+car,and tool boxes. make sure even mural gets done please."* Crew mode ON by his word — #221/#222/#223
+with `taken:` labels, a worktree per builder, one branch because every lane lands in `art.js`. Done,
+`mq-v182` (`docs/3D-LOG.md`, fourth entry of the date; run `docs/runs/2026-09-21-claude-d8e4.md`):
+all fourteen as shapes, the marigold as a stack of whorls with the bed's row-constant seed fixed, a
+pad under every mesh (engine rule), four panels on the wall in four materials — **and the engine half
+the crew could not reach from content, built by the session the same sitting:** `prop:bridge` (the
+engine keeps its deck and rails and adds the pack's stringer, nosing and crest), `prop:tram` (the
+body; wheels and driver stay engine, the wheel guard at four, planted), glass with `a:` (the rail's
+pane at 0.45), and the petal spill banking against a SOLID neighbour. `t3MeshOf` is at file scope now.
+**Two new keys and glass are in `docs/TAGS.md` (L15) and `docs/NEW-WORLD.md`.** **Still open:** the
+hero behind a mesh crown; the iso camera; the chiles and bananas read as "green stuff" and "yellow
+stuff" at 35 px (the smith's own verdict); no phone has been measured since the triangles went up.
+**Costs:** the four agents 1,210,463 on their own live meters (Pili 209,747 · botánica 257,248 · taller
+342,370 · calle 401,098); the session ~330,000; **the session meter's after-figure is read at the start
+of the next turn** (before: 1,511,704 in · 13,871,532 out) — and that read says whether agents' tokens
+post to it. **Two rule contradictions reported in the flight notes (iteration 11):** `crew-fix` and the
+FLIGHT-NOTES header say the session applies persona edits; `docs/RUNS.md` §6 (his, 2026-09-20) says
+they go to `docs/personas/proposed/` — followed §6, the two older texts need a line. **Known:** the
+Pili brief's camera line was wrong (4 tiles/35° vs 7.4/6.2/40°) — every brief's [CODE] lines are only
+as good as the grep behind them. #221–#223 close when the PR merges; their `taken:` labels come off then.
+
 ### ⇢ 2026-09-21, latest — the second try: ruffled marigolds, a dress of flags, tables, poles, the altar.
 
 Owner: *"the marigolds can use another try and same with the decor … tables too, poles with the paper
@@ -13,7 +38,11 @@ third entry of the date). Two helpers in the pack now — `meshMarigold`, `meshP
 rule: a string hangs from something at its own height, or from a pole. **Triangles went up by 3–4×
 where the marigolds are (park 33,502; altar frame 81,464); draw calls did not move; no phone has been
 measured** — if one stutters, a cheaper head for distant beds is the fix. **Still open:** the hero
-behind a mesh crown; the iso camera; row 6, whose shelf; `docs/SECURITY.md` §3 step 1.
+behind a mesh crown; the iso camera; row 6, whose shelf; `docs/SECURITY.md` §3 step 1. **Measured at the next
+turn's start:** 1,958,009 out on the session meter for a sitting the live meter put at ~33,000 — a factor near 60,
+after 30, 15 and 15. The ratio grows with the context the session carries (595k at that read). **For his
+five-hour window: a fresh session at the top of the window does the same work for fewer plan tokens than
+this one, which is a day old and carries everything.** Run `f5b1` has the numbers.
 
 ### ⇢ 2026-09-21, latest — five more shapes; the flat list is eight leggy or boxy things.
 

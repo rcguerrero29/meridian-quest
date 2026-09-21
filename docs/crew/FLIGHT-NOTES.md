@@ -90,6 +90,10 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 67 | `paty` | A document's `sub` is not a state the screen has — `sub` is exported prose, `note` and `p` are screen prose, a canvas caption is neither | **APPLIED 2026-09-14** — end of "A string is a claim about a state", which is the end of her file; `:3344` verified, and `note` confirmed drawn by the reader (grep `"dnote"`); the same fault as row 66, found from the string rather than the meaning |
 | 68 | `chava` | Before you claim a canvas is empty, read it with `getImageData` at the source, not from a screenshot | **APPLIED 2026-09-14** — end of "When you conclude a thing is absent", the section his post-flight pointed at without naming; the 3× crop would not have saved him, because the capture was of the wrong rectangle and not too small |
 | 69 | `remedios` | *None, and here is why not* | **NONE** — her reason, in her words: the edit she would have proposed (check a register's self-references against its own headings) is rule 1 of the shared block, which she applied at `docs/UI-REVIEW.md` §4 versus §6 and which produced a finding; the run's lesson — no tool, say so first — was row 57, added eight hours earlier, and worked in the first sixty seconds; "an agent that proposes an edit every round is performing improvement" |
+| 70 | `pili` | The light in this renderer gives you 1.5:1 and nothing else, and the face it favours wears the map — the Lambert ladder 1.00/0.88/0.78/0.66, and the lid: every engine box wears its TOP-DOWN drawing on its lid | **PROPOSED → `docs/personas/proposed/pili/2026-09-21-claude-d8e4.md`** — not applied by the session: since 2026-09-20 a persona edit is a suggestion the owner folds in or does not (`docs/RUNS.md` §6, his words). The header of this file and `crew-fix` still say the session applies or refuses here — a contradiction, reported in the iteration-11 notes below |
+| 71 | *la botánica* (guest) | *A flower is built from the step that made it: hue per plant at sowing, value per whorl by growth, the turn per head by the seed — put each at its own step and nowhere earlier. Then crop the row at 3×: if two tiles match pixel for pixel, the seed is not reading both axes* | **NO FILE TO EDIT** — a guest with no persona; her own case is AGAINST a standing flora expert (one flower matters, and the two lessons are in the repository's words now). The line is kept here, for the day a persona is opened |
+| 72 | *el taller* (guest) | *Count the parts on the drawing before you write a line — the drawing's hex said a blue customer's car, not the Caprice, and three tires where the brief said four; and when a brief contradicts a table, walk the table (`TILEMETA`, `t3Boxy`, `SOLIDX`, the ribbon) before you build on either* | **NO FILE TO EDIT** — a guest; the line is kept here |
+| 73 | *la calle* (guest) | *A guard reads the grid; a smith reads the member — walk to the run's ends and corners before you assert what a tile's shape must span, and plant the guard against the nearest thing that is NOT the member you mean (the picket's point at 0.452 where the rail stopped). A pane you cannot see through is a wall: render the sheet before you argue for it* | **NO FILE TO EDIT** — a guest; the line is kept here |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -129,6 +133,62 @@ is ordinary and is the whole point: **an un-applied proposal looks exactly like 
 considered and declined, and both look like nothing at all.** Hence the table above.
 
 ---
+
+# ITERATION 11 — 2026-09-21 — the marigold by a botanist, fourteen shapes by two builders, Pili's direction
+
+*Owner: "lets do a crew mode to try to fix as many things but lets have an expert on flora help the
+design on the marigolds so they are realistic. attached a single and a bunch and in a bush. so again,
+computers, rails, fences, coffee machines, fridge, bridge, petals, trolley, desks, fruit stands, car
+lifts, tires, car,and tool boxes. make sure even mural gets done please." Crew mode ON by his word:
+three issues (#221 the marigold, #222 the garage and the offices, #223 the street and the park), a
+`taken:` label each, a worktree per builder, one branch because every lane lands in one file
+(`content/meridian/art.js`). Four called, four returned, every returner painted — four panels carry
+`iter: 11` on the wall, in four materials (a paint-shop swatch card, a herbarium sheet, a shop job
+card with its stamp, chalk on the forge's slate). Pili directed first (no write tool — her deliverable
+came back in the hand-back and the session saved it: `docs/mocks/2026-09-21-contact-sheet/crew-11/`);
+the botanist, the mechanic and the smith built in parallel from her direction. The run file is
+`docs/runs/2026-09-21-claude-d8e4.md`; the ledger rows are 70–73 above.*
+
+**What the run itself proved.** Every one of the four contradicted the brief with a `file:line` and
+was right each time: the brief's camera ("four tiles back at 35°") is 7.4 back, 6.2 up, 40°
+(`engine3d.js`, grep `T3CAMD`) — Pili would have sized every recommendation 50% too large had she
+trusted it; the brief called `6` and `0` boxes — they are sprites the Taller's ribbon lays at
+district two, which the audit walking at chapter zero never counts (el taller, a fifth of his run on
+that one thread); the brief said the park lays eight beds — it lays six (la botánica); the brief said
+the bridge goes through the same hook as the wall — the bridge branch `continue`s before the hook and
+`^` is neither SOLID nor `stand` (la calle). **The finding that explains four of the owner's fourteen
+at once was Pili's:** an engine box wears its TOP-DOWN drawing on its lid, so a counter's coffee cups
+lie face-up on the counter top the size of chairs — the sill's fault, again — and a mesh deletes the
+lid. The second was the botanist's magnifier, not her botany: the bed's seed `(x*7+y*13)%7` was
+constant along a row, so three beds in a row were one bed pressed three times in every frame the owner
+had looked at. The third was the smith's plant: his guard's first cut asked every tile for a whole bay
+and went red on twelve right tiles; the plant then showed a threshold at 0.45 would have read the
+picket's point (0.452) for the rail. All four named a gap before starting and all four watched it
+appear; two watched it appear larger — Pili had no way to render and no write tool; la calle's
+"soft things" (produce that mounds, petals that heap) went down on a grid first, exactly as predicted.
+
+**The engine half the smith could not reach from content was built the same sitting, by the
+session, from his parts lists:** the bridge seam (`prop:bridge`, after the deck, ADD never replace);
+the petal spill banking against a SOLID neighbour and thinning in the open; glass with alpha in
+`t3MeshOf` (the rail has its pane back at 0.45); the tram's body through `prop:tram`, with the wheel
+guard raised from 2 to 4 and planted first — red in its own sentence. `docs/3D-LOG.md`, the same entry.
+
+**A contradiction in the rules, reported.** The header of this file and `.claude/skills/crew-fix`
+say a proposed persona edit is applied or refused *by the calling session, in writing, here*.
+`docs/RUNS.md` §6 and `docs/personas/README.md` (2026-09-20, the owner's words: *"any
+persona-learning suggestion kept separate from the approved persona itself"*) say it goes to
+`docs/personas/proposed/` and the owner folds it in or does not. The newer rule is his; this
+iteration followed it (row 70), and the two older texts need one line each saying so.
+
+| Returner | The gap named in the pre-flight | Did it appear | The persona edit |
+|---|---|---|---|
+| `pili` | Her file is 2D-canvas craft and carries nothing about what a Lambert mesh can do; she expected to guess at value until she found the light's real numbers | Yes, and worse — no render, no write tool, and a brief camera that would have mis-sized everything; `DAY_AMB/DAY_SUN` handed her the ladder halfway through | **PROPOSED** (row 70) — the ladder and the lid, one thought |
+| *la botánica* (guest) | Botany says what the head IS, not what an 8×6 sphere under Lambert reads as at 35 px; expected one round where the correct thing is invisible | Yes, exactly — round 1 was botanically ordered and read as sparse rosettes; the fix was exaggeration (twelve heads packed to touch), not botany | **NO FILE** (row 71); her case is against a standing expert |
+| *el taller* (guest) | The café counter's run logic and the colour step under Lambert | Yes, both — the run needed a second pass (a run whose tiles disagreed about their front), and round-1 colours were replaced by Pili's painted-value reading; and one unpredicted: the sprite finding, found by chasing a contradiction, not by a mechanic's habit | **NO FILE** (row 72) |
+| *la calle* (guest) | The soft things — produce that mounds, petals that heap — where variation entered at the placing, not the jig; expected to put them on a grid | Yes, exactly — the first tomatoes went down 4×3; and one unpredicted: a guard written the way he builds a bay went red on twelve right tiles | **NO FILE** (row 73) |
+
+---
+
 
 # ITERATION 9 — 2026-09-14 — the UI review of the journey mock-ups
 
