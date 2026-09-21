@@ -737,6 +737,10 @@ is about the 2D drawing and stands.
 
 ### The crew sitting, done — 2026-09-21: iteration 11, a botanist on the marigold, two builders on the fourteen, Pili directing
 
+*Merged as #224. **How to do the next one in one sitting instead of five:** `.claude/skills/shapes/SKILL.md` —
+the recipe from the 2D drawing to the frame, and what the marigold taught. **Next:** the chiles and the bananas
+(silhouette above the rim, fewer and fatter units, the value break painted in, a few red chiles) — one sitting.*
+
 Owner: *"everything looks good except the marigolds. lets do a crew mode to try to fix as many things
 but lets have an expert on flora help the design on the marigolds so they are realistic … computers,
 rails, fences, coffee machines, fridge, bridge, petals, trolley, desks, fruit stands, car lifts, tires,

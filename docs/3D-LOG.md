@@ -414,6 +414,10 @@ against it is measured against the wrong thing. — *Chema, 2026-09-09*
 
 ### 2026-09-21 · crew iteration 11: the marigold by a botanist, fourteen shapes by two builders, Pili's direction — and the lid
 
+*The method these five sittings arrived at — the seam, the ten steps, what the marigold taught — is one
+file now: `.claude/skills/shapes/SKILL.md` (owner, the same night: "did you log how we can recreate this
+new polygonal update for all these and what we or you learned from marigolds?"). Merged as #224.*
+
 - **The ask:** *"everything looks good except the marigolds. lets do a crew mode to try to fix as many
   things but lets have an expert on flora help the design on the marigolds so they are realistic …
   computers, rails, fences, coffee machines, fridge, bridge, petals, trolley, desks, fruit stands, car
