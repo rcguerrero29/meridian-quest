@@ -550,14 +550,20 @@ TILEART_MESH["b"]=({x,y})=>{
     parts.push({s:"cyl",x:px,y:0.22,z:pz,r:0.045,h:Math.max(ww,dd),c:LIP,rz:ww>dd?Math.PI/2:0,rx:ww>dd?0:Math.PI/2});}; /* the lip */
   if(N)wall(0,-0.42,0.92,0.08);if(S)wall(0,0.42,0.92,0.08);if(Wt)wall(-0.42,0,0.08,0.92);if(E)wall(0.42,0,0.08,0.92);
   parts.push({s:"box",x:0,y:0.16,z:0,w:0.92,h:0.08,d:0.92,c:SOIL});                       /* the soil, a hand below the lip */
-  const heads=[[-0.24,-0.2],[0.1,-0.26],[0.28,0.02],[-0.05,0.08],[-0.3,0.22],[0.2,0.27]];
-  heads.forEach(([hx,hz],i)=>{const k=(h+i)%3,r=0.075+k*0.012;
-    const hy=0.33+((h*3+i)%3)*0.035+(Math.abs(hx)+Math.abs(hz)<0.3?0.05:0);              /* the middle mounds higher */
-    parts.push({s:"cyl",x:hx,y:(0.2+hy)/2,z:hz,r:0.012,h:hy-0.2,c:STEM});                 /* the stem, into the soil */
+  /* THE MARIGOLDS, BACK (owner, the same night: "we are now missing the marigold in the bushes"). The
+     first cut had six heads at r 0.075–0.10, which is a scatter of dots from the default camera. A
+     cempasúchil bed is a MOUND of blooms wider than the curb: eight heads at r 0.11–0.15, higher over
+     the lip, the middle ones highest, and buds between. */
+  const heads=[[-0.26,-0.22],[0.08,-0.28],[0.3,-0.02],[-0.04,0.06],[-0.31,0.2],[0.22,0.26],[0.02,0.3],[-0.14,-0.06]];
+  heads.forEach(([hx,hz],i)=>{const k=(h+i)%3,r=0.11+k*0.02;
+    const hy=0.4+((h*3+i)%3)*0.04+(Math.abs(hx)+Math.abs(hz)<0.3?0.07:0);                /* the middle mounds higher */
+    parts.push({s:"cyl",x:hx,y:(0.2+hy)/2,z:hz,r:0.014,h:hy-0.2,c:STEM});                 /* the stem, into the soil */
     parts.push({s:"sph",x:hx,y:hy,z:hz,r,c:i%4===3?UNDER:BODY});                          /* the head: a pom-pom */
-    parts.push({s:"sph",x:hx-r*0.35,y:hy+r*0.45,z:hz-r*0.3,r:r*0.45,c:CROWN});});          /* the crown, where the key lands */
-  [[-0.15,-0.05],[0.22,-0.1],[0.0,0.28],[-0.3,0.0]].forEach(([lx,lz],i)=>
-    parts.push({s:"sph",x:lx,y:0.24,z:lz,r:0.07,sx:1.3,sy:0.45,c:LEAF,ry:(h+i)*0.8}));     /* leaves between, flattened */
+    parts.push({s:"sph",x:hx-r*0.35,y:hy+r*0.45,z:hz-r*0.3,r:r*0.5,c:CROWN});});           /* the crown, where the key lands */
+  [[-0.2,0.2],[0.2,-0.2],[0.28,0.28],[-0.3,-0.3]].forEach(([bx,bz],i)=>                    /* buds: the same plant, younger */
+    parts.push({s:"sph",x:bx,y:0.3+(i%2)*0.03,z:bz,r:0.05,c:UNDER}));
+  [[-0.15,-0.05],[0.22,-0.1],[0.0,0.28],[-0.3,0.0],[0.3,0.12]].forEach(([lx,lz],i)=>
+    parts.push({s:"sph",x:lx,y:0.26,z:lz,r:0.09,sx:1.4,sy:0.4,c:LEAF,ry:(h+i)*0.8}));      /* leaves between, flattened */
   return parts;};
 
 /* THE POTTED PLANT. Twenty of them, every one the same picture until tonight (docs/BEAUTIFY.md,
@@ -595,6 +601,88 @@ TILEART_MESH["S"]=({x,y})=>{
   const cr=Math.cos(ry),sr=Math.sin(ry);                                                  /* turn the whole carcass to face the room */
   return parts.map(p=>({...p,x:p.x*cr+p.z*sr,z:-p.x*sr+p.z*cr,ry:(p.ry||0)+ry}));};
 
+/* ---- BEAUTIFY, THIRD SITTING — 2026-09-21, later still. Owner: "lets try the grass and the cones,
+   dog house, and altar … can we also do the tree with its decor?" Five more shapes through the same
+   seam, drawn by what each thing is made of. */
+
+/* GRASS, STANDING. A tuft is blades from one root — cones, leaning outward, the ones toward the
+   light longer and paler, one gone to straw — on a fist of soil. The tile is `stand` now, so the 3D
+   camera asks for the shape; it has no side art, so the front and iso cameras keep painting it. */
+TILEART_MESH["g"]=({x,y})=>{const h=(((x*7+y*13)%8)+8)%8,n=8+(h%3);
+  const parts=[{s:"cyl",x:0,y:0.006,z:0,r:0.13,h:0.012,c:"#5A4632"}];                       /* the soil it holds */
+  for(let i=0;i<n;i++){const a=i*(Math.PI*2/n)+h*0.35,lit=Math.cos(a+Math.PI*0.75)>0.2;
+    const len=0.18+((i*3+h)%4)*0.04+(lit?0.04:0),lean=0.35+((i*5+h)%3)*0.15;              /* toward the light: longer */
+    const bx=Math.cos(a)*0.045,bz=Math.sin(a)*0.045;
+    parts.push({s:"cone",x:bx+Math.cos(a)*Math.sin(lean)*len*0.5,y:Math.cos(lean)*len*0.5,z:bz+Math.sin(a)*Math.sin(lean)*len*0.5,
+      r:0.022,h:len,c:lit?"#A6DB8C":"#5E9E66",rx:Math.sin(a)*lean,rz:-Math.cos(a)*lean});}
+  const a=h*0.9+2,len=0.16,lean=0.9;                                                        /* one blade gone to straw, nearly flat */
+  parts.push({s:"cone",x:Math.cos(a)*Math.sin(lean)*len*0.5,y:Math.cos(lean)*len*0.5,z:Math.sin(a)*Math.sin(lean)*len*0.5,r:0.018,h:len,c:"#C9B66E",rx:Math.sin(a)*lean,rz:-Math.cos(a)*lean});
+  return parts;};
+
+/* THE TRAFFIC CONE. Moulded: a square base with a lip, the cone itself, and the reflective band —
+   a slightly wider slice of cone, white, where the band is wrapped. A cone is the same from every
+   side, which is why it was the one flat thing that never looked flat; it is a cone now anyway. */
+TILEART_MESH["C"]=()=>[
+  {s:"box",x:0,y:0.02,z:0,w:0.34,h:0.04,d:0.34,c:"#C2541F"},                                /* the base, darker than the cone */
+  {s:"cone",x:0,y:0.04+0.24,z:0,r:0.15,h:0.48,c:"#E0662B"},                                 /* the cone */
+  {s:"cyl",x:0,y:0.24,z:0,rt:0.089,rb:0.108,h:0.06,c:"#F4F1EA"}];                           /* the band, wrapped where the cone is that wide */
+
+/* THE DOGHOUSE. Built like a shed: a box body, two roof slabs meeting at a ridge, a dark arched
+   door on the front, and the bone over it. The front faces the first open side. */
+TILEART_MESH["9"]=({x,y})=>{
+  const w=CW(),solid=(gx,gy)=>{const r=w&&w.grid&&w.grid[gy];return !r||r[gx]===undefined||SOLID.has(r[gx]);};
+  const ry=!solid(x,y+1)?0:!solid(x+1,y)?Math.PI/2:!solid(x-1,y)?-Math.PI/2:Math.PI;
+  const WALL="#8A6F4D",ROOF="#C0392B",RIDGE="#8E2A20",DOOR="#3E2F1E",BONE="#F6F2E8",pitch=0.62;
+  const parts=[{s:"box",x:0,y:0.26,z:0,w:0.7,h:0.52,d:0.62,c:WALL},
+    {s:"box",x:-0.19,y:0.62,z:0,w:0.46,h:0.035,d:0.74,c:ROOF,rz:pitch},{s:"box",x:0.19,y:0.62,z:0,w:0.46,h:0.035,d:0.74,c:ROOF,rz:-pitch},
+    {s:"box",x:0,y:0.74,z:0,w:0.06,h:0.05,d:0.76,c:RIDGE},                                  /* the ridge cap */
+    {s:"box",x:0,y:0.15,z:0.3,w:0.26,h:0.3,d:0.04,c:DOOR},{s:"cyl",x:0,y:0.3,z:0.3,r:0.13,h:0.04,c:DOOR,rx:Math.PI/2}, /* the arched door */
+    {s:"box",x:0,y:0.47,z:0.32,w:0.14,h:0.03,d:0.02,c:BONE},{s:"sph",x:-0.08,y:0.47,z:0.32,r:0.028,c:BONE},{s:"sph",x:0.08,y:0.47,z:0.32,r:0.028,c:BONE}]; /* the bone */
+  const cr=Math.cos(ry),sr=Math.sin(ry);
+  return parts.map(p=>({...p,x:p.x*cr+p.z*sr,z:-p.x*sr+p.z*cr,ry:(p.ry||0)+ry}));};
+
+/* THE TREE, WITH ITS DRESS. Grown: a trunk that tapers, two branches leaning out of it, a crown of
+   six leaf masses in two greens, jacaranda blossoms on the outside of the crown in the season's
+   bloom colour. Dressed for the night when the season says so — canopyDress's recipe, in parts: a
+   garland of petals slung across the front of the crown, three papel streamers hanging BELOW it,
+   and one sugar-skull lantern on a thread. One; three is a Christmas tree. Nothing without a season. */
+TILEART_MESH["J"]=({x,y})=>{const h=(((x*7+y*13)%6)+6)%6,a0=h*1.05;
+  const BARK="#6E4A2C",G1="#5A9C66",G2="#78B884",BLOOM=art("bloom","#B08FE0"); /* a step paler than the sprite's greens: a lit mesh shades itself, a sprite never did */
+  const parts=[{s:"cyl",x:0,y:0.42,z:0,rt:0.07,rb:0.11,h:0.84,c:BARK},
+    {s:"cyl",x:0.14,y:0.78,z:0.05,rt:0.03,rb:0.05,h:0.4,c:BARK,rz:-0.6},{s:"cyl",x:-0.13,y:0.82,z:-0.06,rt:0.03,rb:0.05,h:0.36,c:BARK,rz:0.65}];
+  const crown=[[0,1.25,0,0.4],[0.28,1.1,0.1,0.32],[-0.27,1.12,-0.08,0.3],[0.05,1.08,-0.3,0.3],[-0.06,1.12,0.28,0.31],[0.1,1.5,0.05,0.3]];
+  const c=Math.cos(a0),s2=Math.sin(a0);
+  crown.forEach(([px,py,pz,r],i)=>parts.push({s:"sph",x:px*c-pz*s2,y:py,z:px*s2+pz*c,r,c:i%2?G2:G1}));
+  for(let i=0;i<10;i++){const t=i*0.63+h,ph=0.5+(i%3)*0.5;                                 /* blossoms sit on the outside of the crown */
+    parts.push({s:"sph",x:Math.cos(t)*Math.sin(ph)*0.44,y:1.25+Math.cos(ph)*0.36,z:Math.sin(t)*Math.sin(ph)*0.44,r:0.055,c:BLOOM});}
+  const pal=art("papel",null);
+  if(pal){const P=petalPal();
+    for(let i=0;i<9;i++){const t=(i+0.5)/9,gx=-0.36+0.72*t,gy=1.02-2*t*(1-t)*0.16;          /* the garland sags across the front */
+      parts.push({s:"sph",x:gx,y:gy,z:0.42,r:0.045,c:P[3+(i%3)]});}
+    [-0.25,0,0.25].forEach((dx,i)=>{parts.push({s:"cyl",x:dx,y:0.9,z:0.36,r:0.006,h:0.14,c:"#3A2E26"});   /* the thread */
+      parts.push({s:"box",x:dx,y:0.76,z:0.36,w:0.13,h:0.16,d:0.01,c:pal[(i+2)%pal.length]});});         /* the streamer, hanging below */
+    parts.push({s:"cyl",x:0.14,y:0.93,z:0.4,r:0.006,h:0.1,c:"#3A2E26"});parts.push({s:"sph",x:0.14,y:0.85,z:0.4,r:0.055,c:"#F6F2E8"}); /* one lantern */}
+  return parts;};
+
+/* LA OFRENDA, AS A THING ON A TABLE. A season prop, not a tile: the key is "prop:ofrenda" and the
+   engine asks for it where the season sets the altar down. The 2D drawing's parts, built: the lower
+   cloth, the upper tier, the arch as a torus with marigolds along it, three candles with flames, the
+   empty frame at the top, pan de muerto, a calaverita, two cups of water, and cut paper along the
+   front. Nothing without a season. */
+TILEART_MESH["prop:ofrenda"]=()=>{const P=petalPal(),pal=art("papel",["#E8478F","#2FA5A0","#F2B705"]);
+  const parts=[{s:"box",x:0,y:0.16,z:0,w:0.9,h:0.32,d:0.5,c:"#5A2E7A"},{s:"box",x:0,y:0.325,z:0,w:0.9,h:0.01,d:0.5,c:"#7B4BA8"}, /* the lower cloth */
+    {s:"box",x:0,y:0.43,z:-0.06,w:0.6,h:0.2,d:0.34,c:"#E2620F"},{s:"box",x:0,y:0.535,z:-0.06,w:0.6,h:0.01,d:0.34,c:"#F2870F"},   /* the upper tier */
+    {s:"torus",x:0,y:0.6,z:-0.2,r:0.42,t:0.03,arc:Math.PI,c:"#7A2E12"}];                                                        /* the arch */
+  for(let i=0;i<11;i++){const t=Math.PI*(0.04+0.92*i/10);parts.push({s:"sph",x:Math.cos(t)*0.42,y:0.6+Math.sin(t)*0.42,z:-0.2,r:0.06,c:P[2+(i%4)]});}
+  [[-0.32,0.33],[0,0.54],[0.32,0.33]].forEach(([cx,cy])=>{parts.push({s:"cyl",x:cx,y:cy+0.08,z:0.12,r:0.025,h:0.16,c:"#F6F2E8"});
+    parts.push({s:"cone",x:cx,y:cy+0.19,z:0.12,r:0.02,h:0.06,c:"#FFC300"});});                                                 /* candles and flames */
+  parts.push({s:"box",x:0,y:0.75,z:-0.2,w:0.24,h:0.2,d:0.03,c:"#3A2E26"},{s:"box",x:0,y:0.75,z:-0.18,w:0.18,h:0.14,d:0.01,c:"#F6F2E8"}); /* the empty frame */
+  parts.push({s:"sph",x:-0.18,y:0.6,z:-0.02,r:0.07,c:"#B8722E"},{s:"box",x:-0.18,y:0.66,z:-0.02,w:0.02,h:0.06,d:0.13,c:"#E8B86A"},{s:"box",x:-0.18,y:0.66,z:-0.02,w:0.13,h:0.06,d:0.02,c:"#E8B86A"}); /* pan de muerto */
+  parts.push({s:"sph",x:0.17,y:0.6,z:0,r:0.06,c:"#F6F2E8"},{s:"sph",x:0.17,y:0.63,z:0.055,r:0.012,c:"#E8478F"},{s:"sph",x:0.15,y:0.62,z:0.05,r:0.012,c:"#3A2E26"},{s:"sph",x:0.19,y:0.62,z:0.05,r:0.012,c:"#3A2E26"}); /* the calaverita */
+  [[-0.4,0.35],[0.4,0.35]].forEach(([cx,cy])=>parts.push({s:"cyl",x:cx,y:cy,z:0.16,r:0.03,h:0.05,c:"#F6F2E8"}));                /* two cups of water */
+  for(let i=0;i<7;i++)parts.push({s:"box",x:-0.36+i*0.12,y:0.27,z:0.26,w:0.07,h:0.07,d:0.01,c:pal[i%pal.length]});                /* cut paper along the front */
+  return parts;};
+
 const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   /* H and I were cutouts in 3D (docs/BEAUTIFY.md: "the most box-shaped object in the game"). These
      two rows and the two TILEART_SIDE drawings above are the whole fix, and neither reaches the
@@ -610,7 +698,8 @@ const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   "!":{lift:13,kind:"facade",win:[[5,12,22,14]]},  /* was [5,11,22,12]; the art paints (5,12,22,14) and the two have to agree — the joinery, the dusk light and any sill prop all come off this rect */
   "▣":{lift:10,kind:"appliance"},"▯":{lift:9,kind:"furniture"},"⊔":{lift:6,kind:"furniture"},"○":{lift:3,kind:"prop"},
   "Y":{lift:13,kind:"transit",stand:true},   /* walkable, but a real object: nothing reads lift for a stand tile, it is a height class */
-  "b":{lift:3,kind:"nature",box:true}        /* the raised bed (2026-09-21): solid via SOLIDX, a box because TILEART_SIDE draws its curb */
+  "b":{lift:3,kind:"nature",box:true},       /* the raised bed (2026-09-21): solid via SOLIDX, a box because TILEART_SIDE draws its curb */
+  "g":{stand:true,kind:"nature"}             /* grass stands (2026-09-21): walkable, a mesh in 3D; no side art, so front and iso still paint it */
 };
 
 /* ---------- DECOART — the mural on Calle Principal ----------

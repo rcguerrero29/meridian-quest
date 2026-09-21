@@ -520,7 +520,8 @@ function findChromium() {
     const FLAT_BASE = ['3', '4', '5', '7', '9', 'A', 'C', 'H', 'I', 'J', 'P', 'W', 'X', 'Y']; /* the old stair '1' left the city with #7 */
     /* 'P' came off Meridian's row on 2026-09-21: the potted plant is a mesh from parts (the `mesh` view),
        thrown pot and leaf masses, and the guard said so first — red on the run that landed the art. */
-    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', '7', '9', 'A', 'C', 'J', 'W', 'X', 'Y'] };
+    /* '9', 'C' and 'J' came off the same night: the doghouse, the cone and the tree are meshes from parts; red first, each. */
+    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', '7', 'A', 'W', 'X', 'Y'] };
     const FLAT_KNOWN = FLAT_BY_GAME[IDXNAME] || FLAT_BASE;
     const laid = new Set(); Object.values(WORLDS).forEach(w => w.rows.forEach(r => r.split('').forEach(ch => laid.add(ch))));
     Object.keys(flat).forEach(g => { if (!FLAT_KNOWN.includes(g)) P.push('"' + g + '" (' + ((TILES[g] || {}).kind || '?') + ') stands in 3D as a flat picture in ' + [...flatIn[g]].join(',') + ' — give it a side view (TILESIDE) so it becomes a box; nothing new may ship flat (#39)'); });
@@ -1694,7 +1695,11 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
         if (w) {
           const before = camMode, bw = world;
           camSet('3d'); world = w; t3Invalidate(); draw3d();
-          if (!(T3.crownTex && T3.crownTex[treeG]))
+          /* 2026-09-21: a pack may declare the whole tree as a `mesh` (a list of parts), in which case there is no
+             crown texture to find — the mesh IS the pack's tree, and a stronger declaration than a crown. Meridian
+             does; the town does not, so the crown path is still walked by the town's run of this file. */
+          const meshTree = T3.group.children.some(o => o.userData && o.userData.mesh && o.userData.g === treeG);
+          if (!meshTree && !(T3.crownTex && T3.crownTex[treeG]))
             P.push('a pack declared what its tree looks like and the engine drew its own anyway');
           world = bw; camSet(before);
         }

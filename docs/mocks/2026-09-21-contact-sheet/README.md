@@ -61,3 +61,9 @@ pom-pom marigolds (`pk-3d.png`), the shelves as carcasses with insides (`me-3d.p
 potted plant as a thrown pot (`hq-3d.png`, `no-3d.png`). Compare against `after-first-sitting/` for
 the same spots, where the same things were boxes wearing pictures.
 
+## After the third sitting — `after-third-sitting/`
+
+Six frames, default camera, `mq-v179`: the grass standing, the doghouse, a tree, the cone, and two with
+Día de Muertos switched on — the altar in the park's far corner and a tree in its dress. `spots.json`
+carries a `season` field the shipped harness does not read; the scratch copy that took these did.
+
