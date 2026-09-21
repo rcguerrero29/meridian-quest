@@ -611,9 +611,9 @@ function t3Build(key){
           const pl=new THREE.Mesh(new THREE.BoxGeometry(0.05,PH,0.05),pole);
           pl.position.set(cx+(ew?sd*0.48:0),PH/2,cz+(ew?0:sd*0.48));pl.userData={papel:true,pole:true,x,y};grp.add(pl);});
         const st=new THREE.Mesh(new THREE.BoxGeometry(ew?1:0.02,0.02,ew?0.02:1),strg);
-        st.position.set(cx,PH,cz);st.userData={papel:true,string:true,x,y};grp.add(st);
+        st.position.set(cx,PH,cz);st.userData={papel:true,string:true,x,y,ew};grp.add(st); /* `ew`: which way it runs, for t3Fiesta's end-on rule */
         const fl=t3PapelStrip(pap,1,x+y,0);fl.position.set(cx,PH-0.11,cz);if(!ew)fl.rotation.y=Math.PI/2;
-        fl.userData.papel=true;fl.userData.x=x;fl.userData.y=y;grp.add(fl);
+        fl.userData.papel=true;fl.userData.x=x;fl.userData.y=y;fl.userData.ew=ew;grp.add(fl);
       }
       continue;
     }
@@ -747,8 +747,8 @@ function t3Build(key){
              with the paper picado"). Tall means kind wall/facade/tree or a declared lift of 9 or more. */
           const tall=!!m&&(m.kind==="wall"||m.kind==="facade"||m.kind==="tree"||(m.lift|0)>=9);
           if(g!==undefined&&SOLID.has(g)&&tall)return;
-          const pl=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.045,PH+0.12,8),pole);pl.position.set(ex+0.5,(PH+0.12)/2,y+0.5);pl.userData={swag:true,pole:true};grp.add(pl);
-          const cap=new THREE.Mesh(new THREE.SphereGeometry(0.06,8,6),pole);cap.position.set(ex+0.5,PH+0.12,y+0.5);cap.userData={swag:true,pole:true,cap:true};grp.add(cap);});
+          const pl=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.045,PH+0.12,8),pole);pl.position.set(ex+0.5,(PH+0.12)/2,y+0.5);pl.userData={swag:true,pole:true,y};grp.add(pl); /* `y`: its row, for t3Fiesta's end-on rule */
+          const cap=new THREE.Mesh(new THREE.SphereGeometry(0.06,8,6),pole);cap.position.set(ex+0.5,PH+0.12,y+0.5);cap.userData={swag:true,pole:true,cap:true,y};grp.add(cap);});
         [0,1].forEach(row=>{const fl=t3PapelStrip(pal,L,x0+y,row);fl.position.set(x0+L/2+(row?0.07:0),PH-0.11-row*0.22,y+0.5);fl.userData.swag=true;fl.userData.y=y;grp.add(fl);});
         const st2=new THREE.Mesh(new THREE.BoxGeometry(L-0.1,0.02,0.02),strg);st2.position.set(x0+L/2,PH-0.22,y+0.5);st2.userData={swag:true,string:true,y};grp.add(st2);});
       (typeof fiestaProps==="function"?fiestaProps(world):[]).forEach(p=>{
@@ -925,7 +925,28 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
     T3.tram.traverse(o=>{if(o.userData&&o.userData.wheel)o.rotation.y=-TRO.x/0.115;});
   }}
 function t3Fiesta(){ /* the piñata sways; it is never hit and gives nothing (Nacho's guardrail) */
-  (T3.pinatas||[]).forEach(sp=>{if(!sp.parent)return;sp.material.rotation=Math.sin(Date.now()/700+sp.userData.x)*0.08;});}
+  (T3.pinatas||[]).forEach(sp=>{if(!sp.parent)return;sp.material.rotation=Math.sin(Date.now()/700+sp.userData.x)*0.08;});
+  /* A STRING SEEN END-ON IS NOT A STRING (the owner, 2026-09-21, a frame from a quarter turn on Calle
+     Principal: "the skeleton now seems to float in one perspective and with the papel picado, looks like
+     its buggy or broken"). A swag hangs ALONG its row at 1.9. Turn the camera a quarter and you look down
+     that row: the flags are edge-on and vanish, and the string is a bare dark line from the horizon to the
+     foreground, through whoever stands on the row — over his head, between his legs, through his shadow —
+     so a person on it reads as hanging from it. Measured at st (5,1): 42 pixels of string inside the
+     hero's outline and not one flag. So a string the camera looks along, on the hero's own row, is not
+     drawn that frame — it would be a line and nothing else — and the same for the bridge's string, which
+     runs the way you cross. Seen across, at the other two stops, nothing changes. The poles are things
+     standing on the ground and stay — except a pole on that same line that stands on your tile or
+     between you and the camera, which on that line can only be a line through you or a stub under your
+     feet (the bridge's near pole crossed the hero's chest after the string had gone; measured, not
+     reasoned). A pole behind you on the line stays: your body covers its foot and its top shows over
+     your head, which is what a pole behind a person looks like. (The line inspector, crew iteration 12.) */
+  if(T3.group){const q=((Math.round(T3.yaw/(Math.PI/2))%4)+4)%4,alongX=(q===1||q===3),row=Math.round(fy),col=Math.round(fx);
+    const sx=Math.sin(T3.yaw),cz=Math.cos(T3.yaw),hx=fx+0.5,hz=fy+0.5;
+    T3.group.children.forEach(o=>{const u=o.userData;if(!u||!(u.swag||u.papel))return;
+      const runsX=u.swag?true:!!u.ew; /* a swag runs along its row; the bridge's string runs the way you cross */
+      const onLine=runsX?(alongX&&u.y===row):(!alongX&&u.x===col);
+      if(!u.pole){o.visible=!onLine;return;}
+      o.visible=!(onLine&&(runsX?(o.position.x-hx)*sx:(o.position.z-hz)*cz)>=-0.01);});}}
 /* the petal trail in 3D: a pool of little flat planes, three per drop, lying on the ground where
    somebody walked in season, fading over a minute and a half (owner: "a trail forms behind characters") */
 function t3PapelTex(pal,n,seed){ /* a string of n cut-paper flags baked once (Pili): flat colour, a scalloped hem, five punched
@@ -1032,6 +1053,19 @@ function t3Actors(){
     const face=t3ReadFace(w,d.x,d.y);
     if(face)list.push({x:d.x,y:d.y,h:face.h,ox:face.ox,oz:face.oz,fixed:true,mark:"read",f:g=>drawReadMark(g,2,30,-7)}); /* up:-7 centres the card on its anchor */
     else list.push({x:d.x,y:d.y,h:1.15,mark:"read",f:g=>drawReadMark(g,2,30,0)});});
+  /* A TRAM BETWEEN YOU AND THE CAMERA hides your legs, the way a tram does. The hero is drawn through
+     whatever stands between him and the camera (#22, a wall) — and the tram is not a wall, so standing
+     at the platform with the car alongside and the camera on its far side, the person waiting for it
+     was painted ON it, feet on the roof, for the whole dwell, every call, in the camera both games boot
+     into (the owner, 2026-09-21: "the trolley weirdness"; ridden by the line inspector, crew iteration
+     12). When the line from the camera to your feet passes through the car you keep your depth: the
+     body hides what it stands in front of and your head shows over the roof, which is what standing
+     behind a tram looks like. Not while riding — the ride draws you in the car on purpose (rideStart's
+     list of what is deliberately cheap). t3Trolley has placed the car before this runs. */
+  const tramBetween=(()=>{if(!T3.tram||!T3.tram.visible||(typeof RIDE!=="undefined"&&RIDE.on))return false;
+    const from=T3.cam.position,to=new THREE.Vector3(fx+0.5,0.1,fy+0.5),dv=to.clone().sub(from),len=dv.length();
+    const hit=new THREE.Ray(from,dv.normalize()).intersectBox(new THREE.Box3().setFromObject(T3.tram),new THREE.Vector3());
+    return !!hit&&hit.distanceTo(from)<len;})();
   const old=ctx;
   list.forEach((a,i)=>{
     const p=t3Sprite(i);
@@ -1062,7 +1096,8 @@ function t3Actors(){
        floor the hero respects depth — the lip and the knee-high rail hide their legs, which is what going
        down into a hole looks like — and the tall wall on the camera side is the one the near-wall rule
        already minimizes. On the floor and on a climbing flight they still draw through walls (#22). */
-    p.spr.material.depthTest=!a.hero||lift<0;p.spr.renderOrder=1000-Math.round(dl*10);
+    p.spr.material.depthTest=!a.hero||lift<0||tramBetween;p.spr.renderOrder=1000-Math.round(dl*10);
+    p.spr.userData.hero=!!a.hero; /* so a guard can find the person you steer without reading a rendering flag for it */
     p.spr.visible=true;p.live=true;
   });
   for(let i=list.length;i<T3.pool.length;i++){T3.pool[i].spr.visible=false;T3.pool[i].live=false;}
@@ -1097,9 +1132,10 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
     t3Light();
     t3Glow();
     t3Reveal();
+    t3Trolley();   /* the car first: the people ask where it stands (t3Actors, tramBetween) */
     t3Actors();
     t3Petals();
-    t3Fiesta();t3Trolley();
+    t3Fiesta();
     t3Leash();
     T3.renderer.render(T3.scene,T3.cam);
     return true;

@@ -1926,6 +1926,198 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   fails.push(...tram.filter(l => !/^COUNT-ONLY: /.test(l)));
   tram.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
+  /* ---- and a person behind the trolley is behind it ----
+     The owner, 2026-09-21: "we should fix the trolley weirdness." Ridden by the line inspector (crew
+     iteration 12), every position on both lines in all four cameras: the one thing a tram would never
+     let you do is stand on its roof, and this one did. The hero is drawn through whatever stands
+     between him and the camera (#22, a wall) — and the tram is not a wall, so when it stood at the
+     platform with the camera on the far side of it, the person waiting for it was painted ON it, feet
+     on the roof, for the whole dwell, every call, in the camera both games boot into.
+     Asked as pixels, four frames: the hero's footprint (him on, him off, no tram), the tram's footprint
+     (tram on, tram off, no hero), and inside where they overlap, whether HE changed a pixel of the
+     tram. A person standing behind a tram changes nothing in front of him. Raw renders after one
+     draw3d, because draw3d re-places the tram each frame and would undo the toggles. */
+  const onRoof = await page.evaluate(() => {
+    const P = [];
+    const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
+    if (!L) return P;
+    if (typeof T3 === 'undefined' || !window.THREE) { P.push('COUNT-ONLY: this shell declined 3D, so the trolley was not measured in the scene'); return P; }
+    const s = troStops(L)[0], w = WORLDS[L.world];
+    if (!s || !w) { P.push('COUNT-ONLY: the first trolley line declares no stop, so nobody can wait for it'); return P; }
+    const keep = { w: world, px, py, cam: camMode, st: TRO.state, x: TRO.x, d: TRO.dir, yaw: T3.yaw, mv: moving };
+    document.getElementById('world').hidden = false;
+    world = L.world; px = fx = s.x; py = fy = s.y; moving = false; held = null;
+    TRO.dir = L.to >= L.from ? 1 : -1; TRO.state = 'dwell';
+    TRO.x = Math.max(0, Math.min(w.W - TRO_LEN, s.x - 0.5));       /* the car alongside the platform */
+    camSet('3d'); sizeCanvas(); T3.turn = null;
+    T3.yaw = s.y < L.row ? 0 : Math.PI;                            /* the camera on the far side of the rails from the platform */
+    t3Invalidate(); draw3d();
+    const hero = T3.pool.find(p => p.live && p.spr.userData.hero);
+    if (!hero) { P.push('no billboard says it is the hero, so nobody can ask what he is drawn over'); document.getElementById('world').hidden = true; return P; }
+    if (!T3.tram || !T3.tram.visible) { P.push('the trolley is not standing at its stop in 3D, so there is nothing for the hero to be drawn over'); document.getElementById('world').hidden = true; return P; }
+    const c3 = T3.renderer.domElement, W = c3.width, H = c3.height;
+    const grab = () => { T3.renderer.render(T3.scene, T3.cam); const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(c3, 0, 0); return g.getImageData(0, 0, W, H).data; };
+    const ne = (A, B, i) => Math.abs(A[i] - B[i]) + Math.abs(A[i + 1] - B[i + 1]) + Math.abs(A[i + 2] - B[i + 2]) > 30;
+    const A = grab(), A2 = grab();
+    hero.spr.visible = false; const B = grab(); T3.tram.visible = false; const D = grab(); hero.spr.visible = true; const C = grab(); T3.tram.visible = true;
+    let control = 0, overlap = 0, over = 0;
+    for (let i = 0; i < W * H * 4; i += 4) { if (ne(A, A2, i)) control++; if (ne(C, D, i) && ne(B, D, i)) { overlap++; if (ne(A, B, i)) over++; } }
+    if (control) P.push('the probe cannot measure the trolley and the hero: two frames of the same scene differ by ' + control + ' pixels');
+    else if (overlap < 50) P.push('the trolley at its stop in ' + L.world + ' and the person waiting for it do not overlap on screen (' + overlap + ' pixels), so the probe measured nothing — which is not a pass');
+    else if (over) P.push('standing at the stop in ' + L.world + ' with the trolley in front of you, you are drawn on top of it — ' + over + ' pixels of you painted over its roof and side; a person behind a tram is behind it');
+    world = keep.w; px = fx = keep.px; py = fy = keep.py; moving = keep.mv; TRO.state = keep.st; TRO.x = keep.x; TRO.dir = keep.d; T3.yaw = keep.yaw;
+    camSet(keep.cam); sizeCanvas(); document.getElementById('world').hidden = true;
+    return P;
+  });
+  fails.push(...onRoof.filter(l => !/^COUNT-ONLY: /.test(l)));
+  onRoof.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
+  /* ---- and in the flat cameras the trolley is painted in its row's turn ----
+     The owner, 2026-09-21, naming the weirdness: "looks like the person is laying on the trolley."
+     The front camera painted the car in the GROUND pass and the isometric camera painted it LAST,
+     after everybody: so in front a person on the platform behind the car had his feet on its roof,
+     and in iso a person standing in front of the car was painted under it and one behind it had his
+     legs cut off at its roof line — the other two readings of "laying on the trolley". A car is a
+     thing on its row, and the depth queue every camera already keeps is where it belongs: whoever
+     is nearer the camera than the rails paints over it, whoever is farther paints under it.
+     Asked as pixels in each flat camera, with the car alongside the hero's column: a person on the
+     row in FRONT of the rails keeps every pixel of himself (the car changes none), and a person on
+     the row BEHIND the rails yields every pixel where they overlap (he changes none of the car).
+     The ride's own frames were the instrument (the line inspector, crew iteration 12). */
+  const flatTurn = await page.evaluate(() => {
+    const P = [];
+    const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
+    if (!L) return P;
+    const w = WORLDS[L.world]; if (!w) return P;
+    const cams = (typeof CAMS === 'undefined' ? ['front', 'iso'] : ['front', 'iso'].filter(c => CAMS.indexOf(c) >= 0));
+    if (!cams.length) { P.push('COUNT-ONLY: this shell has neither a front nor an isometric camera'); return P; }
+    const open = (x, y) => y >= 0 && y < w.H && x >= 0 && x < w.W && !SOLID.has(w.rows[y][x]) && w.grid[y][x] !== 'N';
+    const mid = Math.round((L.from + L.to) / 2);
+    const rowS = [L.row + 1, L.row + 2].find(y => open(mid, y)), rowN = [L.row - 1, L.row - 2].find(y => open(mid, y));
+    if (rowS === undefined && rowN === undefined) { P.push('COUNT-ONLY: nobody can stand beside the trolley line in ' + L.world + ' at x=' + mid); return P; }
+    const keep = { w: world, px, py, cam: camMode, st: TRO.state, x: TRO.x, d: TRO.dir, mv: moving, season: seasonPick, dp: drawPerson, td: window.troDraw2D };
+    if (typeof seasonSet === 'function') seasonSet('off');   /* nothing that sways by the clock in the frame */
+    world = L.world; moving = false; held = null;
+    /* the car's tail one tile west of the hero's column: a whole-tile x, because the flat cameras paint the car
+       from its tile's corner and a half-tile car beside a whole-tile person barely touches him on screen */
+    TRO.dir = L.to >= L.from ? 1 : -1; TRO.state = 'dwell'; TRO.x = Math.max(0, Math.min(w.W - TRO_LEN, mid - 1));
+    const cv2 = document.getElementById('cv'), g2 = cv2.getContext('2d');
+    const real = keep.td, realDP = keep.dp;
+    let heroOn = true, tramOn = true;
+    window.troDraw2D = function () { if (tramOn) return real.apply(this, arguments); };
+    drawPerson = function (g, sx, sy, lk, o) { if (o && o.hero && !heroOn) return; return realDP.apply(this, arguments); };
+    const grab = () => { draw(); return g2.getImageData(0, 0, cv2.width, cv2.height).data; };
+    const ne = (A, B, i) => Math.abs(A[i] - B[i]) + Math.abs(A[i + 1] - B[i + 1]) + Math.abs(A[i + 2] - B[i + 2]) > 30;
+    cams.forEach(cam => { camSet(cam); sizeCanvas();
+      [[rowS, 'in front of'], [rowN, 'behind']].forEach(([row, side]) => { if (row === undefined) return;
+        px = fx = mid; py = fy = row;
+        const A = grab(), A2 = grab();
+        heroOn = false; const B = grab(); tramOn = false; const D = grab(); heroOn = true; const C = grab(); tramOn = true;
+        let control = 0, region = 0, overlap = 0, heroChangedTram = 0, tramChangedHero = 0;
+        /* his BODY, not his drop shadow: the shadow is a translucent tint and its anti-aliased rim can land within
+           tolerance of either frame; a body pixel differs from the bare ground by more than 120 */
+        const solid = (P, Q, i) => Math.abs(P[i] - Q[i]) + Math.abs(P[i + 1] - Q[i + 1]) + Math.abs(P[i + 2] - Q[i + 2]) > 120;
+        for (let i = 0; i < A.length; i += 4) { const hero = ne(C, D, i), tram = ne(B, D, i); if (!hero && !tram) continue;
+          region++;
+          /* a neighbour's idle bob is a sub-pixel sine of the clock: a pixel that moved between two frames of the same
+             scene is left out of the count, and only a region that is mostly moving is a probe that measures nothing */
+          if (ne(A, A2, i)) { control++; continue; }
+          /* "covered" means the OTHER one's pixel is what shows — a person's translucent drop shadow tinting the car
+             under it is not the car covering him, so a pixel counts only when it equals one frame and not the other */
+          if (hero && tram) { overlap++; if (ne(A, B, i) && !ne(A, C, i)) heroChangedTram++; if (solid(C, D, i) && ne(A, C, i) && !ne(A, B, i)) tramChangedHero++; } }
+        if (control > region * 0.05) { P.push('the ' + cam + ' camera cannot be measured: two frames of the same scene differ by ' + control + ' of ' + region + ' pixels around the trolley'); return; }
+        if (!overlap) return;                                   /* no overlap on this row in this camera: there is no order to get wrong */
+        if (side === 'in front of' && tramChangedHero) P.push('in the ' + cam + ' camera a person standing in front of the trolley is painted under it — ' + tramChangedHero + ' pixels of him covered by a car that is behind him');
+        if (side === 'behind' && heroChangedTram) P.push('in the ' + cam + ' camera a person standing behind the trolley is painted on it — ' + heroChangedTram + ' pixels of him over its roof; "looks like the person is laying on the trolley"');
+      }); });
+    window.troDraw2D = real; drawPerson = realDP;
+    if (typeof seasonSet === 'function') seasonSet(keep.season);
+    world = keep.w; px = fx = keep.px; py = fy = keep.py; moving = keep.mv; TRO.state = keep.st; TRO.x = keep.x; TRO.dir = keep.d;
+    camSet(keep.cam); sizeCanvas();
+    return P;
+  });
+  fails.push(...flatTurn.filter(l => !/^COUNT-ONLY: /.test(l)));
+  flatTurn.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
+  /* ---- a string seen end-on is not a string ----
+     The owner, 2026-09-21, a frame from the 3D camera turned a quarter on Calle Principal: "the
+     skeleton now seems to float in one perspective and with the papel picado, looks like its buggy or
+     broken." A swag is hung ALONG a row at head height. Turn the camera a quarter and you look down
+     that row: the flags are edge-on and vanish, and the string is a bare dark line from the horizon to
+     the foreground, straight through whoever stands under it — over his head, between his legs, through
+     his shadow — and a person on a line reads as HANGING from it. Measured in that frame (the line
+     inspector, crew iteration 12): 42 pixels of string inside the hero's own outline, none of them a
+     flag. The bridge's string over the crossing does the same to whoever crosses under it.
+     Asked as pixels, the way he saw it (docs/POSTMORTEM.md §3): the hero's footprint is the frame with
+     him minus the frame without him; the string's reach into it is the frame with the strings minus the
+     frame without them, inside that footprint — at both quarter turns. And at the two stops that look
+     ACROSS the row the strings must still paint, or the cure was taking the paper down. The control
+     (two frames, nothing changed) is zero first or the probe measures nothing (§13r). A pack that
+     hangs no string over walkable ground has nothing to look at, which is said out loud, not passed. */
+  const endOn = await page.evaluate(() => {
+    const P = [];
+    if (typeof T3 === 'undefined' || !window.THREE) { P.push('COUNT-ONLY: this shell declined 3D, so no string was looked at end-on'); return P; }
+    if (typeof fiestaSwags !== 'function' || typeof seasonSet !== 'function') { P.push('COUNT-ONLY: this engine hangs no swags'); return P; }
+    const S = (typeof SEASONS !== 'undefined' && SEASONS) ? SEASONS : {};
+    const sid = Object.keys(S).find(k => S[k] && S[k].art && Array.isArray(S[k].art.swags) && S[k].art.swags.length);
+    if (!sid) { P.push('COUNT-ONLY: no season in this pack hangs a swag, so no string can be seen end-on'); return P; }
+    const pick0 = seasonPick, keep = { w: world, px, py, cam: camMode, yaw: T3.yaw, mv: moving, st: TRO.state };
+    seasonSet(sid);
+    /* the first swag in any world with open ground under it: that is where a person can stand under a string */
+    let spot = null;
+    Object.keys(WORLDS).some(wid => { const w = WORLDS[wid];
+      return fiestaSwags(wid).some(sw => { const y = sw.from[1];
+        for (let x = Math.min(sw.from[0], sw.to[0]); x <= Math.max(sw.from[0], sw.to[0]); x++) {
+          const g = w.rows[y] && w.rows[y][x]; if (g !== undefined && !SOLID.has(g) && w.grid[y][x] !== 'N') { spot = { wid, x, y }; return true; } }
+        return false; }); });
+    if (!spot) { seasonSet(pick0); P.push('COUNT-ONLY: every swag in this pack hangs over solid ground, so nobody can stand under one'); return P; }
+    document.getElementById('world').hidden = false;
+    world = spot.wid; px = fx = spot.x; py = fy = spot.y; moving = false; held = null; TRO.state = 'away';
+    camSet('3d'); sizeCanvas(); T3.turn = null;
+    const c3 = T3.renderer.domElement, W = c3.width, H = c3.height;
+    const grab = () => { T3.renderer.render(T3.scene, T3.cam); const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(c3, 0, 0); return g.getImageData(0, 0, W, H).data; };
+    const ne = (A, B, i) => Math.abs(A[i] - B[i]) + Math.abs(A[i + 1] - B[i + 1]) + Math.abs(A[i + 2] - B[i + 2]) > 30;
+    /* every part of the paper: the strings, the flags AND the poles — after the strings went, the bridge's
+       near pole crossed the hero's chest, the same line by another part */
+    const strings = () => { const out = []; T3.group.traverse(o => { const u = o.userData; if (u && (u.swag || u.papel)) out.push(o); }); return out; };
+    const look = (yaw) => {
+      T3.yaw = yaw; t3Invalidate(); draw3d();
+      const hero = T3.pool.find(p => p.live && p.spr.userData.hero);
+      const st = strings();
+      if (!hero) return { err: 'no billboard says it is the hero, so nobody can ask what runs through him' };
+      if (!st.some(o => o.userData.string)) return { err: 'in season "' + sid + '" no string hangs in ' + spot.wid + ' in 3D — nothing to look at, which is not a pass' };
+      const shown = st.map(o => o.visible);
+      const A = grab(), A2 = grab();                                   /* strings as the engine left them, hero on — twice, the control */
+      st.forEach(o => { o.visible = false; }); const B = grab();       /* strings off, hero on */
+      hero.spr.visible = false; const D = grab();                      /* strings off, hero off */
+      st.forEach((o, i) => { o.visible = shown[i]; }); hero.spr.visible = true;
+      /* his footprint is B minus D; his OUTLINE is that footprint's box, stretched a quarter of his height
+         up and down, because "hangs from it" is a line that enters at the crown and leaves under the feet,
+         and a fix that only kept the string off his shirt would leave exactly that. The string's reach is
+         A minus B, inside that box. */
+      let control = 0, foot = 0, painted = 0, x0 = W, x1 = -1, y0 = H, y1 = -1;
+      for (let i = 0, p = 0; i < W * H * 4; i += 4, p++) { if (ne(A, A2, i)) control++; if (ne(A, B, i)) painted++;
+        if (ne(B, D, i)) { foot++; const x = p % W, y = (p - x) / W; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } }
+      let over = 0;
+      if (foot) { const pad = Math.round((y1 - y0) / 4);
+        for (let y = Math.max(0, y0 - pad); y <= Math.min(H - 1, y1 + pad); y++) for (let x = x0; x <= x1; x++) { if (ne(A, B, (y * W + x) * 4)) over++; } }
+      return { control, foot, over, painted };
+    };
+    const at = {};
+    [[Math.PI / 2, 'a quarter turn east'], [-Math.PI / 2, 'a quarter turn west'], [0, 'the first stop'], [Math.PI, 'the far stop']].forEach(([yaw, name]) => { at[name] = look(yaw); });
+    Object.keys(at).forEach(name => { const r = at[name];
+      if (r.err) { P.push(r.err); return; }
+      if (r.control) { P.push('the probe cannot measure the string at ' + name + ': two frames of the same scene differ by ' + r.control + ' pixels'); return; }
+      if (r.foot < 100) { P.push('the hero paints ' + r.foot + ' pixels at ' + name + ' under the string in ' + spot.wid + ' — nothing to measure, which is not a pass'); return; }
+      if (/quarter/.test(name) && r.over) P.push('at ' + name + ' the papel picado over row ' + spot.y + ' of ' + spot.wid + ' runs through the hero — ' + r.over + ' pixels of its string or its poles in and around his outline; a person standing under a string seen end-on hangs from it');
+      if (!/quarter/.test(name) && !r.painted) P.push('at ' + name + ' the papel picado over ' + spot.wid + ' paints nothing at all — the paper came down instead of getting out of the way'); });
+    seasonSet(pick0); world = keep.w; px = fx = keep.px; py = fy = keep.py; moving = keep.mv; TRO.state = keep.st; T3.yaw = keep.yaw;
+    camSet(keep.cam); sizeCanvas(); t3Invalidate(); document.getElementById('world').hidden = true;
+    return P;
+  });
+  fails.push(...endOn.filter(l => !/^COUNT-ONLY: /.test(l)));
+  endOn.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
   /* ---- a pack must be able to SAY where its trolley serves, in its own alphabet ----
      Until 2026-09-11 it could not: "is there a stop here" was Meridian's letter "Y", read straight
      out of the engine in the two places that matter — where the car is served and where the pass

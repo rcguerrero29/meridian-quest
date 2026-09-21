@@ -958,15 +958,20 @@ function drawIso(){
     bill(d.x,d.y,(bx,by)=>f(bx,by,d));});
   doorMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawDoorMark(ctx,bx,by,0,d.mark)));
   readMarks().forEach(d=>bill(d.x,d.y,(bx,by)=>drawReadMark(ctx,bx,by,0)));
-  R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
   /* The trolley, the petals and the papel picado are drawn in the top-down and front cameras and
      were drawn in NEITHER here — troDraw2D had exactly two call sites and this was not one of them.
      Measured with the tram running: 1466 pixels changed in top, 1704 in front, and ZERO in iso. Not
      "looks wrong" — a player on this camera watched an empty street while a tram drove down it, and
      test/smoke.js exercises top, front and 3D by name and skips iso, which is why nobody saw it.
      Found by Chava, riding it. `P` is this camera's own tile-to-screen, so the tram lands on the
-     rails rather than on a guess. */
-  troDraw2D(world,P,false);
+     rails rather than on a guess.
+     IN ITS ROW'S TURN, not last (the owner, 2026-09-21: "looks like the person is laying on the
+     trolley"): painted after everybody, the car covered a person standing in FRONT of it — 86 pixels
+     of him under a car that was behind him, measured. It is a thing on its row: it takes the depth
+     queue at its own centre, so whoever is nearer the camera paints over it and whoever is farther
+     paints under it, the way the people already do. (The line inspector, crew iteration 12.) */
+  {const L=troLine(world);if(L&&TRO.state!=="away")R.push({d:TRO.x+TRO_LEN/2+L.row+0.5,f:()=>troDraw2D(world,P,false)});}
+  R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
   petalTrail(world,P);
   fiestaDraw2D(world,P,false);
   /* shared time-of-day wash (door spills are top-down-only for now) */
@@ -1658,7 +1663,16 @@ function troDanger(wid,x,y){const L=troLine(wid);
    platform (`dwellAt`) rather than by run, because a line with two stops must be patient at the
    second one having already been patient at the first; and it is cleared when a run begins, so the
    next tram is as patient as this one was. */
-function troServing(L){if(!L||TRO.state==="away")return null;
+/* A CAR SERVES A STOP FROM THE STREET, never from beyond its end. It is born TRO_LEN past the end of
+   its run so it can drive in, and a stop at the run's first tile sat inside the serving window before
+   the car had entered the street: on Calle Principal it stood at x=-2, its whole body past the west
+   edge — off-screen in the top and front cameras, hanging in the dark in 3D — ran its dwell out there,
+   and then ran past the person it had stopped for. The dwell guard read "dwell" and was satisfied; a
+   state is a proxy for a picture. (The owner, 2026-09-21: "the trolley weirdness"; ridden by the line
+   inspector, crew iteration 12.) troClampX is the one fact — where a car may stand on this street — read
+   by the two things that stand a car at a platform: serving, below, and the ride's bell in rideStart. */
+function troClampX(L,x){const w=L&&WORLDS[L.world];return w?Math.max(0,Math.min(w.W-TRO_LEN,x)):x;}
+function troServing(L){if(!L||TRO.state==="away"||troClampX(L,TRO.x)!==TRO.x)return null;
   return troStops(L).find(function(s){return s.x>=TRO.x-0.5&&s.x<=TRO.x+TRO_LEN+0.5;})||null;}
 function troDwell(L,dt){const s=troServing(L);
   if(!s||world!==L.world)return false;
@@ -1728,7 +1742,7 @@ function rideStart(d){
   /* stand the car at the platform you are on, doors open, whatever it was doing elsewhere */
   const s=troStops(L).reduce(function(a,b){return (Math.abs(b.x-px)<Math.abs(a.x-px))?b:a;});
   TRO.dir=L.to>=L.from?1:-1;
-  TRO.x=s.x-(TRO.dir>0?TRO_LEN:0);TRO.state="dwell";TRO.dwelt=0;TRO.dwellAt=null;
+  TRO.x=troClampX(L,s.x-(TRO.dir>0?TRO_LEN:0));TRO.state="dwell";TRO.dwelt=0;TRO.dwellAt=null; /* on the street, even at a stop on its first tile */
   held=null;moving=false;
   if(T().troRide)toast(T().troRide,1800);
   return true;}

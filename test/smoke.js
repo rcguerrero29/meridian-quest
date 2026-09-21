@@ -4283,7 +4283,7 @@ const CANDIDATES = [
         TRO.dir = L.to >= L.from ? 1 : -1;
         TRO.state = 'run'; TRO.t = 0; TRO.called = false; TRO.dwelt = 0; TRO.dwellAt = null;
         TRO.x = s.x - TRO.dir * 3;
-        let still = 0, served = 0;
+        let still = 0, served = 0, standX = null;
         for (let i = 0; i < 200; i++) {
           const x0 = TRO.x, at = (s.x >= TRO.x - 0.5 && s.x <= TRO.x + TRO_LEN + 0.5);
           troUpdate(50);
@@ -4293,9 +4293,9 @@ const CANDIDATES = [
                made this check intermittently blame the hero for a dog that had wandered onto the
                line thirty tiles away. The brake and the platform both stop the car; only one of them
                is what this check is about, so the condition has to carry both halves. */
-            if (TRO.x === x0 && !(typeof troAhead === 'function' && troAhead(L))) still += 50; }
+            if (TRO.x === x0 && !(typeof troAhead === 'function' && troAhead(L))) { still += 50; if (standX === null) standX = TRO.x; } }
         }
-        return { still: still, served: served, onRails: Math.round(py) === L.row };
+        return { still: still, served: served, onRails: Math.round(py) === L.row, standX: standX };
       };
       const mine = ride(true);
       if (!mine.served) P.push('this check never got the tram as far as its own stop in ' + L.world + ' — it proves nothing');
@@ -4304,6 +4304,25 @@ const CANDIDATES = [
         ' with somebody standing on it: you call it, it comes, and it does not stop for you');
       else if (mine.still > 7000) P.push('the trolley stands at the stop in ' + L.world + ' for ' + mine.still +
         ' ms and shows no sign of leaving — one person on a platform can park the line for ever');
+      /* ...and it stops where you can SEE it. The three lines above read TRO.state, and the state said
+         "dwell" while the car stood at x=-2 on Calle Principal: its whole body past the west end of the
+         street, where the top and front cameras cannot pan and the 3D camera hangs it in the dark. A car
+         is born TRO_LEN off the end of its run so it can drive in; the stop at the line's first tile was
+         inside the serving window before the car had entered the street, so it served the platform from
+         the void, ran its dwell out there, and then ran past the person it had stopped for. "It waits"
+         was true and the person waiting saw nothing — a state is a proxy for a picture (docs/REGRESSION.md).
+         Ridden and photographed by the line inspector, crew iteration 12. Read the noun: with the hero at
+         the stop, the flat cameras' own framing must hold some of the standing car. */
+      if (mine.served && mine.still >= 800 && mine.standX !== null) {
+        const keep3 = { cam: camMode, x: TRO.x, st: TRO.state };
+        world = L.world; px = fx = s.x; py = fy = s.y; TRO.x = mine.standX; TRO.state = 'dwell';
+        const shown = {};
+        ['top', 'front'].forEach(c => { camSet(c); draw(); const sx = mine.standX * TS - camXg, sy = L.row * TS - camYg;
+          shown[c] = sx + TS * TRO_LEN > 0 && sx < VW && sy + TS > 0 && sy < VH; });
+        camSet(keep3.cam); TRO.x = keep3.x; TRO.state = keep3.st;
+        Object.keys(shown).filter(c => !shown[c]).forEach(c => P.push('the trolley stops for you in ' + L.world + ' at x=' + mine.standX.toFixed(1) +
+          ', past the end of the street — with you at the stop the ' + c + ' camera shows none of it: it stopped, and not where you can see it'));
+      }
       const empty = ride(false);
       if (empty.served && empty.still > 400) P.push('the trolley stands at the stop in ' + L.world + ' for ' +
         empty.still + ' ms with nobody anywhere near it — it is not waiting for a passenger, it is just slow');
