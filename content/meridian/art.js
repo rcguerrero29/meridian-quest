@@ -665,17 +665,26 @@ TILEART_MESH["S"]=({x,y})=>{
    branch that fires only in `pa`, and every other world keeps the bookcase it had, byte for byte.
    Built the way .claude/skills/how-its-made says — one dough, one tray, one oven. An exhibidor is a
    frame with sheet pans slid in at a tilt, the same seasoned pans the goods came out of the oven on;
-   each pan holds ONE kind off one sheet, so its pieces are siblings: one size, one cutter, laid in rows
-   and touching. Variation enters at the step it entered and nowhere earlier — the concha's shell colour
+   each pan holds ONE kind off one sheet, so its pieces are siblings: one size, one cutter, shingled the
+   way a hand sets them down. Variation enters at the step it entered and nowhere earlier — the concha's shell colour
    per BATCH (a pan is vanilla or it is chocolate), the bake colour per piece where the oven ran hot,
    the lean of a standing oreja per piece. Which kind sits on which pan is decided per RACK by a seed
    that reads both axes: the shelf's own (x*7+y*13)%6 is 3,5,1,3 along this row, so the first and last
    rack were one picture. Pan de muerto takes the top pan of every second rack in season, never out of it.
    The names are the story's: bolillos ("forty bolillos at five", docs.js; the cat in the flour bin),
-   the concha ("concha, ten weeks"), and the bag of pan de ayer at the door. */
+   the concha ("concha, ten weeks"), and the bag of pan de ayer at the door.
+   SECOND PASS, crew iteration 13, 2026-09-22. The owner looked at the racks and said "i can only see
+   conchas and maybe some ojos de buey". He was right twice over: the concha read, and the OTHER thing he
+   could see was the polvorón — a coloured round sat in a white paper cup, which from the camera is a pale
+   ring round a contrasting centre, and that is an ojo de buey. Nothing else read, and the fault was COUNT
+   before it was shape: six, eight and twelve to a pan made pieces three to five pixels across, and at that
+   size a bolillo is a beige lozenge and a cuerno is lace. Every kind but the concha is now THREE to a pan,
+   shingled so dark pan shows between them, laid in the pan's FRONT half (the shelf above overhangs the
+   back of every pan but the top one) with the front piece over the lip. The concha was not touched,
+   because it was the evidence. */
 const PAN={frame:"#5A3E28",frameL:"#7C5A3A",pan:"#3B3836",panL:"#5A5552",
   crust:"#D19A4C",crustD:"#B0762C",crumb:"#F0D9A8",vanilla:"#F2E7CB",vanillaD:"#D6C49A",choc:"#6B4130",chocD:"#4A2A1E",
-  wicker:"#8F6A3A",wickerD:"#6C4B24",caramel:"#C27C34",caramelL:"#EAC57E",
+  wicker:"#8F6A3A",wickerD:"#6C4B24",caramel:"#C27C34",caramelL:"#EAC57E",caramelD:"#8A4E14",
   pink:"#EFA3B5",vain:"#F1E3BE",cocoa:"#7E5237",cup:"#F8F6F0",sugar:"#F1DCAF"};
 const PA_KINDS=["concha-v","concha-c","bolillo","cuerno","oreja","polvoron"];
 const paHere=()=>typeof world!=="undefined"&&world==="pa";
@@ -692,31 +701,37 @@ const paGoods=(kind,s,ti,put)=>{const R=PAN,hot=(s+ti)%6;                       
     for(let r=0;r<2;r++)for(let c=0;c<3;c++,i++){const u=-0.29+c*0.29,v=-0.11+r*0.22;
       put({s:"cyl",r:0.145,h:0.06,c:i===hot?R.crustD:R.crust},u,v,0.03);                    /* the dough: one cutter, six times */
       put({s:"sph",r:0.14,sy:0.62,c:cap},u,v,0.062);}}                                        /* the shell: one batch, one colour */
-  else if(kind==="bolillo"){                                                                  /* a basket, and in it bolillos laid across: one length, one score */
-    put({s:"box",w:0.78,h:0.02,d:0.4,c:R.wickerD},0,0,0.01);
-    put({s:"box",w:0.78,h:0.09,d:0.025,c:R.wicker},0,-0.19,0.055);put({s:"box",w:0.78,h:0.09,d:0.025,c:R.wicker},0,0.19,0.055);
-    put({s:"box",w:0.025,h:0.09,d:0.4,c:R.wicker},-0.39,0,0.055);put({s:"box",w:0.025,h:0.09,d:0.4,c:R.wicker},0.39,0,0.055);
-    const bol=(u,v,h,i)=>{const c=i===hot?R.crustD:R.crust;
-      put({s:"cyl",r:0.05,h:0.22,rz:Math.PI/2,c},u,v,h);                                     /* the body, along the basket */
-      put({s:"cone",r:0.05,h:0.07,rz:-Math.PI/2,c},u+0.145,v,h);put({s:"cone",r:0.05,h:0.07,rz:Math.PI/2,c},u-0.145,v,h); /* the two points */
-      put({s:"box",w:0.18,h:0.012,d:0.022,c:R.crumb},u,v,h+0.048);};                          /* the score, cut the same way on every one */
-    let i=0;[-0.12,0,0.12].forEach(v=>{bol(-0.19,v,0.07,i++);bol(0.19,v,0.07,i++);});         /* six in the basket, end to end */
-    bol(-0.1,-0.06,0.155,i++);bol(0.1,0.06,0.155,i++);}                                       /* two more on top: a heap, not a diagram */
-  else if(kind==="cuerno"){let i=0;for(let r=0;r<2;r++)for(let c=0;c<3;c++,i++){const u=-0.28+c*0.28,v=-0.11+r*0.22;
-      put({s:"torus",r:0.095,t:0.04,arc:Math.PI*1.2,rx:Math.PI/2,ry:Math.PI+(((s+i)%3)-1)*0.14,c:i===hot?R.crustD:R.crust},u,v,0.04);}} /* a crescent lying flat, horns to the room, each set down by hand */
-  else if(kind==="oreja"){[-0.11,0.11].forEach((v,r)=>{for(let i=0;i<6;i++){                 /* two rows laid flat and shingled, each on the one before; the face is the read */
-      const u=-0.33+i*0.132,rz=0.16+((s+r+i)%3)*0.04;                                        /* the lean of one resting on the last, a hair different each */
-      put({s:"cyl",r:0.07,h:0.025,rz,c:R.caramel},u-0.04,v-0.03,0.03);put({s:"cyl",r:0.07,h:0.025,rz,c:R.caramel},u+0.04,v-0.03,0.03); /* the two lobes of the heart */
-      put({s:"cyl",r:0.04,h:0.03,rz,c:R.caramelL},u,v-0.03,0.036);}});}                      /* the paler spiral, proud of the glaze */
-  else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];let i=0;for(let r=0;r<2;r++)for(let c=0;c<3;c++,i++){const u=-0.29+c*0.29,v=-0.11+r*0.22;
-      put({s:"cyl",rt:0.12,rb:0.095,h:0.045,c:R.cup},u,v,0.0225);                             /* the capacillo */
-      put({s:"cyl",r:0.105,h:0.05,c:col[(i+s)%3]},u,v,0.065);}}                               /* the polvorón: a fat disc; three doughs pressed on one tray, set down in turn */
+  else if(kind==="bolillo"){                                                                  /* THREE, not eight. The basket is gone: the pan is the container */
+    const bol=(u,v,h,L,r,i)=>{const c=i===hot%3?R.crustD:R.crust;
+      put({s:"cyl",r,h:L,rz:Math.PI/2,c},u,v,h);                                              /* the body, laid across so you see the one thing that is not round about it: its length */
+      put({s:"cone",r,h:0.075,rz:-Math.PI/2,c},u+L/2+0.037,v,h);put({s:"cone",r,h:0.075,rz:Math.PI/2,c},u-L/2-0.037,v,h); /* the two points the roll was tapered to */
+      put({s:"box",w:L*0.90,h:0.02,d:r*0.60,c:R.crustD},u,v-r*0.34,h+r*0.74);                 /* the cut's shaded lip, behind the split */
+      put({s:"box",w:L*0.86,h:0.024,d:r*0.72,c:R.crumb},u,v+r*0.10,h+r*0.80);};               /* LA GREÑA: the one slash, opened in the oven — a pale ridge, the only mark that names it */
+    bol(-0.145,-0.05,0.095,0.26,0.085,0);bol(0.125,0.06,0.095,0.26,0.085,1);                  /* shingled three deep, each offset across, so dark pan shows between them */
+    bol(-0.065,0.17,0.095,0.26,0.085,2);}                                                      /* all in the pan's front half: the shelf above overhangs the back of every pan but the top one */
+  else if(kind==="cuerno"){                                                                    /* THREE, shingled the way the bolillos are — a row of them merged into lace, a stack into one blob */
+    const cue=(u,v,h,i)=>{const c=i===hot%3?R.crustD:R.crust;
+      put({s:"torus",r:0.14,t:0.068,arc:Math.PI*1.26,rx:Math.PI/2,ry:Math.PI+(((s+i)%3)-1)*0.34,c},u,v,h);}; /* the rolled triangle curved to a horn: a 4.8px tube round a 4.5px hole */
+    cue(-0.17,-0.03,0.075,0);cue(0.16,0.09,0.075,1);cue(-0.06,0.19,0.085,2);}                  /* forward of the shelf above, which was cutting the back two in half */
+  else if(kind==="oreja"){                                                                     /* THREE laid FACE UP, shingled like the bolillos. Stood on edge they were clipped by the shelf
+                                                                                                  above and read as wedges; the cut face IS the object, so the face goes up and the pan gets three */
+    const ore=(u,v,i)=>{const hotOne=i===hot%3,c=hotOne?R.caramel:R.caramelL;
+      put({s:"box",w:0.21,h:0.05,d:0.105,c:R.caramelD},u,v-0.078,0.026);                       /* the back of the slice, where the sheet's two rolls meet, dark off the tray */
+      put({s:"cyl",r:0.104,h:0.050,c:R.caramelD},u-0.108,v,0.041);                             /* the outer turn of each curl, the edge that caramelises hardest on the tray */
+      put({s:"cyl",r:0.104,h:0.050,c:R.caramelD},u+0.108,v,0.041);                             /* set proud on the OUTSIDE, so it reads as a dark rim and never as a hole */
+      put({s:"cyl",r:0.105,h:0.058,c},u-0.090,v,0.049);                                        /* the cut face: the two curls the sheet was rolled into, sliced across the roll */
+      put({s:"cyl",r:0.105,h:0.058,c},u+0.090,v,0.049);};                                      /* one roll, sliced, so both sit the same way on every piece */
+    ore(-0.17,-0.03,0);ore(0.16,0.085,1);ore(-0.05,0.175,2);}                                  /* the front one's point over the lip */
+  else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];                                /* THREE, half again as big. The white rim stays: it is why this pan reads at all */
+    [-0.30,0,0.30].forEach((u,i)=>{const v=0.02;
+      put({s:"cyl",rt:0.16,rb:0.125,h:0.05,c:R.cup},u,v,0.025);                                /* the capacillo */
+      put({s:"cyl",r:0.142,h:0.058,c:col[(i+s)%3]},u,v,0.079);});}                             /* the polvorón: a fat disc; three doughs pressed on one tray, set down in turn */
   else if(kind==="muerto"){let i=0;for(let r=0;r<2;r++)for(let c=0;c<2;c++,i++){const u=-0.2+c*0.4,v=-0.11+r*0.22;
       put({s:"cyl",r:0.16,h:0.05,c:i===hot%4?R.crustD:R.crust},u,v,0.025);
       put({s:"sph",r:0.16,sy:0.7,c:R.crust},u,v,0.05);                                        /* the round */
-      put({s:"torus",r:0.135,t:0.028,arc:Math.PI,c:R.sugar},u,v,0.06);                        /* the bones, two arches crossed over it */
-      put({s:"torus",r:0.135,t:0.028,arc:Math.PI,ry:Math.PI/2,c:R.sugar},u,v,0.06);
-      put({s:"sph",r:0.05,c:R.sugar},u,v,0.2);}}};                                             /* the knob, sugared */
+      put({s:"torus",r:0.135,t:0.048,arc:Math.PI,c:R.sugar},u,v,0.06);                        /* the bones, two arches crossed over it — fattened from 0.028, which was one pixel */
+      put({s:"torus",r:0.135,t:0.048,arc:Math.PI,ry:Math.PI/2,c:R.sugar},u,v,0.06);
+      put({s:"sph",r:0.055,c:R.sugar},u,v,0.2);}}};                                            /* the knob, sugared */
 /* THE RACK: four posts, the rails, three pans slid in at a tilt with a lip at the front, and on each
    pan what paRack() said. Faces its first open side like the bookcase it replaces. */
 const paRackMesh=({x,y})=>{
@@ -740,16 +755,16 @@ const paGoods2D=(kind,s,ti,x0,base)=>{const R=PAN,hot=(s+ti)%6,tri=i=>x0+3.9+i*7
       ctx.fillStyle=cap;ctx.beginPath();ctx.ellipse(cx,base-2.2,3.5,3.4,0,Math.PI,0);ctx.fill();                       /* the shell, a dome */
       ctx.strokeStyle=sc;ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(cx-2.2,base-2.6);ctx.lineTo(cx+2.2,base-4.6);   /* its score, two cuts */
       ctx.moveTo(cx-2.2,base-4.6);ctx.lineTo(cx+2.2,base-2.6);ctx.stroke();}}
-  else if(kind==="bolillo"){ctx.fillStyle=R.wickerD;ctx.fillRect(x0+1.4,base-4.2,20.4,4.2);ctx.fillStyle=R.wicker;ctx.fillRect(x0+1.4,base-4.2,20.4,1);  /* the basket */
-    [[x0+6.4,base-4.4,0],[x0+16.8,base-4.4,1],[x0+11.6,base-6.8,6]].forEach(([cx,cy,i])=>{                              /* two in front, one on the heap */
-      ctx.fillStyle=i===hot?R.crustD:R.crust;ctx.beginPath();ctx.ellipse(cx,cy,5,1.9,0,0,7);ctx.fill();
-      ctx.fillStyle=R.crumb;ctx.fillRect(cx-2.6,cy-1.3,5.2,0.9);});}                                                     /* the score */
+  else if(kind==="bolillo"){                                                                                             /* the basket went with the mesh's: the pan is the container */
+    [[x0+6.4,base-1.9,0],[x0+16.8,base-1.9,1],[x0+11.6,base-4.6,2]].forEach(([cx,cy,i])=>{                              /* two in front, one on the heap */
+      ctx.fillStyle=i===hot%3?R.crustD:R.crust;ctx.beginPath();ctx.ellipse(cx,cy,5.2,2.1,0,0,7);ctx.fill();
+      ctx.fillStyle=R.crumb;ctx.fillRect(cx-2.7,cy-1.4,5.4,1.1);});}                                                     /* la greña */
   else if(kind==="cuerno"){for(let i=0;i<3;i++){const cx=tri(i);ctx.strokeStyle=(i+3)===hot?R.crustD:R.crust;ctx.lineWidth=2.6;
       ctx.beginPath();ctx.arc(cx,base-1.2,3,Math.PI*1.08,Math.PI*1.92);ctx.stroke();}}                                    /* a crescent, horns to you */
-  else if(kind==="oreja"){for(let k=0;k<2;k++)for(let i=0;i<5;i++){const cx=x0+3.4+i*3.9+k*1.2,cy=base-1.6-k*2.6;       /* shingled flat, the back row peeking over the front */
-      ctx.fillStyle=R.caramel;ctx.beginPath();ctx.arc(cx-1.5,cy-1.2,1.8,0,7);ctx.arc(cx+1.5,cy-1.2,1.8,0,7);ctx.fill();  /* the face: two lobes and the point */
-      ctx.beginPath();ctx.moveTo(cx-3.1,cy-0.8);ctx.lineTo(cx+3.1,cy-0.8);ctx.lineTo(cx,cy+1.6);ctx.closePath();ctx.fill();
-      ctx.fillStyle=R.caramelL;ctx.beginPath();ctx.arc(cx,cy-0.8,1.1,0,7);ctx.fill();}}                                 /* the paler spiral */
+  else if(kind==="oreja"){for(let i=0;i<3;i++){const cx=tri(i),cy=base-2.4;                                             /* three, not ten, and each the size the mesh gives it */
+      ctx.fillStyle=R.caramelD;ctx.beginPath();ctx.arc(cx-2.5,cy,2.9,0,7);ctx.arc(cx+2.5,cy,2.9,0,7);ctx.fill();        /* the caramelised outer turn of each curl */
+      ctx.fillStyle=i===hot%3?R.caramel:R.caramelL;ctx.beginPath();ctx.arc(cx-2.1,cy-0.3,2.5,0,7);ctx.arc(cx+2.1,cy-0.3,2.5,0,7);ctx.fill(); /* the two curls, sliced across the roll */
+      ctx.fillStyle=R.caramelD;ctx.fillRect(cx-3.2,cy+2.2,6.4,1.1);}}                                                    /* the foot it spread over on the tray */
   else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];for(let i=0;i<3;i++){const cx=tri(i);
       ctx.fillStyle=R.cup;ctx.beginPath();ctx.moveTo(cx-3.7,base-3);ctx.lineTo(cx+3.7,base-3);ctx.lineTo(cx+2.9,base);ctx.lineTo(cx-2.9,base);ctx.closePath();ctx.fill(); /* the capacillo */
       ctx.fillStyle=col[(i+3+s)%3];ctx.fillRect(cx-3.3,base-4.4,6.6,1.6);ctx.beginPath();ctx.ellipse(cx,base-4.4,3.3,1.3,0,0,7);ctx.fill();}}  /* the fat disc */
@@ -777,18 +792,18 @@ const paRackTop=rc=>{const{sx,sy,x,y}=rc,{s,trays}=paRack(x,y),R=PAN,kind=trays[
       ctx.fillStyle=i===hot?R.crustD:R.crust;ctx.beginPath();ctx.arc(cx,cy,4.3,0,7);ctx.fill();
       ctx.fillStyle=cap;ctx.beginPath();ctx.arc(cx,cy,3.7,0,7);ctx.fill();
       ctx.strokeStyle=sc;ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(cx-2.4,cy-2.4);ctx.lineTo(cx+2.4,cy+2.4);ctx.moveTo(cx-2.4,cy+2.4);ctx.lineTo(cx+2.4,cy-2.4);ctx.stroke();}}
-  else if(kind==="bolillo"){ctx.fillStyle=R.wickerD;ctx.fillRect(sx+4,sy+9,TS-8,14);ctx.strokeStyle=R.wicker;ctx.lineWidth=1;ctx.strokeRect(sx+4.5,sy+9.5,TS-9,13);
-    let i=0;[11.6,15.4,19.2].forEach(yy=>[sx+10.2,sx+21.8].forEach(cx=>{ctx.fillStyle=i++===hot?R.crustD:R.crust;ctx.beginPath();ctx.ellipse(cx,sy+yy,5.2,1.7,0,0,7);ctx.fill();
-      ctx.fillStyle=R.crumb;ctx.fillRect(cx-2.6,sy+yy-0.4,5.2,0.8);}));
-    [[sx+13.2,sy+13.4],[sx+18.8,sy+17.4]].forEach(([cx,cy])=>{ctx.fillStyle=R.crust;ctx.beginPath();ctx.ellipse(cx,cy,5.2,1.7,0,0,7);ctx.fill();ctx.fillStyle=R.crumb;ctx.fillRect(cx-2.6,cy-0.4,5.2,0.8);});}
-  else if(kind==="cuerno"){let i=0;for(let r=0;r<2;r++)for(let c=0;c<3;c++,i++){ctx.strokeStyle=i===hot?R.crustD:R.crust;ctx.lineWidth=2.6;
-      ctx.beginPath();ctx.arc(gx(c,3),gy(r)+1,3,Math.PI*1.08,Math.PI*1.92);ctx.stroke();}}
-  else if(kind==="oreja"){for(let r=0;r<2;r++)for(let i=0;i<6;i++){const cx=sx+6+i*4.1,cy=sy+12.2+r*7.6;                  /* laid flat and shingled: each face half under the next */
-      ctx.fillStyle=R.caramel;ctx.beginPath();ctx.arc(cx-1.5,cy-1.1,2,0,7);ctx.arc(cx+1.5,cy-1.1,2,0,7);ctx.fill();
-      ctx.beginPath();ctx.moveTo(cx-3.4,cy-0.6);ctx.lineTo(cx+3.4,cy-0.6);ctx.lineTo(cx,cy+2.4);ctx.closePath();ctx.fill();
-      ctx.fillStyle=R.caramelL;ctx.beginPath();ctx.arc(cx,cy-0.7,1.1,0,7);ctx.fill();}}
-  else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];let i=0;for(let r=0;r<2;r++)for(let c=0;c<3;c++,i++){const cx=gx(c,3),cy=gy(r);
-      ctx.fillStyle=R.cup;ctx.beginPath();ctx.arc(cx,cy,4.2,0,7);ctx.fill();ctx.fillStyle=col[(i+s)%3];ctx.beginPath();ctx.arc(cx,cy,3.5,0,7);ctx.fill();}}
+  else if(kind==="bolillo"){                                                                                             /* three, shingled, the same three the mesh lays */
+    [[sx+10.4,sy+12.4],[sx+21.4,sy+15.6],[sx+14.6,sy+19.6]].forEach(([cx,cy],i)=>{
+      ctx.fillStyle=i===hot%3?R.crustD:R.crust;ctx.beginPath();ctx.ellipse(cx,cy,6,2.4,0,0,7);ctx.fill();
+      ctx.fillStyle=R.crumb;ctx.fillRect(cx-3,cy-0.9,6,1.4);});}                                                         /* la greña, seen from over it */
+  else if(kind==="cuerno"){[[sx+10.4,sy+12.6],[sx+21.4,sy+15.8],[sx+14.6,sy+19.8]].forEach(([cx,cy],i)=>{
+      ctx.strokeStyle=i===hot%3?R.crustD:R.crust;ctx.lineWidth=3.4;                                                      /* three, fat enough to have a hole */
+      ctx.beginPath();ctx.arc(cx,cy,4.4,Math.PI*1.02,Math.PI*1.98);ctx.stroke();});}
+  else if(kind==="oreja"){[[sx+10.4,sy+12.6],[sx+21.4,sy+15.8],[sx+14.6,sy+19.8]].forEach(([cx,cy],i)=>{                 /* three face up, shingled: the cut face IS the object */
+      ctx.fillStyle=R.caramelD;ctx.beginPath();ctx.arc(cx-3,cy,3.4,0,7);ctx.arc(cx+3,cy,3.4,0,7);ctx.fill();            /* the caramelised outer turn of each curl */
+      ctx.fillStyle=i===hot%3?R.caramel:R.caramelL;ctx.beginPath();ctx.arc(cx-2.5,cy-0.4,2.9,0,7);ctx.arc(cx+2.5,cy-0.4,2.9,0,7);ctx.fill();});}
+  else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];for(let c=0;c<3;c++){const cx=gx(c,3),cy=sy+16;           /* three, half again as big, in one row as the mesh lays them */
+      ctx.fillStyle=R.cup;ctx.beginPath();ctx.arc(cx,cy,5.2,0,7);ctx.fill();ctx.fillStyle=col[(c+s)%3];ctx.beginPath();ctx.arc(cx,cy,4.5,0,7);ctx.fill();}}
   else if(kind==="muerto"){let i=0;for(let r=0;r<2;r++)for(let c=0;c<2;c++,i++){const cx=gx(c,2)+ (c?1:-1)*1.2,cy=gy(r);
       ctx.fillStyle=i===hot%4?R.crustD:R.crust;ctx.beginPath();ctx.arc(cx,cy,5.4,0,7);ctx.fill();
       ctx.strokeStyle=R.sugar;ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(cx-4.4,cy);ctx.lineTo(cx+4.4,cy);ctx.moveTo(cx,cy-4.4);ctx.lineTo(cx,cy+4.4);ctx.stroke();
@@ -1070,15 +1085,29 @@ TILEART_MESH["0"]=({x,y})=>{const h=(((x*7+y*13)%5)+5)%5,TYRE="#26262B",TOPT="#3
    body; the chrome strip along each side. No lamps, no grille, no handles: at 35 px a tile they are
    noise. A tile and a half long — parts are not clipped and nothing of its kind is laid beside it —
    parked along x, parallel to the taller's front. */
+/* THE PAINT, 2026-09-22 (the owner: "the cars are not following pilis edit/note, can we edit?"). Her rule,
+   now in her own file: this renderer's light gives 1.5:1 and nothing else, so every value difference you
+   want has to be PAINTED into the part's own colour and asked for about a fifth wider than you want it,
+   because tc() mixes 16% of the theme into every hex by day and 22% at night. Both cars were built with
+   a roof one step off the body — #7A2E2E against #8A3636 is sixteen points of luma before the tint, which
+   lands at thirteen — so from seven tiles back a car was one slab with a windscreen. They carry a real
+   ladder now, and it is Rigo's paint rule for the tram applied to a car: a DARK skirt below the waist, the
+   body, a lighter shoulder, the roof lighter again, never two mid-tones, with the shut line dark between
+   them. Luma, before the tint: 29 · 50 · 69 · 100 · 134 · 205 for the glass. */
 TILEART_MESH["6"]=()=>{
-  const BODY="#7A2E2E",ROOF="#8A3636",CABIN="#5E2222",GLASS="#BFD3E0",CHROME="#C9CDD3",TYRE="#1E1E22",HUB="#8E8E96",UNDER="#1A1D22";
+  const SKIRT="#4A1A1A",BODY="#7A2E2E",SHOULDER="#A8524A",ROOF="#C0705E",SHUT="#3A1414",
+        CABIN="#5E2222",GLASS="#BFD3E0",CHROME="#C9CDD3",TYRE="#1E1E22",HUB="#8E8E96",UNDER="#1A1D22";
   const parts=[];
   [[-0.5,-0.3],[0.5,-0.3],[-0.5,0.3],[0.5,0.3]].forEach(([wx,wz])=>{parts.push({s:"cyl",x:wx,y:0.1,z:wz,r:0.1,h:0.08,c:TYRE,rx:Math.PI/2}); /* a wheel */
     parts.push({s:"cyl",x:wx,y:0.1,z:wz,r:0.045,h:0.086,c:HUB,rx:Math.PI/2});});                                                        /* its hub */
   parts.push({s:"box",x:0,y:0.135,z:0,w:1.4,h:0.03,d:0.56,c:UNDER},                       /* the under-body, the darkest thing on it */
-    {s:"box",x:0,y:0.225,z:0,w:1.5,h:0.15,d:0.62,c:BODY},                                 /* the body, 0.15 to 0.30 */
+    {s:"box",x:0,y:0.192,z:0,w:1.5,h:0.085,d:0.62,c:SKIRT},                               /* the skirt, below the waist: dark */
+    {s:"box",x:0,y:0.262,z:0,w:1.5,h:0.055,d:0.622,c:BODY},                               /* the body */
+    {s:"box",x:0,y:0.296,z:0,w:1.5,h:0.014,d:0.624,c:SHOULDER},                           /* the shoulder, where the light sits along the top of the flank */
     {s:"box",x:-0.275,y:0.34,z:0,w:0.55,h:0.08,d:0.5,c:GLASS},                            /* the glass band, 0.30 to 0.38, all the way round */
-    {s:"box",x:-0.275,y:0.4,z:0,w:0.55,h:0.04,d:0.52,c:ROOF});                            /* the roof, painted lighter */
+    {s:"box",x:-0.275,y:0.383,z:0,w:0.56,h:0.012,d:0.51,c:SHUT},                          /* the shut line under the roof: the dark that makes the roof read as a lid */
+    {s:"box",x:-0.275,y:0.404,z:0,w:0.55,h:0.04,d:0.52,c:ROOF},                           /* the roof, two steps lighter than the body */
+    {s:"box",x:0.28,y:0.302,z:0,w:0.9,h:0.012,d:0.6,c:SHOULDER});                         /* the hood, lit: a long bonnet is what says Caprice from above */
   [[-0.535,-0.235],[-0.015,-0.235],[-0.535,0.235],[-0.015,0.235]].forEach(([px,pz])=>parts.push({s:"box",x:px,y:0.34,z:pz,w:0.03,h:0.08,d:0.03,c:CABIN})); /* the pillars */
   [-0.316,0.316].forEach(pz=>parts.push({s:"box",x:0,y:0.17,z:pz,w:1.5,h:0.02,d:0.012,c:CHROME}));                                 /* the chrome strip, low along each side */
   return parts;};
@@ -1092,7 +1121,12 @@ TILEART_MESH["6"]=()=>{
    runs along x and the posts stand north and south of it; the car sits a little east of the posts so
    they hold it at its lift points and do not cut it in half from the door. */
 TILEART_MESH["7"]=()=>{
-  const POST="#6A7480",BASE="#2F353C",ARM="#9EA8B3",STRIPE="#E0B45C",UNDER="#1A1D22",BODY="#3C5C8A",ROOF="#4C6C9A",CABIN="#2C4468",GLASS="#BFD3E0",TYRE="#1E1E22",HUB="#8E8E96";
+  /* the same ladder as the Caprice (2026-09-22, Pili's rule): a dark skirt, the body, a lit shoulder, the
+     roof two steps up, a dark shut line between roof and glass. On a car UP ON A LIFT the ladder does more
+     work than usual, because the thing under it is the bay floor and the thing above it is nothing. */
+  const POST="#6A7480",BASE="#2F353C",ARM="#9EA8B3",STRIPE="#E0B45C",UNDER="#1A1D22",
+        SKIRT="#24406A",BODY="#3C5C8A",SHOULDER="#6E92C4",ROOF="#8FB0DC",SHUT="#1B2F4E",
+        CABIN="#2C4468",GLASS="#BFD3E0",TYRE="#1E1E22",HUB="#8E8E96";
   const parts=[],CX=0.12;                                                                  /* the car's centre, east of the posts */
   [-0.31,0.31].forEach(pz=>{const sg=Math.sign(pz);
     parts.push({s:"box",x:0,y:0.1,z:pz,w:0.16,h:0.2,d:0.14,c:BASE});                       /* the base, dark */
@@ -1105,9 +1139,12 @@ TILEART_MESH["7"]=()=>{
   [[CX-0.3,-0.21],[CX+0.3,-0.21],[CX-0.3,0.21],[CX+0.3,0.21]].forEach(([wx,wz])=>{parts.push({s:"cyl",x:wx,y:0.5,z:wz,r:0.08,h:0.06,c:TYRE,rx:Math.PI/2}); /* a wheel, hanging */
     parts.push({s:"cyl",x:wx,y:0.5,z:wz,r:0.036,h:0.066,c:HUB,rx:Math.PI/2});});
   parts.push({s:"box",x:CX,y:0.535,z:0,w:0.86,h:0.03,d:0.4,c:UNDER},                       /* the car's under-body, the darkest thing in the bay */
-    {s:"box",x:CX,y:0.62,z:0,w:0.9,h:0.14,d:0.44,c:BODY},                                  /* the body, 0.55 to 0.69 */
-    {s:"box",x:CX-0.17,y:0.73,z:0,w:0.42,h:0.08,d:0.36,c:GLASS},                           /* the glass band */
-    {s:"box",x:CX-0.17,y:0.79,z:0,w:0.42,h:0.04,d:0.38,c:ROOF});                           /* the roof, lighter */
+    {s:"box",x:CX,y:0.592,z:0,w:0.9,h:0.084,d:0.44,c:SKIRT},                                /* the skirt, dark */
+    {s:"box",x:CX,y:0.660,z:0,w:0.9,h:0.052,d:0.442,c:BODY},                                /* the body */
+    {s:"box",x:CX,y:0.692,z:0,w:0.9,h:0.012,d:0.444,c:SHOULDER},                            /* the shoulder, lit */
+    {s:"box",x:CX-0.17,y:0.73,z:0,w:0.42,h:0.08,d:0.36,c:GLASS},                            /* the glass band */
+    {s:"box",x:CX-0.17,y:0.773,z:0,w:0.43,h:0.010,d:0.37,c:SHUT},                           /* the shut line under the roof */
+    {s:"box",x:CX-0.17,y:0.792,z:0,w:0.42,h:0.04,d:0.38,c:ROOF});                           /* the roof, two steps up */
   [[CX-0.365,-0.17],[CX+0.025,-0.17],[CX-0.365,0.17],[CX+0.025,0.17]].forEach(([px,pz])=>parts.push({s:"box",x:px,y:0.73,z:pz,w:0.03,h:0.08,d:0.03,c:CABIN})); /* the pillars */
   return parts;};
 
@@ -1585,7 +1622,11 @@ TILEART_MESH["A"]=({x,y})=>{
    paperwork the drawing sits on, which .claude/skills/how-its-made says to read first — says "Six
    burners of consommé diplomacy" (content/meridian/strings.js, grep "Six burners"). Three across by
    two deep is six, which is the only count that agrees with the elevation AND the words, and it is
-   what a restaurant range is; the plan's 2×2 is what fits in 32 px. Made as one is welded: four feet
+   what a restaurant range is. **The owner settled it on 2026-09-22 and it is four**: "i dont care about
+   the amount of burners now- do four if its easiest to be the most detailed with 4" — six across this
+   deck gave each burner three pixels on a phone, and three pixels hold no detail at all. Four in a square,
+   each with its drip bowl, its four-arm grate, its cap, and a ring of flame on the two that are lit.
+   Made as one is welded: four feet
    with the floor showing between them, the body, the oven door proud with its window and its
    full-width bar handle on two brackets, the control fascia under the lip with four knobs, the cast
    deck OVERHANGING the body on every side (that lip is what says range and not cupboard), six open
@@ -1607,10 +1648,22 @@ TILEART_MESH["V"]=({x,y})=>{
   [-0.21,-0.07,0.07,0.21].forEach(kx=>parts.push({s:"cyl",x:kx,y:0.485,z:0.298,r:0.022,h:0.020,c:KNOB,rx:Math.PI/2})); /* four knobs, as the elevation has them */
   parts.push({s:"box",x:0,y:0.528,z:0,w:0.68,h:0.036,d:0.60,c:DECK},                             /* the cast deck, overhanging the body all round */
     {s:"box",x:0,y:0.545,z:0.298,w:0.68,h:0.008,d:0.012,c:NOSE});                                /* its front edge, catching the light */
-  [-0.21,0,0.21].forEach(bx=>[-0.135,0.135].forEach(bz=>{
-    parts.push({s:"cyl",x:bx,y:0.550,z:bz,r:0.085,h:0.012,c:DARK});                              /* the burner well, open */
-    parts.push({s:"sph",x:bx,y:0.556,z:bz,r:0.030,sy:0.5,c:STEEL});                              /* its cap */
-    parts.push({s:"torus",x:bx,y:0.568,z:bz,r:0.082,t:0.018,rx:Math.PI/2,sz:0.6,c:"#2F343B"});}));/* the cast grate over it */
+  /* FOUR BURNERS, not six (the owner, 2026-09-22: "i dont care about the amount of burners now- do four
+     if its easiest to be the most detailed with 4"). Six across a 0.68 deck left each burner 0.085 of a
+     tile — three pixels on his phone — and three pixels cannot hold a grate, a cap and a ring of flame.
+     Four in a square give each one half as much again, and the detail goes in: the drip bowl under it,
+     the cast grate as four arms rather than a ring (a ring at this size is a doughnut), the burner cap
+     with its dark centre, and on the two that are lit a ring of flame. Which two are lit is decided by
+     the tile, so the kitchen is a kitchen somebody is working in and not a showroom. */
+  [[-0.155,-0.13],[0.155,-0.13],[-0.155,0.13],[0.155,0.13]].forEach(([bx,bz],bi)=>{
+    const lit=((((x*5+y*3)%4)+4)%4+bi)%4<2;                                                       /* two of the four are on */
+    parts.push({s:"cyl",x:bx,y:0.548,z:bz,r:0.115,h:0.010,c:"#6A727C"});                          /* the drip bowl, pressed steel, catching the light */
+    parts.push({s:"cyl",x:bx,y:0.554,z:bz,r:0.098,h:0.010,c:DARK});                               /* the well inside it, dark */
+    [0,Math.PI/2].forEach(a=>parts.push({s:"box",x:bx,y:0.566,z:bz,w:0.20,h:0.016,d:0.022,c:"#2F343B",ry:a})); /* the cast grate: four arms, a cross */
+    parts.push({s:"cyl",x:bx,y:0.566,z:bz,r:0.040,h:0.018,c:"#3A4048"});                          /* its centre ring, where the pot sits */
+    parts.push({s:"cyl",x:bx,y:0.560,z:bz,r:0.046,h:0.016,c:STEEL});                              /* the burner cap */
+    parts.push({s:"cyl",x:bx,y:0.569,z:bz,r:0.022,h:0.006,c:"#1B1E22"});                          /* its dark centre */
+    if(lit)parts.push({s:"torus",x:bx,y:0.562,z:bz,r:0.050,t:0.010,rx:Math.PI/2,c:"#2E86C8"});});  /* the ring of flame, blue, on the two that are on */
   parts.push({s:"box",x:0,y:0.612,z:-0.275,w:0.68,h:0.130,d:0.045,c:STEEL},                      /* the riser at the back */
     {s:"box",x:0,y:0.680,z:-0.275,w:0.68,h:0.010,d:0.045,c:NOSE},                                /* its lit top */
     {s:"box",x:0,y:0.612,z:-0.250,w:0.13,h:0.030,d:0.008,c:ORANGE});                             /* the pilot, the one warm note the plan draws */

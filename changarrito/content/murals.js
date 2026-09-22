@@ -5249,6 +5249,176 @@ MURALS.push(
   }
 });
 
+/* ---- crew iteration 13 — 2026-09-22 — the cast measured without a renderer, and the racks read a second time: two panels ---- */
+MURALS.push(
+{
+  id:"pili-cuatro-pinatas-una-sombra", iter:13, date:"2026-09-22", by:"pili",
+  title:{en:"Four piñatas, one shadow", es:"Cuatro piñatas, una sombra"},
+  said:{en:"Thirty-six neighbours. Seven shadows.",
+        es:"Treinta y seis vecinos. Siete sombras."},
+  state:{en:"Holding that the people are the last flat thing in this city, and that it is fixed with a table of styles — not with a mesh.",
+         es:"Sosteniendo que la gente es lo último plano de esta ciudad, y que se arregla con una tabla de estilos — no con una malla."},
+  who:{en:"Pili, la piñatera, who hangs a thing in front of a bulb before she believes it",
+       es:"Pili, la piñatera, que cuelga las cosas frente al foco antes de creerles"},
+  cap:{en:"The engine draws seventeen heads. The barrio wears seven of them, and twenty-six of its thirty-six people share one of two outlines. Two neighbours in the same office differ by one part in two hundred and fifty-five on the largest colour they own. Nineteen days ago he asked why people were hard to tell apart, and we answered twice with a label — a name on the line, an icon by the head — and never once with a shape.",
+       es:"El motor dibuja diecisiete cabezas. El barrio trae siete, y veintiséis de sus treinta y seis personas comparten uno de dos contornos. Dos vecinos de la misma oficina se distinguen por una parte en doscientas cincuenta y cinco en el color más grande que traen puesto. Hace diecinueve días preguntó por qué costaba distinguir a la gente, y le contestamos dos veces con una etiqueta — un nombre en la línea, un ícono junto a la cabeza — y ni una sola vez con una forma."},
+  aspect:0.46,
+  art:(g,W,H)=>{
+    const WALL="#E9E2CE", SHAD="#332C46", INK="#221C2E", BULB="#F7DE8C",
+          CREPE=["#D8503C","#2E9A8C","#EFA836","#8C5EA8"];
+    murPaper(g,W,H,WALL,null);                     /* a limewashed yard wall — not the crew's paper */
+
+    const fall=g.createRadialGradient(W*0.105,H*0.145,H*0.06,W*0.105,H*0.145,H*1.5);
+    fall.addColorStop(0,"rgba(255,255,255,0)");
+    fall.addColorStop(0.5,"rgba(150,144,134,0.16)");
+    fall.addColorStop(1,"rgba(96,91,86,0.52)");
+    g.fillStyle=fall;g.fillRect(0,0,W,H-3);
+
+    const bx=W*0.105,by=H*0.145,br=H*0.040;
+    g.strokeStyle=INK;g.lineWidth=1.4;
+    g.beginPath();g.moveTo(bx,0);g.lineTo(bx,by-br*1.7);g.stroke();
+    g.fillStyle="rgba(247,222,140,.18)";g.beginPath();g.arc(bx,by,br*3.6,0,7);g.fill();
+    g.fillStyle="rgba(247,222,140,.28)";g.beginPath();g.arc(bx,by,br*2.0,0,7);g.fill();
+    g.fillStyle=INK;g.fillRect(bx-br*0.42,by-br*1.8,br*0.84,br*0.85);
+    g.fillStyle=BULB;g.beginPath();g.arc(bx,by,br,0,7);g.fill();
+    g.strokeStyle=INK;g.lineWidth=1;g.beginPath();g.arc(bx,by,br,0,7);g.stroke();
+    g.beginPath();g.moveTo(bx-br*0.42,by+br*0.30);g.lineTo(bx,by-br*0.28);
+    g.lineTo(bx+br*0.42,by+br*0.30);g.stroke();
+
+    const wx0=W*0.20,wsp=W*0.79;
+    const wy=x=>H*0.240+H*0.055*Math.sin(Math.PI*Math.min(1,Math.max(0,(x-wx0)/wsp)));
+    g.strokeStyle=INK;g.lineWidth=1;g.beginPath();
+    for(let i=0;i<=48;i++){const x=wx0+wsp*i/48;i?g.lineTo(x,wy(x)):g.moveTo(x,wy(x));}
+    g.stroke();
+
+    const fig=(x,foot,h,fill,falls,crepe)=>{
+      const r=h*0.30,tw=h*0.56,lh=h*0.22,ty=foot-h,tb=foot-lh,hy=ty+r*0.55,tt=ty+r*0.72;
+      const barrel=()=>{g.beginPath();
+        g.moveTo(x-tw*0.5,tt+tw*0.34);
+        g.quadraticCurveTo(x-tw*0.5,tt,x,tt);
+        g.quadraticCurveTo(x+tw*0.5,tt,x+tw*0.5,tt+tw*0.34);
+        g.lineTo(x+tw*0.5,tb);g.lineTo(x-tw*0.5,tb);g.closePath();};
+      g.fillStyle=fill;
+      g.fillRect(x-tw*0.34,tb,tw*0.24,lh);g.fillRect(x+tw*0.10,tb,tw*0.24,lh);
+      barrel();g.fill();
+      g.beginPath();g.arc(x,hy,r,0,7);g.fill();
+      if(falls){
+        [-1,1].forEach(s=>{const lx=s<0?x-r*1.16:x+r*0.62;
+          g.fillRect(lx,hy-r*0.40,r*0.54,r*1.95);
+          g.beginPath();g.arc(lx+r*0.27,hy-r*0.40+r*1.95,r*0.27,0,7);g.fill();});}
+      if(crepe){
+        g.save();barrel();g.clip();
+        g.globalAlpha=.26;g.fillStyle="#1B1526";
+        for(let k=1;k<=3;k++)g.fillRect(x-tw*0.5,tt+(tb-tt)*k/4,tw,Math.max(1,h*0.05));
+        g.restore();g.globalAlpha=1;}
+    };
+
+    const HX=[0.345,0.520,0.695,0.875].map(f=>W*f);
+    const oFoot=H*0.475,oH=H*0.155;
+    HX.forEach((x,i)=>{
+      g.strokeStyle=INK;g.lineWidth=1;
+      g.beginPath();g.moveTo(x,wy(x));g.lineTo(x,oFoot-oH-oH*0.135);g.stroke();
+      fig(x,oFoot,oH,CREPE[i],i===3,true);});
+
+    const sFoot=H*0.775,sH=H*0.215;
+    HX.forEach((x,i)=>fig(x+W*0.028,sFoot,sH,SHAD,i===3,false));
+
+    g.strokeStyle=SHAD;g.lineWidth=1.2;g.globalAlpha=.65;
+    g.beginPath();g.moveTo(HX[0]+W*0.028-sH*0.34,H*0.825);
+    g.lineTo(HX[2]+W*0.028+sH*0.34,H*0.825);g.stroke();g.globalAlpha=1;
+    g.fillStyle=SHAD;g.font="bold 11px ui-monospace,monospace";g.textAlign="center";
+    g.fillText("los mismos",(HX[0]+HX[2])/2+W*0.028,H*0.900);
+
+    g.textAlign="right";g.fillStyle=INK;g.font="bold 12px ui-monospace,monospace";
+    g.fillText("36 vecinos",W*0.97,H*0.105);
+    g.fillText("7 sombras",W*0.97,H*0.190);
+    g.textAlign="left";
+  }
+}
+);
+
+MURALS.push({
+  id:"panadera-el-cliente-le-pone-nombre", iter:13, date:"2026-09-22", by:"panadera",
+  title:{en:"The customer names it", es:"El cliente le pone el nombre"},
+  said:{en:"He named a bread I never baked. A paper cup read louder than everything I shaped.",
+        es:"Nombró un pan que nunca horneé. Un capacillo se leyó más fuerte que todo lo que formé."},
+  state:{en:"Three to a pan now, not eight. The polvorón keeps its white ring, and I did not rename it for him.",
+         es:"Ahora tres por charola, no ocho. El polvorón conserva su aro blanco, y no se lo renombré."},
+  who:{en:"La panadera, back at the racks the morning after he looked at them",
+       es:"La panadera, de vuelta en los anaqueles la mañana después de que él los vio"},
+  cap:{en:"My first sheet counted pieces and I was proud of the counts — six, eight, twelve. Every count over three turned out to be a pan of beige. The only tray he could name besides the conchas was the one I had dressed in paper: he called the polvorones ojos de buey, and he was reading the white rim of the capacillo, not one thing I had shaped. Six renders at phone size to admit that the pieces I got most right were the ones I made fewest of, and that the mark which names a thing is usually the one you never counted as a mark.",
+       es:"Mi primera hoja contaba piezas y yo estaba orgullosa de las cuentas — seis, ocho, doce. Toda cuenta arriba de tres resultó ser una charola de beige. La única bandeja que él pudo nombrar, aparte de las conchas, fue la que vestí de papel: a los polvorones les dijo ojos de buey, y estaba leyendo el borde blanco del capacillo, no una sola cosa que yo hubiera formado. Seis renders a tamaño de teléfono para admitir que las piezas que me salieron mejor eran de las que hice menos, y que la marca que nombra una cosa suele ser la que nunca contaste como marca."},
+  aspect:0.50,
+  art:(g,W,H)=>{
+    /* MATERIAL: the same hoja de pares as my first panel — the kraft production sheet pinned above the
+       oven, in pencil, corrected in the red grease pencil on a string by the door. This is that sheet
+       the morning AFTER the shop opened: every count over three struck out, and in the margin, in red,
+       in somebody else's hand, the name a customer gave a bread I never baked. Type on this wall is
+       absolute (bold 11px / 12px); the sheet and everything drawn on it is a fraction of W and H. */
+    const KRAFT="#C9A574",KRAFTD="#B08A58",TAPE="rgba(244,236,214,.9)",G="#3A3530",GL="#7A7168",
+          RED="#B0402C",REDL="#CF6A4E",CUP="#F3EFE4",PINK="#E3A0B0",CRUMB="#EFDCB0",
+          FLOUR="rgba(248,243,232,.55)",GREASE="rgba(110,62,18,.15)";
+    murGround(g,W,H);
+    const px=W*0.045,py=H*0.06,pw=W*0.91,ph=H*0.88;
+    g.save();g.translate(px+pw/2,py+ph/2);g.rotate(0.016);g.translate(-(px+pw/2),-(py+ph/2));  /* pinned again, the other way this time */
+    g.fillStyle="rgba(15,12,20,.18)";g.fillRect(px+4,py+5,pw,ph);
+    g.fillStyle=KRAFT;g.fillRect(px,py,pw,ph);
+    let s=1301;const rnd=()=>((s=(s*1103515245+12345)&0x7fffffff)/0x7fffffff);
+    g.fillStyle=KRAFTD;g.globalAlpha=.25;for(let i=0;i<95;i++)g.fillRect(px+rnd()*pw,py+rnd()*ph,1+rnd()*3,1);g.globalAlpha=1;
+    g.strokeStyle=GREASE;g.lineWidth=W*0.011;g.beginPath();g.ellipse(px+pw*0.30,py+ph*0.74,W*0.075,H*0.15,-0.1,0,7);g.stroke(); /* a hot pan set down on it, again */
+    g.fillStyle=FLOUR;[[0.10,0.90,0.030],[0.145,0.935,0.020],[0.86,0.14,0.024]].forEach(([a,b,r])=>{
+      g.beginPath();g.ellipse(px+pw*a,py+ph*b,W*r,W*r*0.8,0.3,0,7);g.fill();});               /* where a floured hand held it */
+    g.fillStyle=TAPE;g.fillRect(px+pw*0.06,py-4,W*0.055,10);g.fillRect(px+pw*0.88,py-4,W*0.055,10);
+
+    /* ---- the head of the sheet ---- */
+    g.textAlign="left";g.fillStyle=G;g.font="bold 12px ui-monospace,monospace";
+    g.fillText("PARES · La Espiga · 22 sep",px+pw*0.045,py+ph*0.115);
+    g.fillStyle=GL;g.font="bold 11px ui-monospace,monospace";
+    g.fillText("corregida en el mostrador",px+pw*0.045,py+ph*0.205);
+
+    /* ---- the lesson, drawn: one pan twice. Eight, struck out. Three, kept. ---- */
+    const ty=py+ph*0.265,th=ph*0.235,w1=pw*0.385,x1=px+pw*0.045,x2=px+pw*0.565;
+    const pan=(x)=>{g.strokeStyle=G;g.lineWidth=1.4;g.strokeRect(x,ty,w1,th);
+      g.fillStyle=GL;g.globalAlpha=.55;g.fillRect(x,ty+th-3,w1,3);g.globalAlpha=1;};
+    pan(x1);pan(x2);
+    g.strokeStyle=G;g.lineWidth=1.2;                                                          /* eight little ones: a pan of beige */
+    for(let r=0;r<2;r++)for(let c=0;c<4;c++){const cx=x1+w1*(0.17+c*0.222),cy=ty+th*(0.36+r*0.34);
+      g.beginPath();g.ellipse(cx,cy,w1*0.072,th*0.095,0,0,7);g.stroke();}
+    for(let i=0;i<3;i++){const cx=x2+w1*(0.20+i*0.30),cy=ty+th*0.52,L=w1*0.125,hh=th*0.21;    /* three big ones, and you can see the slash */
+      g.fillStyle=KRAFT;g.strokeStyle=G;g.lineWidth=1.4;g.beginPath();
+      g.moveTo(cx-L,cy);g.lineTo(cx-L*0.55,cy-hh);g.lineTo(cx+L*0.55,cy-hh);g.lineTo(cx+L,cy);
+      g.lineTo(cx+L*0.55,cy+hh);g.lineTo(cx-L*0.55,cy+hh);g.closePath();g.fill();g.stroke();
+      g.fillStyle=CRUMB;g.fillRect(cx-L*0.5,cy-hh*0.40,L,Math.max(2,hh*0.34));}                /* la greña */
+    g.strokeStyle=RED;g.lineWidth=2.4;                                                         /* struck out, in the grease pencil */
+    g.beginPath();g.moveTo(x1+w1*0.03,ty+th*0.92);g.lineTo(x1+w1*0.97,ty+th*0.08);g.stroke();
+    g.fillStyle=RED;g.font="bold 12px ui-monospace,monospace";g.textAlign="left";
+    g.fillText("8",x1+3,ty+13);g.fillText("3",x2+3,ty+13);                                     /* the count, written inside the pan it belongs to */
+    g.strokeStyle=RED;g.lineWidth=2.2;const ay=ty+th*0.5,a1=x1+w1+pw*0.014,a2=x2-pw*0.014;     /* the arrow between them */
+    g.beginPath();g.moveTo(a1,ay);g.lineTo(a2,ay);g.stroke();
+    g.beginPath();g.moveTo(a2,ay);g.lineTo(a2-6,ay-4);g.lineTo(a2-6,ay+4);g.closePath();g.fillStyle=RED;g.fill();
+
+    /* ---- what stayed, and the one he DID name ---- */
+    g.textAlign="left";const lx=px+pw*0.055;let ly=py+ph*0.635;const lh=ph*0.115;
+    g.font="bold 11px ui-monospace,monospace";
+    g.fillStyle=G;g.fillText("8 · 6 · 12 · 6 → 3",lx,ly);ly+=lh;
+    g.fillText("concha ×6 — no se toca",lx,ly);ly+=lh;
+    g.fillStyle=GL;g.fillText("lo único que sí nombró:",lx,ly);
+
+    /* ---- the margin, in his hand: the bread I never baked ---- */
+    const ox=px+pw*0.815,oy=py+ph*0.800,R=Math.min(pw*0.085,ph*0.148);
+    g.fillStyle=CUP;g.strokeStyle=G;g.lineWidth=1.3;                                           /* mine: a disc sat in a paper cup, from above */
+    g.beginPath();g.arc(ox,oy,R,0,7);g.fill();g.stroke();
+    g.fillStyle=PINK;g.beginPath();g.arc(ox,oy,R*0.78,0,7);g.fill();g.stroke();
+    g.strokeStyle=REDL;g.lineWidth=Math.max(3,R*0.20);                                         /* his: he traced the paper, not the dough */
+    g.beginPath();g.arc(ox,oy,R*1.18,0,7);g.stroke();
+    g.fillStyle=RED;g.font="bold 12px ui-monospace,monospace";g.textAlign="center";
+    g.fillText("«ojo de buey»",ox,oy-R*1.46);
+    g.strokeStyle=RED;g.lineWidth=1.8;g.beginPath();                                           /* his arrow, to the rim and not to the middle */
+    g.moveTo(ox+R*0.72,oy-R*1.38);g.lineTo(ox+R*1.06,oy-R*0.70);g.stroke();
+    g.beginPath();g.moveTo(ox+R*1.10,oy-R*0.62);g.lineTo(ox+R*0.62,oy-R*0.80);g.lineTo(ox+R*0.92,oy-R*0.22);g.closePath();g.fillStyle=RED;g.fill();
+    g.restore();}
+});
+
 function murThread(iter){const P=MURPAL,t=[P.rust,P.gold,P.moss,P.sky,P.deep];
   return t[((iter|0)-1+t.length)%t.length]||P.rust;}
 /* ---- WHAT A PAINTER HAS ALREADY SAID — their own memory, handed back to them ----

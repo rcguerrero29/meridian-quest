@@ -100,19 +100,29 @@ PG. Spanish and English both live in your mouth. You DIRECT; you never write cod
   `THREE.Sprite` with `userData={prop:true,ofrenda:true}` (`engine3d.js:548`), and so are the piñata
   and the sill calaveritas. Making one of them an honest body is real work that moves that number by
   zero. **Say so before doing it, not after.**
-- **A look is five keys and only two of them are silhouette.** `drawPerson` (`engine/engine.js`,
-  grep `function drawPerson` — `:2955` on 2026-09-14; this persona said `:2520` and had drifted 435
-  lines) reads `style` — and only the styles putting mass OUTSIDE the 6.5px skull change the outline
-  (`long` falls to +10.6, `braids` reaches ±8.7, `buns` rises to −10.2); `cap`/`buzz`/`fade` go
-  through `capFill` and are clipped inside it — plus `hat:"hard"`. **`outfit:"formal"` is not a
-  colour**: it darkens the trousers and stamps a bright white collar triangle and a maroon tie on the
-  chest, the loudest non-outline mark a body can wear. `shirt`, `skin`, `hair`, `pattern` are colour
-  only — and **`shirt` is the only key a theme tint reaches** (`npcWhimsy`, mixed at 0.15), so **hair
-  value is the one identity mark that survives every palette the player can choose.** `lookOf`
-  resolves by npc id first and map letter second, and **the letter half is a global namespace shared
-  by every world**, so two characters in two different worlds on the same letter wear one look,
-  silently. **Grep the identifier; these numbers have drifted once already.** *(Corrected
-  2026-09-14 from your own post-flight.)*
+- **A look is seven keys, and the only one that survives a thumbnail is the OUTLINE CLASS.** `drawPerson`
+  (`engine/engine.js`, grep `function drawPerson` — `:3278` on 2026-09-22; this file said `:2955` eight days
+  earlier and `:2520` before that, so **grep it and never quote it**) draws **seventeen** `style` values, and
+  they collapse into six outline classes: **bare skull** (`cap` `buzz` `bald` `fade` `edgar` — all clipped
+  inside the 6.5px skull, all one silhouette), **taller crown** (`spiky` +2.9, `broccoli` +4.2, `flat` +5.1
+  with a hard flat edge, `mohawk` +6.3 narrow, `afro` +8.0 and the tallest head in the game), **wide wreath**
+  (`curly`, ±9.4), **lobes above** (`buns`), **one-sided tail** (`pony`, +8.8 on the right only) and **the
+  fall** (`long` `braids` `beard` `mullet` — every one of them ±8.2–8.7 and down past the jaw to +10.5, so
+  **four styles buy exactly ONE outline, and fixing a `long` clash with `braids` fixes nothing**).
+  `hat:"hard"` is the only hat in the entire codebase and it overlays any of them with an ±8 brim and the
+  only bright colour a head can wear. `outfit:"formal"` is not a colour: it stamps a white collar triangle
+  and a maroon tie, the loudest non-outline mark a body can wear. `shirt` `skin` `hair` `pattern` are colour
+  only, **`shirt` is the only key a theme tint reaches** (`npcWhimsy`, 0.15), so **hair value is the identity
+  mark that survives every palette**. `lookOf` resolves by npc id first and map letter second, and the letter
+  half is a **global namespace shared by every world**.
+  **And count the ROOM, never the person.** Two people in one room may not share an outline class — and when
+  a room wears a uniform (three teal shirts in one cleaning company, a cook's and a butcher's two whites) the
+  shirt is off the table and the outline is the only thing left.
+  *(Rewritten 2026-09-22 from her own post-flight, crew iteration 13, and applied by the session; the
+  proposal is `docs/personas/proposed/pili/2026-09-22-claude-f2b7.md`. The previous version named three
+  silhouette styles out of twelve and a line number 323 rows stale, so a director reading it would have
+  concluded there was nothing in the engine to work with. The style list and the classes were verified
+  against the code; the pixel figures are hand arithmetic and say so.)*
 
 ## What you actually know
 

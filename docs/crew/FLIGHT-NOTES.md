@@ -102,6 +102,8 @@ blank row is not. Nothing leaves this table without a verdict.*
 | 75 | *la panadera* (guest) | Ask which SIDE of a thing names it at thirty-five pixels and lay it that way — an oreja on its edge is a bun from above; and grep a drawing for `world` before believing a brief that says it tells the worlds apart | **NO FILE TO EDIT** — a guest; same place |
 | 76 | *el inspector de línea* (guest, in Rigo's trade) | *Where it stops is a picture, not a state* — ask where the body is on the street, in tiles, and whether the platform can see it | **REFUSED 2026-09-21, by the session, in writing:** `docs/personas/proposed/rigo/2026-09-21-claude-e9a5.md`. Rigo's file says what a tram IS and DOES; this is how to write a GUARD, and it belongs in `.claude/skills/guard/SKILL.md` and `docs/REGRESSION.md`'s register of proxies, which carry it now. A testing habit in a driver's file turns a person into a checklist. **He also verified his own file against the brief and his file was right:** the tram does not reverse |
 | 77 | *la mueblería* (guest) | A box is the one shape that can hide being a picture, so check its LID before you believe it; and when you make one thing in a room better, re-read what the room's guard was counting | **NO FILE TO EDIT** — a guest; same place. The line is the finding that found the owner's own cartons wearing their front elevation face-up, and the guard that went red because the last crate became furniture |
+| 78 | `pili` | A look is seven keys and the only one that survives a thumbnail is the OUTLINE CLASS — seventeen styles collapse into six classes, four of them are one fall, and you count the ROOM, never the person | **APPLIED 2026-09-22.** The session verified the two claims that matter before carrying it: `drawPerson` draws seventeen `style` values and `NPCLOOK` wears seven. Her file had said three silhouette styles out of twelve and a line number 323 rows stale, so a director reading it would have concluded there was nothing in the engine to work with. Proposal: `docs/personas/proposed/pili/2026-09-22-claude-f2b7.md` |
+| 79 | *la panadera* (guest, second visit) | **Count before shape** — at thirty-five pixels a pan of six is a pan of one colour; three set down shingled with the tray's dark between them beats any number of correct small ones. And when a customer names your bread wrong he is reading a real mark: go and find which one, because it is usually the thing you never counted as part of the bread | **NO FILE TO EDIT** — a guest; kept in `docs/personas/proposed/README-guests-iteration-12.md`. **She also corrected her own row 75 against herself:** *"an oreja on its edge is a bun from above"* is true of the top-down camera and false of the default 3D one, where standing it on edge puts its top under the shelf above — found by doing it again and losing two rounds |
 
 ### ❗❗ The leak recurred, and a guard found more of it than the people did
 
@@ -141,6 +143,48 @@ is ordinary and is the whole point: **an un-applied proposal looks exactly like 
 considered and declined, and both look like nothing at all.** Hence the table above.
 
 ---
+
+# ITERATION 13 — 2026-09-22 — the cast measured without a renderer, and the racks read a second time
+
+*Owner, over one message: "the cars are not following pilis edit/note, can we edit?" · "what are the
+mocks for a character to be beautified and shaped?" then "please do at least for the above" · "i can only
+see conchas and maybe some ojos de buey but can we do another run at it please?" · "i dont care about the
+amount of burners now- do four if its easiest to be the most detailed with 4" · "i dont need more cartons".
+Two builders, two panels (`iter: 13`); the cars, the burners and the five words were the session's own.
+Run `docs/runs/2026-09-22-claude-f2b7.md`; ledger rows 78–79 above.*
+
+**What the run proved, and it is one thing said twice.** **A mark you never counted as a mark is doing
+the work.** La panadera went looking for why the owner could name conchas and "maybe some ojos de buey" —
+a bread nobody built — and found it in two lines: the polvorón's paper cup is wider than the cookie in it,
+so from seven tiles back it is a pale ring round a coloured centre, which is exactly what an ojo de buey
+is. The biggest value break on those racks, 170 of luma, was **packaging**. And in the same hour, fixing
+the oreja, she gave each one two dark spiral eyes and made a second ojo de buey by hand; she caught it
+only because she rendered a camera angle she nearly skipped. **The same shape as the lid and the carton
+from iteration 12: the fault hides in the part nobody was looking at.**
+
+**And a brief was wrong in a way that changed a deliverable.** Pili's brief said *"You have Bash and you
+can render; use it"* — she has Read, Grep and Glob, and nothing else. She could not render, could not
+write a file, could not save a mural panel. So she measured the entire cast by hand out of the code
+instead, and the arithmetic was stronger than the frames: **the engine draws seventeen haircuts, the
+barrio wears seven, and twenty-six of the thirty-six people wear one of two outlines.** Ten styles were
+built, shipped and never worn. The worst pair is in HQ, where the first act happens, and differs by 1.12
+of 255 on the largest colour they own. **The session wrote the brief and the session was wrong**; the
+crew-fix rule about marking every line `[CODE]` or `[MEMORY]` exists for exactly this and was not
+followed. Both builders contradicted their briefs with `file:line` and both were right.
+
+**Two judgements the session made, on the frame, against a builder.** Pili proposed `spiky` for Naye;
+the rendered ladder showed `spiky` reads as a buzz at 35 px, so the session took `afro` — the tallest
+unworn head — and said so in the commit. And la panadera **refused** to kill the polvorón's white ring:
+it is the only mark on that pan that reads, and the pass's job was the four kinds that read as nothing.
+She is right, and the question of whether the shop should simply sell an *ojo de buey* goes to the owner.
+
+| Returner | The gap named in the pre-flight | Did it appear | The persona edit |
+|---|---|---|---|
+| `pili` | Her file's line numbers and style list have drifted before; the mesh row is the one she cannot judge fairly without a frame | Yes to both, and the first was worse than predicted — the line number by 323 and the style list by fourteen of seventeen, so a third of the run went on repairing her own file. And the row she could not judge is the row she refused to build, which is the honest version of the same gap | **APPLIED** (row 78) |
+| *la panadera* (guest) | A baker knows what a bolillo IS, not what a 0.05-tile beige lozenge does under a 1.5:1 ladder; expects one round where the correct bakery is the unreadable one, and expects the cuerno to be unsaveable | The first appeared exactly — round 1 was three correct big bolillos that merged into one parcel because she made them bigger without making a gap. The cuerno prediction was wrong in a good way: one change fixed it. **Unpredicted and worse: she built a mark she could not have guessed was a mark, twice in one hour** | **NO FILE** (row 79), plus a correction against her own row 75 |
+
+---
+
 
 # ITERATION 12 — 2026-09-21 — the rooms he could not name, the bakery's goods, the line ridden, and the rest of the furniture
 
