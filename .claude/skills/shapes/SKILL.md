@@ -14,7 +14,9 @@ sittings themselves are in `docs/3D-LOG.md` (the four entries of 2026-09-21) and
 ## What the seam is, in one paragraph
 
 The 3D camera builds a tile from a LIST OF PARTS when the pack declares one: `TILEART_MESH[g]` in
-`content/meridian/art.js` (or `TILEART[g].mesh`), a function `({x,y}) => parts` or a plain list.
+**your pack's** `art.js` (`content/meridian/art.js`, `changarrito/content/art.js`, or whatever
+`content/<world>/art.js` you are building — this seam belongs to every pack, not to Meridian), or
+equivalently `TILEART[g].mesh`, a function `({x,y}) => parts` or a plain list.
 A part is `{s:"box"|"sph"|"cyl"|"cone"|"torus", x,y,z, w,h,d | r | rt,rb,h | r,t,arc, c:"#hex",
 rx,ry,rz, sx,sy,sz, a}` in TILE UNITS — a tile is 1.0, a person is about 1.0 tall, y is up, the
 tile's centre is (0,0). The engine (`engine/engine3d.js`, `t3MeshOf`) merges the parts into ONE mesh
@@ -29,8 +31,67 @@ Three keys are not glyphs but KINDS the engine builds itself and asks the pack t
 **Who gets a shape:** a SOLID tile (the hook runs before wall, box and billboard — `t3MeshTile`), or
 a tile with `stand:true` in `TILEMETA` (grass). A tile that is neither — water, the bridge deck `^`,
 a door — never reaches the hook; the bridge got its own key for that reason. If your thing is not
-SOLID and you add it to `SOLIDX` in `content/meridian/maps.js`, say `ASSUMED:` in the comment —
+SOLID and you add it to `SOLIDX` in your pack's `maps.js` (Meridian's is
+`content/meridian/maps.js`, the town's is `changarrito/content/maps.js`), say `ASSUMED:` in the comment —
 nobody decided people cannot walk through it, the drawing needed a box.
+
+## Step 0 — LOOK IN `SHAPES` FIRST, before you draw anything
+
+*Added 2026-09-22, crew iteration 14, when the engine got a shape library.*
+
+`engine/shapes.js` holds the engine's own shapes, **named by what they are** rather than by a
+letter: `plant · tree · desk · table · crate · shelving · fridge · stove · counter ·
+draftingTable · picketFence · wellRail · doghouse`. `SHAPEBIND` in the same file says which letters
+this engine reads them as (`P J D T H S W V K A F ◺ 9`).
+
+**THE RULE, and it is the one thing to carry out of this step: an engine default may only fill a
+hole. It never replaces a drawing, and it is never assumed — it is TAKEN.** A pack names the
+letters it accepts in a `SHAPETAKE` string; saying nothing takes nothing. The gate in
+`engine/engine.js` then still refuses a letter you named if you already answered for it (`mesh`,
+`TILEART`, `TILEART_SIDE`, `TILEMETA`), if it can never stand, or if it is **already drawn standing
+up** — a solid with a `side` drawing is built as a box wearing its own art on the lid and four
+faces, and the `mesh` view has no texture channel, so a shape there deletes the drawing.
+
+Both halves were bought on 2026-09-22 by the same mistake in two shapes:
+
+- **Silence is not consent.** The engine's `H` is an open produce crate; El Changarrito means a
+  RACK by `H` and had never drawn it, so every "did the pack say something?" question answered *no*
+  and six crates of tomatoes stood up in the bedrooms. One letter, two objects — the third time,
+  after `I` (counter vs storefront) and `b` (marigold bed vs a shadow with nothing over it).
+- **A shape is not automatically better than a picture.** Binding `K` and `T` replaced a counter
+  with a coffee machine on its front and a table with a gingham cloth and two plates with bare
+  vertex-coloured blocks — 71 tiles — and the guard that was watching counted triangles and scored
+  it as 71 tiles fixed.
+
+So, before step 1:
+
+1. **Is the thing you are about to draw already in `SHAPES`?** If it is, and your world means the
+   same object by it, you are done and you write nothing at all. Check by NAME, not by letter —
+   your world may spell shelving `▯`, and `const TILEART_MESH={"▯":o=>SHAPES.shelving(o)};` is the whole job.
+   **The arrow is mandatory.** `engine/boot.js` is the last script tag in both shells and it is what
+   loads `engine/shapes.js`, so your file runs BEFORE `SHAPES` exists: `{mesh:SHAPES.shelving}` is
+   built at pack-evaluation time and throws "SHAPES is not defined". The arrow defers the lookup to
+   draw time, which is long after. **And you must DECLARE the table** — a world that has never
+   written a mesh has no `TILEART_MESH`, so `TILEART_MESH["▯"]=…` throws too. Both halves were
+   planted against El Changarrito on 2026-09-22; the eager form, the undeclared form and
+   `{mesh:SHAPES.x}` all failed, and only the line above printed OK. It was documented wrong in five
+   places first.
+1½. **Does your world mean the same OBJECT by that letter?** Not the same kind of thing — the same
+   thing. A rack and a produce crate are both furniture you put goods on, and they are not the same
+   object, and no test in this repository can tell them apart. Only you can. If the answer is no,
+   leave the letter out of `SHAPETAKE` and say so in a comment there.
+2. **Is the LETTER already bound?** If `SHAPEBIND` names your letter and you draw it anyway, **you
+   are writing an OVERRIDE** — the gate will step aside and your art will win, silently. That is
+   often right: Meridian overrides eleven of the thirteen because its crate carries tomatoes and
+   its jacaranda carries papel picado. But it is a decision, so **say why in the comment above your
+   function**, in one sentence, naming what your version has that the plain one does not. "It is a
+   festival" is a good reason. "I did not look" is the one this step exists to stop.
+3. **If the engine's shape is nearly right, fix it in the ENGINE, not in your pack.** A crate that
+   needs deeper slats needs deeper slats in every world. A crate that needs tomatoes in it is
+   yours. The test is whether the change is true of the OBJECT or true of your WORLD.
+
+The plain shapes are deliberately plain: the festival, the season and the local colour live in the
+pack, and what is left when you take those off is what belongs to the letter.
 
 ## The recipe — ten steps, in order
 
@@ -73,7 +134,7 @@ nobody decided people cannot walk through it, the drawing needed a box.
    known-flat list in `test/engine.smoke.js` (`FLAT_BY_GAME`) only shrinks: take your glyph out of it,
    red first. If you wrote a guard, plant its violation in a copy OUTSIDE the repository and quote what
    it printed (`.claude/skills/guard/SKILL.md`).
-9. **Bump.** `content/meridian/art.js` is precached; `test/bump.js` in CI compares each push with the
+9. **Bump.** Your pack's `art.js` and `engine/shapes.js` are both precached (see `sw.js` ASSETS); `test/bump.js` in CI compares each push with the
    previous one, so every push that touches it moves `GAMEV` in both pack configs and `CACHE` in
    `sw.js` together — even the second push of the same branch.
 10. **Write it down where the next person looks:** an entry in `docs/3D-LOG.md` (what the ask was,

@@ -523,6 +523,85 @@ TILEART_SIDE["b"]=rc=>{const{sx,sy,x,y}=rc;
   ctx.fillStyle="rgba(15,12,20,.3)";if(Wt)ctx.fillRect(sx,sy+21,1.2,9);if(E)ctx.fillRect(sx+TS-1.2,sy+21,1.2,9); /* the ends of the run */
 };
 
+/* LOOSE PETALS ON THE GROUND — THE TRAIL, WHICH IS NOT THE BED (owner, 2026-09-22: "ok can you
+   try to lookinto making petals? that i can walk and interact through as if they were mounds of
+   items piled up").
+   `b` above is the raised bed: a box with a curb, and you do not walk through it. `✿` is what
+   FALLS OUT of it — loose heads and torn petals, swept into low mounds and laid from the bed to
+   the ofrenda, which is how the souls are shown the way. Two objects; they shared one letter for a
+   day and the letter's curb made the arrow a wall (maps.js, the pk row 10 comment and SOLIDX).
+   HOW IT IS MADE, AND THEREFORE HOW IT IS DRAWN (.claude/skills/how-its-made). Nothing here is
+   planted, so nothing here is arranged: a head drops, it breaks up, and the pieces are PUSHED
+   along the ground — which is where the variation enters, at the pushing and not at the growing.
+   So: the same petal the bridge strews (engine.js petalShape) in the same six colours (petalPal),
+   because it is the same flower off the same plant; dark at the foot and lit at the crown, because
+   a heap needs a value range and what shows between petals is the dark that makes the orange sing;
+   piled against whatever stopped it, the rule the bridge's own spill was tuned to on 2026-09-21;
+   worn low down the middle of the lane where feet go through, which is the only thing that tells a
+   laid path from a spill; and a few pieces that got away past the foot.
+   YEAR-ROUND, on purpose, and this is a decision rather than an oversight. A map row cannot be
+   seasonal without a seam nobody asked for — but the bed these fall from is on the map all year
+   and blooms all year, and `petalPal()` deliberately "returns the marigold gradient WITH NO SEASON
+   ON" (engine.js, drawBed). Petals under a flowering bed in March are just true. What the SEASON
+   changes is what it has always changed: the six colours, and the ofrenda that the trail points at. */
+const PETAL_LANE=(w,x,y)=>{ /* which way the trail runs through this tile — feet wear a lane along it */
+  const at=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return !!r&&r[gx]==="✿";};
+  const ew=at(x-1,y)||at(x+1,y),ns=at(x,y-1)||at(x,y+1);
+  return ew&&!ns?"x":ns&&!ew?"z":null;};
+const PETAL_BANK=(w,x,y)=>{ /* the side it was stopped on: a drift piles against a solid, never in the open */
+  const sol=(gx,gy)=>{const r=w&&w.grid&&w.grid[gy];return !!r&&SOLID.has(r[gx]);};
+  return [sol(x+1,y)?1:sol(x-1,y)?-1:0, sol(x,y+1)?1:sol(x,y-1)?-1:0];};
+const PETAL_RND=s=>{let sd=(s|0)&0x7fffffff;return()=>{sd=(sd*1103515245+12345)&0x7fffffff;return sd/0x7fffffff;};};
+TILEART["✿"]=rc=>{const{sx,sy,x,y}=rc;
+  const P=petalPal(),w=CW(),lane=PETAL_LANE(w,x,y),bk=PETAL_BANK(w,x,y),rnd=PETAL_RND(x*911+y*271+29);
+  const cx=sx+16+bk[0]*3.5,cy=sy+16+bk[1]*3.5;
+  /* The damp under the drift — UNDER THE BANKS AND NOWHERE ELSE. The first cut laid one ellipse
+     across the whole tile and at 5× it read as a grey stain on the pavement with petals on top,
+     because a flat brown at a third alpha over this floor desaturates to concrete. A worn lane
+     shows the GROUND, which is the pavement; the dark belongs where the petals are deep. */
+  ctx.fillStyle="rgba(74,38,12,.30)";
+  const lobe=(ox,oy,rx,ry)=>{ctx.beginPath();ctx.ellipse(cx+ox,cy+oy,rx,ry,0,0,7);ctx.fill();};
+  if(lane==="x"){lobe(0,-6.5,12.5,4.6);lobe(0,6.5,12.5,4.6);}
+  else if(lane==="z"){lobe(-6.5,0,4.6,12.5);lobe(6.5,0,4.6,12.5);}
+  else lobe(0,1.4,11,8.6);
+  for(let i=0;i<13;i++)petalShape(ctx,sx+2+rnd()*28,sy+2+rnd()*28,rnd()*6.2832,0.85,P[1+((i+1)%3)]);   /* the ones that got away, out on the grass */
+  for(let i=0;i<70;i++){                                                                               /* the heap itself */
+    const a=rnd()*6.2832,t=Math.sqrt(rnd());let px=Math.cos(a)*t*13,py=Math.sin(a)*t*10.5;
+    if(lane){const across=lane==="x"?py:px;
+      if(Math.abs(across)<4.5&&rnd()<0.55)continue;                                                    /* worn thin where the feet go */
+      if(lane==="x")py*=1.12;else px*=1.12;}                                                           /* and banked up either side of them */
+    const r=Math.min(1,Math.hypot(px/13,py/10.5));
+    petalShape(ctx,cx+px,cy+py,rnd()*6.2832,0.95+(1-r)*0.25,P[1+Math.min(4,Math.floor((1-r)*4.2+rnd()*1.4))]);}
+  const nh=2+((((x*7+y*13)%2)+2)%2);                                                                   /* two or three heads that never broke up */
+  for(let i=0;i<nh;i++){const a=rnd()*6.2832,t=rnd()*0.55,hx=cx+Math.cos(a)*t*11,hy=cy+Math.sin(a)*t*9,r=2.6+rnd()*1.1;
+    ctx.fillStyle="rgba(30,18,8,.30)";ctx.beginPath();ctx.ellipse(hx+0.6,hy+r*0.7,r*0.95,r*0.4,0,0,7);ctx.fill();
+    ctx.fillStyle=P[1];ctx.beginPath();ctx.ellipse(hx,hy+r*0.18,r,r*0.8,0,0,7);ctx.fill();
+    ctx.fillStyle=P[3]||P[2];ctx.beginPath();ctx.ellipse(hx,hy,r*0.95,r*0.76,0,0,7);ctx.fill();
+    ctx.fillStyle=P[5]||P[4];ctx.beginPath();ctx.ellipse(hx-r*0.3,hy-r*0.35,r*0.4,r*0.3,0,0,7);ctx.fill();}
+};
+/* THE HEAP IN PROFILE. It is ANKLE high — about a quarter of a tile, where the bed's curb is knee
+   high and its heads stand higher again — because that is the difference a person has to read at
+   phone size between "I walk through this" and "I walk round that". A drift has an EDGE, so the
+   silhouette is drawn first and every petal is cut by it; shallow sides, because loose light stuff
+   will not stand steep. */
+TILEART_SIDE["✿"]=rc=>{const{sx,sy,x,y}=rc;
+  const P=petalPal(),rnd=PETAL_RND(x*577+y*193+11),base=sy+30,top=base-8.5;
+  ctx.fillStyle="rgba(15,12,20,.20)";ctx.fillRect(sx,base-0.6,TS,2);                        /* it meets the floor in a line */
+  ctx.save();ctx.beginPath();ctx.moveTo(sx-1,base+0.5);
+  ctx.bezierCurveTo(sx+5,base-1,sx+8,top+0.6,sx+16,top);
+  ctx.bezierCurveTo(sx+24,top+0.6,sx+27,base-1,sx+TS+1,base+0.5);
+  ctx.closePath();ctx.fillStyle=P[0];ctx.fill();ctx.clip();
+  for(let i=0;i<56;i++){const h=rnd();
+    petalShape(ctx,sx+rnd()*TS,base-h*9.5,rnd()*6.2832,0.9,P[1+Math.min(4,Math.floor(h*4.2+rnd()*1.2))]);}
+  ctx.fillStyle="rgba(15,12,20,.28)";ctx.fillRect(sx,base-2.8,TS,3.4);                      /* the foot, in the ground's own shade */
+  ctx.restore();
+  const head=(hx,hy,r)=>{
+    ctx.fillStyle=P[1];ctx.beginPath();ctx.ellipse(hx,hy+r*0.16,r,r*0.82,0,0,7);ctx.fill();
+    ctx.fillStyle=P[3]||P[2];ctx.beginPath();ctx.ellipse(hx,hy,r*0.94,r*0.76,0,0,7);ctx.fill();
+    ctx.fillStyle=P[5]||P[4];ctx.beginPath();ctx.ellipse(hx-r*0.32,hy-r*0.36,r*0.38,r*0.28,0,0,7);ctx.fill();};
+  head(sx+13,top+1.6,2.5);head(sx+20.5,top+2.8,2.1);head(sx+27,base-2,1.8);                 /* two on the crown, one rolled clear */
+};
+
 /* ---- BEAUTIFY, SECOND SITTING — 2026-09-21, the same night. SHAPES, NOT PICTURES. ----
    Owner: "i still see squares and not polygonal shapes … can we not try this finally?" The `mesh`
    view: a list of primitives per tile, in tile units (a tile is 1.0 wide, a person about 1.0 tall),
@@ -546,23 +625,62 @@ const TILEART_MESH={};
    the whorls take P[hue+1], P[hue+2], P[hue+3] (the crown capped at P[4]); nothing here names an
    orange, so a season that recolours petals recolours these. Four steps because two touching heads in
    one family are ~5% apart under this light and merge (Pili, run 11): every value difference between
-   heads is PAINTED. `lod` 0 drops the middle whorl (a garland of small heads). `lean` is [x,z]: the
+   heads is PAINTED. `lod` 0 drops the middle whorl, but ONLY on a bed-sized head — below r 0.10 the
+   six-lobe branch never consults it and 0 does nothing (measured; see the count below). `lean` is [x,z]: the
    head sheared off its stem that much per unit of height — the outer stems of a bush splay toward
    the light. The first seven parameters are what the bed, the tree's garland and the altar's arch
-   already pass. 26 parts. */
+   already pass.
+
+   DEFINITION, THE FOURTH REPORT — 2026-09-22, la jardinera (owner: "the marigold decor is also not
+   very well defined"). The head was not the fault; it reads at a 4× crop. TWO things were, and both
+   are about what is NEXT TO the orange, not about the orange:
+
+   (1) THE DARK. The light here has a 1.5:1 range and nothing more (DAY_AMB 0.66, DAY_SUN 0.42), so
+   form cannot separate two orange things — only VALUE can, and value has to be painted in. In the
+   bed it was, by accident: the near-black foliage mound sits under the heads. Everywhere the
+   marigold is used as DECOR — the tree's garland, the altar's arch, the calaverita's lid — it hangs
+   against pale plaster with nothing behind it, and twelve orange lobes with nothing dark at their
+   rim average to a smear. The bakery found the same thing and the answer there was the PACKAGING:
+   a polvorón reads because its white paper cup is WIDER than the cookie. So every head now carries
+   its own dark: a near-black involucre collar, r*1.24 — wider than the petal mass's outer reach of
+   about r*1.15 — flattened to sy 0.16 and set a little below the florets, so from the 40° camera it
+   shows as a dark ring round the lower rim of every head and as dark in every gap between two heads
+   that touch. #1B3521 lands at luma 43 on a lit face and 28 on a shaded one, against 127 for the
+   body orange: the biggest value step anywhere on the flower, and it is the step the eye uses.
+
+   (2) THE SUB-PIXEL FLORETS. A tile is ~35 px on a phone. A decor head at r 0.055 is 4 px across
+   and was being built from 24 florets of r 0.019 — 0.65 px each. They cannot be seen; they can only
+   be averaged, which is exactly what "not defined" looks like. Under r 0.10 the head is now built
+   from SIX fat outer lobes and four inner ones instead of twenty-four small ones, so the outline is
+   a rosette with six points instead of a circle.
+
+   `collar:true` and `petal:true` mark the two kinds for `test/smoke.js`'s definition guard.
+   COUNTED, by calling it rather than by reading it (the first draft of this comment said 26 and 13
+   and both were wrong — it forgot that the crown whorl(3) sits OUTSIDE the small/else branch and is
+   built either way): 27 parts at bed size with `lod` 1, 20 at bed size with `lod` 0, and 16 for any
+   head under r 0.10. `lod` reaches only the bed's branch — a small head builds the same 16 parts
+   whatever it is passed, which is why the marigold on the tamalera's pot lid (grep "a marigold on
+   the lid in season") passes 0 and gets the same head as everything else. That is deliberate:
+   there is nothing left to drop at 4 px. (It said "art.js:1866" and the call was never on that
+   line; a line number in a comment is wrong the next time anything above it is edited, and this
+   comment has now moved it twice. Name the thing, not the line.) */
 const meshMarigold=(parts,hx,hy,hz,r,P,seed,hue,lod,lean)=>{
   const k=hue===undefined?1:hue,full=lod===undefined||lod>0,lx=lean?lean[0]:0,lz=lean?lean[1]:0;
-  const C0=P[Math.max(k+1,0)]||P[2],C1=P[Math.max(k+2,0)]||P[3],C2=P[Math.min(k+3,4)]||P[4],CUP="#4E8A58"; /* the crown stops at P[4]: a gold head is gold to the centre, not cream */
+  const small=r<0.10;                                                                                  /* a decor head: 6 px across, so fewer and fatter */
+  const C0=P[Math.max(k+1,0)]||P[2],C1=P[Math.max(k+2,0)]||P[3],C2=P[Math.min(k+3,4)]||P[4],CUP="#4E8A58",COLLAR="#1B3521"; /* the crown stops at P[4]: a gold head is gold to the centre, not cream */
   const rnd=(i,j)=>{const v=Math.sin((seed+1)*12.9898+i*78.233+j*37.719)*43758.5453;return v-Math.floor(v);}; /* a hash, not Math.random: the same tile grows the same flower every frame */
   const put=p=>{p.x+=(p.y-hy)*lx;p.z+=(p.y-hy)*lz;parts.push(p);};
+  put({s:"sph",x:hx,y:hy-r*0.12,z:hz,r:r*1.24,sy:0.16,c:COLLAR,collar:true});                          /* THE VALUE BREAK: the dark, and it is WIDER than the flower */
   put({s:"cyl",x:hx,y:hy-r*0.32,z:hz,rt:r*0.30,rb:r*0.20,h:r*0.5,c:CUP});                            /* the involucre */
-  put({s:"sph",x:hx,y:hy+r*0.22,z:hz,r:r*0.55,sy:0.9,c:C1});                                           /* the receptacle, in the plant's own hue */
+  put({s:"sph",x:hx,y:hy+r*0.22,z:hz,r:r*0.55,sy:0.9,c:C1,petal:true});                                /* the receptacle, in the plant's own hue */
   const whorl=(n,rad,y,pr,sy,sz,tilt,c,j)=>{const off=rnd(j,0)*6.2832,hl=pr*sz;
     for(let i=0;i<n;i++){const a=off+i*6.2832/n+(rnd(i,j)-0.5)*0.4,t=tilt+(rnd(i,j+5)-0.5)*0.3,rr=rad+Math.cos(t)*hl;
-      put({s:"sph",x:hx+Math.cos(a)*rr,y:y+Math.sin(t)*hl,z:hz+Math.sin(a)*rr,r:pr,sy,sz,rx:-t,ry:Math.PI/2-a,c});}};
-  whorl(8,r*0.30,hy,r*0.34,0.28,1.25,0.3,C0,1);                                                        /* outer: the largest florets, splayed, margins lifted */
-  if(full)whorl(7,r*0.22,hy+r*0.14,r*0.30,0.32,1.1,0.95,C1,2);                                         /* middle: shorter, steeper */
-  whorl(6,r*0.12,hy+r*0.28,r*0.26,0.4,1.0,1.25,C2,3);                                                   /* inner: near upright, crinkled */
+      put({s:"sph",x:hx+Math.cos(a)*rr,y:y+Math.sin(t)*hl,z:hz+Math.sin(a)*rr,r:pr,sy,sz,rx:-t,ry:Math.PI/2-a,c,petal:true});}};
+  if(small){whorl(6,r*0.26,hy,r*0.40,0.32,1.10,0.35,C0,1);                                             /* six fat lobes: at 6 px an outline with points beats a circle of crumbs */
+            whorl(4,r*0.10,hy+r*0.26,r*0.32,0.42,1.0,1.20,C2,3);}
+  else{whorl(8,r*0.30,hy,r*0.34,0.28,1.25,0.3,C0,1);                                                   /* outer: the largest florets, splayed, margins lifted */
+       if(full)whorl(7,r*0.22,hy+r*0.14,r*0.30,0.32,1.1,0.95,C1,2);                                    /* middle: shorter, steeper */
+       whorl(6,r*0.12,hy+r*0.28,r*0.26,0.4,1.0,1.25,C2,3);}                                            /* inner: near upright, crinkled */
   whorl(3,r*0.06,hy+r*0.55,r*0.2,0.8,1.0,1.4,C2,4);};                                                   /* the crown */
 /* A STRING OF PAPEL PICADO between two points, sagging a little, with flags hung from it in the paper
    palette, alternating. Flags are boxes, thin as paper, a hair below the string. */
@@ -619,6 +737,42 @@ TILEART_MESH["b"]=({x,y})=>{
     parts.push({s:"cyl",x:bx,y:(0.3+by)/2,z:bz,r:0.01,h:by-0.3,c:STEM});
     parts.push({s:"cyl",x:bx,y:by,z:bz,rt:0.03,rb:0.02,h:0.07,c:CUP});
     parts.push({s:"sph",x:bx,y:by+0.045,z:bz,r:0.028,sy:1.2,c:P[2+i%2]});});
+  return parts;};
+
+/* THE MOUND OF LOOSE PETALS, IN 3D. The bed above is a planted thing and is built from the ground
+   up — curb, soil, foliage, heads on stems. NOTHING HERE IS ON A STEM. Everything in this heap has
+   fallen and then been pushed, so it is built in that order and in no other: the damp dark it lies
+   on, the broken pieces heaped at the shallow angle loose light stuff actually stands at, the two
+   or three heads that never broke up sitting on top because they landed last, and the few that got
+   away past the foot. A petal is a flattened ellipsoid — that is a petal seen from any side — and
+   the colours are petalPal's six, the same six on the bridge's spill and in the bed, because it is
+   the same flower. Crown at 0.19 of a tile: the cast now stands 0.92, so this is mid-shin, which is
+   what a mound of swept flowers looks like and is well under the bed's knee-high curb. */
+TILEART_MESH["✿"]=({x,y})=>{
+  const P=petalPal(),w=CW(),lane=PETAL_LANE(w,x,y),bk=PETAL_BANK(w,x,y);
+  const rnd=(i,j)=>{const v=Math.sin(x*12.9898+y*78.233+i*39.425+j*17.719)*43758.5453;return v-Math.floor(v);};
+  const ox=bk[0]*0.09,oz=bk[1]*0.09,H=0.175;                                    /* it piles against whatever stopped it */
+  /* the damp, under the BANKS. One disc the width of the tile read as a brown dish with petals
+     sitting in it at 4× — the shadow was wider than what casts it. Same correction as the top art. */
+  const parts=[];
+  const lobe=(lx,lz,r)=>parts.push({s:"cyl",x:ox+lx,y:0.005,z:oz+lz,r:r,h:0.01,c:"#3A1C0A"});
+  if(lane==="x"){lobe(0,-0.16,0.25);lobe(0,0.16,0.25);}
+  else if(lane==="z"){lobe(-0.16,0,0.25);lobe(0.16,0,0.25);}
+  else lobe(0,0,0.34);
+  for(let i=0;i<112;i++){
+    const a=rnd(i,1)*6.2832,t=Math.sqrt(rnd(i,2));let px=Math.cos(a)*t*0.42,pz=Math.sin(a)*t*0.42;
+    if(lane){const across=lane==="x"?pz:px;
+      if(Math.abs(across)<0.13&&rnd(i,3)<0.5)continue;                          /* worn thin down the lane */
+      if(lane==="x")pz*=1.1;else px*=1.1;}                                      /* banked either side of it */
+    const r=Math.min(1,Math.hypot(px,pz)/0.42);
+    parts.push({s:"sph",x:ox+px,y:0.014+H*(1-r*r)*(0.55+rnd(i,4)*0.45),z:oz+pz,
+      r:0.058+rnd(i,5)*0.03,sx:1.25,sy:0.26,sz:0.8,ry:rnd(i,6)*3.1416,rx:(rnd(i,7)-0.5)*0.5,
+      c:P[1+Math.min(4,Math.floor((1-r)*4.2+rnd(i,8)*1.3))]});}
+  for(let i=0;i<3;i++){const a=rnd(i,11)*6.2832,t=rnd(i,12)*0.5;                /* the heads that never broke up */
+    meshMarigold(parts,ox+Math.cos(a)*t*0.34,0.03+H*0.72+rnd(i,13)*0.03,oz+Math.sin(a)*t*0.34,
+      0.055+rnd(i,14)*0.012,P,(x*3+y*7+i)|0,1+(i%2),0);}
+  for(let i=0;i<7;i++){const a=rnd(i,21)*6.2832,rr=0.44+rnd(i,22)*0.055;        /* and the ones that got away */
+    parts.push({s:"sph",x:Math.cos(a)*rr,y:0.012,z:Math.sin(a)*rr,r:0.048,sx:1.25,sy:0.2,sz:0.8,ry:rnd(i,23)*3.1416,c:P[1+(i%3)]});}
   return parts;};
 
 /* THE POTTED PLANT. Twenty of them, every one the same picture until tonight (docs/BEAUTIFY.md,
@@ -713,15 +867,17 @@ const paGoods=(kind,s,ti,put)=>{const R=PAN,hot=(s+ti)%6;                       
     const cue=(u,v,h,i)=>{const c=i===hot%3?R.crustD:R.crust;
       put({s:"torus",r:0.14,t:0.068,arc:Math.PI*1.26,rx:Math.PI/2,ry:Math.PI+(((s+i)%3)-1)*0.34,c},u,v,h);}; /* the rolled triangle curved to a horn: a 4.8px tube round a 4.5px hole */
     cue(-0.17,-0.03,0.075,0);cue(0.16,0.09,0.075,1);cue(-0.06,0.19,0.085,2);}                  /* forward of the shelf above, which was cutting the back two in half */
-  else if(kind==="oreja"){                                                                     /* THREE laid FACE UP, shingled like the bolillos. Stood on edge they were clipped by the shelf
-                                                                                                  above and read as wedges; the cut face IS the object, so the face goes up and the pan gets three */
-    const ore=(u,v,i)=>{const hotOne=i===hot%3,c=hotOne?R.caramel:R.caramelL;
+  else if(kind==="oreja"){                                                                     /* TWO laid FACE UP, shingled like the bolillos. Stood on edge they were clipped by the shelf
+                                                                                                  above and read as wedges; the cut face IS the object, so the face goes up. TWO, not three, because
+                                                                                                  the owner read the sparse tray as the story it is: this is the kind that sells out, and the empty
+                                                                                                  front of the pan says so louder than a third piece ever said "bakery" (docs/ASKS.md, 2026-09-22) */
+    const ore=(u,v,i)=>{const hotOne=i===hot%2,c=hotOne?R.caramel:R.caramelL;
       put({s:"box",w:0.21,h:0.05,d:0.105,c:R.caramelD},u,v-0.078,0.026);                       /* the back of the slice, where the sheet's two rolls meet, dark off the tray */
       put({s:"cyl",r:0.104,h:0.050,c:R.caramelD},u-0.108,v,0.041);                             /* the outer turn of each curl, the edge that caramelises hardest on the tray */
       put({s:"cyl",r:0.104,h:0.050,c:R.caramelD},u+0.108,v,0.041);                             /* set proud on the OUTSIDE, so it reads as a dark rim and never as a hole */
       put({s:"cyl",r:0.105,h:0.058,c},u-0.090,v,0.049);                                        /* the cut face: the two curls the sheet was rolled into, sliced across the roll */
       put({s:"cyl",r:0.105,h:0.058,c},u+0.090,v,0.049);};                                      /* one roll, sliced, so both sit the same way on every piece */
-    ore(-0.17,-0.03,0);ore(0.16,0.085,1);ore(-0.05,0.175,2);}                                  /* the front one's point over the lip */
+    ore(-0.17,-0.03,0);ore(0.16,0.085,1);}                                                     /* the two that were laid at the back; the pan's whole front is bare, where the light is */
   else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];                                /* THREE, half again as big. The white rim stays: it is why this pan reads at all */
     [-0.30,0,0.30].forEach((u,i)=>{const v=0.02;
       put({s:"cyl",rt:0.16,rb:0.125,h:0.05,c:R.cup},u,v,0.025);                                /* the capacillo */
@@ -761,10 +917,11 @@ const paGoods2D=(kind,s,ti,x0,base)=>{const R=PAN,hot=(s+ti)%6,tri=i=>x0+3.9+i*7
       ctx.fillStyle=R.crumb;ctx.fillRect(cx-2.7,cy-1.4,5.4,1.1);});}                                                     /* la greña */
   else if(kind==="cuerno"){for(let i=0;i<3;i++){const cx=tri(i);ctx.strokeStyle=(i+3)===hot?R.crustD:R.crust;ctx.lineWidth=2.6;
       ctx.beginPath();ctx.arc(cx,base-1.2,3,Math.PI*1.08,Math.PI*1.92);ctx.stroke();}}                                    /* a crescent, horns to you */
-  else if(kind==="oreja"){for(let i=0;i<3;i++){const cx=tri(i),cy=base-2.4;                                             /* three, not ten, and each the size the mesh gives it */
+  else if(kind==="oreja"){[0,2].forEach((i,n)=>{const cx=tri(i),cy=base-2.4;                                            /* TWO, at the two ends of the pan, so the gap in the middle is bare pan:
+                                                                                                                             the piece that was between them is the one somebody bought */
       ctx.fillStyle=R.caramelD;ctx.beginPath();ctx.arc(cx-2.5,cy,2.9,0,7);ctx.arc(cx+2.5,cy,2.9,0,7);ctx.fill();        /* the caramelised outer turn of each curl */
-      ctx.fillStyle=i===hot%3?R.caramel:R.caramelL;ctx.beginPath();ctx.arc(cx-2.1,cy-0.3,2.5,0,7);ctx.arc(cx+2.1,cy-0.3,2.5,0,7);ctx.fill(); /* the two curls, sliced across the roll */
-      ctx.fillStyle=R.caramelD;ctx.fillRect(cx-3.2,cy+2.2,6.4,1.1);}}                                                    /* the foot it spread over on the tray */
+      ctx.fillStyle=n===hot%2?R.caramel:R.caramelL;ctx.beginPath();ctx.arc(cx-2.1,cy-0.3,2.5,0,7);ctx.arc(cx+2.1,cy-0.3,2.5,0,7);ctx.fill(); /* the two curls, sliced across the roll */
+      ctx.fillStyle=R.caramelD;ctx.fillRect(cx-3.2,cy+2.2,6.4,1.1);});}                                                  /* the foot it spread over on the tray */
   else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];for(let i=0;i<3;i++){const cx=tri(i);
       ctx.fillStyle=R.cup;ctx.beginPath();ctx.moveTo(cx-3.7,base-3);ctx.lineTo(cx+3.7,base-3);ctx.lineTo(cx+2.9,base);ctx.lineTo(cx-2.9,base);ctx.closePath();ctx.fill(); /* the capacillo */
       ctx.fillStyle=col[(i+3+s)%3];ctx.fillRect(cx-3.3,base-4.4,6.6,1.6);ctx.beginPath();ctx.ellipse(cx,base-4.4,3.3,1.3,0,0,7);ctx.fill();}}  /* the fat disc */
@@ -799,9 +956,9 @@ const paRackTop=rc=>{const{sx,sy,x,y}=rc,{s,trays}=paRack(x,y),R=PAN,kind=trays[
   else if(kind==="cuerno"){[[sx+10.4,sy+12.6],[sx+21.4,sy+15.8],[sx+14.6,sy+19.8]].forEach(([cx,cy],i)=>{
       ctx.strokeStyle=i===hot%3?R.crustD:R.crust;ctx.lineWidth=3.4;                                                      /* three, fat enough to have a hole */
       ctx.beginPath();ctx.arc(cx,cy,4.4,Math.PI*1.02,Math.PI*1.98);ctx.stroke();});}
-  else if(kind==="oreja"){[[sx+10.4,sy+12.6],[sx+21.4,sy+15.8],[sx+14.6,sy+19.8]].forEach(([cx,cy],i)=>{                 /* three face up, shingled: the cut face IS the object */
+  else if(kind==="oreja"){[[sx+10.4,sy+12.6],[sx+21.4,sy+15.8]].forEach(([cx,cy],i)=>{                                    /* TWO face up, the same two the mesh keeps: the front of the pan is bare */
       ctx.fillStyle=R.caramelD;ctx.beginPath();ctx.arc(cx-3,cy,3.4,0,7);ctx.arc(cx+3,cy,3.4,0,7);ctx.fill();            /* the caramelised outer turn of each curl */
-      ctx.fillStyle=i===hot%3?R.caramel:R.caramelL;ctx.beginPath();ctx.arc(cx-2.5,cy-0.4,2.9,0,7);ctx.arc(cx+2.5,cy-0.4,2.9,0,7);ctx.fill();});}
+      ctx.fillStyle=i===hot%2?R.caramel:R.caramelL;ctx.beginPath();ctx.arc(cx-2.5,cy-0.4,2.9,0,7);ctx.arc(cx+2.5,cy-0.4,2.9,0,7);ctx.fill();});}
   else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];for(let c=0;c<3;c++){const cx=gx(c,3),cy=sy+16;           /* three, half again as big, in one row as the mesh lays them */
       ctx.fillStyle=R.cup;ctx.beginPath();ctx.arc(cx,cy,5.2,0,7);ctx.fill();ctx.fillStyle=col[(c+s)%3];ctx.beginPath();ctx.arc(cx,cy,4.5,0,7);ctx.fill();}}
   else if(kind==="muerto"){let i=0;for(let r=0;r<2;r++)for(let c=0;c<2;c++,i++){const cx=gx(c,2)+ (c?1:-1)*1.2,cy=gy(r);
@@ -861,33 +1018,123 @@ TILEART_MESH["9"]=({x,y})=>{
   const cr=Math.cos(ry),sr=Math.sin(ry);
   return parts.map(p=>({...p,x:p.x*cr+p.z*sr,z:-p.x*sr+p.z*cr,ry:(p.ry||0)+ry}));};
 
-/* THE TREE, WITH ITS DRESS. Grown: a trunk that tapers, two branches leaning out of it, a crown of
-   six leaf masses in two greens, jacaranda blossoms on the outside of the crown in the season's
-   bloom colour. Dressed for the night when the season says so — canopyDress's recipe, in parts: a
-   garland of petals slung across the front of the crown, three papel streamers hanging BELOW it,
-   and one sugar-skull lantern on a thread. One; three is a Christmas tree. Nothing without a season. */
+/* THE TREE, WITH ITS DRESS. Grown: a bole that tapers off a root flare, five scaffold limbs fanning
+   out of the fork, a flat crown of leaf masses in three greens laid on the limb ends, jacaranda
+   blossom on the crown's outer skin in the season's bloom colour. Dressed for the night when the
+   season says so — canopyDress's recipe, in parts: a garland of marigolds slung across the front,
+   papel picado above it, three streamers hanging below and one sugar-skull lantern on a thread.
+   One; three is a Christmas tree. Nothing without a season.
+
+   A TREE YOU WALK UNDER — 2026-09-22, la jardinera. The owner asked first for "bigger", and when
+   he was shown a tree of about two and three quarter tiles he said what he had actually wanted:
+   "can we make it tall so we can walk underneath it all ghostly?" So it does not come down. The
+   canopy goes OVERHEAD and wide enough that the tile you stand on is under it, and the engine
+   turns the whole tile see-through while you are there (engine/engine3d.js, t3Top and
+   T3CROWNGLASS — the crown has its own ghost, because the town shares T3GHOST and asked for
+   nothing).
+
+   It was never too SHORT. The shipped tree's top stood 1.800 against 1.096 for a shop front
+   (wallH at lift 13) and 0.92 for a person (T3PERSON) — already the tallest thing on the street.
+   It was too NARROW and too LOW-SLUNG: a ball 1.235 across whose foliage began at 0.780, below a
+   person's head. A jacaranda is an UMBRELLA — a flat crown WIDER THAN THE TREE IS TALL, held high
+   on a clear bole — and that is the shape that has an underneath at all.
+
+   Both columns were measured the same way, by baking each part on its own through the engine's own
+   t3MeshOf and reading the real transformed vertex bounds, so a rotated limb and a squashed sphere
+   are measured as they are drawn. (Measured, not estimated, and not measured by two different
+   methods either: an earlier draft of this table compared an exact disc integration against a
+   box sample and the two are not the same number.)
+
+     foliage bottom  0.780 -> 1.982   the leaves start at twice a person's height
+     lowest of ANY   0.648 -> 1.925   part that is not the trunk — this is the headroom
+     max reach       0.617 -> 1.414   from the trunk's axis. PAST the next tile's centre, which is
+                                      the whole point: under 1.0 there is no tile you can stand on
+                                      and have leaves above your head
+     overhang        0.117 -> 0.914   past the tile edge, onto the pavement you walk on
+     crown width     1.235 -> 2.828   wider than the tree is tall, which is a jacaranda
+     plan area       1.069 -> 6.282 tiles²   +488%, and that is the number the eye reads as "bigger"
+     top             1.800 -> 2.733   +52%
+     parts, dressed    229 ->   152   BIGGER and CHEAPER: a ring of 6 heads, not a line of 7, and
+                                      the tree stopped wearing a second papel picado of its own
+
+   THE CANOPY WAS EATING THE PAPEL PICADO, and that is what set the height. The season strings real
+   papel jacaranda-to-jacaranda (content/meridian/config.js `swags`; engine/engine3d.js hangs two
+   flag rows at PH-0.11 = 1.79 and PH-0.33 = 1.57, each strip 0.22 tall, so the flags are y
+   1.46-1.90; the two strings are 0.02-tall boxes centred at 1.90 and 1.68, so the HIGHEST thing in
+   the whole swag is the top string's upper face at 1.91) and it runs along z = the tree tile's own
+   centre — straight through the trunk's axis, the worst line there is. ELEVEN of the twelve
+   jacarandas in the game are a swag endpoint, so this is not an edge case, it is the season. The
+   twelfth is pk 19,8, which ends no swag and is left ending none: a swag is a ROW, the park has no
+   second tall thing in row 8 to tie one to, and the engine plants a pole wherever an end is not
+   tall (kind wall/facade/tree, or lift 9 or more — the park's fence is lift 5). So a swag there
+   would put a new pole on the park's east fence, and the owner has written in twice about poles
+   (2026-09-10, one at the bridge mouth he walked into; 2026-09-21, "poles with the paper picado").
+   He asked for a bigger tree, not for more bunting. Measured: 41 poles in the game before this
+   change and the same 41 after, on the same tiles.
+
+   WHAT IS IN THE BAND, MEASURED OVER EVERY PART AND NOT JUST THE GREEN ONES — the earlier claim
+   here was "0.000 eaten" and it had measured four green hexes, leaving out the bole, the limbs and
+   the blossom, which is how a true sentence becomes a false one:
+
+     shipped   0.822 of a tile   two crown spheres, one blossom AND the bole
+     now       0.418 of a tile   THE BOLE, AND NOTHING ELSE
+
+   The canopy, the five limbs and all seventeen blossoms clear the band completely: the lowest
+   thing above the trunk is a limb at 1.925 and the swag's highest face is 1.91, which is a
+   clearance of 0.015 of a tile — half a pixel at 35 px a tile. It reads clean in the frame and it
+   is not a margin to spend: anything that drops a limb, or raises PH, closes it. What is left is the
+   trunk itself, 0.418 wide where the flags cross it — and the engine skips the pole at a tree
+   because a tree can hold a string, so that IS the thing the string is tied to. A street ties one
+   to a bare bole under the leaves. (Both figures are upper bounds: each part is measured by the
+   box around it, so a round thing is over-reported. A zero is therefore a true zero.)
+
+   Three greens, not two, and the DARKEST on the skirt under the crown: one ambient 0.66 and one sun
+   0.42 give a Lambert face 1.00 / 0.88 / 0.78 / 0.66 and no more, so the depth of a canopy has to
+   be painted into the parts or it is not there. And the blossom was ten spheres of r 0.055 — under
+   4 px on a phone, which is why a tree in flower read as a plain green one; it is seventeen
+   flattened clusters of r 0.105-0.115 laid on the crown's outer skin — ten round the rim at radius
+   1.18, where the silhouette is, and seven on top, where a jacaranda is seen from a window.
+
+   AND THE BOLE IS THICKER, because it has to be. A crown 2.828 across on the old 0.34-wide trunk
+   is a mushroom, not a tree: the trunk is 0.30 at the flare and 0.44 at the ground now, and the
+   garland ring moved out from 0.24 to 0.29 to sit ON it rather than in it.
+
+   THE DRESS. It used to hang at 0.84-1.02 inside foliage that came down to 0.780, so the tree wore
+   its ofrenda where the leaves were. With the crown up at 1.982 the whole bole is clear, and the
+   dress is hung on it the way a trunk is actually dressed: the garland is a RING of six marigolds
+   round the bole at 1.10 rather than a line strung across the front of the tile with nothing to
+   tie it to, two streamers hang either side, and the calaverita hangs BETWEEN them at 0.74 — in
+   front of the bole, so the one white thing on this tree has its own dark behind it too. The
+   tree's own two little papel strings are GONE: the real papel picado now passes this tree
+   unbroken above the garland, and a second miniature one below it was competing with the thing it
+   was imitating. */
 TILEART_MESH["J"]=({x,y})=>{const h=(((x*7+y*13)%6)+6)%6,a0=h*1.05;
-  const BARK="#6E4A2C",G1="#5A9C66",G2="#78B884",BLOOM=art("bloom","#B08FE0"); /* a step paler than the sprite's greens: a lit mesh shades itself, a sprite never did */
-  const parts=[{s:"cyl",x:0,y:0.42,z:0,rt:0.07,rb:0.11,h:0.84,c:BARK},
-    {s:"cyl",x:0.14,y:0.78,z:0.05,rt:0.03,rb:0.05,h:0.4,c:BARK,rz:-0.6},{s:"cyl",x:-0.13,y:0.82,z:-0.06,rt:0.03,rb:0.05,h:0.36,c:BARK,rz:0.65}];
-  const crown=[[0,1.25,0,0.4],[0.28,1.1,0.1,0.32],[-0.27,1.12,-0.08,0.3],[0.05,1.08,-0.3,0.3],[-0.06,1.12,0.28,0.31],[0.1,1.5,0.05,0.3]];
-  const c=Math.cos(a0),s2=Math.sin(a0);
-  crown.forEach(([px,py,pz,r],i)=>parts.push({s:"sph",x:px*c-pz*s2,y:py,z:px*s2+pz*c,r,c:i%2?G2:G1}));
-  for(let i=0;i<10;i++){const t=i*0.63+h,ph=0.5+(i%3)*0.5;                                 /* blossoms sit on the outside of the crown */
-    parts.push({s:"sph",x:Math.cos(t)*Math.sin(ph)*0.44,y:1.25+Math.cos(ph)*0.36,z:Math.sin(t)*Math.sin(ph)*0.44,r:0.055,c:BLOOM});}
+  const BARK="#6E4A2C",BARK2="#7C5636",G1="#5A9C66",G2="#86C48E",G3="#33663F",BLOOM=art("bloom","#B08FE0"); /* three steps: a lit mesh shades itself but only 1.5:1, so the canopy's own depth is painted */
+  const parts=[{s:"cyl",x:0,y:0.09,z:0,rt:0.22,rb:0.30,h:0.18,c:BARK},                      /* the root flare — a tree meets the ground in one */
+    {s:"cyl",x:0,y:1.20,z:0,rt:0.115,rb:0.22,h:2.04,c:BARK}];                                /* the bole: 0.18 to 2.22, and nothing else is attached to it below 1.925 (the lowest limb) — the papel picado passes under the leaves */
+  for(let i=0;i<5;i++){const a=a0+i*1.2566+0.2;                                              /* five scaffold limbs, flat enough to stay above the flag band and long enough to be worth seeing */
+    parts.push({s:"cyl",x:Math.cos(a)*0.16,y:2.20,z:Math.sin(a)*0.16,rt:0.030,rb:0.062,h:0.90,c:i%2?BARK2:BARK,rz:-1.05,ry:-a});}
+  const lay=(n,rad,y,r,sy,c,off)=>{for(let i=0;i<n;i++){const a=a0+off+i*6.2832/n;
+    parts.push({s:"sph",x:Math.cos(a)*rad,y,z:Math.sin(a)*rad,r,sy,c:typeof c==="function"?c(i):c});}};
+  lay(8,1.00,2.15,0.42,0.40,G3,0.45);                                                         /* the skirt: the underside, the darkest green, and the thing you stand under */
+  lay(8,0.76,2.30,0.50,0.42,i=>i%2?G2:G1,0);                                                  /* the crown proper, flattened: an umbrella, not a ball */
+  lay(4,0.32,2.44,0.46,0.42,i=>i%2?G1:G2,0.4);
+  parts.push({s:"sph",x:0,y:2.54,z:0,r:0.42,sy:0.46,c:G2});                                   /* the crest, palest: the sun lands on the top of a canopy */
+  for(let i=0;i<10;i++){const a=a0+i*0.6283+0.35;                                              /* blossom on the OUTER SKIN — the rim, where the silhouette is */
+    parts.push({s:"sph",x:Math.cos(a)*1.18,y:2.22+(i%3)*0.07,z:Math.sin(a)*1.18,r:0.115,sy:0.6,c:BLOOM});}
+  for(let i=0;i<7;i++){const a=a0+i*0.8976+0.9,rad=0.18+(i%3)*0.26;                            /* and on the top, where a jacaranda is seen from a window */
+    parts.push({s:"sph",x:Math.cos(a)*rad,y:2.60+(i%2)*0.06,z:Math.sin(a)*rad,r:0.105,sy:0.55,c:BLOOM});}
   const pal=art("papel",null);
-  if(pal){const P=petalPal();                                                               /* THE DRESS, SECOND TRY (owner: "same with the decor") */
-    meshPapel(parts,-0.5,1.02,0.46,0.5,1.02,0.46,pal,6,h);                                   /* a string of flags across the front of the crown */
-    meshPapel(parts,0.46,1.0,-0.5,0.46,1.0,0.5,pal,6,h+3);                                   /* and one down the side, so it reads from the turn */
-    for(let i=0;i<7;i++){const t=(i+0.5)/7,gx=-0.42+0.84*t,gy=0.84-2*t*(1-t)*0.14;            /* a chain of marigolds slung under the flags */
-      meshMarigold(parts,gx,gy,0.44,0.055,P,h+i);}
-    [-0.28,0,0.28].forEach((dx,i)=>{parts.push({s:"cyl",x:dx,y:0.82,z:0.3,r:0.006,h:0.2,c:"#3A2E26"}); /* the thread */
-      parts.push({s:"box",x:dx,y:0.58,z:0.3,w:0.16,h:0.3,d:0.008,c:pal[(i+2)%pal.length]});          /* the streamer, hanging well below the crown */
-      parts.push({s:"box",x:dx,y:0.42,z:0.3,w:0.16,h:0.05,d:0.008,c:pal[(i+5)%pal.length]});});      /* its scalloped hem, a second colour */
-    parts.push({s:"cyl",x:0.2,y:0.95,z:0.44,r:0.006,h:0.14,c:"#3A2E26"});                             /* one lantern: a calaverita on a thread */
-    parts.push({s:"sph",x:0.2,y:0.84,z:0.44,r:0.075,c:"#F6F2E8"});
-    parts.push({s:"sph",x:0.17,y:0.855,z:0.51,r:0.016,c:"#3A2E26"},{s:"sph",x:0.23,y:0.855,z:0.51,r:0.016,c:"#3A2E26"}); /* the eyes */
-    parts.push({s:"sph",x:0.2,y:0.91,z:0.46,r:0.022,c:"#E8478F"});}                                    /* the flower on its brow */
+  if(pal){const P=petalPal();                                                                  /* THE DRESS, FOURTH TRY — wrapped round the bole, in the clear air UNDER the street's papel */
+    for(let i=0;i<6;i++){const a=a0*0.7+i*1.0472;                                               /* the garland is a RING round the trunk now, not a line hung on nothing */
+      meshMarigold(parts,Math.cos(a)*0.29,1.10+Math.sin(a*2)*0.02,Math.sin(a)*0.29,0.085,P,h+i);}  /* ring RADIUS 0.29, not 0.24: the bole's radius at this height is 0.173 (it is 0.345 of a tile wide), so a ring at 0.29 sits ON the bark rather than inside it */
+    [-0.34,0.34].forEach((dx,i)=>{parts.push({s:"cyl",x:dx,y:1.00,z:0.42,r:0.006,h:0.20,c:"#3A2E26"}); /* the thread, off the ring's widest point */
+      parts.push({s:"box",x:dx,y:0.74,z:0.42,w:0.16,h:0.32,d:0.008,c:pal[(i+2)%pal.length]});         /* the streamer, hanging clear below the garland */
+      parts.push({s:"box",x:dx,y:0.555,z:0.42,w:0.16,h:0.05,d:0.008,c:pal[(i+5)%pal.length]});});     /* its scalloped hem, a second colour */
+    parts.push({s:"cyl",x:0,y:0.90,z:0.30,r:0.006,h:0.24,c:"#3A2E26"});                                /* one lantern: a calaverita on a thread, hung BETWEEN the streamers */
+    parts.push({s:"sph",x:0,y:0.74,z:0.30,r:0.085,c:"#F6F2E8"});                                       /* and against the BOLE, which is 0.382 of a tile wide here (radius 0.191) against a skull of radius 0.085: a white skull needs a dark behind it too */
+    parts.push({s:"sph",x:-0.035,y:0.758,z:0.375,r:0.018,c:"#3A2E26"},{s:"sph",x:0.035,y:0.758,z:0.375,r:0.018,c:"#3A2E26"}); /* the eyes */
+    parts.push({s:"sph",x:0,y:0.818,z:0.33,r:0.025,c:"#E8478F"});}                                     /* the flower on its brow */
   return parts;};
 
 /* LA OFRENDA, AS A THING ON A TABLE. A season prop, not a tile: the key is "prop:ofrenda" and the
@@ -940,6 +1187,212 @@ TILEART_MESH["T"]=({x,y})=>{const sd=(((x*7+y*13)%4)+4)%4,WOOD="#5E3B20",CLOTH="
     q=at(-0.1,0);parts.push({s:"box",x:q.x,y:0.42,z:q.z,w:0.03,h:0.26,d:0.22,c:WOOD,ry});                                                /* the back, on the far side */
     [[-0.09,-0.09],[0.09,-0.09],[-0.09,0.09],[0.09,0.09]].forEach(([lx,lz])=>{const l=at(lx,lz);parts.push({s:"cyl",x:l.x,y:0.13,z:l.z,r:0.014,h:0.26,c:WOOD});});});
   return parts;};
+
+/* ---- LA MESA DE ALTAR (owner, 2026-09-22: "dona tenchas table is too small. take it out when its
+   dia de los muertos or alebrijes mode and replae it with a bigger table for the altar. please") ----
+
+   MEASURED, NOT FELT. Out of the built geometry: the ofrenda is 0.834 wide by 0.639 deep once the
+   engine has scaled it to 0.8, and the round table's cloth is a disc of radius 0.34 — 0.68 across.
+   THE ALTAR IS WIDER THAN THE TABLE IT STANDS ON, by 0.154, which is why its base hangs in the air
+   either side and why the only thing you can see under it is a pedestal. He is right and it is a
+   number, not an impression.
+
+   WHAT A HOUSE DOES. You do not balance an ofrenda on the round table you eat at. You carry in the
+   long table, and you CLEAR it — so the round table's own two chairs go with it. The two chairs
+   still in the room are the `⊔` tiles at (4,2) and (3,3); they are somebody else's tiles and they
+   are not touched.
+
+   THE THREE THINGS THAT WERE THIS LANE'S TO ASK AND ARE NOT OPEN ANY MORE. They were put to the
+   owner as questions and he answered all three the same day (docs/ASKS.md, 2026-09-22, third
+   window), so they are settled and nobody re-opens them from this file:
+     · the cloth is CREAM WITH THE MARIGOLD BORDER, not purple and not white with a runner — "ok on
+       the altar";
+     · the round table's TWO CHAIRS DO GO AWAY while the altar is up — "ok thats cool";
+     · the table is the SAME HEIGHT and wider only — "yeah same height of the altar table". That one
+       is also why `TOP` below is 0.550 to the thousandth and not a round number: it is the height
+       the altar already stood at, so `TILES.T.lift` of 6 stays honest for the cameras that never ask
+       a shape how tall it is.
+
+   AND ONE MEASUREMENT HIS ANSWER OVERRULES, WRITTEN DOWN SO IT IS NOT REDISCOVERED AS A BUG. Between
+   this lane's first round and its second, every person in both games was rescaled from 1.12 to 0.92
+   (`T3PERSON`, engine/engine3d.js:1263). NOTHING IN THIS TABLE WAS SIZED AGAINST A PERSON — its top
+   was sized against the altar's own standing height and its width against the altar's measured
+   footprint — but the RATIO moved underneath it all the same: 0.550 was 0.49 of a person and is now
+   0.60 of one, so against the new cast this table reads nearer the chest than the hip. He was asked
+   the height question directly and said "yeah same height of the altar table", so it stays at 0.550.
+   If he ever says it looks high, the number to change is `TOP` here and nothing else — but it is HIS
+   to say, and a lane that lowered it on a ratio would be overruling him with arithmetic.
+
+   WHERE THIS TABLE ACTUALLY STOPS, corrected 2026-09-22 after a reader measured it. ±0.477 is the
+   MANTEL'S LIP (`MW = HW + 0.022`) and that is the number this comment used to give. It is not the
+   number the mesh produces: the pleat panels stand `out` = 0.006 proud of the lip and are 0.016
+   thick, and each hem border is drawn `bw + 0.008`, so the BUILT shape runs x -0.491..0.491 and
+   z -0.361..0.501 — which in the room is x 3.009..3.991, z 2.139..3.001, and means the table crosses
+   its own tile's far edge by 0.001 into the chair's tile at (3,3). The clearance claim survives the
+   correction and is now a measurement rather than an inference: chair(4,2) starts at x 4.300, a gap
+   of 0.309; chair(3,3) starts at z 3.300, a gap of 0.299; no Box3 intersection with either, in both
+   seasons. Nothing grows through a chair — but the number offered as proof was the wrong number, and
+   in this repository a comment is the record.
+
+   SCOPED TO THE TILE THE ALTAR IS ON, NEVER TO THE SEASON. There are EIGHT `T` tiles in this game
+   and SEVEN of them are not hers: La Cocina's four dinner tables (lc 3,3 · 7,3 · 11,3 · 15,3), La
+   Panadería's two (pa 15,5 · 13,7) and one in the lobby (lo 11,5) — that last one is the eighth, and
+   an earlier draft of this comment said "eight" and then named six, which is how a census that nobody
+   counted reads. A season-wide swap would set a funeral table under four restaurant dinners, in both
+   seasons, and nobody would have found it until he did. So the question the pack asks is the true
+   one — *is there an ofrenda standing on THIS tile* — which `fiestaProps` answers out of the season
+   the prop is declared in. Out of season it returns nothing, every table in the game is the one it
+   has always been, and this file has added one comparison to the round table's path and no pixels.
+
+   WHAT IT COSTS, MEASURED, because the first draft of this comment called it a wash and it is not.
+   The round table is 31 parts; this one is 94 (4 legs + 4 rails + plank + mantel + two 11-pleat sides
+   at 23 each + two 9-pleat sides at 19 each). The tile's own geometry goes 2376 -> 3384 vertices, so
+   792 -> 1128 triangles, and the whole casa-w scene goes 25356 -> 25692 in muertos AND in alebrije:
+   an INCREASE of 336 triangles, about 1.3% of the room, and only while the season is on. That is a
+   price worth paying and it is small, but it is a price. (The renderer's own INFO line is no use for
+   this — it reports the LAST frame drawn, so in a flat camera it still shows the 3D frame before it,
+   which is how the first draft came to report a decrease. Sum `position.count/3` over the group.)
+
+   THE HEIGHT IS DELIBERATELY UNCHANGED. `TILES.T.lift` is 6 and `wallH` turns that into 0.802 for
+   the cameras that do not ask a shape how tall it is; a taller table in 3D would be a lie in those.
+   The cloth's upper face is the last ink in this mesh at 0.550 — the same 0.550 `t3Top` handed the
+   engine before — so the altar arrives at exactly the height it arrived at yesterday. What changed
+   is what is under it: 0.550 used to be the top of TWO CHAIR BACKS (the cloth stopped at 0.520), so
+   the altar was standing on two 0.03-thick slats with a table's width of air between them. Now it
+   is standing on a table.
+
+   Built in the order one is built: four legs, the rails that stop a long table racking, the plank,
+   the mantel over it, and the marigold hem somebody sewed on the mantel. NOTHING IS SET ON IT — it
+   was cleared for the altar, which is also what keeps the cloth the tallest ink in the mesh. */
+const TABLE_ROUND=TILEART_MESH["T"];
+const altarOnTile=(x,y)=>(typeof fiestaProps==="function"?fiestaProps(typeof world!=="undefined"?world:"")
+  :[]).some(p=>p.kind==="ofrenda"&&p.x===x&&p.y===y);
+const meshMesaAltar=()=>{
+  const LEG="#4A2E19",PLANK="#5E3B20",MANTEL="#F2E8D8",HEM="#F2870F";
+  const HW=0.455,HD=0.395,CZ=0.07;                 /* the top's half-width, half-depth, and how far forward it sits:
+                                                      the altar's own footprint is centred at z 0.07, not at the tile's middle,
+                                                      because its petal path lies on the cloth in front of it */
+  const TOP=0.550,CL=0.016,PLK=0.036,UND=TOP-CL-PLK; /* cloth face, cloth, plank, and the plank's underside at 0.498 */
+  const IN=0.055,parts=[];
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>parts.push(                                    /* 1 · four legs, squared stock, set in from the corners */
+    {s:"box",x:sx*(HW-IN),y:UND/2,z:CZ+sz*(HD-IN),w:0.052,h:UND,d:0.052,c:LEG}));
+  parts.push({s:"box",x:0,y:UND-0.055,z:CZ-(HD-IN),w:2*(HW-IN),h:0.05,d:0.03,c:LEG},              /* 2 · the rails that tie them */
+             {s:"box",x:0,y:UND-0.055,z:CZ+(HD-IN),w:2*(HW-IN),h:0.05,d:0.03,c:LEG},
+             {s:"box",x:-(HW-IN),y:UND-0.055,z:CZ,w:0.03,h:0.05,d:2*(HD-IN),c:LEG},
+             {s:"box",x:HW-IN,y:UND-0.055,z:CZ,w:0.03,h:0.05,d:2*(HD-IN),c:LEG});
+  parts.push({s:"box",x:0,y:UND+PLK/2,z:CZ,w:2*HW,h:PLK,d:2*HD,c:PLANK});                          /* 3 · the plank, air under it */
+  const MW=HW+0.022,MD=HD+0.022,HANG=TOP-CL;                                                       /*    the mantel's lip, and the height the cloth falls from */
+  parts.push({s:"box",x:0,y:TOP-CL/2,z:CZ,w:2*MW,h:CL,d:2*MD,c:MANTEL});                           /* 4 · the mantel — the last ink in the mesh, and what the altar stands on */
+  /* 5 · THE CLOTH FALLS IN PLEATS, because a mantel is gathered over a table and not painted on it:
+        one panel per pleat, its face stepped in or out by a thread's width and shaded for the fold,
+        and the hem cut in teeth — which is the only part of this that survives being looked at from
+        across a room, because at that size a table is a silhouette and two colours. */
+  const PLEAT=[MANTEL,"#DCCBB0"],TIP=0.034,side=(bx,bz,bw,bd,n,along)=>{
+    for(let i=0;i<n;i++){const t=(i+0.5)/n-0.5,out=(i%2?0.006:0),lo=(i%2?0.215:0.175);            /*    teeth: every other pleat hangs 0.040 lower */
+      const px=along?bx+t*bw:bx+(bx<0?-out:out),pz=along?bz+(bz<CZ?-out:out):bz+t*bd;
+      const pw=along?bw/n:0.016,pd=along?0.016:bd/n;
+      parts.push({s:"box",x:px,y:(HANG+lo+TIP)/2,z:pz,w:pw,h:HANG-lo-TIP,d:pd,c:PLEAT[i%2]});      /*    the cream mantel */
+      parts.push({s:"box",x:px,y:lo+TIP/2,z:pz,w:pw,h:TIP,d:pd,c:HEM});}                           /*    and the marigold cloth UNDER it, showing at the tooth */
+    parts.push({s:"box",x:bx,y:HANG-0.030,z:bz,w:bw+0.008,h:0.042,d:bd+0.008,c:HEM});};            /*    the same cloth's border, sewn under the table's edge */
+  side(0,CZ-MD,2*MW,0.016,11,true); side(0,CZ+MD,2*MW,0.016,11,true);
+  side(-MW,CZ,0.016,2*MD,9,false);  side(MW,CZ,0.016,2*MD,9,false);
+  return parts;};
+TILEART_MESH["T"]=p=>altarOnTile(p.x,p.y)?meshMesaAltar():TABLE_ROUND(p);
+
+/* ---- THE SAME TABLE IN THE OTHER THREE CAMERAS ----
+   The first round of this change was a 3D-camera change only, and the reader was right to call it
+   two-thirds of the ask: in top, front and iso the altar still stood over the ROUND table. It is
+   worth being exact about what those cameras were showing, because "the altar is on bare floor" is
+   not quite it and the difference is what makes this fixable from the pack:
+
+     · FRONT — `TILESIDE["T"]` IS drawn, under the ofrenda sprite, which the engine lifts 10px on a
+       solid tile. What shows below and either side of the sprite is the round table's profile: two
+       thin dark legs and a gingham edge. A table, and the wrong one.
+     · TOP — `TILEDRAW["T"]` is drawn first and the sprite paints over it, but the ofrenda's marigold
+       ARCH is an arch: you see the tile's own art through it. What you see through it is red gingham.
+     · ISO — and this one is NOT fixable from here, so it is written down rather than claimed. The
+       isometric camera never draws a solid tile's art at all: `drawIso` builds `ISOCOL`
+       (engine/engine.js:862) and paints `T` as one flat colour, `#C9A96A`. Before this change and
+       after it, iso shows a coloured block under the ofrenda. Giving it the drawing is an engine
+       change and belongs to whoever owns that camera. THE OWNER HAS SINCE TABLED THE ISO CAMERA —
+       "can we table it iso?" (docs/ASKS.md, 2026-09-22), filed as issue #233 — so the flat block
+       under this table in that one camera is a known, filed gap and not an oversight of this lane.
+
+   So FRONT and TOP were already drawing this table and neither had been told it changed. Two drawings
+   fix both, and no engine file is touched.
+
+   HOW THE ROUND TABLE SURVIVES THIS. Its 2D art belongs to the ENGINE (`TILEDRAW["T"]`,
+   `TILESIDE["T"]`) and not to this pack, unlike its mesh, which is ours at the top of this section.
+   A pack's usual move is a flat override — `TILEART["T"]=fn` — and here that would throw the engine's
+   round table away for La Cocina's four dinner tables and La Panadería's two as well, or force a copy
+   of the engine's drawing into this file to hand back to them, which is a second copy to go stale.
+   Neither is acceptable for six tables nobody asked about.
+
+   So this takes the engine's own drawing and puts itself in front of it. `TILEART`/`TILEART_SIDE` are
+   merged into the engine's tables by `Object.assign` (engine/engine.js:1961 and :2186) — which READS
+   each source key and then WRITES it — so a getter on "T" is handed the engine's original at exactly
+   the moment before it is replaced, keeps it, and returns a wrapper that calls it for every tile that
+   is not Doña Tencha's. `__mesaAltar` is there so it can never capture itself.
+
+   THE ONE-LINE BUG THIS USED TO HAVE, AND WHY IT IS WRITTEN OUT IN FULL. The first draft built the
+   wrapper on the FIRST get and kept it — `if(!fn){ …capture…; fn=…; }` — so whatever the capture
+   found on that first read was frozen for the life of the page, INCLUDING FINDING NOTHING. The read
+   that matters is the engine's `Object.assign`, but it is not the only read there can be: anything
+   that so much as touches `TILEART.T` before engine.js has built `TILEDRAW` — a line further down
+   this file, a second pack file, a future tool that enumerates the pack's art — fires the getter
+   while `TILEDRAW` is still a ReferenceError, the catch swallows it, `round` is frozen null, and
+   from then on THE WRAPPER DRAWS NOTHING for every tile that is not the altar's. That is not a
+   near-miss. Planted on 2026-09-22 as one added line (`void TILEART.T;` between the two installs),
+   it erased La Cocina's four dinner tables, La Panadería's two and the lobby's one from the top
+   camera — bare floor where seven tables were — and `node test/smoke.js` printed
+   "OK — 60 quests, maxXP 880, all invariants hold." The picture is in the lane's before/after.
+
+   THE FIX IS THAT A FAILED CAPTURE IS NEVER REMEMBERED. The wrapper is built once, so its identity
+   is stable for anyone comparing it; `round` is filled by the first capture that actually SUCCEEDS
+   and every get before that tries again. An early read now costs nothing, because the engine's own
+   `Object.assign` comes afterwards and that is the read that finds the original. A late read is
+   harmless too: by then `TILEDRAW.T` is this wrapper and `__mesaAltar` sends it away. There is one
+   failure this cannot repair — this file parsed AFTER engine.js — and it is not this seam's to
+   repair, because then `typeof TILEART!=="undefined"` is false at engine.js:1961 and the pack's
+   ENTIRE art table is dropped, altar and all. The guard in test/smoke.js is red for both: it asserts
+   that the altar's tile is drawn DIFFERENTLY in season (which catches a wrapper that never got
+   installed) and that every table in the game is drawn AS SOMETHING AT ALL (which catches a wrapper
+   installed with nothing behind it — the blank-equals-blank hole the old guard passed). */
+const wrapTableArt=(tbl,peek,mine)=>{let round=null;
+  const fn=rc=>altarOnTile(rc.x,rc.y)?mine(rc):(round?round(rc):undefined);
+  fn.__mesaAltar=true;
+  Object.defineProperty(tbl,"T",{configurable:true,enumerable:true,get(){
+    if(!round){try{const e=peek();if(typeof e==="function"&&!e.__mesaAltar)round=e;}catch(err){}}
+    return fn;}});};
+
+/* FROM ABOVE. The numbers are the built mesh's own, so the drawing and the shape cannot drift: the
+   mantel measures x -0.491..0.491 and z -0.361..0.501 of its tile, which on a 32px tile is x 0.3..31.7
+   and y 4.4..32.0 — wider than the round table's 24px gingham disc on every side, and running off the
+   near edge because the table stands forward in its tile. Cream, a marigold border, the pleats ticked
+   along the near edge, and NOTHING SET ON IT: it was cleared for the altar. */
+const drawMesaTop=rc=>{const{sx,sy}=rc,X0=sx+0.3,X1=sx+31.7,Y0=sy+4.4,Y1=sy+32,W=X1-X0;
+  ctx.fillStyle="#E8952A";ctx.fillRect(X0,Y0,W,Y1-Y0);                                    /* the marigold border, seen as the lip all round */
+  ctx.fillStyle="#F2E8D8";ctx.fillRect(X0+1.8,Y0+1.8,W-3.6,Y1-Y0-1.8);                    /* the mantel's face */
+  ctx.fillStyle="rgba(150,130,100,.16)";
+  for(let i=1;i<11;i+=2)ctx.fillRect(X0+1.8+i*(W-3.6)/11,Y0+1.8,(W-3.6)/11,Y1-Y0-1.8);    /* the pleats, from above */
+  ctx.fillStyle="#E8952A";for(let i=0;i<11;i+=2)ctx.fillRect(X0+i*W/11,Y1-2.2,W/11,2.2);};/* the toothed hem on the near edge */
+
+/* FROM THE FRONT. The tabletop stays at sy+13 — the height the engine's round table has always drawn
+   it at — because the altar's standing height did not move and a camera that drew it lower would be
+   the lie the brief warned about. Below it the cloth falls in pleats to a toothed marigold hem, and the
+   legs show in the last few pixels. Full tile width, against the round table's 26. */
+const drawMesaSide=rc=>{const{sx,sy}=rc;
+  ctx.fillStyle="#4A2E19";ctx.fillRect(sx+3,sy+26,3.5,5.5);ctx.fillRect(sx+25.5,sy+26,3.5,5.5); /* the two front legs, showing below the hem */
+  ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+0.3,sy+13,31.4,3);                                /* the mantel over the edge of the plank */
+  ctx.fillStyle="#FFFFFF";ctx.fillRect(sx+0.3,sy+13,31.4,1);                                /* light on the fold */
+  ctx.fillStyle="#EFE2CE";ctx.fillRect(sx+1,sy+16,30,10.2);                                 /* the cloth falling */
+  ctx.fillStyle="rgba(150,130,100,.22)";
+  for(let i=1;i<11;i+=2)ctx.fillRect(sx+1+i*30/11,sy+16,30/11,10.2);                        /* its pleats */
+  ctx.fillStyle="#E8952A";ctx.fillRect(sx+1,sy+24.6,30,1.6);                                /* the marigold border, sewn round */
+  for(let i=0;i<11;i++)ctx.fillRect(sx+1+i*30/11,sy+26.2,30/11,i%2?2.6:1.3);};              /* and the hem, cut in teeth */
+
+wrapTableArt(TILEART,()=>TILEDRAW.T,drawMesaTop);
+wrapTableArt(TILEART_SIDE,()=>TILESIDE.T,drawMesaSide);
 
 /* ---- BEAUTIFY, CREW ITERATION 11 — el taller ---- 2026-09-21. The interiors and the garage. Owner:
    "computers, … desks, … coffee machines, fridge, … car lifts, tires, car, and tool boxes." Seven shapes
@@ -1823,6 +2276,7 @@ const TILEMETA={"▭":{lift:13,kind:"wall"},"▤":{lift:13,kind:"wall"},
   "▣":{lift:10,kind:"appliance"},"▯":{lift:9,kind:"furniture"},"⊔":{lift:6,kind:"furniture"},"○":{lift:3,kind:"prop"},
   "Y":{lift:13,kind:"transit",stand:true},   /* walkable, but a real object: nothing reads lift for a stand tile, it is a height class */
   "b":{lift:3,kind:"nature",box:true},       /* the raised bed (2026-09-21): solid via SOLIDX, a box because TILEART_SIDE draws its curb */
+  "✿":{lift:2,kind:"nature",stand:true,petals:true}, /* loose petals: WALKABLE and standing, so the 3D camera asks for the heap's shape while the flat cameras keep painting it. Deliberately NOT in SOLIDX — the bed keeps its curb and the trail does not get one. `petals:true` is the engine seam: a tile a world declares as loose petals sheds on whoever walks through it (engine.js, petalDrop) — the engine never learns which glyph that is. */
   "g":{stand:true,kind:"nature"}             /* grass stands (2026-09-21): walkable, a mesh in 3D; no side art, so front and iso still paint it */
 };
 
@@ -1954,10 +2408,66 @@ const DECOART={
    how the street gets more variety, with no engine change and no new code anywhere.
    Solid, wall-tall, so 3D wraps the art onto the box like every other facade. */
 const CASA_WALL="#C9A77C", CASA_TRIM="#8A6B48", CASA_ROOF="#9E5442";
+/* the clay: three firings of the same barrel tile, the gap between them, and the dark paint a
+   Calle Dos house wears to the knee so the damp does not show on the render */
+const CASA_TEJA="#B0563F", CASA_TEJA2="#C4664A", CASA_TEJAD="#71382A", CASA_PLINTH="#6E5238";
+const CASA_SILL="#E4D3B4";  /* cast concrete: the palest thing on the house, which is why a ledge reads */
+/* THE ROOF IS THE POINT, and it is drawn here so all three faces share ONE roofline — two windows
+   beside a door beside a lamp wall have to read as one building, not three boxes standing together
+   (the owner, 2026-09-22, looking at exactly that). Drawn the way a roof is LAID, not the way it
+   looks: the dark of the gaps first, a barrel of fired clay over each gap, the lit crown along each
+   barrel's back, a cap along the ridge, and under the whole thing the eave shadow — the line that
+   says the roof oversails the wall. The barrels are on a 4 px pitch, which divides 32 exactly, so
+   the course runs THROUGH the join between two tiles instead of restarting at it. */
+/* THE COURSE ITSELF, on its own, because the front door needs it too and a roof drawn twice
+   in two places is a roof that will come apart. The phase is taken from `sx` on a 4 px pitch
+   and 32/4 = 8, so every tile of the run starts the course at the same place in the barrel and
+   it reads THROUGH the join rather than restarting at it. 8 px of clay, then 2 px of the eave's
+   shadow on whatever is below it — which on the door tile is the head of the door. */
+function casaRoof2D(sx,sy){
+  ctx.fillStyle=CASA_TEJAD;ctx.fillRect(sx,sy,32,8);                /* the gaps the barrels lap over */
+  for(let i=0;i<8;i++){const bx=sx+i*4;
+    ctx.fillStyle=(i%2)?CASA_TEJA:CASA_TEJA2;ctx.fillRect(bx+0.3,sy+1,3.4,7);
+    ctx.fillStyle="rgba(255,255,255,.17)";ctx.fillRect(bx+0.6,sy+1,1.1,7);}
+  ctx.fillStyle=CASA_ROOF;ctx.fillRect(sx,sy,32,2.2);               /* the ridge cap, running through */
+  ctx.fillStyle="rgba(255,255,255,.14)";ctx.fillRect(sx,sy,32,0.8);
+  ctx.fillStyle="rgba(0,0,0,.34)";ctx.fillRect(sx,sy+8,32,2);       /* the eave's shadow on the wall */
+}
+/* ❗AND IT RUNS THROUGH THE FRONT DOOR. `⌂` is drawn by the ENGINE — one door body shared by
+   every door in both games — and it fills its whole tile, so before this the roofline stopped
+   dead at Doña Tencha's doorway and her house read as two stubs with a grey gap between them.
+   `cap` is the engine's seam for exactly this (engine/engine.js, the DOORSET body): a door may
+   say what the BUILDING above it wears, the body is drawn in the 8 px it has left, and a door
+   that says nothing is untouched — which is every other door in Meridian and all of El
+   Changarrito's, none of which is a `⌂`. Every `⌂` in this game is stamped by BUILDTPL.casa,
+   so this cap and that template are the same decision written twice.
+   Deliberately NOT in the 3D bake: the engine passes `rc.bake` there and skips the cap, because
+   in 3D the roof is real geometry standing OVER the door slab and a second one painted onto the
+   slab would hang inside the house.
+
+   ❗AND IT ASKS WHERE THE DOOR STANDS, NOT WHAT LETTER IT IS. `⌂` is the front door of every casa
+   and it is ALSO the way out of the room behind it — `CASA_ROOM` ends "#####⌂####", and so do the
+   barbería's and the caseta's. Keyed on the glyph alone, this cap painted a course of terracotta
+   roof tiles across the top of the door INSIDE Doña Tencha's living room. Three rooms, three
+   indoor roofs, green in every suite, and it was found by looking at the picture.
+   A roof runs over a door when the BUILDING runs up to it, so that is the question: is there a
+   casa face beside this tile? Inside, the neighbours are `#` and the answer is 0 — the engine's
+   own door, not one pixel changed. This is also why the seam takes a function: a door glyph is
+   not a place, and only the pack knows which of its doorways has a house on top of it. */
+const CASA_FACE="▩▨▦";
+const casaRoofOver=(x,y)=>{const w=CW(),r=w&&w.rows&&w.rows[y];
+  if(!r||x===undefined)return false;
+  const L=r[x-1],R=r[x+1];
+  return (L!==undefined&&CASA_FACE.indexOf(L)>=0)||(R!==undefined&&CASA_FACE.indexOf(R)>=0);};
+if(typeof DOORLOOK!=="undefined"&&DOORLOOK["⌂"]){
+  DOORLOOK["⌂"].capH=rc=>casaRoofOver(rc.x,rc.y)?8:0;
+  DOORLOOK["⌂"].cap=rc=>casaRoof2D(rc.sx,rc.sy);
+}
 function casaBase(sx,sy,wall){
   ctx.fillStyle=wall||CASA_WALL;ctx.fillRect(sx,sy,32,32);
-  ctx.fillStyle=CASA_ROOF;ctx.fillRect(sx,sy,32,5);                 /* tile roof edge */
-  ctx.fillStyle="rgba(0,0,0,.18)";ctx.fillRect(sx,sy+5,32,2);
+  casaRoof2D(sx,sy);
+  ctx.fillStyle=CASA_PLINTH;ctx.fillRect(sx,sy+27,32,5);            /* the plinth, painted to the knee */
+  ctx.fillStyle="rgba(255,255,255,.10)";ctx.fillRect(sx,sy+27,32,1);
   ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx,sy+29,32,3);              /* the wet line at the bottom */
 }
 TILEART["▦"]=rc=>{const{sx,sy}=rc;                                   /* the REJA — a closed gate (#9, 2026-09-07) */
@@ -1977,16 +2487,40 @@ TILEART["▦"]=rc=>{const{sx,sy}=rc;                                   /* the RE
   ctx.fillStyle="#2A2A30";ctx.fillRect(sx+15.7,sy+22.2,0.8,0.8);
   ctx.fillStyle="#F2E8D8";ctx.fillRect(sx+9,sy+29,14,3);};           /* the step, kept: same house */
 TILEART["▩"]=rc=>{const{sx,sy}=rc;                                   /* the window */
+  /* An opening in a block wall is CAST, top and bottom: a lintel over it and a sill under it, both
+     wider than the hole and both projecting, so the rain runs off the render instead of down it.
+     The sill is the part that matters and the repository knows why — docs/POSTMORTEM.md §1: four
+     fixes went to the SIZE of a sugar skull before anybody noticed there was no ledge under it. A
+     ledge is a hard bright horizontal edge with a dark line beneath it, and that is the one shape
+     that survives being three screen pixels tall. */
   casaBase(sx,sy);
-  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+7,sy+11,18,14);
+  ctx.fillStyle="#5C4029";ctx.fillRect(sx+6,sy+10,20,16);            /* the reveal, in shadow */
+  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+7,sy+11,18,14);            /* the frame */
   ctx.fillStyle="#A9C6E0";ctx.fillRect(sx+9,sy+13,14,10);
+  ctx.fillStyle="#C8DCEE";ctx.fillRect(sx+9.5,sy+13.5,4,4);          /* the sky in the left light */
   ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+15,sy+13,2,10);            /* the bar down the middle */
-  ctx.fillStyle="#7A9A4E";ctx.fillRect(sx+8,sy+24,16,3);};           /* the plant on the sill */
-TILEART["▨"]=rc=>{const{sx,sy}=rc;                                   /* the blank wall, with a lamp */
+  ctx.fillStyle=CASA_SILL;ctx.fillRect(sx+4,sy+9,24,2);              /* the cast lintel */
+  ctx.fillStyle=CASA_SILL;ctx.fillRect(sx+4,sy+25,24,2.2);           /* THE SILL: wider than the opening */
+  ctx.fillStyle="rgba(0,0,0,.32)";ctx.fillRect(sx+4,sy+27.2,24,1.2); /* the shadow it throws */
+  ctx.fillStyle="#B4633A";ctx.fillRect(sx+13,sy+21,6,4);             /* the pot, thrown, standing on it */
+  ctx.fillStyle="#C9754A";ctx.fillRect(sx+12.4,sy+20.4,7.2,1.4);     /* its rim */
+  ctx.fillStyle="#5F8A42";[[12.6,17.6,3.4,3.4],[15.4,16.8,3.6,4.2],[17.6,18,3.2,3]].forEach(q=>ctx.fillRect(sx+q[0],sy+q[1],q[2],q[3]));};
+TILEART["▨"]=rc=>{const{sx,sy,x,y}=rc;                               /* the blank wall, with a lamp */
+  /* A blank wall is where a house keeps its fittings: the lamp on its bracket, and the meter with
+     its conduit running down to the ground. Nothing says "somebody pays a bill here" faster.
+     ONE METER PER HOUSE — `casaMeterHere` — or El Portero's two cheeks are identical twins. */
   casaBase(sx,sy,"#BE9A72");
-  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+15,sy+9,2,4);
-  ctx.fillStyle="#E8D6B0";ctx.fillRect(sx+12,sy+12,8,5);
-  ctx.fillStyle="rgba(232,214,176,.28)";ctx.fillRect(sx+10,sy+17,12,7);};
+  const jt=(((x*7+y*13)%5)+5)%5, lx=(jt-2)*1.1, ly=(jt%2)*0.7;       /* no two brackets at one height */
+  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+14.6+lx,sy+11+ly,2.8,3.4); /* the back plate and the arm */
+  ctx.fillStyle="#6E5238";ctx.fillRect(sx+12+lx,sy+14+ly,8,1.6);     /* the hood, seen edge-on */
+  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+12.6+lx,sy+14.4+ly,6.8,1.6);
+  ctx.fillStyle="#F2E0AE";ctx.beginPath();ctx.arc(sx+16+lx,sy+17.4+ly,2.6,0,7);ctx.fill();  /* the globe */
+  ctx.fillStyle="rgba(242,224,174,.22)";ctx.beginPath();ctx.arc(sx+16+lx,sy+18.6+ly,5.4,0,7);ctx.fill();
+  if(casaMeterHere(x,y)){
+    ctx.fillStyle="#8A8F98";ctx.fillRect(sx+24.4,sy+19,1.2,8);       /* the conduit, down to the plinth */
+    ctx.fillStyle="#C9CDD2";ctx.fillRect(sx+22,sy+13,6,7);           /* the meter box */
+    ctx.fillStyle="#6E7278";ctx.fillRect(sx+23,sy+14,4,3.4);
+    ctx.fillStyle="#E8EDF2";ctx.fillRect(sx+23.4,sy+14.6,3.2,1.2);}};/* its little window */
 /* ʘ — Doña Meche's bote: a steel tamale pot on a cart at the trolley stop on Calle Dos (Nacho,
    2026-09-07: "tamales are sold at the transit stop in every barrio on earth"). A box in 3D with a
    side view, never a cutout; steam always, a marigold on the lid in season (art("bloom")). */
@@ -2010,6 +2544,179 @@ Object.assign(TILEMETA,{
   "▩":{lift:13,kind:"facade"},
   "▨":{lift:13,kind:"facade"},
 });
+
+/* ---------- THE CASITA IN THREE DIMENSIONS — a house, not a box wearing a drawing ----------
+   (el albañil, crew iteration 14. The owner, 2026-09-22: "should we shape and beautify buildings?
+   lets not over do it since we are limited in tokens but if you decide to start the buildings -
+   start with the small houses that we can create with don gueros help eventually even within game
+   right? i think dona tenchas was one of those. dont do all buildings, just do one or two and show
+   me." Two faces: ▩ the window and ▨ the lamp wall. ▦ the reja is the third and is deliberately
+   NOT shaped — see the note at the foot of this block.)
+
+   HOW A CALLE DOS HOUSE IS ACTUALLY BUILT, which is the order these parts go on
+   (.claude/skills/how-its-made — draw a thing by the process that made it): a footing, then a
+   plinth painted dark to the knee so the damp does not show on the paint; block walls rendered and
+   painted; a cast lintel over every opening and a cast sill under it, both wider than the hole and
+   both projecting so the rain falls clear of the render; a ring beam at the head of the wall; the
+   VIGAS laid across it and oversailing it; and on the vigas the TEJA — barrel tiles of fired clay,
+   laid in courses, each lapping the one below, a cap along the ridge. The variation entered AT THE
+   TILE, because the tiles were made one at a time over a former and fired in a heap: so what
+   differs between two barrels here is the colour of the clay and a hair of its lay, and nothing
+   above that step differs. The wall is one pour, so the wall does not vary.
+
+   ❗THE ONE NUMBER THAT MAY NOT MOVE, and it is why this file measures instead of typing 1.096.
+   A mesh BEATS the wall box — engine3d.js t3MeshTile, whose own comment is "the mesh view beats
+   box, billboard and even wall" — and four places in the engine still compute against `wallH(g)`,
+   the box formula over the glyph's declared `lift`, for a facade: the door's lintel, a person
+   working in a window, wall decor, and the sill pane. Not one of them asks the shape how tall it
+   is. So THE WALL PLANE OF THIS HOUSE STOPS AT EXACTLY `wallH`, and everything that makes it a
+   house instead of a box — the eave, the teja, the ridge — stands ABOVE that line and hangs
+   OUTSIDE the tile. Doña Tencha's front door borrows its lintel height from the wall beside it;
+   move that line and a slot of daylight opens along the top of her door. The guard is
+   test/smoke.js, grep `const casa3d` (the block; its failure sentence begins `the shaped house at`).
+   (`li`'s U mesh — the only other wall with a shape — writes `const WH=0.55+13*0.042` by hand.
+   That is right today and nothing guards it. Here the height is read from the glyph's own `lift`,
+   so an edit to TILEMETA moves the shape with the engine instead of away from it.) */
+const casaWH=g=>0.55+(((typeof TILES!=="undefined"&&TILES[g])||{}).lift|0)*0.042;
+const CASA_CAP="#8E4335",     /* the ridge cap: older clay off another roof, weathered darker */
+      CASA_SOFFIT="#6E5238";  /* the vigas and the plinth: timber and dark paint */
+/* WHICH WAY THE HOUSE FACES, and it is NOT meshFacing. meshFacing takes the first open side —
+   south, east, west, north — and the casa template sweeps its sidewalk at y+1 and then stands a
+   pot or the guest chair ON that sidewalk. So at Doña Tencha's window tile the south is the guest
+   chair (solid) and the first open side is EAST: her own front door. meshFacing would have turned
+   her house to face its own doorway. A casa faces the row the template swept, and a thing standing
+   in the yard is IN FRONT of the house, not beside it. */
+const CASA_YARD="P⊔";
+const casaFront=(x,y)=>{const w=CW(),free=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];
+    if(!r||r[gx]===undefined)return false;const g=r[gx];
+    return !SOLID.has(g)||(typeof DOORSET!=="undefined"&&DOORSET.has(g))||CASA_YARD.indexOf(g)>=0;};
+  return free(x,y+1)?0:free(x,y-1)?Math.PI:0;};
+/* ❗ONE METER PER HOUSE, NOT ONE PER WALL — the rule both the drawing and the shape ask. El
+   Portero's hut is two blank walls with the door between them, and hanging the same lamp and the
+   same meter on both made two identical cheeks: the tell `.claude/skills/how-its-made` warns about
+   whenever several of the same thing stand together. The variation has to enter where it entered in
+   life — the electricity company fits ONE meter to a house and fits it once — so the meter stands
+   only where the house's run ENDS, and every other blank wall keeps the lamp alone. */
+const casaMeterHere=(x,y)=>{const w=CW(),ry=casaFront(x,y),
+  ax=Math.round(Math.cos(ry)),az=Math.round(-Math.sin(ry)),
+  r=w&&w.rows&&w.rows[y+az],g=r&&r[x+ax]!==undefined?r[x+ax]:null;
+  return !(g!==null&&("▩▨▦".indexOf(g)>=0||(typeof DOORSET!=="undefined"&&DOORSET.has(g))));};
+/* THE SHELL EVERY CASA FACE SHARES — plinth, wall, ring beam, vigas, eave and teja. Built once,
+   here, because that is what makes three tiles one building: the courses are on a pitch that
+   divides the tile exactly, so a barrel run carries THROUGH the join, and the roof carries over
+   the front door (which is a `⌂` and has no mesh of its own) half a tile from either side. */
+const casaShell=(g,x,y,ry)=>{
+  const WH=casaWH(g),wall=g==="▨"?"#BE9A72":CASA_WALL,P=[];
+  const w=CW(),at=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return r&&r[gx]!==undefined?r[gx]:null;};
+  const ax=Math.round(Math.cos(ry)),az=Math.round(-Math.sin(ry));  /* the mesh's own +x, in world steps */
+  const isCasa=c=>c!==null&&"▩▨▦".indexOf(c)>=0;
+  const isDoor=c=>c!==null&&typeof DOORSET!=="undefined"&&DOORSET.has(c);
+  const gE=at(x+ax,y+az),gW=at(x-ax,y-az);
+  const ovE=isDoor(gE)?0.5:isCasa(gE)?0:0.07,ovW=isDoor(gW)?0.5:isCasa(gW)?0:0.07;
+  const endE=!isCasa(gE)&&!isDoor(gE),endW=!isCasa(gW)&&!isDoor(gW);
+  const EO=0.62,EH=0.04,RH=0.30;                  /* eave 0.12 proud of the wall; ridge 0.30 over its head */
+  const x0=-0.5-ovW,x1=0.5+ovE,RX=(x0+x1)/2,RW=x1-x0;
+  const th=Math.atan2(RH-EH,EO),L=Math.hypot(RH-EH,EO),ct=Math.cos(th),st=Math.sin(th);
+  const rnd=(k,j)=>{const v=Math.sin(x*12.9898+y*78.233+k*39.425+j*17.719)*43758.5453;return v-Math.floor(v);};
+  P.push({s:"box",x:0,y:0.055,z:0,w:1,h:0.11,d:1.03,c:CASA_SOFFIT});          /* 1 · the plinth */
+  P.push({s:"box",x:0,y:WH/2,z:0,w:1,h:WH,d:1,c:wall});                       /* 2 · the wall — ❗its top is wallH */
+  P.push({s:"box",x:0,y:WH-0.035,z:0,w:1,h:0.07,d:1,c:CASA_TRIM});            /* 3 · the ring beam at its head */
+  [-0.31,0,0.31].forEach(vx=>                                                 /* 4 · the vigas, oversailing */
+    P.push({s:"box",x:vx,y:WH+0.05,z:0.24,w:0.055,h:0.05,d:0.72,c:CASA_SOFFIT}));
+  [1,-1].forEach(sd=>{                                                        /* 5 · the sheathing, two slopes */
+    P.push({s:"box",x:RX,y:WH+(RH+EH)/2,z:sd*EO/2,w:RW,h:0.035,d:L,c:CASA_TEJAD,rx:sd*th});
+    const NB=7,PIT=1/NB,br=PIT*0.56;                                          /* 6 · the teja, 7 to the tile */
+    const k0=Math.round((x0+0.5)/PIT),k1=Math.round((x1+0.5)/PIT)-1;
+    for(let k=k0;k<=k1;k++){const bx=-0.5+(k+0.5)*PIT;if(bx<x0-0.01||bx>x1+0.01)continue;
+      const off=br+0.016,jt=rnd(k,sd);
+      P.push({s:"cyl",x:bx,y:WH+(RH+EH)/2+off*ct,z:sd*(EO/2+off*st),r:br*(0.94+jt*0.12),h:L+0.03,
+              c:[CASA_TEJA,CASA_TEJA2,CASA_ROOF][((k%3)+3)%3],rx:sd*(Math.PI/2+th)});}
+    P.push({s:"box",x:RX,y:WH+EH-0.015,z:sd*(EO+0.012),w:RW,h:0.055,d:0.028,c:CASA_CAP});});  /* 7 · the fascia */
+  P.push({s:"cyl",x:RX,y:WH+RH+0.028,z:0,r:0.048,h:RW,c:CASA_CAP,rz:Math.PI/2});              /* 8 · the ridge cap */
+  /* 9 · where the run ENDS, the roof has a gable to close: the triangle between the wall's head and
+        the two slopes, in the wall's own render, stepped in five courses the way it was laid up. */
+  const gable=gx=>{for(let i=0;i<5;i++){const t=(i+0.5)/5;
+    P.push({s:"box",x:gx,y:WH+EH+(RH-EH)*t,z:0,w:0.07,h:(RH-EH)/5+0.012,d:2*EO*(1-t*0.92),c:wall});}};
+  if(endE)gable(0.5-0.03); if(endW)gable(-0.5+0.03);
+  return P;};
+/* ▩ — LA VENTANA. Three of these stand on Calle Dos today: one is the whole west half of Doña
+   Tencha's front, and two are the Barbería El Espejo's, which is the same small house with a
+   different trade in it. The opening is the rectangle the 2D face draws, because the front camera
+   still shows that drawing and the two must be the same window.
+   ❗NOT to the pixel, and the last round's comment here said it was. The drawing is stretched over a
+   wall 1.096 tall and these parts are written in tile units, so the mesh window sits about 0.03 of a
+   tile — one screen pixel at the face's own size — higher than the drawn one. Measured, not fixed:
+   correcting it would move the cast sill, which is now pinned by how far the engine hangs a sugar
+   skull's lit pane (see the note at THE CAST WORK below), and one pixel is not worth that. */
+/* ❗A WINDOW HERE IS A RELIEF, NOT A HOLE. The wall is one solid box and nothing subtracts from it,
+   so every part of the opening stands PROUD of the wall face and the recess is painted, not cut.
+   The first draft of this inset the frame and the glass to z = F−0.02, which is INSIDE the wall:
+   rendered, the window was a black rectangle and the reveal's front face z-fought the render. Found
+   by looking at the picture, in the first frame, exactly as docs/POSTMORTEM.md §2 promises. */
+TILEART_MESH["▩"]=({x,y})=>{const ry=casaFront(x,y),P=casaShell("▩",x,y,ry),F=0.5;
+  P.push({s:"box",x:0,y:0.49,z:F+0.006,w:0.62,h:0.52,d:0.012,c:"#4A3220"});     /* the opening, in shadow */
+  P.push({s:"box",x:0,y:0.49,z:F+0.014,w:0.56,h:0.44,d:0.010,c:CASA_TRIM});     /* the frame */
+  [-0.143,0.143].forEach(px=>{
+    P.push({s:"box",x:px,y:0.49,z:F+0.022,w:0.235,h:0.385,d:0.010,c:"#A9C6E0"});     /* the two lights */
+    P.push({s:"box",x:px-0.05,y:0.565,z:F+0.030,w:0.10,h:0.13,d:0.006,c:"#C8DCEE"});}); /* sky in the glass */
+  P.push({s:"box",x:0,y:0.49,z:F+0.030,w:0.035,h:0.41,d:0.012,c:CASA_TRIM});    /* the bar down the middle */
+  /* ❗HOW FAR THE CAST WORK MAY STAND OUT, and it is not a matter of taste. When a sweet stands on
+     a sill in season the engine hangs the lit pane at 0.12 of a tile proud of the wall face and its
+     ledge at 0.17 (engine3d.js, `SILL_PROUD`) — a flat Sprite, so anything of this house's that
+     reaches further does not share the space with it, it EATS it. The first draft's sill reached
+     0.127 and sat 0.007 in front of the pane: invisible today only because ▩ declares no `win`, and
+     the day somebody gives this window one — which the drawn ledge invites — the sweet's pane would
+     have been clipped along its bottom edge by the very ledge that was built to hold it. Pulled to
+     0.115, measured against the pane the engine actually places, and guarded in test/smoke.js
+     (grep `the pane a sweet stands in`). The ledge loses four tenths of a screen pixel. */
+  P.push({s:"box",x:0,y:0.745,z:F+0.048,w:0.74,h:0.065,d:0.11,c:CASA_SILL});    /* the cast lintel, proud */
+  P.push({s:"box",x:0,y:0.243,z:F+0.052,w:0.76,h:0.048,d:0.125,c:CASA_SILL});   /* THE SILL: a hard bright edge */
+  P.push({s:"box",x:0,y:0.204,z:F+0.042,w:0.76,h:0.030,d:0.11,c:"#4A3220"});    /* and the shadow under it */
+  /* ❗WHAT VARIES BETWEEN TWO WINDOWS ON ONE HOUSE, and what does not. The frame, the sill and the
+     lintel were made by one joiner and cast in one form on one morning, so two openings on one
+     front ARE the same and drawing them different would be the lie. THE POT IS NOT: somebody
+     carried it out and stood it there, one at a time, years apart. So the variation enters at the
+     pot — its clay, its size, where it sits on the ledge, and whether there is one at all — and
+     nowhere above it (.claude/skills/how-its-made). Before this, the Barbería's two windows and
+     Doña Tencha's seedB pair were the same window twice, which is what a stamped street looks like
+     when nobody asks at which step the difference entered. */
+  const pt=(((x*7+y*13)%6)+6)%6, PC=["#B4633A","#9E5442","#B4633A","#8A6B48","#A8552F","#B4633A"][pt];
+  if(pt!==3){const ps=0.92+(pt%3)*0.09, po=-0.02+((pt%4)-1.5)*0.045;
+    P.push({s:"cyl",x:po,y:0.310+0.012*ps,z:F+0.075,rt:0.072*ps,rb:0.052*ps,h:0.10*ps,c:PC});   /* thrown */
+    P.push({s:"cyl",x:po,y:0.362+0.024*ps,z:F+0.075,r:0.077*ps,h:0.018,c:"#C9754A"});           /* its rim */
+    [[-0.06,0.115,0.052],[0.02,0.145,0.056],[0.07,0.108,0.046]].forEach((q,i)=>
+      P.push({s:"sph",x:po+q[0]*ps,y:0.310+(q[1]+0.012)*ps,z:F+0.075,r:q[2]*ps,sy:0.82,
+              c:["#5F8A42","#4E7A38","#6E9A4E"][(pt+i)%3]}));}                    /* what is growing in it */
+  else{P.push({s:"cyl",x:0.06,y:0.315,z:F+0.072,r:0.030,h:0.10,c:"#4E6E4A"});      /* or nobody planted one, */
+       P.push({s:"cyl",x:0.06,y:0.372,z:F+0.072,r:0.014,h:0.030,c:"#4E6E4A"});}    /* and a bottle stands there */
+  return meshTurned(P,ry);};
+/* ▨ — EL MURO CIEGO. The blank wall is where a house keeps its fittings: the lamp on its bracket,
+   and the meter with its conduit running down to the plinth. Three stand on Calle Dos — the east
+   end of Doña Tencha's, and both cheeks of El Portero's site hut, which is the same small building
+   with a clipboard in it. */
+TILEART_MESH["▨"]=({x,y})=>{const ry=casaFront(x,y),P=casaShell("▨",x,y,ry),F=0.5;
+  /* the same fittings the 2D face draws, and by the same rule: one meter per house (casaMeterHere),
+     a lamp on every blank wall, and no two brackets hung at exactly the same height. */
+  const meter=casaMeterHere(x,y);
+  const jt=(((x*7+y*13)%5)+5)%5, lx=-0.02+(jt-2)*0.035, ly=(jt%2)*0.022;
+  P.push({s:"box",x:lx,y:0.845+ly,z:F+0.006,w:0.09,h:0.12,d:0.02,c:CASA_TRIM});          /* the back plate */
+  P.push({s:"box",x:lx,y:0.858+ly,z:F+0.078,w:0.028,h:0.028,d:0.16,c:CASA_TRIM});        /* the arm */
+  P.push({s:"cone",x:lx,y:0.788+ly,z:F+0.148,r:0.102,h:0.10,c:CASA_TRIM,rx:Math.PI});    /* the hood, mouth down */
+  P.push({s:"sph",x:lx,y:0.726+ly,z:F+0.148,r:0.052,c:"#F2E0AE"});                       /* the globe */
+  if(meter){
+    P.push({s:"box",x:0.31,y:0.605,z:F+0.026,w:0.14,h:0.18,d:0.05,c:"#C9CDD2"});         /* the meter box */
+    P.push({s:"box",x:0.31,y:0.622,z:F+0.053,w:0.09,h:0.085,d:0.008,c:"#6E7278"});       /* its face */
+    P.push({s:"box",x:0.31,y:0.636,z:F+0.058,w:0.07,h:0.030,d:0.006,c:"#E8EDF2"});       /* its little window */
+    P.push({s:"box",x:0.31,y:0.300,z:F+0.014,w:0.022,h:0.44,d:0.022,c:"#8A8F98"});}      /* the conduit down */
+  return meshTurned(P,ry);};
+/* ❗▦ — LA REJA IS DELIBERATELY NOT SHAPED, and this is the note so nobody is surprised later.
+   The owner said "just do one or two and show me", and the reja stands on NO street today: it is
+   used only by BUILDTPL.casita, and no row of BUILDS uses that template (the comment over BUILDS:
+   "NO LOTS ARE BUILT"). Shaping it would have been an hour spent on a tile nobody can walk to.
+   It shares the 2D roofline above, so the front camera already reads it as the same house. THE DAY
+   A CASITA LOT GOES UP, give it `TILEART_MESH["▦"] = ({x,y})=>{const ry=casaFront(x,y); return
+   meshTurned(casaShell("▦",x,y,ry).concat(<the gate>),ry);}` — because until it has one, a reja
+   standing next to a shaped ▩ is a flat-lidded box in the middle of a pitched roof. */
 
 /* ---------- BUILDTPL — the templates themselves ----------
    `casita`: a four-tile house front on Calle Dos with a swept strip of sidewalk in front.

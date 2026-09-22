@@ -397,7 +397,7 @@ function arrivalsOnRails(){return arrivals().filter(function(a){const L=troLine(
    every other way of getting it wrong is named here. A word this engine does not read is the
    loudest of all: it is the one where somebody wrote a line, saw nothing happen, and had no way to
    find out why. Every key added to the seam joins TROKEYS in the same commit as its reader. */
-const TROKEYS=["world","row","from","to","stops"];
+const TROKEYS=["world","row","from","to","stops","cars"];
 function troAudit(){const out=[],lines=(typeof TROLLEYAT!=="undefined"&&TROLLEYAT)?TROLLEYAT:[],seen={};
   lines.forEach(function(L){if(!L||!L.world)return;
     const w=WORLDS[L.world],at=function(s){return L.world+" ("+s.x+","+s.y+")";};
@@ -405,8 +405,21 @@ function troAudit(){const out=[],lines=(typeof TROLLEYAT!=="undefined"&&TROLLEYA
     seen[L.world]=true;
     Object.keys(L).forEach(function(k){if(TROKEYS.indexOf(k)<0)
       out.push("the trolley line in "+L.world+" declares "+k+", which this engine does not read — whatever it was meant to do, nothing does it");});
+    /* ...and a TRAIN says how many cars, in words a person wrote by hand and can get wrong. `cars`
+       is read by troCars, which floors it and caps it at TRO_CARS_MAX so a typo cannot hang the line;
+       this is the half of the seam that says so out loud instead of silently running a different
+       train from the one that was declared. The length test is the one that matters: a train needs
+       street enough to stand clear of both ends of its own run, and the run is what `from`/`to` say. */
+    if("cars" in L){const c=L.cars;
+      if(typeof c!=="number"||!isFinite(c)||c<1||Math.floor(c)!==c)
+        out.push("the trolley line in "+L.world+" declares cars="+JSON.stringify(c)+", which is not a whole number of cars — it runs one car");
+      else if(c>TRO_CARS_MAX)
+        out.push("the trolley line in "+L.world+" declares a train of "+c+" cars and this engine couples at most "+TRO_CARS_MAX+" — the rest never appear");}
     if(!w)return;
     const a=Math.min(L.from,L.to),b=Math.max(L.from,L.to);
+    if(troCars(L)>1&&troSpan(L)>b-a+1)
+      out.push("the trolley line in "+L.world+" runs a train "+troSpan(L).toFixed(2)+" tiles long on a run of "+(b-a+1)+
+               " — it is longer than its own line, so it can never stand clear of either end and the run never finishes");
     troStops(L).forEach(function(s){const g=w.grid[s.y]&&w.grid[s.y][s.x];
       if(g===undefined){out.push("the trolley stop in "+at(s)+" is off the edge of the map");return;}
       if(SOLID.has(g)||g==="N")out.push("the trolley stop in "+at(s)+" is inside something — nobody can stand at it");
@@ -970,7 +983,9 @@ function drawIso(){
      of him under a car that was behind him, measured. It is a thing on its row: it takes the depth
      queue at its own centre, so whoever is nearer the camera paints over it and whoever is farther
      paints under it, the way the people already do. (The line inspector, crew iteration 12.) */
-  {const L=troLine(world);if(L&&TRO.state!=="away")R.push({d:TRO.x+TRO_LEN/2+L.row+0.5,f:()=>troDraw2D(world,P,false)});}
+  {const L=troLine(world);if(L&&TRO.state!=="away"){const n=troCars(L);
+    for(let i=0;i<n;i++){const cx=TRO.x+i*(TRO_LEN+TRO_GAP);
+      R.push({d:cx+TRO_LEN/2+L.row+0.5,f:(function(k){return function(){troDraw2D(world,P,false,k);};})(i)});}}}
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
   petalTrail(world,P);
   fiestaDraw2D(world,P,false);
@@ -1554,6 +1569,20 @@ function petalSpill(w,x,y,sx,sy,scale){
    shipped in mq-v144, and this change is deliberately AFTER it so the faster tram is one with wheels
    on it. docs/3D-LOG.md 2026-09-11. */
 const TRO_EVERY=19000,TRO_SPEED=6.0,TRO_LEN=2,TRO_HOLD=1400,TRO_LOOK=2.6;
+/* TRO_GAP — the coupling gap between two car BODIES, in tiles, and it is an engine constant for the
+   same reason TRO_DWELL is: a coupler is not anybody's taste. Rigo's file settles it in one line —
+   a depot may repaint "the panel, the band, the roof, the lining, the crest, the blind", and never
+   "the pole, the fender, the doors, the bogie, the length, the number of cabs", because each of
+   those "is decided by the wire, the platform, the rails or the terminus, and not by anybody's
+   preference" (.claude/agents/rigo.md). The gap is the coupler and the coupler is the rails'.
+   DERIVED, not felt, the way that file demands: a tram coupler with its gangway is about 0.7 m; a
+   tile here is a DOORWAY (the engine's 1.0, ~2.05 m), so 0.7 m is 0.34 tiles at full size — and the
+   car itself is compressed, 2 tiles standing for a 9 m body, a factor of about 2.5. The same factor
+   on the coupler gives 0.14. At 35 px a tile that is five pixels: a seam you can see and not a place
+   a person could stand, which is what a coupler looks like from the kerb.
+   TRO_CARS_MAX — a train longer than the street it runs on cannot stand clear of either end; the
+   audit says so in words, and this stops a typo from hanging the line while it does. */
+const TRO_GAP=0.14,TRO_CARS_MAX=8;
 /* TRO_SHY — how far up the line a small living thing reads the car, in tiles. TRO_DWELL/TRO_REACH —
    how long the car stands at a platform for somebody walking up to it, and how close "walking up"
    is. All three are engine constants and not pack keys, like TRO_HOLD beside them: a tram waiting
@@ -1581,6 +1610,34 @@ function troLine(wid){const L=(typeof TROLLEYAT!=="undefined"&&TROLLEYAT)?TROLLE
    the engine in two places (docs/TAGS.md L20). */
 function troStops(L){return (L&&Array.isArray(L.stops))?L.stops.filter(function(s){return s&&typeof s.x==="number"&&typeof s.y==="number";}):[];}
 function troIsStop(wid,x,y){return troStops(troLine(wid)).some(function(s){return s.x===x&&s.y===y;});}
+/* ---- HOW MANY CARS — the one word a pack may say about a TRAIN, and why it is the only one ----
+   The owner, 2026-09-22: "we want to make this custom as possibly can turn in to a train of trolleys
+   in other games and a new level unless you recommmend otherwise."
+   `cars: n` (omit it and it is 1) rides on the LINE's own row, not on the car, because the number of
+   cars is not a livery: it is set by how long the platform is and how long the terminus track is, and
+   both of those belong to the route. Rigo again, and he is the reason this is one key and not five.
+   THE FOUR OTHER THINGS A TRAIN HAS AND THIS SEAM DELIBERATELY DOES NOT SAY, each with its reason,
+   because docs/TAGS.md L16 is that a pack which declares HALF is the one that gets hurt:
+   · the coupling distance — TRO_GAP above: a rule, identical in both games, not a choice;
+   · which cars are powered — nothing in this engine has ever read power, and a key with no reader is
+     "the one where somebody wrote a line, saw nothing happen, and had no way to find out why";
+   · which car the driver is in — a rule, and the answer is the LEADING one, which is troLead: a tram
+     has a cab at each end and one driver, who walks the length of it rather than the car turning round;
+   · which car the doors open on — THERE ARE NO DOORS. The car is glazed on four sides and has an open
+     cab at each end; nothing in either game opens, closes, or draws a door on it. A `doors:` key would
+     be a promise the engine cannot keep, and troAudit exists to refuse exactly that.
+   The whole train is ONE RIGID BODY at one speed on one straight row — which is all this engine has
+   ever been able to be, and is honest for a street tram: it cannot bend, and the line it runs is a
+   single `row`, so there is no curve for it to swing out on. */
+function troCars(L){const n=L&&L.cars;
+  return (typeof n==="number"&&isFinite(n)&&n>=1)?Math.min(TRO_CARS_MAX,Math.floor(n)):1;}
+/* how much street the whole train occupies. ONE car is TRO_LEN exactly — every reader below is the
+   expression it was before, to the bit, for a line that says nothing about cars. */
+function troSpan(L){const n=troCars(L);return n*TRO_LEN+(n-1)*TRO_GAP;}
+/* where the LEADING car starts — the one with the driver in it, and the one that berths at the
+   platform. A train stops with its first car at the stop; the rest of it trails past, and the people
+   in those cars walk forward. For one car this is TRO.x whichever way it points. */
+function troLead(L){return TRO.dir>0?TRO.x+troSpan(L)-TRO_LEN:TRO.x;}
 function troTiles(L){const a=Math.min(L.from,L.to),b=Math.max(L.from,L.to),out=[];for(let x=a;x<=b;x++)out.push([x,L.row]);return out;}
 /* what stands on the line — a wall, a lot, a person, a door. The owner's rule: nothing may. */
 function troBlocked(wid){const L=troLine(wid);if(!L)return [];const w=WORLDS[L.world];if(!w)return [];
@@ -1599,7 +1656,10 @@ function troBlocked(wid){const L=troLine(wid);if(!L)return [];const w=WORLDS[L.w
    -0.6, so a thing that steps on beside the door missed both at once.
    A ratio of distances, so it was identical at 3.4 and 6.0 — the speed neither caused it nor
    changed it, it only made the band sweep past twice as fast. */
-function troAhead(L){const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),near=v=>{const d=(v-nose)*TRO.dir;return d>=-TRO_LEN&&d<=TRO_LOOK;};
+/* ...and on a TRAIN the body the band covers is the WHOLE train, not the first car: the tail of a
+   three-car set is six tiles behind the driver and a person standing beside it is standing beside a
+   moving vehicle. `troSpan` is that length; for one car it is TRO_LEN and this line is unchanged. */
+function troAhead(L){const sp=troSpan(L),nose=TRO.x+(TRO.dir>0?sp:0),near=v=>{const d=(v-nose)*TRO.dir;return d>=-sp&&d<=TRO_LOOK;};
   if(world===L.world&&Math.round(py)===L.row&&near(px))return true;
   const w=WORLDS[L.world];if(w&&w.npcs.some(n=>n.y===L.row&&near(n.x)))return true;
   if((typeof CRIT!=="undefined"?CRIT:[]).some(c=>c.world===L.world&&Math.round(c.y)===L.row&&near(c.x)))return true;
@@ -1651,10 +1711,11 @@ function troAtStop(L){if(!L||world!==L.world)return false;
    pigeon. It is a reason for there not to be one. */
 function troDanger(wid,x,y){const L=troLine(wid);
   if(!L||L.row!==y||TRO.state==="away")return false;
-  const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),d=(x-nose)*TRO.dir;
-  return d>=-TRO_LEN&&d<=TRO_SHY;}
+  const sp=troSpan(L),nose=TRO.x+(TRO.dir>0?sp:0),d=(x-nose)*TRO.dir;
+  return d>=-sp&&d<=TRO_SHY;}
 /* ---- which platform the car's doors are at, and whether it should stand there ----
-   The car always spans [TRO.x, TRO.x+TRO_LEN] whichever way it is pointed; only the nose swaps ends.
+   The train always spans [TRO.x, TRO.x+troSpan(L)] whichever way it is pointed — one car is TRO_LEN
+   of that and is the whole of it; only the nose, and which car leads, swap ends.
    The owner, 2026-09-11: "why wouldnt they stop for me? if im walking close to the tram, it should
    wait if it is already at the tram stop, if i missed it then its ok, itll take me a second and then
    i should be at the stop anyhow and wont mind a second to arrive."
@@ -1663,7 +1724,7 @@ function troDanger(wid,x,y){const L=troLine(wid);
    platform (`dwellAt`) rather than by run, because a line with two stops must be patient at the
    second one having already been patient at the first; and it is cleared when a run begins, so the
    next tram is as patient as this one was. */
-/* A CAR SERVES A STOP FROM THE STREET, never from beyond its end. It is born TRO_LEN past the end of
+/* A CAR SERVES A STOP FROM THE STREET, never from beyond its end. It is born its own length past the end of
    its run so it can drive in, and a stop at the run's first tile sat inside the serving window before
    the car had entered the street: on Calle Principal it stood at x=-2, its whole body past the west
    edge — off-screen in the top and front cameras, hanging in the dark in 3D — ran its dwell out there,
@@ -1671,9 +1732,15 @@ function troDanger(wid,x,y){const L=troLine(wid);
    state is a proxy for a picture. (The owner, 2026-09-21: "the trolley weirdness"; ridden by the line
    inspector, crew iteration 12.) troClampX is the one fact — where a car may stand on this street — read
    by the two things that stand a car at a platform: serving, below, and the ride's bell in rideStart. */
-function troClampX(L,x){const w=L&&WORLDS[L.world];return w?Math.max(0,Math.min(w.W-TRO_LEN,x)):x;}
+function troClampX(L,x){const w=L&&WORLDS[L.world];return w?Math.max(0,Math.min(w.W-troSpan(L),x)):x;}
+/* WHICH CAR IS AT THE PLATFORM, and it is the LEADING one — the fault above, one size up. A stop is
+   one tile; a three-car train is six. "Is the stop anywhere inside the train" is true when the stop
+   is at the tail, six tiles behind the driver, and the person waiting watches a car go past, then
+   another, and then a door that is not level with them. Every real service stops the FIRST car at
+   the marker. troLead is that car; for one car it is TRO.x and this window is the one it always was. */
 function troServing(L){if(!L||TRO.state==="away"||troClampX(L,TRO.x)!==TRO.x)return null;
-  return troStops(L).find(function(s){return s.x>=TRO.x-0.5&&s.x<=TRO.x+TRO_LEN+0.5;})||null;}
+  const a=troLead(L);
+  return troStops(L).find(function(s){return s.x>=a-0.5&&s.x<=a+TRO_LEN+0.5;})||null;}
 function troDwell(L,dt){const s=troServing(L);
   if(!s||world!==L.world)return false;
   const k=s.x+","+s.y;
@@ -1688,7 +1755,7 @@ function troUpdate(dt){const L=troLine();
     if(troAtStop(L)&&!TRO.called){TRO.called=true;if(T().troCome)toast(T().troCome,2200);}
     TRO.t+=dt;
     if(TRO.called||TRO.t>=TRO_EVERY){TRO.called=false;TRO.t=0;TRO.dwelt=0;TRO.dwellAt=null;
-      TRO.dir=L.to>=L.from?1:-1;TRO.x=L.from-TRO.dir*TRO_LEN;TRO.state="run";}
+      TRO.dir=L.to>=L.from?1:-1;TRO.x=L.from-TRO.dir*troSpan(L);TRO.state="run";}
     return;}
   if(troAhead(L)){TRO.state="hold";TRO.t=0;return;}          /* somebody is crossing: wait */
   /* ...and somebody walking up to the platform it is standing at: doors open, and they close. This
@@ -1697,7 +1764,7 @@ function troUpdate(dt){const L=troLine();
   if(troDwell(L,dt)){TRO.state="dwell";return;}
   if(TRO.state==="hold"){TRO.t+=dt;if(TRO.t<TRO_HOLD)return;TRO.t=0;}
   TRO.state="run";TRO.x+=TRO.dir*TRO_SPEED*dt/1000;
-  const end=L.to+TRO.dir*TRO_LEN;
+  const end=L.to+TRO.dir*troSpan(L);   /* the run is over when the LAST car is off the street, not the first */
   if((TRO.dir>0&&TRO.x>end)||(TRO.dir<0&&TRO.x<end)){TRO.state="away";TRO.t=0;}}
 /* ---------- EL PASEO — you ride it, you do not blink and arrive ----------
    The owner has circled this for days. 2026-09-11: "lets have the teleport survive for now but maybe
@@ -1742,7 +1809,7 @@ function rideStart(d){
   /* stand the car at the platform you are on, doors open, whatever it was doing elsewhere */
   const s=troStops(L).reduce(function(a,b){return (Math.abs(b.x-px)<Math.abs(a.x-px))?b:a;});
   TRO.dir=L.to>=L.from?1:-1;
-  TRO.x=troClampX(L,s.x-(TRO.dir>0?TRO_LEN:0));TRO.state="dwell";TRO.dwelt=0;TRO.dwellAt=null; /* on the street, even at a stop on its first tile */
+  TRO.x=troClampX(L,s.x-(TRO.dir>0?troSpan(L):0));TRO.state="dwell";TRO.dwelt=0;TRO.dwellAt=null; /* on the street, even at a stop on its first tile; on a train the LEADING car's nose comes to you */
   held=null;moving=false;
   if(T().troRide)toast(T().troRide,1800);
   return true;}
@@ -1758,7 +1825,7 @@ function rideUpdate(dt){
     if(RIDE.held>=RIDE_STUCK)rideArrive();return;}
   RIDE.held=0;
   TRO.state="run";TRO.x+=TRO.dir*RIDE_ZIP*dt/1000;
-  const end=L.to+TRO.dir*TRO_LEN;
+  const end=L.to+TRO.dir*troSpan(L);
   if((TRO.dir>0&&TRO.x>end)||(TRO.dir<0&&TRO.x<end))rideArrive();}
 /* one entry point for the car, whether it is running the timetable or carrying you. Named and
    separate from loop() so the suite can drive the real path rather than a re-implementation of it —
@@ -1767,7 +1834,7 @@ function rideUpdate(dt){
 function troTick(dt){
   if(!RIDE.on){troUpdate(dt);return;}
   rideUpdate(dt);
-  if(RIDE.on){fx=TRO.x+(TRO_LEN-1)/2;fy=(troLine(RIDE.fromW)||{row:fy}).row;}}
+  if(RIDE.on){const L=troLine(RIDE.fromW);fx=(L?troLead(L):TRO.x)+(TRO_LEN-1)/2;fy=(L||{row:fy}).row;} /* you ride in the leading car, where the driver is */}
 function rideArrive(){
   const d=RIDE.to;
   RIDE.on=false;RIDE.phase="";RIDE.t=0;RIDE.held=0;RIDE.to=null;
@@ -1775,23 +1842,31 @@ function rideArrive(){
   if(!d){fx=px;fy=py;return;}
   world=d.w;px=fx=d.x;py=fy=d.y;held=null;moving=false;dir=d.dir||"down";
   worldArrived(RIDE.fromW,RIDE.fromX,RIDE.fromY);}
-function drawTram(g,sx,sy,front){const W=TS*TRO_LEN,H=TS;
+/* ONE CAR. `lead` says this is the car at the front of the train, which is the only one that carries
+   the signal lamp — a train does not say three different things at once, and the lamp is "the only
+   sentence the vehicle can say" (rigo.md). Default true so a one-car line is the car it always was. */
+function drawTram(g,sx,sy,front,lead){const W=TS*TRO_LEN,H=TS;if(lead===undefined)lead=true;
   g.fillStyle="rgba(0,0,0,.18)";g.fillRect(sx+3,sy+H-5,W-6,4);
   g.fillStyle="#B0563A";g.beginPath();g.roundRect(sx+2,sy+(front?2:5),W-4,H-(front?8:12),5);g.fill();
   g.fillStyle="#8E4230";g.fillRect(sx+2,sy+(front?2:5),W-4,3);
   g.fillStyle="#D8E6F0";for(let i=0;i<3;i++)g.fillRect(sx+8+i*(W-20)/3,sy+(front?7:9),(W-24)/3,front?9:7);
   g.fillStyle="#E0A430";g.fillRect(sx+W/2-4,sy+(front?2:5)-2,8,2);
   g.fillStyle="#2B2536";[0.22,0.78].forEach(t2=>{g.beginPath();g.arc(sx+W*t2,sy+H-6,2.6,0,7);g.fill();});
-  if(TRO.state==="hold"||TRO.state==="dwell"||(RIDE.on&&RIDE.phase==="bell")){
+  if(lead&&(TRO.state==="hold"||TRO.state==="dwell"||(RIDE.on&&RIDE.phase==="bell"))){
     /* red: it has stopped BECAUSE OF YOU, get off the rails. amber: the doors are open, come on.
        white, flashing: the bell before a ride — the honk the owner asked for, drawn rather than heard
        because this game has never made a sound and is not going to start on a tram. */
     g.fillStyle=(RIDE.on&&RIDE.phase==="bell")?((Math.floor(RIDE.t/120)%2)?"#FFF6E0":"#E0A430")
       :TRO.state==="hold"?"#D9342B":"#E0A430";
     g.beginPath();g.arc(sx+(TRO.dir>0?W-5:5),sy+(front?5:8),2,0,7);g.fill();}}
-function troDraw2D(wid,toScreen,front){const L=troLine(wid);
+/* every car of it, west to east, at the coupling pitch. `car` draws only one of them, which is what
+   the isometric camera needs: a six-tile train takes its place in ONE depth queue per car, or the
+   far end of it sorts in front of the people standing beside the near end. */
+function troDraw2D(wid,toScreen,front,car){const L=troLine(wid);
   if(!L||L.world!==wid||TRO.state==="away")return;
-  const[sx,sy]=toScreen(TRO.x,L.row);drawTram(ctx,sx,sy,front);}
+  const n=troCars(L),lead=TRO.dir>0?n-1:0;
+  for(let i=0;i<n;i++){if(car!==undefined&&car!==i)continue;
+    const[sx,sy]=toScreen(TRO.x+i*(TRO_LEN+TRO_GAP),L.row);drawTram(ctx,sx,sy,front,i===lead);}}
 const HEROFEET={}; /* what the hero's shoes carry off the deck */
 /* the moment on the deck (owner, 2026-09-07, night: "if one hangs on the petals, the character picks one up and looks at it
    saying something like 'we will meet once again, love...'"): stand still on the bridge in season for a breath and you
@@ -1802,10 +1877,35 @@ function petalMomentTick(dt){const w=CW();
   if(!moving&&w&&petalsOn()&&bridgeDist(w,px,py)===0){deckIdle+=dt;
     if(deckIdle>=2200&&!petalSaid){petalSaid=true;petalMoment=true;const L=(T().petalLines||[]);if(L.length)toast(L[Math.floor(Math.random()*L.length)],4200);}}
   else{deckIdle=0;petalMoment=false;if(!w||bridgeDist(w,px,py)!==0)petalSaid=false;}}
+const petalHeap=g=>!!(TILES[g]&&TILES[g].petals); /* a tile a world declares as LOOSE PETALS lying on the ground */
 function petalDrop(wid,x,y,feet){ /* owner, 2026-09-07: the trail "for the bridge only" — a step on the deck scatters
-  petals; the two steps after it still shed what the shoes carried; nowhere else does a step drop anything */
-  if(!petalsOn())return;const w=WORLDS[wid];if(!w)return;const f=feet||HEROFEET;
-  if(bridgeDist(w,x,y)===0)f.pc=2;else if(f.pc>0)f.pc--;else return;
+  petals; the two steps after it still shed what the shoes carried; nowhere else does a step drop anything.
+  AND SO DOES A HEAP OF LOOSE PETALS, WHATEVER THE SEASON (owner, 2026-09-22: "petals … that i can walk and
+  interact through as if they were mounds of items piled up"). That is the whole of "interact through": you
+  put a foot in a mound of flowers, some of it comes away with you, and it lies where you drop it until it
+  fades — which is the owner's own picture of it from 2026-09-07, "a trail forms behind characters". It costs
+  no new machinery: PETALS, petalTrail and t3Petals already carry it in all four cameras.
+  IT IS A RULE AND NOT A LETTER. Any world may write `petals:true` in TILEMETA and its heaps behave this way;
+  the engine never learns which glyph that is, nor the name of a season. The two clauses are deliberately
+  separate and only one of them asks petalsOn(): a BRIDGE is strewn only in season, so its half stays gated,
+  while a heap that is drawn on the map all year is walked through all year. For any tile no world declared,
+  every branch below runs exactly as it did — `heap` is false, and the function is the one that shipped. */
+  const w=WORLDS[wid];if(!w)return;const f=feet||HEROFEET;
+  /* the heaps keep their OWN counter. The first draft of this shared `pc` with the deck and the
+     suite caught it inside a minute: out of season, shoes charged on the bridge went on shedding
+     the bridge's petals across a park that no longer had any ("out of season a step still drops
+     petals", test/smoke.js). Two sources, two counters, and the deck's three lines below are the
+     ones that shipped — for a world that declares no `petals:true` tile, `carry` is false for ever
+     and every branch here runs exactly as it did. */
+  const heap=petalHeap((w.grid[y]||[])[x]);
+  const carry=heap||f.hc>0;                              /* the heap tile itself, and the two steps after it */
+  if(heap)f.hc=2;else if(f.hc>0)f.hc--;
+  let deck=false;
+  if(petalsOn()){
+    if(bridgeDist(w,x,y)===0){f.pc=2;deck=true;}
+    else if(f.pc>0){f.pc--;deck=true;}
+  }
+  if(!carry&&!deck)return;
   PETALS.push({w:wid,x,y,t:Date.now(),s:((x*37+y*101+PETALS.length*13)|0)});if(PETALS.length>PETAL_N)PETALS.shift();}
 function petalTrail(wid,toScreen){ /* toScreen(x,y) → [sx,sy] of the tile's top-left in this camera */
   if(!PETALS.length)return;const now=Date.now(),P=petalPal();
@@ -1868,6 +1968,36 @@ DOORSET.forEach(dch=>TILEDRAW[dch]=rc=>{const{sx,sy}=rc;
          give it a window, so a shop entrance and an office door stop being the same brown
          (the cold read found all five pixel-identical). An unlisted glyph is the plain door. */
       const dl=(typeof DOORLOOK!=="undefined"&&DOORLOOK[dch])||{};
+      /* ❗A HOUSE PUTS ITS ROOF OVER ITS DOOR, and until now it could not. A door body fills
+         its WHOLE tile, so a facade that wears a roofline stopped dead at the doorway: two
+         shaped casitas beside Doña Tencha's front door read as two roof stubs with a grey
+         gap between them, which is louder than the flat lids they replaced (crew iteration
+         14, shown two shaped houses and asked whether they read as ONE building).
+         `cap` is the seam and it is a CHOICE, not a rule: a door may declare what the
+         BUILDING wears above it, and the shared body is then drawn in the tile it has left.
+         A door that declares nothing — every door in both games except the casa's ⌂ — takes
+         no transform, no extra call and no new pixel. The transform maps sy→sy+cH and leaves
+         sy+TS where it was, so the door still meets the floor.
+         NOT in a 3D bake (`rc.bake`): there the roof is real geometry standing over the door
+         slab, and a second one painted onto the slab would hang inside the house.
+
+         ❗AND `capH` MAY BE A FUNCTION, BECAUSE A DOOR GLYPH IS NOT A PLACE. The first draft
+         of this seam hung the cap on the GLYPH and nothing asked where the glyph STOOD, so
+         `⌂` — which is the front door of every casa AND the way out of every room behind one
+         — wore the terracotta course on both sides of itself: a strip of roof tiles across
+         the top of the door INSIDE Doña Tencha's living room, and the same indoors at El
+         Portero's hut and the barbería. The owner saw the outside and said the three houses
+         "didnt seem to share a roof"; the inside is what that look was hiding. Photographed,
+         not reasoned (docs/POSTMORTEM.md §2).
+         So the question the engine asks is not "does this glyph wear something" but "how many
+         pixels of THIS TILE belong to the building above it" — a number, or a function of the
+         tile when only the pack can know. Zero is the engine's own door, untouched, and that
+         is the answer at every door in both games except a casa's own front. */
+      let cH=0;
+      if(!rc.bake&&dl.cap){const ch=typeof dl.capH==="function"?dl.capH(rc):dl.capH;
+        cH=Math.max(0,Math.min(TS-8,(ch===undefined?10:ch)|0));}
+      const cap=cH>0&&dl.cap;
+      if(cap){ctx.save();ctx.translate(0,sy+cH);ctx.scale(1,(TS-cH)/TS);ctx.translate(0,-sy);}
       ctx.fillStyle=dl.frame||C.doorFrame;ctx.fillRect(sx+2,sy,TS-4,TS);
       ctx.fillStyle=dl.wood||C.doorWood;ctx.fillRect(sx+4,sy+2,11,TS-4);
       ctx.fillStyle=dl.wood2||C.doorWood2;ctx.fillRect(sx+17,sy+2,11,TS-4);
@@ -1882,6 +2012,7 @@ DOORSET.forEach(dch=>TILEDRAW[dch]=rc=>{const{sx,sy}=rc;
       ctx.globalAlpha=0.25+0.2*Math.sin((rc.t!==undefined?rc.t:Date.now())/380);
       ctx.fillStyle="#FFE9A8";ctx.fillRect(sx+4,sy+TS-3,TS-8,2);
       ctx.globalAlpha=1;
+      if(cap){ctx.restore();cap(rc,cH);} /* the building's own course, over the top cH px */
     });
 if(typeof TILEART!=="undefined")Object.assign(TILEDRAW,TILEART);
 /* ---------- TILESIDE — a tile drawn for the cameras that see it STANDING ----------
@@ -2179,6 +2310,115 @@ if(typeof TILEMETA!=="undefined")Object.entries(TILEMETA).forEach(([g,m])=>TILES
    exactly as it was rather than standing its floor plan on edge. */
 const stands=g=>{const m=TILES[g];return !!(m&&m.stand);};
 const standsUp=g=>stands(g)&&!!TILESIDE[g];
+/* ---------- IS THIS LETTER ALREADY WEARING A DRAWING? ----------
+   A tile of these kinds WITH a side drawing is not built as a plain block: `t3BoxMats`
+   (`engine/engine3d.js`, grep "t3BoxMats") bakes the glyph's TOP-DOWN art onto the box's lid and
+   wraps its SIDE art round the four faces. The town's `K` run is a counter with a coffee machine
+   on its front and a cup on its top; its `T` is a gingham cloth with two plates on it. Those are
+   drawings, standing up, with volume already.
+
+   And the `mesh` view has NO texture channel at all — `t3MeshOf` (`engine/engine3d.js`) bakes every
+   part into ONE vertex-coloured geometry, and a part carries a primitive, a place, a size, a colour
+   and an alpha. There is nothing in it that can name a drawing. So handing such a letter a default
+   mesh does not improve the object: it DELETES the art and puts untextured geometry where it was.
+   That is not an upgrade of the same thing, it is a different thing, and only the person who drew
+   the art may make that trade — which they do by writing their own `TILEMESH` entry (clause 1).
+
+   `t3Boxy` in engine3d.js calls THIS function, so the renderer and the gate cannot drift apart.
+   That drift is the whole bug: a gate that counted triangles called deleting a coffee cup a win. */
+const wearsArt=g=>{const m=TILES[g]||{lift:7,kind:"prop"};
+  return !!((m.box||m.kind==="furniture"||m.kind==="appliance")&&typeof TILESIDE!=="undefined"&&TILESIDE[g]);};
+/* ---------- THE GATE: the engine's own shapes, for a letter the pack said nothing about ----------
+   `engine/shapes.js` holds SHAPES (shapes named by what they ARE) and SHAPEBIND (this engine's
+   letters). Meridian built thirteen of these as `TILEART_MESH` and every other world on this
+   engine kept standing its desks up as boxes with a photograph of a desk on the side. This is the
+   one place that changes, and it is a GATE rather than a default because a default would be wrong
+   five different ways. Each refusal below was bought with a measurement:
+
+   THE RULE, in one sentence: **an engine default may only fill a hole — it may never replace a
+   drawing, and it is never assumed, it is TAKEN.**
+
+   That rule was written on 2026-09-22 after this gate was refuted, and both halves of it were
+   bought by a letter that got past the first version:
+
+   · **It is taken, not given** (clause 0). The first version bound a letter whenever the pack had
+     said nothing about it, reading silence as consent. But a world that never mentioned a letter
+     has not agreed with the engine about it — it has said nothing. El Changarrito lays six `H`
+     and its own map calls them RACKS in the houses (`changarrito/content/maps.js`, grep "racks");
+     the engine's `H` is an open PRODUCE CRATE (`TILEDRAW["H"]` above). Nothing in any table in
+     this engine records what a world MEANS by a letter it has never drawn, so no clause can ever
+     catch that — which makes it the third time one letter has meant two objects here, after `I`
+     and `b`. The only thing that can catch it is the world saying which letters it agrees with.
+   · **It fills a hole, never a drawing** (clause 5). See `wearsArt` above. `K`(33) `S`(16) `D`(8)
+     `T`(7) `V`(7) — seventy-one tiles of the town — stand today as boxes wearing their own art,
+     and the first version of this gate replaced all seventy-one with untextured geometry and
+     counted it as seventy-one tiles fixed.
+
+   1 · `TILEMESH[g]` — the pack already answered with a shape. Its answer wins, always. This is the
+       line that makes Meridian byte-identical: it has its own mesh for every letter here. It is
+       also the escape hatch: a pack that WANTS a mesh on a letter clause 5 refuses writes it here,
+       as `const TILEART_MESH={K:o=>SHAPES.counter(o)};` — DECLARED by the pack and LATE-BOUND, and
+       both halves are load-bearing. `engine/boot.js` is the
+       last script tag in both shells and it is what loads `engine/shapes.js`, so a pack file runs
+       before `SHAPES` and `TILEMESH` exist: the eager forms `TILEMESH["K"]=SHAPES.counter` and
+       `TILEART["K"]={mesh:SHAPES.counter}` throw "TILEMESH is not defined" and "SHAPES is not
+       defined" respectively. Both were documented in five places on 2026-09-22 and neither ran —
+       a false mechanism in the record, in the round convened to cure a false mechanism in the
+       record. And a pack that has never written a mesh has no `TILEART_MESH` to add to, so
+       `TILEART_MESH["K"]=…` throws as well: it has to be declared. All three wrong forms and the
+       right one were planted against El Changarrito on 2026-09-22 and only the right one printed OK.
+   2 · `TILEART[g]` / `TILEART_SIDE[g]` — the pack DREW this letter itself. Standing a shape where
+       somebody drew a picture throws their drawing away without telling them.
+   3 · `TILEMETA[g]` — the pack said what this letter MEANS, so it means something else here. El
+       Changarrito re-declares `I` as a storefront face at wall height (`changarrito/content/art.js`);
+       the engine's `I` is a waist-high grocery counter. **`I` IS NOT IN `SHAPEBIND`, and that — not
+       this clause — is what keeps a counter out of twelve of the town's storefronts.** The earlier
+       version of this comment claimed the credit for clause 3 and it was false; a false sentence in
+       the record is a bug here, and this is the repair. The clause stays because it is right for
+       the general case, and it is honest about its own status: **no letter in either of this
+       repository's two games is currently refused by clause 2 or clause 3, so both are untested in
+       this tree.** They are reasoning, not measurement, and they are labelled as such.
+   4 · solidity — `t3MeshTile` is only ever reached for a SOLID tile or a `stand` tile, so a glyph
+       that is neither can never show a shape. It can still be harmed by one: the ground bake's
+       contact pad (`engine/engine3d.js`, grep "THE PAD") asks only whether a glyph HAS a mesh, so
+       binding one to a walkable letter paints a soft shadow on the pavement with nothing standing
+       on it — baked into a texture, where a scene-graph dump reports "identical". Meridian's `b`,
+       the marigold bed, is ten tiles of the town and exactly this case.
+   5 · `wearsArt(g)` — it is already a drawing with volume. Above.
+
+   `SHAPEGIVEN` is the list of letters this gate actually handed a shape to. It exists because the
+   only way to ask that question afterwards was `Object.keys(SHAPEBIND).filter(g=>TILEMESH[g])`,
+   which runs AFTER this block has mutated `TILEMESH` and so cannot tell a pack's own mesh from an
+   engine-supplied one — it answered "does this letter have any mesh at all", and the suite printed
+   that as the score. A number nobody can check is not a measurement.
+
+   The `typeof SHAPES==="object"` test, rather than a bare name, is deliberate: a world with no 3D
+   camera never downloads the file, and an offline visit where `sw.js` forgot to cache it must fall
+   back to the boxes rather than throw. (docs/REGRESSION.md — nothing checks that everything
+   SHIPPED is listed in `sw.js`, only the other direction.) */
+const SHAPEGIVEN=[];
+if(typeof SHAPES==="object"&&SHAPES&&typeof SHAPEBIND==="object"&&SHAPEBIND)
+  Object.keys(SHAPEBIND).forEach(g=>{
+    /* 0 · THE WORLD HAS TO ASK. `SHAPETAKE` is a plain string of the letters this pack agrees the
+       engine may shape for it. No `SHAPETAKE` means no letters: silence is not consent. */
+    if(typeof SHAPETAKE!=="string"||SHAPETAKE.indexOf(g)<0)return;
+    if(TILEMESH[g])return;                                      /* the pack answered */
+    if(typeof TILEART!=="undefined"&&TILEART[g])return;          /* …or drew this letter itself */
+    if(typeof TILEART_SIDE!=="undefined"&&TILEART_SIDE[g])return;
+    if(typeof TILEMETA!=="undefined"&&TILEMETA[g])return;        /* …or said what it means */
+    /* IT COULD ONLY CAST A SHADOW. And the predicate is `stands`, not `standsUp` — measured, and
+       the brief this was built from said `standsUp`. `standsUp` additionally demands a SIDE
+       drawing, because it answers a question for the flat front camera (engine.js:924, :2281,
+       :2312). The 3D camera's walkable-object branch (`engine/engine3d.js:447`) asks plain
+       `stands`, so a letter declared `stand:true` with no side art — Meridian's grass `g` is
+       exactly that (`content/meridian/art.js:1829`) — renders its mesh perfectly well and
+       `standsUp` would have refused it one. A guard written with the same wrong noun reported six
+       of Meridian's grass tiles as faults before the code was read. */
+    if(!SOLID.has(g)&&!stands(g))return;
+    /* IT IS ALREADY A DRAWING WITH VOLUME. The mesh has no texture channel, so this swap trades
+       art for geometry and every meter in this repository reports it as a gain. */
+    if(wearsArt(g))return;
+    const fn=SHAPES[SHAPEBIND[g]];if(fn){TILEMESH[g]=fn;SHAPEGIVEN.push(g);}});
 /* A person who works INSIDE a wall: a clerk at a window, a teller behind a counter. The pack
    marks the station with `win:"B"` — the glyph of the wall she stands in — and every camera
    draws that wall's counter in front of her and its roof over her, so the building keeps its
@@ -2646,7 +2886,7 @@ function pigFlee(now){
   if(PIG.lift)return;
   const L=(typeof troLine==="function")?troLine(AW("pig")):null;
   if(!L||TRO.state==="away"||Math.round(PIG.y)!==L.row)return;  /* a car on the line is a car on the line, whatever it is doing */
-  const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),d=(PIG.x-nose)*TRO.dir;
+  const sp=troSpan(L),nose=TRO.x+(TRO.dir>0?sp:0),d=(PIG.x-nose)*TRO.dir;
   /* She must be GOING before the brake window, or the tram stops for her and she never learns why.
      Measured before this line existed: the brake fires at d<=2.6 and the lift triggered at d<=3.2,
      which is 0.6 tiles of lead — about 176 ms at the shipped speed — so in practice the tram entered
@@ -2654,7 +2894,7 @@ function pigFlee(now){
      result was a tram stopped in the street forever waiting for a bird with no reason to move.
      So: she goes at 5 tiles, comfortably outside the brake, and the lift is also allowed to fire
      while the tram is already holding, which is what unsticks that case rather than hiding it. */
-  if(d<-TRO_LEN||d>TRO_SPEED*0.9)return;   /* the same edge as the brake, moved with it */   /* she hears it ~0.9 s out, not ~5 tiles out: a lead measured
+  if(d<-sp||d>TRO_SPEED*0.9)return;   /* the same edge as the brake, moved with it */   /* she hears it ~0.9 s out, not ~5 tiles out: a lead measured
      in TIME survives the next speed change, and a lead measured in tiles does not. At 3.4 that was
      3.1 tiles and at 6.0 it is 5.4, and in both cases she is going before the brake window (2.6) is
      reached. She is still airborne when the tram first eases — deliberately. A car that checks, sees
@@ -4836,7 +5076,12 @@ function applyTheme(){
 }
 try{darkMq.addEventListener("change",applyTheme);}catch(e){}
 /* ---------- SEASONS: a second palette layer, for WORLD ART, kept apart from THEMES ----------
-   THEMES is UI chrome and never reaches a tile; art(key, fallback) is how world art asks
+   THEMES tints a tile and SEASONS recolours one, and they are different layers doing different
+   jobs. This comment used to say "THEMES is UI chrome and never reaches a tile", which was false
+   the day it was written: tc() has always mixed the theme accent into every hex the world draws,
+   and the mesh baker in engine3d.js runs every part colour through the same tc(). The owner
+   settled it on 2026-09-22 by changing the RULE rather than the code (docs/OWNER.md, the theme
+   entry). A theme may TINT; it may never REDESIGN. art(key, fallback) is how world art asks
    whether a season has recoloured it. The pack declares SEASONS (names, dates, colours);
    the engine never learns a name (the portability guard enforces it). seasonPick is the
    player's Settings choice: "auto" (by the calendar), "off" (year-round), or a season id.

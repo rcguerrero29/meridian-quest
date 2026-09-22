@@ -312,12 +312,61 @@ function findChromium() {
           const ground = T3.group.children.find(o => o.userData && o.userData.ground);
           if (!ground) problems.push('the ground does not name itself in 3D');
           else if (!(ground.material.alphaTest > 0)) problems.push('the ground has no hole for the well — the steps are buried under the floor');
-          const rails = T3.group.children.filter(o => o.userData && o.userData.fence && WORLDS.f2.rows[o.userData.y][o.userData.x] === '◺');
-          if (rails.length < 9) problems.push('the rail is not nine panels round the well (' + rails.length + ')');
-          if (!rails.every(o => Math.abs(o.position.x - (o.userData.x + 0.5)) > 0.3 || Math.abs(o.position.z - (o.userData.y + 0.5)) > 0.3)) problems.push('a rail panel stands mid-tile instead of on the lip of the well');
-          const west = rails.find(o => o.userData.x === 9 && o.userData.y === 14);
-          if (!west || Math.abs(Math.abs(west.rotation.y) - Math.PI / 2) > 1e-6) problems.push('the rail at the head of the well does not turn to face it');
-          if (rails.some(o => o.geometry.parameters.height >= 0.8)) problems.push('the rail is as tall as a fence — it is knee-high, not a cage'); }
+          /* THE RAIL, MEASURED RATHER THAN RECOGNISED (crew iteration 14, el repartidor).
+             Until today this read `userData.fence` and `geometry.parameters.height` — a PANEL, one
+             particular way of drawing a rail — so the moment the engine's shape library gave ◺ a
+             real railing (posts, a handrail, a mid rail) the guard said "the rail is not nine
+             panels round the well (0)" about a loft that had just got a better rail than it ever
+             had. The owner's four questions are about the RAIL, not about the panel: is there one
+             on every ◺ tile, does it stand on the lip of the hole rather than mid-tile, does the
+             one at the head turn to face the well, and is it knee-high rather than a cage. All
+             four are answerable from the geometry whichever way it is built, so they are asked
+             that way now: a bounding box in world space, per tile. */
+          const bounds = o => { const g = o.geometry, p = g.attributes && g.attributes.position;
+            if (!p) { const q = g.parameters || {}; return { cx: o.position.x, cz: o.position.z, h: q.height || 0, dx: q.width || 0, dz: 0.02 }; }
+            const a = p.array; let mnx = 1e9, mxx = -1e9, mny = 1e9, mxy = -1e9, mnz = 1e9, mxz = -1e9;
+            for (let i = 0; i < a.length; i += 3) { if (a[i] < mnx) mnx = a[i]; if (a[i] > mxx) mxx = a[i];
+              if (a[i + 1] < mny) mny = a[i + 1]; if (a[i + 1] > mxy) mxy = a[i + 1];
+              if (a[i + 2] < mnz) mnz = a[i + 2]; if (a[i + 2] > mxz) mxz = a[i + 2]; }
+            return { cx: o.position.x + (mnx + mxx) / 2, cz: o.position.z + (mnz + mxz) / 2, h: mxy - mny, dx: mxx - mnx, dz: mxz - mnz }; };
+          const rails = T3.group.children.filter(o => o.userData && (o.userData.fence || o.userData.mesh) && o.userData.x !== undefined
+            && WORLDS.f2.rows[o.userData.y] && WORLDS.f2.rows[o.userData.y][o.userData.x] === '◺');
+          const railAt = {}; rails.forEach(o => { railAt[o.userData.x + ',' + o.userData.y] = o; });
+          const tiles = []; for (let yy = 0; yy < WORLDS.f2.H; yy++) for (let xx = 0; xx < WORLDS.f2.W; xx++) if (WORLDS.f2.rows[yy][xx] === '◺') tiles.push([xx, yy]);
+          const missing = tiles.filter(([xx, yy]) => !railAt[xx + ',' + yy]);
+          if (tiles.length !== 9) problems.push('the loft does not lay nine rail tiles (' + tiles.length + ')');
+          if (missing.length) problems.push(missing.length + ' of the ' + tiles.length + ' tiles round the well have no rail standing on them in 3D (' + missing.map(t => t.join(',')).join(' ') + ')');
+          rails.forEach(o => { const b = bounds(o), u = o.userData;
+            if (Math.abs(b.cx - (u.x + 0.5)) < 0.25 && Math.abs(b.cz - (u.y + 0.5)) < 0.25)
+              problems.push('the rail at (' + u.x + ',' + u.y + ') stands in the middle of its tile instead of on the lip of the well — you would walk round it, not up to it');
+            if (b.h >= 0.8) problems.push('the rail at (' + u.x + ',' + u.y + ') is ' + b.h.toFixed(2) + ' tall — that is a cage, not a knee-high rail'); });
+          /* ---- A POST AT EVERY JOINT IS NOT A RAIL, IT IS A ROW OF BOLLARDS ----
+             Everything above measures ONE tile: its height, whether it sits on the lip, which way
+             it runs. All nine can pass that and the loft can still show a doubled post at every
+             tile boundary, because the fault only exists BETWEEN two tiles — the first version of
+             this shape put a newel at both ends of every tile unconditionally, so two abutting
+             rails stood two posts 0.12 apart with a 0.035 slot between them. A guard that looks at
+             one object at a time cannot see a fault that is made of two.
+             The newel CAPS are the handle: they are the only parts above the handrail's top
+             (0.5875), so any vertex higher than that belongs to a cap, and a cap sits over a post. */
+          const caps = [];
+          rails.forEach(o => { const p = o.geometry && o.geometry.attributes && o.geometry.attributes.position;
+            if (!p) return; const a = p.array, seen = [];
+            for (let i = 0; i < a.length; i += 3) { if (a[i + 1] <= 0.60) continue;
+              const wx = a[i] + o.position.x, wz = a[i + 2] + o.position.z;
+              if (!seen.some(s => Math.abs(s[0] - wx) < 0.2 && Math.abs(s[1] - wz) < 0.2)) seen.push([wx, wz]); }
+            seen.forEach(s => caps.push({ x: s[0], z: s[1], t: o.userData.x + ',' + o.userData.y })); });
+          if (!caps.length) problems.push('not one of the nine rails round the well has a newel on it — a handrail that stops at nothing is a plank floating in the air');
+          else { const twins = [];
+            for (let i = 0; i < caps.length; i++) for (let j = i + 1; j < caps.length; j++) {
+              if (caps[i].t === caps[j].t) continue;
+              const d = Math.hypot(caps[i].x - caps[j].x, caps[i].z - caps[j].z);
+              if (d < 0.5) twins.push(caps[i].t + ' and ' + caps[j].t + ' (' + d.toFixed(2) + ' apart)'); }
+            if (twins.length) problems.push('the rail round the well has two posts standing side by side where one tile meets the next — ' + twins.slice(0, 3).join(', ') + (twins.length > 3 ? ' and ' + (twins.length - 3) + ' more' : '') + ' — a run of rail has a post at its ENDS, not at every joint'); }
+          const west = railAt['9,14'];
+          if (!west) problems.push('there is no rail at the head of the well (9,14)');
+          else { const b = bounds(west);
+            if (!(b.dz > b.dx)) problems.push('the rail at the head of the well (9,14) runs across the opening instead of along it — it is ' + b.dx.toFixed(2) + ' east-west by ' + b.dz.toFixed(2) + ' north-south, and the hole is to its east'); } }
         world = b0.world; px = b0.px; py = b0.py; T3.yaw = b0.yaw; camSet(b0.cam); }
       // in 3D: four mass boxes wearing four DIFFERENT faces (one flight, not four little staircases), the rail as a panel, the office door with its lintel
       const b3 = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
@@ -378,7 +427,10 @@ function findChromium() {
         if (!hero || hero.spr.position.y < 0.3) problems.push('standing on the second tread does not lift you: ' + (hero && hero.spr.position.y)); }
       world = 'f2'; px = 14; py = 14;
       if (!draw3d() || T3.fail) problems.push('the loft did not render in 3D');
-      else if (T3.group.children.filter(o => o.userData && o.userData.fence && o.userData.y === 13).length < 3) problems.push('the rail does not stand as panels in 3D');
+      /* the same correction as above: the question is whether the back edge of the well is railed,
+         not whether it is railed with PLANES. A rail built from posts and handrails is still a rail. */
+      else if (T3.group.children.filter(o => o.userData && (o.userData.fence || o.userData.mesh) && o.userData.y === 13
+        && WORLDS.f2.rows[13][o.userData.x] === '◺').length < 3) problems.push('the back edge of the well is not railed in 3D — fewer than three of row 13\'s ◺ tiles have anything standing on them');
       T3.yaw = b3.yaw; camSet(b3.cam); world = b3.world; px = b3.px; py = b3.py; }
     // ---- ch-v7: el pregonero walks the street with the three lines (owner: "its hard to
     // remember the command for a git pull — can you have another character walk around with it?") ----

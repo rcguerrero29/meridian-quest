@@ -100,15 +100,36 @@ and `/docs/` are live regardless of what merges (`docs/SECURITY-NOTE-2026-09-10.
 ### 2 · What is inside the box we upload
 **Line: the public build.**
 **Promise.** An allowlist: `index.html sw.js qr.js manifest.webmanifest icon-192.png icon-512.png`,
-`engine/`, `vendor/`, `content/meridian/` — and nothing else (`scripts/build-site.sh:18-20`); anything
-added to the repo tomorrow is private by default (`.github/workflows/pages.yml:28-38`).
-**Guard.** `test/public.js:44` — a named NEVER list (`changarrito`, `docs`, `test`, `.github`, `.git`,
-`node_modules`, `.claude`, `scripts`) — plus `:47-50` (dotfiles, `.sh`, build leftovers) and
-`:103-105` (the game is actually complete). Run **before merge** at
+`engine/`, `vendor/`, `content/meridian/`, **and `content/horno/`** — and nothing else
+(`scripts/build-site.sh`); anything added to the repo tomorrow is private by default
+(`.github/workflows/pages.yml`).
+
+**`content/horno/` joined the box on 2026-09-22**, at the owner's word (*"lets build/ship it"*,
+`docs/ASKS.md`). It is a second world — one room, one tray, one verb — and it shares the engine and
+nothing else: no service worker, no manifest, and it never reads `content/meridian/`. **Its shell is
+GENERATED and is not in git** (`.gitignore`), so `scripts/build-site.sh` runs `node test/horno.js
+--build-only` before the copy and then fails if no shell landed; a folder published without the one
+page that opens it is a public link to nothing. The generator asserts every edit it makes against
+`index.html` matched, so a change to the public shell that silently stops matching turns CI red
+instead of shipping a broken page.
+**Guard.** `test/public.js` — a named NEVER list (`changarrito`, `docs`, `test`, `.github`, `.git`,
+`node_modules`, `.claude`, `scripts`), plus dotfiles, `.sh` and build leftovers, plus a check that the
+game is actually complete — **and, from 2026-09-22, `PUBLIC_WORLDS`, which names every pack allowed
+in the box.** That half was missing and it is the half this row is about: everything else here is a
+BLOCKLIST of eight folder names, so **a whole new world could be added to the packing script and R10
+would still print "the upload is the public game and nothing else"** — which is what it did say, once,
+about a box holding two games. The old comment reasoned it away (*"a directory added tomorrow is
+private by default: it is not on the allowlist in pages.yml"*), which is a statement about the recipe
+and not a check on the box, and this row's own rule is to check the box. Now a pack under `content/`
+that nobody named is red in both directions: unnamed-but-shipped, and named-but-dropped. Run **before merge** at
 `.github/workflows/ci.yml:37-38` and **again after the last file is written into the box** at
 `.github/workflows/pages.yml:55-56`.
-**Last planted against: 2026-09-10** — proven red against the old deploy, thirteen findings, first
-line `changarrito/` (`docs/QA-PASS.md:138-139`; `docs/REGRESSION.md:146`).
+**Last planted against: 2026-09-22** — `PUBLIC_WORLDS` planted both ways against a real built box:
+a `content/sobremesa/` dropped into the upload printed *"the upload publishes the world "sobremesa"
+and nobody put it on the public list"*, and deleting `content/horno/` from the upload printed *"the
+public list names the world "horno" and the upload does not contain it"*. Before that, **2026-09-10**
+— proven red against the old deploy, thirteen findings, first line `changarrito/`
+(`docs/QA-PASS.md:138-139`; `docs/REGRESSION.md:146`).
 **Read the shape.** The NEVER list is *named rather than derived* on purpose (`test/public.js:42-43`)
 — deriving is what failed as R8. But the positive half, the allowlist in `scripts/build-site.sh:18`,
 is the file that decides what becomes public, and **adding a line to it is a decision, not a chore**
@@ -498,6 +519,7 @@ has no date.*
 | `vendor/three.min.js` | zeni | the public build — third-party code in every player's browser | 2026-09-13 |
 | `engine/` | zeni, beto | a person's browser — both games' shared code; every trust boundary | 2026-09-13 |
 | `content/meridian/` | zeni | the public build — the public game's own words and data | 2026-09-13 |
+| `content/horno/` | zeni | the public build — a second world, one room and one tray, shipped at the owner's word; its shell is generated at build time and is not in git | 2026-09-22 |
 | `content/gauge/` | zeni, melo | a person's browser — the paper seam's live attack: a pack that tries to reach out of the reader, run on every push | 2026-09-16 |
 | `changarrito/index.html` | zeni | a key — the CSP that lets a token-bearing page reach GitHub | 2026-09-13 |
 | `changarrito/content/record.js` | zeni | a key — where the token is kept, what carries it, what it writes | 2026-09-13 |

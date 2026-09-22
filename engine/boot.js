@@ -31,7 +31,13 @@
   var me=(document.currentScript&&document.currentScript.src)||"";
   var base=me.replace(/engine\/boot\.js(\?.*)?$/,"");
   function w(p){document.write('<script src="'+base+p+'"><\/script>');}
-  if(want)w("vendor/three.min.js");
+  if(want){w("vendor/three.min.js");
+    /* the shape library (crew iteration 14). It is only ever read by the 3D camera, so a world
+       that did not ask for one does not download it — same bargain as Three, four kilobytes
+       instead of a hundred and forty-nine. It loads BEFORE engine.js because engine.js binds it
+       to its own letters as it builds TILES, and `document.write` from a parser-inserted script
+       keeps that order exactly. */
+    w("engine/shapes.js");}
   w("engine/engine.js");
   /* engine3d.js ALWAYS loads, and only the library is conditional. It is 31KB gzipped against
      Three's 149, so the saving is nearly all in the library — and it declares `T3`, `t3Invalidate`

@@ -33,6 +33,13 @@ jobs:
           node test/engine.smoke.js --index changarrito/index.html
       - name: The gauge — a brand-new world still boots and meets the engine on the same terms
         run: node test/gauge.js
+      # El Horno ships to the public site from 2026-09-22, so what it does has to be checked before a
+      # merge and not after one. Until today this file ran nowhere and was, by docs/POSTMORTEM.md 13h,
+      # a receipt and not a guard: it had been planted, and nothing re-ran it. It also builds its own
+      # shell from index.html and asserts every edit matched, so a change to the public shell that
+      # silently stops matching turns THIS step red rather than publishing a page nobody can open.
+      - name: El Horno — one room, one tray, one verb, and its shell still builds from index.html
+        run: node test/horno.js
       # The run ledger (docs/RUNS.md): every run has a unique ID naming its agent, says what was
       # asked and what proved it, and no agent has written the owner's two words. The authorship
       # half cannot run on a shallow checkout and SAYS SO rather than reporting a pass it skipped.

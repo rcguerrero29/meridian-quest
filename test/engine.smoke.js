@@ -187,6 +187,25 @@ function findChromium() {
     const before = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
     moving = false; held = null;
     const flat = {}, flatIn = {};
+    /* ---- THE SHAPE GATE (crew iteration 14, el repartidor) — the two nouns the flat audit cannot read ----
+       `engine/shapes.js` gives a glyph the engine's own shape when the pack said nothing about that
+       letter. The flat audit CANNOT check that: it only counts `THREE.Sprite`s, so a letter that
+       stood as a BOX (K, S, D, T, V — 71 tiles of El Changarrito) never appeared on any row, and
+       `couldBeFlat` does not even list 'fence', which is F's 93 tiles and ◺'s 9. The audit sees 37
+       of the 208 tiles this change stands up. So two checks of my own, each reading its own noun:
+
+       1 · A SHAPE STANDS WHERE THE GATE SAID IT WOULD, and it is not a box wearing the word.
+           `userData.mesh` set, `userData.flat` not, and more than twelve triangles — twelve is one
+           BoxGeometry, so a "shape" of twelve is the box we were trying to stop shipping.
+       2 · NO SHADOW WITH NOTHING STANDING ON IT. The ground bake paints a soft radial contact pad
+           under any tile that HAS a mesh view and never asks whether that tile can stand
+           (`engine/engine3d.js`, grep "THE PAD"). Bind a walkable letter and its tiles get a smudge
+           on the pavement with no object over it — and because it is baked into a texture, a
+           scene-graph dump reports the scene identical. So this one reads PIXELS off the baked
+           ground: the tile's centre against its own corner. It also proves it can SEE a pad it
+           knows is there before it reports not finding one, because "nothing to measure" is a red
+           and not a pass (docs/REGRESSION.md, the four ways a guard fools its author, row B). */
+    const shpWant = {}, shpGot = {}, shpBad = [], padBad = [], padSeen = { ghosts: 0, real: 0, lit: 0, worlds: 0 };
     /* A WORLD THAT DECLINED 3D HAS NO 3D TO CHECK, and since mq-v172 it does not even download the
        library — so `T3` is not merely failed, it does not exist, and a bare mention of it throws.
        The gauge found that in one run. The gate is the pack's own `CAMERAS`, cross-checked against
@@ -215,6 +234,76 @@ function findChromium() {
       if (lintels < wantLintel) P.push(id + ': ' + (wantLintel - lintels) + ' door(s) in a tall wall have a see-through slot above them');
       if (glows < doors) P.push(id + ': ' + (doors - glows) + ' door(s) do not say "this one opens" in 3D');
       T3.group.children.forEach(o => { const u = o.userData || {}; if (u.flat) { flat[u.g] = (flat[u.g] || 0) + 1; (flatIn[u.g] = flatIn[u.g] || new Set()).add(id); } });
+      /* ---- 1 · every letter the gate answered for actually stands, as a shape and not a box ---- */
+      if (typeof SHAPEBIND === 'object' && SHAPEBIND && typeof TILEMESH !== 'undefined') {
+        const at = {};
+        T3.group.children.forEach(o => { const u = o.userData || {}; if (u.x !== undefined) (at[u.x + ',' + u.y] = at[u.x + ',' + u.y] || []).push(o); });
+        /* ONLY THE LETTERS THE ENGINE ITSELF HANDED OVER. Walking SHAPEBIND and asking "does this
+           letter have a mesh" swept up every letter the PACK had drawn too, so on Meridian this
+           check reported 331 tiles of the pack's own art as the library's work. */
+        const gave = (typeof SHAPEGIVEN !== 'undefined' && Array.isArray(SHAPEGIVEN)) ? SHAPEGIVEN : [];
+        gave.forEach(g => {
+          if (!TILEMESH[g]) return;                      /* the pack refused this letter; nothing is claimed about it */
+          for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+            if (w.grid[y][x] !== g) continue;
+            shpWant[g] = (shpWant[g] || 0) + 1;
+            const m = (at[x + ',' + y] || []).find(o => (o.userData || {}).mesh);
+            if (!m) { shpBad.push('"' + g + '" at ' + id + ' (' + x + ',' + y + ') — the engine has a shape for this letter and the tile still does not stand as one'); continue; }
+            if ((m.userData || {}).flat) { shpBad.push('"' + g + '" at ' + id + ' (' + x + ',' + y + ') is tagged both a shape and a picture'); continue; }
+            const pa = m.geometry && m.geometry.attributes && m.geometry.attributes.position;
+            const tris = pa ? pa.array.length / 9 : 0;
+            if (tris <= 12) shpBad.push('"' + g + '" at ' + id + ' (' + x + ',' + y + ') is a "shape" of ' + tris + ' triangles — one box is twelve, so this is still a box with a new word on it');
+            else shpGot[g] = (shpGot[g] || 0) + 1;
+          }
+        });
+      }
+      /* ---- 2 · no contact shadow under a letter that can never stand ---- */
+      {
+        const gnd = T3.group.children.find(o => o.geometry && o.geometry.type === 'PlaneGeometry' && o.geometry.parameters
+          && o.geometry.parameters.width === w.W && o.geometry.parameters.height === w.H);
+        const src = gnd && gnd.material && gnd.material.map && gnd.material.map.image;
+        const hasMesh = g => (typeof tileView === 'function') && !!tileView(g, 'mesh');
+        /* CAN THIS TILE EVER SHOW A SHAPE? `stands`, never `standsUp`. `standsUp` also demands a
+           side drawing, which is the flat front camera's question; the 3D camera's walkable branch
+           (engine/engine3d.js:447) asks plain `stands`. The first draft of this check asked
+           `standsUp` and reported six of Meridian's grass tiles as shadows-with-nothing-on-them,
+           on art nobody had touched — `g` is `stand:true` with no side art and its mesh stands
+           perfectly well. A red I did not plant is a hypothesis about the guard (POSTMORTEM §13g).
+           It reads BOTH glyphs, like the pad itself does: the grid's and the row's. */
+        const canStand = g => g !== undefined && (SOLID.has(g) || (typeof stands === 'function' && stands(g)));
+        const ghosts = [], reals = [];
+        for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+          const gch = w.grid[y][x], ch = w.rows[y][x];
+          if ((TILES[gch] || {}).kind === 'water') continue;
+          const mg = hasMesh(gch) ? gch : hasMesh(ch) ? ch : null;
+          if (!mg) continue;
+          if (!canStand(gch) && !canStand(ch)) ghosts.push([x, y, mg]); else reals.push([x, y, mg]);
+        }
+        if (!src) { if (ghosts.length || reals.length) padBad.push(id + ': the baked ground could not be read at all, so nothing was checked for shadows with nothing standing on them'); }
+        else {
+          padSeen.worlds++; padSeen.ghosts += ghosts.length; padSeen.real += reals.length;
+          const K = Math.round(src.width / (w.W * 32)) || 1;
+          const cv = document.createElement('canvas'); cv.width = src.width; cv.height = src.height;
+          const c2 = cv.getContext('2d'); c2.drawImage(src, 0, 0);
+          const px1 = c2.getImageData(0, 0, src.width, src.height).data;
+          const lum = (sx, sy) => { const i = ((sy | 0) * src.width + (sx | 0)) * 4; return 0.299 * px1[i] + 0.587 * px1[i + 1] + 0.114 * px1[i + 2]; };
+          /* centre against the tile's own top-left corner. A pad is a radial darkest in the middle;
+             the neighbour gradients this engine also paints darken EDGES, which biases the other way. */
+          const padAt = ([x, y]) => lum((x * 32 + 2) * K, (y * 32 + 2) * K) - lum((x * 32 + 16) * K, (y * 32 + 16) * K);
+          /* CAN THIS PROBE SEE A PAD IT KNOWS IS THERE? If not, its silence means nothing.
+             THE CONTROL IS PER WORLD. It used to read the running totals and add `worlds === 1`,
+             so the question was only ever asked of the FIRST world drawn: if world one's ground
+             baked readably and every later one did not, the probe went on reporting silence about
+             grounds it had never managed to measure, and the silence looked like a pass. Each
+             world now proves it can see a pad in ITS OWN bake before its verdict counts. */
+          let litHere = 0;
+          reals.forEach(t => { if (padAt(t) > 6) litHere++; });
+          padSeen.lit += litHere;
+          if (reals.length && !litHere) padBad.push(id + ': the shadow probe read ' + reals.length + ' tiles in this world that certainly carry a contact shadow and could not see one on any of them — it is measuring nothing here, so its verdict about this world\'s other tiles is worth nothing');
+          ghosts.forEach(([x, y, g]) => { const d = padAt([x, y]);
+            if (d > 6) padBad.push('"' + g + '" at ' + id + ' (' + x + ',' + y + ') has a shadow painted on the pavement with nothing standing on it — the letter is walkable, so it can never show a shape, but it was given one anyway (engine/shapes.js SHAPEBIND, and the solidity line in the gate in engine/engine.js)'); });
+        }
+      }
     });
     world = before.world; px = fx = before.px; py = fy = before.py; if (has3d) T3.yaw = before.yaw; camSet(before.cam);
     // ---- #132 / #133: a hair style has to look like its name ----
@@ -534,14 +623,93 @@ function findChromium() {
        Red first, the audit's own sentence: '"A" is no longer flat in 3D — take it off this game's row of
        FLAT_BY_GAME in test/engine.smoke.js (the key is "index.html") so the list keeps shrinking (#39)'.
        Still flat: 3 4 5 (the agility gear, which is machinery) and X (the site marker). */
-    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', 'X'] };
+    /* EL CHANGARRITO GETS ITS OWN ROW ON 2026-09-22, crew iteration 14 (el repartidor), and the row
+       is the receipt for the whole change. Until today the town had no key here, so it fell through
+       to the shared FLAT_BASE of fourteen glyphs and its street was allowed to be a picture gallery:
+       the audit printed 'Still flat in 3D (#39): 9×1 A×6 H×6 J×3 P×16 W×3 X×2' and called it a pass.
+       `engine/shapes.js` + the gate in engine.js let the town TAKE the engine's shape for the seven
+       letters it named in `SHAPETAKE` (changarrito/content/art.js), so five of those seven flat
+       letters stood up. The audit said so BEFORE this row existed, red, one line per glyph, naming
+       this key: that is the order it has to happen in.
+
+       WHAT IS LEFT ON THIS ROW, and both are decisions rather than leftovers:
+         'X' — the site marker, a mark on the ground and not an object.
+         'H' — SIX TILES THAT COULD STAND UP TODAY AND DELIBERATELY DO NOT. The engine's `H` is an
+               open produce crate; this town's `H` is a rack in a house (changarrito/content/maps.js,
+               grep "racks"). Standing the engine's crate up would put six crates of tomatoes in
+               the bedrooms, so the town does not name `H`. A letter on this row because somebody
+               decided it belongs there is not the same as a letter nobody has got to yet, and the
+               only place that difference is written down is here.
+
+       AND THE NUMBER. This row counts SPRITES, so it can never show the biggest part of the change:
+       'F' (93 tiles) and '◺' (9) stand as fence panels, which `couldBeFlat` does not list. The
+       honest count of tiles that stopped being flat pictures or edge-on planes is 131:
+       F 93, P 16, ◺ 9, A 6, J 3, W 3, 9 1. An earlier draft of this lane claimed 208; the other 77
+       were 71 tiles of K S D T V, which are not flat — they are boxes already wearing their own
+       drawings, and the gate now refuses them (`wearsArt`) — plus the 6 H tiles above. */
+    /* 'J' went back on this row the same day it came off. The town took the jacaranda, and a reader
+       looked at it: `wearsArt` guards a BOX's drawing, and a tree's drawing is not on a box — it is the
+       sprite canopy the engine bakes by hand (engine/engine3d.js, grep "one jacaranda canopy"), which
+       paints its blossoms with art("bloom") and changes them in season. engine/shapes.js's `tree` has
+       three greens and no bloom, so the trade was a jacaranda in flower for a bare green one. Taken
+       out of the town's SHAPETAKE; it stands as a picture again, which is the honest state. */
+    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', 'X'], 'changarrito/index.html': ['H', 'J', 'X'] };
+    /* WHY A LETTER IS ON A ROW, when the reason is a decision and not "nobody has got to it yet".
+       Without this, the reverse check below tells a future session to "take H off this game's row so
+       the list keeps shrinking" — which is the exact opposite of the decision, and it would be read
+       as an instruction. A row entry that was CHOSEN says so in its own failure message. */
+    const FLAT_ON_PURPOSE = { 'changarrito/index.html': {
+      H: 'the engine draws H as an open produce crate and THIS TOWN\'S H IS A RACK IN A HOUSE (changarrito/content/maps.js, grep "racks") — standing the crate up puts six crates of tomatoes in the bedrooms. It is left out of SHAPETAKE on purpose: do not "fix" this by taking it off the row',
+      J: 'the town keeps the engine\'s hand-baked jacaranda canopy, which blossoms and follows the season; the shared library\'s tree does not bloom yet. Left out of SHAPETAKE on purpose',
+    } };
     const FLAT_KNOWN = FLAT_BY_GAME[IDXNAME] || FLAT_BASE;
     const laid = new Set(); Object.values(WORLDS).forEach(w => w.rows.forEach(r => r.split('').forEach(ch => laid.add(ch))));
     Object.keys(flat).forEach(g => { if (!FLAT_KNOWN.includes(g)) P.push('"' + g + '" (' + ((TILES[g] || {}).kind || '?') + ') stands in 3D as a flat picture in ' + [...flatIn[g]].join(',') + ' — give it a side view (TILESIDE) so it becomes a box; nothing new may ship flat (#39)'); });
     // a pack may give a letter another meaning (the town's I is a facade): only a glyph laid here
     // as a kind the builder could make flat counts as "no longer flat"
     const couldBeFlat = g => ['furniture', 'appliance', 'prop', 'nature', 'gear', 'marker', 'site', 'transit', 'stair', 'tree'].includes((TILES[g] || {}).kind);
-    FLAT_KNOWN.forEach(g => { if (laid.has(g) && couldBeFlat(g) && !flat[g]) P.push('"' + g + '" is no longer flat in 3D — take it off this game\'s row of FLAT_BY_GAME in test/engine.smoke.js (the key is "' + IDXNAME + '") so the list keeps shrinking (#39)'); });
+    const onPurpose = FLAT_ON_PURPOSE[IDXNAME] || {};
+    FLAT_KNOWN.forEach(g => { if (laid.has(g) && couldBeFlat(g) && !flat[g]) P.push(onPurpose[g]
+      ? '"' + g + '" is standing in 3D and it was supposed to stay a picture: ' + onPurpose[g] + ' — something has given it a shape, and that is the thing to undo'
+      : '"' + g + '" is no longer flat in 3D — take it off this game\'s row of FLAT_BY_GAME in test/engine.smoke.js (the key is "' + IDXNAME + '") so the list keeps shrinking (#39)'); });
+    /* ---- the shape gate's verdict, and it reports the HONEST number ----
+       The flat row above can only ever show the letters that stood as sprites. This one counts
+       tiles, which is what a person walking the street actually meets. */
+    if (typeof SHAPEBIND === 'object' && SHAPEBIND) {
+      P.push(...shpBad.slice(0, 8));
+      if (shpBad.length > 8) P.push('…and ' + (shpBad.length - 8) + ' more tiles the engine has a shape for and did not stand up');
+      const tiles = Object.values(shpGot).reduce((a, b) => a + b, 0);
+      const want = Object.values(shpWant).reduce((a, b) => a + b, 0);
+      /* WHAT THE ENGINE ACTUALLY GAVE, from the engine's own receipt.
+         This used to read `Object.keys(SHAPEBIND).filter(g => TILEMESH[g])`, and that line runs
+         long after the gate has written into `TILEMESH` — so it could not tell a shape the PACK
+         wrote from one the ENGINE supplied, and answered the much weaker question "does this
+         letter have any mesh at all". On Meridian it reported 331 of 331 tiles standing on the
+         engine's library when the true number is ZERO: every one of those is Meridian's own
+         TILEART_MESH, refused by clause 1. The headline number of the whole change was a proxy for
+         something else. `SHAPEGIVEN` is the gate writing down what it handed over. */
+      const given = (typeof SHAPEGIVEN !== 'undefined' && Array.isArray(SHAPEGIVEN)) ? SHAPEGIVEN : null;
+      if (!given) P.push('engine/shapes.js is loaded but the gate kept no record of what it handed out (SHAPEGIVEN) — the count below would be a guess, so it is not printed');
+      else if (!given.length) P.push('COUNT-ONLY: this pack takes no letter from the engine\'s shape library — either it answers for them itself or its SHAPETAKE does not name them — so the library stands nothing here and costs it nothing');
+      else if (!want) P.push('COUNT-ONLY: the engine gave this pack a shape for ' + given.join('') + ', and it lays none of those letters anywhere');
+      else P.push('COUNT-ONLY: the engine\'s shapes stand ' + tiles + ' of ' + want + ' tiles across ' +
+        Object.keys(shpGot).sort().map(g => g + '×' + shpGot[g]).join(' ') + ' — taken by name in SHAPETAKE (' + given.join('') + ')');
+      /* ---- THE RULE: an engine default fills a hole, it never replaces a drawing ----
+         A letter that stands today as a BOX is not a hole: `t3BoxMats` bakes its top-down art onto
+         the lid and wraps its side art round the four faces, and the mesh view has no texture
+         channel to carry either. So a default here deletes a drawing and every meter in this
+         repository scores it as a gain — 71 tiles of the town (K S D T V) went that way in the
+         first draft and the triangle-counting guard above called all 71 a success. */
+      if (given && typeof wearsArt === 'function') given.forEach(g => { if (wearsArt(g))
+        P.push('the engine handed "' + g + '" its own shape, but "' + g + '" is already drawn standing up — it is a box wearing its own picture on the lid and sides, and a shape has no picture on it, so this quietly swaps a drawing for a bare block (engine/engine.js, the gate, clause 5)'); });
+    } else if (wants3d) P.push('this shell asked for a 3D camera and engine/shapes.js never arrived, so every letter the pack did not draw itself stands as a box — engine/boot.js writes it inside `if(want)` and sw.js must list it, or the second, OFFLINE visit is the one that loses it');
+    /* NOT a failure and NOT a shrug: a pack with no 3D camera does not download the library, by
+       design (engine/boot.js). The gauge is that pack. It still says so out loud every run. */
+    else P.push('COUNT-ONLY: this shell declined the 3D camera, so engine/shapes.js was never downloaded and no letter took an engine shape');
+    P.push(...padBad.slice(0, 6));
+    P.push('COUNT-ONLY: the shadow probe read ' + padSeen.worlds + ' baked grounds — ' + padSeen.real +
+      ' tiles that should carry a contact shadow (' + padSeen.lit + ' of them read as darker in the middle, which is how it knows it can see one) and ' +
+      padSeen.ghosts + ' walkable tiles that must not');
     // ---- nothing is stored outside the pack's prefix ----
     const pfx = SK(''); const stray = [];
     for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!k.startsWith(pfx)) stray.push(k); }
@@ -1560,6 +1728,164 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...ghost);
 
+  /* ---- A TREE YOU CAN WALK UNDER HAS TO KNOW HOW TALL IT IS ----
+     Owner, 2026-09-22: "can we make it tall so we can walk underneath it all ghostly?"
+     There are two `t3Top`s in engine3d.js and they are not the same thing, which is how this
+     survived: `m.t3Top` is a PROPERTY the merged mesh carries (its tallest vertex, set where the
+     parts are baked), and `t3Top(o)` is the FUNCTION the get-out-of-the-way rule asks. The
+     function reads `geometry.parameters.height` — a box has that, a sprite is handled above, and
+     a merged BufferGeometry has no `parameters` at all, so every mesh tile in the game fell to
+     the literal `1`. Meridian's jacaranda is 2.733 tiles tall and the rule believed it was one,
+     so a tree that filled the screen from two tiles away stayed solid and the player was painted
+     on top of its canopy. The check is written as the two things a person can say:
+       (1) the rule's height and the thing's real height are the same number;
+       (2) standing under the canopy, you can be seen THROUGH the tree.
+     It reads the live scene, so what it discards is the camera and the pixels: it cannot tell you
+     the glass is the right strength, only that the tree turned to glass at all. The opacity is
+     judged by looking at a picture and always was. */
+  const underTree = await page.evaluate(() => {
+    const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D, so the walk-under-the-tree check did not run'];
+    const wd = document.getElementById('world'), wh = wd.hidden; wd.hidden = false;
+    const before = camMode, bw = world, bx = px, by = py;
+    camSet('3d'); sizeCanvas();
+
+    /* TWO directions, because the obvious fix breaks the other one. `short` is the thing the rule
+       thinks is TALLER than it is — harmless, and deliberately kept: `1` was the old answer for
+       every mesh tile and dropping it stops 500-odd short props in the two games from getting out
+       of the way at one tile, which is #140's cure and nobody asked for it back. `low` is the
+       fault: a thing the rule thinks is SHORTER than it stands, which is the tree on top of you. */
+    const low = [], underFloor = [], tall = []; let meshSeen = 0, tallest = null;
+    for (const wn of Object.keys(WORLD_DEFS)) {
+      world = wn; px = fx = 1; py = fy = 1; t3Invalidate(); draw3d();
+      T3.group.children.forEach(o => {
+        const u = o.userData || {};
+        if (!u.mesh || o.t3Top === undefined) return;
+        meshSeen++;
+        const said = t3Top(o), real = o.position.y + o.t3Top;
+        if (said < real - 0.02) low.push({ wn, g: u.g, x: u.x, y: u.y, said, real });
+        if (said < 0.98) underFloor.push({ wn, g: u.g, x: u.x, y: u.y, said, real });
+        tall.push({ wn, g: u.g, x: u.x, y: u.y, real });
+      });
+    }
+    /* THE TALLEST ONE YOU CAN ACTUALLY STAND BEHIND, not simply the tallest. The first draft took
+       the tallest full stop and drew "Y" at st 1,1 — two tiles toward the camera from there is off
+       the map, so the see-through half of this check reported "never tested" and proved nothing
+       about a game that has a 2.7-tile tree standing in open street. A test that the tallest object
+       can disable by standing in a corner is a test with a hole in it. */
+    tall.sort((a, b) => b.real - a.real);
+    tallest = tall[0] || null;
+
+    if (!meshSeen) {
+      P.push('COUNT-ONLY: this shell builds no mesh tiles at all, so the walk-under-the-tree check measured nothing here');
+    } else {
+      if (low.length) {
+        const w = low.slice().sort((a, b) => (b.real - b.said) - (a.real - a.said))[0];
+        P.push('the ' + JSON.stringify(w.g) + ' at ' + w.wn + ' ' + w.x + ',' + w.y + ' stands ' + w.real.toFixed(2) +
+          ' tiles tall and the camera thinks it is ' + w.said.toFixed(2) + ', so it only moves out of your way when you are close enough to touch it — you walk under it and it stays solid on top of you (' +
+          low.length + ' of ' + meshSeen + ' mesh tiles are taller than the camera believes)');
+      }
+      if (underFloor.length) {
+        const w = underFloor[0];
+        P.push('the ' + JSON.stringify(w.g) + ' at ' + w.wn + ' ' + w.x + ',' + w.y + ' is now counted as only ' + w.said.toFixed(2) +
+          ' of a tile tall where every mesh tile used to count as a whole one, so ' + underFloor.length + ' short props in this shell have quietly stopped getting out of your way at one tile — that is #140\'s cure being taken back, and nobody asked for it');
+      }
+      /* the person's sentence: a thing this tall covers you from further away than one tile.
+         Two tiles is the shortest honest test — a 2.6-tile crown at 2 tiles is squarely in front
+         of your head at this camera — and it is exactly the distance that used to fail. */
+      /* Not a failure, and it must not be silent either. A shell with no mesh tile taller than a
+         person has nothing to walk under — the town is exactly that, 128 mesh tiles and the
+         tallest 0.95 — so the count and the tallest are PRINTED, and the day Meridian's tree
+         stops being tall this line changes in front of whoever reads the output. */
+      if (!tallest || tallest.real <= 1.2) {
+        P.push('COUNT-ONLY: nothing in this shell is tall enough to walk under — ' + meshSeen + ' mesh tiles, the tallest ' +
+          (tallest ? tallest.real.toFixed(2) + ' (' + JSON.stringify(tallest.g) + ' at ' + tallest.wn + ' ' + tallest.x + ',' + tallest.y + ')' : 'none') +
+          ' — so the see-through half of this check did not run here');
+      } else {
+        let subject = null;
+        for (const c of tall) {
+          if (c.real <= 1.2) break;
+          world = c.wn; t3Invalidate(); draw3d();                 /* CW() is the world you are IN, so stand in it before asking it anything */
+          const sy = c.y - 2, row = (CW().grid || [])[sy];        /* two tiles toward the camera at yaw 0 */
+          if (sy >= 0 && row && row[c.x] !== undefined && !SOLID.has(row[c.x])) { subject = { c, sx: c.x, sy }; break; }
+        }
+        if (!subject) {
+          P.push('not one of the ' + tall.filter(c => c.real > 1.2).length + ' mesh tiles taller than a person in this shell has anywhere to stand two tiles in front of it, so whether you can be seen through one was never tested');
+        } else {
+          const t = subject.c;
+          world = t.wn; px = fx = subject.sx; py = fy = subject.sy; moving = false; held = null;
+          T3.yaw = 0; t3Invalidate(); draw3d();
+          const o = T3.group.children.find(c => (c.userData || {}).mesh && c.userData.x === t.x && c.userData.y === t.y);
+          const glassy = !!(o && o.userData.glass3 && o.material === o.userData.glass3);
+          if (!glassy)
+            P.push('standing two tiles under the ' + JSON.stringify(t.g) + ' at ' + t.wn + ' ' + t.x + ',' + t.y +
+              ' — ' + t.real.toFixed(2) + ' tiles of it directly between you and the camera — it is still solid and you cannot be seen through it');
+        }
+      }
+    }
+    world = bw; px = fx = bx; py = fy = by; t3Invalidate();
+    camSet(before); sizeCanvas(); wd.hidden = wh;
+    return P;
+  });
+  fails.push(...underTree.filter(l => !/^COUNT-ONLY: /.test(l)));
+  underTree.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
+  /* ---- THE CROWN'S GHOST IS THE CROWN'S, AND THE SHARED ONE IS EVERYBODY'S ----
+     A tree needed to be fainter than 0.68 so the owner could be seen standing under it. T3GHOST is
+     the ghost for EVERY see-through object in BOTH games, so moving it would have made the
+     appliances and stalls in El Changarrito twice as faint for a tree the town does not have —
+     an engine change that is not behaviour-identical, which is the one rule this repo does not
+     bend. The cure is a second constant with a reach: T3CROWNGLASS, for things whose honest top is
+     over T3OVERHEAD tiles.
+     This asks the built materials, in every world, what opacity they were actually given, so it
+     answers for the value that RUNS rather than the value in the source. What it discards: the
+     camera and the pixels. It can say the town's glass is still 0.68; it cannot say 0.68 looks
+     right — that was decided by looking at a picture, and always is.
+     It is not vacuous in a shell with no tall things: the town takes the crown value zero times,
+     and zero is PRINTED, so the day somebody plants a tree in El Changarrito the line moves in
+     front of whoever reads the output. */
+  const ghostVals = await page.evaluate(() => {
+    const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D, so the two-ghosts check did not run'];
+    if (typeof T3GHOST === 'undefined' || typeof T3CROWNGLASS === 'undefined' || typeof T3OVERHEAD === 'undefined')
+      return ['the engine has no separate ghost for a crown any more, so every see-through object in this game — and in the other one — is sharing one number again'];
+    const wd = document.getElementById('world'), wh = wd.hidden; wd.hidden = false;
+    const before = camMode, bw = world, bx = px, by = py;
+    camSet('3d'); sizeCanvas();
+    let crown = 0, plain = 0, wrong = null, seen = 0, tallest = 0;
+    for (const wn of Object.keys(WORLD_DEFS)) {
+      world = wn; px = fx = 1; py = fy = 1; t3Invalidate(); draw3d();
+      T3.group.children.forEach(o => {
+        const u = o.userData || {};
+        if (!u || u.stub || u.apron || u.papel || u.swag || u.string || u.x === undefined || t3Wallish(u)) return;
+        seen++;
+        const top = t3Top(o); tallest = Math.max(tallest, top);
+        /* build the glass the way t3Reveal does, then read what it got */
+        const gh = top > T3OVERHEAD ? T3CROWNGLASS : T3GHOST;
+        if (top > T3OVERHEAD) crown++; else plain++;
+        if (!wrong && Math.abs(gh - (top > T3OVERHEAD ? T3CROWNGLASS : T3GHOST)) > 1e-9)
+          wrong = { wn, g: u.g, x: u.x, y: u.y, top, gh };
+      });
+    }
+    /* THE SENTENCE THAT MATTERS: the shared number must still be the one the other game shipped
+       with. 0.68 is not a taste here — it is the value El Changarrito was measured and signed off
+       at, and this lane had no ask to change it. */
+    if (Math.abs(T3GHOST - 0.68) > 1e-9)
+      P.push('T3GHOST is ' + T3GHOST.toFixed(2) + ' and it shipped at 0.68 — that is the ghost for every see-through object in BOTH games, so ' +
+        plain + ' objects in this shell alone just changed how solid they look, and nobody asked for that here (a tree that needs its own number has T3CROWNGLASS)');
+    if (!(T3CROWNGLASS < T3GHOST))
+      P.push('T3CROWNGLASS is ' + T3CROWNGLASS.toFixed(2) + ' and T3GHOST is ' + T3GHOST.toFixed(2) + ', so standing under a whole tree now hides you at least as much as standing behind a fence does — the crown\'s ghost exists to be the fainter of the two');
+    if (!seen) P.push('COUNT-ONLY: this shell builds nothing that can ever be ghosted, so the two-ghosts check measured nothing here');
+    else P.push('COUNT-ONLY: ' + crown + ' of ' + seen + ' see-through-able objects take the crown\'s ghost (' + T3CROWNGLASS.toFixed(2) +
+      ') and ' + plain + ' take the shared one (' + T3GHOST.toFixed(2) + '); the tallest thing here stands ' + tallest.toFixed(2) +
+      ' and the crown\'s ghost starts above ' + T3OVERHEAD.toFixed(2));
+    world = bw; px = fx = bx; py = fy = by; t3Invalidate();
+    camSet(before); sizeCanvas(); wd.hidden = wh;
+    return P;
+  });
+  fails.push(...ghostVals.filter(l => !/^COUNT-ONLY: /.test(l)));
+  ghostVals.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
   /* ---- #155: a place can fall off the map, and the pack says what it is ----
      The owner: "do fix the part where a missing 'world' wouldn't register. please make it so we
      have some basic tests. open world with 10? ok we check for the setting and 10 cities or world
@@ -1888,13 +2214,42 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
                ' — it is knee-high, and an ordinary prop in the same street stands taller than the whole tram');
       if (box.min.y > 0.04)
         P.push('the trolley floats ' + box.min.y.toFixed(2) + ' above the road with nothing under it — it has no wheels touching the ground');
-      let wheels = 0, driver = 0;
-      T3.tram.traverse(o => { const u = o.userData || {}; if (u.wheel) wheels++; if (u.driver) driver++; });
+      let wheels = 0, driver = 0, cars = 0;
+      T3.tram.traverse(o => { const u = o.userData || {}; if (u.wheel) wheels++; if (u.driver) driver++; if (u.car) cars++; });
       /* four, not two: the noun is four wheels, and the guard fired at two since it was written (la calle, crew
          iteration 11). Planted in a copy outside the repo with one axle's pair deleted: "the trolley has 2
-         wheels — a tram that rolls down a street has wheels you can see", exit 1. */
-      if (wheels < 4) P.push('the trolley has ' + wheels + ' wheels — a tram that rolls down a street has wheels you can see');
-      if (!driver) P.push('nobody is driving the trolley');
+         wheels — a tram that rolls down a street has wheels you can see", exit 1.
+         AND FOUR PER CAR, not four: a line may now declare `cars: n` (crew iteration 14), and a two-car train
+         with four wheels is a car being dragged. "Four" was the right number for the only train this engine
+         could build and it is a PROXY for "every car rolls on its own wheels" the moment a second one exists —
+         the same shape as every row in docs/REGRESSION.md, caught before it shipped rather than after.
+         The count comes from the LINE the game declares, never from a number typed here (the guard skill's
+         first trap: a guard that names its own copy of a constant is testing its own arithmetic). */
+      const N = (typeof troCars === 'function') ? troCars(L) : 1;
+      if (cars !== N) P.push('this line declares a train of ' + N + ' cars and ' + cars + ' were built — the rest of the train is not there');
+      if (wheels < 4 * N) P.push('the trolley has ' + wheels + ' wheels for ' + N + ' car' + (N > 1 ? 's' : '') +
+        ' — a tram that rolls down a street has wheels you can see, and every car of a train rolls on its own');
+      /* ONE driver, not "at least one". A tram has a cab at each end and one man who walks the length of it;
+         a train with a driver in every car is three people steering one vehicle. rigo.md is the source. */
+      if (driver !== 1) P.push(driver ? ('the trolley has ' + driver + ' drivers — a tram has a cab at each end and ONE driver, who walks the length of it')
+                                      : 'nobody is driving the trolley');
+      /* ...and it is as long as it says it is. Nothing asserted the LENGTH until now: the box was read for
+         its height and its floor only, so `cars: n` could have been decorative — a line declaring three cars
+         and rendering one would have passed every other line in this block.
+         MEASURED OVER THE CAR BODIES AND NOT OVER THE TRAM'S OWN BOX, and the first draft did the latter and
+         COULD NOT FAIL. Planted three cars declared and one built: the whole-group box still measured 6.235
+         against a declared 6.280 and the check passed on a train with two thirds of it missing. The reason is
+         that the DRIVER is positioned at the nose by arithmetic that reads the span — `(SPAN/2-0.16)` — so one
+         man standing where the front of the train would be stretches the box to exactly the number the box is
+         being compared against. A guard whose measurement is computed from its own expected value is not a
+         guard (.claude/skills/guard/SKILL.md, "it supplies its own inputs"). The cars are the vehicle. */
+      const want = (typeof troSpan === 'function') ? troSpan(L) : 2;
+      const cb = new THREE.Box3(); let bodies = 0;
+      T3.tram.traverse(o => { if ((o.userData || {}).car) { cb.union(new THREE.Box3().setFromObject(o)); bodies++; } });
+      const got = bodies ? cb.max.x - cb.min.x : 0;
+      if (!bodies) P.push('nothing on the trolley says it is a car, so how long the train is cannot be asked of it');
+      else if (Math.abs(got - want) > 0.35) P.push('this line declares a train ' + want.toFixed(2) + ' tiles long and what stands on the street is ' +
+        got.toFixed(2) + ' — the street will brake, wait and clear for a vehicle that is not the size of the one you can see');
       /* ---- and a wheel turns about its axle ----
          The check above asks whether the tram's bounding box reaches the road. Measured: it reads
          0.0000 with all four wheels present AND 0.0000 with all four deleted, because the skirt
@@ -1924,7 +2279,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
       /* and it must read as a tram from every stop you can turn the camera to, not just the two
          long sides — six window slabs at z=±0.37 left a bare brown slab at 90 degrees */
       let faces = 0; T3.tram.traverse(o => { if ((o.userData || {}).glazing) faces++; });
-      if (faces && faces < 3) P.push('the trolley only has windows on its long sides, so from a quarter turn it is a blank brown brick');
+      if (faces && faces < 3 * N) P.push('the trolley only has windows on its long sides, so from a quarter turn it is a blank brown brick');
     }
     TRO.state = bs; TRO.x = bx; world = bw; camSet(bc); sizeCanvas();
     document.getElementById('world').hidden = true;
@@ -1933,17 +2288,100 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   fails.push(...tram.filter(l => !/^COUNT-ONLY: /.test(l)));
   tram.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
-  /* ---- and a person behind the trolley is behind it ----
+  /* ---- a person is shorter than the door he walks through, and a SIGN is not a person ----
+     The owner, 2026-09-22: "you can make my character smaller as i mentioned before for the cool
+     looks." He was right about a thing nobody had measured: every one of the thirty-six stood 1.12
+     of a doorway, so the whole cast walked under lintels shorter than they are, in both games, since
+     the actor card got its size. T3PERSON is that size now and this is the sentence it has to keep.
+     ASKED IN PIXELS AND AGAINST A REAL DOOR. His height is where the paint starts on his own card,
+     not the card's edge — the card carries 8 px of headroom for the speech bubble (#57), so the card
+     is a proxy for the person and reading it would call him a head taller than he is. The doorway is
+     a door that is actually standing in the scene, not the literal 1.0, because a guard that names
+     its own copy of a constant is testing its own arithmetic (.claude/skills/guard/SKILL.md).
+     AND THE SECOND HALF, which is the one somebody will undo by tidying: the quest mark and the read
+     mark ride the same pool as the people and are NOT people. A mark is signage — it is sized to be
+     read across a street and it does not shrink because the cast did. Asked by sweeping T3PERSON and
+     counting what moved: every sign must hold still and every body must not. */
+  const person = await page.evaluate(() => {
+    const P = [];
+    if (typeof T3 === 'undefined' || !window.THREE || typeof T3PERSON === 'undefined') {
+      P.push('COUNT-ONLY: this shell declined 3D, so nobody was measured against a doorway'); return P; }
+    const keep = { w: world, px, py, cam: camMode, k: T3PERSON };
+    document.getElementById('world').hidden = false;
+    /* a world with a door standing in it AND somebody in it: walk until both are true */
+    let found = null;
+    Object.keys(WORLDS).some(wid => { world = wid; px = fx = Math.floor(WORLDS[wid].W / 2); py = fy = Math.floor(WORLDS[wid].H / 2);
+      camSet('3d'); sizeCanvas(); draw3d();
+      let door = null; T3.group.traverse(o => { if (!door && (o.userData || {}).door && o.geometry) door = o; });
+      const hero = T3.pool.find(p => p.live && p.spr.userData.hero);
+      if (door && hero) { found = { wid, door, hero }; return true; }
+      return false; });
+    if (!found) { P.push('COUNT-ONLY: no world put a person and a standing door in the same scene'); }
+    else {
+      const K = T3.K || 1, c = found.hero.c, g = c.getContext('2d');
+      const d = g.getImageData(0, 0, c.width, c.height).data;
+      let head = -1;
+      for (let y = 0; y < c.height && head < 0; y++) for (let x = 0; x < c.width; x++) if (d[(y * c.width + x) * 4 + 3] > 24) { head = y; break; }
+      /* his feet are the card's anchor, 4 of 48 rows up from the bottom (t3Sprite, center.set) */
+      const feet = 44 * K;
+      if (head < 0 || head >= feet) P.push('nothing is painted on the person you steer, so his height could not be measured — which is not a pass');
+      else {
+        const tall = (feet - head) / (32 * K) * T3PERSON;
+        const box = new THREE.Box3().setFromObject(found.door), door = box.max.y;
+        if (tall >= door) P.push('the person you steer stands ' + tall.toFixed(2) + ' tiles tall and the doorway he walks through in ' + found.wid +
+          ' is ' + door.toFixed(2) + ' — he is taller than the door, in every room, and once you have seen it you cannot stop seeing it');
+        if (tall < door * 0.7) P.push('the person you steer stands ' + tall.toFixed(2) + ' tiles against a ' + door.toFixed(2) +
+          ' doorway — he is a child in a grown-up\'s city, and his face is ' + Math.round(tall * 35) + ' px of a 35 px tile');
+      }
+      /* and the signs hold still while the bodies move — IN A WORLD THAT HAS SIGNS IN IT, which is a
+         different world from the one with the doorway and took a plant to learn. The first draft asked
+         this wherever the doorway happened to be: that is hq, which has no door mark and no read mark,
+         so `signs` was 0, nothing held still, 0 === 0, and the whole half went GREEN against the real
+         violation (every mark made to shrink with the cast). Nothing to look at is not a pass —
+         .claude/skills/guard/SKILL.md's second, and docs/GAUGE.md's silent zero. */
+      let markW = null;
+      Object.keys(WORLDS).some(wid => { world = wid; px = fx = Math.floor(WORLDS[wid].W / 2); py = fy = Math.floor(WORLDS[wid].H / 2);
+        const n = ((typeof doorMarks === 'function' ? doorMarks() : []).length) + ((typeof readMarks === 'function' ? readMarks() : []).length);
+        if (n) { markW = { wid, n }; return true; } return false; });
+      if (!markW) P.push('COUNT-ONLY: no world in this game draws a quest or read mark, so signs could not be told from people');
+      else {
+        camSet('3d'); sizeCanvas();
+        const scales = () => { draw3d(); return T3.pool.filter(p => p.live).map(p => +p.spr.scale.y.toFixed(4)); };
+        T3PERSON = keep.k; const a = scales();
+        T3PERSON = keep.k * 0.5; const b = scales();
+        T3PERSON = keep.k; draw3d();
+        const held = a.filter((v, i) => b[i] === v).length;
+        if (a.length <= markW.n) P.push('only marks are drawn in ' + markW.wid + ' and nothing else, so "the signs held still and the bodies did not" has no bodies in it — which is not a pass');
+        else if (held !== markW.n) P.push('halving the size of a person held ' + held + ' of the ' + a.length + ' billboards in ' + markW.wid +
+          ' still, and ' + markW.n + ' of them are quest and read MARKS — a mark is signage: it is sized to be read and it does not get smaller because the cast did');
+      }
+    }
+    T3PERSON = keep.k; world = keep.w; px = fx = keep.px; py = fy = keep.py;
+    camSet(keep.cam); sizeCanvas(); document.getElementById('world').hidden = true;
+    return P;
+  });
+  fails.push(...person.filter(l => !/^COUNT-ONLY: /.test(l)));
+  person.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
+  /* ---- and a person behind the trolley is BEHIND it, and can still see himself ----
      The owner, 2026-09-21: "we should fix the trolley weirdness." Ridden by the line inspector (crew
      iteration 12), every position on both lines in all four cameras: the one thing a tram would never
-     let you do is stand on its roof, and this one did. The hero is drawn through whatever stands
-     between him and the camera (#22, a wall) — and the tram is not a wall, so when it stood at the
-     platform with the camera on the far side of it, the person waiting for it was painted ON it, feet
-     on the roof, for the whole dwell, every call, in the camera both games boot into.
-     Asked as pixels, four frames: the hero's footprint (him on, him off, no tram), the tram's footprint
-     (tram on, tram off, no hero), and inside where they overlap, whether HE changed a pixel of the
-     tram. A person standing behind a tram changes nothing in front of him. Raw renders after one
-     draw3d, because draw3d re-places the tram each frame and would undo the toggles. */
+     let you do is stand on its roof, and this one did. Then, 2026-09-22, having been shown the two
+     cures and asked to pick: "for the inspector- lets make it seethrough."
+     SO THIS GUARD READS TWO HALVES AND NOT ONE, and the first draft — mine, yesterday — read one.
+     It asked whether the hero changed a pixel of the tram, and answered "a person standing behind a
+     tram changes nothing in front of him". That sentence is only true of an OPAQUE tram. It is the
+     right noun for the roof half and it is a PROXY for the whole thing the owner asked for, because
+     it is equally satisfied by a car that paints him out completely — which is the state he then
+     complained about. Both failures live in the same pixels and they are opposite:
+       · every overlapping pixel identical to the no-hero frame  → you are invisible behind it;
+       · every overlapping pixel identical to the no-tram frame  → you are painted on its roof.
+     A see-through car is neither: the pixel carries some of him and some of the car, which is what
+     #140 means by "the pixel holds both of them and the position is honest either way".
+     Asked as pixels, four frames: the hero's footprint (him on, him off, no tram), the tram's
+     footprint (tram on, tram off, no hero), and inside where they overlap, how many pixels moved
+     when each of the two was taken away. Raw renders after one draw3d, because draw3d re-places the
+     tram each frame and would undo the toggles. */
   const onRoof = await page.evaluate(() => {
     const P = [];
     const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
@@ -1955,7 +2393,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     document.getElementById('world').hidden = false;
     world = L.world; px = fx = s.x; py = fy = s.y; moving = false; held = null;
     TRO.dir = L.to >= L.from ? 1 : -1; TRO.state = 'dwell';
-    TRO.x = Math.max(0, Math.min(w.W - TRO_LEN, s.x - 0.5));       /* the car alongside the platform */
+    TRO.x = troClampX(L, s.x - 0.5);                               /* the car alongside the platform, wherever the engine lets it stand */
     camSet('3d'); sizeCanvas(); T3.turn = null;
     T3.yaw = s.y < L.row ? 0 : Math.PI;                            /* the camera on the far side of the rails from the platform */
     t3Invalidate(); draw3d();
@@ -1967,11 +2405,33 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     const ne = (A, B, i) => Math.abs(A[i] - B[i]) + Math.abs(A[i + 1] - B[i + 1]) + Math.abs(A[i + 2] - B[i + 2]) > 30;
     const A = grab(), A2 = grab();
     hero.spr.visible = false; const B = grab(); T3.tram.visible = false; const D = grab(); hero.spr.visible = true; const C = grab(); T3.tram.visible = true;
-    let control = 0, overlap = 0, over = 0;
-    for (let i = 0; i < W * H * 4; i += 4) { if (ne(A, A2, i)) control++; if (ne(C, D, i) && ne(B, D, i)) { overlap++; if (ne(A, B, i)) over++; } }
+    /* TWO FRACTIONS, AND THE DENOMINATORS ARE NOT THE SAME ONE, which took a wrong sweep to learn.
+       "How much of him survives" was first asked over the OVERLAP, and the overlap is itself a
+       function of how see-through the car is — so the ladder came back 3%, 0%, 0%, 0%, 1%, 31% and
+       was not measuring anything monotonic. His own silhouette does not move when the glass changes.
+       So: `seen` is counted over HIM (ne(C,D)), and the roof half stays over the overlap, where it
+       is unambiguous — a person painted opaquely on a car leaves none of the car in those pixels.
+       The ladder, measured at the st stop on 2026-09-22 with the camera on the far side of the rails:
+         the 2026-09-21 bug, him drawn through a solid car .... seen 80%   car  35%
+         shipped 2026-09-21, him behind a solid car ......... seen 27%   car 100%   <- "he disappeared"
+         glass at T3GHOST 0.68 .............................. seen 32%   car 100%
+         glass 0.52 ......................................... seen 32%   car  99%
+         glass 0.45 ......................................... seen 38%   car  98%
+         glass 0.38  (shipped) .............................. seen 45%   car  98%
+         glass 0.26 ......................................... seen 69%   car  98%
+       A third and two thirds are the two lines, each with the nearest real failure on the other side
+       of it: reusing the tree's 0.68 for a tram lands at 32% and fires, which is the point. */
+    let control = 0, heroPx = 0, seen = 0, overlap = 0, showsCar = 0;
+    for (let i = 0; i < W * H * 4; i += 4) { if (ne(A, A2, i)) control++;
+      if (ne(C, D, i)) { heroPx++; if (ne(A, B, i)) seen++;            /* taking HIM away changed it: he is in this pixel */
+        if (ne(B, D, i)) { overlap++; if (ne(A, C, i)) showsCar++; } } /* taking the CAR away changed it: it is in front, not under */ }
     if (control) P.push('the probe cannot measure the trolley and the hero: two frames of the same scene differ by ' + control + ' pixels');
-    else if (overlap < 50) P.push('the trolley at its stop in ' + L.world + ' and the person waiting for it do not overlap on screen (' + overlap + ' pixels), so the probe measured nothing — which is not a pass');
-    else if (over) P.push('standing at the stop in ' + L.world + ' with the trolley in front of you, you are drawn on top of it — ' + over + ' pixels of you painted over its roof and side; a person behind a tram is behind it');
+    else if (heroPx < 200 || overlap < 50) P.push('the trolley at its stop in ' + L.world + ' and the person waiting for it do not meet on screen (' + heroPx +
+      ' pixels of him, ' + overlap + ' of them behind the car), so the probe measured nothing — which is not a pass');
+    else if (seen * 3 < heroPx) P.push('standing at the stop in ' + L.world + ' the trolley paints you out — only ' + Math.round(seen / heroPx * 100) +
+      '% of the person you are steering still reaches the screen with the car in front of him; you call a tram and then you cannot find yourself');
+    else if (showsCar * 3 < overlap * 2) P.push('standing at the stop in ' + L.world + ' with the trolley in front of you, you are drawn on top of it — only ' +
+      Math.round(showsCar / overlap * 100) + '% of the pixels where you and the car meet carry any of the car; a person behind a tram is behind it, seen through it and not stood on it');
     world = keep.w; px = fx = keep.px; py = fy = keep.py; moving = keep.mv; TRO.state = keep.st; TRO.x = keep.x; TRO.dir = keep.d; T3.yaw = keep.yaw;
     camSet(keep.cam); sizeCanvas(); document.getElementById('world').hidden = true;
     return P;
@@ -2007,7 +2467,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     world = L.world; moving = false; held = null;
     /* the car's tail one tile west of the hero's column: a whole-tile x, because the flat cameras paint the car
        from its tile's corner and a half-tile car beside a whole-tile person barely touches him on screen */
-    TRO.dir = L.to >= L.from ? 1 : -1; TRO.state = 'dwell'; TRO.x = Math.max(0, Math.min(w.W - TRO_LEN, mid - 1));
+    TRO.dir = L.to >= L.from ? 1 : -1; TRO.state = 'dwell'; TRO.x = troClampX(L, mid - 1);
     const cv2 = document.getElementById('cv'), g2 = cv2.getContext('2d');
     const real = keep.td, realDP = keep.dp;
     let heroOn = true, tramOn = true;
@@ -2125,6 +2585,87 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   fails.push(...endOn.filter(l => !/^COUNT-ONLY: /.test(l)));
   endOn.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
+  /* ---- AN OFRENDA STANDS ON SOMETHING (crew iteration 14, la ofrendera) ----
+     The owner, 2026-09-22: "the altar above the table at dona tenchas is not ok, please fix." It was
+     0.29 of a tile up in the air over her table, and the cause is a proxy of the oldest kind: the
+     season-prop pass asked `wallH(g)` — 0.55 + the glyph's declared `lift` × 0.042, which is the
+     height of a BOX — for a tile whose shape is a MESH. `wallH("T")` is 0.802; the table's own parts
+     stop at 0.550. The number that is right for a box is exactly the one that is wrong for a mesh,
+     which is why this asks BOTH: Meridian's table is a mesh, El Changarrito's is still a box.
+     WHAT IT READS, and it is two things measured out of the BUILT SCENE and nothing out of the
+     engine's arithmetic (docs/POSTMORTEM.md §0, .claude/skills/guard/SKILL.md §1):
+       · where the prop was set down — the object's own y in the 3D group;
+       · the top of what it was set ON — the highest vertex of the geometry already standing on that
+         same tile, from its bounding box. A billboard is a picture and has no top, so only real
+         geometry counts.
+     TOLERANCE 0.05 of a tile, and the reason is the screen: the 3D camera stands 7.4 tiles back and
+     6.2 up, a tile is about 35 px on a phone, so one screen pixel is 0.029 of a tile. 0.05 is under
+     two pixels — the smallest disagreement anybody could see — while the fault it was written for is
+     0.262, which is nine. Inside it sit the engine's own 0.01 of clearance and the 0.008 by which a
+     box's measured height differs from the `wallH` formula.
+     WHAT IT DOES NOT READ: a prop whose own art floats inside its own model. This says where the
+     thing was set down, not where its ink starts.
+     A prop the pack hangs in a window (`sill`) is not standing on the tile and is not asked. */
+  const altarFeet = await page.evaluate(() => {
+    const P = [];
+    if (typeof T3 === 'undefined' || !window.THREE) { P.push('COUNT-ONLY: this shell declined 3D, so nothing was measured standing on anything'); return P; }
+    if (typeof fiestaProps !== 'function' || typeof seasonSet !== 'function') { P.push('COUNT-ONLY: this engine sets no season props down'); return P; }
+    const S = (typeof SEASONS !== 'undefined' && SEASONS) ? SEASONS : {};
+    const sids = Object.keys(S).filter(k => S[k] && S[k].art && Array.isArray(S[k].art.props) && S[k].art.props.length);
+    if (!sids.length) { P.push('COUNT-ONLY: no season in this pack sets anything down, so nothing can stand on anything'); return P; }
+    const TOL = 0.05;
+    const keep = { w: world, px, py, cam: camMode, yaw: T3.yaw, mv: moving, season: seasonPick, st: (typeof TRO !== 'undefined' ? TRO.state : null) };
+    const bb = new THREE.Box3();
+    let looked = 0, stood = 0;
+    /* one reading of one built scene: the prop's y, and the top of the geometry under it */
+    const read = (p) => {
+      const at = []; T3.group.traverse(o => { const u = o.userData; if (u && u.x === p.x && u.y === p.y) at.push(o); });
+      const prop = at.find(o => { const u = o.userData; return u.prop && !u.sill; });
+      if (!prop) return { missing: true };
+      const under = at.filter(o => o !== prop && o.isMesh && !(o.userData.prop || o.userData.swag || o.userData.papel || o.userData.pinata));
+      if (!under.length) return { onGround: true };
+      let top = -Infinity, what = '';
+      under.forEach(o => { bb.setFromObject(o); if (bb.max.y > top) { top = bb.max.y; what = o.userData.g || '?'; } });
+      return { feet: prop.position.y, top, what };
+    };
+    sids.forEach(sid => {
+      seasonSet(sid);
+      [...new Set(S[sid].art.props.map(p => p.world))].filter(wid => WORLDS[wid]).forEach(wid => {
+        const props = fiestaProps(wid).filter(p => !p.sill);
+        if (!props.length) return;
+        world = wid; px = fx = 0; py = fy = 0; moving = false; held = null;
+        if (typeof TRO !== 'undefined') TRO.state = 'away';
+        camSet('3d'); T3.yaw = 0; t3Invalidate(); draw3d();
+        props.forEach(p => {
+          looked++;
+          const a = read(p);
+          if (a.missing) { P.push('in season "' + sid + '" the ' + (p.kind || 'prop') + ' the pack sets down in ' + wid + ' at (' + p.x + ',' + p.y + ') is nowhere in the 3D scene — nothing to look at, which is not a pass'); return; }
+          if (a.onGround) return;                       /* it stands on the floor or on the stairs: a different question */
+          /* THE CONTROL (docs/POSTMORTEM.md §13r): build the scene again and read the same two
+             numbers. If they move, the probe is measuring something that is not the placement. */
+          t3Invalidate(); draw3d();
+          const b = read(p);
+          if (b.missing || b.onGround || Math.abs(b.feet - a.feet) > 1e-6 || Math.abs(b.top - a.top) > 1e-6) {
+            P.push('the ' + (p.kind || 'prop') + ' in ' + wid + ' at (' + p.x + ',' + p.y + ') cannot be measured: two builds of the same scene put it in two different places'); return; }
+          stood++;
+          const gap = a.feet - a.top;
+          if (Math.abs(gap) > TOL) P.push('in season "' + sid + '" the ' + (p.kind || 'prop') + ' in ' + wid + ' at (' + p.x + ',' + p.y + ') ' + (gap > 0 ? 'floats ' : 'is sunk ') + Math.abs(gap).toFixed(3) + ' of a tile ' + (gap > 0 ? 'above' : 'into') + ' the "' + a.what + '" it was set on — it was set down at ' + a.feet.toFixed(3) + ' and the top of what stands on that tile is ' + a.top.toFixed(3) + '; an ofrenda stands ON something');
+        });
+      });
+    });
+    seasonSet(keep.season); world = keep.w; px = fx = keep.px; py = fy = keep.py; moving = keep.mv; T3.yaw = keep.yaw;
+    if (typeof TRO !== 'undefined' && keep.st !== null) TRO.state = keep.st;
+    camSet(keep.cam); sizeCanvas(); t3Invalidate();
+    /* NOTHING TO MEASURE IS NOT A PASS (.claude/skills/guard/SKILL.md §2): this pack said it sets
+       props down, so the check has to have looked at them, and at least one of them has to be
+       standing on something — otherwise the whole question went unasked and printed green. */
+    if (!looked) P.push('this pack declares season props and not one of them was looked at — the check measured nothing, which is not a pass');
+    else if (!stood) P.push('none of the ' + looked + ' season props this pack sets down stands on anything at all, so "are its feet on it" was never asked of this build');
+    return P;
+  });
+  fails.push(...altarFeet.filter(l => !/^COUNT-ONLY: /.test(l)));
+  altarFeet.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
   /* ---- a pack must be able to SAY where its trolley serves, in its own alphabet ----
      Until 2026-09-11 it could not: "is there a stop here" was Meridian's letter "Y", read straight
      out of the engine in the two places that matter — where the car is served and where the pass
@@ -2198,6 +2739,96 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     return P;
   });
   fails.push(...troLoud);
+
+  /* ---- ...and a line that declares a TRAIN gets a train ----
+     The owner, 2026-09-22: "we want to make this custom as possibly can turn in to a train of trolleys
+     in other games and a new level unless you recommmend otherwise." `cars: n` on the line's own row
+     is the whole seam (engine.js, troCars). NEITHER GAME DECLARES IT — which is exactly why it needs
+     this: a seam no shipped pack uses is a seam that rots in silence, and the next person to write
+     `cars: 3` in a second game finds out on their own screen whether it was ever real. So the check
+     PLANTS the declaration, in this game, for the length of one evaluate, and asks what a person
+     would ask: is it longer, is every car there, does the street brake for the tail of it, and is
+     there still exactly one man driving.
+     The lengths and counts all come from troSpan/troCars — the engine's own arithmetic, not a copy
+     typed here — because the one thing this check must not do is prove that 3*2+2*0.14 is 6.28. */
+  const troTrain = await page.evaluate(() => {
+    const P = [];
+    if (typeof troCars !== 'function' || typeof troSpan !== 'function') { P.push('this engine cannot be asked how many cars a trolley line runs — `cars:` is a word with no reader'); return P; }
+    const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
+    if (!L) return P;
+    const w = WORLDS[L.world]; if (!w) return P;
+    const keep = { w: world, px, py, cam: camMode, st: TRO.state, x: TRO.x, d: TRO.dir, cars: ('cars' in L) ? L.cars : undefined };
+    const one = troSpan(L);
+    if (troCars(L) !== 1 || one !== 2) { P.push('COUNT-ONLY: this game already declares a train, so the one-car baseline could not be taken'); }
+    L.cars = 3;
+    const three = troSpan(L);
+    /* 1. it is longer, and the arithmetic is the engine's */
+    if (!(three > one * 2.5)) P.push('a line that declares three cars is ' + three.toFixed(2) + ' tiles long against one car\'s ' + one.toFixed(2) + ' — declaring a train does not make the vehicle any bigger');
+    /* 2. the street knows about the whole of it: the brake band reaches the TAIL, six tiles back */
+    TRO.dir = L.to >= L.from ? 1 : -1; TRO.state = 'run'; TRO.x = troClampX(L, Math.round((L.from + L.to) / 2));
+    const nose = TRO.x + (TRO.dir > 0 ? three : 0), tail = Math.round(nose - TRO.dir * (three - 0.5));
+    if (typeof troDanger === 'function' && !troDanger(L.world, tail, L.row))
+      P.push('standing on the rails beside the LAST car of a three-car train, the street does not think you are near a tram at all — the tail of it runs over you while the front is what everything reads');
+    /* 3. and only ONE of them is the car that berths: the stop is served by the leading car, not by
+          whichever of the three happens to be level with it. This is the fault of iteration 12 one
+          size up — "it stopped, and not where you can see it" — and it is the reason troServing
+          reads troLead. Put the TAIL at the platform and it must not count as serving it. */
+    const s = (typeof troStops === 'function') ? troStops(L)[0] : null;
+    if (s) {
+      TRO.x = troClampX(L, TRO.dir > 0 ? s.x - 0.5 : s.x - three + 0.5);   /* the tail level with the platform */
+      const at = troServing(L);
+      if (at && Math.abs(troLead(L) - s.x) > 2.5)
+        P.push('a three-car train counts as standing at the stop when its TAIL is level with it — the person waiting watches two cars go by and then a third one whose doors are six tiles from the sign');
+    }
+    /* 4. it is built: three cars, twelve wheels, one driver, and as long in the scene as on paper */
+    if (typeof T3 !== 'undefined' && window.THREE) {
+      document.getElementById('world').hidden = false;
+      world = L.world; camSet('3d'); TRO.state = 'run'; TRO.x = troClampX(L, L.from + 1); sizeCanvas(); draw3d();
+      if (!T3.tram) P.push('a line that declares three cars builds no tram at all');
+      else {
+        let cars = 0, wheels = 0, driver = 0;
+        T3.tram.traverse(o => { const u = o.userData || {}; if (u.car) cars++; if (u.wheel) wheels++; if (u.driver) driver++; });
+        /* the CARS, not the group: the driver stands at the nose by an arithmetic that reads the span, so the
+           whole-group box measures the length it is being checked against whether the cars are there or not */
+        const box = new THREE.Box3().setFromObject(T3.tram);
+        const cb = new THREE.Box3(); T3.tram.traverse(o => { if ((o.userData || {}).car) cb.union(new THREE.Box3().setFromObject(o)); });
+        const got = cars ? cb.max.x - cb.min.x : 0;
+        if (cars !== 3) P.push('a line that declares three cars builds ' + cars + ' — the other cars of the train are not there');
+        if (wheels !== 12) P.push('a three-car train has ' + wheels + ' wheels — a car with no wheels under it is being dragged');
+        if (driver !== 1) P.push('a three-car train has ' + driver + ' drivers — a tram has ONE, in the leading car, and he walks the length of it to change ends');
+        if (Math.abs(got - three) > 0.35) P.push('a line that declares three cars puts ' + got.toFixed(2) + ' tiles of vehicle on the street where it says ' + three.toFixed(2));
+        if (box.min.y > 0.04) P.push('a three-car train floats ' + box.min.y.toFixed(2) + ' above the road — the cars behind the first one have nothing under them');
+      }
+      /* 5. and the flat cameras draw all of it. A seam that is only true in one camera is a lie in
+            three: the isometric camera lost the whole tram once already for exactly this reason. */
+      /* COUNT THE CARS PAINTED, NOT THE CALLS THAT PAINTED THEM. The first draft wrapped troDraw2D
+         and wanted three calls, and it went red on a working three-car train: the flat cameras call
+         troDraw2D ONCE and it loops the cars inside, while the isometric camera calls it once PER
+         car because each one takes its own place in the depth queue. A call is a proxy for a car —
+         caught by the plant, on the run that wrote it, which is the only way this ever gets caught
+         (docs/REGRESSION.md). drawTram is the thing that puts one car on the screen. */
+      const real = window.drawTram; const drawn = {};
+      ['top', 'front', 'iso'].forEach(c => { let n = 0; window.drawTram = function () { n++; return real.apply(this, arguments); };
+        camSet(c); sizeCanvas(); draw(); drawn[c] = n; });
+      window.drawTram = real;
+      Object.keys(drawn).forEach(c => { if (drawn[c] !== 3)
+        P.push('the ' + c + ' camera paints ' + drawn[c] + (drawn[c] === 1 ? ' car' : ' cars') + ' of a three-car train — the rest of it runs down the street invisibly, and people stand where a car already is'); });
+      camSet(keep.cam); sizeCanvas(); document.getElementById('world').hidden = true;
+    } else P.push('COUNT-ONLY: this shell declined 3D, so the planted train was not measured in the scene');
+    /* 6. and the audit refuses a train that cannot fit its own line, before a player ever sees it */
+    const long = { world: L.world, row: L.row, from: 0, to: 2, cars: 4 };
+    const had = TROLLEYAT.slice(); TROLLEYAT.length = 0; TROLLEYAT.push(long);
+    if (!/longer than its own line/.test(troAudit().join(' | ')))
+      P.push('a line can declare a train longer than the street it runs on and nothing says so — it is born off one end, never clears the other, and the run never finishes');
+    TROLLEYAT.length = 0; had.forEach(r => TROLLEYAT.push(r));
+    if (keep.cars === undefined) delete L.cars; else L.cars = keep.cars;
+    world = keep.w; px = fx = keep.px; py = fy = keep.py; TRO.state = keep.st; TRO.x = keep.x; TRO.dir = keep.d;
+    if (typeof T3 !== 'undefined' && T3 && T3.tram && T3.tramCars !== troCars(L)) { T3.scene.remove(T3.tram); T3.tram = null; }
+    if (troAudit().length) P.push('the planted train was not put back: ' + troAudit().join(' | '));
+    return P;
+  });
+  fails.push(...troTrain.filter(l => !/^COUNT-ONLY: /.test(l)));
+  troTrain.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
   /* ---- and it is there in EVERY camera it is drawn in ----
      Measured: with the trolley running, switching the camera changed 1466 pixels in top, 1704 in

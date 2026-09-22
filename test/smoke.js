@@ -14,6 +14,21 @@ const { chromium } = require('playwright-core');
 const fs = require('fs');
 const path = require('path');
 
+/* EVERY file under engine/, read off disk — never a list of names typed here.
+   Both portability guards below used to say ['engine.js','engine3d.js'], which is a PROXY for
+   "the shared engine": correct on the day it was written and wrong the first time the engine
+   grows a third file. Crew 14 planted an engine/shapes.js spelling this pack's transit brand
+   and both guards printed OK (docs/REGRESSION.md, the proxy register). The noun is the folder.
+   Not finding it is a RED, never a pass: an unreadable shelf must not read as an empty one. */
+const ENGINE_DIR = path.join(__dirname, '..', 'engine');
+function engineFiles(fails) {
+  let names = [];
+  try { names = fs.readdirSync(ENGINE_DIR).filter(n => n.endsWith('.js')).sort(); }
+  catch (e) { fails.push('portability: engine/ could not be read (' + e.code + ') — the guard that keeps this pack\'s names out of the engine cannot run, which is a failure and not a pass'); return []; }
+  if (!names.length) fails.push('portability: engine/ holds no .js file — either the engine moved or this guard is now pointed at nothing; it is not a pass either way');
+  return names;
+}
+
 const CANDIDATES = [
   process.env.CHROMIUM_PATH,
   '/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell',
@@ -1112,8 +1127,16 @@ const CANDIDATES = [
     portalHold = '';                    // …and once the hold is gone, the same tile is a door again
     await wait(250);
     if (world !== 'st') problems.push('with the hold cleared, standing on the door still did nothing');
-    // Y (the trolley stop) must stay step-only: a menu you dismissed must not reopen under your feet
-    world = 'st'; px = fx = 0; py = fy = 1; moving = false; held = null; portalT = 0; portalHold = '';
+    /* Y (the trolley stop) must stay step-only: a menu you dismissed must not reopen under your feet.
+       THE TILE COMES FROM THE LINE, and it used to be typed here as (0,1). The owner moved the stop one
+       tile east on 2026-09-22 ("ok move one tile east") and this check went on standing on (0,1) — a
+       tile that is no longer a stop, where the menu could never have opened and the check could never
+       have failed. It would have printed OK for ever. A guard that names a coordinate the content also
+       names is two copies of one fact, and content is the copy that moves. */
+    world = 'st'; moving = false; held = null; portalT = 0; portalHold = '';
+    { const s1 = (typeof troStops === 'function') ? troStops(troLine('st'))[0] : null;
+      if (!s1) problems.push('the street declares no trolley stop, so "the pass is step-only" has nowhere to stand and proves nothing');
+      else { px = fx = s1.x; py = fy = s1.y; } }
     document.getElementById('travel').hidden = true;
     await wait(250);
     if (!document.getElementById('travel').hidden) problems.push('the trolley menu reopened under your feet while you stood still');
@@ -2282,9 +2305,10 @@ const CANDIDATES = [
                    'canela', 'robles', 'jacaranda', 'muertos', 'otono', 'otoño', 'nacho',
                    'tacho', 'yesenia', 'moy', 'licha', 'tito', 'vero', 'chente', 'karla', 'nolasco', 'bere',
                    'espiga', 'velazquez', 'tuerca', 'bolillo', 'pelusa', 'timbre', 'taller'];
-    // engine3d is the same engine, so it is held to the same rule
-    for (const f of ['engine/engine.js', 'engine/engine3d.js']) {
-      const src = fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
+    // every file under engine/ is the same engine, so all of them are held to the same rule
+    for (const base of engineFiles(fails)) {
+      const f = 'engine/' + base;
+      const src = fs.readFileSync(path.join(ENGINE_DIR, base), 'utf8');
       // blank out comments first — block comments span lines, so this cannot be
       // done per-line. Newlines are preserved so reported line numbers stay true.
       const bare = src.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' '))
@@ -2387,6 +2411,104 @@ const CANDIDATES = [
     else if (!b3.want) fails.push('La Cocina lays no furniture at all — this guard measured nothing: ' + JSON.stringify(b3));
     else if (b3.missing) fails.push('La Cocina lays ' + b3.want + ' and ' + b3.missing + ' does not stand up in 3D — a picture, not a thing with sides: ' + JSON.stringify(b3));
     else if (b3.glyphs.includes('P')) fails.push('a plant became a box');
+
+    /* ---- EVERY MARIGOLD HAS SOMETHING DARK BEHIND IT, AND IT IS WIDER THAN THE FLOWER ----
+       The owner has come back about the marigolds four times — "the marigolds can use another try",
+       "everything looks good except the marigolds", and on 2026-09-22 "the marigold decor is also not
+       very well defined". Three of the fixes before this one changed a SIZE (docs/POSTMORTEM.md §1:
+       when the second fix is the same KIND as the first, the cause is not the thing you keep
+       changing). The cause is the light. DAY_AMB 0.66 and DAY_SUN 0.42 give a Lambert face 1.00 /
+       0.88 / 0.78 / 0.66 and nothing else, so FORM cannot separate two orange things — only value
+       can, and value has to be painted into the parts. In the bed that happened by accident: the
+       near-black foliage mound sits under the heads. Used as DECOR — the tree's garland, the altar's
+       arch, the lid of the calaverita — a head hangs against pale plaster with nothing dark anywhere
+       near it, and a dozen orange lobes average to a smear. The bakery found the same law and the
+       answer there was the PACKAGING: a polvorón reads because its paper cup is WIDER than the
+       cookie. So every head meshMarigold grows now carries its own dark collar, and this is the
+       guard on it.
+
+       WHAT IT READS, said plainly, because the extraction is the proxy (docs/REGRESSION.md §3): it
+       reads the PARTS LIST the pack returns, not the screen. It therefore knows nothing about
+       occlusion, about the camera, about whether the collar is actually visible at 40°, or about
+       tc()'s theme tint — it compares the pack's own hexes before any of that. What it does read is
+       the one thing four attempts did not have: that under every petal there is a part darker than
+       every petal of that head, dark in absolute terms, and wider than that head's petals reach.
+       The picture is still the judge, and the picture is not in this repository: it is rendered by
+       standing the hero at a flower bed and looking, which is what settled this and what will
+       settle the next one. (This line used to cite a .png under scratchpad/ as if it were evidence
+       a reader could open. Scratch is not the record — nothing outside the repository is.)
+
+       Red first, on the tree as it stood before the collar existed: 'the marigold on "b" at 17,10 has
+       nothing dark behind it: 12 heads and 0 collars'. A WRONG FIX that would pass a weaker draft —
+       marking a small pale part collar:true — fails on both the width and the luma clause; shrinking
+       the collar under the petals fails on width; painting it a mid green (#4E8A58, luma 115) fails
+       the absolute clause.
+
+       AND IT NAMES ITS SUBJECTS, because a total is not coverage. The first draft's only
+       anti-vacuity clause was "did we find ANY petals", and the flower bed alone supplies 300 of the
+       538 — so the three DECOR cases this guard was written for (the tree's garland, the ofrenda's
+       arch, the marigold on the tamalera's lid) could every one of them stop being laid and the
+       guard would still have gone green on the bed. That is the vacuity trap in .claude/skills/guard
+       word for word: nothing to measure is a RED, never a pass. MARI_FLOOR below is the list of
+       subjects Meridian must actually reach, with the number of heads each one had when this was
+       written; fewer than that, or the subject missing entirely, is a failure that names it. This
+       list is Meridian's, and test/smoke.js is Meridian's suite — a pack that legitimately stops
+       laying one of these edits the floor, and the edit is the point. The coverage is printed on a
+       GREEN run too, so nobody has to fail the build to find out what was measured. */
+    const MARI_FLOOR = { 'b': 12, 'J': 6, 'ʘ': 1, 'prop:ofrenda': 9 };
+    const mari = await page.evaluate((FLOOR) => {
+      if (typeof tileView !== 'function' || typeof WORLDS === 'undefined') return { seam: true };
+      const keep = seasonPick, out = { heads: 0, petals: 0, bad: [], seen: [], found: {} };
+      const L = h => { const n = parseInt(String(h).slice(1), 16);
+        return 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255); };
+      try {
+        /* in season, so the tree's garland and the altar's arch exist to be measured */
+        if (typeof seasonSet === 'function') { const m = Object.keys(SEAS()).find(k => (SEAS()[k].art || {}).papel); if (m) seasonSet(m); }
+        /* every glyph actually laid in a world that answers the `mesh` view, plus the season's props */
+        const laid = new Set(); Object.entries(WORLDS).forEach(([wid, w]) => w.rows.forEach((r, y) => r.split('').forEach((ch, x) => laid.add(ch + '|' + wid + '|' + x + '|' + y))));
+        const first = {}; [...laid].forEach(k => { const g = k.split('|')[0]; if (!first[g]) first[g] = k; });
+        const subjects = Object.values(first).map(k => { const [g, wid, x, y] = k.split('|'); return { g, x: +x, y: +y }; })
+          .concat([{ g: 'prop:ofrenda', x: 0, y: 0 }]);
+        subjects.forEach(({ g, x, y }) => {
+          const mv = tileView(g, 'mesh'); if (!mv) return;
+          let parts; try { parts = typeof mv === 'function' ? mv({ x, y }) : mv; } catch (e) { return; }
+          if (!Array.isArray(parts)) return;
+          const collars = parts.filter(p => p && p.collar), petals = parts.filter(p => p && p.petal);
+          if (!collars.length && !petals.length) return;
+          out.seen.push(g + ':' + collars.length + 'c/' + petals.length + 'p');
+          out.found[g] = collars.length;
+          out.heads += collars.length; out.petals += petals.length;
+          if (!collars.length) { out.bad.push('the marigold on "' + g + '" at ' + x + ',' + y + ' has nothing dark behind it: ' + (petals.length ? Math.round(petals.length / 25) + '-odd heads' : 'no heads') + ' and 0 collars'); return; }
+          const near = collars.map(() => []);
+          petals.forEach(p => { let bi = 0, bd = Infinity;
+            collars.forEach((c, i) => { const d = Math.hypot(p.x - c.x, p.z - c.z); if (d < bd) { bd = d; bi = i; } });
+            near[bi].push(p); });
+          collars.forEach((c, i) => {
+            const mine = near[i]; if (!mine.length) { out.bad.push('a collar on "' + g + '" has no petals over it — it is dark for nothing'); return; }
+            const cl = L(c.c), half = c.r * (c.sx === undefined ? 1 : c.sx);
+            const reach = Math.max(...mine.map(p => Math.hypot(p.x - c.x, p.z - c.z) + p.r * Math.max(p.sx === undefined ? 1 : p.sx, p.sz === undefined ? 1 : p.sz)));
+            const lightest = Math.min(...mine.map(p => L(p.c)));
+            if (half < reach) out.bad.push('a marigold on "' + g + '" is wider than the dark behind it (petals reach ' + reach.toFixed(3) + ', the collar is ' + half.toFixed(3) + ') — at 35 px the flower and the one beside it are one orange smear');
+            else if (cl >= 60 || cl >= lightest) out.bad.push('a marigold on "' + g + '" has a collar the same value as its petals (collar ' + c.c + ' luma ' + Math.round(cl) + ', darkest petal luma ' + Math.round(lightest) + ') — there is nothing for the eye to cut the flower out against');
+          });
+        });
+        /* COVERAGE, not a total: each subject this pack promises must have been reached, and with
+           at least as many heads as it had. A subject that stopped being laid, or that now returns
+           parts with neither a collar nor a petal, lands here instead of vanishing into a big
+           green number somebody else's flower bed paid for. */
+        Object.keys(FLOOR).forEach(g => {
+          const got = out.found[g];
+          if (got === undefined) out.bad.unshift('the marigold guard never reached "' + g + '" at all — it is one of the ' + Object.keys(FLOOR).length + ' places this pack puts marigolds and it measured NONE of them there, so this guard was passing on the flower bed alone');
+          else if (got < FLOOR[g]) out.bad.unshift('"' + g + '" grows ' + got + ' marigold heads and it grew ' + FLOOR[g] + ' when this guard was written — either a flower was dropped or the floor in MARI_FLOOR needs moving, and somebody has to look at which');
+        });
+      } finally { if (typeof seasonSet === 'function') seasonSet(keep); }
+      return out;
+    }, MARI_FLOOR);
+    const mariSeen = mari.seen ? mari.seen.join(' ') : '';
+    if (mari.seam) fails.push('the marigold guard could not reach tileView or WORLDS at all — it measured nothing');
+    else if (!mari.petals) fails.push('the marigold guard found no marigold petals anywhere in this pack — nothing was measured, which is a red and not a pass');
+    else if (mari.bad.length) fails.push(mari.bad[0] + ' [' + mari.bad.length + ' like it; ' + mari.heads + ' collars over ' + mari.petals + ' petals; seen: ' + mariSeen + ']');
+    else console.log('  MARIGOLDS: ' + mari.heads + ' heads, each with a dark collar wider than its own petals — ' + mariSeen);
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; camSet('3d'); });
 
     // Continue with a last visit due: it plays once, the street is not blank, the counter persists
@@ -3274,6 +3396,350 @@ const CANDIDATES = [
     });
     fails.push(...street);
 
+    // ❗A SHAPED HOUSE — the casita faces that answer the `mesh` view (el albañil, crew 14, from the
+    // owner's "should we shape and beautify buildings? ... just do one or two and show me").
+    // Three questions a picture cannot answer, and they cannot all fail the same way: one reads the
+    // geometry the engine places things against, one reads the drawing the front camera shows, and
+    // one reads whether the roof carries over the door you walk through.
+    const casa3d = await page.evaluate(() => {
+      const problems = [];
+      const wallH = g => 0.55 + ((TILES[g] || {}).lift | 0) * 0.042;
+
+      // (1) A FACADE THAT GOT A SHAPE IS STILL A WALL: SOLID MASONRY, WITH NO SLOT IN IT, ALL THE
+      // WAY UP TO THE HEIGHT THE ENGINE READS. engine3d.js t3MeshTile takes the mesh INSTEAD of the
+      // wall branch ("the mesh view beats box, billboard and even wall"), and four places still
+      // compute from wallH(g) for a facade and never ask the shape: the door's lintel, a person
+      // working in a window, wall decor and the sill pane.
+      //
+      // ❗THIS USED TO READ THE MAXIMUM Y ON THE TILE EDGE, AND THAT WAS A PROXY, NOT THE NOUN.
+      // A reader whose only job was to refute this check dropped the wall box alone to wallH−0.2
+      // and the suite stayed green, because the RING BEAM also tops out at exactly wallH — a
+      // see-through slot 0.13 tall opened along the head of every casa wall and a maximum cannot
+      // see a hole underneath it (docs/REGRESSION.md's proxy register; the extraction threw away
+      // everything between the two numbers it kept). So this now walks UP the face: it takes the
+      // triangles actually lying in each of the tile's four vertical planes and asks, at every
+      // centimetre, whether masonry is there. A gap is what a person sees as daylight.
+      camSet('3d'); world = 'ex'; px = fx = 5; py = fy = 3; moving = false; held = null; t3Invalidate(); draw3d();
+      const shaped = T3.group.children.filter(o => o.userData && o.userData.mesh && o.userData.g
+        && ((TILES[o.userData.g] || {}).kind === 'facade' || (TILES[o.userData.g] || {}).kind === 'wall'));
+      if (!shaped.length) problems.push('no wall or facade on Calle Dos answers the mesh view, so this check measured nothing — that is a red, not a pass');
+      // point-in-triangle, in the plane's own two axes
+      const inTri = (t, P) => { const s = (a, b, c) => (a[0] - c[0]) * (b[1] - c[1]) - (b[0] - c[0]) * (a[1] - c[1]);
+        const d1 = s(P, t[0], t[1]), d2 = s(P, t[1], t[2]), d3 = s(P, t[2], t[0]);
+        return !(((d1 < -1e-9) || (d2 < -1e-9) || (d3 < -1e-9)) && ((d1 > 1e-9) || (d2 > 1e-9) || (d3 > 1e-9))); };
+      shaped.forEach(o => {
+        const g = o.userData.g, pa = o.geometry.attributes.position.array, WH = wallH(g);
+        // the four vertical planes where this tile meets whatever is next to it
+        [[0, 0.5], [0, -0.5], [2, 0.5], [2, -0.5]].forEach(([ax, val]) => {
+          const oh = ax === 0 ? 2 : 0;                               // the in-plane horizontal axis
+          const tri = [];
+          for (let i = 0; i < pa.length; i += 9) {
+            if (Math.abs(pa[i + ax] - val) > 1e-4 || Math.abs(pa[i + 3 + ax] - val) > 1e-4 || Math.abs(pa[i + 6 + ax] - val) > 1e-4) continue;
+            tri.push([[pa[i + oh], pa[i + 1]], [pa[i + 3 + oh], pa[i + 4]], [pa[i + 6 + oh], pa[i + 7]]]);
+          }
+          const side = (ax === 0 ? 'east/west' : 'north/south') + ' face';
+          if (!tri.length) { problems.push('the shape at ' + g + ' has no masonry at all in its ' + side + ' (' + (ax ? 'z' : 'x') + '=' + val + '): it is not a wall, and the lintel over the front door beside it is placed against thin air'); return; }
+          let top = -Infinity; tri.forEach(t => t.forEach(p => { if (p[1] > top) top = p[1]; }));
+          if (Math.abs(top - WH) > 1e-6)
+            problems.push('the shaped house at ' + g + ' is ' + top.toFixed(3) + ' tall where it meets the tile next door and the engine reads ' + WH.toFixed(3)
+              + ': the lintel over the front door, anything hung on this wall and any sweet set on its sill are all placed from ' + WH.toFixed(3) + ' and would hang ' + Math.abs(top - WH).toFixed(3) + ' out in the air');
+          // and now the hole a maximum cannot see: march the middle of the face from the plinth up
+          for (let hgt = 0.12; hgt < WH - 0.004; hgt += 0.01) {
+            if (tri.some(t => inTri(t, [0, hgt]))) continue;
+            problems.push('there is a see-through slot in the ' + side + ' of ' + g + ' at ' + hgt.toFixed(3) + ' of a tile up: the wall stops being a wall there and you can see daylight along it, while the door lintel, the wall decor and the sill pane beside it are all still placed from ' + WH.toFixed(3));
+            break;
+          }
+        });
+      });
+
+      // (2) THE ROOF CARRIES OVER THE FRONT DOOR. A `⌂` is a door, not a facade, so it has no mesh
+      // of its own — if each face stopped at its own tile edge the roofline would break exactly
+      // where you walk in, which is the owner's "three boxes, not one building" all over again.
+      const doorAt = [];
+      for (let y = 0; y < WORLDS.ex.H; y++) for (let x = 0; x < WORLDS.ex.W; x++)
+        if (DOORSET.has(WORLDS.ex.rows[y][x]) && !SOLID.has(WORLDS.ex.grid[y][x])) doorAt.push([x, y]);
+      doorAt.forEach(([dx, dy]) => {
+        [-1, 1].forEach(side => {
+          const nb = shaped.find(o => o.userData.x === dx + side && o.userData.y === dy);
+          if (!nb) return;                                  // no shaped neighbour on that side: nothing to carry
+          // the neighbour's roof has to reach BACK toward the door: for the face to the door's west
+          // the door's middle is at local x +1, for the face to its east it is at local x −1
+          const pa = nb.geometry.attributes.position.array; let reach = -Infinity;
+          for (let i = 0; i < pa.length; i += 3) { const r = pa[i] * -side; if (r > reach) reach = r; }
+          if (reach < 0.999) problems.push('the roof of the ' + nb.userData.g + ' beside the door at ' + dx + ',' + dy
+            + ' stops ' + (1 - reach).toFixed(2) + ' of a tile short of the door\'s middle: the roofline breaks over the front door and the house reads as two boxes with a gap between them');
+        });
+      });
+
+      // (3) AND THE DRAWING, because the front camera is the one the owner photographs and it never
+      // sees the mesh at all. Two casa faces laid side by side have to make ONE roof: the same band,
+      // reaching both edges of the tile, on a pitch that divides 32 so the course carries through
+      // the join instead of restarting at it.
+      const bake = (g, tx, ty) => { const c = document.createElement('canvas'); c.width = 32; c.height = 32;
+        const old = ctx; ctx = c.getContext('2d');
+        try { TILEDRAW[g]({ sx: 0, sy: 0, x: tx, y: ty }); } finally { ctx = old; }
+        return c.getContext('2d').getImageData(0, 0, 32, 32).data; };
+      const faces = ['▩', '▨', '▦'].filter(g => TILEDRAW[g]);
+      if (faces.length < 2) problems.push('fewer than two casita faces are drawable, so the roofline check measured nothing');
+      const pxAt = (d, r, c) => d.slice((r * 32 + c) * 4, (r * 32 + c) * 4 + 4).join(',');
+      const bands = faces.map(g => ({ g, d: bake(g, 4, 2) }));
+      bands.forEach(b => { for (let r = 3; r < 8; r++) for (let c = 0; c < 24; c++)
+        if (pxAt(b.d, r, c) !== pxAt(b.d, r, c + 8))
+          { problems.push('the roof course on ' + b.g + ' does not repeat every 8 px across the tile (row ' + r + ', column ' + c + '): its pitch does not divide 32, so two of these side by side show the join'); return; } });
+      bands.forEach(b => { for (let r = 0; r < 8; r++) [0, 31].forEach(c => {
+        if (pxAt(b.d, r, c) === pxAt(b.d, 20, 2))
+          problems.push('the roof on ' + b.g + ' does not reach column ' + c + ' of its own tile (row ' + r + ' is still wall there): the roofline stops short of the join and two houses will not make one roof'); }); });
+      for (let i = 1; i < bands.length; i++) { for (let r = 0; r < 8; r++) for (let c = 0; c < 32; c++)
+        if (pxAt(bands[0].d, r, c) !== pxAt(bands[i].d, r, c))
+          { problems.push('the roof band of ' + bands[0].g + ' and ' + bands[i].g + ' differ at row ' + r + ', column ' + c + ': they are meant to be one roof over one house, and a person will see the step where the two meet'); r = 8; break; } }
+
+      // (4) AND THE ROOF RUNS THROUGH THE FRONT DOOR IN THE DRAWING TOO — which (2) above does NOT
+      // cover, because (2) reads the 3D mesh and the owner photographs the flat front camera. The
+      // first shaped casita carried its roof over the door in 3D and broke it dead at the doorway
+      // in 2D: two roof stubs with a grey gap, louder than the flat lids they replaced. A door
+      // fills its whole tile, so this only works through the engine's `cap` seam.
+      const homeDoor = (typeof DOORLOOK !== 'undefined') && DOORLOOK['⌂'];
+      if (!homeDoor || !homeDoor.cap) problems.push('the casa front door ⌂ declares no roof cap, so the engine draws it full-tile and the roofline of every casita breaks at its own front door');
+      else {
+        const dd = bake('⌂', 5, 2), ww = bake('▩', 4, 2);
+        let same = true;
+        for (let r = 0; r < 8 && same; r++) for (let c = 0; c < 32; c++)
+          if (pxAt(dd, r, c) !== pxAt(ww, r, c)) {
+            problems.push('the roof course over the front door differs from the course on the wall beside it at row ' + r + ', column ' + c + ': the house reads as two buildings with a doorway between them, which is exactly what it was shaped to stop');
+            same = false; break; }
+        // and it must NOT be painted on in 3D, where the roof is real geometry standing over the
+        // door slab — a second one baked onto the slab hangs inside the house
+        const dbk = (() => { const c2 = document.createElement('canvas'); c2.width = 32; c2.height = 32;
+          const old = ctx; ctx = c2.getContext('2d');
+          try { TILEDRAW['⌂']({ sx: 0, sy: 0, x: 5, y: 2, t: 1, bake: true }); } finally { ctx = old; }
+          return c2.getContext('2d').getImageData(0, 0, 32, 32).data; })();
+        let painted = 0; for (let c = 0; c < 32; c++) if (pxAt(dbk, 2, c) === pxAt(ww, 2, c)) painted++;
+        if (painted > 24) problems.push('the door slab baked for 3D has the roof course painted on it as well as standing over it in geometry: the house wears two roofs, one of them inside itself');
+      }
+
+      // (5) THE ❗ YOU PRESS IS STILL VISIBLE. The door marker rides a billboard lifted above the
+      // door; that lift was a constant 1.0 chosen against a flat lid at wallH≈1.096, and a roof
+      // carried over the doorway at 1.10–1.47 swallowed it whole. Found by a reader looking at the
+      // lane's own before/after frames, not by any suite: the arrow became a 6-px cream stub.
+      // ❗IT READS WHERE THE ARROW ACTUALLY ENDED UP. The first draft of this check recomputed the
+      // engine's own lift — max(1.0, cover+0.20) — and then compared it to `cover`, so it agreed
+      // with its own arithmetic: putting the engine back to the flat h:1.0 left it GREEN. Planted
+      // and caught in the lab, which is the first of the four questions in .claude/skills/guard.
+      // So: find the sprite the engine placed, and ask it how high it is.
+      const cov = (T3.group && T3.group.userData && T3.group.userData.cover) || {};
+      const arrows = (T3.pool || []).filter(p => p.live && p.spr && p.spr.visible && p.spr.userData && p.spr.userData.mark === 'door');
+      if (!arrows.length) problems.push('no door marker is standing anywhere near Doña Tencha\'s front door, so the marker-clearance check measured nothing — that is a red, not a pass');
+      let covered = 0;
+      arrows.forEach(p => {
+        // which door tile is this arrow over? the billboard is pulled 0.34 toward the camera
+        let best = null, bd = 9;
+        for (let y = 0; y < WORLDS.ex.H; y++) for (let x = 0; x < WORLDS.ex.W; x++) {
+          if (!portalAt('ex', x, y)) continue;
+          const d = Math.hypot(p.spr.position.x - (x + 0.5), p.spr.position.z - (y + 0.5));
+          if (d < bd) { bd = d; best = [x, y]; } }
+        if (!best || bd > 0.75) return;
+        const over = cov[best[0] + ',' + best[1]] || 0; if (over <= 0) return;
+        covered++;
+        // drawDoorMark's lowest ink sits 0.175 of a tile below the sprite's centre, bob included
+        const bottom = p.spr.position.y - 0.175;
+        if (bottom < over) problems.push('the ❗ over the door at ' + best[0] + ',' + best[1] + ' is inside the roof that is carried over it (the roof reaches ' + over.toFixed(2) + ', the mark bottoms out at ' + bottom.toFixed(2) + '): the one cue that says this door opens is hidden, and a player has no way to know the house can be entered');
+      });
+      if (arrows.length && !covered) problems.push('no door on Calle Dos has anything carried over it, so the marker-clearance check measured nothing — that is a red, not a pass');
+
+      // (6) AND NOTHING HUNG ON A SHAPED WALL IS BURIED IN IT. engine3d.js hangs wall decor
+      // 0.505 from the middle of a tile — 0.005 proud of the wall plane — and a shaped facade's
+      // relief stands PROUD of that plane, because a solid box has no hole in it and an opening
+      // here is built out, never cut in. The casa's sill reaches 0.627. No DECOR row lands on a
+      // casa today, so this would pass by finding nothing; it therefore proves it can fire first,
+      // against a decor row placed on a shaped tile on purpose, and only then reads the real ones.
+      const DECO_Y = 0.62, DECO_PROUD = 0.505, DECO_HALF = 0.47;
+      const buries = o => { const pa = o.geometry.attributes.position.array; let reach = 0;
+        for (let i = 0; i < pa.length; i += 3) { const Y = pa[i + 1];
+          if (Y < DECO_Y - DECO_HALF || Y > DECO_Y + DECO_HALF) continue;
+          if (Math.abs(pa[i + 2]) <= 0.5 + 1e-4 && Math.abs(pa[i]) > reach) reach = Math.abs(pa[i]);
+          if (Math.abs(pa[i]) <= 0.5 + 1e-4 && Math.abs(pa[i + 2]) > reach) reach = Math.abs(pa[i + 2]); }
+        return reach > DECO_PROUD ? reach : 0; };
+      if (!shaped.some(buries)) problems.push('the buried-decor check found no shaped wall whose face stands proud of 0.505, so it cannot tell a buried poster from a visible one and measured nothing — that is a red, not a pass');
+      // (7) AND NO CASITA FACE GOES UP ON A STREET WITHOUT A SHAPE. ▦ la reja is drawn, wears the
+      // shared 2D roofline, and stands on NO lot in the shipped game — BUILDTPL.casita uses it and
+      // no row of BUILDS uses that template. It was left a box on purpose: the owner said "just do
+      // one or two and show me" and an hour on a tile nobody can walk to is an hour of his tokens.
+      // What must never happen QUIETLY is the day somebody builds a casita lot: a flat-lidded box
+      // would stand in the middle of a pitched roof, in 3D only, and the two cameras would disagree
+      // about the same house with nothing anywhere to say so. This is that day's alarm.
+      const casitaLots = (typeof BUILDS !== 'undefined' ? BUILDS : []).filter(b => b.tpl === 'casita');
+      const unshaped = ['▩', '▨', '▦'].filter(g => TILEDRAW[g] && !(typeof TILEMESH !== 'undefined' && TILEMESH[g]));
+      if (casitaLots.length && unshaped.length)
+        problems.push('a casita lot is built (' + casitaLots.map(b => b.id).join(', ') + ') and ' + unshaped.join(' ')
+          + ' still has no shape: in 3D it will stand as a flat-lidded box in the middle of its own pitched roof while the flat cameras show it with one, and the same house will look like two different buildings depending on which camera you are in');
+      if (!unshaped.length && !casitaLots.length && !['▩', '▨', '▦'].some(g => TILEDRAW[g]))
+        problems.push('no casita face is drawable at all, so the unshaped-lot check measured nothing — that is a red, not a pass');
+
+      if (typeof DECOR !== 'undefined') DECOR.forEach(d => {
+        const hit = shaped.find(o => o.userData.x === d.x && o.userData.y === d.y && d.world === 'ex');
+        const r = hit && buries(hit);
+        if (r) problems.push('the ' + d.deco + ' at ' + d.x + ',' + d.y + ' is hung 0.505 from the middle of a tile whose ' + hit.userData.g + ' reaches ' + r.toFixed(3) + ': it is inside the wall and nobody will ever see it, and nothing in the engine will say so');
+      });
+
+      // (8) THE ROOF GOES OVER A FRONT DOOR AND NOWHERE ELSE — every door in the game, drawn twice.
+      //
+      // ❗THIS IS THE ONE THE LAST ROUND SHIPPED AND EVERY SUITE CALLED GREEN. The cap was hung on
+      // the GLYPH and nothing asked where the glyph STOOD. `⌂` is a casa's front door and it is
+      // also the way out of the room behind it — CASA_ROOM ends "#####⌂####", and so do the
+      // barbería's and the caseta's — so a course of terracotta roof tiles was painted across the
+      // top of the door INSIDE Doña Tencha's living room, indoors, in three rooms. Found by looking
+      // at the picture, never by a suite (docs/POSTMORTEM.md §2).
+      //
+      // It also holds the engine to the sentence the owner was given when he was asked what keeping
+      // this seam costs: "it is opt-in per door, every door that declares nothing is unchanged, no
+      // building metadata is updated anywhere." So this does not read the seam's flags — it DRAWS
+      // every door tile in the game as it ships, draws it again with the cap switched off, and
+      // compares all 4096 bytes. The tiles that differ must be exactly the ones with a house beside
+      // them, and every other door in both games must come out byte-identical.
+      const roofed = [], plain = [];
+      {
+        const bakeAt = (ch, tx, ty) => { const c = document.createElement('canvas'); c.width = 32; c.height = 32;
+          const old = ctx; ctx = c.getContext('2d');
+          // t is pinned: the threshold's glow is a sine of the clock and two bakes a millisecond
+          // apart would differ on their own, which would make this check report noise as a fault
+          try { TILEDRAW[ch]({ sx: 0, sy: 0, x: tx, y: ty, t: 1, canopy: () => {} }); } finally { ctx = old; }
+          return c.getContext('2d').getImageData(0, 0, 32, 32).data.join(','); };
+        const tiles = [];
+        Object.keys(WORLDS).forEach(wid => { const W = WORLDS[wid]; if (!W || !W.rows) return;
+          W.rows.forEach((row, ty) => { for (let tx = 0; tx < row.length; tx++)
+            if (DOORSET.has(row[tx]) && TILEDRAW[row[tx]]) tiles.push({ wid, x: tx, y: ty, ch: row[tx] }); }); });
+        if (tiles.length < 2) problems.push('fewer than two doors were found in the whole game, so the opt-in check measured nothing — that is a red, not a pass');
+        const hl = (typeof DOORLOOK !== 'undefined') && DOORLOOK['⌂'];
+        const keepCap = hl && hl.cap, keepH = hl && hl.capH, w0 = world;
+        try {
+          tiles.forEach(d => { world = d.wid; d.shipped = bakeAt(d.ch, d.x, d.y); });
+          if (hl) hl.cap = null;
+          tiles.forEach(d => { world = d.wid; d.plain = bakeAt(d.ch, d.x, d.y); });
+        } finally { if (hl) { hl.cap = keepCap; hl.capH = keepH; } world = w0; }
+        tiles.forEach(d => {
+          const row = WORLDS[d.wid].rows[d.y];
+          const nb = [row[d.x - 1], row[d.x + 1]].filter(c => c !== undefined);
+          const house = nb.some(c => '▩▨▦'.indexOf(c) >= 0);
+          if (d.shipped !== d.plain) { roofed.push(d.wid + ' ' + d.x + ',' + d.y);
+            if (!house) problems.push('the door at ' + d.x + ',' + d.y + ' in "' + d.wid + '" has a course of roof tiles painted across the top of it and there is no house beside it — what stands either side of it is "' + nb.join('" and "') + '". Inside a room that is a strip of terracotta roof over a living-room doorway, and it is the same door glyph as the front door only because a home and the room behind it share one'); }
+          else { plain.push(d.wid + ' ' + d.x + ',' + d.y);
+            if (house) problems.push('the front door at ' + d.x + ',' + d.y + ' in "' + d.wid + '" has a casa face beside it and wears no roof: the roofline breaks at the doorway and the house reads as two boxes with a gap between them, which is what the owner said when he looked at it'); }
+        });
+        if (!roofed.length) problems.push('not one door in the game takes the roof cap, so this check cannot tell an opt-in seam from a dead one — that is a red, not a pass');
+        if (!plain.length) problems.push('every door in the game changed when the roof cap was switched off, so "every door that declares nothing is unchanged" is false — that is a red, not a pass');
+      }
+
+      // (9) AND THE ❗ OVER EVERY OTHER DOOR IN THE GAME IS STILL AT EXACTLY 1.0. The marker's lift
+      // stopped being a constant when a roof started being carried over a doorway; the promise made
+      // in exchange was that nothing else moves. This walks every world that has a portal in it,
+      // builds the scene, and reads the sprite the engine actually placed — not the formula.
+      // It walks to EVERY door in the game rather than standing in one place and reading what
+      // happens to be near: the first draft parked the hero in the middle of each world and reached
+      // three doors out of thirty-odd, because a marker that is out of the billboard pool's range
+      // is not a marker that is at 1.0, it is a marker nobody measured. The scene is rebuilt once
+      // per world and the hero then walked door to door inside it, so the sweep costs one build a
+      // world and not one a door.
+      {
+        const w0 = world, x0 = px, y0 = py;
+        let atOne = 0, raised = 0, unseen = 0, tally = [];
+        // every DOOR TILE on every map, not every entry in PORTALSAT: a coordinate portal is only
+        // how an interior a template carries is wired up, and taking the list from there reached
+        // three doors — the three rooms — and called the other thirty-five measured.
+        const byW = {};
+        Object.keys(WORLDS).forEach(wid => { const W = WORLDS[wid]; if (!W || !W.rows) return;
+          W.rows.forEach((row, dy) => { for (let dx = 0; dx < row.length; dx++)
+            if (DOORSET.has(row[dx])) (byW[wid] = byW[wid] || []).push([dx, dy]); }); });
+        try {
+          Object.keys(byW).forEach(wid => {
+            world = wid; moving = false; held = null;
+            px = fx = byW[wid][0][0]; py = fy = byW[wid][0][1];
+            t3Invalidate(); draw3d();
+            const cov = (T3.group && T3.group.userData && T3.group.userData.cover) || {};
+            byW[wid].forEach(([dx, dy]) => {
+              px = fx = dx; py = fy = dy; draw3d();          // walk to it; the scene is already standing
+              // a door glyph that is not a portal leads nowhere yet and wears no ❗ by design
+              // (doorMarks asks portalAt, not DOORSET) — that is not a mark this check lost
+              if (!portalAt(wid, dx, dy)) return;
+              let hit = null, bd = 9;
+              (T3.pool || []).filter(p => p.live && p.spr && p.spr.visible && p.spr.userData && p.spr.userData.mark === 'door')
+                .forEach(p => { const dd = Math.hypot(p.spr.position.x - (dx + 0.5), p.spr.position.z - (dy + 0.5));
+                  if (dd < bd) { bd = dd; hit = p; } });
+              if (!hit || bd > 0.75) { unseen++; return; }
+              if ((cov[dx + ',' + dy] || 0) > 0) { raised++; return; }
+              atOne++; tally.push(wid + ' ' + dx + ',' + dy);
+              if (Math.abs(hit.spr.position.y - 1.0) > 1e-9)
+                problems.push('the ❗ over the door at ' + dx + ',' + dy + ' in "' + wid + '" is standing at ' + hit.spr.position.y.toFixed(4) + ' and nothing is carried over that tile: the casita roof was supposed to lift the mark at the doorways it covers and leave every other door in both games exactly where it was, and this one moved');
+            });
+          });
+        } finally { world = w0; px = fx = x0; py = fy = y0; t3Invalidate(); draw3d(); }
+        if (atOne < 10) problems.push('only ' + atOne + ' door marker' + (atOne === 1 ? '' : 's') + ' in the whole game stood over an uncovered tile where this check could read ' + (atOne === 1 ? 'it' : 'them') + ': "every other door is untouched" is a claim about every door, and a sweep this thin has not made it — that is a red, not a pass');
+        if (unseen) problems.push(unseen + ' door' + (unseen === 1 ? '' : 's') + ' in the game open onto somewhere and have no ❗ standing over them at all, so nobody can see they open and this check could not read their height either — the first of those is ' + (tally.length ? 'near ' + tally[0] : 'unnamed'));
+        if (!raised) problems.push('not one door marker was found over a tile with something carried across it, so this check cannot tell a lifted mark from an unlifted one — that is a red, not a pass');
+      }
+
+      // (10) THE PANE A SWEET STANDS IN. Round one named TWO readers that place in Z shallower than
+      // this house's new sill: wall decor (guarded above, (6)) and the calaverita's lit sill pane.
+      // This is the second one. The engine hangs that pane 0.12 of a tile proud of the wall face and
+      // its ledge at 0.17, and a Sprite is a flat quad — anything of the house's that reaches past
+      // it does not share the space with it, it eats it. The first shaped sill reached 0.127 and sat
+      // 0.007 in FRONT of the pane.
+      //
+      // ❗THE DEPTH IS TAKEN OFF A PANE THE ENGINE REALLY PLACED, not off the engine's source. A
+      // guard that types the constant back in is testing its own arithmetic.
+      // And the rule is geometric, so nothing has to be tagged and nothing can be tagged around:
+      // a thing that runs the WIDTH OF THE WALL is the wall — a cast sill, a lintel — and a thing
+      // the width of your hand is something somebody carried out and stood on the ledge. A pot in
+      // front of a windowpane is a pot in front of a windowpane.
+      {
+        const w0 = world, s0 = (typeof seasonPick !== 'undefined') ? seasonPick : 'auto';
+        let D = null, from = '';
+        try {
+          seasonSet('muertos');
+          const ids = Object.keys(WORLDS);
+          for (let i = 0; i < ids.length && D === null; i++) {
+            const W = WORLDS[ids[i]]; if (!W || !W.rows) continue;
+            world = ids[i]; px = fx = Math.min(W.W - 2, 5); py = fy = Math.min(W.H - 2, 5); moving = false; held = null;
+            t3Invalidate(); draw3d();
+            (T3.group.children || []).forEach(o => { const u = o.userData || {};
+              if (D !== null || !u.calaverita || !u.sill) return;
+              D = o.position.z - (u.y + 0.5); from = ids[i] + ' ' + u.x + ',' + u.y; });
+          }
+        } finally { seasonSet(s0 || 'auto'); world = w0; t3Invalidate(); draw3d(); }
+        if (D === null) problems.push('no sugar skull is standing in a lit pane on any sill in the whole game with the season forced to muertos, so the depth this check compares against could not be measured at all — that is a red, not a pass');
+        else {
+          // the widest run of this shape that stands further out than `d`, in any of the four
+          // horizontal directions, measured in the mesh's own frame — and only IN THE HEIGHT BAND A
+          // WINDOW CAN BE IN: clear of the plinth at the foot, clear of the ring beam and the eave
+          // at the head. A pane hangs in a window and a window is in a wall, so those are the only
+          // heights at which standing proud can bury one. The roof is the part that is SUPPOSED to
+          // oversail — its eave reaches 0.65 and its barrels 0.75, both wider than a tile — and the
+          // first draft of this check, bounded only by the head of the wall, reported all six roofs
+          // as buried sills because the fascia dips two thousandths below it. A roof over your head
+          // is not in front of your window.
+          const WINLO = 0.12, WINHI = 0.92;
+          const widestBeyond = (o, d) => { const pa = o.geometry.attributes.position.array; let worst = 0, deep = 0;
+            const WH = wallH(o.userData.g);
+            [[0, 1, 2], [0, -1, 2], [2, 1, 0], [2, -1, 0]].forEach(([ax, sgn, oh]) => {
+              let lo = Infinity, hi = -Infinity, far = 0;
+              for (let i = 0; i < pa.length; i += 3) { const r = pa[i + ax] * sgn;
+                if (pa[i + 1] < WH * WINLO || pa[i + 1] > WH * WINHI) continue;
+                if (r <= d + 1e-4) continue;
+                if (r > far) far = r;
+                if (pa[i + oh] < lo) lo = pa[i + oh]; if (pa[i + oh] > hi) hi = pa[i + oh]; }
+              if (hi > lo && hi - lo > worst) { worst = hi - lo; deep = far; } });
+            return [worst, deep]; };
+          // it can fire: with the pane hung at the wall face itself, the cast sill must be found
+          if (!shaped.some(o => widestBeyond(o, 0.5)[0] > 0.5))
+            problems.push('with the pane moved back to the wall face this check still finds no wall-wide cast work on any shaped facade, so it cannot tell a buried pane from a clear one and is measuring nothing — that is a red, not a pass');
+          shaped.forEach(o => { const [wide, deep] = widestBeyond(o, D);
+            if (wide > 0.5) problems.push('the cast work on ' + o.userData.g + ' at ' + o.userData.x + ',' + o.userData.y + ' stands ' + deep.toFixed(3) + ' out from the middle of its tile and runs ' + wide.toFixed(2) + ' of a tile wide — that is a sill or a lintel, not a pot — while the lit pane a sugar skull stands in is hung at ' + D.toFixed(3) + ' (measured off the one at ' + from + '). Give this window a `win` and the sweet\'s pane is clipped along its bottom edge by the very ledge that was built to hold it'); });
+        }
+      }
+
+      return problems;
+    });
+    fails.push(...casa3d);
+
     // every glyph a template can lay is a real, declared, drawable tile
     const gl = await page.evaluate(() => {
       const problems = [], seen = new Set();
@@ -3598,9 +4064,9 @@ const CANDIDATES = [
     {
       const eng = fs.readFileSync(path.resolve(__dirname, '..', 'engine', 'engine3d.js'), 'utf8');
       if (/"345"/.test(eng)) fails.push('engine3d.js still hardcodes a pack glyph list ("345") instead of asking the tile');
-      const bare = f => fs.readFileSync(path.resolve(__dirname, '..', 'engine', f), 'utf8')
+      const bare = f => fs.readFileSync(path.resolve(ENGINE_DIR, f), 'utf8')
         .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
-      ['engine.js', 'engine3d.js'].forEach(f => {
+      engineFiles(fails).forEach(f => {
         if (/\bMQT\b/.test(bare(f)))
           fails.push('engine/' + f + ' spells this pack\'s transit brand — a pack name in engine code is the one thing the portability law forbids');
       });
@@ -3907,6 +4373,99 @@ const CANDIDATES = [
     fails.push(...prop);
   }
 
+  // ---- 35. the flowers that show the souls the way are walked THROUGH, not around ----
+  // Owner, 2026-09-22: "ok can you try to lookinto making petals? that i can walk and interact
+  // through as if they were mounds of items piled up"
+  //
+  // The park lays cempasuchil from a flower bed to the ofrenda, and the map's own comment says
+  // why: "Marigolds are how the souls are shown the way — the flower IS the arrow … Walkable, so
+  // it cannot cork the park (R11)." For a day it was a WALL, because one letter was doing two
+  // jobs — a raised bed with a curb, which is solid, and loose petals on the ground, which are not.
+  //
+  // THIS SECTION READS NEITHER SOLIDX NOR ANY LETTER OF THIS PACK. The altar comes from what the
+  // season declares; the bed is whatever in the altar's own row you cannot stand on; the path is
+  // the ground between them. Then it WALKS it, on arrow keys, in the live game.
+  {
+    const setup = await page.evaluate(() => {
+      const out = { problems: [] };
+      const wid = PL.park, w = WORLDS[wid];
+      if (!w) { out.problems.push('this pack declares no park, so there is nothing to walk'); return out; }
+      // the altar, from what the pack's season sets down — never a coordinate typed here
+      const ofr = (typeof SEASONS === 'object' && SEASONS ? Object.values(SEASONS) : [])
+        .flatMap(s => ((s.art && s.art.props) || []))
+        .find(p => p && p.kind === 'ofrenda' && p.world === wid);
+      if (!ofr) { out.problems.push('no ofrenda is set down in the park, so the trail of petals is an arrow pointing at nothing — there is nothing here to measure, and that is a failure and not a pass'); return out; }
+      // the bed the flowers were cut from: the nearest thing in the altar's own row, to its west,
+      // that is a growing thing you CANNOT stand on. A raised bed has a curb; that is the whole
+      // difference between it and the petals, and it is why they must not share a letter.
+      let bx = -1;
+      for (let x = ofr.x - 1; x >= 0; x--) {
+        const g = w.grid[ofr.y][x];
+        if (SOLID.has(g)) { if ((TILES[g] || {}).kind === 'nature') bx = x; break; }
+      }
+      if (bx < 0) { out.problems.push('nothing in the altar\'s row is a flower bed you cannot walk into — the raised bed has lost its curb, and a scatter of loose petals is not a bed'); return out; }
+      const path = [];
+      for (let x = bx + 1; x < ofr.x; x++) path.push(x);
+      if (!path.length) { out.problems.push('there is no trail of petals to walk to the altar: the tile standing against it at ' + wid + '(' + bx + ',' + ofr.y + ') is "' + w.grid[ofr.y][bx] + '", a growing thing you CANNOT stand on, sitting exactly where marigolds laid on the ground should be. Either nobody laid a trail, or the trail and the raised bed are sharing one letter and the trail went solid with it — the flower IS the arrow, and an arrow you have to walk around is a wall (content/meridian/maps.js, the pk row 10 comment; R11)'); return out; }
+
+      // what the path is MADE of, before anybody walks it
+      path.forEach(x => {
+        const g = w.grid[ofr.y][x];
+        const at = wid + '(' + x + ',' + ofr.y + ')';
+        if (SOLID.has(g)) { out.problems.push('the trail that shows the souls the way is a WALL at ' + at + ': the tile is "' + g + '" and you cannot stand on it. Marigolds laid on the ground are the arrow to the altar — you are supposed to walk through them, not around them (content/meridian/maps.js, the pk row 10 comment; R11)'); return; }
+        if ((TILES[g] || {}).kind !== 'nature') out.problems.push('there are no flowers on the trail at ' + at + ': the tile is "' + g + '", which is not a growing thing — the path from the bed to the altar was cleared instead of being made walkable');
+        if (!(typeof stands === 'function' && stands(g))) out.problems.push('the petals at ' + at + ' do not stand: they are painted into the floor, so they are a rug and not a mound of flowers piled up');
+        if (!TILEDRAW[g]) out.problems.push('the petals at ' + at + ' have no art from above');
+        if (!TILESIDE[g]) out.problems.push('the petals at ' + at + ' have no profile, so the front and iso cameras lay the heap flat on the grass');
+        if (!(typeof TILEMESH !== 'undefined' && TILEMESH[g])) out.problems.push('the petals at ' + at + ' have no shape in 3D, so the one camera that could show a heap shows a picture of one');
+      });
+
+      // stand the hero one tile NORTH of the first petals, and clear everything that could
+      // refuse a step for a reason that is not the trail
+      const start = { x: path[0], y: ofr.y - 1 };
+      if (SOLID.has(w.grid[start.y][start.x])) { out.problems.push('there is no way onto the trail from the north at ' + wid + '(' + start.x + ',' + start.y + ')'); return out; }
+      out.wid = wid; out.ofr = { x: ofr.x, y: ofr.y }; out.bed = bx; out.path = path; out.start = start;
+      out.before = (typeof PETALS !== 'undefined' ? PETALS.length : -1);
+      world = wid; px = fx = start.x; py = fy = start.y; dir = 'down';
+      moving = false; held = null; warpT = 0; portalHold = '';
+      camSet('top');                                  // held direction maps 1:1 to the world
+      window.__petalSeen = [];                        // every tile the hero actually stood on
+      window.__petalTick = setInterval(() => { window.__petalSeen.push(px + ',' + py); }, 40);
+      return out;
+    });
+    setup.walked = !setup.problems.length && !!setup.path;
+    if (setup.walked) {
+      // PRESS THE KEYS. One tap a tile: down onto the first petals, then east along the trail to
+      // the altar. Nothing here calls tryStep() or petalDrop() — a person walks this.
+      const tap = async k => { await page.keyboard.down(k); await page.waitForTimeout(110); await page.keyboard.up(k); await page.waitForTimeout(420); };
+      await tap('ArrowDown');
+      for (let i = 0; i < setup.path.length; i++) await tap('ArrowRight');
+      // and the bed must still refuse him: turn round and walk back into it
+      for (let i = 0; i < setup.path.length; i++) await tap('ArrowLeft');
+      await tap('ArrowLeft');
+    }
+    const walk = await page.evaluate(s => {
+      const problems = [];
+      // Nobody walked, because the setup above already found what is wrong. Say nothing here —
+      // a guard that prints "the petals stopped him" about a walk that never happened is telling
+      // the next person to go and look at the movement code for a fault that is in the map.
+      if (!s.walked) { clearInterval(window.__petalTick); return problems; }
+      clearInterval(window.__petalTick);
+      const seen = new Set(window.__petalSeen || []);
+      s.path.forEach(x => { if (!seen.has(x + ',' + s.ofr.y)) problems.push('walking the trail never put the hero on ' + s.wid + '(' + x + ',' + s.ofr.y + '): the petals stopped him, so the path the souls are shown has to be walked around'); });
+      if (!seen.has(s.ofr.x + ',' + s.ofr.y)) problems.push('walking east along the petals never reached the altar at ' + s.wid + '(' + s.ofr.x + ',' + s.ofr.y + ') — the trail does not go where it points');
+      if (seen.has(s.bed + ',' + s.ofr.y)) problems.push('the hero walked INTO the flower bed at ' + s.wid + '(' + s.bed + ',' + s.ofr.y + '): a raised bed has a curb, and making the petals walkable must not take the bed\'s curb with it');
+      // the interact: you walk through a heap of petals and some of it comes away on your shoes
+      const after = (typeof PETALS !== 'undefined' ? PETALS.length : -1);
+      const onPath = (typeof PETALS !== 'undefined' ? PETALS : []).filter(p => p.w === s.wid && p.y === s.ofr.y && s.path.indexOf(p.x) >= 0).length;
+      if (after <= s.before || !onPath) problems.push('walking through the petals disturbed nothing: ' + (after - s.before) + ' petals came loose on the whole walk and ' + onPath + ' of them on the trail. A mound of loose flowers you can walk through and not touch is a painted rug');
+      // put the park back the way the next section expects it
+      px = fx = PL.parkIn[0]; py = fy = PL.parkIn[1]; moving = false; held = null;
+      return problems;
+    }, setup);
+    fails.push(...setup.problems, ...walk);
+  }
+
   // ---- R1: something stands under every animal, and an animal is only where its pack put it ----
   // Lorenzo floated in the town (#38): the parrot was pinned to a fence only Meridian has.
   // Ground animals need a walkable tile; the parrot needs a perch — a solid or lifted tile.
@@ -4154,9 +4713,10 @@ const CANDIDATES = [
     const mid = Math.round((L.from + L.to) / 2);
     py = fy = L.row; px = fx = mid;                       /* the hero, standing on the rails */
     /* put him dead in the middle of the car: want d = -1, and d = (px-nose)*dir, so nose = px+dir */
-    TRO.x = (px + TRO.dir) - (TRO.dir > 0 ? TRO_LEN : 0);
-    const nose = TRO.x + (TRO.dir > 0 ? TRO_LEN : 0), d = (px - nose) * TRO.dir;
-    if (d < -TRO_LEN || d > 0) P.push('this check did not manage to stand the hero under the tram (d=' + d.toFixed(2) + ') — it proves nothing');
+    const span = (typeof troSpan === 'function') ? troSpan(L) : TRO_LEN;   /* a train is longer than a car, and the body he is standing under is all of it */
+    TRO.x = (px + TRO.dir) - (TRO.dir > 0 ? span : 0);
+    const nose = TRO.x + (TRO.dir > 0 ? span : 0), d = (px - nose) * TRO.dir;
+    if (d < -span || d > 0) P.push('this check did not manage to stand the hero under the tram (d=' + d.toFixed(2) + ') — it proves nothing');
     else if (!troAhead(L))
       P.push('a person standing on the rails INSIDE the tram is invisible to it — it is ' + Math.abs(d).toFixed(2) +
              ' tiles behind the nose, under the car, and the tram rolls straight through without slowing');
@@ -4308,7 +4868,12 @@ const CANDIDATES = [
         TRO.x = s.x - TRO.dir * 3;
         let still = 0, served = 0, standX = null;
         for (let i = 0; i < 200; i++) {
-          const x0 = TRO.x, at = (s.x >= TRO.x - 0.5 && s.x <= TRO.x + TRO_LEN + 0.5);
+          /* the engine's own window, not a copy of it. This line used to spell the serving test out
+             by hand — `s.x >= TRO.x-0.5 && s.x <= TRO.x+TRO_LEN+0.5` — which is two copies of one
+             number, and the day troServing changed (crew 14: a train berths its LEADING car, not
+             whichever of three is level with the sign) the check would have kept measuring the old
+             one and passed. Ask the function the game asks. */
+          const x0 = TRO.x, at = !!troServing(L);
           troUpdate(50);
           if (at && TRO.state !== 'away') { served += 50;
             /* standing still AND with nothing on the rails in front of it. The first draft counted
@@ -4341,7 +4906,7 @@ const CANDIDATES = [
         world = L.world; px = fx = s.x; py = fy = s.y; TRO.x = mine.standX; TRO.state = 'dwell';
         const shown = {};
         ['top', 'front'].forEach(c => { camSet(c); draw(); const sx = mine.standX * TS - camXg, sy = L.row * TS - camYg;
-          shown[c] = sx + TS * TRO_LEN > 0 && sx < VW && sy + TS > 0 && sy < VH; });
+          shown[c] = sx + TS * troSpan(L) > 0 && sx < VW && sy + TS > 0 && sy < VH; });
         camSet(keep3.cam); TRO.x = keep3.x; TRO.state = keep3.st;
         Object.keys(shown).filter(c => !shown[c]).forEach(c => P.push('the trolley stops for you in ' + L.world + ' at x=' + mine.standX.toFixed(1) +
           ', past the end of the street — with you at the stop the ' + c + ' camera shows none of it: it stopped, and not where you can see it'));
@@ -4537,6 +5102,268 @@ const CANDIDATES = [
     return P;
   });
   fails.push(...sills);
+
+  /* ---- THE ALTAR HAS A TABLE UNDER IT, AND IT IS THE ALTAR'S SIZE ----
+     Owner, 2026-09-22: "dona tenchas table is too small. take it out when its dia de los muertos or
+     alebrijes mode and replae it with a bigger table for the altar. please"
+
+     WHAT THIS ASKS, AND WHY IT IS NOT A WIDTH. The obvious check is "is the table's bounding box at
+     least as wide as the altar's", and it is proxy #9 all over again — the tram's skirt reached the
+     road with all four wheels deleted. The round table's own two chairs stand at x ±0.43, so its BOX
+     is 1.09 wide while the cloth you could actually set something on is a disc 0.68 across: a box
+     check calls that "wide enough" and the altar is still standing on air with two chair backs under
+     its corners. The noun is not a width, it is CONTACT — for every place the altar touches down, is
+     there table under it? So this takes the altar's own base out of the built geometry and drops a
+     ray from each point onto the tile's shape. Nothing else can tell the difference between a table
+     and two slats with a table's width of air between them.
+
+     IT CANNOT PASS BY FINDING NOTHING. No season with an ofrenda on a solid tile, no world, no shape
+     under the prop, no prop in the scene — every one of those is a RED with its own sentence, because
+     "nothing to measure" has printed a pass sentence in this repository before (docs/REGRESSION.md
+     #21, and the first sill guard, which went green against three planted violations). */
+  const altarTables = await page.evaluate(() => {
+    const P = [];
+    if (typeof SEASONS === 'undefined' || typeof seasonSet !== 'function' || typeof THREE === 'undefined' ||
+        typeof fiestaProps !== 'function' || typeof draw3d !== 'function') {
+      P.push('nothing measured whether the altar has a table under it: the season seam, three.js or the 3D camera is missing'); return P; }
+    const keep = { w: world, px: px, py: py, cam: camMode, season: (typeof seasonNow === 'function' ? seasonNow() : null) };
+    const restore = () => { seasonSet(keep.season); world = keep.w; px = fx = keep.px; py = fy = keep.py; camSet(keep.cam); };
+
+    /* ASK THE ENGINE where an ofrenda stands ON something — `props` is nested under `art` in this
+       pack, so reading the config file's shape finds nothing and returns early (POSTMORTEM §13).
+       `up` here is the engine's own test, copied from the season-prop pass in engine3d.js. */
+    const stood = [], flat = [];
+    for (const k of Object.keys(SEASONS)) { seasonSet(k);
+      for (const wid of Object.keys(WORLDS)) {
+        const w = WORLDS[wid]; if (!w || !w.rows) continue;
+        (fiestaProps(wid) || []).forEach(p => { if (p.kind !== 'ofrenda') return;
+          const g = w.rows[p.y] && w.rows[p.y][p.x];
+          const up = g !== undefined && (SOLID.has(g) || ((TILES[g] || {}).lift | 0) >= 5);
+          (up ? stood : flat).push({ season: k, world: wid, x: p.x, y: p.y, g: g }); }); } }
+    if (!stood.length) { restore();
+      P.push('no season in this pack stands an ofrenda on a table — ' + flat.length + ' ofrendas were found and every one is on the floor. ' +
+        'So this check measured nothing, and nothing to measure is a red, not a pass'); return P; }
+
+    for (const job of stood) {
+      seasonSet(job.season); world = job.world; px = fx = job.x; py = fy = job.y + 3; moving = false; held = null;
+      camSet('3d'); draw3d();
+      const root = (typeof T3 !== 'undefined' && T3) ? T3.group : null;
+      if (!root) { P.push('the 3D scene did not build at all for ' + job.world + ', so the altar at (' + job.x + ',' + job.y + ') was never measured'); continue; }
+      let table = null, altar = null;
+      root.children.forEach(o => { const u = o.userData || {}; if (!o.geometry) return;
+        if (u.ofrenda) altar = o;
+        else if (u.mesh && u.g && u.x === job.x && u.y === job.y) table = o; });
+      if (!altar) { P.push('in ' + job.season + ' the ofrenda at ' + job.world + ' (' + job.x + ',' + job.y + ') is not a shape in the 3D scene, ' +
+        'so whether it has a table under it could not be measured at all'); continue; }
+      if (!table) { P.push('in ' + job.season + ' the ofrenda at ' + job.world + ' (' + job.x + ',' + job.y + ') is standing on tile "' + job.g +
+        '", and that tile has no shape in 3D — there is nothing under the altar to measure'); continue; }
+
+      /* THE ALTAR'S OWN FEET, out of its built geometry: every vertex within 0.025 of its base is a
+         place it touches down. Taken in its own local space and carried out through its own matrix,
+         so the 0.8 the engine scales it by is included and not retyped here (guard trap A). */
+      altar.updateMatrixWorld(true); table.updateMatrixWorld(true);
+      const pos = altar.geometry.getAttribute('position');
+      const seen = new Set(), feet = [];
+      const v = new THREE.Vector3();
+      for (let i = 0; i < pos.count; i++) {
+        if (pos.getY(i) > 0.025) continue;
+        v.set(pos.getX(i), pos.getY(i), pos.getZ(i)).applyMatrix4(altar.matrixWorld);
+        const key = Math.round(v.x * 60) + ',' + Math.round(v.z * 60);   /* one sample per ~1.7cm of floor */
+        if (seen.has(key)) continue; seen.add(key); feet.push({ x: v.x, z: v.z });
+      }
+      if (feet.length < 8) { P.push('in ' + job.season + ' the ofrenda at ' + job.world + ' (' + job.x + ',' + job.y + ') has only ' + feet.length +
+        ' points where it touches down, which is too few to say anything about what is under it'); continue; }
+
+      const ab = altar.geometry.boundingBox || (altar.geometry.computeBoundingBox(), altar.geometry.boundingBox);
+      const sc = altar.scale.x, aw = (ab.max.x - ab.min.x) * sc, ad = (ab.max.z - ab.min.z) * sc;
+
+      /* AND THE ALTAR IS STILL THE ALTAR'S SIZE — because CONTACT ALONE PASSES THE OPPOSITE WRONG FIX.
+         Leave the round table exactly where it is and shrink the ofrenda until it fits on the cloth:
+         every foot lands on something, nothing is standing on air, the contact test below counts zero
+         misses and prints OK — and the owner, who asked for a BIGGER TABLE, has been given a SMALLER
+         ALTAR. That is not a hypothetical: planted 2026-09-22 by reverting content/meridian/art.js to
+         its old round table and setting the engine's `sc = up ? 0.8 : 1` to 0.45, this whole block went
+         green. A guard that green-lights the opposite of the ask is not a guard, so the size the altar
+         has to KEEP is asserted here and not inferred from the fact that it fits.
+
+         WHERE 0.75 AND 0.57 COME FROM, so nobody has to guess later. An ofrenda is drawn to fill the
+         tile it is set on, and the engine scales it to 0.8 when it stands on something (engine3d.js,
+         the `sc = up ? 0.8 : 1` line), which measures 0.83 wide by 0.64 deep out of the built geometry.
+         These are 90% of that: enough slack that somebody redrawing the altar's art pays nothing, tight
+         enough that any extra shrink below about 0.72 of a tile is caught by the width. */
+      if (aw < 0.75 || ad < 0.57) {
+        P.push('in ' + job.season + ' the altar at ' + job.world + ' (' + job.x + ',' + job.y + ') has been shrunk to fit its table: it measures ' +
+          aw.toFixed(2) + ' wide and ' + ad.toFixed(2) + ' deep, where an ofrenda standing on something is 0.83 by 0.64 — near enough ' +
+          'the whole tile it is set on. Somebody made the altar smaller instead of the table bigger, and the owner asked for the table');
+      }
+
+      const ray = new THREE.Raycaster(), down = new THREE.Vector3(0, -1, 0), from = new THREE.Vector3();
+      const standY = altar.position.y;
+      let miss = 0;
+      feet.forEach(f => { from.set(f.x, standY + 0.12, f.z); ray.set(from, down);
+        if (!ray.intersectObject(table, false).length) miss++; });
+
+      if (miss) {
+        /* what it IS standing on, at the height it stands: the tile's shape sliced at the altar's feet */
+        const tp = table.geometry.getAttribute('position');
+        let tx0 = 1e9, tx1 = -1e9, tz0 = 1e9, tz1 = -1e9, n = 0;
+        const top = (table.t3Top !== undefined ? table.t3Top : standY);
+        for (let i = 0; i < tp.count; i++) { const ty = tp.getY(i); if (ty < top - 0.02 || ty > top + 0.001) continue;
+          n++; const X = tp.getX(i), Z = tp.getZ(i);
+          if (X < tx0) tx0 = X; if (X > tx1) tx1 = X; if (Z < tz0) tz0 = Z; if (Z > tz1) tz1 = Z; }
+        P.push('in ' + job.season + ' the altar at ' + job.world + ' (' + job.x + ',' + job.y + ') is standing on a table too small for it: ' +
+          miss + ' of the ' + feet.length + ' places where it touches down have nothing under them. The altar is ' +
+          aw.toFixed(2) + ' wide and ' + ad.toFixed(2) + ' deep; what it is resting on measures ' +
+          (n ? (tx1 - tx0).toFixed(2) + ' by ' + (tz1 - tz0).toFixed(2) : 'nothing at all') +
+          '. In a house you do not balance an ofrenda on the table you eat at — you carry in a bigger one');
+      }
+    }
+
+    /* AND THE SEVEN TABLES NOBODY ASKED ABOUT. There are eight `T` tiles in this game and only one of
+       them is Doña Tencha's; the other seven are La Cocina's four dinner tables (lc 3,3 · 7,3 · 11,3 ·
+       15,3), La Panadería's two (pa 15,5 · 13,7) and one in the lobby (lo 11,5) — counted out of the
+       built rows on 2026-09-22, because the first draft of this sentence said eight and named six. The
+       cheap way to make the check above pass is to swap the table for the whole season, which would
+       set a funeral table under four restaurant dinners in both seasons and nobody would find it
+       until he did. So: a table with NO altar on it is the same shape in season as out of it. */
+    const onAltar = new Set(stood.concat(flat).map(j => j.world + ':' + j.x + ',' + j.y));
+    const shapeOf = (wid, x, y) => { world = wid; px = fx = x; py = fy = Math.min(y + 3, WORLDS[wid].rows.length - 1);
+      moving = false; camSet('3d'); draw3d();
+      let m = null; (T3.group ? T3.group.children : []).forEach(o => { const u = o.userData || {};
+        if (u.mesh && u.g && u.x === x && u.y === y && o.geometry) m = o; });
+      if (!m) return null;
+      m.geometry.computeBoundingBox(); const b = m.geometry.boundingBox;
+      return m.geometry.getAttribute('position').count + '|' + [b.min.x, b.max.x, b.min.y, b.max.y, b.min.z, b.max.z].map(q => q.toFixed(3)).join(','); };
+    let checked = 0;
+    for (const wid of Object.keys(WORLDS)) { const w = WORLDS[wid]; if (!w || !w.rows) continue;
+      for (let y = 0; y < w.rows.length; y++) for (let x = 0; x < w.rows[y].length; x++) {
+        if (w.rows[y][x] !== 'T' || onAltar.has(wid + ':' + x + ',' + y)) continue;
+        seasonSet('off'); const off = shapeOf(wid, x, y);
+        if (off === null) continue;
+        for (const k of Object.keys(SEASONS)) { seasonSet(k); const on = shapeOf(wid, x, y);
+          checked++;
+          if (on !== off) { P.push('in ' + k + ' the table at ' + wid + ' (' + x + ',' + y + ') changed shape, and there is no altar on it — ' +
+            'the season is dressing every table in the game instead of the one the ofrenda stands on, so ' +
+            "La Cocina's dinner tables are altar tables now"); } } } }
+    if (!checked) P.push('there is no table anywhere in this game without an altar on it, so nothing checked that the season leaves the other tables alone');
+
+    /* ---- AND THE SAME TABLE IN THE THREE CAMERAS THAT ARE NOT 3D ----
+       The first version of this fix was a 3D-camera change and nothing else, and in the flat cameras
+       the altar went on standing over the ROUND table: the front camera drew its two thin legs under
+       the ofrenda sprite and the top camera showed its red gingham through the marigold arch. Both were
+       already drawing a table and neither had been told it changed. (Iso is not in this check and
+       cannot be: `drawIso` paints a solid tile as one flat colour out of `ISOCOL`, engine/engine.js:862,
+       so it has never drawn this table at all and no pack change reaches it.) So the check is: ON THE
+       ALTAR'S TILE, in season, BOTH the top-down drawing and the front profile must differ from what
+       they are out of season — and on every other `T` tile both must be identical to it.
+
+       WHAT THIS COMPARISON THROWS AWAY, named in the same breath as the result (the crew rule: name what your comparison discarded): it
+       paints ONE tile, alone, into a 32x32 buffer and compares the RGBA bytes. It therefore knows
+       nothing about draw ORDER, nothing about what is painted over this tile afterwards — the ofrenda
+       sprite is painted over it, which is the whole reason the first version looked fine — and nothing
+       about any camera's own shading. It answers one question: did the drawing change. Whether the
+       change is VISIBLE is a thing only a picture can answer, and it was answered with one.
+
+       Borrowing `ctx` for an offscreen canvas is the engine's own idiom for this; test/tilesheet.js
+       has done it since the cold-read sheet shipped. */
+    const paintTile = (view, x, y) => {
+      const fn = (typeof tileView === 'function') ? tileView('T', view) : null;
+      if (typeof fn !== 'function') return null;
+      const c = document.createElement('canvas'); c.width = 32; c.height = 32;
+      const old = ctx; let out = null;
+      try { ctx = c.getContext('2d'); fn({ sx: 0, sy: 0, x: x, y: y, canopy: () => {} });
+        const d = c.getContext('2d').getImageData(0, 0, 32, 32).data;
+        let ink = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) ink++;
+        out = { sig: Array.from(d).join(','), ink: ink / (32 * 32) }; }
+      catch (e) { out = { threw: e.message }; }
+      ctx = old; return out; };
+
+    /* ---- AND THE DRAWING HAS TO BE A DRAWING. THIS IS THE HOLE THE FIRST VERSION HAD. ----
+       Everything below compares one signature against another, and two signatures that are both
+       EMPTY compare equal. That is not a hypothetical either: the pack puts a getter in front of the
+       engine's own `TILEDRAW["T"]` and captures the original at the moment `Object.assign` reads it
+       (content/meridian/art.js, `wrapTableArt`), and the first draft froze that capture even when it
+       found nothing. Planted on 2026-09-22 — one line, `void TILEART.T;`, reading the top view before
+       engine.js has built `TILEDRAW` — it took the top-down drawing away from ALL EIGHT `T` tiles in
+       the game: La Cocina's four dinner tables, La Panadería's two and the lobby's one were bare
+       floor from above, and THIS BLOCK PRINTED NOTHING, because blank in season equalled blank out of
+       it. The suite said "OK — 60 quests, maxXP 880, all invariants hold."
+
+       So an empty tile is a RED, everywhere, in both views, in season and out — the fourth guard trap
+       in `.claude/skills/guard/SKILL.md`, "nothing to measure is a red, never a pass", applied to the
+       measurement itself rather than to the subject. The two failures are opposite and BOTH are now
+       named: a wrapper that never got installed leaves the altar's tile drawn the same in season as
+       out of it (caught below by the `onTop === offTop` pair), and a wrapper installed with nothing
+       behind it leaves every OTHER table drawn as nothing at all (caught here). Planted both ways.
+
+       AND IT IS INK, NOT EMPTINESS, BECAUSE "NOT BLANK" IS ONE PIXEL AWAY FROM BLANK. A wrapper that
+       returned a single grey dot for every table in the game would clear a blank test and leave the
+       game just as broken, so the floor is a SHARE OF THE TILE. A table is a big object in its own
+       square and the four real drawings are nowhere near the line — measured on 2026-09-22 out of
+       these same 32x32 buffers, every `T` tile in the game: the round table from above 0.5527 and
+       from the front 0.4023, the altar table from above 0.8750 and from the front 0.4863. The floor
+       is 0.08, a fifth of the thinnest of them, so no honest redraw trips it and a token dot cannot
+       pass it. (WHAT THE SHARE THROWS AWAY, in the same breath as the result: it counts pixels with
+       any alpha at all and knows nothing about WHICH pixels, so it cannot tell a table from a blot
+       of the same area. The identity comparison below is what says it is the same table; this only
+       says something was painted.) */
+    const INK = 0.08;
+    const drew = (r, who, view, when) => {
+      const cam = view === 'top' ? 'FROM ABOVE' : 'in the FRONT camera';
+      if (r === null) { P.push(who + ' has no ' + (view === 'top' ? 'top-down drawing' : 'front profile') + ' at all ' + when +
+        ', so the cameras that are not 3D could not be checked — and those are three of the four'); return false; }
+      if (r.threw !== undefined) {
+        P.push(who + ' threw while it was being drawn ' + cam + ' ' + when + ' (' + r.threw + ')'); return false; }
+      if (r.ink < INK) { P.push(who + ' is drawn as ' + (r.ink === 0 ? 'NOTHING AT ALL' : 'almost nothing — ' + Math.round(r.ink * 100) +
+        '% of the tile') + ' ' + cam + ' ' + when + ', so in that camera the table is bare floor. The pack stands a wrapper in front ' +
+        'of the engine\'s own table drawing (content/meridian/art.js, wrapTableArt) and this is what it looks like when the wrapper ' +
+        'has nothing behind it: every table in the game disappears, not just this one'); return false; }
+      return true; };
+
+    let flatChecked = 0;
+    for (const job of stood) {
+      world = job.world;
+      const who = 'the tile the altar stands on at ' + job.world + ' (' + job.x + ',' + job.y + ')';
+      seasonSet('off');      const offTop = paintTile('top', job.x, job.y), offSide = paintTile('side', job.x, job.y);
+      seasonSet(job.season); const onTop  = paintTile('top', job.x, job.y), onSide  = paintTile('side', job.x, job.y);
+      const ok = [drew(offTop, who, 'top', 'out of season'), drew(offSide, who, 'side', 'out of season'),
+                  drew(onTop, who, 'top', 'in ' + job.season), drew(onSide, who, 'side', 'in ' + job.season)];
+      if (ok.some(q => !q)) continue;
+      flatChecked++;
+      if (onTop.sig === offTop.sig) P.push('in ' + job.season + ' the tile the altar stands on at ' + job.world + ' (' + job.x + ',' + job.y + ') is drawn ' +
+        'FROM ABOVE exactly as it is out of season, so in the top camera the altar is still standing on the small round dinner table ' +
+        '— you can see it through the gap in the marigold arch');
+      if (onSide.sig === offSide.sig) P.push('in ' + job.season + ' the FRONT camera draws the tile the altar stands on at ' + job.world + ' (' + job.x + ',' +
+        job.y + ') exactly as it does out of season, so the legs and the gingham edge showing either side of the ofrenda are still the ' +
+        'small round table\'s');
+    }
+    if (!flatChecked) P.push('nothing checked whether the flat cameras show the altar\'s table, so three of the four cameras went unmeasured');
+
+    let othersDrawn = 0;
+    for (const wid of Object.keys(WORLDS)) { const w = WORLDS[wid]; if (!w || !w.rows) continue;
+      for (let y = 0; y < w.rows.length; y++) for (let x = 0; x < w.rows[y].length; x++) {
+        if (w.rows[y][x] !== 'T' || onAltar.has(wid + ':' + x + ',' + y)) continue;
+        world = wid;
+        const who = 'the table at ' + wid + ' (' + x + ',' + y + '), which has no altar on it,';
+        seasonSet('off'); const oT = paintTile('top', x, y), oS = paintTile('side', x, y);
+        /* this used to be `if (oT === null) continue;` — a table with no drawing was SKIPPED here and
+           RED on the altar's own tile, which is the same fault guarded on one side and waved through
+           on the other. It is red on both sides now. */
+        if (!drew(oT, who, 'top', 'out of season') || !drew(oS, who, 'side', 'out of season')) continue;
+        othersDrawn++;
+        for (const k of Object.keys(SEASONS)) { seasonSet(k);
+          const kT = paintTile('top', x, y), kS = paintTile('side', x, y);
+          if (!drew(kT, who, 'top', 'in ' + k) || !drew(kS, who, 'side', 'in ' + k)) continue;
+          if (kT.sig !== oT.sig || kS.sig !== oS.sig)
+            P.push('in ' + k + ' the table at ' + wid + ' (' + x + ',' + y + ') is DRAWN differently and there is no altar on it — ' +
+              'the altar cloth has been thrown over every table in the game in the flat cameras too'); } } }
+    if (!othersDrawn) P.push('not one table without an altar on it could be drawn in the flat cameras, so nothing checked that the ' +
+      'season leaves the rest of the game\'s tables alone — and nothing to measure is a red, not a pass');
+
+    restore();
+    return P;
+  });
+  fails.push(...altarTables);
 
   /* ---- and in the FRONT camera the sill box has to REACH THE CANVAS at all ----
      Chema, 2026-09-14 (docs/3D-LOG.md): blank the one painter and diff the frame. In the front camera

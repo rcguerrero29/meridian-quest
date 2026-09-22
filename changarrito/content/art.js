@@ -38,3 +38,38 @@ TILEART["▧"]=rc=>{const{sx,sy,x,y}=rc;
   ctx.fillStyle="#C4BBA6";ctx.fillRect(sx,sy+TS-3,TS,3);};                /* the dado */
 const TILEART_SIDE={"▧":TILEART["▧"]};   /* the wall reads the same from the front cameras */
 
+/* ---------- THE SHAPES THIS TOWN TAKES FROM THE ENGINE (2026-09-22) ----------
+   `engine/shapes.js` offers thirteen letters. A world takes the ones it agrees with by naming them
+   here, and naming nothing means taking nothing — the engine does not decide this for anybody,
+   because a world that never mentioned a letter has not agreed about it, it has said nothing.
+
+   These seven were rendered at phone size, before and after, and kept because the new one reads as
+   MORE of the thing than the old one did:
+     P  plants        16 tiles   a flat picture of a pot  ->  a thrown pot with leaves in it
+     F  picket fence  93 tiles   a plane with a fence printed on it, invisible edge-on -> pickets
+     ◺  well rail      9 tiles   the same plane, on the lip  ->  a handrail with newels at its ends
+     A  drafting table 6 tiles   flat picture  ->  a tilted board on legs
+     W  fridge         3 tiles   flat picture  ->  a box with a door and a handle
+     9  doghouse       1 tile    flat picture  ->  a little building with a pitched roof
+
+   WHAT IS DELIBERATELY NOT HERE, and why, because the absences are the decision:
+   · `H` — the engine's `H` is an open produce crate. THIS TOWN'S `H` IS A RACK IN A HOUSE
+     (`changarrito/content/maps.js`, grep "racks"). The town never drew the letter, so it has been
+     showing the engine's crate in 2D all along; standing that crate UP as a solid object with
+     produce in it is the point at which somebody notices there are six crates of tomatoes in the
+     bedrooms. One letter, two objects — the third time in this engine, after `I` and `b`.
+   · `J` — the jacaranda, 3 tiles, TAKEN AND THEN GIVEN BACK on 2026-09-22 after a reader looked at
+     it. `wearsArt` only sees a BOX's art (a `TILESIDE` drawing baked onto four faces and a lid), and
+     a tree is not a box: its art is the sprite canopy the engine bakes by hand at
+     `engine/engine3d.js` (grep "one jacaranda canopy"), which paints six blossoms with
+     `art("bloom","#B08FE0")` and changes them in season. `engine/shapes.js`'s `tree` has three
+     greens and no bloom at all, so taking `J` swapped a jacaranda in flower for a bare green tree
+     and dropped its season with it. THIS IS THE SAME CLASS AS `H` SEEN FROM THE OTHER SIDE: the
+     gate's "never replace a drawing" clause was right and could not see this drawing, because the
+     drawing was not on a box. Until the library's tree can bloom, the town keeps the engine's.
+   · `K`(33) `S`(16) `D`(8) `T`(7) `V`(7) — seventy-one tiles that are NOT flat today. They stand
+     as boxes wearing their own drawings: the counter run carries a coffee machine on its front and
+     a cup on its lid, the tables carry a gingham cloth and two plates. The mesh view has no
+     texture channel, so taking these would trade that art for bare geometry. The engine's gate
+     refuses them anyway (`wearsArt`), and this list agrees with it in writing. */
+const SHAPETAKE="PF◺AW9";

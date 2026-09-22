@@ -90,3 +90,4 @@ inspector-paro-fuera-de-via|1b030f1d5eae|edb653e54496
 muebleria-la-ultima-caja|cf67df34a8db|69d1a9626e80
 pili-cuatro-pinatas-una-sombra|1b508208bfb7|cf68823a37b8
 panadera-el-cliente-le-pone-nombre|11f9871ff370|ab086203fc0d
+repartidor-rehusado-en-la-puerta|5fa078c7071c|c2d04953a840

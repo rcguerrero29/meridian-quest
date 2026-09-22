@@ -100,19 +100,126 @@ architecture.**
 A camera a pack does not declare has **no button** and cannot be reached, however it is asked for —
 including by a saved choice from before a pack dropped one.
 
-### And what a glyph looks like — one entry, four slots
+### And what a glyph looks like — one entry, FIVE slots
 
-A glyph has four views. It used to be describable in two, with two holes: the leafy top of a tree
+A glyph has five views. It used to be describable in two, with two holes: the leafy top of a tree
 was hardcoded in the engine, and there was nowhere at all to describe the isometric view.
 
     TILEART["J"] = { top: fn, side: fn, crown: fn, iso: fn, mesh: fn }
 
 Fill in the views you care about; the rest come back empty and the renderer decides. **A bare
-function still means `top`**, so nothing already written changes. `mesh` (2026-09-21) is a list of primitives — `{s:"box"|"sph"|"cyl"|"cone", x,y,z, w,h,d | r,rt,rb, c, rx,ry,rz, sx,sy,sz}` in tile units, y up — that the 3D camera merges into one shape; a glyph with one is never a box or a picture there. `crown` is what stands *above* the
+function still means `top`**, so nothing already written changes. `crown` is what stands *above* the
 tile — a tree's canopy, a lamp globe, a market umbrella.
 
-**The recipe for giving a thing a shape — from the 2D drawing to a frame at phone size, and what the
-marigold taught — is `.claude/skills/shapes/SKILL.md`; load it before drawing any object as parts.**
+`mesh` (2026-09-21) is the 3D one: a list of parts the camera merges into a single shape, so a
+glyph that has one is never a box and never a picture. **Five primitives, and the fifth is
+`torus`:**
+
+    { s:"box"|"sph"|"cyl"|"cone"|"torus",
+      x,y,z,            // tile units, y up from the floor, the tile's centre at (0,0)
+      w,h,d,            // box
+      r, rt,rb, h,      // sph / cone / cyl (rt,rb taper a cylinder into a thrown pot)
+      r, t, arc,        // torus: ring radius, tube, and how much of the ring
+      rx,ry,rz, sx,sy,sz,
+      c:"#RRGGBB",
+      a: 0.55 }         // ANY `a` under 1 is GLASS — a second, transparent mesh under the tile's
+
+`torus` is easy to miss and it is the one that stops things looking printed: a ring on a stove, an
+arch over a door, the bones on a pan de muerto, the handle of a cup. The engine's own comment said
+"box, sphere, cylinder, cone" for a year while the code had five; it says five now.
+
+### What the engine already has a shape for — and the ONE line you write to take it
+
+`engine/shapes.js` ships thirteen shapes **named by what they are**, not by a letter:
+
+    plant · tree · desk · table · crate · shelving · fridge · stove
+    counter · draftingTable · picketFence · wellRail · doghouse
+
+`SHAPEBIND` in that file is the engine's reading of its own letters (`P J D T H S W V K A F ◺ 9`).
+**It is an offer, not a default.** You take it by naming the letters you agree with, in one string
+in your `art.js`:
+
+    const SHAPETAKE = "PF◺AWJ9";        // the letters the engine may shape for me
+
+**No `SHAPETAKE` means no shapes.** That is deliberate and it cost something to learn: the first
+version of this gate bound every letter a pack had not spoken about, reading silence as agreement.
+But a world that never mentioned a letter has not agreed about it — it has said nothing. El
+Changarrito lays six `H` and calls them RACKS in its houses; the engine's `H` is an open PRODUCE
+CRATE. The town had never drawn `H` at all, so every question the gate knew how to ask ("did this
+pack draw it? declare it? give it a mesh?") answered *no*, correctly, and six crates of tomatoes
+stood up in the bedrooms. **Nothing in this engine records what a world MEANS by a letter it has
+never drawn.** Only you know that, so only you can say it.
+
+The gate in `engine/engine.js` then also refuses a letter you named if:
+
+- you gave it a `mesh`, a `TILEART`, a `TILEART_SIDE` or a `TILEMETA` row — you already answered;
+- it can never stand (a walkable letter) — see the contact-shadow note below;
+- **it is already drawn standing up.** A solid with a `side` drawing is built as a box that wears
+  your top-down art on its lid and your side art round its four faces. The `mesh` view has no
+  texture channel at all — a part is a primitive, a place, a size, a colour and an alpha — so
+  standing a shape there would DELETE your drawing and put bare geometry where it was. That is not
+  a better version of your object, it is a different object. In El Changarrito this refuses
+  `K`(33 tiles) `S`(16) `D`(8) `T`(7) `V`(7): seventy-one tiles that look like a win to anything
+  that counts corners and like a loss to anybody looking at the screen.
+
+If you WANT that trade, it is yours to make — write the mesh yourself and the first clause lets it
+straight through:
+
+    const TILEART_MESH = { K: o => SHAPES.counter(o) };   // yes, I know, and I want the shape
+
+**Your world means something else by a letter?** One line, in your `art.js`, and it is the same
+line whichever way you go:
+
+    TILEMETA["I"] = { lift:13, kind:"facade" };   // MY I is a shopfront, not a grocery counter
+
+That is a real example. El Changarrito's `I` is a storefront face at wall height; the engine's `I`
+is a waist-high counter. Without that row the town would have a counter standing inside twelve of
+its shops.
+
+**And to borrow a shape for a letter the engine spells differently:**
+
+    const TILEART_MESH = { "▯": o => SHAPES.shelving(o) };  // my shelving is spelled ▯
+
+**The arrow is mandatory and it is not style.** `engine/boot.js` is the last script tag in both
+shells and it is what loads `engine/shapes.js`, so your pack file is evaluated BEFORE `SHAPES` and
+`TILEMESH` exist. `TILEMESH["K"] = SHAPES.counter` throws *"TILEMESH is not defined"*, and even
+`TILEART["K"] = { mesh: SHAPES.counter }` throws *"SHAPES is not defined"*, because the object
+literal is built the moment your file runs. The arrow defers the lookup to draw time. **And you
+must DECLARE the table**: a world that has never written a mesh has no `TILEART_MESH` to add a key
+to, so `TILEART_MESH["K"] = …` throws *"TILEART_MESH is not defined"*. All three wrong forms and the
+right one were planted against El Changarrito on 2026-09-22 and only the right one printed OK. This
+is written here because the eager form was documented in five places and not one of them ran.
+
+**Why it is a line you write and not a default you inherit — three reasons, and all three were
+bought.** *One:* a letter means what a WORLD says it means, and a default that overrode you would
+be the engine deciding what your alphabet is. *Two:* a default cannot tell agreement from silence,
+and the difference between them is six crates of produce in somebody's bedroom (above). *Three:* a
+shape you did not ask for is not free even when it is invisible. The 3D ground bakes a soft contact shadow under any tile that HAS a mesh, without
+asking whether that tile can stand — so binding a shape to a walkable letter paints a smudge on the
+pavement with nothing over it, baked into a texture where no scene-graph dump will ever find it.
+
+### A world with NO `mesh` anywhere, in 3D — so you can leave it blank on purpose
+
+You do not have to draw a single part. Here is exactly what you get:
+
+| what you laid | how it stands in 3D with no `mesh` |
+|---|---|
+| a wall or a facade (`kind:"wall"/"facade"`) | a full-height box wearing your `top` drawing on its face |
+| any other solid (`kind:"furniture"`, `"appliance"`, `"prop"`…) with a `side` drawing | a box as tall as its `lift`, your side art on all four faces |
+| a solid with NO side drawing | **a billboard — a flat picture standing in the street, turning to face the camera.** This is the thing `#39` exists to hunt |
+| a tree (`kind:"tree"`) | a trunk box with a canopy billboard over it |
+| a fence (`kind:"fence"`) | an upright plane with your drawing on both sides |
+| a walkable tile | painted flat into the floor, as in every other camera |
+
+**That is a real, shippable world** — it is what Meridian looked like until 2026-09-21 and what El
+Changarrito looked like until 2026-09-22. It reads as a board game with cardboard standees, which
+for some worlds is exactly right. Choose it on purpose, and know that `test/engine.smoke.js` will
+list every letter still standing as a picture (`Still flat in 3D (#39): …`) every single run, so
+the cost is always in front of you and never a surprise.
+
+**The recipe for giving a thing a shape yourself — from the 2D drawing to a frame at phone size,
+and what the marigold taught — is `.claude/skills/shapes/SKILL.md`. Its step 0 is "look in `SHAPES`
+first", because the cheapest shape is the one already written.**
 
 **Three keys in the same table are not glyphs but KINDS** — things the engine builds itself and asks the pack to
 dress: `prop:ofrenda` (the season's altar), `prop:bridge` (what stands on a plank deck — the engine keeps its deck
@@ -177,13 +284,16 @@ content/<name>/
 Changarrito has no `room.js` and adds `record.js` (its `RECORDSRC`, §9). Two rules that only
 became visible once a second world existed:
 
-- **Dropping a file means dropping its `<script>` tag too.** `changarrito/index.html:782` still
-  loads `content/room.js`, and `changarrito/content/room.js` does not exist: a 404 on every load
-  of the town since the folder was made. It is harmless — `INTERVIEW` stays undefined and the
-  engine does less, which is the intended off state — but nothing catches it. `test/town.smoke.js`
-  aborts every non-`file://` request and only records `pageerror`, and a `<script>` that 404s is
-  neither (`test/town.smoke.js:33-36`). **A new world's smoke should assert that every path its
-  shell loads exists on disk.** That check does not exist yet in any suite.
+- **Dropping a file means dropping its `<script>` tag too.** El Changarrito's shell loaded
+  `content/room.js` for weeks with no such file behind it — a 404 on every load of the town since
+  the folder was made. It was harmless (`INTERVIEW` stays undefined and the engine does less, which
+  is the intended off state) and that is exactly why nothing noticed: a browser does not throw for
+  a `<script>` that 404s, so `pageerror` never fires and an aborted-request harness never sees it.
+  **Both halves are fixed and this paragraph is kept because the SHAPE of it recurs.** The tag is
+  gone (`changarrito/index.html`, where it stood there is now a comment saying why), and the check
+  now exists: `test/engine.smoke.js` reads the shell's HTML **off disk** and fails on any
+  `<script src=` with no file behind it — *"this shell loads "…" and there is no such file — every
+  load of it is a 404 nobody sees"*. It runs against both shells on every CI build.
 - **A file the shell loads before `engine/engine.js` may reference nothing from the engine at load
   time.** The town's `record.js` is loaded last of the content files and still only *defines* an
   object; everything that touches `WORLDS`, `SK()` or `docOpen` runs inside `boot()`, which the

@@ -210,9 +210,24 @@ preference that outlives one phase; cite the date and their words.
   wings on the wingless — the owner's word, 2026-09-07: "so sonny will still look sonny like but
   in different colors and perhaps tiny wings"), calavera paint on everyone — a dressing laid over the
   design, never a rebuild of it; every other season stays colour-only until the owner says
-  otherwise. Note this is a SECOND palette layer
-  from `THEMES`, which is UI chrome only — choosing a UI theme must never repaint the
-  barrio.
+  otherwise. Note this is a SECOND palette layer from `THEMES`, and the two do different jobs.
+- **A UI theme DOES tint the world, lightly, and that is the rule now.** *(2026-09-22. This entry
+  used to read "`THEMES` is UI chrome only — choosing a UI theme must never repaint the barrio."
+  The code had disagreed with that sentence for nineteen days, and when it was put to the owner as
+  a straight choice — change the rule, or change the code — he changed the rule, and gave the
+  reason himself: "i think like in a season like the trees can have decor layers so i disagree with
+  flat keeping something." A world whose look is already layered by season is a world a theme may
+  layer too.)* What it actually does, so nobody has to go and measure it again: the default theme
+  is `meridian`, which is **`null` in `THEMES`** (`engine/engine.js`, grep `meridian:null`) — so on
+  the default there is NO tint at all and every surface is exactly the colour it was painted. Pick
+  `forest`, `fairy`, `sunset` or build a custom palette and `tc()` mixes that theme's accent into
+  every hex the world draws at **16% by day, 22% at night** (grep `const tc=`), and `npcWhimsy`
+  mixes it into every shirt at 15%. It reaches flat art and shaped art alike — `engine3d.js`'s
+  mesh baker runs every part colour through the same `tc()`. The tint was tuned from 0.4 to 0.15
+  by the junta on 2026-09-03 rather than removed, because these palettes exist for comfort (AJ's
+  feedback) and a comfort theme that leaves the biggest surface on the screen untouched is not
+  comforting anybody. **What this rule still forbids:** a theme may TINT, it may never REDESIGN —
+  no theme moves a thing, hides a thing, or changes what a thing is.
 - **A season may also declare what it makes AVAILABLE.** *(2026-09-14, owner, on the eating-habits
   world: "seasons would be fun — especially if you can research san diego trends"; to the scope line
   proposed for this file, "sounds good".)* Colour and dressing stay exactly as above; a pack may

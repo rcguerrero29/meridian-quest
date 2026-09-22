@@ -98,7 +98,11 @@ function t3BakeGlyph(g,opaque,base,raw,side,frame,x,y){
     /* a standing cutout wears its SIDE view (TILESIDE), never its top-down drawing. x,y
        reach the artist so a drawing that varies by tile (a box stacked on odd tiles, a
        coffee machine every third counter tile) varies here too. */
-    const tf=side?sideArt(g):TILEDRAW[g];if(tf)tf({sx:0,sy:0,x:x|0,y:y|0,t:380*Math.PI/2,canopy:()=>{}});
+    /* `bake:true` says out loud what the pinned clock only implied: this drawing is being
+       TEXTURED onto something standing in 3D, not painted into a 2D camera. A pack that
+       draws a thing the 3D scene already builds in geometry — a casa's roof over its door —
+       asks here and leaves it out, instead of painting it twice at two different heights. */
+    const tf=side?sideArt(g):TILEDRAW[g];if(tf)tf({sx:0,sy:0,x:x|0,y:y|0,t:380*Math.PI/2,bake:true,canopy:()=>{}});
     /* a light frame baked around a door face, so it reads against a dark wall from across
        the room (owner, 2026-09-02: "hard to see some doors") */
     if(frame){ctx.fillStyle=frame;ctx.fillRect(0,0,32,3);ctx.fillRect(0,29,32,3);ctx.fillRect(0,0,3,32);ctx.fillRect(29,0,3,32);}
@@ -226,7 +230,10 @@ function t3Reuse(key){
   return true;}
 /* ---- A MESH FROM PARTS: the `mesh` view (2026-09-21, owner: "i still see squares and not
    polygonal shapes … can we not try this finally?"). A pack answers "what shape is this tile"
-   with a LIST OF PRIMITIVES — box, sphere, cylinder, cone — each with a place, a size and a
+   with a LIST OF PRIMITIVES — box, sphere, cylinder, cone and TORUS (`s:"torus"`, with `t` for the
+   tube and `arc` for a part-ring: an arch, a ring of a stove, the bones on a pan de muerto; the
+   fifth has been implemented four lines below since the day this shipped and this sentence said
+   four until 2026-09-22) — each with a place, a size and a
    colour, in tile units with y up from the floor and the tile's centre at (0,0). The engine
    merges them into ONE mesh per tile with vertex colours, so a bed of six marigolds costs one
    draw call and not fifteen. Nothing here names a glyph or a colour: a pack that says nothing
@@ -248,6 +255,20 @@ const t3Prim=p=>{const s=p.s||"box",n=v=>v===undefined?"":+v;
   return meshGeo[key]=g.toNonIndexed();};
 const t3MeshOf=(parts,tag)=>{
   const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),sc=new THREE.Vector3(),tr=new THREE.Vector3(),c=new THREE.Color();
+  /* HOW TALL THIS THING IS, and it is the parts that say so (crew iteration 14, la ofrendera).
+     `wallH` answers that question for a BOX — a formula over the glyph's declared `lift` — and a
+     mesh has never had a lift, so anything set down at `wallH` on a mesh tile is set down at the
+     height the tile would have had if it were still a box. Doña Tencha's table is 0.55 tall and
+     `wallH("T")` is 0.802: the altar stood 0.29 of a tile up in the air. Measured here because
+     every vertex is already being transformed one line below — the top costs one comparison. */
+  let top=-Infinity;
+  /* AND HOW FAR IT REACHES SIDEWAYS, measured in the same loop for the same reason. `t3Top`
+     answers "how tall is the thing standing on this tile"; nothing answered "what does it
+     stand OVER". A roof oversails — that is what makes a roof a roof — and the first shaped
+     casita carried its roof half a tile across Doña Tencha's front door and swallowed the ❗
+     the player presses, because the door marker is lifted to a constant 1.0 chosen against a
+     flat lid. Four numbers, three comparisons a vertex, at build time. */
+  let sx0=Infinity,sx1=-Infinity,sz0=Infinity,sz1=-Infinity;
   const bake=list=>{const pos=[],nor=[],col=[];
     list.forEach(p=>{
       e.set(p.rx||0,p.ry||0,p.rz||0,"YXZ");q.setFromEuler(e);sc.set(p.sx||1,p.sy||1,p.sz||1);tr.set(p.x||0,p.y||0,p.z||0);
@@ -255,7 +276,10 @@ const t3MeshOf=(parts,tag)=>{
       const gg=t3Prim(p).clone().applyMatrix4(m4);
       const pa=gg.attributes.position.array,na=gg.attributes.normal.array;
       c.set(tc(p.c||"#888888"));
-      for(let i=0;i<pa.length;i+=3){pos.push(pa[i],pa[i+1],pa[i+2]);nor.push(na[i],na[i+1],na[i+2]);col.push(c.r,c.g,c.b);}
+      for(let i=0;i<pa.length;i+=3){pos.push(pa[i],pa[i+1],pa[i+2]);nor.push(na[i],na[i+1],na[i+2]);col.push(c.r,c.g,c.b);
+        if(pa[i+1]>top)top=pa[i+1];
+        if(pa[i]<sx0)sx0=pa[i]; if(pa[i]>sx1)sx1=pa[i];
+        if(pa[i+2]<sz0)sz0=pa[i+2]; if(pa[i+2]>sz1)sz1=pa[i+2];}
       gg.dispose();});
     const geo=new THREE.BufferGeometry();
     geo.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
@@ -273,6 +297,8 @@ const t3MeshOf=(parts,tag)=>{
   if(glass.length){const byA={};glass.forEach(p=>{(byA[p.a]=byA[p.a]||[]).push(p);});
     Object.keys(byA).forEach(a=>{const gm=new THREE.MeshLambertMaterial({vertexColors:true,transparent:true,opacity:+a,depthWrite:false});
       T3.tintables.push(gm);const gmesh=new THREE.Mesh(bake(byA[a]),gm);gmesh.userData={glass:true,a:+a};m.add(gmesh);});}
+  m.t3Top=top===-Infinity?0:top; /* the tallest ink in the thing itself, glass included — what anything set on it stands on */
+  m.t3Span=top===-Infinity?null:[sx0,sx1,sz0,sz1]; /* and how far out it reaches, in the mesh's own frame */
   return m;};
 function t3Build(key){
   if(t3Reuse(key))return;                       /* already standing; walk back into it */
@@ -363,13 +389,35 @@ function t3Build(key){
   }
   /* the standing world: boxes wear the facade art, everything else is a cutout */
   const faceTex={},flatTex={},wallMat={},boxMat={};
+  /* WHAT STANDS ON THIS TILE, AND HOW TALL IT REALLY IS — keyed "x,y", filled as each tile is
+     built, read by the season-prop pass below when it sets a thing down on top of one. A mesh
+     tile answers with its own parts (`t3Top`); everything else is left out and falls back to
+     `wallH`, which is the box formula and is exactly right for a box. */
+  const topY={};
+  /* WHAT HANGS OVER THIS TILE FROM SOMEWHERE ELSE — keyed "x,y" like topY, and a different
+     question. topY asks how tall the thing STANDING here is; coverY asks what reaches ACROSS
+     here from the tile next door. Only an oversailing mesh answers, and only for a tile whose
+     CENTRE it covers — a 0.07 drip at the edge of a neighbour is not a roof over your head.
+     Read by the door marker, which is the one thing in the scene that has to be above
+     whatever is above the door. */
+  const coverY={};
+  grp.userData=grp.userData||{};grp.userData.cover=coverY; /* rides WITH the group, so a world walked back into (t3Reuse, from T3CACHE) still knows its own overhangs */
+  const t3Cover=(cx,cz,sp,top)=>{
+    for(let tx=Math.ceil(cx+sp[0]-0.5);tx<=Math.floor(cx+sp[1]-0.5);tx++)
+      for(let tz=Math.ceil(cz+sp[2]-0.5);tz<=Math.floor(cz+sp[3]-0.5);tz++){
+        const k=tx+","+tz;if(!(coverY[k]>=top))coverY[k]=top;}};
   /* Furniture, appliances and anything content marks `box:true` stand as a BOX when the
      pack drew a side view for them: the side art on all four faces (measured to the drawn
      height, so nothing floats), the top-down art on the lid. A cutout showed one face from
      every camera stop — a table looked the same walked around ("most art only have one
      display from any direction", owner 2026-09-03). Round or leggy things with no side view
      stay cutouts; that is the right shape for a plant, a cone, a pile of tires. */
-  const t3Boxy=(g,m)=>!!(m.box||m.kind==="furniture"||m.kind==="appliance")&&typeof TILESIDE!=="undefined"&&!!TILESIDE[g];
+  /* ONE DEFINITION, TWO READERS. This used to spell the test out here, and the gate in engine.js
+     spelled its own idea of the same question out there — so the gate could hand a mesh to a
+     letter this line was about to wear a drawing on, and nothing could notice. `wearsArt`
+     (engine/engine.js, grep "ALREADY WEARING A DRAWING") is now the only copy; `m` stays in the
+     signature because the caller has it, and it is the same object `wearsArt` looks up. */
+  const t3Boxy=(g,m)=>wearsArt(g);
   const t3BoxMats=(g,x,y)=>{
     const vk=g+"|"+(((x+y)%6)+6)%6;if(boxMat[vk])return boxMat[vk];
     const sc=t3BakeGlyph(g,false,null,false,true,null,x,y);
@@ -387,10 +435,16 @@ function t3Build(key){
     const mv=(typeof tileView==="function")&&tileView(gch,"mesh");if(!mv)return false;
     let parts;try{parts=typeof mv==="function"?mv({x,y}):mv;}catch(e){t3Note("mesh "+gch,e);return false;}
     if(!Array.isArray(parts)||!parts.length)return false;
-    try{const m=t3MeshOf(parts,{mesh:true,g:gch,x,y});m.position.set(cx,0,cz);grp.add(m);return true;}
+    try{const m=t3MeshOf(parts,{mesh:true,g:gch,x,y});m.position.set(cx,0,cz);topY[x+","+y]=m.t3Top;
+      if(m.t3Span)t3Cover(cx,cz,m.t3Span,m.t3Top);
+      grp.add(m);return true;}
     catch(e){t3Note("mesh "+gch,e);return false;}};
   const baseOf=g=>BASECOL[g]||(typeof MAPCOL!=="undefined"&&MAPCOL[g])||C.wall;
   const wallH=g=>0.55+((TILES[g]||{}).lift|0)*0.042; /* lift 13 ≈ 1.1 units tall */
+  /* THE TOP OF WHAT IS ACTUALLY STANDING THERE. Ask the thing; fall back to the box formula only
+     when nothing standing on that tile measured itself. `wallH` is a fact about a glyph's `lift`,
+     not about a shape, and a season prop set down on a shape needs its feet on the shape. */
+  const tileTop=(x,y,g)=>{const t=topY[x+","+y];return t!==undefined?t:wallH(g);};
   const wallMats=g=>wallMat[g]||(wallMat[g]={ /* one material set per glyph, shared by every box of it */
     side:new THREE.MeshLambertMaterial({color:new THREE.Color(shadeHex(baseOf(g),-0.22))}),
     top:new THREE.MeshLambertMaterial({color:new THREE.Color(tc(roofCol(g)))}),
@@ -759,11 +813,11 @@ function t3Build(key){
           const pm=(typeof tileView==="function")&&tileView("prop:ofrenda","mesh");
           if(pm){let parts=null;try{parts=typeof pm==="function"?pm({x:p.x,y:p.y}):pm;}catch(e){t3Note("mesh prop:ofrenda",e);}
             if(Array.isArray(parts)&&parts.length){try{const m=t3MeshOf(parts,{prop:true,ofrenda:true,mesh:true,x:p.x,y:p.y});
-              const sc=up?0.8:1;m.scale.set(sc,sc,sc);m.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);grp.add(m);return;}
+              const sc=up?0.8:1;m.scale.set(sc,sc,sc);m.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?tileTop(p.x,p.y,g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);grp.add(m);return;}
               catch(e){t3Note("mesh prop:ofrenda",e);}}}
           const c=document.createElement("canvas");c.width=32*K;c.height=32*K;const g2=c.getContext("2d");g2.scale(K,K);drawOfrenda(g2,0,0);
           const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.02);const sc=up?0.8:1;sp.scale.set(sc,sc,1);
-          sp.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);sp.userData={prop:true,ofrenda:true,x:p.x,y:p.y};grp.add(sp);return;}
+          sp.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?tileTop(p.x,p.y,g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);sp.userData={prop:true,ofrenda:true,x:p.x,y:p.y};grp.add(sp);return;}
         if(p.kind!=="calaverita")return;
         const SILL_PROUD=0.09;
         const win=typeof propSill==="function"?propSill(world,p):null;
@@ -833,7 +887,7 @@ function t3Build(key){
           sp.userData={prop:true,calaverita:true,sill:true,x:p.x,y:p.y,win:win.i};grp.add(sp);return;}
         const c=document.createElement("canvas");c.width=z*K;c.height=z*K;const g2=c.getContext("2d");g2.scale(K,K);drawCalaverita(g2,0,0,p.foil,z);
         const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.02);sp.scale.set(z/32,z/32,1);
-        const h=p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y));
+        const h=p.h!==undefined?p.h:(up?tileTop(p.x,p.y,g):stairLift(w,p.x,p.y));
         sp.position.set(p.x+(p.ox===undefined?0.5:p.ox),h+0.01,p.y+(p.oy===undefined?0.5:p.oy));sp.userData={prop:true,calaverita:true,x:p.x,y:p.y};grp.add(sp);});
       fiestaHangs(world).forEach(h=>{if(h.kind!=="pinata")return;
         const c=document.createElement("canvas");c.width=32*K;c.height=32*K;const o2=ctx;ctx=c.getContext("2d");ctx.setTransform(K,0,0,K,0,0);
@@ -855,7 +909,13 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
   sides, and somebody is driving it. Every part carries userData the suite reads, because a test that
   counts wheels survives the tram being redrawn and a test that counts pixels does not. */
   const L=(typeof troLine==="function")?troLine():null;
-  if(!T3.tram){const g=new THREE.Group();
+  const CARS=(typeof troCars==="function")?troCars(L):1,SPAN=(typeof troSpan==="function")?troSpan(L):TRO_LEN;
+  /* A TRAIN IS A NUMBER ON THE LINE, so the car count changes when you walk into another world, and
+     this group is built once per page load into T3.scene where t3Invalidate cannot reach it (the
+     junta noted exactly that on 2026-09-13). Rebuild when the count changes and only then — a line
+     that says nothing about cars never trips it, and Meridian never rebuilds. */
+  if(T3.tram&&T3.tramCars!==CARS){T3.scene.remove(T3.tram);T3.tram=null;T3.tramBody=null;T3.tramBodies=null;T3.tramDriver=null;}
+  if(!T3.tram){const g=new THREE.Group();T3.tramCars=CARS;
     const DK=new THREE.MeshLambertMaterial({color:new THREE.Color("#8E4230")});
     const BD=new THREE.MeshLambertMaterial({color:new THREE.Color("#B0563A")});
     const H=1.02,FL=0.20;                     /* a door is 1.0; the floor rides above the wheels */
@@ -871,16 +931,27 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
     const pm=(typeof tileView==="function")&&tileView("prop:tram","mesh");let mbody=null;
     if(pm){let parts=null;try{parts=typeof pm==="function"?pm({len:TRO_LEN,h:H,fl:FL,cab:CAB}):pm;}catch(e){t3Note("mesh prop:tram",e);}
       if(Array.isArray(parts)&&parts.length){try{mbody=t3MeshOf(parts,{tram:true,mesh:true,body:true});}catch(e){t3Note("mesh prop:tram",e);}}}
-    if(mbody){g.add(mbody);T3.tramBody=mbody;}
-    else{T3.tramBody=null;
-    const body=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.1-CAB*2,H-FL-0.06,0.72),BD);
-    body.position.y=FL+(H-FL-0.06)/2;g.add(body);
-    const floor=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.06,FL+0.10,0.74),DK);
-    floor.position.y=(FL+0.10)/2;g.add(floor);   /* the skirt over the wheels, full length, so the platform has a deck */
-    const roof=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.02,0.06,0.80),DK);
-    roof.position.y=H-0.03;g.add(roof);}
-    /* WHEELS — four, on the ground, turned to roll along the line rather than across it */
     const wm=new THREE.MeshLambertMaterial({color:new THREE.Color("#2B2B31")});
+    const win=new THREE.MeshLambertMaterial({color:new THREE.Color("#D8E6F0")});
+    /* ---- ONE CAR, CARS TIMES — a train of trolleys is trolleys (the owner, 2026-09-22) ----
+       Each car is a group of its own at the coupling pitch TRO_LEN+TRO_GAP, holding the same
+       assembly the single car has always held: the body (the pack's, or the engine's three boxes),
+       four wheels and the glazing. The DRIVER is not in here — there is one of him for the whole
+       train and he is in the LEADING car, which swaps ends with the direction, so he hangs on the
+       train's own group below. For CARS=1 this loop runs once, the group sits at local x=0, and the
+       tram is the object it has always been, part for part. */
+    T3.tramBodies=[];
+    for(let ci=0;ci<CARS;ci++){
+    const g0=new THREE.Group();g0.position.x=(ci-(CARS-1)/2)*(TRO_LEN+TRO_GAP);g0.userData={car:true,i:ci};g.add(g0);
+    if(mbody){const mb=ci?mbody.clone():mbody;g0.add(mb);T3.tramBodies.push(mb);}
+    else{
+    const body=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.1-CAB*2,H-FL-0.06,0.72),BD);
+    body.position.y=FL+(H-FL-0.06)/2;g0.add(body);
+    const floor=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.06,FL+0.10,0.74),DK);
+    floor.position.y=(FL+0.10)/2;g0.add(floor);   /* the skirt over the wheels, full length, so the platform has a deck */
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.02,0.06,0.80),DK);
+    roof.position.y=H-0.03;g0.add(roof);}
+    /* WHEELS — four, on the ground, turned to roll along the line rather than across it */
     [-TRO_LEN/2+0.42,TRO_LEN/2-0.42].forEach(dx=>{[-1,1].forEach(sd=>{
       const w=new THREE.Mesh(new THREE.CylinderGeometry(0.115,0.115,0.07,12),wm);
       w.rotation.x=Math.PI/2;                  /* lay the disc onto its edge, axle across the rails. THAT IS ALL IT NEEDS.
@@ -895,16 +966,20 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
          more segments (12→24) gave 209 px/frame against 203 — it is not an aliasing fault; and
          scaling the visual rotation gave 39.9 against 41.0, no effect, and decouples the wheel from
          the ground it rolls on. docs/3D-LOG.md 2026-09-11. */
-      w.position.set(dx,0.115,sd*0.34);w.userData={wheel:true};g.add(w);});});
+      w.position.set(dx,0.115,sd*0.34);w.userData={wheel:true};g0.add(w);});});
     /* GLAZING on all four sides, so a quarter turn still shows a tram and not a brick (the pack's body carries its own) */
-    if(!mbody){const win=new THREE.MeshLambertMaterial({color:new THREE.Color("#D8E6F0")});
+    if(!mbody){
     [-0.55,0,0.55].forEach(dx=>{[-1,1].forEach(sd=>{
       const m=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.26,0.02),win);
-      m.position.set(dx,0.62,sd*0.37);m.userData={glazing:true};g.add(m);});});
+      m.position.set(dx,0.62,sd*0.37);m.userData={glazing:true};g0.add(m);});});
     [-1,1].forEach(ed=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.30,0.50),win);
-      m.position.set(ed*(TRO_LEN/2-0.05),0.66,0);m.userData={glazing:true};g.add(m);});}
-    /* THE DRIVER — a head and shoulders at the front window. Not a passenger: he is at the end the
-       tram is travelling toward, and he turns round with it when it reverses (below). */
+      m.position.set(ed*(TRO_LEN/2-0.05),0.66,0);m.userData={glazing:true};g0.add(m);});}
+    }
+    T3.tramBody=T3.tramBodies[0]||null;
+    /* THE DRIVER — a head and shoulders at the front window. ONE of him, for the whole train: he
+       is at the end the train is travelling toward, and on a set of coupled cars that end is a
+       different CAR each way round. A tram has a cab at each end and the driver walks the length of
+       it; he never rides in the middle, and there is never a second one. */
     const drv=new THREE.Group();
     const sh=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.16,0.30),new THREE.MeshLambertMaterial({color:new THREE.Color("#3B4A6B")}));
     sh.position.y=0.60;drv.add(sh);
@@ -917,13 +992,43 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
   const on=!!(L&&L.world===world&&typeof TRO!=="undefined"&&TRO.state!=="away");
   T3.tram.visible=on;
   if(on){
-    T3.tram.position.set(TRO.x+TRO_LEN/2,0.0,L.row+0.5);
-    /* he drives from the leading end, whichever way it is going */
-    if(T3.tramDriver)T3.tramDriver.position.x=(TRO.dir>0?1:-1)*(TRO_LEN/2-0.16); /* on the platform, not behind a wall */
-    if(T3.tramBody)T3.tramBody.scale.x=TRO.dir>0?1:-1;              /* the pack's body was baked for +x: its pole leans back against the travel, so it turns round with the driver */
+    T3.tram.position.set(TRO.x+SPAN/2,0.0,L.row+0.5);
+    /* he drives from the leading end of the whole set, whichever way it is going */
+    if(T3.tramDriver)T3.tramDriver.position.x=(TRO.dir>0?1:-1)*(SPAN/2-0.16); /* on the platform, not behind a wall */
+    (T3.tramBodies||[]).forEach(b=>{b.scale.x=TRO.dir>0?1:-1;});     /* the pack's body was baked for +x: its pole leans back against the travel, so every car turns round with the driver */
     /* and the wheels turn with the distance covered, so it rolls instead of sliding */
     T3.tram.traverse(o=>{if(o.userData&&o.userData.wheel)o.rotation.y=-TRO.x/0.115;});
-  }}
+  }
+  /* ---- AND IT GOES TO GLASS WHEN IT IS BETWEEN YOU AND THE CAMERA ----
+     The owner, 2026-09-22, choosing between two cures for a person who disappears at his own stop:
+     "for the inspector- lets make it seethrough". Yesterday the cure was DEPTH — the car hid your
+     legs, honestly, the way a tram does — and honest is not the same as usable: at the stop, in the
+     camera both games boot into, the car covered him to the shoulders and at the corner stop it
+     covered all of him. So the car takes the treatment #140 already gives a tree: it stays exactly
+     where it is, at T3GHOST, drawn AFTER the people and writing no depth, so the pixel holds both
+     of them and "he is behind it" is still the honest reading. A tram is the one object in this
+     game for which that is not even a convention — it is glazed on four sides, and a person behind
+     a real one IS half visible through the windows.
+     Materials are shared between the cars (one wheel material, one glazing material, and the pack's
+     body is cloned), so the glass copy is made once per PIECE and kept beside the solid one, never
+     edited in place — one ghosted wheel would otherwise fog the whole train. t3Reveal does the same
+     thing for the same reason. The tram lives in T3.scene and not T3.group, so t3Near never sees it
+     and there is no cache key here to move: this runs every frame because the car does. */
+  const glass=on&&t3TramNear();
+  T3.tram.traverse(o=>{if(!o.material)return;const u=o.userData;
+    if(!glass&&!u.solid3)return;                    /* never been glass and is not now: leave it alone */
+    if(!u.solid3){u.solid3=o.material;
+      const mk=q=>{const c=q.clone();c.transparent=true;c.opacity=T3TRAMGLASS;c.depthWrite=false;return c;};
+      u.glass3=Array.isArray(o.material)?o.material.map(mk):mk(o.material);}
+    o.material=glass?u.glass3:u.solid3;
+    o.renderOrder=glass?1500:0;});}
+/* is the car standing between the person you steer and the camera? One ray, the hero's feet, the
+   train's own box — so a six-tile set answers for its whole length. Asked here and in t3Actors. */
+function t3TramNear(){
+  if(!T3.tram||!T3.tram.visible||!T3.cam)return false;
+  const from=T3.cam.position,to=new THREE.Vector3(fx+0.5,0.1,fy+0.5),dv=to.clone().sub(from),len=dv.length();
+  const hit=new THREE.Ray(from,dv.normalize()).intersectBox(new THREE.Box3().setFromObject(T3.tram),new THREE.Vector3());
+  return !!hit&&hit.distanceTo(from)<len;}
 function t3Fiesta(){ /* the piñata sways; it is never hit and gives nothing (Nacho's guardrail) */
   (T3.pinatas||[]).forEach(sp=>{if(!sp.parent)return;sp.material.rotation=Math.sin(Date.now()/700+sp.userData.x)*0.08;});
   /* A STRING SEEN END-ON IS NOT A STRING (the owner, 2026-09-21, a frame from a quarter turn on Calle
@@ -1043,29 +1148,35 @@ function t3Actors(){
      often; the person you are steering must never vanish behind one. */
   list.push({x:fx,y:fy,hero:true,f:g=>drawPerson(g,2,6,look,{dir:t3ScreenDir(dir),bob:moving?Math.sin(bob)*2:0,moving,hero:true})});
   /* the door marker rides the same pool, lifted above the wall line so the door slab
-     does not hide it */
-  doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,f:g=>drawDoorMark(g,2,30,0,d.mark)}));
+     does not hide it — and above whatever the BUILDING carries over the door, which until
+     crew iteration 14 nothing in this engine could answer. 1.0 was chosen against a flat
+     lid at wallH≈1.096; the first shaped casita ran a ridge across the doorway at 1.47 and
+     ate the arrow. `cover` is the highest mesh that reaches over this tile from a
+     neighbour, and 0.20 is the clearance the ARROW needs: the glyph's baked bottom sits
+     0.175 below the sprite's centre (drawDoorMark's baseline, on a 48-px card scaled by
+     T3SIGN), so cover+0.20 puts the whole mark clear of the ridge and nothing else moves.
+     A tile nothing reaches over keeps 1.0 exactly — every door in both games but the
+     casa's, measured door by door. */
+  const t3cov=(T3.group&&T3.group.userData&&T3.group.userData.cover)||{};
+  doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:Math.max(1.0,(t3cov[d.x+","+d.y]||0)+0.20),sign:true,mark:"door",
+    f:g=>drawDoorMark(g,2,30,0,d.mark)})); /* mark:"door" so a guard can find the arrow and read where it ACTUALLY ended up, instead of doing this line's arithmetic a second time and agreeing with itself */
   /* a poster on a WALL hangs on the wall's open face, mid-height, and is not pulled toward the
      camera (that would push it inside the wall). It used to float 1.15 up wherever it stood, which
      put the board beside la ventanilla above city hall's roof (#45: "poster next to teller is off,
      a bit too high"). A readable thing that is not a wall (the desk) keeps the float. */
   if(typeof readMarks==="function")readMarks().forEach(d=>{
     const face=t3ReadFace(w,d.x,d.y);
-    if(face)list.push({x:d.x,y:d.y,h:face.h,ox:face.ox,oz:face.oz,fixed:true,mark:"read",f:g=>drawReadMark(g,2,30,-7)}); /* up:-7 centres the card on its anchor */
-    else list.push({x:d.x,y:d.y,h:1.15,mark:"read",f:g=>drawReadMark(g,2,30,0)});});
-  /* A TRAM BETWEEN YOU AND THE CAMERA hides your legs, the way a tram does. The hero is drawn through
-     whatever stands between him and the camera (#22, a wall) — and the tram is not a wall, so standing
-     at the platform with the car alongside and the camera on its far side, the person waiting for it
-     was painted ON it, feet on the roof, for the whole dwell, every call, in the camera both games boot
-     into (the owner, 2026-09-21: "the trolley weirdness"; ridden by the line inspector, crew iteration
-     12). When the line from the camera to your feet passes through the car you keep your depth: the
-     body hides what it stands in front of and your head shows over the roof, which is what standing
-     behind a tram looks like. Not while riding — the ride draws you in the car on purpose (rideStart's
-     list of what is deliberately cheap). t3Trolley has placed the car before this runs. */
-  const tramBetween=(()=>{if(!T3.tram||!T3.tram.visible||(typeof RIDE!=="undefined"&&RIDE.on))return false;
-    const from=T3.cam.position,to=new THREE.Vector3(fx+0.5,0.1,fy+0.5),dv=to.clone().sub(from),len=dv.length();
-    const hit=new THREE.Ray(from,dv.normalize()).intersectBox(new THREE.Box3().setFromObject(T3.tram),new THREE.Vector3());
-    return !!hit&&hit.distanceTo(from)<len;})();
+    if(face)list.push({x:d.x,y:d.y,h:face.h,ox:face.ox,oz:face.oz,fixed:true,mark:"read",sign:true,f:g=>drawReadMark(g,2,30,-7)}); /* up:-7 centres the card on its anchor */
+    else list.push({x:d.x,y:d.y,h:1.15,mark:"read",sign:true,f:g=>drawReadMark(g,2,30,0)});});
+  /* A TRAM BETWEEN YOU AND THE CAMERA used to take your depth back: the car hid your legs, the way a
+     tram does, because the person waiting at the platform had been painted ON it, feet on the roof,
+     for the whole dwell (the owner, 2026-09-21: "the trolley weirdness"; ridden by the line
+     inspector, crew iteration 12). That reading was right and the picture was still wrong — at the
+     stop the car covered him to the shoulders — and the owner chose the other cure on 2026-09-22:
+     "lets make it seethrough". So the CAR goes to glass (t3Trolley) and the hero keeps drawing
+     through walls (#22), which is the treatment #140 gives every tall object that is not a wall.
+     Nothing here has to know about the tram any more, and the depth flag below is back to the two
+     things it was always about: the hero, and being down a hole (#92). */
   const old=ctx;
   list.forEach((a,i)=>{
     const p=t3Sprite(i);
@@ -1084,7 +1195,8 @@ function t3Actors(){
     if(a.fixed)p.spr.position.set(ax+(a.ox||0),(a.h||0)+lift,az+(a.oz||0)); /* pinned to a wall: stays put (#45) */
     else p.spr.position.set(ax+ddx/dl*0.34,(a.h||0)+lift,az+ddz/dl*0.34);
     p.spr.userData.mark=a.mark||"";
-    p.spr.scale.set(36/32*1.12,48/32*1.12,1);
+    const cs=a.sign?T3SIGN:T3PERSON;
+    p.spr.scale.set(36/32*cs,48/32*cs,1);
     p.spr.material.color.copy(T3.tint);
     /* billboards draw in order of distance from the camera, farthest first, all of them after the
        scene's transparent pieces: whoever stands nearer the camera than you draws over you. The hero
@@ -1096,7 +1208,7 @@ function t3Actors(){
        floor the hero respects depth — the lip and the knee-high rail hide their legs, which is what going
        down into a hole looks like — and the tall wall on the camera side is the one the near-wall rule
        already minimizes. On the floor and on a climbing flight they still draw through walls (#22). */
-    p.spr.material.depthTest=!a.hero||lift<0||tramBetween;p.spr.renderOrder=1000-Math.round(dl*10);
+    p.spr.material.depthTest=!a.hero||lift<0;p.spr.renderOrder=1000-Math.round(dl*10);
     p.spr.userData.hero=!!a.hero; /* so a guard can find the person you steer without reading a rendering flag for it */
     p.spr.visible=true;p.live=true;
   });
@@ -1155,6 +1267,119 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
    of you and its two neighbours drop to a knee-high stub in the wall's top colour (t3Reveal);
    everything else, the far wall included, stays whole. */
 const T3CAMD=7.4,T3CAMH=6.2,T3STUB=0.28,T3GHOST=0.68;
+/* ---- and how see-through a thing you stand UNDER is, which is not T3GHOST ----
+   T3GHOST IS SHARED AND STAYS WHERE IT IS. It is the ghost for every ghosted object in both games
+   — the appliances, the stalls, the lintels, the door glows. Round three of this lane moved it to
+   0.34 for the tree's sake, which would have made every see-through thing in the owner's town
+   twice as faint, with no ask there and no measurement there. An engine change is
+   behaviour-identical for both games or it is not an engine change. The pattern to avoid it is one
+   constant below: T3TRAMGLASS exists because a tram needed a different number from a tree's and
+   the tram lane did not move the tree's.
+
+   SO THE CROWN GETS ITS OWN, AND T3OVERHEAD SAYS WHO IT IS FOR. The reach is not a taste: it is
+   t3Hides read back at THREE tiles. A thing is given the crown's ghost when it is tall enough to
+   be going see-through while you are still three tiles away from it — which is the definition of
+   something you are UNDERNEATH rather than beside, and it is the engine's own rule rather than a
+   number somebody liked.
+   Measured, with the reach applied: TWELVE objects in Meridian take it and they are the twelve
+   jacarandas. IN THE TOWN IT IS NONE. Everything else in either game keeps T3GHOST, and the
+   running totals are not written here on purpose — they move whenever any lane adds a prop, and a
+   count copied into prose is how the round-three draft of this comment came to be wrong three
+   times. The guard in test/engine.smoke.js prints them per shell on every build; that is the
+   number to read.
+   THE MARGIN WAS CHECKED RATHER THAN ASSUMED, and it is why this is 2.25 and not the round 2.00
+   the first draft used. El Changarrito has jacarandas of its own (pk 13,1 / 19,8 / 7,9, drawn
+   flat, 1.90 tall) and a season prop at st 12,2 that stands 1.98. At 2.00 the town cleared this
+   rule by two hundredths of a tile — near enough that raising one prop in the other game would
+   have silently handed it a tree's ghost. At 2.25 it clears by 0.27, and Meridian's tree sits 0.48
+   above. The frames agree with the arithmetic: El Changarrito at pp 18,0 yaw 0, head against this
+   patch, is identical pixel for pixel in both seasons.
+
+   THE LADDER, because 0.68 was never measured either. Owner: "can we make it tall so we can walk
+   underneath it all ghostly?" The hero was stood on the tile Meridian's jacaranda overhangs and
+   the ghost swept; each rung was rendered twice, once with his billboard visible and once hidden,
+   so every differing pixel is one he put on the screen.
+
+                   ONE TILE UNDER          TWO TILES BACK
+     ghost 0.00 ..... 3653  100%             3946  100%   the tile is simply gone
+     ghost 0.18 ..... 3640  100%             3714   94%
+     ghost 0.26 ..... 3638  100%             3605   91%
+     ghost 0.34 ..... 3629   99%             3211   81%   HE READS WHOLE at one tile — face, arms,
+                                                          yellow shirt — AND IT IS STILL A TREE
+     ghost 0.42 ..... 3561   97%             2738   69%   his head starts washing into the canopy
+     ghost 0.52 ..... 3273   90%             2066   52%
+     ghost 0.68 ..... 2547   70%             1711   43%   SHIPPED, AND HE IS NOT THERE. Look at the
+                                                          frame: at either distance, no hero at all
+     ghost 1.00 ..... 1342   37%             1336   34%   opaque — and still a third, because his
+                                                          legs hang below the canopy
+
+   THE COUNT IS NOT THE ANSWER AND SAYS SO: at full opacity it still reports a third of him,
+   because it counts a pixel he merely TINTS as a pixel you can see him in, and because the part of
+   him below the crown was never covered. It ranks the rungs; the picture picks between them, and
+   the picture picks 0.34.
+
+   WHY THE LINE IS AT TWO TILES AND NOT LOWER — this was rendered too, not chosen. The next tallest
+   thing either game can ghost is the "Y" market stall at ex 20,2, 1.886 tall. At 0.68 the stall is
+   a stall and the hero's shirt already reads through it; at 0.34 the painted sign it carries
+   washes out and it stops being a stall. The crown's number is not the stall's number. Between
+   1.886 and the jacaranda's 2.733 the only thing either game has is the town's 1.98 prop, and the
+   reach clears it by 0.27.
+
+   AND THE HONEST LIMIT: each crown sphere is its own transparent surface, so at two tiles, with
+   the deepest part of the canopy on the ray, 0.34 stacks toward opaque and he is a yellow SHAPE
+   rather than a face (81% by the count, and the frame is what says "shape"). That is strictly
+   better than what shipped, where at two tiles he is gone — but it is weaker than "ghostly", and
+   fixing it properly means one depth-sorted glass pass per tile, which is engine surgery and was
+   not this lane's to do. A `let`, for the same reason T3PERSON and T3TRAMGLASS are: the ladder
+   sweeps this value, and a number nobody can sweep is a number nobody re-measures. */
+let T3CROWNGLASS=0.34;
+const T3OVERHEAD=0.65*3+0.3;   /* = 2.25: exactly the height t3Hides starts ghosting at three tiles */
+/* ---- HOW BIG A PERSON IS, and why it is two numbers and not one ----
+   The owner, 2026-09-22: "you can make my character smaller as i mentioned before for the cool looks."
+   Every actor rides a 36x48 card and this is what that card is worth in tiles: the sprite's anchor is
+   a FRACTION of the card (`center.set(0.5,4/48)`, his feet), so changing this scales him about his own
+   shoes and nothing floats. A person's drawn height is about 32 of the 48 rows, so his height in tiles
+   is very nearly this number itself — which is how the size can be argued instead of felt:
+     · a DOORWAY in this engine is 1.0 (engine3d.js, the door slab is BoxGeometry(1,1,0.14) at y=0.5);
+     · a real person is about 1.70 m and a real doorway about 2.05 m, so a person is 0.83 of a door;
+     · at 1.12 the cast was 1.12 of a door — every one of the thirty-six walked under a lintel shorter
+       than they are, which is the sort of thing you stop seeing after a week and cannot unsee after.
+   The FLOOR, the thing that does not compress: a tile is about 35 px on a phone, so at 1.12 a person
+   is 39 px and his face is two of them. Take too much off and the barrio is thirty-six silhouettes —
+   and Pili measured on 2026-09-22 that twenty-six of the thirty-six already share one of two outlines,
+   so the face is not spare capacity. The ladder 1.12 / 1.00 / 0.92 / 0.84 was rendered at phone width,
+   on the street and in HQ, and the frame chose 0.92 — an 18% cut:
+     1.12  his head crosses the shop windows' band on Calle Principal, and four people fill an office;
+     1.00  exactly a doorway, which is the size of the LINTEL and not of a person;
+     0.92  under the lintel, clear of the window band, the face still two eyes and a mouth at 32 px;
+     0.84  the arithmetic's own answer, and the floor bites: he is level with a DESK PLANT in HQ, and
+           a person the same height as the thing on the desk is a ruler that has stopped ruling.
+   So the honest ratio is 0.84 and the shipped number is 0.92, and the reason is legibility, not taste.
+   EVERY BODY, not only the hero (the owner said "my character"): thirty-six people walk under the
+   same lintels, and shrinking one of them makes him a child standing next to the tamalera rather than
+   making the street bigger. The size of a person is the size of the world.
+   A `let`, not a `const`, for one reason: the ladder is rendered by sweeping THIS value, and the guard
+   reads THIS value. A guard that names its own copy of a number is testing its own arithmetic
+   (.claude/skills/guard/SKILL.md, the first of the four).
+   T3SIGN is the quest mark and the read mark, which ride the same pool and are NOT people. A mark is
+   signage: it is sized to be read at arm's length across a street, and it does not shrink because the
+   cast did. Rigo's rule for the one painted thing on a tram that is still not livery — "the signal
+   lamp... is the only sentence the vehicle can say, and it is not on anybody's menu" — is the same
+   rule, and the marks are this game's signal lamp. */
+let T3PERSON=0.92;
+const T3SIGN=1.12;
+/* ---- and how see-through the TRAM is, which is not T3GHOST and here is the measurement ----
+   (Written 2026-09-22 when this said "T3GHOST is a TREE's number". It no longer is: the crown took
+   its own constant the same day, T3CROWNGLASS above, and T3GHOST went back to being what it has
+   always actually been — the ghost for everything ordinary, in both games. The argument below is
+   unchanged, because it was never about trees.) A ghosted crown has to still read as a tree, and
+   what stands behind a tree is a whole person-sized silhouette. A ghosted TRAM has a person behind it, 39 px tall, most of
+   him dark clothes against a dark road — and at 0.68 the four-frame probe found 3% of the pixels
+   where he and the car meet carrying any of him at all: his face, and nothing else. "See-through" was
+   true of the material and false of the picture, which is docs/REGRESSION.md's whole subject.
+   Swept 0.68 / 0.60 / 0.52 / 0.45 / 0.38 / 0.30 and looked at every frame (crew iteration 14). A
+   `let` for the same reason as T3PERSON: the ladder sweeps this value and the guard reads it. */
+let T3TRAMGLASS=0.30;
 /* #149: every prop, tree crown and cutout in 3D is a PICTURE on a card, and most of that card is
    see-through. A see-through pixel that still writes depth punches a hole in whatever is drawn after
    it — which is people: a quest mark beside a desk simply went missing, and nobody could see why,
@@ -1166,8 +1391,37 @@ function t3Hides(h,d){return h>0.65*d+0.3;}
    read `geometry.parameters.height`, which a sprite does not have — so a tree crown, a lamp or a
    piñata could never be considered tall no matter how much of you it covered. A box stands on its
    own half-height; a billboard hangs from its centre point. */
+/* A MERGED MESH KNOWS ITS OWN HEIGHT AND WAS NEVER ASKED (owner, 2026-09-22: "can we make it tall
+   so we can walk underneath it all ghostly?"). There are two `t3Top`s and they are not the same
+   thing, which is how this lasted: `m.t3Top` is a PROPERTY the merged mesh carries — its tallest
+   vertex, measured where the parts are baked — and `t3Top(o)` is this FUNCTION. A box answers from
+   `geometry.parameters.height` and a sprite is caught on the line above, but a merged
+   BufferGeometry has no `parameters` at all, so EVERY mesh tile in both games fell through to the
+   literal `1`. Meridian's jacaranda is 2.733 tiles tall; the rule believed it was one, and
+   `t3Hides` only fires for a 1-tile thing within 1.08 tiles — so the tree went see-through on the
+   single tile touching its trunk and stayed solid everywhere else, with the player painted on top
+   of its canopy two tiles away. Measured before this line, in the shipped build: EVERY mesh tile
+   in both games answered 1.000 — 396 of them in Meridian in season, 395 out of it, and 128 in the
+   town — while 29 of Meridian's are genuinely taller than a tile (28 out of season), the tallest
+   of each being "J" 2.733, "Y" 1.886, "▣" 1.865, "7" 1.200, "S" 1.159, the ofrenda prop 1.149,
+   "ʘ" 1.108, "U" 1.096, "I" 1.043 — and the town's tallest is 0.950 ("W" at pp 18,1), so the town
+   has none. THE COUNT IS PER OBJECT AND SAYS SO, because the round-three draft of this comment
+   said 49 and that number came from a probe that grouped by GLYPH and then credited all 21 "S"
+   with the tallest "S"'s height. The guard in test/engine.smoke.js counts the same objects and
+   prints "29 of 396" when the line below is removed; if the two ever disagree, the guard is right,
+   because it is the one that runs.
+   THE FLOOR IS DELIBERATE AND IS THE WHOLE COMPATIBILITY STORY. `1` was the old answer for every
+   mesh tile, and honest heights ALONE would quietly stop 349 + 128 short things — a bed of
+   marigolds, a traffic cone, the town's stalls — from getting out of the way at one tile, which is
+   the cure the owner asked for in #140 ("there are still overlaps with other objects where i seem
+   to walk on them") and nobody asked to have taken back. Those two figures are the guard's own,
+   quoted off the run that planted the fault: drop the `Math.max` and it prints "349 short props in
+   this shell" for Meridian and "128" for the town. So a mesh tile is at least as tall as the box
+   it replaced, and its real height when it is taller than that. Short things behave exactly as
+   they did today; only things that are genuinely taller than a tile change, which is the ask. */
 function t3Top(o){
   if(o.isSprite)return o.position.y+o.scale.y*(1-((o.center&&o.center.y)||0));
+  if(o.t3Top!==undefined)return Math.max(1,o.position.y+o.t3Top);
   const g=o.geometry&&o.geometry.parameters;
   return g&&g.height!==undefined?o.position.y+g.height/2:1;
 }
@@ -1194,10 +1448,14 @@ function t3Near(x,y,yaw,fake){ /* the pieces nearest (x,y) that hide you at this
    reads as a cutaway, which is what every third-person camera does, and it is what the owner already
    signed off on in #65. A tree, a lamp, a piñata is an OBJECT: half a tree is not a cutaway, it is a
    missing tree, and the room stops making sense. So a tall object turns to GLASS instead — still
-   there, still in its place, drawn at T3GHOST so you can be seen through it.
+   there, still in its place, drawn see-through so you can be seen through it — at T3CROWNGLASS if
+   it is something you are underneath, at T3GHOST otherwise.
    The glass is drawn AFTER the people and writes no depth, which is why the hero can keep drawing
    through walls (#22, #92) and still read as being BEHIND the tree: the crown is painted over him at
-   55%, so the pixel holds both of them and the position is honest either way.
+   T3CROWNGLASS, so the pixel holds both of them and the position is honest either way. (This
+   sentence said "at 55%" from the day it was written and the constant beside it has never been
+   0.55. A number repeated in prose drifts from the number that runs; the name does not — so it is
+   a name here now, and the value lives in one place.)
    Materials can be shared between pieces of one glyph, so the glass copy is made once per PIECE and
    kept beside the solid one — never edited in place, or one tree would fog the whole row. */
 function t3Reveal(){
@@ -1214,7 +1472,10 @@ function t3Reveal(){
       o.visible=!cut;if(u.stub3)u.stub3.visible=cut;return;}
     if(!cut&&!u.solid3)return;               /* never been glass and is not now: leave it alone */
     if(!u.solid3){u.solid3=o.material;
-      const mk=q=>{const c=q.clone();c.transparent=true;c.opacity=T3GHOST;c.depthWrite=false;return c;};
+      /* a thing you stand UNDER gets the crown's ghost; everything else keeps the one it has had
+         since #140. t3Top is the honest height now, so the question can finally be asked. */
+      const gh=t3Top(o)>T3OVERHEAD?T3CROWNGLASS:T3GHOST;
+      const mk=q=>{const c=q.clone();c.transparent=true;c.opacity=gh;c.depthWrite=false;return c;};
       u.glass3=Array.isArray(o.material)?o.material.map(mk):mk(o.material);}
     o.material=cut?u.glass3:u.solid3;
     o.renderOrder=cut?1500:0;                /* after the people, so it tints them instead of hiding them */
