@@ -44,6 +44,27 @@ const textFiles = files.filter(f => /\.(js|html|json|webmanifest|md|txt|css|svg)
 const NEVER = ['changarrito', 'docs', 'test', '.github', '.git', 'node_modules', '.claude', 'scripts'];
 NEVER.forEach(d => { const hit = files.filter(f => f === d || f.startsWith(d + '/'));
   if (hit.length) fails.push('the upload contains ' + d + '/ — ' + hit.length + ' file(s), e.g. ' + hit[0]); });
+/* ---- 1a · WHICH WORLDS ARE MEANT TO BE OUT HERE, by name --------------------------------------
+   Added 2026-09-22, the day El Horno shipped and this file said "the upload is the public game and
+   nothing else" about an upload holding TWO games. Everything above is a BLOCKLIST of six folder
+   names; nothing here could see a whole new world arrive. The comment three lines up even reasons
+   it away -- "a directory added tomorrow is private by default: it is not on the allowlist in
+   pages.yml" -- which is a statement about the packing script, not a check on the box, and this
+   file's own header says to check the box and never the recipe.
+   So: name them. A pack under content/ that is not on this list is a world somebody published
+   without deciding to, which is the exact shape of the fault that once put the private town on the
+   internet. Adding a name here is the decision; the diff is where it gets noticed. */
+const PUBLIC_WORLDS = ['meridian', 'horno'];
+{
+  const shipped = [...new Set(files.filter(f => f.startsWith('content/')).map(f => f.split('/')[1]).filter(Boolean))];
+  if (!shipped.length) fails.push('the upload contains no content/ pack at all, so there is no game in it — and every check below about "the game" measured nothing');
+  shipped.filter(w => !PUBLIC_WORLDS.includes(w))
+    .forEach(w => fails.push('the upload publishes the world "' + w + '" and nobody put it on the public list — ' +
+      'content/' + w + '/ is in the box and PUBLIC_WORLDS in test/public.js does not name it. Either it was meant to go out, and this list is where you say so, or the packing script grew a line nobody meant'));
+  PUBLIC_WORLDS.filter(w => !shipped.includes(w))
+    .forEach(w => fails.push('the public list names the world "' + w + '" and the upload does not contain it — either the packing script dropped it or it should come off this list'));
+}
+
 files.filter(f => /^(CLAUDE|README|AGENTS)\.md$|\.sh$|^\.env|(^|\/)\.[^/]+$/.test(f))
   .forEach(f => fails.push('the upload contains ' + f + ', which is the repository\'s business and nobody else\'s'));
 files.filter(f => /\.map$|\.bak$|\.tmp|~$|\.orig$/.test(f))
@@ -106,5 +127,5 @@ if (has('sw.js')) { const sw = read('sw.js');
 
 if (notes.length) notes.forEach(n => console.log('note: ' + n));
 if (fails.length) { console.log('FAIL — what we are about to publish is not only the public game\n- ' + fails.join('\n- ')); process.exit(1); }
-console.log('OK — R10: the upload is the public game and nothing else. ' + files.length + ' files; no private tool, no registers, ' +
+console.log('OK — R10: the upload is ' + (PUBLIC_WORLDS.length === 1 ? 'the public game' : 'the ' + PUBLIC_WORLDS.length + ' worlds this repo publishes (' + PUBLIC_WORLDS.join(', ') + ')') + ' and nothing else. ' + files.length + ' files; no private tool, no registers, ' +
             'no credential surface, no off-origin script, the worker\'s asset list resolves, and the game is complete.');

@@ -32,7 +32,18 @@ edit('script tags',
   /<script src="content\/meridian\/strings\.js"><\/script>[\s\S]*?<script src="content\/meridian\/docs\.js"><\/script>/,
   SCRIPTS.map(s => '<script src="' + s + '.js"></script>').join('\n'));
 edit('engine paths', /<script src="(engine\/|vendor\/|qr\.js)/g, '<script src="../../$1');
-edit('title', /<title>[^<]*<\/title>/, '<title>El Horno — one tray</title>');
+edit('title', /<title>[^<]*<\/title>/, '<title>Reposo — El Horno</title>');
+/* THE HEADING, and the owner caught it by opening the thing rather than reading about it: the
+   generated bakery still said MERIDIAN QUEST across the top of its own page. Every guard in this
+   pack looks INSIDE the game canvas; nothing looks above it, which is exactly where the first
+   thing a person reads lives. The name: `Simmer` is AJ's world (docs/la-sobremesa.md) and it stays
+   hers — this is a BRANCH of it, and a bakery's own version of a simmer is the PROOF, the slow
+   patient rise a dough is left to take. `Reposo` is that, and it also just means rest, which is
+   the right word for a world with no clock and no way to lose. One line to change if he wants
+   another. (owner, 2026-09-22: "use a cute translation for the panaderia simmer version or
+   franchisee?" — the franchise reading is his and it is the one that keeps her name hers.) */
+edit('the heading', /<header><h1>[\s\S]*?<\/h1><\/header>/,
+  '<header><h1>REPOSO <span>EL HORNO</span></h1></header>');
 edit('manifest', /<link rel="manifest"[^>]*>/, '<!-- no manifest: el horno is not the app -->');
 edit('service worker', /navigator\.serviceWorker\.register\([^)]*\)/, 'Promise.reject(new Error("el horno never installs a service worker"))');
 
@@ -70,10 +81,27 @@ edit('the paw button', /<button class="talk treat" id="cmd" hidden><\/button>/,
   '<button class="talk treat" id="cmd" hidden style="display:none"></button>');
 
 if (h.includes('content/meridian/')) throw new Error('the generated horno shell still loads Meridian content');
+/* Only what a PERSON READS. `meridian` is also a THEME key three times over (data-th, data-tn,
+   data-cl) and those must stay: the engine's THEMES table has a key literally named `meridian`,
+   which is its null default, and content/horno/strings.js already says so. A first draft of this
+   check tested the whole file and went red on the theme buttons — the guard would have been
+   telling the truth about the wrong noun. */
+[['title', /<title>([^<]*)<\/title>/], ['heading', /<header><h1>([\s\S]*?)<\/h1><\/header>/]].forEach(([what, re]) => {
+  const m = re.exec(h);
+  if (!m) throw new Error('the bakery shell has no ' + what + ' at all, so the check that it does not say MERIDIAN could not run. Nothing to read is not a pass.');
+  if (/meridian/i.test(m[1])) throw new Error('the generated bakery still says MERIDIAN in its ' + what + ': "' + m[1].replace(/<[^>]*>/g, '').trim() + '". That is what a person reads before the game has even drawn, and it sits above the canvas where every other check in this file looks.');
+});
 ['🏗️', '🤝', '⚡'].forEach(g => { if (h.includes(g)) throw new Error('the generated horno shell still offers the public game\'s careers on its first screen: it carries a ' + g + '. A bakery whose opening screen shows a hard hat is the joke landing the wrong way, and it is the first thing anybody opening the link sees.'); });
 SCRIPTS.forEach(s => { if (!h.includes('"' + s + '.js"')) throw new Error('the generated horno shell never loads ' + s + '.js'); });
 fs.writeFileSync(path.join(root, 'content', 'horno', 'index.html'), h);
 console.log('horno shell built from index.html (' + h.split('\n').length + ' lines, ' + SCRIPTS.length + ' pack scripts)');
+/* --build-only: write the shell and stop. scripts/build-site.sh calls this, because the shell is
+   generated and is not in git, so the site build has to make one before it can copy the pack.
+   The site build must NOT run the browser checks below -- a publish step that needs Chromium is a
+   publish step that fails for a reason that has nothing to do with publishing. CI runs the whole
+   file separately, and a shell that generated cleanly but plays wrong is caught there, before a
+   merge, which is the right place for it. Every edit above already asserted it matched. */
+if (process.argv.includes('--build-only')) process.exit(0);
 
 /* ───────────────── 2 · THE VERB, PLAYED ─────────────────
 
