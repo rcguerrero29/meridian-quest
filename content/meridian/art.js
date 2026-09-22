@@ -713,15 +713,17 @@ const paGoods=(kind,s,ti,put)=>{const R=PAN,hot=(s+ti)%6;                       
     const cue=(u,v,h,i)=>{const c=i===hot%3?R.crustD:R.crust;
       put({s:"torus",r:0.14,t:0.068,arc:Math.PI*1.26,rx:Math.PI/2,ry:Math.PI+(((s+i)%3)-1)*0.34,c},u,v,h);}; /* the rolled triangle curved to a horn: a 4.8px tube round a 4.5px hole */
     cue(-0.17,-0.03,0.075,0);cue(0.16,0.09,0.075,1);cue(-0.06,0.19,0.085,2);}                  /* forward of the shelf above, which was cutting the back two in half */
-  else if(kind==="oreja"){                                                                     /* THREE laid FACE UP, shingled like the bolillos. Stood on edge they were clipped by the shelf
-                                                                                                  above and read as wedges; the cut face IS the object, so the face goes up and the pan gets three */
-    const ore=(u,v,i)=>{const hotOne=i===hot%3,c=hotOne?R.caramel:R.caramelL;
+  else if(kind==="oreja"){                                                                     /* TWO laid FACE UP, shingled like the bolillos. Stood on edge they were clipped by the shelf
+                                                                                                  above and read as wedges; the cut face IS the object, so the face goes up. TWO, not three, because
+                                                                                                  the owner read the sparse tray as the story it is: this is the kind that sells out, and the empty
+                                                                                                  front of the pan says so louder than a third piece ever said "bakery" (docs/ASKS.md, 2026-09-22) */
+    const ore=(u,v,i)=>{const hotOne=i===hot%2,c=hotOne?R.caramel:R.caramelL;
       put({s:"box",w:0.21,h:0.05,d:0.105,c:R.caramelD},u,v-0.078,0.026);                       /* the back of the slice, where the sheet's two rolls meet, dark off the tray */
       put({s:"cyl",r:0.104,h:0.050,c:R.caramelD},u-0.108,v,0.041);                             /* the outer turn of each curl, the edge that caramelises hardest on the tray */
       put({s:"cyl",r:0.104,h:0.050,c:R.caramelD},u+0.108,v,0.041);                             /* set proud on the OUTSIDE, so it reads as a dark rim and never as a hole */
       put({s:"cyl",r:0.105,h:0.058,c},u-0.090,v,0.049);                                        /* the cut face: the two curls the sheet was rolled into, sliced across the roll */
       put({s:"cyl",r:0.105,h:0.058,c},u+0.090,v,0.049);};                                      /* one roll, sliced, so both sit the same way on every piece */
-    ore(-0.17,-0.03,0);ore(0.16,0.085,1);ore(-0.05,0.175,2);}                                  /* the front one's point over the lip */
+    ore(-0.17,-0.03,0);ore(0.16,0.085,1);}                                                     /* the two that were laid at the back; the pan's whole front is bare, where the light is */
   else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];                                /* THREE, half again as big. The white rim stays: it is why this pan reads at all */
     [-0.30,0,0.30].forEach((u,i)=>{const v=0.02;
       put({s:"cyl",rt:0.16,rb:0.125,h:0.05,c:R.cup},u,v,0.025);                                /* the capacillo */
@@ -761,10 +763,11 @@ const paGoods2D=(kind,s,ti,x0,base)=>{const R=PAN,hot=(s+ti)%6,tri=i=>x0+3.9+i*7
       ctx.fillStyle=R.crumb;ctx.fillRect(cx-2.7,cy-1.4,5.4,1.1);});}                                                     /* la greña */
   else if(kind==="cuerno"){for(let i=0;i<3;i++){const cx=tri(i);ctx.strokeStyle=(i+3)===hot?R.crustD:R.crust;ctx.lineWidth=2.6;
       ctx.beginPath();ctx.arc(cx,base-1.2,3,Math.PI*1.08,Math.PI*1.92);ctx.stroke();}}                                    /* a crescent, horns to you */
-  else if(kind==="oreja"){for(let i=0;i<3;i++){const cx=tri(i),cy=base-2.4;                                             /* three, not ten, and each the size the mesh gives it */
+  else if(kind==="oreja"){[0,2].forEach((i,n)=>{const cx=tri(i),cy=base-2.4;                                            /* TWO, at the two ends of the pan, so the gap in the middle is bare pan:
+                                                                                                                             the piece that was between them is the one somebody bought */
       ctx.fillStyle=R.caramelD;ctx.beginPath();ctx.arc(cx-2.5,cy,2.9,0,7);ctx.arc(cx+2.5,cy,2.9,0,7);ctx.fill();        /* the caramelised outer turn of each curl */
-      ctx.fillStyle=i===hot%3?R.caramel:R.caramelL;ctx.beginPath();ctx.arc(cx-2.1,cy-0.3,2.5,0,7);ctx.arc(cx+2.1,cy-0.3,2.5,0,7);ctx.fill(); /* the two curls, sliced across the roll */
-      ctx.fillStyle=R.caramelD;ctx.fillRect(cx-3.2,cy+2.2,6.4,1.1);}}                                                    /* the foot it spread over on the tray */
+      ctx.fillStyle=n===hot%2?R.caramel:R.caramelL;ctx.beginPath();ctx.arc(cx-2.1,cy-0.3,2.5,0,7);ctx.arc(cx+2.1,cy-0.3,2.5,0,7);ctx.fill(); /* the two curls, sliced across the roll */
+      ctx.fillStyle=R.caramelD;ctx.fillRect(cx-3.2,cy+2.2,6.4,1.1);});}                                                  /* the foot it spread over on the tray */
   else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];for(let i=0;i<3;i++){const cx=tri(i);
       ctx.fillStyle=R.cup;ctx.beginPath();ctx.moveTo(cx-3.7,base-3);ctx.lineTo(cx+3.7,base-3);ctx.lineTo(cx+2.9,base);ctx.lineTo(cx-2.9,base);ctx.closePath();ctx.fill(); /* the capacillo */
       ctx.fillStyle=col[(i+3+s)%3];ctx.fillRect(cx-3.3,base-4.4,6.6,1.6);ctx.beginPath();ctx.ellipse(cx,base-4.4,3.3,1.3,0,0,7);ctx.fill();}}  /* the fat disc */
@@ -799,9 +802,9 @@ const paRackTop=rc=>{const{sx,sy,x,y}=rc,{s,trays}=paRack(x,y),R=PAN,kind=trays[
   else if(kind==="cuerno"){[[sx+10.4,sy+12.6],[sx+21.4,sy+15.8],[sx+14.6,sy+19.8]].forEach(([cx,cy],i)=>{
       ctx.strokeStyle=i===hot%3?R.crustD:R.crust;ctx.lineWidth=3.4;                                                      /* three, fat enough to have a hole */
       ctx.beginPath();ctx.arc(cx,cy,4.4,Math.PI*1.02,Math.PI*1.98);ctx.stroke();});}
-  else if(kind==="oreja"){[[sx+10.4,sy+12.6],[sx+21.4,sy+15.8],[sx+14.6,sy+19.8]].forEach(([cx,cy],i)=>{                 /* three face up, shingled: the cut face IS the object */
+  else if(kind==="oreja"){[[sx+10.4,sy+12.6],[sx+21.4,sy+15.8]].forEach(([cx,cy],i)=>{                                    /* TWO face up, the same two the mesh keeps: the front of the pan is bare */
       ctx.fillStyle=R.caramelD;ctx.beginPath();ctx.arc(cx-3,cy,3.4,0,7);ctx.arc(cx+3,cy,3.4,0,7);ctx.fill();            /* the caramelised outer turn of each curl */
-      ctx.fillStyle=i===hot%3?R.caramel:R.caramelL;ctx.beginPath();ctx.arc(cx-2.5,cy-0.4,2.9,0,7);ctx.arc(cx+2.5,cy-0.4,2.9,0,7);ctx.fill();});}
+      ctx.fillStyle=i===hot%2?R.caramel:R.caramelL;ctx.beginPath();ctx.arc(cx-2.5,cy-0.4,2.9,0,7);ctx.arc(cx+2.5,cy-0.4,2.9,0,7);ctx.fill();});}
   else if(kind==="polvoron"){const col=[R.pink,R.vain,R.cocoa];for(let c=0;c<3;c++){const cx=gx(c,3),cy=sy+16;           /* three, half again as big, in one row as the mesh lays them */
       ctx.fillStyle=R.cup;ctx.beginPath();ctx.arc(cx,cy,5.2,0,7);ctx.fill();ctx.fillStyle=col[(c+s)%3];ctx.beginPath();ctx.arc(cx,cy,4.5,0,7);ctx.fill();}}
   else if(kind==="muerto"){let i=0;for(let r=0;r<2;r++)for(let c=0;c<2;c++,i++){const cx=gx(c,2)+ (c?1:-1)*1.2,cy=gy(r);
