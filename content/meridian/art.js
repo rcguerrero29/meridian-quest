@@ -1070,15 +1070,29 @@ TILEART_MESH["0"]=({x,y})=>{const h=(((x*7+y*13)%5)+5)%5,TYRE="#26262B",TOPT="#3
    body; the chrome strip along each side. No lamps, no grille, no handles: at 35 px a tile they are
    noise. A tile and a half long — parts are not clipped and nothing of its kind is laid beside it —
    parked along x, parallel to the taller's front. */
+/* THE PAINT, 2026-09-22 (the owner: "the cars are not following pilis edit/note, can we edit?"). Her rule,
+   now in her own file: this renderer's light gives 1.5:1 and nothing else, so every value difference you
+   want has to be PAINTED into the part's own colour and asked for about a fifth wider than you want it,
+   because tc() mixes 16% of the theme into every hex by day and 22% at night. Both cars were built with
+   a roof one step off the body — #7A2E2E against #8A3636 is sixteen points of luma before the tint, which
+   lands at thirteen — so from seven tiles back a car was one slab with a windscreen. They carry a real
+   ladder now, and it is Rigo's paint rule for the tram applied to a car: a DARK skirt below the waist, the
+   body, a lighter shoulder, the roof lighter again, never two mid-tones, with the shut line dark between
+   them. Luma, before the tint: 29 · 50 · 69 · 100 · 134 · 205 for the glass. */
 TILEART_MESH["6"]=()=>{
-  const BODY="#7A2E2E",ROOF="#8A3636",CABIN="#5E2222",GLASS="#BFD3E0",CHROME="#C9CDD3",TYRE="#1E1E22",HUB="#8E8E96",UNDER="#1A1D22";
+  const SKIRT="#4A1A1A",BODY="#7A2E2E",SHOULDER="#A8524A",ROOF="#C0705E",SHUT="#3A1414",
+        CABIN="#5E2222",GLASS="#BFD3E0",CHROME="#C9CDD3",TYRE="#1E1E22",HUB="#8E8E96",UNDER="#1A1D22";
   const parts=[];
   [[-0.5,-0.3],[0.5,-0.3],[-0.5,0.3],[0.5,0.3]].forEach(([wx,wz])=>{parts.push({s:"cyl",x:wx,y:0.1,z:wz,r:0.1,h:0.08,c:TYRE,rx:Math.PI/2}); /* a wheel */
     parts.push({s:"cyl",x:wx,y:0.1,z:wz,r:0.045,h:0.086,c:HUB,rx:Math.PI/2});});                                                        /* its hub */
   parts.push({s:"box",x:0,y:0.135,z:0,w:1.4,h:0.03,d:0.56,c:UNDER},                       /* the under-body, the darkest thing on it */
-    {s:"box",x:0,y:0.225,z:0,w:1.5,h:0.15,d:0.62,c:BODY},                                 /* the body, 0.15 to 0.30 */
+    {s:"box",x:0,y:0.192,z:0,w:1.5,h:0.085,d:0.62,c:SKIRT},                               /* the skirt, below the waist: dark */
+    {s:"box",x:0,y:0.262,z:0,w:1.5,h:0.055,d:0.622,c:BODY},                               /* the body */
+    {s:"box",x:0,y:0.296,z:0,w:1.5,h:0.014,d:0.624,c:SHOULDER},                           /* the shoulder, where the light sits along the top of the flank */
     {s:"box",x:-0.275,y:0.34,z:0,w:0.55,h:0.08,d:0.5,c:GLASS},                            /* the glass band, 0.30 to 0.38, all the way round */
-    {s:"box",x:-0.275,y:0.4,z:0,w:0.55,h:0.04,d:0.52,c:ROOF});                            /* the roof, painted lighter */
+    {s:"box",x:-0.275,y:0.383,z:0,w:0.56,h:0.012,d:0.51,c:SHUT},                          /* the shut line under the roof: the dark that makes the roof read as a lid */
+    {s:"box",x:-0.275,y:0.404,z:0,w:0.55,h:0.04,d:0.52,c:ROOF},                           /* the roof, two steps lighter than the body */
+    {s:"box",x:0.28,y:0.302,z:0,w:0.9,h:0.012,d:0.6,c:SHOULDER});                         /* the hood, lit: a long bonnet is what says Caprice from above */
   [[-0.535,-0.235],[-0.015,-0.235],[-0.535,0.235],[-0.015,0.235]].forEach(([px,pz])=>parts.push({s:"box",x:px,y:0.34,z:pz,w:0.03,h:0.08,d:0.03,c:CABIN})); /* the pillars */
   [-0.316,0.316].forEach(pz=>parts.push({s:"box",x:0,y:0.17,z:pz,w:1.5,h:0.02,d:0.012,c:CHROME}));                                 /* the chrome strip, low along each side */
   return parts;};
@@ -1092,7 +1106,12 @@ TILEART_MESH["6"]=()=>{
    runs along x and the posts stand north and south of it; the car sits a little east of the posts so
    they hold it at its lift points and do not cut it in half from the door. */
 TILEART_MESH["7"]=()=>{
-  const POST="#6A7480",BASE="#2F353C",ARM="#9EA8B3",STRIPE="#E0B45C",UNDER="#1A1D22",BODY="#3C5C8A",ROOF="#4C6C9A",CABIN="#2C4468",GLASS="#BFD3E0",TYRE="#1E1E22",HUB="#8E8E96";
+  /* the same ladder as the Caprice (2026-09-22, Pili's rule): a dark skirt, the body, a lit shoulder, the
+     roof two steps up, a dark shut line between roof and glass. On a car UP ON A LIFT the ladder does more
+     work than usual, because the thing under it is the bay floor and the thing above it is nothing. */
+  const POST="#6A7480",BASE="#2F353C",ARM="#9EA8B3",STRIPE="#E0B45C",UNDER="#1A1D22",
+        SKIRT="#24406A",BODY="#3C5C8A",SHOULDER="#6E92C4",ROOF="#8FB0DC",SHUT="#1B2F4E",
+        CABIN="#2C4468",GLASS="#BFD3E0",TYRE="#1E1E22",HUB="#8E8E96";
   const parts=[],CX=0.12;                                                                  /* the car's centre, east of the posts */
   [-0.31,0.31].forEach(pz=>{const sg=Math.sign(pz);
     parts.push({s:"box",x:0,y:0.1,z:pz,w:0.16,h:0.2,d:0.14,c:BASE});                       /* the base, dark */
@@ -1105,9 +1124,12 @@ TILEART_MESH["7"]=()=>{
   [[CX-0.3,-0.21],[CX+0.3,-0.21],[CX-0.3,0.21],[CX+0.3,0.21]].forEach(([wx,wz])=>{parts.push({s:"cyl",x:wx,y:0.5,z:wz,r:0.08,h:0.06,c:TYRE,rx:Math.PI/2}); /* a wheel, hanging */
     parts.push({s:"cyl",x:wx,y:0.5,z:wz,r:0.036,h:0.066,c:HUB,rx:Math.PI/2});});
   parts.push({s:"box",x:CX,y:0.535,z:0,w:0.86,h:0.03,d:0.4,c:UNDER},                       /* the car's under-body, the darkest thing in the bay */
-    {s:"box",x:CX,y:0.62,z:0,w:0.9,h:0.14,d:0.44,c:BODY},                                  /* the body, 0.55 to 0.69 */
-    {s:"box",x:CX-0.17,y:0.73,z:0,w:0.42,h:0.08,d:0.36,c:GLASS},                           /* the glass band */
-    {s:"box",x:CX-0.17,y:0.79,z:0,w:0.42,h:0.04,d:0.38,c:ROOF});                           /* the roof, lighter */
+    {s:"box",x:CX,y:0.592,z:0,w:0.9,h:0.084,d:0.44,c:SKIRT},                                /* the skirt, dark */
+    {s:"box",x:CX,y:0.660,z:0,w:0.9,h:0.052,d:0.442,c:BODY},                                /* the body */
+    {s:"box",x:CX,y:0.692,z:0,w:0.9,h:0.012,d:0.444,c:SHOULDER},                            /* the shoulder, lit */
+    {s:"box",x:CX-0.17,y:0.73,z:0,w:0.42,h:0.08,d:0.36,c:GLASS},                            /* the glass band */
+    {s:"box",x:CX-0.17,y:0.773,z:0,w:0.43,h:0.010,d:0.37,c:SHUT},                           /* the shut line under the roof */
+    {s:"box",x:CX-0.17,y:0.792,z:0,w:0.42,h:0.04,d:0.38,c:ROOF});                           /* the roof, two steps up */
   [[CX-0.365,-0.17],[CX+0.025,-0.17],[CX-0.365,0.17],[CX+0.025,0.17]].forEach(([px,pz])=>parts.push({s:"box",x:px,y:0.73,z:pz,w:0.03,h:0.08,d:0.03,c:CABIN})); /* the pillars */
   return parts;};
 
@@ -1585,7 +1607,11 @@ TILEART_MESH["A"]=({x,y})=>{
    paperwork the drawing sits on, which .claude/skills/how-its-made says to read first — says "Six
    burners of consommé diplomacy" (content/meridian/strings.js, grep "Six burners"). Three across by
    two deep is six, which is the only count that agrees with the elevation AND the words, and it is
-   what a restaurant range is; the plan's 2×2 is what fits in 32 px. Made as one is welded: four feet
+   what a restaurant range is. **The owner settled it on 2026-09-22 and it is four**: "i dont care about
+   the amount of burners now- do four if its easiest to be the most detailed with 4" — six across this
+   deck gave each burner three pixels on a phone, and three pixels hold no detail at all. Four in a square,
+   each with its drip bowl, its four-arm grate, its cap, and a ring of flame on the two that are lit.
+   Made as one is welded: four feet
    with the floor showing between them, the body, the oven door proud with its window and its
    full-width bar handle on two brackets, the control fascia under the lip with four knobs, the cast
    deck OVERHANGING the body on every side (that lip is what says range and not cupboard), six open
@@ -1607,10 +1633,22 @@ TILEART_MESH["V"]=({x,y})=>{
   [-0.21,-0.07,0.07,0.21].forEach(kx=>parts.push({s:"cyl",x:kx,y:0.485,z:0.298,r:0.022,h:0.020,c:KNOB,rx:Math.PI/2})); /* four knobs, as the elevation has them */
   parts.push({s:"box",x:0,y:0.528,z:0,w:0.68,h:0.036,d:0.60,c:DECK},                             /* the cast deck, overhanging the body all round */
     {s:"box",x:0,y:0.545,z:0.298,w:0.68,h:0.008,d:0.012,c:NOSE});                                /* its front edge, catching the light */
-  [-0.21,0,0.21].forEach(bx=>[-0.135,0.135].forEach(bz=>{
-    parts.push({s:"cyl",x:bx,y:0.550,z:bz,r:0.085,h:0.012,c:DARK});                              /* the burner well, open */
-    parts.push({s:"sph",x:bx,y:0.556,z:bz,r:0.030,sy:0.5,c:STEEL});                              /* its cap */
-    parts.push({s:"torus",x:bx,y:0.568,z:bz,r:0.082,t:0.018,rx:Math.PI/2,sz:0.6,c:"#2F343B"});}));/* the cast grate over it */
+  /* FOUR BURNERS, not six (the owner, 2026-09-22: "i dont care about the amount of burners now- do four
+     if its easiest to be the most detailed with 4"). Six across a 0.68 deck left each burner 0.085 of a
+     tile — three pixels on his phone — and three pixels cannot hold a grate, a cap and a ring of flame.
+     Four in a square give each one half as much again, and the detail goes in: the drip bowl under it,
+     the cast grate as four arms rather than a ring (a ring at this size is a doughnut), the burner cap
+     with its dark centre, and on the two that are lit a ring of flame. Which two are lit is decided by
+     the tile, so the kitchen is a kitchen somebody is working in and not a showroom. */
+  [[-0.155,-0.13],[0.155,-0.13],[-0.155,0.13],[0.155,0.13]].forEach(([bx,bz],bi)=>{
+    const lit=((((x*5+y*3)%4)+4)%4+bi)%4<2;                                                       /* two of the four are on */
+    parts.push({s:"cyl",x:bx,y:0.548,z:bz,r:0.115,h:0.010,c:"#6A727C"});                          /* the drip bowl, pressed steel, catching the light */
+    parts.push({s:"cyl",x:bx,y:0.554,z:bz,r:0.098,h:0.010,c:DARK});                               /* the well inside it, dark */
+    [0,Math.PI/2].forEach(a=>parts.push({s:"box",x:bx,y:0.566,z:bz,w:0.20,h:0.016,d:0.022,c:"#2F343B",ry:a})); /* the cast grate: four arms, a cross */
+    parts.push({s:"cyl",x:bx,y:0.566,z:bz,r:0.040,h:0.018,c:"#3A4048"});                          /* its centre ring, where the pot sits */
+    parts.push({s:"cyl",x:bx,y:0.560,z:bz,r:0.046,h:0.016,c:STEEL});                              /* the burner cap */
+    parts.push({s:"cyl",x:bx,y:0.569,z:bz,r:0.022,h:0.006,c:"#1B1E22"});                          /* its dark centre */
+    if(lit)parts.push({s:"torus",x:bx,y:0.562,z:bz,r:0.050,t:0.010,rx:Math.PI/2,c:"#2E86C8"});});  /* the ring of flame, blue, on the two that are on */
   parts.push({s:"box",x:0,y:0.612,z:-0.275,w:0.68,h:0.130,d:0.045,c:STEEL},                      /* the riser at the back */
     {s:"box",x:0,y:0.680,z:-0.275,w:0.68,h:0.010,d:0.045,c:NOSE},                                /* its lit top */
     {s:"box",x:0,y:0.612,z:-0.250,w:0.13,h:0.030,d:0.008,c:ORANGE});                             /* the pilot, the one warm note the plan draws */
