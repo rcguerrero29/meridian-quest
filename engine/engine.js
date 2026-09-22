@@ -2254,6 +2254,115 @@ if(typeof TILEMETA!=="undefined")Object.entries(TILEMETA).forEach(([g,m])=>TILES
    exactly as it was rather than standing its floor plan on edge. */
 const stands=g=>{const m=TILES[g];return !!(m&&m.stand);};
 const standsUp=g=>stands(g)&&!!TILESIDE[g];
+/* ---------- IS THIS LETTER ALREADY WEARING A DRAWING? ----------
+   A tile of these kinds WITH a side drawing is not built as a plain block: `t3BoxMats`
+   (`engine/engine3d.js`, grep "t3BoxMats") bakes the glyph's TOP-DOWN art onto the box's lid and
+   wraps its SIDE art round the four faces. The town's `K` run is a counter with a coffee machine
+   on its front and a cup on its top; its `T` is a gingham cloth with two plates on it. Those are
+   drawings, standing up, with volume already.
+
+   And the `mesh` view has NO texture channel at all — `t3MeshOf` (`engine/engine3d.js`) bakes every
+   part into ONE vertex-coloured geometry, and a part carries a primitive, a place, a size, a colour
+   and an alpha. There is nothing in it that can name a drawing. So handing such a letter a default
+   mesh does not improve the object: it DELETES the art and puts untextured geometry where it was.
+   That is not an upgrade of the same thing, it is a different thing, and only the person who drew
+   the art may make that trade — which they do by writing their own `TILEMESH` entry (clause 1).
+
+   `t3Boxy` in engine3d.js calls THIS function, so the renderer and the gate cannot drift apart.
+   That drift is the whole bug: a gate that counted triangles called deleting a coffee cup a win. */
+const wearsArt=g=>{const m=TILES[g]||{lift:7,kind:"prop"};
+  return !!((m.box||m.kind==="furniture"||m.kind==="appliance")&&typeof TILESIDE!=="undefined"&&TILESIDE[g]);};
+/* ---------- THE GATE: the engine's own shapes, for a letter the pack said nothing about ----------
+   `engine/shapes.js` holds SHAPES (shapes named by what they ARE) and SHAPEBIND (this engine's
+   letters). Meridian built thirteen of these as `TILEART_MESH` and every other world on this
+   engine kept standing its desks up as boxes with a photograph of a desk on the side. This is the
+   one place that changes, and it is a GATE rather than a default because a default would be wrong
+   five different ways. Each refusal below was bought with a measurement:
+
+   THE RULE, in one sentence: **an engine default may only fill a hole — it may never replace a
+   drawing, and it is never assumed, it is TAKEN.**
+
+   That rule was written on 2026-09-22 after this gate was refuted, and both halves of it were
+   bought by a letter that got past the first version:
+
+   · **It is taken, not given** (clause 0). The first version bound a letter whenever the pack had
+     said nothing about it, reading silence as consent. But a world that never mentioned a letter
+     has not agreed with the engine about it — it has said nothing. El Changarrito lays six `H`
+     and its own map calls them RACKS in the houses (`changarrito/content/maps.js`, grep "racks");
+     the engine's `H` is an open PRODUCE CRATE (`TILEDRAW["H"]` above). Nothing in any table in
+     this engine records what a world MEANS by a letter it has never drawn, so no clause can ever
+     catch that — which makes it the third time one letter has meant two objects here, after `I`
+     and `b`. The only thing that can catch it is the world saying which letters it agrees with.
+   · **It fills a hole, never a drawing** (clause 5). See `wearsArt` above. `K`(33) `S`(16) `D`(8)
+     `T`(7) `V`(7) — seventy-one tiles of the town — stand today as boxes wearing their own art,
+     and the first version of this gate replaced all seventy-one with untextured geometry and
+     counted it as seventy-one tiles fixed.
+
+   1 · `TILEMESH[g]` — the pack already answered with a shape. Its answer wins, always. This is the
+       line that makes Meridian byte-identical: it has its own mesh for every letter here. It is
+       also the escape hatch: a pack that WANTS a mesh on a letter clause 5 refuses writes it here,
+       as `const TILEART_MESH={K:o=>SHAPES.counter(o)};` — DECLARED by the pack and LATE-BOUND, and
+       both halves are load-bearing. `engine/boot.js` is the
+       last script tag in both shells and it is what loads `engine/shapes.js`, so a pack file runs
+       before `SHAPES` and `TILEMESH` exist: the eager forms `TILEMESH["K"]=SHAPES.counter` and
+       `TILEART["K"]={mesh:SHAPES.counter}` throw "TILEMESH is not defined" and "SHAPES is not
+       defined" respectively. Both were documented in five places on 2026-09-22 and neither ran —
+       a false mechanism in the record, in the round convened to cure a false mechanism in the
+       record. And a pack that has never written a mesh has no `TILEART_MESH` to add to, so
+       `TILEART_MESH["K"]=…` throws as well: it has to be declared. All three wrong forms and the
+       right one were planted against El Changarrito on 2026-09-22 and only the right one printed OK.
+   2 · `TILEART[g]` / `TILEART_SIDE[g]` — the pack DREW this letter itself. Standing a shape where
+       somebody drew a picture throws their drawing away without telling them.
+   3 · `TILEMETA[g]` — the pack said what this letter MEANS, so it means something else here. El
+       Changarrito re-declares `I` as a storefront face at wall height (`changarrito/content/art.js`);
+       the engine's `I` is a waist-high grocery counter. **`I` IS NOT IN `SHAPEBIND`, and that — not
+       this clause — is what keeps a counter out of twelve of the town's storefronts.** The earlier
+       version of this comment claimed the credit for clause 3 and it was false; a false sentence in
+       the record is a bug here, and this is the repair. The clause stays because it is right for
+       the general case, and it is honest about its own status: **no letter in either of this
+       repository's two games is currently refused by clause 2 or clause 3, so both are untested in
+       this tree.** They are reasoning, not measurement, and they are labelled as such.
+   4 · solidity — `t3MeshTile` is only ever reached for a SOLID tile or a `stand` tile, so a glyph
+       that is neither can never show a shape. It can still be harmed by one: the ground bake's
+       contact pad (`engine/engine3d.js`, grep "THE PAD") asks only whether a glyph HAS a mesh, so
+       binding one to a walkable letter paints a soft shadow on the pavement with nothing standing
+       on it — baked into a texture, where a scene-graph dump reports "identical". Meridian's `b`,
+       the marigold bed, is ten tiles of the town and exactly this case.
+   5 · `wearsArt(g)` — it is already a drawing with volume. Above.
+
+   `SHAPEGIVEN` is the list of letters this gate actually handed a shape to. It exists because the
+   only way to ask that question afterwards was `Object.keys(SHAPEBIND).filter(g=>TILEMESH[g])`,
+   which runs AFTER this block has mutated `TILEMESH` and so cannot tell a pack's own mesh from an
+   engine-supplied one — it answered "does this letter have any mesh at all", and the suite printed
+   that as the score. A number nobody can check is not a measurement.
+
+   The `typeof SHAPES==="object"` test, rather than a bare name, is deliberate: a world with no 3D
+   camera never downloads the file, and an offline visit where `sw.js` forgot to cache it must fall
+   back to the boxes rather than throw. (docs/REGRESSION.md — nothing checks that everything
+   SHIPPED is listed in `sw.js`, only the other direction.) */
+const SHAPEGIVEN=[];
+if(typeof SHAPES==="object"&&SHAPES&&typeof SHAPEBIND==="object"&&SHAPEBIND)
+  Object.keys(SHAPEBIND).forEach(g=>{
+    /* 0 · THE WORLD HAS TO ASK. `SHAPETAKE` is a plain string of the letters this pack agrees the
+       engine may shape for it. No `SHAPETAKE` means no letters: silence is not consent. */
+    if(typeof SHAPETAKE!=="string"||SHAPETAKE.indexOf(g)<0)return;
+    if(TILEMESH[g])return;                                      /* the pack answered */
+    if(typeof TILEART!=="undefined"&&TILEART[g])return;          /* …or drew this letter itself */
+    if(typeof TILEART_SIDE!=="undefined"&&TILEART_SIDE[g])return;
+    if(typeof TILEMETA!=="undefined"&&TILEMETA[g])return;        /* …or said what it means */
+    /* IT COULD ONLY CAST A SHADOW. And the predicate is `stands`, not `standsUp` — measured, and
+       the brief this was built from said `standsUp`. `standsUp` additionally demands a SIDE
+       drawing, because it answers a question for the flat front camera (engine.js:924, :2281,
+       :2312). The 3D camera's walkable-object branch (`engine/engine3d.js:447`) asks plain
+       `stands`, so a letter declared `stand:true` with no side art — Meridian's grass `g` is
+       exactly that (`content/meridian/art.js:1829`) — renders its mesh perfectly well and
+       `standsUp` would have refused it one. A guard written with the same wrong noun reported six
+       of Meridian's grass tiles as faults before the code was read. */
+    if(!SOLID.has(g)&&!stands(g))return;
+    /* IT IS ALREADY A DRAWING WITH VOLUME. The mesh has no texture channel, so this swap trades
+       art for geometry and every meter in this repository reports it as a gain. */
+    if(wearsArt(g))return;
+    const fn=SHAPES[SHAPEBIND[g]];if(fn){TILEMESH[g]=fn;SHAPEGIVEN.push(g);}});
 /* A person who works INSIDE a wall: a clerk at a window, a teller behind a counter. The pack
    marks the station with `win:"B"` — the glyph of the wall she stands in — and every camera
    draws that wall's counter in front of her and its roof over her, so the building keeps its

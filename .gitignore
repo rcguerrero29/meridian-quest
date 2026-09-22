@@ -25,3 +25,5 @@ shots/
 
 # the gauge shell is GENERATED from index.html by test/gauge.js — never commit a copy
 content/gauge/index.html
+content/gauge/index-3d.html
+content/gauge/config-3d.js

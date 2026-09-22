@@ -89,7 +89,7 @@ Everything below is detail those three point into.
 | [NEW-WORLD.md](NEW-WORLD.md) | The template — what a new world gets free and what it must decide for itself |
 | [GIFTED-GAMES.md](GIFTED-GAMES.md) | Games as gifts for special occasions — the research and what this engine already has |
 | [GENRE-RULES.md](GENRE-RULES.md) | What other games already proved, written as rules you can build against |
-| [templates/](templates/) | The actual starting files for a new pack, branded and neutral |
+| [templates/](templates/) | The seven **deliverable paperwork** templates a quest hands the player — discovery notes, a recommendation memo, acceptance criteria, a pilot review, a decision log, a process-exception map, an answer/refuse/hand-off sheet — in a neutral set and a branded set built from `brand.yml`. **Not** the starting files for a new pack: that is `NEW-WORLD.md` above |
 
 ## El Changarrito — the town on your laptop
 

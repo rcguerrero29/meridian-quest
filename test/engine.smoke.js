@@ -187,6 +187,25 @@ function findChromium() {
     const before = { cam: camMode, world, px, py, yaw: (typeof T3 !== 'undefined' && T3) ? T3.yaw : 0 };
     moving = false; held = null;
     const flat = {}, flatIn = {};
+    /* ---- THE SHAPE GATE (crew iteration 14, el repartidor) — the two nouns the flat audit cannot read ----
+       `engine/shapes.js` gives a glyph the engine's own shape when the pack said nothing about that
+       letter. The flat audit CANNOT check that: it only counts `THREE.Sprite`s, so a letter that
+       stood as a BOX (K, S, D, T, V — 71 tiles of El Changarrito) never appeared on any row, and
+       `couldBeFlat` does not even list 'fence', which is F's 93 tiles and ◺'s 9. The audit sees 37
+       of the 208 tiles this change stands up. So two checks of my own, each reading its own noun:
+
+       1 · A SHAPE STANDS WHERE THE GATE SAID IT WOULD, and it is not a box wearing the word.
+           `userData.mesh` set, `userData.flat` not, and more than twelve triangles — twelve is one
+           BoxGeometry, so a "shape" of twelve is the box we were trying to stop shipping.
+       2 · NO SHADOW WITH NOTHING STANDING ON IT. The ground bake paints a soft radial contact pad
+           under any tile that HAS a mesh view and never asks whether that tile can stand
+           (`engine/engine3d.js`, grep "THE PAD"). Bind a walkable letter and its tiles get a smudge
+           on the pavement with no object over it — and because it is baked into a texture, a
+           scene-graph dump reports the scene identical. So this one reads PIXELS off the baked
+           ground: the tile's centre against its own corner. It also proves it can SEE a pad it
+           knows is there before it reports not finding one, because "nothing to measure" is a red
+           and not a pass (docs/REGRESSION.md, the four ways a guard fools its author, row B). */
+    const shpWant = {}, shpGot = {}, shpBad = [], padBad = [], padSeen = { ghosts: 0, real: 0, lit: 0, worlds: 0 };
     /* A WORLD THAT DECLINED 3D HAS NO 3D TO CHECK, and since mq-v172 it does not even download the
        library — so `T3` is not merely failed, it does not exist, and a bare mention of it throws.
        The gauge found that in one run. The gate is the pack's own `CAMERAS`, cross-checked against
@@ -215,6 +234,76 @@ function findChromium() {
       if (lintels < wantLintel) P.push(id + ': ' + (wantLintel - lintels) + ' door(s) in a tall wall have a see-through slot above them');
       if (glows < doors) P.push(id + ': ' + (doors - glows) + ' door(s) do not say "this one opens" in 3D');
       T3.group.children.forEach(o => { const u = o.userData || {}; if (u.flat) { flat[u.g] = (flat[u.g] || 0) + 1; (flatIn[u.g] = flatIn[u.g] || new Set()).add(id); } });
+      /* ---- 1 · every letter the gate answered for actually stands, as a shape and not a box ---- */
+      if (typeof SHAPEBIND === 'object' && SHAPEBIND && typeof TILEMESH !== 'undefined') {
+        const at = {};
+        T3.group.children.forEach(o => { const u = o.userData || {}; if (u.x !== undefined) (at[u.x + ',' + u.y] = at[u.x + ',' + u.y] || []).push(o); });
+        /* ONLY THE LETTERS THE ENGINE ITSELF HANDED OVER. Walking SHAPEBIND and asking "does this
+           letter have a mesh" swept up every letter the PACK had drawn too, so on Meridian this
+           check reported 331 tiles of the pack's own art as the library's work. */
+        const gave = (typeof SHAPEGIVEN !== 'undefined' && Array.isArray(SHAPEGIVEN)) ? SHAPEGIVEN : [];
+        gave.forEach(g => {
+          if (!TILEMESH[g]) return;                      /* the pack refused this letter; nothing is claimed about it */
+          for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+            if (w.grid[y][x] !== g) continue;
+            shpWant[g] = (shpWant[g] || 0) + 1;
+            const m = (at[x + ',' + y] || []).find(o => (o.userData || {}).mesh);
+            if (!m) { shpBad.push('"' + g + '" at ' + id + ' (' + x + ',' + y + ') — the engine has a shape for this letter and the tile still does not stand as one'); continue; }
+            if ((m.userData || {}).flat) { shpBad.push('"' + g + '" at ' + id + ' (' + x + ',' + y + ') is tagged both a shape and a picture'); continue; }
+            const pa = m.geometry && m.geometry.attributes && m.geometry.attributes.position;
+            const tris = pa ? pa.array.length / 9 : 0;
+            if (tris <= 12) shpBad.push('"' + g + '" at ' + id + ' (' + x + ',' + y + ') is a "shape" of ' + tris + ' triangles — one box is twelve, so this is still a box with a new word on it');
+            else shpGot[g] = (shpGot[g] || 0) + 1;
+          }
+        });
+      }
+      /* ---- 2 · no contact shadow under a letter that can never stand ---- */
+      {
+        const gnd = T3.group.children.find(o => o.geometry && o.geometry.type === 'PlaneGeometry' && o.geometry.parameters
+          && o.geometry.parameters.width === w.W && o.geometry.parameters.height === w.H);
+        const src = gnd && gnd.material && gnd.material.map && gnd.material.map.image;
+        const hasMesh = g => (typeof tileView === 'function') && !!tileView(g, 'mesh');
+        /* CAN THIS TILE EVER SHOW A SHAPE? `stands`, never `standsUp`. `standsUp` also demands a
+           side drawing, which is the flat front camera's question; the 3D camera's walkable branch
+           (engine/engine3d.js:447) asks plain `stands`. The first draft of this check asked
+           `standsUp` and reported six of Meridian's grass tiles as shadows-with-nothing-on-them,
+           on art nobody had touched — `g` is `stand:true` with no side art and its mesh stands
+           perfectly well. A red I did not plant is a hypothesis about the guard (POSTMORTEM §13g).
+           It reads BOTH glyphs, like the pad itself does: the grid's and the row's. */
+        const canStand = g => g !== undefined && (SOLID.has(g) || (typeof stands === 'function' && stands(g)));
+        const ghosts = [], reals = [];
+        for (let y = 0; y < w.H; y++) for (let x = 0; x < w.W; x++) {
+          const gch = w.grid[y][x], ch = w.rows[y][x];
+          if ((TILES[gch] || {}).kind === 'water') continue;
+          const mg = hasMesh(gch) ? gch : hasMesh(ch) ? ch : null;
+          if (!mg) continue;
+          if (!canStand(gch) && !canStand(ch)) ghosts.push([x, y, mg]); else reals.push([x, y, mg]);
+        }
+        if (!src) { if (ghosts.length || reals.length) padBad.push(id + ': the baked ground could not be read at all, so nothing was checked for shadows with nothing standing on them'); }
+        else {
+          padSeen.worlds++; padSeen.ghosts += ghosts.length; padSeen.real += reals.length;
+          const K = Math.round(src.width / (w.W * 32)) || 1;
+          const cv = document.createElement('canvas'); cv.width = src.width; cv.height = src.height;
+          const c2 = cv.getContext('2d'); c2.drawImage(src, 0, 0);
+          const px1 = c2.getImageData(0, 0, src.width, src.height).data;
+          const lum = (sx, sy) => { const i = ((sy | 0) * src.width + (sx | 0)) * 4; return 0.299 * px1[i] + 0.587 * px1[i + 1] + 0.114 * px1[i + 2]; };
+          /* centre against the tile's own top-left corner. A pad is a radial darkest in the middle;
+             the neighbour gradients this engine also paints darken EDGES, which biases the other way. */
+          const padAt = ([x, y]) => lum((x * 32 + 2) * K, (y * 32 + 2) * K) - lum((x * 32 + 16) * K, (y * 32 + 16) * K);
+          /* CAN THIS PROBE SEE A PAD IT KNOWS IS THERE? If not, its silence means nothing.
+             THE CONTROL IS PER WORLD. It used to read the running totals and add `worlds === 1`,
+             so the question was only ever asked of the FIRST world drawn: if world one's ground
+             baked readably and every later one did not, the probe went on reporting silence about
+             grounds it had never managed to measure, and the silence looked like a pass. Each
+             world now proves it can see a pad in ITS OWN bake before its verdict counts. */
+          let litHere = 0;
+          reals.forEach(t => { if (padAt(t) > 6) litHere++; });
+          padSeen.lit += litHere;
+          if (reals.length && !litHere) padBad.push(id + ': the shadow probe read ' + reals.length + ' tiles in this world that certainly carry a contact shadow and could not see one on any of them — it is measuring nothing here, so its verdict about this world\'s other tiles is worth nothing');
+          ghosts.forEach(([x, y, g]) => { const d = padAt([x, y]);
+            if (d > 6) padBad.push('"' + g + '" at ' + id + ' (' + x + ',' + y + ') has a shadow painted on the pavement with nothing standing on it — the letter is walkable, so it can never show a shape, but it was given one anyway (engine/shapes.js SHAPEBIND, and the solidity line in the gate in engine/engine.js)'); });
+        }
+      }
     });
     world = before.world; px = fx = before.px; py = fy = before.py; if (has3d) T3.yaw = before.yaw; camSet(before.cam);
     // ---- #132 / #133: a hair style has to look like its name ----
@@ -534,14 +623,93 @@ function findChromium() {
        Red first, the audit's own sentence: '"A" is no longer flat in 3D — take it off this game's row of
        FLAT_BY_GAME in test/engine.smoke.js (the key is "index.html") so the list keeps shrinking (#39)'.
        Still flat: 3 4 5 (the agility gear, which is machinery) and X (the site marker). */
-    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', 'X'] };
+    /* EL CHANGARRITO GETS ITS OWN ROW ON 2026-09-22, crew iteration 14 (el repartidor), and the row
+       is the receipt for the whole change. Until today the town had no key here, so it fell through
+       to the shared FLAT_BASE of fourteen glyphs and its street was allowed to be a picture gallery:
+       the audit printed 'Still flat in 3D (#39): 9×1 A×6 H×6 J×3 P×16 W×3 X×2' and called it a pass.
+       `engine/shapes.js` + the gate in engine.js let the town TAKE the engine's shape for the seven
+       letters it named in `SHAPETAKE` (changarrito/content/art.js), so five of those seven flat
+       letters stood up. The audit said so BEFORE this row existed, red, one line per glyph, naming
+       this key: that is the order it has to happen in.
+
+       WHAT IS LEFT ON THIS ROW, and both are decisions rather than leftovers:
+         'X' — the site marker, a mark on the ground and not an object.
+         'H' — SIX TILES THAT COULD STAND UP TODAY AND DELIBERATELY DO NOT. The engine's `H` is an
+               open produce crate; this town's `H` is a rack in a house (changarrito/content/maps.js,
+               grep "racks"). Standing the engine's crate up would put six crates of tomatoes in
+               the bedrooms, so the town does not name `H`. A letter on this row because somebody
+               decided it belongs there is not the same as a letter nobody has got to yet, and the
+               only place that difference is written down is here.
+
+       AND THE NUMBER. This row counts SPRITES, so it can never show the biggest part of the change:
+       'F' (93 tiles) and '◺' (9) stand as fence panels, which `couldBeFlat` does not list. The
+       honest count of tiles that stopped being flat pictures or edge-on planes is 131:
+       F 93, P 16, ◺ 9, A 6, J 3, W 3, 9 1. An earlier draft of this lane claimed 208; the other 77
+       were 71 tiles of K S D T V, which are not flat — they are boxes already wearing their own
+       drawings, and the gate now refuses them (`wearsArt`) — plus the 6 H tiles above. */
+    /* 'J' went back on this row the same day it came off. The town took the jacaranda, and a reader
+       looked at it: `wearsArt` guards a BOX's drawing, and a tree's drawing is not on a box — it is the
+       sprite canopy the engine bakes by hand (engine/engine3d.js, grep "one jacaranda canopy"), which
+       paints its blossoms with art("bloom") and changes them in season. engine/shapes.js's `tree` has
+       three greens and no bloom, so the trade was a jacaranda in flower for a bare green one. Taken
+       out of the town's SHAPETAKE; it stands as a picture again, which is the honest state. */
+    const FLAT_BY_GAME = { 'index.html': ['3', '4', '5', 'X'], 'changarrito/index.html': ['H', 'J', 'X'] };
+    /* WHY A LETTER IS ON A ROW, when the reason is a decision and not "nobody has got to it yet".
+       Without this, the reverse check below tells a future session to "take H off this game's row so
+       the list keeps shrinking" — which is the exact opposite of the decision, and it would be read
+       as an instruction. A row entry that was CHOSEN says so in its own failure message. */
+    const FLAT_ON_PURPOSE = { 'changarrito/index.html': {
+      H: 'the engine draws H as an open produce crate and THIS TOWN\'S H IS A RACK IN A HOUSE (changarrito/content/maps.js, grep "racks") — standing the crate up puts six crates of tomatoes in the bedrooms. It is left out of SHAPETAKE on purpose: do not "fix" this by taking it off the row',
+      J: 'the town keeps the engine\'s hand-baked jacaranda canopy, which blossoms and follows the season; the shared library\'s tree does not bloom yet. Left out of SHAPETAKE on purpose',
+    } };
     const FLAT_KNOWN = FLAT_BY_GAME[IDXNAME] || FLAT_BASE;
     const laid = new Set(); Object.values(WORLDS).forEach(w => w.rows.forEach(r => r.split('').forEach(ch => laid.add(ch))));
     Object.keys(flat).forEach(g => { if (!FLAT_KNOWN.includes(g)) P.push('"' + g + '" (' + ((TILES[g] || {}).kind || '?') + ') stands in 3D as a flat picture in ' + [...flatIn[g]].join(',') + ' — give it a side view (TILESIDE) so it becomes a box; nothing new may ship flat (#39)'); });
     // a pack may give a letter another meaning (the town's I is a facade): only a glyph laid here
     // as a kind the builder could make flat counts as "no longer flat"
     const couldBeFlat = g => ['furniture', 'appliance', 'prop', 'nature', 'gear', 'marker', 'site', 'transit', 'stair', 'tree'].includes((TILES[g] || {}).kind);
-    FLAT_KNOWN.forEach(g => { if (laid.has(g) && couldBeFlat(g) && !flat[g]) P.push('"' + g + '" is no longer flat in 3D — take it off this game\'s row of FLAT_BY_GAME in test/engine.smoke.js (the key is "' + IDXNAME + '") so the list keeps shrinking (#39)'); });
+    const onPurpose = FLAT_ON_PURPOSE[IDXNAME] || {};
+    FLAT_KNOWN.forEach(g => { if (laid.has(g) && couldBeFlat(g) && !flat[g]) P.push(onPurpose[g]
+      ? '"' + g + '" is standing in 3D and it was supposed to stay a picture: ' + onPurpose[g] + ' — something has given it a shape, and that is the thing to undo'
+      : '"' + g + '" is no longer flat in 3D — take it off this game\'s row of FLAT_BY_GAME in test/engine.smoke.js (the key is "' + IDXNAME + '") so the list keeps shrinking (#39)'); });
+    /* ---- the shape gate's verdict, and it reports the HONEST number ----
+       The flat row above can only ever show the letters that stood as sprites. This one counts
+       tiles, which is what a person walking the street actually meets. */
+    if (typeof SHAPEBIND === 'object' && SHAPEBIND) {
+      P.push(...shpBad.slice(0, 8));
+      if (shpBad.length > 8) P.push('…and ' + (shpBad.length - 8) + ' more tiles the engine has a shape for and did not stand up');
+      const tiles = Object.values(shpGot).reduce((a, b) => a + b, 0);
+      const want = Object.values(shpWant).reduce((a, b) => a + b, 0);
+      /* WHAT THE ENGINE ACTUALLY GAVE, from the engine's own receipt.
+         This used to read `Object.keys(SHAPEBIND).filter(g => TILEMESH[g])`, and that line runs
+         long after the gate has written into `TILEMESH` — so it could not tell a shape the PACK
+         wrote from one the ENGINE supplied, and answered the much weaker question "does this
+         letter have any mesh at all". On Meridian it reported 331 of 331 tiles standing on the
+         engine's library when the true number is ZERO: every one of those is Meridian's own
+         TILEART_MESH, refused by clause 1. The headline number of the whole change was a proxy for
+         something else. `SHAPEGIVEN` is the gate writing down what it handed over. */
+      const given = (typeof SHAPEGIVEN !== 'undefined' && Array.isArray(SHAPEGIVEN)) ? SHAPEGIVEN : null;
+      if (!given) P.push('engine/shapes.js is loaded but the gate kept no record of what it handed out (SHAPEGIVEN) — the count below would be a guess, so it is not printed');
+      else if (!given.length) P.push('COUNT-ONLY: this pack takes no letter from the engine\'s shape library — either it answers for them itself or its SHAPETAKE does not name them — so the library stands nothing here and costs it nothing');
+      else if (!want) P.push('COUNT-ONLY: the engine gave this pack a shape for ' + given.join('') + ', and it lays none of those letters anywhere');
+      else P.push('COUNT-ONLY: the engine\'s shapes stand ' + tiles + ' of ' + want + ' tiles across ' +
+        Object.keys(shpGot).sort().map(g => g + '×' + shpGot[g]).join(' ') + ' — taken by name in SHAPETAKE (' + given.join('') + ')');
+      /* ---- THE RULE: an engine default fills a hole, it never replaces a drawing ----
+         A letter that stands today as a BOX is not a hole: `t3BoxMats` bakes its top-down art onto
+         the lid and wraps its side art round the four faces, and the mesh view has no texture
+         channel to carry either. So a default here deletes a drawing and every meter in this
+         repository scores it as a gain — 71 tiles of the town (K S D T V) went that way in the
+         first draft and the triangle-counting guard above called all 71 a success. */
+      if (given && typeof wearsArt === 'function') given.forEach(g => { if (wearsArt(g))
+        P.push('the engine handed "' + g + '" its own shape, but "' + g + '" is already drawn standing up — it is a box wearing its own picture on the lid and sides, and a shape has no picture on it, so this quietly swaps a drawing for a bare block (engine/engine.js, the gate, clause 5)'); });
+    } else if (wants3d) P.push('this shell asked for a 3D camera and engine/shapes.js never arrived, so every letter the pack did not draw itself stands as a box — engine/boot.js writes it inside `if(want)` and sw.js must list it, or the second, OFFLINE visit is the one that loses it');
+    /* NOT a failure and NOT a shrug: a pack with no 3D camera does not download the library, by
+       design (engine/boot.js). The gauge is that pack. It still says so out loud every run. */
+    else P.push('COUNT-ONLY: this shell declined the 3D camera, so engine/shapes.js was never downloaded and no letter took an engine shape');
+    P.push(...padBad.slice(0, 6));
+    P.push('COUNT-ONLY: the shadow probe read ' + padSeen.worlds + ' baked grounds — ' + padSeen.real +
+      ' tiles that should carry a contact shadow (' + padSeen.lit + ' of them read as darker in the middle, which is how it knows it can see one) and ' +
+      padSeen.ghosts + ' walkable tiles that must not');
     // ---- nothing is stored outside the pack's prefix ----
     const pfx = SK(''); const stray = [];
     for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!k.startsWith(pfx)) stray.push(k); }

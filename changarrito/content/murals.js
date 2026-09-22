@@ -5419,6 +5419,135 @@ MURALS.push({
     g.restore();}
 });
 
+MURALS.push({
+  id:"repartidor-rehusado-en-la-puerta", iter:14, date:"2026-09-22", by:"el repartidor",
+  title:{en:"Refused at the door", es:"Rehusado en la puerta"},
+  said:{en:"Same letter on the box, a different thing inside the house. You cannot read that off a label — you have to knock.",
+        es:"La misma letra en la caja, otra cosa dentro de la casa. Eso no se lee en la etiqueta: hay que tocar la puerta."},
+  state:{en:"Holding that a world has to ASK for what the engine offers, because nobody at that door ever said yes — they only never said no, and I had been signing that as a yes.",
+         es:"Sostengo que un mundo tiene que PEDIR lo que el motor ofrece, porque nadie en esa puerta dijo que sí: nomás nunca dijo que no, y yo lo venía firmando como un sí."},
+  who:{en:"el repartidor, who would rather take seventy-seven back to the depot than leave one at the wrong door",
+       es:"el repartidor, que prefiere regresar setenta y siete a la bodega antes que dejar uno en la puerta equivocada"},
+  cap:{en:"I counted two hundred and eight parcels off the van and signed for every one of them. Seventy-one were furniture those rooms already had, standing there with its own picture painted on the lid, and what I was carrying had no picture on it at all — so the meter scored my delivery as a gain, because it counts corners and not what is drawn on them. Six more had the right letter and the wrong thing inside: this engine calls H a crate of produce, that town means a rack in a bedroom, and there is nothing written down anywhere that could have told me. A hundred and thirty-one got to the door. I took the rest back.",
+       es:"Bajé doscientos ocho bultos de la camioneta y firmé por todos. Setenta y uno eran muebles que esos cuartos ya tenían, parados ahí con su propio dibujo pintado en la tapa, y lo que yo traía no traía dibujo ninguno — así que el medidor apuntó mi entrega como ganancia, porque cuenta esquinas y no lo que está dibujado en ellas. Otros seis traían la letra correcta y la cosa equivocada adentro: este motor le dice H a una huacal de fruta, ese pueblo le dice estante de recámara, y no hay nada escrito en ningún lado que me lo hubiera dicho. Ciento treinta y uno llegaron a la puerta. Los demás me los regresé."},
+  aspect:0.46,
+  art:(g,W,H)=>{const P=MURPAL;
+    /* ---- MY PAPER: a carbonless delivery note, the pink duplicate the driver leaves behind.
+       Not limewash, not a blueprint, not a spec sheet — a docket that has been in a pocket. ---- */
+    const PAPER="#EADFDA", PAPER2="#DCC9C4", CARB="#4A3E6B", CARBL="#7C6FA0",
+          RED="#B3322B", REDL="#D4675C", SMUDGE="rgba(74,62,107,0.13)", HOLE="#CDBAB5";
+    /* the second copy, showing behind along the right and bottom: two sheets, one impression */
+    g.fillStyle=PAPER2;g.fillRect(W*0.012,H*0.03,W*0.988,H*0.97);
+    g.fillStyle=PAPER;g.fillRect(0,0,W*0.985,H*0.955);
+    /* the grain of cheap copy paper */
+    g.fillStyle=PAPER2;g.globalAlpha=.30;
+    for(let y=0;y<H*0.955;y+=4)g.fillRect(0,y,W*0.985,1);
+    g.globalAlpha=1;
+    /* the tear-off strip down the left, and its perforation */
+    g.fillStyle=PAPER2;g.globalAlpha=.55;g.fillRect(0,0,W*0.055,H*0.955);g.globalAlpha=1;
+    g.fillStyle=HOLE;
+    for(let y=H*0.04;y<H*0.93;y+=Math.max(7,H*0.055)){g.beginPath();g.arc(W*0.055,y,1.7,0,7);g.fill();}
+
+    /* ---- the head of the docket ---- */
+    g.fillStyle=CARB;g.fillRect(W*0.085,H*0.055,W*0.86,H*0.017);
+    g.font="bold 12px ui-monospace,monospace";g.textAlign="left";
+    g.fillStyle=CARB;g.fillText("NOTA DE ENTREGA",W*0.085,H*0.145);
+    g.font="bold 11px ui-monospace,monospace";
+    /* the sub-line is MEASURED against the line opposite it, never guessed: type here is
+       absolute and the panel is not, so at 320 wide "· 13 rengl." ran straight into the figure
+       opposite it. It is dropped when it does not fit, rather than drawn over somebody's words. */
+    g.fillStyle=CARBL;
+    {const room=W*0.945-W*0.085-g.measureText("entregados 131").width-8;
+     const long="engine → changarrito · 13 rengl.", short="engine → changarrito";
+     g.fillText(g.measureText(long).width<=room?long:short,W*0.085,H*0.215);}
+    g.textAlign="right";
+    g.fillStyle=CARB;g.font="bold 12px ui-monospace,monospace";
+    g.fillText("BULTOS 208",W*0.945,H*0.145);
+    g.font="bold 11px ui-monospace,monospace";g.fillStyle=CARBL;
+    g.fillText("entregados 131",W*0.945,H*0.215);
+    g.textAlign="left";
+
+    /* ---- the manifest: four lines of the load, longest first, and the TICK COLUMN is now the
+       whole panel. Round one's docket put a tick where the AUDIT had a line for the parcel, which
+       made it a drawing about a bad meter. This one puts a tick where the parcel actually went in
+       and a cross where I carried it back out, which makes it a drawing about a bad delivery.
+       Mine. The meter was never the thing that was wrong with that street. ---- */
+    const rows=[["F",93,true],["K",33,false],["S",16,false],["H",6,false]];
+    const x0=W*0.175, x1=W*0.600, top=H*0.285, lead=H*0.098;
+    rows.forEach(function(r,i){
+      const ch=r[0],n=r[1],took=r[2],y=top+i*lead;
+      g.font="bold 12px ui-monospace,monospace";g.fillStyle=CARB;
+      g.fillText(ch,W*0.10,y+4);
+      const bw=Math.max(4,(x1-x0)*(n/93));
+      g.fillStyle=took?CARB:CARBL;g.fillRect(x0,y-5,bw,9);
+      /* what went back on the van, struck through in carbon */
+      if(!took){g.strokeStyle=CARB;g.lineWidth=1;g.globalAlpha=.55;
+        for(let hx=x0+3;hx<x0+bw;hx+=5){g.beginPath();g.moveTo(hx,y+4);g.lineTo(hx-5,y-5);g.stroke();}
+        g.globalAlpha=1;}
+      g.font="bold 11px ui-monospace,monospace";g.fillStyle=CARB;
+      g.fillText(String(n),x1+W*0.022,y+4);
+      g.font="bold 12px ui-monospace,monospace";g.fillStyle=took?CARB:RED;
+      g.fillText(took?"✓":"✕",W*0.730,y+4);
+    });
+
+    /* ---- THE REASON, DRAWN. Not a caption about H: the two objects themselves, side by side, at
+       reading size, with the same letter written under BOTH of them. That is the whole finding,
+       and it is the kind of thing a person gets in one look while an argument about it takes a
+       paragraph. Left, what came off my van: an open produce crate, boards with daylight between
+       them, fruit showing over the rim. Right, what that house actually keeps there: a rack, two
+       uprights and three shelves with the goods stacked on them. Neither label is wrong. ---- */
+    {const s=Math.max(13,H*0.125), bx=W*0.135, gap=s*1.7, rx=bx+gap, by=H*0.700;
+     g.textAlign="center";
+     g.fillStyle=CARB;g.fillRect(bx-s*0.5,by+s*0.28,s,s*0.54);
+     g.fillStyle=PAPER;for(let i=0;i<3;i++)g.fillRect(bx-s*0.34+i*s*0.29,by+s*0.34,s*0.085,s*0.42);
+     g.fillStyle=CARBL;[[-0.26,0.20],[0,0.12],[0.26,0.20]].forEach(function(q){
+       g.beginPath();g.arc(bx+q[0]*s,by+q[1]*s,s*0.13,0,7);g.fill();});
+     g.fillStyle=CARB;g.fillRect(rx-s*0.46,by-s*0.12,s*0.10,s*0.94);g.fillRect(rx+s*0.36,by-s*0.12,s*0.10,s*0.94);
+     [0.04,0.34,0.64].forEach(function(t){
+       g.fillStyle=CARBL;g.fillRect(rx-s*0.30,by+t*s-s*0.19,s*0.21,s*0.19);g.fillRect(rx+s*0.04,by+t*s-s*0.15,s*0.19,s*0.15);
+       g.fillStyle=CARB;g.fillRect(rx-s*0.46,by+t*s,s*0.92,s*0.085);});
+     g.font="bold 11px ui-monospace,monospace";g.fillStyle=CARB;
+     g.fillText("H",bx,by+s*1.18);g.fillText("H",rx,by+s*1.18);
+     g.font="bold 12px ui-monospace,monospace";g.fillStyle=RED;
+     g.fillText("≠",(bx+rx)/2,by+s*0.44);
+     g.textAlign="left";}
+
+    /* ---- the carbon smudge, low in the corner, because a duplicate always has one ---- */
+    g.fillStyle=SMUDGE;g.beginPath();g.ellipse(W*0.115,H*0.955,W*0.095,H*0.05,0.3,0,7);g.fill();
+
+    /* ---- what it came to, on the bottom line. There is NO signature scrawl on this docket and
+       no figure taking it at the door, and that absence is the panel: there was nothing to sign.
+       The space those two used is the drawing above them now, which is the better use of it. ---- */
+    let lx=W*0.085;const ly=H*0.962;
+    g.font="bold 11px ui-monospace,monospace";g.fillStyle=CARBL;
+    g.fillText("entregué ",lx,ly);lx+=g.measureText("entregué ").width;
+    g.font="bold 12px ui-monospace,monospace";g.fillStyle=CARB;
+    g.fillText("131",lx,ly);lx+=g.measureText("131").width;
+    /* MEASURED, not guessed: at 320 wide the long tail ran under the stamp, so the docket says
+       the short thing there and the stamp carries the other number on its own face. */
+    {const tail=" de 208 · regresé 77", room=W*0.68-lx;
+     g.font="bold 11px ui-monospace,monospace";g.fillStyle=CARBL;
+     g.fillText(g.measureText(tail).width<=room?tail:" de 208",lx,ly);}
+
+    /* ---- the rubber stamp, banged on at an angle, as they always are. It said ENTREGADO in
+       round one, over a load I had not looked inside. ---- */
+    g.save();g.translate(W*0.830,H*0.790);g.rotate(-0.21);
+    /* THE BOX IS SIZED TO THE WORD, not to the panel. A stamp is a fixed piece of rubber and this
+       lettering is a fixed number of pixels, so at 320 wide "REHUSADO" was 58px of type inside a
+       54px frame and the word hung out of both ends of its own stamp. Measured, then the frame is
+       whichever is bigger. The same sum moved it up off the bottom line, which it was sitting on. */
+    g.font="bold 12px ui-monospace,monospace";
+    const sw=Math.max(Math.min(W*0.115,H*0.185),g.measureText("REHUSADO").width/2+7), sh=sw*0.60;
+    g.strokeStyle=RED;g.lineWidth=2.2;g.globalAlpha=.85;
+    g.strokeRect(-sw,-sh,sw*2,sh*2);
+    g.lineWidth=1;g.strokeRect(-sw+3.5,-sh+3.5,sw*2-7,sh*2-7);
+    g.fillStyle=RED;g.textAlign="center";
+    g.font="bold 12px ui-monospace,monospace";g.fillText("REHUSADO",0,-3);
+    g.font="bold 11px ui-monospace,monospace";g.fillStyle=REDL;g.fillText("77 · 22·IX",0,sh-6);
+    g.globalAlpha=1;g.textAlign="left";g.restore();
+  }
+});
+
 function murThread(iter){const P=MURPAL,t=[P.rust,P.gold,P.moss,P.sky,P.deep];
   return t[((iter|0)-1+t.length)%t.length]||P.rust;}
 /* ---- WHAT A PAINTER HAS ALREADY SAID — their own memory, handed back to them ----

@@ -226,7 +226,10 @@ function t3Reuse(key){
   return true;}
 /* ---- A MESH FROM PARTS: the `mesh` view (2026-09-21, owner: "i still see squares and not
    polygonal shapes … can we not try this finally?"). A pack answers "what shape is this tile"
-   with a LIST OF PRIMITIVES — box, sphere, cylinder, cone — each with a place, a size and a
+   with a LIST OF PRIMITIVES — box, sphere, cylinder, cone and TORUS (`s:"torus"`, with `t` for the
+   tube and `arc` for a part-ring: an arch, a ring of a stove, the bones on a pan de muerto; the
+   fifth has been implemented four lines below since the day this shipped and this sentence said
+   four until 2026-09-22) — each with a place, a size and a
    colour, in tile units with y up from the floor and the tile's centre at (0,0). The engine
    merges them into ONE mesh per tile with vertex colours, so a bed of six marigolds costs one
    draw call and not fifteen. Nothing here names a glyph or a colour: a pack that says nothing
@@ -382,7 +385,12 @@ function t3Build(key){
      every camera stop — a table looked the same walked around ("most art only have one
      display from any direction", owner 2026-09-03). Round or leggy things with no side view
      stay cutouts; that is the right shape for a plant, a cone, a pile of tires. */
-  const t3Boxy=(g,m)=>!!(m.box||m.kind==="furniture"||m.kind==="appliance")&&typeof TILESIDE!=="undefined"&&!!TILESIDE[g];
+  /* ONE DEFINITION, TWO READERS. This used to spell the test out here, and the gate in engine.js
+     spelled its own idea of the same question out there — so the gate could hand a mesh to a
+     letter this line was about to wear a drawing on, and nothing could notice. `wearsArt`
+     (engine/engine.js, grep "ALREADY WEARING A DRAWING") is now the only copy; `m` stays in the
+     signature because the caller has it, and it is the same object `wearsArt` looks up. */
+  const t3Boxy=(g,m)=>wearsArt(g);
   const t3BoxMats=(g,x,y)=>{
     const vk=g+"|"+(((x+y)%6)+6)%6;if(boxMat[vk])return boxMat[vk];
     const sc=t3BakeGlyph(g,false,null,false,true,null,x,y);
