@@ -625,23 +625,62 @@ const TILEART_MESH={};
    the whorls take P[hue+1], P[hue+2], P[hue+3] (the crown capped at P[4]); nothing here names an
    orange, so a season that recolours petals recolours these. Four steps because two touching heads in
    one family are ~5% apart under this light and merge (Pili, run 11): every value difference between
-   heads is PAINTED. `lod` 0 drops the middle whorl (a garland of small heads). `lean` is [x,z]: the
+   heads is PAINTED. `lod` 0 drops the middle whorl, but ONLY on a bed-sized head — below r 0.10 the
+   six-lobe branch never consults it and 0 does nothing (measured; see the count below). `lean` is [x,z]: the
    head sheared off its stem that much per unit of height — the outer stems of a bush splay toward
    the light. The first seven parameters are what the bed, the tree's garland and the altar's arch
-   already pass. 26 parts. */
+   already pass.
+
+   DEFINITION, THE FOURTH REPORT — 2026-09-22, la jardinera (owner: "the marigold decor is also not
+   very well defined"). The head was not the fault; it reads at a 4× crop. TWO things were, and both
+   are about what is NEXT TO the orange, not about the orange:
+
+   (1) THE DARK. The light here has a 1.5:1 range and nothing more (DAY_AMB 0.66, DAY_SUN 0.42), so
+   form cannot separate two orange things — only VALUE can, and value has to be painted in. In the
+   bed it was, by accident: the near-black foliage mound sits under the heads. Everywhere the
+   marigold is used as DECOR — the tree's garland, the altar's arch, the calaverita's lid — it hangs
+   against pale plaster with nothing behind it, and twelve orange lobes with nothing dark at their
+   rim average to a smear. The bakery found the same thing and the answer there was the PACKAGING:
+   a polvorón reads because its white paper cup is WIDER than the cookie. So every head now carries
+   its own dark: a near-black involucre collar, r*1.24 — wider than the petal mass's outer reach of
+   about r*1.15 — flattened to sy 0.16 and set a little below the florets, so from the 40° camera it
+   shows as a dark ring round the lower rim of every head and as dark in every gap between two heads
+   that touch. #1B3521 lands at luma 43 on a lit face and 28 on a shaded one, against 127 for the
+   body orange: the biggest value step anywhere on the flower, and it is the step the eye uses.
+
+   (2) THE SUB-PIXEL FLORETS. A tile is ~35 px on a phone. A decor head at r 0.055 is 4 px across
+   and was being built from 24 florets of r 0.019 — 0.65 px each. They cannot be seen; they can only
+   be averaged, which is exactly what "not defined" looks like. Under r 0.10 the head is now built
+   from SIX fat outer lobes and four inner ones instead of twenty-four small ones, so the outline is
+   a rosette with six points instead of a circle.
+
+   `collar:true` and `petal:true` mark the two kinds for `test/smoke.js`'s definition guard.
+   COUNTED, by calling it rather than by reading it (the first draft of this comment said 26 and 13
+   and both were wrong — it forgot that the crown whorl(3) sits OUTSIDE the small/else branch and is
+   built either way): 27 parts at bed size with `lod` 1, 20 at bed size with `lod` 0, and 16 for any
+   head under r 0.10. `lod` reaches only the bed's branch — a small head builds the same 16 parts
+   whatever it is passed, which is why the marigold on the tamalera's pot lid (grep "a marigold on
+   the lid in season") passes 0 and gets the same head as everything else. That is deliberate:
+   there is nothing left to drop at 4 px. (It said "art.js:1866" and the call was never on that
+   line; a line number in a comment is wrong the next time anything above it is edited, and this
+   comment has now moved it twice. Name the thing, not the line.) */
 const meshMarigold=(parts,hx,hy,hz,r,P,seed,hue,lod,lean)=>{
   const k=hue===undefined?1:hue,full=lod===undefined||lod>0,lx=lean?lean[0]:0,lz=lean?lean[1]:0;
-  const C0=P[Math.max(k+1,0)]||P[2],C1=P[Math.max(k+2,0)]||P[3],C2=P[Math.min(k+3,4)]||P[4],CUP="#4E8A58"; /* the crown stops at P[4]: a gold head is gold to the centre, not cream */
+  const small=r<0.10;                                                                                  /* a decor head: 6 px across, so fewer and fatter */
+  const C0=P[Math.max(k+1,0)]||P[2],C1=P[Math.max(k+2,0)]||P[3],C2=P[Math.min(k+3,4)]||P[4],CUP="#4E8A58",COLLAR="#1B3521"; /* the crown stops at P[4]: a gold head is gold to the centre, not cream */
   const rnd=(i,j)=>{const v=Math.sin((seed+1)*12.9898+i*78.233+j*37.719)*43758.5453;return v-Math.floor(v);}; /* a hash, not Math.random: the same tile grows the same flower every frame */
   const put=p=>{p.x+=(p.y-hy)*lx;p.z+=(p.y-hy)*lz;parts.push(p);};
+  put({s:"sph",x:hx,y:hy-r*0.12,z:hz,r:r*1.24,sy:0.16,c:COLLAR,collar:true});                          /* THE VALUE BREAK: the dark, and it is WIDER than the flower */
   put({s:"cyl",x:hx,y:hy-r*0.32,z:hz,rt:r*0.30,rb:r*0.20,h:r*0.5,c:CUP});                            /* the involucre */
-  put({s:"sph",x:hx,y:hy+r*0.22,z:hz,r:r*0.55,sy:0.9,c:C1});                                           /* the receptacle, in the plant's own hue */
+  put({s:"sph",x:hx,y:hy+r*0.22,z:hz,r:r*0.55,sy:0.9,c:C1,petal:true});                                /* the receptacle, in the plant's own hue */
   const whorl=(n,rad,y,pr,sy,sz,tilt,c,j)=>{const off=rnd(j,0)*6.2832,hl=pr*sz;
     for(let i=0;i<n;i++){const a=off+i*6.2832/n+(rnd(i,j)-0.5)*0.4,t=tilt+(rnd(i,j+5)-0.5)*0.3,rr=rad+Math.cos(t)*hl;
-      put({s:"sph",x:hx+Math.cos(a)*rr,y:y+Math.sin(t)*hl,z:hz+Math.sin(a)*rr,r:pr,sy,sz,rx:-t,ry:Math.PI/2-a,c});}};
-  whorl(8,r*0.30,hy,r*0.34,0.28,1.25,0.3,C0,1);                                                        /* outer: the largest florets, splayed, margins lifted */
-  if(full)whorl(7,r*0.22,hy+r*0.14,r*0.30,0.32,1.1,0.95,C1,2);                                         /* middle: shorter, steeper */
-  whorl(6,r*0.12,hy+r*0.28,r*0.26,0.4,1.0,1.25,C2,3);                                                   /* inner: near upright, crinkled */
+      put({s:"sph",x:hx+Math.cos(a)*rr,y:y+Math.sin(t)*hl,z:hz+Math.sin(a)*rr,r:pr,sy,sz,rx:-t,ry:Math.PI/2-a,c,petal:true});}};
+  if(small){whorl(6,r*0.26,hy,r*0.40,0.32,1.10,0.35,C0,1);                                             /* six fat lobes: at 6 px an outline with points beats a circle of crumbs */
+            whorl(4,r*0.10,hy+r*0.26,r*0.32,0.42,1.0,1.20,C2,3);}
+  else{whorl(8,r*0.30,hy,r*0.34,0.28,1.25,0.3,C0,1);                                                   /* outer: the largest florets, splayed, margins lifted */
+       if(full)whorl(7,r*0.22,hy+r*0.14,r*0.30,0.32,1.1,0.95,C1,2);                                    /* middle: shorter, steeper */
+       whorl(6,r*0.12,hy+r*0.28,r*0.26,0.4,1.0,1.25,C2,3);}                                            /* inner: near upright, crinkled */
   whorl(3,r*0.06,hy+r*0.55,r*0.2,0.8,1.0,1.4,C2,4);};                                                   /* the crown */
 /* A STRING OF PAPEL PICADO between two points, sagging a little, with flags hung from it in the paper
    palette, alternating. Flags are boxes, thin as paper, a hair below the string. */
@@ -979,33 +1018,123 @@ TILEART_MESH["9"]=({x,y})=>{
   const cr=Math.cos(ry),sr=Math.sin(ry);
   return parts.map(p=>({...p,x:p.x*cr+p.z*sr,z:-p.x*sr+p.z*cr,ry:(p.ry||0)+ry}));};
 
-/* THE TREE, WITH ITS DRESS. Grown: a trunk that tapers, two branches leaning out of it, a crown of
-   six leaf masses in two greens, jacaranda blossoms on the outside of the crown in the season's
-   bloom colour. Dressed for the night when the season says so — canopyDress's recipe, in parts: a
-   garland of petals slung across the front of the crown, three papel streamers hanging BELOW it,
-   and one sugar-skull lantern on a thread. One; three is a Christmas tree. Nothing without a season. */
+/* THE TREE, WITH ITS DRESS. Grown: a bole that tapers off a root flare, five scaffold limbs fanning
+   out of the fork, a flat crown of leaf masses in three greens laid on the limb ends, jacaranda
+   blossom on the crown's outer skin in the season's bloom colour. Dressed for the night when the
+   season says so — canopyDress's recipe, in parts: a garland of marigolds slung across the front,
+   papel picado above it, three streamers hanging below and one sugar-skull lantern on a thread.
+   One; three is a Christmas tree. Nothing without a season.
+
+   A TREE YOU WALK UNDER — 2026-09-22, la jardinera. The owner asked first for "bigger", and when
+   he was shown a tree of about two and three quarter tiles he said what he had actually wanted:
+   "can we make it tall so we can walk underneath it all ghostly?" So it does not come down. The
+   canopy goes OVERHEAD and wide enough that the tile you stand on is under it, and the engine
+   turns the whole tile see-through while you are there (engine/engine3d.js, t3Top and
+   T3CROWNGLASS — the crown has its own ghost, because the town shares T3GHOST and asked for
+   nothing).
+
+   It was never too SHORT. The shipped tree's top stood 1.800 against 1.096 for a shop front
+   (wallH at lift 13) and 0.92 for a person (T3PERSON) — already the tallest thing on the street.
+   It was too NARROW and too LOW-SLUNG: a ball 1.235 across whose foliage began at 0.780, below a
+   person's head. A jacaranda is an UMBRELLA — a flat crown WIDER THAN THE TREE IS TALL, held high
+   on a clear bole — and that is the shape that has an underneath at all.
+
+   Both columns were measured the same way, by baking each part on its own through the engine's own
+   t3MeshOf and reading the real transformed vertex bounds, so a rotated limb and a squashed sphere
+   are measured as they are drawn. (Measured, not estimated, and not measured by two different
+   methods either: an earlier draft of this table compared an exact disc integration against a
+   box sample and the two are not the same number.)
+
+     foliage bottom  0.780 -> 1.982   the leaves start at twice a person's height
+     lowest of ANY   0.648 -> 1.925   part that is not the trunk — this is the headroom
+     max reach       0.617 -> 1.414   from the trunk's axis. PAST the next tile's centre, which is
+                                      the whole point: under 1.0 there is no tile you can stand on
+                                      and have leaves above your head
+     overhang        0.117 -> 0.914   past the tile edge, onto the pavement you walk on
+     crown width     1.235 -> 2.828   wider than the tree is tall, which is a jacaranda
+     plan area       1.069 -> 6.282 tiles²   +488%, and that is the number the eye reads as "bigger"
+     top             1.800 -> 2.733   +52%
+     parts, dressed    229 ->   152   BIGGER and CHEAPER: a ring of 6 heads, not a line of 7, and
+                                      the tree stopped wearing a second papel picado of its own
+
+   THE CANOPY WAS EATING THE PAPEL PICADO, and that is what set the height. The season strings real
+   papel jacaranda-to-jacaranda (content/meridian/config.js `swags`; engine/engine3d.js hangs two
+   flag rows at PH-0.11 = 1.79 and PH-0.33 = 1.57, each strip 0.22 tall, so the flags are y
+   1.46-1.90; the two strings are 0.02-tall boxes centred at 1.90 and 1.68, so the HIGHEST thing in
+   the whole swag is the top string's upper face at 1.91) and it runs along z = the tree tile's own
+   centre — straight through the trunk's axis, the worst line there is. ELEVEN of the twelve
+   jacarandas in the game are a swag endpoint, so this is not an edge case, it is the season. The
+   twelfth is pk 19,8, which ends no swag and is left ending none: a swag is a ROW, the park has no
+   second tall thing in row 8 to tie one to, and the engine plants a pole wherever an end is not
+   tall (kind wall/facade/tree, or lift 9 or more — the park's fence is lift 5). So a swag there
+   would put a new pole on the park's east fence, and the owner has written in twice about poles
+   (2026-09-10, one at the bridge mouth he walked into; 2026-09-21, "poles with the paper picado").
+   He asked for a bigger tree, not for more bunting. Measured: 41 poles in the game before this
+   change and the same 41 after, on the same tiles.
+
+   WHAT IS IN THE BAND, MEASURED OVER EVERY PART AND NOT JUST THE GREEN ONES — the earlier claim
+   here was "0.000 eaten" and it had measured four green hexes, leaving out the bole, the limbs and
+   the blossom, which is how a true sentence becomes a false one:
+
+     shipped   0.822 of a tile   two crown spheres, one blossom AND the bole
+     now       0.418 of a tile   THE BOLE, AND NOTHING ELSE
+
+   The canopy, the five limbs and all seventeen blossoms clear the band completely: the lowest
+   thing above the trunk is a limb at 1.925 and the swag's highest face is 1.91, which is a
+   clearance of 0.015 of a tile — half a pixel at 35 px a tile. It reads clean in the frame and it
+   is not a margin to spend: anything that drops a limb, or raises PH, closes it. What is left is the
+   trunk itself, 0.418 wide where the flags cross it — and the engine skips the pole at a tree
+   because a tree can hold a string, so that IS the thing the string is tied to. A street ties one
+   to a bare bole under the leaves. (Both figures are upper bounds: each part is measured by the
+   box around it, so a round thing is over-reported. A zero is therefore a true zero.)
+
+   Three greens, not two, and the DARKEST on the skirt under the crown: one ambient 0.66 and one sun
+   0.42 give a Lambert face 1.00 / 0.88 / 0.78 / 0.66 and no more, so the depth of a canopy has to
+   be painted into the parts or it is not there. And the blossom was ten spheres of r 0.055 — under
+   4 px on a phone, which is why a tree in flower read as a plain green one; it is seventeen
+   flattened clusters of r 0.105-0.115 laid on the crown's outer skin — ten round the rim at radius
+   1.18, where the silhouette is, and seven on top, where a jacaranda is seen from a window.
+
+   AND THE BOLE IS THICKER, because it has to be. A crown 2.828 across on the old 0.34-wide trunk
+   is a mushroom, not a tree: the trunk is 0.30 at the flare and 0.44 at the ground now, and the
+   garland ring moved out from 0.24 to 0.29 to sit ON it rather than in it.
+
+   THE DRESS. It used to hang at 0.84-1.02 inside foliage that came down to 0.780, so the tree wore
+   its ofrenda where the leaves were. With the crown up at 1.982 the whole bole is clear, and the
+   dress is hung on it the way a trunk is actually dressed: the garland is a RING of six marigolds
+   round the bole at 1.10 rather than a line strung across the front of the tile with nothing to
+   tie it to, two streamers hang either side, and the calaverita hangs BETWEEN them at 0.74 — in
+   front of the bole, so the one white thing on this tree has its own dark behind it too. The
+   tree's own two little papel strings are GONE: the real papel picado now passes this tree
+   unbroken above the garland, and a second miniature one below it was competing with the thing it
+   was imitating. */
 TILEART_MESH["J"]=({x,y})=>{const h=(((x*7+y*13)%6)+6)%6,a0=h*1.05;
-  const BARK="#6E4A2C",G1="#5A9C66",G2="#78B884",BLOOM=art("bloom","#B08FE0"); /* a step paler than the sprite's greens: a lit mesh shades itself, a sprite never did */
-  const parts=[{s:"cyl",x:0,y:0.42,z:0,rt:0.07,rb:0.11,h:0.84,c:BARK},
-    {s:"cyl",x:0.14,y:0.78,z:0.05,rt:0.03,rb:0.05,h:0.4,c:BARK,rz:-0.6},{s:"cyl",x:-0.13,y:0.82,z:-0.06,rt:0.03,rb:0.05,h:0.36,c:BARK,rz:0.65}];
-  const crown=[[0,1.25,0,0.4],[0.28,1.1,0.1,0.32],[-0.27,1.12,-0.08,0.3],[0.05,1.08,-0.3,0.3],[-0.06,1.12,0.28,0.31],[0.1,1.5,0.05,0.3]];
-  const c=Math.cos(a0),s2=Math.sin(a0);
-  crown.forEach(([px,py,pz,r],i)=>parts.push({s:"sph",x:px*c-pz*s2,y:py,z:px*s2+pz*c,r,c:i%2?G2:G1}));
-  for(let i=0;i<10;i++){const t=i*0.63+h,ph=0.5+(i%3)*0.5;                                 /* blossoms sit on the outside of the crown */
-    parts.push({s:"sph",x:Math.cos(t)*Math.sin(ph)*0.44,y:1.25+Math.cos(ph)*0.36,z:Math.sin(t)*Math.sin(ph)*0.44,r:0.055,c:BLOOM});}
+  const BARK="#6E4A2C",BARK2="#7C5636",G1="#5A9C66",G2="#86C48E",G3="#33663F",BLOOM=art("bloom","#B08FE0"); /* three steps: a lit mesh shades itself but only 1.5:1, so the canopy's own depth is painted */
+  const parts=[{s:"cyl",x:0,y:0.09,z:0,rt:0.22,rb:0.30,h:0.18,c:BARK},                      /* the root flare — a tree meets the ground in one */
+    {s:"cyl",x:0,y:1.20,z:0,rt:0.115,rb:0.22,h:2.04,c:BARK}];                                /* the bole: 0.18 to 2.22, and nothing else is attached to it below 1.925 (the lowest limb) — the papel picado passes under the leaves */
+  for(let i=0;i<5;i++){const a=a0+i*1.2566+0.2;                                              /* five scaffold limbs, flat enough to stay above the flag band and long enough to be worth seeing */
+    parts.push({s:"cyl",x:Math.cos(a)*0.16,y:2.20,z:Math.sin(a)*0.16,rt:0.030,rb:0.062,h:0.90,c:i%2?BARK2:BARK,rz:-1.05,ry:-a});}
+  const lay=(n,rad,y,r,sy,c,off)=>{for(let i=0;i<n;i++){const a=a0+off+i*6.2832/n;
+    parts.push({s:"sph",x:Math.cos(a)*rad,y,z:Math.sin(a)*rad,r,sy,c:typeof c==="function"?c(i):c});}};
+  lay(8,1.00,2.15,0.42,0.40,G3,0.45);                                                         /* the skirt: the underside, the darkest green, and the thing you stand under */
+  lay(8,0.76,2.30,0.50,0.42,i=>i%2?G2:G1,0);                                                  /* the crown proper, flattened: an umbrella, not a ball */
+  lay(4,0.32,2.44,0.46,0.42,i=>i%2?G1:G2,0.4);
+  parts.push({s:"sph",x:0,y:2.54,z:0,r:0.42,sy:0.46,c:G2});                                   /* the crest, palest: the sun lands on the top of a canopy */
+  for(let i=0;i<10;i++){const a=a0+i*0.6283+0.35;                                              /* blossom on the OUTER SKIN — the rim, where the silhouette is */
+    parts.push({s:"sph",x:Math.cos(a)*1.18,y:2.22+(i%3)*0.07,z:Math.sin(a)*1.18,r:0.115,sy:0.6,c:BLOOM});}
+  for(let i=0;i<7;i++){const a=a0+i*0.8976+0.9,rad=0.18+(i%3)*0.26;                            /* and on the top, where a jacaranda is seen from a window */
+    parts.push({s:"sph",x:Math.cos(a)*rad,y:2.60+(i%2)*0.06,z:Math.sin(a)*rad,r:0.105,sy:0.55,c:BLOOM});}
   const pal=art("papel",null);
-  if(pal){const P=petalPal();                                                               /* THE DRESS, SECOND TRY (owner: "same with the decor") */
-    meshPapel(parts,-0.5,1.02,0.46,0.5,1.02,0.46,pal,6,h);                                   /* a string of flags across the front of the crown */
-    meshPapel(parts,0.46,1.0,-0.5,0.46,1.0,0.5,pal,6,h+3);                                   /* and one down the side, so it reads from the turn */
-    for(let i=0;i<7;i++){const t=(i+0.5)/7,gx=-0.42+0.84*t,gy=0.84-2*t*(1-t)*0.14;            /* a chain of marigolds slung under the flags */
-      meshMarigold(parts,gx,gy,0.44,0.055,P,h+i);}
-    [-0.28,0,0.28].forEach((dx,i)=>{parts.push({s:"cyl",x:dx,y:0.82,z:0.3,r:0.006,h:0.2,c:"#3A2E26"}); /* the thread */
-      parts.push({s:"box",x:dx,y:0.58,z:0.3,w:0.16,h:0.3,d:0.008,c:pal[(i+2)%pal.length]});          /* the streamer, hanging well below the crown */
-      parts.push({s:"box",x:dx,y:0.42,z:0.3,w:0.16,h:0.05,d:0.008,c:pal[(i+5)%pal.length]});});      /* its scalloped hem, a second colour */
-    parts.push({s:"cyl",x:0.2,y:0.95,z:0.44,r:0.006,h:0.14,c:"#3A2E26"});                             /* one lantern: a calaverita on a thread */
-    parts.push({s:"sph",x:0.2,y:0.84,z:0.44,r:0.075,c:"#F6F2E8"});
-    parts.push({s:"sph",x:0.17,y:0.855,z:0.51,r:0.016,c:"#3A2E26"},{s:"sph",x:0.23,y:0.855,z:0.51,r:0.016,c:"#3A2E26"}); /* the eyes */
-    parts.push({s:"sph",x:0.2,y:0.91,z:0.46,r:0.022,c:"#E8478F"});}                                    /* the flower on its brow */
+  if(pal){const P=petalPal();                                                                  /* THE DRESS, FOURTH TRY — wrapped round the bole, in the clear air UNDER the street's papel */
+    for(let i=0;i<6;i++){const a=a0*0.7+i*1.0472;                                               /* the garland is a RING round the trunk now, not a line hung on nothing */
+      meshMarigold(parts,Math.cos(a)*0.29,1.10+Math.sin(a*2)*0.02,Math.sin(a)*0.29,0.085,P,h+i);}  /* ring RADIUS 0.29, not 0.24: the bole's radius at this height is 0.173 (it is 0.345 of a tile wide), so a ring at 0.29 sits ON the bark rather than inside it */
+    [-0.34,0.34].forEach((dx,i)=>{parts.push({s:"cyl",x:dx,y:1.00,z:0.42,r:0.006,h:0.20,c:"#3A2E26"}); /* the thread, off the ring's widest point */
+      parts.push({s:"box",x:dx,y:0.74,z:0.42,w:0.16,h:0.32,d:0.008,c:pal[(i+2)%pal.length]});         /* the streamer, hanging clear below the garland */
+      parts.push({s:"box",x:dx,y:0.555,z:0.42,w:0.16,h:0.05,d:0.008,c:pal[(i+5)%pal.length]});});     /* its scalloped hem, a second colour */
+    parts.push({s:"cyl",x:0,y:0.90,z:0.30,r:0.006,h:0.24,c:"#3A2E26"});                                /* one lantern: a calaverita on a thread, hung BETWEEN the streamers */
+    parts.push({s:"sph",x:0,y:0.74,z:0.30,r:0.085,c:"#F6F2E8"});                                       /* and against the BOLE, which is 0.382 of a tile wide here (radius 0.191) against a skull of radius 0.085: a white skull needs a dark behind it too */
+    parts.push({s:"sph",x:-0.035,y:0.758,z:0.375,r:0.018,c:"#3A2E26"},{s:"sph",x:0.035,y:0.758,z:0.375,r:0.018,c:"#3A2E26"}); /* the eyes */
+    parts.push({s:"sph",x:0,y:0.818,z:0.33,r:0.025,c:"#E8478F"});}                                     /* the flower on its brow */
   return parts;};
 
 /* LA OFRENDA, AS A THING ON A TABLE. A season prop, not a tile: the key is "prop:ofrenda" and the

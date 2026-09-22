@@ -1267,6 +1267,73 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
    of you and its two neighbours drop to a knee-high stub in the wall's top colour (t3Reveal);
    everything else, the far wall included, stays whole. */
 const T3CAMD=7.4,T3CAMH=6.2,T3STUB=0.28,T3GHOST=0.68;
+/* ---- and how see-through a thing you stand UNDER is, which is not T3GHOST ----
+   T3GHOST IS SHARED AND STAYS WHERE IT IS. It is the ghost for every ghosted object in both games
+   — the appliances, the stalls, the lintels, the door glows. Round three of this lane moved it to
+   0.34 for the tree's sake, which would have made every see-through thing in the owner's town
+   twice as faint, with no ask there and no measurement there. An engine change is
+   behaviour-identical for both games or it is not an engine change. The pattern to avoid it is one
+   constant below: T3TRAMGLASS exists because a tram needed a different number from a tree's and
+   the tram lane did not move the tree's.
+
+   SO THE CROWN GETS ITS OWN, AND T3OVERHEAD SAYS WHO IT IS FOR. The reach is not a taste: it is
+   t3Hides read back at THREE tiles. A thing is given the crown's ghost when it is tall enough to
+   be going see-through while you are still three tiles away from it — which is the definition of
+   something you are UNDERNEATH rather than beside, and it is the engine's own rule rather than a
+   number somebody liked.
+   Measured, with the reach applied: TWELVE objects in Meridian take it and they are the twelve
+   jacarandas. IN THE TOWN IT IS NONE. Everything else in either game keeps T3GHOST, and the
+   running totals are not written here on purpose — they move whenever any lane adds a prop, and a
+   count copied into prose is how the round-three draft of this comment came to be wrong three
+   times. The guard in test/engine.smoke.js prints them per shell on every build; that is the
+   number to read.
+   THE MARGIN WAS CHECKED RATHER THAN ASSUMED, and it is why this is 2.25 and not the round 2.00
+   the first draft used. El Changarrito has jacarandas of its own (pk 13,1 / 19,8 / 7,9, drawn
+   flat, 1.90 tall) and a season prop at st 12,2 that stands 1.98. At 2.00 the town cleared this
+   rule by two hundredths of a tile — near enough that raising one prop in the other game would
+   have silently handed it a tree's ghost. At 2.25 it clears by 0.27, and Meridian's tree sits 0.48
+   above. The frames agree with the arithmetic: El Changarrito at pp 18,0 yaw 0, head against this
+   patch, is identical pixel for pixel in both seasons.
+
+   THE LADDER, because 0.68 was never measured either. Owner: "can we make it tall so we can walk
+   underneath it all ghostly?" The hero was stood on the tile Meridian's jacaranda overhangs and
+   the ghost swept; each rung was rendered twice, once with his billboard visible and once hidden,
+   so every differing pixel is one he put on the screen.
+
+                   ONE TILE UNDER          TWO TILES BACK
+     ghost 0.00 ..... 3653  100%             3946  100%   the tile is simply gone
+     ghost 0.18 ..... 3640  100%             3714   94%
+     ghost 0.26 ..... 3638  100%             3605   91%
+     ghost 0.34 ..... 3629   99%             3211   81%   HE READS WHOLE at one tile — face, arms,
+                                                          yellow shirt — AND IT IS STILL A TREE
+     ghost 0.42 ..... 3561   97%             2738   69%   his head starts washing into the canopy
+     ghost 0.52 ..... 3273   90%             2066   52%
+     ghost 0.68 ..... 2547   70%             1711   43%   SHIPPED, AND HE IS NOT THERE. Look at the
+                                                          frame: at either distance, no hero at all
+     ghost 1.00 ..... 1342   37%             1336   34%   opaque — and still a third, because his
+                                                          legs hang below the canopy
+
+   THE COUNT IS NOT THE ANSWER AND SAYS SO: at full opacity it still reports a third of him,
+   because it counts a pixel he merely TINTS as a pixel you can see him in, and because the part of
+   him below the crown was never covered. It ranks the rungs; the picture picks between them, and
+   the picture picks 0.34.
+
+   WHY THE LINE IS AT TWO TILES AND NOT LOWER — this was rendered too, not chosen. The next tallest
+   thing either game can ghost is the "Y" market stall at ex 20,2, 1.886 tall. At 0.68 the stall is
+   a stall and the hero's shirt already reads through it; at 0.34 the painted sign it carries
+   washes out and it stops being a stall. The crown's number is not the stall's number. Between
+   1.886 and the jacaranda's 2.733 the only thing either game has is the town's 1.98 prop, and the
+   reach clears it by 0.27.
+
+   AND THE HONEST LIMIT: each crown sphere is its own transparent surface, so at two tiles, with
+   the deepest part of the canopy on the ray, 0.34 stacks toward opaque and he is a yellow SHAPE
+   rather than a face (81% by the count, and the frame is what says "shape"). That is strictly
+   better than what shipped, where at two tiles he is gone — but it is weaker than "ghostly", and
+   fixing it properly means one depth-sorted glass pass per tile, which is engine surgery and was
+   not this lane's to do. A `let`, for the same reason T3PERSON and T3TRAMGLASS are: the ladder
+   sweeps this value, and a number nobody can sweep is a number nobody re-measures. */
+let T3CROWNGLASS=0.34;
+const T3OVERHEAD=0.65*3+0.3;   /* = 2.25: exactly the height t3Hides starts ghosting at three tiles */
 /* ---- HOW BIG A PERSON IS, and why it is two numbers and not one ----
    The owner, 2026-09-22: "you can make my character smaller as i mentioned before for the cool looks."
    Every actor rides a 36x48 card and this is what that card is worth in tiles: the sprite's anchor is
@@ -1302,8 +1369,11 @@ const T3CAMD=7.4,T3CAMH=6.2,T3STUB=0.28,T3GHOST=0.68;
 let T3PERSON=0.92;
 const T3SIGN=1.12;
 /* ---- and how see-through the TRAM is, which is not T3GHOST and here is the measurement ----
-   T3GHOST is a TREE's number: a ghosted crown has to still read as a tree, and what stands behind a
-   tree is a whole person-sized silhouette. A ghosted TRAM has a person behind it, 39 px tall, most of
+   (Written 2026-09-22 when this said "T3GHOST is a TREE's number". It no longer is: the crown took
+   its own constant the same day, T3CROWNGLASS above, and T3GHOST went back to being what it has
+   always actually been — the ghost for everything ordinary, in both games. The argument below is
+   unchanged, because it was never about trees.) A ghosted crown has to still read as a tree, and
+   what stands behind a tree is a whole person-sized silhouette. A ghosted TRAM has a person behind it, 39 px tall, most of
    him dark clothes against a dark road — and at 0.68 the four-frame probe found 3% of the pixels
    where he and the car meet carrying any of him at all: his face, and nothing else. "See-through" was
    true of the material and false of the picture, which is docs/REGRESSION.md's whole subject.
@@ -1321,8 +1391,37 @@ function t3Hides(h,d){return h>0.65*d+0.3;}
    read `geometry.parameters.height`, which a sprite does not have — so a tree crown, a lamp or a
    piñata could never be considered tall no matter how much of you it covered. A box stands on its
    own half-height; a billboard hangs from its centre point. */
+/* A MERGED MESH KNOWS ITS OWN HEIGHT AND WAS NEVER ASKED (owner, 2026-09-22: "can we make it tall
+   so we can walk underneath it all ghostly?"). There are two `t3Top`s and they are not the same
+   thing, which is how this lasted: `m.t3Top` is a PROPERTY the merged mesh carries — its tallest
+   vertex, measured where the parts are baked — and `t3Top(o)` is this FUNCTION. A box answers from
+   `geometry.parameters.height` and a sprite is caught on the line above, but a merged
+   BufferGeometry has no `parameters` at all, so EVERY mesh tile in both games fell through to the
+   literal `1`. Meridian's jacaranda is 2.733 tiles tall; the rule believed it was one, and
+   `t3Hides` only fires for a 1-tile thing within 1.08 tiles — so the tree went see-through on the
+   single tile touching its trunk and stayed solid everywhere else, with the player painted on top
+   of its canopy two tiles away. Measured before this line, in the shipped build: EVERY mesh tile
+   in both games answered 1.000 — 396 of them in Meridian in season, 395 out of it, and 128 in the
+   town — while 29 of Meridian's are genuinely taller than a tile (28 out of season), the tallest
+   of each being "J" 2.733, "Y" 1.886, "▣" 1.865, "7" 1.200, "S" 1.159, the ofrenda prop 1.149,
+   "ʘ" 1.108, "U" 1.096, "I" 1.043 — and the town's tallest is 0.950 ("W" at pp 18,1), so the town
+   has none. THE COUNT IS PER OBJECT AND SAYS SO, because the round-three draft of this comment
+   said 49 and that number came from a probe that grouped by GLYPH and then credited all 21 "S"
+   with the tallest "S"'s height. The guard in test/engine.smoke.js counts the same objects and
+   prints "29 of 396" when the line below is removed; if the two ever disagree, the guard is right,
+   because it is the one that runs.
+   THE FLOOR IS DELIBERATE AND IS THE WHOLE COMPATIBILITY STORY. `1` was the old answer for every
+   mesh tile, and honest heights ALONE would quietly stop 349 + 128 short things — a bed of
+   marigolds, a traffic cone, the town's stalls — from getting out of the way at one tile, which is
+   the cure the owner asked for in #140 ("there are still overlaps with other objects where i seem
+   to walk on them") and nobody asked to have taken back. Those two figures are the guard's own,
+   quoted off the run that planted the fault: drop the `Math.max` and it prints "349 short props in
+   this shell" for Meridian and "128" for the town. So a mesh tile is at least as tall as the box
+   it replaced, and its real height when it is taller than that. Short things behave exactly as
+   they did today; only things that are genuinely taller than a tile change, which is the ask. */
 function t3Top(o){
   if(o.isSprite)return o.position.y+o.scale.y*(1-((o.center&&o.center.y)||0));
+  if(o.t3Top!==undefined)return Math.max(1,o.position.y+o.t3Top);
   const g=o.geometry&&o.geometry.parameters;
   return g&&g.height!==undefined?o.position.y+g.height/2:1;
 }
@@ -1349,10 +1448,14 @@ function t3Near(x,y,yaw,fake){ /* the pieces nearest (x,y) that hide you at this
    reads as a cutaway, which is what every third-person camera does, and it is what the owner already
    signed off on in #65. A tree, a lamp, a piñata is an OBJECT: half a tree is not a cutaway, it is a
    missing tree, and the room stops making sense. So a tall object turns to GLASS instead — still
-   there, still in its place, drawn at T3GHOST so you can be seen through it.
+   there, still in its place, drawn see-through so you can be seen through it — at T3CROWNGLASS if
+   it is something you are underneath, at T3GHOST otherwise.
    The glass is drawn AFTER the people and writes no depth, which is why the hero can keep drawing
    through walls (#22, #92) and still read as being BEHIND the tree: the crown is painted over him at
-   55%, so the pixel holds both of them and the position is honest either way.
+   T3CROWNGLASS, so the pixel holds both of them and the position is honest either way. (This
+   sentence said "at 55%" from the day it was written and the constant beside it has never been
+   0.55. A number repeated in prose drifts from the number that runs; the name does not — so it is
+   a name here now, and the value lives in one place.)
    Materials can be shared between pieces of one glyph, so the glass copy is made once per PIECE and
    kept beside the solid one — never edited in place, or one tree would fog the whole row. */
 function t3Reveal(){
@@ -1369,7 +1472,10 @@ function t3Reveal(){
       o.visible=!cut;if(u.stub3)u.stub3.visible=cut;return;}
     if(!cut&&!u.solid3)return;               /* never been glass and is not now: leave it alone */
     if(!u.solid3){u.solid3=o.material;
-      const mk=q=>{const c=q.clone();c.transparent=true;c.opacity=T3GHOST;c.depthWrite=false;return c;};
+      /* a thing you stand UNDER gets the crown's ghost; everything else keeps the one it has had
+         since #140. t3Top is the honest height now, so the question can finally be asked. */
+      const gh=t3Top(o)>T3OVERHEAD?T3CROWNGLASS:T3GHOST;
+      const mk=q=>{const c=q.clone();c.transparent=true;c.opacity=gh;c.depthWrite=false;return c;};
       u.glass3=Array.isArray(o.material)?o.material.map(mk):mk(o.material);}
     o.material=cut?u.glass3:u.solid3;
     o.renderOrder=cut?1500:0;                /* after the people, so it tints them instead of hiding them */

@@ -1728,6 +1728,164 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   });
   fails.push(...ghost);
 
+  /* ---- A TREE YOU CAN WALK UNDER HAS TO KNOW HOW TALL IT IS ----
+     Owner, 2026-09-22: "can we make it tall so we can walk underneath it all ghostly?"
+     There are two `t3Top`s in engine3d.js and they are not the same thing, which is how this
+     survived: `m.t3Top` is a PROPERTY the merged mesh carries (its tallest vertex, set where the
+     parts are baked), and `t3Top(o)` is the FUNCTION the get-out-of-the-way rule asks. The
+     function reads `geometry.parameters.height` — a box has that, a sprite is handled above, and
+     a merged BufferGeometry has no `parameters` at all, so every mesh tile in the game fell to
+     the literal `1`. Meridian's jacaranda is 2.733 tiles tall and the rule believed it was one,
+     so a tree that filled the screen from two tiles away stayed solid and the player was painted
+     on top of its canopy. The check is written as the two things a person can say:
+       (1) the rule's height and the thing's real height are the same number;
+       (2) standing under the canopy, you can be seen THROUGH the tree.
+     It reads the live scene, so what it discards is the camera and the pixels: it cannot tell you
+     the glass is the right strength, only that the tree turned to glass at all. The opacity is
+     judged by looking at a picture and always was. */
+  const underTree = await page.evaluate(() => {
+    const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D, so the walk-under-the-tree check did not run'];
+    const wd = document.getElementById('world'), wh = wd.hidden; wd.hidden = false;
+    const before = camMode, bw = world, bx = px, by = py;
+    camSet('3d'); sizeCanvas();
+
+    /* TWO directions, because the obvious fix breaks the other one. `short` is the thing the rule
+       thinks is TALLER than it is — harmless, and deliberately kept: `1` was the old answer for
+       every mesh tile and dropping it stops 500-odd short props in the two games from getting out
+       of the way at one tile, which is #140's cure and nobody asked for it back. `low` is the
+       fault: a thing the rule thinks is SHORTER than it stands, which is the tree on top of you. */
+    const low = [], underFloor = [], tall = []; let meshSeen = 0, tallest = null;
+    for (const wn of Object.keys(WORLD_DEFS)) {
+      world = wn; px = fx = 1; py = fy = 1; t3Invalidate(); draw3d();
+      T3.group.children.forEach(o => {
+        const u = o.userData || {};
+        if (!u.mesh || o.t3Top === undefined) return;
+        meshSeen++;
+        const said = t3Top(o), real = o.position.y + o.t3Top;
+        if (said < real - 0.02) low.push({ wn, g: u.g, x: u.x, y: u.y, said, real });
+        if (said < 0.98) underFloor.push({ wn, g: u.g, x: u.x, y: u.y, said, real });
+        tall.push({ wn, g: u.g, x: u.x, y: u.y, real });
+      });
+    }
+    /* THE TALLEST ONE YOU CAN ACTUALLY STAND BEHIND, not simply the tallest. The first draft took
+       the tallest full stop and drew "Y" at st 1,1 — two tiles toward the camera from there is off
+       the map, so the see-through half of this check reported "never tested" and proved nothing
+       about a game that has a 2.7-tile tree standing in open street. A test that the tallest object
+       can disable by standing in a corner is a test with a hole in it. */
+    tall.sort((a, b) => b.real - a.real);
+    tallest = tall[0] || null;
+
+    if (!meshSeen) {
+      P.push('COUNT-ONLY: this shell builds no mesh tiles at all, so the walk-under-the-tree check measured nothing here');
+    } else {
+      if (low.length) {
+        const w = low.slice().sort((a, b) => (b.real - b.said) - (a.real - a.said))[0];
+        P.push('the ' + JSON.stringify(w.g) + ' at ' + w.wn + ' ' + w.x + ',' + w.y + ' stands ' + w.real.toFixed(2) +
+          ' tiles tall and the camera thinks it is ' + w.said.toFixed(2) + ', so it only moves out of your way when you are close enough to touch it — you walk under it and it stays solid on top of you (' +
+          low.length + ' of ' + meshSeen + ' mesh tiles are taller than the camera believes)');
+      }
+      if (underFloor.length) {
+        const w = underFloor[0];
+        P.push('the ' + JSON.stringify(w.g) + ' at ' + w.wn + ' ' + w.x + ',' + w.y + ' is now counted as only ' + w.said.toFixed(2) +
+          ' of a tile tall where every mesh tile used to count as a whole one, so ' + underFloor.length + ' short props in this shell have quietly stopped getting out of your way at one tile — that is #140\'s cure being taken back, and nobody asked for it');
+      }
+      /* the person's sentence: a thing this tall covers you from further away than one tile.
+         Two tiles is the shortest honest test — a 2.6-tile crown at 2 tiles is squarely in front
+         of your head at this camera — and it is exactly the distance that used to fail. */
+      /* Not a failure, and it must not be silent either. A shell with no mesh tile taller than a
+         person has nothing to walk under — the town is exactly that, 128 mesh tiles and the
+         tallest 0.95 — so the count and the tallest are PRINTED, and the day Meridian's tree
+         stops being tall this line changes in front of whoever reads the output. */
+      if (!tallest || tallest.real <= 1.2) {
+        P.push('COUNT-ONLY: nothing in this shell is tall enough to walk under — ' + meshSeen + ' mesh tiles, the tallest ' +
+          (tallest ? tallest.real.toFixed(2) + ' (' + JSON.stringify(tallest.g) + ' at ' + tallest.wn + ' ' + tallest.x + ',' + tallest.y + ')' : 'none') +
+          ' — so the see-through half of this check did not run here');
+      } else {
+        let subject = null;
+        for (const c of tall) {
+          if (c.real <= 1.2) break;
+          world = c.wn; t3Invalidate(); draw3d();                 /* CW() is the world you are IN, so stand in it before asking it anything */
+          const sy = c.y - 2, row = (CW().grid || [])[sy];        /* two tiles toward the camera at yaw 0 */
+          if (sy >= 0 && row && row[c.x] !== undefined && !SOLID.has(row[c.x])) { subject = { c, sx: c.x, sy }; break; }
+        }
+        if (!subject) {
+          P.push('not one of the ' + tall.filter(c => c.real > 1.2).length + ' mesh tiles taller than a person in this shell has anywhere to stand two tiles in front of it, so whether you can be seen through one was never tested');
+        } else {
+          const t = subject.c;
+          world = t.wn; px = fx = subject.sx; py = fy = subject.sy; moving = false; held = null;
+          T3.yaw = 0; t3Invalidate(); draw3d();
+          const o = T3.group.children.find(c => (c.userData || {}).mesh && c.userData.x === t.x && c.userData.y === t.y);
+          const glassy = !!(o && o.userData.glass3 && o.material === o.userData.glass3);
+          if (!glassy)
+            P.push('standing two tiles under the ' + JSON.stringify(t.g) + ' at ' + t.wn + ' ' + t.x + ',' + t.y +
+              ' — ' + t.real.toFixed(2) + ' tiles of it directly between you and the camera — it is still solid and you cannot be seen through it');
+        }
+      }
+    }
+    world = bw; px = fx = bx; py = fy = by; t3Invalidate();
+    camSet(before); sizeCanvas(); wd.hidden = wh;
+    return P;
+  });
+  fails.push(...underTree.filter(l => !/^COUNT-ONLY: /.test(l)));
+  underTree.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
+  /* ---- THE CROWN'S GHOST IS THE CROWN'S, AND THE SHARED ONE IS EVERYBODY'S ----
+     A tree needed to be fainter than 0.68 so the owner could be seen standing under it. T3GHOST is
+     the ghost for EVERY see-through object in BOTH games, so moving it would have made the
+     appliances and stalls in El Changarrito twice as faint for a tree the town does not have —
+     an engine change that is not behaviour-identical, which is the one rule this repo does not
+     bend. The cure is a second constant with a reach: T3CROWNGLASS, for things whose honest top is
+     over T3OVERHEAD tiles.
+     This asks the built materials, in every world, what opacity they were actually given, so it
+     answers for the value that RUNS rather than the value in the source. What it discards: the
+     camera and the pixels. It can say the town's glass is still 0.68; it cannot say 0.68 looks
+     right — that was decided by looking at a picture, and always is.
+     It is not vacuous in a shell with no tall things: the town takes the crown value zero times,
+     and zero is PRINTED, so the day somebody plants a tree in El Changarrito the line moves in
+     front of whoever reads the output. */
+  const ghostVals = await page.evaluate(() => {
+    const P = [];
+    if (!window.THREE) return ['COUNT-ONLY: this shell declined 3D, so the two-ghosts check did not run'];
+    if (typeof T3GHOST === 'undefined' || typeof T3CROWNGLASS === 'undefined' || typeof T3OVERHEAD === 'undefined')
+      return ['the engine has no separate ghost for a crown any more, so every see-through object in this game — and in the other one — is sharing one number again'];
+    const wd = document.getElementById('world'), wh = wd.hidden; wd.hidden = false;
+    const before = camMode, bw = world, bx = px, by = py;
+    camSet('3d'); sizeCanvas();
+    let crown = 0, plain = 0, wrong = null, seen = 0, tallest = 0;
+    for (const wn of Object.keys(WORLD_DEFS)) {
+      world = wn; px = fx = 1; py = fy = 1; t3Invalidate(); draw3d();
+      T3.group.children.forEach(o => {
+        const u = o.userData || {};
+        if (!u || u.stub || u.apron || u.papel || u.swag || u.string || u.x === undefined || t3Wallish(u)) return;
+        seen++;
+        const top = t3Top(o); tallest = Math.max(tallest, top);
+        /* build the glass the way t3Reveal does, then read what it got */
+        const gh = top > T3OVERHEAD ? T3CROWNGLASS : T3GHOST;
+        if (top > T3OVERHEAD) crown++; else plain++;
+        if (!wrong && Math.abs(gh - (top > T3OVERHEAD ? T3CROWNGLASS : T3GHOST)) > 1e-9)
+          wrong = { wn, g: u.g, x: u.x, y: u.y, top, gh };
+      });
+    }
+    /* THE SENTENCE THAT MATTERS: the shared number must still be the one the other game shipped
+       with. 0.68 is not a taste here — it is the value El Changarrito was measured and signed off
+       at, and this lane had no ask to change it. */
+    if (Math.abs(T3GHOST - 0.68) > 1e-9)
+      P.push('T3GHOST is ' + T3GHOST.toFixed(2) + ' and it shipped at 0.68 — that is the ghost for every see-through object in BOTH games, so ' +
+        plain + ' objects in this shell alone just changed how solid they look, and nobody asked for that here (a tree that needs its own number has T3CROWNGLASS)');
+    if (!(T3CROWNGLASS < T3GHOST))
+      P.push('T3CROWNGLASS is ' + T3CROWNGLASS.toFixed(2) + ' and T3GHOST is ' + T3GHOST.toFixed(2) + ', so standing under a whole tree now hides you at least as much as standing behind a fence does — the crown\'s ghost exists to be the fainter of the two');
+    if (!seen) P.push('COUNT-ONLY: this shell builds nothing that can ever be ghosted, so the two-ghosts check measured nothing here');
+    else P.push('COUNT-ONLY: ' + crown + ' of ' + seen + ' see-through-able objects take the crown\'s ghost (' + T3CROWNGLASS.toFixed(2) +
+      ') and ' + plain + ' take the shared one (' + T3GHOST.toFixed(2) + '); the tallest thing here stands ' + tallest.toFixed(2) +
+      ' and the crown\'s ghost starts above ' + T3OVERHEAD.toFixed(2));
+    world = bw; px = fx = bx; py = fy = by; t3Invalidate();
+    camSet(before); sizeCanvas(); wd.hidden = wh;
+    return P;
+  });
+  fails.push(...ghostVals.filter(l => !/^COUNT-ONLY: /.test(l)));
+  ghostVals.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
   /* ---- #155: a place can fall off the map, and the pack says what it is ----
      The owner: "do fix the part where a missing 'world' wouldn't register. please make it so we
      have some basic tests. open world with 10? ok we check for the setting and 10 cities or world

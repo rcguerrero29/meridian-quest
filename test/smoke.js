@@ -2411,6 +2411,104 @@ const CANDIDATES = [
     else if (!b3.want) fails.push('La Cocina lays no furniture at all — this guard measured nothing: ' + JSON.stringify(b3));
     else if (b3.missing) fails.push('La Cocina lays ' + b3.want + ' and ' + b3.missing + ' does not stand up in 3D — a picture, not a thing with sides: ' + JSON.stringify(b3));
     else if (b3.glyphs.includes('P')) fails.push('a plant became a box');
+
+    /* ---- EVERY MARIGOLD HAS SOMETHING DARK BEHIND IT, AND IT IS WIDER THAN THE FLOWER ----
+       The owner has come back about the marigolds four times — "the marigolds can use another try",
+       "everything looks good except the marigolds", and on 2026-09-22 "the marigold decor is also not
+       very well defined". Three of the fixes before this one changed a SIZE (docs/POSTMORTEM.md §1:
+       when the second fix is the same KIND as the first, the cause is not the thing you keep
+       changing). The cause is the light. DAY_AMB 0.66 and DAY_SUN 0.42 give a Lambert face 1.00 /
+       0.88 / 0.78 / 0.66 and nothing else, so FORM cannot separate two orange things — only value
+       can, and value has to be painted into the parts. In the bed that happened by accident: the
+       near-black foliage mound sits under the heads. Used as DECOR — the tree's garland, the altar's
+       arch, the lid of the calaverita — a head hangs against pale plaster with nothing dark anywhere
+       near it, and a dozen orange lobes average to a smear. The bakery found the same law and the
+       answer there was the PACKAGING: a polvorón reads because its paper cup is WIDER than the
+       cookie. So every head meshMarigold grows now carries its own dark collar, and this is the
+       guard on it.
+
+       WHAT IT READS, said plainly, because the extraction is the proxy (docs/REGRESSION.md §3): it
+       reads the PARTS LIST the pack returns, not the screen. It therefore knows nothing about
+       occlusion, about the camera, about whether the collar is actually visible at 40°, or about
+       tc()'s theme tint — it compares the pack's own hexes before any of that. What it does read is
+       the one thing four attempts did not have: that under every petal there is a part darker than
+       every petal of that head, dark in absolute terms, and wider than that head's petals reach.
+       The picture is still the judge, and the picture is not in this repository: it is rendered by
+       standing the hero at a flower bed and looking, which is what settled this and what will
+       settle the next one. (This line used to cite a .png under scratchpad/ as if it were evidence
+       a reader could open. Scratch is not the record — nothing outside the repository is.)
+
+       Red first, on the tree as it stood before the collar existed: 'the marigold on "b" at 17,10 has
+       nothing dark behind it: 12 heads and 0 collars'. A WRONG FIX that would pass a weaker draft —
+       marking a small pale part collar:true — fails on both the width and the luma clause; shrinking
+       the collar under the petals fails on width; painting it a mid green (#4E8A58, luma 115) fails
+       the absolute clause.
+
+       AND IT NAMES ITS SUBJECTS, because a total is not coverage. The first draft's only
+       anti-vacuity clause was "did we find ANY petals", and the flower bed alone supplies 300 of the
+       538 — so the three DECOR cases this guard was written for (the tree's garland, the ofrenda's
+       arch, the marigold on the tamalera's lid) could every one of them stop being laid and the
+       guard would still have gone green on the bed. That is the vacuity trap in .claude/skills/guard
+       word for word: nothing to measure is a RED, never a pass. MARI_FLOOR below is the list of
+       subjects Meridian must actually reach, with the number of heads each one had when this was
+       written; fewer than that, or the subject missing entirely, is a failure that names it. This
+       list is Meridian's, and test/smoke.js is Meridian's suite — a pack that legitimately stops
+       laying one of these edits the floor, and the edit is the point. The coverage is printed on a
+       GREEN run too, so nobody has to fail the build to find out what was measured. */
+    const MARI_FLOOR = { 'b': 12, 'J': 6, 'ʘ': 1, 'prop:ofrenda': 9 };
+    const mari = await page.evaluate((FLOOR) => {
+      if (typeof tileView !== 'function' || typeof WORLDS === 'undefined') return { seam: true };
+      const keep = seasonPick, out = { heads: 0, petals: 0, bad: [], seen: [], found: {} };
+      const L = h => { const n = parseInt(String(h).slice(1), 16);
+        return 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255); };
+      try {
+        /* in season, so the tree's garland and the altar's arch exist to be measured */
+        if (typeof seasonSet === 'function') { const m = Object.keys(SEAS()).find(k => (SEAS()[k].art || {}).papel); if (m) seasonSet(m); }
+        /* every glyph actually laid in a world that answers the `mesh` view, plus the season's props */
+        const laid = new Set(); Object.entries(WORLDS).forEach(([wid, w]) => w.rows.forEach((r, y) => r.split('').forEach((ch, x) => laid.add(ch + '|' + wid + '|' + x + '|' + y))));
+        const first = {}; [...laid].forEach(k => { const g = k.split('|')[0]; if (!first[g]) first[g] = k; });
+        const subjects = Object.values(first).map(k => { const [g, wid, x, y] = k.split('|'); return { g, x: +x, y: +y }; })
+          .concat([{ g: 'prop:ofrenda', x: 0, y: 0 }]);
+        subjects.forEach(({ g, x, y }) => {
+          const mv = tileView(g, 'mesh'); if (!mv) return;
+          let parts; try { parts = typeof mv === 'function' ? mv({ x, y }) : mv; } catch (e) { return; }
+          if (!Array.isArray(parts)) return;
+          const collars = parts.filter(p => p && p.collar), petals = parts.filter(p => p && p.petal);
+          if (!collars.length && !petals.length) return;
+          out.seen.push(g + ':' + collars.length + 'c/' + petals.length + 'p');
+          out.found[g] = collars.length;
+          out.heads += collars.length; out.petals += petals.length;
+          if (!collars.length) { out.bad.push('the marigold on "' + g + '" at ' + x + ',' + y + ' has nothing dark behind it: ' + (petals.length ? Math.round(petals.length / 25) + '-odd heads' : 'no heads') + ' and 0 collars'); return; }
+          const near = collars.map(() => []);
+          petals.forEach(p => { let bi = 0, bd = Infinity;
+            collars.forEach((c, i) => { const d = Math.hypot(p.x - c.x, p.z - c.z); if (d < bd) { bd = d; bi = i; } });
+            near[bi].push(p); });
+          collars.forEach((c, i) => {
+            const mine = near[i]; if (!mine.length) { out.bad.push('a collar on "' + g + '" has no petals over it — it is dark for nothing'); return; }
+            const cl = L(c.c), half = c.r * (c.sx === undefined ? 1 : c.sx);
+            const reach = Math.max(...mine.map(p => Math.hypot(p.x - c.x, p.z - c.z) + p.r * Math.max(p.sx === undefined ? 1 : p.sx, p.sz === undefined ? 1 : p.sz)));
+            const lightest = Math.min(...mine.map(p => L(p.c)));
+            if (half < reach) out.bad.push('a marigold on "' + g + '" is wider than the dark behind it (petals reach ' + reach.toFixed(3) + ', the collar is ' + half.toFixed(3) + ') — at 35 px the flower and the one beside it are one orange smear');
+            else if (cl >= 60 || cl >= lightest) out.bad.push('a marigold on "' + g + '" has a collar the same value as its petals (collar ' + c.c + ' luma ' + Math.round(cl) + ', darkest petal luma ' + Math.round(lightest) + ') — there is nothing for the eye to cut the flower out against');
+          });
+        });
+        /* COVERAGE, not a total: each subject this pack promises must have been reached, and with
+           at least as many heads as it had. A subject that stopped being laid, or that now returns
+           parts with neither a collar nor a petal, lands here instead of vanishing into a big
+           green number somebody else's flower bed paid for. */
+        Object.keys(FLOOR).forEach(g => {
+          const got = out.found[g];
+          if (got === undefined) out.bad.unshift('the marigold guard never reached "' + g + '" at all — it is one of the ' + Object.keys(FLOOR).length + ' places this pack puts marigolds and it measured NONE of them there, so this guard was passing on the flower bed alone');
+          else if (got < FLOOR[g]) out.bad.unshift('"' + g + '" grows ' + got + ' marigold heads and it grew ' + FLOOR[g] + ' when this guard was written — either a flower was dropped or the floor in MARI_FLOOR needs moving, and somebody has to look at which');
+        });
+      } finally { if (typeof seasonSet === 'function') seasonSet(keep); }
+      return out;
+    }, MARI_FLOOR);
+    const mariSeen = mari.seen ? mari.seen.join(' ') : '';
+    if (mari.seam) fails.push('the marigold guard could not reach tileView or WORLDS at all — it measured nothing');
+    else if (!mari.petals) fails.push('the marigold guard found no marigold petals anywhere in this pack — nothing was measured, which is a red and not a pass');
+    else if (mari.bad.length) fails.push(mari.bad[0] + ' [' + mari.bad.length + ' like it; ' + mari.heads + ' collars over ' + mari.petals + ' petals; seen: ' + mariSeen + ']');
+    else console.log('  MARIGOLDS: ' + mari.heads + ' heads, each with a dark collar wider than its own petals — ' + mariSeen);
     await page.evaluate(() => { world = 'hq'; px = fx = 10; py = fy = 11; camSet('3d'); });
 
     // Continue with a last visit due: it plays once, the street is not blank, the counter persists
