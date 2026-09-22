@@ -4836,7 +4836,12 @@ function applyTheme(){
 }
 try{darkMq.addEventListener("change",applyTheme);}catch(e){}
 /* ---------- SEASONS: a second palette layer, for WORLD ART, kept apart from THEMES ----------
-   THEMES is UI chrome and never reaches a tile; art(key, fallback) is how world art asks
+   THEMES tints a tile and SEASONS recolours one, and they are different layers doing different
+   jobs. This comment used to say "THEMES is UI chrome and never reaches a tile", which was false
+   the day it was written: tc() has always mixed the theme accent into every hex the world draws,
+   and the mesh baker in engine3d.js runs every part colour through the same tc(). The owner
+   settled it on 2026-09-22 by changing the RULE rather than the code (docs/OWNER.md, the theme
+   entry). A theme may TINT; it may never REDESIGN. art(key, fallback) is how world art asks
    whether a season has recoloured it. The pack declares SEASONS (names, dates, colours);
    the engine never learns a name (the portability guard enforces it). seasonPick is the
    player's Settings choice: "auto" (by the calendar), "off" (year-round), or a season id.
