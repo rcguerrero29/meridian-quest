@@ -14,6 +14,21 @@ const { chromium } = require('playwright-core');
 const fs = require('fs');
 const path = require('path');
 
+/* EVERY file under engine/, read off disk — never a list of names typed here.
+   Both portability guards below used to say ['engine.js','engine3d.js'], which is a PROXY for
+   "the shared engine": correct on the day it was written and wrong the first time the engine
+   grows a third file. Crew 14 planted an engine/shapes.js spelling this pack's transit brand
+   and both guards printed OK (docs/REGRESSION.md, the proxy register). The noun is the folder.
+   Not finding it is a RED, never a pass: an unreadable shelf must not read as an empty one. */
+const ENGINE_DIR = path.join(__dirname, '..', 'engine');
+function engineFiles(fails) {
+  let names = [];
+  try { names = fs.readdirSync(ENGINE_DIR).filter(n => n.endsWith('.js')).sort(); }
+  catch (e) { fails.push('portability: engine/ could not be read (' + e.code + ') — the guard that keeps this pack\'s names out of the engine cannot run, which is a failure and not a pass'); return []; }
+  if (!names.length) fails.push('portability: engine/ holds no .js file — either the engine moved or this guard is now pointed at nothing; it is not a pass either way');
+  return names;
+}
+
 const CANDIDATES = [
   process.env.CHROMIUM_PATH,
   '/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell',
@@ -2282,9 +2297,10 @@ const CANDIDATES = [
                    'canela', 'robles', 'jacaranda', 'muertos', 'otono', 'otoño', 'nacho',
                    'tacho', 'yesenia', 'moy', 'licha', 'tito', 'vero', 'chente', 'karla', 'nolasco', 'bere',
                    'espiga', 'velazquez', 'tuerca', 'bolillo', 'pelusa', 'timbre', 'taller'];
-    // engine3d is the same engine, so it is held to the same rule
-    for (const f of ['engine/engine.js', 'engine/engine3d.js']) {
-      const src = fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
+    // every file under engine/ is the same engine, so all of them are held to the same rule
+    for (const base of engineFiles(fails)) {
+      const f = 'engine/' + base;
+      const src = fs.readFileSync(path.join(ENGINE_DIR, base), 'utf8');
       // blank out comments first — block comments span lines, so this cannot be
       // done per-line. Newlines are preserved so reported line numbers stay true.
       const bare = src.replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' '))
@@ -3598,9 +3614,9 @@ const CANDIDATES = [
     {
       const eng = fs.readFileSync(path.resolve(__dirname, '..', 'engine', 'engine3d.js'), 'utf8');
       if (/"345"/.test(eng)) fails.push('engine3d.js still hardcodes a pack glyph list ("345") instead of asking the tile');
-      const bare = f => fs.readFileSync(path.resolve(__dirname, '..', 'engine', f), 'utf8')
+      const bare = f => fs.readFileSync(path.resolve(ENGINE_DIR, f), 'utf8')
         .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
-      ['engine.js', 'engine3d.js'].forEach(f => {
+      engineFiles(fails).forEach(f => {
         if (/\bMQT\b/.test(bare(f)))
           fails.push('engine/' + f + ' spells this pack\'s transit brand — a pack name in engine code is the one thing the portability law forbids');
       });
