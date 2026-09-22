@@ -46,7 +46,7 @@ const WORLD_DEFS={
      "#.........◺◺◺◺.....#",
      "####################"],
  st:["BBBBBBBBBBBBBBEBBBBBBBBBBBBBBB",
-     "Y............................2",
+     ".Y...........................2",
      "≈≈≈≈≈≈≈≈≈≈≈≈≈--≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
      "≈≈≈≈≈≈≈≈≈≈≈≈≈--≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈",
      "....C...b........b.......C....",
@@ -337,7 +337,14 @@ const MAPDOT={pk:[22,10]};
    Principal keeps both lanes and its crossing at x13–14; Calle Dos is one lane (row 1) with the sidewalk its
    two houses stand on below it (row 2) and a crossing at each door. The smoke fails if anything stands on a
    line: a wall, a person, a lot or a door. */
-const TROLLEYAT=[{world:"st",row:2,from:0,to:29,stops:[{x:0,y:1}]},
+/* The stop moved from x:0 to x:1 on 2026-09-22 — the owner, in three words: "ok move one tile east."
+   A car standing at a platform on the line's very FIRST tile can only stand at x=0 (troClampX keeps
+   it on the street), so its body ran 0..2 and the platform sat at its west END: it presented its tail
+   door to the person waiting, and at a quarter turn the car was between him and everything. One tile
+   east and the same standing car — it still stops at x=0, nothing else changed — has the platform at
+   its CENTRE. The `Y` on row 1 of the st map moved with it in the same commit: the map's stop glyph
+   and the line's declared stops are one fact said twice and test/smoke.js fails if they disagree. */
+const TROLLEYAT=[{world:"st",row:2,from:0,to:29,stops:[{x:1,y:1}]},
                  {world:"ex",row:1,from:20,to:0,stops:[{x:20,y:2}]}];
 const TRV=[{w:"st",x:1,y:1,dir:"right"},{w:"ex",x:22,y:3,dir:"left"}];
 /* ambient critters: kinds live in the engine (butterfly, colibri, gato); spawns are

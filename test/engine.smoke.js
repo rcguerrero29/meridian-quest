@@ -1888,13 +1888,42 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
                ' — it is knee-high, and an ordinary prop in the same street stands taller than the whole tram');
       if (box.min.y > 0.04)
         P.push('the trolley floats ' + box.min.y.toFixed(2) + ' above the road with nothing under it — it has no wheels touching the ground');
-      let wheels = 0, driver = 0;
-      T3.tram.traverse(o => { const u = o.userData || {}; if (u.wheel) wheels++; if (u.driver) driver++; });
+      let wheels = 0, driver = 0, cars = 0;
+      T3.tram.traverse(o => { const u = o.userData || {}; if (u.wheel) wheels++; if (u.driver) driver++; if (u.car) cars++; });
       /* four, not two: the noun is four wheels, and the guard fired at two since it was written (la calle, crew
          iteration 11). Planted in a copy outside the repo with one axle's pair deleted: "the trolley has 2
-         wheels — a tram that rolls down a street has wheels you can see", exit 1. */
-      if (wheels < 4) P.push('the trolley has ' + wheels + ' wheels — a tram that rolls down a street has wheels you can see');
-      if (!driver) P.push('nobody is driving the trolley');
+         wheels — a tram that rolls down a street has wheels you can see", exit 1.
+         AND FOUR PER CAR, not four: a line may now declare `cars: n` (crew iteration 14), and a two-car train
+         with four wheels is a car being dragged. "Four" was the right number for the only train this engine
+         could build and it is a PROXY for "every car rolls on its own wheels" the moment a second one exists —
+         the same shape as every row in docs/REGRESSION.md, caught before it shipped rather than after.
+         The count comes from the LINE the game declares, never from a number typed here (the guard skill's
+         first trap: a guard that names its own copy of a constant is testing its own arithmetic). */
+      const N = (typeof troCars === 'function') ? troCars(L) : 1;
+      if (cars !== N) P.push('this line declares a train of ' + N + ' cars and ' + cars + ' were built — the rest of the train is not there');
+      if (wheels < 4 * N) P.push('the trolley has ' + wheels + ' wheels for ' + N + ' car' + (N > 1 ? 's' : '') +
+        ' — a tram that rolls down a street has wheels you can see, and every car of a train rolls on its own');
+      /* ONE driver, not "at least one". A tram has a cab at each end and one man who walks the length of it;
+         a train with a driver in every car is three people steering one vehicle. rigo.md is the source. */
+      if (driver !== 1) P.push(driver ? ('the trolley has ' + driver + ' drivers — a tram has a cab at each end and ONE driver, who walks the length of it')
+                                      : 'nobody is driving the trolley');
+      /* ...and it is as long as it says it is. Nothing asserted the LENGTH until now: the box was read for
+         its height and its floor only, so `cars: n` could have been decorative — a line declaring three cars
+         and rendering one would have passed every other line in this block.
+         MEASURED OVER THE CAR BODIES AND NOT OVER THE TRAM'S OWN BOX, and the first draft did the latter and
+         COULD NOT FAIL. Planted three cars declared and one built: the whole-group box still measured 6.235
+         against a declared 6.280 and the check passed on a train with two thirds of it missing. The reason is
+         that the DRIVER is positioned at the nose by arithmetic that reads the span — `(SPAN/2-0.16)` — so one
+         man standing where the front of the train would be stretches the box to exactly the number the box is
+         being compared against. A guard whose measurement is computed from its own expected value is not a
+         guard (.claude/skills/guard/SKILL.md, "it supplies its own inputs"). The cars are the vehicle. */
+      const want = (typeof troSpan === 'function') ? troSpan(L) : 2;
+      const cb = new THREE.Box3(); let bodies = 0;
+      T3.tram.traverse(o => { if ((o.userData || {}).car) { cb.union(new THREE.Box3().setFromObject(o)); bodies++; } });
+      const got = bodies ? cb.max.x - cb.min.x : 0;
+      if (!bodies) P.push('nothing on the trolley says it is a car, so how long the train is cannot be asked of it');
+      else if (Math.abs(got - want) > 0.35) P.push('this line declares a train ' + want.toFixed(2) + ' tiles long and what stands on the street is ' +
+        got.toFixed(2) + ' — the street will brake, wait and clear for a vehicle that is not the size of the one you can see');
       /* ---- and a wheel turns about its axle ----
          The check above asks whether the tram's bounding box reaches the road. Measured: it reads
          0.0000 with all four wheels present AND 0.0000 with all four deleted, because the skirt
@@ -1924,7 +1953,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
       /* and it must read as a tram from every stop you can turn the camera to, not just the two
          long sides — six window slabs at z=±0.37 left a bare brown slab at 90 degrees */
       let faces = 0; T3.tram.traverse(o => { if ((o.userData || {}).glazing) faces++; });
-      if (faces && faces < 3) P.push('the trolley only has windows on its long sides, so from a quarter turn it is a blank brown brick');
+      if (faces && faces < 3 * N) P.push('the trolley only has windows on its long sides, so from a quarter turn it is a blank brown brick');
     }
     TRO.state = bs; TRO.x = bx; world = bw; camSet(bc); sizeCanvas();
     document.getElementById('world').hidden = true;
@@ -1933,17 +1962,100 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   fails.push(...tram.filter(l => !/^COUNT-ONLY: /.test(l)));
   tram.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
-  /* ---- and a person behind the trolley is behind it ----
+  /* ---- a person is shorter than the door he walks through, and a SIGN is not a person ----
+     The owner, 2026-09-22: "you can make my character smaller as i mentioned before for the cool
+     looks." He was right about a thing nobody had measured: every one of the thirty-six stood 1.12
+     of a doorway, so the whole cast walked under lintels shorter than they are, in both games, since
+     the actor card got its size. T3PERSON is that size now and this is the sentence it has to keep.
+     ASKED IN PIXELS AND AGAINST A REAL DOOR. His height is where the paint starts on his own card,
+     not the card's edge — the card carries 8 px of headroom for the speech bubble (#57), so the card
+     is a proxy for the person and reading it would call him a head taller than he is. The doorway is
+     a door that is actually standing in the scene, not the literal 1.0, because a guard that names
+     its own copy of a constant is testing its own arithmetic (.claude/skills/guard/SKILL.md).
+     AND THE SECOND HALF, which is the one somebody will undo by tidying: the quest mark and the read
+     mark ride the same pool as the people and are NOT people. A mark is signage — it is sized to be
+     read across a street and it does not shrink because the cast did. Asked by sweeping T3PERSON and
+     counting what moved: every sign must hold still and every body must not. */
+  const person = await page.evaluate(() => {
+    const P = [];
+    if (typeof T3 === 'undefined' || !window.THREE || typeof T3PERSON === 'undefined') {
+      P.push('COUNT-ONLY: this shell declined 3D, so nobody was measured against a doorway'); return P; }
+    const keep = { w: world, px, py, cam: camMode, k: T3PERSON };
+    document.getElementById('world').hidden = false;
+    /* a world with a door standing in it AND somebody in it: walk until both are true */
+    let found = null;
+    Object.keys(WORLDS).some(wid => { world = wid; px = fx = Math.floor(WORLDS[wid].W / 2); py = fy = Math.floor(WORLDS[wid].H / 2);
+      camSet('3d'); sizeCanvas(); draw3d();
+      let door = null; T3.group.traverse(o => { if (!door && (o.userData || {}).door && o.geometry) door = o; });
+      const hero = T3.pool.find(p => p.live && p.spr.userData.hero);
+      if (door && hero) { found = { wid, door, hero }; return true; }
+      return false; });
+    if (!found) { P.push('COUNT-ONLY: no world put a person and a standing door in the same scene'); }
+    else {
+      const K = T3.K || 1, c = found.hero.c, g = c.getContext('2d');
+      const d = g.getImageData(0, 0, c.width, c.height).data;
+      let head = -1;
+      for (let y = 0; y < c.height && head < 0; y++) for (let x = 0; x < c.width; x++) if (d[(y * c.width + x) * 4 + 3] > 24) { head = y; break; }
+      /* his feet are the card's anchor, 4 of 48 rows up from the bottom (t3Sprite, center.set) */
+      const feet = 44 * K;
+      if (head < 0 || head >= feet) P.push('nothing is painted on the person you steer, so his height could not be measured — which is not a pass');
+      else {
+        const tall = (feet - head) / (32 * K) * T3PERSON;
+        const box = new THREE.Box3().setFromObject(found.door), door = box.max.y;
+        if (tall >= door) P.push('the person you steer stands ' + tall.toFixed(2) + ' tiles tall and the doorway he walks through in ' + found.wid +
+          ' is ' + door.toFixed(2) + ' — he is taller than the door, in every room, and once you have seen it you cannot stop seeing it');
+        if (tall < door * 0.7) P.push('the person you steer stands ' + tall.toFixed(2) + ' tiles against a ' + door.toFixed(2) +
+          ' doorway — he is a child in a grown-up\'s city, and his face is ' + Math.round(tall * 35) + ' px of a 35 px tile');
+      }
+      /* and the signs hold still while the bodies move — IN A WORLD THAT HAS SIGNS IN IT, which is a
+         different world from the one with the doorway and took a plant to learn. The first draft asked
+         this wherever the doorway happened to be: that is hq, which has no door mark and no read mark,
+         so `signs` was 0, nothing held still, 0 === 0, and the whole half went GREEN against the real
+         violation (every mark made to shrink with the cast). Nothing to look at is not a pass —
+         .claude/skills/guard/SKILL.md's second, and docs/GAUGE.md's silent zero. */
+      let markW = null;
+      Object.keys(WORLDS).some(wid => { world = wid; px = fx = Math.floor(WORLDS[wid].W / 2); py = fy = Math.floor(WORLDS[wid].H / 2);
+        const n = ((typeof doorMarks === 'function' ? doorMarks() : []).length) + ((typeof readMarks === 'function' ? readMarks() : []).length);
+        if (n) { markW = { wid, n }; return true; } return false; });
+      if (!markW) P.push('COUNT-ONLY: no world in this game draws a quest or read mark, so signs could not be told from people');
+      else {
+        camSet('3d'); sizeCanvas();
+        const scales = () => { draw3d(); return T3.pool.filter(p => p.live).map(p => +p.spr.scale.y.toFixed(4)); };
+        T3PERSON = keep.k; const a = scales();
+        T3PERSON = keep.k * 0.5; const b = scales();
+        T3PERSON = keep.k; draw3d();
+        const held = a.filter((v, i) => b[i] === v).length;
+        if (a.length <= markW.n) P.push('only marks are drawn in ' + markW.wid + ' and nothing else, so "the signs held still and the bodies did not" has no bodies in it — which is not a pass');
+        else if (held !== markW.n) P.push('halving the size of a person held ' + held + ' of the ' + a.length + ' billboards in ' + markW.wid +
+          ' still, and ' + markW.n + ' of them are quest and read MARKS — a mark is signage: it is sized to be read and it does not get smaller because the cast did');
+      }
+    }
+    T3PERSON = keep.k; world = keep.w; px = fx = keep.px; py = fy = keep.py;
+    camSet(keep.cam); sizeCanvas(); document.getElementById('world').hidden = true;
+    return P;
+  });
+  fails.push(...person.filter(l => !/^COUNT-ONLY: /.test(l)));
+  person.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
+  /* ---- and a person behind the trolley is BEHIND it, and can still see himself ----
      The owner, 2026-09-21: "we should fix the trolley weirdness." Ridden by the line inspector (crew
      iteration 12), every position on both lines in all four cameras: the one thing a tram would never
-     let you do is stand on its roof, and this one did. The hero is drawn through whatever stands
-     between him and the camera (#22, a wall) — and the tram is not a wall, so when it stood at the
-     platform with the camera on the far side of it, the person waiting for it was painted ON it, feet
-     on the roof, for the whole dwell, every call, in the camera both games boot into.
-     Asked as pixels, four frames: the hero's footprint (him on, him off, no tram), the tram's footprint
-     (tram on, tram off, no hero), and inside where they overlap, whether HE changed a pixel of the
-     tram. A person standing behind a tram changes nothing in front of him. Raw renders after one
-     draw3d, because draw3d re-places the tram each frame and would undo the toggles. */
+     let you do is stand on its roof, and this one did. Then, 2026-09-22, having been shown the two
+     cures and asked to pick: "for the inspector- lets make it seethrough."
+     SO THIS GUARD READS TWO HALVES AND NOT ONE, and the first draft — mine, yesterday — read one.
+     It asked whether the hero changed a pixel of the tram, and answered "a person standing behind a
+     tram changes nothing in front of him". That sentence is only true of an OPAQUE tram. It is the
+     right noun for the roof half and it is a PROXY for the whole thing the owner asked for, because
+     it is equally satisfied by a car that paints him out completely — which is the state he then
+     complained about. Both failures live in the same pixels and they are opposite:
+       · every overlapping pixel identical to the no-hero frame  → you are invisible behind it;
+       · every overlapping pixel identical to the no-tram frame  → you are painted on its roof.
+     A see-through car is neither: the pixel carries some of him and some of the car, which is what
+     #140 means by "the pixel holds both of them and the position is honest either way".
+     Asked as pixels, four frames: the hero's footprint (him on, him off, no tram), the tram's
+     footprint (tram on, tram off, no hero), and inside where they overlap, how many pixels moved
+     when each of the two was taken away. Raw renders after one draw3d, because draw3d re-places the
+     tram each frame and would undo the toggles. */
   const onRoof = await page.evaluate(() => {
     const P = [];
     const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
@@ -1955,7 +2067,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     document.getElementById('world').hidden = false;
     world = L.world; px = fx = s.x; py = fy = s.y; moving = false; held = null;
     TRO.dir = L.to >= L.from ? 1 : -1; TRO.state = 'dwell';
-    TRO.x = Math.max(0, Math.min(w.W - TRO_LEN, s.x - 0.5));       /* the car alongside the platform */
+    TRO.x = troClampX(L, s.x - 0.5);                               /* the car alongside the platform, wherever the engine lets it stand */
     camSet('3d'); sizeCanvas(); T3.turn = null;
     T3.yaw = s.y < L.row ? 0 : Math.PI;                            /* the camera on the far side of the rails from the platform */
     t3Invalidate(); draw3d();
@@ -1967,11 +2079,33 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     const ne = (A, B, i) => Math.abs(A[i] - B[i]) + Math.abs(A[i + 1] - B[i + 1]) + Math.abs(A[i + 2] - B[i + 2]) > 30;
     const A = grab(), A2 = grab();
     hero.spr.visible = false; const B = grab(); T3.tram.visible = false; const D = grab(); hero.spr.visible = true; const C = grab(); T3.tram.visible = true;
-    let control = 0, overlap = 0, over = 0;
-    for (let i = 0; i < W * H * 4; i += 4) { if (ne(A, A2, i)) control++; if (ne(C, D, i) && ne(B, D, i)) { overlap++; if (ne(A, B, i)) over++; } }
+    /* TWO FRACTIONS, AND THE DENOMINATORS ARE NOT THE SAME ONE, which took a wrong sweep to learn.
+       "How much of him survives" was first asked over the OVERLAP, and the overlap is itself a
+       function of how see-through the car is — so the ladder came back 3%, 0%, 0%, 0%, 1%, 31% and
+       was not measuring anything monotonic. His own silhouette does not move when the glass changes.
+       So: `seen` is counted over HIM (ne(C,D)), and the roof half stays over the overlap, where it
+       is unambiguous — a person painted opaquely on a car leaves none of the car in those pixels.
+       The ladder, measured at the st stop on 2026-09-22 with the camera on the far side of the rails:
+         the 2026-09-21 bug, him drawn through a solid car .... seen 80%   car  35%
+         shipped 2026-09-21, him behind a solid car ......... seen 27%   car 100%   <- "he disappeared"
+         glass at T3GHOST 0.68 .............................. seen 32%   car 100%
+         glass 0.52 ......................................... seen 32%   car  99%
+         glass 0.45 ......................................... seen 38%   car  98%
+         glass 0.38  (shipped) .............................. seen 45%   car  98%
+         glass 0.26 ......................................... seen 69%   car  98%
+       A third and two thirds are the two lines, each with the nearest real failure on the other side
+       of it: reusing the tree's 0.68 for a tram lands at 32% and fires, which is the point. */
+    let control = 0, heroPx = 0, seen = 0, overlap = 0, showsCar = 0;
+    for (let i = 0; i < W * H * 4; i += 4) { if (ne(A, A2, i)) control++;
+      if (ne(C, D, i)) { heroPx++; if (ne(A, B, i)) seen++;            /* taking HIM away changed it: he is in this pixel */
+        if (ne(B, D, i)) { overlap++; if (ne(A, C, i)) showsCar++; } } /* taking the CAR away changed it: it is in front, not under */ }
     if (control) P.push('the probe cannot measure the trolley and the hero: two frames of the same scene differ by ' + control + ' pixels');
-    else if (overlap < 50) P.push('the trolley at its stop in ' + L.world + ' and the person waiting for it do not overlap on screen (' + overlap + ' pixels), so the probe measured nothing — which is not a pass');
-    else if (over) P.push('standing at the stop in ' + L.world + ' with the trolley in front of you, you are drawn on top of it — ' + over + ' pixels of you painted over its roof and side; a person behind a tram is behind it');
+    else if (heroPx < 200 || overlap < 50) P.push('the trolley at its stop in ' + L.world + ' and the person waiting for it do not meet on screen (' + heroPx +
+      ' pixels of him, ' + overlap + ' of them behind the car), so the probe measured nothing — which is not a pass');
+    else if (seen * 3 < heroPx) P.push('standing at the stop in ' + L.world + ' the trolley paints you out — only ' + Math.round(seen / heroPx * 100) +
+      '% of the person you are steering still reaches the screen with the car in front of him; you call a tram and then you cannot find yourself');
+    else if (showsCar * 3 < overlap * 2) P.push('standing at the stop in ' + L.world + ' with the trolley in front of you, you are drawn on top of it — only ' +
+      Math.round(showsCar / overlap * 100) + '% of the pixels where you and the car meet carry any of the car; a person behind a tram is behind it, seen through it and not stood on it');
     world = keep.w; px = fx = keep.px; py = fy = keep.py; moving = keep.mv; TRO.state = keep.st; TRO.x = keep.x; TRO.dir = keep.d; T3.yaw = keep.yaw;
     camSet(keep.cam); sizeCanvas(); document.getElementById('world').hidden = true;
     return P;
@@ -2007,7 +2141,7 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     world = L.world; moving = false; held = null;
     /* the car's tail one tile west of the hero's column: a whole-tile x, because the flat cameras paint the car
        from its tile's corner and a half-tile car beside a whole-tile person barely touches him on screen */
-    TRO.dir = L.to >= L.from ? 1 : -1; TRO.state = 'dwell'; TRO.x = Math.max(0, Math.min(w.W - TRO_LEN, mid - 1));
+    TRO.dir = L.to >= L.from ? 1 : -1; TRO.state = 'dwell'; TRO.x = troClampX(L, mid - 1);
     const cv2 = document.getElementById('cv'), g2 = cv2.getContext('2d');
     const real = keep.td, realDP = keep.dp;
     let heroOn = true, tramOn = true;
@@ -2279,6 +2413,96 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
     return P;
   });
   fails.push(...troLoud);
+
+  /* ---- ...and a line that declares a TRAIN gets a train ----
+     The owner, 2026-09-22: "we want to make this custom as possibly can turn in to a train of trolleys
+     in other games and a new level unless you recommmend otherwise." `cars: n` on the line's own row
+     is the whole seam (engine.js, troCars). NEITHER GAME DECLARES IT — which is exactly why it needs
+     this: a seam no shipped pack uses is a seam that rots in silence, and the next person to write
+     `cars: 3` in a second game finds out on their own screen whether it was ever real. So the check
+     PLANTS the declaration, in this game, for the length of one evaluate, and asks what a person
+     would ask: is it longer, is every car there, does the street brake for the tail of it, and is
+     there still exactly one man driving.
+     The lengths and counts all come from troSpan/troCars — the engine's own arithmetic, not a copy
+     typed here — because the one thing this check must not do is prove that 3*2+2*0.14 is 6.28. */
+  const troTrain = await page.evaluate(() => {
+    const P = [];
+    if (typeof troCars !== 'function' || typeof troSpan !== 'function') { P.push('this engine cannot be asked how many cars a trolley line runs — `cars:` is a word with no reader'); return P; }
+    const L = (typeof TROLLEYAT !== 'undefined' && TROLLEYAT && TROLLEYAT[0]) ? TROLLEYAT[0] : null;
+    if (!L) return P;
+    const w = WORLDS[L.world]; if (!w) return P;
+    const keep = { w: world, px, py, cam: camMode, st: TRO.state, x: TRO.x, d: TRO.dir, cars: ('cars' in L) ? L.cars : undefined };
+    const one = troSpan(L);
+    if (troCars(L) !== 1 || one !== 2) { P.push('COUNT-ONLY: this game already declares a train, so the one-car baseline could not be taken'); }
+    L.cars = 3;
+    const three = troSpan(L);
+    /* 1. it is longer, and the arithmetic is the engine's */
+    if (!(three > one * 2.5)) P.push('a line that declares three cars is ' + three.toFixed(2) + ' tiles long against one car\'s ' + one.toFixed(2) + ' — declaring a train does not make the vehicle any bigger');
+    /* 2. the street knows about the whole of it: the brake band reaches the TAIL, six tiles back */
+    TRO.dir = L.to >= L.from ? 1 : -1; TRO.state = 'run'; TRO.x = troClampX(L, Math.round((L.from + L.to) / 2));
+    const nose = TRO.x + (TRO.dir > 0 ? three : 0), tail = Math.round(nose - TRO.dir * (three - 0.5));
+    if (typeof troDanger === 'function' && !troDanger(L.world, tail, L.row))
+      P.push('standing on the rails beside the LAST car of a three-car train, the street does not think you are near a tram at all — the tail of it runs over you while the front is what everything reads');
+    /* 3. and only ONE of them is the car that berths: the stop is served by the leading car, not by
+          whichever of the three happens to be level with it. This is the fault of iteration 12 one
+          size up — "it stopped, and not where you can see it" — and it is the reason troServing
+          reads troLead. Put the TAIL at the platform and it must not count as serving it. */
+    const s = (typeof troStops === 'function') ? troStops(L)[0] : null;
+    if (s) {
+      TRO.x = troClampX(L, TRO.dir > 0 ? s.x - 0.5 : s.x - three + 0.5);   /* the tail level with the platform */
+      const at = troServing(L);
+      if (at && Math.abs(troLead(L) - s.x) > 2.5)
+        P.push('a three-car train counts as standing at the stop when its TAIL is level with it — the person waiting watches two cars go by and then a third one whose doors are six tiles from the sign');
+    }
+    /* 4. it is built: three cars, twelve wheels, one driver, and as long in the scene as on paper */
+    if (typeof T3 !== 'undefined' && window.THREE) {
+      document.getElementById('world').hidden = false;
+      world = L.world; camSet('3d'); TRO.state = 'run'; TRO.x = troClampX(L, L.from + 1); sizeCanvas(); draw3d();
+      if (!T3.tram) P.push('a line that declares three cars builds no tram at all');
+      else {
+        let cars = 0, wheels = 0, driver = 0;
+        T3.tram.traverse(o => { const u = o.userData || {}; if (u.car) cars++; if (u.wheel) wheels++; if (u.driver) driver++; });
+        /* the CARS, not the group: the driver stands at the nose by an arithmetic that reads the span, so the
+           whole-group box measures the length it is being checked against whether the cars are there or not */
+        const box = new THREE.Box3().setFromObject(T3.tram);
+        const cb = new THREE.Box3(); T3.tram.traverse(o => { if ((o.userData || {}).car) cb.union(new THREE.Box3().setFromObject(o)); });
+        const got = cars ? cb.max.x - cb.min.x : 0;
+        if (cars !== 3) P.push('a line that declares three cars builds ' + cars + ' — the other cars of the train are not there');
+        if (wheels !== 12) P.push('a three-car train has ' + wheels + ' wheels — a car with no wheels under it is being dragged');
+        if (driver !== 1) P.push('a three-car train has ' + driver + ' drivers — a tram has ONE, in the leading car, and he walks the length of it to change ends');
+        if (Math.abs(got - three) > 0.35) P.push('a line that declares three cars puts ' + got.toFixed(2) + ' tiles of vehicle on the street where it says ' + three.toFixed(2));
+        if (box.min.y > 0.04) P.push('a three-car train floats ' + box.min.y.toFixed(2) + ' above the road — the cars behind the first one have nothing under them');
+      }
+      /* 5. and the flat cameras draw all of it. A seam that is only true in one camera is a lie in
+            three: the isometric camera lost the whole tram once already for exactly this reason. */
+      /* COUNT THE CARS PAINTED, NOT THE CALLS THAT PAINTED THEM. The first draft wrapped troDraw2D
+         and wanted three calls, and it went red on a working three-car train: the flat cameras call
+         troDraw2D ONCE and it loops the cars inside, while the isometric camera calls it once PER
+         car because each one takes its own place in the depth queue. A call is a proxy for a car —
+         caught by the plant, on the run that wrote it, which is the only way this ever gets caught
+         (docs/REGRESSION.md). drawTram is the thing that puts one car on the screen. */
+      const real = window.drawTram; const drawn = {};
+      ['top', 'front', 'iso'].forEach(c => { let n = 0; window.drawTram = function () { n++; return real.apply(this, arguments); };
+        camSet(c); sizeCanvas(); draw(); drawn[c] = n; });
+      window.drawTram = real;
+      Object.keys(drawn).forEach(c => { if (drawn[c] !== 3)
+        P.push('the ' + c + ' camera paints ' + drawn[c] + (drawn[c] === 1 ? ' car' : ' cars') + ' of a three-car train — the rest of it runs down the street invisibly, and people stand where a car already is'); });
+      camSet(keep.cam); sizeCanvas(); document.getElementById('world').hidden = true;
+    } else P.push('COUNT-ONLY: this shell declined 3D, so the planted train was not measured in the scene');
+    /* 6. and the audit refuses a train that cannot fit its own line, before a player ever sees it */
+    const long = { world: L.world, row: L.row, from: 0, to: 2, cars: 4 };
+    const had = TROLLEYAT.slice(); TROLLEYAT.length = 0; TROLLEYAT.push(long);
+    if (!/longer than its own line/.test(troAudit().join(' | ')))
+      P.push('a line can declare a train longer than the street it runs on and nothing says so — it is born off one end, never clears the other, and the run never finishes');
+    TROLLEYAT.length = 0; had.forEach(r => TROLLEYAT.push(r));
+    if (keep.cars === undefined) delete L.cars; else L.cars = keep.cars;
+    world = keep.w; px = fx = keep.px; py = fy = keep.py; TRO.state = keep.st; TRO.x = keep.x; TRO.dir = keep.d;
+    if (typeof T3 !== 'undefined' && T3 && T3.tram && T3.tramCars !== troCars(L)) { T3.scene.remove(T3.tram); T3.tram = null; }
+    if (troAudit().length) P.push('the planted train was not put back: ' + troAudit().join(' | '));
+    return P;
+  });
+  fails.push(...troTrain.filter(l => !/^COUNT-ONLY: /.test(l)));
+  troTrain.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
   /* ---- and it is there in EVERY camera it is drawn in ----
      Measured: with the trolley running, switching the camera changed 1466 pixels in top, 1704 in

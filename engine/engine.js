@@ -397,7 +397,7 @@ function arrivalsOnRails(){return arrivals().filter(function(a){const L=troLine(
    every other way of getting it wrong is named here. A word this engine does not read is the
    loudest of all: it is the one where somebody wrote a line, saw nothing happen, and had no way to
    find out why. Every key added to the seam joins TROKEYS in the same commit as its reader. */
-const TROKEYS=["world","row","from","to","stops"];
+const TROKEYS=["world","row","from","to","stops","cars"];
 function troAudit(){const out=[],lines=(typeof TROLLEYAT!=="undefined"&&TROLLEYAT)?TROLLEYAT:[],seen={};
   lines.forEach(function(L){if(!L||!L.world)return;
     const w=WORLDS[L.world],at=function(s){return L.world+" ("+s.x+","+s.y+")";};
@@ -405,8 +405,21 @@ function troAudit(){const out=[],lines=(typeof TROLLEYAT!=="undefined"&&TROLLEYA
     seen[L.world]=true;
     Object.keys(L).forEach(function(k){if(TROKEYS.indexOf(k)<0)
       out.push("the trolley line in "+L.world+" declares "+k+", which this engine does not read — whatever it was meant to do, nothing does it");});
+    /* ...and a TRAIN says how many cars, in words a person wrote by hand and can get wrong. `cars`
+       is read by troCars, which floors it and caps it at TRO_CARS_MAX so a typo cannot hang the line;
+       this is the half of the seam that says so out loud instead of silently running a different
+       train from the one that was declared. The length test is the one that matters: a train needs
+       street enough to stand clear of both ends of its own run, and the run is what `from`/`to` say. */
+    if("cars" in L){const c=L.cars;
+      if(typeof c!=="number"||!isFinite(c)||c<1||Math.floor(c)!==c)
+        out.push("the trolley line in "+L.world+" declares cars="+JSON.stringify(c)+", which is not a whole number of cars — it runs one car");
+      else if(c>TRO_CARS_MAX)
+        out.push("the trolley line in "+L.world+" declares a train of "+c+" cars and this engine couples at most "+TRO_CARS_MAX+" — the rest never appear");}
     if(!w)return;
     const a=Math.min(L.from,L.to),b=Math.max(L.from,L.to);
+    if(troCars(L)>1&&troSpan(L)>b-a+1)
+      out.push("the trolley line in "+L.world+" runs a train "+troSpan(L).toFixed(2)+" tiles long on a run of "+(b-a+1)+
+               " — it is longer than its own line, so it can never stand clear of either end and the run never finishes");
     troStops(L).forEach(function(s){const g=w.grid[s.y]&&w.grid[s.y][s.x];
       if(g===undefined){out.push("the trolley stop in "+at(s)+" is off the edge of the map");return;}
       if(SOLID.has(g)||g==="N")out.push("the trolley stop in "+at(s)+" is inside something — nobody can stand at it");
@@ -970,7 +983,9 @@ function drawIso(){
      of him under a car that was behind him, measured. It is a thing on its row: it takes the depth
      queue at its own centre, so whoever is nearer the camera paints over it and whoever is farther
      paints under it, the way the people already do. (The line inspector, crew iteration 12.) */
-  {const L=troLine(world);if(L&&TRO.state!=="away")R.push({d:TRO.x+TRO_LEN/2+L.row+0.5,f:()=>troDraw2D(world,P,false)});}
+  {const L=troLine(world);if(L&&TRO.state!=="away"){const n=troCars(L);
+    for(let i=0;i<n;i++){const cx=TRO.x+i*(TRO_LEN+TRO_GAP);
+      R.push({d:cx+TRO_LEN/2+L.row+0.5,f:(function(k){return function(){troDraw2D(world,P,false,k);};})(i)});}}}
   R.sort((a,b)=>a.d-b.d).forEach(r=>r.f());
   petalTrail(world,P);
   fiestaDraw2D(world,P,false);
@@ -1554,6 +1569,20 @@ function petalSpill(w,x,y,sx,sy,scale){
    shipped in mq-v144, and this change is deliberately AFTER it so the faster tram is one with wheels
    on it. docs/3D-LOG.md 2026-09-11. */
 const TRO_EVERY=19000,TRO_SPEED=6.0,TRO_LEN=2,TRO_HOLD=1400,TRO_LOOK=2.6;
+/* TRO_GAP — the coupling gap between two car BODIES, in tiles, and it is an engine constant for the
+   same reason TRO_DWELL is: a coupler is not anybody's taste. Rigo's file settles it in one line —
+   a depot may repaint "the panel, the band, the roof, the lining, the crest, the blind", and never
+   "the pole, the fender, the doors, the bogie, the length, the number of cabs", because each of
+   those "is decided by the wire, the platform, the rails or the terminus, and not by anybody's
+   preference" (.claude/agents/rigo.md). The gap is the coupler and the coupler is the rails'.
+   DERIVED, not felt, the way that file demands: a tram coupler with its gangway is about 0.7 m; a
+   tile here is a DOORWAY (the engine's 1.0, ~2.05 m), so 0.7 m is 0.34 tiles at full size — and the
+   car itself is compressed, 2 tiles standing for a 9 m body, a factor of about 2.5. The same factor
+   on the coupler gives 0.14. At 35 px a tile that is five pixels: a seam you can see and not a place
+   a person could stand, which is what a coupler looks like from the kerb.
+   TRO_CARS_MAX — a train longer than the street it runs on cannot stand clear of either end; the
+   audit says so in words, and this stops a typo from hanging the line while it does. */
+const TRO_GAP=0.14,TRO_CARS_MAX=8;
 /* TRO_SHY — how far up the line a small living thing reads the car, in tiles. TRO_DWELL/TRO_REACH —
    how long the car stands at a platform for somebody walking up to it, and how close "walking up"
    is. All three are engine constants and not pack keys, like TRO_HOLD beside them: a tram waiting
@@ -1581,6 +1610,34 @@ function troLine(wid){const L=(typeof TROLLEYAT!=="undefined"&&TROLLEYAT)?TROLLE
    the engine in two places (docs/TAGS.md L20). */
 function troStops(L){return (L&&Array.isArray(L.stops))?L.stops.filter(function(s){return s&&typeof s.x==="number"&&typeof s.y==="number";}):[];}
 function troIsStop(wid,x,y){return troStops(troLine(wid)).some(function(s){return s.x===x&&s.y===y;});}
+/* ---- HOW MANY CARS — the one word a pack may say about a TRAIN, and why it is the only one ----
+   The owner, 2026-09-22: "we want to make this custom as possibly can turn in to a train of trolleys
+   in other games and a new level unless you recommmend otherwise."
+   `cars: n` (omit it and it is 1) rides on the LINE's own row, not on the car, because the number of
+   cars is not a livery: it is set by how long the platform is and how long the terminus track is, and
+   both of those belong to the route. Rigo again, and he is the reason this is one key and not five.
+   THE FOUR OTHER THINGS A TRAIN HAS AND THIS SEAM DELIBERATELY DOES NOT SAY, each with its reason,
+   because docs/TAGS.md L16 is that a pack which declares HALF is the one that gets hurt:
+   · the coupling distance — TRO_GAP above: a rule, identical in both games, not a choice;
+   · which cars are powered — nothing in this engine has ever read power, and a key with no reader is
+     "the one where somebody wrote a line, saw nothing happen, and had no way to find out why";
+   · which car the driver is in — a rule, and the answer is the LEADING one, which is troLead: a tram
+     has a cab at each end and one driver, who walks the length of it rather than the car turning round;
+   · which car the doors open on — THERE ARE NO DOORS. The car is glazed on four sides and has an open
+     cab at each end; nothing in either game opens, closes, or draws a door on it. A `doors:` key would
+     be a promise the engine cannot keep, and troAudit exists to refuse exactly that.
+   The whole train is ONE RIGID BODY at one speed on one straight row — which is all this engine has
+   ever been able to be, and is honest for a street tram: it cannot bend, and the line it runs is a
+   single `row`, so there is no curve for it to swing out on. */
+function troCars(L){const n=L&&L.cars;
+  return (typeof n==="number"&&isFinite(n)&&n>=1)?Math.min(TRO_CARS_MAX,Math.floor(n)):1;}
+/* how much street the whole train occupies. ONE car is TRO_LEN exactly — every reader below is the
+   expression it was before, to the bit, for a line that says nothing about cars. */
+function troSpan(L){const n=troCars(L);return n*TRO_LEN+(n-1)*TRO_GAP;}
+/* where the LEADING car starts — the one with the driver in it, and the one that berths at the
+   platform. A train stops with its first car at the stop; the rest of it trails past, and the people
+   in those cars walk forward. For one car this is TRO.x whichever way it points. */
+function troLead(L){return TRO.dir>0?TRO.x+troSpan(L)-TRO_LEN:TRO.x;}
 function troTiles(L){const a=Math.min(L.from,L.to),b=Math.max(L.from,L.to),out=[];for(let x=a;x<=b;x++)out.push([x,L.row]);return out;}
 /* what stands on the line — a wall, a lot, a person, a door. The owner's rule: nothing may. */
 function troBlocked(wid){const L=troLine(wid);if(!L)return [];const w=WORLDS[L.world];if(!w)return [];
@@ -1599,7 +1656,10 @@ function troBlocked(wid){const L=troLine(wid);if(!L)return [];const w=WORLDS[L.w
    -0.6, so a thing that steps on beside the door missed both at once.
    A ratio of distances, so it was identical at 3.4 and 6.0 — the speed neither caused it nor
    changed it, it only made the band sweep past twice as fast. */
-function troAhead(L){const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),near=v=>{const d=(v-nose)*TRO.dir;return d>=-TRO_LEN&&d<=TRO_LOOK;};
+/* ...and on a TRAIN the body the band covers is the WHOLE train, not the first car: the tail of a
+   three-car set is six tiles behind the driver and a person standing beside it is standing beside a
+   moving vehicle. `troSpan` is that length; for one car it is TRO_LEN and this line is unchanged. */
+function troAhead(L){const sp=troSpan(L),nose=TRO.x+(TRO.dir>0?sp:0),near=v=>{const d=(v-nose)*TRO.dir;return d>=-sp&&d<=TRO_LOOK;};
   if(world===L.world&&Math.round(py)===L.row&&near(px))return true;
   const w=WORLDS[L.world];if(w&&w.npcs.some(n=>n.y===L.row&&near(n.x)))return true;
   if((typeof CRIT!=="undefined"?CRIT:[]).some(c=>c.world===L.world&&Math.round(c.y)===L.row&&near(c.x)))return true;
@@ -1651,10 +1711,11 @@ function troAtStop(L){if(!L||world!==L.world)return false;
    pigeon. It is a reason for there not to be one. */
 function troDanger(wid,x,y){const L=troLine(wid);
   if(!L||L.row!==y||TRO.state==="away")return false;
-  const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),d=(x-nose)*TRO.dir;
-  return d>=-TRO_LEN&&d<=TRO_SHY;}
+  const sp=troSpan(L),nose=TRO.x+(TRO.dir>0?sp:0),d=(x-nose)*TRO.dir;
+  return d>=-sp&&d<=TRO_SHY;}
 /* ---- which platform the car's doors are at, and whether it should stand there ----
-   The car always spans [TRO.x, TRO.x+TRO_LEN] whichever way it is pointed; only the nose swaps ends.
+   The train always spans [TRO.x, TRO.x+troSpan(L)] whichever way it is pointed — one car is TRO_LEN
+   of that and is the whole of it; only the nose, and which car leads, swap ends.
    The owner, 2026-09-11: "why wouldnt they stop for me? if im walking close to the tram, it should
    wait if it is already at the tram stop, if i missed it then its ok, itll take me a second and then
    i should be at the stop anyhow and wont mind a second to arrive."
@@ -1663,7 +1724,7 @@ function troDanger(wid,x,y){const L=troLine(wid);
    platform (`dwellAt`) rather than by run, because a line with two stops must be patient at the
    second one having already been patient at the first; and it is cleared when a run begins, so the
    next tram is as patient as this one was. */
-/* A CAR SERVES A STOP FROM THE STREET, never from beyond its end. It is born TRO_LEN past the end of
+/* A CAR SERVES A STOP FROM THE STREET, never from beyond its end. It is born its own length past the end of
    its run so it can drive in, and a stop at the run's first tile sat inside the serving window before
    the car had entered the street: on Calle Principal it stood at x=-2, its whole body past the west
    edge — off-screen in the top and front cameras, hanging in the dark in 3D — ran its dwell out there,
@@ -1671,9 +1732,15 @@ function troDanger(wid,x,y){const L=troLine(wid);
    state is a proxy for a picture. (The owner, 2026-09-21: "the trolley weirdness"; ridden by the line
    inspector, crew iteration 12.) troClampX is the one fact — where a car may stand on this street — read
    by the two things that stand a car at a platform: serving, below, and the ride's bell in rideStart. */
-function troClampX(L,x){const w=L&&WORLDS[L.world];return w?Math.max(0,Math.min(w.W-TRO_LEN,x)):x;}
+function troClampX(L,x){const w=L&&WORLDS[L.world];return w?Math.max(0,Math.min(w.W-troSpan(L),x)):x;}
+/* WHICH CAR IS AT THE PLATFORM, and it is the LEADING one — the fault above, one size up. A stop is
+   one tile; a three-car train is six. "Is the stop anywhere inside the train" is true when the stop
+   is at the tail, six tiles behind the driver, and the person waiting watches a car go past, then
+   another, and then a door that is not level with them. Every real service stops the FIRST car at
+   the marker. troLead is that car; for one car it is TRO.x and this window is the one it always was. */
 function troServing(L){if(!L||TRO.state==="away"||troClampX(L,TRO.x)!==TRO.x)return null;
-  return troStops(L).find(function(s){return s.x>=TRO.x-0.5&&s.x<=TRO.x+TRO_LEN+0.5;})||null;}
+  const a=troLead(L);
+  return troStops(L).find(function(s){return s.x>=a-0.5&&s.x<=a+TRO_LEN+0.5;})||null;}
 function troDwell(L,dt){const s=troServing(L);
   if(!s||world!==L.world)return false;
   const k=s.x+","+s.y;
@@ -1688,7 +1755,7 @@ function troUpdate(dt){const L=troLine();
     if(troAtStop(L)&&!TRO.called){TRO.called=true;if(T().troCome)toast(T().troCome,2200);}
     TRO.t+=dt;
     if(TRO.called||TRO.t>=TRO_EVERY){TRO.called=false;TRO.t=0;TRO.dwelt=0;TRO.dwellAt=null;
-      TRO.dir=L.to>=L.from?1:-1;TRO.x=L.from-TRO.dir*TRO_LEN;TRO.state="run";}
+      TRO.dir=L.to>=L.from?1:-1;TRO.x=L.from-TRO.dir*troSpan(L);TRO.state="run";}
     return;}
   if(troAhead(L)){TRO.state="hold";TRO.t=0;return;}          /* somebody is crossing: wait */
   /* ...and somebody walking up to the platform it is standing at: doors open, and they close. This
@@ -1697,7 +1764,7 @@ function troUpdate(dt){const L=troLine();
   if(troDwell(L,dt)){TRO.state="dwell";return;}
   if(TRO.state==="hold"){TRO.t+=dt;if(TRO.t<TRO_HOLD)return;TRO.t=0;}
   TRO.state="run";TRO.x+=TRO.dir*TRO_SPEED*dt/1000;
-  const end=L.to+TRO.dir*TRO_LEN;
+  const end=L.to+TRO.dir*troSpan(L);   /* the run is over when the LAST car is off the street, not the first */
   if((TRO.dir>0&&TRO.x>end)||(TRO.dir<0&&TRO.x<end)){TRO.state="away";TRO.t=0;}}
 /* ---------- EL PASEO — you ride it, you do not blink and arrive ----------
    The owner has circled this for days. 2026-09-11: "lets have the teleport survive for now but maybe
@@ -1742,7 +1809,7 @@ function rideStart(d){
   /* stand the car at the platform you are on, doors open, whatever it was doing elsewhere */
   const s=troStops(L).reduce(function(a,b){return (Math.abs(b.x-px)<Math.abs(a.x-px))?b:a;});
   TRO.dir=L.to>=L.from?1:-1;
-  TRO.x=troClampX(L,s.x-(TRO.dir>0?TRO_LEN:0));TRO.state="dwell";TRO.dwelt=0;TRO.dwellAt=null; /* on the street, even at a stop on its first tile */
+  TRO.x=troClampX(L,s.x-(TRO.dir>0?troSpan(L):0));TRO.state="dwell";TRO.dwelt=0;TRO.dwellAt=null; /* on the street, even at a stop on its first tile; on a train the LEADING car's nose comes to you */
   held=null;moving=false;
   if(T().troRide)toast(T().troRide,1800);
   return true;}
@@ -1758,7 +1825,7 @@ function rideUpdate(dt){
     if(RIDE.held>=RIDE_STUCK)rideArrive();return;}
   RIDE.held=0;
   TRO.state="run";TRO.x+=TRO.dir*RIDE_ZIP*dt/1000;
-  const end=L.to+TRO.dir*TRO_LEN;
+  const end=L.to+TRO.dir*troSpan(L);
   if((TRO.dir>0&&TRO.x>end)||(TRO.dir<0&&TRO.x<end))rideArrive();}
 /* one entry point for the car, whether it is running the timetable or carrying you. Named and
    separate from loop() so the suite can drive the real path rather than a re-implementation of it —
@@ -1767,7 +1834,7 @@ function rideUpdate(dt){
 function troTick(dt){
   if(!RIDE.on){troUpdate(dt);return;}
   rideUpdate(dt);
-  if(RIDE.on){fx=TRO.x+(TRO_LEN-1)/2;fy=(troLine(RIDE.fromW)||{row:fy}).row;}}
+  if(RIDE.on){const L=troLine(RIDE.fromW);fx=(L?troLead(L):TRO.x)+(TRO_LEN-1)/2;fy=(L||{row:fy}).row;} /* you ride in the leading car, where the driver is */}
 function rideArrive(){
   const d=RIDE.to;
   RIDE.on=false;RIDE.phase="";RIDE.t=0;RIDE.held=0;RIDE.to=null;
@@ -1775,23 +1842,31 @@ function rideArrive(){
   if(!d){fx=px;fy=py;return;}
   world=d.w;px=fx=d.x;py=fy=d.y;held=null;moving=false;dir=d.dir||"down";
   worldArrived(RIDE.fromW,RIDE.fromX,RIDE.fromY);}
-function drawTram(g,sx,sy,front){const W=TS*TRO_LEN,H=TS;
+/* ONE CAR. `lead` says this is the car at the front of the train, which is the only one that carries
+   the signal lamp — a train does not say three different things at once, and the lamp is "the only
+   sentence the vehicle can say" (rigo.md). Default true so a one-car line is the car it always was. */
+function drawTram(g,sx,sy,front,lead){const W=TS*TRO_LEN,H=TS;if(lead===undefined)lead=true;
   g.fillStyle="rgba(0,0,0,.18)";g.fillRect(sx+3,sy+H-5,W-6,4);
   g.fillStyle="#B0563A";g.beginPath();g.roundRect(sx+2,sy+(front?2:5),W-4,H-(front?8:12),5);g.fill();
   g.fillStyle="#8E4230";g.fillRect(sx+2,sy+(front?2:5),W-4,3);
   g.fillStyle="#D8E6F0";for(let i=0;i<3;i++)g.fillRect(sx+8+i*(W-20)/3,sy+(front?7:9),(W-24)/3,front?9:7);
   g.fillStyle="#E0A430";g.fillRect(sx+W/2-4,sy+(front?2:5)-2,8,2);
   g.fillStyle="#2B2536";[0.22,0.78].forEach(t2=>{g.beginPath();g.arc(sx+W*t2,sy+H-6,2.6,0,7);g.fill();});
-  if(TRO.state==="hold"||TRO.state==="dwell"||(RIDE.on&&RIDE.phase==="bell")){
+  if(lead&&(TRO.state==="hold"||TRO.state==="dwell"||(RIDE.on&&RIDE.phase==="bell"))){
     /* red: it has stopped BECAUSE OF YOU, get off the rails. amber: the doors are open, come on.
        white, flashing: the bell before a ride — the honk the owner asked for, drawn rather than heard
        because this game has never made a sound and is not going to start on a tram. */
     g.fillStyle=(RIDE.on&&RIDE.phase==="bell")?((Math.floor(RIDE.t/120)%2)?"#FFF6E0":"#E0A430")
       :TRO.state==="hold"?"#D9342B":"#E0A430";
     g.beginPath();g.arc(sx+(TRO.dir>0?W-5:5),sy+(front?5:8),2,0,7);g.fill();}}
-function troDraw2D(wid,toScreen,front){const L=troLine(wid);
+/* every car of it, west to east, at the coupling pitch. `car` draws only one of them, which is what
+   the isometric camera needs: a six-tile train takes its place in ONE depth queue per car, or the
+   far end of it sorts in front of the people standing beside the near end. */
+function troDraw2D(wid,toScreen,front,car){const L=troLine(wid);
   if(!L||L.world!==wid||TRO.state==="away")return;
-  const[sx,sy]=toScreen(TRO.x,L.row);drawTram(ctx,sx,sy,front);}
+  const n=troCars(L),lead=TRO.dir>0?n-1:0;
+  for(let i=0;i<n;i++){if(car!==undefined&&car!==i)continue;
+    const[sx,sy]=toScreen(TRO.x+i*(TRO_LEN+TRO_GAP),L.row);drawTram(ctx,sx,sy,front,i===lead);}}
 const HEROFEET={}; /* what the hero's shoes carry off the deck */
 /* the moment on the deck (owner, 2026-09-07, night: "if one hangs on the petals, the character picks one up and looks at it
    saying something like 'we will meet once again, love...'"): stand still on the bridge in season for a breath and you
@@ -2646,7 +2721,7 @@ function pigFlee(now){
   if(PIG.lift)return;
   const L=(typeof troLine==="function")?troLine(AW("pig")):null;
   if(!L||TRO.state==="away"||Math.round(PIG.y)!==L.row)return;  /* a car on the line is a car on the line, whatever it is doing */
-  const nose=TRO.x+(TRO.dir>0?TRO_LEN:0),d=(PIG.x-nose)*TRO.dir;
+  const sp=troSpan(L),nose=TRO.x+(TRO.dir>0?sp:0),d=(PIG.x-nose)*TRO.dir;
   /* She must be GOING before the brake window, or the tram stops for her and she never learns why.
      Measured before this line existed: the brake fires at d<=2.6 and the lift triggered at d<=3.2,
      which is 0.6 tiles of lead — about 176 ms at the shipped speed — so in practice the tram entered
@@ -2654,7 +2729,7 @@ function pigFlee(now){
      result was a tram stopped in the street forever waiting for a bird with no reason to move.
      So: she goes at 5 tiles, comfortably outside the brake, and the lift is also allowed to fire
      while the tram is already holding, which is what unsticks that case rather than hiding it. */
-  if(d<-TRO_LEN||d>TRO_SPEED*0.9)return;   /* the same edge as the brake, moved with it */   /* she hears it ~0.9 s out, not ~5 tiles out: a lead measured
+  if(d<-sp||d>TRO_SPEED*0.9)return;   /* the same edge as the brake, moved with it */   /* she hears it ~0.9 s out, not ~5 tiles out: a lead measured
      in TIME survives the next speed change, and a lead measured in tiles does not. At 3.4 that was
      3.1 tiles and at 6.0 it is 5.4, and in both cases she is going before the brake window (2.6) is
      reached. She is still airborne when the tram first eases — deliberately. A car that checks, sees

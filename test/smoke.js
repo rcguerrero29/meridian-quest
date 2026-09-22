@@ -1127,8 +1127,16 @@ const CANDIDATES = [
     portalHold = '';                    // …and once the hold is gone, the same tile is a door again
     await wait(250);
     if (world !== 'st') problems.push('with the hold cleared, standing on the door still did nothing');
-    // Y (the trolley stop) must stay step-only: a menu you dismissed must not reopen under your feet
-    world = 'st'; px = fx = 0; py = fy = 1; moving = false; held = null; portalT = 0; portalHold = '';
+    /* Y (the trolley stop) must stay step-only: a menu you dismissed must not reopen under your feet.
+       THE TILE COMES FROM THE LINE, and it used to be typed here as (0,1). The owner moved the stop one
+       tile east on 2026-09-22 ("ok move one tile east") and this check went on standing on (0,1) — a
+       tile that is no longer a stop, where the menu could never have opened and the check could never
+       have failed. It would have printed OK for ever. A guard that names a coordinate the content also
+       names is two copies of one fact, and content is the copy that moves. */
+    world = 'st'; moving = false; held = null; portalT = 0; portalHold = '';
+    { const s1 = (typeof troStops === 'function') ? troStops(troLine('st'))[0] : null;
+      if (!s1) problems.push('the street declares no trolley stop, so "the pass is step-only" has nowhere to stand and proves nothing');
+      else { px = fx = s1.x; py = fy = s1.y; } }
     document.getElementById('travel').hidden = true;
     await wait(250);
     if (!document.getElementById('travel').hidden) problems.push('the trolley menu reopened under your feet while you stood still');
@@ -4170,9 +4178,10 @@ const CANDIDATES = [
     const mid = Math.round((L.from + L.to) / 2);
     py = fy = L.row; px = fx = mid;                       /* the hero, standing on the rails */
     /* put him dead in the middle of the car: want d = -1, and d = (px-nose)*dir, so nose = px+dir */
-    TRO.x = (px + TRO.dir) - (TRO.dir > 0 ? TRO_LEN : 0);
-    const nose = TRO.x + (TRO.dir > 0 ? TRO_LEN : 0), d = (px - nose) * TRO.dir;
-    if (d < -TRO_LEN || d > 0) P.push('this check did not manage to stand the hero under the tram (d=' + d.toFixed(2) + ') — it proves nothing');
+    const span = (typeof troSpan === 'function') ? troSpan(L) : TRO_LEN;   /* a train is longer than a car, and the body he is standing under is all of it */
+    TRO.x = (px + TRO.dir) - (TRO.dir > 0 ? span : 0);
+    const nose = TRO.x + (TRO.dir > 0 ? span : 0), d = (px - nose) * TRO.dir;
+    if (d < -span || d > 0) P.push('this check did not manage to stand the hero under the tram (d=' + d.toFixed(2) + ') — it proves nothing');
     else if (!troAhead(L))
       P.push('a person standing on the rails INSIDE the tram is invisible to it — it is ' + Math.abs(d).toFixed(2) +
              ' tiles behind the nose, under the car, and the tram rolls straight through without slowing');
@@ -4324,7 +4333,12 @@ const CANDIDATES = [
         TRO.x = s.x - TRO.dir * 3;
         let still = 0, served = 0, standX = null;
         for (let i = 0; i < 200; i++) {
-          const x0 = TRO.x, at = (s.x >= TRO.x - 0.5 && s.x <= TRO.x + TRO_LEN + 0.5);
+          /* the engine's own window, not a copy of it. This line used to spell the serving test out
+             by hand — `s.x >= TRO.x-0.5 && s.x <= TRO.x+TRO_LEN+0.5` — which is two copies of one
+             number, and the day troServing changed (crew 14: a train berths its LEADING car, not
+             whichever of three is level with the sign) the check would have kept measuring the old
+             one and passed. Ask the function the game asks. */
+          const x0 = TRO.x, at = !!troServing(L);
           troUpdate(50);
           if (at && TRO.state !== 'away') { served += 50;
             /* standing still AND with nothing on the rails in front of it. The first draft counted
@@ -4357,7 +4371,7 @@ const CANDIDATES = [
         world = L.world; px = fx = s.x; py = fy = s.y; TRO.x = mine.standX; TRO.state = 'dwell';
         const shown = {};
         ['top', 'front'].forEach(c => { camSet(c); draw(); const sx = mine.standX * TS - camXg, sy = L.row * TS - camYg;
-          shown[c] = sx + TS * TRO_LEN > 0 && sx < VW && sy + TS > 0 && sy < VH; });
+          shown[c] = sx + TS * troSpan(L) > 0 && sx < VW && sy + TS > 0 && sy < VH; });
         camSet(keep3.cam); TRO.x = keep3.x; TRO.state = keep3.st;
         Object.keys(shown).filter(c => !shown[c]).forEach(c => P.push('the trolley stops for you in ' + L.world + ' at x=' + mine.standX.toFixed(1) +
           ', past the end of the street — with you at the stop the ' + c + ' camera shows none of it: it stopped, and not where you can see it'));

@@ -872,7 +872,13 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
   sides, and somebody is driving it. Every part carries userData the suite reads, because a test that
   counts wheels survives the tram being redrawn and a test that counts pixels does not. */
   const L=(typeof troLine==="function")?troLine():null;
-  if(!T3.tram){const g=new THREE.Group();
+  const CARS=(typeof troCars==="function")?troCars(L):1,SPAN=(typeof troSpan==="function")?troSpan(L):TRO_LEN;
+  /* A TRAIN IS A NUMBER ON THE LINE, so the car count changes when you walk into another world, and
+     this group is built once per page load into T3.scene where t3Invalidate cannot reach it (the
+     junta noted exactly that on 2026-09-13). Rebuild when the count changes and only then — a line
+     that says nothing about cars never trips it, and Meridian never rebuilds. */
+  if(T3.tram&&T3.tramCars!==CARS){T3.scene.remove(T3.tram);T3.tram=null;T3.tramBody=null;T3.tramBodies=null;T3.tramDriver=null;}
+  if(!T3.tram){const g=new THREE.Group();T3.tramCars=CARS;
     const DK=new THREE.MeshLambertMaterial({color:new THREE.Color("#8E4230")});
     const BD=new THREE.MeshLambertMaterial({color:new THREE.Color("#B0563A")});
     const H=1.02,FL=0.20;                     /* a door is 1.0; the floor rides above the wheels */
@@ -888,16 +894,27 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
     const pm=(typeof tileView==="function")&&tileView("prop:tram","mesh");let mbody=null;
     if(pm){let parts=null;try{parts=typeof pm==="function"?pm({len:TRO_LEN,h:H,fl:FL,cab:CAB}):pm;}catch(e){t3Note("mesh prop:tram",e);}
       if(Array.isArray(parts)&&parts.length){try{mbody=t3MeshOf(parts,{tram:true,mesh:true,body:true});}catch(e){t3Note("mesh prop:tram",e);}}}
-    if(mbody){g.add(mbody);T3.tramBody=mbody;}
-    else{T3.tramBody=null;
-    const body=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.1-CAB*2,H-FL-0.06,0.72),BD);
-    body.position.y=FL+(H-FL-0.06)/2;g.add(body);
-    const floor=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.06,FL+0.10,0.74),DK);
-    floor.position.y=(FL+0.10)/2;g.add(floor);   /* the skirt over the wheels, full length, so the platform has a deck */
-    const roof=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.02,0.06,0.80),DK);
-    roof.position.y=H-0.03;g.add(roof);}
-    /* WHEELS — four, on the ground, turned to roll along the line rather than across it */
     const wm=new THREE.MeshLambertMaterial({color:new THREE.Color("#2B2B31")});
+    const win=new THREE.MeshLambertMaterial({color:new THREE.Color("#D8E6F0")});
+    /* ---- ONE CAR, CARS TIMES — a train of trolleys is trolleys (the owner, 2026-09-22) ----
+       Each car is a group of its own at the coupling pitch TRO_LEN+TRO_GAP, holding the same
+       assembly the single car has always held: the body (the pack's, or the engine's three boxes),
+       four wheels and the glazing. The DRIVER is not in here — there is one of him for the whole
+       train and he is in the LEADING car, which swaps ends with the direction, so he hangs on the
+       train's own group below. For CARS=1 this loop runs once, the group sits at local x=0, and the
+       tram is the object it has always been, part for part. */
+    T3.tramBodies=[];
+    for(let ci=0;ci<CARS;ci++){
+    const g0=new THREE.Group();g0.position.x=(ci-(CARS-1)/2)*(TRO_LEN+TRO_GAP);g0.userData={car:true,i:ci};g.add(g0);
+    if(mbody){const mb=ci?mbody.clone():mbody;g0.add(mb);T3.tramBodies.push(mb);}
+    else{
+    const body=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.1-CAB*2,H-FL-0.06,0.72),BD);
+    body.position.y=FL+(H-FL-0.06)/2;g0.add(body);
+    const floor=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.06,FL+0.10,0.74),DK);
+    floor.position.y=(FL+0.10)/2;g0.add(floor);   /* the skirt over the wheels, full length, so the platform has a deck */
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(TRO_LEN-0.02,0.06,0.80),DK);
+    roof.position.y=H-0.03;g0.add(roof);}
+    /* WHEELS — four, on the ground, turned to roll along the line rather than across it */
     [-TRO_LEN/2+0.42,TRO_LEN/2-0.42].forEach(dx=>{[-1,1].forEach(sd=>{
       const w=new THREE.Mesh(new THREE.CylinderGeometry(0.115,0.115,0.07,12),wm);
       w.rotation.x=Math.PI/2;                  /* lay the disc onto its edge, axle across the rails. THAT IS ALL IT NEEDS.
@@ -912,16 +929,20 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
          more segments (12→24) gave 209 px/frame against 203 — it is not an aliasing fault; and
          scaling the visual rotation gave 39.9 against 41.0, no effect, and decouples the wheel from
          the ground it rolls on. docs/3D-LOG.md 2026-09-11. */
-      w.position.set(dx,0.115,sd*0.34);w.userData={wheel:true};g.add(w);});});
+      w.position.set(dx,0.115,sd*0.34);w.userData={wheel:true};g0.add(w);});});
     /* GLAZING on all four sides, so a quarter turn still shows a tram and not a brick (the pack's body carries its own) */
-    if(!mbody){const win=new THREE.MeshLambertMaterial({color:new THREE.Color("#D8E6F0")});
+    if(!mbody){
     [-0.55,0,0.55].forEach(dx=>{[-1,1].forEach(sd=>{
       const m=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.26,0.02),win);
-      m.position.set(dx,0.62,sd*0.37);m.userData={glazing:true};g.add(m);});});
+      m.position.set(dx,0.62,sd*0.37);m.userData={glazing:true};g0.add(m);});});
     [-1,1].forEach(ed=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.30,0.50),win);
-      m.position.set(ed*(TRO_LEN/2-0.05),0.66,0);m.userData={glazing:true};g.add(m);});}
-    /* THE DRIVER — a head and shoulders at the front window. Not a passenger: he is at the end the
-       tram is travelling toward, and he turns round with it when it reverses (below). */
+      m.position.set(ed*(TRO_LEN/2-0.05),0.66,0);m.userData={glazing:true};g0.add(m);});}
+    }
+    T3.tramBody=T3.tramBodies[0]||null;
+    /* THE DRIVER — a head and shoulders at the front window. ONE of him, for the whole train: he
+       is at the end the train is travelling toward, and on a set of coupled cars that end is a
+       different CAR each way round. A tram has a cab at each end and the driver walks the length of
+       it; he never rides in the middle, and there is never a second one. */
     const drv=new THREE.Group();
     const sh=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.16,0.30),new THREE.MeshLambertMaterial({color:new THREE.Color("#3B4A6B")}));
     sh.position.y=0.60;drv.add(sh);
@@ -934,13 +955,43 @@ function t3Trolley(){ /* the tram on the line; it is never a wall — you may st
   const on=!!(L&&L.world===world&&typeof TRO!=="undefined"&&TRO.state!=="away");
   T3.tram.visible=on;
   if(on){
-    T3.tram.position.set(TRO.x+TRO_LEN/2,0.0,L.row+0.5);
-    /* he drives from the leading end, whichever way it is going */
-    if(T3.tramDriver)T3.tramDriver.position.x=(TRO.dir>0?1:-1)*(TRO_LEN/2-0.16); /* on the platform, not behind a wall */
-    if(T3.tramBody)T3.tramBody.scale.x=TRO.dir>0?1:-1;              /* the pack's body was baked for +x: its pole leans back against the travel, so it turns round with the driver */
+    T3.tram.position.set(TRO.x+SPAN/2,0.0,L.row+0.5);
+    /* he drives from the leading end of the whole set, whichever way it is going */
+    if(T3.tramDriver)T3.tramDriver.position.x=(TRO.dir>0?1:-1)*(SPAN/2-0.16); /* on the platform, not behind a wall */
+    (T3.tramBodies||[]).forEach(b=>{b.scale.x=TRO.dir>0?1:-1;});     /* the pack's body was baked for +x: its pole leans back against the travel, so every car turns round with the driver */
     /* and the wheels turn with the distance covered, so it rolls instead of sliding */
     T3.tram.traverse(o=>{if(o.userData&&o.userData.wheel)o.rotation.y=-TRO.x/0.115;});
-  }}
+  }
+  /* ---- AND IT GOES TO GLASS WHEN IT IS BETWEEN YOU AND THE CAMERA ----
+     The owner, 2026-09-22, choosing between two cures for a person who disappears at his own stop:
+     "for the inspector- lets make it seethrough". Yesterday the cure was DEPTH — the car hid your
+     legs, honestly, the way a tram does — and honest is not the same as usable: at the stop, in the
+     camera both games boot into, the car covered him to the shoulders and at the corner stop it
+     covered all of him. So the car takes the treatment #140 already gives a tree: it stays exactly
+     where it is, at T3GHOST, drawn AFTER the people and writing no depth, so the pixel holds both
+     of them and "he is behind it" is still the honest reading. A tram is the one object in this
+     game for which that is not even a convention — it is glazed on four sides, and a person behind
+     a real one IS half visible through the windows.
+     Materials are shared between the cars (one wheel material, one glazing material, and the pack's
+     body is cloned), so the glass copy is made once per PIECE and kept beside the solid one, never
+     edited in place — one ghosted wheel would otherwise fog the whole train. t3Reveal does the same
+     thing for the same reason. The tram lives in T3.scene and not T3.group, so t3Near never sees it
+     and there is no cache key here to move: this runs every frame because the car does. */
+  const glass=on&&t3TramNear();
+  T3.tram.traverse(o=>{if(!o.material)return;const u=o.userData;
+    if(!glass&&!u.solid3)return;                    /* never been glass and is not now: leave it alone */
+    if(!u.solid3){u.solid3=o.material;
+      const mk=q=>{const c=q.clone();c.transparent=true;c.opacity=T3TRAMGLASS;c.depthWrite=false;return c;};
+      u.glass3=Array.isArray(o.material)?o.material.map(mk):mk(o.material);}
+    o.material=glass?u.glass3:u.solid3;
+    o.renderOrder=glass?1500:0;});}
+/* is the car standing between the person you steer and the camera? One ray, the hero's feet, the
+   train's own box — so a six-tile set answers for its whole length. Asked here and in t3Actors. */
+function t3TramNear(){
+  if(!T3.tram||!T3.tram.visible||!T3.cam)return false;
+  const from=T3.cam.position,to=new THREE.Vector3(fx+0.5,0.1,fy+0.5),dv=to.clone().sub(from),len=dv.length();
+  const hit=new THREE.Ray(from,dv.normalize()).intersectBox(new THREE.Box3().setFromObject(T3.tram),new THREE.Vector3());
+  return !!hit&&hit.distanceTo(from)<len;}
 function t3Fiesta(){ /* the piñata sways; it is never hit and gives nothing (Nacho's guardrail) */
   (T3.pinatas||[]).forEach(sp=>{if(!sp.parent)return;sp.material.rotation=Math.sin(Date.now()/700+sp.userData.x)*0.08;});
   /* A STRING SEEN END-ON IS NOT A STRING (the owner, 2026-09-21, a frame from a quarter turn on Calle
@@ -1061,28 +1112,24 @@ function t3Actors(){
   list.push({x:fx,y:fy,hero:true,f:g=>drawPerson(g,2,6,look,{dir:t3ScreenDir(dir),bob:moving?Math.sin(bob)*2:0,moving,hero:true})});
   /* the door marker rides the same pool, lifted above the wall line so the door slab
      does not hide it */
-  doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,f:g=>drawDoorMark(g,2,30,0,d.mark)}));
+  doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,sign:true,f:g=>drawDoorMark(g,2,30,0,d.mark)}));
   /* a poster on a WALL hangs on the wall's open face, mid-height, and is not pulled toward the
      camera (that would push it inside the wall). It used to float 1.15 up wherever it stood, which
      put the board beside la ventanilla above city hall's roof (#45: "poster next to teller is off,
      a bit too high"). A readable thing that is not a wall (the desk) keeps the float. */
   if(typeof readMarks==="function")readMarks().forEach(d=>{
     const face=t3ReadFace(w,d.x,d.y);
-    if(face)list.push({x:d.x,y:d.y,h:face.h,ox:face.ox,oz:face.oz,fixed:true,mark:"read",f:g=>drawReadMark(g,2,30,-7)}); /* up:-7 centres the card on its anchor */
-    else list.push({x:d.x,y:d.y,h:1.15,mark:"read",f:g=>drawReadMark(g,2,30,0)});});
-  /* A TRAM BETWEEN YOU AND THE CAMERA hides your legs, the way a tram does. The hero is drawn through
-     whatever stands between him and the camera (#22, a wall) — and the tram is not a wall, so standing
-     at the platform with the car alongside and the camera on its far side, the person waiting for it
-     was painted ON it, feet on the roof, for the whole dwell, every call, in the camera both games boot
-     into (the owner, 2026-09-21: "the trolley weirdness"; ridden by the line inspector, crew iteration
-     12). When the line from the camera to your feet passes through the car you keep your depth: the
-     body hides what it stands in front of and your head shows over the roof, which is what standing
-     behind a tram looks like. Not while riding — the ride draws you in the car on purpose (rideStart's
-     list of what is deliberately cheap). t3Trolley has placed the car before this runs. */
-  const tramBetween=(()=>{if(!T3.tram||!T3.tram.visible||(typeof RIDE!=="undefined"&&RIDE.on))return false;
-    const from=T3.cam.position,to=new THREE.Vector3(fx+0.5,0.1,fy+0.5),dv=to.clone().sub(from),len=dv.length();
-    const hit=new THREE.Ray(from,dv.normalize()).intersectBox(new THREE.Box3().setFromObject(T3.tram),new THREE.Vector3());
-    return !!hit&&hit.distanceTo(from)<len;})();
+    if(face)list.push({x:d.x,y:d.y,h:face.h,ox:face.ox,oz:face.oz,fixed:true,mark:"read",sign:true,f:g=>drawReadMark(g,2,30,-7)}); /* up:-7 centres the card on its anchor */
+    else list.push({x:d.x,y:d.y,h:1.15,mark:"read",sign:true,f:g=>drawReadMark(g,2,30,0)});});
+  /* A TRAM BETWEEN YOU AND THE CAMERA used to take your depth back: the car hid your legs, the way a
+     tram does, because the person waiting at the platform had been painted ON it, feet on the roof,
+     for the whole dwell (the owner, 2026-09-21: "the trolley weirdness"; ridden by the line
+     inspector, crew iteration 12). That reading was right and the picture was still wrong — at the
+     stop the car covered him to the shoulders — and the owner chose the other cure on 2026-09-22:
+     "lets make it seethrough". So the CAR goes to glass (t3Trolley) and the hero keeps drawing
+     through walls (#22), which is the treatment #140 gives every tall object that is not a wall.
+     Nothing here has to know about the tram any more, and the depth flag below is back to the two
+     things it was always about: the hero, and being down a hole (#92). */
   const old=ctx;
   list.forEach((a,i)=>{
     const p=t3Sprite(i);
@@ -1101,7 +1148,8 @@ function t3Actors(){
     if(a.fixed)p.spr.position.set(ax+(a.ox||0),(a.h||0)+lift,az+(a.oz||0)); /* pinned to a wall: stays put (#45) */
     else p.spr.position.set(ax+ddx/dl*0.34,(a.h||0)+lift,az+ddz/dl*0.34);
     p.spr.userData.mark=a.mark||"";
-    p.spr.scale.set(36/32*1.12,48/32*1.12,1);
+    const cs=a.sign?T3SIGN:T3PERSON;
+    p.spr.scale.set(36/32*cs,48/32*cs,1);
     p.spr.material.color.copy(T3.tint);
     /* billboards draw in order of distance from the camera, farthest first, all of them after the
        scene's transparent pieces: whoever stands nearer the camera than you draws over you. The hero
@@ -1113,7 +1161,7 @@ function t3Actors(){
        floor the hero respects depth — the lip and the knee-high rail hide their legs, which is what going
        down into a hole looks like — and the tall wall on the camera side is the one the near-wall rule
        already minimizes. On the floor and on a climbing flight they still draw through walls (#22). */
-    p.spr.material.depthTest=!a.hero||lift<0||tramBetween;p.spr.renderOrder=1000-Math.round(dl*10);
+    p.spr.material.depthTest=!a.hero||lift<0;p.spr.renderOrder=1000-Math.round(dl*10);
     p.spr.userData.hero=!!a.hero; /* so a guard can find the person you steer without reading a rendering flag for it */
     p.spr.visible=true;p.live=true;
   });
@@ -1172,6 +1220,49 @@ function draw3d(){ /* returns true when it rendered; false → caller falls back
    of you and its two neighbours drop to a knee-high stub in the wall's top colour (t3Reveal);
    everything else, the far wall included, stays whole. */
 const T3CAMD=7.4,T3CAMH=6.2,T3STUB=0.28,T3GHOST=0.68;
+/* ---- HOW BIG A PERSON IS, and why it is two numbers and not one ----
+   The owner, 2026-09-22: "you can make my character smaller as i mentioned before for the cool looks."
+   Every actor rides a 36x48 card and this is what that card is worth in tiles: the sprite's anchor is
+   a FRACTION of the card (`center.set(0.5,4/48)`, his feet), so changing this scales him about his own
+   shoes and nothing floats. A person's drawn height is about 32 of the 48 rows, so his height in tiles
+   is very nearly this number itself — which is how the size can be argued instead of felt:
+     · a DOORWAY in this engine is 1.0 (engine3d.js, the door slab is BoxGeometry(1,1,0.14) at y=0.5);
+     · a real person is about 1.70 m and a real doorway about 2.05 m, so a person is 0.83 of a door;
+     · at 1.12 the cast was 1.12 of a door — every one of the thirty-six walked under a lintel shorter
+       than they are, which is the sort of thing you stop seeing after a week and cannot unsee after.
+   The FLOOR, the thing that does not compress: a tile is about 35 px on a phone, so at 1.12 a person
+   is 39 px and his face is two of them. Take too much off and the barrio is thirty-six silhouettes —
+   and Pili measured on 2026-09-22 that twenty-six of the thirty-six already share one of two outlines,
+   so the face is not spare capacity. The ladder 1.12 / 1.00 / 0.92 / 0.84 was rendered at phone width,
+   on the street and in HQ, and the frame chose 0.92 — an 18% cut:
+     1.12  his head crosses the shop windows' band on Calle Principal, and four people fill an office;
+     1.00  exactly a doorway, which is the size of the LINTEL and not of a person;
+     0.92  under the lintel, clear of the window band, the face still two eyes and a mouth at 32 px;
+     0.84  the arithmetic's own answer, and the floor bites: he is level with a DESK PLANT in HQ, and
+           a person the same height as the thing on the desk is a ruler that has stopped ruling.
+   So the honest ratio is 0.84 and the shipped number is 0.92, and the reason is legibility, not taste.
+   EVERY BODY, not only the hero (the owner said "my character"): thirty-six people walk under the
+   same lintels, and shrinking one of them makes him a child standing next to the tamalera rather than
+   making the street bigger. The size of a person is the size of the world.
+   A `let`, not a `const`, for one reason: the ladder is rendered by sweeping THIS value, and the guard
+   reads THIS value. A guard that names its own copy of a number is testing its own arithmetic
+   (.claude/skills/guard/SKILL.md, the first of the four).
+   T3SIGN is the quest mark and the read mark, which ride the same pool and are NOT people. A mark is
+   signage: it is sized to be read at arm's length across a street, and it does not shrink because the
+   cast did. Rigo's rule for the one painted thing on a tram that is still not livery — "the signal
+   lamp... is the only sentence the vehicle can say, and it is not on anybody's menu" — is the same
+   rule, and the marks are this game's signal lamp. */
+let T3PERSON=0.92;
+const T3SIGN=1.12;
+/* ---- and how see-through the TRAM is, which is not T3GHOST and here is the measurement ----
+   T3GHOST is a TREE's number: a ghosted crown has to still read as a tree, and what stands behind a
+   tree is a whole person-sized silhouette. A ghosted TRAM has a person behind it, 39 px tall, most of
+   him dark clothes against a dark road — and at 0.68 the four-frame probe found 3% of the pixels
+   where he and the car meet carrying any of him at all: his face, and nothing else. "See-through" was
+   true of the material and false of the picture, which is docs/REGRESSION.md's whole subject.
+   Swept 0.68 / 0.60 / 0.52 / 0.45 / 0.38 / 0.30 and looked at every frame (crew iteration 14). A
+   `let` for the same reason as T3PERSON: the ladder sweeps this value and the guard reads it. */
+let T3TRAMGLASS=0.30;
 /* #149: every prop, tree crown and cutout in 3D is a PICTURE on a card, and most of that card is
    see-through. A see-through pixel that still writes depth punches a hole in whatever is drawn after
    it — which is people: a quest mark beside a desk simply went missing, and nobody could see why,
