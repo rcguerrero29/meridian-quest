@@ -248,6 +248,13 @@ const t3Prim=p=>{const s=p.s||"box",n=v=>v===undefined?"":+v;
   return meshGeo[key]=g.toNonIndexed();};
 const t3MeshOf=(parts,tag)=>{
   const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),sc=new THREE.Vector3(),tr=new THREE.Vector3(),c=new THREE.Color();
+  /* HOW TALL THIS THING IS, and it is the parts that say so (crew iteration 14, la ofrendera).
+     `wallH` answers that question for a BOX — a formula over the glyph's declared `lift` — and a
+     mesh has never had a lift, so anything set down at `wallH` on a mesh tile is set down at the
+     height the tile would have had if it were still a box. Doña Tencha's table is 0.55 tall and
+     `wallH("T")` is 0.802: the altar stood 0.29 of a tile up in the air. Measured here because
+     every vertex is already being transformed one line below — the top costs one comparison. */
+  let top=-Infinity;
   const bake=list=>{const pos=[],nor=[],col=[];
     list.forEach(p=>{
       e.set(p.rx||0,p.ry||0,p.rz||0,"YXZ");q.setFromEuler(e);sc.set(p.sx||1,p.sy||1,p.sz||1);tr.set(p.x||0,p.y||0,p.z||0);
@@ -255,7 +262,7 @@ const t3MeshOf=(parts,tag)=>{
       const gg=t3Prim(p).clone().applyMatrix4(m4);
       const pa=gg.attributes.position.array,na=gg.attributes.normal.array;
       c.set(tc(p.c||"#888888"));
-      for(let i=0;i<pa.length;i+=3){pos.push(pa[i],pa[i+1],pa[i+2]);nor.push(na[i],na[i+1],na[i+2]);col.push(c.r,c.g,c.b);}
+      for(let i=0;i<pa.length;i+=3){pos.push(pa[i],pa[i+1],pa[i+2]);nor.push(na[i],na[i+1],na[i+2]);col.push(c.r,c.g,c.b);if(pa[i+1]>top)top=pa[i+1];}
       gg.dispose();});
     const geo=new THREE.BufferGeometry();
     geo.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
@@ -273,6 +280,7 @@ const t3MeshOf=(parts,tag)=>{
   if(glass.length){const byA={};glass.forEach(p=>{(byA[p.a]=byA[p.a]||[]).push(p);});
     Object.keys(byA).forEach(a=>{const gm=new THREE.MeshLambertMaterial({vertexColors:true,transparent:true,opacity:+a,depthWrite:false});
       T3.tintables.push(gm);const gmesh=new THREE.Mesh(bake(byA[a]),gm);gmesh.userData={glass:true,a:+a};m.add(gmesh);});}
+  m.t3Top=top===-Infinity?0:top; /* the tallest ink in the thing itself, glass included — what anything set on it stands on */
   return m;};
 function t3Build(key){
   if(t3Reuse(key))return;                       /* already standing; walk back into it */
@@ -363,6 +371,11 @@ function t3Build(key){
   }
   /* the standing world: boxes wear the facade art, everything else is a cutout */
   const faceTex={},flatTex={},wallMat={},boxMat={};
+  /* WHAT STANDS ON THIS TILE, AND HOW TALL IT REALLY IS — keyed "x,y", filled as each tile is
+     built, read by the season-prop pass below when it sets a thing down on top of one. A mesh
+     tile answers with its own parts (`t3Top`); everything else is left out and falls back to
+     `wallH`, which is the box formula and is exactly right for a box. */
+  const topY={};
   /* Furniture, appliances and anything content marks `box:true` stand as a BOX when the
      pack drew a side view for them: the side art on all four faces (measured to the drawn
      height, so nothing floats), the top-down art on the lid. A cutout showed one face from
@@ -387,10 +400,14 @@ function t3Build(key){
     const mv=(typeof tileView==="function")&&tileView(gch,"mesh");if(!mv)return false;
     let parts;try{parts=typeof mv==="function"?mv({x,y}):mv;}catch(e){t3Note("mesh "+gch,e);return false;}
     if(!Array.isArray(parts)||!parts.length)return false;
-    try{const m=t3MeshOf(parts,{mesh:true,g:gch,x,y});m.position.set(cx,0,cz);grp.add(m);return true;}
+    try{const m=t3MeshOf(parts,{mesh:true,g:gch,x,y});m.position.set(cx,0,cz);topY[x+","+y]=m.t3Top;grp.add(m);return true;}
     catch(e){t3Note("mesh "+gch,e);return false;}};
   const baseOf=g=>BASECOL[g]||(typeof MAPCOL!=="undefined"&&MAPCOL[g])||C.wall;
   const wallH=g=>0.55+((TILES[g]||{}).lift|0)*0.042; /* lift 13 ≈ 1.1 units tall */
+  /* THE TOP OF WHAT IS ACTUALLY STANDING THERE. Ask the thing; fall back to the box formula only
+     when nothing standing on that tile measured itself. `wallH` is a fact about a glyph's `lift`,
+     not about a shape, and a season prop set down on a shape needs its feet on the shape. */
+  const tileTop=(x,y,g)=>{const t=topY[x+","+y];return t!==undefined?t:wallH(g);};
   const wallMats=g=>wallMat[g]||(wallMat[g]={ /* one material set per glyph, shared by every box of it */
     side:new THREE.MeshLambertMaterial({color:new THREE.Color(shadeHex(baseOf(g),-0.22))}),
     top:new THREE.MeshLambertMaterial({color:new THREE.Color(tc(roofCol(g)))}),
@@ -759,11 +776,11 @@ function t3Build(key){
           const pm=(typeof tileView==="function")&&tileView("prop:ofrenda","mesh");
           if(pm){let parts=null;try{parts=typeof pm==="function"?pm({x:p.x,y:p.y}):pm;}catch(e){t3Note("mesh prop:ofrenda",e);}
             if(Array.isArray(parts)&&parts.length){try{const m=t3MeshOf(parts,{prop:true,ofrenda:true,mesh:true,x:p.x,y:p.y});
-              const sc=up?0.8:1;m.scale.set(sc,sc,sc);m.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);grp.add(m);return;}
+              const sc=up?0.8:1;m.scale.set(sc,sc,sc);m.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?tileTop(p.x,p.y,g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);grp.add(m);return;}
               catch(e){t3Note("mesh prop:ofrenda",e);}}}
           const c=document.createElement("canvas");c.width=32*K;c.height=32*K;const g2=c.getContext("2d");g2.scale(K,K);drawOfrenda(g2,0,0);
           const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.02);const sc=up?0.8:1;sp.scale.set(sc,sc,1);
-          sp.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);sp.userData={prop:true,ofrenda:true,x:p.x,y:p.y};grp.add(sp);return;}
+          sp.position.set(p.x+0.5,(p.h!==undefined?p.h:(up?tileTop(p.x,p.y,g):stairLift(w,p.x,p.y)))+0.01,p.y+0.5);sp.userData={prop:true,ofrenda:true,x:p.x,y:p.y};grp.add(sp);return;}
         if(p.kind!=="calaverita")return;
         const SILL_PROUD=0.09;
         const win=typeof propSill==="function"?propSill(world,p):null;
@@ -833,7 +850,7 @@ function t3Build(key){
           sp.userData={prop:true,calaverita:true,sill:true,x:p.x,y:p.y,win:win.i};grp.add(sp);return;}
         const c=document.createElement("canvas");c.width=z*K;c.height=z*K;const g2=c.getContext("2d");g2.scale(K,K);drawCalaverita(g2,0,0,p.foil,z);
         const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t3Tex(c),transparent:true,alphaTest:T3ALPHA}));sp.center.set(0.5,0.02);sp.scale.set(z/32,z/32,1);
-        const h=p.h!==undefined?p.h:(up?wallH(g):stairLift(w,p.x,p.y));
+        const h=p.h!==undefined?p.h:(up?tileTop(p.x,p.y,g):stairLift(w,p.x,p.y));
         sp.position.set(p.x+(p.ox===undefined?0.5:p.ox),h+0.01,p.y+(p.oy===undefined?0.5:p.oy));sp.userData={prop:true,calaverita:true,x:p.x,y:p.y};grp.add(sp);});
       fiestaHangs(world).forEach(h=>{if(h.kind!=="pinata")return;
         const c=document.createElement("canvas");c.width=32*K;c.height=32*K;const o2=ctx;ctx=c.getContext("2d");ctx.setTransform(K,0,0,K,0,0);

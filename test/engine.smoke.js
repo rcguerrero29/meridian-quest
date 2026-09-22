@@ -2125,6 +2125,87 @@ if (typeof CAMS === 'undefined' || CAMS.indexOf('3d') >= 0) {
   fails.push(...endOn.filter(l => !/^COUNT-ONLY: /.test(l)));
   endOn.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
 
+  /* ---- AN OFRENDA STANDS ON SOMETHING (crew iteration 14, la ofrendera) ----
+     The owner, 2026-09-22: "the altar above the table at dona tenchas is not ok, please fix." It was
+     0.29 of a tile up in the air over her table, and the cause is a proxy of the oldest kind: the
+     season-prop pass asked `wallH(g)` — 0.55 + the glyph's declared `lift` × 0.042, which is the
+     height of a BOX — for a tile whose shape is a MESH. `wallH("T")` is 0.802; the table's own parts
+     stop at 0.550. The number that is right for a box is exactly the one that is wrong for a mesh,
+     which is why this asks BOTH: Meridian's table is a mesh, El Changarrito's is still a box.
+     WHAT IT READS, and it is two things measured out of the BUILT SCENE and nothing out of the
+     engine's arithmetic (docs/POSTMORTEM.md §0, .claude/skills/guard/SKILL.md §1):
+       · where the prop was set down — the object's own y in the 3D group;
+       · the top of what it was set ON — the highest vertex of the geometry already standing on that
+         same tile, from its bounding box. A billboard is a picture and has no top, so only real
+         geometry counts.
+     TOLERANCE 0.05 of a tile, and the reason is the screen: the 3D camera stands 7.4 tiles back and
+     6.2 up, a tile is about 35 px on a phone, so one screen pixel is 0.029 of a tile. 0.05 is under
+     two pixels — the smallest disagreement anybody could see — while the fault it was written for is
+     0.262, which is nine. Inside it sit the engine's own 0.01 of clearance and the 0.008 by which a
+     box's measured height differs from the `wallH` formula.
+     WHAT IT DOES NOT READ: a prop whose own art floats inside its own model. This says where the
+     thing was set down, not where its ink starts.
+     A prop the pack hangs in a window (`sill`) is not standing on the tile and is not asked. */
+  const altarFeet = await page.evaluate(() => {
+    const P = [];
+    if (typeof T3 === 'undefined' || !window.THREE) { P.push('COUNT-ONLY: this shell declined 3D, so nothing was measured standing on anything'); return P; }
+    if (typeof fiestaProps !== 'function' || typeof seasonSet !== 'function') { P.push('COUNT-ONLY: this engine sets no season props down'); return P; }
+    const S = (typeof SEASONS !== 'undefined' && SEASONS) ? SEASONS : {};
+    const sids = Object.keys(S).filter(k => S[k] && S[k].art && Array.isArray(S[k].art.props) && S[k].art.props.length);
+    if (!sids.length) { P.push('COUNT-ONLY: no season in this pack sets anything down, so nothing can stand on anything'); return P; }
+    const TOL = 0.05;
+    const keep = { w: world, px, py, cam: camMode, yaw: T3.yaw, mv: moving, season: seasonPick, st: (typeof TRO !== 'undefined' ? TRO.state : null) };
+    const bb = new THREE.Box3();
+    let looked = 0, stood = 0;
+    /* one reading of one built scene: the prop's y, and the top of the geometry under it */
+    const read = (p) => {
+      const at = []; T3.group.traverse(o => { const u = o.userData; if (u && u.x === p.x && u.y === p.y) at.push(o); });
+      const prop = at.find(o => { const u = o.userData; return u.prop && !u.sill; });
+      if (!prop) return { missing: true };
+      const under = at.filter(o => o !== prop && o.isMesh && !(o.userData.prop || o.userData.swag || o.userData.papel || o.userData.pinata));
+      if (!under.length) return { onGround: true };
+      let top = -Infinity, what = '';
+      under.forEach(o => { bb.setFromObject(o); if (bb.max.y > top) { top = bb.max.y; what = o.userData.g || '?'; } });
+      return { feet: prop.position.y, top, what };
+    };
+    sids.forEach(sid => {
+      seasonSet(sid);
+      [...new Set(S[sid].art.props.map(p => p.world))].filter(wid => WORLDS[wid]).forEach(wid => {
+        const props = fiestaProps(wid).filter(p => !p.sill);
+        if (!props.length) return;
+        world = wid; px = fx = 0; py = fy = 0; moving = false; held = null;
+        if (typeof TRO !== 'undefined') TRO.state = 'away';
+        camSet('3d'); T3.yaw = 0; t3Invalidate(); draw3d();
+        props.forEach(p => {
+          looked++;
+          const a = read(p);
+          if (a.missing) { P.push('in season "' + sid + '" the ' + (p.kind || 'prop') + ' the pack sets down in ' + wid + ' at (' + p.x + ',' + p.y + ') is nowhere in the 3D scene — nothing to look at, which is not a pass'); return; }
+          if (a.onGround) return;                       /* it stands on the floor or on the stairs: a different question */
+          /* THE CONTROL (docs/POSTMORTEM.md §13r): build the scene again and read the same two
+             numbers. If they move, the probe is measuring something that is not the placement. */
+          t3Invalidate(); draw3d();
+          const b = read(p);
+          if (b.missing || b.onGround || Math.abs(b.feet - a.feet) > 1e-6 || Math.abs(b.top - a.top) > 1e-6) {
+            P.push('the ' + (p.kind || 'prop') + ' in ' + wid + ' at (' + p.x + ',' + p.y + ') cannot be measured: two builds of the same scene put it in two different places'); return; }
+          stood++;
+          const gap = a.feet - a.top;
+          if (Math.abs(gap) > TOL) P.push('in season "' + sid + '" the ' + (p.kind || 'prop') + ' in ' + wid + ' at (' + p.x + ',' + p.y + ') ' + (gap > 0 ? 'floats ' : 'is sunk ') + Math.abs(gap).toFixed(3) + ' of a tile ' + (gap > 0 ? 'above' : 'into') + ' the "' + a.what + '" it was set on — it was set down at ' + a.feet.toFixed(3) + ' and the top of what stands on that tile is ' + a.top.toFixed(3) + '; an ofrenda stands ON something');
+        });
+      });
+    });
+    seasonSet(keep.season); world = keep.w; px = fx = keep.px; py = fy = keep.py; moving = keep.mv; T3.yaw = keep.yaw;
+    if (typeof TRO !== 'undefined' && keep.st !== null) TRO.state = keep.st;
+    camSet(keep.cam); sizeCanvas(); t3Invalidate();
+    /* NOTHING TO MEASURE IS NOT A PASS (.claude/skills/guard/SKILL.md §2): this pack said it sets
+       props down, so the check has to have looked at them, and at least one of them has to be
+       standing on something — otherwise the whole question went unasked and printed green. */
+    if (!looked) P.push('this pack declares season props and not one of them was looked at — the check measured nothing, which is not a pass');
+    else if (!stood) P.push('none of the ' + looked + ' season props this pack sets down stands on anything at all, so "are its feet on it" was never asked of this build');
+    return P;
+  });
+  fails.push(...altarFeet.filter(l => !/^COUNT-ONLY: /.test(l)));
+  altarFeet.filter(l => /^COUNT-ONLY: /.test(l)).forEach(l => console.log('  ' + l));
+
   /* ---- a pack must be able to SAY where its trolley serves, in its own alphabet ----
      Until 2026-09-11 it could not: "is there a stop here" was Meridian's letter "Y", read straight
      out of the engine in the two places that matter — where the car is served and where the pass
