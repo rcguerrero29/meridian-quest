@@ -98,7 +98,11 @@ function t3BakeGlyph(g,opaque,base,raw,side,frame,x,y){
     /* a standing cutout wears its SIDE view (TILESIDE), never its top-down drawing. x,y
        reach the artist so a drawing that varies by tile (a box stacked on odd tiles, a
        coffee machine every third counter tile) varies here too. */
-    const tf=side?sideArt(g):TILEDRAW[g];if(tf)tf({sx:0,sy:0,x:x|0,y:y|0,t:380*Math.PI/2,canopy:()=>{}});
+    /* `bake:true` says out loud what the pinned clock only implied: this drawing is being
+       TEXTURED onto something standing in 3D, not painted into a 2D camera. A pack that
+       draws a thing the 3D scene already builds in geometry — a casa's roof over its door —
+       asks here and leaves it out, instead of painting it twice at two different heights. */
+    const tf=side?sideArt(g):TILEDRAW[g];if(tf)tf({sx:0,sy:0,x:x|0,y:y|0,t:380*Math.PI/2,bake:true,canopy:()=>{}});
     /* a light frame baked around a door face, so it reads against a dark wall from across
        the room (owner, 2026-09-02: "hard to see some doors") */
     if(frame){ctx.fillStyle=frame;ctx.fillRect(0,0,32,3);ctx.fillRect(0,29,32,3);ctx.fillRect(0,0,3,32);ctx.fillRect(29,0,3,32);}
@@ -258,6 +262,13 @@ const t3MeshOf=(parts,tag)=>{
      `wallH("T")` is 0.802: the altar stood 0.29 of a tile up in the air. Measured here because
      every vertex is already being transformed one line below — the top costs one comparison. */
   let top=-Infinity;
+  /* AND HOW FAR IT REACHES SIDEWAYS, measured in the same loop for the same reason. `t3Top`
+     answers "how tall is the thing standing on this tile"; nothing answered "what does it
+     stand OVER". A roof oversails — that is what makes a roof a roof — and the first shaped
+     casita carried its roof half a tile across Doña Tencha's front door and swallowed the ❗
+     the player presses, because the door marker is lifted to a constant 1.0 chosen against a
+     flat lid. Four numbers, three comparisons a vertex, at build time. */
+  let sx0=Infinity,sx1=-Infinity,sz0=Infinity,sz1=-Infinity;
   const bake=list=>{const pos=[],nor=[],col=[];
     list.forEach(p=>{
       e.set(p.rx||0,p.ry||0,p.rz||0,"YXZ");q.setFromEuler(e);sc.set(p.sx||1,p.sy||1,p.sz||1);tr.set(p.x||0,p.y||0,p.z||0);
@@ -265,7 +276,10 @@ const t3MeshOf=(parts,tag)=>{
       const gg=t3Prim(p).clone().applyMatrix4(m4);
       const pa=gg.attributes.position.array,na=gg.attributes.normal.array;
       c.set(tc(p.c||"#888888"));
-      for(let i=0;i<pa.length;i+=3){pos.push(pa[i],pa[i+1],pa[i+2]);nor.push(na[i],na[i+1],na[i+2]);col.push(c.r,c.g,c.b);if(pa[i+1]>top)top=pa[i+1];}
+      for(let i=0;i<pa.length;i+=3){pos.push(pa[i],pa[i+1],pa[i+2]);nor.push(na[i],na[i+1],na[i+2]);col.push(c.r,c.g,c.b);
+        if(pa[i+1]>top)top=pa[i+1];
+        if(pa[i]<sx0)sx0=pa[i]; if(pa[i]>sx1)sx1=pa[i];
+        if(pa[i+2]<sz0)sz0=pa[i+2]; if(pa[i+2]>sz1)sz1=pa[i+2];}
       gg.dispose();});
     const geo=new THREE.BufferGeometry();
     geo.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
@@ -284,6 +298,7 @@ const t3MeshOf=(parts,tag)=>{
     Object.keys(byA).forEach(a=>{const gm=new THREE.MeshLambertMaterial({vertexColors:true,transparent:true,opacity:+a,depthWrite:false});
       T3.tintables.push(gm);const gmesh=new THREE.Mesh(bake(byA[a]),gm);gmesh.userData={glass:true,a:+a};m.add(gmesh);});}
   m.t3Top=top===-Infinity?0:top; /* the tallest ink in the thing itself, glass included — what anything set on it stands on */
+  m.t3Span=top===-Infinity?null:[sx0,sx1,sz0,sz1]; /* and how far out it reaches, in the mesh's own frame */
   return m;};
 function t3Build(key){
   if(t3Reuse(key))return;                       /* already standing; walk back into it */
@@ -379,6 +394,18 @@ function t3Build(key){
      tile answers with its own parts (`t3Top`); everything else is left out and falls back to
      `wallH`, which is the box formula and is exactly right for a box. */
   const topY={};
+  /* WHAT HANGS OVER THIS TILE FROM SOMEWHERE ELSE — keyed "x,y" like topY, and a different
+     question. topY asks how tall the thing STANDING here is; coverY asks what reaches ACROSS
+     here from the tile next door. Only an oversailing mesh answers, and only for a tile whose
+     CENTRE it covers — a 0.07 drip at the edge of a neighbour is not a roof over your head.
+     Read by the door marker, which is the one thing in the scene that has to be above
+     whatever is above the door. */
+  const coverY={};
+  grp.userData=grp.userData||{};grp.userData.cover=coverY; /* rides WITH the group, so a world walked back into (t3Reuse, from T3CACHE) still knows its own overhangs */
+  const t3Cover=(cx,cz,sp,top)=>{
+    for(let tx=Math.ceil(cx+sp[0]-0.5);tx<=Math.floor(cx+sp[1]-0.5);tx++)
+      for(let tz=Math.ceil(cz+sp[2]-0.5);tz<=Math.floor(cz+sp[3]-0.5);tz++){
+        const k=tx+","+tz;if(!(coverY[k]>=top))coverY[k]=top;}};
   /* Furniture, appliances and anything content marks `box:true` stand as a BOX when the
      pack drew a side view for them: the side art on all four faces (measured to the drawn
      height, so nothing floats), the top-down art on the lid. A cutout showed one face from
@@ -408,7 +435,9 @@ function t3Build(key){
     const mv=(typeof tileView==="function")&&tileView(gch,"mesh");if(!mv)return false;
     let parts;try{parts=typeof mv==="function"?mv({x,y}):mv;}catch(e){t3Note("mesh "+gch,e);return false;}
     if(!Array.isArray(parts)||!parts.length)return false;
-    try{const m=t3MeshOf(parts,{mesh:true,g:gch,x,y});m.position.set(cx,0,cz);topY[x+","+y]=m.t3Top;grp.add(m);return true;}
+    try{const m=t3MeshOf(parts,{mesh:true,g:gch,x,y});m.position.set(cx,0,cz);topY[x+","+y]=m.t3Top;
+      if(m.t3Span)t3Cover(cx,cz,m.t3Span,m.t3Top);
+      grp.add(m);return true;}
     catch(e){t3Note("mesh "+gch,e);return false;}};
   const baseOf=g=>BASECOL[g]||(typeof MAPCOL!=="undefined"&&MAPCOL[g])||C.wall;
   const wallH=g=>0.55+((TILES[g]||{}).lift|0)*0.042; /* lift 13 ≈ 1.1 units tall */
@@ -1119,8 +1148,18 @@ function t3Actors(){
      often; the person you are steering must never vanish behind one. */
   list.push({x:fx,y:fy,hero:true,f:g=>drawPerson(g,2,6,look,{dir:t3ScreenDir(dir),bob:moving?Math.sin(bob)*2:0,moving,hero:true})});
   /* the door marker rides the same pool, lifted above the wall line so the door slab
-     does not hide it */
-  doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:1.0,sign:true,f:g=>drawDoorMark(g,2,30,0,d.mark)}));
+     does not hide it — and above whatever the BUILDING carries over the door, which until
+     crew iteration 14 nothing in this engine could answer. 1.0 was chosen against a flat
+     lid at wallH≈1.096; the first shaped casita ran a ridge across the doorway at 1.47 and
+     ate the arrow. `cover` is the highest mesh that reaches over this tile from a
+     neighbour, and 0.20 is the clearance the ARROW needs: the glyph's baked bottom sits
+     0.175 below the sprite's centre (drawDoorMark's baseline, on a 48-px card scaled by
+     T3SIGN), so cover+0.20 puts the whole mark clear of the ridge and nothing else moves.
+     A tile nothing reaches over keeps 1.0 exactly — every door in both games but the
+     casa's, measured door by door. */
+  const t3cov=(T3.group&&T3.group.userData&&T3.group.userData.cover)||{};
+  doorMarks().forEach(d=>list.push({x:d.x,y:d.y,h:Math.max(1.0,(t3cov[d.x+","+d.y]||0)+0.20),sign:true,mark:"door",
+    f:g=>drawDoorMark(g,2,30,0,d.mark)})); /* mark:"door" so a guard can find the arrow and read where it ACTUALLY ended up, instead of doing this line's arithmetic a second time and agreeing with itself */
   /* a poster on a WALL hangs on the wall's open face, mid-height, and is not pulled toward the
      camera (that would push it inside the wall). It used to float 1.15 up wherever it stood, which
      put the board beside la ventanilla above city hall's roof (#45: "poster next to teller is off,

@@ -1877,10 +1877,35 @@ function petalMomentTick(dt){const w=CW();
   if(!moving&&w&&petalsOn()&&bridgeDist(w,px,py)===0){deckIdle+=dt;
     if(deckIdle>=2200&&!petalSaid){petalSaid=true;petalMoment=true;const L=(T().petalLines||[]);if(L.length)toast(L[Math.floor(Math.random()*L.length)],4200);}}
   else{deckIdle=0;petalMoment=false;if(!w||bridgeDist(w,px,py)!==0)petalSaid=false;}}
+const petalHeap=g=>!!(TILES[g]&&TILES[g].petals); /* a tile a world declares as LOOSE PETALS lying on the ground */
 function petalDrop(wid,x,y,feet){ /* owner, 2026-09-07: the trail "for the bridge only" — a step on the deck scatters
-  petals; the two steps after it still shed what the shoes carried; nowhere else does a step drop anything */
-  if(!petalsOn())return;const w=WORLDS[wid];if(!w)return;const f=feet||HEROFEET;
-  if(bridgeDist(w,x,y)===0)f.pc=2;else if(f.pc>0)f.pc--;else return;
+  petals; the two steps after it still shed what the shoes carried; nowhere else does a step drop anything.
+  AND SO DOES A HEAP OF LOOSE PETALS, WHATEVER THE SEASON (owner, 2026-09-22: "petals … that i can walk and
+  interact through as if they were mounds of items piled up"). That is the whole of "interact through": you
+  put a foot in a mound of flowers, some of it comes away with you, and it lies where you drop it until it
+  fades — which is the owner's own picture of it from 2026-09-07, "a trail forms behind characters". It costs
+  no new machinery: PETALS, petalTrail and t3Petals already carry it in all four cameras.
+  IT IS A RULE AND NOT A LETTER. Any world may write `petals:true` in TILEMETA and its heaps behave this way;
+  the engine never learns which glyph that is, nor the name of a season. The two clauses are deliberately
+  separate and only one of them asks petalsOn(): a BRIDGE is strewn only in season, so its half stays gated,
+  while a heap that is drawn on the map all year is walked through all year. For any tile no world declared,
+  every branch below runs exactly as it did — `heap` is false, and the function is the one that shipped. */
+  const w=WORLDS[wid];if(!w)return;const f=feet||HEROFEET;
+  /* the heaps keep their OWN counter. The first draft of this shared `pc` with the deck and the
+     suite caught it inside a minute: out of season, shoes charged on the bridge went on shedding
+     the bridge's petals across a park that no longer had any ("out of season a step still drops
+     petals", test/smoke.js). Two sources, two counters, and the deck's three lines below are the
+     ones that shipped — for a world that declares no `petals:true` tile, `carry` is false for ever
+     and every branch here runs exactly as it did. */
+  const heap=petalHeap((w.grid[y]||[])[x]);
+  const carry=heap||f.hc>0;                              /* the heap tile itself, and the two steps after it */
+  if(heap)f.hc=2;else if(f.hc>0)f.hc--;
+  let deck=false;
+  if(petalsOn()){
+    if(bridgeDist(w,x,y)===0){f.pc=2;deck=true;}
+    else if(f.pc>0){f.pc--;deck=true;}
+  }
+  if(!carry&&!deck)return;
   PETALS.push({w:wid,x,y,t:Date.now(),s:((x*37+y*101+PETALS.length*13)|0)});if(PETALS.length>PETAL_N)PETALS.shift();}
 function petalTrail(wid,toScreen){ /* toScreen(x,y) → [sx,sy] of the tile's top-left in this camera */
   if(!PETALS.length)return;const now=Date.now(),P=petalPal();
@@ -1943,6 +1968,36 @@ DOORSET.forEach(dch=>TILEDRAW[dch]=rc=>{const{sx,sy}=rc;
          give it a window, so a shop entrance and an office door stop being the same brown
          (the cold read found all five pixel-identical). An unlisted glyph is the plain door. */
       const dl=(typeof DOORLOOK!=="undefined"&&DOORLOOK[dch])||{};
+      /* ❗A HOUSE PUTS ITS ROOF OVER ITS DOOR, and until now it could not. A door body fills
+         its WHOLE tile, so a facade that wears a roofline stopped dead at the doorway: two
+         shaped casitas beside Doña Tencha's front door read as two roof stubs with a grey
+         gap between them, which is louder than the flat lids they replaced (crew iteration
+         14, shown two shaped houses and asked whether they read as ONE building).
+         `cap` is the seam and it is a CHOICE, not a rule: a door may declare what the
+         BUILDING wears above it, and the shared body is then drawn in the tile it has left.
+         A door that declares nothing — every door in both games except the casa's ⌂ — takes
+         no transform, no extra call and no new pixel. The transform maps sy→sy+cH and leaves
+         sy+TS where it was, so the door still meets the floor.
+         NOT in a 3D bake (`rc.bake`): there the roof is real geometry standing over the door
+         slab, and a second one painted onto the slab would hang inside the house.
+
+         ❗AND `capH` MAY BE A FUNCTION, BECAUSE A DOOR GLYPH IS NOT A PLACE. The first draft
+         of this seam hung the cap on the GLYPH and nothing asked where the glyph STOOD, so
+         `⌂` — which is the front door of every casa AND the way out of every room behind one
+         — wore the terracotta course on both sides of itself: a strip of roof tiles across
+         the top of the door INSIDE Doña Tencha's living room, and the same indoors at El
+         Portero's hut and the barbería. The owner saw the outside and said the three houses
+         "didnt seem to share a roof"; the inside is what that look was hiding. Photographed,
+         not reasoned (docs/POSTMORTEM.md §2).
+         So the question the engine asks is not "does this glyph wear something" but "how many
+         pixels of THIS TILE belong to the building above it" — a number, or a function of the
+         tile when only the pack can know. Zero is the engine's own door, untouched, and that
+         is the answer at every door in both games except a casa's own front. */
+      let cH=0;
+      if(!rc.bake&&dl.cap){const ch=typeof dl.capH==="function"?dl.capH(rc):dl.capH;
+        cH=Math.max(0,Math.min(TS-8,(ch===undefined?10:ch)|0));}
+      const cap=cH>0&&dl.cap;
+      if(cap){ctx.save();ctx.translate(0,sy+cH);ctx.scale(1,(TS-cH)/TS);ctx.translate(0,-sy);}
       ctx.fillStyle=dl.frame||C.doorFrame;ctx.fillRect(sx+2,sy,TS-4,TS);
       ctx.fillStyle=dl.wood||C.doorWood;ctx.fillRect(sx+4,sy+2,11,TS-4);
       ctx.fillStyle=dl.wood2||C.doorWood2;ctx.fillRect(sx+17,sy+2,11,TS-4);
@@ -1957,6 +2012,7 @@ DOORSET.forEach(dch=>TILEDRAW[dch]=rc=>{const{sx,sy}=rc;
       ctx.globalAlpha=0.25+0.2*Math.sin((rc.t!==undefined?rc.t:Date.now())/380);
       ctx.fillStyle="#FFE9A8";ctx.fillRect(sx+4,sy+TS-3,TS-8,2);
       ctx.globalAlpha=1;
+      if(cap){ctx.restore();cap(rc,cH);} /* the building's own course, over the top cH px */
     });
 if(typeof TILEART!=="undefined")Object.assign(TILEDRAW,TILEART);
 /* ---------- TILESIDE — a tile drawn for the cameras that see it STANDING ----------

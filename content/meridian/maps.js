@@ -188,10 +188,18 @@ const WORLD_DEFS={
      "F..~~....g....b........F",
      "F..~~....3.4.5.g...J...F",
      "F..~~..J...............F",
-     "F..~~......g.....bbb...F"   /* (18,10) (19,10): cempasúchil laid from the bed at 17 to the
-     ofrenda at 20. Marigolds are how the souls are shown the way — the flower IS the arrow, which
-     is the one the owner said the altar in the corner needed, and it is the historically correct
-     one. Walkable, so it cannot cork the park (R11). Pili, 2026-09-16. */,
+     "F..~~......g.....b✿✿...F"   /* (17,10) is `b`, the raised BED. (18,10) (19,10) are `✿`, loose
+     cempasúchil laid on the ground from that bed to the ofrenda at 20. Marigolds are how the souls
+     are shown the way — the flower IS the arrow, which is the one the owner said the altar in the
+     corner needed, and it is the historically correct one. Walkable, so it cannot cork the park
+     (R11). Pili, 2026-09-16.
+     THE TWO OBJECTS WERE ONE LETTER, AND THE SENTENCE ABOVE WAS FALSE FOR A DAY. On 2026-09-21 all
+     three tiles were `b` and `b` went into SOLIDX so the bed could have a curb (the line below,
+     and docs/BEAUTIFY.md row 3) — which turned the trail solid too, so the arrow that shows the
+     souls the way was a wall you walked around, while this comment went on saying "Walkable". A
+     raised bed and a scatter of loose petals are not the same thing and may not share a name.
+     la florista, 2026-09-22 — the owner's words: "can you try to lookinto making petals? that i
+     can walk and interact through as if they were mounds of items piled up". */,
      "FFF~~FFFFFFFFFFFFFFFFFFF"]
 };
 /* la caja de escalera (#4, Don Güero's candidate B, walked in the town first, 2026-09-06): HQ grew
@@ -265,11 +273,12 @@ const DOORLOOK={E:{wood:"#4F5474",wood2:"#5F6588",frame:"#2E3147",glass:true}, /
                 "*":{wood:"#3FA3A0",wood2:"#52B8B4",frame:"#1F5A58",glass:true}, /* Velázquez: teal */
                 "$":{wood:"#6E2F4A",wood2:"#84405E",frame:"#3A1728",glass:true}, /* Nolasco: burgundy, frosted */
                "⌂":{wood:"#8A5A2B",wood2:"#A26A35",frame:"#4A2E17",glass:false}}; /* a home on Calle Dos: plain pine, no glass */
-const SOLIDX="ZSHI~9|□=6780&!▣▯⊔○▭▤▦▩▨ʘb";  /* ASSUMED: b, the marigold bed, is not walked through (2026-09-21, docs/BEAUTIFY.md row 3) — a raised bed with a curb; nobody decided it, the drawing needed a box and a box needs a solid */        /* solid glyphs this pack adds (~ water, 9 doghouse, | window, □ box, and the four parcels' tiles) */
+const SOLIDX="ZSHI~9|□=6780&!▣▯⊔○▭▤▦▩▨ʘb";  /* b, the raised marigold BED, is not walked through: a knee-high box with a painted curb. docs/BEAUTIFY.md row 3 is where that came from and it is a sound citation: the row is marked as an assumption in the register's own form and its words are that a marigold bed is not walked through and that nobody decided it. (Those words are paraphrased here on purpose. Quoting the marker VERBATIM makes `test/assumed.js` report this closed assumption as a live one — it greps the token, and a comment recording a decision is not a decision waiting to be made. Do not "restore" the quote.) What was NOT sound is its SCOPE: row 3 decided about the bed, and a solid is applied to a LETTER, and that letter was also carrying the trail of loose petals laid to the ofrenda (the pk row above). One row's decision about one object silently annexed a second one and made the arrow a wall. The petals are `✿` now, they are walkable, and they are deliberately not in this string. One part, one name. (la florista, 2026-09-22) */        /* solid glyphs this pack adds (~ water, 9 doghouse, | window, □ box, and the four parcels' tiles) */
 const MAPCOL={"1":"#E0B45C","⌂":"#8A5A2B","ʘ":"#8A8F98","▭":"#6E6A80","▤":"#E8DFC4","▦":"#9E5442","▩":"#C9A77C","▨":"#BE9A72",  /* the legend says "doors & stairs in gold" and the plan painted them grey */
   Z:"#4E7A4A",S:"#8A6F4D",H:"#B0895B",I:"#A8825A",M:"#E0B45C","~":"#4A7FA8","9":"#8A6F4D",
               "|":"#6E638A",  /* window: shades to the wall-top colour, so 3D gives it no darker cap */
               "□":"#C8A277",  /* moving box: cardboard, paler than the produce crate so the map never confuses them */
+              "✿":"#E2620F",  /* loose petals: cempasúchil orange, so the plan never draws the trail in the bed's pink. The park is not a panel the plan draws (TOWNPLAN below is st and ex), so this is here for the day one of them is — and if it ever is, the plan's `nature` symbol is a canopy on a trunk, which is the wrong mark for something lying on the ground */
               "=":"#6E6A73","%":"#E0B45C","6":"#7A2E2E","7":"#5A6470","8":"#B3352B","0":"#2E2E33",
               "&":"#D9A441","!":"#3FA3A0","▣":"#4A4F57","▯":"#7C8590","⊔":"#8A6F4D","○":"#7A5C8A"};
 /* mini-map labels. `when` reads the city's flags: obra 0-2, mercado bool. */
