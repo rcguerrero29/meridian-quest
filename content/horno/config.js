@@ -10,10 +10,16 @@
    chapter in its story. Nothing here reaches into content/meridian/ at runtime.
 
    THREE THINGS IT REFUSES BY CONSTRUCTION, and the refusal is the design:
-     - no inventory. Nothing is carried, counted or held. docs/NEW-WORLD.md:143 prices it.
-     - no timer, no day budget. docs/NEW-WORLD.md:152-155: the engine reads the real clock for
-       light only and nothing in it spends a day. The verb here is a CHOICE, not a wait.
-     - no punishment. docs/NEW-WORLD.md:156-159: a mistake is only a punishment if it SUBTRACTS.
+     THE ADDRESSES ARE GREPS AND NOT LINE NUMBERS, and that is not a style choice: this file
+     shipped on 2026-09-22 citing :143, :152-155 and :156-159, and by the end of the SAME DAY all
+     three were about a hundred lines out, because a sibling lane rewrote that document's shape
+     section and everything below it moved. Line 143 now lands in the middle of SHAPETAKE. The
+     rules quoted below were correct; only the addresses rotted. Grep the sentence.
+     - no inventory. Nothing is carried, counted or held. docs/NEW-WORLD.md prices it, grep
+       `an inventory this engine does not have`.
+     - no timer, no day budget. docs/NEW-WORLD.md, grep `nothing in it spends a day`: the engine
+       reads the real clock for light only. The verb here is a CHOICE, not a wait.
+     - no punishment. docs/NEW-WORLD.md, grep `punishment if it SUBTRACTS` (the phrase wraps a line, so grep the tail).
        You may change your mind about the shell colour for ever and lose nothing. */
 const STOREPFX="horno";
 const GAMENAME="El Horno";
