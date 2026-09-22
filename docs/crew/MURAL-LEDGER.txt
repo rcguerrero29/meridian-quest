@@ -88,3 +88,5 @@ ebanista-la-silla-en-la-tapa|c71df70e3c18|01dd0a355a4f
 panadera-de-cara-no-de-canto|bad775112d41|75c97403dae6
 inspector-paro-fuera-de-via|1b030f1d5eae|edb653e54496
 muebleria-la-ultima-caja|cf67df34a8db|69d1a9626e80
+pili-cuatro-pinatas-una-sombra|1b508208bfb7|cf68823a37b8
+panadera-el-cliente-le-pone-nombre|11f9871ff370|ab086203fc0d
