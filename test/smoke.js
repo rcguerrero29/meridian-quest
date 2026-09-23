@@ -357,6 +357,25 @@ const CANDIDATES = [
     for (let ci = 1; ci < CHAPTERS.length; ci++) {
       const c = CHAPTERS[ci], last = ci === CHAPTERS.length - 1, k = chClose(c);
       if (!(c.need < c.quests.length)) problems.push(`district ${c.id}: need must be lower than its pack size`);
+      /* EVERY ENDING A DISTRICT HAS MUST BE REACHABLE, and the arithmetic is the whole check.
+         A district ends the instant `need` quests are answered (chClosed), and gradeOf divides by
+         how many were ANSWERED — not by how many exist. So at the moment the ending is picked the
+         denominator IS `need`, the only scores possible are 0/need .. need/need, and the grade
+         bands are 0.9 and 0.6. At need:2 that gives 0, 0.5, 1 -> grades 1, 1, 3: GRADE 2 CAN NEVER
+         HAPPEN. Somebody writes three endings, two of them ever appear, nothing errors, no test
+         fails, and the only way to find out is to do this multiplication.
+         Caught by Nacho in 2026-09-16 while COSTING El Espejo, which was signed at need:2 and not
+         yet built — so no ending has ever been lost in this game, and every shipped district
+         reaches 1, 2 and 3 today. It was written into docs/CITY.md as prose and guarded nowhere,
+         which is why it is here: a lesson in a ledger is not a guard, and the next district added
+         at need:2 would have passed the line above it. */
+      {
+        const bands = [];
+        for (let k = 0; k <= c.need; k++) { const clean = k / c.need; bands.push(clean >= 0.9 ? 3 : clean >= 0.6 ? 2 : 1); }
+        const reach = [...new Set(bands)];
+        [1, 2, 3].forEach(g => { if (!reach.includes(g))
+          problems.push(`district ${c.id}: grade ${g} can never happen, so the ending written for it is never shown. It closes at need:${c.need}, and gradeOf divides by how many were ANSWERED — which at the ending is exactly need — so the only scores are ${bands.map((_, k) => k + '/' + c.need).join(', ')} and they land on grades ${bands.join(', ')}. A district needs at least four quests and need:3 for all three endings to be reachable.`); });
+      }
       if (k !== null && c.quests.indexOf(k) < 0) problems.push(`district ${c.id}: the quest it closes on (${k}) is not one of its own`);
       // the count alone, WITHOUT the closing visit, must not be enough
       if (k !== null) {
