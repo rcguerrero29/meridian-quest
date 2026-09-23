@@ -33,6 +33,8 @@ if they do not, that is a bug to report, not a choice to make.
 3½. **`docs/CREW-MODE.md`** — one line at the top says whether crew mode is `on` or `off`. `off` is
    today's behaviour and the default; `on` means one issue per branch, a `taken:` label as the lock,
    and one worktree per builder. A per-session instruction beats the file; a session unsure is `off`.
+   **The `taken:` lock also applies whenever a second AI has access to this repo, crew mode or not**,
+   and it is a signal the town draws — never a gate anything automated may read (`AGENTS.md` §2, R4a).
 4. **`docs/OWNER.md`** — the settled rules. `docs/BACKLOG.md` — the ranked index.
    **`docs/INDEX.md`** — every document in `docs/`, what each is for, and how the owner reads them
    when no session is running. A new document is not written until it is listed there; the guard is
