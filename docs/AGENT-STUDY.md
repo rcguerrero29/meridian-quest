@@ -131,6 +131,7 @@ between impressions:
 | did its evidence hold up — real output, real renders, citations that resolve | re-running what it quoted |
 | did it find what the brief got wrong | the run file's own "what I found wrong" |
 | what it cost | the run file's token column — measured or estimated, and it must say which (`docs/RUNS.md` §3½) |
+| **what it cost the OWNER** | how many tasks he had to start, read and decide between by hand. A crew that runs itself spends tokens; a crew he has to run as separate tasks spends his attention. Both are costs, and only one of them shows in a token count |
 | did the owner accept it | `accepted` / `rejected` — **his two words alone** (`docs/RUNS.md`) |
 
 ---

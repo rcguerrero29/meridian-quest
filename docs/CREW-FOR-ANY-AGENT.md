@@ -80,6 +80,15 @@ what independence gives. Order is everything.
 its own file, and one more to synthesise. That restores real independence, not an approximation of it.
 Whether a given agent can do this is `[UNTESTED]` until it is tried — see `docs/AGENT-STUDY.md`.
 
+**And notice who runs it, because it is not the agent.** When Claude runs the crew, the calling
+session IS the manager: it starts every specialist, collects every answer, compares them, decides and
+reviews. An agent that cannot spawn its own helpers cannot be that manager — so **the manager's job
+moves to the person**. The owner starts each task, waits, and then reads the files himself or starts a
+last task to compare them. *Owner, 2026-09-23: "so are you saying it may be like tasks vs agents for
+jules?"* — yes: separate tasks stand in for separate agents, and the person stands in for the session
+that would have run them. **That is a real cost and the study measures it**: the Claude crew spends
+tokens; this spends the owner's attention. A human team runs on the same trade.
+
 ---
 
 ## 4 · What NOT to replicate
