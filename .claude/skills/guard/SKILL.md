@@ -7,11 +7,12 @@ description: The pre-flight for writing or trusting a guard — a test, a check,
 
 *Opened 2026-09-15, after four guards written in one day each went green while wrong — and each was
 caught by a plant or by looking, never by reading. This file exists because the lesson had already
-been written down twice that week, in `docs/REGRESSION.md` and in the guards' own comments, and a
+been written down twice that week, in this project's regression register and in the guards' own
+comments, and a
 rule in a document has never stopped anything. Pili painted that on the wall the same afternoon:
 **the lamp is the instrument; the sentence in the file is not.***
 
-`docs/REGRESSION.md` holds the register of guards that read a **proxy** — asked one thing and meant
+**Keep a register of guards that read a PROXY** — asked one thing and meant
 another. That is the biggest family and it has twenty-five rows. This file is the other half: four
 ways a guard is asking the right question and still cannot answer it.
 
@@ -53,7 +54,7 @@ nothing.***
 
 **Ask:** what does this guard do when the thing it measures is absent, empty, hidden or zero-sized?
 Assert the *preconditions* out loud and fail on them. Nothing to look at is **not** a pass — that is
-`docs/GAUGE.md`'s silent zero, and it is the most common way a check evaporates.
+the silent-zero failure, and it is the most common way a check evaporates.
 
 ### 3 · It reads the clock
 

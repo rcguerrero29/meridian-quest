@@ -11,6 +11,14 @@ polygonal update for all these and what we or you learned from marigolds?" This 
 sittings themselves are in `docs/3D-LOG.md` (the four entries of 2026-09-21) and the register is
 `docs/BEAUTIFY.md`; this file is the method, so the next thing takes one sitting and not five.*
 
+**THE PORTABLE HALF OF THIS FILE LIVES IN `shaping`.** Silhouette before colour, the light's range,
+variation that moves on both axes, render-and-look, "wrong three times means rebuild not re-tune",
+and how to brief somebody else — none of that is about this engine, and `.claude/skills/shaping/SKILL.md`
+carries it with no file paths in it so it can be installed into any project (`./install-skills.sh`).
+**This file is THIS engine's version**: the seam, the library, the guards, the suites and the bump.
+Where the two overlap, the craft is stated once, there; where they differ, here is the one that knows
+what `TILEART_MESH` is.
+
 ## What the seam is, in one paragraph
 
 The 3D camera builds a tile from a LIST OF PARTS when the pack declares one: `TILEART_MESH[g]` in
