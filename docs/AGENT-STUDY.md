@@ -51,6 +51,8 @@ not re-check.**
 | read `AGENTS.md` | yes, as a file in the checkout | `[STATED]` |
 | find the skills | **only through `AGENTS.md` §5½** — it does not scan `.claude/skills/` by description | `[STATED]` that is what §5½ was written for, 2026-09-23 |
 | convene the crew | **no** — those are Claude subagents | follows from what they are |
+| fork itself into parallel personas or sub-agents | **no** — *"I do not split into separate sub-agents or personas to take on task forks concurrently, but I can handle tasks sequentially or execute concurrent tool calls when appropriate."* | `[STATED]` Jules, in its own words, run 1, 2026-09-23. **Concurrent tool calls are one mind making several calls at once — not several independent views.** So within one Jules task the crew's independence is not recoverable; across several tasks the owner starts, it is (`docs/CREW-FOR-ANY-AGENT.md` §3) |
+| stop and report honestly when it cannot do the first step | **yes** | `[MEASURED]` run 1: it could not run the smoke test and **said so**, instead of claiming the suite passed — the first thing Experiment 1 was written to catch |
 | run headless Chromium, so the suites and render-and-look | **unknown** | `[UNTESTED]` **— its first task asks it to find out before anything else** |
 | apply a `taken:` label | **unknown** | `[UNTESTED]` |
 | log the owner's ask in `docs/ASKS.md` before working | **unknown** | `[UNTESTED]` — the contract requires it; whether it does is the test |
@@ -86,6 +88,31 @@ the whole instrument. Compare runs, not reputations.
 
 ### Experiment 1 — Jules, issue #241: the barbería looks like somebody's house
 
+**The exact brief — part of the experiment, because a run cannot be repeated without its prompt:**
+
+> Read `AGENTS.md` at the root of this repository before anything else, and follow it: it is the
+> contract every agent here works under, whoever built it.
+>
+> **If your workspace is empty**, the repository was not attached: clone it with
+> `git clone https://github.com/rcguerrero29/meridian-quest.git`, work inside it on the `main` branch,
+> and say in your report that you had to.
+>
+> **First, before any other work:** run `node test/smoke.js` and tell me exactly what it printed.
+> `AGENTS.md` §5½ explains why — every test here, and the rule "render it and look", need headless
+> Chromium. If it will not run, stop and report that. It matters more than the task.
+>
+> **Then your task is issue #241** — the barbería on Calle Dos looks like somebody's house. Claim it
+> with the `taken: jules` label, work on a branch named `jules/241-barberia-front`, and read the three
+> skill files §5½ lists for beautifying and shaping before you draw anything. Put before-and-after
+> renders at phone size in the PR. Don't merge it; I'll review it.
+
+**Run log**
+
+| run | date | what happened | what it measured |
+|---|---|---|---|
+| 1 | 2026-09-23 | The workspace was **empty** — the task was started without the repository attached — so there was no `test/smoke.js` and no `AGENTS.md` to read. **Jules stopped and reported exactly that**, and asked whether it should clone the repository. | **Honesty under failure: a pass** (`[MEASURED]`). Whether it can run the suites: **not reached** — still `[UNTESTED]`. The brief above gained its empty-workspace line because of this run. |
+| 2 | 2026-09-23 | Jules returned **a plan for #241 and four questions, before writing any code**: a new glyph in the house family with its own flat and 3D art, and which character, which pole colours, which of the three front squares. **All three characters it offered collide** — 💈 is two UTF-16 units and map rows are split one unit at a time; `B` is an engine tile in `SOLID`; `≈` is the road. It suspected the emoji itself. **The plan never mentions silhouette, a render or a skill file.** The owner's first reply from Claude answered all four questions outright; **the owner stopped it** — *"wait i want to make sure jules tries beautify and shaping"* — and the reply sent instead gives only the engine facts, marked `[CODE]`, and hands the design back with `shaping`'s steps as what Jules must show. | **Asks before building: a pass** (`[MEASURED]`). **Found the craft unprompted: no** (`[MEASURED]` on the plan) — so from here, measure 3 measures whether it *follows* a skill it was pointed at twice, not whether it *finds* one. **What it cost the owner:** one catch, and the catch was his — the session nearly spent the measure by answering the design for it. |
+
 Chosen because it is small, self-contained, already diagnosed down to the file, judged by looking, and
 it is beautify-and-shape work — the owner's own example. **What it measures:**
 
@@ -110,6 +137,10 @@ Hypotheses worth testing, **all `[UNTESTED]`, none of them a conclusion:**
   the runs. The fairest comparison there is, and the only one that controls for the task.
 - **Complementary lanes.** If Jules turns out strong at contained, well-specified tickets and weaker where
   the crew's planning is needed, then Claude plans and Jules builds — the split this study exists to find.
+- **What independence is worth.** The same issue as a **single-agent crew pass**
+  (`docs/CREW-FOR-ANY-AGENT.md` §3) and as a **real Claude crew run**. If the single pass is as good,
+  the subagents are ceremony; if it misses what the crew catches, we know what they are for. The one
+  question in this study that cannot be settled by argument.
 - **Cross-review.** One agent reviews the other's PR against `AGENTS.md`. Two readers who fail
   differently catch more than one who fails the same way twice — which is the human-team argument the
   owner made, applied literally.
@@ -127,6 +158,7 @@ between impressions:
 | did its evidence hold up — real output, real renders, citations that resolve | re-running what it quoted |
 | did it find what the brief got wrong | the run file's own "what I found wrong" |
 | what it cost | the run file's token column — measured or estimated, and it must say which (`docs/RUNS.md` §3½) |
+| **what it cost the OWNER** | how many tasks he had to start, read and decide between by hand. A crew that runs itself spends tokens; a crew he has to run as separate tasks spends his attention. Both are costs, and only one of them shows in a token count |
 | did the owner accept it | `accepted` / `rejected` — **his two words alone** (`docs/RUNS.md`) |
 
 ---
