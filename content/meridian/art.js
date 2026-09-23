@@ -2454,7 +2454,7 @@ function casaRoof2D(sx,sy){
    casa face beside this tile? Inside, the neighbours are `#` and the answer is 0 — the engine's
    own door, not one pixel changed. This is also why the seam takes a function: a door glyph is
    not a place, and only the pack knows which of its doorways has a house on top of it. */
-const CASA_FACE="▩▨▦";
+const CASA_FACE="▩▨▦◫";
 const casaRoofOver=(x,y)=>{const w=CW(),r=w&&w.rows&&w.rows[y];
   if(!r||x===undefined)return false;
   const L=r[x-1],R=r[x+1];
@@ -2505,6 +2505,29 @@ TILEART["▩"]=rc=>{const{sx,sy}=rc;                                   /* the wi
   ctx.fillStyle="#B4633A";ctx.fillRect(sx+13,sy+21,6,4);             /* the pot, thrown, standing on it */
   ctx.fillStyle="#C9754A";ctx.fillRect(sx+12.4,sy+20.4,7.2,1.4);     /* its rim */
   ctx.fillStyle="#5F8A42";[[12.6,17.6,3.4,3.4],[15.4,16.8,3.6,4.2],[17.6,18,3.2,3]].forEach(q=>ctx.fillRect(sx+q[0],sy+q[1],q[2],q[3]));};
+TILEART["◫"]=rc=>{const{sx,sy}=rc;                                   /* the barbería window */
+  /* Like ▩ but reads as a barbershop: the mirror inside, the photo strip, the pole on the wall */
+  casaBase(sx,sy);
+  ctx.fillStyle="#5C4029";ctx.fillRect(sx+6,sy+10,20,16);            /* the reveal, in shadow */
+  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+7,sy+11,18,14);            /* the frame */
+  ctx.fillStyle="#A9C6E0";ctx.fillRect(sx+9,sy+13,14,10);            /* the glass */
+  ctx.fillStyle="#88B2D4";ctx.fillRect(sx+10,sy+14,12,8);            /* the mirror */
+  ctx.fillStyle="#C8DCEE";ctx.fillRect(sx+10.5,sy+14.5,4,2);         /* its reflection */
+  ctx.fillStyle="#FFF";ctx.fillRect(sx+11,sy+20,8,2);                /* the photo strip taped down */
+  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+15,sy+13,2,10);            /* the bar down the middle */
+  ctx.fillStyle=CASA_SILL;ctx.fillRect(sx+4,sy+9,24,2);              /* the cast lintel */
+  ctx.fillStyle=CASA_SILL;ctx.fillRect(sx+4,sy+25,24,2.2);           /* the sill */
+  ctx.fillStyle="rgba(0,0,0,.32)";ctx.fillRect(sx+4,sy+27.2,24,1.2); /* the shadow it throws */
+
+  /* The pole: stands proud of the wall, so it breaks the top-down outline.
+     Drawn on the left side (x=3) of the tile so it sits between the door and the window. */
+  ctx.fillStyle="#A8A8A8";ctx.fillRect(sx+2,sy+13,5,2);              /* bracket */
+  ctx.fillStyle="#FFF";ctx.fillRect(sx+1.5,sy+14,6,10);              /* glass body */
+  ctx.fillStyle="#D94040";ctx.fillRect(sx+1.5,sy+15,6,2);            /* red stripe */
+  ctx.fillStyle="#406CD9";ctx.fillRect(sx+1.5,sy+19,6,2);            /* blue stripe */
+  ctx.fillStyle="#A8A8A8";ctx.fillRect(sx+1,sy+13,7,1.5);            /* top cap */
+  ctx.fillStyle="#A8A8A8";ctx.fillRect(sx+1,sy+23.5,7,1.5);          /* bottom cap */
+};
 TILEART["▨"]=rc=>{const{sx,sy,x,y}=rc;                               /* the blank wall, with a lamp */
   /* A blank wall is where a house keeps its fittings: the lamp on its bracket, and the meter with
      its conduit running down to the ground. Nothing says "somebody pays a bill here" faster.
@@ -2543,6 +2566,7 @@ Object.assign(TILEMETA,{
   "▦":{lift:13,kind:"facade"},
   "▩":{lift:13,kind:"facade"},
   "▨":{lift:13,kind:"facade"},
+  "◫":{lift:13,kind:"facade"},
 });
 
 /* ---------- THE CASITA IN THREE DIMENSIONS — a house, not a box wearing a drawing ----------
@@ -2600,7 +2624,7 @@ const casaFront=(x,y)=>{const w=CW(),free=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy
 const casaMeterHere=(x,y)=>{const w=CW(),ry=casaFront(x,y),
   ax=Math.round(Math.cos(ry)),az=Math.round(-Math.sin(ry)),
   r=w&&w.rows&&w.rows[y+az],g=r&&r[x+ax]!==undefined?r[x+ax]:null;
-  return !(g!==null&&("▩▨▦".indexOf(g)>=0||(typeof DOORSET!=="undefined"&&DOORSET.has(g))));};
+  return !(g!==null&&(CASA_FACE.indexOf(g)>=0||(typeof DOORSET!=="undefined"&&DOORSET.has(g))));};
 /* THE SHELL EVERY CASA FACE SHARES — plinth, wall, ring beam, vigas, eave and teja. Built once,
    here, because that is what makes three tiles one building: the courses are on a pitch that
    divides the tile exactly, so a barrel run carries THROUGH the join, and the roof carries over
@@ -2609,7 +2633,7 @@ const casaShell=(g,x,y,ry)=>{
   const WH=casaWH(g),wall=g==="▨"?"#BE9A72":CASA_WALL,P=[];
   const w=CW(),at=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return r&&r[gx]!==undefined?r[gx]:null;};
   const ax=Math.round(Math.cos(ry)),az=Math.round(-Math.sin(ry));  /* the mesh's own +x, in world steps */
-  const isCasa=c=>c!==null&&"▩▨▦".indexOf(c)>=0;
+  const isCasa=c=>c!==null&&CASA_FACE.indexOf(c)>=0;
   const isDoor=c=>c!==null&&typeof DOORSET!=="undefined"&&DOORSET.has(c);
   const gE=at(x+ax,y+az),gW=at(x-ax,y-az);
   const ovE=isDoor(gE)?0.5:isCasa(gE)?0:0.07,ovW=isDoor(gW)?0.5:isCasa(gW)?0:0.07;
@@ -2694,6 +2718,29 @@ TILEART_MESH["▩"]=({x,y})=>{const ry=casaFront(x,y),P=casaShell("▩",x,y,ry),
    and the meter with its conduit running down to the plinth. Three stand on Calle Dos — the east
    end of Doña Tencha's, and both cheeks of El Portero's site hut, which is the same small building
    with a clipboard in it. */
+TILEART_MESH["◫"]=({x,y})=>{const ry=casaFront(x,y),P=casaShell("◫",x,y,ry),F=0.5;
+  P.push({s:"box",x:0,y:0.49,z:F+0.006,w:0.62,h:0.52,d:0.012,c:"#4A3220"});     /* the opening, in shadow */
+  P.push({s:"box",x:0,y:0.49,z:F+0.014,w:0.56,h:0.44,d:0.010,c:CASA_TRIM});     /* the frame */
+  [-0.143,0.143].forEach(px=>{
+    P.push({s:"box",x:px,y:0.49,z:F+0.022,w:0.235,h:0.385,d:0.010,c:"#A9C6E0"});     /* the two lights */
+    P.push({s:"box",x:px,y:0.49,z:F+0.026,w:0.2,h:0.3,d:0.006,c:"#88B2D4"});         /* the mirror inside */
+    P.push({s:"box",x:px-0.05,y:0.565,z:F+0.030,w:0.06,h:0.08,d:0.006,c:"#C8DCEE"}); /* mirror reflection */
+    P.push({s:"box",x:px+0.06,y:0.37,z:F+0.028,w:0.12,h:0.06,d:0.006,c:"#FFF"});     /* photo strip */
+  });
+  P.push({s:"box",x:0,y:0.49,z:F+0.030,w:0.035,h:0.41,d:0.012,c:CASA_TRIM});    /* the bar down the middle */
+  P.push({s:"box",x:0,y:0.745,z:F+0.048,w:0.74,h:0.065,d:0.11,c:CASA_SILL});    /* the cast lintel */
+  P.push({s:"box",x:0,y:0.243,z:F+0.052,w:0.76,h:0.048,d:0.125,c:CASA_SILL});   /* THE SILL */
+  P.push({s:"box",x:0,y:0.204,z:F+0.042,w:0.76,h:0.030,d:0.11,c:"#4A3220"});    /* shadow under it */
+
+  /* The barber pole on the left wall */
+  P.push({s:"box",x:-0.32,y:0.49,z:F+0.08,w:0.03,h:0.06,d:0.08,c:"#A8A8A8"});   /* bracket */
+  P.push({s:"cyl",x:-0.32,y:0.49,z:F+0.12,r:0.04,h:0.28,c:"#FFF"});             /* glass body */
+  P.push({s:"cyl",x:-0.32,y:0.56,z:F+0.12,r:0.042,h:0.05,c:"#D94040"});         /* red stripe */
+  P.push({s:"cyl",x:-0.32,y:0.42,z:F+0.12,r:0.042,h:0.05,c:"#406CD9"});         /* blue stripe */
+  P.push({s:"cyl",x:-0.32,y:0.64,z:F+0.12,r:0.05,h:0.04,c:"#A8A8A8"});          /* top cap */
+  P.push({s:"cyl",x:-0.32,y:0.34,z:F+0.12,r:0.05,h:0.04,c:"#A8A8A8"});          /* bottom cap */
+
+  return meshTurned(P,ry);};
 TILEART_MESH["▨"]=({x,y})=>{const ry=casaFront(x,y),P=casaShell("▨",x,y,ry),F=0.5;
   /* the same fittings the 2D face draws, and by the same rule: one meter per house (casaMeterHere),
      a lamp on every blank wall, and no two brackets hung at exactly the same height. */
@@ -2808,7 +2855,7 @@ const BARBER_ROOM={
 BUILDTPL.barberia={
   id:"barberia", size:{w:3,h:2},
   parts:[
-    {id:"shell", tiles:[[0,0,"▩"],[0,1,"▩"],[0,2,"▩"],[1,0,"."],[1,1,"."],[1,2,"."]]},
+    {id:"shell", tiles:[[0,0,"◫"],[0,1,"◫"],[0,2,"◫"],[1,0,"."],[1,1,"."],[1,2,"."]]},
     {id:"door", tiles:[[0,1,"⌂"]], link:{door:[0,1],landing:[5,6],exit:[5,7],interior:BARBER_ROOM}},
   ],
 };
