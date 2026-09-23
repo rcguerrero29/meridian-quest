@@ -51,6 +51,23 @@ credential at all**: work from a fork, open pull requests, let the owner merge (
 
 ## 2 · Claim before you start, or you are working on somebody else's job
 
+**When this applies, and until 2026-09-23 it never had.** The lock is for work on an **issue**, when
+more than one agent can be in this repository at the same time: crew mode `on` (`docs/CREW-MODE.md`),
+or **any time a second AI — Jules, Codex, anybody — has been given access.** A Claude session working
+the owner's own words live in a chat is not working an issue and has nothing to claim. That is why no
+one ever applied one: crew mode had been `off`, every session worked the owner's chat, and neither
+`taken: claude` nor `taken: jules` existed as a label. **The first `taken:` anybody applies creates it.**
+This section used to state the lock with no condition at all while `CLAUDE.md` scoped it to crew mode —
+two contracts saying different things, which `CLAUDE.md` itself calls a bug. The owner asked why it had
+been skipped; this paragraph is the answer, and both files now say the same thing.
+
+**It is a signal, never a gate, and that is on purpose.** Nothing automated may read this label and act
+on it — not CI, not a workflow, not a bot. `docs/story/el-changarrito.md` R4a rates gating automation
+on a label **Critical**: it is prompt injection by another door, because whoever can set a label would
+then decide what runs. The lock is enforced by being **seen** — the owner's town draws it as a sash on
+whoever holds the issue. If you think a CI check would make it stronger: it would make it a hole. The
+session that wrote this paragraph thought exactly that first, and `test/leaves.js` stopped it.
+
 The lock is a **GitHub label on the issue**, applied *before* the branch exists:
 
 ```
@@ -81,6 +98,10 @@ claude/<issue>-<slug>        codex/<issue>-<slug>        <you>/<issue>-<slug>
 
 **Never push to, rebase, amend or force-push a branch in another agent's namespace.** If you need
 something from it, merge it into yours.
+
+A Claude Code session in the cloud is given its branch name by its harness — `claude/<words>-<hex>` —
+and cannot choose it. That is fine for work that is not an issue. **Working an issue, use the form
+above,** so the branch name says which issue it is for.
 
 ## 4 · Before you open the PR — check what else is in flight
 

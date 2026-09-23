@@ -5,7 +5,25 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
-### ⇢ 2026-09-23, latest — El Horno's second verb, and the reader's canvas became somewhere a MECHANIC can live. `mq-v197`, `horno-v2`.
+### ⇢ 2026-09-23, later — a second AI is coming, and the owner wants to study the team
+
+**Jules is about to work this repository**, and the owner wants it studied: *"we want to study how
+different agents perform, to explore and complement abilities- its done with humans and leads to great
+team work."* The study is `docs/AGENT-STUDY.md`; its evidence is `docs/runs/`, whose IDs have named
+their agent since 2026-09-20.
+
+**Getting it ready turned up four things, all fixed and merged or merging:** `AGENTS.md` §5½ is a
+routing table so any agent can find the skills (a pointer, never a copy); §2's claim lock had never
+once been applied and contradicted `CLAUDE.md` about when it applies — now stated, and stated as a
+signal the town draws and never a gate, because R4a forbids automation on a label; a person in this
+engine may now be two things (a quest AND a service), which unblocked El Espejo; and Yaz carries El
+Espejo's quests, a casting decision now rather than a workaround.
+
+**Experiment 1 is Jules on #241** (the barbería looks like a house). Its brief asks it to run
+`node test/smoke.js` FIRST and report what printed — whether it can run headless Chromium at all
+decides whether it can keep §5, and nobody knows yet. **The owner merges Jules' first PR himself.**
+
+### ⇢ 2026-09-23, earlier — El Horno's second verb, and the reader's canvas became somewhere a MECHANIC can live. `mq-v197`, `horno-v2`.
 
 Owner: *"are you planning some kneading in there? would be cool"*, then the correction that decided the
 whole design — *"i know the time seems strange but **kneading could be therapeutic**"* — then the build
