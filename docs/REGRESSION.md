@@ -344,6 +344,31 @@ field, `hRise`/`hSpread` flattened, `t3Invalidate` removed from the settle, the 
 — and every one printed a sentence naming what a player would lose. The plants ran in a copy outside
 the repository, on a tree whose HEAD is recorded beside them.
 
+### And the plant that WALKED STRAIGHT PAST all of it — the seventh, run after the other six had fired
+
+The six plants above each printed a sentence a person would say. A seventh was run for completeness —
+**the dough bench deleted from the map**, `"w.m.p...w"` back to `"w...p...w"` — and `test/horno.js` came
+back **green**, and printed its whole pass line, the one that says *"you walk to the other bench, push the
+dough with a real drag, and it comes together WHERE THE HAND WENT."* There was no bench.
+
+**Why, and every pack inherits this.** `READS` declares a COORDINATE; `readAt` matches world, x, y and
+whether the document exists, and **never asks what is standing there.** So the mark floats over bare
+floor, the Read button lights, the card opens — and the knead's state lives in the pack (`H_MASA`) and
+reaches the tray through `hRise`/`hSpread`, neither of which is a tile. Delete the object and nothing any
+of the eight assertions could see had changed.
+
+**This is not a proxy. It is a shape this register did not have a name for: every assertion was about
+BEHAVIOUR and not one was about PRESENCE.** A proxy reads the wrong noun; this read the right nouns and
+there was simply no assertion that the thing existed. It is the same hole as `docs/POSTMORTEM.md` §13t —
+five fixes about how well a window read, and the window was never drawn — arriving from the other end:
+there, nobody asked whether it was on the paper; here, nobody asked whether it was in the room.
+
+**The question that catches it, and it is one line:** *delete the OBJECT, not the behaviour — does
+anything go red?* Section 2c¼ is that question as a guard: every read this pack declares must stand on a
+glyph with a mesh in `TILEART` and a place in `SOLIDX`, checked through the registries rather than a list
+of letters typed into the test. The engine's own sentence beside `readAt` was already the rule — *"a thing
+you can read is a place"* — and it had never been anything but prose.
+
 **One number in that lane belongs here too, because a guard did not catch it and a stash did.** The
 knead had to be behaviour-identical for a player who never finds the dough bench, and the only thing
 that proved it was running the suite with the whole feature stashed and diffing its four camera

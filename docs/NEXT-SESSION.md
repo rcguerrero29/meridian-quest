@@ -30,7 +30,17 @@ pointer — `touch-action:none`, a grab cursor, a place in the tab order. Opt-in
 is thirty-odd pictures you scroll PAST. Written up as `docs/NEW-WORLD.md` §9.3a, which is the four things
 a second world needs before it builds a mechanic on a canvas.
 
-**Three findings worth carrying.** (1) **A pixel count in a comment was copied forward by three sessions
+**The finding of the day, and it is the one to carry.** Six plants against the knead each printed a
+sentence a person would say. A seventh — **the dough bench deleted from the map entirely** — came back
+**GREEN and printed the pass line claiming a player walks to that bench and pushes the dough.** `READS`
+declares a coordinate and `readAt` never asks what is STANDING there, and the knead's state and its
+effect on the bread are both pack state, so nothing on the path from thumb to bread touches the tile.
+**Every assertion was about BEHAVIOUR and none about PRESENCE.** It is fixed and guarded (§2c¼: every
+read must stand on a glyph with a mesh and a place in SOLIDX), and the rule is one line for every
+future guard: **the plants you think of are plants against the thing WORKING — add one against the
+thing EXISTING.** `docs/POSTMORTEM.md` §13v.
+
+**Three more worth carrying.** (1) **A pixel count in a comment was copied forward by three sessions
 and the third did arithmetic on it** — `docs/POSTMORTEM.md` §13u. Re-take a number before you build on it;
 `git stash push -- <files>` gives you the before and the after from the same binary on the same tree.
 (2) **A route that leans on where a PERSON stands is not a proof.** Mari moved one tile west (she was

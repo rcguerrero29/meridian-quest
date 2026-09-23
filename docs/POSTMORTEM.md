@@ -776,6 +776,28 @@ two minutes, and it gives you the before AND the after from the same binary on t
 what finally produced 224 / 149 / 915 / 49 on both sides of the stash and proved the knead
 behaviour-identical at rest, which no amount of reading the comment could have told anybody.
 
+### 13v · Eight assertions about what the dough DID, and not one about whether it was there (the calling session)
+
+**Believed:** the knead was guarded. Six plants had been written and fired — the pointer seam, the
+reader's width, the field spreading, the effect on the bread, the re-bake, the way out — and each printed
+a sentence a person would say. **True:** a seventh plant, run only for completeness, **deleted the dough
+bench from the map** and the suite came back green and printed its own pass line claiming a player walks
+to that bench and pushes the dough. **Cost:** caught before it shipped, at the cost of one more plant —
+but the pass sentence was already written, already quoted in a run file, and would have been read by the
+owner as a measurement.
+
+**The mechanism, and it belongs to the ENGINE and not to this pack.** `READS` declares a coordinate and
+`readAt` matches world, x and y; it never asks what tile is standing there. So the read mark, the Read
+button and the whole card work perfectly over bare floor. The knead's state is pack state and its effect
+on the bread goes through two scalars, so nothing on the path from the player's thumb to the bread
+touches the tile at all. **Every assertion was about behaviour. None was about presence. Both readings
+were correct and the room was empty.**
+
+**Rule:** the plants you think of are plants against the thing WORKING. Add one against the thing
+EXISTING — delete the object, not the logic — and ask whether anything goes red. This is
+[§13t](#13t) arriving from the other end: there, five fixes measured how well a window read and the
+window had never been drawn.
+
 ## How to add to this file
 
 Same discipline as every register here: **it grows from what happened, never from imagination.** An

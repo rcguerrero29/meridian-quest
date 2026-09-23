@@ -372,6 +372,50 @@ async function played() {
     else if (t3.glyph !== g1) bad.push('the 3D scene is still holding a "' + t3.glyph + '" at the tray\'s tile while every other camera draws a "' + g1 + '".');
     else console.log('  the 3d camera: re-baked, and the mesh standing at the tray is labelled "' + t3.glyph + '"');
 
+    /* ───────── 2c¼ · A THING YOU CAN READ IS A PLACE, SO THE PLACE HAS TO BE THERE ─────────
+
+       THIS CHECK EXISTS BECAUSE A PLANT WALKED STRAIGHT PAST EVERYTHING BELOW IT. On 2026-09-23 the
+       dough bench was deleted from the map — `"w.m.p...w"` back to `"w...p...w"` — and `test/horno.js`
+       came back GREEN and printed its whole pass sentence, the one that says you walk to the other
+       bench and push the dough. Six other plants that day each printed a sentence a person would say;
+       this one printed a lie.
+
+       WHY IT GOT THROUGH, and it is worth stating plainly because every pack inherits it: READS
+       declares a COORDINATE, and readAt (engine.js, grep `const readAt=`) matches on world/x/y and
+       whether the document exists. It never asks what is STANDING there. So the read mark floats over
+       bare floor, the Read button lights, the card opens — and the knead's own state lives in the
+       pack (H_MASA) and reaches the tray through hRise/hSpread, neither of which is a tile. Every
+       assertion below was about the dough's BEHAVIOUR and not one was about the dough's PRESENCE, so
+       deleting the object changed nothing any of them could see.
+
+       The engine's own rule, printed beside readAt: "a thing you can read is a place." This is that
+       sentence as a guard — every read this pack declares has to stand on something that is drawn as
+       an object, checked through TILEART's mesh entry rather than a list of letters typed here. */
+    const reads = await pg.evaluate(() => ((typeof READS !== 'undefined' && READS) || []).map(r => {
+      let g = null; try { g = WORLDS[r.world].grid[r.y][r.x]; } catch (e) {}
+      return { x: r.x, y: r.y, doc: r.doc, g: g,
+               mesh: !!(g && typeof TILEART !== 'undefined' && TILEART[g] && TILEART[g].mesh),
+               solid: !!(g && typeof SOLIDX !== 'undefined' && SOLIDX.indexOf(g) >= 0) };
+    }));
+    if (!reads.length) bad.push('this pack declares no READS at all, so the two cards below cannot be opened by anybody and every check after this one is measuring nothing.');
+    reads.forEach(r => {
+      if (!r.g) bad.push('the read "' + r.doc + '" is declared at (' + r.x + ',' + r.y + ') and there is no tile there at all.');
+      else if (!r.mesh) bad.push('the read "' + r.doc + '" stands at (' + r.x + ',' + r.y + ') on a "' + r.g + '", which has no mesh in TILEART — so in 3D the mark hangs over an empty piece of floor and a player walks up to nothing. The engine\'s own note beside readAt is "a thing you can read is a place"; a coordinate with no object on it is not a place. (READS matches world/x/y and never asks what is standing there, which is why nothing else in this file can see it.)');
+      else if (!r.solid) bad.push('the read "' + r.doc + '" stands at (' + r.x + ',' + r.y + ') on a "' + r.g + '" that is not in SOLIDX, so a player can walk through the bench.');
+    });
+    /* AND THE REGISTRY IS NOT THE ROOM. TILEART[g].mesh says a painter was REGISTERED; it does not say
+       the painter returned anything, and `mesh:()=>[]` would satisfy it while the bench stayed empty —
+       the same distance between a declaration and a thing that the plant above walked through. So the
+       height is read off the BAKED scene, from the props 2b already collected (`o.t3Top`, the tallest
+       ink in the thing itself), which is the room and not a table. */
+    if (!scale.err && scale.props) reads.forEach(r => {
+      if (!r.mesh) return;                                    /* already reported above, with a better sentence */
+      const stood = scale.props.find(q => q.x === r.x && q.y === r.y);
+      if (!stood) bad.push('the read "' + r.doc + '" stands at (' + r.x + ',' + r.y + ') on a "' + r.g + '" that registers a mesh in TILEART, and the baked 3D scene is holding nothing at that tile at all.');
+      else if (!(stood.top > 0)) bad.push('the read "' + r.doc + '" stands at (' + r.x + ',' + r.y + ') on a "' + r.g + '" whose mesh baked to a height of ' + stood.top + ', so the painter is registered and draws nothing. A registered painter is a declaration; this is the room.');
+    });
+    if (reads.length && !bad.length) console.log('  every read stands on something that is really there: ' + reads.map(r => '"' + r.doc + '" on a "' + r.g + '" at (' + r.x + ',' + r.y + ')').join(', '));
+
     /* ───────── 2c½ · THE KNEAD. A STROKE, AND WHERE THE STROKE WENT ─────────
 
        This is the second verb and it is the one that could not be checked by asking whether a frame
