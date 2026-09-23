@@ -110,6 +110,10 @@ Hypotheses worth testing, **all `[UNTESTED]`, none of them a conclusion:**
   the runs. The fairest comparison there is, and the only one that controls for the task.
 - **Complementary lanes.** If Jules turns out strong at contained, well-specified tickets and weaker where
   the crew's planning is needed, then Claude plans and Jules builds — the split this study exists to find.
+- **What independence is worth.** The same issue as a **single-agent crew pass**
+  (`docs/CREW-FOR-ANY-AGENT.md` §3) and as a **real Claude crew run**. If the single pass is as good,
+  the subagents are ceremony; if it misses what the crew catches, we know what they are for. The one
+  question in this study that cannot be settled by argument.
 - **Cross-review.** One agent reviews the other's PR against `AGENTS.md`. Two readers who fail
   differently catch more than one who fails the same way twice — which is the human-team argument the
   owner made, applied literally.

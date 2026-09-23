@@ -159,9 +159,10 @@ method written "for the other AI" drifts within a week, and then two agents work
 
 **Three of this project's skills do not transfer, and pretending otherwise is worse than skipping
 them.** `crew-fix`, `meeting-of-da-minds` and the planner skills (`don-guero`, `nacho`) spawn Claude
-subagents; you cannot convene them. You CAN read them as method: `crew-fix`'s loop — ground the facts,
-write the failing test, show what done looks like, fix, review your own diff — is a sound process for
-one agent working alone. The personas in `.claude/agents/` are readable reference, not callable.
+subagents; you cannot convene them. **You can get close, and [`docs/CREW-FOR-ANY-AGENT.md`](docs/CREW-FOR-ANY-AGENT.md)
+is how**: the personas in `.claude/agents/` become lenses you work the problem through one at a time,
+the loop transfers whole, and the one part that does not — independence, the reason nineteen lenses are
+worth more than one — is mostly recovered by writing every lens's position before reading any other's.
 
 **And the rule the craft skills put first is the one most likely to be out of your reach:** *render
 it at the size it is really seen, and look, before you reason about it.* This project renders through
