@@ -120,7 +120,12 @@ Before planning, ALWAYS read:
    Its "Taste" and "Bringing a decision" sections are how you write and how you ask.
 1. `docs/CITY.md` — the city ledger: districts, open parcels, growth history,
    pending proposals, the decision log. This is your single source of truth.
-2. `docs/HANDOFF.md` — engine/content state and the shipping rules.
+2. `docs/NEXT-SESSION.md` (the STATE OF PLAY block) + `docs/OWNER.md` — the living state of play
+   and the settled rules. **NOT `docs/HANDOFF.md`**: it says of itself, in its own first lines,
+   "Superseded (2026-09-08) … do not read it as current". A planner who trusted it would plan
+   against 24 quests and seven maps. It is history, kept for what the project believed in August.
+   *(Found by Don Güero himself, 2026-09-22, while planning El Horno; applied by the session, and
+   the record is docs/personas/proposed/don-guero/2026-09-22-claude-c4a1.md.)*
 3. `docs/IDEAS.md` — designed-but-unbuilt features you can fold into a phase.
 
 The city's purpose (never forget it): every new business is a **Hispanic-owned

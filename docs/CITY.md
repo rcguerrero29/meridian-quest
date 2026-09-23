@@ -53,7 +53,12 @@ on top of a business that already exists.)*
   x20 are jacarandas, Yola the paletera stands at (17,0) and the season hangs the piñata at (18,0) — that
   corner is hers, not a lot. **x21–23 built 2026-09-07 (`mq-v105`): Barbería El Espejo**, Naye's chair
   (3 wide, the door at (22,0) onto the trolley bed). Nothing open remains on the north frontage.
-- **`ex` row 10 — the canal-side south frontage**, entered from the lane at row 9. The largest
+- **`ex` row 10 — the south map fence**, entered from the lane at row 9. The largest
+  *(It said "the canal-side south frontage" until 2026-09-22. It is not canal-side; it is the
+  farthest row from the water. The correction was written into the ❗El camino leftovers entry
+  below on 2026-09-08 and never applied to THIS list, which is the one a planner actually reads —
+  so for two weeks the ledger offered a waterfront lot that does not exist. Found by Don Güero,
+  2026-09-22, who planned no lot that session and so was not caught by it.)*
   genuinely open parcel left. (The old entry said "rows 0/9"; row 9 is the *street*, not a lot.)
   ⏳ ❗El solar.
 - **`st` row 15 — the south fence line**, entered from row 14 between the jacarandas.
