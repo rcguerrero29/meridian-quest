@@ -45,8 +45,8 @@ const field = (src, k) => {
   const m = new RegExp('^' + k.replace(/ /g, '\\s') + ':[ \\t]*(.*)$', 'im').exec(src);
   return m ? m[1].trim() : null;
 };
-const section = (src, h) => {
-  const m = new RegExp('^##[ \\t]+' + h + '[ \\t]*$([\\s\\S]*?)(?=^##[ \\t]|\\Z)', 'im').exec(src);
+const section = (src, h) => {  /* end of input is (?![\s\S]) — JavaScript has no \Z */
+  const m = new RegExp('^##[ \\t]+' + h + '[ \\t]*$([\\s\\S]*?)(?=^##[ \\t]|(?![\\s\\S]))', 'im').exec(src);
   return m ? m[1] : null;
 };
 /* prose with every template placeholder and every blockquote marker taken out — so a run that
@@ -221,6 +221,10 @@ function selftest() {
     ['a task row with a blank tokens cell', mk('tkb', { '2026-09-20-claude-a3f1.md': good.replace('| 12,000 |', '|  |') }), 1],
     ['a task row with tokens but no method', mk('tkm', { '2026-09-20-claude-a3f1.md': good.replace('| session usage delta |', '|  |') }), 1],
     ['a task row with unknown tokens AND a reason is green', mk('tku', { '2026-09-20-claude-a3f1.md': good.replace('| 12,000 | session usage delta |', '| unknown: session ended first | unknown: session ended first |') }), 0],
+    /* \Z is not end-of-input in JavaScript: it is the letter Z, and the 'i' flag makes it any z, so every section
+       was cut at its first "z" (a handoff from a session in another project found it, 2026-09-23). */
+    ['a task row with a "z" in it is green', mk('z1', { '2026-09-20-claude-a3f1.md': good.replace('| the thing |', '| the real size |') }), 0],
+    ['acceptance criteria with a "z" before the checkbox is green', mk('z2', { '2026-09-20-claude-a3f1.md': good.replace('- [ ] open the map and look', 'sized for a phone:\n- [ ] open the map and look') }), 0],
   ];
   const mkc = (name, files) => { const d = path.join(base, name, 'docs', 'council', '2026-09-20-topic');
     fs.mkdirSync(d, { recursive: true }); Object.entries(files).forEach(([f, s]) => fs.writeFileSync(path.join(d, f), s));
