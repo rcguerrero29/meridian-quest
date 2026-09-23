@@ -3689,7 +3689,7 @@ const CANDIDATES = [
         tiles.forEach(d => {
           const row = WORLDS[d.wid].rows[d.y];
           const nb = [row[d.x - 1], row[d.x + 1]].filter(c => c !== undefined);
-          const house = nb.some(c => '▩▨▦◫'.indexOf(c) >= 0);
+          const house = nb.some(c => (typeof CASA_FACE !== 'undefined' ? CASA_FACE : '▩▨▦◫').indexOf(c) >= 0);
           if (d.shipped !== d.plain) { roofed.push(d.wid + ' ' + d.x + ',' + d.y);
             if (!house) problems.push('the door at ' + d.x + ',' + d.y + ' in "' + d.wid + '" has a course of roof tiles painted across the top of it and there is no house beside it — what stands either side of it is "' + nb.join('" and "') + '". Inside a room that is a strip of terracotta roof over a living-room doorway, and it is the same door glyph as the front door only because a home and the room behind it share one'); }
           else { plain.push(d.wid + ' ' + d.x + ',' + d.y);

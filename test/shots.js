@@ -28,6 +28,12 @@ const CAND=[process.env.CHROMIUM_PATH,'/opt/pw-browsers/chromium_headless_shell-
   await pg.waitForTimeout(400);
   // open the whole city so storefronts exist
   await pg.evaluate(()=>{ if(typeof CHAPTERS!=='undefined'&&CHAPTERS.length&&typeof applyGrowth==='function'){CHAPTERS[0].quests.forEach(i=>done.add(i)); chSeen=1; applyGrowth();} });
+  await pg.evaluate(()=>{
+    const toast = document.getElementById('toast');
+    if (toast) toast.style.display = 'none';
+    /* Also ensure tram is out of frame by moving tram progress */
+    if (typeof TRAM !== 'undefined') { TRAM.t = -100000; }
+  });
   const SPOTS = JSON.parse(fs.readFileSync(path.resolve(__dirname,path.basename(arg('--spots','spots.json'))),'utf8'));
   const OUT=path.resolve(__dirname,'..','shots');fs.mkdirSync(OUT,{recursive:true});
   /* --cams: shoot EVERY spot in all four cameras instead of the one it names.

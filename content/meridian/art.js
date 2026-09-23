@@ -2519,14 +2519,14 @@ TILEART["◫"]=rc=>{const{sx,sy}=rc;                                   /* the ba
   ctx.fillStyle=CASA_SILL;ctx.fillRect(sx+4,sy+25,24,2.2);           /* the sill */
   ctx.fillStyle="rgba(0,0,0,.32)";ctx.fillRect(sx+4,sy+27.2,24,1.2); /* the shadow it throws */
 
-  /* The pole: stands proud of the wall, so it breaks the top-down outline.
-     Drawn on the left side (x=3) of the tile so it sits between the door and the window. */
-  ctx.fillStyle="#A8A8A8";ctx.fillRect(sx+2,sy+13,5,2);              /* bracket */
-  ctx.fillStyle="#FFF";ctx.fillRect(sx+1.5,sy+14,6,10);              /* glass body */
-  ctx.fillStyle="#D94040";ctx.fillRect(sx+1.5,sy+15,6,2);            /* red stripe */
-  ctx.fillStyle="#406CD9";ctx.fillRect(sx+1.5,sy+19,6,2);            /* blue stripe */
-  ctx.fillStyle="#A8A8A8";ctx.fillRect(sx+1,sy+13,7,1.5);            /* top cap */
-  ctx.fillStyle="#A8A8A8";ctx.fillRect(sx+1,sy+23.5,7,1.5);          /* bottom cap */
+  /* The pole: stands off the wall, breaking the top-down outline.
+     Drawn on the right side of the window tile, putting it right beside the door. */
+  ctx.fillStyle="#A8A8A8";ctx.fillRect(sx+26,sy+16,12,2);             /* bracket pushing it off the wall */
+  ctx.fillStyle="#FFF";ctx.fillRect(sx+34,sy+13,6,10);               /* glass body */
+  ctx.fillStyle="#D94040";ctx.fillRect(sx+34,sy+14,6,2);             /* red stripe */
+  ctx.fillStyle="#406CD9";ctx.fillRect(sx+34,sy+18,6,2);             /* blue stripe */
+  ctx.fillStyle="#A8A8A8";ctx.fillRect(sx+33.5,sy+12,7,1.5);         /* top cap */
+  ctx.fillStyle="#A8A8A8";ctx.fillRect(sx+33.5,sy+22.5,7,1.5);       /* bottom cap */
 };
 TILEART["▨"]=rc=>{const{sx,sy,x,y}=rc;                               /* the blank wall, with a lamp */
   /* A blank wall is where a house keeps its fittings: the lamp on its bracket, and the meter with
@@ -2732,13 +2732,18 @@ TILEART_MESH["◫"]=({x,y})=>{const ry=casaFront(x,y),P=casaShell("◫",x,y,ry),
   P.push({s:"box",x:0,y:0.243,z:F+0.052,w:0.76,h:0.048,d:0.125,c:CASA_SILL});   /* THE SILL */
   P.push({s:"box",x:0,y:0.204,z:F+0.042,w:0.76,h:0.030,d:0.11,c:"#4A3220"});    /* shadow under it */
 
-  /* The barber pole on the left wall */
-  P.push({s:"box",x:-0.32,y:0.49,z:F+0.08,w:0.03,h:0.06,d:0.08,c:"#A8A8A8"});   /* bracket */
-  P.push({s:"cyl",x:-0.32,y:0.49,z:F+0.12,r:0.04,h:0.28,c:"#FFF"});             /* glass body */
-  P.push({s:"cyl",x:-0.32,y:0.56,z:F+0.12,r:0.042,h:0.05,c:"#D94040"});         /* red stripe */
-  P.push({s:"cyl",x:-0.32,y:0.42,z:F+0.12,r:0.042,h:0.05,c:"#406CD9"});         /* blue stripe */
-  P.push({s:"cyl",x:-0.32,y:0.64,z:F+0.12,r:0.05,h:0.04,c:"#A8A8A8"});          /* top cap */
-  P.push({s:"cyl",x:-0.32,y:0.34,z:F+0.12,r:0.05,h:0.04,c:"#A8A8A8"});          /* bottom cap */
+  /* The barber pole on the wall, beside the door, standing off to break the outline */
+  P.push({s:"box",x:0.42,y:0.49,z:F+0.15,w:0.04,h:0.04,d:0.30,c:"#A8A8A8"});    /* long bracket pushing it off the wall */
+  P.push({s:"cyl",x:0.42,y:0.49,z:F+0.32,r:0.05,h:0.38,c:"#FFF"});              /* glass body */
+  P.push({s:"cyl",x:0.42,y:0.69,z:F+0.32,r:0.055,h:0.04,c:"#A8A8A8"});          /* top cap */
+  P.push({s:"cyl",x:0.42,y:0.29,z:F+0.32,r:0.055,h:0.04,c:"#A8A8A8"});          /* bottom cap */
+  /* spiral stripes */
+  for (let i=0; i<4; i++) {
+    const y1 = 0.35 + i*0.08;
+    const y2 = 0.39 + i*0.08;
+    if (y1 < 0.65) P.push({s:"box",x:0.42,y:y1,z:F+0.33,w:0.11,h:0.02,d:0.11,c:"#D94040", ry:Math.PI/4});
+    if (y2 < 0.65) P.push({s:"box",x:0.42,y:y2,z:F+0.33,w:0.11,h:0.02,d:0.11,c:"#406CD9", ry:Math.PI/4});
+  }
 
   return meshTurned(P,ry);};
 TILEART_MESH["▨"]=({x,y})=>{const ry=casaFront(x,y),P=casaShell("▨",x,y,ry),F=0.5;
@@ -2855,7 +2860,7 @@ const BARBER_ROOM={
 BUILDTPL.barberia={
   id:"barberia", size:{w:3,h:2},
   parts:[
-    {id:"shell", tiles:[[0,0,"◫"],[0,1,"◫"],[0,2,"◫"],[1,0,"."],[1,1,"."],[1,2,"."]]},
+    {id:"shell", tiles:[[0,0,"◫"],[0,1,"▩"],[0,2,"▩"],[1,0,"."],[1,1,"."],[1,2,"."]]},
     {id:"door", tiles:[[0,1,"⌂"]], link:{door:[0,1],landing:[5,6],exit:[5,7],interior:BARBER_ROOM}},
   ],
 };
