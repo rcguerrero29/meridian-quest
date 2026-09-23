@@ -1,4 +1,4 @@
-/* EL HORNO — one room, one tray, one verb.
+/* EL HORNO — one room, one bench, one tray. A choice, and a rhythm.
    Owner, 2026-09-22: "theoretically can we use these polygonal art for the cooking game? we can
    try to surprise AJ with a baking option lol" and, when a producer said no to the game half,
    "why no for the game? because we havent built it? we will soon".
@@ -8,6 +8,16 @@
    Meridian nothing and edits none of its files. docs/story/el-changarrito.md §7½ governs a second
    world: it trains no role, carries no curriculum, is never a district of Meridian and never a
    chapter in its story. Nothing here reaches into content/meridian/ at runtime.
+
+   TWO VERBS NOW, and the second one owes everything to the first one not needing it. The tray is
+   full, readable and bakeable from the first second — walk three tiles, press Read, press a shell.
+   Kneading is the other bench and it gates NOTHING: no step of the bake waits on it, it cannot be
+   failed, and it can be left in one press. An action you could skip in a tap and do not is the
+   definition of something done on purpose; an action you must finish is a toll. Owner, 2026-09-22,
+   correcting this session, which had priced it as a wait needing a clock: "i know the time seems
+   strange but kneading could be therapeutic." A wait is time you spend to be allowed something.
+   A rhythm advances per gesture, with no clock anywhere — which is the only shape this pack could
+   take, because it refuses a timer three lines below. See content/horno/docs.js, the `masa` card.
 
    THREE THINGS IT REFUSES BY CONSTRUCTION, and the refusal is the design:
      THE ADDRESSES ARE GREPS AND NOT LINE NUMBERS, and that is not a style choice: this file
@@ -23,7 +33,7 @@
        You may change your mind about the shell colour for ever and lose nothing. */
 const STOREPFX="horno";
 const GAMENAME="El Horno";
-const GAMEV="horno-v1";
+const GAMEV="horno-v2";
 const MAXXP=40;
 const LEVELS=[0];
 const CAMDEF="3d";                       /* the tray is a SHAPE; the shape camera is the one it is for */

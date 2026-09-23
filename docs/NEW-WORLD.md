@@ -741,6 +741,7 @@ Meridian and badly incomplete. The reader renders **thirteen** block kinds
 | `{sel, opts, value, run}` | a dropdown, options optionally grouped by `o.g` | `:2944-2953` |
 | `{form:{fields, submit, cancel, onCancel, run, noFocus}}` | a whole form — `text`, `password`, `area`, `select`, `checks` — every field on one screen beside the paperwork. The reader collects the values and hands them to `run(v)` | `:2954-2975` |
 | `{red}` | a line in red, for what is critical | `:2923` |
+| `{art, aspect, wide, cap, grab}` | **a real canvas the pack draws on**, at 240–560 CSS px — or at its own `wide` width inside its own scroller, for a picture you walk along. `aspect` may be a function of the width. `grab:true` gives that canvas the POINTER: `touch-action:none`, a grab cursor and a place in the tab order | `engine.js`, grep `A DRAWING. The pack draws` and `A PICTURE MAY TAKE THE POINTER` |
 
 And the two that make it composable:
 
@@ -756,6 +757,34 @@ And the two that make it composable:
 kv t q docs` and deliberately **not** `btn sel form red`. So the Copy/Download buttons on any sheet
 silently drop every interactive part. That is correct — a button is not text — but a new world that
 promises "copy this document" has to know its form will not be in the copy.
+
+#### 9.3a · A canvas in the reader is where a MECHANIC goes, and it is the only zoom this engine has
+
+A tile is about 35 screen pixels and `T3CAMD`/`T3CAMH`/`T3FOV` are engine constants no pack can set,
+so **there is no camera a world can pull in with.** The reader's canvas is the answer: 240–560 CSS px
+against that 35, which is seven to sixteen times the linear size for free, and the owner's own words
+for it are printed in the engine beside the code — *"you see tiles/icons from afar but you get close
+and can interact to see it full screen."* A thing whose content is TEXTURE or a GESTURE — dough
+coming together, a seam, a photograph, a wiring diagram — belongs there and cannot work on a tile.
+
+Four things a second world needs to know before it builds one, all of them paid for once already:
+
+1. **Say `grab:true` or lose every vertical drag.** `.dart` carries no `touch-action` rule in either
+   shell, so on a phone a downward swipe on an un-`grab`bed canvas scrolls the sheet. It is opt-in
+   because a wall of pictures you scroll PAST is the commoner case, and an engine that took the
+   pointer from all of them would wall the page off behind them.
+2. **Map the pointer with `getBoundingClientRect()`, never `offsetX`.** The non-`wide` branch CSS-scales
+   the canvas (`cv.style.height="auto"`), so its layout box and its backing box are different sizes.
+3. **Start any loop with `requestAnimationFrame`, never a direct call.** At `art()` time the canvas is
+   not in the document yet — `docRender` appends it *after* it hands the pack the context — so a
+   synchronous first frame measures an element with no box.
+4. **Never refresh the card by calling `docOpen` again.** It re-runs `exitFsForCard`, which records
+   `wasFs=false` because the first open already stripped `.fs`, and a fullscreen player is dropped out
+   of fullscreen for good. A canvas that repaints itself has no such problem, which is why a live
+   surface should carry its own changing sentence rather than rely on a paragraph beside it.
+
+`content/horno/` is the worked example of all four: `docs.js`'s `masa` card and `art.js`, grep
+`THE CARD'S SURFACE`.
 
 ### 9.4 · People who arrive and leave while the game is running
 

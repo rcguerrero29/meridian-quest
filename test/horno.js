@@ -18,6 +18,8 @@ const fs = require('fs'), path = require('path'), { execFileSync } = require('ch
 const root = path.resolve(__dirname, '..');
 const SCRIPTS = ['strings', 'quests.en', 'quests.es', 'npcs', 'maps', 'art', 'docs', 'config'];
 const TRAY = { x: 4, y: 3 };
+const MASA = { x: 2, y: 3 };                /* the dough bench */
+const KSTAND = { x: 2, y: 4 };              /* directly below the dough, which is where a walk west actually stops */
 const STAND = { x: 4, y: 4 };               /* the tile you stand on to read it — one step up from the spawn */
 const CAMS = ['top', 'front', 'iso', '3d']; /* ALL FOUR, and the fourth is read back as pixels like the rest */
 
@@ -190,7 +192,8 @@ async function played() {
     console.log('  walked from (' + spawn.x + ',' + spawn.y + ') to (' + stood.x + ',' + stood.y + ') on the dpad, and the Read button lit');
 
     /* pin both clocks, so the only thing that can move a pixel is the bake */
-    await pg.evaluate(() => { Date.now = () => 1700000000000; performance.now = () => 50000; });
+    await pg.evaluate(() => { window.__rclock = { d: Date.now, p: performance.now };
+      Date.now = () => 1700000000000; performance.now = () => 50000; });
 
     /* stand(): NOT the walk — the walk is above and it is the one that proves reachability. This
        puts the player on exactly the same sub-tile coordinates before every photograph, because a
@@ -369,6 +372,201 @@ async function played() {
     else if (t3.glyph !== g1) bad.push('the 3D scene is still holding a "' + t3.glyph + '" at the tray\'s tile while every other camera draws a "' + g1 + '".');
     else console.log('  the 3d camera: re-baked, and the mesh standing at the tray is labelled "' + t3.glyph + '"');
 
+    /* ───────── 2c½ · THE KNEAD. A STROKE, AND WHERE THE STROKE WENT ─────────
+
+       This is the second verb and it is the one that could not be checked by asking whether a frame
+       changed, because its whole content is WHICH PART of a surface your hand has been over. So it is
+       checked in two different currencies and they are kept apart on purpose:
+
+       - THE FIELD, exactly. H_MASA.cover is arithmetic; a claim about it can be proved and not
+         estimated. That is where "the dough develops where your hand went" is tested, by working one
+         third of the lump with a real drag and requiring the far third to be UNTOUCHED — zero, not
+         small. A per-region claim tested with a whole-object average is exactly the proxy this repo
+         keeps a register of (docs/REGRESSION.md).
+       - THE PIXELS, for the two things the field cannot say: that the drawing actually repainted, and
+         that a worked dough reaches the three rounds on the TRAY in 3D — which is the only reason the
+         gesture is worth a player's attention a second time.
+
+       WHAT THE EXTRACTIONS THREW AWAY, said out loud: the field check discards how it LOOKS (a dough
+       whose numbers are perfect and whose drawing is a grey disc would pass it), and the pixel checks
+       discard what the pixels ARE (they say something changed at the tray, never that it is bread).
+       Neither is the other's evidence, which is why both are here.
+
+       AND THE CLOCKS COME BACK FOR THE WALK. Pinning performance.now freezes movement, so the walk to
+       the second bench restores the real pair stashed at pin time and re-pins on arrival — the four
+       pixel diffs above are already taken, so nothing upstream can be disturbed by it. */
+    await pg.evaluate(() => { if (window.__rclock) { Date.now = window.__rclock.d; performance.now = window.__rclock.p; } });
+    await pg.evaluate(() => { world = 'horno'; px = fx = 4; py = fy = 4; moving = false; held = null; setWorldTag(); checkTalk(); });
+    await pg.waitForTimeout(200);
+    /* ONE HELD BUTTON, WEST, and it stops where the room stops it — the tile under the dough.
+       This used to hold left and then up for (3,3), and it worked only because MARI was standing at
+       (2,4) and blocked the walk there. She moved one tile west on 2026-09-23 — she was between her
+       own dough and the camera and hid it completely in 3D — the wall the walk leaned on disappeared,
+       and the walk sailed past to (2,4), where `up` is the dough itself and solid, so the player stood
+       still and this reported the second verb unreachable. A route that depends on where a PERSON
+       happens to stand is a route, not a proof. (2,4) is where a walk west actually ends, and readAt's
+       own order — self, up, down, left, right — finds the dough from it. */
+    let kthere = false;
+    await pg.dispatchEvent('.dpad button[data-d="left"]', 'pointerdown');
+    for (let i = 0; i < 30; i++) { await pg.waitForTimeout(100);
+      const q = await where(); if (q.x === KSTAND.x && q.y === KSTAND.y) { kthere = true; break; } }
+    await pg.dispatchEvent('.dpad button[data-d="left"]', 'pointerup');
+    await pg.waitForTimeout(400);
+    const kat = await where();
+    await pg.evaluate(() => { Date.now = () => 1700000000000; performance.now = () => 50000; });
+    if (!kthere) bad.push('you cannot WALK to the dough bench. From beside the tray at (4,4), holding the left button left you at (' + kat.x + ',' + kat.y + ') instead of (' + KSTAND.x + ',' + KSTAND.y + '), the tile under the dough. A second verb you cannot reach on foot is not a second verb.');
+    else {
+      const kread = await pg.evaluate(() => { const r = document.getElementById('read'); return r && !r.hidden; });
+      if (!kread) bad.push('standing between the two benches at (' + KSTAND.x + ',' + KSTAND.y + ') there is no Read button, so the dough at (' + MASA.x + ',' + MASA.y + ') cannot be opened at all. READS in content/horno/docs.js declares it and readAt (engine.js, grep `const readAt=`) looks at the tile you are on plus its four neighbours.');
+      else {
+        await pg.evaluate(() => { try { hMasaReset(); } catch (e) {} });
+        /* the tray in 3D BEFORE any dough has been worked, shot from where we are standing now, so
+           the only thing that can move these pixels afterwards is the dough */
+        await pg.evaluate(k => { px = fx = k.x; py = fy = k.y; moving = false; dir = 'up'; }, KSTAND);
+        const k3before = await frame('3d');
+        const un = unreadable(k3before); if (un) bad.push(un);
+
+        await pg.click('#read'); await pg.waitForTimeout(500);
+        const card = await pg.evaluate(() => ({
+          open: !document.getElementById('reader').hidden,
+          title: (document.getElementById('docTitle') || {}).textContent || '',
+          n: document.querySelectorAll('#docBody canvas.dart').length,
+          touch: (() => { const c = document.querySelector('#docBody canvas.dart'); return c ? c.style.touchAction : null; })(),
+          tab: (() => { const c = document.querySelector('#docBody canvas.dart'); return c ? c.getAttribute('tabindex') : null; })(),
+          cssw: (() => { const c = document.querySelector('#docBody canvas.dart'); return c ? Math.round(parseFloat(c.style.width)) : 0; })(),
+          col: document.getElementById('docBody').clientWidth,
+          win: document.documentElement.clientWidth,
+          txt: document.getElementById('docBody').textContent
+        }));
+        if (!card.open || !/dough|masa/i.test(card.title))
+          bad.push('standing between the benches, pressing Read opened "' + card.title + '" instead of the dough. readAt checks the tile you are on and then up, down, LEFT, right — the dough is the left neighbour of (' + KSTAND.x + ',' + KSTAND.y + ') and the tray is the right one, so the dough is supposed to win here.');
+        else if (!card.n)
+          bad.push('the dough card opened with no drawing on it at all. The knead IS the drawing: docRender only builds a canvas for a section that carries an `art` function (engine.js, grep `A DRAWING. The pack draws`), and content/horno/docs.js pushes one into the `masa` card.');
+        else {
+          /* ---- THE ENGINE SEAM, both halves, measured on the canvas the reader actually made ---- */
+          if (card.touch !== 'none')
+            bad.push('the dough\'s canvas has touch-action "' + card.touch + '", so on a phone a downward drag on it scrolls the sheet instead of working the dough and the whole mechanic is unreachable by thumb. The section declares `grab:true` and the engine is supposed to answer it (engine.js, grep `A PICTURE MAY TAKE THE POINTER`); .dart carries no touch-action rule in either shell, so nothing else will.');
+          if (card.tab === null)
+            bad.push('the dough\'s canvas is not in the tab order, so a player who does not use a pointer cannot reach the knead at all. `grab` is supposed to put it there.');
+          /* THE WIDTH. docOpen used to render the sheet while the reader was still hidden, and a
+             display:none column measures 0 — so the measuring chain fell through to the WINDOW and
+             every drawing in either game was sized to 382 while sitting in a ~330 column, which the
+             CSS cap then scaled down. This is the one mechanic whose entire content is surface
+             texture, so it is the one that pays for that, and it is checked here rather than
+             described: the canvas must be the COLUMN's width, and must not be the window's. */
+          if (card.col <= 0)
+            bad.push('the reader\'s column measured ' + card.col + 'px while the sheet was open, so this check cannot tell what width the drawing should have been.');
+          else if (Math.abs(card.cssw - Math.max(240, Math.min(560, card.col - 8))) > 1)
+            bad.push('the dough is drawn ' + card.cssw + 'px wide inside a ' + card.col + 'px column (the window is ' + card.win + 'px). A picture wider than its column is scaled down by the CSS cap, and the detail the browser throws away is the only thing this mechanic has to show. engine.js docOpen has to unhide the reader BEFORE docRender measures it — grep `THE READER IS SHOWN BEFORE THE DOCUMENT IS DRAWN`.');
+          else console.log('  the dough is drawn ' + card.cssw + 'px wide in a ' + card.col + 'px column (the window is ' + card.win + 'px, and that is what it used to be drawn at)');
+          /* NO COUNTER. Narrow on purpose and it says so: this catches a percentage and an "8 of 12",
+             and it cannot catch a bar drawn on the canvas. The bar it cannot see is the reason the
+             canvas diff below exists at all. */
+          if (/\d+\s*%|\d+\s*(\/|of|de)\s*\d+/i.test(card.txt))
+            bad.push('the dough card is showing a count: "' + (card.txt.match(/\d+\s*%|\d+\s*(\/|of|de)\s*\d+/i) || [])[0] + '". The dough is the display — a number turns a thing you do into a thing you complete, and the four lines of prose become four checkpoints.');
+
+          const box = await pg.locator('#docBody canvas.dart').boundingBox();
+          const shot = () => pg.evaluate(() => { const c = document.querySelector('#docBody canvas.dart');
+            const x = c.getContext('2d'); return { w: c.width, h: c.height, d: [...x.getImageData(0, 0, c.width, c.height).data] }; });
+          const field = () => pg.evaluate(() => ({ dev: hDev(), even: hEven(), band: hBand(),
+            piece: [0, 1, 2].map(hPieceDev), cover: H_MASA.cover.slice() }));
+          /* a real drag, with the browser's own pointer events, mapped through the canvas's box —
+             which is also the only way to catch a handler that reads offsetX on a CSS-scaled canvas */
+          /* THE LUMP'S OWN GEOMETRY, ASKED OF THE PAGE AND NEVER RECOMPUTED HERE. A guard that keeps
+             its own copy of the centre and the radii is testing its own arithmetic
+             (.claude/skills/guard/SKILL.md): move the lump in art.js and this file would keep
+             stroking thin air and stay green. hGeom() is what the drawing itself uses. */
+          const G = await pg.evaluate(() => { const g = hGeom(); return { cx: g.cx, cy: g.cy, rx: g.rx, ry: g.ry, W: H_CARD.W, H: H_CARD.H }; });
+          const stroke = async (u0, u1, v, steps) => {
+            const X = u => box.x + box.width * (G.cx + u * G.rx) / G.W;
+            const yy = box.y + box.height * (G.cy + v * G.ry) / G.H;
+            await pg.mouse.move(X(u0), yy); await pg.mouse.down();
+            for (let i = 1; i <= steps; i++) await pg.mouse.move(X(u0 + (u1 - u0) * i / steps), yy);
+            await pg.mouse.up(); await pg.waitForTimeout(80);
+          };
+          const before = await shot();
+          /* ONE THIRD OF IT, AND THE FAR THIRD MUST COME BACK ZERO */
+          for (const v of [-0.5, 0, 0.5]) await stroke(-0.92, -0.34, v, 10);
+          await pg.waitForTimeout(250);
+          const f1 = await field(), after = await shot();
+          if (!(f1.dev > 0)) bad.push('a real mouse drag across the dough changed nothing in it at all: hDev() is still ' + f1.dev + '. Either the canvas never got the pointer, or the handler is reading offsetX on a canvas the CSS has scaled (engine.js sets `cv.style.height="auto"` on the non-wide branch, so its layout box and its backing box are different sizes).');
+          else {
+            if (!(f1.piece[0] > 0.10))
+              bad.push('three strokes down the LEFT of the dough left the left third at ' + f1.piece[0].toFixed(3) + '. The strokes landed somewhere, but not where they were aimed.');
+            if (f1.piece[2] > 0.001)
+              bad.push('working only the LEFT of the dough also worked the RIGHT: the right third came back at ' + f1.piece[2].toFixed(3) + ', where it has to be exactly zero. "It develops where your hand went" is the whole of this mechanic — a knead that spreads everywhere is a counter with a thumb on it, and then the three rounds on the tray cannot differ from each other either.');
+            else if (f1.piece[0] > 0.10)
+              console.log('  a drag down the left of the dough worked the left third to ' + f1.piece[0].toFixed(2) + ' and left the right third at exactly ' + f1.piece[2].toFixed(0) + ' — the dough develops where the hand went');
+            const cd = diff(before, after);
+            if (!cd.n) bad.push('the dough\'s own drawing did not change by one pixel after a drag that demonstrably moved the field (hDev ' + f1.dev.toFixed(3) + '). The surface is the only display this mechanic has; a field that changes behind an unchanged picture is a number with no face.');
+            else console.log('  and the drawing repainted: ' + cd.n + ' pixels moved on the card, in a box at ' + cd.box);
+          }
+          /* ---- A HAND THAT IS A KEYBOARD ---- */
+          await pg.evaluate(() => { try { hMasaReset(); } catch (e) {} const c = document.querySelector('#docBody canvas.dart'); if (c) c.focus(); });
+          await pg.waitForTimeout(120);
+          for (let i = 0; i < 6; i++) { await pg.keyboard.press('ArrowRight'); await pg.waitForTimeout(40); }
+          const fk = await field();
+          if (!(fk.dev > 0)) bad.push('the dough cannot be worked from the keyboard: six ArrowRight presses on the focused canvas left hDev() at ' + fk.dev + '. A surface you can only reach with a thumb is a surface some people cannot reach at all, and `grab` put this canvas in the tab order on purpose.');
+          else console.log('  and it can be worked from the keyboard: six arrow presses took it to ' + fk.dev.toFixed(2));
+
+          /* ---- AND IT HAS TO REACH THE BREAD. Work the WHOLE lump, then look at the tray. ---- */
+          await pg.evaluate(() => { try { hMasaReset(); } catch (e) {} });
+          for (let pass = 0; pass < 5; pass++)
+            for (const v of [-0.9, -0.55, -0.18, 0.18, 0.55, 0.9]) await stroke(-0.92, 0.92, v, 12);
+          await pg.waitForTimeout(250);
+          const f2 = await field();
+          if (f2.band < 3) bad.push('thirty full strokes across the whole lump only took it to band ' + f2.band + ' of 3 (hDev ' + f2.dev.toFixed(3) + ', evenness ' + f2.even.toFixed(2) + '). The far end of this mechanic is meant to be reachable by hand in a sitting, not in an afternoon — if it is not, the last of the four lines is written and never read, which is the same fault as a district ending nobody can reach.');
+          else console.log('  and a thorough knead reaches the far band: hDev ' + f2.dev.toFixed(2) + ', evenness ' + f2.even.toFixed(2));
+          /* the way out, which is on screen from the first second and is what makes this an offer */
+          const outBtn = await pg.evaluate(() => { const b = [...document.querySelectorAll('#docBody .dbtn')]
+            .find(x => /tray|charola/i.test(x.textContent)); if (!b) return null; b.click(); return b.textContent.trim(); });
+          await pg.waitForTimeout(450);
+          /* AND IT CLOSES THE SHEET ITSELF WHEN THE BUTTON IS GONE. Planting this one the first time
+             did report the missing button — and then left the reader open, so section 2d's click on
+             #read hit an overlay and the whole run died with "page.click: Timeout 30000ms exceeded".
+             A true finding followed by a crash about something else is worse than either, because the
+             crash is what a person reads. A check that removes a thing puts it back. */
+          if (!outBtn) { bad.push('the dough card has no button that takes you to the tray, so the only way out of the knead is the reader\'s own close. An action you can leave in one press and do not leave is something done on purpose; an action you have to finish is a toll.');
+            await pg.evaluate(() => { const c = document.getElementById('docClose'); if (c) c.click(); }); await pg.waitForTimeout(350); }
+          else {
+            const shut = await pg.evaluate(() => document.getElementById('reader').hidden);
+            if (!shut) bad.push('pressing "' + outBtn + '" on the dough card left the sheet open.');
+          }
+          await pg.evaluate(k => { world = 'horno'; px = fx = k.x; py = fy = k.y; moving = false; held = null; dir = 'up'; setWorldTag(); checkTalk(); }, KSTAND);
+          const k3after = await frame('3d');
+          const kd = diff(k3before, k3after);
+          const aim2 = await pg.evaluate(t => { try {
+            const v = new THREE.Vector3(t.x + 0.5, 0.6, t.y + 0.5).project(T3.cam), c3 = T3.renderer.domElement;
+            return { x: Math.round((v.x * 0.5 + 0.5) * c3.width), y: Math.round((-v.y * 0.5 + 0.5) * c3.height) };
+          } catch (e) { return { err: String(e) }; } }, TRAY);
+          /* NOT A BOUNDING BOX THIS TIME. The dough's own tile is two tiles from the tray and a box
+             that contains both proves nothing about either, so this counts the changed pixels within
+             18 of where three.js says the TRAY's tile lands. It still discards shape: it says the
+             tray moved, never that it moved into taller bread. */
+          if (aim2.err) bad.push('the 3D camera could not be asked where the tray lands: ' + aim2.err);
+          else {
+            let near = 0;
+            for (let i = 0; i < k3before.d.length; i += 4) {
+              if (Math.abs(k3before.d[i] - k3after.d[i]) + Math.abs(k3before.d[i + 1] - k3after.d[i + 1]) + Math.abs(k3before.d[i + 2] - k3after.d[i + 2]) <= 18) continue;
+              const q = i / 4, x = q % k3before.w, y = (q / k3before.w) | 0;
+              if (Math.abs(x - aim2.x) <= 18 && Math.abs(y - aim2.y) <= 18) near++;
+            }
+            if (!near) bad.push('a dough worked to silk changed nothing at the TRAY in 3D: ' + kd.n + ' pixels moved in the frame and not one of them is within 18 of where the tray\'s tile projects (' + aim2.x + ',' + aim2.y + '). Then the knead is a toy in a sheet — the three rounds are supposed to come off the dough you worked (content/horno/art.js, grep `WHERE YOUR HAND WENT, SURVIVING INTO THE BREAD`), and t3Invalidate has to be called when the hand comes off, or the scene keeps the shape it baked.');
+            else console.log('  and the worked dough reached the bread: ' + near + ' of ' + kd.n + ' changed pixels are on the tray itself at (' + aim2.x + ',' + aim2.y + ')');
+          }
+          await pg.evaluate(() => { try { hMasaReset(); if (typeof t3Invalidate === 'function') t3Invalidate(); } catch (e) {} });
+        }
+      }
+    }
+    /* AND IT PUTS THE ROOM BACK WHERE IT FOUND IT. This section walks the player two tiles west to
+       the dough bench, and readAt checks the LEFT neighbour before the right one — so leaving her
+       there makes 2d below press Read and get the dough card, look for a chocolate button that is
+       not on it, click nothing, and report that baking left the sheet open. Which is what it did
+       report, on the first run of this section: a true failure about the wrong thing, caused by the
+       check above it. A step that moves the player owes the next step its starting position. */
+    await stand();
+    await pg.waitForTimeout(200);
+
     /* ───────── 2d · AND THE WAY OUT OF THE CARD, WHICH IS WHERE A PHONE PLAYER GETS HURT ─────────
        Opening the card runs exitFsForCard() (engine.js, grep `exitFsForCard`): #vp loses `.fs`, the body
        loses `noscroll`, browser fullscreen is exited, and `wasFs=true` is recorded. ONLY restoreFs()
@@ -446,6 +644,6 @@ function demands() {
      rendered from this very tree showed the iso column as a flat coloured slab in all three rows —
      no bench, no pan, no rounds. The picture refuted the sentence, and the sentence was the one CI
      and the owner read. A pass line is a claim; it says what was measured and nothing wider. */
-  if (ok) console.log('OK — el horno: you walk to the tray on the dpad, press Read, press a shell, and the same three rounds are wearing it — as a SHAPE in top, front and 3D, and as a COLOUR in iso, where drawIso draws no object at all. The bench she works at was measured against her, painted and scanned, and stands between her hip and her face. One room, one tray, one verb.');
+  if (ok) console.log('OK — el horno: you walk to the tray on the dpad, press Read, press a shell, and the same three rounds are wearing it — as a SHAPE in top, front and 3D, and as a COLOUR in iso, where drawIso draws no object at all. You walk to the other bench, push the dough with a real drag, and it comes together WHERE THE HAND WENT — the far third measured at exactly zero — reaches its last band by hand in a sitting, works from the keyboard too, and the rounds on the tray change with it in 3D. The bench she works at was measured against her, painted and scanned, and stands between her hip and her face. Two benches, one tray, and nothing here waits on anything.');
   process.exit(ok ? 0 : 1);
 })().catch(e => { console.log('FAIL — el horno could not be run at all: ' + e.message); process.exit(1); });

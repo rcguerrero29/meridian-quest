@@ -321,3 +321,31 @@ number the code under test owns is reading the code, not the behaviour.* `T3CACH
 a literal path in a file the change is allowed to edit — all three are the same mistake, and all
 three passed while the thing they guard was broken.
 
+
+## 2026-09-23 — a guard written FOR this register, and the two shapes it had to avoid
+
+El Horno grew a second verb: you push a lump of dough on a canvas and it comes together **where your
+hand went.** That sentence is the mechanic, and it is also the hardest kind of thing this register has
+a name for, because every cheap way to check it reads something near the noun instead of the noun.
+
+**Two proxies were available and both were refused, in writing, in `test/horno.js`:**
+
+| the cheap check | what it would have read | why it is the wrong noun |
+|---|---|---|
+| `hDev() > 0` after a drag | the dough, **on average**, moved | a knead that spread over the whole lump from one stroke would pass it — and that is the exact bug that would make the three rounds on the tray unable to differ from each other, which is the whole point of the mechanic. **The guard works one third of the lump and requires the far third to come back at exactly 0**, not small |
+| the changed box in 3D contains the tray | something in the frame moved **near** the tray | the dough's own tile is two tiles from the tray, and a bounding box that contains both proves nothing about either. **The guard counts changed pixels within 18 px of where three.js says the TRAY's tile projects** — 40 of 67, on the run that shipped |
+
+**And the split that is the real lesson.** The field is arithmetic and the drawing is pixels, and the
+guard checks both **without either standing in for the other**, because each discards exactly what the
+other keeps: the field check would pass a dough drawn as a grey disc, and the pixel checks say
+something changed at the tray and never that it is bread. Six of the eight new assertions were planted
+against — `grab` removed, the reader's old render-then-show order restored, `hWork` spread to the whole
+field, `hRise`/`hSpread` flattened, `t3Invalidate` removed from the settle, the way-out button deleted
+— and every one printed a sentence naming what a player would lose. The plants ran in a copy outside
+the repository, on a tree whose HEAD is recorded beside them.
+
+**One number in that lane belongs here too, because a guard did not catch it and a stash did.** The
+knead had to be behaviour-identical for a player who never finds the dough bench, and the only thing
+that proved it was running the suite with the whole feature stashed and diffing its four camera
+figures against the same run with it in — 224 / 149 / 915 / 49 either way. The comment in the file had
+said 228 / 155 / 76 / 915 for a week. `docs/POSTMORTEM.md` §13u has that one.

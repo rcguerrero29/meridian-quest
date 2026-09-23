@@ -64,6 +64,8 @@ complaint: it is why nobody can write a validator, a form, or a document that sa
 | Answer grade `r` | `engine/engine.js:3174–3189` | `ok` `mid` `bad` |
 | Hair `style` | `engine/engine.js:2426–2527` | 18 (a pack uses 7) |
 | Doc `tmpl` | `content/meridian/docs.js` | 7 bare numbers, no registry |
+| Doc block kinds | `engine/engine.js`, grep `function docRender` | 13 (`h p note red blank kv t q btn sel form docs art`) |
+| Doc `art` modifiers | same block | `aspect` `wide` `cap` `grab` — `grab` added 2026-09-23, registered below |
 | Pack seams | 40 `typeof X!=="undefined"` guards in `engine/engine.js` | see NEW-WORLD.md |
 
 ### What is genuinely reusable
