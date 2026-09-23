@@ -374,3 +374,48 @@ knead had to be behaviour-identical for a player who never finds the dough bench
 that proved it was running the suite with the whole feature stashed and diffing its four camera
 figures against the same run with it in — 224 / 149 / 915 / 49 either way. The comment in the file had
 said 228 / 155 / 76 / 915 for a week. `docs/POSTMORTEM.md` §13u has that one.
+
+
+## 2026-09-23 (second) — the register's own subject, twice in one guard, and the second one was green
+
+Building El Espejo needed `test/smoke.js`'s quest-assignment check widened first. **It read `WNPC` — the
+table declaring which letter on which map is which person — as a proxy for "somebody asks this quest",
+and that proxy stopped being true in two different directions.** Both were planted before anything was
+changed, in a copy outside the repository:
+
+| planted | the OLD guard said | which is |
+|---|---|---|
+| a real quest moved off a station person and onto **Naye, who lives in a template-built room** and genuinely asks it | `quest 13 unassigned` | a **false red** — it costs a build |
+| a station letter changed to **one that appears in no map**, so that person is never placed and the quest can be started by nobody | `OK — 60 quests, maxXP 880, all invariants hold.` | a **false green** — it ships a quest no player can reach |
+
+**The false green is the one that matters, and it is the one nobody was looking for.** The brief that
+predicted this fault predicted only the first direction; the second was found by asking the register's
+own question in the other direction — *what does this guard say when the thing is MISSING rather than
+misfiled?*
+
+Both are the same root and both predate ❗La llave (2026-09-07), the day a person gained a second place
+to stand: `buildInterior` takes a room's people from the interior's own `people` and never touches
+`WNPC` (`engine/engine.js`, grep `wnpcs.push` — two call sites, one of them reads `WNPC`).
+
+**The fix reads the people standing in the worlds**, which is what the engine itself asks when it decides
+who is in front of you. No growth pass is needed: `applyBuilds()` runs unconditionally at load and
+`BLDS()` is not gated on `chSeen`. Green on unchanged code — all sixty askers found — and red on all
+three plants afterwards, the third being a new one the old guard also could not phrase:
+
+```
+quest 10 is asked by nobody — no person standing in any world carries it, so a player can never start it.
+lupe in st asks quest 999, and there is no such quest
+```
+
+### And the plant found a live design constraint nobody had
+
+Plant one stopped saying `unassigned` — and started failing two **other** guards: *the chair did not open*.
+Giving Naye an unanswered quest makes the barbería's chair unreachable, and the cause is one line:
+`checkTalk` (`engine/engine.js`, grep `tb.dataset.qi=qi`) sets the Talk button to the QUEST and **deletes
+`dataset.chatn`**, which is the only thing the chair path reads. So while she has any open quest, Talk
+starts the quest and the chair is gone — the chair the owner asked for on 2026-09-07 (*"open the ability
+to change our character outfit and haircut after start. maybe have a small barber"*).
+
+**The plan for El Espejo had Naye carrying all four quests.** That is now a decision and not a detail, and
+it was surfaced by a plant written for something else entirely. That is the argument for planting: the
+guard was the target, the constraint was the find.

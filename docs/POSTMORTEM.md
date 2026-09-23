@@ -798,6 +798,28 @@ EXISTING — delete the object, not the logic — and ask whether anything goes 
 [§13t](#13t) arriving from the other end: there, five fixes measured how well a window read and the
 window had never been drawn.
 
+### 13w · The guard was the target; the constraint was the find (the calling session)
+
+**Believed:** a plant is a test of the guard you just wrote. **True:** the second plant against
+`test/smoke.js`'s quest-assignment check — a real quest moved onto a person who lives in a
+template-built room — stopped printing the false `unassigned` it was written to catch, and started
+failing two completely unrelated guards: *"the chair did not open"*.
+
+**What it found.** `checkTalk` (`engine/engine.js`, grep `tb.dataset.qi=qi`) sets the Talk button to a
+person's QUEST when they have an unanswered one, and in doing so **deletes `dataset.chatn`** — which is
+the only thing the barber-chair path reads. So any person who carries an open quest cannot also run a
+service. Give Naye a quest and the chair the owner asked for on 2026-09-07 silently disappears until
+the quest is answered. The plan for the district being built that hour had her carrying four.
+
+**Cost:** none, because the plant caught it. Had the plant been skipped — and it nearly was, since the
+fault it was written for had already been demonstrated — the district would have shipped with a feature
+quietly switched off for the length of it, and the report would have said every suite was green.
+
+**Rule:** a plant is not a receipt for the guard. **Read what else went red, and read it as a finding
+about the GAME rather than noise around the guard.** The two extra lines under that plant were the most
+valuable output of the run, and the natural reading — "my plant was sloppy, those are side effects" —
+is the one that throws them away.
+
 ## How to add to this file
 
 Same discipline as every register here: **it grows from what happened, never from imagination.** An
