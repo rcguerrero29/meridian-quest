@@ -1,6 +1,6 @@
 /* ONE ROOM. Nine by seven, and the tray is the only thing in it you do anything to.
 
-   Six glyphs, and not one of them is a letter the engine already owns (docs/TAGS.md L1 lists the
+   Seven glyphs, and not one of them is a letter the engine already owns (docs/TAGS.md L1 lists the
    ~thirty it pre-assigns: # B Q Z D K T A S H I W V F G C X P J ~ ^ 1 ⊓ ≡ ▲ ▼ ◺ 3 4 5, plus N for
    a standing person and + E L O for doors). Every one here is lower case and free.
 
@@ -8,9 +8,23 @@
      .  the floor
      h  el horno — the oven, brick, with its mouth and its iron door
      f  the flour bin
+     m  LA MASA — the dough bench, one lump on a floured board   <- the other readable thing
      p  THE TRAY, with three plain rounds of dough on it        <- the readable thing
      v  THE TRAY, baked, vanilla shells   (the tile p becomes)
      c  THE TRAY, baked, chocolate shells (the tile p becomes)
+
+   m IS A SECOND BENCH, not a second room. It is one tile west of the tray with a floor tile between
+   them, on purpose: they are drawn from the same hBench() so they are the same carpenter's bench,
+   and the tile between them is where a baker stands to work at both. Adjacent would have been worse
+   — two 0.82-wide tops butted against a 1.0 tile pitch leave a visible gap in what the eye is being
+   asked to read as one surface, and a gap in the middle of one bench is a bug you cannot unsee.
+   You read the dough from (2,4), the tile under it, which is where holding the left button from
+   beside the tray brings you to a stop.
+   AND MARI MOVED ONE TILE WEST FOR IT, from (2,4) to (1,4). She was standing directly south of the
+   dough bench, which is between it and the camera: rendered at 390x844 from the spawn, the baker's
+   own body hid the dough completely in the 3D view, so the second verb was invisible from the one
+   place every player starts. She is beside her dough now instead of in front of it — still hers,
+   and the tile below the bench is free for a player to stand on and read it.
 
    p, v and c are the SAME tray in three states. They are all in SOLIDX, so the swap can never
    change what a person can walk on: the room is exactly as reachable after the bake as before it.
@@ -22,8 +36,8 @@ const WORLD_DEFS={
     "wwwwwwwww",
     "whh....fw",
     "w.......w",
-    "w...p...w",
-    "w.M...Y.w",
+    "w.m.p...w",
+    "wM....Y.w",
     "w.......w",
     "wwwwwwwww"
   ]

@@ -9,7 +9,7 @@ const GAMENAME="El Changarrito";
    at El Mercado Robles, in a town with no mercado and no Chelo. There is no ending panel here now,
    no title to claim and no reward — the street is as long tomorrow as it was this morning. */
 const ENDLESS=true;
-const GAMEV="ch-v134 · engine mq-v196";   /* the town's own version, and the engine it was built on */
+const GAMEV="ch-v135 · engine mq-v197";   /* the town's own version, and the engine it was built on */
 const STOREPFX="ch";                     /* its own saves, never Meridian's (engine SK()) */
 const CAMDEF="3d";
 const MAXXP=10;

@@ -4065,6 +4065,15 @@ function docRender(body,secs){
       const K=Math.min(3,window.devicePixelRatio||1);
       cv.width=W*K;cv.height=H*K;cv.style.width=W+"px";cv.style.height=H+"px";
       cv.style.display="block";cv.style.margin="10px auto";cv.style.borderRadius="6px";
+      /* ---- A PICTURE MAY TAKE THE POINTER: `grab` ----
+         A drawing you push with your thumb is not a drawing you scroll past, and on a phone those
+         two readings of the same downward swipe cannot both win. The browser resolves it from
+         `touch-action`, and `.dart` declares none in either shell — so a gesture surface that does
+         not say so loses every vertical drag to the paper's scroller and the player never reaches it.
+         This is opt-in and must stay opt-in: the town's wall is thirty-odd pictures you scroll past,
+         and an engine that took the pointer from all of them would wall the page off behind them.
+         A section that says `grab:true` is saying "this one is worked, not read". */
+      if(s2.grab){cv.style.touchAction="none";cv.style.cursor="grab";cv.setAttribute("tabindex","0");}
       if(wide){cv.style.maxWidth="none";cv.style.margin="10px 0";}
       else{cv.style.maxWidth="100%";cv.style.height="auto";}   /* it may be smaller than asked. It may never be wider than the column */
       const g=cv.getContext("2d");g.setTransform(K,0,0,K,0,0);g.imageSmoothingEnabled=false;
@@ -4264,12 +4273,23 @@ function docOpen(id,from){
   const d=docDef(id)||{},body=$("docBody");
   docCur=id;docBack=from==="card"?"card":null;body.innerHTML="";
   $("docTitle").textContent=docTitle(id);
+  /* ---- THE READER IS SHOWN BEFORE THE DOCUMENT IS DRAWN, AND THAT ORDER IS THE POINT ----
+     It used to render first and unhide last, and a hidden element has no width: `display:none`
+     makes `#docBody.clientWidth` exactly 0, so docRender's measuring chain below fell all the way
+     through to `documentElement.clientWidth` — THE WINDOW — and every drawing in the game was sized
+     to the window while sitting in a narrower column. Measured in docs/la-sobremesa.md: 382 drawn
+     into a 322 box, which the CSS cap then scales down, throwing away 16.8% of the detail on a flat
+     picture and 33.3% on a lit one. A picture you are meant to walk up to cannot afford either.
+     Nothing flashes: this whole function is one synchronous block, the browser paints nothing until
+     it returns, and `body.innerHTML=""` above already emptied the sheet. And the reader is
+     `position:fixed; inset:0` OUTSIDE #vp, so its width does not depend on the `.fs` class that
+     exitFsForCard strips a few lines below — showing it early cannot change what that call sees. */
+  $("reader").hidden=false;held=null;   /* overlays the world, like Settings — hiding it collapses the panel's parent */
   docRender(body,secs);
   body.scrollTop=0;{const sc=$("paperScroll");if(sc)sc.scrollTop=0;}  /* the paper scrolls in its own box now, so that is what returns to the top */
   /* a document handed over inside a quest must NOT re-run exitFsForCard: questStart already
      ran it, and a second call records wasFs=false, so the player never gets fullscreen back. */
   if(docBack!=="card")exitFsForCard();
-  $("reader").hidden=false;held=null;   /* overlays the world, like Settings — hiding it collapses the panel's parent */
 }
 let docCur=null,docBack=null;   /* "card" while a document is being read inside a quest */
 /* ---------- READS / DOCS — a thing you can read without talking to anybody ----------

@@ -753,6 +753,73 @@ before measuring how well a thing reads, blank its one painter and diff the fram
 contrast. The instrument is in `.claude/agents/chema.md` now, and the suite asks the question in the
 front camera.
 
+### 13u · A pixel count was copied forward three times, and the third session did arithmetic on it (the calling session)
+
+**Believed:** `content/horno/art.js` said, under a heading reading *"MEASURED, not reasoned"*, that
+*"the numbers the shipped guard prints today are top 228, front 155, 3D 76 and iso 915"* — and it said
+so in a paragraph whose entire subject was that an earlier write-up's numbers came from a different
+probe on a different tree. **True:** `node test/horno.js` prints 224 / 149 / 915 / 49, and did on the
+day that sentence was written. **Cost:** the session building the knead needed a before-figure for the
+bake's own legibility in 3D, took the 76 out of that comment because it was the only one in the file
+that claimed to be current, measured 52 after its first draft, and wrote "down from 76 to 52" into a
+new comment as the reason for a design decision. The decision was right for an entirely different
+reason — an untouched dough has to reproduce the shipped tray to the byte — and the sentence
+justifying it was a two-ended fabrication: a stale before and a real after, subtracted.
+
+**What made it possible:** the receipt looked like the most trustworthy thing in the file. It was in
+capitals, it named a suite, it named four cameras, and its own paragraph was a warning about exactly
+this. **A comment that warns about stale numbers is not thereby exempt from being one.**
+
+**Rule, and it is cheap enough that there is no excuse:** a number you are about to build on gets
+re-taken before you build on it. `git stash push -- <the files you changed>`, run the suite, pop —
+two minutes, and it gives you the before AND the after from the same binary on the same tree. That is
+what finally produced 224 / 149 / 915 / 49 on both sides of the stash and proved the knead
+behaviour-identical at rest, which no amount of reading the comment could have told anybody.
+
+### 13v · Eight assertions about what the dough DID, and not one about whether it was there (the calling session)
+
+**Believed:** the knead was guarded. Six plants had been written and fired — the pointer seam, the
+reader's width, the field spreading, the effect on the bread, the re-bake, the way out — and each printed
+a sentence a person would say. **True:** a seventh plant, run only for completeness, **deleted the dough
+bench from the map** and the suite came back green and printed its own pass line claiming a player walks
+to that bench and pushes the dough. **Cost:** caught before it shipped, at the cost of one more plant —
+but the pass sentence was already written, already quoted in a run file, and would have been read by the
+owner as a measurement.
+
+**The mechanism, and it belongs to the ENGINE and not to this pack.** `READS` declares a coordinate and
+`readAt` matches world, x and y; it never asks what tile is standing there. So the read mark, the Read
+button and the whole card work perfectly over bare floor. The knead's state is pack state and its effect
+on the bread goes through two scalars, so nothing on the path from the player's thumb to the bread
+touches the tile at all. **Every assertion was about behaviour. None was about presence. Both readings
+were correct and the room was empty.**
+
+**Rule:** the plants you think of are plants against the thing WORKING. Add one against the thing
+EXISTING — delete the object, not the logic — and ask whether anything goes red. This is
+[§13t](#13t) arriving from the other end: there, five fixes measured how well a window read and the
+window had never been drawn.
+
+### 13w · The guard was the target; the constraint was the find (the calling session)
+
+**Believed:** a plant is a test of the guard you just wrote. **True:** the second plant against
+`test/smoke.js`'s quest-assignment check — a real quest moved onto a person who lives in a
+template-built room — stopped printing the false `unassigned` it was written to catch, and started
+failing two completely unrelated guards: *"the chair did not open"*.
+
+**What it found.** `checkTalk` (`engine/engine.js`, grep `tb.dataset.qi=qi`) sets the Talk button to a
+person's QUEST when they have an unanswered one, and in doing so **deletes `dataset.chatn`** — which is
+the only thing the barber-chair path reads. So any person who carries an open quest cannot also run a
+service. Give Naye a quest and the chair the owner asked for on 2026-09-07 silently disappears until
+the quest is answered. The plan for the district being built that hour had her carrying four.
+
+**Cost:** none, because the plant caught it. Had the plant been skipped — and it nearly was, since the
+fault it was written for had already been demonstrated — the district would have shipped with a feature
+quietly switched off for the length of it, and the report would have said every suite was green.
+
+**Rule:** a plant is not a receipt for the guard. **Read what else went red, and read it as a finding
+about the GAME rather than noise around the guard.** The two extra lines under that plant were the most
+valuable output of the run, and the natural reading — "my plant was sloppy, those are side effects" —
+is the one that throws them away.
+
 ## How to add to this file
 
 Same discipline as every register here: **it grows from what happened, never from imagination.** An

@@ -321,3 +321,101 @@ number the code under test owns is reading the code, not the behaviour.* `T3CACH
 a literal path in a file the change is allowed to edit — all three are the same mistake, and all
 three passed while the thing they guard was broken.
 
+
+## 2026-09-23 — a guard written FOR this register, and the two shapes it had to avoid
+
+El Horno grew a second verb: you push a lump of dough on a canvas and it comes together **where your
+hand went.** That sentence is the mechanic, and it is also the hardest kind of thing this register has
+a name for, because every cheap way to check it reads something near the noun instead of the noun.
+
+**Two proxies were available and both were refused, in writing, in `test/horno.js`:**
+
+| the cheap check | what it would have read | why it is the wrong noun |
+|---|---|---|
+| `hDev() > 0` after a drag | the dough, **on average**, moved | a knead that spread over the whole lump from one stroke would pass it — and that is the exact bug that would make the three rounds on the tray unable to differ from each other, which is the whole point of the mechanic. **The guard works one third of the lump and requires the far third to come back at exactly 0**, not small |
+| the changed box in 3D contains the tray | something in the frame moved **near** the tray | the dough's own tile is two tiles from the tray, and a bounding box that contains both proves nothing about either. **The guard counts changed pixels within 18 px of where three.js says the TRAY's tile projects** — 40 of 67, on the run that shipped |
+
+**And the split that is the real lesson.** The field is arithmetic and the drawing is pixels, and the
+guard checks both **without either standing in for the other**, because each discards exactly what the
+other keeps: the field check would pass a dough drawn as a grey disc, and the pixel checks say
+something changed at the tray and never that it is bread. Six of the eight new assertions were planted
+against — `grab` removed, the reader's old render-then-show order restored, `hWork` spread to the whole
+field, `hRise`/`hSpread` flattened, `t3Invalidate` removed from the settle, the way-out button deleted
+— and every one printed a sentence naming what a player would lose. The plants ran in a copy outside
+the repository, on a tree whose HEAD is recorded beside them.
+
+### And the plant that WALKED STRAIGHT PAST all of it — the seventh, run after the other six had fired
+
+The six plants above each printed a sentence a person would say. A seventh was run for completeness —
+**the dough bench deleted from the map**, `"w.m.p...w"` back to `"w...p...w"` — and `test/horno.js` came
+back **green**, and printed its whole pass line, the one that says *"you walk to the other bench, push the
+dough with a real drag, and it comes together WHERE THE HAND WENT."* There was no bench.
+
+**Why, and every pack inherits this.** `READS` declares a COORDINATE; `readAt` matches world, x, y and
+whether the document exists, and **never asks what is standing there.** So the mark floats over bare
+floor, the Read button lights, the card opens — and the knead's state lives in the pack (`H_MASA`) and
+reaches the tray through `hRise`/`hSpread`, neither of which is a tile. Delete the object and nothing any
+of the eight assertions could see had changed.
+
+**This is not a proxy. It is a shape this register did not have a name for: every assertion was about
+BEHAVIOUR and not one was about PRESENCE.** A proxy reads the wrong noun; this read the right nouns and
+there was simply no assertion that the thing existed. It is the same hole as `docs/POSTMORTEM.md` §13t —
+five fixes about how well a window read, and the window was never drawn — arriving from the other end:
+there, nobody asked whether it was on the paper; here, nobody asked whether it was in the room.
+
+**The question that catches it, and it is one line:** *delete the OBJECT, not the behaviour — does
+anything go red?* Section 2c¼ is that question as a guard: every read this pack declares must stand on a
+glyph with a mesh in `TILEART` and a place in `SOLIDX`, checked through the registries rather than a list
+of letters typed into the test. The engine's own sentence beside `readAt` was already the rule — *"a thing
+you can read is a place"* — and it had never been anything but prose.
+
+**One number in that lane belongs here too, because a guard did not catch it and a stash did.** The
+knead had to be behaviour-identical for a player who never finds the dough bench, and the only thing
+that proved it was running the suite with the whole feature stashed and diffing its four camera
+figures against the same run with it in — 224 / 149 / 915 / 49 either way. The comment in the file had
+said 228 / 155 / 76 / 915 for a week. `docs/POSTMORTEM.md` §13u has that one.
+
+
+## 2026-09-23 (second) — the register's own subject, twice in one guard, and the second one was green
+
+Building El Espejo needed `test/smoke.js`'s quest-assignment check widened first. **It read `WNPC` — the
+table declaring which letter on which map is which person — as a proxy for "somebody asks this quest",
+and that proxy stopped being true in two different directions.** Both were planted before anything was
+changed, in a copy outside the repository:
+
+| planted | the OLD guard said | which is |
+|---|---|---|
+| a real quest moved off a station person and onto **Naye, who lives in a template-built room** and genuinely asks it | `quest 13 unassigned` | a **false red** — it costs a build |
+| a station letter changed to **one that appears in no map**, so that person is never placed and the quest can be started by nobody | `OK — 60 quests, maxXP 880, all invariants hold.` | a **false green** — it ships a quest no player can reach |
+
+**The false green is the one that matters, and it is the one nobody was looking for.** The brief that
+predicted this fault predicted only the first direction; the second was found by asking the register's
+own question in the other direction — *what does this guard say when the thing is MISSING rather than
+misfiled?*
+
+Both are the same root and both predate ❗La llave (2026-09-07), the day a person gained a second place
+to stand: `buildInterior` takes a room's people from the interior's own `people` and never touches
+`WNPC` (`engine/engine.js`, grep `wnpcs.push` — two call sites, one of them reads `WNPC`).
+
+**The fix reads the people standing in the worlds**, which is what the engine itself asks when it decides
+who is in front of you. No growth pass is needed: `applyBuilds()` runs unconditionally at load and
+`BLDS()` is not gated on `chSeen`. Green on unchanged code — all sixty askers found — and red on all
+three plants afterwards, the third being a new one the old guard also could not phrase:
+
+```
+quest 10 is asked by nobody — no person standing in any world carries it, so a player can never start it.
+lupe in st asks quest 999, and there is no such quest
+```
+
+### And the plant found a live design constraint nobody had
+
+Plant one stopped saying `unassigned` — and started failing two **other** guards: *the chair did not open*.
+Giving Naye an unanswered quest makes the barbería's chair unreachable, and the cause is one line:
+`checkTalk` (`engine/engine.js`, grep `tb.dataset.qi=qi`) sets the Talk button to the QUEST and **deletes
+`dataset.chatn`**, which is the only thing the chair path reads. So while she has any open quest, Talk
+starts the quest and the chair is gone — the chair the owner asked for on 2026-09-07 (*"open the ability
+to change our character outfit and haircut after start. maybe have a small barber"*).
+
+**The plan for El Espejo had Naye carrying all four quests.** That is now a decision and not a detail, and
+it was surfaced by a plant written for something else entirely. That is the argument for planting: the
+guard was the target, the constraint was the find.

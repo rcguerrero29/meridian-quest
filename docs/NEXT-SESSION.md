@@ -5,7 +5,61 @@ current: each session rewrites the queue before signing off.)*
 
 ## STATE OF PLAY — read this first (2026-09-20, night — the pending list)
 
-### ⇢ 2026-09-21, latest — crew iteration 12 shipped in three parts: #229, #230 and the furniture sweep. `mq-v185`.
+### ⇢ 2026-09-23, latest — El Horno's second verb, and the reader's canvas became somewhere a MECHANIC can live. `mq-v197`, `horno-v2`.
+
+Owner: *"are you planning some kneading in there? would be cool"*, then the correction that decided the
+whole design — *"i know the time seems strange but **kneading could be therapeutic**"* — then the build
+order: *"ok so whats the espejo? i forgot but build it, then build all those but yeah its ok if el horno
+first."*
+
+**What shipped.** El Horno has a second bench. You walk west from the tray, press Read, and push a lump of
+dough with your thumb; it comes together **where your hand went**, in a 6×6 field, and the three rounds on
+the tray are divided out of the three parts of it — knead one end and the conchas on that end stand up
+taller for the rest of the session, in every camera. Four bands of prose, no counter, no bar, no clock, and
+a way out on screen from the first second. It gates nothing: the tray is bakeable in three steps from the
+spawn exactly as it shipped, and an untouched dough reproduces the old tray **to the byte** (proved by
+stashing the whole feature and diffing the suite's four camera figures: 224 / 149 / 915 / 49 both ways).
+
+**Two engine changes it needed, and both are for every pack.** (1) **Every picture in either game was
+drawn at the WINDOW's width, not its column's** — `docOpen` rendered while the reader was still hidden,
+and a `display:none` element measures 0, so the chain fell through to `documentElement`: 382 into a 322
+box, which `docs/la-sobremesa.md` §20.2 had measured as a third of the detail thrown away on a lit
+picture. That section also said "the first document of a session"; it was every document, every time, and
+it is fixed and guarded now. (2) **A document section may say `grab:true`** and that canvas takes the
+pointer — `touch-action:none`, a grab cursor, a place in the tab order. Opt-in on purpose: the town's wall
+is thirty-odd pictures you scroll PAST. Written up as `docs/NEW-WORLD.md` §9.3a, which is the four things
+a second world needs before it builds a mechanic on a canvas.
+
+**The finding of the day, and it is the one to carry.** Six plants against the knead each printed a
+sentence a person would say. A seventh — **the dough bench deleted from the map entirely** — came back
+**GREEN and printed the pass line claiming a player walks to that bench and pushes the dough.** `READS`
+declares a coordinate and `readAt` never asks what is STANDING there, and the knead's state and its
+effect on the bread are both pack state, so nothing on the path from thumb to bread touches the tile.
+**Every assertion was about BEHAVIOUR and none about PRESENCE.** It is fixed and guarded (§2c¼: every
+read must stand on a glyph with a mesh and a place in SOLIDX), and the rule is one line for every
+future guard: **the plants you think of are plants against the thing WORKING — add one against the
+thing EXISTING.** `docs/POSTMORTEM.md` §13v.
+
+**Three more worth carrying.** (1) **A pixel count in a comment was copied forward by three sessions
+and the third did arithmetic on it** — `docs/POSTMORTEM.md` §13u. Re-take a number before you build on it;
+`git stash push -- <files>` gives you the before and the after from the same binary on the same tree.
+(2) **A route that leans on where a PERSON stands is not a proof.** Mari moved one tile west (she was
+between her own dough and the camera and hid it completely in 3D) and the guard's walk sailed straight
+past the tile it was aiming for. (3) **A guard that removes a thing must put it back**: the plant for "the
+dough card has no way out" reported correctly and then left the reader open, and the whole run died three
+checks later on a generic click timeout — a true finding followed by a crash about something else.
+
+**Where the espejo stands, since he asked.** *"is the espejo figurative- or do we actually show a
+picture?"* — **figurative today**: Naye's barbería has two mirrors and a photo strip that exist only in the
+room's `arrive:` prose, and there is no mirror glyph on that map. The mirror should stay figurative. **The
+photo strip should become a real drawing** on the seam this session just fixed and guarded — the town's
+mural wall is built on it, and Meridian has never once used it. That is the first piece of El Espejo.
+
+**Next, in his order:** El Espejo (four quests and `need:3` minimum, or one of the three endings is
+unreachable — `.claude/skills/district/SKILL.md`, and `test/smoke.js` fails the build on it now), then
+La charola, then the card art for the bread.
+
+### ⇢ 2026-09-21 — crew iteration 12 shipped in three parts: #229, #230 and the furniture sweep. `mq-v185`.
 
 Owner: *"a couple more to beautify and shape - crew mode please … also we should fix the trolley weirdness.
 the skeleton now seems to float in one perspective"*, then *"cool merge and then run a crew mode do update

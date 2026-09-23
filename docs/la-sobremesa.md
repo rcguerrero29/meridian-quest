@@ -1665,16 +1665,36 @@ immediately and never re-arms. **Start it with `requestAnimationFrame(loop)`, ne
 call.** The same applies to anything that measures the canvas's layout at draw time — which is the
 root of the resolution fault in 20.2.
 
-**A pack that animates must also:** set `cv.style.touchAction="none"` itself (the canvas lives inside
-the scrolling paper, so a vertical drag scrolls the page instead of stirring the pot), and stop its own
-loop when the canvas leaves the document, because the reader rebuilds the element on every render.
+**A pack that animates must also:** stop its own loop when the canvas leaves the document, because the
+reader rebuilds the element on every render.
 
-### 20.2 · The first document of a session is drawn at the wrong size — an ENGINE fault, and Meridian has it too
+> **UPDATED 2026-09-23.** The `touchAction` half of this is an engine seam now and a pack should not
+> reach for `cv.style` to get it: a section says **`grab:true`** and the engine sets `touch-action:none`,
+> a grab cursor and a tabindex on that canvas (`engine/engine.js`, grep `A PICTURE MAY TAKE THE
+> POINTER`). It stays opt-in because the town's wall is thirty-odd pictures you scroll PAST. First user:
+> `content/horno/`'s dough. And the tabindex is not decoration — a surface reachable only by thumb is a
+> surface some people cannot reach, so the same pack binds arrow keys to the same field.
+
+### 20.2 · Every document is drawn at the wrong size — an ENGINE fault, and Meridian has it too · **FIXED 2026-09-23**
 
 `engine/engine.js` (grep `const room=`) measures the column to decide how wide to draw a picture — and
 `docOpen` renders **while the reader is still hidden**, where a hidden element's width is 0. The
-fallback chain then lands on the window: **382 instead of 322**, so the first picture anyone opens in a
-session is drawn into a 764-px buffer and the browser resamples it down by 0.843 into the 322-px box.
+fallback chain then lands on the window: **382 instead of 322**, so the picture is drawn into a 764-px
+buffer and the browser resamples it down by 0.843 into the 322-px box.
+
+> **TWO CORRECTIONS TO THIS SECTION, both found by fixing it.**
+> **(a) It was not "the first document of a session".** This section's own heading and first paragraph
+> said first; the fault is on EVERY open, because `hidden` is `display:none` every time and a
+> display:none element measures 0 every time. Measured by planting the old order back on 2026-09-23
+> with several documents already opened in the same session: still 382. A bug described as rarer than
+> it is gets priced as rarer than it is, and this one sat for eight days.
+> **(b) It is fixed.** `docOpen` unhides the reader BEFORE `docRender` measures it (grep `THE READER IS
+> SHOWN BEFORE THE DOCUMENT IS DRAWN`). Nothing flashes — `docOpen` is one synchronous block and the
+> sheet is emptied above — and `#reader` is `position:fixed; inset:0` outside `#vp`, so its width cannot
+> depend on the `.fs` class `exitFsForCard` strips two lines later. Guarded, not just fixed:
+> `test/horno.js` asserts the dough's canvas is the COLUMN's width and names the window's beside it, and
+> the plant that restored the old order printed *"drawn 382px wide inside a 322px column (the window is
+> 390px)"* — this section's own numbers, produced by the guard.
 
 Measured cost, in detail actually delivered (mean absolute Laplacian at the displayed size):
 

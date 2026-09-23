@@ -298,7 +298,24 @@ would have none left unless looks key by npc instead.
   was never an option either. **This is a rule every small district on this engine now inherits: a
   district needs at least four quests and a `need` of at least three, or one of its endings is
   fiction.** Found by Nacho while costing la esquina, 2026-09-16.
-  Four quests and a small `espejo` district, `need:3`, opening after Nolasco — *La foto* (the brief is not the
+  **⚠️ "opening after Nolasco" is STALE and the code wins (corrected 2026-09-23, Don Güero, while siting it).**
+  It was written when Nolasco WAS the last district; `esquina` was appended after Nolasco on 2026-09-17 and
+  the same edit that fixed the quest count here left this word standing. **El Espejo opens after la esquina**
+  — and it has to be APPENDED, never inserted, because `chSeen` is a saved integer index into `CHAPTERS`
+  (`content/meridian/config.js`, grep `chSeen` is a SAVED INTEGER INDEX): insert anywhere but the end and
+  every existing save points at a different district.
+  **AND LA ESQUINA KEEPS THE CITY'S LAST WORD, at the owner's ruling, 2026-09-23:** *"i mean append- the
+  first- why cant it be an expansion pack or something. the end is not a harsh rule in an open world model
+  for us -maybe for other games yes but not her"*. The session and the planner had both assumed appending
+  forces la esquina to hand off. **It does not: `open` is ONLY a toast key** (`engine/engine.js`, grep
+  `function epiKeys`), and what opens a district is `qOpen`, which is `c<=chSeen`. So El Espejo's quests
+  open the moment la esquina closes whatever the toast says, `esquina.open` stays `endStayToast`, and that
+  line already reads *"The city is yours to walk. Whatever's still open stays open."* Discovery is Naye
+  wearing a ❗ — template-room people ARE pushed into their world's npcs (`engine.js`, grep `wnpcs.push`),
+  so the marker works, and this ledger already noted that Calle Dos has six people and not one has ever
+  carried one. One fewer string changed than the planner's version, and no finale demoted.
+
+  Four quests and a small `espejo` district, `need:3` — *La foto* (the brief is not the
   request), *Nomás tantito* (the confirm before the irreversible step), *La tía* (Chelo Robles). Naye is the only
   person in the city holding a tool that cannot be undone, and the beat she carries is human-in-the-loop with
   scissors. Next: Nacho writes the three quests EN+ES, Don Güero places the district, and the chapter block goes

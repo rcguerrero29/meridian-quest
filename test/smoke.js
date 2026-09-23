@@ -230,11 +230,32 @@ const CANDIDATES = [
     QEN.forEach(q => { max += 10; Object.values(q.nodes).forEach(n => n.ch.forEach(c => { if (c.next) max += 10; })); });
     if (max !== MAXXP) problems.push('MAXXP=' + MAXXP + ' but max achievable=' + max);
 
+    /* WHO ACTUALLY ASKS IT — the people standing in the rooms, not the table they are seeded from.
+       This read `WNPC`, the declaration of which letter on which map is which person, and that was a
+       PROXY for "somebody asks this quest" which stopped being true twice over:
+
+       - A TEMPLATE-BUILT ROOM takes its people from the interior's own `people` and never touches
+         `WNPC` (engine.js, grep `wnpcs.push` — two call sites, and only one of them reads WNPC). So a
+         quest carried by anybody in a room a BUILD brought with it read as orphaned. PLANTED: quest 13
+         moved off Lupe and onto Naye in the barbería, who really does ask it, and this printed
+         `quest 13 unassigned`.
+       - A `WNPC` ENTRY WHOSE LETTER IS IN NO MAP is never placed in any world, so its quests can be
+         started by nobody — and reading the declaration made that INVISIBLE. PLANTED: Rosa's station
+         letter changed to one no map contains, and the whole suite came back
+         `OK — 60 quests, maxXP 880, all invariants hold.` **That is the dangerous direction**: a false
+         red costs a build, a false green ships a quest a player can never reach.
+
+       Both are the same fault and both predate La llave (2026-09-07), when a person first gained a
+       second place to stand. Reading the worlds catches both, because a world's `npcs` is what the
+       engine itself asks when it decides who is standing in front of you. No growth pass is needed:
+       `applyBuilds()` runs unconditionally at load and `BLDS()` is not gated on `chSeen`, so every
+       template interior and its people exist from the first frame. */
     const assigned = new Set();
-    Object.values(WNPC).forEach(m => Object.values(m).forEach(d => d.q.forEach(qi => {
-      assigned.add(qi); if (!QEN[qi]) problems.push('WNPC references missing quest ' + qi);
+    Object.entries(WORLDS).forEach(([wid, w]) => (w.npcs || []).forEach(n => (n.q || []).forEach(qi => {
+      assigned.add(qi);
+      if (!QEN[qi]) problems.push((n.npc || n.key) + ' in ' + wid + ' asks quest ' + qi + ', and there is no such quest');
     })));
-    QEN.forEach((_, i) => { if (!assigned.has(i)) problems.push('quest ' + i + ' unassigned'); });
+    QEN.forEach((_, i) => { if (!assigned.has(i)) problems.push('quest ' + i + ' is asked by nobody — no person standing in any world carries it, so a player can never start it. (This reads the people in the rooms, not the WNPC table: a station letter that appears in no map, and anybody in a room a build brought with it, were both invisible here until 2026-09-23.)'); });
     // every district's last visit is written in both languages: three endings, the burnout,
     // and the toast that opens the next lot (or says nothing opens). A chapter wired
     // to a missing key would print "undefined" on the one screen the player waited for.
@@ -357,6 +378,25 @@ const CANDIDATES = [
     for (let ci = 1; ci < CHAPTERS.length; ci++) {
       const c = CHAPTERS[ci], last = ci === CHAPTERS.length - 1, k = chClose(c);
       if (!(c.need < c.quests.length)) problems.push(`district ${c.id}: need must be lower than its pack size`);
+      /* EVERY ENDING A DISTRICT HAS MUST BE REACHABLE, and the arithmetic is the whole check.
+         A district ends the instant `need` quests are answered (chClosed), and gradeOf divides by
+         how many were ANSWERED — not by how many exist. So at the moment the ending is picked the
+         denominator IS `need`, the only scores possible are 0/need .. need/need, and the grade
+         bands are 0.9 and 0.6. At need:2 that gives 0, 0.5, 1 -> grades 1, 1, 3: GRADE 2 CAN NEVER
+         HAPPEN. Somebody writes three endings, two of them ever appear, nothing errors, no test
+         fails, and the only way to find out is to do this multiplication.
+         Caught by Nacho in 2026-09-16 while COSTING El Espejo, which was signed at need:2 and not
+         yet built — so no ending has ever been lost in this game, and every shipped district
+         reaches 1, 2 and 3 today. It was written into docs/CITY.md as prose and guarded nowhere,
+         which is why it is here: a lesson in a ledger is not a guard, and the next district added
+         at need:2 would have passed the line above it. */
+      {
+        const bands = [];
+        for (let k = 0; k <= c.need; k++) { const clean = k / c.need; bands.push(clean >= 0.9 ? 3 : clean >= 0.6 ? 2 : 1); }
+        const reach = [...new Set(bands)];
+        [1, 2, 3].forEach(g => { if (!reach.includes(g))
+          problems.push(`district ${c.id}: grade ${g} can never happen, so the ending written for it is never shown. It closes at need:${c.need}, and gradeOf divides by how many were ANSWERED — which at the ending is exactly need — so the only scores are ${bands.map((_, k) => k + '/' + c.need).join(', ')} and they land on grades ${bands.join(', ')}. A district needs at least four quests and need:3 for all three endings to be reachable.`); });
+      }
       if (k !== null && c.quests.indexOf(k) < 0) problems.push(`district ${c.id}: the quest it closes on (${k}) is not one of its own`);
       // the count alone, WITHOUT the closing visit, must not be enough
       if (k !== null) {
