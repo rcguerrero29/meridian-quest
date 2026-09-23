@@ -4436,6 +4436,54 @@ function portalNudge(){
     return;
   }
 }
+/* ---------- A PERSON MAY BE TWO THINGS ----------
+   For the whole life of this engine a person has been ONE thing. `checkTalk`'s chain below is
+   else-if and a pending quest is its first branch, so a quest HID a service completely: it sets
+   `dataset.qi` and deletes `dataset.chatn`, and `dataset.chatn` is the only thing the doc, the room,
+   the fitting room and the chair are ever dispatched from. Nobody noticed because nobody had both.
+
+   Found 2026-09-23 by a plant aimed at something else entirely: a quest was moved onto Naye to test
+   an unrelated guard, and two other guards came back with "the chair did not open". The barber's
+   chair is the owner's own ask (2026-09-07, *"open the ability to change our character outfit and
+   haircut after start. maybe have a small barber"*) and the district being planned for her would have
+   switched it off for its whole length, silently, with every suite green. docs/POSTMORTEM.md §13w.
+
+   So: a person who has a quest AND runs something offers BOTH — the quest on Talk, the service on
+   its own button beside it, the same way a readable thing beside you gets its own button. The two
+   functions below are the ONE place the service is named and the ONE place it is opened; the click
+   handler on Talk was a second copy of this chain and now calls svcRun instead, so they cannot drift.
+
+   BEHAVIOUR-IDENTICAL FOR EVERYONE TODAY: no person in either game has a quest and a service at the
+   same time, so `#serve` never appears until one does. A shell without the button (an older pack's
+   own index.html) simply keeps today's behaviour — every use of it is guarded. */
+function svcKind(who,n){
+  const dn=n||(CW().npcs||[]).find(m=>m.npc===who);
+  if(dn&&dn.doc)return "doc";                                  /* a person the record placed hands you a document */
+  if(roomHosts[who])return "room";
+  if(who===GRW().wardrobeNpc)return "wardrobe";                /* content nominates who runs the fitting room */
+  if(who===GRW().barberNpc)return "chair";                     /* ...and who runs the chair */
+  return null;
+}
+/* what the button SAYS. Separate from svcKind on purpose: the chair and the fitting room dispatch
+   whether or not their hint string exists, and only the LABEL depends on it — which is exactly how
+   the chain below has always behaved, and changing that would be a silent regression for a pack
+   that ships no hint. */
+function svcLabel(who,n){
+  const k=svcKind(who,n),dn=n||(CW().npcs||[]).find(m=>m.npc===who);
+  if(k==="doc")return docTitle(dn.doc);
+  if(k==="room"){const rh=roomHosts[who];return (rh.talk&&(rh.talk[lang]||rh.talk.en))||"";}
+  if(k==="wardrobe")return T().wdHint||"";
+  if(k==="chair")return T().chairHint||"";
+  return "";
+}
+function svcRun(who,n){
+  const k=svcKind(who,n),dn=n||(CW().npcs||[]).find(m=>m.npc===who);
+  if(k==="doc"){docOpen(dn.doc);return true;}
+  if(k==="room"){roomStart(roomHosts[who],who);return true;}
+  if(k==="wardrobe"){openWardrobe();return true;}
+  if(k==="chair"){openChair(who);return true;}
+  return false;
+}
 function checkTalk(){
   portalNudge();
   checkRead();
@@ -4455,8 +4503,17 @@ function checkTalk(){
       tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]} — “${T().wdHint}”`;tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
     else{tb.textContent=`${T().talkPre}${npcName(n.npc).split(" ·")[0]}`;
       tb.dataset.chatn=n.npc;delete tb.dataset.qi;}
-    tb.hidden=false;}
-  else $("talk").hidden=true;
+    tb.hidden=false;
+    /* the service, beside the quest and never instead of it */
+    const sb=$("serve");
+    if(sb){const k=(qi!==undefined)?svcKind(n.npc,n):null;
+      if(k){const lb=svcLabel(n.npc,n);
+        sb.textContent=lb?`“${lb}”`:`${T().talkPre}${npcName(n.npc).split(" ·")[0]}`;
+        sb.dataset.svcn=n.npc;sb.hidden=false;}
+      else{sb.hidden=true;delete sb.dataset.svcn;}}
+  }
+  else{$("talk").hidden=true;
+    const sb=$("serve");if(sb){sb.hidden=true;delete sb.dataset.svcn;}}
 }
 /* the Read button: a readable thing one step away. It answers EVERY time it is pressed —
    silence reads as a broken control (owner, 2026-09-03: "even if they just say an npc line
@@ -4524,12 +4581,10 @@ $("docDl").addEventListener("click",()=>{
 $("talk").addEventListener("click",()=>{
   const tb=$("talk");
   if(tb.dataset.chatn){
-    const dn=CW().npcs.find(m=>m.npc===tb.dataset.chatn);
-    if(dn&&dn.doc){docOpen(dn.doc);return;} /* a person the record placed hands you the document */
-    if(roomHosts[tb.dataset.chatn]){roomStart(roomHosts[tb.dataset.chatn],tb.dataset.chatn);return;}
-    /* content nominates who runs the fitting room; the engine just opens it */
-    if(tb.dataset.chatn===GRW().wardrobeNpc){openWardrobe();return;}
-    if(tb.dataset.chatn===GRW().barberNpc){openChair(tb.dataset.chatn);return;} /* the chair: content nominates the barber; the engine reopens the creator */
+    /* the document, the room, the fitting room and the chair all live in svcRun now — this was a
+       second copy of that chain and the two could drift. A person with nothing to run falls through
+       to their chat lines exactly as before. */
+    if(svcRun(tb.dataset.chatn))return;
     const L=chillLines(tb.dataset.chatn)||(T().chat||{})[tb.dataset.chatn]||[];
     /* A line with nobody's name on it is a line you cannot place: half the barrio sounds
        alike on a phone screen (owner, 2026-09-03: "its hard to tell people apart, should
@@ -4538,6 +4593,9 @@ $("talk").addEventListener("click",()=>{
     if(L.length){let ln=L[Math.floor(Math.random()*L.length)];if(typeof ln==="function")ln=ln(); /* a line may be counted at the moment it is said (El Portero, #8) */
       const crit=!!(ln&&ln.crit);ln=(ln&&ln.t!==undefined)?ln.t:ln;toast(sayAs(tb.dataset.chatn,ln),2800,crit);}return;}
   questStart(+tb.dataset.qi);});
+/* the service button. It only ever exists beside a quest, so it has exactly one job. */
+{const sb=$("serve");
+ if(sb)sb.addEventListener("click",()=>{const who=sb.dataset.svcn;if(who)svcRun(who);});}
 let petTarget=null,petCrit=null;
 function fredCheck(){ /* now the generic animal-interaction check: every creature is reachable and greetable */
   let tgt=null,label="";

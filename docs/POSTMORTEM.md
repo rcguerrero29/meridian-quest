@@ -820,6 +820,35 @@ about the GAME rather than noise around the guard.** The two extra lines under t
 valuable output of the run, and the natural reading — "my plant was sloppy, those are side effects" —
 is the one that throws them away.
 
+### 13x · A person had been one thing for the whole life of the engine, and nothing said so
+
+**Believed:** `checkTalk` picks the most important thing a neighbour has to offer. **True:** it picks
+the ONLY thing. The chain is else-if with a pending quest first, and that branch sets `dataset.qi` and
+**deletes `dataset.chatn`** — which is the single key the carried document, the room host, the fitting
+room and the barber's chair are all dispatched from. A person with a quest therefore had no service,
+silently, with no warning anywhere.
+
+**Why it survived a year:** nobody in either game had both. The fault needed a district to be planned
+for the one person who runs a service, and it was found by a plant aimed at an unrelated guard
+(§13w). **A constraint that only appears when two features meet cannot be found by reading either
+feature.**
+
+**The fix is a seam, not a special case:** `svcKind` / `svcRun` are now the one place a service is
+named and the one place it is opened, and a person who has both offers both — the quest on Talk, the
+service on its own button beside it, exactly as a readable thing beside you already gets its own
+button. The Talk click handler had carried a second copy of that dispatch chain and could have
+drifted from `checkTalk`'s; it calls `svcRun` now.
+
+**Guarded, and planted both ways it can regress.** With the button missing from the shell:
+*"this shell has no #serve button, so a person who has a quest AND runs something can only ever offer
+one of them."* With the button present but never shown — the exact pre-fix behaviour: *"the barber has
+a quest and runs the chair, and only the quest is offered … The owner asked for that chair on
+2026-09-07."*
+
+**Rule:** when a feature reads one key off a shared object to decide what something IS, ask what
+happens to everything else that reads the same key. `dataset.chatn` was doing four jobs and a fifth
+feature deleted it.
+
 ## How to add to this file
 
 Same discipline as every register here: **it grows from what happened, never from imagination.** An

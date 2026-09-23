@@ -118,6 +118,38 @@ it. The shortest version: *a count whose noun is a line in a file passes for eve
 actually mean, and plant a real violation against your guard in a copy **outside** this repository —
 reading a guard is not checking it.
 
+## 5½ · The craft lives in skill files — read the one for your task before you start
+
+*Owner, 2026-09-23: "if i wanted jules to try to lets say beautify and shape, since it doesnt have
+access to my skills…"* — **it does.** Every skill this project has learned is a plain markdown file
+under `.claude/skills/`, and you have the checkout. What you did not have was the pointer: Claude Code
+matches a task to each skill's description on its own, and you only read what this file tells you to.
+**So this is that pointer.** It is a routing table and not a copy, on purpose — a second copy of a
+method written "for the other AI" drifts within a week, and then two agents work to two methods.
+
+| If your task is… | Read this first | What it carries |
+|---|---|---|
+| making anything look better — "beautify", "it still looks like a box", "it looks generated" | [`shaping`](.claude/skills/shaping/SKILL.md), then [`how-its-made`](.claude/skills/how-its-made/SKILL.md) | silhouette before colour at the size it is really seen; wrong three times means rebuild, not re-tune; build a thing in the order it was made |
+| giving a tile a 3D shape **in this engine** | [`shapes`](.claude/skills/shapes/SKILL.md) | the engine half of `shaping`: the `mesh` seam, the shape library, the guards and the version bump |
+| writing or trusting any test, check or CI step | [`guard`](.claude/skills/guard/SKILL.md) | already required by §5 — the four ways a guard fools its author |
+| adding or resizing a district, its quests or its `need` | [`district`](.claude/skills/district/SKILL.md) | the arithmetic that decides whether an ending can ever be shown |
+| a door, a staircase, a floor, a world boundary | [`stairs`](.claude/skills/stairs/SKILL.md) | the five questions, and what this engine does at a portal |
+| filing an issue | [`ticket`](.claude/skills/ticket/SKILL.md) | one symptom per issue, plain words first, the five headings |
+
+**Three of this project's skills do not transfer, and pretending otherwise is worse than skipping
+them.** `crew-fix`, `meeting-of-da-minds` and the planner skills (`don-guero`, `nacho`) spawn Claude
+subagents; you cannot convene them. You CAN read them as method: `crew-fix`'s loop — ground the facts,
+write the failing test, show what done looks like, fix, review your own diff — is a sound process for
+one agent working alone. The personas in `.claude/agents/` are readable reference, not callable.
+
+**And the rule the craft skills put first is the one most likely to be out of your reach:** *render
+it at the size it is really seen, and look, before you reason about it.* This project renders through
+headless Chromium (`test/shots.js`, and every suite in §5 needs it too). **On your first run here,
+find out whether you can run `node test/smoke.js` at all.** If you cannot, you cannot keep §5 either,
+and that is the thing to report — before any beautifying.
+
+---
+
 ## 6 · Write the run ledger — one file, and it is not optional
 
 Every run writes exactly one file: **`docs/runs/<RUN-ID>.md`**, from

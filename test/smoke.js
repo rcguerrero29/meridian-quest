@@ -114,6 +114,36 @@ const CANDIDATES = [
           if (bs.position !== 'sticky') problems.push('the way out of the chair does not ride the bottom of the panel');
           if (br.width < 40 || br.height < 20) problems.push('the way out of the chair has no size');
           out.click(); if (!$('creator').hidden) problems.push('pressing the way out does not leave the chair'); }
+
+        /* ---- AND THE CHAIR SURVIVES HER HAVING A QUEST ----
+           For the whole life of this engine a person was ONE thing: checkTalk's chain is else-if and
+           a pending quest is its first branch, so a quest deleted `dataset.chatn` and that key is the
+           only thing the chair, the fitting room, a room host and a carried document are dispatched
+           from. Give the barber a quest and the chair the owner asked for on 2026-09-07 silently
+           disappeared for as long as it was unanswered — with every suite green, because nobody in
+           either game had both until a district was planned for her.
+           Found by a plant aimed at a completely different guard (docs/POSTMORTEM.md §13w), so this
+           is the check that would have caught it on purpose. It hands her a quest, asserts Talk
+           offers the QUEST and the new button offers the SERVICE, presses the service, and puts her
+           back exactly as she was. */
+        const hadQ = n.q;
+        const free = QEN.findIndex((_, i) => !done.has(i) && qOpen(i));
+        if (free < 0) problems.push('no open quest to lend the barber, so the two-things check measured nothing — that is not a pass.');
+        else {
+          n.q = [free]; checkTalk();
+          const tb = $('talk'), sb = $('serve');
+          if (tb.hidden || tb.dataset.qi === undefined)
+            problems.push('with a quest on her, the barber stopped offering the quest: Talk is ' + (tb.hidden ? 'hidden' : 'showing "' + tb.textContent + '"') + '.');
+          if (!sb) problems.push('this shell has no #serve button, so a person who has a quest AND runs something can only ever offer one of them.');
+          else if (sb.hidden)
+            problems.push('the barber has a quest and runs the chair, and only the quest is offered — the chair is gone until the quest is answered. checkTalk sets dataset.qi and deletes dataset.chatn, and dataset.chatn is the only thing the chair is dispatched from. The owner asked for that chair on 2026-09-07.');
+          else {
+            sb.click();
+            if ($('creator').hidden) problems.push('the service button is showing beside the barber\'s quest and pressing it does not open the chair.');
+            else { $('begin').click(); }
+          }
+          n.q = hadQ; checkTalk();
+        }
       }
       seasonSet(keep.season || 'auto'); world = keep.world; px = fx = keep.px; py = fy = keep.py;
       return problems;
