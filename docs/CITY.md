@@ -315,6 +315,16 @@ would have none left unless looks key by npc instead.
   so the marker works, and this ledger already noted that Calle Dos has six people and not one has ever
   carried one. One fewer string changed than the planner's version, and no finale demoted.
 
+  **WHO CARRIES THEM — settled 2026-09-23, owner: *"if option b is easiest, go for it."*** The four
+  quests go to **Yaz, the apprentice**; **Naye keeps her chair.** This started as a way around a bug —
+  a person with an unanswered quest could not also run a service, so quests on Naye switched off the
+  barber's chair the owner asked for on 2026-09-07 — but **the engine was fixed first** (`svcKind`/
+  `svcRun`, a person may be two things; `docs/POSTMORTEM.md` §13x), so this is now a free STORY choice
+  and not a workaround. It is the better one either way: the district's closing lesson is that the
+  handover is the spec and the name of the person who owns it, so the apprentice asking the questions
+  ACTS that out instead of describing it. Naye is still why the district exists — she holds the tool
+  that cannot be undone — and she is still the one you go to for a haircut.
+
   Four quests and a small `espejo` district, `need:3` — *La foto* (the brief is not the
   request), *Nomás tantito* (the confirm before the irreversible step), *La tía* (Chelo Robles). Naye is the only
   person in the city holding a tool that cannot be undone, and the beat she carries is human-in-the-loop with
