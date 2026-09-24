@@ -11,7 +11,12 @@ current: each session rewrites the queue before signing off.)*
 - **#247** (`tier: high`) — look at security again after the Jules day. Inside it, the three switches:
   **protect `main`** (ON since 2026-09-24 — still check `GET /repos/rcguerrero29/meridian-quest/rules/branches/main`
   each session; empty means someone switched it off), **secret scanning + push protection** (only he can see it), **approve every deploy** on the
-  `github-pages` environment (not readable from a session's proxy). And his laptop's git commits with his personal address, which is public in the history since 527a35a: the no-reply address and GitHub's email privacy settings (the fix is in #247's comments).
+  `github-pages` environment (not readable from a session's proxy). And his personal addresses in commit history — **corrected 2026-09-24:** not only since 527a35a. Two of his personal
+  addresses are public as commit author: one on 17 commits made by Claude sessions under his git identity (2026-08-30,
+  09-13, 09-14 — each carries Claude's co-author line), the other on his own verdict commit 527a35a. Neither is in any
+  file, ever, nor in any of the 380 issues, PRs and comments (checked 2026-09-24). He set the no-reply address and
+  GitHub's email privacy switches (his word); **confirm on his next pushed commit, and on the next Claude commit made
+  from his laptop.** History is not rewritten: it would change every commit since 2026-08-30 and copies already exist.
 - **#193** (`tier: low`) — a paste into the admin text lab can reach a shared object's prototype.
 - **The lock is guarded:** `test/protect.js` (workflow `protect.yml`: every PR, every push to `main`, and daily at
   13:17 UTC; not required) goes red when `main`'s protection is switched off or weakened. What it cannot see — the
