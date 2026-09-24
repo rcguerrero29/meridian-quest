@@ -365,6 +365,23 @@ token it is not.** `test/smoke.js:3702` looks for the literal `github_pat` and t
 because those never reach the box. The promise holds where it is scoped ("in the public shell"); the
 guard it names is the wrong one.
 
+**Added 2026-09-24 — the envelope, which this row never read.** Everything above is about what goes INTO a
+commit. Every commit also carries **an author name and address and a committer address**, sent to a public
+server on every push and kept in the history for good — and none of it is in a diff, so no review, no persona
+and no guard ever looked. Two of the owner's personal addresses reached `main` that way: one on 17 commits
+Claude sessions made in the cloud (2026-08-30 to 2026-09-14), one on his own verdict commit (2026-09-23). The
+owner named the risk: *targeted phishing*. **Promise:** only no-reply addresses leave town — in a commit's
+author, committer or message, or in any file git could ship. **Guards:** `test/authors.js`, an allow-list
+closed by default, which names a domain and never an address because CI logs are public — in `smoke` on
+every PR and push, and as a `PreToolUse` hook (`.claude/settings.json`) that refuses a Claude session's
+`git push` on the machine, **before** anything is published, which CI cannot do. **Last planted against:
+2026-09-24** — a personal author, a personal co-author trailer, an address in an uncommitted doc, an
+unreadable base, and four edits to the guard itself (a whole mail domain allowed, the message unread, the
+address printed, the allow-list unanchored): all red. **Re-run by:** the self-test (29 cases) and the live
+range in `smoke`. **Not guarded:** what is already public — the range never reaches back to it; commits made
+through the GitHub API or web editor are read only by CI, after they exist; and names, which the rule does
+not judge.
+
 ### 14 · The crew's own files
 **Line: nothing** (they never ship) — **and the public build.**
 **Promise.** `.claude/` is not on the allowlist (`scripts/build-site.sh:18-20`) and is on the NEVER
@@ -555,6 +572,8 @@ has no date.*
 | `changarrito/README.md` | zeni | a key — the origin the key is allowed to exist on | 2026-09-13 |
 | `.gitignore` | zeni | nothing — what reaches a commit | 2026-09-13 |
 | `test/protect.js` | zeni, melo | a key — the workflow's `contents: read` token (by hand: whatever `GITHUB_TOKEN` the shell holds), sent to `api.github.com` alone, to read whether `main` is still locked | 2026-09-24 |
+| `test/authors.js` | zeni, melo | a commit's envelope — the author, committer and message addresses every push publishes, and every address in a shippable file; only no-reply ones may leave | 2026-09-24 |
+| `.claude/settings.json` | zeni, melo | a hook — code every Claude session in this repository runs before each Bash command; today it only refuses a push that would publish a personal address | 2026-09-24 |
 | `CLAUDE.md` | chuy | nothing — where the promises are written down | 2026-09-13 |
 
 ### Does that script read a noun or a proxy? — a proxy, and here is exactly which

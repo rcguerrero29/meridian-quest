@@ -7,7 +7,13 @@ current: each session rewrites the queue before signing off.)*
 
 ### 🔒 SECURITY — first, always, with the count (owner, 2026-09-24; `AGENTS.md` §0½)
 
-**Open on 2026-09-24, 03:48 UTC: 2 issues labelled `security`, and 3 switches only the owner can flip.** **`main` is protected** since that night: ruleset `main-lock`, no bypass, deletion and force-push blocked, a PR required with 0 approvals, `smoke` required from GitHub Actions (15368) on an up-to-date branch — checked against the live rules endpoint, not the command that set it.
+**Open on 2026-09-24, 06:30 UTC: 3 issues labelled `security` (#252 and #247 at `tier: high`, #193 low), and the owner-only
+switches inside them: secret scanning with push protection (unconfirmed), and #252's passkeys on the accounts behind his two public
+addresses.** *(At 03:48 UTC it was 2 issues and 3 switches; `main`'s lock and deploy approval have since gone on.)* **`main` is protected** since that night: ruleset `main-lock`, no bypass, deletion and force-push blocked, a PR required with 0 approvals, `smoke` required from GitHub Actions (15368) on an up-to-date branch — checked against the live rules endpoint, not the command that set it.
+- **#252** (`tier: high`, 2026-09-24) — two of his personal addresses are public as commit authors for good (17 Claude commits
+  from the cloud, 2026-08-30 to 09-14, and his own 527a35a). The risk is **targeted phishing**, not spam. His part: passkeys on
+  GitHub and on both Google accounts, and a look at authorised apps. Ours: `test/authors.js`, in CI and as the push hook in
+  `.claude/settings.json`; `docs/BOUNDARY.md` row 13 now names the envelope as well as the letter.
 - **#247** (`tier: high`) — look at security again after the Jules day. Inside it, the three switches:
   **protect `main`** (ON since 2026-09-24 — still check `GET /repos/rcguerrero29/meridian-quest/rules/branches/main`
   each session; empty means someone switched it off), **secret scanning + push protection** (only he can see it), **approve every deploy** on the

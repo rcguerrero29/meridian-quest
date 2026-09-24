@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/test/authors.js\" --hook",
+            "timeout": 60,
+            "statusMessage": "Checking this push publishes no personal address"
+          }
+        ]
+      }
+    ]
+  }
+}
