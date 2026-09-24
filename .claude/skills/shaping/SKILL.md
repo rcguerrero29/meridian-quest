@@ -31,8 +31,9 @@ at the step it actually entered, and nowhere earlier* — is the single most com
 
 ## 1 · Silhouette first, then value, then colour. In that order, every time.
 
-Decide the size the thing will actually be seen at, and be honest about it. Most objects in most
-projects are looked at far smaller than they are authored.
+Decide the size **and the view** the thing will actually be seen at, and be honest about both. Most
+objects in most projects are looked at far smaller than they are authored, and from an angle nobody
+chose.
 
 **At small sizes the outline is the whole message.** A head with petals sticking out of it. A crate
 whose contents mound *above* the rim. A vehicle with a pole over its roof. What does not survive is
@@ -41,6 +42,14 @@ something nobody will see.
 
 > **If a thing "still looks like a box", its silhouette is still a box.** No colour, material or
 > lighting change will fix that, and every hour spent on those is an hour spent not fixing it.
+
+**The view is the other half, and it decides your evidence too.** A stacked thing — a burger, a
+cake — wants a lower camera that shows its layers; a plated thing wants a higher one that shows the
+plate. And a before-and-after is only evidence if the thing is IN the frame: on one project, three
+rounds of renders showed a building cut off at the frame's edge, behind a passing vehicle, a tree
+and a tutorial bubble, and the change could not have been seen in any of them. **Pick the frame
+first** — where a person actually stands, at the angle the camera actually has, with nothing in
+front — and take the before and the after from exactly that frame.
 
 ---
 
@@ -158,7 +167,7 @@ not the reasoning that produced it.
 ## The short version
 
 1. Ask how it was made, and build it in that order.
-2. Silhouette first, at the size it will really be seen.
+2. Silhouette first, at the size and from the view it will really be seen.
 3. Wrong three times the same way? Rebuild, do not re-tune.
 4. Learn the light's real range, then paint the differences in.
 5. Make the seed move on both axes, and check it by magnifying.

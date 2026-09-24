@@ -48,6 +48,7 @@ scroll, so the only way out is to reload" beats "UI overflow issue".
 
 | Label | When |
 |---|---|
+| `security` | anything that touches safety: a hole, an access, a secret, a switch only the owner can flip. **Always counted and listed first** (`AGENTS.md` §0½); an owner-only switch goes in at `tier: high` |
 | `bug` | it is broken or wrong today |
 | `ask` | build this, change this, decide this |
 | `decision` | the owner must choose before anything can be built |
