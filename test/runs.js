@@ -71,11 +71,15 @@ function lastTouch(rel) {
   const shallow = gitLines(['rev-parse', '--is-shallow-repository']);
   if (shallow === null) return { ran: false, why: 'git is not available here' };
   if (shallow.trim() === 'true') return { ran: false, why: 'the checkout is shallow, and on a shallow clone `git log -1 -- file` returns HEAD for every file, which would be the wrong commit (ci.yml needs fetch-depth: 0 for this half to run)' };
-  const log = gitLines(['log', '-1', '--format=%H%x00%an%x00%ae%x00%B', '--', rel]);
+  /* The hash and the message only — never the author's name or address. Until 2026-09-24 this read
+     `%an <%ae>` and printed it in a NOTE on every CI run, and CI logs on a public repository are public:
+     the owner's full name and a personal address, eleven times a run, from 2026-09-23. The question this
+     answers is whether an AGENT set the word, which the trailer answers; who the human was is not asked. */
+  const log = gitLines(['log', '-1', '--format=%H%x00%B', '--', rel]);
   if (log === null) return { ran: false, why: 'git log failed here' };
   if (!log.trim()) return { ran: false, why: 'no commit in this checkout touches the file' };
-  const [sha, an, ae, body] = log.split('\u0000');
-  return { ran: true, sha: (sha || '').slice(0, 8), who: an + ' <' + ae + '>', agent: AGENT_TRAILER.test(body || '') };
+  const [sha, body] = log.split('\u0000');
+  return { ran: true, sha: (sha || '').slice(0, 8), agent: AGENT_TRAILER.test(body || '') };
 }
 
 function runs(root) {
@@ -152,9 +156,9 @@ function runs(root) {
       const t = lastTouch(rel);
       if (!t.ran) notes.push(rel + ' is "' + status + '" and this check COULD NOT VERIFY who set it: ' + t.why +
                              '. That is not a pass — the binding record is the issue the owner closed (docs/RUNS.md §5)');
-      else if (t.agent) say('is "' + status + '", and the commit that set it (' + t.sha + ', ' + t.who + ') carries an agent\'s Co-Authored-By trailer — ' +
+      else if (t.agent) say('is "' + status + '", and the commit that set it (' + t.sha + ') carries an agent\'s Co-Authored-By trailer — ' +
                             'accepted and rejected are the owner\'s two words and no agent may write either (AGENTS.md §8)');
-      else notes.push(rel + ' is "' + status + '", set by ' + t.sha + ' (' + t.who + '), which carries no agent trailer — a tripwire, not a vault');
+      else notes.push(rel + ' is "' + status + '", set by ' + t.sha + ', which carries no agent trailer — a tripwire, not a vault');
     }
   });
   return { P, board, notes, n: files.length };

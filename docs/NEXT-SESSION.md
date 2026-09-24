@@ -13,7 +13,8 @@ addresses.** *(At 03:48 UTC it was 2 issues and 3 switches; `main`'s lock and de
 - **#252** (`tier: high`, 2026-09-24) — two of his personal addresses are public as commit authors for good (17 Claude commits
   from the cloud, 2026-08-30 to 09-14, and his own 527a35a). The risk is **targeted phishing**, not spam. His part: passkeys on
   GitHub and on both Google accounts, and a look at authorised apps. Ours: `test/authors.js`, in CI and as the push hook in
-  `.claude/settings.json`; `docs/BOUNDARY.md` row 13 now names the envelope as well as the letter.
+  `.claude/settings.json`; `docs/BOUNDARY.md` row 13½ names the envelope; `test/runs.js` no longer prints a name or address into CI logs
+  (it did, 11 times a run, from 2026-09-23 — the owner decides whether the logs of those 23 runs are deleted).
 - **#247** (`tier: high`) — look at security again after the Jules day. Inside it, the three switches:
   **protect `main`** (ON since 2026-09-24 — still check `GET /repos/rcguerrero29/meridian-quest/rules/branches/main`
   each session; empty means someone switched it off), **secret scanning + push protection** (only he can see it), **approve every deploy** on the

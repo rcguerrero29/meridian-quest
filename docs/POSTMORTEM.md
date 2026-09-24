@@ -921,3 +921,12 @@ what they would send him.
 **3 · The date, from memory.** The session had told him the exposure began with his own laptop commit.
 `git log` said 2026-08-30, with Claude's commits. It was checked only when he asked again — §11½ of
 this file, *measure before you reassure*, broken by the session that has read it.
+
+**4 · The same address, printed by our own test.** `test/runs.js` asked git for `%an <%ae>` of whoever set a
+run's verdict and printed it in a NOTE: from 2026-09-23 that was the owner's full name and a personal
+address, eleven times on every CI run, in logs anyone can open — 23 runs before it was found. The session
+read that exact output on 2026-09-23 while checking his verdicts, and saw a pass. Zeni found it by reading the
+format string. *Cost:* a second public copy of what item 1 leaked, renewed on every push.
+**What to do instead:** a test's output is a publication. Read what it PRINTS as if a stranger will, because on
+a public repository one will. Guard: `test/authors.js` now fails any script under `test/`, `.github/` or
+`scripts/` that asks git for a name or an address.
