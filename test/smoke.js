@@ -3689,7 +3689,7 @@ const CANDIDATES = [
         tiles.forEach(d => {
           const row = WORLDS[d.wid].rows[d.y];
           const nb = [row[d.x - 1], row[d.x + 1]].filter(c => c !== undefined);
-          const house = nb.some(c => '▩▨▦'.indexOf(c) >= 0);
+          const house = nb.some(c => CASA_FACE.indexOf(c) >= 0);  // the pack's one list, not a copy (#241)
           if (d.shipped !== d.plain) { roofed.push(d.wid + ' ' + d.x + ',' + d.y);
             if (!house) problems.push('the door at ' + d.x + ',' + d.y + ' in "' + d.wid + '" has a course of roof tiles painted across the top of it and there is no house beside it — what stands either side of it is "' + nb.join('" and "') + '". Inside a room that is a strip of terracotta roof over a living-room doorway, and it is the same door glyph as the front door only because a home and the room behind it share one'); }
           else { plain.push(d.wid + ' ' + d.x + ',' + d.y);
@@ -3762,7 +3762,7 @@ const CANDIDATES = [
       // front of a windowpane is a pot in front of a windowpane.
       {
         const w0 = world, s0 = (typeof seasonPick !== 'undefined') ? seasonPick : 'auto';
-        let D = null, from = '';
+        let D = null, from = '', PT = null, TP = null;  // the pane's depth, its top edge, and the camera's pitch — all read, none typed
         try {
           seasonSet('muertos');
           const ids = Object.keys(WORLDS);
@@ -3772,7 +3772,8 @@ const CANDIDATES = [
             t3Invalidate(); draw3d();
             (T3.group.children || []).forEach(o => { const u = o.userData || {};
               if (D !== null || !u.calaverita || !u.sill) return;
-              D = o.position.z - (u.y + 0.5); from = ids[i] + ' ' + u.x + ',' + u.y; });
+              D = o.position.z - (u.y + 0.5); PT = o.position.y + o.scale.y / 2; from = ids[i] + ' ' + u.x + ',' + u.y;
+              const dir = new THREE.Vector3(); T3.cam.getWorldDirection(dir); TP = Math.tan(Math.asin(-dir.y)); });
           }
         } finally { seasonSet(s0 || 'auto'); world = w0; t3Invalidate(); draw3d(); }
         if (D === null) problems.push('no sugar skull is standing in a lit pane on any sill in the whole game with the season forced to muertos, so the depth this check compares against could not be measured at all — that is a red, not a pass');
@@ -3786,7 +3787,15 @@ const CANDIDATES = [
           // first draft of this check, bounded only by the head of the wall, reported all six roofs
           // as buried sills because the fascia dips two thousandths below it. A roof over your head
           // is not in front of your window.
+          // ❗AND ONLY WHERE IT CAN STAND BETWEEN THE PANE AND THE CAMERA (#241). Above the pane's top
+          // edge, a thing standing further out hides the pane only if the camera's line of sight from
+          // that edge passes under it: lower than the edge by nothing, higher by less than (how much
+          // further out) × tan(pitch). An awning over a shop window is a roof over the window, as the eave
+          // is over the house, and the band's old head (92% of the wall) called it a buried sill. The
+          // edge and the pitch are read off the pane and the camera the engine placed, like the depth.
           const WINLO = 0.12, WINHI = 0.92;
+          if (PT === null || !(TP > 0)) problems.push('the sweet\'s pane or the 3D camera could not be read (top ' + PT + ', pitch tangent ' + TP + '), so this check cannot tell what stands in front of a pane from what stands over it — that is a red, not a pass');
+          const inSight = (y, r, d) => y <= PT + Math.max(0, r - d) * TP;
           const widestBeyond = (o, d) => { const pa = o.geometry.attributes.position.array; let worst = 0, deep = 0;
             const WH = wallH(o.userData.g);
             [[0, 1, 2], [0, -1, 2], [2, 1, 0], [2, -1, 0]].forEach(([ax, sgn, oh]) => {
@@ -3794,6 +3803,7 @@ const CANDIDATES = [
               for (let i = 0; i < pa.length; i += 3) { const r = pa[i + ax] * sgn;
                 if (pa[i + 1] < WH * WINLO || pa[i + 1] > WH * WINHI) continue;
                 if (r <= d + 1e-4) continue;
+                if (!inSight(pa[i + 1], r, d)) continue;
                 if (r > far) far = r;
                 if (pa[i + oh] < lo) lo = pa[i + oh]; if (pa[i + oh] > hi) hi = pa[i + oh]; }
               if (hi > lo && hi - lo > worst) { worst = hi - lo; deep = far; } });
@@ -3802,7 +3812,7 @@ const CANDIDATES = [
           if (!shaped.some(o => widestBeyond(o, 0.5)[0] > 0.5))
             problems.push('with the pane moved back to the wall face this check still finds no wall-wide cast work on any shaped facade, so it cannot tell a buried pane from a clear one and is measuring nothing — that is a red, not a pass');
           shaped.forEach(o => { const [wide, deep] = widestBeyond(o, D);
-            if (wide > 0.5) problems.push('the cast work on ' + o.userData.g + ' at ' + o.userData.x + ',' + o.userData.y + ' stands ' + deep.toFixed(3) + ' out from the middle of its tile and runs ' + wide.toFixed(2) + ' of a tile wide — that is a sill or a lintel, not a pot — while the lit pane a sugar skull stands in is hung at ' + D.toFixed(3) + ' (measured off the one at ' + from + '). Give this window a `win` and the sweet\'s pane is clipped along its bottom edge by the very ledge that was built to hold it'); });
+            if (wide > 0.5) problems.push('the cast work on ' + o.userData.g + ' at ' + o.userData.x + ',' + o.userData.y + ' stands ' + deep.toFixed(3) + ' out from the middle of its tile and runs ' + wide.toFixed(2) + ' of a tile wide where the camera looks at the pane — that is a sill, a lintel or an awning, not a pot — while the lit pane a sugar skull stands in is hung at ' + D.toFixed(3) + ' (measured off the one at ' + from + '). Give this window a `win` and the sweet\'s pane is clipped along its bottom edge by the very ledge that was built to hold it'); });
         }
       }
 

@@ -483,3 +483,30 @@ new polygonal update for all these and what we or you learned from marigolds?").
     headlamps, a bell, fenders, grab rails on the open platforms. **The wheel guard fires at four now,
     not two** — planted first in a copy outside the repo with one axle's pair deleted: *"the trolley
     has 2 wheels — a tram that rolls down a street has wheels you can see"*, exit 1.
+
+### 2026-09-24 · #241 — "The barbería on Calle Dos looks like somebody's house"
+
+- **The ask** (the issue's own *Done when*): standing on the pavement at phone size, it reads as a
+  barbershop and not as a house, in the top, front and 3D cameras; its door still opens into Naye's
+  shop; the houses beside it unchanged.
+- **What was made — `◫`, EL ESCAPARATE, in the order a barber fits out a front room.** The house
+  first and untouched (`casaBase`, `casaShell`: it IS the same small house). Then the window knocked
+  wider into one pane, with the chair's back and the mirror inside where the street can see them; a
+  striped canvas awning over each window with a blue valance; and one pole on a wall bracket, standing
+  0.15 off the wall, carried by whichever tile has the door as its east neighbour. The awning is the
+  outline change that reads first; the pole is the one that says *which* trade.
+- **What it cost:** about 60 parts on the pole's tile and 45 on the other, one mesh per tile as
+  before; no draw calls added. No phone measured.
+- **What it taught.** Jules' round (#244, closed) put two thin poles and bluer glass on an unchanged
+  outline, then fixed the count of poles by turning one window back into a house. The outline was the
+  whole job, and the fix for "two" is to ask the street which tile is beside the door, not to take a
+  tile away.
+- **A guard measured a stand-in, and the awning found it.** `test/smoke.js` (10), the sweet's pane,
+  counted anything wide and proud between 12% and 92% of the wall as a buried sill. It now counts a
+  part only where it stands between the pane and the camera: the pane's top edge and the camera's
+  pitch are read off the scene, like the pane's depth already was. Four plants outside the repository
+  stay red; `docs/REGRESSION.md` row 31. The awning's valance was raised 0.02 to clear that sightline.
+- **Not done:** the iso camera still draws `◫` as a coloured slab (an engine limit #241 names). The
+  flat cameras cannot centre the building — it is the last three tiles of the row — so there the
+  corner buttons cover part of it; the awnings still read between them.
+- Frames: `docs/mocks/2026-09-24-barberia/`.
