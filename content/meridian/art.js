@@ -2454,7 +2454,7 @@ function casaRoof2D(sx,sy){
    casa face beside this tile? Inside, the neighbours are `#` and the answer is 0 — the engine's
    own door, not one pixel changed. This is also why the seam takes a function: a door glyph is
    not a place, and only the pack knows which of its doorways has a house on top of it. */
-const CASA_FACE="▩▨▦";
+const CASA_FACE="▩▨▦◫";  /* ◫ is the barbería's shopfront (#241): the same house, with a trade in it */
 const casaRoofOver=(x,y)=>{const w=CW(),r=w&&w.rows&&w.rows[y];
   if(!r||x===undefined)return false;
   const L=r[x-1],R=r[x+1];
@@ -2505,6 +2505,40 @@ TILEART["▩"]=rc=>{const{sx,sy}=rc;                                   /* the wi
   ctx.fillStyle="#B4633A";ctx.fillRect(sx+13,sy+21,6,4);             /* the pot, thrown, standing on it */
   ctx.fillStyle="#C9754A";ctx.fillRect(sx+12.4,sy+20.4,7.2,1.4);     /* its rim */
   ctx.fillStyle="#5F8A42";[[12.6,17.6,3.4,3.4],[15.4,16.8,3.6,4.2],[17.6,18,3.2,3]].forEach(q=>ctx.fillRect(sx+q[0],sy+q[1],q[2],q[3]));};
+/* ◫ — EL ESCAPARATE (#241). The barbería is the same small house as the ones beside it, and that
+   is the truth to keep: a barber rented a front room and fitted it out. So it is built in the order
+   the fitting-out happened (.claude/skills/how-its-made): the house first, untouched (casaBase and,
+   in 3D, casaShell); then the window knocked wider into one pane so the street can see the chair;
+   then a canvas awning over it; then ONE pole on a bracket beside the door. The pole is the outline
+   change (.claude/skills/shaping §1): it stands off the wall, so it survives being 35 px wide.
+   Which tile carries the pole is asked of the street, not written into the tile: the one whose east
+   neighbour is a door. On Calle Dos that is the west window, and the east window is the map's edge,
+   so it can only happen once. */
+const BARB_RED="#C8423A", BARB_BLUE="#2F4F8F", BARB_CANVAS="#F1ECE2", BARB_GLASS="#F4F4F4", BARB_STEEL="#B8B8B8";
+TILEART["◫"]=rc=>{const{sx,sy,x,y}=rc;
+  casaBase(sx,sy);
+  const w=CW(),r=w&&w.rows&&w.rows[y],pole=!!(r&&typeof DOORSET!=="undefined"&&DOORSET.has(r[x+1]));
+  const R=pole?25:29;                                                /* the shopfront stops short of the pole */
+  for(let i=0;sx+3+i*3<sx+R;i++){                                    /* the awning's canvas, striped */
+    ctx.fillStyle=i%2?BARB_CANVAS:BARB_RED;ctx.fillRect(sx+3+i*3,sy+10,Math.min(3,R-3-i*3),4);}
+  ctx.fillStyle=BARB_BLUE;ctx.fillRect(sx+3,sy+14,R-3,1.6);          /* its valance */
+  ctx.fillStyle="rgba(0,0,0,.30)";ctx.fillRect(sx+3,sy+15.6,R-3,1);  /* the shade it throws */
+  ctx.fillStyle="#5C4029";ctx.fillRect(sx+4,sy+16.6,R-5,9);          /* the opening, knocked wider */
+  ctx.fillStyle=CASA_TRIM;ctx.fillRect(sx+5,sy+17,R-7,8.2);          /* one frame, no bar: a shop pane */
+  ctx.fillStyle="#7FA3C4";ctx.fillRect(sx+6,sy+18,R-9,6.4);          /* glass with a room behind it */
+  ctx.fillStyle="#B89B6A";ctx.fillRect(sx+7.5,sy+18.5,5,5.4);        /* the mirror's frame, on the back wall */
+  ctx.fillStyle="#E6EEF4";ctx.fillRect(sx+8.3,sy+19.2,3.4,4);        /* the mirror */
+  ctx.fillStyle="#6A2626";ctx.fillRect(sx+15.5,sy+19,3,1.4);         /* the chair's headrest */
+  ctx.fillStyle="#7A2E2E";ctx.fillRect(sx+14.5,sy+20.4,5,4);         /* the chair's back, facing the mirror */
+  ctx.fillStyle=CASA_SILL;ctx.fillRect(sx+3,sy+25.2,R-3,1.8);        /* the sill, kept from the house */
+  if(!pole)return;
+  ctx.fillStyle="#8C8C8C";ctx.fillRect(sx+26,sy+17.5,5,1.2);ctx.fillRect(sx+26,sy+23.5,5,1.2);  /* two brackets */
+  ctx.fillStyle=BARB_STEEL;ctx.fillRect(sx+27,sy+15.2,4.6,1.8);ctx.fillRect(sx+27,sy+24.6,4.6,1.8);  /* the caps */
+  ctx.fillStyle="#D8D8D8";ctx.fillRect(sx+28.2,sy+13.6,2.2,1.6);     /* the globe on top */
+  for(let j=0;j<8;j++)for(let c=0;c<4;c++){                           /* the glass, banded on the slant */
+    ctx.fillStyle=[BARB_RED,BARB_GLASS,BARB_BLUE,BARB_GLASS][Math.floor((j+c)/2)%4];
+    ctx.fillRect(sx+27.3+c,sy+17+j*0.95,1,0.95);}
+};
 TILEART["▨"]=rc=>{const{sx,sy,x,y}=rc;                               /* the blank wall, with a lamp */
   /* A blank wall is where a house keeps its fittings: the lamp on its bracket, and the meter with
      its conduit running down to the ground. Nothing says "somebody pays a bill here" faster.
@@ -2542,6 +2576,7 @@ Object.assign(TILEMETA,{
   "ʘ":{lift:8,kind:"appliance"},
   "▦":{lift:13,kind:"facade"},
   "▩":{lift:13,kind:"facade"},
+  "◫":{lift:13,kind:"facade"},   /* casaWH reads lift: anything but 13 puts a step in the roof */
   "▨":{lift:13,kind:"facade"},
 });
 
@@ -2600,7 +2635,7 @@ const casaFront=(x,y)=>{const w=CW(),free=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy
 const casaMeterHere=(x,y)=>{const w=CW(),ry=casaFront(x,y),
   ax=Math.round(Math.cos(ry)),az=Math.round(-Math.sin(ry)),
   r=w&&w.rows&&w.rows[y+az],g=r&&r[x+ax]!==undefined?r[x+ax]:null;
-  return !(g!==null&&("▩▨▦".indexOf(g)>=0||(typeof DOORSET!=="undefined"&&DOORSET.has(g))));};
+  return !(g!==null&&(CASA_FACE.indexOf(g)>=0||(typeof DOORSET!=="undefined"&&DOORSET.has(g))));};
 /* THE SHELL EVERY CASA FACE SHARES — plinth, wall, ring beam, vigas, eave and teja. Built once,
    here, because that is what makes three tiles one building: the courses are on a pitch that
    divides the tile exactly, so a barrel run carries THROUGH the join, and the roof carries over
@@ -2609,7 +2644,7 @@ const casaShell=(g,x,y,ry)=>{
   const WH=casaWH(g),wall=g==="▨"?"#BE9A72":CASA_WALL,P=[];
   const w=CW(),at=(gx,gy)=>{const r=w&&w.rows&&w.rows[gy];return r&&r[gx]!==undefined?r[gx]:null;};
   const ax=Math.round(Math.cos(ry)),az=Math.round(-Math.sin(ry));  /* the mesh's own +x, in world steps */
-  const isCasa=c=>c!==null&&"▩▨▦".indexOf(c)>=0;
+  const isCasa=c=>c!==null&&CASA_FACE.indexOf(c)>=0;   /* the ONE list — a second copy here left ◫ out of the roof (#241) */
   const isDoor=c=>c!==null&&typeof DOORSET!=="undefined"&&DOORSET.has(c);
   const gE=at(x+ax,y+az),gW=at(x-ax,y-az);
   const ovE=isDoor(gE)?0.5:isCasa(gE)?0:0.07,ovW=isDoor(gW)?0.5:isCasa(gW)?0:0.07;
@@ -2689,6 +2724,47 @@ TILEART_MESH["▩"]=({x,y})=>{const ry=casaFront(x,y),P=casaShell("▩",x,y,ry),
               c:["#5F8A42","#4E7A38","#6E9A4E"][(pt+i)%3]}));}                    /* what is growing in it */
   else{P.push({s:"cyl",x:0.06,y:0.315,z:F+0.072,r:0.030,h:0.10,c:"#4E6E4A"});      /* or nobody planted one, */
        P.push({s:"cyl",x:0.06,y:0.372,z:F+0.072,r:0.014,h:0.030,c:"#4E6E4A"});}    /* and a bottle stands there */
+  return meshTurned(P,ry);};
+/* ◫ — EL ESCAPARATE in 3D. The same fitting-out, in the same order, on the same shell. Every part
+   stands PROUD of the wall, as the window's do (a window here is a relief, not a hole). The awning
+   stops over its own window and never crosses the door: the door slab is a full tile tall
+   (engine3d.js, BoxGeometry(1,1,0.14) at y 0.5), and canvas at 0.8–0.97 would run through it. */
+TILEART_MESH["◫"]=({x,y})=>{const ry=casaFront(x,y),P=casaShell("◫",x,y,ry),F=0.5;
+  const w=CW(),ax=Math.round(Math.cos(ry)),az=Math.round(-Math.sin(ry));
+  const r=w&&w.rows&&w.rows[y+az],gE=r&&r[x+ax]!==undefined?r[x+ax]:null;
+  const pole=gE!==null&&typeof DOORSET!=="undefined"&&DOORSET.has(gE);    /* the door is on my +x: the pole is mine */
+  const WX=pole?-0.04:0,WW=0.66;                                          /* the shopfront steps aside for it */
+  P.push({s:"box",x:WX,y:0.47,z:F+0.006,w:WW+0.06,h:0.56,d:0.012,c:"#4A3220"});   /* the opening, knocked wider */
+  P.push({s:"box",x:WX,y:0.47,z:F+0.014,w:WW,h:0.50,d:0.010,c:CASA_TRIM});         /* one frame */
+  P.push({s:"box",x:WX,y:0.47,z:F+0.022,w:WW-0.06,h:0.44,d:0.010,c:"#7FA3C4"});    /* one pane, a room behind it */
+  P.push({s:"box",x:WX-0.13,y:0.52,z:F+0.027,w:0.17,h:0.25,d:0.006,c:"#B89B6A"});  /* the mirror's frame */
+  P.push({s:"box",x:WX-0.13,y:0.52,z:F+0.030,w:0.13,h:0.21,d:0.006,c:"#E6EEF4"});  /* the mirror */
+  P.push({s:"box",x:WX+0.10,y:0.39,z:F+0.027,w:0.14,h:0.17,d:0.006,c:"#7A2E2E"});  /* the chair's back */
+  P.push({s:"box",x:WX+0.10,y:0.50,z:F+0.027,w:0.08,h:0.045,d:0.006,c:"#6A2626"}); /* its headrest */
+  [-0.16,-0.08,0,0.08,0.16].forEach(lx=>                                           /* the name, painted on the glass */
+    P.push({s:"box",x:WX+lx,y:0.655,z:F+0.030,w:0.05,h:0.022,d:0.004,c:"#F4F1EA"}));
+  P.push({s:"box",x:WX,y:0.755,z:F+0.048,w:WW+0.08,h:0.06,d:0.11,c:CASA_SILL});    /* the lintel, proud */
+  P.push({s:"box",x:WX,y:0.215,z:F+0.052,w:WW+0.10,h:0.048,d:0.125,c:CASA_SILL});  /* the sill, proud */
+  P.push({s:"box",x:WX,y:0.178,z:F+0.042,w:WW+0.10,h:0.030,d:0.11,c:"#4A3220"});   /* and its shadow */
+  /* the awning: canvas on two arms, from the wall at 0.97 down and out to 0.82, 0.30 proud.
+     ❗ITS LOW EDGE IS SET BY THE CAMERA, not by taste. A sugar skull's pane hangs in this window in
+     season (0.31–0.59 up, 0.12 proud — measured off one the engine really placed), and the camera
+     looks down at about 40°, so anything standing further out than the pane hides its top edge
+     unless it is higher than the pane's top by (how much further out) × tan 40°. At 0.80 the
+     valance grazed it; at 0.82 it clears. test/smoke.js (10) checks exactly this sightline. */
+  const AW=0.78,AY0=0.97,AY1=0.82,AZ=0.30,th=Math.atan2(AY0-AY1,AZ),L=Math.hypot(AY0-AY1,AZ),NS=7;
+  for(let i=0;i<NS;i++)P.push({s:"box",x:WX-AW/2+(i+0.5)*AW/NS,y:(AY0+AY1)/2,z:F+AZ/2,w:AW/NS+0.002,h:0.018,d:L,
+                               c:i%2?BARB_CANVAS:BARB_RED,rx:th});
+  P.push({s:"box",x:WX,y:AY1-0.025,z:F+AZ+0.004,w:AW,h:0.05,d:0.012,c:BARB_BLUE});  /* the valance */
+  [-1,1].forEach(sd=>P.push({s:"box",x:WX+sd*AW/2,y:(AY0+AY1)/2,z:F+AZ/2,w:0.014,h:0.014,d:L,c:"#5A5A5A",rx:th}));  /* the arms */
+  if(pole){const PX=0.43,PZ=F+0.15;                                       /* THE POLE: glass on a wall bracket */
+    [0.42,0.74].forEach(by=>P.push({s:"box",x:PX,y:by,z:F+0.075,w:0.03,h:0.03,d:0.15,c:"#8C8C8C"}));  /* brackets */
+    P.push({s:"cyl",x:PX,y:0.35,z:PZ,r:0.07,h:0.05,c:BARB_STEEL});                /* bottom cap */
+    P.push({s:"cyl",x:PX,y:0.575,z:PZ,r:0.055,h:0.40,c:BARB_GLASS});              /* the glass */
+    for(let i=0;i<6;i++)P.push({s:"cyl",x:PX,y:0.41+i*0.065,z:PZ,r:0.058,h:0.022,  /* the stripe, on the slant */
+                                 c:i%2?BARB_BLUE:BARB_RED,rz:0.5});
+    P.push({s:"cyl",x:PX,y:0.80,z:PZ,r:0.07,h:0.05,c:BARB_STEEL});                /* top cap */
+    P.push({s:"sph",x:PX,y:0.855,z:PZ,r:0.045,c:"#D8D8D8"});}                     /* and its globe */
   return meshTurned(P,ry);};
 /* ▨ — EL MURO CIEGO. The blank wall is where a house keeps its fittings: the lamp on its bracket,
    and the meter with its conduit running down to the plinth. Three stand on Calle Dos — the east
@@ -2808,7 +2884,7 @@ const BARBER_ROOM={
 BUILDTPL.barberia={
   id:"barberia", size:{w:3,h:2},
   parts:[
-    {id:"shell", tiles:[[0,0,"▩"],[0,1,"▩"],[0,2,"▩"],[1,0,"."],[1,1,"."],[1,2,"."]]},
+    {id:"shell", tiles:[[0,0,"◫"],[0,1,"◫"],[0,2,"◫"],[1,0,"."],[1,1,"."],[1,2,"."]]},  /* ◫, not ▩: #241 */
     {id:"door", tiles:[[0,1,"⌂"]], link:{door:[0,1],landing:[5,6],exit:[5,7],interior:BARBER_ROOM}},
   ],
 };
