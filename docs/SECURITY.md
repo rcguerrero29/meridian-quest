@@ -75,8 +75,8 @@ done nothing else on this page matters** — not the guards, not the token, not 
 
 **✅ Done 2026-09-24** (ruleset `main-lock`, switched on by the owner with one `gh api` call and read back from the
 live rules endpoint: no bypass, deletion and force-push blocked, a PR with 0 approvals, `smoke` pinned to GitHub
-Actions on an up-to-date branch). **Guarded since the same night by `test/protect.js`** — CI job `protection`,
-live, not required; its red cases inside `smoke`. It sat undone for three days before that because nothing
+Actions on an up-to-date branch). **Guarded since the same night by `test/protect.js`** — workflow `protect.yml`, job `protection`:
+every PR, every push to `main` and once a day; live, not required; its red cases inside `smoke`. It sat undone for three days before that because nothing
 read the live setting.
 
 **Settings → Rules → Rulesets → New ruleset → New branch ruleset.** *Not* the older *Settings →

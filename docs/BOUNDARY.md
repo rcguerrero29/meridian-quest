@@ -28,7 +28,8 @@ guard, and that is the most useful word on the page.
 A plant proves a guard fired **once**, against **one draft**, on **one afternoon**; the only thing that
 keeps it true is a step that runs on every push. So a date here is half an answer: read it with **what
 re-runs it** beside it, or with the word **unrepeated**. The freshest date on this page — row 11's
-2026-09-13 — is the one that taught us this, and its six plants are re-run by nothing.
+2026-09-13 — is the one that taught us this, and its six plants were re-run by nothing until `smoke` took
+them on 2026-09-20.
 
 ---
 
@@ -290,15 +291,19 @@ agent auto-started on an issue by anyone but the owner, or gated on a label
 **Guard, since the afternoon this file was written: `test/leaves.js`** (grep `function workflows`) — every
 workflow declares `permissions:`; no `write` scope outside the deploy's own `pages`/`id-token` in
 `pages.yml`, in any syntax (`write-all`, a block at any indent, `{flow}`); no `pull_request_target`,
-`issue_comment`, `issues`, `label` or `discussion_comment` under `on:`, quoted or not. Run inside
+`issue_comment`, `issues`, `label`, `discussion_comment`, `workflow_run` or `repository_dispatch` under `on:`, quoted or not. Run inside
 `test/town.smoke.js` on every push and PR. **Last planted against: 2026-09-13**, by Melo: `write-all`,
 a trailing comment and `"on":` all walked past the first draft. **The six plants are preserved as
-fixtures** — `node test/leaves.js --selftest`, eighteen cases (grep `--selftest` in `test/leaves.js`)
-— **and nothing invokes them**: `test/town.smoke.js` calls `require('./leaves.js').consistency()` and
-only that (grep `leaves.js').consistency`), and no workflow in `.github/` names `leaves` or
-`selftest` at all. **Re-run by: nothing. See gap G9.** I verified by hand today that `.github/workflows/`
-contains exactly two workflows, both triggered on `push`/`pull_request`/`workflow_dispatch`, and that
-`pages.yml`'s only write scopes are `pages: write` and `id-token: write`, which are the deploy's own.
+fixtures** — `node test/leaves.js --selftest`, thirty-five cases on 2026-09-24 (grep `--selftest` in `test/leaves.js`)
+— **and since 2026-09-20 (#217) `smoke` runs them on every push and PR**, in the step *The guards' own red
+cases* (`.github/workflows/ci.yml`, grep `--selftest`), beside the self-tests of `runs.js`, `issue.js` and
+`protect.js`. **Re-run by: that step.** *(Until 2026-09-24 this paragraph still said "nothing invokes them";
+Zeni found it contradicting ci.yml while reviewing the `protection` job. The code was right.)* On 2026-09-13 I
+verified by hand that `.github/workflows/` held exactly two workflows, both triggered on
+`push`/`pull_request`/`workflow_dispatch`, and that `pages.yml`'s only write scopes are `pages: write` and
+`id-token: write`, which are the deploy's own. **Today (2026-09-24) there are three:** `ci.yml` (`push`,
+`pull_request`), `pages.yml` (`push` to `main` only — `workflow_dispatch` came off on 2026-09-21) and
+`protect.yml` (`push` to `main`, `pull_request`, and a daily `schedule`); the write scopes are unchanged.
 **Why this rises as crew mode approaches.** `docs/CITY-AS-MEMORY.md:76-86` makes **a label the lock**
 for claiming an issue. `docs/story/el-changarrito.md:172` (R4a) says a trigger gates on
 `issue.user.login == owner`, **never a label**, and `:206-208` refuses a label-gated merge action for
@@ -306,15 +311,25 @@ the same reason. Those two are not in conflict today — a claim label that noth
 a note on a door, not a trigger — **but they become the same sentence the moment anything runs on a
 label.** That is question Q1 below.
 
-**Added 2026-09-24 — a second job, `protection`, and what it sends out.** It reads GitHub's live rules for
-`main` (`GET /repos/<repo>/rules/branches/main`) with the workflow's own token — `contents: read`, issued by
-GitHub, sent only to GitHub, never printed — and retries once without it, because the rules of a public
-repository are public. **Nothing leaves town but a read.** It is deliberately not a required check, so a
-GitHub hiccup cannot block a merge; its red cases run offline inside `smoke` (`test/protect.js --selftest`,
-fifteen cases). **Last planted against: 2026-09-24** — GitHub's real answer, saved outside the repository,
-with deletion allowed, the check unpinned, up-to-date off, one approval required, and no rules at all, plus
-a copy of `ci.yml` with the job renamed and a GitHub that would not answer: all seven red, each in a
-sentence; the real answer green.
+**Added 2026-09-24 — a third workflow, `protect.yml`, and what it sends out.** Its one job, `protection`,
+reads GitHub's live rules for `main` (`GET /repos/<repo>/rules/branches/main`) on every PR, every push to
+`main`, and **once a day** — so a lock switched off on a quiet day is red by the next morning, not at the
+next push. It sends the workflow's own token — `contents: read` and nothing else, declared in the file;
+issued by GitHub, sent only to `api.github.com`, never printed — and retries once without it, because the
+rules of a public repository are public. The checkout does not keep the token (`persist-credentials:
+false`). **Nothing leaves town but a read.** It is deliberately not a required check, so a GitHub hiccup
+cannot block a merge. **What it cannot see, said in `test/protect.js`'s header:** the bypass list; an edit
+to itself (a PR runs its own copy, fixtures and all, so only a person reading the diff stands between —
+until *Require review from Code Owners* is on, docs/SECURITY.md §3 step 4); what the required job runs,
+only its name; and any branch but `main`. **Last planted against: 2026-09-24**, twice — GitHub's real answer,
+saved outside the repository, with deletion allowed, the check unpinned, up-to-date off, one approval on
+the lock, a code owner's review on the lock, no rules at all, and a renamed job: all red, each in a sentence;
+the real answer green, and green again with the plan's step-4 ruleset added beside it. Then five edits to
+`test/protect.js` itself (the retry keeping the token, no retry, a refused answer read anyway, code-owner
+review ignored, any approval anywhere read as a lockout): the self-test went red on every one. **Re-run by:**
+the fixtures and the stubbed network cases, twenty-four in all, in `smoke` on every push and PR
+(`test/protect.js --selftest`); the read of GitHub's real answer, in `protect.yml` daily. **Unrepeated:** the
+plants against the saved real answer.
 
 ### 12 · The service worker's reach on the owner's own machine
 **Line: a person's browser** — his.
@@ -486,6 +501,9 @@ sentences it printed into `docs/REGRESSION.md` §3 and the date into this ledger
 working guard from a decorative one is a planted violation.* Every entry in that register says so.
 
 ### G9 · The plants are kept as fixtures and no runner invokes them *(row 11)*
+**Half closed, 2026-09-20 (#217):** `smoke` runs `node test/leaves.js --selftest` on every push and PR
+(`.github/workflows/ci.yml`, grep `--selftest`). **Still open:** `node test/closes.js --selftest` runs in no
+workflow. *(Noted 2026-09-24; the entry below is as it was written.)*
 **Smallest guard.** One line in `.github/workflows/ci.yml` beside the town step:
 `node test/leaves.js --selftest` — and `node test/closes.js --selftest`, which is invoked by nothing
 either (grep `--selftest` in `test/closes.js`).
@@ -516,6 +534,7 @@ has no date.*
 | `scripts/build-site.sh` | zeni, yaz | the public build — what goes in the box | 2026-09-13 |
 | `.github/workflows/pages.yml` | zeni, yaz | the public build — whether and what we upload, and when it is checked | 2026-09-13 |
 | `.github/workflows/ci.yml` | zeni, yaz | the public build — the gate that runs before a merge, and CI's own permissions | 2026-09-13 |
+| `.github/workflows/protect.yml` | zeni, yaz, melo | a key — the workflow's `contents: read` token, sent to GitHub alone, daily and on every PR, to read whether `main` is still locked | 2026-09-24 |
 | `.github/CODEOWNERS` | zeni | who must open a diff before it merges — the list of paths a second agent's PR cannot land on green alone, once the owner turns on code-owner review | 2026-09-21 |
 | `.github/scripts/city-record.js` | zeni | the public build — the one file written from the API into the box | 2026-09-13 |
 | `test/public.js` | melo, zeni | the public build — the guard that reads the box | 2026-09-13 |
@@ -535,7 +554,7 @@ has no date.*
 | `changarrito/content/record.js` | zeni | a key — where the token is kept, what carries it, what it writes | 2026-09-13 |
 | `changarrito/README.md` | zeni | a key — the origin the key is allowed to exist on | 2026-09-13 |
 | `.gitignore` | zeni | nothing — what reaches a commit | 2026-09-13 |
-| `test/protect.js` | zeni, melo | a key — the workflow's read-only token, sent to GitHub alone, to read whether `main` is still locked | 2026-09-24 |
+| `test/protect.js` | zeni, melo | a key — the workflow's `contents: read` token (by hand: whatever `GITHUB_TOKEN` the shell holds), sent to `api.github.com` alone, to read whether `main` is still locked | 2026-09-24 |
 | `CLAUDE.md` | chuy | nothing — where the promises are written down | 2026-09-13 |
 
 ### Does that script read a noun or a proxy? — a proxy, and here is exactly which
