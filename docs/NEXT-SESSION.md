@@ -7,11 +7,23 @@ current: each session rewrites the queue before signing off.)*
 
 ### 🔒 SECURITY — first, always, with the count (owner, 2026-09-24; `AGENTS.md` §0½)
 
-**Open on 2026-09-24, 03:48 UTC: 2 issues labelled `security`, and 3 switches only the owner can flip.** **`main` is protected** since that night: ruleset `main-lock`, no bypass, deletion and force-push blocked, a PR required with 0 approvals, `smoke` required from GitHub Actions (15368) on an up-to-date branch — checked against the live rules endpoint, not the command that set it.
+**Open on 2026-09-24, 06:30 UTC: 3 issues labelled `security` (#252 and #247 at `tier: high`, #193 low), and the owner-only
+switches inside them: secret scanning with push protection (unconfirmed), and #252's passkeys on the accounts behind his two public
+addresses.** *(At 03:48 UTC it was 2 issues and 3 switches; `main`'s lock and deploy approval have since gone on.)* **`main` is protected** since that night: ruleset `main-lock`, no bypass, deletion and force-push blocked, a PR required with 0 approvals, `smoke` required from GitHub Actions (15368) on an up-to-date branch — checked against the live rules endpoint, not the command that set it.
+- **#252** (`tier: high`, 2026-09-24) — two of his personal addresses are public as commit authors for good (17 Claude commits
+  from the cloud, 2026-08-30 to 09-14, and his own 527a35a). The risk is **targeted phishing**, not spam. His part: passkeys on
+  GitHub and on both Google accounts, and a look at authorised apps. Ours: `test/authors.js`, in CI and as the push hook in
+  `.claude/settings.json`; `docs/BOUNDARY.md` row 13½ names the envelope; `test/runs.js` no longer prints a name or address into CI logs
+  (it did, 11 times a run, from 2026-09-23 — the owner decides whether the logs of those 23 runs are deleted).
 - **#247** (`tier: high`) — look at security again after the Jules day. Inside it, the three switches:
   **protect `main`** (ON since 2026-09-24 — still check `GET /repos/rcguerrero29/meridian-quest/rules/branches/main`
   each session; empty means someone switched it off), **secret scanning + push protection** (only he can see it), **approve every deploy** on the
-  `github-pages` environment (not readable from a session's proxy). And his laptop's git commits with his personal address, which is public in the history since 527a35a: the no-reply address and GitHub's email privacy settings (the fix is in #247's comments).
+  `github-pages` environment (not readable from a session's proxy). And his personal addresses in commit history — **corrected 2026-09-24:** not only since 527a35a. Two of his personal
+  addresses are public as commit author: one on 17 commits made by Claude sessions under his git identity (2026-08-30,
+  09-13, 09-14 — each carries Claude's co-author line), the other on his own verdict commit 527a35a. Neither is in any
+  file, ever, nor in any of the 380 issues, PRs and comments (checked 2026-09-24). He set the no-reply address and
+  GitHub's email privacy switches (his word); **confirm on his next pushed commit, and on the next Claude commit made
+  from his laptop.** History is not rewritten: it would change every commit since 2026-08-30 and copies already exist.
 - **#193** (`tier: low`) — a paste into the admin text lab can reach a shared object's prototype.
 - **The lock is guarded:** `test/protect.js` (workflow `protect.yml`: every PR, every push to `main`, and daily at
   13:17 UTC; not required) goes red when `main`'s protection is switched off or weakened. What it cannot see — the

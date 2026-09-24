@@ -893,3 +893,40 @@ dressed as diligence. **A guard that says "I measured nothing" is still a guard 
 nothing**, and next week nobody reads the note. Both now derive their demand from what the pack
 itself declares and cross-check it with a cruder question that cannot break the same way.
 
+
+## 2026-09-24 — the name on the envelope
+
+*The owner: "whattt you forget about targetted phishing attacks ... i thought we had a cybersecurity
+expert in our engine... someones failing. not you necessarily but the personas..."*
+
+**1 · A row titled "What reaches a commit at all" that read only the letter.** `docs/BOUNDARY.md` row 13
+guarded what goes INTO a commit: tokens, scratch files, a `?dev=` flag. Every commit also carries an
+author name and address and a committer address, sent to a public server on every push — and none of
+it is in a diff, so no review, no persona and no guard ever looked. *Believed:* a commit is its diff.
+*True:* a commit is its diff plus a return address. *Cost:* two of the owner's personal addresses are
+public for good — one on 17 commits Claude sessions made in the cloud from 2026-08-30, one on his own
+commit of 2026-09-23 — through a security review (2026-09-21), a security persona and a boundary
+register, and found by accident while checking something else.
+**What to do instead:** at every edge, ask what the envelope says about the sender — author,
+committer, timezone, trailers, headers — not only what the letter says. Guard: `test/authors.js`, in
+CI and as a hook that refuses the push before anything is published.
+
+**2 · A threat named without an attacker.** Asked what was exposed, the session said "the realistic
+risk is spam". The owner named the real one: targeted phishing — and this repository is a public diary
+of which tools he uses, which is the pretext a targeted email needs. *Cost:* a wrong reassurance, to
+the person the rule says to tell the truth to first.
+**What to do instead:** before telling him how bad something is, name the person who would use it and
+what they would send him.
+
+**3 · The date, from memory.** The session had told him the exposure began with his own laptop commit.
+`git log` said 2026-08-30, with Claude's commits. It was checked only when he asked again — §11½ of
+this file, *measure before you reassure*, broken by the session that has read it.
+
+**4 · The same address, printed by our own test.** `test/runs.js` asked git for `%an <%ae>` of whoever set a
+run's verdict and printed it in a NOTE: from 2026-09-23 that was the owner's full name and a personal
+address, eleven times on every CI run, in logs anyone can open — 23 runs before it was found. The session
+read that exact output on 2026-09-23 while checking his verdicts, and saw a pass. Zeni found it by reading the
+format string. *Cost:* a second public copy of what item 1 leaked, renewed on every push.
+**What to do instead:** a test's output is a publication. Read what it PRINTS as if a stranger will, because on
+a public repository one will. Guard: `test/authors.js` now fails any script under `test/`, `.github/` or
+`scripts/` that asks git for a name or an address.

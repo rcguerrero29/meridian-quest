@@ -8,8 +8,10 @@ read this file since 2026-09-11. For two days it did not exist. This is the file
 **What this register is.** One row per edge, ranked by what it costs when it goes wrong. Each row
 answers two questions and nothing else:
 
-> **¿Qué se va?** — what leaves town, on one of four lines: **nothing** · **the public build** ·
-> **a person's browser** · **a key**.
+> **¿Qué se va?** — what leaves town, on one of five lines: **nothing** · **the public build** ·
+> **a person's browser** · **a key** · **the public repository** — its files, *and the envelope every
+> commit carries* (added 2026-09-24; Zeni's persona named the fifth line on 2026-09-14 and this header
+> never picked it up).
 >
 > **¿Y eso, quién lo revisa?** — what reads *that exact noun*? File and line, or the word **nobody**.
 
@@ -365,6 +367,50 @@ token it is not.** `test/smoke.js:3702` looks for the literal `github_pat` and t
 because those never reach the box. The promise holds where it is scoped ("in the public shell"); the
 guard it names is the wrong one.
 
+
+### 13½ · What every commit carries that no diff shows — the envelope
+*Added 2026-09-24, Zeni's text, checked against git by the calling session. The owner: "whattt you forget
+about targetted phishing attacks ... i thought we had a cybersecurity expert in our engine... someones
+failing."*
+**Line: the public repository** — the fifth line, and the part of it that is not a file. A push to any
+branch publishes it; a merge only makes it current.
+**What leaves.** Per commit: author and committer name and address, two timestamps carrying the
+committer's UTC offset, every trailer. In no diff, no file, no box — and re-printed by GitHub's pages and
+by our CI logs, which are public. **What already left, counted 2026-09-24 over `main`, all 10 branches and
+all 132 pull-request refs:** 18 commits and no third address — one personal address on 17 commits Claude
+sessions made in the cloud (2026-08-30 to 2026-09-14), a second on the owner's own 527a35a (2026-09-23),
+with his full name. **And a second channel nobody had named:** `test/runs.js` printed that name and the
+second address in a NOTE, eleven times on every CI run, from 2026-09-23 until this change — the address was
+never in a file; it was in the log.
+**Promise.** Only no-reply addresses leave town, in a commit or a file; and no script asks git for a name or
+an address it could print (`test/authors.js`, grep `THE RULE IS AN ALLOW-LIST` and `ASKS git for a name`).
+The owner switched his side (`docs/ASKS.md`, grep `i did the email thing`), to be confirmed on his next
+push and the next Claude commit from his laptop. Under it: `docs/OWNER.md`, grep `cybersecurity should be
+key always`.
+**Guard: `test/authors.js`, reading the exact nouns** — `%ae`, `%ce`, every address in `%B`, every file git
+could ship, and every git format string under `test/`, `.github/` and `scripts/` — against a four-pattern
+allow-list, printing commit, field and domain, never the address. **Before publication** only as the
+`PreToolUse` hook in `.claude/settings.json` (exit 2 refuses a Claude session's `git push`; input it cannot
+read runs the check rather than passing). **After publication** in CI (`.github/workflows/ci.yml`, grep
+`only no-reply ones leave town`): PR range `origin/<base>..<head>`, push range `before..HEAD`. CI keeps it
+off `main`; it cannot keep it off GitHub.
+**What it does not read:** the author/committer **name**; the **UTC offset**; a trailer with a name and no
+address; a push that is not the words `git push` in a Bash call — the GitHub connector's write tools, `gh`,
+a script, a merge button (CI reads those, after); images' metadata; anything already public.
+**Last planted against: 2026-09-24** — in a copy outside the repository: a personal author, a personal
+co-author trailer, an address in an uncommitted doc, an unreadable base, the old `runs.js` line, and four
+edits to the guard itself (a whole mail domain allowed, the message unread, the address printed, the
+allow-list unanchored): all red; the hook on a planted commit, exit 2. **Against real history:**
+`node test/authors.js 527a35a~1 527a35a` names `gmail.com` twice and no address; the range
+`3bec58a~1..527a35a` names 17 commits. The root commit 7b3928f has no parent to range from, and says so in
+red. **Not yet watched:** a real Claude push with a personal `user.email`, refused by the loaded hook.
+**Re-run by:** `--selftest` in `smoke` (36 cases); the range and file check on every PR and push; the hook
+on every Claude push.
+**Read the shape.** An allow-list is the right shape — a new agent's address stays red until decided here.
+But it is over *addresses*, and the envelope has other fields. Why nobody saw it: `docs/SECURITY.md`, grep
+`under your name and e-mail` — it read this field on 2026-09-21 and asked only *who signed*, never *what is
+leaving*.
+
 ### 14 · The crew's own files
 **Line: nothing** (they never ship) — **and the public build.**
 **Promise.** `.claude/` is not on the allowlist (`scripts/build-site.sh:18-20`) and is on the NEVER
@@ -555,6 +601,8 @@ has no date.*
 | `changarrito/README.md` | zeni | a key — the origin the key is allowed to exist on | 2026-09-13 |
 | `.gitignore` | zeni | nothing — what reaches a commit | 2026-09-13 |
 | `test/protect.js` | zeni, melo | a key — the workflow's `contents: read` token (by hand: whatever `GITHUB_TOKEN` the shell holds), sent to `api.github.com` alone, to read whether `main` is still locked | 2026-09-24 |
+| `test/authors.js` | zeni, melo | the public repository — every commit's envelope, every file git could ship, and every script that could print an identity into a public log | 2026-09-24 |
+| `.claude/settings.json` | zeni, melo, yaz | a hook — code every Claude session in this repository runs before each Bash command; the only check that runs before a Claude session's push is published | 2026-09-24 |
 | `CLAUDE.md` | chuy | nothing — where the promises are written down | 2026-09-13 |
 
 ### Does that script read a noun or a proxy? — a proxy, and here is exactly which

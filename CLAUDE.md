@@ -16,8 +16,10 @@ only he can switch on is filed as a `security` issue at `tier: high` the day it 
 
 ## Where a session takes its orders from, in this order
 
-1. **The owner, in the session.** What they type wins. Log it verbatim in `docs/ASKS.md`
-   before doing it — the repo's rule ("logged before doing").
+1. **The owner, in the session.** What they type wins. Log it in `docs/ASKS.md` before doing it —
+   the repo's rule ("logged before doing") — **verbatim except that any personal detail becomes a
+   bracketed stand-in** (`[a pet — a dog]`, `[partner]`, `[city]`). His exact words stay in the session;
+   nothing about a real person reaches git as said (`AGENTS.md` §0½, 2026-09-24).
 2. **`docs/NEXT-SESSION.md`** — the state of play, rewritten at the end of every session.
    Read its "STATE OF PLAY" block before touching anything.
 3. **GitHub issues on this repo** — the ledger since 2026-09-05 (labels `ask` / `decision` /

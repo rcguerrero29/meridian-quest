@@ -55,7 +55,31 @@ jobs:
       # goes under env: and is read as "$NAME" — the pattern PR_BODY already used. test/leaves.js
       # now fails the build on a `${{` inside any run: block.
       - name: The guards' own red cases, so a regex that regressed is caught before it is trusted
-        run: node test/leaves.js --selftest && node test/runs.js --selftest && node test/issue.js --selftest && node test/protect.js --selftest
+        run: node test/leaves.js --selftest && node test/runs.js --selftest && node test/issue.js --selftest && node test/protect.js --selftest && node test/authors.js --selftest
+      # The owner, 2026-09-24: "whattt you forget about targetted phishing attacks". Every commit carries an
+      # author and a committer address to a public server, and none of it is in a diff: two of his personal
+      # addresses reached main that way. test/authors.js allows no-reply addresses only, in the commits this
+      # PR or push brings and in every file git could ship, and names a DOMAIN, never an address — this log
+      # is public too. It runs before the steps below, whose shallow fetches would cut the history it reads.
+      # (The .claude/settings.json hook runs the same check before a Claude session pushes; this is the net
+      # for every other author.)
+      - name: No personal address in a commit or a file — only no-reply ones leave town
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            git fetch --no-tags origin "$BASE_REF"
+            node test/authors.js "origin/$BASE_REF" "$PR_HEAD"
+          else
+            BASE="$BEFORE"
+            if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+              BASE="origin/main"   # a new branch: everything it carries that main does not
+            fi
+            node test/authors.js "$BASE" HEAD
+          fi
       - name: The issues this PR closes are the ones it talks about (R3)
         if: github.event_name == 'pull_request'
         env:
