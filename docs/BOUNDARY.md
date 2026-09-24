@@ -306,6 +306,16 @@ the same reason. Those two are not in conflict today — a claim label that noth
 a note on a door, not a trigger — **but they become the same sentence the moment anything runs on a
 label.** That is question Q1 below.
 
+**Added 2026-09-24 — a second job, `protection`, and what it sends out.** It reads GitHub's live rules for
+`main` (`GET /repos/<repo>/rules/branches/main`) with the workflow's own token — `contents: read`, issued by
+GitHub, sent only to GitHub, never printed — and retries once without it, because the rules of a public
+repository are public. **Nothing leaves town but a read.** It is deliberately not a required check, so a
+GitHub hiccup cannot block a merge; its red cases run offline inside `smoke` (`test/protect.js --selftest`,
+fifteen cases). **Last planted against: 2026-09-24** — GitHub's real answer, saved outside the repository,
+with deletion allowed, the check unpinned, up-to-date off, one approval required, and no rules at all, plus
+a copy of `ci.yml` with the job renamed and a GitHub that would not answer: all seven red, each in a
+sentence; the real answer green.
+
 ### 12 · The service worker's reach on the owner's own machine
 **Line: a person's browser** — his.
 **Promise.** "The town registers **no service worker**" (`docs/story/el-changarrito.md:175`, R6) —
@@ -525,6 +535,7 @@ has no date.*
 | `changarrito/content/record.js` | zeni | a key — where the token is kept, what carries it, what it writes | 2026-09-13 |
 | `changarrito/README.md` | zeni | a key — the origin the key is allowed to exist on | 2026-09-13 |
 | `.gitignore` | zeni | nothing — what reaches a commit | 2026-09-13 |
+| `test/protect.js` | zeni, melo | a key — the workflow's read-only token, sent to GitHub alone, to read whether `main` is still locked | 2026-09-24 |
 | `CLAUDE.md` | chuy | nothing — where the promises are written down | 2026-09-13 |
 
 ### Does that script read a noun or a proxy? — a proxy, and here is exactly which

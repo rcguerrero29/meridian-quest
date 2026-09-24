@@ -13,6 +13,8 @@ current: each session rewrites the queue before signing off.)*
   each session; empty means someone switched it off), **secret scanning + push protection** (only he can see it), **approve every deploy** on the
   `github-pages` environment (not readable from a session's proxy). And his laptop's git commits with his personal address, which is public in the history since 527a35a: the no-reply address and GitHub's email privacy settings (the fix is in #247's comments).
 - **#193** (`tier: low`) — a paste into the admin text lab can reach a shared object's prototype.
+- **The lock is guarded:** `test/protect.js` (CI job `protection`, live, not required) goes red the day `main`'s
+  protection is switched off or weakened. **Deploy approval is on** (the Pages run after #250 stood at `waiting`).
 - **Recount before you report**: issues labelled `security`, plus the switches. Never carry this number
   forward from here without checking — it is a snapshot.
 

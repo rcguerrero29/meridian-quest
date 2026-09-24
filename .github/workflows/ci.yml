@@ -55,7 +55,7 @@ jobs:
       # goes under env: and is read as "$NAME" — the pattern PR_BODY already used. test/leaves.js
       # now fails the build on a `${{` inside any run: block.
       - name: The guards' own red cases, so a regex that regressed is caught before it is trusted
-        run: node test/leaves.js --selftest && node test/runs.js --selftest && node test/issue.js --selftest
+        run: node test/leaves.js --selftest && node test/runs.js --selftest && node test/issue.js --selftest && node test/protect.js --selftest
       - name: The issues this PR closes are the ones it talks about (R3)
         if: github.event_name == 'pull_request'
         env:
@@ -94,3 +94,22 @@ jobs:
             if git cat-file -e "HEAD~1^{commit}" 2>/dev/null; then BASE="HEAD~1"; else echo "no base to compare against; nothing to check"; exit 0; fi
           fi
           node test/bump.js "$BASE" HEAD
+
+  # THE LOCK ON MAIN, read live (docs/SECURITY.md §3 step 1; owner, 2026-09-24: "cybersecurity should
+  # be key always"). The ruleset sat undone for three days because nothing read the live setting. This
+  # job reads GitHub's rules for main on every push and PR and goes red the day the lock is switched off
+  # or weakened. It is its OWN job and deliberately NOT a required check — a GitHub API hiccup must not
+  # be able to block the owner's merges; a missing lock still shows as a red mark on every PR. Its red
+  # cases run offline inside `smoke` above (`test/protect.js --selftest`). Read-only: the workflow's
+  # token has `contents: read`, and the rules of a public repository are public anyway.
+  protection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: 22
+      - name: main is still locked — read from GitHub's live rules
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node test/protect.js
