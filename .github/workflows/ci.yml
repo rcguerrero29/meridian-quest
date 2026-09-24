@@ -55,7 +55,7 @@ jobs:
       # goes under env: and is read as "$NAME" — the pattern PR_BODY already used. test/leaves.js
       # now fails the build on a `${{` inside any run: block.
       - name: The guards' own red cases, so a regex that regressed is caught before it is trusted
-        run: node test/leaves.js --selftest && node test/runs.js --selftest && node test/issue.js --selftest
+        run: node test/leaves.js --selftest && node test/runs.js --selftest && node test/issue.js --selftest && node test/protect.js --selftest
       - name: The issues this PR closes are the ones it talks about (R3)
         if: github.event_name == 'pull_request'
         env:

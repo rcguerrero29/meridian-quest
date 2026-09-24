@@ -50,6 +50,7 @@ content/meridian/                 @rcguerrero29
 test/public.js                    @rcguerrero29
 test/leaves.js                    @rcguerrero29
 test/runs.js                      @rcguerrero29
+test/protect.js                   @rcguerrero29
 docs/BOUNDARY.md                  @rcguerrero29
 
 # the town: the owner's own tool, and the token's origin
