@@ -31,6 +31,39 @@ addresses.** *(At 03:48 UTC it was 2 issues and 3 switches; `main`'s lock and de
 - **Recount before you report**: issues labelled `security`, plus the switches. Never carry this number
   forward from here without checking — it is a snapshot.
 
+### ⇢ 2026-09-24, night — NEXT: the privacy split, in the order he set (prep done; he continues "tomorrow likely")
+**His words (logged under his rule, `docs/ASKS.md`, twenty-eighth window):** first the cleanup, then the
+instructions for this and other instances, then the repo plan and how other instances are told.
+**Done tonight:** #253 merged — `test/authors.js` guards commits, files and scripts; the push hook is in
+`.claude/settings.json`; `runs.js` no longer prints identities. The logs of the **23** CI runs that printed his
+name and an address are **deleted** (his yes; checked: a deleted job's log now answers 404). *(He was told 25;
+two runs had been counted twice.)* His logging rule is in `CLAUDE.md`, `AGENTS.md` §0½ and `docs/OWNER.md`.
+**The mechanism he chose — a MAP, never committed.** The originals stay on his machine. Every committed
+document is MADE from them by programmatic replacement: a personal detail → its bracketed stand-in, or dropped
+with a one-line note saying why it mattered ("a personal detail was raised as an example: consider colour
+exceptions"), so a reader of the clean copy can still see why a design choice (e.g. heavy customisation) was
+made and question it. The draft map was built outside the repository and sent to him in the session; it lists
+the real details and is the most sensitive file there is — **it never enters any repository.** The session
+holds no copy that survives the container.
+**Tomorrow, in order:**
+1. **The cleanup.** He answers the map's open questions (the pet in the game: his real name or a made-up one; one
+   recurring name — real or fiction?). Then a clean-copy tool (public-safe code; reads the map from a path
+   outside the repo; prints categories, never terms; red if any mapped term survives) produces the clean tree.
+   He sees the file list and the diff before anything is created.
+2. **The instructions** — for this and every other instance: the map workflow in `AGENTS.md` / `CLAUDE.md`, and a
+   guard that fails on a mapped term in a commit (the term list lives outside the repo, e.g. a CI secret —
+   a list in the repo would publish the words it protects; Zeni's point).
+3. **The repo plan.** Public repo, fresh history, same name (so the site address and installed games keep
+   working): engine + the shipped games + their tests, CI, Pages. The current repo renamed and made **private**:
+   his notes, the town, the run ledger, crew docs, mocks. Why not just flip this one private: Pages from a
+   private repo needs a paid plan, and private CI minutes (~2,000–3,000/month) are far below this repo's pace
+   (~68 runs a day, ~9,000 min/month, measured 2026-09-24) *(plan facts from memory — GitHub's docs are blocked
+   from the container; confirm in Settings before relying on them)*. Skills move to his account level
+   (`install-skills.sh`). His two clicks: rename, then make private.
+4. **How other instances are told** — both repos' `CLAUDE.md`/`AGENTS.md`, and the handoff.
+**Still open for him:** the site update after #253's merge waits for his approval (Actions → Review
+deployments); #252's passkeys and recovery answers; secret scanning (unconfirmed).
+
 ### ⇢ 2026-09-23, later — a second AI is coming, and the owner wants to study the team
 
 **Jules is about to work this repository**, and the owner wants it studied: *"we want to study how
