@@ -23,6 +23,14 @@ preference that outlives one phase; cite the date and their words.
   says it should be on; (3) a security to-do is never folded into a summary — each one is named, with
   whether it is done.
 
+  **And the scope, the same night:** *"they should always be near the top of the list or if anything to
+  lists and always be telling me how many there are there but honestly everything should be built with
+  cybersecurity best practices and architecture. through out my system, anyone who talks to me or you
+  or our AI or our agents please."* So also: (4) every list given to him opens with the count of open
+  security items — issues labelled `security`, plus any owner-only switch still off; (5) security by
+  design in everything built, by every agent — written into `AGENTS.md` §0½ and `CLAUDE.md` so every
+  agent reads it; beyond this repository it travels only where he carries it (his profile preferences).
+
 - **A rename may never touch a verbatim record.** *(2026-09-17, learned by doing it.)* The owner
   said *"this concept of a Saturday is silly, explain it differently"*, which was right, and the word
   was retired across eighteen files in one pass. **That pass ran over `docs/ASKS.md` — the file whose
