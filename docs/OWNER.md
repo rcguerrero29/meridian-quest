@@ -31,6 +31,18 @@ preference that outlives one phase; cite the date and their words.
   design in everything built, by every agent — written into `AGENTS.md` §0½ and `CLAUDE.md` so every
   agent reads it; beyond this repository it travels only where he carries it (his profile preferences).
 
+- **Nothing about a real person reaches git as said.** *(2026-09-24)* Owner, logged by this rule
+  itself: *"i'll let you make an educated guess, if i mention [a detail about one of my pets], dont try to
+  put it together, and i could be speaking theoretically so if i say something and there is a posibility
+  to leak- you can immediately use like in your documentation what i said verbatim in claude lets say,
+  but when you send to git - ensure you translate to a user pet that can be a dog, or something like that
+  if that makes sense"* — said on learning that his log, written word for word into a public file, had
+  published details about him, his partner and his pets. **What it means:** his exact words live in the
+  session; what is committed carries stand-ins (`[a pet — a dog]`, `[partner]`, `[city]`), marked with
+  brackets so the record stays honest that it was translated. Details are never joined into a profile.
+  It binds `docs/ASKS.md` from 2026-09-24 on; rows written before that are not rewritten by a rename
+  (the rule below) — they move with the private repository (#252, and the repo switch he asked for).
+
 - **A rename may never touch a verbatim record.** *(2026-09-17, learned by doing it.)* The owner
   said *"this concept of a Saturday is silly, explain it differently"*, which was right, and the word
   was retired across eighteen files in one pass. **That pass ran over `docs/ASKS.md` — the file whose

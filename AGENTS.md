@@ -37,6 +37,13 @@ whoever built it.
   plus any switch only he can flip that is still off. Zero is worth saying too.
 - **What only he can switch on becomes an issue that day** — labelled `security`, `tier: high` —
   never only a line in a document. That is how `main` sat unprotected for three days in September 2026.
+- **Nothing about a real person reaches git as said.** The owner's words are kept exactly in the session
+  (the conversation itself). In anything you commit — his log in `docs/ASKS.md` included, and in a
+  private repository as much as a public one — a personal detail becomes a stand-in: a name, a pet, a
+  place, someone's health, work, a schedule, an account → `[a pet — a dog]`, `[partner]`, `[city]`.
+  **Never join details into a profile**; he may be speaking hypothetically. A commit's author and
+  committer are the same kind of detail: no-reply addresses only (`test/authors.js`). *(Owner,
+  2026-09-24; `docs/OWNER.md`.)*
 
 ---
 
