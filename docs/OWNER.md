@@ -13,6 +13,16 @@ preference that outlives one phase; cite the date and their words.
 
 ## Settled — never re-ask
 
+- **Security comes first, always.** *(2026-09-24)* Owner, verbatim: *"cybersecurity should be key
+  always...."* — said on learning that `main` had stayed unprotected for three days after the security
+  review that put protecting it first. **What it means in practice** (the session's proposal the same
+  night; his to overrule): (1) anything only the owner can switch on for security becomes a GitHub
+  issue at `tier: high` the day it is found — never only a line in a document, which is how the
+  ruleset waited three days; (2) a session that touches security, CI, a workflow or anyone's access
+  checks the **live** setting (the public rules endpoint, the workflow file) and not the document that
+  says it should be on; (3) a security to-do is never folded into a summary — each one is named, with
+  whether it is done.
+
 - **A rename may never touch a verbatim record.** *(2026-09-17, learned by doing it.)* The owner
   said *"this concept of a Saturday is silly, explain it differently"*, which was right, and the word
   was retired across eighteen files in one pass. **That pass ran over `docs/ASKS.md` — the file whose
