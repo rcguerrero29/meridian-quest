@@ -52,8 +52,15 @@ character name is fiction and stays.
 1. **The cleanup — STARTED 2026-09-25.** Built: `scripts/clean-copy.js` (20-case self-test in CI) and
    `scripts/clean-copy-ledger.js`. First copy made outside the repo: no mapped detail survives; **every suite passes on
    it**; shipped game code identical once comments are stripped. The runnable map is **v3** in his private storage
-   (location: ask him / the session). Next: Zeni's sweep of the copy for what the map missed → map v4 → rerun; then he
-   reviews. One map question still open (anyone else real to add?). Originally: a clean-copy tool (public-safe code; reads the map from a path
+   (location: ask him / the session). **Zeni's sweep found survivors and breakages, so he chose (2026-09-25): diaries
+   stay private, and the public copy is made from an ALLOWED LIST only — `scripts/public-manifest.txt` (committed,
+   not yet read by the tool).** Next, in order: (a) `clean-copy.js --manifest` + a `public-overlay/` folder copied
+   in last; (b) in code files change comments only, never strings — the read-back stays strict over whole files and
+   calls a detail in a string a decision; (c) drops a paragraph at a time, so a sentence wrapped over lines goes
+   whole; notes in `[brackets]`; (d) replace options `ci` and `suffix`, and replace terms checked in file names;
+   (e) self-test cases for each; (f) map v4 (drop the pet rules 2 and 21 he overruled; partner rule case-free with
+   an "s" ending) to his private storage; (g) `public-overlay/` README, SECURITY.md, docs/WHY.md; (h) run the copy
+   and the public suites; Zeni round 2; then he reviews. One map question still open (anyone else real to add?). Originally: a clean-copy tool (public-safe code; reads the map from a path
    outside the repo; prints categories, never terms; red if any mapped term survives) produces the clean tree.
    He sees the file list and the diff before anything is created.
 2. **The instructions** — for this and every other instance: the map workflow in `AGENTS.md` / `CLAUDE.md`, and a

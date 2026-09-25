@@ -1,0 +1,43 @@
+# WHAT GOES PUBLIC — the allowed list for the clean copy (scripts/clean-copy.js --manifest).
+# The owner, 2026-09-25: "Keep diaries private" and "Yes, go" to the split. Closed by default: a path is
+# public only if a line below matches it (JavaScript regex, matched against the whole repo-relative path).
+# Everything else stays in the private repository only. Adding a line here is a decision to publish —
+# say which, and why, in the commit.
+#
+# The files under public-overlay/ are copied into the public copy last, at the same relative path
+# (a public README, a security policy, the "why we built it this way" note).
+
+# --- the game and the engine (what the site serves, and what makes it) ---
+^index\.html$
+^sw\.js$
+^qr\.js$
+^manifest\.webmanifest$
+^icon-(192|512)\.png$
+^engine/
+^vendor/
+^content/(meridian|horno|gauge)/
+^scripts/build-site\.sh$
+^\.gitignore$
+^install-skills\.sh$
+
+# --- the game's own tests (the town's, the ledger's and the issues' tests stay private with what they read) ---
+^test/(smoke|engine\.smoke|gauge|horno|public|authors|protect|bump|overlap|shots|tilesheet|assumed)\.js$
+^test/(spots|beautify\.spots)\.json$
+^test/vendor\.sha256$
+
+# --- the site's workflow and its record writer (ci.yml is adapted in the repo plan, step 3) ---
+^\.github/workflows/(pages|protect)\.yml$
+^\.github/scripts/city-record\.js$
+
+# --- the crew's craft: skills and personas (the deliverable skill is the owner's business: private) ---
+^\.claude/skills/(?!deliverable/)
+^\.claude/agents/
+^\.claude/settings\.json$
+
+# --- design and craft documents ---
+^docs/(3D-LOG|BEAUTIFY|GAUGE|GENRE-RULES|NEW-WORLD|TAGS|STORY|CITY|QA-PASS|REGRESSION|UI-REVIEW|SOURCES|CREW|CREW-FOR-ANY-AGENT)\.md$
+^docs/story/las-cuatro-puertas\.md$
+^docs/rooms/2026-
+^docs/decisions/(README|0001-|0002-)
+^docs/plans/
+^docs/mocks/2026-09-(21-contact-sheet|24-barberia|22-bakery|22-characters|22-nitpicks)/
