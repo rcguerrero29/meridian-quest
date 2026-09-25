@@ -49,7 +49,11 @@ session needs it: ask him. It lists the real details and is the most sensitive f
 any repository.** His answers: the game's pet keeps its name (what goes is that it was real); the recurring
 character name is fiction and stays.
 **Tomorrow, in order:**
-1. **The cleanup.** One map question is still open (anyone else real to add?). Then a clean-copy tool (public-safe code; reads the map from a path
+1. **The cleanup — STARTED 2026-09-25.** Built: `scripts/clean-copy.js` (20-case self-test in CI) and
+   `scripts/clean-copy-ledger.js`. First copy made outside the repo: no mapped detail survives; **every suite passes on
+   it**; shipped game code identical once comments are stripped. The runnable map is **v3** in his private storage
+   (location: ask him / the session). Next: Zeni's sweep of the copy for what the map missed → map v4 → rerun; then he
+   reviews. One map question still open (anyone else real to add?). Originally: a clean-copy tool (public-safe code; reads the map from a path
    outside the repo; prints categories, never terms; red if any mapped term survives) produces the clean tree.
    He sees the file list and the diff before anything is created.
 2. **The instructions** — for this and every other instance: the map workflow in `AGENTS.md` / `CLAUDE.md`, and a
