@@ -63,8 +63,9 @@ character name is fiction and stays.
    from the container; confirm in Settings before relying on them)*. Skills move to his account level
    (`install-skills.sh`). His two clicks: rename, then make private.
 4. **How other instances are told** — both repos' `CLAUDE.md`/`AGENTS.md`, and the handoff.
-**Still open for him:** the site update after #253's merge waits for his approval (Actions → Review
-deployments); #252's passkeys and recovery answers; secret scanning (unconfirmed).
+**Done 2026-09-25, by his word:** #252 (passkeys, recovery answers, app access, email switches, the questionnaire
+link) — closed on his word, not verifiable from a session. The site update after #253 was approved and deployed
+(checked). **Security count: 2 issues** (#247 high, #193 low) **+ secret scanning, still unconfirmed.**
 
 ### ⇢ 2026-09-23, later — a second AI is coming, and the owner wants to study the team
 
