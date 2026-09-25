@@ -59,7 +59,7 @@ character name is fiction and stays.
    calls a detail in a string a decision; (c) drops a paragraph at a time, so a sentence wrapped over lines goes
    whole; notes in `[brackets]`; (d) replace options `ci` and `suffix`, and replace terms checked in file names;
    (e) self-test cases for each; (f) map v4 (drop the pet rules 2 and 21 he overruled; partner rule case-free with
-   an "s" ending) to his private storage; (g) `public-overlay/` README, SECURITY.md, docs/WHY.md; (h) run the copy
+   an "s" ending) to his private storage; (g) `public-overlay/` README, a security policy and a "why we built it this way" note; (h) run the copy
    and the public suites; Zeni round 2; then he reviews. One map question still open (anyone else real to add?). Originally: a clean-copy tool (public-safe code; reads the map from a path
    outside the repo; prints categories, never terms; red if any mapped term survives) produces the clean tree.
    He sees the file list and the diff before anything is created.
