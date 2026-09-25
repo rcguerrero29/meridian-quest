@@ -602,6 +602,8 @@ has no date.*
 | `.gitignore` | zeni | nothing — what reaches a commit | 2026-09-13 |
 | `test/protect.js` | zeni, melo | a key — the workflow's `contents: read` token (by hand: whatever `GITHUB_TOKEN` the shell holds), sent to `api.github.com` alone, to read whether `main` is still locked | 2026-09-24 |
 | `test/authors.js` | zeni, melo | the public repository — every commit's envelope, every file git could ship, and every script that could print an identity into a public log | 2026-09-24 |
+| `scripts/clean-copy.js` | zeni, melo | the public repository — the tool that makes the clean copy: it reads the private map from OUTSIDE the repository (and refuses one inside), writes only outside it, prints rule ids and lines and never a mapped term, and fails if any mapped detail survives | 2026-09-25 |
+| `scripts/clean-copy-ledger.js` | zeni, melo | the town's mural ledger in the clean copy — re-fingerprints only panels the map translated, refuses any panel the ORIGINAL no longer matches (planted 2026-09-25: a tampered caption, refused) | 2026-09-25 |
 | `.claude/settings.json` | zeni, melo, yaz | a hook — code every Claude session in this repository runs before each Bash command; the only check that runs before a Claude session's push is published | 2026-09-24 |
 | `CLAUDE.md` | chuy | nothing — where the promises are written down | 2026-09-13 |
 

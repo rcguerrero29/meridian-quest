@@ -55,7 +55,7 @@ jobs:
       # goes under env: and is read as "$NAME" — the pattern PR_BODY already used. test/leaves.js
       # now fails the build on a `${{` inside any run: block.
       - name: The guards' own red cases, so a regex that regressed is caught before it is trusted
-        run: node test/leaves.js --selftest && node test/runs.js --selftest && node test/issue.js --selftest && node test/protect.js --selftest && node test/authors.js --selftest
+        run: node test/leaves.js --selftest && node test/runs.js --selftest && node test/issue.js --selftest && node test/protect.js --selftest && node test/authors.js --selftest && node scripts/clean-copy.js --selftest
       # The owner, 2026-09-24: "whattt you forget about targetted phishing attacks". Every commit carries an
       # author and a committer address to a public server, and none of it is in a diff: two of his personal
       # addresses reached main that way. test/authors.js allows no-reply addresses only, in the commits this
