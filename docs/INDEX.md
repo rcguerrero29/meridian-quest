@@ -50,6 +50,8 @@ Everything below is detail those three point into.
 | File | What it is |
 |---|---|
 | **[../AGENTS.md](../AGENTS.md)** | **The contract every agent works under, whoever built it.** At the repository root, because that is the cross-vendor convention — one file, every agent |
+| **[AI-BRIEF.md](AI-BRIEF.md)** | **A box to paste into any other AI's chat** — the engine and its settled rules in one page, a slot for your question, and the answer shape a session can check. Carries nothing personal and no open weakness; read its three lines before you paste |
+| [SPEC.md](SPEC.md) | **The engine's technical specifications, safe for a stranger** — platform, architecture, systems, privacy, quality. No person, no account setting, no open weakness |
 | [RUNS.md](RUNS.md) | The run ledger: the ID that names its agent, one file per run, the five statuses, and **the two words that are yours alone** |
 | [CREW-FOR-ANY-AGENT.md](CREW-FOR-ANY-AGENT.md) | **The crew, for an agent that cannot call it.** How Jules or any agent without Claude's subagents gets as close to crew mode as one agent can — which of its four parts transfer, why the one that does not (independence) is the load-bearing one, and a step-by-step crew pass that recovers most of it |
 | [AGENT-STUDY.md](AGENT-STUDY.md) | **How different AIs perform here, and where they complement each other.** What each agent can and cannot do, every line marked measured, stated or untested; the experiments in order, starting with Jules on #241; and the columns every run is compared on. RUNS.md is its evidence |
