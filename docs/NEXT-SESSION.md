@@ -42,12 +42,14 @@ two runs had been counted twice.)* His logging rule is in `CLAUDE.md`, `AGENTS.m
 document is MADE from them by programmatic replacement: a personal detail → its bracketed stand-in, or dropped
 with a one-line note saying why it mattered ("a personal detail was raised as an example: consider colour
 exceptions"), so a reader of the clean copy can still see why a design choice (e.g. heavy customisation) was
-made and question it. The draft map was built outside the repository and sent to him in the session; it lists
-the real details and is the most sensitive file there is — **it never enters any repository.** The session
-holds no copy that survives the container.
+made and question it. **The map (draft 2, his answers in) is saved in his own private cloud storage, shared with
+nobody (checked 2026-09-25)** — where exactly is recorded in the session and, after the split, in the PRIVATE repo's
+handoff, never in a public file (a named private file is what a "file shared with you" lure imitates). If a new
+session needs it: ask him. It lists the real details and is the most sensitive file there is — **it never enters
+any repository.** His answers: the game's pet keeps its name (what goes is that it was real); the recurring
+character name is fiction and stays.
 **Tomorrow, in order:**
-1. **The cleanup.** He answers the map's open questions (the pet in the game: his real name or a made-up one; one
-   recurring name — real or fiction?). Then a clean-copy tool (public-safe code; reads the map from a path
+1. **The cleanup.** One map question is still open (anyone else real to add?). Then a clean-copy tool (public-safe code; reads the map from a path
    outside the repo; prints categories, never terms; red if any mapped term survives) produces the clean tree.
    He sees the file list and the diff before anything is created.
 2. **The instructions** — for this and every other instance: the map workflow in `AGENTS.md` / `CLAUDE.md`, and a
