@@ -65,8 +65,9 @@ character name is fiction and stays.
 4. **How other instances are told** — both repos' `CLAUDE.md`/`AGENTS.md`, and the handoff.
 **#247, gone through 2026-09-25:** `main` protected ✅; the email exposure handled (#252, #253) ✅. **Deferred by him, ask
 again:** (1) whether the Jules app keeps access (its branch `jules/241-…` is still here, 3 commits); (2) whether the next second
-AI works from a fork. **Considering:** (3) signed verdicts (a signing key only on his laptop; `runs.js` would require a
-Verified verdict) — recommended for after the split. #247 stays open until the write-up of what a second AI can reach.
+AI works from a fork. **Yes, later (his word, 2026-09-25: "at some point but not right now"):** (3) signed verdicts (a signing key kept in
+his password manager, one Touch ID tap per verdict; `runs.js` would require a Verified verdict) — after the split; ask
+when that work is done. #247 stays open until the write-up of what a second AI can reach.
 **Done 2026-09-25, by his word:** #252 (passkeys, recovery answers, app access, email switches, the questionnaire
 link) — closed on his word, not verifiable from a session. The site update after #253 was approved and deployed
 (checked). **Security count: 2 issues** (#247 high, #193 low) **+ secret scanning, still unconfirmed.**
